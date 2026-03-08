@@ -7,6 +7,22 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Sector Reclassification, Pre-Planned Ops Expansion, Warroom Regions
+
+**Sectors**: New Step 8 `reclassifyRearBrigades()` — after equalization and coverage, demotes assigned brigades not physically on front OSIDs or 1-hop behind to reserve. Reserve cap: 1 for ≤10 edges, 2 for >10. Removed hostile-side adjacency bridging from `splitNonContiguousSectors` (~90 lines of O(E²) logic causing non-contiguous sectors wrapping around enemy territory). Coverage fallback Step 3 added. Ghost sector pruning tightened to `length_edges > 0`.
+
+**Pre-planned ops**: Expanded from VRS-only to VRS + ARBiH. Added Operation Corridor (1KK, 2 axes). Added Operation Teočak (ARBiH 2nd Corps, deferred w14). `faction` field on `PrePlannedOp` replaces hardcoded 'RS'. `available_from` gating for deferred injection. Queued chaining: Prijedor → Corridor → Bosanski Novi. Cross-corps brigade eligibility for historical accuracy. Fixed `rs_2nd_posavina` → `rs_2nd_posavina_light_infantry`.
+
+**Warroom**: Faction-specific clickable region loading (`ensureRegionsLoadedForFaction`). Canonical anchor→modal mapping table (8 anchors). Removed stale `hq_clickable_regions.json`.
+
+**GUI**: CombatSummaryPanel redesign with casualties/victories stats. Removed unused ArmyDetail.tsx and CorpsDetail.tsx. `turn_summaries` added to serialization whitelist.
+
+**Simplify pass**: Extracted `isEligibleOperationFormation` to shared `formation_constants.ts` (was duplicated in `pre_planned_operations.ts` + `triggered_operations.ts`). Extracted `buildAxesFromDef` + `buildCorpsOperation` helpers (~50 lines dedup). Fixed `available_from: 0` falsy bug (truthiness → `!= null`). Removed dead `getFormationCorpsId` import.
+
+**Files**: `corps_front_sectors.ts`, `pre_planned_operations.ts`, `triggered_operations.ts`, `formation_constants.ts`, `sector_offensive.ts`, `sector_rearrangement.ts`, `serializeGameState.ts`, `CombatSummaryPanel.tsx`, `warroom.ts`, `WARROOM_MASTER.md`
+**Verification**: tsc clean, 389 vitest tests passing.
+**Report**: `docs/40_reports/implemented/20260308_SECTOR_PREPLAN_WARROOM_SIMPLIFY.md`
+
 ## [2026-03-08] Turn AAR System
 
 Full after-action report system: simulation side, state persistence, and GUI panel.

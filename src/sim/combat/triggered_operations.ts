@@ -22,6 +22,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { assignOperationCommander } from './officer_system.js';
+import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -227,10 +228,7 @@ const MAX_DECLINE_COUNT = 3;
 // Core logic
 // ═══════════════════════════════════════════════════════════════════════════
 
-function isEligibleFormation(f: { kind?: string; status: string }): boolean {
-    return (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom')
-        && f.status === 'active';
-}
+// Use shared isEligibleOperationFormation from formation_constants
 
 function buildOperation(
     def: TriggeredOpDef,
@@ -247,7 +245,7 @@ function buildOperation(
         const axisBrigades = axisDef.brigades.filter((fid) => {
             const formation = formations[fid];
             if (!formation || getFormationCorpsId(formation) !== axisDef.corps) return false;
-            return isEligibleFormation(formation);
+            return isEligibleOperationFormation(formation);
         }).sort(strictCompare);
 
         if (axisBrigades.length === 0) continue;

@@ -60,7 +60,23 @@
 ## Current status (summary)
 
 - **Scene:** Fixed plate **2752×1536**; faction-keyed background image. Current direction: **15 room images total** (`prewar/year1/year2/year3/year4` × 3 factions), **flag baked into room art**, **desk map projected as runtime overlay**, **date / next-turn board projected as runtime overlay**. Ticker/UI chrome remains engine-side as needed.
-- **Hotspots:** Physical anchors drive routing: `wall_flag_area`, `command_briefing_folio`, `newspaper_stack`, `intelligence_journal`, `diplomatic_telephone`, `desk_radio`, `wall_calendar_area`. Legacy action strings kept for compatibility.
+- **Hotspots:** Physical anchors drive routing: `wall_flag_area`, `desk_map`, `wall_calendar_area`, `command_briefing_folio`, `newspaper_stack`, `intelligence_journal`, `diplomatic_telephone`, `desk_radio`. Legacy action strings kept for compatibility.
+
+**Canonical anchor → modal mapping (definitive).** Room art must show **eight distinct physical anchors**; each maps to one modal or behavior. Use this table when authoring prompts or region JSON.
+
+**Flag (precise — avoid flat/pinned flag):** The flag must **hang down** from the pole: attached at or near the top of the pole, the cloth **drops vertically downward** under gravity (like a normal indoor flag). Do **not** show the flag stretched flat against the wall, pinned flat, taut horizontally, stiffened, or displayed like a banner. It must **hang down** from the pole.
+
+| Anchor ID | Room object (what to draw) | Modal / behavior |
+|-----------|----------------------------|------------------|
+| wall_flag_area | Flag on pole (baked), fully visible | Faction Overview |
+| wall_calendar_area | Date / next-turn board (blank, flat, fully in frame) | Advance turn; runtime overlays date |
+| desk_map | Large cork board (map placeholder only, empty) | Primary/tactical map; runtime projects map |
+| command_briefing_folio | Binders / folders on desk | Reports (command briefing) |
+| newspaper_stack | Stack of newspapers (faction masthead) | Newspaper modal |
+| intelligence_journal | Separate journal or magazine (distinct from newspaper) | Intelligence Journal / Magazine modal |
+| diplomatic_telephone | Telephone on desk | Diplomacy modal |
+| desk_radio | Radio on desk | News ticker |
+
 - **Region data:** Click/hover geometry is in `public/data/ui/hq_clickable_regions.json`. Region bounds must match the scene plate; default JSON has `options.calendar_baked_in_art: true` so the runtime does not draw a second calendar when the room art already shows one. For a different room layout, use a custom region file (see § Region data and new room layout).
 - **Modals (implemented):** Newspaper, Magazine, Reports, Diplomacy, Faction Overview (COMMAND + commander assignment), Advance turn confirmation, Declaration event, War begins, Settings (placeholder), Help (warroom controls), “Line dead” (diplomacy in peace).
 - **Commander assignment:** **Warroom only** — Faction Overview (wall flag) → COMMAND section → CHANGE → ASSIGN COMMANDER modal. Map UI displays only; no assignment there. IPC: `assign-commander`.
@@ -71,14 +87,16 @@
 
 ### Implemented (current)
 
-| Modal | Trigger | Short description |
-|-------|---------|--------------------|
-| Newspaper | newspaper_stack / desk | Faction newspaper, T-1 events; start brief on load |
-| Magazine | open_magazine_modal | Monthly operational review, game stats |
-| Reports | intelligence_journal / report stack | Situation reports; pre-war mun intel, war-phase operational briefs |
+| Modal | Anchor ID | Short description |
+|-------|------------|--------------------|
+| Newspaper | newspaper_stack | Faction newspaper, T-1 events; start brief on load |
+| Magazine (Intelligence Journal) | intelligence_journal | Monthly operational review, game stats |
+| Reports (Command Briefing) | command_briefing_folio | Situation reports; pre-war mun intel, war-phase operational briefs |
 | Diplomacy | diplomatic_telephone | Belgrade/Zagreb/Alliance channels; war only (peace → “Line dead”) |
 | Faction Overview | wall_flag_area | Faction stats, COMMAND (officers + CHANGE → ASSIGN COMMANDER) |
-| Advance turn | calendar | Confirmation, staged investments, preview |
+| Advance turn | wall_calendar_area | Confirmation, staged investments, preview |
+| Primary/tactical map | desk_map | Map view (cork board = projection surface) |
+| News ticker | desk_radio | Radio toggle |
 | Declaration event | after advance (Phase 0) | Full-screen critical events (RS/HRHB declaration, referendum) |
 | War begins | peace→war transition | Full-screen “War begins” |
 | Settings | toolbar | Placeholder “coming soon” |
@@ -113,6 +131,10 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-03-08 | **Canonical anchor → modal mapping:** Added definitive table in § Current status: eight anchors (wall_flag_area, wall_calendar_area, desk_map, command_briefing_folio, newspaper_stack, intelligence_journal, diplomatic_telephone, desk_radio) with room object and modal for each. Fixed Implemented table so Reports = command_briefing_folio, Magazine = intelligence_journal. Prompts must show all eight distinct props. | This file § Current status, § Modals |
+| 2026-03-08 | **Missing shared regions file no longer black-screens startup:** Initial region loading is now non-fatal and tries multiple candidates (`override`, shared default, then faction files). This prevents `init()` from aborting when `hq_clickable_regions.json` is intentionally removed and only faction-specific files remain. | warroom.ts, this file |
+| 2026-03-08 | **Early Electron bridge init:** `window.awwv` is now read at the start of `init()` instead of after later async warroom/map loading. This fixes a startup race where clicking **New Campaign** quickly could hit `Desktop bridge unavailable.` before the preload bridge had been assigned to `this.desktopBridge`. | warroom.ts, this file |
+| 2026-03-08 | **Faction-specific region files:** Warroom loads `hq_<faction>_clickable_regions.json` (e.g. `hq_rbih_clickable_regions.json`, `hq_rs_clickable_regions.json`, `hq_hrhb_clickable_regions.json`) when game state has a player faction; falls back to default if missing. Staging script copies all three faction files from repo root `data/ui/`. Override still used at init when no faction is known. | warroom.ts, warroom_stage_assets.ts, WARROOM_MASTER |
 | 2026-03-08 | **Region file config + calendar overlay:** (1) Region URL is configurable via `window.__awwvWarroomRegionsUrl` so new room art can use a custom region JSON with measured quads. (2) Region JSON supports `options.calendar_baked_in_art: true`; when set, runtime does not draw the calendar overlay (avoids duplicate/mismatch when art has calendar baked). Default `hq_clickable_regions.json` now has this option set. (3) WARROOM_MASTER § Region data and new room layout added. | warroom.ts, ClickableRegionManager.ts, WARROOM_MASTER |
 | 2026-03-08 | **Flag no longer drawn as sprite:** Removed runtime flag overlay so room art is not obscured. Per clean-room handover and WARROOM_MASTER, flag is baked into room art; only calendar (and future desk map / date board) are runtime overlays. `renderFlag()` removed; `wall_flag_area` remains for click/tooltip (Faction Overview). | warroom.ts, this file |
 | 2026-03-08 | **Faction yearly rooms + overlay surfaces:** Current direction. Generate one stable room per faction, then derive `prewar/year1/year2/year3/year4` with yearly aging while preserving geometry; bake the flag into room art; keep the desk-map zone empty for projection; use a flat date / next-turn board for overlay; target archival/documentary photorealism. | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) |
@@ -129,10 +151,16 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 Overlays (e.g. calendar) and click/hover hotspots use **region geometry** from a JSON file. If the scene plate changes (new room art with different positions for corkboard, whiteboard, flag, desk props), that geometry will be wrong until the region data is updated.
 
-- **Default region file:** `public/data/ui/hq_clickable_regions.json`. It includes `options.calendar_baked_in_art: true` so the runtime does **not** draw a calendar overlay when the room art already has a calendar baked in (avoids duplicate/mismatched calendar).
-- **Custom region file for a new room:** Measure the wall map (cork board) and date/next-turn board quads using the Gemini prompts in [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §11. Create a new JSON with the same schema, updated `regions` (and optional `options`). Serve it (e.g. as `/data/ui/hq_clickable_regions_newroom.json`) and set **before** the warroom script runs:
-  - **Browser:** `window.__awwvWarroomRegionsUrl = '/data/ui/hq_clickable_regions_newroom.json';` (e.g. in a script tag in `index.html` before the main bundle).
-  - **Electron:** In preload or before loading the warroom window, inject the same so the warroom loads your region file. Then overlays and click areas will align with the new room.
+- **Default region file:** `public/data/ui/hq_clickable_regions.json` (or repo root `data/ui/` for build). It includes `options.calendar_baked_in_art: true` so the runtime does **not** draw a calendar overlay when the room art already has a calendar baked in (avoids duplicate/mismatched calendar).
+- **Faction-specific region files (preferred):** The warroom loads **per-faction** region data when a game state with a player faction is present. Place one file per faction in the same folder as the default:
+  - **RBiH:** `hq_rbih_clickable_regions.json`
+  - **RS:** `hq_rs_clickable_regions.json`
+  - **HRHB:** `hq_hrhb_clickable_regions.json`
+  If a faction file is missing, the runtime falls back to the default `hq_clickable_regions.json`. At init (before any campaign is loaded) the override or default is used; once state arrives, the matching faction file is loaded.
+  - **Dev** (`npm run dev:warroom`): place in `src/ui/warroom/public/data/ui/` or rely on repo-root fallback (`data/ui/`).
+  - **Electron/desktop build:** place in repo root `data/ui/`. Run `npm run warroom:build` so `tools/ui/warroom_stage_assets.ts` copies them into `dist/warroom/data/ui/`.
+- **Optional single override:** If `hq_clickable_regions_override.json` exists, it is used at init when no faction is known. Faction-specific files still take precedence once state is loaded.
+- **Optional:** Set `window.__awwvWarroomRegionsUrl` before the warroom script runs to force a single URL (disables faction-specific loading).
 
 ---
 

@@ -1,16 +1,18 @@
 /**
- * Pre-planned VRS operations injected at scenario start.
+ * Pre-planned operations injected at scenario start (VRS + ARBiH).
  *
  * These opening operations are explicit scenario-shaping data with
  * multi-axis structure: named brigades, JNA phantom support, and
  * historically-accurate objective chains.
  *
  * All operations are player-initiated: they start in 'planning' phase
- * and the player must execute them.
+ * and the player must execute them. Operations with `available_from`
+ * are deferred until the specified turn.
  */
 
 import type {
     CorpsOperation,
+    FactionId,
     FormationId,
     GameState,
     OperationAxis,
@@ -18,8 +20,8 @@ import type {
 import { createSingleAxis } from './sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { getFormationCorpsId } from './corps_sector_partition.js';
 import { assignOperationCommander } from './officer_system.js';
+import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Pre-planned operation definitions
@@ -35,15 +37,19 @@ interface AxisDef {
 
 interface PrePlannedOp {
     corps: string;
+    faction: FactionId;
     name: string;
     axes: AxisDef[];
     /** Fallback staging for the operation (used when axis doesn't specify one). */
     staging_osid: string;
+    /** Minimum turn before this op can be injected (default: 0). */
+    available_from?: number;
 }
 
 const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         corps: 'vrs_east_bosnian',
+        faction: 'RS',
         name: 'Operation Koridor',
         staging_osid: 'op:bijeljina:dvorovi_2',
         axes: [
@@ -71,7 +77,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'rs_3rd_posavina_light_infantry',
                     'rs_1st_posavina_infantry',
-                    'rs_2nd_posavina',
+                    'rs_2nd_posavina_light_infantry',
                 ],
                 objectives: [
                     'op:bosanski_samac:samac_2',
@@ -86,6 +92,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     },
     {
         corps: 'vrs_drina',
+        faction: 'RS',
         name: 'Operation Drina',
         staging_osid: 'op:zvornik:kozluk_2',
         axes: [
@@ -126,6 +133,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     },
     {
         corps: 'vrs_herzegovina',
+        faction: 'RS',
         name: 'Operation Visegrad',
         staging_osid: 'op:visegrad:visegrad_2',
         axes: [
@@ -153,6 +161,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     },
     {
         corps: 'vrs_sarajevo_romanija',
+        faction: 'RS',
         name: 'Operation Prsten',
         staging_osid: 'op:ilidza:kasindo',
         axes: [
@@ -191,6 +200,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     },
     {
         corps: 'vrs_herzegovina',
+        faction: 'RS',
         name: 'Operation Foca',
         staging_osid: 'op:foca:foca_3',
         axes: [
@@ -231,6 +241,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     },
     {
         corps: 'vrs_1st_krajina',
+        faction: 'RS',
         name: 'Operation Prijedor',
         staging_osid: 'op:prijedor:prijedor_2',
         axes: [
@@ -283,6 +294,46 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     },
     {
         corps: 'vrs_1st_krajina',
+        faction: 'RS',
+        name: 'Operation Corridor',
+        staging_osid: 'op:modrica:skugric_gornji_2',
+        axes: [
+            {
+                axis_id: 'corridor_east',
+                name: 'Corridor East',
+                brigades: [
+                    'rs_43rd_prijedor_motorized',
+                    'rs_1st_guards_motorized',
+                    'rs_27th_derventa_motorized',
+                ],
+                objectives: [
+                    'op:modrica:modrica',
+                    'op:modrica:garevac_2',
+                    'op:derventa:derventa_2',
+                    'op:derventa:misinci_2',
+                    'op:bosanski_brod:novo_selo_2',
+                    'op:bosanski_brod:brod',
+                ],
+                staging_osid: 'op:modrica:skugric_gornji_2',
+            },
+            {
+                axis_id: 'corridor_south',
+                name: 'Corridor South',
+                brigades: [
+                    'rs_1st_doboj_light_infantry',
+                ],
+                objectives: [
+                    'op:odzak:donja_dubica',
+                    'op:odzak:potocani_2',
+                    'op:bosanski_samac:novo_selo_2',
+                ],
+                staging_osid: 'op:doboj:stanari_2',
+            },
+        ],
+    },
+    {
+        corps: 'vrs_1st_krajina',
+        faction: 'RS',
         name: 'Operation Bosanski Novi',
         staging_osid: 'op:bosanski_novi:novi_grad_3',
         axes: [
@@ -304,13 +355,100 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     },
 ];
 
+const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
+    {
+        corps: 'arbih_2nd_corps',
+        faction: 'RBiH',
+        name: 'Operation Teočak',
+        staging_osid: 'op:tuzla:simin_han_2',
+        available_from: 14,
+        axes: [
+            {
+                axis_id: 'teocak_link',
+                name: 'Teočak Link',
+                brigades: [
+                    'arbih_120th_liberation_black_swans',
+                    'arbih_2nd_tuzla',
+                ],
+                objectives: [
+                    'op:zvornik:rastosnica_2',
+                ],
+                staging_osid: 'op:tuzla:simin_han_2',
+            },
+        ],
+    },
+];
+
+const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...ARBIH_PRE_PLANNED];
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Injection
 // ═══════════════════════════════════════════════════════════════════════════
 
-function isEligibleFormation(f: { kind?: string; status: string }): boolean {
-    return (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom')
-        && f.status === 'active';
+// Use shared isEligibleOperationFormation from formation_constants
+
+/**
+ * Build axes and operation from a PrePlannedOp definition.
+ * Shared by both initial injection and queued operation injection.
+ */
+function buildAxesFromDef(
+    def: PrePlannedOp,
+    state: GameState,
+): { axes: OperationAxis[]; participating: FormationId[] } | null {
+    const formations = state.formations ?? {};
+    const builtAxes: OperationAxis[] = [];
+    const allParticipating: FormationId[] = [];
+
+    for (const axisDef of def.axes) {
+        const axisBrigades = axisDef.brigades.filter((fid) => {
+            const formation = formations[fid];
+            if (!formation) return false;
+            return isEligibleOperationFormation(formation);
+        }).sort(strictCompare);
+
+        if (axisBrigades.length === 0) continue;
+
+        const axisObjectives = axisDef.objectives.filter((osid) => {
+            const controller = getPoliticalControllerOSID(state, osid, undefined);
+            return controller !== null && controller !== def.faction;
+        });
+
+        if (axisObjectives.length === 0) continue;
+
+        builtAxes.push(createSingleAxis(
+            axisBrigades,
+            axisObjectives,
+            axisDef.staging_osid ?? def.staging_osid,
+        ));
+        const lastAxis = builtAxes[builtAxes.length - 1]!;
+        lastAxis.axis_id = axisDef.axis_id;
+        lastAxis.name = axisDef.name;
+        allParticipating.push(...axisBrigades);
+    }
+
+    if (builtAxes.length === 0) return null;
+    return { axes: builtAxes, participating: allParticipating };
+}
+
+function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participating: FormationId[], turn: number): CorpsOperation {
+    const allObjectives = axes.flatMap(a => a.objectives);
+    return {
+        name: def.name,
+        type: 'sector_attack',
+        phase: 'planning',
+        started_turn: turn,
+        phase_started_turn: turn,
+        participating_brigades: [...new Set(participating)].sort(strictCompare),
+        axes,
+        objectives: [...new Set(allObjectives)],
+        current_objective_index: 0,
+        planning_duration: 1,
+        supply_readiness: 1.0,
+        momentum: 0,
+        failure_count: 0,
+        consecutive_failures_on_current: 0,
+        staging_osid: def.staging_osid,
+    };
 }
 
 /**
@@ -333,73 +471,24 @@ export function injectPrePlannedOperations(state: GameState): void {
     // Track which corps already got an op this injection pass
     const injectedCorps = new Set<string>();
 
-    for (const def of VRS_PRE_PLANNED) {
+    for (const def of ALL_PRE_PLANNED) {
         const cmd = corpsCommand[def.corps];
         if (!cmd) continue;
+
+        // Skip if not yet available
+        if (def.available_from != null && turn < def.available_from) continue;
 
         // Skip if corps already has an active operation (including from this pass)
         if (cmd.active_operation) continue;
         if (injectedCorps.has(def.corps)) continue;
 
         // Build axes with validated brigades and objectives
-        const builtAxes: OperationAxis[] = [];
-        const allParticipating: FormationId[] = [];
+        const result = buildAxesFromDef(def, state);
+        if (!result) continue;
 
-        for (const axisDef of def.axes) {
-            const axisBrigades = axisDef.brigades.filter((fid) => {
-                const formation = formations[fid];
-                if (!formation || getFormationCorpsId(formation) !== def.corps) return false;
-                return isEligibleFormation(formation);
-            }).sort(strictCompare);
-
-            if (axisBrigades.length === 0) continue;
-
-            const axisObjectives = axisDef.objectives.filter((osid) => {
-                const controller = getPoliticalControllerOSID(state, osid, undefined);
-                return controller !== null && controller !== 'RS';
-            });
-
-            if (axisObjectives.length === 0) continue;
-
-            builtAxes.push(createSingleAxis(
-                axisBrigades,
-                axisObjectives,
-                axisDef.staging_osid ?? def.staging_osid,
-            ));
-            // Override the auto-generated axis_id and name
-            const lastAxis = builtAxes[builtAxes.length - 1]!;
-            lastAxis.axis_id = axisDef.axis_id;
-            lastAxis.name = axisDef.name;
-
-            allParticipating.push(...axisBrigades);
-        }
-
-        if (builtAxes.length === 0) continue;
-
-        // Flat fields for backward compatibility
-        const allObjectives = builtAxes.flatMap(a => a.objectives);
-        const dedupedObjectives = [...new Set(allObjectives)];
-
-        const op: CorpsOperation = {
-            name: def.name,
-            type: 'sector_attack',
-            phase: 'planning',
-            started_turn: turn,
-            phase_started_turn: turn,
-            participating_brigades: [...new Set(allParticipating)].sort(strictCompare),
-            axes: builtAxes,
-            objectives: dedupedObjectives,
-            current_objective_index: 0,
-            planning_duration: 1,
-            supply_readiness: 1.0,
-            momentum: 0,
-            failure_count: 0,
-            consecutive_failures_on_current: 0,
-            staging_osid: def.staging_osid,
-        };
-
+        const op = buildCorpsOperation(def, result.axes, result.participating, turn);
         cmd.active_operation = op;
-        assignOperationCommander(state, op, def.corps, 'RS');
+        assignOperationCommander(state, op, def.corps, def.faction);
         cmd.stance = 'offensive';
         injectedCorps.add(def.corps);
     }
@@ -407,19 +496,30 @@ export function injectPrePlannedOperations(state: GameState): void {
     // Queue second Herzegovina op (Foca) if Visegrad was injected
     // This will be picked up when the first op completes
     if (injectedCorps.has('vrs_herzegovina')) {
-        const focaDef = VRS_PRE_PLANNED.find(d => d.name === 'Operation Foca');
+        const focaDef = ALL_PRE_PLANNED.find(d => d.name === 'Operation Foca');
         const cmd = corpsCommand['vrs_herzegovina'];
         if (focaDef && cmd && !cmd.queued_operations) {
             cmd.queued_operations = [focaDef.name];
         }
     }
 
-    // Queue second 1KK op (Bosanski Novi) if Prijedor was injected
+    // Queue 1KK ops: Prijedor → Corridor → Bosanski Novi
     if (injectedCorps.has('vrs_1st_krajina')) {
-        const noviDef = VRS_PRE_PLANNED.find(d => d.name === 'Operation Bosanski Novi');
         const cmd = corpsCommand['vrs_1st_krajina'];
-        if (noviDef && cmd && !cmd.queued_operations) {
-            cmd.queued_operations = [noviDef.name];
+        if (cmd && !cmd.queued_operations) {
+            cmd.queued_operations = ['Operation Corridor', 'Operation Bosanski Novi'];
+        }
+    }
+
+    // Queue deferred ops (those with available_from that weren't injected this pass)
+    for (const def of ALL_PRE_PLANNED) {
+        if (def.available_from == null) continue;
+        if (injectedCorps.has(def.corps)) continue; // already injected directly
+        const cmd = corpsCommand[def.corps];
+        if (!cmd) continue;
+        if (!cmd.queued_operations) cmd.queued_operations = [];
+        if (!cmd.queued_operations.includes(def.name)) {
+            cmd.queued_operations.push(def.name);
         }
     }
 }
@@ -433,66 +533,33 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
     if (!cmd || cmd.active_operation) return false;
     if (!cmd.queued_operations?.length) return false;
 
-    const opName = cmd.queued_operations.shift()!;
-    if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
-
-    const def = VRS_PRE_PLANNED.find(d => d.name === opName && d.corps === corpsId);
-    if (!def) return false;
-
-    const formations = state.formations ?? {};
     const turn = state.meta?.turn ?? 0;
+    const opName = cmd.queued_operations[0]!;
 
-    const builtAxes: OperationAxis[] = [];
-    const allParticipating: FormationId[] = [];
-
-    for (const axisDef of def.axes) {
-        const axisBrigades = axisDef.brigades.filter((fid) => {
-            const formation = formations[fid];
-            if (!formation || getFormationCorpsId(formation) !== def.corps) return false;
-            return isEligibleFormation(formation);
-        }).sort(strictCompare);
-
-        if (axisBrigades.length === 0) continue;
-
-        const axisObjectives = axisDef.objectives.filter((osid) => {
-            const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return controller !== null && controller !== 'RS';
-        });
-
-        if (axisObjectives.length === 0) continue;
-
-        builtAxes.push(createSingleAxis(axisBrigades, axisObjectives, axisDef.staging_osid ?? def.staging_osid));
-        const lastAxis = builtAxes[builtAxes.length - 1]!;
-        lastAxis.axis_id = axisDef.axis_id;
-        lastAxis.name = axisDef.name;
-        allParticipating.push(...axisBrigades);
+    const def = ALL_PRE_PLANNED.find(d => d.name === opName && d.corps === corpsId);
+    if (!def) {
+        // Unknown op — remove from queue and skip
+        cmd.queued_operations.shift();
+        if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+        return false;
     }
 
-    if (builtAxes.length === 0) return false;
+    // Check available_from gating
+    if (def.available_from != null && turn < def.available_from) return false;
 
-    const allObjectives = builtAxes.flatMap(a => a.objectives);
+    // Build axes — brigades may not exist yet; keep queue entry for retry
+    const result = buildAxesFromDef(def, state);
+    if (!result) return false;
 
-    const op: import('../../state/game_state.js').CorpsOperation = {
-        name: def.name,
-        type: 'sector_attack',
-        phase: 'planning',
-        started_turn: turn,
-        phase_started_turn: turn,
-        participating_brigades: [...new Set(allParticipating)].sort(strictCompare),
-        axes: builtAxes,
-        objectives: [...new Set(allObjectives)],
-        current_objective_index: 0,
-        planning_duration: 1,
-        supply_readiness: 1.0,
-        momentum: 0,
-        failure_count: 0,
-        consecutive_failures_on_current: 0,
-        staging_osid: def.staging_osid,
-    };
+    // Success — consume queue entry
+    cmd.queued_operations.shift();
+    if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+
+    const op = buildCorpsOperation(def, result.axes, result.participating, turn);
     cmd.active_operation = op;
-    assignOperationCommander(state, op, corpsId, 'RS');
+    assignOperationCommander(state, op, corpsId, def.faction);
     cmd.stance = 'offensive';
     return true;
 }
 
-export const _VRS_PRE_PLANNED = VRS_PRE_PLANNED;
+export const _ALL_PRE_PLANNED = ALL_PRE_PLANNED;

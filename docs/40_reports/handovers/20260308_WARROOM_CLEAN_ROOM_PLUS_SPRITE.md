@@ -190,7 +190,7 @@ Only the **wear, pressure, clutter density, smoke traces, paperwork density, and
 
 ## 8. Shared prompt core
 
-Append this shared core to every faction/year prompt:
+The text below is **inlined into every prompt block** in §9, so you can copy-paste a single prompt without appending anything. It is repeated here for reference and for editing the standard constraints in one place.
 
 ```text
 OUTPUT: exactly 2752 × 1536 pixels, landscape.
@@ -208,9 +208,13 @@ Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, ove
 
 ## 9. Prompt pack
 
+Each prompt block below is a single copy-paste prompt: everything is inlined (no separate appendix). RBiH (9.1–9.5) and RS (9.6–9.10) share the same structure for direct comparison.
+
 ### 9.1 RBiH — Prewar
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Generate a Republic of Bosnia and Herzegovina command room in the tense prewar period. The room should feel governmental, improvised, and dignified under pressure, but not yet fully consumed by long war routine. Daytime scene: natural light from a window, clear archival feel.
 
 RBiH identity: period-appropriate RBiH flag integrated naturally into the room; no post-1998 symbolism. The flag must be fully visible and unobstructed.
@@ -221,12 +225,14 @@ Desk: telephone, military or institutional radio, desk lamp, ashtray, thermos or
 
 Mood: restrained, preparatory, institutional, serious, slightly improvised. Worn wood, modest office furniture, muted green, brown, grey, and institutional off-white. No visible year anywhere except the future runtime calendar overlay.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.2 RBiH — Year1
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year1 of wartime use: more urgency, more side paperwork, slightly more smoke residue, more visible use of ashtray, more radio-use feeling, stronger sense of operational activation. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
@@ -237,12 +243,14 @@ RBiH tone: improvised state command adapting under pressure, but still energetic
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.3 RBiH — Year2
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year2 of wartime use: entrenched command routine, denser paperwork, more worn surfaces, more cigarette traces, more used lamp and desk surfaces, stronger logistical and administrative burden. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
@@ -253,12 +261,14 @@ RBiH tone: still improvised and dignified, but increasingly burdened and resourc
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.4 RBiH — Year3
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year3 of wartime use: accumulated fatigue, darker wear patterns, more persistent smoke staining, more paperwork density at the sides, more visibly overused furniture and desk surfaces. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
@@ -269,12 +279,14 @@ RBiH tone: survivalist bureaucracy under prolonged strain. The room should feel 
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.5 RBiH — Year4
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year4 of wartime use: hardened exhaustion, deep wear, tired surfaces, more severe signs of long duration, but the room is still functioning as a command space. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
@@ -285,85 +297,97 @@ RBiH tone: heavily burdened but still dignified and operational. No theatrical r
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.6 RS — Prewar
 
+RS prompts below are aligned with the RBiH pack: same structure (daytime/archival Prewar, explicit wall/desk instructions, shared core), same yearly follow-up pattern and lighting progression, with RS tone (colder, bureaucratic, severe) and period symbolism (1992–1995, no post-Dayton).
+
 ```text
-Generate a Republika Srpska command room in the prewar period. The room should feel colder, more bureaucratic, more rigid, and more severe than a civilian office.
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
 
-RS identity: wartime-era RS symbolism appropriate to the period, integrated naturally into the room art; no post-Dayton symbolism.
+Generate a Republika Srpska command room in the tense prewar period. The room should feel colder, more bureaucratic, more rigid, and more severe than a civilian office — institutional and administrative, not yet fully consumed by long war routine. Daytime scene: natural light from a window, clear archival feel.
 
-On the wall: a **large cork board** as a **map placeholder only** — **empty** or with pins / empty frame; **do not draw a detailed map**. Flat and frontal. A separate **date / next-turn board** (flat, frontal, no readable text).
+RS identity: wartime-era RS symbolism (1992–1995) appropriate to the period, integrated naturally into the room art; no post-Dayton symbolism. The flag must be fully visible and unobstructed.
 
-Desk: heavier field or command telephone, sturdier radio, desk lamp, ashtray, rigid stamped binders or document trays, harder cigarette pack, **faction newspaper stack**, restrained side papers. A small glass may be present as a subtle side prop only. **Moderate clutter only** — keep clutter limited and organized so clickables stay visible.
+On the wall: a **large cork board** as a **map placeholder only** — **empty** or with pins / empty frame; **do not draw a detailed map**. Keep the cork board flat and frontal to the camera. A separate **date / next-turn board** (flat, frontal, no readable text) for runtime overlay.
+
+Desk: heavier field or command telephone, sturdier radio, desk lamp, ashtray, rigid stamped binders or document trays, harder cigarette pack or small glass as subtle side prop only, **faction newspaper stack** (e.g. folded papers or stack with period masthead — RS e.g. Glas Srpski–style), restrained side papers. **Moderate clutter only** — keep clutter limited and organized so telephone, radio, newspaper stack, and other clickables remain clearly visible. No overwhelming piles.
 
 Mood: austere, harder, administrative, formal, darker wood and colder walls. Keep clutter restrained in prewar. No visible year anywhere except the future runtime calendar overlay.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.7 RS — Year1
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year1 of wartime use: stronger command pressure, slightly denser paperwork at the sides, more tobacco use, more severe atmosphere, more active communications feel. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
-**Lighting: daytime or soft afternoon.**
+**Lighting: daytime or soft afternoon** — room still busy in daylight.
 
 RS tone: bureaucratic and forceful, newly operationalized, not yet exhausted. Keep the heavier phone, rigid binders, and hard administrative atmosphere.
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.8 RS — Year2
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year2 of wartime use: entrenched bureaucratic war routine, denser side paperwork, more stamped and handled binders, more smoke traces, slightly harsher institutional wear. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
-**Lighting: late afternoon or early evening.**
+**Lighting: late afternoon or early evening** — light beginning to go, more reliance on desk lamp.
 
 RS tone: colder, more rigid, more administrative, more settled into wartime hierarchy. Props should feel used, not rearranged into a different room.
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.9 RS — Year3
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year3 of wartime use: accumulated harsh wear, more severe smoke and stain traces, more paperwork density at the edges, stronger sense of command fatigue without disorder. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
-**Lighting: evening.**
+**Lighting: evening** — dimmer, window darker, room lit mainly by lamp(s).
 
 RS tone: stern, overused, and increasingly burdened by duration. Avoid caricature. Avoid theatrical villain aesthetics.
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.10 RS — Year4
 
 ```text
+OUTPUT: exactly 2752 × 1536 pixels, landscape.
+
 Use the attached image as the exact same room. Do not redesign the room.
 
 Transform it into Year4 of wartime use: hardened institutional exhaustion, visibly overused materials, tired but functional command atmosphere, stronger signs of long-duration strain. Keep the same geometry, same wall map (cork board + pinned map), same date board, same flag, same furniture, same camera.
 
-**Lighting: full night.**
+**Lighting: full night** — window dark or very dim, room lit by desk lamp and practicals only; strong late-war feel.
 
 RS tone: bureaucratic severity under late-war fatigue. No ruin, no melodrama, no visible year markings, no change to interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.11 HRHB — Prewar
@@ -379,7 +403,7 @@ Desk: intact telephone, military or institutional radio, desk lamp, ashtray, cli
 
 Mood: compact authority, regional administration, cleaner discipline, warm-neutral and restrained blue accents. Keep clutter limited in prewar. No visible year anywhere except the future runtime calendar overlay.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.12 HRHB — Year1
@@ -395,7 +419,7 @@ HRHB tone: compact regional wartime administration, more pressured but still con
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.13 HRHB — Year2
@@ -411,7 +435,7 @@ HRHB tone: disciplined, regional, increasingly burdened but still relatively com
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.14 HRHB — Year3
@@ -425,7 +449,7 @@ Transform it into Year3 of wartime use: accumulated wear, denser paper handling,
 
 Do not add visible year markings. Do not change the interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.15 HRHB — Year4
@@ -439,7 +463,7 @@ Transform it into Year4 of wartime use: visibly tired, worn, and prolonged by du
 
 HRHB tone: late-war exhaustion in a compact regional HQ, no melodrama, no visible year markings, no change to interaction anchors.
 
-[append shared prompt core]
+The image must look like a real archival or journalistic photograph taken inside an actual 1990s command room, not AI art, not concept art, not a 3D render, and not a cinematic illustration. Aim for documentary realism, ordinary interior photography, natural available light, believable materials, real wear, and physically plausible clutter. On the wall: a **large cork board** as a **map placeholder only** — **empty** (or with pins / empty frame / light grid). **Do not draw a detailed map**: no geography, no place names, no topography. The engine will project the full map there at runtime. Keep the board **flat and frontal** to the camera. Keep a second wall board **flat and frontal** as the date / next-turn board for runtime overlay; it must have **no readable text** — no English, no placeholder words, no legible labels. Blank or minimally gridded or illegible scribble only. No readable year anywhere. Flag is baked naturally into the room art and must be **fully visible and unobstructed** (nothing in front of it). The telephone, radio, **newspaper stack**, and any other clickable elements must also be unobstructed. The **desk** has **moderate clutter** — telephone, radio, lamp, thermos, **faction newspaper stack**, folders, papers — **clutter limited and organized** so every clickable is clearly visible. No overwhelming piles. Any visible text must be local-language or illegible. No readable English. No digital screens. Telephone intact and usable. **No people or figures in the room — the space must be empty and unoccupied.** Avoid: AI-art look, cinematic concept art, glossy render, plastic materials, over-sharpening, fake depth of field, dramatic poster composition, visible printed year, dated newspapers, dated forms, mangled phone, clean modern office, white placeholder rectangles, fisheye distortion, **people or figures in the room, readable English or placeholder text on the wall boards (e.g. "RUNTIME OVERLAY"), obstructed flag or blocked clickable elements.**
 ```
 
 ### 9.16 Wall map: placeholder only (no baked map)

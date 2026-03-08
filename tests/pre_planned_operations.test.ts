@@ -1,19 +1,19 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { injectPrePlannedOperations, _VRS_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { injectPrePlannedOperations, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
 import type { CorpsCommandState, FactionId, FormationState, GameState } from '../src/state/game_state.js';
 
 function makeMinimalState(): GameState {
     const formations: Record<string, FormationState> = {};
     const corpsCommand: Record<string, CorpsCommandState> = {};
 
-    const defs = _VRS_PRE_PLANNED;
+    const defs = _ALL_PRE_PLANNED;
     for (const def of defs) {
         formations[def.corps] = {
             id: def.corps,
             name: def.corps,
-            faction: 'RS' as FactionId,
+            faction: def.faction,
             kind: 'corps',
             status: 'active',
             personnel: 0,
@@ -32,7 +32,7 @@ function makeMinimalState(): GameState {
                 formations[brigadeId] = {
                     id: brigadeId,
                     name: brigadeId,
-                    faction: 'RS' as FactionId,
+                    faction: def.faction,
                     kind: brigadeId.startsWith('jna_') ? 'jna_phantom' : 'brigade',
                     status: 'active',
                     personnel: 1000,
@@ -44,12 +44,14 @@ function makeMinimalState(): GameState {
     }
 
     const politicalControllers: Record<string, string> = {};
+    // Assign enemy control to objectives so they're valid targets
+    const enemyFaction: Record<string, string> = { RS: 'RBiH', RBiH: 'RS', HRHB: 'RBiH' };
     for (const def of defs) {
-        politicalControllers[def.staging_osid] = 'RS';
+        politicalControllers[def.staging_osid] = def.faction;
         for (const axisDef of def.axes) {
-            if (axisDef.staging_osid) politicalControllers[axisDef.staging_osid] = 'RS';
+            if (axisDef.staging_osid) politicalControllers[axisDef.staging_osid] = def.faction;
             for (const osid of axisDef.objectives) {
-                politicalControllers[osid] = 'RBiH';
+                politicalControllers[osid] = enemyFaction[def.faction] ?? 'RBiH';
             }
         }
     }
@@ -68,10 +70,10 @@ function makeMinimalState(): GameState {
     } as GameState;
 }
 
-describe('pre-planned VRS operations', () => {
-    it('defines seven expanded opening operations', () => {
-        assert.equal(_VRS_PRE_PLANNED.length, 7);
-        for (const def of _VRS_PRE_PLANNED) {
+describe('pre-planned operations', () => {
+    it('defines nine pre-planned operations (8 VRS + 1 ARBiH)', () => {
+        assert.equal(_ALL_PRE_PLANNED.length, 9);
+        for (const def of _ALL_PRE_PLANNED) {
             assert.ok(def.axes.length >= 1, `${def.name} should have at least one axis`);
             for (const axis of def.axes) {
                 assert.ok(axis.brigades.length >= 1, `${def.name}/${axis.name} should have brigades`);
@@ -107,7 +109,7 @@ describe('pre-planned VRS operations', () => {
         // 1KK should have Bosanski Novi queued
         const kkCmd = state.corps_command?.vrs_1st_krajina;
         assert.ok(kkCmd?.queued_operations);
-        assert.deepEqual(kkCmd!.queued_operations, ['Operation Bosanski Novi']);
+        assert.deepEqual(kkCmd!.queued_operations, ['Operation Corridor', 'Operation Bosanski Novi']);
     });
 
     it('creates multi-axis operations with proper axis structure', () => {

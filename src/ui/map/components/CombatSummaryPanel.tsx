@@ -125,29 +125,41 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
             {/* Top brigades (hidden in compact mode) */}
             {!compact && formations && onSelectFormation && (
                 (summary.most_victories_brigade_id || summary.most_casualties_brigade_id) && (
-                    <div className="mt-1.5 space-y-0.5">
+                    <div className="mt-1.5 space-y-1.5">
                         {summary.most_victories_brigade_id && (
-                            <div className="flex justify-between">
-                                <span className="text-text-secondary">Most Victories</span>
-                                <button
-                                    type="button"
-                                    className="text-interactive hover:underline truncate ml-1 text-right"
-                                    onClick={() => onSelectFormation(summary.most_victories_brigade_id!)}
-                                >
-                                    {resolveName(summary.most_victories_brigade_id, formations)}
-                                </button>
+                            <div className="flex justify-between items-center text-xs p-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-accent-gold" title="Most Victorious Brigade">⭐</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] uppercase tracking-wide text-text-secondary">Wall of Valor</span>
+                                        <button
+                                            type="button"
+                                            className="text-text-primary hover:text-interactive text-left font-semibold truncate max-w-[120px]"
+                                            onClick={() => onSelectFormation(summary.most_victories_brigade_id!)}
+                                        >
+                                            {resolveName(summary.most_victories_brigade_id, formations)}
+                                        </button>
+                                    </div>
+                                </div>
+                                <span className="text-accent-gold font-mono text-xs">MVP</span>
                             </div>
                         )}
                         {summary.most_casualties_brigade_id && (
-                            <div className="flex justify-between">
-                                <span className="text-text-secondary">Bloodiest</span>
-                                <button
-                                    type="button"
-                                    className="text-interactive hover:underline truncate ml-1 text-right"
-                                    onClick={() => onSelectFormation(summary.most_casualties_brigade_id!)}
-                                >
-                                    {resolveName(summary.most_casualties_brigade_id, formations)}
-                                </button>
+                            <div className="flex justify-between items-center text-xs p-1.5 bg-[#d45555]/5 border border-[#d45555]/20 rounded">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-[#d45555]" title="Highest Casualties Brigade">🩸</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] uppercase tracking-wide text-text-secondary">Bleeding Edge</span>
+                                        <button
+                                            type="button"
+                                            className="text-text-primary hover:text-interactive text-left font-semibold truncate max-w-[120px]"
+                                            onClick={() => onSelectFormation(summary.most_casualties_brigade_id!)}
+                                        >
+                                            {resolveName(summary.most_casualties_brigade_id, formations)}
+                                        </button>
+                                    </div>
+                                </div>
+                                <span className="text-[#d45555] font-mono text-xs">HEAVIEST LOSSES</span>
                             </div>
                         )}
                     </div>

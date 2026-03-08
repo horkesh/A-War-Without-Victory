@@ -147,6 +147,8 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'pending_paramilitary_requests',
     'paramilitary_policy',
     'paramilitary_deployment_count',
+    // Turn AAR summaries (per-turn compiled report data)
+    'turn_summaries',
 ]);
 
 /**

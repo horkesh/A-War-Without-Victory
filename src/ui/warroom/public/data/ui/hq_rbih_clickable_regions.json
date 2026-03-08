@@ -1,0 +1,460 @@
+{
+  "schema_version": "2.1",
+  "image_dimensions": {
+    "width": 2752,
+    "height": 1536
+  },
+  "options": {
+    "calendar_baked_in_art": true
+  },
+  "regions": [
+    {
+      "id": "diplomatic_telephone",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 263,
+        "y": 1197,
+        "width": 275,
+        "height": 197
+      },
+      "polygon": [
+        [
+          366,
+          1394
+        ],
+        [
+          519,
+          1375
+        ],
+        [
+          526,
+          1341
+        ],
+        [
+          510,
+          1309
+        ],
+        [
+          490,
+          1268
+        ],
+        [
+          533,
+          1272
+        ],
+        [
+          538,
+          1245
+        ],
+        [
+          533,
+          1217
+        ],
+        [
+          490,
+          1201
+        ],
+        [
+          437,
+          1197
+        ],
+        [
+          384,
+          1201
+        ],
+        [
+          331,
+          1219
+        ],
+        [
+          279,
+          1231
+        ],
+        [
+          263,
+          1254
+        ],
+        [
+          265,
+          1286
+        ],
+        [
+          279,
+          1309
+        ],
+        [
+          308,
+          1293
+        ],
+        [
+          301,
+          1327
+        ],
+        [
+          301,
+          1355
+        ],
+        [
+          327,
+          1378
+        ]
+      ],
+      "action": "open_diplomatic_telephone",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Diplomatic Telephone",
+      "layer": "desk"
+    },
+    {
+      "id": "wall_flag_area",
+      "type": "runtime_overlay",
+      "bounds": {
+        "x": 2274,
+        "y": 181,
+        "width": 358,
+        "height": 1213
+      },
+      "polygon": [
+        [
+          2455,
+          1394
+        ],
+        [
+          2629,
+          1295
+        ],
+        [
+          2632,
+          1245
+        ],
+        [
+          2583,
+          860
+        ],
+        [
+          2528,
+          580
+        ],
+        [
+          2446,
+          181
+        ],
+        [
+          2421,
+          200
+        ],
+        [
+          2418,
+          261
+        ],
+        [
+          2333,
+          663
+        ],
+        [
+          2292,
+          914
+        ],
+        [
+          2274,
+          1098
+        ],
+        [
+          2347,
+          1208
+        ],
+        [
+          2391,
+          1316
+        ]
+      ],
+      "action": "open_faction_archive",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Faction Flag",
+      "layer": "wall"
+    },
+    {
+      "id": "wall_calendar_area",
+      "type": "runtime_overlay",
+      "bounds": {
+        "x": 1421,
+        "y": 433,
+        "width": 793,
+        "height": 541
+      },
+      "polygon": [
+        [
+          1421,
+          433
+        ],
+        [
+          1425,
+          974
+        ],
+        [
+          2214,
+          965
+        ],
+        [
+          2212,
+          433
+        ]
+      ],
+      "action": "advance_turn",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Wall Calendar",
+      "layer": "wall"
+    },
+    {
+      "id": "intelligence_journal",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 1620,
+        "y": 1348,
+        "width": 319,
+        "height": 117
+      },
+      "polygon": [
+        [
+          1661,
+          1458
+        ],
+        [
+          1721,
+          1465
+        ],
+        [
+          1939,
+          1460
+        ],
+        [
+          1932,
+          1433
+        ],
+        [
+          1868,
+          1348
+        ],
+        [
+          1620,
+          1348
+        ]
+      ],
+      "action": "open_intelligence_journal",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Intelligence Journal",
+      "layer": "wall"
+    },
+    {
+      "id": "desk_map",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 496,
+        "y": 426,
+        "width": 844,
+        "height": 548
+      },
+      "polygon": [
+        [
+          496,
+          426
+        ],
+        [
+          501,
+          972
+        ],
+        [
+          1340,
+          974
+        ],
+        [
+          1336,
+          426
+        ]
+      ],
+      "action": "open_operational_map",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Operational Map",
+      "layer": "desk"
+    },
+    {
+      "id": "newspaper_stack",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 540,
+        "y": 1307,
+        "width": 498,
+        "height": 156
+      },
+      "polygon": [
+        [
+          542,
+          1460
+        ],
+        [
+          985,
+          1463
+        ],
+        [
+          1038,
+          1373
+        ],
+        [
+          1028,
+          1323
+        ],
+        [
+          671,
+          1307
+        ],
+        [
+          540,
+          1410
+        ]
+      ],
+      "action": "open_press_briefing",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Press Briefing",
+      "layer": "desk"
+    },
+    {
+      "id": "command_briefing_folio",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 1180,
+        "y": 1323,
+        "width": 325,
+        "height": 140
+      },
+      "polygon": [
+        [
+          1180,
+          1463
+        ],
+        [
+          1501,
+          1463
+        ],
+        [
+          1505,
+          1421
+        ],
+        [
+          1487,
+          1330
+        ],
+        [
+          1386,
+          1336
+        ],
+        [
+          1315,
+          1336
+        ],
+        [
+          1207,
+          1323
+        ]
+      ],
+      "action": "open_command_briefing",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Command Briefing",
+      "layer": "desk"
+    },
+    {
+      "id": "desk_radio",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 581,
+        "y": 1043,
+        "width": 367,
+        "height": 293
+      },
+      "polygon": [
+        [
+          629,
+          1336
+        ],
+        [
+          586,
+          1334
+        ],
+        [
+          581,
+          1222
+        ],
+        [
+          586,
+          1082
+        ],
+        [
+          655,
+          1077
+        ],
+        [
+          758,
+          1073
+        ],
+        [
+          866,
+          1068
+        ],
+        [
+          879,
+          1043
+        ],
+        [
+          909,
+          1043
+        ],
+        [
+          937,
+          1070
+        ],
+        [
+          944,
+          1123
+        ],
+        [
+          948,
+          1192
+        ],
+        [
+          946,
+          1242
+        ],
+        [
+          930,
+          1272
+        ],
+        [
+          889,
+          1274
+        ],
+        [
+          886,
+          1318
+        ],
+        [
+          769,
+          1320
+        ],
+        [
+          673,
+          1304
+        ]
+      ],
+      "action": "open_radio_net",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Radio Net",
+      "layer": "desk"
+    }
+  ]
+}

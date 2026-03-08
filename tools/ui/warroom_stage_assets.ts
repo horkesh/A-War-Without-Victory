@@ -18,7 +18,10 @@ const COPY_FILES: Array<{ src: string; dest: string }> = [
   { src: 'data/derived/settlements_a1_viewer.geojson', dest: 'data/derived/settlements_a1_viewer.geojson' },
   { src: 'data/derived/settlements_meta.json', dest: 'data/derived/settlements_meta.json' },
   { src: 'data/source/settlements_initial_master.json', dest: 'data/source/settlements_initial_master.json' },
-  { src: 'data/ui/hq_clickable_regions.json', dest: 'data/ui/hq_clickable_regions.json' }
+  { src: 'data/ui/hq_clickable_regions.json', dest: 'data/ui/hq_clickable_regions.json' },
+  { src: 'data/ui/hq_rbih_clickable_regions.json', dest: 'data/ui/hq_rbih_clickable_regions.json' },
+  { src: 'data/ui/hq_rs_clickable_regions.json', dest: 'data/ui/hq_rs_clickable_regions.json' },
+  { src: 'data/ui/hq_hrhb_clickable_regions.json', dest: 'data/ui/hq_hrhb_clickable_regions.json' }
 ].sort((a, b) => a.dest.localeCompare(b.dest));
 
 /** Warroom public dir for dev server; settlement_edges.json staged here so /data/derived/settlement_edges.json is available at dev time. */

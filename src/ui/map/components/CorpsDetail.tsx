@@ -207,53 +207,6 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
           />
         )}
 
-        {/* Subordinate Leaderboards */}
-        {corpsFormation.combatSummary && (corpsFormation.combatSummary.most_victories_brigade_id || corpsFormation.combatSummary.most_casualties_brigade_id) && (
-          <div className="border-t border-panel-border pt-2 mb-3 space-y-2">
-            <div className="text-xs text-text-secondary">Subordinate Leaderboards</div>
-
-            {corpsFormation.combatSummary.most_victories_brigade_id && (
-              <div className="flex justify-between items-center text-xs p-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-accent-gold" title="Most Victorious Brigade">⭐</span>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase tracking-wide text-text-secondary">Wall of Valor</span>
-                    <button
-                      className="text-text-primary hover:text-interactive text-left font-semibold truncate max-w-[120px]"
-                      onClick={() => setSelectedFormationId(corpsFormation.combatSummary!.most_victories_brigade_id!)}
-                    >
-                      {loadedGameState.formations.find(f => f.id === corpsFormation.combatSummary!.most_victories_brigade_id)?.name || corpsFormation.combatSummary.most_victories_brigade_id}
-                    </button>
-                  </div>
-                </div>
-                <span className="text-accent-gold font-mono text-xs">
-                  MVP
-                </span>
-              </div>
-            )}
-
-            {corpsFormation.combatSummary.most_casualties_brigade_id && (
-              <div className="flex justify-between items-center text-xs p-1.5 bg-[#d45555]/5 border border-[#d45555]/20 rounded">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[#d45555]" title="Highest Casualties Brigade">🩸</span>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase tracking-wide text-text-secondary">Bleeding Edge</span>
-                    <button
-                      className="text-text-primary hover:text-interactive text-left font-semibold truncate max-w-[120px]"
-                      onClick={() => setSelectedFormationId(corpsFormation.combatSummary!.most_casualties_brigade_id!)}
-                    >
-                      {loadedGameState.formations.find(f => f.id === corpsFormation.combatSummary!.most_casualties_brigade_id)?.name || corpsFormation.combatSummary.most_casualties_brigade_id}
-                    </button>
-                  </div>
-                </div>
-                <span className="text-[#d45555] font-mono text-xs">
-                  HEAVIEST LOSSES
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Sectors */}
         {corpsSectors.length > 0 && (
           <div className="border-t border-panel-border pt-2 mb-3">

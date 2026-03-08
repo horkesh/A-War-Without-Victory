@@ -706,6 +706,16 @@ function updateMultiAxisResults(
         }
     }
 
+    // Aggregate axis-level captures to operation level
+    let totalCaptures = 0;
+    let totalAttempts = 0;
+    for (const axis of axes) {
+        totalCaptures += axis.objective_capture_count ?? 0;
+        totalAttempts += axis.attack_attempt_count ?? 0;
+    }
+    op.objective_capture_count = totalCaptures;
+    op.attack_attempt_count = totalAttempts;
+
     // Check if all axes terminal → operation enters recovery
     if (allAxesTerminal(axes)) {
         const allComplete = axes.every(a => a.status === 'complete');

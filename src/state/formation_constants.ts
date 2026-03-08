@@ -89,6 +89,12 @@ export function isInCombat(f: { posture?: string; disrupted?: boolean }): boolea
     return f.posture === 'attack' || f.disrupted === true;
 }
 
+/** Whether a formation is eligible to participate in operations (active brigade/OG/phantom). */
+export function isEligibleOperationFormation(f: { kind?: string; status: string }): boolean {
+    return (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom')
+        && f.status === 'active';
+}
+
 /** Whether a brigade is eligible for reinforcement (not degraded, not forming, not enclave). */
 export function isEligibleForReinforcement(f: { kind?: string; readiness?: string; tags?: string[] }): boolean {
     if (f.kind === 'paramilitary') return false;

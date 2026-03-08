@@ -29,10 +29,34 @@ const WARROOM_SCENE_HEIGHT = 1536;
 const WARROOM_CALENDAR_REGION_IDS = ['wall_calendar_area', 'wall_calendar'] as const;
 
 const DEFAULT_REGIONS_URL = '/data/ui/hq_clickable_regions.json';
+/** If this file exists, it is used when no faction-specific file is available. */
+const OVERRIDE_REGIONS_URL = '/data/ui/hq_clickable_regions_override.json';
 
-function getRegionsUrl(): string {
+/** URL for faction-specific region file: hq_rbih_clickable_regions.json, hq_rs_clickable_regions.json, hq_hrhb_clickable_regions.json */
+function getFactionRegionsUrl(faction: FactionId): string {
+    return `/data/ui/hq_${faction.toLowerCase()}_clickable_regions.json`;
+}
+
+async function resolveRegionsUrl(): Promise<string> {
     const w = typeof window !== 'undefined' ? (window as unknown as { __awwvWarroomRegionsUrl?: string }) : undefined;
-    return w?.__awwvWarroomRegionsUrl ?? DEFAULT_REGIONS_URL;
+    if (w?.__awwvWarroomRegionsUrl) return w.__awwvWarroomRegionsUrl;
+    try {
+        const r = await fetch(OVERRIDE_REGIONS_URL);
+        if (r.ok) return OVERRIDE_REGIONS_URL;
+    } catch {
+        // ignore
+    }
+    return DEFAULT_REGIONS_URL;
+}
+
+function getInitialRegionCandidates(): string[] {
+    return [
+        OVERRIDE_REGIONS_URL,
+        DEFAULT_REGIONS_URL,
+        getFactionRegionsUrl('RBiH'),
+        getFactionRegionsUrl('RS'),
+        getFactionRegionsUrl('HRHB')
+    ];
 }
 const WARROOM_SCENE_PLATE_URLS: Record<FactionId, string> = {
     RBiH: hqRbih1991Url,
@@ -77,6 +101,8 @@ class WarroomApp {
     private phase0StartBriefShown = false;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
+    /** Faction for which we last loaded region data (so we only reload when faction changes). */
+    private lastLoadedRegionsFaction: FactionId | null = null;
 
     constructor() {
         this.canvas = document.getElementById('warroom-canvas') as HTMLCanvasElement;
@@ -89,6 +115,10 @@ class WarroomApp {
     }
 
     async init() {
+        // Grab the Electron preload bridge immediately so early menu clicks can start a campaign
+        // even while the rest of the warroom finishes loading.
+        this.desktopBridge = this.getDesktopBridge();
+
         // Apply main menu background: image first, overlay gradient for readability
         const mainMenuEl = document.getElementById('main-menu');
         if (mainMenuEl) {
@@ -110,7 +140,7 @@ class WarroomApp {
             this.loadFlagAssets()
         ]);
 
-        await this.regionManager.loadRegions(getRegionsUrl());
+        await this.loadInitialRegions();
         this.regionManager.setCanvasScale(this.canvas.width, this.canvas.height);
         this.regionManager.setModalManager(this.modalManager);
         this.regionManager.setTacticalMap(this.map);
@@ -121,6 +151,8 @@ class WarroomApp {
 
         this.regionManager.setOnGameStateChange((newState) => {
             this.gameState = newState;
+            const faction = (newState.meta.player_faction ?? newState.factions[0]?.id ?? 'RBiH') as FactionId;
+            void this.ensureRegionsLoadedForFaction(faction);
             this.updateUIOverlay();
         });
 
@@ -153,7 +185,6 @@ class WarroomApp {
         await this.warPlanningMap.loadData();
         await this.phase0PreparationMap.loadData();
 
-        this.desktopBridge = this.getDesktopBridge();
         // Resolve tactical map HTTP server URL (set by Electron main process).
         // MapLibre requires http:// origin; its Web Workers don't work under awwv://.
         if (this.desktopBridge && typeof (this.desktopBridge as Record<string, unknown>).getMapServerUrl === 'function') {
@@ -285,6 +316,8 @@ class WarroomApp {
     private applyGameStateFromJson(stateJson: string): void {
         try {
             this.gameState = deserializeState(stateJson);
+            const faction = (this.gameState.meta.player_faction ?? this.gameState.factions[0]?.id ?? 'RBiH') as FactionId;
+            void this.ensureRegionsLoadedForFaction(faction);
             // Sync scenario epoch so date helpers produce correct calendar dates
             setScenarioStartDate(this.gameState.meta.scenario_start_date);
             // Defer DOM work to the next task so the triggering click is consumed and UI stays responsive.
@@ -621,6 +654,53 @@ class WarroomApp {
         const loaded = await Promise.all(entries.map(async ([id, src]) => [id, await this.loadImage(src)] as const));
         for (const [id, img] of loaded) {
             this.flagImages.set(id, img);
+        }
+    }
+
+    /**
+     * Load some region data during startup, but never let a missing default file
+     * abort warroom init. This keeps the menu/campaign flow alive even when the
+     * shared regions file is intentionally removed in favor of per-faction files.
+     */
+    private async loadInitialRegions(): Promise<void> {
+        const explicitUrl = await resolveRegionsUrl();
+        const candidates = explicitUrl === DEFAULT_REGIONS_URL
+            ? getInitialRegionCandidates()
+            : [explicitUrl];
+
+        for (const url of candidates) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) continue;
+                await this.regionManager.loadRegions(url);
+                return;
+            } catch {
+                // Try the next candidate.
+            }
+        }
+
+        console.warn('[warroom] No initial region file found; continuing without regions until faction-specific data loads.');
+    }
+
+    /** Load faction-specific region file when player faction is known; fall back to default if missing. */
+    private async ensureRegionsLoadedForFaction(faction: FactionId): Promise<void> {
+        if (this.lastLoadedRegionsFaction === faction) return;
+        const url = getFactionRegionsUrl(faction);
+        try {
+            const r = await fetch(url);
+            if (r.ok) {
+                await this.regionManager.loadRegions(url);
+                this.lastLoadedRegionsFaction = faction;
+                return;
+            }
+        } catch {
+            // ignore
+        }
+        try {
+            await this.regionManager.loadRegions(DEFAULT_REGIONS_URL);
+            this.lastLoadedRegionsFaction = faction;
+        } catch {
+            // keep previous regions if default also fails
         }
     }
 
