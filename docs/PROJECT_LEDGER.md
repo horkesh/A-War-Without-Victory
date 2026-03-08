@@ -7,6 +7,19 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Phase I/II Terminology Sweep + Mega-File Splitting — Phase 5 of Audit Remediation
+
+**Phase I/II sweep**: 400 references across 154 files. Comments/docstrings: "Phase I"→"Peace phase", "Phase II"→"War phase". Internal variable renames: `phaseIiSupplyPressure`→`warPhaseSupplyPressure`, `phaseIiExhaustion`→`warPhaseExhaustion`. Preserved ~50 serialized values, exported function names, import paths, runtime discriminators.
+
+**Mega-file splitting**: Two mega-files split into modules with re-exports for backward compatibility.
+- `bot_corps_ai.ts` (2,197→225L): → `bot_corps_helpers.ts` (229L), `bot_corps_stance.ts` (274L), `bot_corps_operations.ts` (431L), `bot_corps_corridor.ts` (159L), `bot_corps_directives.ts` (1,036L)
+- `bot_brigade_ai_osid.ts` (1,994→1,343L): → `bot_brigade_context.ts` (187L), `bot_brigade_movement_ai.ts` (338L), `bot_brigade_targeting.ts` (190L), `bot_brigade_supply_ethnic.ts` (143L)
+- `war_phases.ts` (1,891L): kept as-is — config artifact, splitting reduces readability
+- `corps_front_sectors.ts` (2,223L): deferred — tightly coupled territory/subsegment pipeline
+
+**Files**: 154 files (terminology) + 11 files (splitting)
+**Verification**: tsc clean, 389/389 vitest passing. Zero behavioral changes.
+
 ## [2026-03-08] Code Health — Phase 4 of Audit Remediation
 
 Behavior-preserving cleanup. Three changes:
