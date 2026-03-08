@@ -39,6 +39,9 @@ data/derived/terrain/_tmp/
 .tmp_scenario_test_a/
 .tmp_scenario_test_b/
 
+# Temporary diagnostic scripts (one-off session artifacts)
+tools/tmp_*.cjs
+
 # Repo cleanup 2026: run outputs and temp dirs (do not track)
 runs/
 .tmp_*/

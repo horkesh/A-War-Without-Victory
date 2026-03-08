@@ -233,6 +233,22 @@ export function updateSiegeTurnCounters(
     return report;
 }
 
+// ── Invariant Assertion ──────────────────────────────────────────────────────
+
+/** Validate supply reserve invariants. Throws on violation. */
+function assertSupplyInvariant(state: GameState, label: string): void {
+    for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
+        const gen = state.general_supply_reserve?.[faction] ?? 0;
+        const heavy = state.heavy_munitions_reserve?.[faction] ?? 0;
+        if (gen < 0 || heavy < 0) {
+            throw new Error(`Supply invariant violation at ${label}: ${faction} gen=${gen.toFixed(2)} heavy=${heavy.toFixed(2)}`);
+        }
+        if (gen > 200 || heavy > 200) {
+            throw new Error(`Supply invariant violation at ${label}: ${faction} gen=${gen.toFixed(2)} heavy=${heavy.toFixed(2)} (>200 cap)`);
+        }
+    }
+}
+
 // ── Core: Per-Turn Reserve Update ────────────────────────────────────────────
 
 
@@ -252,6 +268,7 @@ export function updateSupplyReserves(
     productionBonusByFaction: Record<string, number>
 ): SupplyReservesReport {
     ensureSupplyReserves(state);
+    assertSupplyInvariant(state, 'updateSupplyReserves:entry');
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort((a, b) => a.localeCompare(b));
     const formations = state.formations ?? {};
@@ -368,6 +385,8 @@ export function updateSupplyReserves(
             embargo_factor_heavy: embargoFactorHeavy,
         });
     }
+
+    assertSupplyInvariant(state, 'updateSupplyReserves:exit');
 
     return {
         schema: 1,

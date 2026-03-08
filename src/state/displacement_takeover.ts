@@ -257,6 +257,99 @@ function getRoutingOrder(sourceMun: MunicipalityId, faction: FactionId): Municip
     return orderedUnique([...primary, ...fallback, ...LARGE_URBAN_MUN_IDS]);
 }
 
+/**
+ * Shared routing helper for displaced cohorts. Routes population from sourceMunId
+ * to friendly municipalities in routing order, respecting capacity constraints.
+ *
+ * Three callers with different options:
+ *  - Pass-through: no militia pool, no brigade check, no event logging
+ *  - Sustained displacement: militia pool tracking, event logging
+ *  - Camp reroute: militia pool tracking, brigade presence check, event logging
+ */
+function routeDisplacedCohort(
+    state: GameState,
+    sourceMunId: MunicipalityId,
+    faction: FactionId,
+    amount: number,
+    friendlyMuns: Set<MunicipalityId>,
+    settlements: Map<string, SettlementRecord>,
+    routedByPoolKey: Map<string, { munId: MunicipalityId; faction: FactionId; amount: number }>,
+    report: TakeoverDisplacementReport,
+    options: {
+        trackMilitiaPool?: boolean;
+        requireBrigadePresence?: boolean;
+        eventReason?: string;
+    }
+): { routed: number; remaining: number } {
+    const currentTurn = state.meta.turn;
+    let remaining = amount;
+    let totalRouted = 0;
+    const routeOrder = getRoutingOrder(sourceMunId, faction);
+    for (const targetMunId of routeOrder) {
+        if (remaining <= 0) break;
+        if (!friendlyMuns?.has(targetMunId)) continue;
+        if (targetMunId === sourceMunId) continue;
+        if (options.requireBrigadePresence && !factionHasBrigadeInMunicipality(state, faction, targetMunId, settlements)) continue;
+        const targetState = getOrInitDisplacementState(
+            state,
+            targetMunId,
+            state.displacement_state?.[targetMunId]?.original_population ?? 10000
+        );
+        const targetCurrent = Math.max(
+            0,
+            targetState.original_population + targetState.displaced_in
+            - targetState.displaced_out - targetState.lost_population
+        );
+        const targetCapacity = Math.floor(
+            targetState.original_population * getReceivingCapacityFraction(targetMunId)
+        );
+        const availableCapacity = Math.max(0, targetCapacity - targetCurrent);
+        if (availableCapacity <= 0) continue;
+        const routed = Math.min(remaining, availableCapacity);
+        if (routed <= 0) continue;
+
+        targetState.displaced_in += routed;
+        if (!targetState.displaced_in_by_faction) targetState.displaced_in_by_faction = {};
+        targetState.displaced_in_by_faction[faction] =
+            (targetState.displaced_in_by_faction[faction] ?? 0) + routed;
+        targetState.last_updated_turn = currentTurn;
+
+        if (options.trackMilitiaPool) {
+            const poolKey = militiaPoolKey(targetMunId, faction);
+            const current = routedByPoolKey.get(poolKey);
+            if (current) {
+                current.amount += routed;
+            } else {
+                routedByPoolKey.set(poolKey, { munId: targetMunId, faction, amount: routed });
+            }
+        }
+
+        if (options.eventReason) {
+            report.routing.push({
+                from_mun: sourceMunId,
+                to_mun: targetMunId,
+                amount: routed,
+                reason: options.eventReason
+            });
+
+            state.displacement_event_log!.push({
+                turn: currentTurn,
+                origin_mun: sourceMunId,
+                dest_mun: targetMunId,
+                ethnicity: faction,
+                displaced: 0,
+                killed: 0,
+                fled_abroad: 0,
+                settled: routed,
+            });
+        }
+
+        remaining -= routed;
+        totalRouted += routed;
+    }
+    return { routed: totalRouted, remaining };
+}
+
 function addOneTurnPoolContribution(
     state: GameState,
     routedByPoolKey: Map<string, { munId: MunicipalityId; faction: FactionId; amount: number }>
@@ -603,34 +696,13 @@ export function processDisplacementTakeover(
                 for (const fid of fKeys) {
                     let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
                     if (rem <= 0) continue;
-                    const routeOrder = getRoutingOrder(munId, fid as FactionId);
-                    for (const targetMunId of routeOrder) {
-                        if (rem <= 0) break;
-                        if (!friendlyMunsByFaction[fid as FactionId]?.has(targetMunId)) continue;
-                        if (targetMunId === munId) continue;
-                        const targetState = getOrInitDisplacementState(
-                            state, targetMunId,
-                            state.displacement_state?.[targetMunId]?.original_population ?? 10000
-                        );
-                        const targetCurrent = Math.max(0,
-                            targetState.original_population + targetState.displaced_in
-                            - targetState.displaced_out - targetState.lost_population
-                        );
-                        const targetCapacity = Math.floor(
-                            targetState.original_population * getReceivingCapacityFraction(targetMunId)
-                        );
-                        const avail = Math.max(0, targetCapacity - targetCurrent);
-                        if (avail <= 0) continue;
-                        const routed = Math.min(rem, avail);
-                        if (routed <= 0) continue;
-                        targetState.displaced_in += routed;
-                        if (!targetState.displaced_in_by_faction) targetState.displaced_in_by_faction = {};
-                        targetState.displaced_in_by_faction[fid as FactionId] =
-                            (targetState.displaced_in_by_faction[fid as FactionId] ?? 0) + routed;
-                        targetState.last_updated_turn = currentTurn;
-                        rem -= routed;
-                    }
-                    byFaction[fid] = rem;
+                    const result = routeDisplacedCohort(
+                        state, munId, fid as FactionId, rem,
+                        friendlyMunsByFaction[fid as FactionId],
+                        settlements, routedByPoolKey, report,
+                        {}
+                    );
+                    byFaction[fid] = result.remaining;
                 }
                 const remainder = (Object.values(byFaction) as number[])
                     .filter(v => typeof v === 'number' && Number.isFinite(v) && v > 0)
@@ -716,64 +788,12 @@ export function processDisplacementTakeover(
 
             // Direct routing to friendly municipalities (no camp — sustained = civilian flight)
             if (directRouted > 0) {
-                let remaining = directRouted;
-                const routeOrder = getRoutingOrder(munId, timer.from_faction);
-                for (const targetMunId of routeOrder) {
-                    if (remaining <= 0) break;
-                    if (!friendlyMunsByFaction[timer.from_faction]?.has(targetMunId)) continue;
-                    if (targetMunId === munId) continue;
-                    const targetState = getOrInitDisplacementState(
-                        state,
-                        targetMunId,
-                        state.displacement_state?.[targetMunId]?.original_population ?? 10000
-                    );
-                    const targetCurrent = Math.max(
-                        0,
-                        targetState.original_population + targetState.displaced_in
-                        - targetState.displaced_out - targetState.lost_population
-                    );
-                    const targetCapacity = Math.floor(
-                        targetState.original_population * getReceivingCapacityFraction(targetMunId)
-                    );
-                    const availableCapacity = Math.max(0, targetCapacity - targetCurrent);
-                    if (availableCapacity <= 0) continue;
-                    const routed = Math.min(remaining, availableCapacity);
-                    if (routed <= 0) continue;
-
-                    targetState.displaced_in += routed;
-                    if (!targetState.displaced_in_by_faction) targetState.displaced_in_by_faction = {};
-                    targetState.displaced_in_by_faction[timer.from_faction] =
-                        (targetState.displaced_in_by_faction[timer.from_faction] ?? 0) + routed;
-                    targetState.last_updated_turn = currentTurn;
-
-                    const poolKey = militiaPoolKey(targetMunId, timer.from_faction);
-                    const current = routedByPoolKey.get(poolKey);
-                    if (current) {
-                        current.amount += routed;
-                    } else {
-                        routedByPoolKey.set(poolKey, { munId: targetMunId, faction: timer.from_faction, amount: routed });
-                    }
-
-                    report.routing.push({
-                        from_mun: munId,
-                        to_mun: targetMunId,
-                        amount: routed,
-                        reason: 'sustained_displacement'
-                    });
-
-                    state.displacement_event_log.push({
-                        turn: currentTurn,
-                        origin_mun: munId,
-                        dest_mun: targetMunId,
-                        ethnicity: timer.from_faction,
-                        displaced: 0,
-                        killed: 0,
-                        fled_abroad: 0,
-                        settled: routed,
-                    });
-
-                    remaining -= routed;
-                }
+                routeDisplacedCohort(
+                    state, munId, timer.from_faction, directRouted,
+                    friendlyMunsByFaction[timer.from_faction],
+                    settlements, routedByPoolKey, report,
+                    { trackMilitiaPool: true, eventReason: 'sustained_displacement' }
+                );
             }
 
             recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
@@ -810,67 +830,16 @@ export function processDisplacementTakeover(
         let routedFromCamp = 0;
         const factionKeys = (Object.keys(camp.by_faction) as FactionId[]).sort(strictCompare);
         for (const factionId of factionKeys) {
-            let remaining = Math.max(0, Math.floor(camp.by_faction[factionId] ?? 0));
-            if (remaining <= 0) continue;
-            const routeOrder = getRoutingOrder(sourceMunId, factionId);
-            for (const targetMunId of routeOrder) {
-                if (remaining <= 0) break;
-                if (!friendlyMunsByFaction[factionId]?.has(targetMunId)) continue;
-                if (targetMunId === sourceMunId) continue;
-                if (!factionHasBrigadeInMunicipality(state, factionId, targetMunId, settlements)) continue;
-                const targetState = getOrInitDisplacementState(
-                    state,
-                    targetMunId,
-                    state.displacement_state?.[targetMunId]?.original_population ?? 10000
-                );
-                const targetCurrent = Math.max(
-                    0,
-                    targetState.original_population + targetState.displaced_in - targetState.displaced_out - targetState.lost_population
-                );
-                const targetCapacity = Math.floor(
-                    targetState.original_population * getReceivingCapacityFraction(targetMunId)
-                );
-                const availableCapacity = Math.max(0, targetCapacity - targetCurrent);
-                if (availableCapacity <= 0) continue;
-                const routed = Math.min(remaining, availableCapacity);
-                if (routed <= 0) continue;
-
-                targetState.displaced_in += routed;
-                if (!targetState.displaced_in_by_faction) targetState.displaced_in_by_faction = {};
-                targetState.displaced_in_by_faction[factionId] =
-                    (targetState.displaced_in_by_faction[factionId] ?? 0) + routed;
-                targetState.last_updated_turn = currentTurn;
-
-                const poolKey = militiaPoolKey(targetMunId, factionId);
-                const current = routedByPoolKey.get(poolKey);
-                if (current) {
-                    current.amount += routed;
-                } else {
-                    routedByPoolKey.set(poolKey, { munId: targetMunId, faction: factionId, amount: routed });
-                }
-
-                report.routing.push({
-                    from_mun: sourceMunId,
-                    to_mun: targetMunId,
-                    amount: routed,
-                    reason: 'camp_reroute_urban_motherland'
-                });
-
-                // Displacement event log — settlement/arrival event
-                state.displacement_event_log.push({
-                    turn: currentTurn,
-                    origin_mun: sourceMunId,
-                    dest_mun: targetMunId,
-                    ethnicity: factionId,
-                    displaced: 0,
-                    killed: 0,
-                    fled_abroad: 0,
-                    settled: routed,
-                });
-                remaining -= routed;
-                routedFromCamp += routed;
-            }
-            camp.by_faction[factionId] = remaining;
+            const cohortAmount = Math.max(0, Math.floor(camp.by_faction[factionId] ?? 0));
+            if (cohortAmount <= 0) continue;
+            const result = routeDisplacedCohort(
+                state, sourceMunId, factionId, cohortAmount,
+                friendlyMunsByFaction[factionId],
+                settlements, routedByPoolKey, report,
+                { trackMilitiaPool: true, requireBrigadePresence: true, eventReason: 'camp_reroute_urban_motherland' }
+            );
+            camp.by_faction[factionId] = result.remaining;
+            routedFromCamp += result.routed;
         }
 
         camp.population = (Object.values(camp.by_faction) as number[])
