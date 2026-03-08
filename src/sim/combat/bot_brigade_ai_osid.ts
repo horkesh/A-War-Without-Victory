@@ -1019,6 +1019,36 @@ function executeFactionDirectives(
             continue;
         }
 
+        // --- Sector march: brigade assigned to a sector but not on its front → column march ---
+        // This overrides home defense: the corps needs this brigade at the front.
+        if (state.corps_front_sectors && !isActiveSectorOperationParticipant) {
+            let assignedSector: (typeof state.corps_front_sectors)[string] | null = null;
+            for (const sid of Object.keys(state.corps_front_sectors).sort(strictCompare)) {
+                const sec = state.corps_front_sectors[sid]!;
+                if (sec.assigned_brigade_ids.includes(brigade.id)) {
+                    assignedSector = sec;
+                    break;
+                }
+            }
+            if (assignedSector) {
+                const frontSet = new Set<string>();
+                for (const ss of assignedSector.sub_segments) {
+                    for (const o of ss.friendly_osids) frontSet.add(o);
+                }
+                if (!frontSet.has(loc)) {
+                    // Not on sector front — column march there
+                    if (frontSet.size > 0) {
+                        const dest = findNearestFriendlyOsidInSet(state, faction, loc, adjacency, reverseMap, frontSet);
+                        if (dest) {
+                            result.column_march_orders[brigade.id] = dest;
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
         // --- Home-ground brigades: defend or counterattack only, never attack ---
         // home_defense_active is set by the compute-home-defense-active pipeline step.
         // Exception: truly undefended directive targets (no sector coverage = no brigade
@@ -1670,50 +1700,6 @@ const freeTarget = predictions.find(t =>
                             }
                             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                             continue;
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- Rule 5b3: March to assigned sector ---
-        // Brigade is assigned to a sector (possibly by ensureMinimumSectorCoverage paper-transfer)
-        // but not physically in that sector's territory. Column march toward the sector.
-        // Guards: only march if brigade is safe to move (rear-area or surplus position).
-        // Don't pull front-line defenders that would create gaps or uproot entrenched units.
-        if (state.corps_front_sectors) {
-            let assignedSector: (typeof state.corps_front_sectors)[string] | null = null;
-            for (const sid of Object.keys(state.corps_front_sectors).sort(strictCompare)) {
-                const sec = state.corps_front_sectors[sid]!;
-                if (sec.assigned_brigade_ids.includes(brigade.id)) {
-                    assignedSector = sec;
-                    break;
-                }
-            }
-            if (assignedSector) {
-                const territorySet = new Set(assignedSector.territory_osids);
-                if (!territorySet.has(loc)) {
-                    // Skip entrenched brigades — too invested in current position
-                    if ((brigade.entrenchment_turns ?? 0) >= 2) {
-                        // Stay put, don't uproot
-                    } else {
-                        const onFront = adjEnemy.length > 0;
-                        const factionHere = onFront ? countFactionBrigadesAtOsid(state, faction, loc) : 0;
-                        // Only march if: rear-area (no enemies adjacent) or surplus (>=2 at location)
-                        if (!onFront || factionHere >= 2) {
-                            const targetOsids = new Set<string>();
-                            for (const ss of assignedSector.sub_segments) {
-                                for (const o of ss.friendly_osids) targetOsids.add(o);
-                            }
-                            for (const o of assignedSector.territory_osids) targetOsids.add(o);
-                            if (targetOsids.size > 0) {
-                                const dest = findNearestFriendlyOsidInSet(state, faction, loc, adjacency, reverseMap, targetOsids);
-                                if (dest) {
-                                    result.column_march_orders[brigade.id] = dest;
-                                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-                                    continue;
-                                }
-                            }
                         }
                     }
                 }

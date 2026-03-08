@@ -203,7 +203,9 @@
    Do instead: Run `npm run map:audit:split-muni-duplicates` before any map rebuild.
 
 ## User Directives
-1. **[Standing] Life lessons enforcement system (3 mechanisms)**
+1. **[Standing] working-on.md — task continuity across compaction**
+   Do instead: When context is visibly high (many tool calls, long session), OR before any major task boundary, write `working-on.md` to project root with: (1) current task in one sentence, (2) files actively being modified, (3) next 3 concrete steps. This is Claude's own responsibility — not a hook. At session start: if `working-on.md` exists, read it first and delete it (MEMORY.md step 4).
+2. **[Standing] Life lessons enforcement system (3 mechanisms)**
    Do instead: (A) **Session start**: read `docs/life_lessons.md`, flag lessons relevant to current task, STOP if about to violate one. (B) **Pre-commit**: `/awwv_pre_commit_check` includes life-lessons compliance — each active lesson checked as PASS/FLAG against the diff. (C) **Daily cron**: schedule `3 6 * * *` at session start — gathers 24h activity, detects violations in git diffs, synthesizes new lessons, promotes/demotes based on compliance, regenerates `/visual-explainer`. Session-only cron — must re-schedule each session.
 2. **[Standing] Absolute paths**
    Do instead: Always use absolute paths for tool calls.

@@ -254,23 +254,29 @@ function classifyBrigadesByTerritory(
         s.reserve_brigade_ids = [];
     }
 
-    // Build reverse map: OSID → sector index (from territory_osids)
-    const osidToSectorIdx = new Map<string, number>();
+    // Build per-sector front OSID set and 1-hop-behind reserve set.
+    // Assigned = on front OSID. Reserve = 1 hop behind front in friendly territory.
+    // Deeper rear brigades are not classified to any sector.
+    const frontOsidToSectorIdx = new Map<string, number>();
+    const reserveOsidToSectorIdx = new Map<string, number>();
     for (let i = 0; i < sectors.length; i++) {
-        for (const osid of sectors[i]!.territory_osids) {
-            if (!osidToSectorIdx.has(osid)) osidToSectorIdx.set(osid, i);
+        const sec = sectors[i]!;
+        const frontSet = new Set<string>();
+        for (const ss of sec.sub_segments) {
+            for (const o of ss.friendly_osids) {
+                frontSet.add(o);
+                if (!frontOsidToSectorIdx.has(o)) frontOsidToSectorIdx.set(o, i);
+            }
         }
-    }
-
-    // Classify each brigade — corps-strict: brigades only attach to their own corps's sectors.
-    // A brigade in foreign-corps territory goes to the nearest own-corps sector as reserve.
-    // Build reverse lookup: corpsId → sector indices for that corps
-    const corpsSectorIndices = new Map<string, number[]>();
-    for (let i = 0; i < sectors.length; i++) {
-        const cid = sectors[i]!.corps_id;
-        let list = corpsSectorIndices.get(cid);
-        if (!list) { list = []; corpsSectorIndices.set(cid, list); }
-        list.push(i);
+        // 1-hop behind: adjacent to front, in friendly territory, not itself a front OSID
+        for (const frontOsid of frontSet) {
+            for (const n of (adjacency.get(frontOsid as Osid) ?? [])) {
+                if (frontSet.has(n)) continue;
+                if (!friendlyOsids.has(n)) continue;
+                if (frontOsidToSectorIdx.has(n)) continue; // Front of another sector
+                if (!reserveOsidToSectorIdx.has(n)) reserveOsidToSectorIdx.set(n, i);
+            }
+        }
     }
 
     const sortedFormIds = Object.keys(formations).sort(strictCompare);
@@ -283,33 +289,82 @@ function classifyBrigadesByTerritory(
         const fCorpsId = getFormationCorpsId(f);
         if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue;
 
-        // Check if brigade is in a sector of its OWN corps
-        const sectorIdx = osidToSectorIdx.get(f.location_osid);
-        if (sectorIdx !== undefined && sectors[sectorIdx]!.corps_id === fCorpsId) {
-            sectors[sectorIdx]!.assigned_brigade_ids.push(fid);
+        const loc = f.location_osid;
+
+        // Priority 1: brigade on a front OSID of its own corps → assigned
+        const frontIdx = frontOsidToSectorIdx.get(loc);
+        if (frontIdx !== undefined && sectors[frontIdx]!.corps_id === fCorpsId) {
+            sectors[frontIdx]!.assigned_brigade_ids.push(fid);
             continue;
         }
 
-        // Brigade is in foreign-corps territory or no sector territory at all.
-        // Find nearest own-corps sector to assign as reserve.
-        if (fCorpsId && friendlyOsids.has(f.location_osid)) {
-            const ownSectorIdxs = corpsSectorIndices.get(fCorpsId);
-            if (ownSectorIdxs && ownSectorIdxs.length > 0) {
-                // Build a set of OSIDs that belong to own-corps sectors
-                const nearestIdx = bfsToNearestSector(
-                    f.location_osid, osidToSectorIdx, adjacency, friendlyOsids, ownSectorIdxs
-                );
-                if (nearestIdx !== null) {
-                    sectors[nearestIdx]!.reserve_brigade_ids.push(fid);
-                    continue;
+        // Priority 2: brigade 1 hop behind front of its own corps → reserve
+        const reserveIdx = reserveOsidToSectorIdx.get(loc);
+        if (reserveIdx !== undefined && sectors[reserveIdx]!.corps_id === fCorpsId) {
+            sectors[reserveIdx]!.reserve_brigade_ids.push(fid);
+            continue;
+        }
+
+        // Priority 3: brigade on a front OSID of another corps → assigned (cross-corps)
+        if (frontIdx !== undefined) {
+            sectors[frontIdx]!.assigned_brigade_ids.push(fid);
+            continue;
+        }
+
+        // Priority 4: brigade 1 hop behind front of another corps → reserve (cross-corps)
+        if (reserveIdx !== undefined) {
+            sectors[reserveIdx]!.reserve_brigade_ids.push(fid);
+            continue;
+        }
+
+        // Priority 5: deeper rear — assign to nearest own-corps sector.
+        // These brigades need to column-march to their sector's front.
+        if (fCorpsId && friendlyOsids.has(loc)) {
+            // BFS from brigade location through friendly territory to find nearest sector front OSID
+            const visited = new Set<string>([loc]);
+            const queue: string[] = [loc];
+            let head = 0;
+            let bestSectorIdx: number | null = null;
+            while (head < queue.length && bestSectorIdx === null) {
+                const osid = queue[head++]!;
+                // Check if this OSID is a front OSID of an own-corps sector
+                const fi = frontOsidToSectorIdx.get(osid);
+                if (fi !== undefined && sectors[fi]!.corps_id === fCorpsId) {
+                    bestSectorIdx = fi;
+                    break;
+                }
+                for (const n of (adjacency.get(osid as Osid) ?? []).slice().sort(strictCompare)) {
+                    if (visited.has(n)) continue;
+                    if (!friendlyOsids.has(n)) continue;
+                    visited.add(n);
+                    queue.push(n);
                 }
             }
-            // Fallback: no own-corps sector exists — assign to any nearest sector as reserve
-            const fallbackIdx = bfsToNearestSector(
-                f.location_osid, osidToSectorIdx, adjacency, friendlyOsids
-            );
-            if (fallbackIdx !== null) {
-                sectors[fallbackIdx]!.reserve_brigade_ids.push(fid);
+            if (bestSectorIdx !== null) {
+                sectors[bestSectorIdx]!.assigned_brigade_ids.push(fid);
+                continue;
+            }
+        }
+
+        // Last resort: no own-corps sector reachable. Try any faction sector.
+        if (friendlyOsids.has(loc)) {
+            const visited = new Set<string>([loc]);
+            const queue: string[] = [loc];
+            let head = 0;
+            let bestIdx: number | null = null;
+            while (head < queue.length && bestIdx === null) {
+                const osid = queue[head++]!;
+                const fi = frontOsidToSectorIdx.get(osid);
+                if (fi !== undefined) { bestIdx = fi; break; }
+                for (const n of (adjacency.get(osid as Osid) ?? []).slice().sort(strictCompare)) {
+                    if (visited.has(n)) continue;
+                    if (!friendlyOsids.has(n)) continue;
+                    visited.add(n);
+                    queue.push(n);
+                }
+            }
+            if (bestIdx !== null) {
+                sectors[bestIdx]!.assigned_brigade_ids.push(fid);
             }
         }
     }
@@ -1339,60 +1394,8 @@ function ensureMinimumSectorCoverage(
                 if (promoted) continue;
             }
 
-            // Step 2: BFS from sector friendly OSIDs through friendly territory
-            // to find nearest brigade in a surplus sector (>1 assigned) within the same corps.
-            // Restricted to friendly territory — isolated pockets stay empty if no brigade is inside.
-            const sectorOsids = new Set<string>();
-            for (const ss of sector.sub_segments) {
-                for (const o of ss.friendly_osids) sectorOsids.add(o);
-            }
-
-            // Map brigade location_osid → brigade_id for surplus sectors only
-            // Skip entrenched brigades (>=2 turns) — too valuable in current position
-            const donorByOsid = new Map<string, FormationId>();
-            for (const other of corpsSectors) {
-                if (other.sector_id === sector.sector_id) continue;
-                if (other.assigned_brigade_ids.length <= 1) continue; // Keep at least 1
-                for (const bid of other.assigned_brigade_ids) {
-                    const f = formations[bid];
-                    if (!f?.location_osid) continue;
-                    if ((f.entrenchment_turns ?? 0) >= 2) continue;
-                    if (!donorByOsid.has(f.location_osid)) {
-                        donorByOsid.set(f.location_osid, bid);
-                    }
-                }
-            }
-            if (donorByOsid.size === 0) continue;
-
-            // BFS through friendly territory only from sector friendly OSIDs
-            const queue: Osid[] = [...sectorOsids].sort(strictCompare);
-            const visited = new Set(queue);
-            let head = 0;
-            let donorBid: FormationId | null = null;
-
-            outer: while (head < queue.length) {
-                const osid = queue[head++]!;
-                for (const n of [...(adjacency.get(osid) ?? [])].sort(strictCompare)) {
-                    if (visited.has(n)) continue;
-                    if (!friendlyOsids.has(n)) continue; // Only traverse friendly territory
-                    visited.add(n);
-                    const bid = donorByOsid.get(n);
-                    if (bid) { donorBid = bid; break outer; }
-                    queue.push(n);
-                }
-            }
-
-            if (!donorBid) continue;
-
-            // Transfer donorBid from its sector to this empty sector
-            for (const other of corpsSectors) {
-                const idx = other.assigned_brigade_ids.indexOf(donorBid);
-                if (idx >= 0) {
-                    other.assigned_brigade_ids.splice(idx, 1);
-                    sector.assigned_brigade_ids.push(donorBid);
-                    break;
-                }
-            }
+            // No paper-transfer from other sectors. Empty sectors with no reserve
+            // will be filled naturally by bot AI column-marching rear brigades forward.
         }
     }
 

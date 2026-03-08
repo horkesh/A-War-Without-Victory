@@ -1861,6 +1861,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 weeklyControlChangeAttributionForReport,
                 operationDiagnosticsForReport
             );
+            // Attach movement diagnostics from turn report
+            const rowAny = reportRow as unknown as Record<string, unknown>;
+            const trAny = turnReport as unknown as Record<string, unknown>;
+            if (trAny.column_movement) {
+                rowAny.column_movement = trAny.column_movement;
+            }
+            if (trAny.movement_report) {
+                rowAny.movement_report = trAny.movement_report;
+            }
             if (week_index === 0) firstReportRow = reportRow;
             lastReportRow = reportRow;
             reportStream.write(stableStringify(reportRow) + '\n');

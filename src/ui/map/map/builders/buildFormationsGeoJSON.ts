@@ -41,8 +41,9 @@ export function buildFormationsGeoJSON(
   const features: Array<Feature<Point, FormationMarkerProperties>> = [];
 
   for (const formation of orderedFormations) {
-    // Determine if this is a command abstraction or a physical combat unit.
+    // Corps HQs and army HQs are organizational concepts, not physical map units — skip them.
     const isHQ = formation.kind === 'corps' || formation.kind === 'corps_asset' || formation.kind === 'army_hq';
+    if (isHQ) continue;
 
     const osid = resolveFormationLocationOsid(formation, centroidLookup);
     if (!osid) continue;

@@ -7,6 +7,26 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Sector Classification and Movement Overhaul — Column March Fix + Brigade Front Alignment
+
+**Critical bug fix**: Column march orders were silently failing because `stance: 'column'` was missing from merged movement orders in `bot_brigade_ai_osid.ts`. Zero column arrivals across 40 simulated weeks. Fix restored 300 march starts, 237 arrivals.
+
+**Sector classification rewrite** (`corps_front_sectors.ts:classifyBrigadesByTerritory`): Three-tier priority — (1) Assigned: brigade on sector front OSIDs (`sub_segments.friendly_osids`), (2) Reserve: 1 hop behind front, (3) Deep rear: BFS to nearest own-corps sector front. Previously used full BFS Voronoi territory depth, putting 47% of "assigned" brigades in deep rear. Post-fix: 97% on front.
+
+**Sector march rule** (`bot_brigade_ai_osid.ts`): New rule before home defense check — brigades assigned to a sector but not on its front get column march orders. Overrides `home_defense_active`. Corps needs > garrison duty.
+
+**Paper-transfer removal** (`corps_front_sectors.ts:ensureMinimumSectorCoverage`): Step 2 BFS paper-transfer of brigade IDs from surplus sectors removed. Was creating phantom coverage without physical movement.
+
+**Elite home distance curve** (`home_distance.ts`): `elite_loan_state` brigades get flatter curve (floor 0.85 vs 0.70, -2%/hop vs -4%/hop). 3 affected brigades.
+
+**Corps HQ off map** (`buildFormationsGeoJSON.ts`): `corps_asset` and `army_hq` formations filtered from map rendering. These are organizational concepts, not physical map units.
+
+**Movement tracking** (`scenario_runner.ts`): `column_movement` and `movement_report` forwarded to weekly report rows.
+
+**Files**: `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/home_distance.ts`, `src/sim/combat/combat_math.ts`, `src/ui/map/map/builders/buildFormationsGeoJSON.ts`, `src/scenario/scenario_runner.ts`, `tests/home_distance.test.ts`
+**Calibration**: n384 = 87.9% area-weighted (from 88.2%). Krajina +1.5pp to 99.2%.
+**Report**: `docs/40_reports/implemented/20260308_SECTOR_CLASSIFICATION_AND_MOVEMENT_OVERHAUL.md`
+
 ## [2026-03-08] Frontline Attrition Sector Port + Entrenchment Reduction + Ops Modal Cosmetic Fixes
 
 **Frontline attrition ported to corps_front_sectors** (`frontline_attrition.ts`): Replaced legacy `brigade_front_assignment` + `local_fronts` iteration with `corps_front_sectors` `assigned_brigade_ids` lookup. Brigades take passive attrition if physically in any sector's territory (verified by `classifyBrigadesByTerritory()` each turn); reserves exempt. Density modifier uses `sector.assigned_brigade_ids.length / sector.length_edges`. `isColdFront()` rewritten to use structured `CorpsFrontSector` data (`faction`, `opposing_factions`, `sub_segments`) instead of parsing legacy front_id strings. n366 = 88.2% area-weighted. Report: `docs/40_reports/implemented/20260308_FRONTLINE_ATTRITION_SECTOR_PORT.md`.
