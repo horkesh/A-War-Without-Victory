@@ -72,6 +72,12 @@ export const MIN_MANDATORY_SPAWN = 100;
 /** Minimum personnel a formation can have during combat — below this the unit routes/dissolves rather than taking further casualties. Used as casualty floor instead of MIN_BRIGADE_SPAWN so defenders at 800 personnel can actually take losses. */
 export const MIN_COMBAT_PERSONNEL = 100;
 
+/** Minimum personnel to be eligible for offensive action. Below this, brigade can only defend.
+ *  A sub-company-sized unit cannot assault positions — it lacks mass and fire support.
+ *  Prevents death-spiral attacks where depleted brigades repeatedly throw 100-200 men
+ *  at fortified positions with catastrophic outcomes every turn until destroyed. */
+export const MIN_ATTACK_PERSONNEL = 200;
+
 /** Maximum fatigue a formation can accumulate. Shared across combat resolution, fatigue recovery, and combat power calculation. */
 export const FATIGUE_MAX = 30;
 
@@ -216,8 +222,8 @@ export const VRS_EQUIPMENT_DECAY_FLOOR = 0.60;
 // --- Paramilitary rear pocket cleanup ---
 /** Base paramilitary unit size (personnel). Small autonomous units. */
 export const PARAMILITARY_UNIT_SIZE = 150;
-/** Turns to reach target and capture. Represents march + mop-up. */
-export const PARAMILITARY_MARCH_TURNS = 2;
+/** Turns to reach target and capture. 0 = capture same turn (rear pockets are already surrounded). */
+export const PARAMILITARY_MARCH_TURNS = 0;
 /** Week after which paramilitaries stop spawning (war professionalizes). */
 export const PARAMILITARY_FADE_WEEK = 20;
 /** Paramilitary spawn probability by faction (keyed on OrganizationalPenetration field).

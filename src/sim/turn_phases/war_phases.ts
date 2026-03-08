@@ -137,6 +137,7 @@ import {
 } from '../../state/supply_reserves.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
+import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { PARAMILITARY_FADE_WEEK } from '../../state/formation_constants.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
@@ -488,6 +489,7 @@ export const warPhases: NamedPhase[] = [
             if ((context.state.meta?.turn ?? 0) > PARAMILITARY_FADE_WEEK) return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+
             const report = detectParamilitaryTargets(
                 context.state, od.edges, od.opData.operationalToCanonical
             );
@@ -513,6 +515,20 @@ export const warPhases: NamedPhase[] = [
                 } else {
                     context.report.paramilitary_sweep = report;
                 }
+            }
+        }
+    },
+    {
+        name: 'consolidate-rear-pockets',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const report = consolidateRearPockets(
+                context.state, od.edges, od.opData.operationalToCanonical
+            );
+            if (report.total_flipped > 0) {
+                context.report.rear_pocket_consolidation = report;
             }
         }
     },

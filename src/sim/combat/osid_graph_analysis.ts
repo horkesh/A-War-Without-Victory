@@ -338,18 +338,67 @@ export function analyzeFactionGraph(
         }
     }
 
-    // 4. Detect enemy pockets: enemy OSIDs where ALL neighbors are faction-controlled
+    // 4. Detect enemy pockets: enemy OSID clusters (1-3 connected same-controller OSIDs)
+    //    where ALL external neighbors are faction-controlled.
+    //    A cluster of 2 HRHB OSIDs inside RS territory won't be caught by single-OSID
+    //    detection because they neighbor each other. BFS finds the connected component first.
+    //    Scan ALL controlled OSIDs (not just front) because pockets are typically deep
+    //    in the interior, surrounded by friendly territory on all sides.
+    const MAX_POCKET_CLUSTER = 3;
     const pocketChecked = new Set<Osid>();
-    for (const frontOsid of result.front_osids) {
-        const analysis = result.osid_analysis.get(frontOsid)!;
-        for (const enemyOsid of analysis.enemy_neighbors) {
+    for (const osid2 of allOsids) {
+        if (!osid2.startsWith('op:')) continue;
+        if (!controlledSet.has(osid2)) continue;
+        const neighbors2 = adjacency.get(osid2) ?? [];
+        for (const enemyOsid of neighbors2) {
+            if (!enemyOsid.startsWith('op:')) continue;
+            if (controlledSet.has(enemyOsid)) continue; // skip friendly
             if (pocketChecked.has(enemyOsid)) continue;
-            pocketChecked.add(enemyOsid);
-            const enemyNeighbors = adjacency.get(enemyOsid) ?? [];
-            if (enemyNeighbors.length > 0 && enemyNeighbors.every(n =>
-                (controllerCache.get(n) ?? getPoliticalControllerOSID(state, n, reverseMap)) === faction
-            )) {
-                result.enemy_pockets.push(enemyOsid);
+
+            // BFS: find connected component of same-controller enemy OSIDs
+            const enemyController = controllerCache.get(enemyOsid) ?? getPoliticalControllerOSID(state, enemyOsid, reverseMap);
+            if (!enemyController || enemyController === faction) { pocketChecked.add(enemyOsid); continue; }
+
+            const cluster: Osid[] = [];
+            const clusterSet = new Set<Osid>();
+            const bfsQueue: Osid[] = [enemyOsid];
+            clusterSet.add(enemyOsid);
+            let tooLarge = false;
+
+            while (bfsQueue.length > 0) {
+                const curr = bfsQueue.shift()!;
+                cluster.push(curr);
+                if (cluster.length > MAX_POCKET_CLUSTER) { tooLarge = true; break; }
+                for (const n of (adjacency.get(curr) ?? [])) {
+                    if (!n.startsWith('op:')) continue; // skip canonical SID nodes
+                    if (clusterSet.has(n)) continue;
+                    const nCtrl = controllerCache.get(n) ?? getPoliticalControllerOSID(state, n, reverseMap);
+                    if (nCtrl === enemyController) {
+                        clusterSet.add(n);
+                        bfsQueue.push(n);
+                    }
+                }
+            }
+
+            // Mark all cluster members as checked
+            for (const c of clusterSet) pocketChecked.add(c);
+            if (tooLarge) continue;
+
+            // Check: ALL external op: neighbors of the cluster must be faction-controlled
+            // Skip canonical SID nodes (S:-prefixed) — they have no political_controllers entry
+            let allSurrounded = true;
+            for (const c of cluster) {
+                for (const n of (adjacency.get(c) ?? [])) {
+                    if (!n.startsWith('op:')) continue; // skip canonical SID nodes
+                    if (clusterSet.has(n)) continue; // skip intra-cluster edges
+                    const nCtrl = controllerCache.get(n) ?? getPoliticalControllerOSID(state, n, reverseMap);
+                    if (nCtrl !== faction) { allSurrounded = false; break; }
+                }
+                if (!allSurrounded) break;
+            }
+
+            if (allSurrounded) {
+                for (const c of cluster) result.enemy_pockets.push(c);
             }
         }
     }

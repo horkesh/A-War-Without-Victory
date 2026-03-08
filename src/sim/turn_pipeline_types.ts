@@ -226,6 +226,8 @@ export interface TurnReport {
     }>;
     /** Paramilitary rear pocket cleanup report */
     paramilitary_sweep?: import('./combat/paramilitary_sweep.js').ParamilitarySweepReport;
+    /** Rear pocket consolidation: auto-flipped surrounded enemy OSIDs */
+    rear_pocket_consolidation?: import('./combat/rear_pocket_consolidation.js').RearPocketConsolidationReport;
 }
 
 export interface TurnContext {

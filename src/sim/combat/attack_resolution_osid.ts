@@ -493,7 +493,10 @@ export function resolveAttackOrdersOsid(
         const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
         const personnelDefender = defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
         const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
-        const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult;
+        // Militia-only defense: attacker takes far fewer casualties — scattered civilian resistance,
+        // not organized military defense. A brigade sweeping an undefended settlement loses ~5 men, not 40.
+        const militiaOnlyMult = defenderFormation ? 1.0 : 0.15;
+        const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult * militiaOnlyMult;
         const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult;
         const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
         const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(baseDefenderCas)));
@@ -514,7 +517,8 @@ export function resolveAttackOrdersOsid(
             applyPersonnelLoss(a, cas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
 
-            recordFormationFatigue(a, 2);
+            // Sweeping undefended territory (militia only) is far less exhausting than real combat.
+            recordFormationFatigue(a, defenderFormation ? 2 : 0.5);
 
             if (outcome === 'costly_victory') (a as { disrupted_turns?: number }).disrupted_turns = 1;
             if (outcome === 'repulsed' || outcome === 'catastrophic') {

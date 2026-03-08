@@ -291,11 +291,10 @@ export function advanceParamilitaries(
 
         // Civilian casualties inflicted (war crimes)
         const civCas = Math.ceil(PARAMILITARY_TARGET_AVG_POPULATION * PARAMILITARY_CIVILIAN_CASUALTY_RATE);
-        if (state.civilian_casualties && currentController) {
-            const civFaction = state.civilian_casualties[currentController];
-            if (civFaction) {
-                civFaction.killed = (civFaction.killed ?? 0) + civCas;
-            }
+        if (currentController) {
+            const cc = state.civilian_casualties ??= {} as typeof state.civilian_casualties & Record<string, { killed?: number; fled_abroad?: number }>;
+            const civFaction = cc![currentController] ??= { killed: 0, fled_abroad: 0 };
+            civFaction.killed = (civFaction.killed ?? 0) + civCas;
         }
 
         report.captured.push({

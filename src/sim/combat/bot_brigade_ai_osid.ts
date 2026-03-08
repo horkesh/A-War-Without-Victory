@@ -17,7 +17,7 @@
  */
 
 import type { EdgeRecord } from '../../map/settlements.js';
-import { getFormationTier } from '../../state/formation_constants.js';
+import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import type {
     BrigadePosture,
     CorpsOperation,
@@ -1007,6 +1007,14 @@ function executeFactionDirectives(
 
         // Detachments (militia kind, < 500 personnel) only garrison — never attack.
         if (brigade.kind === 'militia' && getFormationTier(brigade) === 'detachment') {
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            continue;
+        }
+
+        // Combat-ineffective brigades: below MIN_ATTACK_PERSONNEL, can only defend.
+        // A sub-200-man unit lacks the mass to assault positions — prevents death-spiral
+        // attacks where depleted brigades throw 100-200 men at fortified positions repeatedly.
+        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             continue;
         }

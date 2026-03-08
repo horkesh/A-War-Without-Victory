@@ -1426,6 +1426,10 @@ export function generateCorpsDirectives(
         // so reserves will move toward them. Front pockets still require an adjacent brigade.
         // Rear pockets bypass the municipality constraint — they're free territory that should always
         // be consolidated. Front pockets still require operational-area membership to prevent adventurism.
+        // Pocket targets: enemy OSIDs from cluster detection (1-3 connected same-controller OSIDs
+        // completely surrounded by faction territory). All cluster members are in enemy_pockets.
+        // Rear pockets bypass the municipality constraint — they're free territory to consolidate.
+        // Front pockets still require operational-area membership to prevent adventurism.
         const rearPocketOsids = new Set<string>();
         if (graphAnalysis?.enemy_pockets.length) {
             const corpsMunSet = new Set<string>(
@@ -1433,11 +1437,22 @@ export function generateCorpsDirectives(
             );
             const pc = state.political_controllers ?? {};
             const pocketSubLocations = new Set(subordinates.map(b => b.location_osid).filter(Boolean));
+            // Skip rear pockets that already have a paramilitary dispatched — let paramilitaries handle them
+            const paramilitaryTargets = new Set<string>();
+            for (const [fid, f] of Object.entries(state.formations ?? {})) {
+                if (f.kind === 'paramilitary' && f.status === 'active' && f.paramilitary_target && f.faction === faction) {
+                    paramilitaryTargets.add(f.paramilitary_target);
+                }
+            }
+            // Build set of all pocket OSIDs for intra-cluster neighbor filtering
+            const allPocketSet = new Set(graphAnalysis.enemy_pockets);
             for (const pocketOsid of graphAnalysis.enemy_pockets) {
                 if (offensiveTargetSet.has(pocketOsid)) continue;
+                if (paramilitaryTargets.has(pocketOsid)) continue;
                 const neighbors = adjacency.get(pocketOsid) ?? [];
+                // Rear pocket: all non-cluster neighbors are faction-controlled
                 const isRearPocket = neighbors.length > 0 && neighbors.every(n =>
-                    (pc[n] ?? '') === faction
+                    allPocketSet.has(n) || (pc[n] ?? '') === faction
                 );
                 if (isRearPocket) {
                     offensiveTargetSet.add(pocketOsid);
