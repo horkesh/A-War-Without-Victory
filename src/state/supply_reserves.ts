@@ -14,6 +14,7 @@ import type { EnclaveResilienceEntry, EnclaveState, FactionId, GameState, Pendin
 import type { EdgeRecord } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
+import { isGrazAccordsActive } from '../sim/local_truces.js';
 import {
     MAINTENANCE_DRAIN_PER_FORMATION,
     COMBAT_HEAVY_MUNITIONS_RATE,
@@ -189,9 +190,20 @@ export function updateSiegeTurnCounters(
         }
     }
 
+    // When Graz Accords are active, HRHB is not under siege:
+    // RS has a ceasefire with HRHB, and RBiH is an ally. Central Bosnia HRHB pockets
+    // are classified as "critical" (isolated) because the BFS only traverses own territory,
+    // but historically supply flowed through allied RBiH territory and RS truce zones.
+    // Skip HRHB siege counters entirely under Graz — resume when truce breaks.
+    const grazActive = isGrazAccordsActive(state);
+
     const sortedFactions = [...supplyByOsid.factions].sort((a, b) => a.faction_id.localeCompare(b.faction_id));
     for (const facEntry of sortedFactions) {
         if (!facEntry.by_osid) continue;
+
+        // Graz Accords: HRHB is not besieged while RS truce + RBiH alliance hold
+        if (grazActive && facEntry.faction_id === 'HRHB') continue;
+
         const sortedOsids = [...facEntry.by_osid].sort((a, b) => a.osid.localeCompare(b.osid));
         for (const entry of sortedOsids) {
             const key = `${facEntry.faction_id}:${entry.osid}`;

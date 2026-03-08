@@ -58,9 +58,9 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
  * n179: HRHB 1.55→39.4k (target 40-45k). Historical note: 1.60→42k, 1.70→47k.
  *   Restoring 1.60 to regain ~42k target. RS scale reduction (0.25→unchanged) irrelevant here. */
 const FACTION_POOL_SCALE: Record<string, number> = {
-    RBiH: 0.18,
+    RBiH: 0.25,   // n345: HRHB cold-front fix cascade; 0.18→0.25 to compensate (diminishing returns below 0.25).
     RS: 0.25,
-    HRHB: 1.60    // n375: 1.70→47k; n179: 1.55→39k, 1.60 restores ~42k target.
+    HRHB: 1.05    // n340: cold-front+siege fix eliminated phantom HRHB attrition; 0.95→39.9k, 1.05→42.5k (target 41.5k).
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;
 

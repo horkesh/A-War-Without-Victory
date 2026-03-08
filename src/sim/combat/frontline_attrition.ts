@@ -19,6 +19,7 @@ import {
 } from '../../state/casualty_ledger.js';
 import { MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import type {
+    FormationState,
     GameState,
     MilitiaPoolState
 } from '../../state/game_state.js';
@@ -27,6 +28,15 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
+import {
+    isGrazAccordsActive,
+    isHerzegovinaTruceActive,
+    isKiseljakExclusionActive,
+    isCorpsInGrazPair,
+    GRAZ_KISELJAK_VRS_EXCLUSION,
+    GRAZ_KISELJAK_HRHB_EXCLUSION,
+} from '../local_truces.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -74,6 +84,49 @@ export interface FrontlineAttritionReport {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Cold-front detection (Graz Accords truce)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Returns true if this brigade is on a cold front under the Graz Accords.
+ * Cold fronts are RS↔HRHB borders where a corps-pair truce or Kiseljak
+ * exclusion is active — no shooting, no passive attrition.
+ */
+function isColdFront(state: GameState, formation: FormationState, frontId: string): boolean {
+    if (!isGrazAccordsActive(state)) return false;
+
+    // Parse front_id: "HRHB__RS__osid1__osid2"
+    const parts = frontId.split('__');
+    if (parts.length < 2) return false;
+    const factionA = parts[0];
+    const factionB = parts[1];
+
+    // Only applies to RS↔HRHB fronts
+    if (!(
+        (factionA === 'RS' && factionB === 'HRHB') ||
+        (factionA === 'HRHB' && factionB === 'RS')
+    )) return false;
+
+    // Herzegovina corps-pair truce: brigade's corps is in a Graz pair
+    if (isHerzegovinaTruceActive(state)) {
+        const corpsId = getFormationCorpsId(formation);
+        if (corpsId && isCorpsInGrazPair(corpsId)) return true;
+    }
+
+    // Kiseljak OSID exclusion: front includes excluded OSIDs
+    if (isKiseljakExclusionActive(state)) {
+        for (let i = 2; i < parts.length; i++) {
+            const osid = parts[i]!;
+            if (GRAZ_KISELJAK_VRS_EXCLUSION.has(osid) || GRAZ_KISELJAK_HRHB_EXCLUSION.has(osid)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Main function
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -111,12 +164,14 @@ export function applyFrontlineAttrition(
     // Compute per-faction total heavy weapons firepower for front-assigned brigades.
     // Used to determine bombardment exposure: brigades facing superior enemy
     // firepower take additional passive casualties from persistent shelling.
+    // Excludes brigades on cold (truce-covered) fronts — no shelling across truce lines.
     const factionFrontFP: Record<string, { totalFP: number; count: number }> = {};
     for (const fid of formationIds) {
         const frontId = assignments[fid];
         if (!frontId) continue;
         const f = formations[fid];
         if (!f || f.status !== 'active') continue;
+        if (isColdFront(state, f, frontId)) continue;
         const fac = f.faction as string;
         if (!factionFrontFP[fac]) factionFrontFP[fac] = { totalFP: 0, count: 0 };
         const comp = f.composition ?? ensureBrigadeComposition(f);
@@ -132,6 +187,9 @@ export function applyFrontlineAttrition(
 
         const formation = formations[fid];
         if (!formation || formation.status !== 'active') continue;
+
+        // Graz Accords: skip attrition on cold (truce-covered) fronts
+        if (isColdFront(state, formation, frontId)) continue;
 
         const personnel = formation.personnel ?? 0;
         if (personnel <= MIN_COMBAT_PERSONNEL) continue;

@@ -7,6 +7,25 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] N345 Cold-Front Attrition Fix + Pool Recalibration — 86.8%
+
+### Summary
+- **Cold-front attrition exemption**: RS↔HRHB front segments under Graz Accords ("cold fronts") were applying full passive attrition (0.5%/turn × 3× modifiers) to HRHB brigades despite the truce. 31 HRHB brigades were bleeding ~1.5k casualties/turn from phantom attrition. Fix: `isColdFront()` in `frontline_attrition.ts` skips attrition and bombardment FP calculation for brigades on RS↔HRHB fronts when Graz is active. Detection: checks corps pair membership + Kiseljak exclusion zone.
+- **HRHB siege drain skip**: 50+ HRHB siege counters (Central Bosnia pocket classified as "critical" by supply BFS that can't traverse RS territory under truce) were draining HRHB supply from 75→0 by w30. Fix: skip HRHB faction entirely in `updateSiegeTurnCounters()` while Graz active.
+- **HRHB KIA regression fixed**: HRHB KIA dropped from 6.3k to 1.6k at w40 (full-war historical total is 8k — was nearly exhausted by January 1993). Leaves proper headroom for the 1993+ Croat-Bosniak war period.
+- **HRHB pool scale recalibration**: With phantom attrition eliminated, HRHB troop strength jumped from 31k to 50k. Reduced FACTION_POOL_SCALE from 1.60 to 1.05 to target 42k.
+- **RBiH cascade compensation**: HRHB pool reduction caused RBiH to drop from 120k to 114k via changed territorial dynamics (healthier HRHB → different war balance → less RBiH mobilization). Raised RBiH FACTION_POOL_SCALE from 0.18 to 0.25 to compensate. Final: 119.2k (target 120k).
+- **Terminology**: "Graz Accords" is the correct name (not "Vienna Declaration"). State field `vienna_declaration_turn` retained for backwards compatibility.
+- **ATH**: 86.8% area-weighted (up from n326 85.8%). KRAJINA 94.9%, HERZEGOVINA 89.6%, CORRIDOR 87.9%, CENTRAL_BOSNIA 85.4%, DRINA 71.4% (pre-existing regression from n326).
+
+### Changes
+- `src/sim/combat/frontline_attrition.ts` — `isColdFront()` helper, attrition skip, bombardment FP skip for cold fronts
+- `src/state/supply_reserves.ts` — HRHB siege drain skip while Graz active
+- `src/sim/early_war/pool_population.ts` — FACTION_POOL_SCALE: HRHB 1.60→1.05, RBiH 0.18→0.25
+- `docs/10_canon/context.md` — Cold-front attrition exemption documented, Graz Accords terminology
+- `.claude/napkin.md` — Updated pool scales, calibration state, Graz Accords entry
+- `docs/40_reports/CALIBRATION_MASTER.md` — n345 as latest calibration run
+
 ## [2026-03-08] N326 Cluster Pocket Detection + Paramilitary Fixes — 85.8%
 
 ### Summary

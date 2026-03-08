@@ -81,8 +81,8 @@
    Do instead: Hard block — brigades ONLY attack `effectiveDirective.offensive_targets`. Fatigue: +1.5/turn frontline, +2 attacker/+1 defender per battle. Recovery: -1 every 3 turns, ONLY when OFF frontline (must rotate). **BUG FIXED (n304)**: `updateFormationFatigue` was resetting fractional fatigue to 0 via `Number.isInteger` check — replaced with `typeof !== 'number'` check. `garrison: true` on OOB → defend-only (VRS 65th Protection). Dissolution: `brigade_dissolution.ts` triple criteria. Siege bombardment: `siege_attrition.ts`. Equipment loss: OSID path (`attack_resolution_osid.ts`) now records equipment losses (was missing entirely — only legacy SID path had it). TANK_LOSS_RATE=0.08, ARTILLERY_LOSS_RATE=0.04, min 1 per battle if unit has equipment. Defender rates at 0.5×. Supply embargo: PATRON_AID_SCALE=10, faction efficiency (RBiH=0.3, RS=1.0, HRHB=0.8), caps (RBiH=45, RS=90, HRHB=70). **n304 ATH=93.8% (up from n290=88.1%) — fatigue+equipment naturally limit RS offensives.**
 3. **[2026-03-04] Morale retreat resistance: per-faction floor (updated)**
    Do instead: `getMoraleResistFloor()`: RBiH=**50**, RS=70, HRHB=**60**. Morale ≥ floor + costly_victory → absorb. Decisive always retreats. ARBiH homeland last stand (≥50% Bosniak co-ethnic) also absorbs 'victory' outcomes regardless of morale. Added in n439 session.
-4. **[2026-03-04] Vienna Declaration / Local Truces (RS-HRHB non-aggression)**
-   Do instead: `src/sim/local_truces.ts` — fires at week 4; sets `state.vienna_declaration_turn`. Bot filters RS↔HRHB truce-partner OSIDs from `offensive_targets`, except {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: `check-truce-break` step; sets `state.truce_broken_turn[faction]`, opponent gets +0.25 aggression for 6 turns.
+4. **[2026-03-08] Graz Accords / Local Truces (RS-HRHB non-aggression) + cold fronts**
+   Do instead: `src/sim/local_truces.ts` — fires at week 4; sets `state.vienna_declaration_turn`. Bot filters RS↔HRHB truce-partner OSIDs from `offensive_targets`, except {brod, derventa, odzak, bosanski_samac, orasje, jajce}. Player truce-break: `check-truce-break` step; sets `state.truce_broken_turn[faction]`, opponent gets +0.25 aggression for 6 turns. **Cold fronts**: RS↔HRHB front segments exempt from frontline attrition + bombardment FP calc (`isColdFront()` in `frontline_attrition.ts`). HRHB siege drain skipped while Graz active (`supply_reserves.ts`). Terminology: "Graz Accords" (not "Vienna Declaration") — state field remains `vienna_declaration_turn` for backwards compat.
 5. **[2026-03-07] Pre-planned VRS operations (5 corps only) + JNA ghost Kupres**
    Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only the original 5 corps (EBK/Drina/SRK/Herzegovina/1KK). 2KK has NO pre-planned op (−6.7pp regression). Kupres captured by JNA ghost phantom (`jna_9th_corps_tg`): `capture_osids` flips control at spawn, `no_equipment_handoff` dissolves without equipment distribution. No post_op_stance/stance_cap mechanism.
 6. **[2026-02-25] RBiH general_defensive through week 56**
@@ -98,7 +98,7 @@
 
 ## OOB & Brigade Systems
 1. **[2026-03-06] Personnel ceilings REMOVED; organic troop strength via pool system**
-   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`: RBiH=0.10, RS=0.12, HRHB=0.29), exhaustion (MILITARY_AGE_MALE_FRACTION=0.28 denominator, threshold 0.25 half-rate, cap 0.50), and FACTION_POOL_SCALE (RBiH=0.18, RS=0.25, HRHB=1.60). RS JNA bonus=10k. n191 result: RS=102.6k/110.1k, RBiH=121.0k/175.4k, HRHB=41.5k/49.8k (w40/w80).
+   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`: RBiH=0.10, RS=0.12, HRHB=0.29), exhaustion (MILITARY_AGE_MALE_FRACTION=0.28 denominator, threshold 0.25 half-rate, cap 0.50), and FACTION_POOL_SCALE (RBiH=0.25, RS=0.25, HRHB=1.05). RS JNA bonus=10k. n345 result: RBiH=119.2k (target 120k), RS=103.3k (target 102.6k), HRHB=43.4k (target 41.5k). Note: HRHB scale reduced from 1.60→1.05 after cold-front fix eliminated phantom attrition; RBiH raised from 0.18→0.25 to compensate cascade (healthier HRHB → changed territorial dynamics → less RBiH mobilization).
 2. **[2026-03-02] Decoration system replaces honor**
    Do instead: `getDecorationAtkMult()` and `getDecorationDefBonus()` in `decoration_evaluator.ts` — replace direct honor lookups. Falls back to legacy honor when no decorations. Three tiers per faction. Pipeline step `evaluate-brigade-decorations`.
 3. **[2026-03-02] Brigade history recorder wired after each battle**
@@ -212,8 +212,8 @@
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-08] n326 = 85.8% — cluster pockets + paramilitary fixes (down from n304=93.8%)**
-   Do instead: Cluster BFS pocket detection (1-3 enemy OSIDs), instant paramilitary capture (MARCH_TURNS=0), civilian casualty `??=` fix, bot AI paramilitary deference. RS delta −60 — RS aggression recalibration needed. Previous ATH: n304=93.8% (fatigue+equipment fix). Key: rear pocket consolidation re-added (cluster-aware, post-w20). Paramilitaries handle w0-20.
+1. **[2026-03-08] n345 = 86.8% — cold-front attrition fix + pool recalibration (up from n326=85.8%)**
+   Do instead: RS↔HRHB cold fronts exempt from frontline attrition + bombardment. HRHB siege drain skipped under Graz. HRHB pool scale 1.60→1.05, RBiH 0.18→0.25. HRHB KIA dropped 6.3k→1.6k. All factions within tolerance: RBiH=119.2k, RS=103.3k, HRHB=43.4k. RS delta still −60 — RS aggression recalibration still needed. Previous: n326=85.8% (cluster pockets+paramilitaries). ATH remains n304=93.8%.
 2. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
    Do instead: Cells like banja_luka:dragocaj, kotor_varos x4, mrkonjic_grad:baljvine_2, skender_vakuf:donji_koricani start HRHB but painting=RS. Adding RS overrides for these IS effective (n238: KRAJINA 89.4%→97.8%). RULE: add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only, etc.) — adding 10+ HRHB cells across multiple regions at once (n237) caused POSAVINA_NE −9.9pp and SARAJEVO −9.3pp cascade.
 3. **[2026-03-08] Rear pocket consolidation: cluster-aware version RE-ADDED**
@@ -229,8 +229,8 @@
    Do instead: For current scenario runs, use `control_change_attribution` in `weekly_report.jsonl` / `run_summary.json`. `control_events.jsonl` was a leftover Phase I artifact and is no longer the live harness contract.
 8. **[2026-03-06] Quiet weeks are warnings, not automatic causality failures**
    Do instead: In weekly combat-causality, invalidate `zero_battles` only when attack orders existed but resolved to no battles, or when the whole run totals zero battles. Keep battleless weeks visible under `behavioral_health.battleless_weeks`, but do not fail a healthy run just because of an operational lull.
-9. **[2026-03-05] Pool exhaustion fix: avoided_osids DON'T prevent loss; control_overrides DO**
-   Do instead: When sim=RBiH but painted=RS, adding RBiH avoided_osids is often ineffective (cells lost via counterattack or weakness, not direct attack). Add RS `osid_control_overrides` for systematic under-captures. avoideds work only when bot is actively targeting wrong cells.
+9. **[2026-03-08] NEVER override initial OSIDs — not an option**
+   Do instead: Initial OSID control comes from census/referendum data and is NEVER manually overridden. If sim doesn't match painted, fix the engine, OOB, operations, or scenario parameters — not init_control. This applies to ALL calibration work. No exceptions.
 10. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
     Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
 ## Engine Runtime Patterns
