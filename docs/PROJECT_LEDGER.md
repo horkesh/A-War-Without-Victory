@@ -7,6 +7,17 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Supply & Morale Balance — Phase 3 of Audit Remediation (n415)
+
+Supply drain reduction + morale collapse mechanic. Calibration: **89.4% area-weighted** (+2.0pp from n414 87.4%).
+
+**Supply**: MAINTENANCE_DRAIN_PER_FORMATION 0.045→0.035. OOB grew to ~112 RS fmns, old drain exceeded patron income. JNA inheritance justifies lighter logistics.
+**Morale penalty**: getCriticalMoralePenalty — below morale 15, combat power drops to 0.3-1.0×. Applied in both attacker and defender power.
+**Cohesion decay**: Formations below morale 15 lose 2 cohesion/turn, creating organic surrender cascade.
+
+**Results n415**: RS delta improved -70→-50. DRINA 78.4% (+8.4pp from n414 70.0%), KRAJINA 96.3%, CENTRAL_BOSNIA 83.8% (+2.8pp). RS=362 OSIDs (+19 from n414).
+**Files**: `supply_reserve_constants.ts`, `combat_math.ts`, `morale_drift.ts`
+
 ## [2026-03-08] Frozen Front Cascade — Phase 2 of Audit Remediation (n414)
 
 Five fixes to break the w40 stasis cycle. Calibration: 87.4% area-weighted (+0.5pp from n403 86.9%).
