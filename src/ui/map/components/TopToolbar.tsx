@@ -41,9 +41,10 @@ interface TopToolbarProps {
   onOpenSidePicker?: () => void;
   onOpenSummary?: (focus?: SummaryFocusSection) => void;
   onOpenEnclaves?: () => void;
+  onOpenAAR?: () => void;
 }
 
-export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves }: TopToolbarProps) {
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR }: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadSave = useGameStore((s) => s.loadSave);
@@ -263,6 +264,13 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
           className={TOOLBAR_BUTTON_CLASS}
         >
           Summary
+        </button>
+        <button
+          onClick={() => onOpenAAR?.()}
+          disabled={!loadedGameState}
+          className={TOOLBAR_BUTTON_CLASS}
+        >
+          AAR
         </button>
         <button
           onClick={() => onOpenEnclaves?.()}

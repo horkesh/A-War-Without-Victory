@@ -167,6 +167,15 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'capture-aar-snapshot',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { setAARSnapshot } = await import('../turn_pipeline_types.js');
+            const { captureAARSnapshot } = await import('../compile_turn_summary.js');
+            setAARSnapshot(context, captureAARSnapshot(context.state));
+        }
+    },
+    {
         name: 'migrate-political-control-osid',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -1847,6 +1856,20 @@ export const warPhases: NamedPhase[] = [
                     freeze_edges_count: 0
                 };
             }
+        }
+    },
+    {
+        name: 'compile-turn-summary',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { getAARSnapshot } = await import('../turn_pipeline_types.js');
+            const { compileTurnSummary } = await import('../compile_turn_summary.js');
+            const { MAX_TURN_SUMMARIES } = await import('../../state/turn_summary.js');
+            const snapshot = getAARSnapshot(context);
+            if (!snapshot) return;
+            const summary = compileTurnSummary(context.state, snapshot, context.report);
+            const existing = context.state.turn_summaries ?? [];
+            context.state.turn_summaries = [summary, ...existing].slice(0, MAX_TURN_SUMMARIES);
         }
     },
     {

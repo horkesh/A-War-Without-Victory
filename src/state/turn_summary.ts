@@ -1,0 +1,126 @@
+/**
+ * TurnSummary: after-action report compiled at the end of each war turn.
+ *
+ * Written by `compile-turn-summary` pipeline step; stored in GameState.turn_summaries[].
+ * Trimmed to last 3 turns. Persists through save/load.
+ * Read-only to all systems after compilation — used by GUI only.
+ */
+
+import type { FactionId, FormationId } from './game_state.js';
+import type { CombatOutcome } from './brigade_history.js';
+import type { NarrativeArc } from '../sim/war_stories.js';
+import type { BrigadeDecoration } from './decoration_types.js';
+
+/** A single battle that occurred this turn. One entry per OSID (concentrated assaults merged). */
+export interface TurnBattle {
+    osid: string;
+    mun_id?: string;
+    attacker_faction: FactionId;
+    defender_faction: FactionId;
+    /** Pioneer brigade (first/lead attacker). */
+    primary_attacker_id: FormationId;
+    primary_defender_id: FormationId | null;
+    /** All participating attacker IDs (for concentrated assaults). */
+    all_attacker_ids: FormationId[];
+    /** Outcome from attacker's perspective. */
+    outcome: CombatOutcome;
+    attacker_casualties: number;
+    defender_casualties: number;
+    territory_flipped: boolean;
+    was_concentrated: boolean;
+}
+
+/** A territory control change deemed notable. */
+export interface NotableFlip {
+    osid: string;
+    mun_id?: string;
+    from: FactionId | null;
+    to: FactionId | null;
+    significance: 'municipality_seat' | 'enclave_breach' | 'enclave_relief' | 'corridor' | 'generic';
+}
+
+/** A brigade decoration newly awarded this turn. */
+export interface DecorationAward {
+    formation_id: FormationId;
+    formation_name: string;
+    faction: FactionId;
+    decoration: BrigadeDecoration;
+}
+
+/** A formation whose narrative arc changed this turn. */
+export interface ArcTransition {
+    formation_id: FormationId;
+    formation_name: string;
+    faction: FactionId;
+    from_arc: NarrativeArc;
+    to_arc: NarrativeArc;
+}
+
+/** A formation that spawned this turn. */
+export interface FormationSpawn {
+    formation_id: FormationId;
+    formation_name: string;
+    faction: FactionId;
+    kind: string;
+}
+
+/** A formation destroyed or disbanded this turn. */
+export interface FormationDestruction {
+    formation_id: FormationId;
+    formation_name: string;
+    faction: FactionId;
+}
+
+/** A notable non-combat event. */
+export interface TurnNotableEvent {
+    kind:
+        | 'graz_accords_activated'
+        | 'truce_broken'
+        | 'washington_agreement'
+        | 'operation_storm'
+        | 'ceasefire_activated'
+        | 'siege_formed'
+        | 'siege_broken'
+        | 'first_battle';
+    description: string;
+    faction?: FactionId;
+    osid?: string;
+}
+
+/** Complete after-action report for one simulation turn. */
+export interface TurnSummary {
+    turn: number;
+
+    // --- Combat ---
+    /** All battles that occurred this turn, deduplicated per OSID, sorted by osid. */
+    battles: TurnBattle[];
+
+    // --- Territory ---
+    /** Net OSID gain/loss per faction (positive = gained). */
+    territory_net: Partial<Record<FactionId, number>>;
+    /** Notable territory flips (municipality seats, enclave events, corridors). */
+    notable_flips: NotableFlip[];
+
+    // --- Displacement ---
+    displacement_total: number;
+    displacement_by_ethnicity: Partial<Record<FactionId, number>>;
+    /** Municipality ID with highest displacement volume this turn. */
+    displacement_hotspot?: string;
+
+    // --- Unit events ---
+    decoration_awards: DecorationAward[];
+    arc_transitions: ArcTransition[];
+    formation_spawns: FormationSpawn[];
+    formation_destructions: FormationDestruction[];
+
+    // --- Faction pulse ---
+    /** Change in general_supply_reserve per faction this turn (positive = gained). */
+    supply_deltas: Partial<Record<FactionId, number>>;
+    heavy_munitions_deltas: Partial<Record<FactionId, number>>;
+
+    // --- Notable events ---
+    notable_events: TurnNotableEvent[];
+}
+
+/** Maximum number of turn summaries to retain in GameState. */
+export const MAX_TURN_SUMMARIES = 3;

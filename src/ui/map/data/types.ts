@@ -440,5 +440,7 @@ export interface LoadedGameState {
     mobilizationSummary?: Record<string, MobilizationSummaryView>;
     /** Top-level command-routing summary for urgent player-facing matters. */
     commandBriefing?: CommandBriefingView;
+    /** Most recent turn after-action report (null before first turn is advanced). */
+    latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
 }
 

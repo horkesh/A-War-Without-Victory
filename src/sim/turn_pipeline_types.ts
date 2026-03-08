@@ -267,6 +267,42 @@ export function setOperationalData(context: TurnContext, data: OperationalDataCa
 /** Siege state cached on TurnContext by compute-siege-state step (Phase F). Turn-local only. */
 export interface SiegeStateCache { siegeRatios: SiegeRatioByMunFaction; }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// AAR snapshot cache (transient — never written to GameState)
+// ═══════════════════════════════════════════════════════════════════════════
+
+import type { NarrativeArc } from './war_stories.js';
+import type { FormationId } from '../state/game_state.js';
+
+/**
+ * Snapshot of pre-turn state captured by capture-aar-snapshot.
+ * Used by compile-turn-summary to diff against post-turn state.
+ * Stored on TurnContext only — never serialized to GameState.
+ */
+export interface AARSnapshot {
+    turn: number;
+    supply: Partial<Record<FactionId, number>>;
+    heavy_munitions: Partial<Record<FactionId, number>>;
+    /** war_story.arc per formation, before generate-war-stories runs. */
+    arcs: Record<FormationId, NarrativeArc>;
+    /** Decoration tier strings per formation, before evaluate-brigade-decorations runs. */
+    decoration_tiers: Record<FormationId, string[]>;
+    /** Formation IDs that already had lifecycle_status destroyed/disbanded before this turn. */
+    already_destroyed: Set<FormationId>;
+    /** All formation IDs present at turn start. */
+    formation_ids: Set<FormationId>;
+}
+
+/** Type-safe accessor for AAR snapshot attached to context. */
+export function getAARSnapshot(context: TurnContext): AARSnapshot | undefined {
+    return (context as TurnContext & { aarSnapshot?: AARSnapshot }).aarSnapshot;
+}
+
+/** Type-safe setter for AAR snapshot on context. */
+export function setAARSnapshot(context: TurnContext, snapshot: AARSnapshot): void {
+    (context as TurnContext & { aarSnapshot?: AARSnapshot }).aarSnapshot = snapshot;
+}
+
 /** Type-safe accessor for siege state attached to context. */
 export function getSiegeStateCache(context: TurnContext): SiegeStateCache | undefined {
     return (context as TurnContext & { siegeStateCache?: SiegeStateCache }).siegeStateCache;

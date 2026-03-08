@@ -1403,6 +1403,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         sectorEntrenchmentSummary,
         mobilizationSummary,
         commandBriefing,
+        latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
     };
 }
 

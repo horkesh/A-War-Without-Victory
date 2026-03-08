@@ -7,6 +7,24 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Turn AAR System
+
+Full after-action report system: simulation side, state persistence, and GUI panel.
+
+**Schema** (`src/state/turn_summary.ts`): `TurnSummary` with sections for battles, territory, displacement, unit events (spawns/destructions/arc transitions/decorations), supply deltas, and notable events. `MAX_TURN_SUMMARIES = 3` — rolling window, most recent first. Persists through save/load.
+
+**Compiler** (`src/sim/compile_turn_summary.ts`): `captureAARSnapshot(state)` captures pre-turn baseline (supply, arcs, decoration tiers, formation lifecycle). `compileTurnSummary(state, snapshot, report)` diffs pre/post state and filters turn-tagged arrays. Zero changes to existing sim systems — no event bus required.
+
+**Pipeline** (`war_phases.ts`): `capture-aar-snapshot` at position 2 (after `initialize`); `compile-turn-summary` second-to-last (before `resolve-noop`). Uses TurnContext accessor pattern (`getAARSnapshot`/`setAARSnapshot`).
+
+**GUI** (`AARPanel.tsx`): 7-section collapsible panel (Combat, Territory, Unit Events, Faction Pulse, Displacement, Notable Events). "AAR" button added to TopToolbar. Accessible at any time — not only immediately after advancing turn.
+
+**Simplify pass** fixed 5 issues: wrong `rbih_hrhb_state?.washington_turn` cast, spawn/destruction detection blocked for non-brigades, OSID regex duplication, unstable React key, hardcoded faction literal.
+
+**Files**: `src/state/turn_summary.ts` (new), `src/sim/compile_turn_summary.ts` (new), `src/ui/map/components/AARPanel.tsx` (new), `src/state/game_state.ts`, `src/sim/turn_pipeline_types.ts`, `src/sim/turn_phases/war_phases.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/types.ts`, `src/ui/map/components/TopToolbar.tsx`, `src/ui/map/App.tsx`
+**Verification**: tsc clean, 378 vitest tests passing.
+**Report**: `docs/40_reports/implemented/20260308_TURN_AAR_SYSTEM.md`
+
 ## [2026-03-08] Sector Classification and Movement Overhaul — Column March Fix + Brigade Front Alignment
 
 **Critical bug fix**: Column march orders were silently failing because `stance: 'column'` was missing from merged movement orders in `bot_brigade_ai_osid.ts`. Zero column arrivals across 40 simulated weeks. Fix restored 300 march starts, 237 arrivals.

@@ -22,6 +22,7 @@ import { WarSummaryModal } from './components/WarSummaryModal';
 import { OpsPlanningModal } from './components/OpsPlanningModal';
 import { SupplyPanel } from './components/SupplyPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
+import { AARPanel } from './components/AARPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore } from './store/gameStore';
@@ -78,6 +79,7 @@ function App() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
+  const [aarOpen, setAarOpen] = useState(false);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -234,6 +236,7 @@ function App() {
         }}
         onOpenSummary={openSummary}
         onOpenEnclaves={() => setEnclaveDashboardOpen((current) => !current)}
+        onOpenAAR={() => setAarOpen((current) => !current)}
       />
       <CommandBriefingLayer
         onOpenSummary={openSummary}
@@ -293,6 +296,7 @@ function App() {
         focusSection={summaryFocus}
         onClose={() => setSummaryOpen(false)}
       />
+      <AARPanel isOpen={aarOpen} onClose={() => setAarOpen(false)} />
       <OpsPlanningModal />
       {loadedGameState && (
         <EnclaveDashboard
