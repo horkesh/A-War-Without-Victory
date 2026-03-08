@@ -824,3 +824,15 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 - **Siege drain under truce**: HRHB Central Bosnia pocket is classified "critical" by supply BFS (can only traverse own-faction territory — RS territory blocks BFS even under truce). 50+ siege counters drained HRHB supply from 75→0 by w30. Fix: skip HRHB in `updateSiegeTurnCounters()` while Graz active. The supply BFS topology is correct (HRHB pocket IS isolated from Herzegovina) — but the consequence (siege drain) should not apply when the surrounding faction is a truce partner.
 - **Cascade effect**: Fixing HRHB phantom attrition required reducing HRHB pool scale (1.60→1.05) to prevent troop overshoot (50k vs 41.5k target). This cascaded to RBiH: healthier HRHB → changed territorial dynamics → 4.1k less RBiH mobilization + 1.5k more RBiH casualties → 114k vs 120k target. Compensated by raising RBiH pool scale 0.18→0.25. Key lesson: faction pool scale changes have cross-faction effects through changed war dynamics, not just direct pool mechanics.
 - **Terminology**: "Graz Accords" is the historically correct name for the RS-HRHB non-aggression pact. Code state field remains `vienna_declaration_turn` for backwards compatibility.
+
+## 2026-03-08 - N403 Corps sector system overhaul
+
+- **Territory cap (`MAX_TERRITORY_OSIDS = 40`)**: Exported constant in `corps_front_sectors.ts`. Prevents mega-sectors from consuming excessive BFS depth in `assignTerritoryVoronoi`. Sectors stop expanding once they reach the cap.
+- **Edge adjacency no longer bridges hostile territory**: `buildEdgeAdjacency` removed hostile-side bridging. `isSegmentAdjacent` now does BFS through friendly territory when `friendlyOsids` provided — segments must be reachable through own-faction OSIDs, not through enemy space.
+- **`equalizeSectorDensity` (new)**: Redistributes brigades across sectors proportional to front edge count. Surplus sectors donate brigades to under-staffed neighbors. Runs after initial brigade assignment, before sector classification.
+- **`ensureMinimumSectorCoverage` enhanced**: Surplus sector transfers added — sectors with brigade surplus donate to adjacent zero-brigade sectors. More robust than paper-only transfers.
+- **Exempt corps (`EXEMPT_CORPS_IDS`)**: Corps like `hvo_central_bosnia` skip sector creation entirely. Isolated pocket formations where formal front sectors are not meaningful.
+- **Ghost sector filtering**: Sectors with <=1 edge and 0 territory filtered as topology artifacts. 73 total sectors post-filter, 17 zero-brigade.
+- **`getSectorFrontOsids()` helper**: Extracted for reusable front OSID collection from sector sub-segments. `mergeUndersizedSubSegments` accepts `friendlyOsids` param for BFS-aware merging.
+- **Calibration result**: n403 = 86.9% area-weighted. Troop: RBiH=120.5k, RS=106.0k, HRHB=44.2k. Previous: n384=87.9%, n366=88.2%, n345=86.8%, n304=93.8% (ATH).
+- **Key lesson**: Hostile-side adjacency bridging created phantom sector connectivity — sectors claiming edges far from their actual territory. BFS through friendly territory is the correct adjacency model for front sectors.

@@ -11932,3 +11932,23 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 - Systems Manual §7.5: implementation-note on OOB seeding and `distinction_potential` in FormationState
 - CONSOLIDATED_IMPLEMENTED: entry added
 - Full report: `docs/40_reports/implemented/20260308_DISTINCTION_POTENTIAL_OOB_DECORATION_OVERHAUL.md`
+
+## [2026-03-08] Corps Sector System Overhaul — Territory Cap, Density Equalization, Exempt Corps
+
+**Sector territory cap** (`corps_front_sectors.ts`): New `MAX_TERRITORY_OSIDS = 40` cap in `assignTerritoryVoronoi` prevents mega-sectors from consuming excessive territory depth. Sectors exceeding the cap stop BFS expansion early.
+
+**Edge adjacency cleanup**: Removed hostile-side edge adjacency bridging from `buildEdgeAdjacency` — sectors no longer bridge across enemy territory to claim distant edges. `isSegmentAdjacent` now does BFS through friendly territory when `friendlyOsids` provided, replacing straight-line adjacency checks.
+
+**Density equalization** (`equalizeSectorDensity`): New function redistributes brigades across sectors proportional to front edge count. Sectors with excess brigade density transfer surplus to under-staffed neighbors, smoothing force distribution across the front.
+
+**Enhanced minimum coverage** (`ensureMinimumSectorCoverage`): Now includes surplus sector transfers — sectors with brigade surplus donate to adjacent zero-brigade sectors before falling back to paper transfers.
+
+**Exempt corps** (`EXEMPT_CORPS_IDS`): Corps like `hvo_central_bosnia` skip sector creation entirely. These formations operate in isolated pockets where formal front sectors are not meaningful.
+
+**Ghost sector filtering**: Sectors with <=1 edge and 0 territory OSIDs are filtered out as artifacts of edge-case topology.
+
+**Helper extraction**: `getSectorFrontOsids()` extracted as reusable helper for collecting front OSIDs from sector sub-segments. `mergeUndersizedSubSegments` now accepts `friendlyOsids` param for BFS-aware merging.
+
+**Files**: `src/sim/combat/corps_front_sectors.ts`
+**Calibration**: n403 = 86.9% ATH area-weighted. 73 total sectors, 17 zero-brigade. Troop: RBiH=120.5k (target 120k), RS=106.0k (target 102.6k), HRHB=44.2k (target 41.5k).
+**Report**: `docs/40_reports/20260308_SECTOR_SYSTEM_OVERHAUL.md`
