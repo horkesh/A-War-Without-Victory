@@ -15,6 +15,22 @@ export interface CorpsOperationOrderPayload {
     tempo?: 'methodical' | 'standard' | 'all_out';
     schwerpunktOsid?: string;
     artilleryPreparation?: boolean;
+    axes?: Array<{
+        axis_id: string;
+        name: string;
+        assigned_brigades: string[];
+        objectives: string[];
+        current_objective_index: number;
+        status: 'executing';
+        failure_count: number;
+        consecutive_failures_on_current: number;
+        momentum: number;
+        attack_attempt_count: number;
+        objective_capture_count: number;
+        movement_only_execution_turns: number;
+        idle_execution_turn_streak: number;
+        staging_osid?: string;
+    }>;
 }
 
 /** Shape of window.awwv as exposed by preload.cjs. */
