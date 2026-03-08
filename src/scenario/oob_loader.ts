@@ -62,6 +62,11 @@ export interface OobBrigade {
     historical_decorations?: HistoricalDecoration[];
     /** Initial brigade officer quality [0,1]. When set, overrides faction default. Elite units get higher values. */
     initial_officer_quality?: number;
+    /**
+     * Historical distinction potential. Reduces decoration-earning thresholds.
+     * Replaces pre-awarding historical_decorations at war start.
+     */
+    distinction_potential?: 'tier_1' | 'tier_2' | 'tier_3';
 }
 
 export interface OobCorps {
@@ -74,6 +79,12 @@ export interface OobCorps {
     kind: 'corps' | 'army_hq';
     /** Turn when this corps becomes available (Phase I Overhaul: phased activation). Default 0. */
     available_from: number;
+    /** Initial officer quality [0,1]. Army HQs reflect general staff competence at war start. */
+    initial_officer_quality?: number;
+    /** Initial cohesion [0,100]. Army HQs reflect organizational readiness at war start. */
+    initial_cohesion?: number;
+    /** Initial morale [0,100]. Only set when army HQ starts historically disorganized. */
+    initial_morale?: number;
 }
 
 interface RegistryRow {
@@ -165,6 +176,8 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             : undefined;
         const initial_officer_quality = typeof r.initial_officer_quality === 'number' && Number.isFinite(r.initial_officer_quality)
             ? Math.max(0, Math.min(1, r.initial_officer_quality)) : undefined;
+        const distinction_potential = (r.distinction_potential === 'tier_1' || r.distinction_potential === 'tier_2' || r.distinction_potential === 'tier_3')
+            ? r.distinction_potential as 'tier_1' | 'tier_2' | 'tier_3' : undefined;
         result.push({
             id,
             faction,
@@ -195,6 +208,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(garrison && { garrison }),
             ...(historical_decorations && historical_decorations.length > 0 && { historical_decorations }),
             ...(initial_officer_quality != null && { initial_officer_quality }),
+            ...(distinction_potential && { distinction_potential }),
         });
     }
 
@@ -239,6 +253,10 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
         const corpsKind = r.kind === 'army_hq' ? 'army_hq' as const : 'corps' as const;
         const hq_osid = typeof r.hq_osid === 'string' && r.hq_osid.trim() ? r.hq_osid.trim() : undefined;
         const available_from = typeof r.available_from === 'number' && Number.isFinite(r.available_from) ? r.available_from : 0;
+        const corps_initial_officer_quality = typeof r.initial_officer_quality === 'number' && Number.isFinite(r.initial_officer_quality)
+            ? Math.max(0, Math.min(1, r.initial_officer_quality)) : undefined;
+        const corps_initial_cohesion = typeof r.initial_cohesion === 'number' && Number.isFinite(r.initial_cohesion) ? r.initial_cohesion : undefined;
+        const corps_initial_morale = typeof r.initial_morale === 'number' && Number.isFinite(r.initial_morale) ? r.initial_morale : undefined;
         result.push({
             id,
             faction,
@@ -247,6 +265,9 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
             ...(hq_osid && { hq_osid }),
             kind: corpsKind,
             available_from,
+            ...(corps_initial_officer_quality != null && { initial_officer_quality: corps_initial_officer_quality }),
+            ...(corps_initial_cohesion != null && { initial_cohesion: corps_initial_cohesion }),
+            ...(corps_initial_morale != null && { initial_morale: corps_initial_morale }),
         });
     }
 

@@ -185,7 +185,10 @@ export function createOobFormations(
             kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
             personnel: 0,
             ...(hq_sid ? { hq_sid } : {}),
-            ...(location_osid != null ? { location_osid } : {})
+            ...(location_osid != null ? { location_osid } : {}),
+            ...(c.initial_officer_quality != null ? { officer_quality: c.initial_officer_quality } : {}),
+            ...(c.initial_cohesion != null ? { cohesion: c.initial_cohesion } : {}),
+            ...(c.initial_morale != null ? { morale: c.initial_morale } : {}),
         };
         state.formations[c.id] = formation;
         report.corps_created += 1;
@@ -257,6 +260,8 @@ export function createOobFormations(
         }
         // Officer quality: use per-brigade OOB override or faction default
         formation.officer_quality = b.initial_officer_quality ?? getFactionDefaultOfficerQuality(b.faction, currentTurn);
+        // Distinction potential: historical units that earned glory — reduced decoration thresholds
+        if (b.distinction_potential) formation.distinction_potential = b.distinction_potential;
         state.formations[b.id] = formation;
         report.brigades_created += 1;
     }

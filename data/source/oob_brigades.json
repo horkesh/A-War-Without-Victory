@@ -29,7 +29,8 @@
     "available_from": 14,
     "mandatory": true,
     "initial_personnel": 480,
-    "initial_cohesion": 55
+    "initial_cohesion": 55,
+    "is_elite": true
   },
   {
     "id": "arbih_17th_muslim_light",
@@ -166,13 +167,8 @@
     "mandatory": true,
     "initial_personnel": 500,
     "initial_cohesion": 45,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_112th_vitezka_motorized",
@@ -188,13 +184,8 @@
     "mandatory": true,
     "initial_personnel": 500,
     "initial_cohesion": 45,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_115th_mountain",
@@ -270,13 +261,8 @@
     "mandatory": true,
     "initial_personnel": 500,
     "initial_cohesion": 45,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_109th_mountain",
@@ -352,13 +338,8 @@
     "mandatory": true,
     "initial_personnel": 500,
     "initial_cohesion": 45,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_147th_light",
@@ -389,13 +370,8 @@
     "mandatory": true,
     "initial_personnel": 400,
     "initial_cohesion": 35,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_162nd_mountain",
@@ -516,13 +492,8 @@
     "mandatory": true,
     "initial_personnel": 550,
     "initial_cohesion": 48,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_215th_vitezka_mountain",
@@ -538,13 +509,8 @@
     "mandatory": true,
     "initial_personnel": 400,
     "initial_cohesion": 30,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_217th_vitezka_mountain",
@@ -560,13 +526,8 @@
     "mandatory": true,
     "initial_personnel": 550,
     "initial_cohesion": 48,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_221st_mountain",
@@ -672,13 +633,8 @@
     "mandatory": true,
     "initial_personnel": 550,
     "initial_cohesion": 48,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_253rd_mountain",
@@ -724,14 +680,9 @@
     "mandatory": true,
     "initial_personnel": 800,
     "initial_cohesion": 56,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ],
-    "defense_terrain_bonus": 0.3
+    "defense_terrain_bonus": 0.3,
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_7th_vitezka_muslim_liberation",
@@ -747,13 +698,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_303rd_vitezka_mountain",
@@ -769,13 +715,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_314th_slavna_liberation",
@@ -791,13 +732,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_319th_liberation",
@@ -843,13 +779,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_328th_mountain",
@@ -912,13 +843,8 @@
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 40,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_373rd_slavna_mountain",
@@ -934,13 +860,8 @@
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 40,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_374th_slavna_light",
@@ -956,13 +877,8 @@
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 40,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_375th_liberation",
@@ -993,13 +909,8 @@
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 40,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_4th_muslim_light",
@@ -1120,13 +1031,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_442nd_mountain",
@@ -1188,14 +1094,8 @@
     "initial_personnel": 700,
     "initial_cohesion": 60,
     "initial_officer_quality": 0.2,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ],
-    "defense_terrain_bonus": 0.25
+    "defense_terrain_bonus": 0.25,
+    "distinction_potential": "tier_1"
   },
   {
     "id": "arbih_502nd_vitezka_mountain",
@@ -1211,13 +1111,8 @@
     "mandatory": true,
     "initial_personnel": 700,
     "initial_cohesion": 60,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_503rd_slavna_mountain",
@@ -1233,14 +1128,9 @@
     "mandatory": true,
     "initial_personnel": 700,
     "initial_cohesion": 60,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ],
-    "defense_terrain_bonus": 0.25
+    "defense_terrain_bonus": 0.25,
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_505th_vitezka_mountain",
@@ -1256,14 +1146,9 @@
     "mandatory": true,
     "initial_personnel": 700,
     "initial_cohesion": 60,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ],
-    "defense_terrain_bonus": 0.2
+    "defense_terrain_bonus": 0.2,
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_506th_mountain",
@@ -1309,14 +1194,9 @@
     "mandatory": true,
     "initial_personnel": 700,
     "initial_cohesion": 60,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ],
-    "defense_terrain_bonus": 0.2
+    "defense_terrain_bonus": 0.2,
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_517th_light",
@@ -1346,13 +1226,8 @@
     "mandatory": true,
     "initial_personnel": 1200,
     "initial_cohesion": 60,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_17th_vitezka_mountain",
@@ -1368,13 +1243,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_706th_muslim_mountain",
@@ -1450,13 +1320,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_733rd_mountain",
@@ -1502,13 +1367,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_707th_slavna_mountain",
@@ -1524,13 +1384,8 @@
     "mandatory": true,
     "initial_personnel": 440,
     "initial_cohesion": 38,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_717th_slavna_mountain",
@@ -1546,13 +1401,8 @@
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 38,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_770th_slavna_mountain",
@@ -1568,13 +1418,8 @@
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 38,
-    "honor": "slavna",
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Slavna"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_210th_vitezka_liberation_nesib_maliki",
@@ -1590,13 +1435,8 @@
     "mandatory": true,
     "initial_personnel": 600,
     "initial_cohesion": 48,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_240th_muslim_mountain",
@@ -1702,14 +1542,9 @@
     "mandatory": true,
     "initial_personnel": 600,
     "initial_cohesion": 48,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ],
-    "defense_terrain_bonus": 0.25
+    "defense_terrain_bonus": 0.25,
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "arbih_286th_mountain",
@@ -1974,13 +1809,6 @@
     "initial_personnel": 1100,
     "initial_cohesion": 72,
     "initial_morale": 55,
-    "honor": "viteska",
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Viteška"
-      }
-    ],
     "composition": {
       "infantry": 1100,
       "tanks": 0,
@@ -1999,7 +1827,9 @@
     },
     "tags": [
       "enclave"
-    ]
+    ],
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.15
   },
   {
     "id": "rs_1st_guards_motorized",
@@ -2014,7 +1844,8 @@
     "available_from": 0,
     "mandatory": true,
     "initial_personnel": 1200,
-    "initial_cohesion": 72
+    "initial_cohesion": 72,
+    "is_elite": true
   },
   {
     "id": "rs_1st_armored",
@@ -2886,12 +2717,8 @@
     "mandatory": true,
     "initial_personnel": 1200,
     "initial_cohesion": 72,
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Medalja Petra Mrkonjića"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.6
   },
   {
     "id": "rs_1st_zvornik",
@@ -2907,12 +2734,8 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 67,
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Medalja Petra Mrkonjića"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.6
   },
   {
     "id": "rs_1st_bratunac",
@@ -2973,12 +2796,8 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 67,
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Medalja Petra Mrkonjića"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.6
   },
   {
     "id": "rs_nevesinje_brigade",
@@ -2994,12 +2813,8 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 67,
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Orden Nemanjića"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.62
   },
   {
     "id": "rs_gacko_brigade",
@@ -3015,12 +2830,8 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 67,
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Orden Nemanjića"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.62
   },
   {
     "id": "rs_bilea_brigade",
@@ -3051,12 +2862,8 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 67,
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Medalja Petra Mrkonjića"
-      }
-    ]
+    "distinction_potential": "tier_1",
+    "initial_officer_quality": 0.6
   },
   {
     "id": "rs_ajnie_brigade",
@@ -3104,13 +2911,7 @@
     "initial_cohesion": 72,
     "initial_officer_quality": 0.85,
     "is_elite": true,
-    "garrison": true,
-    "historical_decorations": [
-      {
-        "tier": "tier_3",
-        "name": "Orden Miloša Obilića"
-      }
-    ]
+    "distinction_potential": "tier_3"
   },
   {
     "id": "rs_ilidza_brigade",
@@ -3769,12 +3570,7 @@
     "initial_cohesion": 75,
     "initial_officer_quality": 0.5,
     "is_elite": true,
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Red Nikole Šubića Zrinskog"
-      }
-    ]
+    "distinction_potential": "tier_1"
   },
   {
     "id": "hvo_2nd_guard_mechanized",
@@ -3788,12 +3584,7 @@
     "available_from": 84,
     "initial_personnel": 2000,
     "initial_cohesion": 70,
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Red Nikole Šubića Zrinskog"
-      }
-    ]
+    "distinction_potential": "tier_1"
   },
   {
     "id": "hvo_3rd_guard_jastrebovi",
@@ -3807,12 +3598,7 @@
     "available_from": 84,
     "initial_personnel": 1800,
     "initial_cohesion": 70,
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Red Nikole Šubića Zrinskog"
-      }
-    ]
+    "distinction_potential": "tier_1"
   },
   {
     "id": "hvo_4th_guard_sinovi_posavine",
@@ -3826,12 +3612,7 @@
     "available_from": 88,
     "initial_personnel": 1500,
     "initial_cohesion": 65,
-    "historical_decorations": [
-      {
-        "tier": "tier_1",
-        "name": "Red Nikole Šubića Zrinskog"
-      }
-    ]
+    "distinction_potential": "tier_1"
   },
   {
     "id": "hrhb_110th_usora_brigade",
@@ -4263,12 +4044,8 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 67,
-    "historical_decorations": [
-      {
-        "tier": "tier_2",
-        "name": "Orden Nemanjića"
-      }
-    ]
+    "distinction_potential": "tier_2",
+    "initial_officer_quality": 0.62
   },
   {
     "id": "rs_5th_podrinje",

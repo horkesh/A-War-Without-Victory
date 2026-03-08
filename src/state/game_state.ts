@@ -435,8 +435,15 @@ export interface FormationState {
     // --- OOB Rework: Brigade history, decorations, elite loan, lifecycle ---
     /** Brigade combat history (engagement log + running tallies). Initialized on first battle or at creation. */
     brigade_history?: BrigadeHistory;
-    /** Decorations awarded to this brigade (historical + earned). Highest tier bonus applies (no stacking). */
+    /** Decorations awarded to this brigade (earned during the war). Highest tier bonus applies (no stacking). */
     decorations?: BrigadeDecoration[];
+    /**
+     * Historical distinction potential: this unit has the character to earn this tier.
+     * Reduces decoration-earning thresholds by ~30% (tier_1) / 35% (tier_2/3).
+     * Set from OOB for units that earned decorations in the historical war; replaces
+     * the old `historical_decorations` start-of-war pre-award.
+     */
+    distinction_potential?: 'tier_1' | 'tier_2' | 'tier_3';
     /** Elite loan lifecycle state (army-level elite units only). */
     elite_loan_state?: EliteLoanState;
     /** Formation lifecycle status. Default 'active'. Set by lifecycle event processing. */

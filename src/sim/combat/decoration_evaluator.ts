@@ -63,13 +63,32 @@ function hasTier(decorations: BrigadeDecoration[], tier: DecorationTier): boolea
 }
 
 /**
+ * Threshold multiplier from distinction_potential.
+ * Historically distinguished units earn decorations at lower thresholds —
+ * they have the character for it, but must still fight to prove it.
+ *   tier_1 potential → 0.70× (30% easier)
+ *   tier_2 potential → 0.65× (35% easier)
+ *   tier_3 potential → 0.65× (matches tier_2; already elite)
+ */
+function getDistinctionMult(formation: FormationState): number {
+    switch (formation.distinction_potential) {
+        case 'tier_2':
+        case 'tier_3': return 0.65;
+        case 'tier_1': return 0.70;
+        default:       return 1.0;
+    }
+}
+
+/**
  * Evaluate tier_1 criteria:
  * - 5+ consecutive victories without catastrophic loss, OR
  * - 8+ battles with >60% win rate
+ * Thresholds reduced by distinction_potential multiplier.
  */
-function qualifiesTier1(h: BrigadeHistory): boolean {
-    if (h.longest_victory_streak >= 5) return true;
-    if (h.battles_fought >= 8 && h.victories / h.battles_fought > 0.60) return true;
+function qualifiesTier1(h: BrigadeHistory, formation: FormationState): boolean {
+    const mult = getDistinctionMult(formation);
+    if (h.longest_victory_streak >= Math.ceil(5 * mult)) return true;
+    if (h.battles_fought >= Math.ceil(8 * mult) && h.victories / h.battles_fought > 0.60) return true;
     return false;
 }
 
@@ -77,11 +96,12 @@ function qualifiesTier1(h: BrigadeHistory): boolean {
  * Evaluate tier_2 criteria:
  * - Longest defense streak >= 3 (held through 3+ attacks), OR
  * - 4+ consecutive defensive victories
+ * Thresholds reduced by distinction_potential multiplier.
  */
-function qualifiesTier2(h: BrigadeHistory): boolean {
-    if (h.longest_defense_streak >= 3) return true;
-    // Check for 4+ consecutive defensive victories in log
-    if (h.longest_defense_streak >= 4) return true;
+function qualifiesTier2(h: BrigadeHistory, formation: FormationState): boolean {
+    const mult = getDistinctionMult(formation);
+    if (h.longest_defense_streak >= Math.ceil(3 * mult)) return true;
+    if (h.longest_defense_streak >= Math.ceil(4 * mult)) return true;
     return false;
 }
 
@@ -109,7 +129,7 @@ export function evaluateBrigadeDecorations(
     const faction = formation.faction;
 
     // Check tier_1
-    if (!hasTier(d, 'tier_1') && qualifiesTier1(h)) {
+    if (!hasTier(d, 'tier_1') && qualifiesTier1(h, formation)) {
         d.push({
             tier: 'tier_1',
             awarded_turn: turn,
@@ -120,7 +140,7 @@ export function evaluateBrigadeDecorations(
     }
 
     // Check tier_2
-    if (!hasTier(d, 'tier_2') && qualifiesTier2(h)) {
+    if (!hasTier(d, 'tier_2') && qualifiesTier2(h, formation)) {
         d.push({
             tier: 'tier_2',
             awarded_turn: turn,
