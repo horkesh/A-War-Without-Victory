@@ -4,7 +4,8 @@ import {
     getHomeDistanceMult,
     buildHomeDistanceCache,
     HOME_DISTANCE_FREE_RANGE,
-    HOME_DISTANCE_FLOOR
+    HOME_DISTANCE_FLOOR,
+    HOME_DISTANCE_FLOOR_ELITE
 } from '../src/sim/combat/home_distance.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
@@ -66,6 +67,29 @@ describe('getHomeDistanceMult', () => {
     it('never goes below floor', () => {
         for (let i = 0; i <= 50; i++) {
             expect(getHomeDistanceMult(i)).toBeGreaterThanOrEqual(HOME_DISTANCE_FLOOR);
+        }
+    });
+
+    it('elite brigades get flatter curve', () => {
+        // Same at 0 hops
+        expect(getHomeDistanceMult(0, true)).toBe(1.0);
+        // Both 1.0 within free range
+        expect(getHomeDistanceMult(3, true)).toBe(1.0);
+        // Elite decays slower beyond free range
+        const regular6 = getHomeDistanceMult(6);
+        const elite6 = getHomeDistanceMult(6, true);
+        expect(elite6).toBeGreaterThan(regular6);
+    });
+
+    it('elite floor is higher than regular floor', () => {
+        expect(HOME_DISTANCE_FLOOR_ELITE).toBeGreaterThan(HOME_DISTANCE_FLOOR);
+        expect(getHomeDistanceMult(50, true)).toBe(HOME_DISTANCE_FLOOR_ELITE);
+        expect(getHomeDistanceMult(50, false)).toBe(HOME_DISTANCE_FLOOR);
+    });
+
+    it('elite never goes below elite floor', () => {
+        for (let i = 0; i <= 50; i++) {
+            expect(getHomeDistanceMult(i, true)).toBeGreaterThanOrEqual(HOME_DISTANCE_FLOOR_ELITE);
         }
     });
 });

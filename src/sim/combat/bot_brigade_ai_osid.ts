@@ -1035,9 +1035,8 @@ function executeFactionDirectives(
                     const homeTargets = homeAdjEnemy.filter(o => homeTargetSet.has(o));
                     if (homeTargets.length > 0) {
                         const predictions = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
-                        const freeTarget = predictions.find(t =>
+const freeTarget = predictions.find(t =>
                             homeTargets.includes(t.osid) &&
-                            t.prediction.predicted_outcome === 'decisive_victory' &&
                             !t.prediction.defender_has_brigade &&
                             (chosenTargets.get(t.osid) ?? 0) < (homeDirective.max_attackers_per_target)
                         );
@@ -1677,6 +1676,50 @@ function executeFactionDirectives(
             }
         }
 
+        // --- Rule 5b3: March to assigned sector ---
+        // Brigade is assigned to a sector (possibly by ensureMinimumSectorCoverage paper-transfer)
+        // but not physically in that sector's territory. Column march toward the sector.
+        // Guards: only march if brigade is safe to move (rear-area or surplus position).
+        // Don't pull front-line defenders that would create gaps or uproot entrenched units.
+        if (state.corps_front_sectors) {
+            let assignedSector: (typeof state.corps_front_sectors)[string] | null = null;
+            for (const sid of Object.keys(state.corps_front_sectors).sort(strictCompare)) {
+                const sec = state.corps_front_sectors[sid]!;
+                if (sec.assigned_brigade_ids.includes(brigade.id)) {
+                    assignedSector = sec;
+                    break;
+                }
+            }
+            if (assignedSector) {
+                const territorySet = new Set(assignedSector.territory_osids);
+                if (!territorySet.has(loc)) {
+                    // Skip entrenched brigades — too invested in current position
+                    if ((brigade.entrenchment_turns ?? 0) >= 2) {
+                        // Stay put, don't uproot
+                    } else {
+                        const onFront = adjEnemy.length > 0;
+                        const factionHere = onFront ? countFactionBrigadesAtOsid(state, faction, loc) : 0;
+                        // Only march if: rear-area (no enemies adjacent) or surplus (>=2 at location)
+                        if (!onFront || factionHere >= 2) {
+                            const targetOsids = new Set<string>();
+                            for (const ss of assignedSector.sub_segments) {
+                                for (const o of ss.friendly_osids) targetOsids.add(o);
+                            }
+                            for (const o of assignedSector.territory_osids) targetOsids.add(o);
+                            if (targetOsids.size > 0) {
+                                const dest = findNearestFriendlyOsidInSet(state, faction, loc, adjacency, reverseMap, targetOsids);
+                                if (dest) {
+                                    result.column_march_orders[brigade.id] = dest;
+                                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // --- Rule 5c: Reinforce under-density or empty sector ---
         // When this brigade is on a stacked front OSID (≥2 friendly brigades here) and
         // the directive flags under-density sectors, march to the nearest one.
@@ -1939,16 +1982,17 @@ export function generateAllBotOrdersOsid(
     }
 
     // Movement orders: merge regular moves + column march destinations
-    const mergedMovement: Record<string, { destination_sids: string[] }> = {};
+    const mergedMovement: Record<string, { destination_sids: string[]; stance?: string }> = {};
     for (const [bid, dest] of Object.entries(allMovementOrders)) {
         mergedMovement[bid] = { destination_sids: [dest] };
     }
     for (const [bid, dest] of Object.entries(allColumnMarchOrders)) {
-        // Column march: write to movement orders (column movement processor handles multi-turn transit)
-        mergedMovement[bid] = { destination_sids: [dest] };
+        // Column march: write to movement orders with stance:'column' so the
+        // column movement processor (processOsidColumnMovement) picks them up.
+        mergedMovement[bid] = { destination_sids: [dest], stance: 'column' };
     }
     if (Object.keys(mergedMovement).length > 0) {
-        state.brigade_movement_orders = mergedMovement as Record<FormationId, { destination_sids: string[] }>;
+        state.brigade_movement_orders = mergedMovement as Record<FormationId, { destination_sids: string[]; stance?: string }>;
     }
 
     return {

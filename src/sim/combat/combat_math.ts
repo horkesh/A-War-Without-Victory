@@ -574,7 +574,8 @@ function getHomeDistanceMultFromCache(state: GameState, formation: FormationStat
     if (!cache) return 1.0;
     const hops = cache[formation.id];
     if (hops === undefined) return 1.0;
-    return getHomeDistanceMult(hops);
+    const isElite = !!(formation as { elite_loan_state?: unknown }).elite_loan_state;
+    return getHomeDistanceMult(hops, isElite);
 }
 
 export function classifyOutcome(powerRatio: number): CombatOutcome {

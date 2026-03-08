@@ -474,7 +474,8 @@ export function resolveAttackOrdersOsid(
             battleSnapEvents.push(ev);
             pushSnapEvent(report, ev);
         }
-        const outcome: CombatOutcome = surrenderCascade ? 'decisive_victory' : classifyOutcome(powerRatio);
+        let outcome: CombatOutcome = surrenderCascade ? 'decisive_victory' : classifyOutcome(powerRatio);
+
         report.orders_processed += attackerIds.length;
         report.battles.push({
             attacker_brigade: firstAttacker.id,

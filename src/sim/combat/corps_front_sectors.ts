@@ -1348,13 +1348,16 @@ function ensureMinimumSectorCoverage(
             }
 
             // Map brigade location_osid → brigade_id for surplus sectors only
+            // Skip entrenched brigades (>=2 turns) — too valuable in current position
             const donorByOsid = new Map<string, FormationId>();
             for (const other of corpsSectors) {
                 if (other.sector_id === sector.sector_id) continue;
                 if (other.assigned_brigade_ids.length <= 1) continue; // Keep at least 1
                 for (const bid of other.assigned_brigade_ids) {
                     const f = formations[bid];
-                    if (f?.location_osid && !donorByOsid.has(f.location_osid)) {
+                    if (!f?.location_osid) continue;
+                    if ((f.entrenchment_turns ?? 0) >= 2) continue;
+                    if (!donorByOsid.has(f.location_osid)) {
                         donorByOsid.set(f.location_osid, bid);
                     }
                 }
@@ -1997,8 +2000,14 @@ function getFactions(state: GameState): FactionId[] {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Find the sector that has targetOsid as an enemy-side OSID (i.e., the sector
- * whose brigades should defend it when attacked with no brigade physically there).
+ * Find the sector that DEFENDS targetOsid via sector-coverage when no brigade
+ * is physically there.  That is the defender-faction sector whose sub-segment
+ * lists targetOsid as a **friendly** OSID (= the sector that owns the territory).
+ *
+ * Previous implementation searched enemy_osids, which returned the attacker's
+ * sector instead of the defender's — making the predictor treat the attacker's
+ * own brigades as defenders (blocking attacks against truly undefended OSIDs).
+ *
  * Returns the first matching sector in deterministic sector_id order, or null.
  */
 export function findSectorForEnemyOsid(
@@ -2010,7 +2019,7 @@ export function findSectorForEnemyOsid(
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
         for (const sub of sector.sub_segments) {
-            if (sub.enemy_osids.includes(targetOsid)) return sector;
+            if (sub.friendly_osids.includes(targetOsid)) return sector;
         }
     }
     return null;

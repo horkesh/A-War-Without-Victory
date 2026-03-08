@@ -21,8 +21,14 @@ export const HOME_DISTANCE_FREE_RANGE = 3;
 /** Multiplier floor — minimum effectiveness at any distance. */
 export const HOME_DISTANCE_FLOOR = 0.70;
 
+/** Floor for elite/professional brigades — trained for expeditionary ops. */
+export const HOME_DISTANCE_FLOOR_ELITE = 0.85;
+
 /** Per-hop penalty beyond FREE_RANGE. Reaches floor at ~10 hops. */
 const PER_HOP_PENALTY = 0.04;
+
+/** Per-hop penalty for elite brigades. Reaches floor at ~10 hops. */
+const PER_HOP_PENALTY_ELITE = 0.02;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BFS distance computation
@@ -75,11 +81,24 @@ export function computeOsidGraphDistance(
  * | 8    | 0.80 |
  * | 9    | 0.76 |
  * | 10+  | 0.70 |
+ *
+ * Elite/professional brigades (is_elite flag):
+ * | Hops | Mult |
+ * |------|------|
+ * | 0-3  | 1.00 |
+ * | 4    | 0.98 |
+ * | 5    | 0.96 |
+ * | 6    | 0.94 |
+ * | 7    | 0.92 |
+ * | 8    | 0.90 |
+ * | 10+  | 0.85 |
  */
-export function getHomeDistanceMult(hops: number): number {
+export function getHomeDistanceMult(hops: number, isElite = false): number {
     if (hops <= HOME_DISTANCE_FREE_RANGE) return 1.0;
-    const penalty = (hops - HOME_DISTANCE_FREE_RANGE) * PER_HOP_PENALTY;
-    return Math.max(HOME_DISTANCE_FLOOR, 1.0 - penalty);
+    const perHop = isElite ? PER_HOP_PENALTY_ELITE : PER_HOP_PENALTY;
+    const floor = isElite ? HOME_DISTANCE_FLOOR_ELITE : HOME_DISTANCE_FLOOR;
+    const penalty = (hops - HOME_DISTANCE_FREE_RANGE) * perHop;
+    return Math.max(floor, 1.0 - penalty);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
