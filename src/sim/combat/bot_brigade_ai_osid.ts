@@ -14,10 +14,14 @@
  * canonical settlement graphs.
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
+ *
+ * This file is the slim orchestrator. Helpers live in submodules:
+ *   - bot_brigade_context.ts — brigade location, context, counting
+ *   - bot_brigade_movement_ai.ts — movement logic (BFS, column march, interior)
+ *   - bot_brigade_targeting.ts — target scoring and combat prediction
+ *   - bot_brigade_supply_ethnic.ts — supply state and ethnic composition
  */
 
-import type { EdgeRecord } from '../../map/settlements.js';
-import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import type {
     BrigadePosture,
     CorpsOperation,
@@ -28,36 +32,127 @@ import type {
     GameState,
     OperationAxis,
 } from '../../state/game_state.js';
+import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import {
     predictAllAdjacentTargets,
     buildTerrainCache,
-    OUTCOME_SCORE,
-    type CombatPrediction,
     type PredictedOutcome
 } from './combat_predictor.js';
 import {
     analyzeFactionGraph,
     type FactionGraphAnalysis,
-    type OsidAnalysis
 } from './osid_graph_analysis.js';
 import { getEffectiveAttackShare } from './bot_strategy.js';
 import {
     buildOsidAdjacency,
-    isBrigadeDeployed,
     type Osid
 } from './osid_adjacency.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
-import type { SettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { isMultiAxis, getAllAxisBrigades } from './sector_offensive.js';
+import { getCorpsStance } from './combat_math.js';
+import type { OsidEthnicComposition } from './ethnic_defense.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Types
+// Submodule imports
+// ═══════════════════════════════════════════════════════════════════════════
+
+import {
+    getFactionBrigades,
+    findBrigadeSectorId,
+    getAdjacentEnemyOsids,
+    findNearestFriendlyOsidInSet,
+    countCorpsBrigadesAtOsid,
+    countFactionBrigadesAtOsid,
+    isMovementDestinationRisky,
+    MAX_CORPS_BRIGADES_PER_OSID,
+} from './bot_brigade_context.js';
+
+import {
+    findAdjacentFrontGap,
+    findNearestFrontOsid,
+    findNearestOsidByPattern,
+    computeHopsToFront,
+    findFrontDestinationForColumnMarch,
+    issueInteriorMovement,
+    osidContains,
+    osidMatchesAny,
+    COLUMN_MARCH_MIN_HOPS,
+} from './bot_brigade_movement_ai.js';
+
+import {
+    scoreTargetFromDirective,
+    estimateConcentratedOutcome,
+    isOutcomeSufficientForAttack,
+    outcomeRank,
+    outcomeFromRank,
+    MAX_ATTACKERS_PER_TARGET,
+    OUTCOME_RANK,
+} from './bot_brigade_targeting.js';
+
+import {
+    computeOsidEthnicComposition,
+    getBrigadeSupplyState,
+    getAttackerSupplyPenalty,
+    getCoEthnicScore,
+    getRsVsHrhbPenalty,
+    RS_VS_HRHB_ATTACK_ALLOWLIST,
+} from './bot_brigade_supply_ethnic.js';
+import type {
+    OsidBotContext,
+    SupplyConnectivityByFaction,
+} from './bot_brigade_supply_ethnic.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Re-exports — all public symbols from submodules
+// ═══════════════════════════════════════════════════════════════════════════
+
+export {
+    // context
+    getFactionBrigades,
+    findBrigadeSectorId,
+    getAdjacentEnemyOsids,
+    findNearestFriendlyOsidInSet,
+    countCorpsBrigadesAtOsid,
+    countFactionBrigadesAtOsid,
+    isMovementDestinationRisky,
+    MAX_CORPS_BRIGADES_PER_OSID,
+    // movement
+    findAdjacentFrontGap,
+    findNearestFrontOsid,
+    findNearestOsidByPattern,
+    computeHopsToFront,
+    findFrontDestinationForColumnMarch,
+    issueInteriorMovement,
+    osidContains,
+    osidMatchesAny,
+    COLUMN_MARCH_MIN_HOPS,
+    // targeting
+    scoreTargetFromDirective,
+    estimateConcentratedOutcome,
+    isOutcomeSufficientForAttack,
+    outcomeRank,
+    outcomeFromRank,
+    MAX_ATTACKERS_PER_TARGET,
+    OUTCOME_RANK,
+    // supply/ethnic
+    computeOsidEthnicComposition,
+    getBrigadeSupplyState,
+    getAttackerSupplyPenalty,
+    getCoEthnicScore,
+    getRsVsHrhbPenalty,
+    RS_VS_HRHB_ATTACK_ALLOWLIST,
+};
+export type { OsidBotContext, SupplyConnectivityByFaction };
+export type { OsidEthnicComposition } from './ethnic_defense.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Types (owned by orchestrator)
 // ═══════════════════════════════════════════════════════════════════════════
 
 export interface OsidBotOrdersResult {
@@ -79,32 +174,14 @@ export interface BotOrderGenerationDiagnostics {
 interface BrigadeContext {
     formation: FormationState;
     loc: Osid;
-    osidAnalysis: OsidAnalysis | null;
+    osidAnalysis: import('./osid_graph_analysis.js').OsidAnalysis | null;
     corpsStance: CorpsStance | null;
     adjacentEnemyOsids: Osid[];
 }
 
-type DirectiveOutcome = 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
-
-function outcomeRank(outcome: string): number {
-    switch (outcome) {
-        case 'decisive_victory': return 5;
-        case 'victory': return 4;
-        case 'costly_victory': return 3;
-        case 'stalemate': return 2;
-        case 'repulsed':
-        default:
-            return 1;
-    }
-}
-
-function outcomeFromRank(rank: number): DirectiveOutcome {
-    if (rank >= 5) return 'decisive_victory';
-    if (rank === 4) return 'victory';
-    if (rank === 3) return 'costly_victory';
-    if (rank === 2) return 'stalemate';
-    return 'repulsed';
-}
+// ═══════════════════════════════════════════════════════════════════════════
+// Operation helpers (private to orchestrator)
+// ═══════════════════════════════════════════════════════════════════════════
 
 /** Find the axis a brigade belongs to, or null if flat/not found. */
 function getBrigadeAxis(op: CorpsOperation, brigadeId: FormationId): OperationAxis | null {
@@ -190,529 +267,6 @@ function getSectorOffensiveProbeThreshold(
     return momentum >= 2 ? 'stalemate' : 'costly_victory';
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Shared helpers
-// ═══════════════════════════════════════════════════════════════════════════
-
-import { getCorpsStance } from './combat_math.js';
-
-function getFactionBrigades(state: GameState, faction: FactionId): FormationState[] {
-    const formations = state.formations ?? {};
-    const result: FormationState[] = [];
-    for (const [, f] of Object.entries(formations)) {
-        if (f.faction !== faction) continue;
-        if (f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid) continue;
-        // Skip brigades in column transit (they're redeploying; no new orders)
-        if (!isBrigadeDeployed(state, f.id)) continue;
-        result.push(f);
-    }
-    result.sort((a, b) => strictCompare(a.id, b.id));
-    return result;
-}
-
-/**
- * Find the sector_id for a brigade based on its location_osid and corps_front_sectors.
- * Returns the sector whose friendly_osids contain the brigade's location, or the corps'
- * largest sector as fallback.
- */
-function findBrigadeSectorId(state: GameState, brigade: FormationState): string | null {
-    const sectors = state.corps_front_sectors;
-    if (!sectors || !brigade.corps_id || !brigade.location_osid) return null;
-
-    const corpsId = brigade.corps_id;
-    const loc = brigade.location_osid;
-    let largestSector: string | null = null;
-    let largestEdges = -1;
-
-    for (const sectorKey of Object.keys(sectors).sort(strictCompare)) {
-        const sector = sectors[sectorKey]!;
-        if (sector.corps_id !== corpsId) continue;
-        // Track largest for fallback
-        if (sector.length_edges > largestEdges) {
-            largestEdges = sector.length_edges;
-            largestSector = sector.sector_id;
-        }
-        // Direct match: brigade at a friendly OSID of this sector
-        for (const ss of sector.sub_segments) {
-            if (ss.friendly_osids.includes(loc)) return sector.sector_id;
-        }
-    }
-
-    return largestSector;
-}
-
-/** Return adjacent enemy-controlled OSIDs for a brigade location. */
-function getAdjacentEnemyOsids(
-    loc: Osid,
-    faction: FactionId,
-    adjacency: Map<Osid, Osid[]>,
-    state: GameState,
-    reverseMap: OperationalToCanonicalReverseMap
-): Osid[] {
-    const neighbors = adjacency.get(loc) ?? [];
-    const result: Osid[] = [];
-    for (const n of neighbors) {
-        const c = getPoliticalControllerOSID(state, n, reverseMap);
-        if (c !== null && c !== faction) result.push(n);
-    }
-    return result.sort(strictCompare);
-}
-
-/**
- * BFS through friendly territory from a start OSID to find the nearest OSID in a target set.
- * Used for sector operation deployment (Rule 1.5): march brigade to its assigned sector.
- */
-function findNearestFriendlyOsidInSet(
-    state: GameState,
-    faction: FactionId,
-    startOsid: Osid,
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap,
-    targetOsids: Set<string>
-): Osid | null {
-    const visited = new Set<string>();
-    const queue: Array<{ osid: Osid; firstStep: Osid | null }> = [{ osid: startOsid, firstStep: null }];
-    visited.add(startOsid);
-    let head = 0;
-    while (head < queue.length) {
-        const { osid, firstStep } = queue[head++]!;
-        if (targetOsids.has(osid)) return firstStep ?? osid;
-        const neighbors = adjacency.get(osid) ?? [];
-        for (const n of [...neighbors].sort(strictCompare)) {
-            if (visited.has(n)) continue;
-            visited.add(n);
-            const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-            if (ctrl === faction) {
-                queue.push({ osid: n, firstStep: firstStep ?? n });
-            }
-        }
-    }
-    return null;
-}
-
-/** Count how many active brigades from the same corps are at a given OSID.
- * Corps-level rebalancing: a corps commander manages their own zone.
- * If corpsId is null/undefined, falls back to counting all faction brigades. */
-function countCorpsBrigadesAtOsid(state: GameState, faction: FactionId, corpsId: FormationId | null | undefined, osid: Osid): number {
-    const formations = state.formations ?? {};
-    let count = 0;
-    for (const fid of Object.keys(formations)) {
-        const f = formations[fid]!;
-        if (f.faction !== faction) continue;
-        if (f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (f.location_osid !== osid) continue;
-        if (corpsId) {
-            // Corps-level: only count brigades from the same corps
-            if (f.corps_id === corpsId) count++;
-        } else {
-            // No corps info: count all faction brigades
-            count++;
-        }
-    }
-    return count;
-}
-
-/** Maximum brigades per corps that should stay at one OSID before rebalancing.
- * Per-corps threshold: each corps should have at most 2 at one position
- * (1 attacking + 1 in reserve). More means the corps has excess to redeploy
- * within its zone. At corps boundary junctions, 2+2=4 total is acceptable
- * since those are natural concentration points. */
-const MAX_CORPS_BRIGADES_PER_OSID = 2;
-
-/** Count ALL faction brigades at an OSID (regardless of corps). Used for
- * front-line gap-fill: a brigade should move to cover an undefended neighbor
- * only if at least 1 other faction brigade remains behind. */
-function countFactionBrigadesAtOsid(state: GameState, faction: FactionId, osid: Osid): number {
-    const formations = state.formations ?? {};
-    let count = 0;
-    for (const fid of Object.keys(formations)) {
-        const f = formations[fid]!;
-        if (f.faction !== faction) continue;
-        if (f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (f.location_osid !== osid) continue;
-        count++;
-    }
-    return count;
-}
-
-/**
- * Front-line gap filling: find an adjacent friendly OSID that is on the front
- * (has enemy neighbors) but has NO friendly brigade ("undefended" or "critical").
- * Returns the gap OSID to move to, or null.
- *
- * Historical: all factions prioritized covering their line. Even VRS, with
- * smaller manpower, spread brigades thinly to maintain a continuous front.
- * Gaps invited enemy penetration and encirclement.
- *
- * Deterministic: sorted neighbor iteration, returns first qualifying gap.
- */
-/** True if moving a brigade to this OSID would be risky (salient or cut-off).
- * Used to avoid sending reinforcements into positions that could be overrun or isolated. */
-function isMovementDestinationRisky(
-    dest: Osid,
-    graphAnalysis: FactionGraphAnalysis
-): boolean {
-    const analysis = graphAnalysis.osid_analysis.get(dest);
-    if (!analysis) return false;
-    const enemyCount = analysis.enemy_neighbors.length;
-    const friendlyCount = analysis.friendly_neighbors.length;
-    if (enemyCount >= 3) return true;   // salient — exposed on 3+ sides
-    if (friendlyCount <= 1) return true; // cut-off risk — at most one escape route
-    return false;
-}
-
-function findAdjacentFrontGap(
-    state: GameState,
-    loc: Osid,
-    faction: FactionId,
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap,
-    graphAnalysis: FactionGraphAnalysis
-): Osid | null {
-    const neighbors = (adjacency.get(loc) ?? []).slice().sort(strictCompare);
-    for (const n of neighbors) {
-        const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-        if (ctrl !== faction) continue;
-        const analysis = graphAnalysis.osid_analysis.get(n);
-        if (!analysis) continue;
-        // Must be a front OSID (has enemy neighbors) AND undefended/critical (no or few defenders)
-        if (analysis.enemy_neighbors.length > 0 &&
-            (analysis.classification === 'undefended' || analysis.classification === 'critical')) {
-            // Don't move to a gap if it already has a faction brigade heading there
-            const factionHere = countFactionBrigadesAtOsid(state, faction, n);
-            if (factionHere === 0 && !isMovementDestinationRisky(n, graphAnalysis)) return n;
-        }
-    }
-    return null;
-}
-
-/** Maximum brigades that can attack the same target OSID.
- * Increased from 2→3 to allow corps-level concentration of force.
- * Historical: VRS regularly massed 3+ brigades for key operations
- * (Corridor 92, Gorazde, Bihac). The attack resolution system applies
- * coordination penalty (0.8× for 3+) to the summed power. */
-const MAX_ATTACKERS_PER_TARGET = 3;
-
-/**
- * Estimate whether a coordinated attack (with already-assigned co-attackers)
- * would achieve a better outcome than the individual prediction.
- *
- * When evaluating a target that already has 1+ brigade assigned to attack it,
- * estimate the combined power ratio. Each additional attacker contributes
- * roughly 65% of one attacker's power (after coordination penalty).
- *
- * Returns the estimated combined outcome, or null if no improvement.
- */
-function estimateConcentratedOutcome(
-    individualRatio: number,
-    existingAttackers: number
-): PredictedOutcome | null {
-    if (existingAttackers <= 0) return null;
-    // Each additional attacker adds ~85% of one brigade's power (mild coord penalty).
-    // Actual attack resolution sums attacker powers independently, so the true ratio for
-    // N equal brigades is N × individual_ratio. 0.85 accounts for sequential resolution
-    // losses (each battle weakens the defender, but also costs the attacker).
-    // N=1: ×1.85 (2 brigades)  N=2: ×2.70 (3 brigades)  N=3: ×3.55 (4 brigades)
-    const combinedRatioMult = 1 + existingAttackers * 0.85;
-    const estimatedRatio = individualRatio * combinedRatioMult;
-    // Classify using same thresholds as combat predictor
-    if (estimatedRatio >= 2.0) return 'decisive_victory';
-    if (estimatedRatio >= 1.5) return 'victory';
-    if (estimatedRatio >= 1.0) return 'costly_victory';
-    if (estimatedRatio >= 0.7) return 'stalemate';
-    if (estimatedRatio >= 0.5) return 'repulsed';
-    return 'catastrophic';
-}
-
-/** Check if OSID contains a string pattern (case-insensitive). */
-function osidContains(osid: Osid, pattern: string): boolean {
-    return osid.toLowerCase().includes(pattern.toLowerCase());
-}
-
-/** Check if any array of patterns match the OSID. */
-function osidMatchesAny(osid: Osid, patterns: string[]): boolean {
-    const lower = osid.toLowerCase();
-    return patterns.some(p => lower.includes(p.toLowerCase()));
-}
-
-/** Find the nearest front OSID with a given classification for movement. */
-function findNearestFrontOsid(
-    state: GameState,
-    faction: FactionId,
-    loc: Osid,
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap,
-    graphAnalysis: FactionGraphAnalysis,
-    targetClassifications: string[]
-): Osid | null {
-    // BFS from current location through friendly territory toward front
-    const controllerCache = new Map<Osid, FactionId | null>();
-    const visited = new Set<Osid>([loc]);
-    const queue: Array<{ osid: Osid; firstStep: Osid | null }> = [{ osid: loc, firstStep: null }];
-
-    while (queue.length > 0) {
-        const { osid, firstStep } = queue.shift()!;
-        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
-
-        for (const n of neighbors) {
-            if (visited.has(n)) continue;
-            visited.add(n);
-
-            let ctrl = controllerCache.get(n);
-            if (ctrl === undefined) {
-                ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-                controllerCache.set(n, ctrl);
-            }
-            if (ctrl !== faction && ctrl !== null) continue; // Move through friendly or unoccupied
-
-            const step = firstStep ?? n;
-            const analysis = graphAnalysis.osid_analysis.get(n);
-            if (analysis && targetClassifications.includes(analysis.classification)) {
-                if (!isMovementDestinationRisky(n, graphAnalysis)) return step; // safe first step
-            }
-            queue.push({ osid: n, firstStep: step });
-        }
-    }
-    return null;
-}
-
-/** BFS to find the nearest OSID matching a substring pattern through friendly territory.
- * Returns the FIRST STEP toward the target (for movement orders), not the target itself. */
-function findNearestOsidByPattern(
-    loc: Osid,
-    pattern: string,
-    faction: FactionId,
-    adjacency: Map<Osid, Osid[]>,
-    state: GameState,
-    reverseMap: OperationalToCanonicalReverseMap
-): Osid | null {
-    const lowerPattern = pattern.toLowerCase();
-    const visited = new Set<Osid>([loc]);
-    const queue: Array<{ osid: Osid; firstStep: Osid }> = [];
-
-    for (const n of (adjacency.get(loc) ?? []).slice().sort(strictCompare)) {
-        if (visited.has(n)) continue;
-        visited.add(n);
-        const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-        if (ctrl !== faction) continue;
-        if (n.toLowerCase().includes(lowerPattern)) return n;
-        queue.push({ osid: n, firstStep: n });
-    }
-
-    while (queue.length > 0) {
-        const { osid, firstStep } = queue.shift()!;
-        for (const n of (adjacency.get(osid) ?? []).slice().sort(strictCompare)) {
-            if (visited.has(n)) continue;
-            visited.add(n);
-            const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-            if (ctrl !== faction) continue;
-            if (n.toLowerCase().includes(lowerPattern)) return firstStep;
-            queue.push({ osid: n, firstStep });
-        }
-    }
-    return null;
-}
-
-/** Minimum distance (BFS hops) from front for a brigade to use column march instead of 1-hop.
- * Lowered from 3→2: column march is more efficient than bumbling 1-hop-at-a-time because
- * it goes directly to a specific front OSID rather than just taking the nearest first step.
- * At 2 hops, column transit time ≈ 1 turn (same as 2× 1-hop), but with better targeting. */
-const COLUMN_MARCH_MIN_HOPS = 2;
-
-/**
- * Compute BFS hop distance from a location to the nearest front OSID.
- * Returns the number of hops, or Infinity if no front is reachable.
- */
-function computeHopsToFront(
-    loc: Osid,
-    faction: FactionId,
-    adjacency: Map<Osid, Osid[]>,
-    state: GameState,
-    reverseMap: OperationalToCanonicalReverseMap,
-    graphAnalysis: FactionGraphAnalysis
-): number {
-    const visited = new Set<Osid>([loc]);
-    const queue: Array<{ osid: Osid; depth: number }> = [{ osid: loc, depth: 0 }];
-
-    while (queue.length > 0) {
-        const { osid, depth } = queue.shift()!;
-        const analysis = graphAnalysis.osid_analysis.get(osid);
-        // Front = any OSID with enemy neighbors (not 'interior' or 'quiet' deep)
-        if (depth > 0 && analysis && analysis.enemy_neighbors.length > 0) {
-            return depth;
-        }
-
-        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
-        for (const n of neighbors) {
-            if (visited.has(n)) continue;
-            visited.add(n);
-            const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-            if (ctrl !== faction) continue;
-            queue.push({ osid: n, depth: depth + 1 });
-        }
-    }
-    return Infinity;
-}
-
-/**
- * Find the actual front-line destination OSID for a column march.
- * Unlike findNearestFrontOsid (which returns the FIRST HOP), this returns
- * the actual front OSID itself — the endpoint for multi-turn column transit.
- *
- * Prefers: undefended > critical > threatened (so reinforcements fill gaps).
- * Deterministic: BFS with sorted expansion.
- */
-function findFrontDestinationForColumnMarch(
-    state: GameState,
-    faction: FactionId,
-    loc: Osid,
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap,
-    graphAnalysis: FactionGraphAnalysis,
-    assignedDests?: Map<Osid, number>
-): Osid | null {
-    // BFS outward through friendly territory, find closest front OSID
-    // Priority: undefended first (needs reinforcement most), then critical, then threatened, then active
-    // Distribution: skip destinations already assigned to ≥2 brigades (prevents stacking)
-    const visited = new Set<Osid>([loc]);
-    const queue: Array<{ osid: Osid; depth: number }> = [{ osid: loc, depth: 0 }];
-
-    let bestTarget: Osid | null = null;
-    let bestPriority = Infinity; // lower = better
-    let bestDepth = Infinity;
-
-    const classificationPriority: Record<string, number> = {
-        undefended: 0,
-        critical: 1,
-        threatened: 2,
-        active: 3
-    };
-
-    /** Max brigades that can march to the same front OSID. */
-    const MAX_COLUMN_MARCH_PER_OSID = 2;
-
-    while (queue.length > 0) {
-        const { osid, depth } = queue.shift()!;
-
-        // Early exit: if we've found a target and gone 2 BFS layers past it, stop
-        // (allow some depth to find better-priority targets at similar distance)
-        if (bestTarget && depth > bestDepth + 1) break;
-
-        if (depth > 0) {
-            const analysis = graphAnalysis.osid_analysis.get(osid);
-            if (analysis && analysis.enemy_neighbors.length > 0) {
-                // Skip salient or cut-off destinations — avoid sending brigades into risky positions
-                if (isMovementDestinationRisky(osid, graphAnalysis)) continue;
-                // Distribution: skip if too many brigades already assigned here
-                const assigned = assignedDests?.get(osid) ?? 0;
-                if (assigned >= MAX_COLUMN_MARCH_PER_OSID) {
-                    continue; // Don't expand past front, but skip this full OSID
-                }
-
-                const prio = classificationPriority[analysis.classification] ?? 10;
-                if (prio < bestPriority || (prio === bestPriority && strictCompare(osid, bestTarget!) < 0)) {
-                    bestTarget = osid;
-                    bestPriority = prio;
-                    bestDepth = depth;
-                }
-                continue; // Don't expand past front
-            }
-        }
-
-        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
-        for (const n of neighbors) {
-            if (visited.has(n)) continue;
-            visited.add(n);
-            const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-            if (ctrl !== faction && ctrl !== null) continue; // traverse friendly or unoccupied
-            queue.push({ osid: n, depth: depth + 1 });
-        }
-    }
-
-    // Update assignment tracker
-    if (bestTarget && assignedDests) {
-        assignedDests.set(bestTarget, (assignedDests.get(bestTarget) ?? 0) + 1);
-    }
-
-    return bestTarget;
-}
-
-/**
- * Shared interior-brigade movement: column march if deep, 1-hop move if close to front.
- * Returns true if an order was issued (caller should `continue`), false if nothing was done.
- */
-/**
- * Shared interior-brigade movement: column march if deep, 1-hop move if close to front.
- * Returns true if an order was issued (caller should `continue`), false if nothing was done.
- *
- * Key fixes (n119):
- * - 1-hop classifications now include 'active' as fallback — brigades no longer get stuck
- *   when all front OSIDs are defended (was the primary cause of 53% RS brigades stuck in interior).
- * - Column march destination distribution via `columnAssignments` — prevents all interior
- *   brigades from converging on the same front OSID.
- */
-function issueInteriorMovement(
-    brigade: FormationState,
-    loc: Osid,
-    faction: FactionId,
-    adjacency: Map<Osid, Osid[]>,
-    state: GameState,
-    reverseMap: OperationalToCanonicalReverseMap,
-    graphAnalysis: FactionGraphAnalysis,
-    result: OsidBotOrdersResult,
-    oneHopClassifications: string[],
-    columnAssignments?: Map<Osid, number>
-): boolean {
-    const hopsToFront = computeHopsToFront(loc, faction, adjacency, state, reverseMap, graphAnalysis);
-
-    // Anti-oscillation: if brigade is only 1 hop from front but has been at this location
-    // for multiple turns (entrenchment_turns > 0), use column march instead of 1-hop.
-    // This prevents ping-pong between two equidistant positions.
-    const useColumnMarch = hopsToFront >= COLUMN_MARCH_MIN_HOPS ||
-        (hopsToFront === 1 && (brigade.entrenchment_turns ?? 0) >= 1);
-
-    if (useColumnMarch) {
-        const frontDest = findFrontDestinationForColumnMarch(state, faction, loc, adjacency, reverseMap, graphAnalysis, columnAssignments);
-        if (frontDest) {
-            result.column_march_orders[brigade.id] = frontDest;
-            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-            return true;
-        }
-    }
-    // 1-hop movement: try priority classifications first, then fall back to any front OSID ('active')
-    let dest = findNearestFrontOsid(state, faction, loc, adjacency, reverseMap, graphAnalysis, oneHopClassifications);
-    if (!dest) {
-        // Fallback: move toward ANY front OSID (including 'active' — already defended but still front)
-        dest = findNearestFrontOsid(state, faction, loc, adjacency, reverseMap, graphAnalysis,
-            ['undefended', 'critical', 'threatened', 'active', 'quiet']);
-    }
-    if (dest) result.movement_orders[brigade.id] = dest;
-    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-    return true;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Shared utilities
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Outcome ranking for threshold comparison. */
-const OUTCOME_RANK: Record<PredictedOutcome, number> = {
-    decisive_victory: 6,
-    victory: 5,
-    costly_victory: 4,
-    stalemate: 3,
-    repulsed: 2,
-    catastrophic: 1
-};
-
-function isOutcomeSufficientForAttack(actual: PredictedOutcome, minimum: PredictedOutcome): boolean {
-    return (OUTCOME_RANK[actual] ?? 0) >= (OUTCOME_RANK[minimum] ?? 0);
-}
-
 function isPartOfNamedOperation(state: GameState, formation: FormationState): boolean {
     if (!formation.corps_id || !state.corps_command) return false;
     const op = state.corps_command[formation.corps_id]?.active_operation;
@@ -721,217 +275,8 @@ function isPartOfNamedOperation(state: GameState, formation: FormationState): bo
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Main dispatcher — Directive-based brigade execution
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Supply connectivity: OSIDs reachable from faction supply (adequate or strained = on network).
- * Used for chokepoint/corridor defense priority. Derived from supply_state_by_osid (non-critical).
- */
-export type SupplyConnectivityByFaction = Map<FactionId, Set<Osid>>;
-
-// Re-export from shared module
-export type { OsidEthnicComposition } from './ethnic_defense.js';
-import type { OsidEthnicComposition } from './ethnic_defense.js';
-
-/**
- * Compute per-OSID ethnic composition by averaging canonical SID compositions.
- * Deterministic: iteration order does not matter (arithmetic average).
- */
-export function computeOsidEthnicComposition(
-    reverseMap: OperationalToCanonicalReverseMap,
-    ethnicityData: SettlementEthnicityData
-): OsidEthnicComposition {
-    const result: OsidEthnicComposition = new Map();
-    for (const [osid, canonicalSids] of reverseMap.entries()) {
-        if (!canonicalSids || canonicalSids.length === 0) continue;
-        let totalBosniak = 0, totalSerb = 0, totalCroat = 0, count = 0;
-        for (const sid of canonicalSids) {
-            const entry = ethnicityData.by_settlement_id[sid];
-            if (!entry || !entry.composition) continue;
-            totalBosniak += entry.composition.bosniak;
-            totalSerb += entry.composition.serb;
-            totalCroat += entry.composition.croat;
-            count++;
-        }
-        if (count > 0) {
-            result.set(osid, { bosniak: totalBosniak / count, serb: totalSerb / count, croat: totalCroat / count });
-        }
-    }
-    return result;
-}
-
-/**
- * Bipolar co-ethnic score: -80 (0% co-ethnic) to +80 (≥50% co-ethnic).
- * Penalizes attacking non-coethnic territory, attracts toward coethnic areas.
- * Linear: 0% → -80, 25% → 0 (neutral), 50%+ → +80.
- * This replaces hardcoded avoid_municipalities — factions naturally avoid
- * territory with no co-ethnic population (e.g., RS won't attack Livno = 3% Serb → -70).
- */
-function getCoEthnicScore(osid: Osid, faction: FactionId, ethnicMap: OsidEthnicComposition | undefined): number {
-    if (!ethnicMap) return 0;
-    const comp = ethnicMap.get(osid);
-    if (!comp) return 0;
-    let share: number;
-    switch (faction) {
-        case 'RS': share = comp.serb; break;
-        case 'RBiH': share = comp.bosniak; break;
-        case 'HRHB': share = comp.croat; break;
-        default: return 0;
-    }
-    const normalized = Math.min(share / 0.5, 1.0); // 0..1
-    return Math.floor((normalized * 2 - 1) * 80);   // -80..+80
-}
-
-/** Look up a brigade's supply state from the OSID supply report. */
-export function getBrigadeSupplyState(
-    brigade: FormationState,
-    supplyStateByOsid?: SupplyStateByOsidReport | null
-): 'adequate' | 'strained' | 'critical' {
-    if (!supplyStateByOsid?.factions || !brigade.location_osid || !brigade.faction) return 'adequate';
-    const fac = supplyStateByOsid.factions.find(f => f.faction_id === brigade.faction);
-    if (!fac?.by_osid) return 'adequate';
-    const entry = fac.by_osid.find(e => e.osid === brigade.location_osid);
-    if (!entry) return 'adequate';
-    return entry.state;
-}
-
-/** Supply-aware attack penalty. Faction-specific conservatism. */
-function getAttackerSupplyPenalty(attackerOsid: Osid, faction: FactionId, supplyReport?: SupplyStateByOsidReport | null): number {
-    if (!supplyReport?.factions) return 0;
-    const fac = supplyReport.factions.find(f => f.faction_id === faction);
-    if (!fac?.by_osid) return 0;
-    const entry = fac.by_osid.find(e => e.osid === attackerOsid);
-    if (!entry) return 0;
-    switch (entry.state) {
-        case 'critical':
-            if (faction === 'RBiH') return -300;
-            if (faction === 'HRHB') return -250;
-            return -200;
-        case 'strained':
-            if (faction === 'RBiH') return -100;
-            if (faction === 'HRHB') return -75;
-            return -50;
-        default: return 0;
-    }
-}
-
-/**
- * RS should not attack HRHB-controlled territory outside historically plausible areas.
- * VRS had no strategic interest in fighting HVO in Central Bosnia or Herzegovina in 1992.
- * Allowlist: Posavina corridor municipalities + Kupres (VRS-HVO friction did occur there).
- */
-const RS_VS_HRHB_ATTACK_ALLOWLIST = new Set([
-    'odzak', 'orasje', 'bosanski_samac', 'bosanski_brod', 'brcko',
-    'derventa', 'modrica', 'kupres',
-]);
-
-function getRsVsHrhbPenalty(targetOsid: string, attackerFaction: string, defenderFaction: string | null): number {
-    if (attackerFaction !== 'RS' || defenderFaction !== 'HRHB') return 0;
-    const mun = targetOsid.split(':')[1];
-    if (!mun || RS_VS_HRHB_ATTACK_ALLOWLIST.has(mun)) return 0;
-    return 0; // Disabled — net area regression (KRAJINA/HERZEGOVINA offset Central gains)
-}
-
-/** Context needed for OSID bot decisions. Passed from the pipeline. */
-export interface OsidBotContext {
-    edges: EdgeRecord[];
-    reverseMap: OperationalToCanonicalReverseMap;
-    supplyStateByOsid?: SupplyStateByOsidReport | null;
-    supplyConnectivityByFaction?: SupplyConnectivityByFaction;
-    ethnicCompositionByOsid?: OsidEthnicComposition;
-    osidPopulationMap?: OsidPopulationMap;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 // Directive-based brigade execution (HoI-style: corps decides, brigade executes)
 // ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Score a target OSID based on corps directive + tactical factors.
- * Strategic priorities come from the directive (offensive_targets, avoid_osids).
- * Tactical factors: combat prediction, co-ethnic bonus, supply, counter-attack.
- *
- * This replaces the three faction-specific scoring functions.
- * Faction personality is embedded in the corps directive (what targets, what thresholds).
- */
-function scoreTargetFromDirective(
-    osid: Osid,
-    prediction: CombatPrediction,
-    directive: import('../../state/game_state.js').CorpsDirective,
-    faction: FactionId,
-    ethnicMap?: OsidEthnicComposition,
-    hasDirectiveTargetAdjacent?: boolean,
-    offensiveTargetSet?: Set<Osid>,
-    avoidOsidSet?: Set<Osid>
-): number {
-    const _offensiveTargetSet = offensiveTargetSet ?? new Set(directive.offensive_targets);
-    const _avoidOsidSet = avoidOsidSet ?? new Set(directive.avoid_osids);
-    let score = OUTCOME_SCORE[prediction.predicted_outcome] ?? 0;
-
-    // Directive-driven: is this an offensive target?
-    if (_offensiveTargetSet.has(osid)) {
-        score += 200; // Corps wants this attacked
-    }
-
-    // Brigade conservatism: without corps offensive targets, default to territorial defense.
-    // Historical brigades were territorial — only attacked when ordered by corps.
-    if (_offensiveTargetSet.size === 0) {
-        score -= 200; // No orders — hold position
-    }
-
-    // When corps has specific offensive targets, penalize non-priority targets.
-    // Penalty scales with aggression: offensive corps (-100) let brigades grab adjacent
-    // undefended territory; defensive corps (-250) lock brigades to directive targets only.
-    // RS early war (aggression 0.35): -145 → undefended non-priority barely viable.
-    // ARBiH defensive (aggression -0.20): -310 → non-priority fully blocked.
-    if (_offensiveTargetSet.size > 0 && !_offensiveTargetSet.has(osid)) {
-        const nonPriorityPenalty = Math.floor(-250 + directive.aggression_modifier * 300);
-        score += Math.min(-100, nonPriorityPenalty); // Floor at -100 (never free)
-    }
-
-    // Directive-driven: avoid zone (legacy — avoid_municipalities removed, but keep for future use)
-    if (_avoidOsidSet.has(osid)) {
-        score -= 500;
-    }
-
-    // Tactical bonuses (same for all factions — universal combat logic)
-    if (!prediction.defender_has_brigade) score += 100; // Undefended
-    if (prediction.is_counter_attack_opportunity) score += 180; // Counter-attack
-    if (prediction.defender_has_brigade && (prediction.defender_cohesion < 30 || prediction.defender_casualty_percent > 0.15)) {
-        score += 80; // Weak defender
-    }
-
-    // Tactical penalties — heavily reduced for directive targets (corps accepted the risk).
-    // Overextension: avoid pushing into salients or positions that could be cut off.
-    const isDirectiveTarget = _offensiveTargetSet.has(osid);
-    const overextPenaltyScale = isDirectiveTarget ? 0.25 : 1.0;
-    if (prediction.overextension_risk >= 3) score -= Math.floor(220 * overextPenaltyScale);
-    if (prediction.overextension_risk >= 2) score -= Math.floor(120 * overextPenaltyScale);
-    if (prediction.overextension_risk >= 1) score -= Math.floor(50 * overextPenaltyScale);
-    if (prediction.attacker_casualty_percent > 0.20) score -= 150;
-    // Cut-off risk: advancing to a tile with 0–1 friendly neighbors risks being isolated/cut off.
-    const friendlyAfter = prediction.friendly_neighbors_after_capture ?? 2;
-    if (friendlyAfter <= 1) score -= Math.floor(180 * overextPenaltyScale);
-    // Line-shortening (consolidation): prefer capturing bulges — more friendly neighbors after
-    // capture = shorter front (e.g. Teočak, Šapna historically). Bonus when 2+ friendly neighbors.
-    if (friendlyAfter >= 3) score += 35;
-    else if (friendlyAfter >= 2) score += 20;
-
-    // Co-ethnic bonus (all factions fight harder for co-ethnic areas)
-    score += getCoEthnicScore(osid, faction, ethnicMap);
-
-    // Aggression modifier: flat bonus for offensive stances + multiplier for the whole score.
-    // Flat component ensures stalemate targets (base 10) become viable when aggression is high.
-    // Without this, a 1.3× multiplier on 10 only gives 13 — killed by any supply penalty.
-    if (directive.aggression_modifier > 0) {
-        score += Math.floor(directive.aggression_modifier * 120);
-    }
-    const aggressionMult = 1.0 + directive.aggression_modifier;
-    score = Math.floor(score * aggressionMult);
-
-    return score;
-}
 
 /**
  * Execute corps directive for all brigades of a faction.
@@ -1832,6 +1177,10 @@ const freeTarget = predictions.find(t =>
 
     return result;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Main entry point
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Generate bot brigade orders for all bot factions using directive-based execution.
