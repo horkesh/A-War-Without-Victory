@@ -7,6 +7,18 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Determinism Audit — Phase 1 of Audit Remediation
+
+Systematic determinism audit across combat subsystem. 24 locations in 9 files where `Object.values()`/`Object.keys()` iteration could produce different results across JS engines.
+
+**Fixes (order-affecting)**: Sorted iteration via `strictCompare` in `attack_resolution_osid.ts` (4: displacement, resolution, post-flip, cleanup), `bot_brigade_ai_osid.ts` (3: sector fallback, brigade filtering), `decoration_evaluator.ts`, `front_assignment.ts`, `operation_storm.ts`, `paramilitary_sweep.ts` (3), `rear_pocket_consolidation.ts`.
+
+**Simplify pass**: Removed unnecessary sorts from order-independent operations — counter functions, `.length` checks, `.some()` existence checks, and hot-loop `.filter()` callbacks replaced with `.some()` to avoid sort+map+filter per iteration (~8000 unnecessary sorts/turn eliminated).
+
+**Files**: `attack_resolution_osid.ts`, `bot_brigade_ai_osid.ts`, `bot_corps_ai.ts`, `decoration_evaluator.ts`, `faction_resilience.ts`, `front_assignment.ts`, `operation_storm.ts`, `paramilitary_sweep.ts`, `rear_pocket_consolidation.ts`
+**Verification**: tsc clean, 389/389 vitest passing. No calibration impact (reproducibility only).
+**Plan**: `docs/plans/2026-03-08-audit-remediation-plan.md` Phase 1.
+
 ## [2026-03-08] Sector Reclassification, Pre-Planned Ops Expansion, Warroom Regions
 
 **Sectors**: New Step 8 `reclassifyRearBrigades()` — after equalization and coverage, demotes assigned brigades not physically on front OSIDs or 1-hop behind to reserve. Reserve cap: 1 for ≤10 edges, 2 for >10. Removed hostile-side adjacency bridging from `splitNonContiguousSectors` (~90 lines of O(E²) logic causing non-contiguous sectors wrapping around enemy territory). Coverage fallback Step 3 added. Ghost sector pruning tightened to `length_edges > 0`.
