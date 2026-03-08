@@ -1,5 +1,5 @@
 /**
- * Phase II ongoing mobilization tests (Mobilization & Force Growth plan Part 1).
+ * War phase ongoing mobilization tests (Mobilization & Force Growth plan Part 1).
  * - Report shape and conscription adds to pool.available.
  * - Exhaustion cap skips when cumulative >= 25% of eligible pop.
  * - Deterministic: same inputs -> same report.

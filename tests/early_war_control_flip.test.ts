@@ -1,6 +1,6 @@
 /**
  * Phase C Step 4: Early war control change system tests.
- * - No control flips before war_start_turn (Phase I path not run; gating in phase_i_entry_gating.test.ts).
+ * - No control flips before war_start_turn (Peace phase path not run; gating in phase_i_entry_gating.test.ts).
  * - Control flips only under authorized early war conditions (war active, eligible, trigger met).
  * - Control flips do not modify authority (faction profile unchanged).
  */

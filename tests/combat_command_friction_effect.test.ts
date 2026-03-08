@@ -1,5 +1,5 @@
 /**
- * Phase D0.9 Step 3: Command friction effect on Phase II outcomes.
+ * Phase D0.9 Step 3: Command friction effect on War phase outcomes.
  * - Higher exhaustion/longer front → lower friction factor (deterministic).
  * - Supply pressure and exhaustion increments are larger under higher friction (lower factor).
  * - No control changes caused by friction wiring.

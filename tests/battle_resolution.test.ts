@@ -1,5 +1,5 @@
 /**
- * Tests for Phase II battle resolution engine.
+ * Tests for War phase battle resolution engine.
  * Covers: combat power, terrain, casualties, outcomes, snap events, casualty ledger, determinism.
  */
 

@@ -48,7 +48,7 @@ export interface Phase0TurnOptions {
  * 6. Referendum eligibility — set eligible_turn and deadline_turn when both declared
  * 7. Authority Degradation — (no-op: not yet implemented)
  * 8. Stability Score Update — recompute all municipality stability scores
- * 9. War start countdown — transition to Phase I if current_turn === war_start_turn
+ * 9. War start countdown — transition to Peace phase if current_turn === war_start_turn
  * 10. Non-war terminal — game_over if deadline reached without referendum
  *
  * No-op if meta.game_over or meta.phase !== 'peace'.

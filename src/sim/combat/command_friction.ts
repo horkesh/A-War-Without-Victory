@@ -1,5 +1,5 @@
 /**
- * Phase D Step 6 / D0.9.1: Command friction for Phase II (Mid-War).
+ * Phase D Step 6 / D0.9.1: Command friction for War phase (Mid-War).
  * Semantic: command_friction_multiplier >= 1; higher = more friction = worse execution.
  * Deterministic: identical state + inputs → same multiplier; no randomness.
  */
@@ -19,7 +19,7 @@ const FRICTION_PER_FRONT_EDGE = 0.02;
 const MAX_MULTIPLIER = 10;
 
 /**
- * Compute command friction multiplier for a faction in Phase II.
+ * Compute command friction multiplier for a faction in War phase.
  * Returns a value >= 1; higher = more friction = worse execution.
  * Only meaningful when meta.phase === 'war'; returns 1 otherwise.
  * Deterministic: same state + factionId → same result.

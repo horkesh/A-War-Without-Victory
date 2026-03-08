@@ -1,5 +1,5 @@
 /**
- * Phase II: OSID-native column (undeployed) movement.
+ * War phase: OSID-native column (undeployed) movement.
  *
  * Terrain-weighted multi-hop movement for brigades redeploying through rear areas.
  * Column brigades cannot fight but move faster than deployed brigades.

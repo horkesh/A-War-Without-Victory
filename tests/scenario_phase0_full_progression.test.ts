@@ -23,7 +23,7 @@ function isMissingMappingError(err: unknown): boolean {
     );
 }
 
-test('phase0_full_progression: starts Phase 0, transitions to Phase I at war_start_turn', async () => {
+test('phase0_full_progression: starts Phase 0, transitions to Peace phase at war_start_turn', async () => {
     let ran = false;
     try {
         const result = await runScenario({

@@ -1,5 +1,5 @@
 /**
- * Phase II: Per-turn morale drift for all active formations.
+ * War phase: Per-turn morale drift for all active formations.
  * Population affinity (census-driven), encirclement reversal, exhaustion penalty.
  * Called from turn pipeline after cohesion drift.
  * Deterministic: formations in sorted order, no randomness.

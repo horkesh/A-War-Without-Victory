@@ -1,5 +1,5 @@
 /**
- * Proto-brigade spawn system test (Phase I Overhaul Phase B).
+ * Proto-brigade spawn system test (Peace-phase Overhaul Phase B).
  *
  * Verifies:
  * 1. spawnFormationsFromPools in bottom_up mode creates TO detachments at MIN_DETACHMENT_SPAWN (100).

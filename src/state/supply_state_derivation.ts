@@ -69,7 +69,7 @@ export interface LocalProductionCapacityReport {
     by_municipality: LocalProductionCapacityEntry[]; // sorted by mun_id
 }
 
-/** Per-OSID supply state for one faction (Phase II). */
+/** Per-OSID supply state for one faction (War phase). */
 export interface OsidSupplyStateEntry {
     osid: string;
     state: SupplyStateLevel;
@@ -337,7 +337,7 @@ export function deriveLocalProductionCapacity(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// OSID-level supply state (Phase II)
+// OSID-level supply state (War phase)
 // ═══════════════════════════════════════════════════════════════════════════
 
 

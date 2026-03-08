@@ -17,29 +17,29 @@ const LEGITIMACY_LOW_THRESHOLD = 50;
 /** Authority ceiling when legitimacy is low (Contested level). */
 const CONTESTED_AUTHORITY_CEILING = 60;
 
-/** Phase I §4.7.3: RBiH floor 0.20 → 20 in 0–100 scale. */
+/** Peace-phase §4.7.3: RBiH floor 0.20 → 20 in 0–100 scale. */
 const RBIH_AUTHORITY_FLOOR = 20;
-/** Phase I §4.7.3: RBiH cap 1.0 → 100. */
+/** Peace-phase §4.7.3: RBiH cap 1.0 → 100. */
 const RBIH_AUTHORITY_CAP = 100;
-/** Phase I §4.7.3: RS cap 0.85 → 85. */
+/** Peace-phase §4.7.3: RS cap 0.85 → 85. */
 const RS_AUTHORITY_CAP = 85;
-/** Phase I §4.7.3: HRHB cap 0.70 → 70. */
+/** Peace-phase §4.7.3: HRHB cap 0.70 → 70. */
 const HRHB_AUTHORITY_CAP = 70;
 
-/** Phase I §4.7.1: RS declared ongoing penalty per turn (0.01 → 1 in 0–100). */
+/** Peace-phase §4.7.1: RS declared ongoing penalty per turn (0.01 → 1 in 0–100). */
 const RS_DECLARED_ongoing_PER_TURN = 1;
-/** Phase I §4.7.1: HRHB declared ongoing penalty per turn (0.008 → 0.8). */
+/** Peace-phase §4.7.1: HRHB declared ongoing penalty per turn (0.008 → 0.8). */
 const HRHB_DECLARED_ongoing_PER_TURN = 0.8;
-/** Phase I §4.7.1: JNA active opponent per turn (0.01 → 1). */
+/** Peace-phase §4.7.1: JNA active opponent per turn (0.01 → 1). */
 const JNA_OPPOSITION_PER_TURN = 1;
-/** Phase I §4.7.1: International recognition per turn (0.02 → 2). */
+/** Peace-phase §4.7.1: International recognition per turn (0.02 → 2). */
 const INTERNATIONAL_RECOGNITION_PER_TURN = 2;
-/** Phase I §4.7.1: Successful defense of Sarajevo per turn (0.005 → 0.5). Stub: 0 when not implemented. */
+/** Peace-phase §4.7.1: Successful defense of Sarajevo per turn (0.005 → 0.5). Stub: 0 when not implemented. */
 const SARAJEVO_DEFENSE_PER_TURN = 0;
 
-/** Phase I §4.7.2: Declaration enacted ongoing per turn (0.008 → 0.8). */
+/** Peace-phase §4.7.2: Declaration enacted ongoing per turn (0.008 → 0.8). */
 const DECLARED_ongoing_PER_TURN = 0.8;
-/** Phase I §4.7.2: External support per turn (0.01 → 1). */
+/** Peace-phase §4.7.2: External support per turn (0.01 → 1). */
 const EXTERNAL_SUPPORT_PER_TURN = 1;
 
 export interface AuthorityDegradationReport {
@@ -47,7 +47,7 @@ export interface AuthorityDegradationReport {
 }
 
 /**
- * Run Phase I authority degradation (Phase I §4.7).
+ * Run Peace phase authority degradation (Peace-phase §4.7).
  * Updates faction.profile.authority only; does not touch political control.
  * Municipality lost/gain penalties require prior-turn snapshot; Step 5 applies only declaration, JNA, and recognition ongoing.
  */

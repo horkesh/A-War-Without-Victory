@@ -1,5 +1,5 @@
 /**
- * Phase II: Validate that every brigade/OG with location_osid is in territory its faction controls.
+ * War phase: Validate that every brigade/OG with location_osid is in territory its faction controls.
  * Invariant: formation.location_osid implies political_controllers[location_osid] === formation.faction.
  */
 

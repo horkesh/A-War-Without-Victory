@@ -38,7 +38,7 @@ function computeFrontSummary(state: LoadedGameState): { static: number; fluid: n
 }
 
 function computeSupplySummary(state: LoadedGameState): { open: number; strained: number; cut: number } {
-  const values = Object.values(state.phaseIiSupplyPressure ?? {});
+  const values = Object.values(state.warPhaseSupplyPressure ?? {});
   let open = 0;
   let strained = 0;
   let cut = 0;

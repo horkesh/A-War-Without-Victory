@@ -36,6 +36,6 @@ IPC (preload exposes `window.awwv`): `loadReplayDialog()`, `getLastReplayContent
 
 - **Load scenario...** (layer panel when in Electron, or File → Load scenario): Opens file picker for a scenario JSON; main process runs scenario init (one week) and sends initial state to the map. Map shows control, formations, turn.
 - **Load state file...** (layer panel, or File → Load state file): Opens file picker for a saved game (e.g. `final_save.json`); main process loads and sends state to the map.
-- **Advance turn** (layer panel): Advances one week using Phase 0 / Phase I / Phase II browser-safe runners; main process sends updated state; map and OOB refresh.
+- **Advance turn** (layer panel): Advances one week using Phase 0 / Peace phase / War phase browser-safe runners; main process sends updated state; map and OOB refresh.
 
 Sim runs in the main process via `dist/desktop/desktop_sim.cjs` (built by `npm run desktop:sim:build`). Data paths use project root when dev, or resources when packaged.

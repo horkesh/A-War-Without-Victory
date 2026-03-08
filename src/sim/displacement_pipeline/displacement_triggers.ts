@@ -39,7 +39,7 @@ export interface DisplacementTriggerReport {
     pressure_eligible_size: number;
     /** Phase H1.7: Count of front-active settlements (for activity diagnostics). */
     front_active_set_size: number;
-    /** Phase H1.7: Count of settlements eligible for displacement trigger (same as front_active_set_size when phase_ii). */
+    /** Phase H1.7: Count of settlements eligible for displacement trigger (same as front_active_set_size when in war phase). */
     displacement_trigger_eligible_size: number;
 }
 
@@ -53,7 +53,7 @@ export interface DisplacementTriggerReport {
  * @param state - Game state (read-only)
  * @param edges - Settlement adjacency edges (contact graph); endpoints may be SIDs or OSIDs
  * @param canonicalToOperational - Optional SID→OSID map; supply when political_controllers is
- *   OSID-keyed and edge endpoints are canonical SIDs (typical Phase II scenario run)
+ *   OSID-keyed and edge endpoints are canonical SIDs (typical War phase scenario run)
  * @returns Per-settlement displacement_delta (bounded [0, PHASE_F_MAX_DELTA_PER_TURN]) and report
  */
 export function evaluateDisplacementTriggers(

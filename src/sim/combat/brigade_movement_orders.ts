@@ -1,5 +1,5 @@
 /**
- * Phase II: Apply brigade movement orders (OSID model).
+ * War phase: Apply brigade movement orders (OSID model).
  *
  * Valid moves: (a) stay; (b) move to adjacent OSID with a controller.
  * On move: update location_osid, reset entrenchment_turns, set movement_state deployed.

@@ -14,7 +14,7 @@ import type {
 import { strictCompare } from './validateGameState.js';
 
 /**
- * Phase I.0: Formation lifecycle state management.
+ * Peace phase.0: Formation lifecycle state management.
  * 
  * Systems Manual §5: "Formations progress through readiness states: Forming, Active, Overextended, and Degraded."
  * Systems Manual §13: "Militia emerge early with low cohesion. Formation of organized brigades requires time, authority, supply, and training."

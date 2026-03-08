@@ -1,5 +1,5 @@
 /**
- * Phase II: Militia garrison computation (Brigade AoR Redesign Phase B).
+ * War phase: Militia garrison computation (Brigade AoR Redesign Phase B).
  *
  * Settlements not covered by a brigade have a militia garrison derived from
  * Phase 0 org penetration and militia_pools. Garrison = base_militia(mun) × org_pen_mult(mun, faction).

@@ -402,8 +402,8 @@ export interface LoadedGameState {
     pendingConvoyDecisions?: PendingConvoyDecisionView[];
     municipalitySupportOrders?: Partial<Record<'RS' | 'RBiH' | 'HRHB', MunicipalitySupportOrderView>>;
     sarajevoTunnelOperational?: boolean;
-    phaseIiSupplyPressure?: Record<string, number>;
-    phaseIiExhaustion?: Record<string, number>;
+    warPhaseSupplyPressure?: Record<string, number>;
+    warPhaseExhaustion?: Record<string, number>;
     player_faction?: string | null;
     rbih_hrhb_war_earliest_turn?: number | null;
     war_alliance_rbih_hrhb?: number | null;

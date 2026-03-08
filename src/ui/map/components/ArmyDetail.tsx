@@ -52,7 +52,7 @@ export function ArmyDetail({ railSlot }: ArmyDetailProps) {
   const totalWIA = casualtyEntries.reduce((sum, c) => sum + (c.wounded ?? 0), 0);
 
   // Exhaustion (faction average)
-  const exhaustionValues = loadedGameState.phaseIiExhaustion?.[faction];
+  const exhaustionValues = loadedGameState.warPhaseExhaustion?.[faction];
   const exhaustionDisplay = exhaustionValues != null
     ? (typeof exhaustionValues === 'number' ? exhaustionValues.toFixed(1) : '—')
     : '—';

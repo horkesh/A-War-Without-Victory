@@ -12,31 +12,31 @@ import { strictCompare } from '../../state/validateGameState.js';
 export const MILITIA_STRENGTH_MIN = 0;
 export const MILITIA_STRENGTH_MAX = 100;
 
-/** Phase I spec §4.2.1: Police × 15, TO × 20, Party × 10, Paramilitary × 25. */
+/** Peace-phase spec §4.2.1: Police × 15, TO × 20, Party × 10, Paramilitary × 25. */
 const WEIGHT_POLICE = 15;
 const WEIGHT_TO = 20;
 const WEIGHT_PARTY = 10;
 const WEIGHT_PARAMILITARY = 25;
 
-/** Phase I spec §4.2.1: Declaration multiplier when own faction declared. */
+/** Peace-phase spec §4.2.1: Declaration multiplier when own faction declared. */
 const DECLARATION_MULTIPLIER_DECLARED = 1.5;
 const DECLARATION_MULTIPLIER_NOT_DECLARED = 1.0;
 
-/** Phase I spec §4.2.3: Base organizational strength growth rate per turn. */
+/** Peace-phase spec §4.2.3: Base organizational strength growth rate per turn. */
 const BASE_GROWTH_RATE = 0.1;
 
-/** Phase I spec §4.2.3: Declaration bonus RS in Serb-majority municipalities. */
+/** Peace-phase spec §4.2.3: Declaration bonus RS in Serb-majority municipalities. */
 const DECLARATION_BONUS_RS = 2;
-/** Phase I spec §4.2.3: Declaration bonus HRHB in Croat-majority municipalities. */
+/** Peace-phase spec §4.2.3: Declaration bonus HRHB in Croat-majority municipalities. */
 const DECLARATION_BONUS_HRHB = 1.5;
 
-/** Phase I spec §4.2.3: External support RS with JNA. */
+/** Peace-phase spec §4.2.3: External support RS with JNA. */
 const EXTERNAL_BONUS_JNA_RS = 1;
-/** Phase I spec §4.2.3: External support HRHB with Croatian (stub: use 0.8 when HRHB declared; no separate Croatian flag in state yet). */
+/** Peace-phase spec §4.2.3: External support HRHB with Croatian (stub: use 0.8 when HRHB declared; no separate Croatian flag in state yet). */
 const EXTERNAL_BONUS_CROATIAN_HRHB = 0.8;
 
 /**
- * Map police_loyalty to 0–1 scalar for a faction (Phase I §4.2.1).
+ * Map police_loyalty to 0–1 scalar for a faction (Peace-phase §4.2.1).
  * RBiH: loyal=1, mixed=0.5, hostile=0. RS/HRHB: hostile=1, mixed=0.5, loyal=0 (police against government).
  */
 function policeLoyaltyScalar(op: OrganizationalPenetration | undefined, faction: FactionId): number {
@@ -71,7 +71,7 @@ function paramilitaryScalar(op: OrganizationalPenetration | undefined, faction: 
 }
 
 /**
- * Base organizational strength (Phase I §4.2.1 formula before declaration and demographic).
+ * Base organizational strength (Peace-phase §4.2.1 formula before declaration and demographic).
  */
 function baseOrganizationalStrength(op: OrganizationalPenetration | undefined, faction: FactionId): number {
     if (!op) return 0;
@@ -82,14 +82,14 @@ function baseOrganizationalStrength(op: OrganizationalPenetration | undefined, f
     return police * WEIGHT_POLICE + to * WEIGHT_TO + party * WEIGHT_PARTY + param * WEIGHT_PARAMILITARY;
 }
 
-/** Declaration multiplier: 1.5 if faction declared, 1.0 else (Phase I §4.2.1). */
+/** Declaration multiplier: 1.5 if faction declared, 1.0 else (Peace-phase §4.2.1). */
 function declarationMultiplier(state: GameState, faction: FactionId): number {
     const f = state.factions.find((x) => x.id === faction);
     return f?.declared ? DECLARATION_MULTIPLIER_DECLARED : DECLARATION_MULTIPLIER_NOT_DECLARED;
 }
 
 /**
- * Demographic support factor (Phase I §4.2.1).
+ * Demographic support factor (Peace-phase §4.2.1).
  * Stub: no municipality majority data in state; use 0.7 (plurality) for all. Document in ledger if needed.
  */
 function demographicSupportFactor(_munId: MunicipalityId, _faction: FactionId, _state: GameState): number {
@@ -97,7 +97,7 @@ function demographicSupportFactor(_munId: MunicipalityId, _faction: FactionId, _
 }
 
 /**
- * Compute militia strength for one municipality, one faction (Phase I §4.2.1).
+ * Compute militia strength for one municipality, one faction (Peace-phase §4.2.1).
  * Bounds [0, 100].
  */
 export function computeMilitiaStrength(
@@ -114,7 +114,7 @@ export function computeMilitiaStrength(
 }
 
 /**
- * Growth per turn for one municipality, one faction (Phase I §4.2.3).
+ * Growth per turn for one municipality, one faction (Peace-phase §4.2.3).
  */
 function militiaGrowthPerTurn(
     op: OrganizationalPenetration | undefined,
@@ -144,7 +144,7 @@ export interface MilitiaEmergenceReport {
 }
 
 /**
- * Update war_militia_strength for all municipalities and factions (Phase I §4.2).
+ * Update war_militia_strength for all municipalities and factions (Peace-phase §4.2).
  * Deterministic order: municipalities sorted by id, then factions sorted by id.
  * Only runs when state.meta.phase === 'war' and after war_start_turn (caller gates).
  */

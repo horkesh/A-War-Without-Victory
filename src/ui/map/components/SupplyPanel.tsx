@@ -41,7 +41,7 @@ function pressureClass(pressure: number): 'open' | 'strained' | 'cut' {
 
 export function SupplyPanel({ state }: SupplyPanelProps) {
   const reserves = state.factionReserves;
-  const pressure = state.phaseIiSupplyPressure ?? {};
+  const pressure = state.warPhaseSupplyPressure ?? {};
 
   // Corridor summary: count factions by pressure class
   let open = 0, strained = 0, cut = 0;

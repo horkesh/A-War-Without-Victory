@@ -8,7 +8,7 @@
  * - Sorted by urgency (highly contested → contested → secure)
  * - Faction-specific headers (FROM/TO per faction)
  *
- * War-phase (Phase I/II) renders operational intelligence briefs
+ * War-phase (Peace/War phase) renders operational intelligence briefs
  * using extractWarData snapshot instead of municipality org-pen.
  */
 
@@ -407,7 +407,7 @@ export class ReportsModal {
     }
 
     /**
-     * Render war-phase (Phase I/II) operational intelligence brief.
+     * Render war-phase (Peace/War phase) operational intelligence brief.
      */
     private renderWarPhase(): HTMLElement {
         const turn = this.gameState.meta.turn;
@@ -458,7 +458,7 @@ export class ReportsModal {
     /**
      * Render the reports modal as HTML element.
      * Phase gate: Phase 0 shows municipality intelligence,
-     * war phases (Phase I/II) show operational intelligence briefs.
+     * war phases (Peace/War phase) show operational intelligence briefs.
      */
     render(): HTMLElement {
         const phase = this.gameState.meta.phase ?? 'peace';

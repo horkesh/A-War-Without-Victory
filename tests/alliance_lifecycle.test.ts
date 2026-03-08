@@ -1,5 +1,5 @@
 /**
- * Phase I §4.8: RBiH–HRHB alliance lifecycle tests.
+ * Peace-phase §4.8: RBiH–HRHB alliance lifecycle tests.
  * Tests: alliance update, ceasefire, Washington Agreement, minority erosion, mixed municipalities.
  * Determinism: all tests verify identical outputs for identical inputs (no randomness).
  */

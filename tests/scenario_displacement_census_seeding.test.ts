@@ -1,5 +1,5 @@
 /**
- * Displacement census seeding: when scenario has Phase II (or Phase I) and census is available,
+ * Displacement census seeding: when scenario has War phase (or Peace phase) and census is available,
  * initial state must have displacement_state seeded from 1991 census (original_population per mun),
  * not default 10,000.
  */
@@ -12,7 +12,7 @@ import { test } from 'node:test';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { createStateFromScenario } from '../src/scenario/scenario_runner.js';
 
-test('Phase II scenario with census seeds displacement_state from 1991 population', async () => {
+test('War phase scenario with census seeds displacement_state from 1991 population', async () => {
     const baseDir = process.cwd();
     const prereq = checkDataPrereqs({ baseDir });
     if (!prereq.ok) {

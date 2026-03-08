@@ -1,5 +1,5 @@
 /**
- * Phase II: Battle resolution engine.
+ * War phase: Battle resolution engine.
  *
  * Replaces the simplistic garrison-based combat with a multi-factor battle system.
  * Every engagement produces detailed casualties, equipment losses, and snap events.
@@ -58,11 +58,11 @@ const DEFENDER_OUTNUMBERED_BONUS = 1.15;
 const MAX_ATTACKERS_PER_TARGET = 3;
 const LINKING_DEFENSE_BONUS = 1.1;
 
-/** Phase I (Battle Damage): casualties per 1.0 damage point; damage = combined_cas / divisor, cap 1.0. */
+/** Peace phase (Battle Damage): casualties per 1.0 damage point; damage = combined_cas / divisor, cap 1.0. */
 const BATTLE_DAMAGE_DIVISOR = 2000;
-/** Phase I: defender power × (1 + BATTLE_DAMAGE_DEFENDER_BONUS × damage). */
+/** Peace phase: defender power × (1 + BATTLE_DAMAGE_DEFENDER_BONUS × damage). */
 const BATTLE_DAMAGE_DEFENDER_BONUS = 0.1;
-/** Phase I: attacker power × (1 - BATTLE_DAMAGE_ATTACKER_PENALTY × damage). */
+/** Peace phase: attacker power × (1 - BATTLE_DAMAGE_ATTACKER_PENALTY × damage). */
 const BATTLE_DAMAGE_ATTACKER_PENALTY = 0.1;
 
 /** Power ratio below which defender wins outright. */
@@ -985,7 +985,7 @@ export function resolveBattleOrders(
             };
         }
 
-        // --- Power ratio & outcome (Phase I: battle damage modifies power) ---
+        // --- Power ratio & outcome (Peace phase: battle damage modifies power) ---
         const battleDamage = Math.min(1, state.battle_damage?.[targetSid] ?? 0);
         const aPower = attackerPower.total_combat_power * (1 - BATTLE_DAMAGE_ATTACKER_PENALTY * battleDamage);
         const dPower = (defenderPower?.total_combat_power ?? 0) * (1 + BATTLE_DAMAGE_DEFENDER_BONUS * battleDamage);
@@ -1125,7 +1125,7 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
             });
         }
 
-        // Phase I: accumulate battle damage (monotonic, cap 1.0)
+        // Peace phase: accumulate battle damage (monotonic, cap 1.0)
         const combinedCas = totalAttackerLoss + totalPersonnelLoss(casualties.defender);
         if (combinedCas > 0) {
             if (!state.battle_damage) state.battle_damage = {};

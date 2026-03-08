@@ -1,5 +1,5 @@
 /**
- * Shared Phase II helpers: adjacency from edges (Set-based) and faction brigades.
+ * Shared War phase helpers: adjacency from edges (Set-based) and faction brigades.
  * Used by bot_corps_ai and bot_brigade_ai_osid for deterministic iteration.
  *
  * Deterministic: sorted keys, no randomness.

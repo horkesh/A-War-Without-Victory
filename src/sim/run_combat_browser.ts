@@ -1,8 +1,8 @@
 /**
- * Browser-safe Phase II turn advance. No Node/fs imports.
- * Used by the warroom when advancing a turn in phase_ii. Performs turn increment only.
- * AoR phase-out: no AoR init; Phase II uses location_osid / OSID fronts.
- * Supply pressure and exhaustion are not run here; for full Phase II simulation use runTurn in Node.
+ * Browser-safe War phase turn advance. No Node/fs imports.
+ * Used by the warroom when advancing a turn in war phase. Performs turn increment only.
+ * AoR phase-out: no AoR init; War phase uses location_osid / OSID fronts.
+ * Supply pressure and exhaustion are not run here; for full War phase simulation use runTurn in Node.
  */
 
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
@@ -20,7 +20,7 @@ export interface PhaseIITurnReport {
 }
 
 /**
- * Run one Phase II turn in the browser: increment turn only.
+ * Run one War phase turn in the browser: increment turn only.
  * Returns new state and report; does not mutate the argument.
  */
 export function runPhaseIITurn(

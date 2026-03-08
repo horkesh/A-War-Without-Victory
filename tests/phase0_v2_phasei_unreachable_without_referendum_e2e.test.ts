@@ -1,8 +1,8 @@
 /**
- * Phase B1.1 V2: Phase I unreachable without referendum — end-to-end via runOneTurn.
+ * Phase B1.1 V2: Peace phase unreachable without referendum — end-to-end via runOneTurn.
  *
  * Start in phase_0 with referendum_held false. Run multiple turns.
- * Assert phase remains phase_0; no Phase I entry unless referendum_held AND current_turn == war_start_turn.
+ * Assert phase remains phase_0; no Peace phase entry unless referendum_held AND current_turn == war_start_turn.
  */
 
 import assert from 'node:assert';

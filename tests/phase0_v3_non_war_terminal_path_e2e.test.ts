@@ -2,7 +2,7 @@
  * Phase B1.1 V3: Non-war terminal path — end-to-end via runOneTurn.
  *
  * Configure state so referendum eligibility occurs but referendum is not held within deadline.
- * Run until after referendum_deadline_turn. Assert non-war terminal and Phase I blocked.
+ * Run until after referendum_deadline_turn. Assert non-war terminal and Peace phase blocked.
  */
 
 import assert from 'node:assert';

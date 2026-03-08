@@ -1,7 +1,7 @@
 /**
  * War Headline Templates — picks the best newspaper headline from TurnEvents.
  *
- * Used during Phase I / Phase II to generate faction-framed war communiques.
+ * Used during Peace phase / War phase to generate faction-framed war communiques.
  * Priority ordering follows the TurnEvent priority field (lower = more important).
  *
  * Fog framing: own losses downplayed, enemy losses inflated,

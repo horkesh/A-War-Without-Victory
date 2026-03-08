@@ -1,5 +1,5 @@
 /**
- * Phase II: OSID-based attack resolution per Attack Resolution Formula Spec.
+ * War phase: OSID-based attack resolution per Attack Resolution Formula Spec.
  *
  * Formulas: §2–§5, §9 state, §10 constants (docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md).
  * One attack resolution = at most one OSID control flip (Engine Invariants §6).

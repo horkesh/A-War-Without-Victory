@@ -1,5 +1,5 @@
 /**
- * Phase I Overhaul Phase E: Tests for TO terrain combat modifiers.
+ * Peace-phase Overhaul Phase E: Tests for TO terrain combat modifiers.
  *
  * Tests cover:
  *  1.  getEquipmentRatio: RBiH detachment returns 0.15

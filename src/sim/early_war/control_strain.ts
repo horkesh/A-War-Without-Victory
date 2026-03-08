@@ -7,23 +7,23 @@ import type { SettlementRecord } from '../../map/settlements.js';
 import type { FactionId, GameState, MunicipalityId, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-/** Phase I §4.5.3: Exhaustion rate += Faction_Total_Control_Strain × 0.0001 (every 10k strain = +1% exhaustion/turn). */
+/** Peace-phase §4.5.3: Exhaustion rate += Faction_Total_Control_Strain × 0.0001 (every 10k strain = +1% exhaustion/turn). */
 const EXHAUSTION_COUPLING_FACTOR = 0.0001;
-/** Phase I §4.5.3: Faction_Authority -= Faction_Total_Control_Strain × 0.000005 (0-1 scale); state uses 0-100 so ×0.0005. */
+/** Peace-phase §4.5.3: Faction_Authority -= Faction_Total_Control_Strain × 0.000005 (0-1 scale); state uses 0-100 so ×0.0005. */
 const AUTHORITY_PENALTY_PER_STRAIN = 0.0005;
 
-/** Phase I §4.5.1: Time factor cap. */
+/** Peace-phase §4.5.1: Time factor cap. */
 const TIME_FACTOR_CAP = 1.0;
-/** Phase I §4.5.1: Time factor rate per turn since war start. */
+/** Peace-phase §4.5.1: Time factor rate per turn since war start. */
 const TIME_FACTOR_RATE = 0.05;
-/** Phase I §4.5.1: Time factor base. */
+/** Peace-phase §4.5.1: Time factor base. */
 const TIME_FACTOR_BASE = 0.5;
 
 /** Stub: hostile population in thousands when no census. Deterministic. */
 const HOSTILE_POP_STUB = 1;
 /** Stub: demographic hostility factor when no census (significant minority band). */
 const DEMO_FACTOR_STUB = 0.4;
-/** Control method multiplier: militia control (Phase I §4.5.1). */
+/** Control method multiplier: militia control (Peace-phase §4.5.1). */
 const CONTROL_METHOD_MILITIA = 1.0;
 
 export interface ControlStrainReport {
@@ -75,21 +75,21 @@ export function getMunicipalityController(state: GameState, sids: SettlementId[]
     return entries[0]![0] as FactionId;
 }
 
-/** Authority multiplier (Phase I §4.5.1): (1.0 - Faction_Authority_Score). State authority is 0-100. */
+/** Authority multiplier (Peace-phase §4.5.1): (1.0 - Faction_Authority_Score). State authority is 0-100. */
 function authorityMultiplier(authority0to100: number): number {
     const score = Math.max(0, Math.min(100, authority0to100)) / 100;
     return Math.max(0, 1 - score);
 }
 
-/** Phase I time factor: 0.50 + (Turn_Number_Since_War_Start × 0.05), cap 1.0. */
-function phaseITimeFactor(turn: number, warStartTurn: number | null | undefined): number {
+/** Peace phase time factor: 0.50 + (Turn_Number_Since_War_Start × 0.05), cap 1.0. */
+function peacePhaseTimeFactor(turn: number, warStartTurn: number | null | undefined): number {
     if (warStartTurn == null || turn < warStartTurn) return TIME_FACTOR_BASE;
     const turnsSince = turn - warStartTurn;
     return Math.min(TIME_FACTOR_CAP, TIME_FACTOR_BASE + turnsSince * TIME_FACTOR_RATE);
 }
 
 /**
- * Run Phase I control strain accumulation and apply authorized effects (Phase I §4.5).
+ * Run Peace phase control strain accumulation and apply authorized effects (Peace-phase §4.5).
  * Strain accumulates per municipality; faction totals drive exhaustion coupling and authority degradation.
  * Does not alter supply; exhaustion change is per spec §4.5.3.
  */
@@ -118,7 +118,7 @@ export function runControlStrain(
         const faction = state.factions?.find((f) => f.id === controller);
         const authority0to100 = faction?.profile?.authority ?? 50;
         const authMult = authorityMultiplier(authority0to100);
-        const timeFactor = phaseITimeFactor(turn, warStartTurn);
+        const timeFactor = peacePhaseTimeFactor(turn, warStartTurn);
         const increment =
             HOSTILE_POP_STUB * DEMO_FACTOR_STUB * authMult * CONTROL_METHOD_MILITIA * timeFactor;
         const current = strainByMun[munId] ?? 0;

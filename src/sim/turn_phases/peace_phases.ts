@@ -39,8 +39,8 @@ import type { NamedPhase, TurnContext } from '../turn_pipeline_types.js';
 import { getSiegeStateCache, setSiegeStateCache, loadRecruitmentCatalog } from '../turn_pipeline_types.js';
 
 /**
- * Phase C: Phase I entry gating (Phase_I_Specification_v0_4_0.md; ROADMAP Phase C).
- * Phase I execution occurs only when referendum_held and current_turn >= war_start_turn.
+ * Phase C: Peace phase entry gating (Phase_I_Specification_v0_4_0.md; ROADMAP Phase C).
+ * Peace phase execution occurs only when referendum_held and current_turn >= war_start_turn.
  * Phase 0 must remain the only runner before war_start_turn; use state pipeline for phase_0.
  */
 export function isEarlyWarAllowed(state: GameState): boolean {
@@ -55,7 +55,7 @@ export function assertNoAoRInEarlyWar(state: GameState): void {
     const factions = state.factions ?? [];
     for (const faction of factions) {
         if (faction.areasOfResponsibility && faction.areasOfResponsibility.length > 0) {
-            throw new Error(`Phase I forbids AoR assignment; faction ${faction.id} has AoR entries`);
+            throw new Error(`Peace phase forbids AoR assignment; faction ${faction.id} has AoR entries`);
         }
     }
 }
@@ -197,7 +197,7 @@ export const peacePhases: NamedPhase[] = [
     {
         name: 'early-war-bot-posture',
         run: async (context) => {
-            // Phase I bot: assign posture (hold/probe/push) to front edges for bot-controlled factions
+            // Peace phase bot: assign posture (hold/probe/push) to front edges for bot-controlled factions
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
                 ? context.input.settlementEdges
@@ -215,7 +215,7 @@ export const peacePhases: NamedPhase[] = [
     {
         name: 'early-alliance-update',
         run: (context) => {
-            // Phase I §4.8: Initialize rbih_hrhb_state if not present (backward compatible)
+            // Peace-phase §4.8: Initialize rbih_hrhb_state if not present (backward compatible)
             ensureRbihHrhbState(context.state);
             // Update mixed municipalities list
             updateMixedMunicipalitiesList(context.state);
@@ -228,14 +228,14 @@ export const peacePhases: NamedPhase[] = [
     {
         name: 'early-ceasefire-check',
         run: (context) => {
-            // Phase I §4.8: Evaluate bilateral ceasefire preconditions
+            // Peace-phase §4.8: Evaluate bilateral ceasefire preconditions
             context.report.ceasefire_check = checkAndApplyCeasefire(context.state);
         }
     },
     {
         name: 'early-washington-check',
         run: (context) => {
-            // Phase I §4.8: Evaluate Washington Agreement preconditions (requires ceasefire state)
+            // Peace-phase §4.8: Evaluate Washington Agreement preconditions (requires ceasefire state)
             context.report.washington_check = checkAndApplyWashington(context.state);
         }
     },
@@ -249,8 +249,8 @@ export const peacePhases: NamedPhase[] = [
     {
         name: 'early-control-flip',
         run: (context) => {
-            // Canonical path: Phase I no longer performs control flips.
-            // Political control changes are resolved in Phase II attack resolution only.
+            // Canonical path: Peace phase no longer performs control flips.
+            // Political control changes are resolved in War phase attack resolution only.
             if (context.state.meta.phase !== 'war') return;
             context.report.control_flip = {
                 flips: [],
@@ -262,7 +262,7 @@ export const peacePhases: NamedPhase[] = [
     {
         name: 'bilateral-flip-count',
         run: (context) => {
-            // Phase I §4.8: Count bilateral RBiH–HRHB flips (feeds next turn's alliance update)
+            // Peace-phase §4.8: Count bilateral RBiH–HRHB flips (feeds next turn's alliance update)
             const flips = context.report.control_flip?.flips ?? [];
             context.report.bilateral_flip_count = countBilateralFlips(context.state, flips);
         }
@@ -327,7 +327,7 @@ export const peacePhases: NamedPhase[] = [
     {
         name: 'minority-erosion',
         run: async (context) => {
-            // Phase I §4.8: Minority militia erosion in mixed municipalities
+            // Peace-phase §4.8: Minority militia erosion in mixed municipalities
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const byMun = buildSettlementsByMun(graph.settlements);
             context.report.minority_erosion_report = runMinorityErosion(context.state, byMun);

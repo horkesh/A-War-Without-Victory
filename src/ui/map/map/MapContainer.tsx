@@ -1329,7 +1329,7 @@ export function MapContainer() {
         controlGeoJson,
         loadedGameState.controlBySettlement,
         loadedGameState.factionReserves,
-        loadedGameState.phaseIiSupplyPressure
+        loadedGameState.warPhaseSupplyPressure
       );
       if (cancelled || !mapRef.current) return;
       const m = mapRef.current;

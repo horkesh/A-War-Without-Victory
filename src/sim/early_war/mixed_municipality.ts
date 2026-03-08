@@ -1,5 +1,5 @@
 /**
- * Phase I §4.8: Allied mixed municipality tracking + allied defense bonus vs RS.
+ * Peace-phase §4.8: Allied mixed municipality tracking + allied defense bonus vs RS.
  *
  * When RS attacks a mixed mun and the alliance is above ALLIED_THRESHOLD,
  * the allied faction's militia contributes to defense:

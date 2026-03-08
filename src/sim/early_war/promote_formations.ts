@@ -1,5 +1,5 @@
 /**
- * Phase I Overhaul Phase D: Battalion → Brigade promotion.
+ * Peace-phase Overhaul Phase D: Battalion → Brigade promotion.
  *
  * Promotes militia-kind formations that have reached brigade-readiness thresholds:
  *   - personnel >= MIN_BRIGADE_THRESHOLD (1500)

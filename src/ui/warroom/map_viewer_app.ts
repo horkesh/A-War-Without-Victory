@@ -568,16 +568,16 @@ async function main(): Promise<void> {
         const demoBody = hasDemographics
             ? `<p><strong>Majority (1991)</strong> ${escapeHtml(props!.majority_ethnicity!)}</p>`
             : '<p class="panel-phase">Settlement-level / municipality-derived (when available)</p>';
-        const militaryBody = '<p class="panel-phase">Assigned brigade, corps, exhaustion %, supply (Phase II)</p>';
-        const stabilityBody = '<p class="panel-phase">Stability score, control strain (Phase I+)</p>';
+        const militaryBody = '<p class="panel-phase">Assigned brigade, corps, exhaustion %, supply (War phase)</p>';
+        const stabilityBody = '<p class="panel-phase">Stability score, control strain (Peace phase+)</p>';
 
         panelSections.innerHTML = [
             sectionHtml('SETTLEMENT', settlementBody),
             sectionHtml('MUNICIPALITY', munBody),
             sectionHtml('CONTROL', controlBody),
             sectionHtml('DEMOGRAPHICS', demoBody),
-            sectionHtml('MILITARY (Phase II)', militaryBody, true),
-            sectionHtml('STABILITY (Phase I+)', stabilityBody, true)
+            sectionHtml('MILITARY (War phase)', militaryBody, true),
+            sectionHtml('STABILITY (Peace phase+)', stabilityBody, true)
         ].join('');
 
         panel.style.borderLeftColor = SIDE_BORDER_COLORS[controller] ?? SIDE_BORDER_COLORS['null'];

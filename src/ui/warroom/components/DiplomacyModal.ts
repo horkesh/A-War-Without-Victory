@@ -1,7 +1,7 @@
 /**
- * DiplomacyModal -- Faction-specific diplomacy modal for Phase I/II.
+ * DiplomacyModal -- Faction-specific diplomacy modal for Peace/War phase.
  *
- * Replaces the Phase I+ placeholder in ClickableRegionManager.ts.
+ * Replaces the Peace phase+ placeholder in ClickableRegionManager.ts.
  * Each faction gets a tailored view:
  *   RS   -> "Belgrade Channel" (patron status, negotiation momentum)
  *   RBiH -> "Alliance & International" (alliance, ceasefire/Washington trackers, embargo)

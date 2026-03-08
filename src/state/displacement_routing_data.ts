@@ -1,7 +1,7 @@
 /**
  * Per-municipality displacement routing tables (Phase M4, 2026-03-01).
  * Replaces region-specific arrays with comprehensive routing for all 8 regions × 3 ethnicities.
- * Source: docs/30_planning/20260228_phase_ii_mechanics_design.md §Mechanic 8.
+ * Source: docs/30_planning/20260228_war_phase_mechanics_design.md §Mechanic 8.
  *
  * Design principles:
  * 1. Every municipality gets origin-specific routing for each displaced ethnicity.

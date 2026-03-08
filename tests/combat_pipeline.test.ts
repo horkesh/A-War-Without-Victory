@@ -1,7 +1,7 @@
 /**
- * Phase D Step 7: Phase II turn structure integration tests.
- * - Pipeline order for phase_ii: phase-ii-consolidation runs after supply-resolution.
- * - Regression: Phase I behavior unchanged (Phase I run reports only phase-i-* phases).
+ * Phase D Step 7: War phase turn structure integration tests.
+ * - Pipeline order for war phase: phase-ii-consolidation runs after supply-resolution.
+ * - Regression: Peace phase behavior unchanged (Peace phase run reports only phase-i-* phases).
  */
 
 import assert from 'node:assert';
@@ -66,7 +66,7 @@ function minimalPhaseIState(): GameState {
     };
 }
 
-test('Phase II runTurn includes phase-ii-consolidation after supply-resolution', async () => {
+test('War phase runTurn includes phase-ii-consolidation after supply-resolution', async () => {
     const state = minimalPhaseIIState();
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { report } = await runTurn(state, { seed: 'pipeline-ii', settlementEdges: edges });

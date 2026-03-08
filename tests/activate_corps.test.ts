@@ -1,8 +1,8 @@
 /**
- * Phase I Overhaul Phase C: activateCorpsForTurn tests.
+ * Peace-phase Overhaul Phase C: activateCorpsForTurn tests.
  *
  * Verifies:
- * 1. bottom_up, turn 0: RS corps exist (created at Phase I entry), RBiH/HRHB corps do NOT exist.
+ * 1. bottom_up, turn 0: RS corps exist (created at Peace phase entry), RBiH/HRHB corps do NOT exist.
  * 2. bottom_up, turn 10: HRHB corps appear (available_from: 10).
  * 3. bottom_up, turn 24: RBiH corps appear (available_from: 24).
  * 4. Idempotency: calling twice at same turn does not create duplicate corps.
@@ -75,7 +75,7 @@ const SAMPLE_BRIGADES: OobBrigade[] = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Minimal GameState for Phase I with bottom_up mode. */
+/** Minimal GameState for Peace phase with bottom_up mode. */
 function makeBottomUpState(turn = 0): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
@@ -205,7 +205,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
 
     it('idempotency: calling twice at turn 24 does not create duplicate corps', () => {
         const state = makeBottomUpState(24);
-        // Pre-seed RS corps as createOobFormations would at Phase I entry
+        // Pre-seed RS corps as createOobFormations would at Peace phase entry
         for (const c of RS_CORPS_OOB) {
             state.formations![c.id] = {
                 id: c.id as import('../src/state/game_state.js').FormationId,

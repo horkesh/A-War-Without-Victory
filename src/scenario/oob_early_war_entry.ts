@@ -1,6 +1,6 @@
 /**
- * Phase I entry: OOB slot creation and eligibility.
- * OOB formations (brigades, corps) are created once when entering Phase I, gated by
+ * Peace phase entry: OOB slot creation and eligibility.
+ * OOB formations (brigades, corps) are created once when entering Peace phase, gated by
  * faction presence in home mun (and not fragmented).
  */
 
@@ -138,7 +138,7 @@ function convertOobDecorations(b: OobBrigade): BrigadeDecoration[] {
 }
 
 /**
- * Create OOB formations (corps then brigades) at Phase I entry. Only creates slots when
+ * Create OOB formations (corps then brigades) at Peace phase entry. Only creates slots when
  * faction has presence in home/hq mun and formation id does not already exist. Idempotent.
  * Mutates state.formations. Uses municipalityHqSettlement to set hq_sid on each formation.
  * When population1991ByMun is provided, brigades in muns where faction's 1991 population is
@@ -159,7 +159,7 @@ export function createOobFormations(
     }
     const currentTurn = state.meta.turn;
 
-    // Phase I Overhaul (bottom_up mode): only RS corps and army_hq entries are created at turn 0.
+    // Peace-phase Overhaul (bottom_up mode): only RS corps and army_hq entries are created at turn 0.
     // RBiH and HRHB corps are deferred to activateCorpsForTurn() at their available_from turns.
     // RS brigades still come from OOB at turn 0 (VRS JNA exception).
     // RBiH and HRHB brigades are never created here — they emerge as TO detachments from pools.

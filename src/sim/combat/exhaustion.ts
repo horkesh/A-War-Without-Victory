@@ -1,5 +1,5 @@
 /**
- * Phase D Step 5: Exhaustion accumulation for Phase II (Mid-War).
+ * Phase D Step 5: Exhaustion accumulation for War phase (Mid-War).
  * Exhaustion is irreversible (Engine Invariants §8); degrades effectiveness; does not flip control.
  */
 

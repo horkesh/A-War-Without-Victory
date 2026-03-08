@@ -1,5 +1,5 @@
 /**
- * Phase I pool population tests (plan: militia_and_brigade_formation_system).
+ * Peace phase pool population tests (plan: militia_and_brigade_formation_system).
  * - Pools created from war_militia_strength with composite key mun_id:faction.
  * - Displaced contribution adds to controller's pool.
  * - Deterministic: same state -> same report and pool state.

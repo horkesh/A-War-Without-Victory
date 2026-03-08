@@ -109,7 +109,7 @@ function isPoliticalControllersAlreadyOsidKeyed(
  * If operational data is present and state.political_controllers is SID-keyed (at least one key not an OSID
  * and that key is a known canonical SID in the map), promote to OSID-keyed and mutate state.
  * Skips when keys look like test fixtures (e.g. S1, S2 not in map). No-op when already OSID-keyed.
- * Call after load (e.g. first turn) before running Phase I/II steps.
+ * Call after load (e.g. first turn) before running Peace/War phase steps.
  */
 export function migratePoliticalControllersToOsidIfNeeded(
     state: GameState,

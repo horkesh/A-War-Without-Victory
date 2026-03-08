@@ -62,7 +62,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'ivp_consequences_active',
     'enclaves',
     'sarajevo_state',
-    // Phase I (Early War) state (Phase_I_Specification_v0_3_0.md)
+    // Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md)
     'war_consolidation_until',
     'war_militia_strength',
     'war_control_strain',
@@ -71,7 +71,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'rbih_hrhb_state',
     'war_displacement_initiated',
     'coercion_pressure_by_municipality',
-    // Phase II (Mid-War / Consolidation) state (Phase D)
+    // War phase (Mid-War / Consolidation) state (Phase D)
     'war_supply_pressure',
     'war_exhaustion',
     'war_exhaustion_local',
@@ -81,7 +81,7 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'general_supply_reserve',
     'heavy_munitions_reserve',
     'siege_turn_counters',
-    // Brigade Operations System state (Phase II)
+    // Brigade Operations System state (War phase)
     'brigade_front_assignment',
     'corps_front_edges',
     'corps_fallback_front_edges',

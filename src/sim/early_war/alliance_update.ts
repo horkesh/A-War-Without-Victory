@@ -1,5 +1,5 @@
 /**
- * Phase I §4.8: RBiH–HRHB alliance update (per-turn deterministic).
+ * Peace-phase §4.8: RBiH–HRHB alliance update (per-turn deterministic).
  *
  * Drivers:
  *   (a) appeasement:  +APPEASEMENT_BASE_RATE when no bilateral incidents
@@ -111,7 +111,7 @@ export function ensureRbihHrhbState(state: GameState, initValue?: number, initMi
 }
 
 /**
- * Per-turn alliance value update (Phase I §4.8). Pure function of state; no randomness.
+ * Per-turn alliance value update (Peace-phase §4.8). Pure function of state; no randomness.
  * Must run BEFORE control flip (so this turn's threshold governs flip eligibility).
  * Uses bilateral_flips_this_turn from PREVIOUS turn (one-turn-delayed feedback).
  */
@@ -152,7 +152,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
 
     // Apply delta, clamp to [-1, 1]
     let newValue = Math.max(-1, Math.min(1, previousValue + delta));
-    // Phase I §4.8 (historical fidelity): no open war before rbih_hrhb_war_earliest_turn (e.g. Oct 1992 for Apr 1992 start).
+    // Peace-phase §4.8 (historical fidelity): no open war before rbih_hrhb_war_earliest_turn (e.g. Oct 1992 for Apr 1992 start).
     const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
     if (state.meta.turn < earliestTurn) {
         newValue = Math.max(newValue, ALLIED_THRESHOLD);

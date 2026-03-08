@@ -1,5 +1,5 @@
 /**
- * Phase D Step 4: Supply pressure for Phase II (Mid-War).
+ * Phase D Step 4: Supply pressure for War phase (Mid-War).
  * Supply constrains effectiveness; does not regenerate freely (Engine Invariants §4).
  * Pressure from overextension (front segment count) and isolation (critical supply).
  */

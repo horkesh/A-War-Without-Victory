@@ -2,7 +2,7 @@
  * Militia/brigade rework tests (MILITIA_BRIGADE_SYSTEM_RESEARCH_AND_REWORK_PLAN).
  * - Spawn at 800 (MIN_BRIGADE_SPAWN); new brigade has personnel 800.
  * - Fragmented mun never spawns.
- * - Minority decay runs only in first 3 turns of Phase I and reduces pool.
+ * - Minority decay runs only in first 3 turns of Peace phase and reduces pool.
  */
 
 import assert from 'node:assert';
@@ -87,7 +87,7 @@ test('fragmented mun never spawns', () => {
     assert.strictEqual(report.formations_created, 0, 'fragmented mun must not spawn');
 });
 
-test('minority decay runs only in first 3 turns of Phase I and reduces pool', () => {
+test('minority decay runs only in first 3 turns of Peace phase and reduces pool', () => {
     const state = baseState();
     state.meta.phase = 'war';
     state.meta.war_start_turn = 10;
@@ -118,7 +118,7 @@ test('minority decay runs only in first 3 turns of Phase I and reduces pool', ()
     assert.ok(state.militia_pools![key].available < 1000);
 });
 
-test('minority decay does not run outside first 3 turns of Phase I', () => {
+test('minority decay does not run outside first 3 turns of Peace phase', () => {
     const state = baseState();
     state.meta.phase = 'war';
     state.meta.war_start_turn = 10;

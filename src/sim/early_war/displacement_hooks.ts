@@ -13,7 +13,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import type { ControlFlipReport } from './control_flip.js';
 export type { MunicipalityPopulation1991Map } from '../../state/population_share.js';
 
-/** Phase I §4.4.1: displacement begins when Hostile_Population_Share > 0.30. */
+/** Peace-phase §4.4.1: displacement begins when Hostile_Population_Share > 0.30. */
 const HOSTILE_SHARE_THRESHOLD = 0.3;
 
 /** When no census data, assume sufficient hostile share to trigger (per legacy stub behavior). */
@@ -24,7 +24,7 @@ export interface DisplacementHooksReport {
     by_mun: Array<{ mun_id: MunicipalityId; initiated_turn: number }>;
 }
 
-/** Compute hostile share for Phase I hooks from census (losing-faction aligned share). */
+/** Compute hostile share for Peace phase hooks from census (losing-faction aligned share). */
 function getHostileShare(
     munId: MunicipalityId,
     fromFaction: FactionId | null,
@@ -39,7 +39,7 @@ function getHostileShare(
 }
 
 /**
- * Create displacement initiation hooks for municipalities that flipped and meet trigger (Phase I §4.4.1).
+ * Create displacement initiation hooks for municipalities that flipped and meet trigger (Peace-phase §4.4.1).
  * Does not alter displacement_state or any population totals.
  * Hostile share computed from census when available; deterministic fallback when not.
  */

@@ -40,7 +40,7 @@ export function deriveRearPoliticalControlZones(
 ): PhaseERearZoneDescriptor {
     const result: PhaseERearZoneDescriptor = { settlement_ids: [] };
 
-    // Phase E only runs in phase_ii
+    // Phase E only runs in war phase
     if (state.meta?.phase !== 'war') {
         return result;
     }

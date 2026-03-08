@@ -28,7 +28,7 @@ const EQUIPMENT_TYPE_WEIGHT: Readonly<Record<string, number>> = {
 };
 
 /**
- * Controlled RS-only Phase II manpower accrual for pending mandatory brigades.
+ * Controlled RS-only War phase manpower accrual for pending mandatory brigades.
  * Prevents historical RS brigades from stalling permanently below mandatory spawn floor.
  */
 const RS_MANDATORY_MOBILIZATION_PER_TURN = 120;

@@ -33,7 +33,7 @@ export function computeEngagementLevel(signal: EngagementSignal): number {
 
 /**
  * Apply baseline-ops exhaustion delta to state (war_exhaustion and profile.exhaustion).
- * Monotonic, irreversible. Phase II exhaustion is unbounded; we add delta only (no clamp to 1).
+ * Monotonic, irreversible. War phase exhaustion is unbounded; we add delta only (no clamp to 1).
  * H1.11: optional scalar multiplies delta (harness-only; default 1).
  */
 export function applyBaselineOpsExhaustion(

@@ -2,7 +2,7 @@
  * Phase F Step 6: Pipeline integration tests.
  * - phase-f-displacement runs only when meta.phase === 'war'.
  * - Pipeline order: phase-f-displacement after phase-e-rear-zone-derivation.
- * - No displacement step in phase_0 / phase_i.
+ * - No displacement step in phase_0 / peace phase.
  */
 
 import assert from 'node:assert';
@@ -81,8 +81,8 @@ test('phase_ii runTurn includes phase-f-displacement after phase-e-rear-zone-der
     const phaseNames = report.phases.map((p) => p.name);
     const idxPhaseF = phaseNames.indexOf('phase-f-displacement');
     const idxRear = phaseNames.indexOf('phase-e-rear-zone-derivation');
-    assert.ok(idxPhaseF >= 0, 'phase-f-displacement must run in phase_ii');
-    assert.ok(idxRear >= 0, 'phase-e-rear-zone-derivation must run in phase_ii');
+    assert.ok(idxPhaseF >= 0, 'phase-f-displacement must run in war phase');
+    assert.ok(idxRear >= 0, 'phase-e-rear-zone-derivation must run in war phase');
     assert.ok(idxPhaseF > idxRear, 'phase-f-displacement must run after phase-e-rear-zone-derivation');
     assert.ok(report.phase_f_displacement?.trigger_report != null);
     assert.ok(report.phase_f_displacement?.capacity_report != null);

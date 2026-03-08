@@ -44,7 +44,7 @@ export function getMaxBrigadesPerMun(mun_id: MunicipalityId): number {
 export const MIN_BRIGADE_SPAWN = 800;
 
 /**
- * Faction-specific initial brigade personnel at Phase I OOB creation (Mobilization & Force Growth Part 3).
+ * Faction-specific initial brigade personnel at Peace phase OOB creation (Mobilization & Force Growth Part 3).
  * RS (VRS): JNA inheritance → larger initial brigades; RBiH/HRHB: militia/TO origin → standard.
  */
 export const FACTION_INITIAL_PERSONNEL: Record<string, number> = {
@@ -106,7 +106,7 @@ export function isEligibleForReinforcement(f: { kind?: string; readiness?: strin
 /** Brigade can grow from pool up to this size; only then do we form a second brigade (if pool still has ≥ MIN_BRIGADE_SPAWN). Tuned for historical personnel band (~3k per brigade at full strength). */
 export const MAX_BRIGADE_PERSONNEL = 3_000;
 
-/** Phase II hard operational frontage cap (settlements) per brigade. */
+/** War phase hard operational frontage cap (settlements) per brigade. */
 export const BRIGADE_OPERATIONAL_FRONTAGE_CAP = 48;
 
 // --- Militia garrison (Brigade AoR Redesign Phase B) ---
@@ -170,7 +170,7 @@ export function getFactionReinforcementMult(faction: string, turn: number, timel
  */
 export const WIA_TRICKLE_RATE = 80;
 
-// --- Phase I Overhaul: proto-brigade tier thresholds ---
+// --- Peace-phase Overhaul: proto-brigade tier thresholds ---
 /** Minimum pool to spawn a TO detachment (replaces MIN_BRIGADE_SPAWN for bottom-up lifecycle). */
 export const MIN_DETACHMENT_SPAWN = 100;
 /** Personnel threshold for automatic detachment→battalion promotion. */
@@ -180,7 +180,7 @@ export const MIN_BRIGADE_THRESHOLD = 1500;
 /** Max militia-kind formations per municipality per faction (prevents runaway spawning). */
 export const MAX_TO_PER_MUN = 5;
 
-// --- Phase I Overhaul Phase D: promotion thresholds ---
+// --- Peace-phase Overhaul Phase D: promotion thresholds ---
 /** Minimum cohesion [0,100] required for a militia formation to be eligible for brigade promotion. */
 export const PROMOTION_COHESION_THRESHOLD = 40;
 /** Minimum turns a militia formation must have existed before it can promote to brigade. */
@@ -190,7 +190,7 @@ export const PROMOTION_COHESION_BONUS = 10;
 
 /**
  * Returns the formation tier based on kind and personnel count.
- * Used by Phase I Overhaul phases D–F for promotion logic and combat tier scaling.
+ * Used by Peace-phase Overhaul phases D–F for promotion logic and combat tier scaling.
  * Pure and deterministic — no side effects.
  */
 export function getFormationTier(f: { kind?: string; personnel?: number }): 'detachment' | 'battalion' | 'brigade' {
@@ -201,7 +201,7 @@ export function getFormationTier(f: { kind?: string; personnel?: number }): 'det
     return 'detachment';
 }
 
-// --- Phase I Overhaul: siege mobilization ratios ---
+// --- Peace-phase Overhaul: siege mobilization ratios ---
 /** Full siege (≥90% surrounded): pool growth multiplier 3.0×. */
 export const SIEGE_RATIO_FULL = 0.90;
 /** Mostly surrounded (≥75%): pool growth multiplier 2.0×, caps lifted. */

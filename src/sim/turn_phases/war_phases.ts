@@ -290,7 +290,7 @@ export const warPhases: NamedPhase[] = [
     {
         name: 'update-formation-lifecycle',
         run: async (context) => {
-            // Phase I.0: Formation lifecycle state management
+            // Peace phase.0: Formation lifecycle state management
             // Runs early so brigades transition forming→active before bot AI evaluates posture.
             const fatigueReport = context.report.formation_fatigue;
             if (!fatigueReport) return;
@@ -323,7 +323,7 @@ export const warPhases: NamedPhase[] = [
             }
         }
     },
-    // --- Brigade Operations Pipeline (Phase II only) ---
+    // --- Brigade Operations Pipeline (War phase only) ---
     {
         name: 'formation-hq-relocation',
         run: async (context) => {
@@ -663,7 +663,7 @@ export const warPhases: NamedPhase[] = [
             const factions = (context.state.factions ?? []).map(f => f.id)
                 .filter(fid => playerFaction == null || fid !== playerFaction);
 
-            // Phase II bot brigade orders: OSID-only (no brigade_aor). When operational data present, run OSID AI.
+            // War phase bot brigade orders: OSID-only (no brigade_aor). When operational data present, run OSID AI.
             const od = getOperationalData(context);
             if (od?.opData?.operationalToCanonical && od?.edges?.length) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
@@ -1094,7 +1094,7 @@ export const warPhases: NamedPhase[] = [
     {
         name: 'alliance-update',
         run: (context) => {
-            // RBiH–HRHB alliance dynamics: must run in Phase II too, or alliance never
+            // RBiH–HRHB alliance dynamics: must run in War phase too, or alliance never
             // degrades and HVO never enters bilateral war with RBiH.
             // Uses same functions as phase-i-alliance-update.
             ensureRbihHrhbState(context.state);

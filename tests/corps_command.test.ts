@@ -1,5 +1,5 @@
 /**
- * Tests for Phase II corps command layer (Stage 5) and operational groups (Stage 6).
+ * Tests for War phase corps command layer (Stage 5) and operational groups (Stage 6).
  * Validates corps initialization, stance resolution, army overrides,
  * operation phase advancement, OG activation/lifecycle, and pressure bonuses.
  */

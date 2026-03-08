@@ -265,7 +265,7 @@ export function normalizeScenario(raw: unknown): Scenario {
     const bot_diagnostics = o.bot_diagnostics === true;
     const victory_conditions = normalizeVictoryConditions(o.victory_conditions);
 
-    // Phase I §4.8: RBiH–HRHB alliance dynamics config
+    // Peace-phase §4.8: RBiH–HRHB alliance dynamics config
     const init_alliance_rbih_hrhb =
         typeof o.init_alliance_rbih_hrhb === 'number' && Number.isFinite(o.init_alliance_rbih_hrhb)
             ? Math.max(-1, Math.min(1, o.init_alliance_rbih_hrhb))
@@ -304,7 +304,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             ? Math.max(0, o.max_recruits_per_faction_per_turn)
             : undefined;
 
-    // Phase I→II: optional initial entrenchment at transition (Phase II Spec §4, §6).
+    // Peace→War phase: optional initial entrenchment at transition (War phase Spec §4, §6).
     const war_entrenchment_init_turns =
         typeof o.war_entrenchment_init_turns === 'number' &&
         Number.isInteger(o.war_entrenchment_init_turns) &&
@@ -313,7 +313,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             ? o.war_entrenchment_init_turns
             : undefined;
 
-    // Stuck-in-Phase-I fallback: optional N turns after war_start_turn to force Phase II transition.
+    // Stuck-in-Peace-phase fallback: optional N turns after war_start_turn to force War phase transition.
     const war_force_transition_after_turns =
         typeof o.war_force_transition_after_turns === 'number' &&
         Number.isInteger(o.war_force_transition_after_turns) &&

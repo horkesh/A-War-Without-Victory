@@ -96,7 +96,7 @@ export function applyScheduledReferendum(
 
 /**
  * If referendum deadline has been reached and referendum was not held, end Phase 0 in
- * non-war terminal outcome (BiH remains in Yugoslavia; Phase I never entered).
+ * non-war terminal outcome (BiH remains in Yugoslavia; Peace phase never entered).
  */
 export function checkReferendumDeadline(state: GameState, turn: number): void {
     const meta = state.meta;
@@ -110,7 +110,7 @@ export function checkReferendumDeadline(state: GameState, turn: number): void {
 }
 
 /**
- * True when referendum was held and current turn is war_start_turn (transition to Phase I).
+ * True when referendum was held and current turn is war_start_turn (transition to Peace phase).
  */
 export function isWarStartTurn(state: GameState): boolean {
     const meta = state.meta;
@@ -121,7 +121,7 @@ export function isWarStartTurn(state: GameState): boolean {
 }
 
 /**
- * Phase B Step 7: Phase 0 → Phase I transfer gating (Phase_0_Spec §6).
+ * Phase B Step 7: Phase 0 → Peace phase transfer gating (Phase_0_Spec §6).
  * Transition occurs ONLY when current_turn == war_start_turn (referendum held + 4 turns).
  * No declaration or other condition triggers transition. Irreversible once applied.
  *

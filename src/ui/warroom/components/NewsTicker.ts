@@ -3,7 +3,7 @@
  * Toggled by clicking the transistor radio.
  *
  * Phase 0: scripted historical events only.
- * War phases (phase_i, phase_ii): dynamic TurnEvent-based war headlines
+ * War phases (peace, war): dynamic TurnEvent-based war headlines
  * interleaved with any scripted events still in range.
  */
 

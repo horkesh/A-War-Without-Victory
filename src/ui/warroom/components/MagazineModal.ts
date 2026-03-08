@@ -3,7 +3,7 @@
  * Triggers every 4 turns (monthly). Between issues: shows most recent.
  *
  * Phase 0: Pre-war organizational coverage, capital, stability, declaration pressure.
- * Phase I/II (war phases): Force strength, casualties, territory, displacement,
+ * Peace/War phase (war phases): Force strength, casualties, territory, displacement,
  * exhaustion/supply, enemy assessment via WarDataSnapshot.
  *
  * No Math.random(), no Date.now().
@@ -310,7 +310,7 @@ export class MagazineModal {
     }
 
     /**
-     * Render the war-phase magazine modal (Phase I / Phase II).
+     * Render the war-phase magazine modal (Peace phase / War phase).
      * Uses WarDataSnapshot for all data. Shows 6 operational sections.
      */
     private renderWarPhase(): HTMLElement {

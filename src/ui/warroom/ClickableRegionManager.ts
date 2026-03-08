@@ -499,7 +499,7 @@ export class ClickableRegionManager {
                         await showDeclarationModal(criticalEvent, pf ?? 'RBiH');
                     }
 
-                    // Check for Phase 0 → Phase I transition (war begins)
+                    // Check for Phase 0 → Peace phase transition (war begins)
                     if (checkWarTransition(prevPhase, newState.meta.phase)) {
                         await showWarBeginsModal(pf ?? 'RBiH');
                     }
@@ -513,11 +513,11 @@ export class ClickableRegionManager {
                         this.onGameStateChange?.(nextState);
                         await this.checkWarMilestone(nextState, this.playerFaction ?? 'RBiH');
                     } catch (e) {
-                        console.error('Phase I advance failed', e);
+                        console.error('Peace phase advance failed', e);
                     }
                     this.modalManager?.hideModal();
                 } else {
-                    // Phase II: browser-safe advance (turn + AoR init when empty).
+                    // War phase: browser-safe advance (turn + AoR init when empty).
                     try {
                         const graph = await this.loadSettlementGraphIfNeeded();
                         const seed = state.meta.seed ?? 'start_1991_09';
@@ -525,7 +525,7 @@ export class ClickableRegionManager {
                         this.onGameStateChange?.(nextState);
                         await this.checkWarMilestone(nextState, this.playerFaction ?? 'RBiH');
                     } catch (e) {
-                        console.error('Phase II advance failed', e);
+                        console.error('War phase advance failed', e);
                     }
                     this.modalManager?.hideModal();
                 }

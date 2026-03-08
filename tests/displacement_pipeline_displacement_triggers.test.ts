@@ -2,7 +2,7 @@
  * Phase F Step 2: Displacement trigger conditions tests.
  * - Trigger evaluator returns bounded deltas only for front-active settlements when phase_ii.
  * - Deterministic: same state + edges => same deltas.
- * - No triggers in phase_0 / phase_i.
+ * - No triggers in phase_0 / peace phase.
  */
 
 import assert from 'node:assert';
@@ -47,7 +47,7 @@ test('evaluateDisplacementTriggers: peace returns empty deltas', () => {
     assert.strictEqual(report.triggered_settlements.length, 0);
 });
 
-test('evaluateDisplacementTriggers: phase_ii + opposing control yields bounded deltas for front-active settlements', () => {
+test('evaluateDisplacementTriggers: war phase + opposing control yields bounded deltas for front-active settlements', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { deltas, report } = evaluateDisplacementTriggers(state, edges);

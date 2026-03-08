@@ -38,7 +38,7 @@ test('systems 2/3/4/7/9/10 acceptance gates: phase_ii run populates required sta
 
     // System 3 + 9 gates at formation level
     const formations = Object.values(state.formations ?? {});
-    assert.ok(formations.length > 0, 'formations should exist for phase_ii scenario');
+    assert.ok(formations.length > 0, 'formations should exist for war phase scenario');
     for (const f of formations) {
         assert.ok(f.equipment_state, `system3 equipment_state missing for formation ${f.id}`);
         assert.ok(f.doctrine_state, `system9 doctrine_state missing for formation ${f.id}`);

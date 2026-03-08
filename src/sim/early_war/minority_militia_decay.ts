@@ -1,6 +1,6 @@
 /**
- * Phase I: Early-war minority militia decay (MVP).
- * First 3 turns of Phase I: in non-urban muns, minority faction pools under opposing
+ * Peace phase: Early-war minority militia decay (MVP).
+ * First 3 turns of Peace phase: in non-urban muns, minority faction pools under opposing
  * consolidated control are reduced by 20–40% (deterministic, census-based formula).
  * See docs/40_reports/MILITIA_BRIGADE_SYSTEM_RESEARCH_AND_REWORK_PLAN.md and design §8.2.
  */
@@ -39,7 +39,7 @@ function getFactionShareInMun(
 }
 
 /**
- * Run early-war minority militia decay when in first 3 turns of Phase I.
+ * Run early-war minority militia decay when in first 3 turns of Peace phase.
  * Only runs when meta.phase === 'war', meta.turn in [war_start_turn, war_start_turn + 2].
  * Deterministic: sorted pool keys; decay formula from research (ethnicPct → 20–40%).
  */

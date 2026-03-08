@@ -86,7 +86,7 @@ const LARGE_CORPS_THRESHOLD = 6; // subordinate count for 2 OG slots
 
 /**
  * Initialize corps command state for corps formations.
- * Called at Phase II entry and each turn. Idempotent: skips corps that already have state.
+ * Called at War phase entry and each turn. Idempotent: skips corps that already have state.
  *
  * Sources corps IDs from two places:
  * 1. Corps/corps_asset formations (kind === 'corps' || kind === 'corps_asset')

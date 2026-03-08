@@ -632,7 +632,7 @@ export function scenarioWithoutProbeIntent(scenario: Scenario): Scenario {
     };
 }
 
-/** H1.11: Collect settlement IDs from Phase II front descriptors filtered by stability. Edge ID format: a__b. */
+/** H1.11: Collect settlement IDs from War phase front descriptors filtered by stability. Edge ID format: a__b. */
 function settlementIdsFromFrontDescriptors(
     descriptors: Array<{ edge_ids: string[]; stability: string }> | undefined,
     stabilityFilter: 'static' | 'fluid'
@@ -653,7 +653,7 @@ function settlementIdsFromFrontDescriptors(
 }
 
 /**
- * Create OOB formations at Phase I entry via recruitment or legacy auto-spawn.
+ * Create OOB formations at Peace phase entry via recruitment or legacy auto-spawn.
  * Shared helper to avoid duplication across startup and Phase 0→I transitions.
  */
 async function createOobFormations(
@@ -670,11 +670,11 @@ async function createOobFormations(
     baseDir?: string
 ): Promise<void> {
     if (scenario.recruitment_mode === 'player_choice') {
-        // Ensure phase_i militia strength exists before deriving pool availability.
+        // Ensure peace phase militia strength exists before deriving pool availability.
         if (!state.war_militia_strength || Object.keys(state.war_militia_strength).length === 0) {
             updateMilitiaEmergence(state);
         }
-        // Recruitment spends from militia pools; seed them first at Phase I entry.
+        // Recruitment spends from militia pools; seed them first at Peace phase entry.
         if (!state.militia_pools || Object.keys(state.militia_pools).length === 0) {
             runPoolPopulation(state, settlements, municipalityPopulation1991);
             applyRsJnaInheritanceBonus(state, municipalityPopulation1991);
@@ -1036,7 +1036,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
         }
 
-        // Phase I→II edge cases: entrenchment init and stuck-in-Phase-I fallback (PHASE_I_II_EDGE_CASES.md)
+        // Peace→War phase edge cases: entrenchment init and stuck-in-Phase-I fallback (PHASE_I_II_EDGE_CASES.md)
         if (typeof scenario.war_entrenchment_init_turns === 'number') {
             state.meta.war_entrenchment_init_turns = scenario.war_entrenchment_init_turns;
         }
@@ -1046,7 +1046,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.war_force_transition_after_turns = 52;
         }
 
-        // Phase I Overhaul: store recruitment_mode in state.meta so turn pipeline can access it.
+        // Peace-phase Overhaul: store recruitment_mode in state.meta so turn pipeline can access it.
         if (scenario.recruitment_mode === 'bottom_up' || scenario.recruitment_mode === 'player_choice') {
             state.meta.recruitment_mode = scenario.recruitment_mode;
         }
@@ -1090,7 +1090,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.avoided_osids_by_faction = scenario.avoided_osids_by_faction;
         }
 
-        // When init_formations_oob is true, OOB creates formations at Phase I entry; do not load placeholder init_formations.
+        // When init_formations_oob is true, OOB creates formations at Peace phase entry; do not load placeholder init_formations.
         if (formationsPath && !scenario.init_formations_oob) {
             const initialFormations = await loadInitialFormations(formationsPath);
             if (!state.formations) state.formations = {};
@@ -1099,7 +1099,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
         }
 
-        // AoR phase-out: no populateFactionAoRFromControl; Phase II uses location_osid / OSID fronts.
+        // AoR phase-out: no populateFactionAoRFromControl; War phase uses location_osid / OSID fronts.
 
         if (scenario.start_lifecycle_phase === 'peace') {
             const referendumHeldAtStart = scenario.peace_referendum_held_at_start ?? true;
@@ -1147,7 +1147,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.peace_scheduled_referendum_turn = null;
             state.meta.peace_scheduled_war_start_turn = null;
             state.meta.peace_war_start_control_path = null;
-            // Phase I §4.8 (historical fidelity): no RBiH–HRHB open war before this turn (e.g. 26 = October 1992 for April 1992 start).
+            // Peace-phase §4.8 (historical fidelity): no RBiH–HRHB open war before this turn (e.g. 26 = October 1992 for April 1992 start).
             state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
             if (scenario.enable_rbih_hrhb_dynamics === false) {
                 state.meta.enable_rbih_hrhb_dynamics = false;
@@ -1187,7 +1187,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.scenario_start_date = { year: 1992, month: 3, day: 6 };
         }
 
-        // Seed displacement_state from 1991 census when available (Phase I/II only) so receiving capacity and map population scale by real mun size.
+        // Seed displacement_state from 1991 census when available (Peace/War phase only) so receiving capacity and map population scale by real mun size.
         if (
             scenario.start_lifecycle_phase === 'war' &&
             municipalityPopulation1991 &&
@@ -1225,7 +1225,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let oobCreated = false;
         if (!scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice') oobCreated = true;
 
-        // Create OOB formations at Phase I or Phase II start (recruitment or legacy auto-spawn)
+        // Create OOB formations at Peace phase or War phase start (recruitment or legacy auto-spawn)
         if (scenario.start_lifecycle_phase === 'war' && !oobCreated) {
             await createOobFormations(
                 state,
@@ -1243,7 +1243,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             oobCreated = true;
         }
 
-        // Phase II entry: initialize corps command; location_osid via backfill (AoR phase-out).
+        // War phase entry: initialize corps command; location_osid via backfill (AoR phase-out).
         if (scenario.start_lifecycle_phase === 'war') {
             initializeCorpsCommand(state);
             spawnJnaPhantomBrigades(state);

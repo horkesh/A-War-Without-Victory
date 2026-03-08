@@ -72,7 +72,7 @@ test('runAuthorityDegradation updates RBiH authority (decay from RS/HRHB declare
     assert.ok(rbihAfter !== rbihBefore, 'RBiH authority should change when RS/HRHB declared and JNA active');
 });
 
-test('RBiH authority does not fall below 20 (Phase I floor)', () => {
+test('RBiH authority does not fall below 20 (Peace phase floor)', () => {
     const state = stateWithDeclarations();
     state.factions!.find((f) => f.id === 'RBiH')!.profile.authority = 22;
     for (let i = 0; i < 5; i++) runAuthorityDegradation(state);

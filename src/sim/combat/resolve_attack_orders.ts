@@ -1,5 +1,5 @@
 /**
- * Phase II: Resolve brigade attack orders (one target per brigade per turn).
+ * War phase: Resolve brigade attack orders (one target per brigade per turn).
  *
  * Delegates to battle_resolution.ts for multi-factor combat with terrain,
  * equipment, experience, corps command, and snap events.

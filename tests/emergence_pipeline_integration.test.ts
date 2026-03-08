@@ -1,7 +1,7 @@
 /**
  * Phase E Step 6: Pipeline integration tests.
- * - Pipeline order correct (Phase E after Phase II consolidation)
- * - Phase II unchanged (Phase E does not modify Phase II logic)
+ * - Pipeline order correct (Phase E after War phase consolidation)
+ * - War phase unchanged (Phase E does not modify War phase logic)
  * - No early execution (Phase E only runs when meta.phase === 'war')
  */
 
@@ -42,18 +42,18 @@ test('Pipeline: Phase E steps run in correct order (after phase-ii-consolidation
     const rearIdx = phaseNames.indexOf('phase-e-rear-zone-derivation');
 
     assert.ok(consolidationIdx >= 0, 'phase-ii-consolidation exists');
-    assert.ok(frontEmergenceIdx >= 0, 'phase-ii-front-emergence exists (Phase II-scoped)');
+    assert.ok(frontEmergenceIdx >= 0, 'phase-ii-front-emergence exists (War phase-scoped)');
     assert.ok(pressureIdx >= 0, 'phase-e-pressure-update exists');
     assert.ok(aorIdx >= 0, 'phase-e-aor-derivation exists');
     assert.ok(rearIdx >= 0, 'phase-e-rear-zone-derivation exists');
 
-    // Phase II front emergence runs after Phase II consolidation; Phase E steps after that
+    // War phase front emergence runs after War phase consolidation; Phase E steps after that
     assert.ok(frontEmergenceIdx > consolidationIdx, 'phase-ii-front-emergence after phase-ii-consolidation');
     assert.ok(pressureIdx > consolidationIdx, 'phase-e-pressure-update after phase-ii-consolidation');
     assert.ok(aorIdx > consolidationIdx, 'phase-e-aor-derivation after phase-ii-consolidation');
     assert.ok(rearIdx > consolidationIdx, 'phase-e-rear-zone-derivation after phase-ii-consolidation');
 
-    // Order: consolidation → pressure → front emergence (Phase II) → aor → rear
+    // Order: consolidation → pressure → front emergence (War phase) → aor → rear
     assert.ok(frontEmergenceIdx > pressureIdx, 'phase-ii-front-emergence after phase-e-pressure-update');
     assert.ok(aorIdx > frontEmergenceIdx, 'phase-e-aor-derivation after phase-ii-front-emergence');
     assert.ok(rearIdx > aorIdx, 'phase-e-rear-zone-derivation after phase-e-aor-derivation');
@@ -69,7 +69,7 @@ test('Pipeline: peace phase is rejected by war pipeline', async () => {
     );
 });
 
-test('Pipeline: Phase E reports are populated when phase_ii', async () => {
+test('Pipeline: Phase E reports are populated when war phase', async () => {
     const state = minimalPhaseIIState();
     const edges = [{ a: 'S1', b: 'S2' }];
     const result = await runTurn(state, { seed: 'test', settlementEdges: edges });
@@ -81,7 +81,7 @@ test('Pipeline: Phase E reports are populated when phase_ii', async () => {
     assert.ok('phase_e_rear_zone_derivation' in result.report, 'phase_e_rear_zone_derivation report exists');
 });
 
-test('Pipeline: Phase II unchanged (Phase E does not modify Phase II logic)', async () => {
+test('Pipeline: War phase unchanged (Phase E does not modify War phase logic)', async () => {
     const state = minimalPhaseIIState();
     state.war_supply_pressure = { RBiH: 10, RS: 15 };
     state.war_exhaustion = { RBiH: 5, RS: 8 };
@@ -91,12 +91,12 @@ test('Pipeline: Phase II unchanged (Phase E does not modify Phase II logic)', as
     const edges = [{ a: 'S1', b: 'S2' }];
     const result = await runTurn(state, { seed: 'test', settlementEdges: edges });
 
-    // Phase II state should not be modified by Phase E (Phase E reads only)
-    // Note: Phase II consolidation may update these values; we're checking Phase E doesn't override
-    // For this test, we just verify that Phase E reports exist and Phase II ran
+    // War phase state should not be modified by Phase E (Phase E reads only)
+    // Note: War phase consolidation may update these values; we're checking Phase E doesn't override
+    // For this test, we just verify that Phase E reports exist and War phase ran
     const phaseNames = result.report.phases.map((p) => p.name);
-    assert.ok(phaseNames.includes('phase-ii-consolidation'), 'Phase II consolidation ran');
-    assert.ok(phaseNames.includes('phase-e-pressure-update'), 'Phase E ran after Phase II');
+    assert.ok(phaseNames.includes('phase-ii-consolidation'), 'War phase consolidation ran');
+    assert.ok(phaseNames.includes('phase-e-pressure-update'), 'Phase E ran after War phase');
 });
 
 test('Pipeline: Phase E derivation is deterministic (same state + edges → same reports)', async () => {

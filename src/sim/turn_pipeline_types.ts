@@ -91,7 +91,7 @@ export type MunicipalityPopulation1991 = Record<
 export interface TurnInput {
     seed: string;
     settlementEdges?: EdgeRecord[];
-    /** When provided, Phase I uses this graph instead of loadSettlementGraph() (e.g. browser or tests). */
+    /** When provided, Peace phase uses this graph instead of loadSettlementGraph() (e.g. browser or tests). */
     settlementGraph?: LoadedSettlementGraph;
     applyNegotiation?: boolean; // Phase 11B: apply accepted negotiation offers
     /** When provided, pool population is weighted by eligible population (RBiH=bosniak, RS=serb, HRHB=croat) so brigade counts reflect demographics. */
@@ -102,7 +102,7 @@ export interface TurnInput {
     municipalityHqSettlement?: Record<string, string>;
     /** When provided, emergent brigade names use historical OOB name for (faction, mun_id, ordinal). */
     historicalNameLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
-    /** When provided, Phase I wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
+    /** When provided, Peace phase wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
 }
 
@@ -206,7 +206,7 @@ export interface TurnReport {
         remaining_capital: Record<FactionId, number>;
         remaining_equipment: Record<FactionId, number>;
     };
-    /** Phase II: OSID column movement report */
+    /** War phase: OSID column movement report */
     osid_column_movement?: OsidColumnMovementReport;
     /** Officer quality growth/loss report */
     officer_quality_update?: OfficerQualityReport;

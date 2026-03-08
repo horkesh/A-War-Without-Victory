@@ -1,5 +1,5 @@
 /**
- * Phase I §4.8: Washington Agreement evaluator (precondition-driven).
+ * Peace-phase §4.8: Washington Agreement evaluator (precondition-driven).
  *
  * Six preconditions (ALL must be true):
  *   W1: ceasefire active

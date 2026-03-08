@@ -1,5 +1,5 @@
 /**
- * Phase II brigade behavior. Legacy AoR (Area of Responsibility) is phased out;
+ * War phase brigade behavior. Legacy AoR (Area of Responsibility) is phased out;
  * spatial model is OSID/location_osid only. Active tests cover the thin legacy API
  * retained in brigade_aor_legacy.ts. Full AoR system (Voronoi BFS, mun orders,
  * AoR validation, encirclement) was deleted in R5.

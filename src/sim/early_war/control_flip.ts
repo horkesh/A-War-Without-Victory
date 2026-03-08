@@ -1,6 +1,6 @@
 /**
  * Phase C Step 4: Early war control change system (Phase_I_Specification_v0_4_0.md §4.3).
- * Control flips only via Phase I mechanisms, only after war_start_turn.
+ * Control flips only via Peace phase mechanisms, only after war_start_turn.
  * Control changes do not grant authority (Engine Invariants §3, §9).
  */
 
@@ -25,7 +25,7 @@ function getDefenderDoctrine(factionId: FactionId): string {
     return factionId === 'RS' ? 'STATIC_DEFENSE' : 'DEFEND';
 }
 
-/** Phase I §4.3.3: Flip when Current_Stability + Defensive_Militia < 50 + (Attacking_Militia × 1.50). */
+/** Peace-phase §4.3.3: Flip when Current_Stability + Defensive_Militia < 50 + (Attacking_Militia × 1.50). */
 const FLIP_THRESHOLD_BASE = 50;
 const FLIP_ATTACKER_FACTOR = 1.5;
 /** B4: Coercion pressure reduces threshold (max reduction per mun). */
@@ -43,19 +43,19 @@ const RS_BORDER_INTERVENTION_MUN_IDS = new Set<MunicipalityId>([
     'rudo',
 ]);
 
-/** Phase I §4.3.5: Base consolidation duration (turns).
+/** Peace-phase §4.3.5: Base consolidation duration (turns).
  * Increased from 4 to 8 to dampen oscillation: recently-flipped municipalities
  * need more time to stabilize before becoming flip-eligible again. */
 const CONSOLIDATION_BASE_TURNS = 8;
 
-/** Phase I §4.3.4: Post-flip stability lockdown. */
+/** Peace-phase §4.3.4: Post-flip stability lockdown. */
 const POST_FLIP_STABILITY = 100;
 
-/** Phase I §4.3.4: Militia strength after flip for new controller / prior controller. */
+/** Peace-phase §4.3.4: Militia strength after flip for new controller / prior controller. */
 const POST_FLIP_CONTROLLER_STRENGTH = 100;
 const POST_FLIP_LOST_STRENGTH = 0;
 
-/** Phase I §4.3.1: Controlling faction militia below this makes municipality flip-eligible. */
+/** Peace-phase §4.3.1: Controlling faction militia below this makes municipality flip-eligible. */
 // Increased from 40 to 5000 to allow flips even when defended by significant forces (brigade size).
 const FLIP_ELIGIBLE_MILITIA_THRESHOLD = 5000;
 
@@ -88,7 +88,7 @@ export interface ControlFlipInput {
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
     /** Optional: settlement population by sid for holdout resistance scaling. */
     settlementPopulationBySid?: Record<string, number>;
-    /** Experimental: resolve Phase I control with military-action weighting (formation-led) instead of militia-pressure thresholds. */
+    /** Experimental: resolve Peace phase control with military-action weighting (formation-led) instead of militia-pressure thresholds. */
     militaryActionOnly?: boolean;
     /** Experimental military-action tuning override. */
     militaryActionAttackScale?: number;
@@ -98,7 +98,7 @@ export interface ControlFlipInput {
     canonicalToOperational?: CanonicalToOperationalMap;
 }
 
-/** Brigade offensive amplification factor (brigades amplify militia in Phase I). */
+/** Brigade offensive amplification factor (brigades amplify militia in Peace phase). */
 const BRIGADE_ATTACK_AMPLIFIER = 0.5;
 /** Experimental military-action mode: adjacent brigade pressure scale. */
 const MILITARY_ACTION_ATTACK_SCALE = 1.0;
@@ -171,12 +171,12 @@ function getMunicipalityController(
     return best as FactionId | null;
 }
 
-/** War is active if at least one faction has declared (Phase I §4.3.1). */
+/** War is active if at least one faction has declared (Peace-phase §4.3.1). */
 function isWarActive(state: GameState): boolean {
     return (state.factions ?? []).some((f) => f.declared === true);
 }
 
-/** Is municipality in consolidation period? (Phase I §4.3.1, §4.3.5). */
+/** Is municipality in consolidation period? (Peace-phase §4.3.1, §4.3.5). */
 function inConsolidation(state: GameState, munId: MunicipalityId, turn: number): boolean {
     const until = state.war_consolidation_until?.[munId];
     return typeof until === 'number' && turn < until;
@@ -193,7 +193,7 @@ function hasAdjacentHostile(
 ): boolean {
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return false;
-    // Dynamic alliance check: use war_alliance_rbih_hrhb threshold (Phase I §4.8)
+    // Dynamic alliance check: use war_alliance_rbih_hrhb threshold (Peace-phase §4.8)
     const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
     const beforeEarliestWar = state.meta.turn < earliestTurn;
     const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
@@ -217,7 +217,7 @@ function hasAdjacentHostile(
 
 /**
  * Formation strength in a municipality for a faction (sum of personnel of formations with tag mun:munId).
- * Used for formation-aware Phase I flip (JNA/early RS historical fidelity: RS gains from day one where VRS brigades sit).
+ * Used for formation-aware Peace phase flip (JNA/early RS historical fidelity: RS gains from day one where VRS brigades sit).
  * Deterministic: formations iterated in sorted id order.
  */
 function getFormationStrengthInMun(state: GameState, munId: MunicipalityId, faction: FactionId): number {
@@ -272,7 +272,7 @@ function getStrongestAdjacentAttacker(
     if (!neighbors) return null;
     let best: { faction: FactionId; strength: number } | null = null;
     const strengthByMun = state.war_militia_strength ?? {};
-    // Dynamic alliance check (Phase I §4.8); before earliest war turn treat RBiH–HRHB as allied (historical fidelity).
+    // Dynamic alliance check (Peace-phase §4.8); before earliest war turn treat RBiH–HRHB as allied (historical fidelity).
     const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
     const beforeEarliestWar = state.meta.turn < earliestTurn;
     const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
@@ -371,7 +371,7 @@ function rsBorderInterventionBonus(
     return RS_BORDER_INTERVENTION_MUN_IDS.has(munId) ? BORDER_INTERVENTION_BONUS : 0;
 }
 
-/** Current stability for mun (Phase I §4.3.2): base + militia defense bonus + control_status adjustment. */
+/** Current stability for mun (Peace-phase §4.3.2): base + militia defense bonus + control_status adjustment. */
 function getCurrentStability(state: GameState, munId: MunicipalityId, controller: FactionId | null): number {
     const mun = state.municipalities?.[munId];
     const base = mun?.stability_score ?? 50;
@@ -453,7 +453,7 @@ function applyFlip(
 }
 
 /**
- * Run Phase I control flip resolution (Phase I §4.3).
+ * Run Peace phase control flip resolution (Peace-phase §4.3).
  * Only evaluates municipalities in state.municipalities. Requires war_start_turn (caller gates).
  * Does not modify faction authority (control/authority distinction preserved).
  */
@@ -541,7 +541,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
             : getStrongestAdjacentAttacker(munId, controller, munAdjacency, state, settlementsByMun, input.canonicalToOperational);
         if (!attacker || attacker.strength <= 0) continue;
         const currentStability = getCurrentStability(state, munId, controller);
-        // Phase I §4.8: Allied defense bonus when RS attacks a mixed municipality
+        // Peace-phase §4.8: Allied defense bonus when RS attacks a mixed municipality
         let effectiveDefense = (attacker.faction === 'RS' && controller !== null)
             ? computeAlliedDefense(state, munId, controller, defensiveMilitia)
             : defensiveMilitia;
@@ -583,7 +583,7 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
 
     report.municipalities_evaluated = munIds.length;
 
-    // Phase I §9.2: Flip resolution order — consolidation first (attackerNeighborCount DESC), then Stability ASC, Municipality_ID ASC
+    // Peace-phase §9.2: Flip resolution order — consolidation first (attackerNeighborCount DESC), then Stability ASC, Municipality_ID ASC
     candidates.sort((a, b) => {
         const consolidationA = a[6];
         const consolidationB = b[6];

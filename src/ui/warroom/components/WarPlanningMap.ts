@@ -554,7 +554,7 @@ export class WarPlanningMap {
     }
 
     /**
-     * Drive control layer from current game state (e.g. after Phase I advance).
+     * Drive control layer from current game state (e.g. after Peace phase advance).
      * Call from warroom onGameStateChange so the map reflects latest political_controllers.
      */
     setControlFromState(state: GameState): void {

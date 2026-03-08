@@ -4,7 +4,7 @@
  *
  * Phase 0: shows pre-war capital, organizational coverage, declaration pressure,
  * investment counts, and stability overview.
- * Phase I+: shows territory, military (real data), casualties, authority/supply,
+ * Peace phase+: shows territory, military (real data), casualties, authority/supply,
  * formations with personnel/posture, and data-driven strategic warnings.
  */
 
@@ -152,7 +152,7 @@ export class FactionOverviewPanel {
         if (controlCounts.highlyContested > 2) warnings.push('Multiple municipalities at risk of destabilization');
         if (rsPressure >= 80 && !rs?.declared) warnings.push('RS declaration imminent');
         if (hrhbPressure >= 80 && !hrhb?.declared) warnings.push('HRHB declaration imminent');
-        if (warCountdown !== null && warCountdown <= 4) warnings.push(`War in ${warCountdown} weeks \u2014 prepare for Phase I`);
+        if (warCountdown !== null && warCountdown <= 4) warnings.push(`War in ${warCountdown} weeks \u2014 prepare for Peace phase`);
         if (warnings.length === 0) warnings.push('No strategic warnings at this time');
 
         return {
@@ -179,7 +179,7 @@ export class FactionOverviewPanel {
     }
 
     /**
-     * Render the panel — dispatches to Phase 0 or Phase I+ layout.
+     * Render the panel — dispatches to Phase 0 or Peace phase+ layout.
      */
     render(): HTMLElement {
         const phase = this.gameState.meta.phase ?? 'peace';
@@ -318,7 +318,7 @@ export class FactionOverviewPanel {
     }
 
     /**
-     * Phase I+ layout: territory, military, casualties, authority/supply, formations, warnings.
+     * Peace phase+ layout: territory, military, casualties, authority/supply, formations, warnings.
      * Uses extractWarData() for real GameState data instead of fake placeholders.
      */
     private renderPhaseIPlus(): HTMLElement {
@@ -416,7 +416,7 @@ export class FactionOverviewPanel {
     }
 
     /**
-     * Formations section for Phase I+: own faction formations with personnel, posture, kind.
+     * Formations section for Peace phase+: own faction formations with personnel, posture, kind.
      */
     private renderOwnFormationsSection(snap: WarDataSnapshot): HTMLElement | null {
         const ownFormations = snap.ownForces.formationDetails;
@@ -451,7 +451,7 @@ export class FactionOverviewPanel {
     }
 
     /**
-     * Officers section for Phase I+ (Phase E): list commanders for player faction.
+     * Officers section for Peace phase+ (Phase E): list commanders for player faction.
      */
     private renderOfficersSection(snap: WarDataSnapshot): HTMLElement | null {
         const pf = snap.playerFaction;
@@ -627,7 +627,7 @@ export class FactionOverviewPanel {
     }
 
     /**
-     * Create a quadrant div (Phase I+)
+     * Create a quadrant div (Peace phase+)
      */
     private createQuadrant(title: string, stats: Array<{ label: string; value: string }>): HTMLElement {
         const quad = document.createElement('div');

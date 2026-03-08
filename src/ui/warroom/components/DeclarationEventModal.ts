@@ -96,7 +96,7 @@ export function findCriticalEvent(events: Phase0Event[]): Phase0Event | null {
 }
 
 /**
- * Check if the game just transitioned to Phase I (war begins).
+ * Check if the game just transitioned to Peace phase (war begins).
  */
 export function checkWarTransition(prevPhase: string | undefined, nextPhase: string | undefined): boolean {
     return prevPhase === 'peace' && nextPhase === 'war';

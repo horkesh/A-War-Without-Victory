@@ -1,7 +1,7 @@
 /**
  * Stage 3: Brigade-derived pressure computation.
  *
- * Brigades are the primary source of front pressure in Phase II.
+ * Brigades are the primary source of front pressure in War phase.
  * Pressure = f(density, posture, composition, cohesion, supply, resilience, corps bonus).
  *
  * Deterministic: no randomness.
@@ -116,7 +116,7 @@ export function computeBrigadeDefense(
 
 /**
  * Compute brigade-derived pressure for all front edges.
- * Used in Phase II to replace the edge-posture-based system.
+ * Used in War phase to replace the edge-posture-based system.
  */
 export function computeBrigadePressureByEdge(
     state: GameState,
@@ -154,7 +154,7 @@ export function computeBrigadePressureByEdge(
 
 /**
  * Apply brigade-derived pressure to the front_pressure state.
- * Called from the turn pipeline when Phase II is active and brigade_aor exists.
+ * Called from the turn pipeline when War phase is active and brigade_aor exists.
  */
 export function applyBrigadePressureToState(
     state: GameState,

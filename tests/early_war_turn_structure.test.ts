@@ -75,7 +75,7 @@ test('war runTurn executes expected leading phases in order', async () => {
     );
 });
 
-test('Phase I runTurn leaves areasOfResponsibility empty (no AoRs in Phase I)', async () => {
+test('Peace phase runTurn leaves areasOfResponsibility empty (no AoRs in Peace phase)', async () => {
     const state = statePhaseI();
     const { nextState } = await runTurn(state, { seed: 'step9-fixture' });
     const factions = nextState.factions ?? [];
@@ -84,7 +84,7 @@ test('Phase I runTurn leaves areasOfResponsibility empty (no AoRs in Phase I)', 
         assert.strictEqual(
             aor.length,
             0,
-            `Phase I must not instantiate AoRs; faction ${f.id} has areasOfResponsibility.length = ${aor.length}`
+            `Peace phase must not instantiate AoRs; faction ${f.id} has areasOfResponsibility.length = ${aor.length}`
         );
     }
 });

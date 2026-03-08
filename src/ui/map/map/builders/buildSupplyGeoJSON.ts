@@ -7,7 +7,7 @@
  *   unknown   (no controller / supply disabled) → grey
  *
  * Prefers Phase A-E factionReserves (general_supply_reserve, 0–100).
- * Falls back to legacy phaseIiSupplyPressure when reserves not present.
+ * Falls back to legacy warPhaseSupplyPressure when reserves not present.
  */
 import type { FeatureCollection, Feature, Polygon, MultiPolygon } from 'geojson';
 
@@ -41,13 +41,13 @@ function legacyPressureToClass(pressure: number): OsidSupplyClass {
  * @param controlGeoJson        Existing control GeoJSON (from buildControlGeoJSON)
  * @param controlBySettlement   OSID → faction controller map
  * @param factionReserves       Phase A-E per-faction reserve levels (preferred)
- * @param phaseIiSupplyPressure Legacy faction → pressure fallback
+ * @param warPhaseSupplyPressure Legacy faction → pressure fallback
  */
 export function buildSupplyGeoJSON(
   controlGeoJson: FeatureCollection,
   controlBySettlement: Record<string, string | null>,
   factionReserves: Record<string, { generalSupply: number; heavyMunitions: number }> | undefined,
-  phaseIiSupplyPressure?: Record<string, number>
+  warPhaseSupplyPressure?: Record<string, number>
 ): FeatureCollection<Polygon | MultiPolygon, SupplyProperties> {
   const features: Feature<Polygon | MultiPolygon, SupplyProperties>[] = [];
 
@@ -64,8 +64,8 @@ export function buildSupplyGeoJSON(
       if (res != null && isFinite(res.generalSupply)) {
         supply_pressure = res.generalSupply;
         supply_class = reserveToClass(res.generalSupply);
-      } else if (phaseIiSupplyPressure) {
-        const p = phaseIiSupplyPressure[controller];
+      } else if (warPhaseSupplyPressure) {
+        const p = warPhaseSupplyPressure[controller];
         if (typeof p === 'number' && isFinite(p)) {
           supply_pressure = p;
           supply_class = legacyPressureToClass(p);

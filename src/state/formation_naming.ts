@@ -3,13 +3,13 @@
  * Historical OoB names can be added via data lookup; fallback is deterministic.
  * Never reuse another faction's historical name.
  *
- * Historical names: Formations created from OOB at Phase I entry (oob_brigades.json) get
+ * Historical names: Formations created from OOB at Peace phase entry (oob_brigades.json) get
  * historical names (e.g. "5th Kozara Light Infantry Brigade"). Emergent spawn uses this
  * fallback only. To give emergent brigades historical names would require a lookup
  * (faction, home_mun) -> name from OOB masters or a derived dataset (see docs/knowledge/
  * ARBIH, HVO, VRS_ORDER_OF_BATTLE_MASTER.md).
  *
- * Phase I Overhaul (Phase B): TO detachment and TO battalion naming added.
+ * Peace-phase Overhaul (Phase B): TO detachment and TO battalion naming added.
  * - TO Detachment: "TO <mun_id>"
  * - TO Battalion:  "TO Bn <mun_id>"
  * - Brigade fallback: "<N>st/nd/rd/th <home_mun> Brigade" (Phase D)

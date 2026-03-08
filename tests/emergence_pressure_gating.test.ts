@@ -1,7 +1,7 @@
 /**
  * Phase E1.1: Phase E pressure update gating tests.
- * - Calling sim pipeline in phase_i does not run Phase E pressure update (no phase_e_pressure_update effect).
- * - Calling in phase_ii runs exactly one phase-e-pressure-update per turn and report is present when edges exist.
+ * - Calling sim pipeline in peace phase does not run Phase E pressure update (no phase_e_pressure_update effect).
+ * - Calling in war phase runs exactly one phase-e-pressure-update per turn and report is present when edges exist.
  */
 
 import assert from 'node:assert';
@@ -81,7 +81,7 @@ test('phase_ii runTurn includes phase-e-pressure-update and runs exactly once pe
     const { report } = await runTurn(state, { seed: 'gating-ii', settlementEdges: edges });
     const phaseNames = report.phases.map((p) => p.name);
     const count = phaseNames.filter((n) => n === 'phase-e-pressure-update').length;
-    assert.strictEqual(count, 1, 'phase-e-pressure-update must run exactly once per turn in phase_ii path');
+    assert.strictEqual(count, 1, 'phase-e-pressure-update must run exactly once per turn in war phase path');
     assert.ok(report.phase_e_pressure_update !== undefined, 'phase_e_pressure_update report should be present');
     assert.strictEqual(typeof report.phase_e_pressure_update.applied, 'boolean');
     assert.strictEqual(typeof report.phase_e_pressure_update.stats.nodes_with_outflow, 'number');

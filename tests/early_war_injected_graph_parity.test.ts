@@ -68,7 +68,7 @@ function minimalPhaseIState(): GameState {
     };
 }
 
-test('Phase I: injected settlementGraph produces same nextState as loadSettlementGraph path', async () => {
+test('Peace phase: injected settlementGraph produces same nextState as loadSettlementGraph path', async () => {
     const graph = await loadSettlementGraph();
     const seed = 'injected-graph-parity';
     const initial = minimalPhaseIState();

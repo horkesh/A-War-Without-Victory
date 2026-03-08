@@ -1,7 +1,7 @@
 /**
  * Phase D Step 2/3: Front emergence and stabilization tests.
  * - No fronts when meta.phase !== 'war'.
- * - Fronts emerge deterministically when phase_ii and opposing control on edges.
+ * - Fronts emerge deterministically when war phase and opposing control on edges.
  * - No geometry created (descriptors have edge_ids only).
  * - Fronts can harden (static) or remain fluid; no front guarantees victory.
  */
@@ -58,14 +58,14 @@ test('detectFronts returns empty when meta.phase is phase_0', () => {
     assert.deepStrictEqual(fronts, []);
 });
 
-test('detectFronts returns empty when phase_ii but no opposing control', () => {
+test('detectFronts returns empty when war phase but no opposing control', () => {
     const state = minimalState('war', { S1: 'RBiH', S2: 'RBiH', S3: 'RBiH' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectFronts(state, edges);
     assert.deepStrictEqual(fronts, []);
 });
 
-test('detectFronts returns descriptors when phase_ii and opposing control on edge', () => {
+test('detectFronts returns descriptors when war phase and opposing control on edge', () => {
     const state = minimalState('war', { S1: 'RBiH', S2: 'RS', S3: 'HRHB' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectFronts(state, edges);

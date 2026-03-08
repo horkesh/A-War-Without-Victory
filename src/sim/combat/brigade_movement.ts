@@ -1,5 +1,5 @@
 /**
- * Phase II: Brigade movement (Brigade AoR Redesign Phase C).
+ * War phase: Brigade movement (Brigade AoR Redesign Phase C).
  *
  * Pack → in_transit → unpack cycle; pathfinding through friendly territory only.
  * Deterministic: BFS with sorted neighbor expansion; formation ID order.
@@ -112,7 +112,7 @@ export function shortestPathThroughFriendly(
 /**
  * Transit turns for a path (path includes start and end; steps = path.length - 1).
  * Study: transit_turns = max(1, ceil(graph_distance / MOVEMENT_RATE)).
- * Phase I: +1 turn per settlement with battle_damage > 0 in path.
+ * Peace phase: +1 turn per settlement with battle_damage > 0 in path.
  */
 export function transitTurnsForPath(
     path: SettlementId[],

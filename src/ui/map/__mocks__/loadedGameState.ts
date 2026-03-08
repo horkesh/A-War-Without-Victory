@@ -2,7 +2,7 @@ import type { LoadedGameState } from '../data/types';
 
 export function makeMockLoadedGameState(): LoadedGameState {
   return {
-    label: 'Turn 12 (phase_ii)',
+    label: 'Turn 12 (war phase)',
     turn: 12,
     phase: 'war',
     formations: [

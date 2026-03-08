@@ -2,7 +2,7 @@
  * Phase C Step 3: Militia emergence tests.
  * - Emergence triggers under specified conditions (organizational penetration, declarations).
  * - Deterministic ordering for formation creation (municipalities and factions sorted).
- * - No emergence before war_start_turn (Phase I path not run; gating in phase_i_entry_gating.test.ts).
+ * - No emergence before war_start_turn (Peace phase path not run; gating in phase_i_entry_gating.test.ts).
  */
 
 import assert from 'node:assert';

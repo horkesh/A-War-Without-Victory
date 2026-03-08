@@ -35,7 +35,7 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     const rawMovementState = state.brigade_movement_state as Record<string, { status?: string; stance?: string }> | undefined;
 
-    // Build reverse index: formation id -> sorted list of location IDs (Phase II: OSID from location_osid; else legacy brigade_aor SIDs)
+    // Build reverse index: formation id -> sorted list of location IDs (War phase: OSID from location_osid; else legacy brigade_aor SIDs)
     const brigadeAorByFormationId: Record<string, string[]> = {};
     if (phase === 'war') {
         const rawFormations = state.formations as Record<string, Record<string, unknown>> | undefined;

@@ -1,13 +1,13 @@
 /**
  * Regression test: displacement reporting bug fix
  *
- * System A (displacement_state) carries the 2.2M displaced persons from Phase I.
+ * System A (displacement_state) carries the 2.2M displaced persons from Peace phase.
  * System C (settlement_displacement / municipality_displacement) was always 0 because
  * isPressureEligible looked up SID keys (e.g. "S100013") in an OSID-keyed
  * political_controllers map (e.g. keyed by "op:mun:slug") — always returning false.
  *
  * Fixes verified here:
- * 1. buildWeeklyReport in Phase II now includes displacement_state in totals.
+ * 1. buildWeeklyReport in War phase now includes displacement_state in totals.
  * 2. isPressureEligible correctly resolves SID→OSID when canonicalToOperational is provided.
  */
 
@@ -17,7 +17,7 @@ import { isPressureEligible, getEligiblePressureEdges } from '../src/sim/emergen
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
-/** Minimal Phase II GameState fixture with System A displacement data. */
+/** Minimal War phase GameState fixture with System A displacement data. */
 function makePhaseIIStateWithDisplacementState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
@@ -61,12 +61,12 @@ function makePhaseIIStateWithDisplacementState(): GameState {
         front_posture_regions: {},
         front_pressure: {},
         militia_pools: {},
-        // OSID-keyed political_controllers (as they are after Phase I → Phase II transition)
+        // OSID-keyed political_controllers (as they are after Peace phase → War phase transition)
         political_controllers: {
             'op:banovici:banovici_2': 'RS',
             'op:banovici:seona': 'RBiH'
         },
-        // System A: real displacement data from Phase I
+        // System A: real displacement data from Peace phase
         displacement_state: {
             'banovici': {
                 displaced_out: 15000,
@@ -86,7 +86,7 @@ function makePhaseIIStateWithDisplacementState(): GameState {
 }
 
 describe('displacement reporting fix — scenario_reporting.ts', () => {
-    it('Phase II buildWeeklyReport returns non-zero municipality_displacement_total when displacement_state has data', () => {
+    it('War phase buildWeeklyReport returns non-zero municipality_displacement_total when displacement_state has data', () => {
         const state = makePhaseIIStateWithDisplacementState();
         const report = buildWeeklyReport(state);
 
@@ -96,7 +96,7 @@ describe('displacement reporting fix — scenario_reporting.ts', () => {
         expect(report.municipality_displacement_total).toBe(17000 + 85000);
     });
 
-    it('Phase II buildWeeklyReport counts municipalities with displacement_state data', () => {
+    it('War phase buildWeeklyReport counts municipalities with displacement_state data', () => {
         const state = makePhaseIIStateWithDisplacementState();
         const report = buildWeeklyReport(state);
 
@@ -104,7 +104,7 @@ describe('displacement reporting fix — scenario_reporting.ts', () => {
         expect(report.municipality_displacement_count).toBe(2);
     });
 
-    it('Phase II buildWeeklyReport settlement_displacement_total includes System A data as proxy', () => {
+    it('War phase buildWeeklyReport settlement_displacement_total includes System A data as proxy', () => {
         const state = makePhaseIIStateWithDisplacementState();
         const report = buildWeeklyReport(state);
 
@@ -112,7 +112,7 @@ describe('displacement reporting fix — scenario_reporting.ts', () => {
         expect(report.settlement_displacement_total).toBeGreaterThan(0);
     });
 
-    it('Phase II buildWeeklyReport returns zero when both System A and System C are empty', () => {
+    it('War phase buildWeeklyReport returns zero when both System A and System C are empty', () => {
         const state = makePhaseIIStateWithDisplacementState();
         // Remove displacement_state
         delete (state as { displacement_state?: unknown }).displacement_state;
@@ -123,9 +123,9 @@ describe('displacement reporting fix — scenario_reporting.ts', () => {
         expect(report.settlement_displacement_total).toBe(0);
     });
 
-    it('Phase I buildWeeklyReport still reads from displacement_state (existing behavior)', () => {
+    it('Peace phase buildWeeklyReport still reads from displacement_state (existing behavior)', () => {
         const state = makePhaseIIStateWithDisplacementState();
-        // Switch to Phase I
+        // Switch to Peace phase
         (state.meta as { phase: string }).phase = 'war';
         const report = buildWeeklyReport(state);
 
@@ -135,7 +135,7 @@ describe('displacement reporting fix — scenario_reporting.ts', () => {
 });
 
 describe('displacement OSID fix — isPressureEligible', () => {
-    /** GameState with OSID-keyed political_controllers (post-promotion Phase II state) */
+    /** GameState with OSID-keyed political_controllers (post-promotion War phase state) */
     const osidKeyedState: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 10, seed: 'osid-test', phase: 'war' },

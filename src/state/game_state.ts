@@ -51,7 +51,7 @@ export type PostureLevel = 'hold' | 'probe' | 'push';
 
 // --- Brigade Operations System types ---
 
-/** Brigade posture (Phase II). Controls pressure output, defensive resilience, and exhaustion rate. */
+/** Brigade posture (War phase). Controls pressure output, defensive resilience, and exhaustion rate. */
 export type BrigadePosture = 'hold' | 'defend' | 'defend_at_all_costs' | 'elastic_defense' | 'counterattack' | 'dig_in' | 'attack' | 'assault';
 
 /** Equipment condition for a typed equipment category (tanks, artillery). */
@@ -313,7 +313,7 @@ export interface OGActivationOrder {
     max_duration: number;
 }
 
-/** Settlement holdout state (Phase I settlement-level control). */
+/** Settlement holdout state (Peace phase settlement-level control). */
 export interface SettlementHoldoutState {
     holdout: boolean;
     holdout_faction: FactionId;
@@ -327,7 +327,7 @@ export interface SettlementHoldoutState {
 
 /**
  * Canonical phase names (game phase, not turn sub-phase).
- * Phase 0 = Pre-War; Phase I = Early War (Phase_Specifications_v0_3_0, Phase_0/Phase_I specs).
+ * Phase 0 = Pre-War; Peace phase = Early War (Phase_Specifications_v0_3_0, Phase_0/Phase_I specs).
  */
 export type PhaseName = 'peace' | 'war';
 
@@ -342,10 +342,10 @@ export interface FormationOpsState {
     last_supplied_turn: number | null; // null or <= current turn
 }
 
-// Phase I.0: Formation lifecycle states (Systems Manual §5)
+// Peace phase.0: Formation lifecycle states (Systems Manual §5)
 export type FormationReadinessState = 'forming' | 'active' | 'overextended' | 'degraded';
 
-// Phase I.0: Formation types (Systems Manual §4)
+// Peace phase.0: Formation types (Systems Manual §4)
 export type FormationKind = 'militia' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq' | 'jna_phantom' | 'paramilitary';
 
 export interface FormationState {
@@ -358,7 +358,7 @@ export interface FormationState {
     tags?: string[]; // optional, descriptive only, no gameplay meaning
     ops?: FormationOpsState; // Phase 10: operational degradation tracking
     force_label?: ArmyLabel; // optional, presentational army label (ARBiH/VRS/HVO) for visibility
-    // Phase I.0: Formation organization substrate
+    // Peace phase.0: Formation organization substrate
     kind?: FormationKind; // default: 'brigade' for backward compatibility
     /** Troops in formation. Brigades: spawn at MIN_BRIGADE_SPAWN (1000), reinforce from pool up to MAX_BRIGADE_PERSONNEL (2500). When absent, treat as 1000. */
     personnel?: number;
@@ -366,7 +366,7 @@ export interface FormationState {
     cohesion?: number; // [0,100] formation cohesion, affects effectiveness and collapse risk
     /** Willingness to fight [0,100]. Non-monotonic. Distinct from cohesion (tactical effectiveness). Gates retreat resistance. */
     morale?: number;
-    experience?: number; // [0,1] formation experience (Phase I / System 10)
+    experience?: number; // [0,1] formation experience (Peace phase / System 10)
     /** Unit honor/decoration title. Affects combat power: slavna (1.10×), viteska (1.20×). ARBiH decoration system; reflects veteran status and battle-hardened capability. */
     honor?: 'slavna' | 'viteska';
     activation_gated?: boolean; // true if activation is blocked by time, authority, or supply constraints
@@ -380,7 +380,7 @@ export interface FormationState {
     /** Operational settlement ID (OSID). Set at creation from hq_sid via canonical_to_operational_map. */
     location_osid?: SettlementId;
     // --- Brigade Operations System fields ---
-    /** Brigade posture (Phase II). Default: 'hold'. */
+    /** Brigade posture (War phase). Default: 'hold'. */
     posture?: BrigadePosture;
     /** True when brigade is defending its ethnic homeland (auto-set by posture system). */
     home_defense_active?: boolean;
@@ -410,7 +410,7 @@ export interface FormationState {
     /** Fog of war: OSID where this brigade's attack was repulsed/catastrophic.
      *  Lifts fog for this target — brigade learned enemy strength the hard way. */
     last_repulsed_from?: { osid: string; turn: number };
-    // Phase I Overhaul: proto-brigade lifecycle tracking
+    // Peace-phase Overhaul: proto-brigade lifecycle tracking
     /** Municipality where formation originally emerged (for naming displaced-origin brigades). */
     origin_mun?: string;
     /** Turn when formation was promoted to its current kind. */
@@ -747,7 +747,7 @@ export interface DisplacementEvent {
 }
 
 /**
- * Phase II: delayed hostile-takeover displacement timer.
+ * War phase: delayed hostile-takeover displacement timer.
  * Starts on settlement control flip (when factions are at war) and matures after N turns.
  */
 export interface HostileTakeoverTimerState {
@@ -762,7 +762,7 @@ export interface HostileTakeoverTimerState {
 }
 
 /**
- * Phase II: temporary municipality holding pool (camp simulation) prior to rerouting.
+ * War phase: temporary municipality holding pool (camp simulation) prior to rerouting.
  */
 export interface DisplacementCampState {
     mun_id: MunicipalityId;
@@ -772,7 +772,7 @@ export interface DisplacementCampState {
 }
 
 /**
- * Phase II: non-takeover minority flight (settlement-level).
+ * War phase: non-takeover minority flight (settlement-level).
  * Tracks gradual (RBiH 50% over 26 turns) or completed (HRHB/RS 100% immediate).
  * Key: SettlementId. Canon: displacement redesign 2026-02-17.
  */
@@ -795,7 +795,7 @@ export interface SustainabilityState {
 }
 
 /**
- * Phase I (Early War): JNA withdrawal and asset transfer state (Phase_I_Spec §4.6).
+ * Peace phase (Early War): JNA withdrawal and asset transfer state (Phase_I_Spec §4.6).
  * War start remains referendum-gated; JNA transition does not start the war.
  */
 export interface JNATransitionState {
@@ -808,7 +808,7 @@ export interface JNATransitionState {
 }
 
 /**
- * Phase I §4.8: RBiH–HRHB bilateral relationship state.
+ * Peace-phase §4.8: RBiH–HRHB bilateral relationship state.
  * Tracks the full lifecycle: fragile alliance → strain → open war → ceasefire → Washington Agreement.
  * All fields deterministic; no timestamps or randomness.
  */
@@ -855,13 +855,13 @@ export interface StateMeta {
     turn: number;
     /** Deterministic seed for reproducibility; no wall-clock time. */
     seed: string;
-    /** Game phase (Phase 0 / Phase I / Phase II). Optional for backward compatibility. */
+    /** Game phase (Phase 0 / Peace phase / War phase). Optional for backward compatibility. */
     phase?: PhaseName;
     /** Phase 0: Referendum has been held. War start only when true and current_turn == war_start_turn. */
     referendum_held?: boolean;
     /** Phase 0: Turn when referendum was held; null if not yet held. */
     referendum_turn?: number | null;
-    /** Phase 0: Turn when war starts (referendum_turn + 4). Phase I entered only at this turn. */
+    /** Phase 0: Turn when war starts (referendum_turn + 4). Peace phase entered only at this turn. */
     war_start_turn?: number | null;
     /** Phase 0: Optional scheduled referendum turn for deterministic historical starts when referendum is not held at turn 0. */
     peace_scheduled_referendum_turn?: number | null;
@@ -873,33 +873,33 @@ export interface StateMeta {
     referendum_eligible_turn?: number | null;
     /** Phase 0: Deadline turn for referendum; if reached without referendum → non-war terminal. */
     referendum_deadline_turn?: number | null;
-    /** Phase 0: Game ended (e.g. non-war terminal). Phase I unreachable when true without war. */
+    /** Phase 0: Game ended (e.g. non-war terminal). Peace phase unreachable when true without war. */
     game_over?: boolean;
     /** Phase 0: Outcome label when game_over (e.g. 'non_war_terminal'). */
     outcome?: string;
     /** Phase 0→I: Turn when Phase 0 ended (audit; set at transition). §8 Output Contract. */
     peace_end_turn?: number | null;
-    /** Phase 0→I: Turn when Phase I started (audit; set at transition). §8 Output Contract. */
+    /** Phase 0→I: Turn when Peace phase started (audit; set at transition). §8 Output Contract. */
     war_start_lifecycle_phase_turn?: number | null;
     /** Phase 0→I: What triggered transition (e.g. 'war_start_turn'). §8 Output Contract. */
     escalation_reason?: string | null;
-    /** Phase I → II: Consecutive turns with opposing-control edges >= MIN_OPPOSING_EDGES (D0.9.1). Default 0 on load. */
+    /** Peace → War phase: Consecutive turns with opposing-control edges >= MIN_OPPOSING_EDGES (D0.9.1). Default 0 on load. */
     war_opposing_edges_streak?: number;
-    /** Phase I→II: Optional initial entrenchment turns (0..12) for all brigades at transition; set from scenario. */
+    /** Peace→War phase: Optional initial entrenchment turns (0..12) for all brigades at transition; set from scenario. */
     war_entrenchment_init_turns?: number;
-    /** Stuck-in-Phase-I fallback: force transition after this many Phase I turns since war_start_turn (e.g. 52). */
+    /** Stuck-in-Peace-phase fallback: force transition after this many Peace phase turns since war_start_turn (e.g. 52). */
     war_force_transition_after_turns?: number;
-    /** Phase II §11.3: Operation Storm (Oluja) has triggered (precondition step set). */
+    /** War phase §11.3: Operation Storm (Oluja) has triggered (precondition step set). */
     operation_storm_triggered?: boolean;
-    /** Phase I §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
+    /** Peace-phase §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
     rbih_hrhb_war_earliest_turn?: number | null;
-    /** Phase I §4.8: When false, alliance value is not updated (RBiH–HRHB remain at init_alliance_rbih_hrhb). Set from scenario.enable_rbih_hrhb_dynamics. */
+    /** Peace-phase §4.8: When false, alliance value is not updated (RBiH–HRHB remain at init_alliance_rbih_hrhb). Set from scenario.enable_rbih_hrhb_dynamics. */
     enable_rbih_hrhb_dynamics?: boolean;
     /** Desktop GUI: which side the human plays (RBiH, RS, HRHB). Set when starting a new campaign from the app. Non-normative for simulation. */
     player_faction?: FactionId;
     /** Calendar date corresponding to turn 0 for this scenario. Defaults to { year: 1991, month: 8, day: 1 } (1 September 1991) when absent. Non-normative for simulation — used by UI only. */
     scenario_start_date?: { year: number; month: number; day: number };
-    /** Phase I Overhaul: recruitment mode from scenario config. Controls whether bottom-up TO detachment
+    /** Peace-phase Overhaul: recruitment mode from scenario config. Controls whether bottom-up TO detachment
      *  lifecycle is active ("bottom_up") or legacy brigade spawn is used ("auto_oob" / "player_choice"). */
     recruitment_mode?: 'player_choice' | 'auto_oob' | 'bottom_up';
     /** Per-faction OSID-level avoidance: brigade AI will not attack these OSIDs for the listed faction.
@@ -934,7 +934,7 @@ export interface SettlementState {
 
 /**
  * Phase 0: Per-municipality organizational factors (Phase_0_Spec §4.2, §7.2).
- * Used for Stability Score derivation and Phase I hand-off.
+ * Used for Stability Score derivation and Peace phase hand-off.
  */
 export interface OrganizationalPenetration {
     /** Police loyalty to controller: loyal | mixed | hostile */
@@ -972,7 +972,7 @@ export interface MunicipalityState {
     control?: 'contested' | 'consolidated' | 'fragmented';
     /** Placeholder: legitimacy. */
     legitimacy?: number;
-    /** Phase 0: Stability Score [0, 100]. Carried to Phase I as flip resistance. */
+    /** Phase 0: Stability Score [0, 100]. Carried to Peace phase as flip resistance. */
     stability_score?: number;
     /** Phase 0: Stability-derived control status (SECURE/CONTESTED/HIGHLY_CONTESTED). */
     control_status?: ControlStatus;
@@ -1236,7 +1236,7 @@ export interface LossOfControlTrendExposureState {
 }
 
 /**
- * Phase II: In-memory front descriptor (non-geometric). Not serialized (Engine Invariants §13.1).
+ * War phase: In-memory front descriptor (non-geometric). Not serialized (Engine Invariants §13.1).
  * Fronts are derived each turn from settlement-level interaction; this type describes one logical front.
  */
 export type PhaseIIFrontStability = 'fluid' | 'static' | 'oscillating';
@@ -1312,19 +1312,19 @@ export interface GameState {
     /** Faction-level strategic manpower reserve. Excess pool.available from rear municipalities flows here;
      *  under-strength front-line brigades draw from it at reduced rate. Key: FactionId → available manpower. */
     strategic_reserves?: Record<string, number>;
-    /** Phase II (Brigade AoR Redesign Phase B): Per-settlement militia garrison strength. Derived from militia_pools + org penetration; settlements with a brigade use brigade garrison instead. Recomputed each turn. */
+    /** War phase (Brigade AoR Redesign Phase B): Per-settlement militia garrison strength. Derived from militia_pools + org penetration; settlements with a brigade use brigade garrison instead. Recomputed each turn. */
     militia_garrison?: Record<SettlementId, number>;
-    /** Phase II (Brigade AoR Redesign Phase C): Per-brigade movement state (packing / in_transit / unpacking). When in_transit, brigade has no AoR. */
+    /** War phase (Brigade AoR Redesign Phase C): Per-brigade movement state (packing / in_transit / unpacking). When in_transit, brigade has no AoR. */
     brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
-    /** Phase II (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
+    /** War phase (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
     brigade_movement_orders?: Record<FormationId, { destination_sids: SettlementId[] }>;
-    /** Phase II: Pending reposition orders (consumed each turn). Set brigade AoR to exactly these 1–4 contiguous faction-controlled settlements; no physical move. */
+    /** War phase: Pending reposition orders (consumed each turn). Set brigade AoR to exactly these 1–4 contiguous faction-controlled settlements; no physical move. */
     brigade_reposition_orders?: Record<FormationId, { settlement_ids: SettlementId[] }>;
-    /** Phase II tactical deploy/undeploy staging (consumed each turn). */
+    /** War phase tactical deploy/undeploy staging (consumed each turn). */
     brigade_deploy_orders?: Record<FormationId, BrigadeDeployAction>;
-    /** Phase II (Brigade AoR Redesign Phase G): Per-brigade encirclement (AoR entirely in enclave). Used for cohesion drain, garrison penalty, movement block. */
+    /** War phase (Brigade AoR Redesign Phase G): Per-brigade encirclement (AoR entirely in enclave). Used for cohesion drain, garrison penalty, movement block. */
     brigade_encircled?: Record<FormationId, boolean>;
-    /** Phase II (Brigade AoR Redesign Phase I): Per-settlement cumulative battle damage [0, 1] (exhaustion-as-terrain). */
+    /** War phase (Brigade AoR Redesign Peace phase): Per-settlement cumulative battle damage [0, 1] (exhaustion-as-terrain). */
     battle_damage?: Record<SettlementId, number>;
     /** Formation spawn directive (FORAWWV H2.4). When set and active for current turn, formation spawn may run. */
     formation_spawn_directive?: FormationSpawnDirective;
@@ -1345,11 +1345,11 @@ export interface GameState {
     end_state?: EndState;
     // Phase 21: Population displacement tracking (per municipality)
     displacement_state?: Record<MunicipalityId, DisplacementState>;
-    /** Phase II: delayed hostile takeover timers (per OSID). */
+    /** War phase: delayed hostile takeover timers (per OSID). */
     hostile_takeover_timers?: Record<string, HostileTakeoverTimerState>;
-    /** Phase II: temporary camp holding pools before rerouting (per municipality). */
+    /** War phase: temporary camp holding pools before rerouting (per municipality). */
     displacement_camp_state?: Record<MunicipalityId, DisplacementCampState>;
-    /** Phase II: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */
+    /** War phase: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */
     minority_flight_state?: Record<SettlementId, MinorityFlightStateEntry>;
     /** Cumulative displacement event log, sorted by (turn, origin_mun). */
     displacement_event_log?: DisplacementEvent[];
@@ -1386,7 +1386,7 @@ export interface GameState {
      * true => contested at initialization; false => uncontested.
      */
     contested_control?: Record<SettlementId, boolean>;
-    /** Phase 0: Per-municipality state (stability_score, organizational_penetration). Hand-off to Phase I. */
+    /** Phase 0: Per-municipality state (stability_score, organizational_penetration). Hand-off to Peace phase. */
     municipalities?: Record<MunicipalityId, MunicipalityState>;
     /** System 4: Settlement-level state (legitimacy, etc). */
     settlements?: Record<SettlementId, SettlementState>;
@@ -1399,25 +1399,25 @@ export interface GameState {
     /** System 6: Sarajevo exception state. */
     sarajevo_state?: SarajevoState;
 
-    // --- Phase I (Early War) state (Phase_I_Specification_v0_3_0.md) ---
+    // --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
     /** Turn (inclusive) until which municipality cannot flip control; keyed by MunicipalityId. */
     war_consolidation_until?: Record<MunicipalityId, number>;
-    /** Militia strength [0, 100] per municipality per faction; Phase I §4.2. */
+    /** Militia strength [0, 100] per municipality per faction; Peace-phase §4.2. */
     war_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
-    /** Control strain accumulated per municipality; Phase I §4.5. */
+    /** Control strain accumulated per municipality; Peace-phase §4.5. */
     war_control_strain?: Record<MunicipalityId, number>;
-    /** JNA withdrawal and asset transfer; Phase I §4.6. Does not start war. */
+    /** JNA withdrawal and asset transfer; Peace-phase §4.6. Does not start war. */
     war_jna?: JNATransitionState;
-    /** RBiH–HRHB alliance relationship [-1, 1]; Phase I §4.8. */
+    /** RBiH–HRHB alliance relationship [-1, 1]; Peace-phase §4.8. */
     war_alliance_rbih_hrhb?: number;
-    /** Phase I §4.8: RBiH–HRHB bilateral state (war tracking, ceasefire, Washington Agreement). */
+    /** Peace-phase §4.8: RBiH–HRHB bilateral state (war tracking, ceasefire, Washington Agreement). */
     rbih_hrhb_state?: RbihHrhbState;
-    /** Phase I §4.4: displacement initiated turn per municipality (hook only; no population change). */
+    /** Peace-phase §4.4: displacement initiated turn per municipality (hook only; no population change). */
     war_displacement_initiated?: Record<MunicipalityId, number>;
     /** B4: Coercion pressure [0, 1] per municipality; reduces flip threshold (makes flip easier). Scenario/init can supply (e.g. Prijedor, Zvornik). */
     coercion_pressure_by_municipality?: Record<MunicipalityId, number>;
 
-    // --- Phase II (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
+    // --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
     /** Supply pressure per faction [0, 100]; higher = worse. Constrains effectiveness; no free replenishment. */
     war_supply_pressure?: Record<FactionId, number>;
     /** Faction-level exhaustion (monotonic, irreversible). Engine Invariants §8. */
@@ -1444,10 +1444,10 @@ export interface GameState {
     /** Municipality-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
     municipality_displacement?: Record<MunicipalityId, number>;
 
-    // --- Brigade Operations System state (Phase II: OSID-based) ---
+    // --- Brigade Operations System state (War phase: OSID-based) ---
     /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
     front_edges?: FrontEdgeState[];
-    /** OSID front-edge snapshot (Phase II operational view) for HoI/OSID consumers. */
+    /** OSID front-edge snapshot (War phase operational view) for HoI/OSID consumers. */
     war_front_edges_osid?: FrontEdgeState[];
     /** HoI-style assignable front segments derived from canonical front_edges. */
     assignable_front_segments?: AssignableFrontSegmentState[];
@@ -1489,7 +1489,7 @@ export interface GameState {
     og_orders?: OGActivationOrder[];
     /** Optional OG subfront extent as front edge IDs (subset of parent corps front). */
     og_subfront_edges?: Record<FormationId, string[]>;
-    /** Settlement holdout state (Phase I settlement-level control). Key: SettlementId. */
+    /** Settlement holdout state (Peace phase settlement-level control). Key: SettlementId. */
     settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
 
     // --- Phase 0 event log and relationship tracking ---

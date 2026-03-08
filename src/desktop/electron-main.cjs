@@ -1350,7 +1350,7 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
       if ((state?.meta?.phase ?? 'war') !== 'war') {
-        return { ok: false, error: 'Movement range query is available in Phase II only' };
+        return { ok: false, error: 'Movement range query is available in War phase only' };
       }
       const result = await sim.queryMovementRangeForBrigade(state, brigadeId, getBaseDir());
       return { ok: true, ...result };
@@ -1368,7 +1368,7 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
       if ((state?.meta?.phase ?? 'war') !== 'war') {
-        return { ok: false, error: 'Movement path query is available in Phase II only' };
+        return { ok: false, error: 'Movement path query is available in War phase only' };
       }
       const result = await sim.queryMovementPathForBrigade(state, brigadeId, destinationSid, getBaseDir());
       if (!result) return { ok: false, error: 'No friendly path to destination' };
@@ -1387,7 +1387,7 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
       if ((state?.meta?.phase ?? 'war') !== 'war') {
-        return { ok: false, error: 'Combat estimate query is available in Phase II only' };
+        return { ok: false, error: 'Combat estimate query is available in War phase only' };
       }
       const estimate = await sim.queryCombatEstimateForBrigade(state, brigadeId, targetSettlementId, getBaseDir());
       if (!estimate) return { ok: false, error: 'Could not estimate combat for this brigade/target' };

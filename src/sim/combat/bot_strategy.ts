@@ -1,5 +1,5 @@
 /**
- * Faction-specific bot strategy profiles for Phase II brigade AI.
+ * Faction-specific bot strategy profiles for War phase brigade AI.
  *
  * Defines per-faction behavioral parameters: corridor priorities, posture thresholds,
  * attack/defense balance, and strategic objectives for target scoring.

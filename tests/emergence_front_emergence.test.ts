@@ -1,9 +1,9 @@
 /**
  * Phase E1.2: Front emergence tests.
- * - Fronts appear only under sustained opposing conditions (phase_ii + opposing control + pressure-eligible).
+ * - Fronts appear only under sustained opposing conditions (war phase + opposing control + pressure-eligible).
  * - No fronts without eligible pressure (same control or ineligible).
  * - Stable ordering and deterministic replay.
- * - Phase gating: runs only in phase_ii.
+ * - Phase gating: runs only in war phase.
  */
 
 import assert from 'node:assert';
@@ -84,7 +84,7 @@ test('phase_ii runTurn includes phase-ii-front-emergence and runs exactly once p
     const { report } = await runTurn(state, { seed: 'fe-ii', settlementEdges: edges });
     const phaseNames = report.phases.map((p) => p.name);
     const count = phaseNames.filter((n) => n === 'phase-ii-front-emergence').length;
-    assert.strictEqual(count, 1, 'phase-ii-front-emergence must run exactly once per turn in phase_ii path');
+    assert.strictEqual(count, 1, 'phase-ii-front-emergence must run exactly once per turn in war phase path');
     assert.ok(Array.isArray(report.front_emergence_report), 'front_emergence_report report should be an array');
 });
 
@@ -95,7 +95,7 @@ test('deriveFrontsFromPressureEligible: peace returns empty array', () => {
     assert.deepStrictEqual(fronts, []);
 });
 
-test('deriveFrontsFromPressureEligible: phase_ii + opposing control + eligible edge yields front with that edge', () => {
+test('deriveFrontsFromPressureEligible: war phase + opposing control + eligible edge yields front with that edge', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = deriveFrontsFromPressureEligible(state, edges);
@@ -109,7 +109,7 @@ test('deriveFrontsFromPressureEligible: phase_ii + opposing control + eligible e
     }
 });
 
-test('deriveFrontsFromPressureEligible: phase_ii + same control on both ends yields no front-active edges', () => {
+test('deriveFrontsFromPressureEligible: war phase + same control on both ends yields no front-active edges', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RBiH' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = deriveFrontsFromPressureEligible(state, edges);

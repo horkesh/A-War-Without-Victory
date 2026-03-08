@@ -1,5 +1,5 @@
 /**
- * Phase I §4.8: Minority militia erosion in mixed municipalities.
+ * Peace-phase §4.8: Minority militia erosion in mixed municipalities.
  *
  * When alliance < HOSTILE_THRESHOLD (0.0), minority faction militia in mixed
  * municipalities erodes at MINORITY_EROSION_RATE_PER_TURN (0.10).

@@ -1,13 +1,13 @@
 /**
- * Phase I Overhaul Phase C: Phased corps activation.
+ * Peace-phase Overhaul Phase C: Phased corps activation.
  *
- * In bottom_up recruitment mode, corps are NOT all created at Phase I entry.
+ * In bottom_up recruitment mode, corps are NOT all created at Peace phase entry.
  * Instead they activate at their historical `available_from` turn:
- *   - RS (VRS): available_from 0 — created at Phase I entry by createOobFormations
+ *   - RS (VRS): available_from 0 — created at Peace phase entry by createOobFormations
  *   - HRHB (HVO OZs): available_from 10 — activated by this step at turn 10
  *   - RBiH (ARBiH corps): available_from 24 — activated by this step at turn 24
  *
- * auto_oob mode is unchanged: all corps are created at Phase I entry.
+ * auto_oob mode is unchanged: all corps are created at Peace phase entry.
  *
  * Deterministic: corps entries iterated in sorted id order.
  * No file I/O — oobCorps is passed in from the pipeline's recruitmentCatalogCache.
@@ -33,7 +33,7 @@ export interface ActivateCorpsReport {
 /**
  * Activate corps whose `available_from <= currentTurn` that do not yet exist in state.formations.
  *
- * Called every Phase I turn by the `activate-corps` pipeline step.
+ * Called every Peace phase turn by the `activate-corps` pipeline step.
  * Gated on `state.meta.recruitment_mode === 'bottom_up'` — the pipeline step already checks this,
  * but callers may also call directly.
  *

@@ -1,7 +1,7 @@
 /**
- * Phase D Step 1: Phase II state schema extension tests.
- * - Schema validation accepts Phase II fields (war_supply_pressure, war_exhaustion, war_exhaustion_local).
- * - Serialization round-trip preserves Phase II state and remains deterministic.
+ * Phase D Step 1: War phase state schema extension tests.
+ * - Schema validation accepts War phase fields (war_supply_pressure, war_exhaustion, war_exhaustion_local).
+ * - Serialization round-trip preserves War phase state and remains deterministic.
  */
 
 import assert from 'node:assert';
@@ -12,8 +12,8 @@ import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { serializeGameState } from '../src/state/serializeGameState.js';
 import { validateGameStateShape } from '../src/state/validateGameState.js';
 
-/** Minimal valid GameState with Phase II fields present. Includes all Phase II fields that migration defaults for round-trip. */
-function phaseIIGameStateFixture(): GameState {
+/** Minimal valid GameState with War phase fields present. Includes all War phase fields that migration defaults for round-trip. */
+function warPhaseGameStateFixture(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
@@ -84,14 +84,14 @@ function phaseIIGameStateFixture(): GameState {
     };
 }
 
-test('validateGameStateShape returns ok for GameState with Phase II fields', () => {
-    const state = phaseIIGameStateFixture();
+test('validateGameStateShape returns ok for GameState with War phase fields', () => {
+    const state = warPhaseGameStateFixture();
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, true, result.ok ? '' : (result as { errors: string[] }).errors.join('; '));
 });
 
-test('validateGameStateShape returns ok for GameState with only some Phase II fields', () => {
-    const state = phaseIIGameStateFixture();
+test('validateGameStateShape returns ok for GameState with only some War phase fields', () => {
+    const state = warPhaseGameStateFixture();
     const stateObj = state as unknown as Record<string, unknown>;
     delete stateObj.war_exhaustion_local;
     const result = validateGameStateShape(stateObj);
@@ -99,7 +99,7 @@ test('validateGameStateShape returns ok for GameState with only some Phase II fi
 });
 
 test('validateGameStateShape rejects war_supply_pressure when value out of [0, 100]', () => {
-    const state = phaseIIGameStateFixture();
+    const state = warPhaseGameStateFixture();
     state.war_supply_pressure!['RBiH'] = 150;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
@@ -107,15 +107,15 @@ test('validateGameStateShape rejects war_supply_pressure when value out of [0, 1
 });
 
 test('validateGameStateShape rejects war_exhaustion when value negative', () => {
-    const state = phaseIIGameStateFixture();
+    const state = warPhaseGameStateFixture();
     state.war_exhaustion!['RS'] = -1;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_exhaustion')));
 });
 
-test('Phase II state serialization round-trip preserves Phase II fields', () => {
-    const original = phaseIIGameStateFixture();
+test('War phase state serialization round-trip preserves War phase fields', () => {
+    const original = warPhaseGameStateFixture();
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
@@ -124,8 +124,8 @@ test('Phase II state serialization round-trip preserves Phase II fields', () => 
     assert.deepStrictEqual(hydrated.war_exhaustion_local, { 'SID_001': 2, 'SID_002': 3 });
 });
 
-test('Phase II state serialization reaches deterministic fixed-point after migration defaults', () => {
-    const original = phaseIIGameStateFixture();
+test('War phase state serialization reaches deterministic fixed-point after migration defaults', () => {
+    const original = warPhaseGameStateFixture();
     const once = serializeState(original);
     const hydrated = deserializeState(once);
     const twice = serializeState(hydrated);
@@ -133,8 +133,8 @@ test('Phase II state serialization reaches deterministic fixed-point after migra
     assert.strictEqual(twice, thrice, 'Serialized output must be byte-identical once migration defaults are materialized');
 });
 
-test('serializeGameState produces identical string when called twice with Phase II state', () => {
-    const state = phaseIIGameStateFixture();
+test('serializeGameState produces identical string when called twice with War phase state', () => {
+    const state = warPhaseGameStateFixture();
     const a = serializeGameState(state);
     const b = serializeGameState(state);
     assert.strictEqual(a, b, 'Two serializations of same state must be byte-identical');

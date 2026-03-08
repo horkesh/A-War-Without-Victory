@@ -132,7 +132,7 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
             if ('escalation_reason' in m && m.escalation_reason !== undefined && m.escalation_reason !== null && typeof m.escalation_reason !== 'string') {
                 errors.push('meta.escalation_reason must be string or null when present');
             }
-            // D0.9.1: Phase I opposing-edges streak (optional; non-negative integer when present)
+            // D0.9.1: Peace phase opposing-edges streak (optional; non-negative integer when present)
             if (
                 'war_opposing_edges_streak' in m &&
                 m.war_opposing_edges_streak !== undefined &&
@@ -155,7 +155,7 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
         }
     }
 
-    // Phase I: optional top-level Phase I state (validate type when present)
+    // Peace phase: optional top-level Peace phase state (validate type when present)
     if ('war_jna' in s && s.war_jna !== undefined) {
         const jna = s.war_jna;
         if (jna !== null && typeof jna === 'object') {
@@ -180,7 +180,7 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
         }
     }
 
-    // Phase II: optional supply pressure and exhaustion (validate type when present)
+    // War phase: optional supply pressure and exhaustion (validate type when present)
     if ('war_supply_pressure' in s && s.war_supply_pressure !== undefined) {
         const pp = s.war_supply_pressure;
         if (pp !== null && typeof pp === 'object' && !Array.isArray(pp)) {
@@ -218,7 +218,7 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
         }
     }
 
-    // Phase II: AoR keys removed (brigade_municipality_assignment, brigade_mun_orders not validated; legacy load may strip)
+    // War phase: AoR keys removed (brigade_municipality_assignment, brigade_mun_orders not validated; legacy load may strip)
 
     // Phase F: displacement state (stored; monotonic [0, 1]; missing maps treated as empty)
     if ('settlement_displacement' in s && s.settlement_displacement !== undefined) {

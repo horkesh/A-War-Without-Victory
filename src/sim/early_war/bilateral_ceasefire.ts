@@ -1,5 +1,5 @@
 /**
- * Phase I §4.8: RBiH–HRHB bilateral ceasefire evaluator (precondition-driven).
+ * Peace-phase §4.8: RBiH–HRHB bilateral ceasefire evaluator (precondition-driven).
  *
  * Six preconditions (ALL must be true):
  *   C1: war duration >= CEASEFIRE_MIN_WAR_DURATION turns since war_started_turn

@@ -5,9 +5,9 @@ const ALLIED_THRESHOLD = 0.2;
 
 export function buildFrontLinesGeoJSON(
   controlledOsidGeoJson: FeatureCollection,
-  phaseIAllianceRbihHrhb?: number | null
+  peacePhaseAllianceRbihHrhb?: number | null
 ): FeatureCollection<LineString> {
   const rbihHrhbAllied =
-    phaseIAllianceRbihHrhb != null ? phaseIAllianceRbihHrhb > ALLIED_THRESHOLD : undefined;
+    peacePhaseAllianceRbihHrhb != null ? peacePhaseAllianceRbihHrhb > ALLIED_THRESHOLD : undefined;
   return generateFactionBorders(controlledOsidGeoJson, rbihHrhbAllied);
 }

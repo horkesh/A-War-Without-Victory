@@ -64,7 +64,7 @@ test('exhaustion does not flip control directly', () => {
     assert.deepStrictEqual(state.political_controllers, controllersBefore);
 });
 
-test('updateExhaustion does nothing when meta.phase is phase_i', () => {
+test('updateExhaustion does nothing when meta.phase is peace', () => {
     const state = minimalPhaseIIState();
     state.meta.phase = 'war';
     state.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };

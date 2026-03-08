@@ -1,8 +1,8 @@
 /**
  * Phase C Step 8: JNA transition tests.
- * - JNA starts when RS is declared (Phase I already gated); does not start the war.
+ * - JNA starts when RS is declared (Peace phase already gated); does not start the war.
  * - Withdrawal and asset transfer advance 0.05 per turn; completion at ≥0.95 / ≥0.90.
- * - Report appears in Phase I runTurn.
+ * - Report appears in Peace phase runTurn.
  */
 
 import assert from 'node:assert';

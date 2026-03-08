@@ -104,7 +104,7 @@ export function validateFormations(
             }
         }
 
-        // Phase I.0: kind validation (if present)
+        // Peace phase.0: kind validation (if present)
         const kind = (f as any).kind;
         if (kind !== undefined && kind !== null) {
             const validKinds = ['militia', 'brigade', 'operational_group', 'corps_asset'];
@@ -118,7 +118,7 @@ export function validateFormations(
             }
         }
 
-        // Phase I.0: readiness validation (if present)
+        // Peace phase.0: readiness validation (if present)
         const readiness = (f as any).readiness;
         if (readiness !== undefined && readiness !== null) {
             const validReadiness = ['forming', 'active', 'overextended', 'degraded'];
@@ -132,7 +132,7 @@ export function validateFormations(
             }
         }
 
-        // Phase I.0: cohesion validation (if present)
+        // Peace phase.0: cohesion validation (if present)
         const cohesion = (f as any).cohesion;
         if (cohesion !== undefined && cohesion !== null) {
             if (!Number.isInteger(cohesion) || cohesion < 0 || cohesion > 100) {
@@ -158,7 +158,7 @@ export function validateFormations(
             }
         }
 
-        // Phase I.0: activation_gated validation (if present)
+        // Peace phase.0: activation_gated validation (if present)
         const activationGated = (f as any).activation_gated;
         if (activationGated !== undefined && activationGated !== null) {
             if (typeof activationGated !== 'boolean') {
@@ -171,7 +171,7 @@ export function validateFormations(
             }
         }
 
-        // Phase I.0: activation_turn validation (if present)
+        // Peace phase.0: activation_turn validation (if present)
         const activationTurn = (f as any).activation_turn;
         if (activationTurn !== undefined && activationTurn !== null) {
             if (!Number.isInteger(activationTurn) || activationTurn > (state.meta?.turn ?? 0)) {

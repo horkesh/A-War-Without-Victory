@@ -1,10 +1,10 @@
 /**
- * Phase I Bot AI: lightweight posture assignment for non-player factions.
+ * Peace phase Bot AI: lightweight posture assignment for non-player factions.
  *
  * Sets front_posture assignments (hold/probe/push) for bot-controlled factions
- * during the Phase I transitional period (typically 2-8 weeks).
+ * during the Peace phase transitional period (typically 2-8 weeks).
  *
- * Simpler than Phase II bot (no corps/brigade hierarchy, no AoR, no OGs).
+ * Simpler than War phase bot (no corps/brigade hierarchy, no AoR, no OGs).
  * Uses front edges + faction-specific aggression levels to assign posture.
  *
  * Deterministic: strictCompare ordering, no Math.random().
@@ -18,7 +18,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Faction-specific aggression profile for Phase I posture assignment. */
+/** Faction-specific aggression profile for Peace phase posture assignment. */
 interface PhaseIFactionProfile {
     /** Fraction of front edges assigned to 'push' posture. */
     push_share: number;
@@ -36,7 +36,7 @@ const PHASE_I_PROFILES: Record<FactionId, PhaseIFactionProfile> = {
         early_push_boost: 0.15,
     },
     RBiH: {
-        // RBiH: mostly defensive in Phase I (survival mode)
+        // RBiH: mostly defensive in Peace phase (survival mode)
         push_share: 0.08,
         probe_share: 0.25,
         early_push_boost: -0.05,

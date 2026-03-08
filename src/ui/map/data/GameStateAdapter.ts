@@ -351,7 +351,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
-    // War-phase: use formation location_osid. Peace/legacy: use brigade_aor. Accept phase_ii as war for backward compat.
+    // War-phase: use formation location_osid. Peace/legacy: use brigade_aor. Accept phase_ii value as war for backward compat.
     const brigadeAorByFormationId: Record<string, string[]> = {};
     const isWarPhase = phase === 'war' || phase === 'phase_ii';
     if (isWarPhase) {
@@ -908,14 +908,14 @@ export function parseGameState(json: unknown): LoadedGameState {
         ) as LoadedGameState['municipalitySupportOrders']
         : undefined;
 
-    let phaseIiSupplyPressure: LoadedGameState['phaseIiSupplyPressure'] | undefined;
+    let warPhaseSupplyPressure: LoadedGameState['warPhaseSupplyPressure'] | undefined;
     const rawSupply = state.war_supply_pressure as Record<string, unknown> | undefined;
     if (rawSupply && typeof rawSupply === 'object' && !Array.isArray(rawSupply)) {
-        const out: NonNullable<LoadedGameState['phaseIiSupplyPressure']> = {};
+        const out: NonNullable<LoadedGameState['warPhaseSupplyPressure']> = {};
         for (const faction of Object.keys(rawSupply).sort((a, b) => a.localeCompare(b))) {
             out[faction] = finiteNumber(rawSupply[faction], 100);
         }
-        if (Object.keys(out).length > 0) phaseIiSupplyPressure = out;
+        if (Object.keys(out).length > 0) warPhaseSupplyPressure = out;
     }
 
     let factionReserves: LoadedGameState['factionReserves'] | undefined;
@@ -981,14 +981,14 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) mobilizationSummary = out;
     }
 
-    let phaseIiExhaustion: LoadedGameState['phaseIiExhaustion'] | undefined;
+    let warPhaseExhaustion: LoadedGameState['warPhaseExhaustion'] | undefined;
     const rawExhaustion = state.war_exhaustion as Record<string, unknown> | undefined;
     if (rawExhaustion && typeof rawExhaustion === 'object' && !Array.isArray(rawExhaustion)) {
-        const out: NonNullable<LoadedGameState['phaseIiExhaustion']> = {};
+        const out: NonNullable<LoadedGameState['warPhaseExhaustion']> = {};
         for (const faction of Object.keys(rawExhaustion).sort((a, b) => a.localeCompare(b))) {
             out[faction] = finiteNumber(rawExhaustion[faction], 0);
         }
-        if (Object.keys(out).length > 0) phaseIiExhaustion = out;
+        if (Object.keys(out).length > 0) warPhaseExhaustion = out;
     }
 
     let namedOfficerData: LoadedGameState['namedOfficerData'] | undefined;
@@ -1379,7 +1379,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
         attackOrders, aorOrders, recentControlEvents, recruitment,
         armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
-        sarajevoTunnelOperational: Boolean(state.sarajevo_tunnel_operational), phaseIiSupplyPressure, phaseIiExhaustion,
+        sarajevoTunnelOperational: Boolean(state.sarajevo_tunnel_operational), warPhaseSupplyPressure, warPhaseExhaustion,
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,

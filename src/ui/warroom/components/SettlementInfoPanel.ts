@@ -384,7 +384,7 @@ export class SettlementInfoPanel {
             <div class="settlement-info-section">
                 <div class="settlement-info-section-header">Local Directives</div>
                 <div class="settlement-info-section-body">
-                    <button class="settlement-info-order-btn" type="button" disabled title="Available in Phase II">Modify Garrison</button>
+                    <button class="settlement-info-order-btn" type="button" disabled title="Available in War phase">Modify Garrison</button>
                 </div>
             </div>
         `;

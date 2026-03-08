@@ -22,7 +22,7 @@ export class SimpleGeneralBot implements Bot {
             formation_assignments: {}
         };
 
-        // Phase I §4.8: Alliance-aware edge filtering
+        // Peace-phase §4.8: Alliance-aware edge filtering
         // When RBiH/HRHB are allied or ceasefire active, skip edges where the opponent is the allied faction
         const rbihHrhbAllied = areRbihHrhbAllied(state);
         const ceasefireActive = state.rbih_hrhb_state?.ceasefire_active === true;
@@ -79,13 +79,13 @@ export class SimpleGeneralBot implements Bot {
                         ? 2
                         : 0;
                 const pressureMagnitude = Math.min(3, Math.floor(Math.abs(pressureValue) / 5));
-                // Phase I §4.8: Post-Washington joint coordination bonus vs RS
+                // Peace-phase §4.8: Post-Washington joint coordination bonus vs RS
                 let jointBonus = 0;
                 if (washingtonSigned && isRbihOrHrhb) {
                     const opponent = edge.side_a === this.factionId ? edge.side_b : edge.side_a;
                     if (opponent === 'RS') jointBonus = 2; // Prioritize RS fronts post-Washington
                 }
-                // Phase I §4.8: When at war with ally, prioritize confrontation edges
+                // Peace-phase §4.8: When at war with ally, prioritize confrontation edges
                 let confrontationBonus = 0;
                 if (isRbihOrHrhb && allyFaction && isRbihHrhbAtWar(state) && !ceasefireActive) {
                     const opponent = edge.side_a === this.factionId ? edge.side_b : edge.side_a;

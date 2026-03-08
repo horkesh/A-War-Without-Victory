@@ -5,11 +5,11 @@
 
 import type { GameState, JNATransitionState } from '../../state/game_state.js';
 
-/** Phase I §4.6.1: withdrawal progress per turn. */
+/** Peace-phase §4.6.1: withdrawal progress per turn. */
 const WITHDRAWAL_PER_TURN = 0.05;
-/** Phase I §4.6.2: asset transfer to RS per turn (JNA_Total_Assets × 0.05). */
+/** Peace-phase §4.6.2: asset transfer to RS per turn (JNA_Total_Assets × 0.05). */
 const ASSET_TRANSFER_PER_TURN = 0.05;
-/** Phase I §6.1: transition complete when withdrawal ≥ 0.95 and asset transfer ≥ 0.90. */
+/** Peace-phase §6.1: transition complete when withdrawal ≥ 0.95 and asset transfer ≥ 0.90. */
 const WITHDRAWAL_COMPLETE_THRESHOLD = 0.95;
 const ASSET_COMPLETE_THRESHOLD = 0.9;
 
@@ -27,8 +27,8 @@ export interface JNATransitionReport {
 }
 
 /**
- * Advance JNA withdrawal and asset transfer (Phase I §4.6).
- * Starts transition when RS is declared and war active (Phase I already gated); advances 0.05/turn each.
+ * Advance JNA withdrawal and asset transfer (Peace-phase §4.6).
+ * Starts transition when RS is declared and war active (Peace phase already gated); advances 0.05/turn each.
  * Does not start the war; war start remains referendum-gated (Engine Invariants §8).
  */
 export function runJNATransition(state: GameState): JNATransitionReport {

@@ -1,5 +1,5 @@
 /**
- * Phase D Step 2/3: Front emergence and stabilization for Phase II (Mid-War).
+ * Phase D Step 2/3: Front emergence and stabilization for War phase (Mid-War).
  * Fronts are derived from settlement-level interaction: opposing control adjacency.
  * Stability (fluid / static / oscillating) is derived from segment active_streak (Phase D Step 3).
  * No geometry created; fronts are non-geometric descriptors only (Engine Invariants §6, §13.1).
@@ -39,8 +39,8 @@ export function deriveFrontStability(
 }
 
 /**
- * Detect Phase II fronts from settlement-level interaction.
- * - Runs only when meta.phase === 'war'. Returns [] otherwise (no fronts before Phase II).
+ * Detect War phase fronts from settlement-level interaction.
+ * - Runs only when meta.phase === 'war'. Returns [] otherwise (no fronts before War phase).
  * - Fronts are derived from opposing political control across settlement adjacency edges.
  * - No geometry created; returns descriptors with edge_ids only.
  * - Deterministic: stable sort by edge_id and side-pair.

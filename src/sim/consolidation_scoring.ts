@@ -1,7 +1,7 @@
 /**
  * Deterministic consolidation and isolated-cluster scoring for AI.
  *
- * Used by Phase I bot (edge ranking) and Phase II brigade AI (target/posture).
+ * Used by Peace phase bot (edge ranking) and War phase brigade AI (target/posture).
  * Scores candidate settlements/municipalities for rear cleanup priority,
  * with exception handling for connected strongholds, isolated holdouts,
  * and fast-cleanup municipalities (e.g. Prijedor, Banja Luka ≤4 turns).

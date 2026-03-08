@@ -41,7 +41,7 @@ export interface Scenario {
     peace_hrhb_declared_at_start?: boolean;
     /** For start_lifecycle_phase phase_0: turn when referendum was held. War starts at referendum_turn + 4 per canon. */
     peace_referendum_turn?: number;
-    /** For start_lifecycle_phase phase_0: turn when war starts (Phase I). Must be referendum_turn + 4. Default: peace_referendum_turn + 4. */
+    /** For start_lifecycle_phase phase_0: turn when war starts (Peace phase). Must be referendum_turn + 4. Default: peace_referendum_turn + 4. */
     peace_war_start_turn?: number;
     /** For start_lifecycle_phase phase_0: control map key/path to apply exactly when war begins (e.g. "apr1992"). */
     peace_war_start_control?: string;
@@ -57,9 +57,9 @@ export interface Scenario {
     ethnic_override_threshold?: number;
     /** Option A: scenario date key (e.g. apr1992) or path to initial formations JSON. When set, harness loads and merges formations at start. */
     init_formations?: string;
-    /** When true or a key (e.g. "default"), at Phase I entry create OOB formations from data/source/oob_brigades.json and oob_corps.json, gated by control. */
+    /** When true or a key (e.g. "default"), at Peace phase entry create OOB formations from data/source/oob_brigades.json and oob_corps.json, gated by control. */
     init_formations_oob?: boolean | string;
-    /** Formation spawn directive (FORAWWV H2.4). When set, harness applies at init so Phase I spawns militia/brigades from pools. */
+    /** Formation spawn directive (FORAWWV H2.4). When set, harness applies at init so Peace phase spawns militia/brigades from pools. */
     formation_spawn_directive?: { kind?: 'militia' | 'brigade' | 'both'; turn?: number; allow_displaced_origin?: boolean };
     /** When true, harness instantiates BotManager and runs bots each turn (Apr 1992 - Jan 1993 sim). */
     use_smart_bots?: boolean;
@@ -69,22 +69,22 @@ export interface Scenario {
     bot_diagnostics?: boolean;
     /** Optional end-of-scenario victory evaluation contract. */
     victory_conditions?: ScenarioVictoryConditions;
-    /** Phase I §4.8: Initial RBiH–HRHB alliance value [-1, 1]. Default 0.35 (fragile alliance, Apr 1992). */
+    /** Peace-phase §4.8: Initial RBiH–HRHB alliance value [-1, 1]. Default 0.35 (fragile alliance, Apr 1992). */
     init_alliance_rbih_hrhb?: number;
-    /** Phase I §4.8: Override default mixed municipalities list. */
+    /** Peace-phase §4.8: Override default mixed municipalities list. */
     init_mixed_municipalities?: string[];
-    /** Phase I §4.8: Enable dynamic RBiH–HRHB alliance mechanics (update, ceasefire, Washington). Default true when init_alliance_rbih_hrhb is set. */
+    /** Peace-phase §4.8: Enable dynamic RBiH–HRHB alliance mechanics (update, ceasefire, Washington). Default true when init_alliance_rbih_hrhb is set. */
     enable_rbih_hrhb_dynamics?: boolean;
-    /** Phase I §4.8 (historical fidelity): Earliest scenario week when RBiH–HRHB open war can begin (bilateral flips, war_started_turn). April 1992 start: 26 = first week of October 1992. Default 26. */
+    /** Peace-phase §4.8 (historical fidelity): Earliest scenario week when RBiH–HRHB open war can begin (bilateral flips, war_started_turn). April 1992 start: 26 = first week of October 1992. Default 26. */
     rbih_hrhb_war_earliest_week?: number;
-    /** B4: Coercion pressure [0, 1] per municipality (mun1990_id). When set, applied to state at init; reduces Phase I flip threshold in those muns. E.g. Prijedor, Zvornik, Foča. */
+    /** B4: Coercion pressure [0, 1] per municipality (mun1990_id). When set, applied to state at init; reduces Peace phase flip threshold in those muns. E.g. Prijedor, Zvornik, Foča. */
     coercion_pressure_by_municipality?: Record<string, number>;
     /** B2: Scenario IDs that must be completed before this scenario is playable. Empty or omitted = no prerequisites. */
     prerequisites?: string[];
     /**
      * Recruitment mode: "player_choice" = setup-phase recruitment from OOB catalog;
      * "auto_oob" = legacy behavior (init_formations_oob: true auto-spawns all). Default: "auto_oob".
-     * "bottom_up" = Phase I Overhaul: TO detachments emerge at 100 threshold, grow via tier system.
+     * "bottom_up" = Peace-phase Overhaul: TO detachments emerge at 100 threshold, grow via tier system.
      */
     recruitment_mode?: 'player_choice' | 'auto_oob' | 'bottom_up';
     /**
@@ -103,9 +103,9 @@ export interface Scenario {
     /** Optional deterministic cap of elective recruits per faction per turn (default 1). */
     max_recruits_per_faction_per_turn?: number;
     /**
-     * Phase I→II transition: initial entrenchment turns (0..12) for all brigades at Phase II entry.
+     * Peace→War phase transition: initial entrenchment turns (0..12) for all brigades at War phase entry.
      * Optional; default 0. When set, implementation may set state.meta.war_entrenchment_init_turns at load
-     * so the transition can apply it. See Phase II Spec §4, §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
+     * so the transition can apply it. See War phase Spec §4, §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
      */
     war_entrenchment_init_turns?: number;
     /**
@@ -115,8 +115,8 @@ export interface Scenario {
      */
     supply_reserves_enabled?: boolean;
     /**
-     * Stuck-in-Phase-I fallback: after this many Phase I turns (since war_start_turn) without transition,
-     * force transition to Phase II. Optional; when absent, default 52 is used for phase_0/phase_i starts.
+     * Stuck-in-Peace-phase fallback: after this many Peace phase turns (since war_start_turn) without transition,
+     * force transition to War phase. Optional; when absent, default 52 is used for phase_0/phase_i starts.
      * See docs/30_planning/PHASE_I_II_EDGE_CASES.md.
      */
     war_force_transition_after_turns?: number;

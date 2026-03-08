@@ -2,7 +2,7 @@
  * Phase B Step 4: Stability Score derivation (Phase_0_Specification_v0_4_0.md §4.6).
  *
  * Formula: Base(50) + Demographic + Organizational - Geographic_Vulnerabilities.
- * Domain: [0, 100]. Output carried to Phase I.
+ * Domain: [0, 100]. Output carried to Peace phase.
  */
 
 import type { ControlStatus, FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../state/game_state.js';

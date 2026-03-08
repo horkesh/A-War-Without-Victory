@@ -335,7 +335,7 @@ export interface BotWeeklyDiagnosticsRow {
     total_reassignments: number;
 }
 
-/** Phase H2.3: Aggregate Phase II attack-resolution metrics from pipeline reports. */
+/** Phase H2.3: Aggregate War phase attack-resolution metrics from pipeline reports. */
 export interface AttackResolutionSummary {
     weeks_at_war: number;
     weeks_with_orders: number;

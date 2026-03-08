@@ -18,7 +18,7 @@ import { deriveFrontStability } from '../combat/front_emergence.js';
 import { isPressureEligible } from './pressure_eligibility.js';
 
 /**
- * Derive Phase II fronts from pressure-eligible edges (front-active settlement edges only).
+ * Derive War phase fronts from pressure-eligible edges (front-active settlement edges only).
  * An edge is front-active iff it has opposing political control AND is pressure-eligible.
  * Runs only when meta.phase === 'war'. Returns [] otherwise.
  * Deterministic: stable sort by edge_id and faction pair.

@@ -1,5 +1,5 @@
 /**
- * Sandbox Turn Engine — Minimal Phase II pipeline for the tactical sandbox.
+ * Sandbox Turn Engine — Minimal War phase pipeline for the tactical sandbox.
  *
  * Wraps the real AWWV engine functions (battle resolution, movement, posture,
  * equipment degradation) in a simplified turn pipeline suitable for browser
@@ -71,7 +71,7 @@ export function processDeploymentStates(
         const brigadeAor = (legacyAoR ?? {}) as Record<string, string | null>;
 
         if (ds.status === 'undeploying') {
-            // Transition: undeploying → undeployed (Phase II: no AoR to contract)
+            // Transition: undeploying → undeployed (War phase: no AoR to contract)
             if (phase !== 'war') {
                 for (const [sid, bid] of Object.entries(brigadeAor)) {
                     if (bid === fid && sid !== ds.hq_sid) {
@@ -86,10 +86,10 @@ export function processDeploymentStates(
         } else if (ds.status === 'deploying') {
             const remaining = (ds.turns_remaining ?? 1) - 1;
             if (remaining <= 0) {
-                // Expand AoR to HQ + adjacent (Phase II: location_osid only; skip AoR expand)
+                // Expand AoR to HQ + adjacent (War phase: location_osid only; skip AoR expand)
                 if (phase === 'war') {
                     toDelete.push(fid);
-                    logs.push(`${fid}: deployed (Phase II location_osid-only)`);
+                    logs.push(`${fid}: deployed (War phase location_osid-only)`);
                     continue;
                 }
                 const pc = (state as any).political_controllers as Record<string, string | null> ?? {};
@@ -241,7 +241,7 @@ export function advanceSandboxTurn(
         degradeEquipment(f, f.posture ?? 'defend', 0.5);
     }
 
-    // 4. Compute brigade pressure (Phase II: no AoR; skip)
+    // 4. Compute brigade pressure (War phase: no AoR; skip)
     const aor = getLegacyAoR(state).brigade_aor;
     if (aor && Object.keys(aor).length > 0 && (state.meta as { phase?: string })?.phase !== 'war') {
         applyBrigadePressureToState(state, edges);

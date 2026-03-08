@@ -24,7 +24,7 @@ type CliOptions = {
     dryRun: boolean;
     outPath: string | null;
     reportOutPath: string | null;
-    kind: 'militia' | 'brigade' | null; // Phase I.0: formation kind
+    kind: 'militia' | 'brigade' | null; // Peace phase.0: formation kind
 };
 
 type GenerationReportFile = {

@@ -169,7 +169,7 @@ export interface GameSave {
     army_theatre_assignment?: Record<string, string>;
     /** Canonical front edges snapshot (when provided by state serialization). */
     front_edges?: FrontEdgeView[];
-    /** Phase II OSID front-edge snapshot for operational/HoI rendering. */
+    /** War phase OSID front-edge snapshot for operational/HoI rendering. */
     war_front_edges_osid?: FrontEdgeView[];
     /** Contiguous assignable front segments derived from canonical front edges. */
     assignable_front_segments?: AssignableFrontSegmentView[];
@@ -190,7 +190,7 @@ export interface GameSave {
         mun_id: string | null;
     }>;
     turn?: number; week?: number; date?: string;
-    /** phase_i | phase_ii; used to hide AoR UI in Phase II. */
+    /** phase_i | phase_ii; used to hide AoR UI in War phase. */
     phase?: string;
     rbih_hrhb_war_earliest_turn?: number | null;
     war_alliance_rbih_hrhb?: number | null;
@@ -321,7 +321,7 @@ export interface LoadedGameState {
     reconIntelligence?: ReconIntelligenceView;
     /** Phase K: Settlement-level movement orders (destination_sids) for map and ORDERS tab. */
     movementOrdersSettlement?: MovementOrderSettlementView[];
-    /** Phase II OSID: per-faction list of OSIDs in enemy ZoC (for ZoC overlay). When set, map may tint these OSIDs. */
+    /** War phase OSID: per-faction list of OSIDs in enemy ZoC (for ZoC overlay). When set, map may tint these OSIDs. */
     enemyZocByFaction?: Record<string, string[]>;
     /** Reposition orders (set AoR to 1–4 settlements; no move). */
     repositionOrders?: RepositionOrderView[];

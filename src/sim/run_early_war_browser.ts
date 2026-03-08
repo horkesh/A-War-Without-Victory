@@ -1,8 +1,8 @@
 /**
- * Browser-safe Phase I turn runner. No Node/fs imports.
- * Used by the warroom when advancing a turn in phase_i. Accepts a pre-loaded settlement graph
+ * Browser-safe Peace phase turn runner. No Node/fs imports.
+ * Used by the warroom when advancing a turn in peace phase. Accepts a pre-loaded settlement graph
  * (built via settlements_parse.buildGraphFromJSON from fetched JSON).
- * Same logic as turn_pipeline Phase I path; does not import turn_pipeline or map/settlements.
+ * Same logic as turn_pipeline Peace phase path; does not import turn_pipeline or map/settlements.
  */
 
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
@@ -60,13 +60,13 @@ function assertNoAoRInEarlyWar(state: GameState): void {
     const factions = state.factions ?? [];
     for (const faction of factions) {
         if (faction.areasOfResponsibility && faction.areasOfResponsibility.length > 0) {
-            throw new Error(`Phase I forbids AoR assignment; faction ${faction.id} has AoR entries`);
+            throw new Error(`Peace phase forbids AoR assignment; faction ${faction.id} has AoR entries`);
         }
     }
 }
 
 /**
- * Run one Phase I turn in the browser. Requires pre-loaded settlement graph (no Node).
+ * Run one Peace phase turn in the browser. Requires pre-loaded settlement graph (no Node).
  * Returns new state and report; does not mutate the argument.
  */
 export async function runPhaseITurn(
@@ -78,7 +78,7 @@ export async function runPhaseITurn(
         throw new Error('runPhaseITurn: state must be in war phase');
     }
     if (!isEarlyWarAllowed(working)) {
-        throw new Error('runPhaseITurn: Phase I requires referendum_held and current_turn >= war_start_turn');
+        throw new Error('runPhaseITurn: Peace phase requires referendum_held and current_turn >= war_start_turn');
     }
     assertNoAoRInEarlyWar(working);
 

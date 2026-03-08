@@ -1,7 +1,7 @@
 /**
- * Phase C Step 2: Phase I entry and gating tests.
- * - Phase I unreachable without referendum_held.
- * - Phase I unreachable unless current_turn >= war_start_turn.
+ * Phase C Step 2: Peace phase entry and gating tests.
+ * - Peace phase unreachable without referendum_held.
+ * - Peace phase unreachable unless current_turn >= war_start_turn.
  * - Phase 0 continues to run safely via state pipeline (runOneTurn).
  */
 

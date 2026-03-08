@@ -1,9 +1,9 @@
 /**
  * Phase D Step 8: Phase D validation suite.
- * - Fronts are emergent (derived from opposing control; no fronts in Phase I).
+ * - Fronts are emergent (derived from opposing control; no fronts in Peace phase).
  * - Exhaustion accumulates (never decreases).
  * - No total victory reachable (no victory/decisive in descriptors or outcomes).
- * - Phase B and C invariants still hold (Phase I gating, no control flip before war_start_turn).
+ * - Phase B and C invariants still hold (Peace phase gating, no control flip before war_start_turn).
  */
 
 import assert from 'node:assert';
@@ -47,7 +47,7 @@ test('Phase D: fronts are emergent (no fronts when peace)', () => {
     assert.strictEqual(fronts.length, 0);
 });
 
-test('Phase D: fronts are emergent (fronts when phase_ii and opposing control)', () => {
+test('Phase D: fronts are emergent (fronts when war phase and opposing control)', () => {
     const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const fronts = detectFronts(state, edges);

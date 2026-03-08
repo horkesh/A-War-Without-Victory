@@ -1,7 +1,7 @@
 /**
  * Phase 0 Directive Staging System — manages staged investments before turn advance.
  *
- * Pattern: mirrors Phase II order staging. Player stages investments, previews
+ * Pattern: mirrors War phase order staging. Player stages investments, previews
  * costs, can undo individual investments or clear all, then confirms when
  * advancing the turn via the calendar.
  *

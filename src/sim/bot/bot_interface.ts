@@ -10,7 +10,7 @@ export interface BotDecisions {
     formation_assignments?: Record<string, string>;
 }
 
-/** Optional graph context for consolidation-aware edge scoring (Phase I). */
+/** Optional graph context for consolidation-aware edge scoring (Peace phase). */
 export interface ConsolidationContext {
     edges: EdgeRecord[];
     sidToMun: Map<string, string> | Record<string, string>;
@@ -22,7 +22,7 @@ export interface BotDecisionContext {
     difficulty: BotDifficulty;
     strategy: BotStrategyProfile;
     timeContext?: BotTimeContext;
-    /** When present, Phase I bot adds consolidation bonus to edge scores. */
+    /** When present, Peace phase bot adds consolidation bonus to edge scores. */
     consolidationContext?: ConsolidationContext;
 }
 

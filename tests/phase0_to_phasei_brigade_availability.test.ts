@@ -106,7 +106,7 @@ function runToSpawn(state: GameState): { poolAvailable: number; spawned: number 
     return { poolAvailable, spawned: spawnReport.formations_created };
 }
 
-test('Phase 0 investment deterministically changes Phase I brigade availability', () => {
+test('Phase 0 investment deterministically changes Peace phase brigade availability', () => {
     const baselineState = makePhase0State();
     const investedState = makePhase0State();
 
@@ -165,7 +165,7 @@ test('Coordinated directives update alliance state deterministically', () => {
     assert.ok((stateA.phase0_relationships?.rbih_rs ?? 0) < -0.2);
 });
 
-test('Phase 0 to Phase I handoff seeds uninvested municipalities with formula values', () => {
+test('Phase 0 to Peace phase handoff seeds uninvested municipalities with formula values', () => {
     const state = makePhase0State();
     state.municipalities = {
         TEST_MUN: {

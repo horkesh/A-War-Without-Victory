@@ -2,13 +2,13 @@
  * Browser-safe Phase 0 turn advancement for the warroom.
  * Uses runPhase0Turn from the phase0 pipeline and advances meta.turn by 1.
  * No Node/fs dependencies so it can run in the Vite bundle.
- * Phase I+ is not supported here; use sim/turn_pipeline runTurn in Node for war phases.
+ * Peace phase+ is not supported here; use sim/turn_pipeline runTurn in Node for war phases.
  *
  * Now wires real options (buildPhase0TurnOptions), bot AI (runPhase0BotInvestments),
  * alliance tracking, and event generation (generatePhase0Events) into the
  * Phase 0 pipeline.
  *
- * Phase I handoff: when runPhase0Turn transitions to phase_i, seeds org-pen for
+ * Peace phase handoff: when runPhase0Turn transitions to phase_i, seeds org-pen for
  * un-invested municipalities based on political controller, initializes JNA
  * transition state, and emits a war_begins event.
  */
@@ -137,7 +137,7 @@ export function runPhase0TurnAndAdvance(
     // 4. Generate events by comparing pre/post state
     const events: Phase0Event[] = generatePhase0Events(preTurnSnapshot, working);
 
-    // 5. Phase I handoff: if runPhase0Turn transitioned to phase_i
+    // 5. Peace phase handoff: if runPhase0Turn transitioned to phase_i
     // Note: runPhase0Turn mutates working.meta.phase in place, but TS control flow
     // still narrows it to 'peace' from the guard above. Cast to string for comparison.
     const currentPhase: string = working.meta.phase;
@@ -169,7 +169,7 @@ export function runPhase0TurnAndAdvance(
 }
 
 /**
- * Apply Phase I handoff: seed organizational penetration for un-invested municipalities
+ * Apply Peace phase handoff: seed organizational penetration for un-invested municipalities
  * based on political controller, and initialize JNA transition state.
  *
  * Per Phase 0 Spec §6: municipalities without explicit investment get a baseline
@@ -191,7 +191,7 @@ function applyPhaseIHandoff(state: GameState): void {
         }
     }
 
-    // Initialize Phase I JNA transition state
+    // Initialize Peace phase JNA transition state
     if (!state.war_jna) {
         state.war_jna = {
             transition_begun: false,

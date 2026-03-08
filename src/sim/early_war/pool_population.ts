@@ -1,5 +1,5 @@
 /**
- * Phase I: Militia pool population from war_militia_strength and displacement.
+ * Peace phase: Militia pool population from war_militia_strength and displacement.
  * Plan: militia_and_brigade_formation_system.
  * Deterministic: mun_id then faction sorted; displaced contribution by controller.
  */
@@ -183,7 +183,7 @@ export interface DisplacedAndCrossEthnicReport {
 
 /**
  * Add displaced-in and RBiH cross-ethnic contributions to militia_pools.
- * Shared by Phase I runPoolPopulation and Phase II ongoing mobilization. Deterministic.
+ * Shared by Peace phase runPoolPopulation and War phase ongoing mobilization. Deterministic.
  */
 export function runDisplacedAndCrossEthnicContributions(
     state: GameState,
@@ -397,7 +397,7 @@ export function runPoolPopulation(
         }
     }
 
-    // 2) Displaced + 3) RBiH cross-ethnic: shared path (Phase I and Phase II).
+    // 2) Displaced + 3) RBiH cross-ethnic: shared path (Peace phase and War phase).
     const displacedReport = runDisplacedAndCrossEthnicContributions(state, settlements, population1991ByMun);
     report.displaced_contributions = displacedReport.displaced_contributions;
     if (displacedReport.rbih_10pct_additions != null) report.rbih_10pct_additions = displacedReport.rbih_10pct_additions;

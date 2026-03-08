@@ -1,5 +1,5 @@
 /**
- * Phase I Overhaul Phase D: Tests for promoteFormations and naming helpers.
+ * Peace-phase Overhaul Phase D: Tests for promoteFormations and naming helpers.
  *
  * Tests cover:
  *  1.  Eligible militia formation promotes to brigade

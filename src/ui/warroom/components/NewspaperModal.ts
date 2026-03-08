@@ -87,7 +87,7 @@ export class NewspaperModal {
     }
 
     /**
-     * Generate newspaper content from war-phase TurnEvents (Phase I / Phase II).
+     * Generate newspaper content from war-phase TurnEvents (Peace phase / War phase).
      * Uses delta-based comparison against previous turn snapshot.
      */
     private generateWarContent(): NewspaperContent {

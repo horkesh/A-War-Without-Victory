@@ -45,7 +45,7 @@ export function deriveAoRMembership(
 ): PhaseEAorMembership {
     const result: PhaseEAorMembership = { by_formation: {} };
 
-    // Phase E only runs in phase_ii
+    // Phase E only runs in war phase
     if (state.meta?.phase !== 'war') {
         return result;
     }

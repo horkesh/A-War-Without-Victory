@@ -1166,7 +1166,7 @@ export class MapApp {
 
     // ─── Front Lines ────────────────────────────────
 
-    /** Phase I §4.8: no front between RBiH and HRHB until war (match backend ALLIED_THRESHOLD 0.20). */
+    /** Peace-phase §4.8: no front between RBiH and HRHB until war (match backend ALLIED_THRESHOLD 0.20). */
     private shouldDrawFrontSegment(ca: string | null, cb: string | null): boolean {
         if (ca == null || cb == null || ca === cb) return false;
         const isRbihHrhb =
@@ -1431,7 +1431,7 @@ export class MapApp {
             if (c) return c;
         }
         if (gs?.phase === 'war') {
-            // Phase II: no AoR fallback; use hq_sid or municipality only
+            // War phase: no AoR fallback; use hq_sid or municipality only
             if (f.hq_sid) {
                 const c = this.data.settlementCentroids.get(f.hq_sid);
                 if (c) return c;
@@ -1977,7 +1977,7 @@ export class MapApp {
         const gs = this.state.snapshot.loadedGameState;
         const formationId = this.state.snapshot.selectedFormationId;
         if (!gs || !formationId) return;
-        if (gs.phase === 'war') return; // Phase II: no AoR; location_osid only
+        if (gs.phase === 'war') return; // War phase: no AoR; location_osid only
         const formation = gs.formations.find((f) => f.id === formationId);
         if (!formation) return;
 
@@ -4667,7 +4667,7 @@ export class MapApp {
       <div class="tm-panel-field"><span class="tm-panel-field-label">Cohesion</span><span class="tm-panel-field-value">${f.cohesion}%</span></div>
     </div>`;
         const isPhaseII = gs.phase === 'war';
-        // Phase II: no AoR UI (location_osid only). Phase I: AoR section + coverage.
+        // War phase: no AoR UI (location_osid only). Peace phase: AoR section + coverage.
         const aorStatusParts: string[] = isPhaseII ? [] : [`${coveredCount}/${aorCount} settlements covered`];
         if (!isPhaseII && overflowCount > 0) aorStatusParts.push(`<span style="color:#ef9a9a">${overflowCount} overextended</span>`);
         if (!isPhaseII && fortressActive) aorStatusParts.push(`<span style="color:#80cbc4">urban fortress</span>`);
@@ -4712,7 +4712,7 @@ export class MapApp {
             .join('');
         const canAssignFront = !!this.getDesktopBridge()?.assignBrigadeToFront;
         const noFrontsHint = frontSegments.length === 0
-            ? '<div style="margin-top:4px;font-size:10px;color:#78909c">No assignable fronts in state. Load a Phase II save or advance turn to derive fronts.</div>'
+            ? '<div style="margin-top:4px;font-size:10px;color:#78909c">No assignable fronts in state. Load a War phase save or advance turn to derive fronts.</div>'
             : '';
         html += `<div class="tm-panel-section"><div class="tm-panel-section-header">FRONT ASSIGNMENT</div>
       <div class="tm-panel-field"><span class="tm-panel-field-label">Current</span><span class="tm-panel-field-value">${this.escapeHtml(currentFrontLabel)}</span></div>
@@ -5110,7 +5110,7 @@ export class MapApp {
       <button type="button" class="tm-toolbar-btn" id="move-brigade-here-btn" data-brigade-id="${this.escapeHtml(formation.id)}" data-settlement-id="${this.escapeHtml(sid)}">Move brigade here</button></div>`;
     }
 
-    /** Section "Transfer to brigade" for player-owned settlements in Phase II with a current AoR-holding brigade. */
+    /** Section "Transfer to brigade" for player-owned settlements in War phase with a current AoR-holding brigade. */
     private renderTransferToBrigadeSection(sid: string): string {
         const gs = this.state.snapshot.loadedGameState;
         if (!gs?.player_faction || gs.phase !== 'war') return '';

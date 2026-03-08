@@ -1,5 +1,5 @@
 /**
- * Tests for Phase II brigade posture system (Stage 4B).
+ * Tests for War phase brigade posture system (Stage 4B).
  * Validates posture adoption constraints, order processing,
  * per-turn cohesion costs, and auto-downgrade mechanics.
  *

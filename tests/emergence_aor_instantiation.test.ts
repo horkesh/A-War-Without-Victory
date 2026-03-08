@@ -35,13 +35,13 @@ function minimalPhaseIIState(): GameState {
     };
 }
 
-test('AoR: no AoRs when phase_i', () => {
+test('AoR: no AoRs when peace phase', () => {
     const state = minimalPhaseIIState();
     state.meta.phase = 'war';
     state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);
-    assert.strictEqual(Object.keys(aor.by_formation).length, 0, 'No AoRs in phase_i');
+    assert.strictEqual(Object.keys(aor.by_formation).length, 0, 'No AoRs in peace phase');
 });
 
 test('AoR: no AoRs when no eligible edges', () => {

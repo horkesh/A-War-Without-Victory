@@ -1,5 +1,5 @@
 /**
- * OSID-level supply reachability for Phase II.
+ * OSID-level supply reachability for War phase.
  * BFS from faction supply sources over OSID graph (faction-controlled OSIDs only).
  * Determinism: sorted iteration (faction_id, osid, edge_id). No timestamps or RNG.
  * Canon: SUPPLY_DESIGN.md, Systems Manual §14.

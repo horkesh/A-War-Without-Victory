@@ -1,5 +1,5 @@
 /**
- * Phase II: Per-turn pool growth from conscription, displacement, and cross-ethnic contributions.
+ * War phase: Per-turn pool growth from conscription, displacement, and cross-ethnic contributions.
  * Runs before phase-ii-brigade-reinforcement so freshly mobilized manpower is available same turn.
  * Deterministic: sorted mun_id then faction; controller tie-break by localeCompare.
  */
@@ -165,7 +165,7 @@ export interface OngoingMobilizationReport {
 }
 
 /**
- * Run Phase II ongoing mobilization: conscription then shared displaced + cross-ethnic.
+ * Run War phase ongoing mobilization: conscription then shared displaced + cross-ethnic.
  * Mutates state.militia_pools. Deterministic iteration order.
  */
 export function runOngoingMobilization(

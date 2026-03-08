@@ -77,7 +77,7 @@ export interface OobCorps {
     /** Optional historical corps HQ OSID (op:mun:slug). When set, used as formation location_osid. */
     hq_osid?: string;
     kind: 'corps' | 'army_hq';
-    /** Turn when this corps becomes available (Phase I Overhaul: phased activation). Default 0. */
+    /** Turn when this corps becomes available (Peace-phase Overhaul: phased activation). Default 0. */
     available_from: number;
     /** Initial officer quality [0,1]. Army HQs reflect general staff competence at war start. */
     initial_officer_quality?: number;

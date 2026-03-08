@@ -1,5 +1,5 @@
 /**
- * Phase II §11.3: Operation Storm (Oluja) precondition check.
+ * War phase §11.3: Operation Storm (Oluja) precondition check.
  *
  * When Washington Agreement is active and RS threat, exhaustion, and IVP meet thresholds,
  * sets state.meta.operation_storm_triggered. Same pattern as phase-ii-washington-check.

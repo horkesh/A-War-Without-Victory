@@ -369,7 +369,7 @@ function migrateState(raw: unknown): GameState {
                         }
                     }
 
-                    // Phase I.0: Initialize formation lifecycle fields with defaults if missing
+                    // Peace phase.0: Initialize formation lifecycle fields with defaults if missing
                     // kind: default 'brigade' for backward compatibility
                     if (form.kind === undefined) {
                         form.kind = 'brigade';
@@ -489,8 +489,8 @@ function migrateState(raw: unknown): GameState {
             // Phase 0: Default event log and relationships for older saves (do not inject if absent)
             // phase0_events_log and phase0_relationships are optional; leave undefined if not present
 
-            // Phase I: Default Phase I optional state for determinism when present (do not inject for old saves).
-            // When any phase_i_* key exists, ensure others have deterministic defaults for round-trip.
+            // Peace phase: Default Peace phase optional state for determinism when present (do not inject for old saves).
+            // When any peace-phase key exists, ensure others have deterministic defaults for round-trip.
             const hasAnyPhaseI =
                 (candidate.war_consolidation_until !== undefined) ||
                 (candidate.war_militia_strength !== undefined) ||
@@ -526,7 +526,7 @@ function migrateState(raw: unknown): GameState {
                 }
             }
 
-            // Phase II: Default Phase II optional state for determinism when present (do not inject for old saves).
+            // War phase: Default War phase optional state for determinism when present (do not inject for old saves).
             const hasAnyPhaseII =
                 (candidate as any).war_supply_pressure !== undefined ||
                 (candidate as any).war_exhaustion !== undefined ||
@@ -573,7 +573,7 @@ function migrateState(raw: unknown): GameState {
                 (candidate as any).displacement_event_log = [];
             }
 
-            // AoR phase-out: strip legacy keys so serialization allowlist passes (Phase II uses location_osid only)
+            // AoR phase-out: strip legacy keys so serialization allowlist passes (War phase uses location_osid only)
             delete candidate.brigade_aor;
             delete candidate.brigade_aor_orders;
             delete candidate.brigade_mun_orders;

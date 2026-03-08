@@ -123,7 +123,7 @@ test('Phase E validation: Phase D invariants still hold (exhaustion monotonic)',
     const result = await runTurn(state, { seed: 'test', settlementEdges: edges });
 
     // Phase E must not decrease exhaustion (Phase D invariant: exhaustion monotonic)
-    // Note: Phase II consolidation may increase exhaustion; Phase E must not decrease it
+    // Note: War phase consolidation may increase exhaustion; Phase E must not decrease it
     for (const fid of Object.keys(originalExhaustion)) {
         const original = originalExhaustion[fid] ?? 0;
         const current = result.nextState.war_exhaustion?.[fid] ?? 0;

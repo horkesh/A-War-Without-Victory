@@ -182,7 +182,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 export function formatTurnDate(turn: number, phase = ''): string {
     const anchorMs = phase.toLowerCase() === 'peace'
         ? Date.UTC(1991, 8, 1)   // 1 Sep 1991
-        : Date.UTC(1992, 3, 6);  // 6 Apr 1992 (phase_i / phase_ii / default)
+        : Date.UTC(1992, 3, 6);  // 6 Apr 1992 (peace / war / default)
     const dayMs = 24 * 60 * 60 * 1000;
     const d = new Date(anchorMs + Math.max(0, turn) * 7 * dayMs);
     return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;

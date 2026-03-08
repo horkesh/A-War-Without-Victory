@@ -1,8 +1,8 @@
 /**
- * Phase C Step 1: Phase I state schema extension tests.
- * - Schema validation accepts Phase I fields (war_consolidation_until, war_militia_strength,
+ * Phase C Step 1: Peace phase state schema extension tests.
+ * - Schema validation accepts Peace phase fields (war_consolidation_until, war_militia_strength,
  *   war_control_strain, war_jna, war_alliance_rbih_hrhb).
- * - Serialization round-trip preserves Phase I state and remains deterministic.
+ * - Serialization round-trip preserves Peace phase state and remains deterministic.
  */
 
 import assert from 'node:assert';
@@ -13,8 +13,8 @@ import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { serializeGameState } from '../src/state/serializeGameState.js';
 import { validateGameStateShape } from '../src/state/validateGameState.js';
 
-/** Minimal valid GameState with Phase I fields present. Includes all fields that migration defaults so round-trip is byte-identical. */
-function phaseIGameStateFixture(): GameState {
+/** Minimal valid GameState with Peace phase fields present. Includes all fields that migration defaults so round-trip is byte-identical. */
+function peacePhaseGameStateFixture(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
@@ -98,14 +98,14 @@ function phaseIGameStateFixture(): GameState {
     };
 }
 
-test('validateGameStateShape returns ok for GameState with Phase I fields', () => {
-    const state = phaseIGameStateFixture();
+test('validateGameStateShape returns ok for GameState with Peace phase fields', () => {
+    const state = peacePhaseGameStateFixture();
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, true, result.ok ? '' : (result as { errors: string[] }).errors.join('; '));
 });
 
-test('validateGameStateShape returns ok for GameState with only some Phase I fields', () => {
-    const state = phaseIGameStateFixture();
+test('validateGameStateShape returns ok for GameState with only some Peace phase fields', () => {
+    const state = peacePhaseGameStateFixture();
     const stateObj = state as unknown as Record<string, unknown>;
     delete stateObj.war_militia_strength;
     delete stateObj.war_alliance_rbih_hrhb;
@@ -114,7 +114,7 @@ test('validateGameStateShape returns ok for GameState with only some Phase I fie
 });
 
 test('validateGameStateShape rejects war_jna when transition_begun is not boolean', () => {
-    const state = phaseIGameStateFixture();
+    const state = peacePhaseGameStateFixture();
     state.war_jna!.transition_begun = 1 as unknown as boolean;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
@@ -122,7 +122,7 @@ test('validateGameStateShape rejects war_jna when transition_begun is not boolea
 });
 
 test('validateGameStateShape rejects war_jna when withdrawal_progress out of range', () => {
-    const state = phaseIGameStateFixture();
+    const state = peacePhaseGameStateFixture();
     state.war_jna!.withdrawal_progress = 1.5;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
@@ -130,15 +130,15 @@ test('validateGameStateShape rejects war_jna when withdrawal_progress out of ran
 });
 
 test('validateGameStateShape rejects war_alliance_rbih_hrhb when out of [-1, 1]', () => {
-    const state = phaseIGameStateFixture();
+    const state = peacePhaseGameStateFixture();
     state.war_alliance_rbih_hrhb = 1.5;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_alliance_rbih_hrhb')));
 });
 
-test('Phase I state serialization round-trip preserves Phase I fields', () => {
-    const original = phaseIGameStateFixture();
+test('Peace phase state serialization round-trip preserves Peace phase fields', () => {
+    const original = peacePhaseGameStateFixture();
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
@@ -153,8 +153,8 @@ test('Phase I state serialization round-trip preserves Phase I fields', () => {
     assert.strictEqual(hydrated.war_alliance_rbih_hrhb, 0.5);
 });
 
-test('Phase I state serialization reaches deterministic fixed-point after migration defaults', () => {
-    const original = phaseIGameStateFixture();
+test('Peace phase state serialization reaches deterministic fixed-point after migration defaults', () => {
+    const original = peacePhaseGameStateFixture();
     const once = serializeState(original);
     const hydrated = deserializeState(once);
     const twice = serializeState(hydrated);
@@ -162,8 +162,8 @@ test('Phase I state serialization reaches deterministic fixed-point after migrat
     assert.strictEqual(twice, thrice, 'Serialized output must be byte-identical once migration defaults are materialized');
 });
 
-test('serializeGameState produces identical string when called twice with Phase I state', () => {
-    const state = phaseIGameStateFixture();
+test('serializeGameState produces identical string when called twice with Peace phase state', () => {
+    const state = peacePhaseGameStateFixture();
     const a = serializeGameState(state);
     const b = serializeGameState(state);
     assert.strictEqual(a, b, 'Two serializations of same state must be byte-identical');

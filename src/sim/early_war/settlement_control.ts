@@ -1,5 +1,5 @@
 /**
- * Phase I settlement-level control change (wave + holdout cleanup).
+ * Peace phase settlement-level control change (wave + holdout cleanup).
  *
  * Replaces municipality-level bulk flips with settlement-by-settlement resolution:
  * - Wave phase: when a municipality is overrun, settlements with favorable demographics flip immediately;

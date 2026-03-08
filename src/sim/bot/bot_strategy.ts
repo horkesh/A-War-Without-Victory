@@ -148,7 +148,7 @@ export function resolveAggression(profile: BotStrategyProfile, phase: PhaseName 
         broadBase = clamp01(broadBase);
     }
 
-    // Phase I §4.8: Alliance-aware aggression modifiers
+    // Peace-phase §4.8: Alliance-aware aggression modifiers
     let allianceMod = 0;
     if (state) {
         const rhs = state.rbih_hrhb_state;

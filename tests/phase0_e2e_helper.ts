@@ -40,7 +40,7 @@ export function buildMinimalPhase0State(opts?: {
     referendum_held?: boolean;
     /** Turn when referendum was held (canon: war_start_turn = referendum_turn + 4). */
     referendum_turn?: number;
-    /** Turn when war starts (Phase I); must be referendum_turn + 4. */
+    /** Turn when war starts (Peace phase); must be referendum_turn + 4. */
     war_start_turn?: number;
 }): GameState {
     const turn = opts?.turn ?? 0;

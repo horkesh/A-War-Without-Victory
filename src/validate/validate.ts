@@ -83,7 +83,7 @@ export function validateState(state: GameState): ValidationIssue[] {
     issues.push(...validateControlOverrides(state));
     issues.push(...validateControlRecognition(state));
 
-    // Phase II: Brigade/OG location_osid must be in faction-controlled territory
+    // War phase: Brigade/OG location_osid must be in faction-controlled territory
     issues.push(...validateBrigadeLocationControl(state));
 
     // Phase 12C.3: Validate supply_rights

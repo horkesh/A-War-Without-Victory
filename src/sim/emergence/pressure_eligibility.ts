@@ -19,7 +19,7 @@ export interface PressureEdge {
 
 /**
  * Resolve a settlement ID to the key used in political_controllers.
- * When political_controllers is OSID-keyed (Phase II after promotePoliticalControllersToOsid)
+ * When political_controllers is OSID-keyed (War phase after promotePoliticalControllersToOsid)
  * and the provided id is a canonical SID (does not start with "op:"), the SID must be
  * mapped to its OSID via canonicalToOperational before the lookup succeeds.
  * Falls back to the id itself when the map is absent or the id is not found in it.
@@ -45,7 +45,7 @@ function resolveControlKey(id: string, pc: Record<string, unknown>, canonicalToO
  * Hard gating: both settlements must have political control state; pressure flows
  * where opposing control meets (front edge). No geometry; uses contact/adjacency only.
  *
- * Fix (System C OSID key mismatch): state.political_controllers is OSID-keyed after Phase II
+ * Fix (System C OSID key mismatch): state.political_controllers is OSID-keyed after War phase
  * initialization (promotePoliticalControllersToOsid), but edges from the canonical settlement
  * graph carry SID endpoints (e.g. "S100013"). When canonicalToOperational is provided, SID
  * endpoints are resolved to their OSIDs before the political_controllers lookup, so the
