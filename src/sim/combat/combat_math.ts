@@ -26,6 +26,7 @@ import { getEnclaveDefenseBonus } from './enclave_resilience.js';
 import { getLocalFrontDensityModifier } from './local_front_defense.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import type { Osid } from './osid_adjacency.js';
+import { getHomeDistanceMult } from './home_distance.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome type
@@ -564,6 +565,18 @@ export function getToTerrainDefenseMult(
     return 1.0;
 }
 
+/**
+ * Look up the home distance multiplier for a formation from the per-turn cache.
+ * Returns 1.0 if no cache or no entry (backwards compatible).
+ */
+function getHomeDistanceMultFromCache(state: GameState, formation: FormationState): number {
+    const cache = state.home_distance_cache;
+    if (!cache) return 1.0;
+    const hops = cache[formation.id];
+    if (hops === undefined) return 1.0;
+    return getHomeDistanceMult(hops);
+}
+
 export function classifyOutcome(powerRatio: number): CombatOutcome {
     if (powerRatio >= VICTORY_THRESHOLD_DECISIVE) return 'decisive_victory';
     if (powerRatio >= VICTORY_THRESHOLD_NORMAL) return 'victory';
@@ -598,7 +611,8 @@ export function computeAttackerPower(
     const heavyMult = getHeavyWeaponsOffensiveMult(formation, targetTerrainMult);
     const officerMult = getThreeTierOfficerMod(formation, state, 'attack');
     const fatigueMult = getFatigueMult(formation, 'attack');
-    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult * fatigueMult;
+    const homeMult = getHomeDistanceMultFromCache(state, formation);
+    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult * fatigueMult * homeMult;
 }
 
 export function computeDefenderPower(
@@ -636,7 +650,8 @@ export function computeDefenderPower(
     const officerMult = getThreeTierOfficerMod(formation, state, 'defend');
     const ethnicMult = 1.0 + (ethnicDefenseBonus ?? 0);
     const fatigueMult = getFatigueMult(formation, 'defend');
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult * officerMult * ethnicMult * fatigueMult;
+    const homeMult = getHomeDistanceMultFromCache(state, formation);
+    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult * officerMult * ethnicMult * fatigueMult * homeMult;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -283,6 +283,9 @@ export interface CorpsDirective {
     reinforce_sector_ids?: string[];
     /** Priority sector for offensive concentration (sector with most offensive targets). */
     priority_sector_id?: string;
+    /** Explicit brigade-to-sector reassignment orders from density equalization.
+     *  Brigade AI reads these and issues column march orders to move brigades to their assigned sector. */
+    sector_reassignment_orders?: Array<{ brigade_id: string; to_sector_id: string }>;
 }
 
 /** Per-corps command state. */
@@ -420,6 +423,8 @@ export interface FormationState {
     recruit_pool_faction?: FactionId;
     /** Fallback OSID where brigade reforms if stranded with no retreat path. Set from OOB. */
     fallback_osid?: string;
+    /** Origin OSID — where this brigade was raised / permanently based. Used for home distance effectiveness. Set at creation, never changes. */
+    home_osid?: string;
     /** Garrison unit — only defends, never attacks. Set from OOB (e.g. VRS 65th Protection Regiment). */
     garrison?: boolean;
     /** Target OSID for paramilitary sweep. When set, this paramilitary unit marches to and captures this OSID, then dissolves. */
@@ -1508,6 +1513,9 @@ export interface GameState {
 
     /** Sector-facing intelligence: per-friendly-sector intelligence records (one per facing enemy sector). Derived each turn. */
     sector_intel?: Record<string, SectorIntelRecord[]>;
+
+    /** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. */
+    home_distance_cache?: Record<string, number>;
 
     /** War timeline: externalized faction temporal profiles (doctrine, cohesion, reinforcement, etc). Loaded from data/scenarios/timelines/{id}.json. */
     war_timeline?: import('./war_timeline.js').WarTimeline;

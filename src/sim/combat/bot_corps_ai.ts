@@ -1759,6 +1759,103 @@ export function generateCorpsDirectives(
             }
         }
 
+        // ── Density equalization: issue explicit brigade reassignment orders ──
+        // Identify surplus (>1.3× target) and deficit (<0.7× target) sectors.
+        // Move brigades from surplus to deficit, preferring brigades whose home_osid
+        // is near the deficit sector and avoiding entrenched brigades.
+        const sectorReassignmentOrders: Array<{ brigade_id: string; to_sector_id: string }> = [];
+        if (directiveEligibleSectors.length > 1) {
+            // ── Intel-driven threat weighting ──
+            // Sectors where intel detects enemy offensive preparation or massing
+            // get boosted threat weight, attracting more brigades proactively.
+            const intelThreatBoost = new Map<string, number>();
+            if (state.sector_intel) {
+                for (const sec of directiveEligibleSectors) {
+                    const records = state.sector_intel[sec.sector_id];
+                    if (!records) continue;
+                    let maxBoost = 0;
+                    for (const rec of records) {
+                        if (rec.confidence < CONFIDENCE_ROUGH_STRENGTH) continue;
+                        if (rec.offensive_signs) maxBoost = Math.max(maxBoost, 2.0);
+                        else if (rec.strength_category === 'fortress') maxBoost = Math.max(maxBoost, 1.5);
+                        else if (rec.strength_category === 'dense') maxBoost = Math.max(maxBoost, 1.0);
+                    }
+                    if (maxBoost > 0) intelThreatBoost.set(sec.sector_id, maxBoost);
+                }
+            }
+
+            // Pre-compute threat-weighted sector weights (one pass)
+            const sectorWeights = new Map<string, number>();
+            let totalAssignedForRebalance = 0;
+            let totalThreatWeightForRebalance = 0;
+            for (const sec of directiveEligibleSectors) {
+                totalAssignedForRebalance += sec.assigned_brigade_ids.length;
+                const intelBoost = 1.0 + (intelThreatBoost.get(sec.sector_id) ?? 0);
+                const w = sec.length_edges * Math.max(0.25, sec.threat_ratio) * intelBoost;
+                sectorWeights.set(sec.sector_id, w);
+                totalThreatWeightForRebalance += w;
+            }
+            const sectorDesired = new Map<string, number>();
+            const surplusSectors: typeof directiveEligibleSectors = [];
+            const deficitSectors: typeof directiveEligibleSectors = [];
+            for (const sec of directiveEligibleSectors) {
+                const w = sectorWeights.get(sec.sector_id) ?? 0;
+                const desired = totalThreatWeightForRebalance > 0
+                    ? totalAssignedForRebalance * (w / totalThreatWeightForRebalance) : 0;
+                sectorDesired.set(sec.sector_id, desired);
+                if (sec.assigned_brigade_ids.length > desired * 1.3 && sec.assigned_brigade_ids.length >= 2) {
+                    surplusSectors.push(sec);
+                } else if (desired > 0 && sec.assigned_brigade_ids.length < desired * 0.7) {
+                    deficitSectors.push(sec);
+                }
+            }
+            // Sort deficit sectors by severity (most under-staffed first)
+            deficitSectors.sort((a, b) => {
+                const aRatio = a.assigned_brigade_ids.length / (sectorDesired.get(a.sector_id) ?? 1);
+                const bRatio = b.assigned_brigade_ids.length / (sectorDesired.get(b.sector_id) ?? 1);
+                if (aRatio !== bRatio) return aRatio - bRatio;
+                return strictCompare(a.sector_id, b.sector_id);
+            });
+            const alreadyMoved = new Set<string>();
+            const homeCache = state.home_distance_cache ?? {};
+            for (const deficit of deficitSectors) {
+                const needed = Math.ceil((sectorDesired.get(deficit.sector_id) ?? 0) * 0.7) - deficit.assigned_brigade_ids.length;
+                if (needed <= 0) continue;
+                let moved = 0;
+                // Look for candidates from surplus sectors
+                for (const surplus of surplusSectors) {
+                    if (moved >= needed) break;
+                    const surplusDesired = sectorDesired.get(surplus.sector_id) ?? 0;
+                    const canDonate = surplus.assigned_brigade_ids.length - Math.ceil(surplusDesired);
+                    if (canDonate <= 0) continue;
+                    // Rank surplus brigades: prefer low entrenchment, low home distance to deficit sector
+                    const candidates = surplus.assigned_brigade_ids
+                        .filter(bid => !alreadyMoved.has(bid))
+                        .map(bid => {
+                            const bf = state.formations?.[bid];
+                            const entrench = bf?.entrenchment_turns ?? 0;
+                            const homeDist = homeCache[bid] ?? 0;
+                            return { bid, entrench, homeDist };
+                        })
+                        .filter(c => c.entrench <= 3) // Don't move heavily entrenched brigades
+                        .sort((a, b) => {
+                            // Prefer less entrenched, then lower home distance (already far from home = more "loose")
+                            if (a.entrench !== b.entrench) return a.entrench - b.entrench;
+                            if (a.homeDist !== b.homeDist) return b.homeDist - a.homeDist;
+                            return strictCompare(a.bid, b.bid);
+                        });
+                    let donated = 0;
+                    for (const c of candidates) {
+                        if (moved >= needed || donated >= canDonate) break;
+                        sectorReassignmentOrders.push({ brigade_id: c.bid, to_sector_id: deficit.sector_id });
+                        alreadyMoved.add(c.bid);
+                        moved++;
+                        donated++;
+                    }
+                }
+            }
+        }
+
         const directive: CorpsDirective = {
             assigned_front_ids: assignedFrontIds,
             offensive_targets: offensiveTargets,
@@ -1771,6 +1868,7 @@ export function generateCorpsDirectives(
             sector_targets: Object.keys(sectorTargets).length > 0 ? sectorTargets : undefined,
             reinforce_sector_ids: reinforceSectorIds.length > 0 ? reinforceSectorIds : undefined,
             priority_sector_id: prioritySectorId,
+            sector_reassignment_orders: sectorReassignmentOrders.length > 0 ? sectorReassignmentOrders : undefined,
         };
 
         cmd.directive = directive;

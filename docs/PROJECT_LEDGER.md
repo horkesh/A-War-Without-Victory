@@ -7,6 +7,26 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] N347 Corps Sector Intelligence Rework — Brigade-Presence-First + Home Distance + Density Management
+
+**Six interlocking changes** to make corps sectors emerge from actual brigade positions:
+
+1. **`home_osid` on FormationState** (`game_state.ts`, `recruitment_engine.ts`, `oob_early_war_entry.ts`): Brigade origin OSID persisted at creation. Never changes. Used for distance-from-home effectiveness.
+
+2. **Home distance effectiveness** (`home_distance.ts`, `combat_math.ts`): BFS graph distance from home → multiplier. 1.0 within 3 hops, -0.04/hop beyond, floor 0.70. Applied to both attacker and defender power. Cache: `state.home_distance_cache` rebuilt each turn.
+
+3. **Brigade-presence-first territory** (`corps_front_sectors.ts:mapOsidsToCorps`): Phase 1 locks OSIDs with brigades to majority corps. Phase 2 BFS gap-fills from locked seeds. Replaces HQ-proximity BFS Voronoi. Corps HQ used only as fallback if corps has zero brigade seeds. **Fixes 3rd Corps having no sectors.**
+
+4. **Corps-strict sector assignment** (`corps_front_sectors.ts:classifyBrigadesByTerritory`): Brigades only attach to own-corps sectors. Foreign-territory brigades → nearest own-corps sector as reserve. `bfsToNearestSectorInSet` helper added. **Sector relabeling code removed** — no longer needed.
+
+5. **Density equalization** (`bot_corps_ai.ts:generateCorpsDirectives`): Threat-weighted desired density per sector. Surplus (>1.3× target) → deficit (<0.7× target) reassignment via `sector_reassignment_orders` on CorpsDirective. Brigade AI reads orders → column march. Candidate ranking: prefer low entrenchment, already-displaced.
+
+6. **Intel-driven reinforcement** (`bot_corps_ai.ts`): Sectors with `offensive_signs` get 3× threat weight boost. `fortress` 2.5×, `dense` 2×. Confidence-gated. Corps repositions proactively based on sector intel.
+
+**Results**: n347 = 85.9% area-weighted (ATH-neutral). 3rd Corps: 3 sectors, 38 front edges, 6 assigned + 11 reserves. All 5 ARBiH corps have front sectors. 37 test suites, 375 tests pass (10 new in `home_distance.test.ts`).
+
+**Files**: `src/sim/combat/home_distance.ts` (NEW), `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/combat_math.ts`, `src/sim/combat/bot_corps_ai.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/state/game_state.ts`, `src/state/serializeGameState.ts`, `src/sim/turn_phases/war_phases.ts`, `src/scenario/oob_early_war_entry.ts`, `src/sim/recruitment_engine.ts`, `tests/home_distance.test.ts` (NEW), `vitest.config.ts`
+
 ## [2026-03-08] N345 Cold-Front Attrition Fix + Pool Recalibration — 86.8%
 
 ### Summary

@@ -136,6 +136,7 @@ import {
     updateSupplyReserves
 } from '../../state/supply_reserves.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
+import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { PARAMILITARY_FADE_WEEK } from '../../state/formation_constants.js';
@@ -587,6 +588,17 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             checkTriggeredOperations(context.state);
+        }
+    },
+    {
+        name: 'compute-home-distance-cache',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const adjacency = buildOsidAdjacency(od.edges);
+            const sortedIds = Object.keys(context.state.formations ?? {}).sort(strictCompare);
+            context.state.home_distance_cache = buildHomeDistanceCache(context.state.formations ?? {}, adjacency, sortedIds);
         }
     },
     {

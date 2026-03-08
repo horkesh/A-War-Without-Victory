@@ -458,9 +458,8 @@ export function SettlementDetailContent({
                       const sum = scaled.reduce((a, { v }) => a + v, 0);
                       const diff = totalOutPlusLost - sum;
                       if (diff !== 0 && scaled.length > 0) {
-                        const idx = diff > 0
-                          ? scaled.reduce((best, cur, i) => (cur.v > (scaled[best]?.v ?? 0) ? i : best), 0)
-                          : scaled.reduce((best, cur, i) => (cur.v > (scaled[best]?.v ?? 0) ? i : best), 0);
+                        // Apply rounding correction to largest ethnicity to maintain total
+                        const idx = scaled.reduce((best, cur, i) => (cur.v > (scaled[best]?.v ?? 0) ? i : best), 0);
                         scaled[idx].v = Math.max(0, scaled[idx].v + diff);
                       }
                       return scaled.map(({ eth, v }) => (

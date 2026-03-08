@@ -248,7 +248,17 @@ function classifyBrigadesByTerritory(
         }
     }
 
-    // Classify each brigade
+    // Classify each brigade — corps-strict: brigades only attach to their own corps's sectors.
+    // A brigade in foreign-corps territory goes to the nearest own-corps sector as reserve.
+    // Build reverse lookup: corpsId → sector indices for that corps
+    const corpsSectorIndices = new Map<string, number[]>();
+    for (let i = 0; i < sectors.length; i++) {
+        const cid = sectors[i]!.corps_id;
+        let list = corpsSectorIndices.get(cid);
+        if (!list) { list = []; corpsSectorIndices.set(cid, list); }
+        list.push(i);
+    }
+
     const sortedFormIds = Object.keys(formations).sort(strictCompare);
     for (const fid of sortedFormIds) {
         const f = formations[fid];
@@ -259,20 +269,33 @@ function classifyBrigadesByTerritory(
         const fCorpsId = getFormationCorpsId(f);
         if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue;
 
-        // Check if brigade is in any sector's territory
+        // Check if brigade is in a sector of its OWN corps
         const sectorIdx = osidToSectorIdx.get(f.location_osid);
-        if (sectorIdx !== undefined) {
+        if (sectorIdx !== undefined && sectors[sectorIdx]!.corps_id === fCorpsId) {
             sectors[sectorIdx]!.assigned_brigade_ids.push(fid);
             continue;
         }
 
-        // Not in any territory — find nearest sector via BFS
-        if (friendlyOsids.has(f.location_osid)) {
-            const nearestIdx = bfsToNearestSector(
+        // Brigade is in foreign-corps territory or no sector territory at all.
+        // Find nearest own-corps sector to assign as reserve.
+        if (fCorpsId && friendlyOsids.has(f.location_osid)) {
+            const ownSectorIdxs = corpsSectorIndices.get(fCorpsId);
+            if (ownSectorIdxs && ownSectorIdxs.length > 0) {
+                // Build a set of OSIDs that belong to own-corps sectors
+                const nearestIdx = bfsToNearestSector(
+                    f.location_osid, osidToSectorIdx, adjacency, friendlyOsids, ownSectorIdxs
+                );
+                if (nearestIdx !== null) {
+                    sectors[nearestIdx]!.reserve_brigade_ids.push(fid);
+                    continue;
+                }
+            }
+            // Fallback: no own-corps sector exists — assign to any nearest sector as reserve
+            const fallbackIdx = bfsToNearestSector(
                 f.location_osid, osidToSectorIdx, adjacency, friendlyOsids
             );
-            if (nearestIdx !== null) {
-                sectors[nearestIdx]!.reserve_brigade_ids.push(fid);
+            if (fallbackIdx !== null) {
+                sectors[fallbackIdx]!.reserve_brigade_ids.push(fid);
             }
         }
     }
@@ -344,32 +367,61 @@ function mapOsidsToCorps(
         if (ctrl === faction) friendlyOsids.add(osid);
     }
 
-    // Collect seed OSIDs for each corps (sorted by corps ID for determinism)
-    const seeds: Array<{ corpsId: FormationId; osid: Osid }> = [];
-    for (const corpsId of corpsIds) {
-        const corpsFormation = formations[corpsId];
-        if (!corpsFormation) continue;
-
-        // Primary: corps' own location_osid
-        const hqOsid = corpsFormation.location_osid;
-        if (hqOsid && friendlyOsids.has(hqOsid)) {
-            seeds.push({ corpsId, osid: hqOsid });
-            continue;
-        }
-
-        // Fallback: find any subordinate brigade's location_osid
-        const subOsid = findSubordinateOsid(formations, corpsId, friendlyOsids);
-        if (subOsid) {
-            seeds.push({ corpsId, osid: subOsid });
-        }
+    // ── Phase 1: Lock OSIDs by brigade presence ──
+    // For each friendly OSID where brigades are stationed, assign to the corps
+    // with the most brigades there. This makes corps boundaries emerge from
+    // actual force disposition rather than HQ proximity.
+    const osidCorpsVotes = new Map<Osid, Map<FormationId, number>>();
+    const sortedBrigadeIds = Object.keys(formations).sort(strictCompare);
+    for (const fid of sortedBrigadeIds) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid || !friendlyOsids.has(f.location_osid)) continue;
+        const fCorpsId = getFormationCorpsId(f);
+        if (!fCorpsId || !corpsIds.includes(fCorpsId)) continue;
+        let votes = osidCorpsVotes.get(f.location_osid);
+        if (!votes) { votes = new Map(); osidCorpsVotes.set(f.location_osid, votes); }
+        votes.set(fCorpsId, (votes.get(fCorpsId) ?? 0) + 1);
     }
 
-    // Multi-source BFS: all seeds start at distance 0
+    // Lock: assign each brigade-occupied OSID to the majority corps
+    const lockedSeeds: Array<{ corpsId: FormationId; osid: Osid }> = [];
+    const sortedOccupiedOsids = [...osidCorpsVotes.keys()].sort(strictCompare);
+    for (const osid of sortedOccupiedOsids) {
+        const votes = osidCorpsVotes.get(osid)!;
+        // Deterministic: sort by vote count desc, then corps ID asc for tie-break
+        const sorted = [...votes.entries()].sort((a, b) => {
+            if (b[1] !== a[1]) return b[1] - a[1];
+            return strictCompare(a[0], b[0]);
+        });
+        const winner = sorted[0]![0];
+        result.set(osid, winner);
+        lockedSeeds.push({ corpsId: winner, osid });
+    }
+
+    // ── Phase 2: BFS gap fill from locked seeds ──
+    // Fill unoccupied friendly OSIDs by expanding from locked brigade positions.
+    // Nearest brigade-occupied OSID determines ownership of interior territory.
     const queue: Array<{ osid: Osid; corpsId: FormationId }> = [];
-    for (const seed of seeds) {
-        if (result.has(seed.osid)) continue; // First corps to claim wins (sorted order)
-        result.set(seed.osid, seed.corpsId);
+    for (const seed of lockedSeeds) {
         queue.push(seed);
+    }
+
+    // Fallback: if a corps has zero locked seeds (no brigades at all), use HQ
+    for (const corpsId of corpsIds) {
+        if (lockedSeeds.some(s => s.corpsId === corpsId)) continue;
+        const corpsFormation = formations[corpsId];
+        if (corpsFormation?.location_osid && friendlyOsids.has(corpsFormation.location_osid) && !result.has(corpsFormation.location_osid)) {
+            result.set(corpsFormation.location_osid, corpsId);
+            queue.push({ corpsId, osid: corpsFormation.location_osid });
+        } else {
+            const subOsid = findSubordinateOsid(formations, corpsId, friendlyOsids);
+            if (subOsid && !result.has(subOsid)) {
+                result.set(subOsid, corpsId);
+                queue.push({ corpsId, osid: subOsid });
+            }
+        }
     }
 
     let head = 0;
@@ -386,8 +438,7 @@ function mapOsidsToCorps(
 
     // Post-BFS: claim disconnected friendly OSIDs where corps brigades are located.
     // Handles pockets/enclaves not reachable through contiguous friendly territory.
-    const sortedFormIds = Object.keys(formations).sort(strictCompare);
-    for (const fid of sortedFormIds) {
+    for (const fid of sortedBrigadeIds) {
         const f = formations[fid];
         if (!f || f.faction !== faction || f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
@@ -395,7 +446,6 @@ function mapOsidsToCorps(
         if (!f.location_osid || !fCorpsId) continue;
         if (!friendlyOsids.has(f.location_osid)) continue;
         if (result.has(f.location_osid)) continue;
-        // Brigade at unreachable friendly OSID → assign to its corps and BFS from there
         if (!corpsIds.includes(fCorpsId)) continue;
         result.set(f.location_osid, fCorpsId);
         const pocketQueue: Osid[] = [f.location_osid];
@@ -1118,19 +1168,24 @@ function buildSectorFromSubSegments(
 
 /**
  * BFS from startOsid through friendly territory to find the nearest OSID
- * belonging to any sector. Returns the sector index, or null if unreachable.
+ * belonging to a sector. If allowedSectorIdxs is provided, only sectors
+ * in that set are considered (used for corps-strict assignment).
+ * Returns the sector index, or null if unreachable.
  */
 function bfsToNearestSector(
     startOsid: string,
     osidToSectorIdx: Map<string, number>,
     adjacency: Map<Osid, Osid[]>,
-    friendlyOsids: Set<string>
+    friendlyOsids: Set<string>,
+    allowedSectorIdxs?: number[]
 ): number | null {
+    const allowed = allowedSectorIdxs ? new Set(allowedSectorIdxs) : null;
+
     // Quick check: already at a sector OSID?
     const direct = osidToSectorIdx.get(startOsid);
-    if (direct !== undefined) return direct;
+    if (direct !== undefined && (!allowed || allowed.has(direct))) return direct;
 
-    // BFS through friendly territory (sorted neighbors for determinism)
+    // BFS through friendly territory (adjacency lists are pre-sorted by buildOsidAdjacency)
     const visited = new Set<string>();
     visited.add(startOsid);
     const queue: string[] = [startOsid];
@@ -1138,14 +1193,14 @@ function bfsToNearestSector(
 
     while (head < queue.length) {
         const osid = queue[head++]!;
-        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
+        const neighbors = adjacency.get(osid) ?? [];
         for (const n of neighbors) {
             if (visited.has(n)) continue;
             if (!friendlyOsids.has(n)) continue;
             visited.add(n);
 
             const sIdx = osidToSectorIdx.get(n);
-            if (sIdx !== undefined) return sIdx;
+            if (sIdx !== undefined && (!allowed || allowed.has(sIdx))) return sIdx;
 
             queue.push(n);
         }

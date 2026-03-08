@@ -1647,6 +1647,36 @@ function executeFactionDirectives(
             }
         }
 
+        // --- Rule 5b2: Sector reassignment from density equalization ---
+        // Corps AI issued explicit reassignment orders — this brigade should column march
+        // to its assigned sector. Only act if not heavily entrenched.
+        if (directive?.sector_reassignment_orders && state.corps_front_sectors) {
+            const reassign = directive.sector_reassignment_orders.find(r => r.brigade_id === brigade.id);
+            if (reassign) {
+                const targetSec = state.corps_front_sectors[reassign.to_sector_id];
+                if (targetSec) {
+                    const targetOsids = new Set<string>();
+                    for (const ss of targetSec.sub_segments) {
+                        for (const o of ss.friendly_osids) targetOsids.add(o);
+                    }
+                    if (targetOsids.size > 0 && !targetOsids.has(loc)) {
+                        const dest = findNearestFriendlyOsidInSet(state, faction, loc, adjacency, reverseMap, targetOsids);
+                        if (dest) {
+                            // Use column march for distant moves, 1-hop for adjacent
+                            const hops = computeHopsToFront(loc, faction, adjacency, state, reverseMap, graphAnalysis);
+                            if (hops >= COLUMN_MARCH_MIN_HOPS) {
+                                result.column_march_orders[brigade.id] = dest;
+                            } else {
+                                result.movement_orders[brigade.id] = dest;
+                            }
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
         // --- Rule 5c: Reinforce under-density or empty sector ---
         // When this brigade is on a stacked front OSID (≥2 friendly brigades here) and
         // the directive flags under-density sectors, march to the nearest one.

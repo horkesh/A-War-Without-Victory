@@ -40,6 +40,9 @@ interface EnclaveDefinition {
     faction: FactionId;
     /** OSID prefixes that belong to this enclave. */
     osid_prefixes: string[];
+    /** Turn before which resilience does not grow. Enclaves formed gradually through
+     *  1992 as VRS advanced — they weren't "resilient enclaves" from day one. */
+    resilience_start_turn?: number;
 }
 
 /**
@@ -50,27 +53,32 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     {
         id: 'bihac_pocket',
         faction: 'RBiH',
-        osid_prefixes: ['op:bihac:', 'op:cazin:', 'op:velika_kladusa:', 'op:bosanska_krupa:']
+        osid_prefixes: ['op:bihac:', 'op:cazin:', 'op:velika_kladusa:', 'op:bosanska_krupa:'],
+        resilience_start_turn: 20,  // Pocket crystallized after initial VRS Krajina offensive
     },
     {
         id: 'srebrenica',
         faction: 'RBiH',
-        osid_prefixes: ['op:srebrenica:']
+        osid_prefixes: ['op:srebrenica:'],
+        resilience_start_turn: 16,  // Enclave formed after Drina valley offensive (spring-summer 1992)
     },
     {
         id: 'zepa',
         faction: 'RBiH',
-        osid_prefixes: ['op:rogatica:zepa']
+        osid_prefixes: ['op:rogatica:zepa'],
+        resilience_start_turn: 16,  // Same timeline as Srebrenica
     },
     {
         id: 'gorazde',
         faction: 'RBiH',
-        osid_prefixes: ['op:gorazde:']
+        osid_prefixes: ['op:gorazde:'],
+        resilience_start_turn: 16,  // Goražde enclave formed mid-1992
     },
     {
         id: 'sarajevo',
         faction: 'RBiH',
-        osid_prefixes: ['op:centar_sarajevo:', 'op:novo_sarajevo:', 'op:stari_grad_sarajevo:', 'op:novi_grad_sarajevo:']
+        osid_prefixes: ['op:centar_sarajevo:', 'op:novo_sarajevo:', 'op:stari_grad_sarajevo:', 'op:novi_grad_sarajevo:'],
+        resilience_start_turn: 8,   // Siege began immediately but resilience adaptation takes time
     }
 ] as const;
 
@@ -82,11 +90,11 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
  * Sarajevo was most resilient (largest, tunnel, international attention).
  */
 const ENCLAVE_CONFIG: Record<string, { max_resilience: number; growth_mult: number }> = {
-    bihac_pocket: { max_resilience: 40, growth_mult: 1.2 },
-    srebrenica: { max_resilience: 25, growth_mult: 0.8 },
-    zepa: { max_resilience: 20, growth_mult: 0.7 },
-    gorazde: { max_resilience: 35, growth_mult: 1.0 },
-    sarajevo: { max_resilience: 45, growth_mult: 1.3 },
+    bihac_pocket: { max_resilience: 40, growth_mult: 0.55 },   // was 1.2 — maxes ~w93 (full war), ~18 at w40
+    srebrenica: { max_resilience: 25, growth_mult: 0.35 },     // was 0.8 — maxes ~w52, ~17 at w40
+    zepa: { max_resilience: 20, growth_mult: 0.30 },           // was 0.7 — maxes ~w49, ~14 at w40
+    gorazde: { max_resilience: 35, growth_mult: 0.45 },        // was 1.0 — maxes ~w55, ~22 at w40
+    sarajevo: { max_resilience: 45, growth_mult: 0.60 },       // was 1.3 — maxes ~w45, ~38 at w40
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -173,20 +181,25 @@ export function updateEnclaveResilience(
 
     const sortedEnclaves = [...ENCLAVE_DEFINITIONS].sort((a, b) => strictCompare(a.id, b.id));
 
+    const currentTurn = state.meta?.turn ?? 0;
+
     for (const enclave of sortedEnclaves) {
         const current = readEntry(resilience[enclave.id]);
         const supplyState = getEnclaveSupplyState(enclave, supplyByOsid);
+
+        // Resilience doesn't grow before the enclave historically formed
+        const tooEarly = enclave.resilience_start_turn != null && currentTurn < enclave.resilience_start_turn;
 
         let delta: number;
         let isolated: boolean;
         switch (supplyState) {
             case 'critical':
-                delta = RESILIENCE_GROWTH_CRITICAL;
-                isolated = true;
+                delta = tooEarly ? 0 : RESILIENCE_GROWTH_CRITICAL;
+                isolated = !tooEarly;
                 break;
             case 'strained':
-                delta = RESILIENCE_GROWTH_STRAINED;
-                isolated = true;
+                delta = tooEarly ? 0 : RESILIENCE_GROWTH_STRAINED;
+                isolated = !tooEarly;
                 break;
             default:
                 delta = -RESILIENCE_DECAY_ADEQUATE;

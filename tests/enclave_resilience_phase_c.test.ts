@@ -18,7 +18,7 @@ import {
 function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
     return {
         schema_version: 1,
-        meta: { turn: 10, seed: 'test', phase: 'war' },
+        meta: { turn: 20, seed: 'test', phase: 'war' },
         factions: [
             { id: 'RBiH', supply_sources: [] },
             { id: 'RS', supply_sources: [] },
@@ -35,7 +35,7 @@ function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
 function makeCriticalSupplyReport(enclavePrefix: string, faction: string = 'RBiH') {
     return {
         schema: 1 as const,
-        turn: 10,
+        turn: 20,
         factions: [{
             faction_id: faction,
             by_osid: [
@@ -49,7 +49,7 @@ function makeCriticalSupplyReport(enclavePrefix: string, faction: string = 'RBiH
 function makeAdequateSupplyReport(enclavePrefix: string, faction: string = 'RBiH') {
     return {
         schema: 1 as const,
-        turn: 10,
+        turn: 20,
         factions: [{
             faction_id: faction,
             by_osid: [
@@ -93,7 +93,7 @@ describe('updateEnclaveResilience — isolation tracking', () => {
         }
         const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(5);
-        expect(entry.resilience).toBeCloseTo(8, 5); // 5 turns × +2 × 0.8 growth_mult per critical turn
+        expect(entry.resilience).toBeCloseTo(3.5, 5); // 5 turns × +2 × 0.35 growth_mult per critical turn
     });
 
     it('resets isolation_turns on adequate supply', () => {
@@ -273,7 +273,7 @@ describe('migration from bare number', () => {
         updateEnclaveResilience(state, supply);
         const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(typeof entry).toBe('object');
-        expect(entry.resilience).toBeCloseTo(16.6, 5); // 15 + 2 * 0.8 growth (srebrenica growth_mult)
+        expect(entry.resilience).toBeCloseTo(15.7, 5); // 15 + 2 * 0.35 growth (srebrenica growth_mult)
         expect(entry.isolation_turns).toBe(1);
         expect(entry.hardening_active).toBe(false);
     });

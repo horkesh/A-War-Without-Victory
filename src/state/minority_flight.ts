@@ -355,46 +355,16 @@ export function processMinorityFlight(
         if (routedRS > 0) addToCamp(state, munId, 'RS', routedRS, report);
 
         if (!state.displacement_event_log) state.displacement_event_log = [];
-        const displacedRBiH = routedRBiH + killedRBiH + fleeRBiH;
-        const displacedHRHB = routedHRHB + killedHRHB + fleeHRHB;
-        const displacedRS = routedRS + killedRS + fleeRS;
-        if (displacedRBiH > 0) {
+        const factionData: [string, number, number, number, number][] = [
+            ['RBiH', routedRBiH + killedRBiH + fleeRBiH, killedRBiH, fleeRBiH, routedRBiH],
+            ['HRHB', routedHRHB + killedHRHB + fleeHRHB, killedHRHB, fleeHRHB, routedHRHB],
+            ['RS', routedRS + killedRS + fleeRS, killedRS, fleeRS, routedRS],
+        ];
+        for (const [ethnicity, displaced, killed, fled_abroad, settled] of factionData) {
+            if (displaced <= 0) continue;
             state.displacement_event_log.push({
-                turn: currentTurn,
-                origin_mun: munId,
-                origin_osid: sid,
-                dest_mun: munId,
-                ethnicity: 'RBiH',
-                displaced: displacedRBiH,
-                killed: killedRBiH,
-                fled_abroad: fleeRBiH,
-                settled: routedRBiH,
-            });
-        }
-        if (displacedHRHB > 0) {
-            state.displacement_event_log.push({
-                turn: currentTurn,
-                origin_mun: munId,
-                origin_osid: sid,
-                dest_mun: munId,
-                ethnicity: 'HRHB',
-                displaced: displacedHRHB,
-                killed: killedHRHB,
-                fled_abroad: fleeHRHB,
-                settled: routedHRHB,
-            });
-        }
-        if (displacedRS > 0) {
-            state.displacement_event_log.push({
-                turn: currentTurn,
-                origin_mun: munId,
-                origin_osid: sid,
-                dest_mun: munId,
-                ethnicity: 'RS',
-                displaced: displacedRS,
-                killed: killedRS,
-                fled_abroad: fleeRS,
-                settled: routedRS,
+                turn: currentTurn, origin_mun: munId, origin_osid: sid, dest_mun: munId,
+                ethnicity, displaced, killed, fled_abroad, settled,
             });
         }
     }

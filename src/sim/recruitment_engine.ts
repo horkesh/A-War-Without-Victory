@@ -232,7 +232,8 @@ function buildRecruitedFormation(
         ...(brigade.fallback_osid ? { fallback_osid: brigade.fallback_osid } : {}),
         ...(brigade.garrison ? { garrison: true } : {}),
         ...(hqSid ? { hq_sid: hqSid } : {}),
-        ...(effectiveLocationOsid != null ? { location_osid: effectiveLocationOsid } : {})
+        ...(effectiveLocationOsid != null ? { location_osid: effectiveLocationOsid } : {}),
+        home_osid: brigade.home_osid ?? locationOsid
     };
 }
 

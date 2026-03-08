@@ -312,7 +312,6 @@ function getInitialDisplacementFraction(
         if (!isFrontAdjacent) return null;
         return RBIH_SERB_DISPLACEMENT_FRACTION;
     }
-    if (toFaction === 'RS' && (fromFaction === 'RBiH' || fromFaction === 'HRHB')) return INITIAL_DISPLACEMENT_FRACTION;
     return INITIAL_DISPLACEMENT_FRACTION;
 }
 

@@ -108,6 +108,8 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'corps_front_sectors',
     // Sector-facing intelligence (derived each turn, stored for GUI/fog-of-war/bot)
     'sector_intel',
+    // Home distance cache (derived each turn, used by combat math)
+    'home_distance_cache',
     // Phase F (Displacement & Population Dynamics) — stored, not derived
     'settlement_displacement',
     'settlement_displacement_started_turn',
