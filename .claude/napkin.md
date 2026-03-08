@@ -118,8 +118,15 @@
    Do instead: Use municipality_support_orders as one shared state surface, but keep faction effects distinct: RBiH local mobilization (weapons_shipment), RS reinforcement-rate boost (staff_priority), HRHB reinforcement cohesion bonus (croatian_support_package). One target, one turn, no global manpower rewrite.
 
 ## Sectors & Operations
-1. **[2026-03-08] Corps sector intelligence rework — brigade-presence-first + home distance + density management**
-   Do instead: `mapOsidsToCorps` uses **brigade-presence-first** (Phase 1: lock OSIDs by brigade votes; Phase 2: BFS gap-fill from locked seeds; HQ fallback only if corps has zero brigade seeds). `classifyBrigadesByTerritory` is **corps-strict**: brigades only attach to own corps's sectors; foreign-territory brigades go to nearest own-corps sector as reserve. `home_distance.ts`: BFS graph distance from `home_osid` → effectiveness multiplier (1.0 within 3 hops, -0.04/hop beyond, floor 0.70). Applied in both `computeAttackerPower` and `computeDefenderPower`. Cache: `state.home_distance_cache` rebuilt each turn. Density equalization: `generateCorpsDirectives` computes threat-weighted desired density per sector, identifies surplus (>1.3×) and deficit (<0.7×), issues `sector_reassignment_orders` (prefer low-entrenchment, home-distance-aware). Brigade AI reads reassignment orders → column march. Intel-driven: sectors with `offensive_signs` get 3× threat weight; `fortress`/`dense` enemy sectors get 2.5×/2× boost. Relabeling code REMOVED — no longer needed.
+1. **[2026-03-08] Corps sector rework — ALL 6 ITEMS DONE**
+   Do instead: All items from the corps sector management plan are implemented and live:
+   (1) Home distance effectiveness: `home_distance.ts` → `combat_math.ts` (attack+defense), 1.0≤3 hops, -4%/hop, floor 0.70.
+   (2) Brigade movement to sectors: column march (`osid_column_movement.ts`) + `sector_reassignment_orders` on CorpsDirective.
+   (3) Density equalization: `bot_corps_ai.ts` surplus(>1.3×)→deficit(<0.7×), threat-weighted.
+   (4) Intel-driven reinforcement: `offensive_signs` 3× boost, `fortress` 2.5×, `dense` 2×.
+   (5) Sector reserves: `reserve_brigade_ids`, `reserve_fraction` (10-30% by stance).
+   (6) Territory assignment: brigade-presence-first in `mapOsidsToCorps` (Phase 1 lock + Phase 2 BFS gap-fill).
+   REMAINING: Elite/professional brigades should get flatter home distance curve (floor 0.85 vs 0.70).
 2. **[2026-03-07] Sector intel replaces recon_intelligence (DELETED) — fog LIVE**
    Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war is LIVE: `GameStateAdapter` derives `fogOfWar` from `sector_intel` + `corps_front_sectors`; `buildFogOfWarGeoJSON` renders it; `MapContainer` toggles via `fogVisible`. `ReconIntelligenceView` + `reconIntelligence` field fully removed. `recon_intelligence.ts` is DELETED — do not reference it.
 3. **[2026-03-07] Sector orders + OPSEC are sector-state, not brigade hacks**
@@ -196,26 +203,28 @@
    Do instead: Run `npm run map:audit:split-muni-duplicates` before any map rebuild.
 
 ## User Directives
-1. **[Standing] Absolute paths**
+1. **[Standing] Life lessons enforcement system (3 mechanisms)**
+   Do instead: (A) **Session start**: read `docs/life_lessons.md`, flag lessons relevant to current task, STOP if about to violate one. (B) **Pre-commit**: `/awwv_pre_commit_check` includes life-lessons compliance — each active lesson checked as PASS/FLAG against the diff. (C) **Daily cron**: schedule `3 6 * * *` at session start — gathers 24h activity, detects violations in git diffs, synthesizes new lessons, promotes/demotes based on compliance, regenerates `/visual-explainer`. Session-only cron — must re-schedule each session.
+2. **[Standing] Absolute paths**
    Do instead: Always use absolute paths for tool calls.
-2. **[Standing] Update napkin during work**
+3. **[Standing] Update napkin during work**
    Do instead: Update napkin after significant changes; don't wait until session end.
-3. **[2026-02-28] Maximize safe parallel execution**
+4. **[2026-02-28] Maximize safe parallel execution**
    Do instead: Run independent tasks in parallel; sequence only on shared-file or dependency gates.
-4. **[2026-02-28] Canon docs get implementation notes on tech changes**
+5. **[2026-02-28] Canon docs get implementation notes on tech changes**
    Do instead: When stack changes (e.g. Canvas→MapLibre), add implementation notes in planning/spec doc. Keep aesthetic authority doc referenced from canon.
-5. **[2026-02-25] Counterattacks are correct**
+6. **[2026-02-25] Counterattacks are correct**
    Do instead: Captured territory SHOULD be immediately reclaimable. Counterattacks are mechanically correct.
-6. **[2026-02-22] Replay disabled by default**
+7. **[2026-02-22] Replay disabled by default**
    Do instead: Only generate replay with `--video` flag (saves 13.6GB).
-7. **[2026-02-28] Canonical map is React+MapLibre**
+8. **[2026-02-28] Canonical map is React+MapLibre**
    Do instead: `npm run dev:map`. Legacy map_hoi.html / tactical_map.html are archived.
-8. **[2026-03-02] ZoC fully removed**
+9. **[2026-03-02] ZoC fully removed**
    Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-08] n345 = 86.8% — cold-front attrition fix + pool recalibration (up from n326=85.8%)**
-   Do instead: RS↔HRHB cold fronts exempt from frontline attrition + bombardment. HRHB siege drain skipped under Graz. HRHB pool scale 1.60→1.05, RBiH 0.18→0.25. HRHB KIA dropped 6.3k→1.6k. All factions within tolerance: RBiH=119.2k, RS=103.3k, HRHB=43.4k. RS delta still −60 — RS aggression recalibration still needed. Previous: n326=85.8% (cluster pockets+paramilitaries). ATH remains n304=93.8%.
+1. **[2026-03-08] n371 = 88.2% — findSectorForEnemyOsid fix + elite home distance curve (neutral)**
+   Do instead: Fixed `findSectorForEnemyOsid` searching `enemy_osids` instead of `friendly_osids` in `corps_front_sectors.ts` — correctness fix, no calibration change. Elite home distance curve (floor 0.85 vs 0.70 for `elite_loan_state` brigades) — neutral (only 3 elite brigades). Bucovaca painted control fix (HRHB→RS) changes comparison hash. Undefended floor REMOVED (caused 82.5% regression). ATH remains n304=93.8%.
 2. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
    Do instead: Cells like banja_luka:dragocaj, kotor_varos x4, mrkonjic_grad:baljvine_2, skender_vakuf:donji_koricani start HRHB but painting=RS. Adding RS overrides for these IS effective (n238: KRAJINA 89.4%→97.8%). RULE: add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only, etc.) — adding 10+ HRHB cells across multiple regions at once (n237) caused POSAVINA_NE −9.9pp and SARAJEVO −9.3pp cascade.
 3. **[2026-03-08] Rear pocket consolidation: cluster-aware version RE-ADDED**

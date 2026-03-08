@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Life Lessons — Field Intelligence Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+
+    --bg: #0c1118;
+    --surface: #131a24;
+    --surface2: #1a2332;
+    --surface-elevated: #1e2b3a;
+    --border: rgba(255,255,255,0.06);
+    --border-bright: rgba(255,255,255,0.12);
+    --text: #d4dce8;
+    --text-dim: #6b7f99;
+    --text-muted: #3d4f66;
+
+    --cat-arch: #4a90d9;
+    --cat-arch-dim: rgba(74,144,217,0.10);
+    --cat-arch-border: rgba(74,144,217,0.25);
+
+    --cat-cal: #d4982a;
+    --cat-cal-dim: rgba(212,152,42,0.10);
+    --cat-cal-border: rgba(212,152,42,0.25);
+
+    --cat-debug: #c74a4a;
+    --cat-debug-dim: rgba(199,74,74,0.10);
+    --cat-debug-border: rgba(199,74,74,0.25);
+
+    --cat-process: #5a9e4f;
+    --cat-process-dim: rgba(90,158,79,0.10);
+    --cat-process-border: rgba(90,158,79,0.25);
+
+    --cat-gui: #9a6dab;
+    --cat-gui-dim: rgba(154,109,171,0.10);
+    --cat-gui-border: rgba(154,109,171,0.25);
+
+    --cat-platform: #7a8a9e;
+    --cat-platform-dim: rgba(122,138,158,0.10);
+    --cat-platform-border: rgba(122,138,158,0.25);
+
+    --cat-botai: #3a9ea5;
+    --cat-botai-dim: rgba(58,158,165,0.10);
+    --cat-botai-border: rgba(58,158,165,0.25);
+
+    --wrong: #8b3a3a;
+    --wrong-dim: rgba(139,58,58,0.15);
+    --right: #3a6b3a;
+    --right-dim: rgba(58,107,58,0.15);
+    --action: #d4982a;
+    --action-dim: rgba(212,152,42,0.08);
+
+    --violated: #c74a4a;
+    --violated-dim: rgba(199,74,74,0.07);
+    --violated-border: rgba(199,74,74,0.20);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #eef1f5;
+      --surface: #ffffff;
+      --surface2: #f4f6f9;
+      --surface-elevated: #ffffff;
+      --border: rgba(0,0,0,0.07);
+      --border-bright: rgba(0,0,0,0.13);
+      --text: #1a2233;
+      --text-dim: #5a6a80;
+      --text-muted: #9aa8b8;
+      --cat-arch: #2563a0; --cat-arch-dim: rgba(37,99,160,0.07); --cat-arch-border: rgba(37,99,160,0.20);
+      --cat-cal: #b07d1a; --cat-cal-dim: rgba(176,125,26,0.07); --cat-cal-border: rgba(176,125,26,0.20);
+      --cat-debug: #a03030; --cat-debug-dim: rgba(160,48,48,0.07); --cat-debug-border: rgba(160,48,48,0.20);
+      --cat-process: #3d7a34; --cat-process-dim: rgba(61,122,52,0.07); --cat-process-border: rgba(61,122,52,0.20);
+      --cat-gui: #7a4e8a; --cat-gui-dim: rgba(122,78,138,0.07); --cat-gui-border: rgba(122,78,138,0.20);
+      --cat-platform: #5a6a7e; --cat-platform-dim: rgba(90,106,126,0.07); --cat-platform-border: rgba(90,106,126,0.20);
+      --cat-botai: #1f7e85; --cat-botai-dim: rgba(31,126,133,0.07); --cat-botai-border: rgba(31,126,133,0.20);
+      --wrong: #8b3a3a; --wrong-dim: rgba(139,58,58,0.08);
+      --right: #2d6a2d; --right-dim: rgba(45,106,45,0.08);
+      --action: #9a7520; --action-dim: rgba(154,117,32,0.06);
+      --violated: #a03030; --violated-dim: rgba(160,48,48,0.05); --violated-border: rgba(160,48,48,0.15);
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 15% 5%, rgba(74,144,217,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 95%, rgba(212,152,42,0.03) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 40px;
+    min-height: 100vh;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeScale {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .anim { animation: fadeUp 0.4s ease-out both; animation-delay: calc(var(--i,0) * 0.04s); }
+  .anim-scale { animation: fadeScale 0.35s ease-out both; animation-delay: calc(var(--i,0) * 0.04s); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* ── HEADER ── */
+  .classification {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 2px;
+    color: var(--cat-cal); margin-bottom: 10px;
+  }
+  h1 {
+    font-size: 34px; font-weight: 700;
+    letter-spacing: -0.5px; line-height: 1.15;
+    text-wrap: balance; margin-bottom: 6px;
+  }
+  .subtitle {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--text-dim); margin-bottom: 28px;
+  }
+
+  /* ── KPI ROW ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px; margin-bottom: 28px;
+  }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; text-align: center;
+  }
+  .kpi-number {
+    font-size: 26px; font-weight: 700;
+    font-family: var(--font-mono); line-height: 1; margin-bottom: 4px;
+  }
+  .kpi-label {
+    font-size: 10px; font-family: var(--font-mono);
+    text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-dim);
+  }
+
+  /* ── CATEGORY FILTER BAR ── */
+  .cat-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 8px; padding: 14px 18px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    align-items: center;
+  }
+  .cat-bar-label {
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--text-muted); margin-right: 4px; flex-shrink: 0;
+  }
+  .cat-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; font-family: var(--font-mono); font-weight: 500;
+    padding: 4px 10px; border-radius: 4px;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    border: 1px solid transparent; user-select: none;
+  }
+  .cat-badge:hover { border-color: var(--border-bright); }
+  .cat-badge.active { border-color: currentColor; }
+  .cat-badge.dimmed { opacity: 0.28; }
+  .cat-badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .cat-badge .count { font-weight: 600; margin-left: 1px; }
+
+  /* ── SORT BAR ── */
+  .sort-bar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px; font-family: var(--font-mono);
+    font-size: 10px; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 1.2px;
+  }
+  .sort-label { flex-shrink: 0; }
+  .sort-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 4px 10px;
+    font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);
+    cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .sort-btn:hover { border-color: var(--border-bright); color: var(--text); }
+  .sort-btn.active { border-color: var(--cat-cal); color: var(--cat-cal); background: var(--cat-cal-dim); }
+  .sort-btn .arrow { display: inline-block; margin-left: 3px; }
+  .clear-btn { margin-left: auto; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .clear-btn.visible { opacity: 1; pointer-events: auto; }
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 32px 0 18px;
+  }
+  .section-divider .line { flex: 1; height: 1px; background: var(--border-bright); }
+  .section-divider .label {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); white-space: nowrap;
+  }
+  .section-divider.violated .label { color: var(--violated); }
+  .section-divider.violated .line { background: var(--violated-border); }
+
+  /* ── VIOLATED NOTICE ── */
+  .violated-notice {
+    background: var(--violated-dim); border: 1px solid var(--violated-border);
+    border-radius: 8px; padding: 14px 20px;
+    font-size: 13px; color: var(--text-dim);
+    font-family: var(--font-mono); font-style: italic;
+    margin-bottom: 4px;
+  }
+
+  /* ── LESSON CARDS ── */
+  .lessons-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+
+  .lesson-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s, opacity 0.25s, transform 0.25s;
+  }
+  .lesson-card:hover { border-color: var(--border-bright); box-shadow: 0 2px 16px rgba(0,0,0,0.12); }
+  .lesson-card.filtered-out {
+    opacity: 0; transform: scale(0.96);
+    max-height: 0; overflow: hidden; pointer-events: none;
+    border: 0; margin: 0;
+  }
+  .lesson-card--internalized { opacity: 0.45; border-style: dashed; }
+  .lesson-card--internalized:hover { opacity: 0.72; }
+
+  .lesson-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px 11px; border-bottom: 1px solid var(--border);
+    flex-wrap: wrap; row-gap: 6px;
+  }
+  .lesson-cat {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 3px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0;
+  }
+  .lesson-title { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; }
+  .lesson-date {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--text-muted); flex-shrink: 0;
+  }
+
+  .lesson-body { padding: 14px 18px 18px; }
+  .lesson-context {
+    font-size: 12.5px; line-height: 1.6; color: var(--text-dim); margin-bottom: 12px;
+  }
+  .lesson-context code, .approach code, .do-instead code {
+    font-family: var(--font-mono); font-size: 10.5px;
+    background: var(--surface2); padding: 1px 5px;
+    border-radius: 3px; color: var(--text);
+  }
+
+  .approach-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 9px; margin-bottom: 11px;
+  }
+  .approach {
+    border-radius: 6px; padding: 9px 13px;
+    font-size: 11.5px; line-height: 1.55; min-width: 0; overflow-wrap: break-word;
+  }
+  .approach--wrong { background: var(--wrong-dim); border-left: 3px solid var(--wrong); }
+  .approach--wrong .approach-label { color: var(--wrong); }
+  .approach--right { background: var(--right-dim); border-left: 3px solid var(--right); }
+  .approach--right .approach-label { color: var(--right); }
+  .approach-label {
+    font-family: var(--font-mono); font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px;
+  }
+
+  .do-instead {
+    background: var(--action-dim); border: 1px solid rgba(212,152,42,0.15);
+    border-radius: 6px; padding: 9px 13px; font-size: 11.5px; line-height: 1.55;
+    overflow-wrap: break-word;
+  }
+  .do-instead-label {
+    font-family: var(--font-mono); font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--action); margin-bottom: 5px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 48px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--text-muted); text-align: center; letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 20px; }
+    h1 { font-size: 24px; }
+    .approach-grid { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: 1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="anim" style="--i:0; margin-bottom:36px">
+    <div class="classification">Field Intelligence Report &mdash; Lessons Learned</div>
+    <h1>AWWV Development Life Lessons</h1>
+    <div class="subtitle">synthesized 2026-02-07 &mdash; 2026-03-08 &bull; 2 months of development &bull; 272 commits</div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi anim-scale" style="--i:1"><div class="kpi-number" style="color:var(--text)">32</div><div class="kpi-label">Total Lessons</div></div>
+    <div class="kpi anim-scale" style="--i:2"><div class="kpi-number" style="color:var(--cat-process)">29</div><div class="kpi-label">Active</div></div>
+    <div class="kpi anim-scale" style="--i:3"><div class="kpi-number" style="color:var(--text-muted)">3</div><div class="kpi-label">Internalized</div></div>
+    <div class="kpi anim-scale" style="--i:4"><div class="kpi-number" style="color:var(--cat-cal)">7</div><div class="kpi-label">Categories</div></div>
+    <div class="kpi anim-scale" style="--i:5"><div class="kpi-number" style="color:var(--cat-arch)">272</div><div class="kpi-label">Commits</div></div>
+    <div class="kpi anim-scale" style="--i:6"><div class="kpi-number" style="color:var(--cat-debug)">0</div><div class="kpi-label">Violations</div></div>
+  </div>
+
+  <!-- CATEGORY FILTER BAR -->
+  <div class="cat-bar anim" style="--i:7">
+    <span class="cat-bar-label">Filter:</span>
+    <div class="cat-badge" data-filter="architecture" style="background:var(--cat-arch-dim);color:var(--cat-arch)">
+      <span class="dot" style="background:var(--cat-arch)"></span><span>Architecture</span><span class="count">8</span>
+    </div>
+    <div class="cat-badge" data-filter="calibration" style="background:var(--cat-cal-dim);color:var(--cat-cal)">
+      <span class="dot" style="background:var(--cat-cal)"></span><span>Calibration</span><span class="count">7</span>
+    </div>
+    <div class="cat-badge" data-filter="debugging" style="background:var(--cat-debug-dim);color:var(--cat-debug)">
+      <span class="dot" style="background:var(--cat-debug)"></span><span>Debugging</span><span class="count">6</span>
+    </div>
+    <div class="cat-badge" data-filter="process" style="background:var(--cat-process-dim);color:var(--cat-process)">
+      <span class="dot" style="background:var(--cat-process)"></span><span>Process</span><span class="count">5</span>
+    </div>
+    <div class="cat-badge" data-filter="gui" style="background:var(--cat-gui-dim);color:var(--cat-gui)">
+      <span class="dot" style="background:var(--cat-gui)"></span><span>GUI</span><span class="count">2</span>
+    </div>
+    <div class="cat-badge" data-filter="botai" style="background:var(--cat-botai-dim);color:var(--cat-botai)">
+      <span class="dot" style="background:var(--cat-botai)"></span><span>Bot AI</span><span class="count">1</span>
+    </div>
+    <div class="cat-badge" data-filter="platform" style="background:var(--cat-platform-dim);color:var(--cat-platform)">
+      <span class="dot" style="background:var(--cat-platform)"></span><span>Platform</span><span class="count">1</span>
+    </div>
+  </div>
+
+  <!-- SORT BAR -->
+  <div class="sort-bar anim" style="--i:8">
+    <span class="sort-label">Sort:</span>
+    <button class="sort-btn active" data-sort="date-desc">Newest <span class="arrow">&#9660;</span></button>
+    <button class="sort-btn" data-sort="date-asc">Oldest <span class="arrow">&#9650;</span></button>
+    <button class="sort-btn" data-sort="category">Category</button>
+    <button class="sort-btn clear-btn" data-sort="reset">Clear Filter</button>
+  </div>
+
+  <!-- RECENTLY VIOLATED -->
+  <div class="section-divider violated anim" style="--i:9">
+    <span class="line"></span><span class="label">Recently Violated &mdash; Needs Reinforcement</span><span class="line"></span>
+  </div>
+  <div class="violated-notice anim" style="--i:10">No violations detected yet. The daily cron will flag violations here when patterns from git diffs contradict active lessons.</div>
+
+  <!-- ACTIVE LESSONS -->
+  <div class="section-divider anim" style="--i:11">
+    <span class="line"></span><span class="label">Active Lessons &mdash; 29</span><span class="line"></span>
+  </div>
+
+  <div class="lessons-grid" id="active-lessons">
+
+    <!-- 1 -->
+    <div class="lesson-card anim" data-category="architecture" data-date="2026-03-06" style="--i:12">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-arch-dim);color:var(--cat-arch);border:1px solid var(--cat-arch-border)">Architecture</span>
+        <span class="lesson-title">Organic emergence beats hard caps</span>
+        <span class="lesson-date">2026-03-06</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">VRS tempo needed to decay over a 40-week war. Designers expected explicit phase transitions to produce this; instead tempo locked at max aggression and never slowed.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Phase switches ("RS goes defensive at week X"), hardcoded personnel caps, forced stance transitions. Creates artificial cliffs that don't match historical gradual degradation.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Fatigue (+2/battle, recovery only off frontline), supply drain (0.045/formation), entrenchment walls (sqrt curve), pool demographics. RS attacks naturally decline 8&rarr;1 by w40.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Find the emergent lever (fatigue, supply, pool exhaustion). If you can't, the underlying system is missing a mechanic. Never add a hard cap or phase switch.</div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="lesson-card anim" data-category="calibration" data-date="2026-03-08" style="--i:13">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-cal-dim);color:var(--cat-cal);border:1px solid var(--cat-cal-border)">Calibration</span>
+        <span class="lesson-title">Fixing one faction cascades to all others</span>
+        <span class="lesson-date">2026-03-08</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">HRHB was taking 6.3k KIA from phantom attrition on cold (Graz Accords) fronts. After fixing it, HRHB was suddenly too healthy — changing territorial dynamics and RBiH mobilization pressure.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Fixing HRHB attrition in isolation, expecting other factions to stay stable.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Treat faction calibration as a system. HRHB fix required pool scale 1.60&rarr;1.05 AND RBiH scale 0.18&rarr;0.25 to maintain equilibrium.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>After fixing any faction-specific bug, immediately check all three factions' troop strength, KIA, and territorial outcomes. Budget time for cascade recalibration.</div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="lesson-card anim" data-category="debugging" data-date="2026-03-08" style="--i:14">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-debug-dim);color:var(--cat-debug);border:1px solid var(--cat-debug-border)">Debugging</span>
+        <span class="lesson-title">The bug is never where you think it is</span>
+        <span class="lesson-date">2026-03-08</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">n304: too-low casualties, RS not degrading. Looked like a combat balance issue. Real bugs: <code>Number.isInteger</code> resetting fractional fatigue every turn, and equipment losses simply missing from OSID attack path.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Tuning combat constants (attacker/defender rates, morale thresholds). The mechanic wasn't even executing — constants are irrelevant.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Trace actual data flow. Print fatigue values across turns. Check whether equipment loss code exists in the active code path. Answer: "no."</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Before tuning constants, verify the mechanic is actually executing. Add a diagnostic to trace the value across turns. If it isn't changing when it should, you have a bug, not a balance problem.</div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="lesson-card anim" data-category="debugging" data-date="2026-03-08" style="--i:15">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-debug-dim);color:var(--cat-debug);border:1px solid var(--cat-debug-border)">Debugging</span>
+        <span class="lesson-title">One fix can expose a second deeper bug</span>
+        <span class="lesson-date">2026-03-08</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Wiring equipment loss into undefended-path battles caused total combat shutdown (0 battles). Looked like the equipment formula was wrong — but the real issue was <code>defenderFormation = undefined</code> hardcoded in legacy path.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Tune the equipment loss formula because "that's what changed." Assume the new code is the bug.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>The new code was correct; it exposed a hollow legacy path. When one fix causes cascade failure, audit what the fix exposed.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>When a fix causes regression, ask "what did this expose?" before tuning the fix. The regression is often a symptom of a deeper pre-existing hole.</div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="lesson-card anim" data-category="debugging" data-date="2026-03-08" style="--i:16">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-debug-dim);color:var(--cat-debug);border:1px solid var(--cat-debug-border)">Debugging</span>
+        <span class="lesson-title">Formation state is a state machine — guard transitions, not values</span>
+        <span class="lesson-date">2026-03-08</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context"><code>Number.isInteger(1.5) === false</code> caused the fatigue recovery guard to skip recovery, leaving fractional fatigue unreset every turn. Looked like a formula error.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Checking if a value is an integer as a guard for a state transition. This is a type assumption, not a state guard.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Guard with <code>typeof !== 'number'</code> (data presence), not <code>Number.isInteger</code> (value shape). Guard the transition, not the value format.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>For any state machine field, document transitions explicitly. Never guard with shape assumptions (<code>isInteger</code>, <code>isArray</code>) when presence is the right gate.</div>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="lesson-card anim" data-category="architecture" data-date="2026-03-08" style="--i:17">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-arch-dim);color:var(--cat-arch);border:1px solid var(--cat-arch-border)">Architecture</span>
+        <span class="lesson-title">Port systems incrementally, not all-at-once</span>
+        <span class="lesson-date">2026-03-08</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Frontline attrition needed to move from legacy <code>brigade_front_assignment</code>/<code>local_fronts</code> to <code>corps_front_sectors</code>. Legacy still used by fatigue, defense, GUI, serialization.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Remove the entire legacy system at once. Breaks 4+ consumers simultaneously — untestable, uncommittable.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Port one consumer at a time (<code>frontline_attrition.ts</code> only). Each port = clean, testable, committable unit.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Enumerate ALL consumers of the old system first. Port one at a time, verify calibration between each, delete old system only when the last consumer is ported.</div>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="lesson-card anim" data-category="architecture" data-date="2026-03-08" style="--i:18">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-arch-dim);color:var(--cat-arch);border:1px solid var(--cat-arch-border)">Architecture</span>
+        <span class="lesson-title">Scope determines lookup granularity</span>
+        <span class="lesson-date">2026-03-08</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">First sector-based attrition attempt used <code>friendly_osids</code> (border-adjacent only). Only 55% of RBiH brigades were there — casualties dropped ~50%.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Narrowest scope (border OSIDs). Brigades in the depth zone were excluded despite taking sniping/shelling/disease attrition.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Use <code>assigned_brigade_ids</code> — any brigade in sector <code>territory_osids</code>. Passive attrition = entire sector territory. Active combat = border only.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Map the full spatial hierarchy (border &rarr; territory &rarr; faction space) and pick the level matching the mechanic's real-world scope.</div>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="lesson-card anim" data-category="calibration" data-date="2026-03-07" style="--i:19">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-cal-dim);color:var(--cat-cal);border:1px solid var(--cat-cal-border)">Calibration</span>
+        <span class="lesson-title">Data problems masquerade as engine bugs</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">84.2% calibration plateau. Combat loop looked broken — VRS wasn't capturing historically-held territory. The engine was working correctly.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Debugging combat resolution engine, checking morale and attack thresholds. The engine was fine.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Pre-planned operation targets in <code>pre_planned_operations.ts</code> were missing key OSIDs (Zvornik, Br&#269;ko corridors). Data fix, not engine fix.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>When calibration plateaus, check whether operations are targeting the right places before debugging combat. Use <code>weekly_report.jsonl</code> to trace attacks.</div>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="lesson-card anim" data-category="architecture" data-date="2026-03-07" style="--i:20">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-arch-dim);color:var(--cat-arch);border:1px solid var(--cat-arch-border)">Architecture</span>
+        <span class="lesson-title">When you have 50+ overrides for one behavior, the mechanic is missing</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Goražde, Srebrenica, Žepa auto-captured via consolidation. Override pile-up hit a hard ceiling at ~93.6% ATH.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Keep adding <code>avoided_osids</code> and <code>osid_control_overrides</code> for each enclave. Eventually hit hard ceiling from override debt.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Enclaves are an engineering problem. Surrounded OSIDs with ethnic co-control need an enclave resilience mechanic, not more overrides.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Count your overrides. 10+ overrides for the same structural behavior = stop adding overrides and build the mechanic instead.</div>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="lesson-card anim" data-category="architecture" data-date="2026-03-07" style="--i:21">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-arch-dim);color:var(--cat-arch);border:1px solid var(--cat-arch-border)">Architecture</span>
+        <span class="lesson-title">FormationKind beats conditional checks everywhere</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Paramilitary units needed exclusion from reinforcement, bot AI, fatigue, and 6+ other systems.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Adding <code>if (f.is_paramilitary) continue;</code> in every system. Fragile, easy to miss one, maintenance burden.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>New <code>FormationKind = 'paramilitary'</code>. Existing kind-filters naturally exclude them without any new conditional checks.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>When a new entity type needs different lifecycle rules, make it a new Kind so existing filters exclude it automatically.</div>
+      </div>
+    </div>
+
+    <!-- 11 -->
+    <div class="lesson-card anim" data-category="debugging" data-date="2026-03-07" style="--i:22">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-debug-dim);color:var(--cat-debug);border:1px solid var(--cat-debug-border)">Debugging</span>
+        <span class="lesson-title">Empty execution windows need layer-by-layer diagnosis</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Drina corps went dormant — zero operations for weeks 4–40 after pre-planned operations. Three separate investigations before finding the right layer.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Debugging the operation execution code when the real gap was in corps directive generation.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Three-layer diagnosis: (1) Is the operation launching? (2) Are brigades assigned? (3) Is it progressing? Find which layer is broken before touching code.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Build layer-by-layer diagnostic tooling. A blank execution window = no launch, no assignment, or no progression — each has a different fix.</div>
+      </div>
+    </div>
+
+    <!-- 12 -->
+    <div class="lesson-card anim" data-category="calibration" data-date="2026-03-07" style="--i:23">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-cal-dim);color:var(--cat-cal);border:1px solid var(--cat-cal-border)">Calibration</span>
+        <span class="lesson-title">Test override blocks in isolation</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Adding 10+ HRHB cell overrides across multiple regions caused cascading regressions (POSAVINA_NE &minus;9.9pp, SARAJEVO &minus;9.3pp).</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Bulk-adding overrides across regions. Each shifts force balance, supply lines, bot targeting — effects compound non-linearly.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Add by isolated geographic cluster, one at a time. Some overrides are "load-bearing" — removing them causes net losses.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>One cluster at a time, calibration run between each. If a single override causes &gt;1pp regression elsewhere, investigate before adding more.</div>
+      </div>
+    </div>
+
+    <!-- 13 -->
+    <div class="lesson-card anim" data-category="calibration" data-date="2026-03-07" style="--i:24">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-cal-dim);color:var(--cat-cal);border:1px solid var(--cat-cal-border)">Calibration</span>
+        <span class="lesson-title">Measure secondary region deltas, not just the target</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">n237 — HRHB overrides improved the target region but caused POSAVINA_NE &minus;9.9pp and SARAJEVO &minus;9.3pp collateral damage.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Only checking the target region's delta after a change.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Faction changes trigger cascades: weaker HRHB &rarr; VRS easier wins &rarr; different front geometry &rarr; different casualty distribution. Check 2–3 secondary regions.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Always run a full-region ATH diff after any calibration change. Not just the target region.</div>
+      </div>
+    </div>
+
+    <!-- 14 -->
+    <div class="lesson-card anim" data-category="process" data-date="2026-03-07" style="--i:25">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-process-dim);color:var(--cat-process);border:1px solid var(--cat-process-border)">Process</span>
+        <span class="lesson-title">Classify tasks by actual system impact, not plan labels</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">A task labeled "GUI Phase 5" actually touched IPC contracts, bot AI logic, pipeline steps, and serialization schemas — all engine-critical.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Treating it as "UI work" — skipping regression gates, parallelizing shared-state tasks, combining engine + UI commits.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Audit what the task actually touches. If it modifies schema, IPC, bot logic, pipeline, or serialization — it's engine work.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Read the actual file list before deciding classification. Any file in <code>src/sim/</code>, <code>src/state/</code>, or IPC contracts = add regression gates.</div>
+      </div>
+    </div>
+
+    <!-- 15 -->
+    <div class="lesson-card anim" data-category="process" data-date="2026-03-07" style="--i:26">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-process-dim);color:var(--cat-process);border:1px solid var(--cat-process-border)">Process</span>
+        <span class="lesson-title">OSID-level anchors, not municipality-level</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Scenario anchors for pockets at municipality level gave false failures because a municipality can be partially controlled.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div><code>anchor: "bihac"</code> — fails if any OSID in the municipality is lost, even if the pocket core is held.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div><code>anchor: "op:bihac:bihac_2"</code> — checks the specific OSID representing the pocket core.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Always use OSID-level anchors for calibration checkpoints. Municipality-level is too coarse for a 744-OSID map.</div>
+      </div>
+    </div>
+
+    <!-- 16 -->
+    <div class="lesson-card anim" data-category="gui" data-date="2026-03-07" style="--i:27">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-gui-dim);color:var(--cat-gui);border:1px solid var(--cat-gui-border)">GUI</span>
+        <span class="lesson-title">Never show raw engine values to the player</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Officer stats displayed as raw 1-5 integers. "Competence: 3" — meaningless, immersion-breaking, invites min-maxing.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div><code>Math.round(stat * 100)</code> or raw integers. No meaning to players.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div><code>OfficerProfile</code> with archetypes ("Master Strategist"), pip ratings (&bull;&bull;&bull;&#9675;&#9675;), descriptive text. Values drive mechanics but are never shown.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Every engine value shown to the player must go through a presentation layer. Pips, bars, descriptive labels, archetypes — never raw numbers.</div>
+      </div>
+    </div>
+
+    <!-- 17 -->
+    <div class="lesson-card anim" data-category="botai" data-date="2026-03-07" style="--i:28">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-botai-dim);color:var(--cat-botai);border:1px solid var(--cat-botai-border)">Bot AI</span>
+        <span class="lesson-title">New mechanics competing with bot AI need explicit target exclusion</span>
+        <span class="lesson-date">2026-03-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Paramilitary brigades competed with bot AI for undefended rear pocket OSIDs. Bot AI struck immediately; paramilitaries with MARCH_TURNS=2 never captured anything.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Assume bot AI and new mechanics will naturally share territory. Set MARCH_TURNS and expect the system to work.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Bot AI must explicitly exclude paramilitary target OSIDs. New mechanics competing for territory must gate the bot's access to that target class.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>When adding any new mechanic that captures OSIDs, immediately check <code>generateCorpsDirectives</code> and <code>bot_brigade_ai_osid.ts</code> for conflicts. Add exclusions before wiring.</div>
+      </div>
+    </div>
+
+    <!-- 18 -->
+    <div class="lesson-card anim" data-category="architecture" data-date="2026-03-06" style="--i:29">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-arch-dim);color:var(--cat-arch);border:1px solid var(--cat-arch-border)">Architecture</span>
+        <span class="lesson-title">Operations need explicit phase lifecycle</span>
+        <span class="lesson-date">2026-03-06</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Operations entered execution phase and stayed there indefinitely with no attacks, triggering <code>execution_without_attack_orders</code> warnings.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Treating a quiet execution turn as always a broken state. Triggering failure logic and resetting ops.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>A quiet turn with movement orders is a maneuver turn — brigades staging. Only trigger failure after brigades have staged AND zero attacks over multiple turns.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Operations need explicit states: planning &rarr; staging &rarr; attacking &rarr; completion. A movement-only turn is still progress.</div>
+      </div>
+    </div>
+
+    <!-- 19 -->
+    <div class="lesson-card anim" data-category="calibration" data-date="2026-03-06" style="--i:30">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-cal-dim);color:var(--cat-cal);border:1px solid var(--cat-cal-border)">Calibration</span>
+        <span class="lesson-title">Supply is a three-faction cascade — change one, verify all</span>
+        <span class="lesson-date">2026-03-06</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">PATRON_AID_SCALE at 6 meant RBiH felt near-zero embargo. Raising it to 12 broke HRHB. Each faction's supply formula interacts.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Tuning one faction's supply constants and checking only that faction's outcome.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Supply cascade: RBiH (UN airdrops + patron) &rarr; RS (self-sufficient) &rarr; HRHB (Croatian pipeline). All three must be checked after any supply constant change.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>After any supply change, check all three factions' reserve levels, run a 40w scenario, verify no faction hits critical unexpectedly.</div>
+      </div>
+    </div>
+
+    <!-- 20 -->
+    <div class="lesson-card anim" data-category="calibration" data-date="2026-03-06" style="--i:31">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-cal-dim);color:var(--cat-cal);border:1px solid var(--cat-cal-border)">Calibration</span>
+        <span class="lesson-title">Constants need inline range documentation</span>
+        <span class="lesson-date">2026-03-06</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">UN airdrops set to 15 pts/turn were silently dominating RBiH's entire supply system. Only discovered during n159 audit when drilling into a cascade failure.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Treating constants as opaque tuning levers with no documentation of expected range or system impact.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Constants get inline docs: expected range, what happens at min/max, which systems they dominate. Capping AIRDROP_MAX 15&rarr;3 changed the entire RBiH supply flow.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>When adding a constant, document: expected range, min/max effect, dominant subsystems. A buried constant can be the true control knob while "documented" parameters do nothing.</div>
+      </div>
+    </div>
+
+    <!-- 21 -->
+    <div class="lesson-card anim" data-category="process" data-date="2026-03-06" style="--i:32">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-process-dim);color:var(--cat-process);border:1px solid var(--cat-process-border)">Process</span>
+        <span class="lesson-title">Update CALIBRATION_MASTER during the session, not after</span>
+        <span class="lesson-date">2026-03-06</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Calibration insights scattered across 20+ report files when captured after the fact. Next session had to re-derive which constants were touched and why.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Writing calibration notes at end of session or in ad-hoc reports. Knowledge fragments and context is lost.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div><code>CALIBRATION_MASTER.md</code> is the single source of truth. Update it as you change constants, not after. Same for <code>GUI_MASTER.md</code>.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Open the relevant master doc at session start. Update every time you change a constant or complete a calibration run.</div>
+      </div>
+    </div>
+
+    <!-- 22 -->
+    <div class="lesson-card anim" data-category="process" data-date="2026-03-06" style="--i:33">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-process-dim);color:var(--cat-process);border:1px solid var(--cat-process-border)">Process</span>
+        <span class="lesson-title">Pre-run validity checks prevent calibration dead-ends</span>
+        <span class="lesson-date">2026-03-06</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Multiple early calibration runs (n35, n52) produced zero battles because operation preconditions weren't checked before investing in a 40w run.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Running full 40w scenarios to discover that combat is fundamentally broken (no attack orders, wrong OSID keys, zero eligible brigades).</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Proof-lane test (<code>scenario_vrs_operation_proof_4w.json</code>) validates one VRS opening op can attack, battle, and advance. Run before any 40w calibration.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Maintain a lightweight proof test that validates the critical path. Run it before every calibration run. Saves 5-10 minutes per failed long run.</div>
+      </div>
+    </div>
+
+    <!-- 23 -->
+    <div class="lesson-card anim" data-category="calibration" data-date="2026-03-05" style="--i:34">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-cal-dim);color:var(--cat-cal);border:1px solid var(--cat-cal-border)">Calibration</span>
+        <span class="lesson-title">Confidence thresholds should be named constants, not magic numbers</span>
+        <span class="lesson-date">2026-03-05</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Sector intelligence used raw float comparisons throughout GUI and bot code. Changing a threshold required finding every comparison site.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Inline: <code>if (confidence > 0.5)</code>. Each site independently defines "good enough" — values silently diverge.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div><code>sector_intel_constants.ts</code> defines named tiers: CONFIDENCE_ROUGH=0.2, CONFIDENCE_FRONT=0.3, CONFIDENCE_FULL=0.5, CONFIDENCE_DEEP=0.8. Every consumer uses the same gates.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Any threshold gating information or behavior should be a named constant. If two float comparisons look similar but differ slightly, they're silently diverging.</div>
+      </div>
+    </div>
+
+    <!-- 24 -->
+    <div class="lesson-card anim" data-category="architecture" data-date="2026-03-05" style="--i:35">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-arch-dim);color:var(--cat-arch);border:1px solid var(--cat-arch-border)">Architecture</span>
+        <span class="lesson-title">Systems need a single owner file</span>
+        <span class="lesson-date">2026-03-05</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context"><code>recon_intelligence.ts</code>: BFS logic in one file, GUI-only consumers, types in game_state.ts. When OSID migration happened, the dead SID-keyed BFS hung around for weeks undetected.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Split system across: types in game_state, logic in module, constants consumed by 3 different places.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>One owner file declares types, constants, and core logic. <code>sector_intel.ts</code> + <code>sector_intel_constants.ts</code> as a self-contained pair — dead code becomes immediately visible.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>When a system spans more than 2 files for its core logic (not consumers), consolidate. Dead code becomes visible when ownership is clear.</div>
+      </div>
+    </div>
+
+    <!-- 25 -->
+    <div class="lesson-card anim" data-category="debugging" data-date="2026-03-04" style="--i:36">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-debug-dim);color:var(--cat-debug);border:1px solid var(--cat-debug-border)">Debugging</span>
+        <span class="lesson-title">Override direction is critical and confusing</span>
+        <span class="lesson-date">2026-03-04</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">RS territory calibration. Adding under-captured OSIDs to <code>avoided_osids</code> made RS even <em>less</em> likely to capture them. Cost: &minus;0.7pp regression.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Guessing the direction. The names describe the mechanism, not the problem.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div><code>avoided_osids</code> = fix OVER-captures. <code>osid_control_overrides</code> = fix UNDER-captures. State the problem first, then pick the tool.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>State "RS has too much/too little here" then match: too much &rarr; avoided_osids, too little &rarr; osid_control_overrides. Never guess.</div>
+      </div>
+    </div>
+
+    <!-- 26 -->
+    <div class="lesson-card anim" data-category="process" data-date="2026-03-04" style="--i:37">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-process-dim);color:var(--cat-process);border:1px solid var(--cat-process-border)">Process</span>
+        <span class="lesson-title">Determinism requires explicit sorting, not hope</span>
+        <span class="lesson-date">2026-03-04</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context"><code>Object.keys()</code> and <code>Object.entries()</code> iteration order is not guaranteed. Map source updates diverged across runs on different machines.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Assuming iteration order is stable because it "usually is." Single-machine testing that happens to be consistent.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Every iteration over maps, every <code>Object.keys()</code>, every derived array must be explicitly sorted via <code>strictCompare</code>. Document the sorting contract in function signatures.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Search for any <code>Object.keys()</code> or <code>Object.entries()</code> without <code>.sort(strictCompare)</code>. Each one is a latent nondeterminism bug.</div>
+      </div>
+    </div>
+
+    <!-- 27 -->
+    <div class="lesson-card anim" data-category="debugging" data-date="2026-03-01" style="--i:38">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-debug-dim);color:var(--cat-debug);border:1px solid var(--cat-debug-border)">Debugging</span>
+        <span class="lesson-title">Validate attribution at three layers: firing → accounting → outcome</span>
+        <span class="lesson-date">2026-03-01</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Displacement system attributed all casualties to "encirclement" due to OSID/SID mismatch. Ledger said "working" — accounting was technically correct. But 4.36M displaced = 4× history.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Validating only that a mechanism fires and accounting is non-negative. Missing the magnitude sanity check.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Three-layer: (1) mechanism fires correctly, (2) accounting correct (no negatives), (3) outcome within 0.5×–2× of historical. All three must pass.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>For any new casualty/displacement/loss mechanic, add a magnitude sanity check. If total is &gt;2× historical, the mechanism has a hidden amplifier.</div>
+      </div>
+    </div>
+
+    <!-- 28 -->
+    <div class="lesson-card anim" data-category="gui" data-date="2026-03-01" style="--i:39">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-gui-dim);color:var(--cat-gui);border:1px solid var(--cat-gui-border)">GUI</span>
+        <span class="lesson-title">Defer heavy work off the main thread</span>
+        <span class="lesson-date">2026-03-01</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">Formation icon creation (canvas draw + getImageData + MapLibre GPU upload) was synchronous in a single rAF, freezing the UI for hundreds of milliseconds per load.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>DOM manipulation, image encoding, and GPU operations synchronously in the render path.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div><code>requestIdleCallback</code> with 400ms timeout deferred icon loading without blocking UI. Heavy work belongs off the hot path.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>Any work touching DOM, canvas, or GPU inside a render callback needs a <code>requestIdleCallback</code> or next-tick defer. If the UI stutters during load, the render path has synchronous work.</div>
+      </div>
+    </div>
+
+    <!-- 29 -->
+    <div class="lesson-card anim" data-category="architecture" data-date="2026-02-22" style="--i:40">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-arch-dim);color:var(--cat-arch);border:1px solid var(--cat-arch-border)">Architecture</span>
+        <span class="lesson-title">If you enforce a property every turn, the model is wrong</span>
+        <span class="lesson-date">2026-02-22</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">AoR model treated brigade location as a set of owned settlements, requiring contiguity enforcement, enclave fragmentation, and 20+ lines of rebalancing code every turn.</div>
+        <div class="approach-grid">
+          <div class="approach approach--wrong"><div class="approach-label">Wrong Approach</div>Add more enforcement code each time the model drifts. Contiguity enforcement, sector rebalancing, AoR re-computation each turn.</div>
+          <div class="approach approach--right"><div class="approach-label">Right Approach</div>Brigade location as a single node (<code>location_osid</code>) in the contact graph. Contiguity, sector assignment, and territory claims become derived views — no enforcement loop needed.</div>
+        </div>
+        <div class="do-instead"><div class="do-instead-label">Do Instead</div>When you add per-turn enforcement code for a property, stop. Find the model that makes the property invariant by construction.</div>
+      </div>
+    </div>
+
+  </div><!-- end #active-lessons -->
+
+  <!-- INTERNALIZED -->
+  <div class="section-divider anim" style="--i:41">
+    <span class="line"></span><span class="label">Internalized &mdash; Consistently Applied</span><span class="line"></span>
+  </div>
+
+  <div class="lessons-grid">
+
+    <div class="lesson-card lesson-card--internalized anim" data-category="process" data-date="2026-02-25" style="--i:42">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-process-dim);color:var(--cat-process);border:1px solid var(--cat-process-border)">Process</span>
+        <span class="lesson-title">Determinism is sacred</span>
+        <span class="lesson-date">2026-02-25</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">No <code>Math.random()</code>, no timestamps, sorted iteration via <code>strictCompare</code>. Consistently followed — no violations in last 3 days.</div>
+      </div>
+    </div>
+
+    <div class="lesson-card lesson-card--internalized anim" data-category="process" data-date="2026-02-21" style="--i:43">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-process-dim);color:var(--cat-process);border:1px solid var(--cat-process-border)">Process</span>
+        <span class="lesson-title">Smoke-test triad after every change</span>
+        <span class="lesson-date">2026-02-21</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context"><code>tsc --noEmit</code> + <code>vitest run</code> + <code>desktop:map:build</code>. Consistently run. No recent failures from skipping.</div>
+      </div>
+    </div>
+
+    <div class="lesson-card lesson-card--internalized anim" data-category="platform" data-date="2026-02-07" style="--i:44">
+      <div class="lesson-header">
+        <span class="lesson-cat" style="background:var(--cat-platform-dim);color:var(--cat-platform);border:1px solid var(--cat-platform-border)">Platform</span>
+        <span class="lesson-title">Windows shell uses semicolons</span>
+        <span class="lesson-date">2026-02-07</span>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-context">PowerShell: <code>;</code> not <code>&&</code>. No recent violations.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer anim" style="--i:45">
+    AWWV Life Lessons &bull; Auto-generated daily at 06:00 &bull; Cross-checked &amp; violation-tracked &bull; docs/life_lessons.md
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const badges = document.querySelectorAll('.cat-badge[data-filter]');
+  const grid = document.getElementById('active-lessons');
+  const sortBtns = document.querySelectorAll('.sort-btn[data-sort]');
+  const clearBtn = document.querySelector('.clear-btn');
+  const catOrder = ['architecture','calibration','debugging','process','gui','botai','platform'];
+  let activeFilter = null;
+
+  function applyFilter(cat) {
+    document.querySelectorAll('.lesson-card').forEach(c => {
+      c.classList.toggle('filtered-out', cat !== null && c.dataset.category !== cat);
+    });
+  }
+
+  badges.forEach(badge => {
+    badge.addEventListener('click', () => {
+      const cat = badge.dataset.filter;
+      if (activeFilter === cat) {
+        activeFilter = null;
+        badges.forEach(b => b.classList.remove('active','dimmed'));
+        clearBtn.classList.remove('visible');
+      } else {
+        activeFilter = cat;
+        badges.forEach(b => {
+          b.classList.toggle('active', b.dataset.filter === cat);
+          b.classList.toggle('dimmed', b.dataset.filter !== cat);
+        });
+        clearBtn.classList.add('visible');
+      }
+      applyFilter(activeFilter);
+    });
+  });
+
+  clearBtn.addEventListener('click', () => {
+    activeFilter = null;
+    badges.forEach(b => b.classList.remove('active','dimmed'));
+    clearBtn.classList.remove('visible');
+    applyFilter(null);
+  });
+
+  function sortCards(mode) {
+    const cards = Array.from(grid.querySelectorAll('.lesson-card'));
+    cards.sort((a, b) => {
+      if (mode === 'date-desc') return b.dataset.date.localeCompare(a.dataset.date);
+      if (mode === 'date-asc')  return a.dataset.date.localeCompare(b.dataset.date);
+      if (mode === 'category') {
+        const ci = catOrder.indexOf(a.dataset.category) - catOrder.indexOf(b.dataset.category);
+        return ci !== 0 ? ci : b.dataset.date.localeCompare(a.dataset.date);
+      }
+      return 0;
+    });
+    cards.forEach((card, i) => {
+      card.style.setProperty('--i', i);
+      card.classList.remove('anim');
+      void card.offsetWidth;
+      card.classList.add('anim');
+      grid.appendChild(card);
+    });
+  }
+
+  sortBtns.forEach(btn => {
+    if (btn.dataset.sort === 'reset') return;
+    btn.addEventListener('click', () => {
+      sortBtns.forEach(b => { if (b.dataset.sort !== 'reset') b.classList.remove('active'); });
+      btn.classList.add('active');
+      sortCards(btn.dataset.sort);
+    });
+  });
+})();
+</script>
+</body>
+</html>
