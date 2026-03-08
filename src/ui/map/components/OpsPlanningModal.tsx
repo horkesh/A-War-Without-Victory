@@ -14,6 +14,7 @@ import styleJson from '../map/awwv_map_style.json';
 import { rewritePmtilesUrls } from '../map/rewritePmtilesUrls';
 import { buildCorpsFrontLinesGeoJSON } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import type { FormationView } from '../data/types';
+import { OPERATION_NAMES, simpleHash } from '../../../sim/combat/operation_names';
 
 // --- Axis colors for map arrows and UI accents ---
 const AXIS_COLORS = [
@@ -26,8 +27,6 @@ const AXIS_COLORS = [
 const OP_TYPE_TOOLTIPS: Record<string, string> = {
     sector_attack: 'Concentrated attack on enemy positions in this sector. Brigades advance along assigned axes toward objectives in sequence.',
     general_offensive: 'Broad-front push across the entire sector. Higher casualties, wider territorial gains.',
-    strategic_defense: 'Fortify positions and prepare for enemy attack. Brigades dig in and hold ground.',
-    reorganization: 'Rest, refit, and redistribute forces. No combat objectives required.',
     feint: 'Diversionary attack to draw enemy reserves. Lower commitment, higher deception value.',
     probe: 'Reconnaissance in force. Quick 1-turn planning, tests enemy defenses without full commitment.',
 };
@@ -61,25 +60,26 @@ export function OpsPlanningModal() {
     const controlGeoRef = useRef<FeatureCollection<Polygon | MultiPolygon> | null>(null);
     const centroidLookupRef = useRef<Map<string, [number, number]>>(new Map());
     const [opName, setOpName] = useState('');
-    const [operationType, setOperationType] = useState<'sector_attack' | 'general_offensive' | 'strategic_defense' | 'reorganization' | 'feint' | 'probe'>('sector_attack');
+    const [operationType, setOperationType] = useState<'sector_attack' | 'general_offensive' | 'feint' | 'probe'>('sector_attack');
     const [minAttackOutcome, setMinAttackOutcome] = useState<'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed'>('victory');
     const [tempo, setTempo] = useState<'methodical' | 'standard' | 'all_out'>('standard');
     const [artilleryPreparation, setArtilleryPreparation] = useState(false);
     const [schwerpunktOsid, setSchwerpunktOsid] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [statusMessage, setStatusMessage] = useState<string | null>(null);
-    const [hoveredOpType, setHoveredOpType] = useState<string | null>(null);
 
     // Multi-axis state
     const [axes, setAxes] = useState<AxisState[]>([]);
     const [activeAxisId, setActiveAxisId] = useState<string>('');
+    const activeAxisIdRef = useRef<string>('');
     const [mapClickMode, setMapClickMode] = useState<MapClickMode>('objectives');
     const mapClickModeRef = useRef<MapClickMode>('objectives');
     const [showConfirmation, setShowConfirmation] = useState(false);
     const ipc = useIPC();
 
-    // Keep ref in sync with state for use in map click closure
+    // Keep refs in sync with state for use in map click closure
     useEffect(() => { mapClickModeRef.current = mapClickMode; }, [mapClickMode]);
+    useEffect(() => { activeAxisIdRef.current = activeAxisId; }, [activeAxisId]);
 
     const sector = useMemo(() => {
         if (!selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
@@ -134,8 +134,14 @@ export function OpsPlanningModal() {
         setArtilleryPreparation(false);
         setSchwerpunktOsid('');
         setStatusMessage(null);
-        setOpName(`Operation ${sector.display_name}`);
-    }, [sector]);
+        // Pre-generate a faction-flavored operation name from the canonical pools
+        const factionPool = OPERATION_NAMES[playerFaction] ?? OPERATION_NAMES['RS'] ?? [];
+        if (factionPool.length > 0) {
+            setOpName(factionPool[simpleHash(sector.corps_id) % factionPool.length]!);
+        } else {
+            setOpName(`Operation ${sector.display_name}`);
+        }
+    }, [sector, playerFaction]);
 
     const activeAxis = axes.find((a) => a.id === activeAxisId) ?? null;
 
@@ -361,9 +367,10 @@ export function OpsPlanningModal() {
     }
 
     function toggleObjectiveOnActiveAxis(osid: string) {
+        const axisId = activeAxisIdRef.current;
         setAxes((prev) => {
             const next = prev.map((a) => {
-                if (a.id !== activeAxisId) return a;
+                if (a.id !== axisId) return a;
                 const objs = a.objectives.includes(osid)
                     ? a.objectives.filter((o) => o !== osid)
                     : [...a.objectives, osid];
@@ -375,15 +382,17 @@ export function OpsPlanningModal() {
     }
 
     function setStagingOnActiveAxis(osid: string) {
+        const axisId = activeAxisIdRef.current;
         setAxes((prev) => prev.map((a) => {
-            if (a.id !== activeAxisId) return a;
+            if (a.id !== axisId) return a;
             return { ...a, stagingOsid: a.stagingOsid === osid ? undefined : osid };
         }));
         setMapClickMode('objectives');
     }
 
     function clearStagingOnActiveAxis() {
-        setAxes((prev) => prev.map((a) => a.id !== activeAxisId ? a : { ...a, stagingOsid: undefined }));
+        const axisId = activeAxisIdRef.current;
+        setAxes((prev) => prev.map((a) => a.id !== axisId ? a : { ...a, stagingOsid: undefined }));
     }
 
     function handleMapClick(osid: string) {
@@ -418,7 +427,7 @@ export function OpsPlanningModal() {
             return;
         }
         const hasObjectives = axes.some((a) => a.objectives.length > 0);
-        if (!hasObjectives && operationType !== 'reorganization') {
+        if (!hasObjectives) {
             setStatusMessage('Select at least one objective on the map.');
             return;
         }
@@ -494,6 +503,7 @@ export function OpsPlanningModal() {
             center: [17.7, 43.87],
             zoom: 8,
             interactive: true,
+            attributionControl: false,
         });
         mapRef.current = map;
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -529,7 +539,7 @@ export function OpsPlanningModal() {
 
                 (map.getSource('osid-control') as maplibregl.GeoJSONSource | undefined)?.setData(controlledGeoJson);
                 if (map.getLayer('osid-control-fill')) {
-                    map.setPaintProperty('osid-control-fill', 'fill-opacity', 0.25);
+                    map.setPaintProperty('osid-control-fill', 'fill-opacity', 0.55);
                 }
 
                 const frontLineGeo = buildCorpsFrontLinesGeoJSON(
@@ -767,25 +777,16 @@ export function OpsPlanningModal() {
                                         placeholder="Operation..."
                                         className="w-full bg-black/30 border border-panel-border rounded px-2 py-1.5 text-sm text-white placeholder-text-secondary focus:border-accent-gold focus:outline-none" />
                                 </div>
-                                <div className="flex flex-col gap-1 relative">
+                                <div className="flex flex-col gap-1">
                                     <label className="text-[10px] font-semibold text-accent-gold uppercase tracking-widest">Type</label>
                                     <select value={operationType}
                                         onChange={(e) => setOperationType(e.target.value as typeof operationType)}
-                                        onMouseEnter={() => setHoveredOpType(operationType)}
-                                        onMouseLeave={() => setHoveredOpType(null)}
                                         className="w-full bg-black/30 border border-panel-border rounded px-2 py-1.5 text-sm text-white focus:border-accent-gold focus:outline-none">
                                         <option value="sector_attack">Sector Attack</option>
                                         <option value="general_offensive">General Offensive</option>
-                                        <option value="strategic_defense">Strategic Defense</option>
-                                        <option value="reorganization">Reorganization</option>
                                         <option value="feint">Feint</option>
                                         <option value="probe">Probe</option>
                                     </select>
-                                    {hoveredOpType && (
-                                        <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-panel-card border border-panel-border rounded p-2 text-[10px] text-text-secondary shadow-lg">
-                                            {OP_TYPE_TOOLTIPS[hoveredOpType] ?? ''}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 

@@ -93,24 +93,10 @@ function buildFactionSectors(
     // adjacency) is split across multiple corps by the BFS Voronoi boundary,
     // reassign the minority edges to the majority corps. Prevents pockets and
     // border settlements from being split between distant corps.
-    consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency);
+    // Brigade-locked edges (where a brigade of that corps is stationed) are protected.
+    consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency, formations);
 
-    // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
-    const sectors: CorpsFrontSector[] = [];
-    for (const corpsId of corpsIds) {
-        const edgeIds = corpsEdges.get(corpsId);
-        if (!edgeIds || edgeIds.length === 0) continue;
-
-        const corpsMultiSectors = buildMultiSectorsForCorps(
-            state, corpsId, faction, edgeIds, osidFrontEdges,
-            adjacency, formations, reverseMap
-        );
-        for (const sector of corpsMultiSectors) {
-            sectors.push(sector);
-        }
-    }
-
-    // Pre-compute friendly OSIDs once for territory and brigade assignment.
+    // Pre-compute friendly OSIDs once for territory, brigade assignment, and contiguity checks.
     const friendlyOsids = new Set<string>();
     for (const osid of adjacency.keys()) {
         const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
@@ -122,10 +108,26 @@ function buildFactionSectors(
         if (ctrl === faction) friendlyOsids.add(osid);
     }
 
+    // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
+    const sectors: CorpsFrontSector[] = [];
+    for (const corpsId of corpsIds) {
+        const edgeIds = corpsEdges.get(corpsId);
+        if (!edgeIds || edgeIds.length === 0) continue;
+
+        const corpsMultiSectors = buildMultiSectorsForCorps(
+            state, corpsId, faction, edgeIds, osidFrontEdges,
+            adjacency, formations, reverseMap, friendlyOsids
+        );
+        for (const sector of corpsMultiSectors) {
+            sectors.push(sector);
+        }
+    }
+
     // Step 5: Territory Voronoi — BFS from each sector's front-edge OSIDs
     // backward through friendly territory. Each friendly OSID is assigned to
-    // the nearest sector (by hop count). Creates contiguous sector territories.
-    assignTerritoryVoronoi(sectors, adjacency, friendlyOsids);
+    // the nearest sector (by hop count). Corps boundaries are respected:
+    // each sector's BFS can only claim OSIDs assigned to its corps.
+    assignTerritoryVoronoi(sectors, adjacency, friendlyOsids, osidToCorps);
 
     // Step 6: Classify brigades by territory membership.
     // Brigades in a sector's territory_osids → assigned.
@@ -150,13 +152,17 @@ function buildFactionSectors(
  * through friendly territory. Each friendly OSID is assigned to the nearest
  * sector (by hop count). First-claim wins; sectors processed in sorted order.
  *
+ * Corps boundaries are respected: each sector's BFS can only claim OSIDs
+ * that mapOsidsToCorps assigned to the same corps (or unclaimed OSIDs).
+ *
  * Sets each sector's `territory_osids` to the sorted list of claimed OSIDs.
  * Deterministic: sorted sector order, sorted neighbor iteration.
  */
 function assignTerritoryVoronoi(
     sectors: CorpsFrontSector[],
     adjacency: Map<Osid, Osid[]>,
-    friendlyOsids: Set<string>
+    friendlyOsids: Set<string>,
+    osidToCorps?: Map<Osid, FormationId>
 ): void {
     if (sectors.length === 0) return;
 
@@ -187,14 +193,22 @@ function assignTerritoryVoronoi(
         }
     }
 
-    // Multi-source BFS through friendly territory
+    // Multi-source BFS through friendly territory.
+    // Corps boundary enforcement: each sector can only claim OSIDs that
+    // mapOsidsToCorps assigned to its corps (or OSIDs not in the map at all).
     let head = 0;
     while (head < queue.length) {
         const { osid, sectorIdx } = queue[head++]!;
-        const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
+        const sectorCorps = sectors[sectorIdx]!.corps_id;
+        const neighbors = adjacency.get(osid) ?? [];
         for (const n of neighbors) {
             if (claimed.has(n)) continue;
             if (!friendlyOsids.has(n)) continue;
+            // Respect corps boundaries: don't claim OSIDs owned by another corps
+            if (osidToCorps) {
+                const ownerCorps = osidToCorps.get(n as Osid);
+                if (ownerCorps && ownerCorps !== sectorCorps) continue;
+            }
             claimed.set(n, sectorIdx);
             queue.push({ osid: n, sectorIdx });
         }
@@ -580,7 +594,8 @@ function consolidateCrossCorpsFronts(
     corpsEdges: Map<FormationId, string[]>,
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     faction: FactionId,
-    adjacency: Map<Osid, Osid[]>
+    adjacency: Map<Osid, Osid[]>,
+    formations: Record<FormationId, FormationState>
 ): void {
     // Collect all edge_ids across all corps for this faction
     const allEdgeIds: string[] = [];
@@ -603,41 +618,27 @@ function consolidateCrossCorpsFronts(
         }
     }
 
-    // Build adjacency across ALL faction edges (ignoring corps boundaries)
+    // Build adjacency across ALL faction edges (ignoring corps boundaries).
+    // Includes friendly-OSID, OSID-neighbor, same-hostile-OSID, and hostile-
+    // OSID-neighbor adjacency — so connected components faithfully represent
+    // contiguous front segments.
     const edgeAdj = buildEdgeAdjacency(allEdgeIds, edgeMeta, faction, adjacency);
 
-    // Also connect edges sharing a hostile-side OSID. Two edges facing the same
-    // enemy OSID are part of the same front even if their friendly OSIDs aren't
-    // adjacent (e.g. orahova<>kruskik_2 and gradiska_3<>kruskik_2 share hostile
-    // kruskik_2 but orahova and gradiska_3 aren't directly adjacent).
-    const hostileToEdges = new Map<string, string[]>();
-    for (const eid of allEdgeIds) {
-        const meta = edgeMeta.get(eid);
-        if (!meta) continue;
-        const addHostile = (osid: string, side: string | null) => {
-            if (side === faction) return; // skip friendly side
-            let list = hostileToEdges.get(osid);
-            if (!list) { list = []; hostileToEdges.set(osid, list); }
-            list.push(eid);
-        };
-        addHostile(meta.a, meta.side_a);
-        addHostile(meta.b, meta.side_b);
-    }
-    for (const edgesAtHostile of hostileToEdges.values()) {
-        if (edgesAtHostile.length < 2) continue;
-        edgesAtHostile.sort(strictCompare);
-        for (let i = 0; i < edgesAtHostile.length; i++) {
-            for (let j = i + 1; j < edgesAtHostile.length; j++) {
-                const a = edgesAtHostile[i]!;
-                const b = edgesAtHostile[j]!;
-                let listA = edgeAdj.get(a);
-                if (!listA) { listA = []; edgeAdj.set(a, listA); }
-                if (!listA.includes(b)) listA.push(b);
-                let listB = edgeAdj.get(b);
-                if (!listB) { listB = []; edgeAdj.set(b, listB); }
-                if (!listB.includes(a)) listB.push(a);
-            }
-        }
+    // Build brigade-presence lookup once: OSID → set of corps with brigades
+    // stationed there. Edges where a brigade of the current corps is stationed
+    // are protected from consolidation (brigade presence defines the corps
+    // boundary — not edge-count majority).
+    const osidBrigadeCorps = new Map<string, Set<FormationId>>();
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid) continue;
+        const fCorpsId = getFormationCorpsId(f);
+        if (!fCorpsId) continue;
+        let set = osidBrigadeCorps.get(f.location_osid);
+        if (!set) { set = new Set(); osidBrigadeCorps.set(f.location_osid, set); }
+        set.add(fCorpsId);
     }
 
     // Find connected components via BFS
@@ -699,6 +700,14 @@ function consolidateCrossCorpsFronts(
             if (!currentCorps || currentCorps === majorityCorps) continue;
             if (protectedCorps.has(currentCorps)) continue;
 
+            // Protect edges where a brigade of the current corps is on the friendly OSID
+            const meta = edgeMeta.get(eid);
+            if (meta) {
+                const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
+                const brigCorps = osidBrigadeCorps.get(friendlyOsid);
+                if (brigCorps && brigCorps.has(currentCorps)) continue; // Brigade presence protects
+            }
+
             // Remove from current corps
             const currentList = corpsEdges.get(currentCorps);
             if (currentList) {
@@ -714,6 +723,63 @@ function consolidateCrossCorpsFronts(
             }
             majorityList.push(eid);
             edgeToCorps.set(eid, majorityCorps);
+        }
+    }
+
+    // ── Hostile-OSID coherence pass ──
+    // When edges from multiple corps face the SAME hostile OSID, consolidate
+    // minority-corps edges to the majority corps. This prevents settlements
+    // from being split between corps (e.g. Bijela with edges from both 1st
+    // and 4th Corps). Brigade presence still protects.
+    const hostileOsidToCorpsCounts = new Map<string, Map<FormationId, string[]>>();
+    for (const edge of osidFrontEdges) {
+        if (edge.side_a !== faction && edge.side_b !== faction) continue;
+        const corps = edgeToCorps.get(edge.edge_id);
+        if (!corps) continue;
+        const hostileOsid = edge.side_a === faction ? edge.b : edge.a;
+        let corpMap = hostileOsidToCorpsCounts.get(hostileOsid);
+        if (!corpMap) { corpMap = new Map(); hostileOsidToCorpsCounts.set(hostileOsid, corpMap); }
+        let list = corpMap.get(corps);
+        if (!list) { list = []; corpMap.set(corps, list); }
+        list.push(edge.edge_id);
+    }
+
+    for (const [_hostileOsid, corpMap] of [...hostileOsidToCorpsCounts.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        if (corpMap.size <= 1) continue; // single corps — no conflict
+
+        // Find majority corps for this hostile OSID
+        let majCorps: FormationId | null = null;
+        let majCount = 0;
+        for (const [cid, eids] of [...corpMap.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+            if (eids.length > majCount || (eids.length === majCount && majCorps !== null && strictCompare(cid, majCorps) < 0)) {
+                majCorps = cid;
+                majCount = eids.length;
+            }
+        }
+        if (!majCorps) continue;
+
+        // Reassign minority-corps edges (respect brigade presence)
+        for (const [cid, eids] of corpMap) {
+            if (cid === majCorps) continue;
+            for (const eid of eids) {
+                // Check brigade presence protection
+                const meta = edgeMeta.get(eid);
+                if (meta) {
+                    const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
+                    const brigCorps = osidBrigadeCorps.get(friendlyOsid);
+                    if (brigCorps && brigCorps.has(cid)) continue;
+                }
+                // Reassign
+                const fromList = corpsEdges.get(cid);
+                if (fromList) {
+                    const idx = fromList.indexOf(eid);
+                    if (idx >= 0) fromList.splice(idx, 1);
+                }
+                let toList = corpsEdges.get(majCorps);
+                if (!toList) { toList = []; corpsEdges.set(majCorps, toList); }
+                toList.push(eid);
+                edgeToCorps.set(eid, majCorps);
+            }
         }
     }
 }
@@ -820,7 +886,8 @@ function buildMultiSectorsForCorps(
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     adjacency: Map<Osid, Osid[]>,
     formations: Record<FormationId, FormationState>,
-    reverseMap: Map<string, string[]> | null
+    reverseMap: Map<string, string[]> | null,
+    friendlyOsids?: Set<string>
 ): CorpsFrontSector[] {
     if (edgeIds.length === 0) return [];
 
@@ -889,7 +956,7 @@ function buildMultiSectorsForCorps(
     deduplicateBrigadesAcrossSectors(finalSectors);
 
     // Step 4b: Split non-contiguous sectors (friendly OSIDs must form connected components via OSID adjacency)
-    const contiguousSectors = splitNonContiguousSectors(finalSectors, adjacency);
+    const contiguousSectors = splitNonContiguousSectors(finalSectors, adjacency, friendlyOsids);
 
     // Brigade assignment (territory_osids, assigned/reserve classification) is now
     // handled faction-wide by assignTerritoryVoronoi + classifyBrigadesByTerritory
@@ -1383,6 +1450,7 @@ function deduplicateBrigadesAcrossSectors(sectors: CorpsFrontSector[]): void {
 export function splitNonContiguousSectors(
     sectors: CorpsFrontSector[],
     osidAdjacency: Map<Osid, Osid[]>,
+    allFactionFriendlyOsids?: Set<string>,
 ): CorpsFrontSector[] {
     const result: CorpsFrontSector[] = [];
 
@@ -1487,6 +1555,102 @@ export function splitNonContiguousSectors(
                 for (const ea of edgesA) {
                     for (const eb of edgesB) {
                         if (ea === eb) continue;
+                        initEdge(ea); initEdge(eb);
+                        edgeNeighbors.get(ea)!.add(eb);
+                        edgeNeighbors.get(eb)!.add(ea);
+                    }
+                }
+            }
+        }
+
+        // Hostile-side adjacency: connect edges sharing or adjacent to the same
+        // enemy OSID, BUT only if their friendly OSIDs are in the same
+        // friendly-territory connected component. This prevents bridging across
+        // enemy territory (e.g. Sarajevo enclave ↔ Hadžići via shared Ilidža)
+        // while still connecting legitimate front-line edges on the same side.
+
+        // Step 1: find connected components of this sector's front-edge friendly
+        // OSIDs through the FULL friendly territory graph (not just front-edge OSIDs).
+        // This allows interior OSIDs to bridge front-edge OSIDs on the same side.
+        // We use BFS through all friendly territory, then group front-edge OSIDs
+        // by which component they land in.
+        const traversalSet = allFactionFriendlyOsids ?? allFriendly;
+        const friendlyOsidToComp = new Map<string, number>();
+        let nextCompId = 0;
+        const visitedFriendly = new Set<string>();
+        for (const seed of [...allFriendly].sort(strictCompare)) {
+            if (visitedFriendly.has(seed)) continue;
+            const compId = nextCompId++;
+            // BFS through all friendly territory from this seed
+            const queue = [seed];
+            visitedFriendly.add(seed);
+            let head = 0;
+            while (head < queue.length) {
+                const cur = queue[head++]!;
+                // Record component for front-edge friendly OSIDs
+                if (allFriendly.has(cur)) {
+                    friendlyOsidToComp.set(cur, compId);
+                }
+                for (const nb of osidAdjacency.get(cur) ?? []) {
+                    if (!visitedFriendly.has(nb) && traversalSet.has(nb)) {
+                        visitedFriendly.add(nb);
+                        queue.push(nb);
+                    }
+                }
+            }
+        }
+
+        // Step 3: map each edge to its friendly OSID component
+        const edgeFriendlyComp = new Map<string, number>();
+        for (const eid of sector.edge_ids) {
+            const sep = eid.indexOf('__');
+            if (sep < 0) continue;
+            const osidA = eid.slice(0, sep);
+            const osidB = eid.slice(sep + 2);
+            const friendlyOsid = allFriendly.has(osidA) ? osidA : osidB;
+            const comp = friendlyOsidToComp.get(friendlyOsid);
+            if (comp !== undefined) edgeFriendlyComp.set(eid, comp);
+        }
+
+        // Step 4: build hostile OSID → edges map, then connect edges that share
+        // or are adjacent to the same hostile OSID AND are in the same friendly component
+        const hostileToEdges = new Map<string, string[]>();
+        for (const eid of sector.edge_ids) {
+            const sep = eid.indexOf('__');
+            if (sep < 0) continue;
+            const osidA = eid.slice(0, sep);
+            const osidB = eid.slice(sep + 2);
+            const hostileOsid = allFriendly.has(osidA) ? osidB : osidA;
+            let list = hostileToEdges.get(hostileOsid);
+            if (!list) { list = []; hostileToEdges.set(hostileOsid, list); }
+            list.push(eid);
+        }
+
+        // Same hostile OSID + same friendly component → adjacent
+        for (const edges of hostileToEdges.values()) {
+            for (let i = 0; i < edges.length; i++) {
+                for (let j = i + 1; j < edges.length; j++) {
+                    const compI = edgeFriendlyComp.get(edges[i]!);
+                    const compJ = edgeFriendlyComp.get(edges[j]!);
+                    if (compI === undefined || compJ === undefined || compI !== compJ) continue;
+                    initEdge(edges[i]!); initEdge(edges[j]!);
+                    edgeNeighbors.get(edges[i]!)!.add(edges[j]!);
+                    edgeNeighbors.get(edges[j]!)!.add(edges[i]!);
+                }
+            }
+        }
+
+        // OSID-adjacent hostile locations + same friendly component → adjacent
+        for (const [hostileA, edgesA] of hostileToEdges) {
+            for (const nb of osidAdjacency.get(hostileA) ?? []) {
+                const edgesB = hostileToEdges.get(nb);
+                if (!edgesB) continue;
+                for (const ea of edgesA) {
+                    for (const eb of edgesB) {
+                        if (ea === eb) continue;
+                        const compEa = edgeFriendlyComp.get(ea);
+                        const compEb = edgeFriendlyComp.get(eb);
+                        if (compEa === undefined || compEb === undefined || compEa !== compEb) continue;
                         initEdge(ea); initEdge(eb);
                         edgeNeighbors.get(ea)!.add(eb);
                         edgeNeighbors.get(eb)!.add(ea);
@@ -1731,48 +1895,71 @@ function buildEdgeAdjacency(
         addOsid(meta.b, meta.side_b);
     }
 
-    const adj = new Map<string, string[]>();
-    for (const edgesAtOsid of osidToEdges.values()) {
-        edgesAtOsid.sort(strictCompare);
-        for (let i = 0; i < edgesAtOsid.length; i++) {
-            for (let j = i + 1; j < edgesAtOsid.length; j++) {
-                const a = edgesAtOsid[i]!;
-                const b = edgesAtOsid[j]!;
-                let listA = adj.get(a);
-                if (!listA) { listA = []; adj.set(a, listA); }
-                if (!listA.includes(b)) listA.push(b);
-                let listB = adj.get(b);
-                if (!listB) { listB = []; adj.set(b, listB); }
-                if (!listB.includes(a)) listB.push(a);
+    // Use Set-based adjacency for O(1) dedup, convert to sorted arrays at end
+    const adjSets = new Map<string, Set<string>>();
+    const link = (a: string, b: string) => {
+        if (a === b) return;
+        let sa = adjSets.get(a);
+        if (!sa) { sa = new Set(); adjSets.set(a, sa); }
+        sa.add(b);
+        let sb = adjSets.get(b);
+        if (!sb) { sb = new Set(); adjSets.set(b, sb); }
+        sb.add(a);
+    };
+
+    // Connect edges sharing the same friendly OSID
+    const connectEdgesAtSameAndAdjacentOsids = (
+        groupedEdges: Map<string, string[]>,
+        osidAdj?: Map<Osid, Osid[]>
+    ) => {
+        // Same OSID → adjacent
+        for (const edges of groupedEdges.values()) {
+            for (let i = 0; i < edges.length; i++) {
+                for (let j = i + 1; j < edges.length; j++) {
+                    link(edges[i]!, edges[j]!);
+                }
             }
         }
-    }
-
-    // Proposal A: also connect edges whose friendly-side OSIDs are OSID-adjacent.
-    // E1=(A,X) and E2=(B,Y) become adjacent if A and B are neighbors in the OSID graph.
-    // This makes sub-segments follow the geographic front line, not isolated by OSID.
-    if (osidAdjacency) {
-        for (const [osidA, edgesA] of osidToEdges) {
-            for (const neighborOsid of osidAdjacency.get(osidA) ?? []) {
-                const edgesB = osidToEdges.get(neighborOsid);
-                if (!edgesB) continue;
-                for (const ea of edgesA) {
-                    for (const eb of edgesB) {
-                        if (ea === eb) continue;
-                        let listA = adj.get(ea);
-                        if (!listA) { listA = []; adj.set(ea, listA); }
-                        if (!listA.includes(eb)) listA.push(eb);
-                        let listB = adj.get(eb);
-                        if (!listB) { listB = []; adj.set(eb, listB); }
-                        if (!listB.includes(ea)) listB.push(ea);
+        // OSID-adjacent → also adjacent
+        if (osidAdj) {
+            for (const [osidA, edgesA] of groupedEdges) {
+                for (const neighborOsid of osidAdj.get(osidA) ?? []) {
+                    const edgesB = groupedEdges.get(neighborOsid);
+                    if (!edgesB) continue;
+                    for (const ea of edgesA) {
+                        for (const eb of edgesB) link(ea, eb);
                     }
                 }
             }
         }
+    };
+
+    // Friendly-side adjacency
+    connectEdgesAtSameAndAdjacentOsids(osidToEdges, osidAdjacency);
+
+    // Hostile-side adjacency: edges facing the same or adjacent enemy OSID
+    if (faction) {
+        const hostileToEdges = new Map<string, string[]>();
+        for (const eid of edgeIds) {
+            const meta = edgeMeta.get(eid);
+            if (!meta) continue;
+            const addHostile = (osid: string, side: string | null | undefined) => {
+                if (side === faction) return;
+                let list = hostileToEdges.get(osid);
+                if (!list) { list = []; hostileToEdges.set(osid, list); }
+                list.push(eid);
+            };
+            addHostile(meta.a, meta.side_a);
+            addHostile(meta.b, meta.side_b);
+        }
+        connectEdgesAtSameAndAdjacentOsids(hostileToEdges, osidAdjacency);
     }
 
-    // Sort each adjacency list
-    for (const list of adj.values()) list.sort(strictCompare);
+    // Convert Sets to sorted arrays
+    const adj = new Map<string, string[]>();
+    for (const [k, s] of adjSets) {
+        adj.set(k, [...s].sort(strictCompare));
+    }
     return adj;
 }
 

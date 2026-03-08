@@ -46,8 +46,8 @@
 | Need | Go to |
 |------|--------|
 | **Scene plate + asset-generation brief** | [handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_BRIEF.md](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_BRIEF.md) — single-image warroom, hotspot mapping, modal anchors, generation rules |
-| **Unified room prompt (same room, details change; military feel)** | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) — everything painted except calendar; prewar/war = same layout, only details differ; map = **geography only (no entity lines)**; **all text in Bosnian**; §6 military-feel ideas |
-| **Alternative: clean room + one sprite** | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) — generate clean warroom (empty map zone) then one desk-map sprite; composite at runtime; asset names `warroom_clean`, `warroom_sprite_map` (TBD) |
+| **Unified room direction + military feel** | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) — guidance doc for the hybrid model: same room per faction, yearly war aging preserves geometry, **desk map stays empty for overlay**, **date / next-turn board stays flat for overlay**, **flag baked into art**, archival-photo target |
+| **Faction yearly rooms + overlay surfaces** | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) — copy-paste prompt pack for `prewar/year1/year2/year3/year4` per faction; staff-map base template; Gemini measurement prompts; baked flag + projected map/date board |
 | **Six nano banana prompts (6 assets)** | [handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md](handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md) — 2752×1536, prewar+war × RBiH/RS/HRHB, copy-paste blocks and modal placeholders |
 | **Overlay alignment + RBiH symbolism** | [handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md](handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md) — flat/frontal flag & calendar zones, RBiH-era only on documents |
 | **Warroom implementation (scene, hotspots, identity)** | [implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md](implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md) — scene-plate contract, physical anchors, faction voice |
@@ -59,7 +59,7 @@
 
 ## Current status (summary)
 
-- **Scene:** Fixed plate **2752×1536**; faction-keyed background image. Only **flag**, **calendar**, and **ticker** are separate runtime overlays. No separate room sprites/props.
+- **Scene:** Fixed plate **2752×1536**; faction-keyed background image. Current direction: **15 room images total** (`prewar/year1/year2/year3/year4` × 3 factions), **flag baked into room art**, **desk map projected as runtime overlay**, **date / next-turn board projected as runtime overlay**. Ticker/UI chrome remains engine-side as needed.
 - **Hotspots:** Physical anchors drive routing: `wall_flag_area`, `command_briefing_folio`, `newspaper_stack`, `intelligence_journal`, `diplomatic_telephone`, `desk_radio`, `wall_calendar_area`. Legacy action strings kept for compatibility.
 - **Modals (implemented):** Newspaper, Magazine, Reports, Diplomacy, Faction Overview (COMMAND + commander assignment), Advance turn confirmation, Declaration event, War begins, Settings (placeholder), Help (warroom controls), “Line dead” (diplomacy in peace).
 - **Commander assignment:** **Warroom only** — Faction Overview (wall flag) → COMMAND section → CHANGE → ASSIGN COMMANDER modal. Map UI displays only; no assignment there. IPC: `assign-commander`.
@@ -112,8 +112,8 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
-| 2026-03-08 | **Clean room + one sprite (alternative):** Pipeline to generate clean warroom (empty map zone) then one desk-map sprite; nano banana workflow; composite at runtime | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) |
-| 2026-03-08 | **Unified room prompt:** Same room for prewar and war; only details change. Everything painted except calendar (flat surface for engine). §6 military-feel ideas and suggestions for war variant. | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) |
+| 2026-03-08 | **Faction yearly rooms + overlay surfaces:** Current direction. Generate one stable room per faction, then derive `prewar/year1/year2/year3/year4` with yearly aging while preserving geometry; bake the flag into room art; keep the desk-map zone empty for projection; use a flat date / next-turn board for overlay; target archival/documentary photorealism. | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) |
+| 2026-03-08 | **Unified room direction:** Guidance/reference doc updated to support the hybrid model rather than “everything painted except calendar.” Same room per faction, war follow-up preserves geometry, military-feel guidance retained. | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) |
 | 2026-03-07 | **Six nano banana prompts:** 6 detailed prompts (prewar+war × RBiH/RS/HRHB), 2752×1536, modal placeholders, copy-paste blocks | [handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md](handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md) |
 | 2026-03-07 | **Overlay alignment + RBiH symbolism:** Flat/frontal flag & calendar zones; RBiH-era only on documents; prompts and brief updated | [handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md](handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md) |
 | 2026-03-07 | **Peace vs war:** Separate room (6 assets) and modal systems; design decision and gates | This file § Peace vs war |
@@ -124,10 +124,10 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 ## Gates / discipline
 
-- **Single scene plate:** Warroom is one image (or one plate per faction); modal regions outlined afterward. No separate desk/wall props, folders, lamps, radios in the scene. See nano banana brief §4. **Alternative:** Clean room + one composited sprite (e.g. desk map) is documented in [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md); base plate + sprite(s) then allowed.
-- **Overlay alignment:** Flag and calendar are drawn by the engine as flat 2D rectangles. Scene plates must show the flag zone and calendar zone as **flat and frontal** (facing the camera, no perspective tilt) so overlays align. See handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md.
+- **Single scene plate:** Warroom remains one scene plate per faction/phase for room art, but current direction allows **projected information surfaces** inside that plate: desk map and date / next-turn board. See [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md).
+- **Overlay alignment:** Current direction is **desk map projected into the desk quad** and **date / next-turn board projected into the wall-board quad**. The **flag is baked into the art**. Keep overlay surfaces flat/frontal where required and preserve measured quad geometry.
 - **Symbolism:** In-scene documents, binders, stamps must use **RBiH-era (1992–1998)** only; no post-1998 BiH crest. See same handover.
-- **Peace vs war:** Separate **room** (6 assets: prewar + war × RBiH, RS, HRHB) and separate **modal systems** (peace set vs war set). Scene plate selection = f(phase, faction); modal routing and content = f(phase). See “Peace vs war: separate systems” above.
+- **Peace vs war:** Modal logic remains split between **prewar** and **war**, but current art direction expands war visuals into yearly states: `prewar` + `year1/year2/year3/year4` per faction. War modals stay the same from April 1992 onward; only the room art ages by year.
 - **Hotspot contract:** Use physical anchor ids for new behavior; legacy action strings are compatibility only.
 - **Commander assignment:** Stays in Warroom Faction Overview → COMMAND; do not duplicate assignment UI in map without design decision.
 - **New warroom modals:** Align with proposed list above and nano banana §7 when adding; update this table when a proposed modal is implemented. Add to the correct set (peace and/or war).

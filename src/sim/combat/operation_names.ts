@@ -183,7 +183,7 @@ export const OPERATION_NAMES: Record<string, readonly string[]> = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Simple deterministic hash for starting index. No randomness. */
-function simpleHash(s: string): number {
+export function simpleHash(s: string): number {
     let h = 0;
     for (let i = 0; i < s.length; i++) {
         h = ((h << 5) - h + s.charCodeAt(i)) | 0;

@@ -64,6 +64,7 @@ import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
 import { getTruceBreakAggressionBonus, shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander, releaseOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
+import { splitNonContiguousSectors } from './corps_front_sectors.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
@@ -418,17 +419,10 @@ export function generateCorpsStanceOrders(
             }
         }
 
-        // --- Army stance ceiling ---
-        // Army-level stance constrains corps: general_defensive → all corps at most defensive.
-        // Prevents corps from independently going offensive/balanced when army says "hold everywhere."
-        const armyStance = getActiveStandingOrder(faction, turn, state.war_timeline)?.army_stance ?? 'balanced';
-        if (armyStance === 'general_defensive' && stance !== 'reorganize') {
-            stance = 'defensive';
-        }
-        // general_offensive floor: don't let corps go reorganize (maintain offensive tempo)
-        if (armyStance === 'general_offensive' && stance === 'reorganize' && avgCoh >= 20) {
-            stance = 'defensive'; // at least defend, don't sit out the offensive
-        }
+        // Army stance is informational only — corps determine their own stance
+        // organically from combat readiness (personnel, cohesion, fatigue).
+        // Factions are offensive or defensive because of their material capacity,
+        // not because of artificial code constraints.
 
         cmd.stance = stance;
     }
@@ -1261,14 +1255,11 @@ export function generateCorpsDirectives(
     const strategy = FACTION_STRATEGIES[faction];
     const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.war_timeline);
 
-    // Army stance modulation: adjusts reserve fractions and aggression
+    // Army stance is recorded but does not artificially constrain corps behavior.
+    // Offensive/defensive posture emerges organically from material capacity.
     const armyStance = state.army_stance?.[faction] ?? 'balanced';
-    const armyAggressionBonus = armyStance === 'general_offensive' ? 0.25
-        : armyStance === 'general_defensive' ? -0.1
-        : 0;
-    const armyReserveModifier = armyStance === 'general_offensive' ? -0.05
-        : armyStance === 'general_defensive' ? 0.1
-        : 0;
+    const armyAggressionBonus = 0;
+    const armyReserveModifier = 0;
 
     for (const corps of corpsList) {
         const cmd = corpsCommand[corps.id];
@@ -1329,10 +1320,6 @@ export function generateCorpsDirectives(
             }
             // avoid_municipalities removed — bipolar co-ethnic scoring handles deterrence emergently
         }
-        // Track how many targets came from army priorities (before opportunistic targets are added).
-        // Used by general_defensive to keep priority-derived counterattack targets.
-        const priorityTargetCount = offensiveTargetSet.size;
-
         // P3: Collect priority municipality slugs for opportunistic target filtering.
         // Opportunistic targets outside these municipalities are filtered to prevent
         // corps spreading into non-priority areas (e.g. 1KK sprawling into Central Corridor).
@@ -1382,42 +1369,26 @@ export function generateCorpsDirectives(
             }
         }
 
-        // Opportunistic targets: add weak/undefended enemy OSIDs adjacent to brigades.
-        // When army is general_offensive OR corps is offensive: ALWAYS add, ensuring
-        // front-line brigades have authorized targets even when army-priority municipalities
-        // are far away or already captured. Otherwise: only when no priority targets exist.
-        // Bipolar co-ethnic scoring naturally deters non-coethnic targets at brigade level.
-        const addOpportunistic = armyStance === 'general_offensive'
-            || cmd.stance === 'offensive'
-            || (offensiveTargetSet.size === 0);
-        if (addOpportunistic && graphAnalysis) {
-            // Pre-index subordinate locations for O(1) adjacency checks
-            const subLocations = new Set(subordinates.map(b => b.location_osid).filter(Boolean));
-            const hasAdjacentBrigade = (osid: Osid): boolean => {
-                for (const n of adjacency.get(osid) ?? []) {
-                    if (subLocations.has(n)) return true;
+        // Opportunistic targets: enemy sectors with zero assigned brigades are
+        // undefended — add all their enemy OSIDs (our front-edge hostile OSIDs)
+        // as targets. This is sector-level assessment, not OSID-level.
+        // Brigades adjacent to these empty sectors can walk in.
+        {
+            const allSectors = state.corps_front_sectors ?? {};
+            // Collect enemy OSIDs from undefended enemy sectors
+            for (const [_sId, enemySector] of Object.entries(allSectors).sort((a, b) => strictCompare(a[0], b[0]))) {
+                if (enemySector.faction === faction) continue; // skip own sectors
+                // Undefended: no assigned brigades in the sector
+                if (enemySector.assigned_brigade_ids.length > 0) continue;
+                // Add all enemy OSIDs from this sector's sub-segments as targets
+                for (const ss of enemySector.sub_segments) {
+                    for (const osid of ss.friendly_osids) {
+                        // The enemy sector's "friendly" OSIDs are our targets
+                        if (!offensiveTargetSet.has(osid)) {
+                            offensiveTargetSet.add(osid);
+                        }
+                    }
                 }
-                return false;
-            };
-
-            // Opportunistic targets: weak/undefended enemy OSIDs that a brigade
-            // can immediately exploit. Requires adjacent brigade to prevent force
-            // dilution — strategic objectives without adjacency come from army
-            // priority municipalities via findTargetOsidsFromMunicipalities (no
-            // adjacency gate there; corps plans operations to reach them).
-            // TODO: This does not account for sector-line coverage. An OSID without a
-            // brigade can still be covered by a sector defensive line. A future pass
-            // should check sector coverage before classifying as "undefended".
-            for (const entry of graphAnalysis.weak_enemy_osids) {
-                if (offensiveTargetSet.has(entry.osid)) continue;
-                // Truly undefended (no brigade present): bypass P3 municipality filter.
-                // Weak-but-defended targets: still filter to priority municipalities
-                // to prevent corps from bleeding against non-strategic positions.
-                if (entry.reason !== 'undefended' && priorityMunicipalities.size > 0) {
-                    const osidMun = entry.osid.split(':')[1];
-                    if (!priorityMunicipalities.has(osidMun)) continue;
-                }
-                if (hasAdjacentBrigade(entry.osid)) offensiveTargetSet.add(entry.osid);
             }
         }
 
@@ -1477,6 +1448,14 @@ export function generateCorpsDirectives(
             adjacency,
             offensiveTargets,
         );
+        // Re-split any non-contiguous sectors created by concentration merges
+        // Build friendly OSID set for territory-aware contiguity checking
+        const friendlyOsidsForSplit = new Set<string>();
+        const pcForSplit = state.political_controllers ?? {};
+        for (const [osid, ctrl] of Object.entries(pcForSplit)) {
+            if (ctrl === faction) friendlyOsidsForSplit.add(osid);
+        }
+        corpsSectors = splitNonContiguousSectors(corpsSectors, adjacency, friendlyOsidsForSplit);
         for (const oldSec of rawCorpsSectors) {
             delete sectorLookup[oldSec.sector_id];
         }
@@ -1523,10 +1502,7 @@ export function generateCorpsDirectives(
         reserveFraction = Math.max(0, Math.min(0.5, reserveFraction + armyReserveModifier));
 
         // Max attackers: offensive/balanced allow concentration, defensive is more cautious
-        let maxAttackersPerTarget = cmd.stance === 'defensive' || cmd.stance === 'reorganize' ? 2 : 3;
-        if (armyStance === 'general_offensive' && cmd.stance !== 'reorganize') {
-            maxAttackersPerTarget = Math.max(maxAttackersPerTarget, 4);
-        }
+        const maxAttackersPerTarget = cmd.stance === 'defensive' || cmd.stance === 'reorganize' ? 2 : 3;
 
         // Aggression modifier: doctrine phase + army stance bonus + seasonal adjustment + officer aggressiveness
         const seasonalAdj = getSeasonalModifiers(
@@ -1551,20 +1527,11 @@ export function generateCorpsDirectives(
             }
         }
 
-        // Army offensive stance: accept riskier attacks to maintain offensive tempo.
-        // Concentration joining only needs 'repulsed' instead of 'stalemate', enabling
-        // multiple light brigades to coordinate against entrenched defenders.
-        if (armyStance === 'general_offensive' && cmd.stance !== 'defensive' && cmd.stance !== 'reorganize') {
-            bestMinOutcome = 'repulsed';
-        }
+        // Min attack outcome comes from doctrine phase + officer competence.
+        // No artificial stance-based overrides.
 
-        // Army defensive stance: keep army-priority-derived counterattack targets, drop opportunistic ones.
-        // Priority targets represent defensive recapture goals (e.g. RBiH reclaiming lost corridor cells).
-        // Opportunistic targets (undefended front, weak OSIDs) are suppressed to prevent adventurism.
-        if (armyStance === 'general_defensive') {
-            offensiveTargets.splice(priorityTargetCount); // Remove opportunistic targets added after priorities
-            // bestMinOutcome comes from army priority definitions (already set above)
-        }
+        // Opportunistic targets are always retained — factions limit their own
+        // offensive ambition organically through combat readiness and supply.
 
         // Supply health gating: critical majority → strip offensive targets
         const supplyHealth = assessCorpsSupplyHealth(subordinates, faction, supplyByOsid);
@@ -1573,10 +1540,7 @@ export function generateCorpsDirectives(
         }
         // Near-complete supply isolation → upgrade minimum outcome by one rank (max costly_victory).
         // Only applies when almost no brigades have adequate supply (< 5%).
-        // Skipped for general_defensive: those factions only attack from army-priority defensive targets,
-        // not opportunistic offensives. RBiH in Sarajevo siege has 0% adequate supply but still
-        // mounts desperate counterattacks — blocking them is historically wrong.
-        if (supplyHealth.adequate_fraction < 0.05 && armyStance !== 'general_defensive') {
+        if (supplyHealth.adequate_fraction < 0.05) {
             const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
             const rankVal = outcomeRank[bestMinOutcome] ?? 2;
             if (rankVal < 3) { // below costly_victory → upgrade to costly_victory

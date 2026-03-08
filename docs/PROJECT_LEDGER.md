@@ -7,6 +7,22 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Entrenchment-Based Passive Attrition Reduction + Ops Modal Cosmetic Fixes
+
+**Entrenchment attrition reduction** (`frontline_attrition.ts`): Well-entrenched brigades now take less passive frontline attrition from both sniping/disease and bombardment exposure. Uses sqrt diminishing returns matching combat_math.ts entrenchment model: `mult = max(0.40, 1.0 - sqrt(turns) * 0.10)`. At 6 turns: 24.5% reduction. At 20 turns: 44.7% reduction. At 52 turns: 60% reduction (floor). Applied to both `BASE_ATTRITION_RATE` and `BOMBARDMENT_EXPOSURE_RATE` casualties.
+
+**Ops modal cosmetic fixes** (`OpsPlanningModal.tsx`):
+- Fixed stale closure bug: map click handlers captured `activeAxisId` from init time (always `''`). Added `activeAxisIdRef` synced via useEffect; arrows now render correctly.
+- Removed defensive operation types (`strategic_defense`, `reorganization`) — modal is for offensive planning only.
+- Removed MapLibre attribution label (`attributionControl: false`).
+- Increased faction control fill opacity 0.25→0.55 for better territory visibility.
+- Pre-generates faction-flavored operation names from `OPERATION_NAMES` pools using `simpleHash()`.
+- Removed `hoveredOpType` state (eliminated re-renders on dropdown hover).
+- Exported `simpleHash()` from `operation_names.ts` to eliminate inline hash duplication.
+
+**Files**: `src/sim/combat/frontline_attrition.ts`, `src/ui/map/components/OpsPlanningModal.tsx`, `src/sim/combat/operation_names.ts`
+**Impact**: Entrenchment change affects calibration (reduces passive casualties for entrenched units). GUI fixes are cosmetic only.
+
 ## [2026-03-08] Ops Planning Modal Rewrite — Multi-Axis Operations, Staging Areas, Force-Ratio Preview
 
 Full rewrite of `OpsPlanningModal.tsx` in two phases:

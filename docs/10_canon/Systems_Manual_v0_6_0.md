@@ -205,6 +205,8 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **Brigade dissolution (n292):** Brigades meeting all three criteria — personnel < 200, cohesion ≤ 10, and readiness = degraded — are dissolved. Remaining personnel are returned to the faction's strategic reserve; surviving equipment is redistributed to a sibling brigade within the same corps. Module: `src/sim/combat/brigade_dissolution.ts`.
 
+**Frontline attrition entrenchment reduction:** Passive frontline attrition (sniping, disease, desertion) and bombardment exposure attrition are both reduced by entrenchment. Modifier: `max(0.40, 1.0 - sqrt(entrenchment_turns) * 0.10)` — sqrt diminishing returns matching the combat entrenchment model. At 6 turns: 24.5% reduction. At 20 turns: 44.7% reduction. At 52 turns: 60% reduction (floor 0.40). Module: `src/sim/combat/frontline_attrition.ts`.
+
 **Siege bombardment attrition (n292):** Besieged OSIDs with enemy artillery in range suffer passive casualties each turn, independent of active combat. This models the slow attrition of garrison forces under sustained bombardment (e.g. Sarajevo, enclaves). Module: `src/sim/combat/siege_attrition.ts`.
 
 **State (per brigade):** location_osid, entrenchment_turns, defense_streak, disrupted_turns, movement_state, **garrison** (boolean; see below). **Invariant:** No single resolution flips more than one OSID.

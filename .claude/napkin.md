@@ -150,6 +150,8 @@
    Do instead: Keep map detail flow on a right-side panel rail: overview -> primary detail -> secondary detail sliding further right. Preserve parent context, animate horizontal drill-downs, and let `App.tsx` mount panels from one deterministic selector instead of per-component hide/show guesses.
 5. **[2026-03-07] Warroom art and hotspots: one scene plate, physical anchors**
    Do instead: For warroom image generation, create a single full-scene background per faction with stable camera/layout and outline hotspots afterward. Keep only flag, calendar, and ticker separate at runtime; do not rely on detachable room props. Route interactions from physical anchor ids like `command_briefing_folio` and `desk_radio`, not arbitrary legacy action names.
+6. **[2026-03-08] Warroom image target: archival photograph, not AI concept art**
+   Do instead: In warroom prompt packs, make documentary / archival photo realism the top invariant. Say "real photographed room, not AI art, not concept art, not 3D render" explicitly. Keep visible year out of baked art; only the runtime calendar shows the year. Re-measure overlay quads per approved room image.
 6. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
    Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions, then render `LoadedGameState.fogOfWar`. Do not wire map layers directly to raw engine intel structures.
 7. **[2026-03-06] Briefing panels: prefer stacked accordions over tabs**

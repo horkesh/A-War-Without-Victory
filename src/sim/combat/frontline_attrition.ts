@@ -7,6 +7,7 @@
  *   - Dense fronts → lower attrition (mutual support)
  *   - Critical supply → doubled attrition (starvation, disease)
  *   - Strained supply → 30% increase
+ *   - Entrenchment → reduced attrition (fortifications protect against sniping/shelling)
  *   - Bombardment exposure: brigades facing superior enemy heavy weapons
  *     take additional casualties from shelling (equipment deficit driven)
  *
@@ -67,6 +68,17 @@ const BOMBARDMENT_EXPOSURE_RATE = 0.008;
 const BOMBARDMENT_RATIO_SCALE = 2.0;
 /** Minimum own firepower floor (prevents division by zero). */
 const MIN_COUNTERBATTERY_FP = 1.0;
+
+/**
+ * Entrenchment attrition reduction: well-dug-in units suffer less passive
+ * attrition from sniping/shelling. Uses sqrt diminishing returns matching
+ * combat_math.ts entrenchment model. Floor 0.4 (60% reduction at max).
+ * At 6 turns: sqrt(6)*0.10 = 0.245 → mult 0.755 (24.5% reduction)
+ * At 20 turns: sqrt(20)*0.10 = 0.447 → mult 0.553 (44.7% reduction)
+ * At 52 turns: sqrt(52)*0.10 = 0.721 → mult 0.40 (floor, 60% reduction)
+ */
+const ENTRENCHMENT_ATTRITION_REDUCTION_PER_SQRT_TURN = 0.10;
+const ENTRENCHMENT_ATTRITION_FLOOR = 0.40;
 
 /** Fraction of attrition casualties that are KIA (match P9 value). */
 const KIA_FRACTION = 0.30;
@@ -224,8 +236,15 @@ export function applyFrontlineAttrition(
             }
         }
 
+        // Entrenchment modifier: dug-in units take less passive attrition
+        const entrenchmentTurns = formation.entrenchment_turns ?? 0;
+        const entrenchmentMod = Math.max(
+            ENTRENCHMENT_ATTRITION_FLOOR,
+            1.0 - Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_ATTRITION_REDUCTION_PER_SQRT_TURN
+        );
+
         // Base attrition (sniping, disease, desertion)
-        const baseAttritionCas = Math.floor(personnel * BASE_ATTRITION_RATE * exposureMod * supplyMod);
+        const baseAttritionCas = Math.floor(personnel * BASE_ATTRITION_RATE * exposureMod * supplyMod * entrenchmentMod);
 
         // Bombardment exposure: ratio-based vulnerability model.
         // Brigades with low own firepower facing high enemy firepower take extra losses.
@@ -245,7 +264,7 @@ export function applyFrontlineAttrition(
         const firepowerRatio = incomingFPPerBrigade / ownFP;
         const logRatio = Math.max(0, Math.log(firepowerRatio));
         const bombardmentFraction = Math.min(1.0, logRatio / BOMBARDMENT_RATIO_SCALE);
-        const bombardmentCas = Math.floor(personnel * BOMBARDMENT_EXPOSURE_RATE * bombardmentFraction);
+        const bombardmentCas = Math.floor(personnel * BOMBARDMENT_EXPOSURE_RATE * bombardmentFraction * entrenchmentMod);
 
         const casualties = Math.min(
             personnel - MIN_COMBAT_PERSONNEL,

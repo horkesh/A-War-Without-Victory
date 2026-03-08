@@ -600,8 +600,9 @@ Passive attrition from enemy heavy weapons — the major new mechanic for closin
 - ARBiH (own FP ~1.8, incoming ~13) → ln(7.2)/2.0 = 0.99 → near-full effect
 - HVO (own FP ~5, incoming ~13) → ln(2.6)/2.0 = 0.48 → half effect
 - VRS (own FP ~17, incoming ~2) → ln(0.13) < 0 → zero effect
-- BOMBARDMENT_EXPOSURE_RATE = 0.012, BOMBARDMENT_RATIO_SCALE = 2.0
+- BOMBARDMENT_EXPOSURE_RATE = 0.008 (was 0.012, reduced in n159 audit), BOMBARDMENT_RATIO_SCALE = 2.0
 - Enemy FP distributed across all non-enemy brigades (not just own faction)
+- **Entrenchment reduction**: both base attrition and bombardment exposure scaled by `entrenchmentMod = max(0.40, 1.0 - sqrt(entrenchment_turns) * 0.10)`. Fortifications reduce exposure to shelling.
 
 ### Calibration Iterations (n375–n392)
 
@@ -958,7 +959,7 @@ Triggers only when defender has **zero valid retreat destinations** (complete en
 - `BASE_DEFENDER_LOSS_RATE = 0.028` (2.8%; was 0.015→0.02→0.028, Phase A n343 + n159 audit). Att:def ratio target 2.5-3:1.
 - `KIA_FRACTION = 0.30` (30% of casualties are killed; 55% wounded; 15% MIA; was 0.25/0.60, Phase A n343)
 - **Morale retreat resistance**: per-faction via `getMoraleResistFloor()`: RBiH=55, RS=70, HRHB=65 (was flat 70)
-- **Frontline attrition**: 0.5%/week passive loss for front-assigned brigades (`frontline_attrition.ts`)
+- **Frontline attrition**: 0.5%/week passive loss for front-assigned brigades (`frontline_attrition.ts`). **Entrenchment reduction**: `mult = max(0.40, 1.0 - sqrt(turns) * 0.10)` applied to both base attrition and bombardment exposure. At 6 turns: 24.5% reduction. At 52 turns: 60% reduction (floor). Matches combat_math.ts sqrt diminishing returns model.
 - Outcome multipliers: decisive\_victory → attacker 1.0×/defender 2.5×; stalemate → 1.0×/0.8×; repulsed → 2.0×/0.5×
 
 ### Cohesion Mechanics

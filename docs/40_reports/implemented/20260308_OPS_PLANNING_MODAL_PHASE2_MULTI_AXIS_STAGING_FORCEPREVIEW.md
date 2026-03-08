@@ -52,8 +52,9 @@ Each brigade shows: name, personnel count, tanks, artillery, fatigue, cohesion. 
 
 ### Operation parameters
 
-- Type selector: sector_attack / general_offensive / strategic_defense / reorganization / feint / probe (with tooltip descriptions)
+- Type selector: sector_attack / general_offensive / feint / probe (defensive ops removed — modal is for offensive planning only)
 - Tolerance (min attack outcome), tempo, main effort (schwerpunkt), artillery preparation
+- Faction-flavored operation name pre-generated from `OPERATION_NAMES` pools via `simpleHash(corps_id)` — user can override
 - All wired to IPC payload
 
 ---
@@ -93,7 +94,7 @@ Each brigade shows: name, personnel count, tanks, artillery, fatigue, cohesion. 
 {
     corpsId: string;
     name: string;
-    type: 'sector_attack' | 'general_offensive' | 'strategic_defense' | 'reorganization' | 'feint' | 'probe';
+    type: 'sector_attack' | 'general_offensive' | 'feint' | 'probe';
     targetSettlements: string[];
     participatingBrigades: string[];
     sectorId?: string;
@@ -187,12 +188,25 @@ The engine already fully supports multi-axis operations via `CorpsOperation.axes
 
 ---
 
+## Cosmetic Fixes (post-rewrite)
+
+1. **Stale closure bug**: Map click handler captured `activeAxisId` from init time (always `''`). Added `activeAxisIdRef` synced via `useEffect`; read `activeAxisIdRef.current` in `toggleObjectiveOnActiveAxis`, `setStagingOnActiveAxis`, `clearStagingOnActiveAxis`. Arrows now render correctly.
+2. **Defensive ops removed**: `strategic_defense` and `reorganization` removed from type selector — modal is for offensive planning only.
+3. **MapLibre attribution hidden**: `attributionControl: false` in map init.
+4. **Faction control visibility**: Fill opacity 0.25→0.55 for better territory distinction.
+5. **Faction name pre-generation**: Operation name pre-populated from `OPERATION_NAMES` pools using `simpleHash(corps_id)`. User can override.
+6. **Dropdown performance**: Removed `hoveredOpType` state and tooltip — eliminated re-renders on dropdown hover.
+7. **Hash deduplication**: Exported `simpleHash()` from `operation_names.ts`; modal imports it instead of inlining the algorithm.
+
+---
+
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/ui/map/components/OpsPlanningModal.tsx` | Full rewrite: multi-axis, staging, force preview, confirmation |
+| `src/ui/map/components/OpsPlanningModal.tsx` | Full rewrite: multi-axis, staging, force preview, confirmation + cosmetic fixes |
 | `src/ui/map/desktop/useIPC.ts` | Extended `CorpsOperationOrderPayload` with axes array + staging_osid |
+| `src/sim/combat/operation_names.ts` | Exported `simpleHash()` for reuse |
 
 ---
 

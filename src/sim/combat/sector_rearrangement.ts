@@ -315,7 +315,15 @@ export function rearrangeSectorsForCorps(
     let result = consolidateThinSectors(sectors, osidAdjacency);
 
     // 1b. Re-split non-contiguous sectors that consolidation may have created
-    result = splitNonContiguousSectors(result, osidAdjacency);
+    // Build friendly OSID set for territory-aware contiguity checking
+    let friendlyOsidsForSplit: Set<string> | undefined;
+    if (context?.politicalControllers && context?.faction) {
+        friendlyOsidsForSplit = new Set<string>();
+        for (const [osid, ctrl] of Object.entries(context.politicalControllers)) {
+            if (ctrl === context.faction) friendlyOsidsForSplit.add(osid);
+        }
+    }
+    result = splitNonContiguousSectors(result, osidAdjacency, friendlyOsidsForSplit);
 
     // 2. Enemy pocket containment
     if (context?.politicalControllers && context?.faction) {
