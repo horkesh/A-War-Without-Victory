@@ -287,6 +287,7 @@ Pass 4: Front Lines
 
 Pass 5: Formation Markers
   Only when game state loaded and formations layer enabled.
+  `corps_asset` and `army_hq` formations are filtered out of `buildFormationsGeoJSON` — they are organizational concepts and do not render as map markers. They may still appear in command hierarchy panels (e.g. OOB sidebar, army HQ panel).
   Horizontal box: dark translucent bg, faction-colored border, drop shadow; army crest + NATO symbol; phosphor-green posture badge (D/P/A/E) when posture present.
   If a formation’s HQ is in enemy-controlled territory, marker is drawn at a fallback position (centroid of first friendly AoR settlement).
   Co-located markers (same HQ settlement) are grouped by quantized screen position (2px grid); groups with >1 marker are offset **vertically** (MARKER_STACK_GAP) so corps/brigade at same HQ stack top-to-bottom (buildFormationPositionGroups); hit-test uses the same grouping. See [TACTICAL_MAP_SEVEN_UI_SIM_FIXES_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md).
@@ -541,7 +542,7 @@ Right-side sliding panel (e.g. 20rem width) opened on settlement click; closes o
 | Tab | Content |
 |-----|--------|
 | **Overview** | Municipality, political control, status (CONSOLIDATED/CONTESTED/HIGHLY_CONTESTED). Population (1991) and Population (Current) with dramatic change (Out/In/Lost, arrived by faction). “Fled from this settlement” by **nation** (Bosniaks, Serbs, Croats, Others) not faction code. Pre-war ethnic structure (bar chart). **Current ethnic structure** (bar chart when displacement/departures allow computation). Terrain context. |
-| **Military** | Front sector (name + faction when OSID is in a corps front sector). Stationed units: formation rows with readiness badge, cohesion bar, personnel; rows clickable to open Formation detail. Militia pool for the municipality (available/committed/exhausted stacked bar per faction). |
+| **Military** | Front sector (name + faction when OSID is in a corps front sector; "sector" here means front-line OSIDs from `sub_segments.friendly_osids`, not full territory depth). Stationed units: formation rows with readiness badge, cohesion bar, personnel; rows clickable to open Formation detail. Militia pool for the municipality (available/committed/exhausted stacked bar per faction). |
 | **Orders & events** | Operations targeting this OSID. Pending attack/move/reposition orders affecting this settlement (with brigade names when available). Recent control events from `loadedGameState.recentControlEvents`. |
 
 Tooltip variant (hover) shows a single scroll of key fields without tabs.

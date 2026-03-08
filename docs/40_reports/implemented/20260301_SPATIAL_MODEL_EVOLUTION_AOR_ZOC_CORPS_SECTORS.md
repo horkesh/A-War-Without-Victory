@@ -141,6 +141,8 @@ CorpsFrontSector {
 }
 ```
 
+**Update (2026-03-08):** Sector classification rewritten to three-tier system: front (on sub_segments.friendly_osids), reserve (1 hop behind front), deep rear (BFS to nearest own-corps sector front). Territory depth no longer used for brigade assignment. Column march stance bug fixed. 97% of assigned brigades on front. See 20260308_SECTOR_CLASSIFICATION_AND_MOVEMENT_OVERHAUL.md.
+
 ### How it's used
 
 1. **Bot targeting constraint**: Corps attack orders are filtered to OSIDs adjacent to the corps' sector. Prevents geographic sprawl (e.g., 2nd Corps attacking deep into Drina territory).
