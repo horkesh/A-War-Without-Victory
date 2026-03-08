@@ -756,8 +756,7 @@ const freeTarget = predictions.find(t =>
         // Supply strained: upgrade min_attack_outcome to 'victory', no pioneer attacks
         const isSupplyStrained = brigadeSupplyState === 'strained';
         if (isSupplyStrained) {
-            const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
-            if ((outcomeRank[effectiveDirective.min_attack_outcome] ?? 2) < (outcomeRank['victory'] ?? 4)) {
+            if ((OUTCOME_RANK[effectiveDirective.min_attack_outcome as PredictedOutcome] ?? 2) < (OUTCOME_RANK['victory'] ?? 5)) {
                 effectiveDirective = { ...effectiveDirective, min_attack_outcome: 'victory' };
             }
         }
@@ -805,7 +804,7 @@ const freeTarget = predictions.find(t =>
                         ...effectiveDirective,
                         aggression_modifier: effectiveDirective.aggression_modifier - 0.05,
                         reserve_fraction: Math.min(0.5, effectiveDirective.reserve_fraction + 0.10),
-                        min_attack_outcome: outcomeFromRank(Math.min(5, outcomeRank(effectiveDirective.min_attack_outcome) + 1)),
+                        min_attack_outcome: outcomeFromRank(Math.min(6, outcomeRank(effectiveDirective.min_attack_outcome) + 1)),
                     };
                 } else if (activeOpLater.tempo === 'all_out') {
                     effectiveDirective = {

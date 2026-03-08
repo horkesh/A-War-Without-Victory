@@ -49,22 +49,14 @@ export const OUTCOME_RANK: Record<PredictedOutcome, number> = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function outcomeRank(outcome: string): number {
-    switch (outcome) {
-        case 'decisive_victory': return 5;
-        case 'victory': return 4;
-        case 'costly_victory': return 3;
-        case 'stalemate': return 2;
-        case 'repulsed':
-        default:
-            return 1;
-    }
+    return OUTCOME_RANK[outcome as PredictedOutcome] ?? 1;
 }
 
 export function outcomeFromRank(rank: number): DirectiveOutcome {
-    if (rank >= 5) return 'decisive_victory';
-    if (rank === 4) return 'victory';
-    if (rank === 3) return 'costly_victory';
-    if (rank === 2) return 'stalemate';
+    if (rank >= 6) return 'decisive_victory';
+    if (rank >= 5) return 'victory';
+    if (rank >= 4) return 'costly_victory';
+    if (rank >= 3) return 'stalemate';
     return 'repulsed';
 }
 

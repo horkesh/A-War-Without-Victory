@@ -22,6 +22,8 @@ import {
     getCorpsArmyPriorities,
 } from './bot_strategy.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
+import { OUTCOME_RANK } from './bot_brigade_targeting.js';
+import type { PredictedOutcome } from './combat_predictor.js';
 import { analyzeFrontGeometry, type FrontGeometryAssessment } from './front_geometry_analysis.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
@@ -300,8 +302,7 @@ export function generateCorpsDirectives(
                 if (!offensiveTargetSet.has(t)) offensiveTargetSet.add(t);
             }
             // Use the most permissive min_outcome from active priorities
-            const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
-            if ((outcomeRank[priority.min_outcome] ?? 2) < (outcomeRank[bestMinOutcome] ?? 2)) {
+            if ((OUTCOME_RANK[priority.min_outcome as PredictedOutcome] ?? 2) < (OUTCOME_RANK[bestMinOutcome as PredictedOutcome] ?? 2)) {
                 bestMinOutcome = priority.min_outcome;
             }
             // avoid_municipalities removed — bipolar co-ethnic scoring handles deterrence emergently
@@ -631,9 +632,8 @@ export function generateCorpsDirectives(
         // Near-complete supply isolation → upgrade minimum outcome by one rank (max costly_victory).
         // Only applies when almost no brigades have adequate supply (< 5%).
         if (supplyHealth.adequate_fraction < 0.05) {
-            const outcomeRank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
-            const rankVal = outcomeRank[bestMinOutcome] ?? 2;
-            if (rankVal < 3) { // below costly_victory → upgrade to costly_victory
+            const rankVal = OUTCOME_RANK[bestMinOutcome as PredictedOutcome] ?? 2;
+            if (rankVal < 4) { // below costly_victory (4 in 6-scale) → upgrade to costly_victory
                 bestMinOutcome = 'costly_victory';
             }
         }
