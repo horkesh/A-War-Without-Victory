@@ -16,6 +16,7 @@ import type { FormationState, FactionId, GameState } from '../../state/game_stat
 import type { BrigadeDecoration } from '../../state/decoration_types.js';
 import { type DecorationTier, getDecorationDisplayName, getHighestDecorationTier } from '../../state/decoration_types.js';
 import type { BrigadeHistory } from '../../state/brigade_history.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 /** Combat bonuses by decoration tier. */
 export const DECORATION_COMBAT_BONUS: Record<DecorationTier, { atk: number; def: number; morale_resist: number; morale_flat: number }> = {
@@ -163,7 +164,9 @@ export function evaluateBrigadeDecorations(
  */
 export function evaluateAllBrigadeDecorations(state: GameState): void {
     const turn = state.meta?.turn ?? 0;
-    for (const f of Object.values(state.formations ?? {})) {
+    const fmtsDecorations = state.formations ?? {};
+    for (const fKey of Object.keys(fmtsDecorations).sort(strictCompare)) {
+        const f = fmtsDecorations[fKey]!;
         if (f.status !== 'active') continue;
         if (f.kind && f.kind !== 'brigade') continue;
         evaluateBrigadeDecorations(f, turn);

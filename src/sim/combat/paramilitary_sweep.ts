@@ -65,7 +65,7 @@ function emptyReport(): ParamilitarySweepReport {
 function buildDefendedOsids(state: GameState): Set<string> {
     const defended = new Set<string>();
     const formations = state.formations ?? {};
-    for (const fid of Object.keys(formations)) {
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (!f || f.status !== 'active' || f.kind === 'paramilitary') continue;
         if (f.location_osid) defended.add(f.location_osid);
@@ -78,7 +78,7 @@ function isDefendedAgainst(defendedOsids: Set<string>, state: GameState, osid: s
     if (!defendedOsids.has(osid)) return false;
     // Confirm at least one non-attacker active formation is there
     const formations = state.formations ?? {};
-    for (const fid of Object.keys(formations)) {
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (!f || f.status !== 'active' || f.kind === 'paramilitary') continue;
         if (f.faction !== attackerFaction && f.location_osid === osid) return true;
@@ -125,7 +125,7 @@ export function detectParamilitaryTargets(
     // Existing paramilitary targets — avoid duplicates
     const existingTargets = new Set<string>();
     const formations = state.formations ?? {};
-    for (const fid of Object.keys(formations)) {
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (f?.kind === 'paramilitary' && f.paramilitary_target) {
             existingTargets.add(`${f.faction}:${f.paramilitary_target}`);

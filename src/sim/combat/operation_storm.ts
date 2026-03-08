@@ -10,6 +10,7 @@
  */
 
 import type { GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 // ── Storm precondition thresholds (Architect-decided; flag for review) ──
 
@@ -37,13 +38,13 @@ export interface OperationStormCheckReport {
 function computeRsTerritorialShare(state: GameState): number {
     const pc = state.political_controllers;
     if (!pc) return 0;
-    const entries = Object.values(pc);
-    if (entries.length === 0) return 0;
+    const keys = Object.keys(pc).sort(strictCompare);
+    if (keys.length === 0) return 0;
     let rsCount = 0;
-    for (const controller of entries) {
-        if (controller === 'RS') rsCount++;
+    for (const key of keys) {
+        if (pc[key] === 'RS') rsCount++;
     }
-    return rsCount / entries.length;
+    return rsCount / keys.length;
 }
 
 /**

@@ -201,7 +201,8 @@ export function displaceFormationsInEnemyTerritory(
 ): void {
     const adjacency = buildOsidAdjacency(edges);
     const formations = state.formations ?? {};
-    for (const f of Object.values(formations)) {
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
         if (!f || f.status !== 'active') continue;
         const loc = (f as { location_osid?: string }).location_osid;
         if (!loc) continue;
@@ -319,7 +320,8 @@ export function resolveAttackOrdersOsid(
 
     const orders = state.brigade_attack_orders;
     const adjacency = buildOsidAdjacency(edges);
-    const allFormations = Object.values(state.formations ?? {});
+    const fmts = state.formations ?? {};
+    const allFormations = Object.keys(fmts).sort(strictCompare).map(k => fmts[k]!);
     if (!orders || typeof orders !== 'object') {
         // No orders this turn — still run displacement pass so formations left in enemy territory from a previous turn are fixed
         for (const f of allFormations) {
@@ -845,7 +847,8 @@ export function resolveAttackOrdersOsid(
             }
             // Displace any other formations still in the flipped OSID (invariant: no brigade in enemy territory)
             const formations = state.formations ?? {};
-            for (const f of Object.values(formations)) {
+            for (const fid of Object.keys(formations).sort(strictCompare)) {
+                const f = formations[fid];
                 if (!f || f.status !== 'active' || (f as { location_osid?: string }).location_osid !== targetOsid) continue;
                 if (f.faction === attackerFaction) continue;
                 const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };
@@ -900,7 +903,8 @@ export function resolveAttackOrdersOsid(
 
     // Final pass: displace any formation still in enemy territory (e.g. moved to an OSID that flipped in a later battle this turn)
     const formations = state.formations ?? {};
-    for (const f of Object.values(formations)) {
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
         if (!f || f.status !== 'active') continue;
         const loc = (f as { location_osid?: string }).location_osid;
         if (!loc) continue;

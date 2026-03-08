@@ -12,14 +12,13 @@ function parseEdgeEndpoints(edgeId: string): [SettlementId, SettlementId] | null
 
 function activeBrigades(state: GameState): FormationState[] {
     const formations = state.formations ?? {};
-    return Object.values(formations)
+    return Object.keys(formations).sort(strictCompare).map(k => formations[k]!)
         .filter((f): f is FormationState =>
             f != null &&
             f.status === 'active' &&
             (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom') &&
             f.location_osid != null
-        )
-        .sort((a, b) => strictCompare(a.id, b.id));
+        );
 }
 
 export function hasValidFrontAssignment(state: GameState, formationId: FormationId): boolean {
@@ -92,7 +91,8 @@ export function ensureBrigadeFrontAssignments(state: GameState): void {
     const segmentAssignCount = new Map<string, number>();
     for (const seg of segments) segmentAssignCount.set(seg.front_id, 0);
     // Count existing valid assignments
-    for (const frontId of Object.values(assignments)) {
+    for (const aKey of Object.keys(assignments).sort(strictCompare)) {
+        const frontId = assignments[aKey];
         if (frontId && segmentAssignCount.has(frontId)) {
             segmentAssignCount.set(frontId, (segmentAssignCount.get(frontId) ?? 0) + 1);
         }

@@ -18,6 +18,7 @@ import type {
     FormationState,
     GameState
 } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 // --- Constants ---
 

@@ -226,7 +226,8 @@ function findBrigadeSectorId(state: GameState, brigade: FormationState): string 
     let largestSector: string | null = null;
     let largestEdges = -1;
 
-    for (const sector of Object.values(sectors)) {
+    for (const sectorKey of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorKey]!;
         if (sector.corps_id !== corpsId) continue;
         // Track largest for fallback
         if (sector.length_edges > largestEdges) {
@@ -297,7 +298,8 @@ function findNearestFriendlyOsidInSet(
 function countCorpsBrigadesAtOsid(state: GameState, faction: FactionId, corpsId: FormationId | null | undefined, osid: Osid): number {
     const formations = state.formations ?? {};
     let count = 0;
-    for (const f of Object.values(formations)) {
+    for (const fid of Object.keys(formations)) {
+        const f = formations[fid]!;
         if (f.faction !== faction) continue;
         if (f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
@@ -326,7 +328,8 @@ const MAX_CORPS_BRIGADES_PER_OSID = 2;
 function countFactionBrigadesAtOsid(state: GameState, faction: FactionId, osid: Osid): number {
     const formations = state.formations ?? {};
     let count = 0;
-    for (const f of Object.values(formations)) {
+    for (const fid of Object.keys(formations)) {
+        const f = formations[fid]!;
         if (f.faction !== faction) continue;
         if (f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
@@ -1308,11 +1311,13 @@ const freeTarget = predictions.find(t =>
             if (adjEnemy.length > 0 && directive) {
                 const undefendedReorg = adjEnemy.filter(eo => {
                     if (!directive.offensive_targets.includes(eo)) return false;
-                    const defenders = Object.values(state.formations ?? {}).filter(
-                        (f): f is FormationState => f != null && f.status === 'active' &&
+                    const fmtsReorg = state.formations ?? {};
+                    // Order-independent: checking if any defender exists (length === 0)
+                    const hasDefender = Object.values(fmtsReorg).some(
+                        f => f != null && f.status === 'active' &&
                             f.location_osid === eo && f.faction !== faction
                     );
-                    return defenders.length === 0;
+                    return !hasDefender;
                 });
                 if (undefendedReorg.length > 0) {
                     const target = undefendedReorg[0]!;
@@ -1421,11 +1426,13 @@ const freeTarget = predictions.find(t =>
                 // A recovering brigade shouldn't ignore free territory right next door.
                 const undefendedAdj = adjEnemy.filter(eo => {
                     if (!directive?.offensive_targets.includes(eo)) return false;
-                    const defenders = Object.values(state.formations ?? {}).filter(
-                        (f): f is FormationState => f != null && f.status === 'active' &&
+                    const fmtsAdj = state.formations ?? {};
+                    // Order-independent: checking if any defender exists (length === 0)
+                    const hasDefender = Object.values(fmtsAdj).some(
+                        f => f != null && f.status === 'active' &&
                             f.location_osid === eo && f.faction !== faction
                     );
-                    return defenders.length === 0;
+                    return !hasDefender;
                 });
                 if (undefendedAdj.length > 0) {
                     const target = undefendedAdj[0]!;
@@ -1853,15 +1860,15 @@ export function generateAllBotOrdersOsid(
     const allEligibleAttackersByCorps: Record<FormationId, number> = {};
 
     for (const faction of sortedFactions) {
-        const brigades = Object.values(state.formations ?? {})
+        const fmtsBrigades = state.formations ?? {};
+        const brigades = Object.keys(fmtsBrigades).sort(strictCompare).map(k => fmtsBrigades[k]!)
             .filter((f): f is FormationState =>
                 f != null &&
                 f.faction === faction &&
                 f.status === 'active' &&
                 (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia' || f.kind === 'jna_phantom') &&
                 f.location_osid != null
-            )
-            .sort((a, b) => strictCompare(a.id, b.id));
+            );
 
         if (brigades.length === 0) continue;
 

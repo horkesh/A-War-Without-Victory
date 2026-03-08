@@ -43,7 +43,8 @@ export function consolidateRearPockets(
 
     // Build set of OSIDs that have an active brigade present
     const defendedOsids = new Set<string>();
-    for (const f of Object.values(formations)) {
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid]!;
         if (f.status === 'active' && f.location_osid && f.kind === 'brigade') {
             defendedOsids.add(f.location_osid);
         }

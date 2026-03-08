@@ -370,7 +370,8 @@ export function generateCorpsStanceOrders(
                 // Check if faction controls enough territory for counteroffensive
                 const pc = state.political_controllers ?? {};
                 const totalSids = Object.keys(pc).length;
-                const ownedSids = Object.values(pc).filter(f => f === 'RBiH').length;
+                let ownedSids = 0;
+                for (const k of Object.keys(pc)) { if (pc[k] === 'RBiH') ownedSids++; }
                 if (totalSids > 0 && ownedSids / totalSids >= 0.25) {
                     stance = 'offensive';
                 }
@@ -531,7 +532,7 @@ export function generateCorpsOperationOrders(
             let relevance = 0;
             for (const mun of template.target_municipalities) {
                 // Count enemy-held settlements in this municipality
-                const sids = Object.keys(pc).filter(sid => {
+                const sids = Object.keys(pc).sort(strictCompare).filter(sid => {
                     const m = sidToMun.get(sid);
                     return m === mun && pc[sid] !== faction;
                 });
@@ -1353,7 +1354,9 @@ export function generateCorpsDirectives(
                     });
                     if (hasEnemyNeighbor) continue;
                     // Must have enemy formation present (uncleared pocket/holdout)
-                    const hasEnemyFormation = Object.values(state.formations ?? {}).some(f =>
+                    const fmtsEnemy = state.formations ?? {};
+                    // Order-independent: existence check via .some()
+                    const hasEnemyFormation = Object.values(fmtsEnemy).some(f =>
                         f && f.status === 'active' && f.faction !== faction && f.location_osid === neighborOsid
                     );
                     if (!hasEnemyFormation) continue;
