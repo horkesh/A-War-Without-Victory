@@ -641,6 +641,32 @@ The strategic reserve solves the topology mismatch without artificial caps or sc
 - Corps can plan operations on their own, but generic named-op planning is currently load-bearingly ambiguous because sector-op launch later in the same corps-AI pass may replace a fresh non-sector active operation. Treat corps operation ownership as split until one path is canonical.
 - Engine/UI ownership mismatch: operation participants are exempt from `home_defense_active` in `bot_brigade_ai_osid.ts`, but the formation detail panel still disables offensive posture buttons purely on `home_defense_active`. Do not assume the tactical UI currently reflects operation ownership rules.
 
+## 2026-03-08 - N304 combat mechanics root causes — fatigue, equipment, attrition
+
+Three critical bugs discovered and fixed, each with systemic lessons:
+
+### Fatigue reset bug (formation_fatigue.ts)
+- `FRONTLINE_FATIGUE_PER_TURN = 1.5` (fractional) was silently reset to 0 every turn by `Number.isInteger(1.5) === false` check in `updateFormationFatigue`. The check was meant to sanitize garbage values but blocked all fractional fatigue accumulation.
+- **Lesson:** Guard clauses that use `Number.isInteger()` are dangerous for any float-valued field. Use `typeof !== 'number' || isNaN()` instead. This pattern may exist elsewhere in the codebase.
+- **Impact:** 189 front-assigned brigades never tired. RS could sustain indefinite offensives with no combat power degradation. Fixing this alone improved ATH from 87% to ~93% because RS offensives naturally exhaust.
+
+### Equipment losses missing from OSID attack path (attack_resolution_osid.ts)
+- The primary battle resolution system (`resolveAttackOrdersOsid`) had **zero equipment loss logic**. Only the legacy SID path (`resolveBattleOrders`) in `battle_resolution.ts` had equipment loss code — but that path has `defenderFormation = undefined` and `defenderBrigadeId = undefined` hardcoded (AoR removal leftover), meaning ALL its battles were "undefended" and equipment losses were always 0.
+- **Lesson:** When two parallel resolution paths exist (OSID vs legacy SID), features added to one may never reach the other. The OSID path is the live path; the legacy SID path is effectively dead code for combat. Equipment features must live in the OSID path.
+- **Impact:** RS lost 165 tanks + 230 artillery in 40 weeks after fix. Equipment attrition reduces RS heavy firepower over time — matching VRS doctrinal arc (starts professional, degrades from attrition).
+
+### Frontline attrition rate (frontline_attrition.ts)
+- `BASE_ATTRITION_RATE` was reduced from 0.005 to 0.003 at n159 for RS/HRHB KIA running too high. With fatigue now working and equipment degrading RS firepower, the lower rate produced too few total casualties (97k vs historical ~120-130k for the first year). Restored to 0.005.
+- **Lesson:** Attrition rate calibration depends on other systems working correctly. When fatigue was broken, 0.003 seemed right. With fatigue working, 0.005 is needed because RS offensives are naturally limited and produce fewer battle casualties.
+
+### Emergent behavior: doctrinal arcs without hard caps
+- With fatigue + equipment working, RS territorial acquisition naturally slows and stops by ~w30 without any hardcoded phase switch or RS stance change. This matches the design intent: "Arcs must emerge ORGANICALLY — NOT from hard caps or phase switches." ATH improved from 87% to 93.8% purely from fixing these mechanical bugs.
+- RS delta went from -23 (RS under-acquiring by 23 OSIDs) to +1 (nearly perfect). The over-acquisition was actually caused by RS having infinite stamina (no fatigue) and infinite firepower (no equipment attrition).
+
+### Legacy SID path status
+- `resolveBattleOrders()` in `battle_resolution.ts` lines 930-933: `defenderBrigadeId = undefined`, `defenderFormation = undefined`. This was an intentional stub after AoR removal ("legacy SID path: militia-only, no brigade_aor lookup"). It still runs in the pipeline (line 856 of war_phases.ts) alongside the OSID path but produces only trivial casualties (2 wounded per battle, no equipment).
+- **Decision:** Leave legacy SID path as-is; all real combat goes through OSID path. Legacy path exists for backward compat with SID-keyed scenarios.
+
 ## 2026-03-06 - Combat-causality recovery knowledge
 
 - `n126` is the current April 1992 40w recovery milestone. It passed the live combat-causality gate with `91` attack orders, `81` battles, and `invalid_operation_count = 0`. Use it as the current evidence point for "combat restored," not as proof that all repo integration issues are solved.
