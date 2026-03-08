@@ -7,6 +7,17 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] N293 Validation Run — Combat Mechanics Overhaul
+
+### Summary
+- **40w validation run** (n293, hash `dc4469e8672146c5`): 104 battles, 102,397 total casualties, 54 settlement flips.
+- **ATH**: 85.0% area-weighted (down 3.1pp from n290's 88.1%). Barely passes >85% threshold.
+- **What works**: Supply embargo (RBiH=47.5, correctly constrained), garrison flag (65th Protection defend-only), equipment condition degradation (56% operational at w40), per-enclave resilience configs loaded.
+- **Structural failures** (not bugs): Equipment losses=0 (undefended-path returns 0, most battles vs militia), dissolution=0 (no brigade hit triple threshold at 40w), fatigue=0 (no front assignment in bot AI), casualty ratio RS>RBiH (attacker casualties dominate).
+- **ATH regression**: DRINA 66.7%, Bihac anchor failed. Supply embargo likely too aggressive — RS/HRHB at supply=0.
+- **Next**: Supply tuning, bot AI front assignment, extended 80w run.
+- Full report: `docs/40_reports/convenes/20260308_N293_VALIDATION_REPORT.md`
+
 ## [2026-03-08] Combat Mechanics Fix Plan — 6 phases, 8 issues
 
 ### Summary
