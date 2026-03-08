@@ -7,6 +7,17 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Code Health — Phase 4 of Audit Remediation
+
+Behavior-preserving cleanup. Three changes:
+
+**Displacement routing dedup** (displacement_takeover.ts): Extracted `routeDisplacedCohort` helper replacing ~120 lines of duplicated routing logic across pass-through, sustained, and camp displacement. Net -412 lines.
+**Supply audit assertions** (supply_reserves.ts): `assertSupplyInvariant` checks no faction goes negative or exceeds 200. Called at start/end of `updateSupplyReserves`.
+**Tmp script cleanup**: Deleted 5 tracked diagnostic scripts. Added `tools/tmp_*.cjs` to `.gitignore`.
+
+**Files**: `displacement_takeover.ts`, `supply_reserves.ts`, `.gitignore`, 5 deleted scripts
+**Verification**: tsc clean, 389/389 vitest passing. No behavioral change.
+
 ## [2026-03-08] Supply & Morale Balance — Phase 3 of Audit Remediation (n415)
 
 Supply drain reduction + morale collapse mechanic. Calibration: **89.4% area-weighted** (+2.0pp from n414 87.4%).
