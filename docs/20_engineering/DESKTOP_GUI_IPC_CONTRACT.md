@@ -146,6 +146,11 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
     - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
     - Behavior: validates officer exists in pool and corps exists. Sets `officer.assignment = corpsId`, `officer.status = "active"`. If a previous commander existed, they return to the pool. Reserializes, sends update.
 
+- `stage-corps-operation-order` (invoke)
+    - Payload: `CorpsOperationOrderPayload` — `{ corpsId: string, name: string, type: 'sector_attack' | 'general_offensive' | 'strategic_defense' | 'reorganization' | 'feint' | 'probe', targetSettlements: string[], participatingBrigades: string[], sectorId?: string, objectives?: string[], planningDuration?: number, stagingOsid?: string, minAttackOutcome?: string, tempo?: 'methodical' | 'standard' | 'all_out', schwerpunktOsid?: string, artilleryPreparation?: boolean, axes?: Array<{ axis_id, name, assigned_brigades, objectives, staging_osid?, current_objective_index, status, ... }> }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: creates a `CorpsOperation` on `state.corps_operations` for the given corps. If `axes` array provided, creates multi-axis operation with per-axis brigade assignment, objective chains, and optional staging OSIDs. Single-axis operations omit the `axes` field and use top-level `objectives`/`participatingBrigades`. Validates corps exists, at least one brigade, at least one objective (unless `reorganization`). Sets operation status to `planning`, reserializes, sends state via `game-state-updated`. Consumer: OpsPlanningModal (`src/ui/map/components/OpsPlanningModal.tsx`).
+
 ### Read-only query channels (no state mutation)
 
 - `query-movement-range` (invoke)

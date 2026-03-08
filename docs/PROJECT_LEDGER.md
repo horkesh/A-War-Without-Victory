@@ -7,6 +7,21 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-08] Ops Planning Modal Rewrite — Multi-Axis Operations, Staging Areas, Force-Ratio Preview
+
+Full rewrite of `OpsPlanningModal.tsx` in two phases:
+
+- **Multi-axis operations**: AxisState model with per-axis brigades (exclusive assignment), ordered objective chains, color-coded Bezier arrow rendering (4-color AXIS_COLORS palette), numbered objective markers
+- **Per-axis staging areas**: MapClickMode toggle ('objectives' vs 'staging'), diamond map markers, staging_osid in IPC payload per axis
+- **Force-ratio preview**: enemyStrengthByOsid memo aggregates enemy formations per objective OSID; color-coded display (green >1.5×, yellow >1×, red outnumbered) with tanks/artillery counts
+- **Post-submit confirmation**: Overlay showing full plan summary (axes, brigades, objectives, staging) before staging the order
+- **IPC**: CorpsOperationOrderPayload extended with `axes[]` array + `staging_osid` per axis. Single-axis operations omit axes for backward compat.
+- **Simplify pass**: Removed 6× setTimeout double-refresh (useEffect already handles it), hoisted friendlyPersonnel computation, simplified playerFaction to direct `loadedGameState.player_faction`, extracted clearStagingOnActiveAxis helper
+
+**Files**: `src/ui/map/components/OpsPlanningModal.tsx`, `src/ui/map/desktop/useIPC.ts`
+**Impact**: GUI-only, no calibration change
+**Report**: `docs/40_reports/implemented/20260308_OPS_PLANNING_MODAL_PHASE2_MULTI_AXIS_STAGING_FORCEPREVIEW.md`
+
 ## [2026-03-08] N347 Corps Sector Intelligence Rework — Brigade-Presence-First + Home Distance + Density Management
 
 **Six interlocking changes** to make corps sectors emerge from actual brigade positions:
@@ -11825,3 +11840,32 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 - MILITIA_BRIGADE_FORMATION_DESIGN: §9a paramilitary section
 - README (40_reports): entry in §1 need table
 - Full report: `docs/40_reports/implemented/20260307_PARAMILITARY_SWEEP_FEATURE.md`
+
+---
+
+## [2026-03-08] Warroom yearly art direction + overlay workflow documentation
+
+### What changed
+- Reworked the warroom asset-generation handovers around **15 room images total**: `prewar/year1/year2/year3/year4` for each of **RBiH**, **RS**, and **HRHB**
+- Locked the new hybrid room rule: **flag baked into room art**, **desk map projected at runtime**, **date / next-turn board projected at runtime**
+- Added explicit **archival / documentary photograph** style language so prompts target a real photographed room rather than cinematic AI art
+- Added faction-specific recurring prop guidance that supports identity without conflicting with modal anchors
+- Added Gemini follow-up prompts for:
+  - exact desk-map quad measurement
+  - exact date / next-turn board quad measurement
+  - geometry verification between yearly follow-up images
+  - detecting unwanted visible year/date text in baked room art
+- Clarified that **war modals remain the same from April 1992 onward** while only the yearly room art changes; **prewar** remains the distinct modal state
+
+### Why
+- The earlier `prewar + war` split was too coarse for the intended April-to-April room aging arc
+- Runtime overlays now depend on **per-image measurement**, so the documentation needed to stop treating test-room quads as canonical
+- The project needed a durable prompt pack that reduces the chance of getting "AI-looking" room art that would be hard to replace later
+
+### Verification
+- Updated:
+  - `docs/40_reports/handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md`
+  - `docs/40_reports/handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md`
+  - `docs/40_reports/WARROOM_MASTER.md`
+  - `docs/40_reports/GUI_MASTER.md`
+- No code or canon files changed

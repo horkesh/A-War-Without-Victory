@@ -101,6 +101,8 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
    Do instead: Treat calibration changes as gated work. Read the master file first, update it during the session, and do not resume historical shaping unless the combat-causality gate is green.
 8. **[2026-03-07] Operations must be sector-sourced — no corps-wide brigade pulls**
    Do instead: Operations launch only from `generateCorpsDirectives` sector offensive path. Only sector-assigned brigades participate. `MAX_PARTICIPATING_BRIGADES=12`. Old catalog-based `generateCorpsOperationOrders` disabled. If sector lacks brigades, density balancing reinforces first — no rear-area dump.
+9. **[2026-03-08] Player operations support multi-axis advance with per-axis staging**
+   Do instead: OpsPlanningModal exposes the engine's existing `CorpsOperation.axes` system to the player. Each axis has independent brigade assignment, ordered objective chain, and optional staging OSID. Single-axis operations omit the `axes` payload for backward compatibility. IPC: `stage-corps-operation-order` in `electron-main.cjs`. Force-ratio preview aggregates enemy formations per objective OSID for planning intelligence.
 | 2026-01-24 | Municipality outlines can be single polygons | Union must handle single and multi | No rejection of valid single-polygon munis | architecture |
 | 2026-01-24 | Convex hull fallback when union fails | Union unreliable for some geometries | Deterministic fallback + inflation reporting | architecture |
 | 2026-01-24 | Measure hull inflation when using hull salvage | Convex hull can distort shapes | High-inflation flagged in metadata | architecture |

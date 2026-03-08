@@ -37,7 +37,10 @@ interface AxisState {
     name: string;
     brigadeIds: Set<string>;
     objectives: string[];
+    stagingOsid?: string;
 }
+
+type MapClickMode = 'objectives' | 'staging';
 
 let nextAxisCounter = 0;
 function makeAxisId(): string {
@@ -70,7 +73,13 @@ export function OpsPlanningModal() {
     // Multi-axis state
     const [axes, setAxes] = useState<AxisState[]>([]);
     const [activeAxisId, setActiveAxisId] = useState<string>('');
+    const [mapClickMode, setMapClickMode] = useState<MapClickMode>('objectives');
+    const mapClickModeRef = useRef<MapClickMode>('objectives');
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const ipc = useIPC();
+
+    // Keep ref in sync with state for use in map click closure
+    useEffect(() => { mapClickModeRef.current = mapClickMode; }, [mapClickMode]);
 
     const sector = useMemo(() => {
         if (!selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
@@ -90,6 +99,23 @@ export function OpsPlanningModal() {
         }
         return map;
     }, [loadedGameState?.formations]);
+
+    const playerFaction = loadedGameState?.player_faction ?? '';
+
+    // Build enemy strength per OSID for force-ratio display
+    const enemyStrengthByOsid = useMemo(() => {
+        const map = new Map<string, { brigadeCount: number; totalPersonnel: number; tanks: number; artillery: number }>();
+        for (const f of loadedGameState?.formations ?? []) {
+            if (!f.location_osid || f.faction === playerFaction || f.status !== 'active') continue;
+            const existing = map.get(f.location_osid) ?? { brigadeCount: 0, totalPersonnel: 0, tanks: 0, artillery: 0 };
+            existing.brigadeCount++;
+            existing.totalPersonnel += f.personnel ?? 0;
+            existing.tanks += f.composition?.tanks ?? 0;
+            existing.artillery += f.composition?.artillery ?? 0;
+            map.set(f.location_osid, existing);
+        }
+        return map;
+    }, [loadedGameState?.formations, playerFaction]);
 
     // Initialize axes when sector changes
     useEffect(() => {
@@ -256,6 +282,24 @@ export function OpsPlanningModal() {
                     properties: { type: 'obj-label', label: `${objIdx + 1}`, axisIdx, color: colorSet.label },
                 });
             }
+
+            // Staging marker (diamond shape)
+            if (axis.stagingOsid) {
+                const stPt = lookup.get(axis.stagingOsid);
+                if (stPt) {
+                    const sz = 0.003;
+                    features.push({
+                        type: 'Feature',
+                        geometry: { type: 'Polygon', coordinates: [[[stPt[0], stPt[1] + sz], [stPt[0] + sz, stPt[1]], [stPt[0], stPt[1] - sz], [stPt[0] - sz, stPt[1]], [stPt[0], stPt[1] + sz]]] },
+                        properties: { type: 'staging-marker', axisIdx, color: colorSet.line },
+                    });
+                    features.push({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: stPt },
+                        properties: { type: 'staging-label', label: 'S', axisIdx, color: colorSet.label },
+                    });
+                }
+            }
         }
         return { type: 'FeatureCollection', features };
     }
@@ -277,11 +321,7 @@ export function OpsPlanningModal() {
     function addAxis() {
         const id = makeAxisId();
         const name = axes.length === 0 ? 'Main Advance' : `Axis ${String.fromCharCode(65 + axes.length)}`;
-        setAxes((prev) => {
-            const next = [...prev, { id, name, brigadeIds: new Set<string>(), objectives: [] }];
-            setTimeout(() => refreshOverlaySources(next), 0);
-            return next;
-        });
+        setAxes((prev) => [...prev, { id, name, brigadeIds: new Set<string>(), objectives: [] }]);
         setActiveAxisId(id);
     }
 
@@ -290,13 +330,10 @@ export function OpsPlanningModal() {
             const next = prev.filter((a) => a.id !== axisId);
             if (next.length === 0) {
                 const id = makeAxisId();
-                const fresh = [{ id, name: 'Main Advance', brigadeIds: new Set<string>(sector?.assigned_brigade_ids ?? []), objectives: [] as string[] }];
                 setActiveAxisId(id);
-                setTimeout(() => refreshOverlaySources(fresh), 0);
-                return fresh;
+                return [{ id, name: 'Main Advance', brigadeIds: new Set<string>(sector?.assigned_brigade_ids ?? []), objectives: [] as string[] }];
             }
             if (axisId === activeAxisId) setActiveAxisId(next[0].id);
-            setTimeout(() => refreshOverlaySources(next), 0);
             return next;
         });
     }
@@ -332,26 +369,40 @@ export function OpsPlanningModal() {
                     : [...a.objectives, osid];
                 return { ...a, objectives: objs };
             });
-            const allObjs = next.flatMap((a) => a.objectives);
-            setOperationTargetOsids(allObjs);
-            setTimeout(() => refreshOverlaySources(next), 0);
+            setOperationTargetOsids(next.flatMap((a) => a.objectives));
             return next;
         });
     }
 
+    function setStagingOnActiveAxis(osid: string) {
+        setAxes((prev) => prev.map((a) => {
+            if (a.id !== activeAxisId) return a;
+            return { ...a, stagingOsid: a.stagingOsid === osid ? undefined : osid };
+        }));
+        setMapClickMode('objectives');
+    }
+
+    function clearStagingOnActiveAxis() {
+        setAxes((prev) => prev.map((a) => a.id !== activeAxisId ? a : { ...a, stagingOsid: undefined }));
+    }
+
+    function handleMapClick(osid: string) {
+        if (mapClickModeRef.current === 'staging') {
+            setStagingOnActiveAxis(osid);
+        } else {
+            toggleObjectiveOnActiveAxis(osid);
+        }
+    }
+
     function moveObjective(axisId: string, objIdx: number, direction: -1 | 1) {
-        setAxes((prev) => {
-            const next = prev.map((a) => {
-                if (a.id !== axisId) return a;
-                const objs = [...a.objectives];
-                const newIdx = objIdx + direction;
-                if (newIdx < 0 || newIdx >= objs.length) return a;
-                [objs[objIdx], objs[newIdx]] = [objs[newIdx], objs[objIdx]];
-                return { ...a, objectives: objs };
-            });
-            setTimeout(() => refreshOverlaySources(next), 0);
-            return next;
-        });
+        setAxes((prev) => prev.map((a) => {
+            if (a.id !== axisId) return a;
+            const objs = [...a.objectives];
+            const newIdx = objIdx + direction;
+            if (newIdx < 0 || newIdx >= objs.length) return a;
+            [objs[objIdx], objs[newIdx]] = [objs[newIdx], objs[objIdx]];
+            return { ...a, objectives: objs };
+        }));
     }
 
     // --- Submit ---
@@ -396,6 +447,7 @@ export function OpsPlanningModal() {
             objective_capture_count: 0,
             movement_only_execution_turns: 0,
             idle_execution_turn_streak: 0,
+            staging_osid: a.stagingOsid,
         }));
 
         const result = await ipc.stageCorpsOperationOrder({
@@ -407,7 +459,7 @@ export function OpsPlanningModal() {
             sectorId: ['sector_attack', 'feint', 'probe'].includes(operationType) ? sector.sector_id : undefined,
             objectives: isSingleAxis ? axes[0].objectives : allObjs,
             planningDuration: operationType === 'probe' ? 1 : ['sector_attack', 'feint'].includes(operationType) ? 1 : undefined,
-            stagingOsid: sectorFriendlyOsids[0],
+            stagingOsid: axes[0]?.stagingOsid ?? sectorFriendlyOsids[0],
             minAttackOutcome,
             tempo,
             schwerpunktOsid: schwerpunktOsid || undefined,
@@ -544,11 +596,34 @@ export function OpsPlanningModal() {
                     },
                     paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
                 });
+                // Staging diamond markers
+                map.addLayer({
+                    id: 'ops-staging-markers', type: 'fill', source: 'ops-advance-arrows',
+                    filter: ['==', ['get', 'type'], 'staging-marker'],
+                    paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.4 },
+                });
+                map.addLayer({
+                    id: 'ops-staging-outline', type: 'line', source: 'ops-advance-arrows',
+                    filter: ['==', ['get', 'type'], 'staging-marker'],
+                    paint: { 'line-color': ['get', 'color'], 'line-width': 2 },
+                });
+                map.addLayer({
+                    id: 'ops-staging-labels', type: 'symbol', source: 'ops-advance-arrows',
+                    filter: ['==', ['get', 'type'], 'staging-label'],
+                    layout: {
+                        'text-field': ['get', 'label'],
+                        'text-size': 12,
+                        'text-font': ['Open Sans Bold'],
+                        'text-allow-overlap': true,
+                        'text-offset': [0, -1.0],
+                    },
+                    paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
+                });
 
-                // Click handlers
+                // Click handlers — dispatch via ref so closure captures latest mode
                 const handleClick = (event: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
                     const osid = event.features?.[0]?.properties?.osid;
-                    if (typeof osid === 'string' && osid.length > 0) toggleObjectiveOnActiveAxis(osid);
+                    if (typeof osid === 'string' && osid.length > 0) handleMapClick(osid);
                 };
                 for (const layerId of ['osid-control-fill', 'ops-sector-overlay-fill', 'ops-objectives-fill']) {
                     map.on('click', layerId, handleClick);
@@ -817,6 +892,32 @@ export function OpsPlanningModal() {
                                                 </div>
                                             </div>
 
+                                            {/* Staging area */}
+                                            <div>
+                                                <div className="text-[10px] font-semibold text-accent-gold uppercase tracking-widest mb-1">Staging Area</div>
+                                                <div className="flex items-center gap-2">
+                                                    <button type="button"
+                                                        onClick={() => {
+                                                            const next = mapClickMode === 'staging' ? 'objectives' : 'staging';
+                                                            setMapClickMode(next);
+                                                        }}
+                                                        className={`text-[10px] px-2.5 py-1 rounded border transition-colors ${
+                                                            mapClickMode === 'staging'
+                                                                ? 'bg-accent-gold/20 border-accent-gold text-accent-gold'
+                                                                : 'bg-panel-card border-panel-border text-text-secondary hover:border-interactive/50'
+                                                        }`}>
+                                                        {mapClickMode === 'staging' ? 'Click map to set staging...' : 'Set Staging Area'}
+                                                    </button>
+                                                    {activeAxis.stagingOsid && (
+                                                        <span className="text-[10px] text-text-primary flex items-center gap-1">
+                                                            <span className="text-accent-gold">&#9670;</span>
+                                                            {getOsidDisplayName(activeAxis.stagingOsid, osidDisplayNames)}
+                                                            <button type="button" onClick={clearStagingOnActiveAxis} className="text-red-400 hover:text-red-300 ml-0.5">&#10005;</button>
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
                                             {/* Objectives for this axis */}
                                             <div>
                                                 <div className="text-[10px] font-semibold text-accent-gold uppercase tracking-widest mb-1">
@@ -824,33 +925,55 @@ export function OpsPlanningModal() {
                                                 </div>
                                                 {activeAxis.objectives.length === 0 ? (
                                                     <div className="text-[10px] text-text-secondary italic p-2">Click enemy positions on the map to add objectives.</div>
-                                                ) : (
+                                                ) : (() => {
+                                                    // Compute once for all objectives on this axis
+                                                    let axisFriendlyPersonnel = 0;
+                                                    for (const bId of activeAxis.brigadeIds) {
+                                                        axisFriendlyPersonnel += formationById.get(bId)?.personnel ?? 0;
+                                                    }
+                                                    return (
                                                     <div className="space-y-1">
-                                                        {activeAxis.objectives.map((osid, objIdx) => (
-                                                            <div key={osid} className="flex items-center gap-1.5 p-1.5 bg-panel-card rounded border border-panel-border text-[11px]">
-                                                                <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                                                                    style={{ backgroundColor: colorSet.line, color: '#000' }}>
-                                                                    {objIdx + 1}
-                                                                </span>
-                                                                <span className="flex-1 text-text-primary truncate">{getOsidDisplayName(osid, osidDisplayNames)}</span>
-                                                                <button type="button" onClick={() => moveObjective(activeAxis.id, objIdx, -1)}
-                                                                    disabled={objIdx === 0}
-                                                                    className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-white disabled:opacity-20 transition-colors">
-                                                                    &#9650;
-                                                                </button>
-                                                                <button type="button" onClick={() => moveObjective(activeAxis.id, objIdx, 1)}
-                                                                    disabled={objIdx === activeAxis.objectives.length - 1}
-                                                                    className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-white disabled:opacity-20 transition-colors">
-                                                                    &#9660;
-                                                                </button>
-                                                                <button type="button" onClick={() => toggleObjectiveOnActiveAxis(osid)}
-                                                                    className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors">
-                                                                    &#10005;
-                                                                </button>
-                                                            </div>
-                                                        ))}
+                                                        {activeAxis.objectives.map((osid, objIdx) => {
+                                                            const enemy = enemyStrengthByOsid.get(osid);
+                                                            return (
+                                                                <div key={osid} className="flex items-center gap-1.5 p-1.5 bg-panel-card rounded border border-panel-border text-[11px]">
+                                                                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                                                                        style={{ backgroundColor: colorSet.line, color: '#000' }}>
+                                                                        {objIdx + 1}
+                                                                    </span>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <span className="text-text-primary truncate block">{getOsidDisplayName(osid, osidDisplayNames)}</span>
+                                                                        {enemy ? (
+                                                                            <span className={`text-[9px] ${axisFriendlyPersonnel > enemy.totalPersonnel * 1.5 ? 'text-green-400' : axisFriendlyPersonnel > enemy.totalPersonnel ? 'text-yellow-400' : 'text-red-400'}`}>
+                                                                                {axisFriendlyPersonnel.toLocaleString()} vs ~{enemy.totalPersonnel.toLocaleString()} est.
+                                                                                {enemy.tanks > 0 ? ` (${enemy.tanks}T` : ''}
+                                                                                {enemy.artillery > 0 ? `${enemy.tanks > 0 ? '/' : '('}${enemy.artillery}A)` : enemy.tanks > 0 ? ')' : ''}
+                                                                                {' '}&mdash; {enemy.brigadeCount} bde{enemy.brigadeCount !== 1 ? 's' : ''}
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="text-[9px] text-text-secondary">No known enemy forces</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <button type="button" onClick={() => moveObjective(activeAxis.id, objIdx, -1)}
+                                                                        disabled={objIdx === 0}
+                                                                        className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-white disabled:opacity-20 transition-colors">
+                                                                        &#9650;
+                                                                    </button>
+                                                                    <button type="button" onClick={() => moveObjective(activeAxis.id, objIdx, 1)}
+                                                                        disabled={objIdx === activeAxis.objectives.length - 1}
+                                                                        className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-white disabled:opacity-20 transition-colors">
+                                                                        &#9660;
+                                                                    </button>
+                                                                    <button type="button" onClick={() => toggleObjectiveOnActiveAxis(osid)}
+                                                                        className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors">
+                                                                        &#10005;
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
-                                                )}
+                                                    );
+                                                })()}
                                             </div>
                                         </div>
                                     );
@@ -873,7 +996,7 @@ export function OpsPlanningModal() {
                                 className="px-4 py-2 rounded text-sm font-semibold bg-panel-card text-text-primary hover:bg-panel-hover transition-colors border border-panel-border">
                                 Cancel
                             </button>
-                            <button type="button" onClick={() => void submitDraft()} disabled={isSubmitting}
+                            <button type="button" onClick={() => setShowConfirmation(true)} disabled={isSubmitting}
                                 className="px-4 py-2 rounded text-sm font-bold bg-interactive text-white hover:bg-interactive-hover transition-colors shadow-[0_0_15px_rgba(200,165,110,0.3)] shadow-interactive/20">
                                 {isSubmitting ? 'Staging...' : 'Draft Orders'}
                             </button>
@@ -886,12 +1009,63 @@ export function OpsPlanningModal() {
 
                         <div className="absolute top-4 right-14 bg-panel-card/90 border border-panel-border rounded p-2.5 text-[10px] font-semibold tracking-wider text-text-secondary flex flex-col gap-0.5 z-10 shadow-lg">
                             <span className="uppercase text-accent-gold border-b border-panel-border/50 pb-1 mb-0.5">Map Controls</span>
-                            <span>Click to toggle objective on active axis</span>
+                            {mapClickMode === 'staging' ? (
+                                <span className="text-accent-gold">Click to set staging area for active axis</span>
+                            ) : (
+                                <span>Click to toggle objective on active axis</span>
+                            )}
                             <span>Numbered markers show attack sequence</span>
                             {axes.length > 1 && <span>Colors distinguish axes of advance</span>}
                         </div>
                     </div>
                 </div>
+
+                {/* Confirmation overlay */}
+                {showConfirmation && (
+                    <div className="absolute inset-0 z-20 bg-black/70 backdrop-blur-sm flex items-center justify-center">
+                        <div className="bg-panel-bg border border-panel-border rounded-lg p-6 max-w-[480px] w-full shadow-2xl space-y-4">
+                            <h3 className="text-lg font-bold text-accent-gold tracking-widest uppercase">Confirm Operation</h3>
+                            <div className="text-sm text-text-primary font-semibold">{opName}</div>
+                            <div className="text-[11px] text-text-secondary space-y-1">
+                                <div>Type: <span className="text-text-primary capitalize">{operationType.replace(/_/g, ' ')}</span></div>
+                                <div>Tolerance: <span className="text-text-primary capitalize">{minAttackOutcome.replace(/_/g, ' ')}</span></div>
+                                <div>Tempo: <span className="text-text-primary capitalize">{tempo}</span></div>
+                                {artilleryPreparation && <div className="text-interactive">Artillery preparation enabled</div>}
+                            </div>
+                            <div className="border-t border-panel-border/50 pt-3 space-y-2">
+                                {axes.map((axis, idx) => {
+                                    const colorSet = AXIS_COLORS[idx % AXIS_COLORS.length];
+                                    return (
+                                        <div key={axis.id} className="text-[11px]">
+                                            <div className="font-semibold flex items-center gap-1.5" style={{ color: colorSet.label }}>
+                                                <span className={`w-2 h-2 rounded-full ${colorSet.dot}`} />
+                                                {axis.name}: {axis.brigadeIds.size} bde{axis.brigadeIds.size !== 1 ? 's' : ''} → {axis.objectives.length} obj{axis.objectives.length !== 1 ? 's' : ''}
+                                            </div>
+                                            {axis.stagingOsid && (
+                                                <div className="text-[10px] text-text-secondary pl-3.5">Staging: {getOsidDisplayName(axis.stagingOsid, osidDisplayNames)}</div>
+                                            )}
+                                            {axis.objectives.length > 0 && (
+                                                <div className="text-[10px] text-text-secondary pl-3.5">
+                                                    {axis.objectives.map((o, i) => `${i + 1}. ${getOsidDisplayName(o, osidDisplayNames)}`).join(' → ')}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button type="button" onClick={() => setShowConfirmation(false)}
+                                    className="px-4 py-2 rounded text-sm font-semibold bg-panel-card text-text-primary hover:bg-panel-hover transition-colors border border-panel-border">
+                                    Back
+                                </button>
+                                <button type="button" onClick={() => { setShowConfirmation(false); void submitDraft(); }} disabled={isSubmitting}
+                                    className="px-4 py-2 rounded text-sm font-bold bg-interactive text-white hover:bg-interactive-hover transition-colors shadow-[0_0_15px_rgba(200,165,110,0.3)]">
+                                    {isSubmitting ? 'Staging...' : 'Confirm & Stage'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
