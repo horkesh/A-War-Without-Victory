@@ -545,7 +545,13 @@ The following systems are canonical at v0.4. This manual provides the authoritat
 
 ---
 
-## Appendix A (v0.4): State schema additions
+## Appendix A (v0.6): State schema additions
+
+**Implementation-note (Phase 3 Engine & State Refactoring, 2026-03-08):** The monolithic `GameState` was restructured into nested domains (`military`, `political`, `displacement`) to enforce strict boundaries. 
+- **Root:** `schema_version`, `meta`, `factions`, `turn_summaries`, `operation_history`, `pending_paramilitary_requests`.
+- **`military`:** `formations`, `militia_pools`, `front_segments`, `front_posture`, `front_pressure`, `casualty_ledger`, `corps_command`, `brigade_movement_state`, `municipality_support_orders`, `airdrop_allocation`.
+- **`political`:** `political_controllers`, `municipalities`, `war_exhaustion`, `war_alliance_rbih_hrhb`, `rbih_hrhb_state`, `enclave_resilience`, `international_visibility_pressure`, `sarajevo_state`.
+- **`displacement`:** `displacement_state`, `civilian_casualties`, `municipality_displacement`, `settlement_displacement`.
 
 All state additions are serializable and deterministic. Derived state remains non-serialized.
 
