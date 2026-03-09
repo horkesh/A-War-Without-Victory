@@ -70,7 +70,7 @@ test('war runTurn executes expected leading phases in order', async () => {
     assert.ok(names.length > 10, `war runTurn should execute many phases; got ${names.length}`);
     assert.deepStrictEqual(
         names.slice(0, 3),
-        ['initialize', 'migrate-political-control-osid', 'evaluate-events'],
+        ['initialize', 'capture-aar-snapshot', 'migrate-political-control-osid'],
         'war runTurn should begin with deterministic initialization/event order'
     );
 });

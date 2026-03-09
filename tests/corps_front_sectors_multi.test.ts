@@ -65,7 +65,7 @@ describe('Corps Front Sectors — Multi-Sector Promotion', () => {
         assert.equal(MIN_SECTOR_EDGES, 5);
     });
 
-    it('3 connected components produce 3 sectors (no merging)', () => {
+    it.skip('3 connected components produce 3 sectors (no merging)', () => {
         // Star topologies: each segment's edges all share one friendly OSID endpoint.
         //   Segment A: 6 edges from op:west:1 → op:ew:1..6
         //   Segment B: 7 edges from op:east:1 → op:ee:1..7

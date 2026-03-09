@@ -31,11 +31,15 @@ function parseChunkSize(value) {
 }
 
 function parseArgs(argv) {
-  const out = { chunkSize: undefined, help: false };
+  const out = { chunkSize: undefined, help: false, coverage: false };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--help' || arg === '-h') {
       out.help = true;
+      continue;
+    }
+    if (arg === '--coverage') {
+      out.coverage = true;
       continue;
     }
     if (arg === '--chunk-size') {
@@ -107,7 +111,8 @@ for (let i = 0; i < files.length; i += CHUNK_SIZE) {
     `run_node_tests: chunk ${chunkIndex}/${totalChunks} (${chunk.length} files) ${first} -> ${last}\n`
   );
 
-  const result = spawnSync(process.execPath, [tsxCli, '--test', ...chunk], {
+  const nodeArgs = cli.coverage ? ['--experimental-test-coverage', tsxCli, '--test', ...chunk] : [tsxCli, '--test', ...chunk];
+  const result = spawnSync(process.execPath, nodeArgs, {
     stdio: 'inherit',
     shell: false
   });

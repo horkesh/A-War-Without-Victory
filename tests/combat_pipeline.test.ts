@@ -66,22 +66,22 @@ function minimalPhaseIState(): GameState {
     };
 }
 
-test('War phase runTurn includes phase-ii-consolidation after supply-resolution', async () => {
+test('War phase runTurn includes consolidate-rear-pockets after supply-resolution', async () => {
     const state = minimalPhaseIIState();
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { report } = await runTurn(state, { seed: 'pipeline-ii', settlementEdges: edges });
     const names = report.phases.map((p) => p.name);
     const idxSupply = names.indexOf('supply-resolution');
-    const idxPhaseII = names.indexOf('phase-ii-consolidation');
+    const idxPhaseII = names.indexOf('consolidate-rear-pockets');
     assert.ok(idxSupply >= 0, 'supply-resolution should be in pipeline');
-    assert.ok(idxPhaseII >= 0, 'phase-ii-consolidation should be in pipeline');
-    assert.ok(idxPhaseII > idxSupply, 'phase-ii-consolidation should run after supply-resolution');
+    assert.ok(idxPhaseII >= 0, 'consolidate-rear-pockets should be in pipeline');
+    assert.ok(idxPhaseII > idxSupply, 'consolidate-rear-pockets should run after supply-resolution');
 });
 
-test('war runTurn includes phase-ii-consolidation on default path', async () => {
+test('war runTurn includes consolidate-rear-pockets on default path', async () => {
     const state = minimalPhaseIState();
     const { report } = await runTurn(state, { seed: 'pipeline-i' });
     const names = report.phases.map((p) => p.name);
-    assert.ok(names.includes('phase-ii-consolidation'));
+    assert.ok(names.includes('consolidate-rear-pockets'));
     assert.ok(!names.includes('phase-i-control-flip'));
 });

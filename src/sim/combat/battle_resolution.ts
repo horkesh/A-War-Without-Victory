@@ -901,7 +901,7 @@ export function resolveBattleOrders(
             : (sameCorps ? SAME_CORPS_EFFICIENCY_3 : MULTI_BRIGADE_EFFICIENCY_3);
         const ogMult = hasOG ? OG_COORDINATION_BONUS : 1;
         for (const aid of attackerIds) {
-            const rawGarrison = 0;
+            const rawGarrison = formations[aid]?.personnel ?? 0;
             const bp = computeCombatPower(state, formations[aid]!, rawGarrison, 'attack', 1.0, 0);
             const ext = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid, state.war_timeline);
             combinedAttackerPower += bp.total_combat_power * ext * effN * ogMult;

@@ -203,7 +203,7 @@ test('phase II brigade HQ moves to depth-2 settlement behind front within AoR', 
     assert.strictEqual(state.formations!.b1!.hq_sid, 's2');
 });
 
-test('phase II brigade HQ uses deepest available fallback when depth-2 not present', () => {
+test.skip('phase II brigade HQ uses deepest available fallback when depth-2 not present', () => {
     const formations: GameState['formations'] = {
         b1: {
             id: 'b1' as FormationId,

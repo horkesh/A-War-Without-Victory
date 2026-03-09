@@ -37,7 +37,8 @@ const BASE_TMP = join(process.cwd(), 'data', 'derived', 'scenario', '_baseline_t
  */
 const DEFAULT_SCENARIOS: Array<{ id: string; scenario_path: string; weeks?: number }> = [
     { id: 'noop_4w', scenario_path: 'data/scenarios/noop_4w.json', weeks: 4 },
-    { id: 'baseline_ops_4w', scenario_path: 'data/scenarios/baseline_ops_4w.json', weeks: 4 }
+    { id: 'baseline_ops_4w', scenario_path: 'data/scenarios/baseline_ops_4w.json', weeks: 4 },
+    { id: 'apr1992_52w', scenario_path: 'data/scenarios/apr1992_definitive_52w.json', weeks: 52 }
 ];
 
 export interface ScenarioBaselineEntry {
