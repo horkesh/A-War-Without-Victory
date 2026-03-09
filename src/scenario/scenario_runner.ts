@@ -108,8 +108,10 @@ import {
     type HistoricalFactionMetrics,
     type AttackResolutionSummary,
     type AttackResolutionWeekRollup,
-    type CorpsAiSnapshot
+    type CorpsAiSnapshot,
+    type ActiveOperationSummary
 } from './scenario_end_report.js';
+import type { OperationAAR } from '../sim/combat/operation_aar.js';
 import { computeRunId, loadScenario, normalizeActions, resolveInitControlPath, resolveInitFormationsPath } from './scenario_loader.js';
 import {
     buildCompareResult,
@@ -274,6 +276,8 @@ export interface RunScenarioResult {
         activity_summary: string;
         /** Phase H2.2: formation delta (initial vs final). */
         formation_delta: string;
+        /** Operation AARs (completed operations). */
+        operation_aars: string;
         /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
         weekly_saves?: string[];
         /** Optional replay timeline bundle for tactical-map animation playback/export. */
@@ -284,7 +288,7 @@ export interface RunScenarioResult {
 }
 
 function computeControlShareByFaction(state: GameState): Array<{ faction: string; control_share: number }> {
-    const controllers = state.political_controllers ?? {};
+    const controllers = state.political.political_controllers ?? {};
     const totalSettlements = Object.keys(controllers).length;
     const byFaction = new Map<string, number>();
     for (const faction of (state.factions ?? []).map((f) => f.id)) {
@@ -305,8 +309,8 @@ function computeControlShareByFaction(state: GameState): Array<{ faction: string
 
 function captureHistoricalFactionMetrics(state: GameState): HistoricalFactionMetrics[] {
     const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
-    const formations = state.formations ?? {};
-    const recruitment = state.recruitment_state;
+    const formations = state.military.formations ?? {};
+    const recruitment = state.military.recruitment_state;
     const out: HistoricalFactionMetrics[] = [];
     for (const faction of factions) {
         let personnel_total = 0;
@@ -671,11 +675,11 @@ async function createOobFormations(
 ): Promise<void> {
     if (scenario.recruitment_mode === 'player_choice') {
         // Ensure peace phase militia strength exists before deriving pool availability.
-        if (!state.war_militia_strength || Object.keys(state.war_militia_strength).length === 0) {
+        if (!state.military.war_militia_strength || Object.keys(state.military.war_militia_strength).length === 0) {
             updateMilitiaEmergence(state);
         }
         // Recruitment spends from militia pools; seed them first at Peace phase entry.
-        if (!state.militia_pools || Object.keys(state.militia_pools).length === 0) {
+        if (!state.military.militia_pools || Object.keys(state.military.militia_pools).length === 0) {
             runPoolPopulation(state, settlements, municipalityPopulation1991);
             applyRsJnaInheritanceBonus(state, municipalityPopulation1991);
         }
@@ -688,7 +692,7 @@ async function createOobFormations(
             scenario.equipment_points_trickle,
             scenario.max_recruits_per_faction_per_turn
         );
-        state.recruitment_state = resources;
+        state.military.recruitment_state = resources;
         if (scenario.no_initial_brigade_formations) {
             createOobFormationsAtPhaseIEntry(
                 state,
@@ -754,6 +758,48 @@ function buildPlannedWarStartBrigadePresenceByMunicipality(
         byMun[brigade.home_mun] = existing;
     }
     return Object.keys(byMun).length > 0 ? byMun : undefined;
+}
+
+/** Collect summary of active (not-yet-completed) operations at run end. */
+function collectActiveOperations(state: GameState): ActiveOperationSummary[] {
+    const cc = state.military.corps_command;
+    if (!cc) return [];
+    const results: ActiveOperationSummary[] = [];
+    const corpsIds = Object.keys(cc).sort(strictCompare);
+    for (const corpsId of corpsIds) {
+        const cmd = cc[corpsId];
+        const op = cmd?.active_operation;
+        if (!op) continue;
+        // Collect objectives
+        const objectives: string[] = [];
+        if (op.axes) {
+            for (const axis of op.axes) {
+                if (axis.objectives) {
+                    for (const o of axis.objectives) {
+                        if (!objectives.includes(o)) objectives.push(o);
+                    }
+                }
+            }
+        } else if (op.objectives) {
+            for (const o of op.objectives) {
+                if (!objectives.includes(o)) objectives.push(o);
+            }
+        }
+        const totalAttacks = op.weekly_log
+            ? op.weekly_log.reduce((s, e) => s + e.attacks_this_turn, 0)
+            : (op.attack_attempt_count ?? 0);
+        const objsCaptured = op.objective_capture_count ?? 0;
+        results.push({
+            corps_id: corpsId,
+            operation_name: op.name,
+            phase: op.phase,
+            started_turn: op.started_turn,
+            total_attacks: totalAttacks,
+            objectives_targeted: objectives.length,
+            objectives_captured: objsCaptured,
+        });
+    }
+    return results;
 }
 
 export async function runScenario(options: RunScenarioOptions): Promise<RunScenarioResult> {
@@ -968,7 +1014,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // (OSID-as-base-layer). Rebuild sidToMun as OSID→mun so factionHasPresenceInMun,
         // resolveValidHqSid, and other consumers match the pc keying scheme.
         if (operationalData?.operationalToCanonical) {
-            const pc = state.political_controllers ?? {};
+            const pc = state.political.political_controllers ?? {};
             const firstKey = Object.keys(pc)[0];
             if (firstKey?.startsWith('op:')) {
                 sidToMun = buildOsidToMunFromReverseMap(
@@ -991,17 +1037,17 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     by_settlement_id?: Record<string, string>;
                 };
                 if (opControlRaw.by_settlement_id) {
-                    const pc = state.political_controllers ?? {};
+                    const pc = state.political.political_controllers ?? {};
                     const sortedOsids = Object.keys(opControlRaw.by_settlement_id).sort((a, b) => a.localeCompare(b));
                     for (const osid of sortedOsids) {
                         const faction = opControlRaw.by_settlement_id[osid];
                         if (faction) pc[osid] = faction as FactionId;
                     }
-                    state.political_controllers = pc;
+                    state.political.political_controllers = pc;
                     // Reset contested_control to match (ethnic-based start = no contested)
-                    if (state.contested_control) {
+                    if (state.political.contested_control) {
                         for (const osid of sortedOsids) {
-                            state.contested_control[osid] = false;
+                            state.political.contested_control[osid] = false;
                         }
                     }
                 }
@@ -1019,11 +1065,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Historical accuracy: some OSIDs need different controllers than ethnic majority.
         // E.g. Brčko city held by VRS despite Bosniak municipality majority.
         if (scenario.osid_control_overrides && Object.keys(scenario.osid_control_overrides).length > 0) {
-            const beforeOverrideControllers = { ...(state.political_controllers ?? {}) };
+            const beforeOverrideControllers = { ...(state.political.political_controllers ?? {}) };
             applyOsidControlOverrides(state, scenario.osid_control_overrides);
             initOverrideChangeCount = countInitOverrideChanges(
                 beforeOverrideControllers,
-                state.political_controllers ?? {},
+                state.political.political_controllers ?? {},
                 scenario.osid_control_overrides
             );
             // Rebuild sidToMun after overrides so factionHasPresenceInMun sees updated controllers
@@ -1068,7 +1114,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             } catch (err) {
                 throw new Error(`Failed to load war timeline "${scenario.war_timeline}" from ${timelinePath}: ${err instanceof Error ? err.message : err}`);
             }
-            state.war_timeline = validateWarTimeline(timelineRaw);
+            state.military.war_timeline = validateWarTimeline(timelineRaw);
         }
 
         // Named officers: load historical officer data from JSON.
@@ -1093,9 +1139,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // When init_formations_oob is true, OOB creates formations at Peace phase entry; do not load placeholder init_formations.
         if (formationsPath && !scenario.init_formations_oob) {
             const initialFormations = await loadInitialFormations(formationsPath);
-            if (!state.formations) state.formations = {};
+            if (!state.military.formations) state.military.formations = {};
             for (const f of initialFormations) {
-                state.formations[f.id] = f;
+                state.military.formations[f.id] = f;
             }
         }
 
@@ -1169,10 +1215,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         if (scenario.start_lifecycle_phase === 'war') {
             if (scenario.recruitment_mode === 'player_choice' || scenario.recruitment_mode === 'bottom_up' || scenario.init_formations_oob) {
                 // War-start scenarios need deterministic manpower pools for reinforcement/spawn.
-                if (!state.war_militia_strength || Object.keys(state.war_militia_strength).length === 0) {
+                if (!state.military.war_militia_strength || Object.keys(state.military.war_militia_strength).length === 0) {
                     updateMilitiaEmergence(state);
                 }
-                if (!state.militia_pools || Object.keys(state.militia_pools).length === 0) {
+                if (!state.military.militia_pools || Object.keys(state.military.militia_pools).length === 0) {
                     runPoolPopulation(state, graph.settlements, municipalityPopulation1991);
                     applyRsJnaInheritanceBonus(state, municipalityPopulation1991);
                 }
@@ -1193,13 +1239,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             municipalityPopulation1991 &&
             Object.keys(municipalityPopulation1991).length > 0
         ) {
-            if (!state.displacement_state) state.displacement_state = {};
+            if (!state.displacement.displacement_state) state.displacement.displacement_state = {};
             const turn = state.meta.turn;
             for (const munId of Object.keys(municipalityPopulation1991).sort(strictCompare)) {
                 const entry = municipalityPopulation1991[munId];
                 if (!entry || typeof entry.total !== 'number' || !Number.isFinite(entry.total)) continue;
-                if (state.displacement_state[munId]) continue;
-                state.displacement_state[munId] = {
+                if (state.displacement.displacement_state[munId]) continue;
+                state.displacement.displacement_state[munId] = {
                     mun_id: munId as MunicipalityId,
                     original_population: entry.total,
                     displaced_out: 0,
@@ -1211,14 +1257,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         if (scenario.formation_spawn_directive) {
-            state.formation_spawn_directive = scenario.formation_spawn_directive;
+            state.military.formation_spawn_directive = scenario.formation_spawn_directive;
         }
 
         if (scenario.coercion_pressure_by_municipality && Object.keys(scenario.coercion_pressure_by_municipality).length > 0) {
             const keys = Object.keys(scenario.coercion_pressure_by_municipality).sort(strictCompare);
-            state.coercion_pressure_by_municipality = {};
+            state.political.coercion_pressure_by_municipality = {};
             for (const munId of keys) {
-                state.coercion_pressure_by_municipality![munId] = scenario.coercion_pressure_by_municipality[munId]!;
+                state.political.coercion_pressure_by_municipality![munId] = scenario.coercion_pressure_by_municipality[munId]!;
             }
         }
 
@@ -1285,7 +1331,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     control_delta: join(outDir, 'control_delta.json'),
                     end_report: join(outDir, 'end_report.md'),
                     activity_summary: join(outDir, 'activity_summary.json'),
-                    formation_delta: join(outDir, 'formation_delta.json')
+                    formation_delta: join(outDir, 'formation_delta.json'),
+                    operation_aars: join(outDir, 'operation_aars.json')
                 }
             };
         }
@@ -1293,8 +1340,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Phase H2.2: snapshot initial formations (id -> kind) for formation_delta at end-of-run.
         const initialFormationsSnapshot: Record<string, string> = {};
         const initialFormationFatigue: Record<string, number> = {};
-        for (const id of Object.keys(state.formations ?? {}).sort(strictCompare)) {
-            const f = state.formations![id];
+        for (const id of Object.keys(state.military.formations ?? {}).sort(strictCompare)) {
+            const f = state.military.formations![id];
             initialFormationsSnapshot[id] = (f.kind as string) ?? 'brigade';
             const ops = (f as { ops?: { fatigue?: number } }).ops;
             initialFormationFatigue[id] =
@@ -1398,18 +1445,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
             if (postureAllPushAndApplyBreaches && state.meta.phase === 'war') {
                 const frontEdgesPre = computeFrontEdges(state, graph.edges);
-                if (!state.front_posture || typeof state.front_posture !== 'object') state.front_posture = {};
+                if (!state.military.front_posture || typeof state.military.front_posture !== 'object') state.military.front_posture = {};
                 // Asymmetric posture so pressure accumulates (side_a push, side_b hold) and breaches can fire.
                 for (const e of frontEdgesPre) {
                     if (e.side_a) {
-                        if (!state.front_posture[e.side_a]) state.front_posture[e.side_a] = { assignments: {} };
-                        if (!state.front_posture[e.side_a].assignments) state.front_posture[e.side_a].assignments = {};
-                        state.front_posture[e.side_a].assignments[e.edge_id] = { edge_id: e.edge_id, posture: 'push', weight: 1 };
+                        if (!state.military.front_posture[e.side_a]) state.military.front_posture[e.side_a] = { assignments: {} };
+                        if (!state.military.front_posture[e.side_a].assignments) state.military.front_posture[e.side_a].assignments = {};
+                        state.military.front_posture[e.side_a].assignments[e.edge_id] = { edge_id: e.edge_id, posture: 'push', weight: 1 };
                     }
                     if (e.side_b) {
-                        if (!state.front_posture[e.side_b]) state.front_posture[e.side_b] = { assignments: {} };
-                        if (!state.front_posture[e.side_b].assignments) state.front_posture[e.side_b].assignments = {};
-                        state.front_posture[e.side_b].assignments[e.edge_id] = { edge_id: e.edge_id, posture: 'hold', weight: 1 };
+                        if (!state.military.front_posture[e.side_b]) state.military.front_posture[e.side_b] = { assignments: {} };
+                        if (!state.military.front_posture[e.side_b].assignments) state.military.front_posture[e.side_b].assignments = {};
+                        state.military.front_posture[e.side_b].assignments[e.edge_id] = { edge_id: e.edge_id, posture: 'hold', weight: 1 };
                     }
                 }
                 // Assign unassigned formations to a front edge (deterministic) so fatigue can accrue when unsupplied.
@@ -1712,7 +1759,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     });
                 }
 
-                const currentTurnControlEvents = (state.control_events ?? [])
+                const currentTurnControlEvents = (state.political.control_events ?? [])
                     .filter((event) => event.turn === state.meta.turn)
                     .map((event) => ({ mechanism: event.mechanism }));
                 const weeklyControlChangeAttribution = summarizeControlChangeAttribution(currentTurnControlEvents);
@@ -1737,8 +1784,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     // Harness: seed one edge so breach-based flips occur when pipeline pressure does not yet reach threshold.
                     const firstEdge = [...derivedFrontEdges].sort((a, b) => a.edge_id.localeCompare(b.edge_id))[0];
                     const eid = firstEdge.edge_id;
-                    if (!state.front_segments || typeof state.front_segments !== 'object') state.front_segments = {};
-                    (state.front_segments as Record<string, unknown>)[eid] = {
+                    if (!state.military.front_segments || typeof state.military.front_segments !== 'object') state.military.front_segments = {};
+                    (state.military.front_segments as Record<string, unknown>)[eid] = {
                         edge_id: eid,
                         active: true,
                         created_turn: state.meta.turn,
@@ -1749,8 +1796,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         friction: 1,
                         max_friction: 1
                     };
-                    if (!state.front_pressure || typeof state.front_pressure !== 'object') state.front_pressure = {};
-                    (state.front_pressure as Record<string, { edge_id: string; value: number; max_abs: number; last_updated_turn: number }>)[eid] = {
+                    if (!state.military.front_pressure || typeof state.military.front_pressure !== 'object') state.military.front_pressure = {};
+                    (state.military.front_pressure as Record<string, { edge_id: string; value: number; max_abs: number; last_updated_turn: number }>)[eid] = {
                         edge_id: eid,
                         value: FRONT_BREACH_THRESHOLD,
                         max_abs: FRONT_BREACH_THRESHOLD,
@@ -1770,8 +1817,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
             // Metrics derivation from active pipeline phases
             let front_active_set_size = 0;
-            if (state.front_segments) {
-                for (const seg of Object.values(state.front_segments)) {
+            if (state.military.front_segments) {
+                for (const seg of Object.values(state.military.front_segments)) {
                     if ((seg as any).active) front_active_set_size++;
                 }
             }
@@ -1915,9 +1962,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         await writeFile(finalSavePath, serializeState(state), 'utf8');
 
         let breachDiagnostic: { max_abs_pressure: number; breach_count_last_turn: number } | undefined;
-        if (postureAllPushAndApplyBreaches && state.front_pressure && typeof state.front_pressure === 'object') {
+        if (postureAllPushAndApplyBreaches && state.military.front_pressure && typeof state.military.front_pressure === 'object') {
             let maxAbs = 0;
-            for (const rec of Object.values(state.front_pressure as Record<string, { value?: number }>)) {
+            for (const rec of Object.values(state.military.front_pressure as Record<string, { value?: number }>)) {
                 const v = rec?.value;
                 if (rec && typeof v === 'number' && Number.isInteger(v)) maxAbs = Math.max(maxAbs, Math.abs(v));
             }
@@ -2055,14 +2102,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     takeover_displacement_weekly: takeoverDisplacementWeekly
                 }
                 : {}),
-            ...(attackResolutionSummary.weeks_at_war > 0 && state.civilian_casualties
-                ? { civilian_casualties: state.civilian_casualties }
+            ...(attackResolutionSummary.weeks_at_war > 0 && state.displacement.civilian_casualties
+                ? { civilian_casualties: state.displacement.civilian_casualties }
                 : {}),
             ...(attackResolutionSummary.weeks_at_war > 0
                 ? {
                     front_corps_tracking: {
-                        corps_front_edges_present: !!(state.corps_front_edges && Object.keys(state.corps_front_edges).length > 0),
-                        corps_count: Object.keys(state.corps_front_edges ?? {}).length
+                        corps_front_edges_present: !!(state.military.corps_front_edges && Object.keys(state.military.corps_front_edges).length > 0),
+                        corps_count: Object.keys(state.military.corps_front_edges ?? {}).length
                     }
                 }
                 : {}),
@@ -2106,10 +2153,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         // Phase H2.2: formation delta (initial vs final formations).
-        const finalFormations = state.formations ?? {};
+        const finalFormations = state.military.formations ?? {};
         const formationDelta = computeFormationDelta(initialFormationsSnapshot, finalFormations);
         const formationDeltaPath = join(outDir, 'formation_delta.json');
         await writeFile(formationDeltaPath, stableStringify(formationDelta, 2), 'utf8');
+
+        // Operation AARs artifact
+        const operationAars = state.operation_history ?? [];
+        const operationAarsPath = join(outDir, 'operation_aars.json');
+        await writeFile(operationAarsPath, stableStringify(operationAars, 2), 'utf8');
 
         let formationFatigueSummary: FormationFatigueSummary | null = null;
         const formationIds = Object.keys(finalFormations).sort(strictCompare);
@@ -2181,7 +2233,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             attackResolutionWeekly:
                 attackResolutionSummary.weeks_at_war > 0 ? attackResolutionWeekly : null,
             historicalAlignmentDiagnostics,
-            corpsAiSnapshots: corpsAiSnapshots.length > 0 ? corpsAiSnapshots : null
+            corpsAiSnapshots: corpsAiSnapshots.length > 0 ? corpsAiSnapshots : null,
+            operationHistory: operationAars.length > 0 ? operationAars : null,
+            activeOperations: collectActiveOperations(state)
         });
         const endReportPath = join(outDir, 'end_report.md');
         await writeFile(endReportPath, endReportMd, 'utf8');
@@ -2200,6 +2254,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 end_report: endReportPath,
                 activity_summary: activitySummaryPath,
             formation_delta: formationDeltaPath,
+                operation_aars: operationAarsPath,
             ...(weeklySavePaths.length > 0 ? { weekly_saves: weeklySavePaths } : {}),
             ...(replayTimelinePath ? { replay_timeline: replayTimelinePath } : {}),
                 ...(botDiagnosticsPath ? { bot_diagnostics: botDiagnosticsPath } : {})

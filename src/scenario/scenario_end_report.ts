@@ -8,6 +8,7 @@ import type { GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { WeeklyActivityCounts, WeeklyReportRow } from './scenario_reporting.js';
 import type { CorpsAiReportEntry } from '../sim/combat/bot_corps_ai.js';
+import type { OperationAAR } from '../sim/combat/operation_aar.js';
 import type { VictoryEvaluation } from './victory_conditions.js';
 
 /** Snapshot of corps AI directives at a specific turn, for end report. */
@@ -33,7 +34,7 @@ export function extractSettlementControlSnapshot(
     state: GameState,
     graph: LoadedSettlementGraph
 ): ControlKey[] {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const pcKeys = Object.keys(pc);
     const firstKey = pcKeys[0];
 
@@ -397,8 +398,8 @@ export interface HistoricalAlignmentDiagnostics {
  * Compute army strengths from final state. Deterministic ordering.
  */
 export function computeArmyStrengthsSummary(state: GameState): ArmyStrengthsSummary {
-    const formations = state.formations ?? {};
-    const pools = state.militia_pools ?? {};
+    const formations = state.military.formations ?? {};
+    const pools = state.military.militia_pools ?? {};
     const factions = [...(state.factions ?? [])].map((f) => f.id).sort((a, b) => a.localeCompare(b));
     const formationByFaction = new Map<string, { militia: number; brigade: number; other: number }>();
     for (const fid of factions) {
@@ -440,10 +441,10 @@ export function computeArmyStrengthsSummary(state: GameState): ArmyStrengthsSumm
 
     const assignmentCounts = new Map<string, number>();
     for (const fid of factions) assignmentCounts.set(fid, 0);
-    const assignments = state.brigade_front_assignment ?? {};
+    const assignments = state.military.brigade_front_assignment ?? {};
     for (const [formationId, frontId] of Object.entries(assignments)) {
         if (typeof frontId !== 'string' || frontId.length === 0) continue;
-        const formation = state.formations?.[formationId];
+        const formation = state.military.formations?.[formationId];
         const fid = formation?.faction;
         if (!fid) continue;
         assignmentCounts.set(fid, (assignmentCounts.get(fid) ?? 0) + 1);
@@ -547,6 +548,17 @@ export function validateBotBenchmarkSummary(summary: BotBenchmarkSummary): BotBe
     };
 }
 
+/** Summary of an active (not-yet-completed) operation at run end. */
+export interface ActiveOperationSummary {
+    corps_id: string;
+    operation_name: string;
+    phase: 'planning' | 'execution' | 'recovery';
+    started_turn: number;
+    total_attacks: number;
+    objectives_targeted: number;
+    objectives_captured: number;
+}
+
 export interface FormatEndReportParams {
     scenario_id: string;
     run_id: string;
@@ -578,6 +590,10 @@ export interface FormatEndReportParams {
     historicalAlignmentDiagnostics?: HistoricalAlignmentDiagnostics | null;
     /** Optional corps AI directive snapshots at key turns (1, 13, 26, 52). */
     corpsAiSnapshots?: CorpsAiSnapshot[] | null;
+    /** Completed operation AARs. */
+    operationHistory?: OperationAAR[] | null;
+    /** Active (not-yet-completed) operations at run end. */
+    activeOperations?: ActiveOperationSummary[] | null;
 }
 
 /** Phase H1.7: Run-level activity diagnostics (machine-readable). */
@@ -998,6 +1014,38 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
             }
             lines.push('');
         }
+    }
+    if (params.operationHistory && params.operationHistory.length > 0) {
+        lines.push('## Operation History');
+        lines.push('');
+        for (const aar of params.operationHistory) {
+            const stars = '\u2605'.repeat(aar.grade.stars) + '\u2606'.repeat(5 - aar.grade.stars);
+            const oic = aar.commander_name
+                ? `OiC: ${aar.commander_rank ?? ''} ${aar.commander_name}`.trim()
+                : 'OiC: —';
+            const suffered = aar.casualties_suffered.killed + aar.casualties_suffered.wounded;
+            const inflicted = aar.casualties_inflicted.killed + aar.casualties_inflicted.wounded;
+            const exchange = suffered > 0
+                ? `${(inflicted / suffered).toFixed(1)}:1 exchange`
+                : (inflicted > 0 ? 'inf:1 exchange' : '0:0 exchange');
+            lines.push(
+                `${stars} ${aar.operation_name} (w${aar.started_turn}-w${aar.ended_turn})  ` +
+                `${oic}    ${aar.objectives_captured.length}/${aar.objectives_targeted.length} obj  ${exchange}  ` +
+                `[${aar.faction} ${aar.corps_id}] ${aar.outcome}`
+            );
+        }
+        lines.push('');
+    }
+    if (params.activeOperations && params.activeOperations.length > 0) {
+        lines.push('## Active Operations (not completed)');
+        lines.push('');
+        for (const op of params.activeOperations) {
+            lines.push(
+                `${op.corps_id}: ${op.operation_name} — ${op.phase} phase, ` +
+                `${op.total_attacks} attacks, ${op.objectives_captured}/${op.objectives_targeted} obj`
+            );
+        }
+        lines.push('');
     }
     lines.push('## Notes on interpretation');
     lines.push('');
