@@ -57,12 +57,12 @@ test('Phase D: fronts are emergent (fronts when war phase and opposing control)'
 
 test('Phase D: exhaustion accumulates (never decreases)', () => {
     const state = minimalState('war');
-    state.war_exhaustion = { RBiH: 30, RS: 40, HRHB: 20 };
-    const before = { ...state.war_exhaustion! };
+    state.political.war_exhaustion = { RBiH: 30, RS: 40, HRHB: 20 };
+    const before = { ...state.political.war_exhaustion! };
     updateExhaustion(state, []);
-    assert.ok(state.war_exhaustion!['RBiH']! >= before['RBiH']!);
-    assert.ok(state.war_exhaustion!['RS']! >= before['RS']!);
-    assert.ok(state.war_exhaustion!['HRHB']! >= before['HRHB']!);
+    assert.ok(state.political.war_exhaustion!['RBiH']! >= before['RBiH']!);
+    assert.ok(state.political.war_exhaustion!['RS']! >= before['RS']!);
+    assert.ok(state.political.war_exhaustion!['HRHB']! >= before['HRHB']!);
 });
 
 test('Phase D: no total victory reachable (front descriptors have no victory/decisive)', () => {

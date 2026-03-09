@@ -62,7 +62,7 @@ export function updateDoctrineState(
     supplyReport: SupplyStateDerivationReport | undefined,
     effectivePosture?: Record<string, { assignments?: Record<string, { posture: PostureLevel }> }>
 ): void {
-    const formations = Object.values(state.formations ?? {}).sort((a, b) => a.id.localeCompare(b.id));
+    const formations = Object.values(state.military.formations ?? {}).sort((a, b) => a.id.localeCompare(b.id));
     for (const formation of formations) {
         const doctrine = ensureDoctrineState(formation);
         for (const d of DOCTRINES) {
@@ -132,7 +132,7 @@ export function getDoctrinePressureMultiplier(formation: FormationState): number
 export function getFactionDoctrinePressureMultiplier(state: GameState): Record<string, number> {
     const result: Record<string, number> = {};
     for (const faction of state.factions) {
-        const formations = Object.values(state.formations ?? {}).filter((f) => f.faction === faction.id);
+        const formations = Object.values(state.military.formations ?? {}).filter((f) => f.faction === faction.id);
         if (formations.length === 0) {
             result[faction.id] = 1.0;
             continue;

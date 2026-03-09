@@ -39,14 +39,14 @@ import { strictCompare } from '../../state/validateGameState.js';
  * Writes to state.sector_intel.
  */
 export function deriveSectorIntel(state: GameState, turn: number): void {
-    const sectors = state.corps_front_sectors;
+    const sectors = state.military.corps_front_sectors;
     if (!sectors || Object.keys(sectors).length === 0) {
-        state.sector_intel = {};
+        state.military.sector_intel = {};
         return;
     }
 
     const edgeToSectors = buildEdgeToSectorsMap(sectors);
-    const prevIntel = state.sector_intel ?? {};
+    const prevIntel = state.military.sector_intel ?? {};
     const nextIntel: Record<string, SectorIntelRecord[]> = {};
     const sectorIds = Object.keys(sectors).sort(strictCompare);
 
@@ -73,7 +73,7 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
             const prev = prevByEnemySector.get(enemySectorId);
             const prevConfidence = prev?.confidence ?? 0;
             const prevTurnsInContact = prev?.turns_in_contact ?? 0;
-            const passiveBuildup = (state.opsec_sectors ?? []).includes(enemySectorId)
+            const passiveBuildup = (state.military.opsec_sectors ?? []).includes(enemySectorId)
                 ? profile.passive_buildup_per_turn * 0.5
                 : profile.passive_buildup_per_turn;
             const newConfidence = Math.min(1.0, prevConfidence + passiveBuildup);
@@ -100,7 +100,7 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
         nextIntel[sectorId] = newRecords;
     }
 
-    state.sector_intel = nextIntel;
+    state.military.sector_intel = nextIntel;
 }
 
 // ===============================================================
@@ -117,9 +117,9 @@ export function updateSectorIntelFromCombat(
     defenderOsid: string,
     turn: number
 ): void {
-    const sectors = state.corps_front_sectors;
+    const sectors = state.military.corps_front_sectors;
     if (!sectors) return;
-    const intel = state.sector_intel;
+    const intel = state.military.sector_intel;
     if (!intel) return;
 
     const friendlySectorId = findSectorByFriendlyOsid(sectors, attackerOsid);
@@ -188,7 +188,7 @@ function computeStrengthCategory(sector: CorpsFrontSector, confidence: number): 
 
 function computePosture(sector: CorpsFrontSector, state: GameState, confidence: number): SectorPostureObserved {
     if (confidence < CONFIDENCE_FULL_STRENGTH) return 'unknown';
-    const corpsCommand = state.corps_command?.[sector.corps_id];
+    const corpsCommand = state.military.corps_command?.[sector.corps_id];
     if (corpsCommand?.active_operation?.type === 'sector_attack' || corpsCommand?.active_operation?.type === 'feint' || corpsCommand?.active_operation?.type === 'probe') {
         return 'offensive_prep';
     }
@@ -198,7 +198,7 @@ function computePosture(sector: CorpsFrontSector, state: GameState, confidence: 
 
 function computeOffensiveSigns(sector: CorpsFrontSector, state: GameState, confidence: number, reconRange: number): boolean {
     if (confidence < CONFIDENCE_DEEP_INTEL || reconRange < 2) return false;
-    const corpsCommand = state.corps_command?.[sector.corps_id];
+    const corpsCommand = state.military.corps_command?.[sector.corps_id];
     return corpsCommand?.active_operation?.type === 'sector_attack' ||
         corpsCommand?.active_operation?.type === 'feint' ||
         corpsCommand?.active_operation?.type === 'probe';

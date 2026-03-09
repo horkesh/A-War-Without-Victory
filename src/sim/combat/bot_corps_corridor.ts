@@ -49,7 +49,7 @@ export function detectCorridorBreachOpportunities(
     edges: EdgeRecord[],
     sidToMun: Map<SettlementId, string>
 ): CorridorTarget[] {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const adj = buildAdjacencyFromEdges(edges);
     const strategy = FACTION_STRATEGIES[faction];
 
@@ -111,7 +111,7 @@ export function attemptCorridorBreach(
     edges: EdgeRecord[],
     sidToMun: Map<SettlementId, string>
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const targets = detectCorridorBreachOpportunities(state, faction, edges, sidToMun);

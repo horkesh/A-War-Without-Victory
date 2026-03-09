@@ -50,9 +50,9 @@ test('RBiH-controlled settlement with Serbs displaces 50% gradually over 26 turn
         ['op:tuzla:1', { sid: 'op:tuzla:1', source_id: '1', mun_code: 'tuzla', mun: 'Tuzla', mun1990_id: 'tuzla' }]
     ]);
     const state = baseState();
-    state.political_controllers = { 'op:tuzla:1': 'RBiH' };
+    state.political.political_controllers = { 'op:tuzla:1': 'RBiH' };
     state.factions.find((f) => f.id === 'RBiH')!.areasOfResponsibility.push('op:tuzla:1');
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         tuzla: { mun_id: 'tuzla', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
 
@@ -66,10 +66,10 @@ test('RBiH-controlled settlement with Serbs displaces 50% gradually over 26 turn
 
 test('HRHB-controlled settlement with Serbs displaces 100% immediately', () => {
     const state = baseState();
-    state.political_controllers = { 'op:mostar:E': 'HRHB', 'op:travnik:1': 'RBiH', 'op:tuzla:1': 'RBiH' };
+    state.political.political_controllers = { 'op:mostar:E': 'HRHB', 'op:travnik:1': 'RBiH', 'op:tuzla:1': 'RBiH' };
     state.factions.find((f) => f.id === 'HRHB')!.areasOfResponsibility.push('op:mostar:E');
     state.factions.find((f) => f.id === 'RBiH')!.areasOfResponsibility.push('op:travnik:1', 'op:tuzla:1');
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         mostar: { mun_id: 'mostar', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
 
@@ -80,11 +80,11 @@ test('HRHB-controlled settlement with Serbs displaces 100% immediately', () => {
 
 test('RS-controlled settlement with Bosniaks/Croats displaces 100% immediately', () => {
     const state = baseState();
-    state.political_controllers = { 'op:tuzla:1': 'RS', 'op:travnik:1': 'RBiH', 'op:mostar:E': 'HRHB' };
+    state.political.political_controllers = { 'op:tuzla:1': 'RS', 'op:travnik:1': 'RBiH', 'op:mostar:E': 'HRHB' };
     state.factions.find((f) => f.id === 'RS')!.areasOfResponsibility.push('op:tuzla:1');
     state.factions.find((f) => f.id === 'RBiH')!.areasOfResponsibility.push('op:travnik:1');
     state.factions.find((f) => f.id === 'HRHB')!.areasOfResponsibility.push('op:mostar:E');
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         tuzla: { mun_id: 'tuzla', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
 
@@ -98,10 +98,10 @@ test('skips settlements that have an active takeover timer (per-OSID)', () => {
         ['op:tuzla:1', { sid: 'op:tuzla:1', source_id: '1', mun_code: 'tuzla', mun: 'Tuzla', mun1990_id: 'tuzla' }]
     ]);
     const state = baseState();
-    state.political_controllers = { 'op:tuzla:1': 'RBiH' };
+    state.political.political_controllers = { 'op:tuzla:1': 'RBiH' };
     state.factions.find((f) => f.id === 'RBiH')!.areasOfResponsibility.push('op:tuzla:1');
     // Timer key format: osid|from_faction. Only this OSID is skipped, not the whole mun.
-    state.hostile_takeover_timers = {
+    state.displacement.hostile_takeover_timers = {
         'op:tuzla:1|RS': { mun_id: 'tuzla', from_faction: 'RS', to_faction: 'RBiH', started_turn: 3 }
     };
 
@@ -123,13 +123,13 @@ test('RS-from-start settlement in same mun as timer still gets minority flight (
         'op:bosanska_dubica:aginci': 8000
     };
     const state = baseState();
-    state.political_controllers = { 'op:bosanska_dubica:kozarska_dubica': 'RS', 'op:bosanska_dubica:aginci': 'RS' };
+    state.political.political_controllers = { 'op:bosanska_dubica:kozarska_dubica': 'RS', 'op:bosanska_dubica:aginci': 'RS' };
     state.factions.find((f) => f.id === 'RS')!.areasOfResponsibility.push('op:bosanska_dubica:kozarska_dubica', 'op:bosanska_dubica:aginci');
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         bosanska_dubica: { mun_id: 'bosanska_dubica', original_population: 31606, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
     // Only aginci has a timer (flipped); kozarska_dubica was RS from start — must still get minority flight.
-    state.hostile_takeover_timers = {
+    state.displacement.hostile_takeover_timers = {
         'op:bosanska_dubica:aginci|RBiH': { mun_id: 'bosanska_dubica', from_faction: 'RBiH', to_faction: 'RS', started_turn: 2 }
     };
 
@@ -140,18 +140,18 @@ test('RS-from-start settlement in same mun as timer still gets minority flight (
 
 test('records civilian_casualties by faction (ethnicity)', () => {
     const state = baseState();
-    state.political_controllers = { 'op:mostar:E': 'HRHB', 'op:travnik:1': 'RBiH', 'op:tuzla:1': 'RBiH' };
+    state.political.political_controllers = { 'op:mostar:E': 'HRHB', 'op:travnik:1': 'RBiH', 'op:tuzla:1': 'RBiH' };
     state.factions.find((f) => f.id === 'HRHB')!.areasOfResponsibility.push('op:mostar:E');
     state.factions.find((f) => f.id === 'RBiH')!.areasOfResponsibility.push('op:travnik:1', 'op:tuzla:1');
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         mostar: { mun_id: 'mostar', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
 
     const report = processMinorityFlight(state, settlementsFixture(), pop1991, popBySid);
     assert.ok(report.settlements_displaced >= 1, 'Mostar has Serbs under HRHB; should displace 100%');
-    assert.ok(state.civilian_casualties?.RS, 'civilian_casualties.RS should exist (Serbs displaced)');
+    assert.ok(state.displacement.civilian_casualties?.RS, 'civilian_casualties.RS should exist (Serbs displaced)');
     assert.ok(
-        (state.civilian_casualties?.RS?.killed ?? 0) + (state.civilian_casualties?.RS?.fled_abroad ?? 0) > 0,
+        (state.displacement.civilian_casualties?.RS?.killed ?? 0) + (state.displacement.civilian_casualties?.RS?.fled_abroad ?? 0) > 0,
         'RS civilian casualties (Serbs) should be positive'
     );
 });

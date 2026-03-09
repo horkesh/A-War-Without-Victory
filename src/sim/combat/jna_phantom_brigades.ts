@@ -120,11 +120,11 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
  * Called once at scenario start (turn 0, before first runTurn).
  */
 export function spawnJnaPhantomBrigades(state: GameState): void {
-    if (!state.formations) state.formations = {};
+    if (!state.military.formations) state.military.formations = {};
     const turn = state.meta?.turn ?? 0;
 
     for (const def of JNA_PHANTOM_DEFS) {
-        if (state.formations[def.id]) continue; // already spawned
+        if (state.military.formations[def.id]) continue; // already spawned
 
         const formation: FormationState = {
             id: def.id,
@@ -154,13 +154,13 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
             },
         } as FormationState;
 
-        state.formations[def.id] = formation;
+        state.military.formations[def.id] = formation;
 
         // Ghost phantoms flip political control of target OSIDs at spawn
         if (def.capture_osids) {
-            if (!state.political_controllers) state.political_controllers = {};
+            if (!state.political.political_controllers) state.political.political_controllers = {};
             for (const osid of def.capture_osids) {
-                state.political_controllers[osid] = 'RS';
+                state.political.political_controllers[osid] = 'RS';
             }
         }
     }
@@ -187,16 +187,16 @@ export interface JnaWithdrawalEvent {
  * Returns withdrawal events for notifications.
  */
 export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
-    if (!state.formations) return [];
+    if (!state.military.formations) return [];
     const turn = state.meta?.turn ?? 0;
     const events: JnaWithdrawalEvent[] = [];
 
-    const phantomIds = Object.keys(state.formations)
-        .filter(id => state.formations![id]?.kind === 'jna_phantom')
+    const phantomIds = Object.keys(state.military.formations)
+        .filter(id => state.military.formations![id]?.kind === 'jna_phantom')
         .sort(strictCompare);
 
     for (const phantomId of phantomIds) {
-        const phantom = state.formations[phantomId]!;
+        const phantom = state.military.formations[phantomId]!;
         if (phantom.status !== 'active') continue;
         if (phantom.withdrawal_turn == null || turn < phantom.withdrawal_turn) continue;
 
@@ -219,8 +219,8 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
             });
 
             // Remove from any active operations
-            if (corpsId && state.corps_command?.[corpsId]?.active_operation) {
-                const op = state.corps_command[corpsId].active_operation!;
+            if (corpsId && state.military.corps_command?.[corpsId]?.active_operation) {
+                const op = state.military.corps_command[corpsId].active_operation!;
                 op.participating_brigades = op.participating_brigades.filter(id => id !== phantomId);
                 if (Array.isArray(op.axes)) {
                     for (const axis of op.axes) {
@@ -231,7 +231,7 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
 
             phantom.status = 'inactive';
             phantom.lifecycle_status = 'withdrawn';
-            delete state.formations[phantomId];
+            delete state.military.formations[phantomId];
             continue;
         }
 
@@ -246,7 +246,7 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
 
         if (corpsId) {
             // Find eligible receiving brigades in same corps, sorted by proximity
-            const eligibleBrigades = Object.values(state.formations)
+            const eligibleBrigades = Object.values(state.military.formations)
                 .filter((f): f is FormationState =>
                     f != null &&
                     f.corps_id === corpsId &&
@@ -319,12 +319,12 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
 
             // Excess goes to corps equipment reserve
             if (tanksToGive > 0 || artilleryToGive > 0 || apcsToGive > 0) {
-                if (!state.corps_equipment_reserve) state.corps_equipment_reserve = {};
-                const reserve = state.corps_equipment_reserve[corpsId] ?? { tanks: 0, artillery: 0, apcs: 0 };
+                if (!state.military.corps_equipment_reserve) state.military.corps_equipment_reserve = {};
+                const reserve = state.military.corps_equipment_reserve[corpsId] ?? { tanks: 0, artillery: 0, apcs: 0 };
                 reserve.tanks += tanksToGive;
                 reserve.artillery += artilleryToGive;
                 reserve.apcs += apcsToGive;
-                state.corps_equipment_reserve[corpsId] = reserve;
+                state.military.corps_equipment_reserve[corpsId] = reserve;
             }
         }
 
@@ -341,8 +341,8 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
         });
 
         // Remove phantom from any active operations
-        if (corpsId && state.corps_command?.[corpsId]?.active_operation) {
-            const op = state.corps_command[corpsId].active_operation!;
+        if (corpsId && state.military.corps_command?.[corpsId]?.active_operation) {
+            const op = state.military.corps_command[corpsId].active_operation!;
             // Remove from flat participating_brigades
             op.participating_brigades = op.participating_brigades.filter(id => id !== phantomId);
             // Remove from axes
@@ -356,7 +356,7 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
         // Disband: remove from formations
         phantom.status = 'inactive';
         phantom.lifecycle_status = 'withdrawn';
-        delete state.formations[phantomId];
+        delete state.military.formations[phantomId];
     }
 
     return events;
@@ -376,16 +376,16 @@ export interface JnaCountdownNotice {
  * Generate withdrawal countdown notices for situation briefing.
  */
 export function getJnaWithdrawalCountdowns(state: GameState): JnaCountdownNotice[] {
-    if (!state.formations) return [];
+    if (!state.military.formations) return [];
     const turn = state.meta?.turn ?? 0;
     const notices: JnaCountdownNotice[] = [];
 
-    const phantomIds = Object.keys(state.formations)
-        .filter(id => state.formations![id]?.kind === 'jna_phantom')
+    const phantomIds = Object.keys(state.military.formations)
+        .filter(id => state.military.formations![id]?.kind === 'jna_phantom')
         .sort(strictCompare);
 
     for (const id of phantomIds) {
-        const f = state.formations[id]!;
+        const f = state.military.formations[id]!;
         if (f.status !== 'active' || f.withdrawal_turn == null) continue;
         const remaining = f.withdrawal_turn - turn;
         if (remaining >= 0) {

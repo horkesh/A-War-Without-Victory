@@ -157,8 +157,8 @@ test('updateMunicipalityStabilityScore sets state.municipalities[munId].stabilit
         geographic: {}
     });
     assert.strictEqual(out, 50 + 15 + 0 - 0);
-    assert.strictEqual(state.municipalities!['M_NEW'].stability_score, 65);
-    assert.strictEqual(state.municipalities!['M_NEW'].control_status, 'SECURE');
+    assert.strictEqual(state.political.municipalities!['M_NEW'].stability_score, 65);
+    assert.strictEqual(state.political.municipalities!['M_NEW'].control_status, 'SECURE');
 });
 
 test('updateAllStabilityScores iterates in sorted order and sets all scores', () => {
@@ -168,9 +168,9 @@ test('updateAllStabilityScores iterates in sorted order and sets all scores', ()
         getControllerShare: () => 0.5,
         getGeographic: (id) => (id === 'M3' ? { adjacentHostile: true } : undefined)
     });
-    const m1 = state.municipalities!['M1'];
-    const m2 = state.municipalities!['M2'];
-    const m3 = state.municipalities!['M3'];
+    const m1 = state.political.municipalities!['M1'];
+    const m2 = state.political.municipalities!['M2'];
+    const m3 = state.political.municipalities!['M3'];
     assert.ok(m1 && typeof m1.stability_score === 'number');
     assert.ok(m1.stability_score >= 0 && m1.stability_score <= 100);
     assert.ok(m2 && typeof m2.stability_score === 'number' && m2.stability_score >= 50);

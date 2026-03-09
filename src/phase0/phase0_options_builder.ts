@@ -62,21 +62,21 @@ function defaultRbihHrhbRelationship(turn: number): number {
  * (sds_penetration > 0 OR paramilitary_rs > 0).
  */
 function computeRsOrgCoverage(state: GameState): number {
-    if (!state.municipalities) return 0;
+    if (!state.political.municipalities) return 0;
 
-    const munIds = Object.keys(state.municipalities).sort(strictCompare);
+    const munIds = Object.keys(state.political.municipalities).sort(strictCompare);
     let serbMajorityCount = 0;
     let coveredCount = 0;
 
     for (const munId of munIds) {
-        const mun = state.municipalities[munId];
+        const mun = state.political.municipalities[munId];
         if (!mun) continue;
         const op = mun.organizational_penetration;
 
         // Identify Serb-majority: has SDS penetration or is RS-controlled
         const isSerbMajority =
             (op?.sds_penetration !== undefined && op.sds_penetration > 0) ||
-            (state.political_controllers?.[munId] === 'RS');
+            (state.political.political_controllers?.[munId] === 'RS');
 
         if (!isSerbMajority) continue;
         serbMajorityCount++;
@@ -85,7 +85,7 @@ function computeRsOrgCoverage(state: GameState): number {
         const hasCoverage =
             (op?.sds_penetration !== undefined && op.sds_penetration > 0) ||
             (op?.paramilitary_rs !== undefined && op.paramilitary_rs > 0) ||
-            (op?.police_loyalty === 'loyal' && state.political_controllers?.[munId] === 'RS');
+            (op?.police_loyalty === 'loyal' && state.political.political_controllers?.[munId] === 'RS');
 
         if (hasCoverage) coveredCount++;
     }
@@ -98,21 +98,21 @@ function computeRsOrgCoverage(state: GameState): number {
  * Compute HRHB organizational coverage in Croat-majority municipalities (0-100).
  */
 function computeHrhbOrgCoverage(state: GameState): number {
-    if (!state.municipalities) return 0;
+    if (!state.political.municipalities) return 0;
 
-    const munIds = Object.keys(state.municipalities).sort(strictCompare);
+    const munIds = Object.keys(state.political.municipalities).sort(strictCompare);
     let croatMajorityCount = 0;
     let coveredCount = 0;
 
     for (const munId of munIds) {
-        const mun = state.municipalities[munId];
+        const mun = state.political.municipalities[munId];
         if (!mun) continue;
         const op = mun.organizational_penetration;
 
         // Identify Croat-majority: has HDZ penetration or is HRHB-controlled
         const isCroatMajority =
             (op?.hdz_penetration !== undefined && op.hdz_penetration > 0) ||
-            (state.political_controllers?.[munId] === 'HRHB');
+            (state.political.political_controllers?.[munId] === 'HRHB');
 
         if (!isCroatMajority) continue;
         croatMajorityCount++;
@@ -145,7 +145,7 @@ function isRsDeclared(state: GameState): boolean {
  */
 export function buildPhase0TurnOptions(state: GameState): Phase0TurnOptions {
     const turn = state.meta.turn;
-    const relationships = state.phase0_relationships;
+    const relationships = state.political.phase0_relationships;
     const useHistoricalPhase0Calibration = hasScheduledPhase0Timing(state);
 
     const declarationPressure: DeclarationPressureOptions = {
@@ -198,7 +198,7 @@ export function buildPhase0TurnOptions(state: GameState): Phase0TurnOptions {
         referendum,
         stability: {
             getController: (munId: MunicipalityId): FactionId | null =>
-                state.political_controllers?.[munId] ?? null,
+                state.political.political_controllers?.[munId] ?? null,
         },
     };
 }

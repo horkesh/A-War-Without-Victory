@@ -37,7 +37,7 @@ test('systems 2/3/4/7/9/10 acceptance gates: phase_ii run populates required sta
     }
 
     // System 3 + 9 gates at formation level
-    const formations = Object.values(state.formations ?? {});
+    const formations = Object.values(state.military.formations ?? {});
     assert.ok(formations.length > 0, 'formations should exist for war phase scenario');
     for (const f of formations) {
         assert.ok(f.equipment_state, `system3 equipment_state missing for formation ${f.id}`);
@@ -45,7 +45,7 @@ test('systems 2/3/4/7/9/10 acceptance gates: phase_ii run populates required sta
     }
 
     // System 4 legitimacy gate at settlement level
-    const settlementEntries = Object.entries(state.settlements ?? {});
+    const settlementEntries = Object.entries(state.political.settlements ?? {});
     assert.ok(settlementEntries.length > 0, 'settlement state should exist');
     const legitimacyCount = settlementEntries.filter(([, s]) => s.legitimacy_state != null).length;
     assert.ok(legitimacyCount > 0, 'system4 legitimacy_state should be populated for at least one settlement');

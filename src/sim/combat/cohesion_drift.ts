@@ -26,7 +26,7 @@ const CRITICAL_EXHAUSTION_PENALTY = -1.5;
 
 /** Compute faction exhaustion ratio: committed / (committed + available). Deterministic. */
 function getFactionExhaustionRatio(state: GameState, faction: FactionId): number {
-    const pools = state.militia_pools;
+    const pools = state.military.militia_pools;
     if (!pools || typeof pools !== 'object') return 0;
     let committed = 0;
     let available = 0;
@@ -42,11 +42,11 @@ function getFactionExhaustionRatio(state: GameState, faction: FactionId): number
 }
 
 function isFormationInOpsecSector(state: GameState, formation: FormationState): boolean {
-    const opsecSectors = state.opsec_sectors ?? [];
-    if (opsecSectors.length === 0 || !formation.location_osid || !state.corps_front_sectors) return false;
+    const opsecSectors = state.military.opsec_sectors ?? [];
+    if (opsecSectors.length === 0 || !formation.location_osid || !state.military.corps_front_sectors) return false;
     const activeOpsec = new Set(opsecSectors);
     for (const sectorId of activeOpsec) {
-        const sector = state.corps_front_sectors[sectorId];
+        const sector = state.military.corps_front_sectors[sectorId];
         if (!sector || sector.faction !== formation.faction) continue;
         for (const subSegment of sector.sub_segments ?? []) {
             if (subSegment.friendly_osids.includes(formation.location_osid)) {
@@ -120,7 +120,7 @@ export function runCohesionDrift(
     const engagedSet = engagedFormationIds instanceof Set
         ? engagedFormationIds
         : new Set(engagedFormationIds);
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const turn = state.meta.turn;
     const factionIds = (state.factions ?? []).map((x) => x.id).filter((x): x is FactionId => typeof x === 'string').sort(strictCompare);
     const exhaustionPenaltyByFaction: Record<string, number> = {};
@@ -139,7 +139,7 @@ export function runCohesionDrift(
         if (!f || (f.kind !== 'brigade' && f.kind !== 'operational_group')) continue;
         const faction = f.faction;
         if (!faction) continue;
-        let drift = getFactionCohesionDrift(faction, turn, state.war_timeline);
+        let drift = getFactionCohesionDrift(faction, turn, state.military.war_timeline);
         const exhaustionPenalty = exhaustionPenaltyByFaction[faction];
         if (exhaustionPenalty != null) drift += exhaustionPenalty;
         // B4: Enclave cohesion recovery — besieged formations adapt over time
@@ -152,8 +152,8 @@ export function runCohesionDrift(
         // Apply drift
         let next = Math.max(0, Math.min(100, prev + drift));
         // C1: Clamp to faction cohesion floor (ARBiH professionalization) and ceiling (RS decay)
-        const floor = getFactionCohesionFloor(faction, turn, state.war_timeline);
-        const ceiling = getFactionCohesionCeiling(faction, turn, state.war_timeline);
+        const floor = getFactionCohesionFloor(faction, turn, state.military.war_timeline);
+        const ceiling = getFactionCohesionCeiling(faction, turn, state.military.war_timeline);
         if (next < floor) next = floor;
         if (next > ceiling) next = ceiling;
         if (next === prev) continue;

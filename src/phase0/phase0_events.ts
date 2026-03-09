@@ -109,12 +109,12 @@ function checkStabilityChanges(
     turn: number,
     events: Phase0Event[]
 ): void {
-    if (!next.municipalities) return;
-    const munIds = Object.keys(next.municipalities).sort(strictCompare);
+    if (!next.political.municipalities) return;
+    const munIds = Object.keys(next.political.municipalities).sort(strictCompare);
 
     for (const munId of munIds) {
-        const prevMun = prev.municipalities?.[munId];
-        const nextMun = next.municipalities[munId];
+        const prevMun = prev.political.municipalities?.[munId];
+        const nextMun = next.political.municipalities[munId];
         if (!nextMun) continue;
 
         const oldScore = prevMun?.stability_score ?? 50;
@@ -228,8 +228,8 @@ function checkAllianceChanges(
     turn: number,
     events: Phase0Event[]
 ): void {
-    const prevRel = prev.phase0_relationships;
-    const nextRel = next.phase0_relationships;
+    const prevRel = prev.political.phase0_relationships;
+    const nextRel = next.political.phase0_relationships;
     if (!prevRel || !nextRel) return;
 
     const hrhbDiff = nextRel.rbih_hrhb - prevRel.rbih_hrhb;

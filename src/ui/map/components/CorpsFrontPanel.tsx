@@ -81,17 +81,17 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const sector = _sector;
   if (!sector) return null;
 
-  const corpsFormation = loadedGameState.formations.find((f) => f.id === sector.corps_id);
+  const corpsFormation = loadedGameState.military.formations.find((f) => f.id === sector.corps_id);
   const corpsStance = corpsFormation?.corpsStance ?? 'unknown';
   const corpsColorMap = buildCorpsColorMap(loadedGameState.corpsFrontSectors);
   const corpsColor = corpsColorMap[sector.corps_id] ?? '#888';
 
   const assignedFormations = sector.assigned_brigade_ids
-    .map((id) => loadedGameState.formations.find((f) => f.id === id))
+    .map((id) => loadedGameState.military.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null);
 
   const reserveFormations = sector.reserve_brigade_ids
-    .map((id) => loadedGameState.formations.find((f) => f.id === id))
+    .map((id) => loadedGameState.military.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null);
 
   const assignedPersonnel = assignedFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);

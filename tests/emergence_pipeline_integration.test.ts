@@ -83,10 +83,10 @@ test('Pipeline: Phase E reports are populated when war phase', async () => {
 
 test('Pipeline: War phase unchanged (Phase E does not modify War phase logic)', async () => {
     const state = minimalPhaseIIState();
-    state.war_supply_pressure = { RBiH: 10, RS: 15 };
-    state.war_exhaustion = { RBiH: 5, RS: 8 };
-    const originalPressure = { ...state.war_supply_pressure };
-    const originalExhaustion = { ...state.war_exhaustion };
+    state.political.war_supply_pressure = { RBiH: 10, RS: 15 };
+    state.political.war_exhaustion = { RBiH: 5, RS: 8 };
+    const originalPressure = { ...state.political.war_supply_pressure };
+    const originalExhaustion = { ...state.political.war_exhaustion };
 
     const edges = [{ a: 'S1', b: 'S2' }];
     const result = await runTurn(state, { seed: 'test', settlementEdges: edges });

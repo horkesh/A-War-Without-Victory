@@ -16,7 +16,7 @@ export const NATO_INTERVENTION_THRESHOLD = 0.8;
 export const IVP_HYSTERESIS = 0.1;
 
 function getCurrentTurnAtrocityVisibility(state: GameState): number {
-    const displacedThisTurn = (state.displacement_event_log ?? [])
+    const displacedThisTurn = (state.displacement.displacement_event_log ?? [])
         .filter((event) => event.turn === state.meta.turn)
         .reduce((sum, event) => sum + Math.max(0, event.displaced ?? 0), 0);
     return clamp01(displacedThisTurn / 100000);
@@ -57,8 +57,8 @@ function patronCommitmentBase(factionId: FactionId, year: number): number {
 }
 
 export function ensureInternationalVisibilityPressure(state: GameState): InternationalVisibilityPressure {
-    if (!state.international_visibility_pressure) {
-        state.international_visibility_pressure = {
+    if (!state.political.international_visibility_pressure) {
+        state.political.international_visibility_pressure = {
             sarajevo_siege_visibility: 0,
             enclave_humanitarian_pressure: 0,
             atrocity_visibility: 0,
@@ -67,7 +67,7 @@ export function ensureInternationalVisibilityPressure(state: GameState): Interna
             last_major_shift: null
         };
     }
-    return state.international_visibility_pressure;
+    return state.political.international_visibility_pressure;
 }
 
 export function ensurePatronState(state: GameState, factionId: FactionId): PatronState {
@@ -98,7 +98,7 @@ export function updateInternationalVisibilityPressure(
     const turn = state.meta.turn;
     const prev = { ...ivp };
 
-    const sarajevoModifier = state.sarajevo_tunnel_operational ? 0.7 : 1.0;
+    const sarajevoModifier = state.military.sarajevo_tunnel_operational ? 0.7 : 1.0;
     const sarajevoVisibility = sarajevo ? sarajevo.siege_intensity * SARAJEVO_VISIBILITY_RATE * sarajevoModifier : 0;
     ivp.sarajevo_siege_visibility = clamp01(sarajevoVisibility);
     ivp.enclave_humanitarian_pressure = clamp01(enclaveHumanitarianPressure * ENCLAVE_PRESSURE_WEIGHT);
@@ -131,7 +131,7 @@ export function updateInternationalVisibilityPressure(
 
 export function applyIvpConsequences(state: GameState, ivp: InternationalVisibilityPressure): string[] {
     const composite = ivp.composite_ivp ?? 0;
-    const prior = Array.isArray(state.ivp_consequences_active) ? [...state.ivp_consequences_active] : [];
+    const prior = Array.isArray(state.political.ivp_consequences_active) ? [...state.political.ivp_consequences_active] : [];
     const next: string[] = [];
 
     const drinaActive = composite >= DRINA_BLOCKADE_THRESHOLD ||
@@ -146,7 +146,7 @@ export function applyIvpConsequences(state: GameState, ivp: InternationalVisibil
         (hasConsequence(prior, 'nato_intervention_threat') && composite >= NATO_INTERVENTION_THRESHOLD - IVP_HYSTERESIS);
     if (natoActive) next.push('nato_intervention_threat');
 
-    state.ivp_consequences_active = next;
+    state.political.ivp_consequences_active = next;
     return next;
 }
 
@@ -172,13 +172,13 @@ export function updatePatronState(
         let nextCommitment = clamp01(base * (1.0 - atrocity * 0.1) * (1.0 + momentum * 0.05));
         if (faction.id === 'RS') {
             nextCommitment = clamp01(nextCommitment * (1 - composite * RS_IVP_COMMITMENT_MULTIPLIER));
-            if (hasConsequence(state.ivp_consequences_active, 'drina_blockade')) {
+            if (hasConsequence(state.political.ivp_consequences_active, 'drina_blockade')) {
                 nextCommitment = clamp01(nextCommitment * 0.85);
             }
-            if (hasConsequence(state.ivp_consequences_active, 'international_sanctions')) {
+            if (hasConsequence(state.political.ivp_consequences_active, 'international_sanctions')) {
                 nextCommitment = clamp01(nextCommitment * 0.7);
             }
-            if (hasConsequence(state.ivp_consequences_active, 'nato_intervention_threat')) {
+            if (hasConsequence(state.political.ivp_consequences_active, 'nato_intervention_threat')) {
                 nextCommitment = clamp01(nextCommitment * 0.9);
             }
         } else if (faction.id === 'RBiH') {
@@ -188,14 +188,14 @@ export function updatePatronState(
         const nextDiplomaticIsolation = clamp01(patron.diplomatic_isolation + sarajevoIsolation);
 
         let materialSupport = clamp01(base + nextCommitment * 0.1 - nextDiplomaticIsolation * 0.1);
-        if (faction.id === 'RS' && hasConsequence(state.ivp_consequences_active, 'international_sanctions')) {
+        if (faction.id === 'RS' && hasConsequence(state.political.ivp_consequences_active, 'international_sanctions')) {
             materialSupport = clamp01(materialSupport * 0.8);
         }
         const constraintSeverity = clamp01(
             0.3 +
             momentum * 0.2 +
             ivp.enclave_humanitarian_pressure * 0.1 +
-            (faction.id === 'RS' && hasConsequence(state.ivp_consequences_active, 'nato_intervention_threat') ? 0.05 : 0)
+            (faction.id === 'RS' && hasConsequence(state.political.ivp_consequences_active, 'nato_intervention_threat') ? 0.05 : 0)
         );
 
         patron.patron_commitment = nextCommitment;

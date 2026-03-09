@@ -32,7 +32,7 @@ function canonicalSidePair(sideA: string, sideB: string): string {
  */
 export function computeFrontRegions(state: GameState, derivedFrontEdges: FrontEdge[]): FrontRegionsFile {
     const activeEdgeIds = new Set<string>();
-    for (const [edge_id, seg] of Object.entries(state.front_segments ?? {})) {
+    for (const [edge_id, seg] of Object.entries(state.military.front_segments ?? {})) {
         if (seg && typeof seg === 'object' && (seg as any).active === true) activeEdgeIds.add(edge_id);
     }
 

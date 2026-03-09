@@ -58,7 +58,7 @@ function getMunicipalityIdForSettlement(graph: LoadedSettlementGraph, sid: Settl
 
 function getPopulationFractionForMun(state: GameState, munId: MunicipalityId | null): number {
     if (!munId) return 1;
-    const disp = state.displacement_state?.[munId];
+    const disp = state.displacement.displacement_state?.[munId];
     if (!disp || disp.original_population <= 0) return 1;
     const effective =
         disp.original_population - disp.displaced_out - disp.lost_population + disp.displaced_in;
@@ -67,7 +67,7 @@ function getPopulationFractionForMun(state: GameState, munId: MunicipalityId | n
 
 function getAuthorityForMun(state: GameState, munId: MunicipalityId | null): number {
     if (!munId) return 0.5;
-    const value = state.municipalities?.[munId]?.authority;
+    const value = state.political.municipalities?.[munId]?.authority;
     if (typeof value !== 'number') return 0.5;
     return clamp01(value);
 }
@@ -132,7 +132,7 @@ export function updateEnclaveIntegrity(
     supplyReport: SupplyStateDerivationReport | undefined
 ): EnclaveIntegrityReport {
     const adjacency = buildAdjacencyMap(edges);
-    const controllers = state.political_controllers ?? {};
+    const controllers = state.political.political_controllers ?? {};
     const factions = state.factions.map((f) => f.id).sort((a, b) => a.localeCompare(b));
     const enclaves: EnclaveState[] = [];
 
@@ -174,7 +174,7 @@ export function updateEnclaveIntegrity(
             const visibilityMult = isSarajevo ? CAPITAL_ENCLAVE_VISIBILITY : 1.0;
             const pressureMult = isSarajevo ? SARAJEVO_PRESSURE_MULTIPLIER : HUMANITARIAN_PRESSURE_MULTIPLIER;
 
-            const prev = state.enclaves?.find((e) => e.faction_id === factionId && e.settlement_ids[0] === component[0]);
+            const prev = state.political.enclaves?.find((e) => e.faction_id === factionId && e.settlement_ids[0] === component[0]);
             const prevIntegrity = prev?.integrity ?? baseIntegrity;
             const siegeDuration = (prev?.siege_duration ?? 0) + 1;
             const decayed =
@@ -205,7 +205,7 @@ export function updateEnclaveIntegrity(
     }
 
     enclaves.sort((a, b) => a.id.localeCompare(b.id));
-    state.enclaves = enclaves;
+    state.political.enclaves = enclaves;
     const humanitarian_pressure_total = enclaves.reduce((sum, e) => sum + e.humanitarian_pressure, 0);
     return { enclaves, humanitarian_pressure_total };
 }

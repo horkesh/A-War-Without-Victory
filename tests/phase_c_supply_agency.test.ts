@@ -117,13 +117,13 @@ describe('Phase C supply agency', () => {
         };
 
         applyIvpConsequences(state, ivp);
-        expect(state.ivp_consequences_active).toEqual(['drina_blockade', 'international_sanctions']);
+        expect(state.political.ivp_consequences_active).toEqual(['drina_blockade', 'international_sanctions']);
 
         applyIvpConsequences(state, { ...ivp, composite_ivp: 0.55 });
-        expect(state.ivp_consequences_active).toEqual(['drina_blockade', 'international_sanctions']);
+        expect(state.political.ivp_consequences_active).toEqual(['drina_blockade', 'international_sanctions']);
 
         applyIvpConsequences(state, { ...ivp, composite_ivp: 0.49 });
-        expect(state.ivp_consequences_active).toEqual(['drina_blockade']);
+        expect(state.political.ivp_consequences_active).toEqual(['drina_blockade']);
     });
 
     it('derives atrocity visibility and tunnel-reduced Sarajevo pressure into composite IVP', () => {
@@ -132,7 +132,7 @@ describe('Phase C supply agency', () => {
 
         const ivp = updateInternationalVisibilityPressure(
             state,
-            state.sarajevo_state as SarajevoState,
+            state.political.sarajevo_state as SarajevoState,
             0.8
         );
 
@@ -152,12 +152,12 @@ describe('Phase C supply agency', () => {
         expect(convoys).toHaveLength(1);
         expect(convoys[0]?.route_faction).toBe('RS');
 
-        state.pending_convoy_decisions = [{ ...convoys[0], decision: 'divert' }];
+        state.military.pending_convoy_decisions = [{ ...convoys[0], decision: 'divert' }];
         applyHumanitarianConvoyDecisions(state);
 
-        expect(state.general_supply_reserve?.RS).toBeCloseTo(40 + (convoys[0]?.supply_amount ?? 0) * 0.5);
-        expect(state.general_supply_reserve?.RBiH).toBeCloseTo(20 + (convoys[0]?.supply_amount ?? 0) * 0.5);
-        expect(state.pending_convoy_decisions).toEqual([]);
+        expect(state.military.general_supply_reserve?.RS).toBeCloseTo(40 + (convoys[0]?.supply_amount ?? 0) * 0.5);
+        expect(state.military.general_supply_reserve?.RBiH).toBeCloseTo(20 + (convoys[0]?.supply_amount ?? 0) * 0.5);
+        expect(state.military.pending_convoy_decisions).toEqual([]);
         expect(state.factions.find((f) => f.id === 'RS')?.patron_state?.diplomatic_isolation ?? 0).toBeGreaterThan(0);
     });
 
@@ -169,13 +169,13 @@ describe('Phase C supply agency', () => {
             },
         });
         ensureInternationalVisibilityPressure(state);
-        state.international_visibility_pressure!.enclave_humanitarian_pressure = 0.5;
+        state.political.international_visibility_pressure!.enclave_humanitarian_pressure = 0.5;
 
         applySmugglingAllocation(state);
         maybeActivateSarajevoTunnel(state);
 
-        expect(state.heavy_munitions_reserve?.RBiH).toBeGreaterThan(5);
-        expect(state.international_visibility_pressure?.enclave_humanitarian_pressure).toBeLessThan(0.5);
-        expect(state.sarajevo_tunnel_operational).toBe(true);
+        expect(state.military.heavy_munitions_reserve?.RBiH).toBeGreaterThan(5);
+        expect(state.political.international_visibility_pressure?.enclave_humanitarian_pressure).toBeLessThan(0.5);
+        expect(state.military.sarajevo_tunnel_operational).toBe(true);
     });
 });

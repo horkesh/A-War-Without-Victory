@@ -88,16 +88,16 @@ function computeSmokeSummary(state: GameState, graph: Awaited<ReturnType<typeof 
 
     // Count collapsed municipalities
     let collapsedCount = 0;
-    if (state.sustainability_state) {
-        for (const sust of Object.values(state.sustainability_state)) {
+    if (state.displacement.sustainability_state) {
+        for (const sust of Object.values(state.displacement.sustainability_state)) {
             if (sust.collapsed) collapsedCount += 1;
         }
     }
 
     // Sum displacement
     let displacementTotal = 0;
-    if (state.displacement_state) {
-        for (const disp of Object.values(state.displacement_state)) {
+    if (state.displacement.displacement_state) {
+        for (const disp of Object.values(state.displacement.displacement_state)) {
             displacementTotal += disp.displaced_out + disp.lost_population;
         }
     }
@@ -125,7 +125,7 @@ function computeSmokeSummary(state: GameState, graph: Awaited<ReturnType<typeof 
         displacement_total: displacementTotal,
         negotiation_pressure_total: negotiationPressureTotal,
         exhaustion_total: exhaustionTotal,
-        end_state: state.end_state !== null && state.end_state !== undefined
+        end_state: state.political.end_state !== null && state.political.end_state !== undefined
     };
 }
 
@@ -182,7 +182,7 @@ async function main(): Promise<void> {
         currentState = nextState;
 
         // Check for end state (early termination)
-        if (currentState.end_state) {
+        if (currentState.political.end_state) {
             process.stdout.write(`End state reached at turn ${currentState.meta.turn}\n`);
             break;
         }
@@ -196,10 +196,10 @@ async function main(): Promise<void> {
     let invariantFailed = false;
 
     // Invariant: Sustainability scores should be monotonic (never increase)
-    if (state.sustainability_state && currentState.sustainability_state) {
-        for (const munId of Object.keys(currentState.sustainability_state)) {
-            const initial = state.sustainability_state[munId];
-            const final = currentState.sustainability_state[munId];
+    if (state.displacement.sustainability_state && currentState.displacement.sustainability_state) {
+        for (const munId of Object.keys(currentState.displacement.sustainability_state)) {
+            const initial = state.displacement.sustainability_state[munId];
+            const final = currentState.displacement.sustainability_state[munId];
             if (initial && final) {
                 if (final.sustainability_score > initial.sustainability_score) {
                     process.stderr.write(`Invariant violation: sustainability_score increased for ${munId} (${initial.sustainability_score} -> ${final.sustainability_score})\n`);
@@ -210,10 +210,10 @@ async function main(): Promise<void> {
     }
 
     // Invariant: Displacement should be monotonic (never decrease)
-    if (state.displacement_state && currentState.displacement_state) {
-        for (const munId of Object.keys(currentState.displacement_state)) {
-            const initial = state.displacement_state[munId];
-            const final = currentState.displacement_state[munId];
+    if (state.displacement.displacement_state && currentState.displacement.displacement_state) {
+        for (const munId of Object.keys(currentState.displacement.displacement_state)) {
+            const initial = state.displacement.displacement_state[munId];
+            const final = currentState.displacement.displacement_state[munId];
             if (initial && final) {
                 if (final.displaced_out < initial.displaced_out || final.lost_population < initial.lost_population) {
                     process.stderr.write(`Invariant violation: displacement decreased for ${munId}\n`);

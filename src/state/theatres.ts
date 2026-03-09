@@ -9,13 +9,13 @@ function defaultTheatreIdForFaction(faction: string): string {
  * Ensure deterministic default theatres (one per faction) and army->theatre assignments.
  */
 export function ensureDefaultTheatres(state: GameState): void {
-    if (!state.theatres || typeof state.theatres !== 'object') state.theatres = {};
-    if (!state.army_theatre_assignment || typeof state.army_theatre_assignment !== 'object') {
-        state.army_theatre_assignment = {};
+    if (!state.military.theatres || typeof state.military.theatres !== 'object') state.military.theatres = {};
+    if (!state.military.army_theatre_assignment || typeof state.military.army_theatre_assignment !== 'object') {
+        state.military.army_theatre_assignment = {};
     }
 
-    const theatres = state.theatres;
-    const assignment = state.army_theatre_assignment;
+    const theatres = state.military.theatres;
+    const assignment = state.military.army_theatre_assignment;
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
 
     for (const factionId of factionIds) {
@@ -30,7 +30,7 @@ export function ensureDefaultTheatres(state: GameState): void {
         }
     }
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const armyIds = Object.keys(formations)
         .filter((id) => (formations[id]?.kind ?? '') === 'army_hq')
         .sort(strictCompare) as FormationId[];
@@ -74,7 +74,7 @@ export function assignFrontSegmentTheatres(
     segments: AssignableFrontSegmentState[]
 ): AssignableFrontSegmentState[] {
     ensureDefaultTheatres(state);
-    const theatres = state.theatres ?? {};
+    const theatres = state.military.theatres ?? {};
     const theatreByFaction = new Map<string, string>();
     for (const theatreId of Object.keys(theatres).sort(strictCompare)) {
         const factionId = theatres[theatreId]?.faction;

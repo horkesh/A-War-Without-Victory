@@ -113,15 +113,15 @@ export class BotManager {
     }
 
     private applyDecisions(state: GameState, decisionsList: { bot: SimpleGeneralBot; decision: BotDecisions }[]) {
-        if (!state.front_posture) state.front_posture = {};
+        if (!state.military.front_posture) state.military.front_posture = {};
 
         for (const { bot, decision } of decisionsList) {
             // Apply Posture
             if (decision.posture_assignments) {
-                if (!state.front_posture[bot.factionId]) {
-                    state.front_posture[bot.factionId] = { assignments: {} };
+                if (!state.military.front_posture[bot.factionId]) {
+                    state.military.front_posture[bot.factionId] = { assignments: {} };
                 }
-                const assignments = state.front_posture[bot.factionId].assignments;
+                const assignments = state.military.front_posture[bot.factionId].assignments;
                 for (const [edgeId, posture] of Object.entries(decision.posture_assignments).sort(([a], [b]) => a.localeCompare(b))) {
                     assignments[edgeId] = {
                         edge_id: edgeId,
@@ -132,9 +132,9 @@ export class BotManager {
             }
 
             // Apply Formation Moves
-            if (decision.formation_assignments && state.formations) {
+            if (decision.formation_assignments && state.military.formations) {
                 for (const [formationId, edgeId] of Object.entries(decision.formation_assignments).sort(([a], [b]) => a.localeCompare(b))) {
-                    const formation = state.formations[formationId];
+                    const formation = state.military.formations[formationId];
                     // Security check: only move own formations
                     if (formation && formation.faction === bot.factionId) {
                         formation.assignment = {

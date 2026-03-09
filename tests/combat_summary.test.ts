@@ -243,7 +243,7 @@ describe('computeCombatSummaries', () => {
 
         computeCombatSummaries(state);
 
-        const cs = state.formations!['corps_1'].combat_summary;
+        const cs = state.military.formations!['corps_1'].combat_summary;
         assert.ok(cs);
         assert.equal(cs.battles_fought, 8);
         assert.equal(cs.victories, 4);
@@ -269,7 +269,7 @@ describe('computeCombatSummaries', () => {
 
         computeCombatSummaries(state);
 
-        const cs = state.formations!['army_rbih'].combat_summary;
+        const cs = state.military.formations!['army_rbih'].combat_summary;
         assert.ok(cs);
         // Only RBiH brigades (bde_1)
         assert.equal(cs.battles_fought, 10);
@@ -291,7 +291,7 @@ describe('computeCombatSummaries', () => {
 
         computeCombatSummaries(state);
 
-        const cs = state.formations!['corps_asset_1'].combat_summary;
+        const cs = state.military.formations!['corps_asset_1'].combat_summary;
         assert.ok(cs);
         assert.equal(cs.battles_fought, 7);
         assert.equal(cs.victories, 4);
@@ -317,7 +317,7 @@ describe('computeCombatSummaries', () => {
 
         computeCombatSummaries(state);
 
-        const cs = state.formations!['corps_1'].combat_summary;
+        const cs = state.military.formations!['corps_1'].combat_summary;
         assert.ok(cs);
         // Only the brigade, not the OG
         assert.equal(cs.battles_fought, 5);
@@ -336,6 +336,6 @@ describe('computeCombatSummaries', () => {
         } as unknown as GameState;
 
         computeCombatSummaries(state);
-        assert.equal(state.formations!['bde_1'].combat_summary, undefined);
+        assert.equal(state.military.formations!['bde_1'].combat_summary, undefined);
     });
 });

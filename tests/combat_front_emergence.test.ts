@@ -130,7 +130,7 @@ test('deriveFrontStability returns oscillating when edge has streak 1 and max_st
 
 test('detectFronts returns static stability when segment has active_streak >= STABILIZATION_TURNS', () => {
     const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
-    state.front_segments = {
+    state.military.front_segments = {
         S1__S2: {
             edge_id: 'S1__S2',
             active: true,

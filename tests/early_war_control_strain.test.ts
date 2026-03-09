@@ -82,8 +82,8 @@ test('runControlStrain accumulates strain per municipality and reports faction t
     const rsTotal = report.faction_totals.find((t) => t.faction_id === 'RS');
     assert.ok(rbihTotal !== undefined);
     assert.ok(rsTotal !== undefined);
-    assert.ok(state.war_control_strain);
-    assert.ok('MUN_A' in state.war_control_strain! || 'MUN_B' in state.war_control_strain!);
+    assert.ok(state.political.war_control_strain);
+    assert.ok('MUN_A' in state.political.war_control_strain! || 'MUN_B' in state.political.war_control_strain!);
 });
 
 test('runControlStrain is deterministic: same state yields same report', () => {
@@ -118,7 +118,7 @@ test('runControlStrain does not touch supply state', () => {
 
 test('getFactionTotalControlStrain returns sum for faction-controlled municipalities', () => {
     const state = stateWithMunicipalitiesAndControl();
-    state.war_control_strain = { MUN_A: 5, MUN_B: 3 };
+    state.political.war_control_strain = { MUN_A: 5, MUN_B: 3 };
     const byMun = stubSettlementsByMun();
     const rbihTotal = getFactionTotalControlStrain(state, 'RBiH', byMun);
     const rsTotal = getFactionTotalControlStrain(state, 'RS', byMun);

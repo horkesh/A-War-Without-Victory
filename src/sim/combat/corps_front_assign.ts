@@ -32,13 +32,13 @@ export function ensureDerivedCorpsFrontEdges(
     edges: EdgeRecord[]
 ): void {
     const derived = deriveCorpsFrontEdgesFromBrigadeAoR(state, edges);
-    if (!state.corps_front_edges) {
-        state.corps_front_edges = derived;
+    if (!state.military.corps_front_edges) {
+        state.military.corps_front_edges = derived;
         return;
     }
     for (const corpsId of Object.keys(derived).sort(strictCompare)) {
-        if (!Array.isArray(state.corps_front_edges[corpsId])) {
-            state.corps_front_edges[corpsId] = derived[corpsId];
+        if (!Array.isArray(state.military.corps_front_edges[corpsId])) {
+            state.military.corps_front_edges[corpsId] = derived[corpsId];
         }
     }
 }
@@ -51,9 +51,9 @@ export function applyCorpsFrontAutoDistributionForCorps(
     state: GameState,
     corpsId: FormationId
 ): void {
-    const corpsFrontEdges = state.corps_front_edges?.[corpsId];
+    const corpsFrontEdges = state.military.corps_front_edges?.[corpsId];
     if (!Array.isArray(corpsFrontEdges) || corpsFrontEdges.length === 0) return;
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const corps = formations[corpsId];
     if (!corps || !corps.faction) return;
     const faction = corps.faction;
@@ -69,8 +69,8 @@ export function applyCorpsFrontAutoDistributionForCorps(
 export function applyCorpsFrontAutoDistribution(
     state: GameState
 ): void {
-    if (!state.corps_front_edges) return;
-    for (const corpsId of Object.keys(state.corps_front_edges).sort(strictCompare)) {
+    if (!state.military.corps_front_edges) return;
+    for (const corpsId of Object.keys(state.military.corps_front_edges).sort(strictCompare)) {
         applyCorpsFrontAutoDistributionForCorps(state, corpsId);
     }
 }
@@ -82,11 +82,11 @@ export function applyCorpsFrontAutoDistribution(
 export function applyCorpsAttackAxisOrders(
     state: GameState
 ): void {
-    const axisOrders = state.corps_attack_axis_orders;
+    const axisOrders = state.military.corps_attack_axis_orders;
     if (!axisOrders) return;
-    const formations = state.formations ?? {};
-    const controllers = state.political_controllers ?? {};
-    if (!state.brigade_attack_orders) state.brigade_attack_orders = {};
+    const formations = state.military.formations ?? {};
+    const controllers = state.political.political_controllers ?? {};
+    if (!state.military.brigade_attack_orders) state.military.brigade_attack_orders = {};
     for (const corpsId of Object.keys(axisOrders).sort(strictCompare)) {
         const corps = formations[corpsId];
         if (!corps || !corps.faction) continue;
@@ -109,7 +109,7 @@ export function applyCorpsAttackAxisOrders(
             })
             .sort(strictCompare);
         for (let i = 0; i < brigades.length; i++) {
-            state.brigade_attack_orders[brigades[i]] = targetList[i % targetList.length];
+            state.military.brigade_attack_orders[brigades[i]] = targetList[i % targetList.length];
         }
     }
 }

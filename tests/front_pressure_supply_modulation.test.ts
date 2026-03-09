@@ -98,7 +98,7 @@ test('accumulateFrontPressure applies 50% penalty when one side locally unsuppli
     assert.strictEqual(stats.edges_with_any_unsupplied_side, 1);
     assert.deepStrictEqual(stats.pressure_deltas, { b__c: 3 });
     assert.deepStrictEqual(stats.local_supply, { b__c: { side_a_supplied: true, side_b_supplied: false } });
-    assert.strictEqual(state.front_pressure['b__c'].value, 3);
+    assert.strictEqual(state.military.front_pressure['b__c'].value, 3);
 });
 
 test('accumulateFrontPressure yields no change when both sides locally supplied', () => {
@@ -199,6 +199,6 @@ test('accumulateFrontPressure yields no change when both sides locally supplied'
     assert.strictEqual(stats.edges_with_any_unsupplied_side, 0);
     assert.deepStrictEqual(stats.pressure_deltas, { b__c: 0 });
     assert.deepStrictEqual(stats.local_supply, { b__c: { side_a_supplied: true, side_b_supplied: true } });
-    assert.strictEqual(state.front_pressure['b__c'].value, 0);
+    assert.strictEqual(state.military.front_pressure['b__c'].value, 0);
 });
 

@@ -130,7 +130,7 @@ function scoreMunicipality(
     seed: string,
     strategy: FactionPhase0Strategy
 ): number {
-    const mun = state.municipalities?.[munId];
+    const mun = state.political.municipalities?.[munId];
     if (!mun) return SCORE_MISSING_MUN;
 
     const op = mun.organizational_penetration;
@@ -151,7 +151,7 @@ function scoreMunicipality(
     if (ownPen >= PEN_VERY_HEAVY_THRESHOLD) score += SCORE_HEAVY_PEN_80;
     else if (ownPen >= PEN_HEAVY_THRESHOLD) score += SCORE_HEAVY_PEN_50;
 
-    const controller = state.political_controllers?.[munId];
+    const controller = state.political.political_controllers?.[munId];
     if (controller === factionId) score += strategy.scoring.own_controller;
     if (controller && controller !== factionId) score += strategy.scoring.enemy_controller;
 
@@ -191,17 +191,17 @@ function countInvestedMunicipalities(
     factionId: FactionId,
     checkType: 'police' | 'to' | 'party' | 'paramilitary'
 ): number {
-    if (!state.municipalities) return 0;
+    if (!state.political.municipalities) return 0;
     let count = 0;
-    const munIds = Object.keys(state.municipalities).sort(strictCompare);
+    const munIds = Object.keys(state.political.municipalities).sort(strictCompare);
 
     for (const munId of munIds) {
-        const op = state.municipalities[munId]?.organizational_penetration;
+        const op = state.political.municipalities[munId]?.organizational_penetration;
         if (!op) continue;
 
         switch (checkType) {
             case 'police':
-                if (op.police_loyalty === 'loyal' && state.political_controllers?.[munId] === factionId) count++;
+                if (op.police_loyalty === 'loyal' && state.political.political_controllers?.[munId] === factionId) count++;
                 break;
             case 'to':
                 if (op.to_control === 'controlled') count++;
@@ -253,7 +253,7 @@ function shouldCoordinate(
     factionId: FactionId
 ): boolean {
     if (factionId !== 'RBiH' && factionId !== 'HRHB') return false;
-    const rels = state.phase0_relationships;
+    const rels = state.political.phase0_relationships;
     if (!rels) return false;
     return rels.rbih_hrhb > 0.2;
 }
@@ -276,7 +276,7 @@ export function runPhase0BotInvestments(
     playerFaction: FactionId | undefined,
     seed: string
 ): void {
-    if (!state.municipalities) return;
+    if (!state.political.municipalities) return;
 
     for (const factionId of PHASE0_FACTION_ORDER) {
         // Skip player faction
@@ -288,7 +288,7 @@ export function runPhase0BotInvestments(
         if (budget < MIN_INVESTMENT_BUDGET) continue;
 
         // Score and rank municipalities using faction-specific weights
-        const munIds = Object.keys(state.municipalities).sort(strictCompare);
+        const munIds = Object.keys(state.political.municipalities).sort(strictCompare);
         const scored: Array<{ munId: MunicipalityId; score: number }> = [];
 
         for (const munId of munIds) {
@@ -320,8 +320,8 @@ export function runPhase0BotInvestments(
                 { coordinated }
             );
             // Update alliance tracking
-            if (result.ok && state.phase0_relationships) {
-                updateAllianceAfterInvestment(state.phase0_relationships, factionId, coordinated);
+            if (result.ok && state.political.phase0_relationships) {
+                updateAllianceAfterInvestment(state.political.phase0_relationships, factionId, coordinated);
             }
         }
 
@@ -345,8 +345,8 @@ export function runPhase0BotInvestments(
                     { kind: 'municipality', mun_ids: [scored[1].munId] },
                     { coordinated }
                 );
-                if (result.ok && state.phase0_relationships) {
-                    updateAllianceAfterInvestment(state.phase0_relationships, factionId, coordinated);
+                if (result.ok && state.political.phase0_relationships) {
+                    updateAllianceAfterInvestment(state.political.phase0_relationships, factionId, coordinated);
                 }
             }
         }

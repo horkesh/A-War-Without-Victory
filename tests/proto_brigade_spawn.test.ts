@@ -81,7 +81,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
         expect(report.formations_created).toBe(1);
         expect(report.manpower_committed).toBe(MIN_DETACHMENT_SPAWN);
 
-        const formations = Object.values(state.formations as Record<string, FormationState>);
+        const formations = Object.values(state.military.formations as Record<string, FormationState>);
         expect(formations).toHaveLength(1);
 
         const f = formations[0];
@@ -94,7 +94,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
         const state = makeBottomUpState(150);
         spawnFormationsFromPools(state, defaultOptions());
 
-        const f = Object.values(state.formations as Record<string, FormationState>)[0];
+        const f = Object.values(state.military.formations as Record<string, FormationState>)[0];
         expect(f.cohesion).toBe(MILITIA_COHESION);
     });
 
@@ -102,7 +102,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
         const state = makeBottomUpState(150);
         spawnFormationsFromPools(state, defaultOptions());
 
-        const f = Object.values(state.formations as Record<string, FormationState>)[0];
+        const f = Object.values(state.military.formations as Record<string, FormationState>)[0];
         expect(f.origin_mun).toBe('test_mun');
     });
 
@@ -110,7 +110,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
         const state = makeBottomUpState(150);
         spawnFormationsFromPools(state, defaultOptions());
 
-        const pool = state.militia_pools['test_mun:RBiH'];
+        const pool = state.military.militia_pools['test_mun:RBiH'];
         expect(pool.available).toBe(50); // 150 - 100
         expect(pool.committed).toBe(MIN_DETACHMENT_SPAWN);
     });
@@ -120,7 +120,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
         const report = spawnFormationsFromPools(state, defaultOptions());
 
         expect(report.formations_created).toBe(0);
-        expect(Object.keys(state.formations).length).toBe(0);
+        expect(Object.keys(state.military.formations).length).toBe(0);
     });
 
     it('respects MAX_TO_PER_MUN cap (5 militia-kind formations max per mun+faction)', () => {
@@ -129,7 +129,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
         // Pre-populate the state with MAX_TO_PER_MUN existing militia formations
         for (let i = 0; i < MAX_TO_PER_MUN; i += 1) {
             const id = `F_RBiH_${String(i).padStart(4, '0')}`;
-            (state.formations as Record<string, FormationState>)[id] = {
+            (state.military.formations as Record<string, FormationState>)[id] = {
                 id,
                 faction: 'RBiH',
                 name: `TO test_mun`,
@@ -150,7 +150,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
 
         // Should not create any more — cap is reached
         expect(report.formations_created).toBe(0);
-        const militiaCount = Object.values(state.formations as Record<string, FormationState>)
+        const militiaCount = Object.values(state.military.formations as Record<string, FormationState>)
             .filter(f => f.kind === 'militia' && Array.isArray(f.tags) && f.tags.includes('mun:test_mun'))
             .length;
         expect(militiaCount).toBe(MAX_TO_PER_MUN);
@@ -183,7 +183,7 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
         const state = makeBottomUpState(1000);
         // Pre-create a detachment with 100 personnel
         const fid = 'F_RBiH_0001';
-        (state.formations as Record<string, FormationState>)[fid] = {
+        (state.military.formations as Record<string, FormationState>)[fid] = {
             id: fid,
             faction: 'RBiH',
             name: 'TO test_mun',
@@ -204,7 +204,7 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
         expect(report.formations_reinforced).toBe(1);
         expect(report.manpower_added).toBeGreaterThan(0);
 
-        const f = (state.formations as Record<string, FormationState>)[fid];
+        const f = (state.military.formations as Record<string, FormationState>)[fid];
         // Personnel should have grown (but capped by REINFORCEMENT_RATE and tier cap)
         expect(f.personnel).toBeGreaterThan(MIN_DETACHMENT_SPAWN);
         // Should not exceed battalion threshold cap in one turn (REINFORCEMENT_RATE * mult)
@@ -215,7 +215,7 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
         const state = makeBottomUpState(2000);
         // Set detachment very close to battalion threshold
         const fid = 'F_RBiH_0001';
-        (state.formations as Record<string, FormationState>)[fid] = {
+        (state.military.formations as Record<string, FormationState>)[fid] = {
             id: fid,
             faction: 'RBiH',
             name: 'TO test_mun',
@@ -233,7 +233,7 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
 
         reinforceBrigadesFromPools(state);
 
-        const f = (state.formations as Record<string, FormationState>)[fid];
+        const f = (state.military.formations as Record<string, FormationState>)[fid];
         // Should have crossed threshold (pool has plenty, REINFORCEMENT_RATE will add >= 1)
         if ((f.personnel ?? 0) >= MIN_BATTALION_THRESHOLD) {
             expect(f.name).toBe('TO Bn test_mun');
@@ -244,7 +244,7 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
         const state = makeBottomUpState(5000);
         const fid = 'F_RBiH_0001';
         // Set at battalion level
-        (state.formations as Record<string, FormationState>)[fid] = {
+        (state.military.formations as Record<string, FormationState>)[fid] = {
             id: fid,
             faction: 'RBiH',
             name: 'TO Bn test_mun',
@@ -263,11 +263,11 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
         // Run many turns worth of reinforcement to test cap
         for (let t = 0; t < 20; t += 1) {
             state.meta.turn = t + 1;
-            state.militia_pools['test_mun:RBiH'].available = 5000; // refresh
+            state.military.militia_pools['test_mun:RBiH'].available = 5000; // refresh
             reinforceBrigadesFromPools(state);
         }
 
-        const f = (state.formations as Record<string, FormationState>)[fid];
+        const f = (state.military.formations as Record<string, FormationState>)[fid];
         // Battalion should not grow past MIN_BRIGADE_THRESHOLD
         expect(f.personnel).toBeLessThanOrEqual(1500);
         expect(f.personnel).toBeGreaterThan(MIN_BATTALION_THRESHOLD);
@@ -278,7 +278,7 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
         state.meta.recruitment_mode = undefined; // legacy mode
 
         const fid = 'F_RBiH_0001';
-        (state.formations as Record<string, FormationState>)[fid] = {
+        (state.military.formations as Record<string, FormationState>)[fid] = {
             id: fid,
             faction: 'RBiH',
             name: 'TO test_mun',
@@ -298,7 +298,7 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
 
         // Legacy path only handles brigades — militia-kind should be untouched
         expect(report.formations_reinforced).toBe(0);
-        const f = (state.formations as Record<string, FormationState>)[fid];
+        const f = (state.military.formations as Record<string, FormationState>)[fid];
         expect(f.personnel).toBe(MIN_DETACHMENT_SPAWN);
     });
 });

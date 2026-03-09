@@ -57,10 +57,10 @@ export function factionHasPresenceInMun(
     munId: MunicipalityId,
     sidToMun: Map<SettlementId, MunicipalityId>
 ): boolean {
-    if (state.municipalities?.[munId]?.control === 'fragmented') {
+    if (state.political.municipalities?.[munId]?.control === 'fragmented') {
         return false;
     }
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     for (const [sid, m] of sidToMun) {
         if (m === munId && pc[sid] === faction) {
             return true;
@@ -154,8 +154,8 @@ export function createOobFormations(
     canonicalToOperational?: CanonicalToOperationalMap
 ): CreateOobFormationsReport {
     const report: CreateOobFormationsReport = { corps_created: 0, brigades_created: 0 };
-    if (!state.formations || typeof state.formations !== 'object') {
-        (state as GameState & { formations: Record<string, FormationState> }).formations = {};
+    if (!state.military.formations || typeof state.military.formations !== 'object') {
+        (state as GameState & { formations: Record<string, FormationState> }).military.formations = {};
     }
     const currentTurn = state.meta.turn;
 
@@ -169,7 +169,7 @@ export function createOobFormations(
         // bottom_up: skip non-RS corps that are not army_hq (army_hq also follows available_from logic)
         // Exception: RS army_hq (vrs_main_staff) is kind='army_hq' and available_from=0 — keep it.
         if (isBottomUp && c.faction !== 'RS') continue;
-        if (state.formations[c.id]) continue;
+        if (state.military.formations[c.id]) continue;
         if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[c.hq_mun];
         const location_osid =
@@ -190,7 +190,7 @@ export function createOobFormations(
             ...(c.initial_cohesion != null ? { cohesion: c.initial_cohesion } : {}),
             ...(c.initial_morale != null ? { morale: c.initial_morale } : {}),
         };
-        state.formations[c.id] = formation;
+        state.military.formations[c.id] = formation;
         report.corps_created += 1;
     }
 
@@ -199,7 +199,7 @@ export function createOobFormations(
         // bottom_up: skip RBiH and HRHB brigades entirely — they emerge from pools as TO detachments.
         // RS brigades are created at turn 0 (VRS JNA exception).
         if (isBottomUp && b.faction !== 'RS') continue;
-        if (state.formations[b.id]) continue;
+        if (state.military.formations[b.id]) continue;
         if (!factionHasPresenceInMun(state, b.faction, b.home_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[b.home_mun];
         const tags = [`mun:${b.home_mun}`];
@@ -262,7 +262,7 @@ export function createOobFormations(
         formation.officer_quality = b.initial_officer_quality ?? getFactionDefaultOfficerQuality(b.faction, currentTurn);
         // Distinction potential: historical units that earned glory — reduced decoration thresholds
         if (b.distinction_potential) formation.distinction_potential = b.distinction_potential;
-        state.formations[b.id] = formation;
+        state.military.formations[b.id] = formation;
         report.brigades_created += 1;
     }
 
@@ -309,7 +309,7 @@ export function spreadBrigadesToFrontOsids(
 
     const adjacency = buildOsidAdjacency(edges);
     const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare) as FactionId[];
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     for (const faction of factions) {
         report.brigades_spread[faction] = 0;

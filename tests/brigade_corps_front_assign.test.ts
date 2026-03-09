@@ -77,8 +77,8 @@ describe('corps_front_assign', () => {
             political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RBiH', S4: 'RS' },
         });
         applyCorpsAttackAxisOrders(state);
-        expect(state.brigade_attack_orders?.b1).toBe('S2');
-        expect(state.brigade_attack_orders?.b2).toBe('S4');
+        expect(state.military.brigade_attack_orders?.b1).toBe('S2');
+        expect(state.military.brigade_attack_orders?.b2).toBe('S4');
     });
 });
 

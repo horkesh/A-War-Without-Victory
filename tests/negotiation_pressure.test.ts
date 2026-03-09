@@ -73,14 +73,14 @@ test('negotiation pressure: increases by exhaustion delta', () => {
 test('negotiation pressure: breach count contributes with cap', () => {
     const state = createTestState();
     // Set up front pressure to create breaches
-    state.front_pressure = {
+    state.military.front_pressure = {
         edge1: { edge_id: 'edge1', value: 25, max_abs: 25, last_updated_turn: 5 },
         edge2: { edge_id: 'edge2', value: -22, max_abs: 22, last_updated_turn: 5 },
         edge3: { edge_id: 'edge3', value: 21, max_abs: 21, last_updated_turn: 5 },
         edge4: { edge_id: 'edge4', value: 23, max_abs: 23, last_updated_turn: 5 },
         edge5: { edge_id: 'edge5', value: 24, max_abs: 24, last_updated_turn: 5 }
     };
-    state.front_segments = {
+    state.military.front_segments = {
         edge1: { edge_id: 'edge1', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 },
         edge2: { edge_id: 'edge2', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 },
         edge3: { edge_id: 'edge3', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 },
@@ -189,11 +189,11 @@ test('negotiation pressure: all components combined', () => {
     };
 
     // Set up 2 breaches for faction_a
-    state.front_pressure = {
+    state.military.front_pressure = {
         edge1: { edge_id: 'edge1', value: 25, max_abs: 25, last_updated_turn: 5 },
         edge2: { edge_id: 'edge2', value: 22, max_abs: 22, last_updated_turn: 5 }
     };
-    state.front_segments = {
+    state.military.front_segments = {
         edge1: { edge_id: 'edge1', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 },
         edge2: { edge_id: 'edge2', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 }
     };

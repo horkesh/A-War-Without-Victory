@@ -558,13 +558,13 @@ export class WarPlanningMap {
      * Call from warroom onGameStateChange so the map reflects latest political_controllers.
      */
     setControlFromState(state: GameState): void {
-        const pc = state.political_controllers ?? {};
+        const pc = state.political.political_controllers ?? {};
         const bySid: Record<string, string | null> = {};
         for (const [sid, controller] of Object.entries(pc)) {
             bySid[sid] = controller ?? null;
         }
         this.controlData.by_settlement_id = bySid;
-        const contested = state.contested_control ?? {};
+        const contested = state.political.contested_control ?? {};
         const statusBySid: Record<string, string> = {};
         for (const [sid, isContested] of Object.entries(contested)) {
             if (isContested) statusBySid[sid] = 'CONTESTED';
@@ -1328,13 +1328,13 @@ export class WarPlanningMap {
         const munId = midStr as MunicipalityId;
 
         // Get municipality state
-        const mun = this.gameState?.municipalities?.[munId];
+        const mun = this.gameState?.political?.municipalities?.[munId];
         const stabilityScore = mun?.stability_score ?? 50;
         const controlStatus = mun?.control_status ?? 'NEUTRAL';
         const orgPen: OrganizationalPenetration = mun?.organizational_penetration ?? {};
 
         // Get controller
-        const controller = this.gameState?.political_controllers?.[munId] ?? null;
+        const controller = this.gameState?.political?.political_controllers?.[munId] ?? null;
 
         // Get majority ethnicity from first settlement in this municipality
         let majorityEthnicity: string | null = null;

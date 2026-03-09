@@ -84,12 +84,12 @@ export function createBotOrderDiagnosticsSnapshot(
     const movementOrdersByBrigade: Record<FormationId, string> = {};
     const attackOrdersByCorps: Record<FormationId, number> = {};
     const attackOrdersByFaction: Record<FactionId, number> = {};
-    const orders = state.brigade_attack_orders ?? {};
+    const orders = state.military.brigade_attack_orders ?? {};
     for (const brigadeId of Object.keys(orders).sort(strictCompare)) {
         const target = orders[brigadeId];
         if (typeof target !== 'string' || target.length === 0) continue;
         attackOrdersByBrigade[brigadeId] = target;
-        const formation = state.formations?.[brigadeId];
+        const formation = state.military.formations?.[brigadeId];
         const factionId = formation?.faction;
         if (typeof factionId === 'string' && factionId.length > 0) {
             attackOrdersByFaction[factionId] = (attackOrdersByFaction[factionId] ?? 0) + 1;
@@ -101,7 +101,7 @@ export function createBotOrderDiagnosticsSnapshot(
             }
         }
     }
-    const movementOrders = state.brigade_movement_orders ?? {};
+    const movementOrders = state.military.brigade_movement_orders ?? {};
     for (const brigadeId of Object.keys(movementOrders).sort(strictCompare)) {
         const destinations = movementOrders[brigadeId]?.destination_sids;
         const destination = Array.isArray(destinations) ? destinations[0] : null;
@@ -122,7 +122,7 @@ export function buildOperationCombatDiagnostics(
     orderSnapshot: BotOrderDiagnosticsSnapshot | undefined,
     osidResolution: AttackResolutionOsidReport | undefined
 ): OperationCombatDiagnostic[] {
-    const corpsCommand = state.corps_command ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
     const battleCountsByBrigade = new Map<FormationId, number>();
     const battleCountsByTarget = new Map<string, number>();
     for (const battle of osidResolution?.battles ?? []) {
@@ -138,7 +138,7 @@ export function buildOperationCombatDiagnostics(
         const corpsState = corpsCommand[corpsId];
         const operation = corpsState?.active_operation;
         if (!operation) continue;
-        const corpsFormation = state.formations?.[corpsId];
+        const corpsFormation = state.military.formations?.[corpsId];
         const factionId = (corpsFormation?.faction ?? 'unknown') as FactionId;
         const brigades = sortedFormationIds(operation.participating_brigades ?? []);
         const currentObjective = getCurrentObjective(operation);

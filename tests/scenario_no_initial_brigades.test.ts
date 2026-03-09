@@ -22,7 +22,7 @@ function formationCounts(state: { formations?: Record<string, { kind?: string }>
 } {
     let brigades = 0;
     let corpsLike = 0;
-    for (const f of Object.values(state.formations ?? {})) {
+    for (const f of Object.values(state.military.formations ?? {})) {
         const kind = f?.kind ?? 'brigade';
         if (kind === 'brigade') brigades += 1;
         if (kind === 'corps_asset' || kind === 'army_hq') corpsLike += 1;

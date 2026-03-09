@@ -131,7 +131,7 @@ function militiaGrowthPerTurn(
         if (faction === 'HRHB') growth += DECLARATION_BONUS_HRHB;
     }
 
-    const jna = state.war_jna;
+    const jna = state.military.war_jna;
     if (jna?.transition_begun && faction === 'RS') growth += EXTERNAL_BONUS_JNA_RS;
     if (faction === 'HRHB' && f?.declared) growth += EXTERNAL_BONUS_CROATIAN_HRHB;
 
@@ -149,17 +149,17 @@ export interface MilitiaEmergenceReport {
  * Only runs when state.meta.phase === 'war' and after war_start_turn (caller gates).
  */
 export function updateMilitiaEmergence(state: GameState): MilitiaEmergenceReport {
-    const municipalities = state.municipalities ?? {};
+    const municipalities = state.political.municipalities ?? {};
     const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
     const factionIds: FactionId[] = (state.factions ?? [])
         .map((f) => f.id)
         .slice()
         .sort(strictCompare) as FactionId[];
 
-    if (!state.war_militia_strength) {
-        (state as GameState & { war_militia_strength: Record<string, Record<string, number>> }).war_militia_strength = {};
+    if (!state.military.war_militia_strength) {
+        (state as GameState & { war_militia_strength: Record<string, Record<string, number>> }).military.war_militia_strength = {};
     }
-    const strengthMap = state.war_militia_strength!;
+    const strengthMap = state.military.war_militia_strength!;
 
     const by_mun: MilitiaEmergenceReport['by_mun'] = [];
 

@@ -98,9 +98,9 @@ test('HRHB authority is capped at 70', () => {
 
 test('Authority can degrade while control unchanged (political_controllers not touched)', () => {
     const state = stateWithDeclarations();
-    const pcBefore = { ...state.political_controllers };
+    const pcBefore = { ...state.political.political_controllers };
     runAuthorityDegradation(state);
-    assert.deepStrictEqual(state.political_controllers, pcBefore, 'Authority update must not change political_controllers');
+    assert.deepStrictEqual(state.political.political_controllers, pcBefore, 'Authority update must not change political_controllers');
     const rbihAfter = state.factions!.find((f) => f.id === 'RBiH')!.profile.authority;
     assert.ok(typeof rbihAfter === 'number', 'RBiH authority should still be updated');
 });

@@ -105,7 +105,7 @@ function computeEnforceabilityMetrics(state: GameState, activeEdgeIds: string[])
     let activeCount = 0;
 
     for (const edgeId of activeEdgeIds) {
-        const seg = (state.front_segments as any)?.[edgeId];
+        const seg = (state.military.front_segments as any)?.[edgeId];
         if (seg && typeof seg === 'object' && seg.active === true) {
             activeCount += 1;
             const friction = Number.isInteger(seg.friction) ? seg.friction : 0;
@@ -329,7 +329,7 @@ export function generateNegotiationOffers(
     formationFatigueReport: FormationFatigueStepReport | undefined,
     militiaFatigueReport: MilitiaFatigueStepReport | undefined
 ): OfferGenerationReport {
-    const negotiationStatus = state.negotiation_status;
+    const negotiationStatus = state.political.negotiation_status;
     const ceasefireActive = negotiationStatus?.ceasefire_active ?? false;
 
     // Check if we should generate offers
@@ -369,7 +369,7 @@ export function generateNegotiationOffers(
     // Compute active edges
     const activeEdgeIds: string[] = [];
     for (const edge of derivedFrontEdges) {
-        const seg = (state.front_segments as any)?.[edge.edge_id];
+        const seg = (state.military.front_segments as any)?.[edge.edge_id];
         if (seg && typeof seg === 'object' && seg.active === true) {
             activeEdgeIds.push(edge.edge_id);
         }
@@ -449,7 +449,7 @@ export function checkOfferAcceptance(
     // Get active edges
     const activeEdgeIds: string[] = [];
     for (const edge of derivedFrontEdges) {
-        const seg = (state.front_segments as any)?.[edge.edge_id];
+        const seg = (state.military.front_segments as any)?.[edge.edge_id];
         if (seg && typeof seg === 'object' && seg.active === true) {
             activeEdgeIds.push(edge.edge_id);
         }
@@ -528,26 +528,26 @@ export function applyEnforcementPackage(state: GameState, enforcementPackage: En
     const currentTurn = state.meta.turn;
 
     // Initialize negotiation_status if needed
-    if (!state.negotiation_status || typeof state.negotiation_status !== 'object') {
-        state.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
+    if (!state.political.negotiation_status || typeof state.political.negotiation_status !== 'object') {
+        state.political.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
     }
 
     // Initialize ceasefire if needed
-    if (!state.ceasefire || typeof state.ceasefire !== 'object') {
-        state.ceasefire = {};
+    if (!state.political.ceasefire || typeof state.political.ceasefire !== 'object') {
+        state.political.ceasefire = {};
     }
 
     // Set negotiation status
-    state.negotiation_status.ceasefire_active = true;
-    state.negotiation_status.ceasefire_since_turn = currentTurn;
-    state.negotiation_status.last_offer_turn = currentTurn;
+    state.political.negotiation_status.ceasefire_active = true;
+    state.political.negotiation_status.ceasefire_since_turn = currentTurn;
+    state.political.negotiation_status.last_offer_turn = currentTurn;
     // Store offer_id reference (for audit)
-    (state.negotiation_status as any).last_enforcement_offer_id = enforcementPackage.offer_id;
+    (state.political.negotiation_status as any).last_enforcement_offer_id = enforcementPackage.offer_id;
 
     // Add freeze entries
     const untilTurn = enforcementPackage.duration_turns === 'indefinite' ? null : currentTurn + enforcementPackage.duration_turns;
     for (const edgeId of enforcementPackage.freeze_edges) {
-        state.ceasefire[edgeId] = {
+        state.political.ceasefire[edgeId] = {
             since_turn: currentTurn,
             until_turn: untilTurn
         };
@@ -559,7 +559,7 @@ export function applyEnforcementPackage(state: GameState, enforcementPackage: En
  */
 export function expireCeasefireEntries(state: GameState): void {
     const currentTurn = state.meta.turn;
-    const ceasefire = state.ceasefire;
+    const ceasefire = state.political.ceasefire;
     if (!ceasefire || typeof ceasefire !== 'object') return;
 
     const edgeIds = Object.keys(ceasefire).sort();
@@ -575,7 +575,7 @@ export function expireCeasefireEntries(state: GameState): void {
     }
 
     // If no freeze entries remain, deactivate ceasefire
-    if (Object.keys(ceasefire).length === 0 && state.negotiation_status) {
-        state.negotiation_status.ceasefire_active = false;
+    if (Object.keys(ceasefire).length === 0 && state.political.negotiation_status) {
+        state.political.negotiation_status.ceasefire_active = false;
     }
 }

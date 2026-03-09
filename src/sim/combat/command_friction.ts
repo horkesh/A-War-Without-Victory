@@ -33,7 +33,7 @@ export function getCommandFrictionMultiplier(
         return 1;
     }
 
-    const exhaustion = (state.war_exhaustion ?? {})[factionId] ?? 0;
+    const exhaustion = (state.political.war_exhaustion ?? {})[factionId] ?? 0;
     const frontEdges = computeFrontEdges(state, settlementEdges);
     let frontEdgeCount = 0;
     for (const fe of frontEdges) {

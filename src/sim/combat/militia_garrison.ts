@@ -59,9 +59,9 @@ export function computeMilitiaGarrisons(
     state: GameState,
     sidToMun: Record<SettlementId, MunicipalityId>
 ): void {
-    const pc = state.political_controllers ?? {};
-    const pools = state.militia_pools ?? {};
-    const municipalities = state.municipalities ?? {};
+    const pc = state.political.political_controllers ?? {};
+    const pools = state.military.militia_pools ?? {};
+    const municipalities = state.political.municipalities ?? {};
     const out: Record<SettlementId, number> = {};
 
     const sids = Object.keys(pc).filter((sid): sid is SettlementId => pc[sid] != null).sort(strictCompare);
@@ -81,5 +81,5 @@ export function computeMilitiaGarrisons(
         const garrison = Math.max(0, Math.floor(base * mult));
         if (garrison > 0) out[sid] = garrison;
     }
-    state.militia_garrison = out;
+    state.military.militia_garrison = out;
 }

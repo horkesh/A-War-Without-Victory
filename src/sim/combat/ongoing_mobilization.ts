@@ -181,10 +181,10 @@ export function runOngoingMobilization(
         pocket_municipalities: 0
     };
 
-    if (!state.militia_pools || typeof state.militia_pools !== 'object') return report;
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') return report;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
-    const municipalities = state.municipalities ?? {};
+    const municipalities = state.political.municipalities ?? {};
     const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
     const factionIds: FactionId[] = (state.factions ?? [])
         .map((f) => f.id)
@@ -199,7 +199,7 @@ export function runOngoingMobilization(
     // A faction in only one municipality is isolated — boost their mobilization.
     const factionMunSets = new Map<string, Set<string>>();
     for (const fid of factionIds) factionMunSets.set(fid, new Set());
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     for (const osid of Object.keys(pc).sort(strictCompare)) {
         const ctrl = pc[osid];
         if (!ctrl) continue;
@@ -237,7 +237,7 @@ export function runOngoingMobilization(
         const isPocket = controlledMuns !== undefined && controlledMuns.size === 1 && controlledMuns.has(munId);
         const pocketMult = isPocket ? POCKET_MOBILIZATION_MULT : 1.0;
 
-        const authorityState = state.municipalities?.[munId]?.control ?? 'consolidated';
+        const authorityState = state.political.municipalities?.[munId]?.control ?? 'consolidated';
         const authorityMult =
             authorityState === 'contested' ? 0.7 : authorityState === 'fragmented' ? 0.3 : 1.0;
 

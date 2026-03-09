@@ -41,15 +41,15 @@ export function applySettlementDisplacementDeltas(
     }
 
     const turn = state.meta.turn;
-    if (!state.settlement_displacement) {
-        (state as GameState & { settlement_displacement: Record<SettlementId, number> }).settlement_displacement = {};
+    if (!state.displacement.settlement_displacement) {
+        (state as GameState & { settlement_displacement: Record<SettlementId, number> }).displacement.settlement_displacement = {};
     }
-    if (!state.settlement_displacement_started_turn) {
-        (state as GameState & { settlement_displacement_started_turn: Record<SettlementId, number> }).settlement_displacement_started_turn = {};
+    if (!state.displacement.settlement_displacement_started_turn) {
+        (state as GameState & { settlement_displacement_started_turn: Record<SettlementId, number> }).displacement.settlement_displacement_started_turn = {};
     }
 
-    const sd = state.settlement_displacement!;
-    const started = state.settlement_displacement_started_turn!;
+    const sd = state.displacement.settlement_displacement!;
+    const started = state.displacement.settlement_displacement_started_turn!;
     const sortedIds = Object.keys(deltas).filter((sid) => deltas[sid]! > 0).sort(strictCompare);
 
     for (const sid of sortedIds) {

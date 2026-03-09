@@ -30,11 +30,11 @@ describe('applyUnAirdrops', () => {
     it('no-op when supply_reserves_enabled is false', () => {
         const state = makeState();
         state.meta.supply_reserves_enabled = false;
-        state.enclave_resilience = {
+        state.political.enclave_resilience = {
             'op:gorazde:core': { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
         };
         applyUnAirdrops(state);
-        expect(state.general_supply_reserve!['RBiH']).toBe(50);
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(50);
     });
 
     it('no-op when no enclaves have reached isolation threshold', () => {
@@ -44,7 +44,7 @@ describe('applyUnAirdrops', () => {
             },
         });
         applyUnAirdrops(state);
-        expect(state.general_supply_reserve!['RBiH']).toBe(50);
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(50);
     });
 
     it('airdrops begin exactly at isolation threshold', () => {
@@ -54,7 +54,7 @@ describe('applyUnAirdrops', () => {
             },
         });
         applyUnAirdrops(state);
-        expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(50 + AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE);
+        expect(state.military.general_supply_reserve!['RBiH']).toBeCloseTo(50 + AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE);
     });
 
     it('multiple eligible enclaves accumulate drops', () => {
@@ -66,7 +66,7 @@ describe('applyUnAirdrops', () => {
             },
         });
         applyUnAirdrops(state);
-        expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(50 + AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE * 3);
+        expect(state.military.general_supply_reserve!['RBiH']).toBeCloseTo(50 + AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE * 3);
     });
 
     it('total drop capped at AIRDROP_MAX_SUPPLY_PER_TURN', () => {
@@ -75,9 +75,9 @@ describe('applyUnAirdrops', () => {
             enclaves[`op:enclave${i}:core`] = { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 5, hardening_active: false };
         }
         const state = makeState({ enclave_resilience: enclaves as GameState['enclave_resilience'] });
-        state.general_supply_reserve!['RBiH'] = 0;
+        state.military.general_supply_reserve!['RBiH'] = 0;
         applyUnAirdrops(state);
-        expect(state.general_supply_reserve!['RBiH']).toBe(AIRDROP_MAX_SUPPLY_PER_TURN);
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(AIRDROP_MAX_SUPPLY_PER_TURN);
     });
 
     it('heavy munitions are NOT affected — humanitarian only', () => {
@@ -87,7 +87,7 @@ describe('applyUnAirdrops', () => {
             },
         });
         applyUnAirdrops(state);
-        expect(state.heavy_munitions_reserve!['RBiH']).toBe(40);
+        expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(40);
     });
 
     it('non-RBiH factions not affected', () => {
@@ -97,8 +97,8 @@ describe('applyUnAirdrops', () => {
             },
         });
         applyUnAirdrops(state);
-        expect(state.general_supply_reserve!['RS']).toBe(70);
-        expect(state.general_supply_reserve!['HRHB']).toBe(60);
+        expect(state.military.general_supply_reserve!['RS']).toBe(70);
+        expect(state.military.general_supply_reserve!['HRHB']).toBe(60);
         expect(AIRDROP_ELIGIBLE_FACTION).toBe('RBiH');
     });
 
@@ -108,9 +108,9 @@ describe('applyUnAirdrops', () => {
                 'op:gorazde:core': { resilience: 20, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 5, hardening_active: false },
             },
         });
-        state.general_supply_reserve!['RBiH'] = 99.9;
+        state.military.general_supply_reserve!['RBiH'] = 99.9;
         applyUnAirdrops(state);
-        expect(state.general_supply_reserve!['RBiH']).toBe(100);
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(100);
     });
 
     it('normalizes staged airdrop allocations across eligible enclaves', () => {
@@ -126,7 +126,7 @@ describe('applyUnAirdrops', () => {
 
         applyUnAirdrops(state);
 
-        expect(state.airdrop_allocation?.gorazde).toBeCloseTo(0.75);
-        expect(state.airdrop_allocation?.srebrenica).toBeCloseTo(0.25);
+        expect(state.military.airdrop_allocation?.gorazde).toBeCloseTo(0.75);
+        expect(state.military.airdrop_allocation?.srebrenica).toBeCloseTo(0.25);
     });
 });

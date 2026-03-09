@@ -101,7 +101,7 @@ interface BfsSeedContext {
 }
 
 function computeEdgePressureSumAbs(state: GameState): number {
-    const fp = state.front_pressure;
+    const fp = state.military.front_pressure;
     if (!fp || typeof fp !== 'object') return 0;
     const keys = Object.keys(fp).sort((a, b) => a.localeCompare(b));
     let sum = 0;
@@ -115,7 +115,7 @@ function computeEdgePressureSumAbs(state: GameState): number {
 }
 
 function computeNonZeroEdges(state: GameState): number {
-    const fp = state.front_pressure;
+    const fp = state.military.front_pressure;
     if (!fp || typeof fp !== 'object') return 0;
     const keys = Object.keys(fp).sort((a, b) => a.localeCompare(b));
     let c = 0;
@@ -129,7 +129,7 @@ function computeNonZeroEdges(state: GameState): number {
 }
 
 function computeTop1AndTop5Share(state: GameState): { top1: number; top5Share: number } {
-    const fp = state.front_pressure;
+    const fp = state.military.front_pressure;
     if (!fp || typeof fp !== 'object') return { top1: 0, top5Share: 0 };
     const vals: number[] = [];
     for (const k of Object.keys(fp)) {
@@ -583,8 +583,8 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
         else factionB.areasOfResponsibility.push(sid);
     }
 
-    if (!state.front_segments || typeof state.front_segments !== 'object') state.front_segments = {};
-    if (!state.front_pressure || typeof state.front_pressure !== 'object') state.front_pressure = {};
+    if (!state.military.front_segments || typeof state.military.front_segments !== 'object') state.military.front_segments = {};
+    if (!state.military.front_pressure || typeof state.military.front_pressure !== 'object') state.military.front_pressure = {};
 
     const edgeValue: Record<string, number> = {};
     for (const sid of seed.nodes_bfs) {
@@ -607,7 +607,7 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
     if (total !== SEED_TOTAL_PRESSURE) throw new Error(`phase3abc seed: expected total ${SEED_TOTAL_PRESSURE}, got ${total}`);
 
     for (const eid of seed.tree_edge_ids) {
-        (state.front_segments as any)[eid] = {
+        (state.military.front_segments as any)[eid] = {
             edge_id: eid,
             active: true,
             created_turn: 0,
@@ -619,7 +619,7 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
             max_friction: 0
         };
         const v = edgeValue[eid] ?? 0;
-        (state.front_pressure as any)[eid] = {
+        (state.military.front_pressure as any)[eid] = {
             edge_id: eid,
             value: v,
             max_abs: v,
@@ -629,8 +629,8 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
 
     if (seed.seed_method === 'weaklink_two_cluster_v1' && seed.weaklink_edge) {
         const eid = canonicalEdgeId(seed.weaklink_edge.a, seed.weaklink_edge.b);
-        if (!((state.front_segments as any)[eid])) {
-            (state.front_segments as any)[eid] = {
+        if (!((state.military.front_segments as any)[eid])) {
+            (state.military.front_segments as any)[eid] = {
                 edge_id: eid,
                 active: true,
                 created_turn: 0,
@@ -642,10 +642,10 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
                 max_friction: 0
             };
         } else {
-            (state.front_segments as any)[eid].active = true;
+            (state.military.front_segments as any)[eid].active = true;
         }
-        if (!((state.front_pressure as any)[eid])) {
-            (state.front_pressure as any)[eid] = { edge_id: eid, value: 0, max_abs: 0, last_updated_turn: 0 };
+        if (!((state.military.front_pressure as any)[eid])) {
+            (state.military.front_pressure as any)[eid] = { edge_id: eid, value: 0, max_abs: 0, last_updated_turn: 0 };
         }
     }
 }
@@ -695,10 +695,10 @@ function setAllSeedEdgesPosture(
     posture: 'hold' | 'probe' | 'push',
     weight: number
 ): void {
-    if (!state.front_posture || typeof state.front_posture !== 'object') state.front_posture = {};
-    if (!(state.front_posture as any)[factionId]) (state.front_posture as any)[factionId] = { assignments: {} };
-    if (!((state.front_posture as any)[factionId].assignments)) (state.front_posture as any)[factionId].assignments = {};
-    const assignments = (state.front_posture as any)[factionId].assignments as Record<string, { posture: string; weight: number }>;
+    if (!state.military.front_posture || typeof state.military.front_posture !== 'object') state.military.front_posture = {};
+    if (!(state.military.front_posture as any)[factionId]) (state.military.front_posture as any)[factionId] = { assignments: {} };
+    if (!((state.military.front_posture as any)[factionId].assignments)) (state.military.front_posture as any)[factionId].assignments = {};
+    const assignments = (state.military.front_posture as any)[factionId].assignments as Record<string, { posture: string; weight: number }>;
 
     const edgeIds = [...seed.tree_edge_ids].sort((a, b) => a.localeCompare(b));
     for (const eid of edgeIds) {
@@ -1138,8 +1138,8 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
             const sids = ((built as any).seed?.nodes_sorted ?? []).slice().sort((a: string, b: string) => a.localeCompare(b));
             const sid0 = sids.length > 0 ? sids[0] : null;
             if (sid0) {
-                if (!state.collapse_damage) state.collapse_damage = { by_entity: {} };
-                state.collapse_damage.by_entity[sid0] = { authority: 0, cohesion: 0, spatial: 0.5 };
+                if (!state.political.collapse_damage) state.political.collapse_damage = { by_entity: {} };
+                state.political.collapse_damage.by_entity[sid0] = { authority: 0, cohesion: 0, spatial: 0.5 };
                 recomputePhase3DCapacityModifiersFromDamage(state);
             }
         }
@@ -1265,14 +1265,14 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
 
                     // Invariant: collapse_damage monotonic per SID per domain
                     // Check that damage never decreases (enforced when Phase 3D is enabled)
-                    if (state.collapse_damage?.by_entity) {
+                    if (state.political.collapse_damage?.by_entity) {
                         // Track previous damage state (initialize on first turn)
                         if (!(state as any)._phase3d_prev_damage) {
                             (state as any)._phase3d_prev_damage = {};
                         }
                         const prevDamage = (state as any)._phase3d_prev_damage;
 
-                        for (const [entityId, damage] of Object.entries(state.collapse_damage.by_entity)) {
+                        for (const [entityId, damage] of Object.entries(state.political.collapse_damage.by_entity)) {
                             const prev = prevDamage[entityId] ?? { authority: 0, cohesion: 0, spatial: 0 };
                             const cur = damage as { authority: number; cohesion: number; spatial: number };
 
@@ -1310,7 +1310,7 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
                 }
 
                 // Audit visibility (compact): min pressure_cap_mult over damaged SIDs.
-                const damaged = state.collapse_damage?.by_entity;
+                const damaged = state.political.collapse_damage?.by_entity;
                 if (damaged && typeof damaged === 'object') {
                     let found = false;
                     for (const sid of Object.keys(damaged).sort((a, b) => a.localeCompare(b))) {

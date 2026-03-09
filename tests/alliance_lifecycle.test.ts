@@ -77,18 +77,18 @@ describe('alliance update', () => {
     test('ensureRbihHrhbState initializes with defaults', () => {
         const state = makeState();
         ensureRbihHrhbState(state);
-        assert.strictEqual(state.war_alliance_rbih_hrhb, DEFAULT_INIT_ALLIANCE);
-        assert.ok(state.rbih_hrhb_state);
-        assert.deepStrictEqual(state.rbih_hrhb_state!.allied_mixed_municipalities, [...DEFAULT_MIXED_MUNICIPALITIES].sort());
-        assert.strictEqual(state.rbih_hrhb_state!.ceasefire_active, false);
-        assert.strictEqual(state.rbih_hrhb_state!.washington_signed, false);
+        assert.strictEqual(state.political.war_alliance_rbih_hrhb, DEFAULT_INIT_ALLIANCE);
+        assert.ok(state.political.rbih_hrhb_state);
+        assert.deepStrictEqual(state.political.rbih_hrhb_state!.allied_mixed_municipalities, [...DEFAULT_MIXED_MUNICIPALITIES].sort());
+        assert.strictEqual(state.political.rbih_hrhb_state!.ceasefire_active, false);
+        assert.strictEqual(state.political.rbih_hrhb_state!.washington_signed, false);
     });
 
     test('ensureRbihHrhbState uses custom init value', () => {
         const state = makeState();
         ensureRbihHrhbState(state, 0.50, ['travnik', 'mostar']);
-        assert.strictEqual(state.war_alliance_rbih_hrhb, 0.50);
-        assert.deepStrictEqual(state.rbih_hrhb_state!.allied_mixed_municipalities, ['mostar', 'travnik']);
+        assert.strictEqual(state.political.war_alliance_rbih_hrhb, 0.50);
+        assert.deepStrictEqual(state.political.rbih_hrhb_state!.allied_mixed_municipalities, ['mostar', 'travnik']);
     });
 
     test('updateAllianceValue decreases with patron pressure', () => {
@@ -106,8 +106,8 @@ describe('alliance update', () => {
     test('updateAllianceValue includes ceasefire recovery', () => {
         const state = makeState({ war_alliance_rbih_hrhb: -0.20 });
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.ceasefire_active = true;
-        state.rbih_hrhb_state!.ceasefire_since_turn = 8;
+        state.political.rbih_hrhb_state!.ceasefire_active = true;
+        state.political.rbih_hrhb_state!.ceasefire_since_turn = 8;
         const report = updateAllianceValue(state);
         assert.ok(report.drivers.ceasefire_boost > 0);
         assert.strictEqual(report.drivers.ceasefire_boost, CEASEFIRE_RECOVERY_RATE);
@@ -116,8 +116,8 @@ describe('alliance update', () => {
     test('updateAllianceValue is locked when Washington signed', () => {
         const state = makeState({ war_alliance_rbih_hrhb: 0.80 });
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.washington_signed = true;
-        state.rbih_hrhb_state!.washington_turn = 5;
+        state.political.rbih_hrhb_state!.washington_signed = true;
+        state.political.rbih_hrhb_state!.washington_turn = 5;
         const report = updateAllianceValue(state);
         assert.strictEqual(report.locked, true);
         assert.strictEqual(report.delta, 0);
@@ -133,11 +133,11 @@ describe('alliance update', () => {
         const hrhbFaction = state.factions.find((f) => f.id === 'HRHB')!;
         hrhbFaction.patron_state!.patron_commitment = 1.0;
         // Also add incident penalty
-        state.rbih_hrhb_state!.bilateral_flips_this_turn = 2;
+        state.political.rbih_hrhb_state!.bilateral_flips_this_turn = 2;
         const report = updateAllianceValue(state);
         assert.ok(report.new_value <= HOSTILE_THRESHOLD);
         assert.strictEqual(report.war_started_this_turn, true);
-        assert.strictEqual(state.rbih_hrhb_state!.war_started_turn, state.meta.turn);
+        assert.strictEqual(state.political.rbih_hrhb_state!.war_started_turn, state.meta.turn);
     });
 
     test('countBilateralFlips counts correctly', () => {
@@ -150,24 +150,24 @@ describe('alliance update', () => {
         ];
         const count = countBilateralFlips(state, flips);
         assert.strictEqual(count, 2);
-        assert.strictEqual(state.rbih_hrhb_state!.bilateral_flips_this_turn, 2);
-        assert.strictEqual(state.rbih_hrhb_state!.total_bilateral_flips, 2);
+        assert.strictEqual(state.political.rbih_hrhb_state!.bilateral_flips_this_turn, 2);
+        assert.strictEqual(state.political.rbih_hrhb_state!.total_bilateral_flips, 2);
     });
 
     test('stalemate counter increments on zero flips', () => {
         const state = makeState();
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.stalemate_turns = 3;
+        state.political.rbih_hrhb_state!.stalemate_turns = 3;
         countBilateralFlips(state, []);
-        assert.strictEqual(state.rbih_hrhb_state!.stalemate_turns, 4);
+        assert.strictEqual(state.political.rbih_hrhb_state!.stalemate_turns, 4);
     });
 
     test('stalemate counter resets on bilateral flip', () => {
         const state = makeState();
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.stalemate_turns = 5;
+        state.political.rbih_hrhb_state!.stalemate_turns = 5;
         countBilateralFlips(state, [{ mun_id: 'travnik', from_faction: 'RBiH', to_faction: 'HRHB' }]);
-        assert.strictEqual(state.rbih_hrhb_state!.stalemate_turns, 0);
+        assert.strictEqual(state.political.rbih_hrhb_state!.stalemate_turns, 0);
     });
 });
 
@@ -215,13 +215,13 @@ describe('bilateral ceasefire', () => {
     test('ceasefire fires when all preconditions met', () => {
         const state = makeState({ war_alliance_rbih_hrhb: -0.30 });
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.war_started_turn = 5;
-        state.rbih_hrhb_state!.stalemate_turns = CEASEFIRE_STALEMATE_MIN;
+        state.political.rbih_hrhb_state!.war_started_turn = 5;
+        state.political.rbih_hrhb_state!.stalemate_turns = CEASEFIRE_STALEMATE_MIN;
         state.meta.turn = 5 + CEASEFIRE_MIN_WAR_DURATION + 1;
         // Set exhaustion
-        state.war_exhaustion = { RBiH: CEASEFIRE_RBIH_EXHAUSTION + 1, RS: 10, HRHB: CEASEFIRE_HRHB_EXHAUSTION + 1 };
+        state.political.war_exhaustion = { RBiH: CEASEFIRE_RBIH_EXHAUSTION + 1, RS: 10, HRHB: CEASEFIRE_HRHB_EXHAUSTION + 1 };
         // Set IVP
-        state.international_visibility_pressure = {
+        state.political.international_visibility_pressure = {
             sarajevo_siege_visibility: 0, enclave_humanitarian_pressure: 0,
             atrocity_visibility: 0, negotiation_momentum: CEASEFIRE_IVP_THRESHOLD + 0.01,
             last_major_shift: null
@@ -233,15 +233,15 @@ describe('bilateral ceasefire', () => {
         const report = checkAndApplyCeasefire(state);
         assert.strictEqual(report.preconditions.all_met, true);
         assert.strictEqual(report.fired, true);
-        assert.strictEqual(state.rbih_hrhb_state!.ceasefire_active, true);
-        assert.strictEqual(state.rbih_hrhb_state!.ceasefire_since_turn, state.meta.turn);
+        assert.strictEqual(state.political.rbih_hrhb_state!.ceasefire_active, true);
+        assert.strictEqual(state.political.rbih_hrhb_state!.ceasefire_since_turn, state.meta.turn);
     });
 
     test('ceasefire does not re-fire when already active', () => {
         const state = makeState({ war_alliance_rbih_hrhb: -0.20 });
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.ceasefire_active = true;
-        state.rbih_hrhb_state!.ceasefire_since_turn = 20;
+        state.political.rbih_hrhb_state!.ceasefire_active = true;
+        state.political.rbih_hrhb_state!.ceasefire_since_turn = 20;
         const report = checkAndApplyCeasefire(state);
         assert.strictEqual(report.fired, false);
         assert.strictEqual(report.already_active, true);
@@ -262,13 +262,13 @@ describe('washington agreement', () => {
     test('washington fires when all preconditions met', () => {
         const state = makeState({ war_alliance_rbih_hrhb: -0.10 });
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.ceasefire_active = true;
-        state.rbih_hrhb_state!.ceasefire_since_turn = 90;
+        state.political.rbih_hrhb_state!.ceasefire_active = true;
+        state.political.rbih_hrhb_state!.ceasefire_since_turn = 90;
         state.meta.turn = 90 + WASH_CEASEFIRE_DURATION + 1;
         // Set exhaustion
-        state.war_exhaustion = { RBiH: 30, RS: 20, HRHB: 30 };
+        state.political.war_exhaustion = { RBiH: 30, RS: 20, HRHB: 30 };
         // Set IVP
-        state.international_visibility_pressure = {
+        state.political.international_visibility_pressure = {
             sarajevo_siege_visibility: 0, enclave_humanitarian_pressure: 0,
             atrocity_visibility: 0, negotiation_momentum: 0.55,
             last_major_shift: null
@@ -283,13 +283,13 @@ describe('washington agreement', () => {
         for (let i = 0; i < 100; i++) {
             pc[`S${i}`] = i < 45 ? 'RS' : i < 75 ? 'RBiH' : 'HRHB';
         }
-        state.political_controllers = pc;
+        state.political.political_controllers = pc;
 
         const report = checkAndApplyWashington(state);
         assert.strictEqual(report.preconditions.all_met, true);
         assert.strictEqual(report.fired, true);
-        assert.strictEqual(state.war_alliance_rbih_hrhb, WASH_ALLIANCE_LOCK_VALUE);
-        assert.strictEqual(state.rbih_hrhb_state!.washington_signed, true);
+        assert.strictEqual(state.political.war_alliance_rbih_hrhb, WASH_ALLIANCE_LOCK_VALUE);
+        assert.strictEqual(state.political.rbih_hrhb_state!.washington_signed, true);
         assert.strictEqual(hrhb.capability_profile!.equipment_access, POST_WASH_EQUIPMENT_ACCESS);
         assert.strictEqual(hrhb.capability_profile!.croatian_support, POST_WASH_CROATIAN_SUPPORT);
     });
@@ -297,7 +297,7 @@ describe('washington agreement', () => {
     test('washington does not fire when already signed', () => {
         const state = makeState({ war_alliance_rbih_hrhb: 0.80 });
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.washington_signed = true;
+        state.political.rbih_hrhb_state!.washington_signed = true;
         const report = checkAndApplyWashington(state);
         assert.strictEqual(report.fired, false);
         assert.strictEqual(report.already_signed, true);
@@ -317,7 +317,7 @@ describe('minority erosion', () => {
     test('no erosion when ceasefire active', () => {
         const state = makeState({ war_alliance_rbih_hrhb: -0.30 });
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.ceasefire_active = true;
+        state.political.rbih_hrhb_state!.ceasefire_active = true;
         const report = runMinorityErosion(state);
         assert.strictEqual(report.municipalities_affected, 0);
     });
@@ -325,16 +325,16 @@ describe('minority erosion', () => {
     test('erosion occurs in mixed muns during open war', () => {
         const state = makeState({ war_alliance_rbih_hrhb: -0.30 });
         ensureRbihHrhbState(state);
-        state.rbih_hrhb_state!.war_started_turn = 5;
+        state.political.rbih_hrhb_state!.war_started_turn = 5;
         // Set militia: RBiH controls travnik, HRHB has minority militia
-        state.war_militia_strength = {
+        state.military.war_militia_strength = {
             travnik: { RBiH: 100, HRHB: 200, RS: 0 }
         };
         // Need political_controllers for controller lookup
         // Build a minimal settlementsByMun
         const settlementsByMun = new Map<string, string[]>();
         settlementsByMun.set('travnik', ['S1', 'S2']);
-        state.political_controllers = { S1: 'RBiH', S2: 'RBiH' };
+        state.political.political_controllers = { S1: 'RBiH', S2: 'RBiH' };
 
         const report = runMinorityErosion(state, settlementsByMun);
         assert.strictEqual(report.municipalities_affected, 1);
@@ -350,7 +350,7 @@ describe('mixed municipality allied defense', () => {
     test('computeAlliedDefense adds allied militia when alliance is strong', () => {
         const state = makeState({ war_alliance_rbih_hrhb: 0.60 });
         ensureRbihHrhbState(state);
-        state.war_militia_strength = {
+        state.military.war_militia_strength = {
             travnik: { RBiH: 100, HRHB: 80, RS: 0 }
         };
         const effective = computeAlliedDefense(state, 'travnik', 'RBiH', 100);
@@ -361,7 +361,7 @@ describe('mixed municipality allied defense', () => {
     test('computeAlliedDefense returns controller only when not mixed mun', () => {
         const state = makeState({ war_alliance_rbih_hrhb: 0.60 });
         ensureRbihHrhbState(state);
-        state.war_militia_strength = {
+        state.military.war_militia_strength = {
             banja_luka: { RBiH: 100, HRHB: 0, RS: 80 }
         };
         const effective = computeAlliedDefense(state, 'banja_luka', 'RBiH', 100);
@@ -371,7 +371,7 @@ describe('mixed municipality allied defense', () => {
     test('computeAlliedDefense returns controller only when strained', () => {
         const state = makeState({ war_alliance_rbih_hrhb: 0.10 }); // Below ALLIED_THRESHOLD
         ensureRbihHrhbState(state);
-        state.war_militia_strength = {
+        state.military.war_militia_strength = {
             travnik: { RBiH: 100, HRHB: 80, RS: 0 }
         };
         const effective = computeAlliedDefense(state, 'travnik', 'RBiH', 100);
@@ -400,8 +400,8 @@ describe('alliance determinism', () => {
         ensureRbihHrhbState(state1);
         ensureRbihHrhbState(state2);
         assert.strictEqual(
-            JSON.stringify(state1.rbih_hrhb_state),
-            JSON.stringify(state2.rbih_hrhb_state)
+            JSON.stringify(state1.political.rbih_hrhb_state),
+            JSON.stringify(state2.political.rbih_hrhb_state)
         );
     });
 
@@ -441,12 +441,12 @@ describe('full alliance lifecycle', () => {
         }
 
         // Should have crossed into open war
-        assert.strictEqual(state.rbih_hrhb_state!.war_started_turn !== null, true, 'War should have started');
-        assert.ok(state.war_alliance_rbih_hrhb! <= HOSTILE_THRESHOLD, 'Alliance should be hostile');
+        assert.strictEqual(state.political.rbih_hrhb_state!.war_started_turn !== null, true, 'War should have started');
+        assert.ok(state.political.war_alliance_rbih_hrhb! <= HOSTILE_THRESHOLD, 'Alliance should be hostile');
 
         // Phase 2: Set up ceasefire conditions
-        state.war_exhaustion = { RBiH: 35, RS: 20, HRHB: 40 };
-        state.international_visibility_pressure = {
+        state.political.war_exhaustion = { RBiH: 35, RS: 20, HRHB: 40 };
+        state.political.international_visibility_pressure = {
             sarajevo_siege_visibility: 0, enclave_humanitarian_pressure: 0,
             atrocity_visibility: 0, negotiation_momentum: 0.45,
             last_major_shift: null
@@ -470,20 +470,20 @@ describe('full alliance lifecycle', () => {
         }
 
         // Phase 4: Washington conditions
-        state.international_visibility_pressure!.negotiation_momentum = 0.55;
+        state.political.international_visibility_pressure!.negotiation_momentum = 0.55;
         hrhb.patron_state!.constraint_severity = 0.60;
         const pc: Record<string, string | null> = {};
         for (let i = 0; i < 100; i++) {
             pc[`S${i}`] = i < 45 ? 'RS' : i < 75 ? 'RBiH' : 'HRHB';
         }
-        state.political_controllers = pc;
+        state.political.political_controllers = pc;
         hrhb.capability_profile = { year: 1994, equipment_access: 0.4, training_quality: 0.5, organizational_maturity: 0.5, croatian_support: 0.3 };
         hrhb.embargo_profile = { heavy_equipment_access: 0.3, ammunition_resupply_rate: 0.4, maintenance_capacity: 0.3, smuggling_efficiency: 0.3, external_pipeline_status: 0.4 };
 
         const washReport = checkAndApplyWashington(state);
         assert.strictEqual(washReport.fired, true, 'Washington should fire');
-        assert.strictEqual(state.war_alliance_rbih_hrhb, WASH_ALLIANCE_LOCK_VALUE);
-        assert.strictEqual(state.rbih_hrhb_state!.washington_signed, true);
+        assert.strictEqual(state.political.war_alliance_rbih_hrhb, WASH_ALLIANCE_LOCK_VALUE);
+        assert.strictEqual(state.political.rbih_hrhb_state!.washington_signed, true);
 
         // Phase 5: Verify alliance locked
         state.meta.turn++;

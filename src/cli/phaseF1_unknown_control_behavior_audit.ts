@@ -40,7 +40,7 @@ async function main(): Promise<void> {
 
     await prepareNewGameState(state, graph);
 
-    const controllers = state.political_controllers;
+    const controllers = state.political.political_controllers;
     if (!controllers) {
         process.stderr.write('political_controllers not initialized\n');
         process.exit(1);

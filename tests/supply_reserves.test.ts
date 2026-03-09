@@ -24,12 +24,12 @@ describe('ensureSupplyReserves', () => {
     it('initializes reserves with per-faction default values when absent', () => {
         const state = makeMinimalState();
         ensureSupplyReserves(state);
-        expect(state.general_supply_reserve).toBeDefined();
-        expect(state.heavy_munitions_reserve).toBeDefined();
+        expect(state.military.general_supply_reserve).toBeDefined();
+        expect(state.military.heavy_munitions_reserve).toBeDefined();
         // Per-faction overrides: RBiH starts near-zero (no JNA inheritance)
-        expect(state.general_supply_reserve!['RBiH']).toBe(10);
-        expect(state.general_supply_reserve!['RS']).toBe(80);
-        expect(state.heavy_munitions_reserve!['RBiH']).toBe(5);
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(10);
+        expect(state.military.general_supply_reserve!['RS']).toBe(80);
+        expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(5);
     });
 
     it('does not overwrite existing reserves', () => {
@@ -38,8 +38,8 @@ describe('ensureSupplyReserves', () => {
             heavy_munitions_reserve: { RBiH: 40, RS: 40, HRHB: 40 } as any
         });
         ensureSupplyReserves(state);
-        expect(state.general_supply_reserve!['RBiH']).toBe(50);
-        expect(state.heavy_munitions_reserve!['RBiH']).toBe(40);
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(50);
+        expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(40);
     });
 });
 
@@ -57,15 +57,15 @@ describe('updateSupplyReserves', () => {
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
 
         // RBiH starts at 10 (per-faction override), RS at 80, HRHB at 75
-        expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(10 - 2 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
+        expect(state.military.general_supply_reserve!['RBiH']).toBeCloseTo(10 - 2 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
         // RS: 80 - 1*DRAIN
-        expect(state.general_supply_reserve!['RS']).toBeCloseTo(80 - 1 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
+        expect(state.military.general_supply_reserve!['RS']).toBeCloseTo(80 - 1 * MAINTENANCE_DRAIN_PER_FORMATION, 5);
         // HRHB: 75 - 0*DRAIN = 75, but capped by EMBARGO_SUPPLY_CAP['HRHB'] = 70
-        expect(state.general_supply_reserve!['HRHB']).toBe(70);
+        expect(state.military.general_supply_reserve!['HRHB']).toBe(70);
 
         // Heavy munitions unchanged (no combat expenditure in per-turn update)
         // RBiH starts at 5 (per-faction override)
-        expect(state.heavy_munitions_reserve!['RBiH']).toBe(5);
+        expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(5);
 
         expect(report.factions).toHaveLength(3);
         expect(report.factions[0]!.faction_id).toBe('HRHB'); // sorted
@@ -78,9 +78,9 @@ describe('updateSupplyReserves', () => {
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 8, HRHB: 0 });
 
         // RS: general = 80 - 0 + 8*1.0*0.6 = 84.8
-        expect(state.general_supply_reserve!['RS']).toBeCloseTo(84.8, 5);
+        expect(state.military.general_supply_reserve!['RS']).toBeCloseTo(84.8, 5);
         // RS: heavy = 60 + 8*1.0*0.4 = 63.2
-        expect(state.heavy_munitions_reserve!['RS']).toBeCloseTo(63.2, 5);
+        expect(state.military.heavy_munitions_reserve!['RS']).toBeCloseTo(63.2, 5);
     });
 
     it('drains heavy munitions proportional to heavy weapon count (tanks + artillery)', () => {
@@ -99,11 +99,11 @@ describe('updateSupplyReserves', () => {
         const rbihHeavyDrain = 5 * HEAVY_MAINTENANCE_PER_WEAPON; // 5 weapons × 0.001 = 0.005
 
         // RS heavy starts at 60 (same as default): 60 - rsHeavyDrain
-        expect(state.heavy_munitions_reserve!['RS']).toBeCloseTo(60 - rsHeavyDrain, 5);
+        expect(state.military.heavy_munitions_reserve!['RS']).toBeCloseTo(60 - rsHeavyDrain, 5);
         // RBiH heavy starts at 5 (per-faction override): 5 - rbihHeavyDrain
-        expect(state.heavy_munitions_reserve!['RBiH']).toBeCloseTo(5 - rbihHeavyDrain, 5);
+        expect(state.military.heavy_munitions_reserve!['RBiH']).toBeCloseTo(5 - rbihHeavyDrain, 5);
         // HRHB: no formations → no drain, starts at 25 (per-faction override)
-        expect(state.heavy_munitions_reserve!['HRHB']).toBe(25);
+        expect(state.military.heavy_munitions_reserve!['HRHB']).toBe(25);
 
         // Report should include heavy_maintenance_drain
         const rsEntry = report.factions.find(f => f.faction_id === 'RS')!;
@@ -123,9 +123,9 @@ describe('updateSupplyReserves', () => {
         updateSupplyReserves(state, { RBiH: 0, RS: 50, HRHB: 0 });
 
         // RBiH: 1 - 50*0.025 = 1-1.25 = -0.25 → clamped to 0
-        expect(state.general_supply_reserve!['RBiH']).toBe(0);
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(0);
         // RS: 99 + 50*0.6 = 129 → clamped to EMBARGO_SUPPLY_CAP['RS'] = 90
-        expect(state.general_supply_reserve!['RS']).toBe(90);
+        expect(state.military.general_supply_reserve!['RS']).toBe(90);
     });
 });
 
@@ -137,9 +137,9 @@ describe('deductCombatExpenditure', () => {
         deductCombatExpenditure(state, 'RBiH', 3, 1.5);
 
         // Heavy: RBiH starts at 5 (per-faction override); 5 - (3 * 1.5 * 1.2 / 100) = 5 - 0.054 = 4.946
-        expect(state.heavy_munitions_reserve!['RBiH']).toBeCloseTo(4.946, 5);
+        expect(state.military.heavy_munitions_reserve!['RBiH']).toBeCloseTo(4.946, 5);
         // General: RBiH starts at 10; 10 - (3 * 1.5 * 0.5 / 100) = 10 - 0.0225 = 9.9775
-        expect(state.general_supply_reserve!['RBiH']).toBeCloseTo(9.9775, 5);
+        expect(state.military.general_supply_reserve!['RBiH']).toBeCloseTo(9.9775, 5);
     });
 
     it('does not go below zero', () => {
@@ -148,8 +148,8 @@ describe('deductCombatExpenditure', () => {
             general_supply_reserve: { RBiH: 0.001, RS: 80, HRHB: 80 } as any
         });
         deductCombatExpenditure(state, 'RBiH', 10, 5.0);
-        expect(state.heavy_munitions_reserve!['RBiH']).toBe(0);
-        expect(state.general_supply_reserve!['RBiH']).toBe(0);
+        expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(0);
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(0);
     });
 });
 

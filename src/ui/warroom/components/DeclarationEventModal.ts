@@ -270,7 +270,7 @@ export function findWarMilestoneEvent(
 ): string | null {
     if (!previousSnapshot) return null;
 
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
 
     // Washington agreement just signed
     if (rhs?.washington_signed && !previousSnapshot.washingtonSigned) {
@@ -284,14 +284,14 @@ export function findWarMilestoneEvent(
 
     // Alliance war started (alliance crossed below 0)
     const oldAlliance = previousSnapshot.allianceValue;
-    const newAlliance = state.war_alliance_rbih_hrhb ?? null;
+    const newAlliance = state.political.war_alliance_rbih_hrhb ?? null;
     if (oldAlliance != null && newAlliance != null && oldAlliance >= 0 && newAlliance < 0) {
         return 'rbih_hrhb_war_begins';
     }
 
     // Exhaustion crossed 75% for player faction
     const oldExhaustion = (previousSnapshot.exhaustion[playerFaction] ?? 0) * 100;
-    const newExhaustion = ((state.war_exhaustion?.[playerFaction]) ?? 0) * 100;
+    const newExhaustion = ((state.political.war_exhaustion?.[playerFaction]) ?? 0) * 100;
     if (oldExhaustion < 75 && newExhaustion >= 75) {
         return 'exhaustion_critical';
     }

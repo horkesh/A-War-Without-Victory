@@ -209,7 +209,7 @@ export class TacticalMap {
     }
 
     private renderControlLayer(state: GameState) {
-        const controllers = state.political_controllers ?? {};
+        const controllers = state.political.political_controllers ?? {};
         const SIDE_COLORS: Record<string, string> = {
             RBiH: factionFill('RBiH'),
             RS: factionFill('RS'),

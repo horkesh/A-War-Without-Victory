@@ -26,13 +26,13 @@ export interface MovementPathQuery {
 }
 
 function getStartSid(state: GameState, brigadeId: FormationId): SettlementId | null {
-    const formation = state.formations?.[brigadeId];
+    const formation = state.military.formations?.[brigadeId];
     const locOsid = (formation as { location_osid?: string })?.location_osid as SettlementId | undefined;
     return locOsid ?? formation?.hq_sid ?? null;
 }
 
 function getColumnMovementRate(state: GameState, brigadeId: FormationId): number {
-    const formation = state.formations?.[brigadeId];
+    const formation = state.military.formations?.[brigadeId];
     const c = formation?.composition;
     if (!c) return COLUMN_BASE_MOVEMENT_RATE;
     const infantry = Math.max(0, c.infantry ?? 0);
@@ -70,10 +70,10 @@ function computeReachable(
     brigadeId: FormationId,
     mode: 'deployed' | 'column'
 ): SettlementId[] {
-    const formation = state.formations?.[brigadeId];
+    const formation = state.military.formations?.[brigadeId];
     if (!formation || (formation.kind ?? 'brigade') !== 'brigade' || !formation.faction) return [];
     const factionId = formation.faction as FactionId;
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const startSid = getStartSid(state, brigadeId);
     if (!startSid || pc[startSid] !== factionId) return [];
 
@@ -125,7 +125,7 @@ export function queryMovementPath(
     brigadeId: FormationId,
     destinationSid: SettlementId
 ): MovementPathQuery | null {
-    const formation = state.formations?.[brigadeId];
+    const formation = state.military.formations?.[brigadeId];
     if (!formation || (formation.kind ?? 'brigade') !== 'brigade' || !formation.faction) return null;
     const factionId = formation.faction as FactionId;
     const startSid = getStartSid(state, brigadeId);
@@ -134,7 +134,7 @@ export function queryMovementPath(
     const path = shortestPathThroughFriendly(state, edges, startSid, [destinationSid], factionId);
     if (!path) return null;
 
-    const movementState = state.brigade_movement_state?.[brigadeId];
+    const movementState = state.military.brigade_movement_state?.[brigadeId];
     const stance = movementState?.stance ?? (movementState?.status === 'packing' ? 'column' : 'combat');
     const movementRate = stance === 'column' ? getColumnMovementRate(state, brigadeId) : MOVEMENT_RATE;
     const edgeCost = stance === 'column'

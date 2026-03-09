@@ -15,5 +15,5 @@ import type { GameState } from '../../state/game_state.js';
  * brigade_aor is never populated; orders are consumed and cleared with no other effect.
  */
 export function applyBrigadeRepositionOrders(state: GameState, _edges: EdgeRecord[]): void {
-    state.brigade_reposition_orders = undefined;
+    state.military.brigade_reposition_orders = undefined;
 }

@@ -13,7 +13,7 @@ export function factionHasBrigadeInMunicipality(
     munId: MunicipalityId,
     _settlements: Map<string, SettlementRecord>
 ): boolean {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     // OSID-level brigade location — "op:municipality:slug"
     const osidPrefix = `op:${munId}:`;
     for (const f of Object.values(formations)) {
@@ -28,10 +28,10 @@ const FACTION_IDS: FactionId[] = ['HRHB', 'RBiH', 'RS'];
 
 /** Ensure civilian_casualties exists and has all factions. */
 function ensureCivilianCasualties(state: GameState): void {
-    if (!state.civilian_casualties) {
-        state.civilian_casualties = {};
+    if (!state.displacement.civilian_casualties) {
+        state.displacement.civilian_casualties = {};
         for (const fid of FACTION_IDS) {
-            state.civilian_casualties[fid] = { killed: 0, fled_abroad: 0 };
+            state.displacement.civilian_casualties[fid] = { killed: 0, fled_abroad: 0 };
         }
     }
 }
@@ -44,7 +44,7 @@ export function recordCivilianDisplacementCasualties(
     fledAbroad: number
 ): void {
     ensureCivilianCasualties(state);
-    const entry = state.civilian_casualties![factionId];
+    const entry = state.displacement.civilian_casualties![factionId];
     if (entry) {
         entry.killed += killed;
         entry.fled_abroad += fledAbroad;
@@ -56,8 +56,8 @@ export function getOrInitDisplacementState(
     munId: MunicipalityId,
     originalPopulation: number
 ): DisplacementState {
-    if (!state.displacement_state) state.displacement_state = {};
-    const existing = state.displacement_state[munId];
+    if (!state.displacement.displacement_state) state.displacement.displacement_state = {};
+    const existing = state.displacement.displacement_state[munId];
     if (existing) return existing;
     const created: DisplacementState = {
         mun_id: munId,
@@ -67,7 +67,7 @@ export function getOrInitDisplacementState(
         lost_population: 0,
         last_updated_turn: state.meta.turn
     };
-    state.displacement_state[munId] = created;
+    state.displacement.displacement_state[munId] = created;
     return created;
 }
 

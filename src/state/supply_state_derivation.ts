@@ -322,7 +322,7 @@ export function deriveLocalProductionCapacity(
             }
         }
 
-        const displacement = state.displacement_state?.[munId];
+        const displacement = state.displacement.displacement_state?.[munId];
         let populationMult = 1;
         if (displacement && displacement.original_population > 0) {
             const effective = Math.max(0, displacement.original_population - displacement.displaced_out - displacement.lost_population + displacement.displaced_in);

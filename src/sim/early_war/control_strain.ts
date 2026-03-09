@@ -49,7 +49,7 @@ export function buildSettlementsByMun(settlements: Map<string, SettlementRecord>
 /** Derive current controller of a municipality from political_controllers (majority of settlements).
  * Handles OSID-keyed pc via munId fallback (scans op:<munId>:* prefix). Deterministic tie-break: strictCompare(factionId). */
 export function getMunicipalityController(state: GameState, sids: SettlementId[], munId?: string): FactionId | null {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const counts: Record<string, number> = {};
     for (const sid of sids) {
         const c = pc[sid] ?? null;
@@ -99,14 +99,14 @@ export function runControlStrain(
     settlementsByMun: Map<MunicipalityId, SettlementId[]>
 ): ControlStrainReport {
     const report: ControlStrainReport = { municipalities_updated: 0, faction_totals: [] };
-    const municipalities = state.municipalities ?? {};
+    const municipalities = state.political.municipalities ?? {};
     const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
     const warStartTurn = state.meta.war_start_turn ?? null;
 
-    if (!state.war_control_strain) {
-        (state as GameState & { war_control_strain: Record<string, number> }).war_control_strain = {};
+    if (!state.political.war_control_strain) {
+        (state as GameState & { war_control_strain: Record<string, number> }).political.war_control_strain = {};
     }
-    const strainByMun = state.war_control_strain!;
+    const strainByMun = state.political.war_control_strain!;
 
     const factionTotals = new Map<FactionId, number>();
 
@@ -159,8 +159,8 @@ export function getFactionTotalControlStrain(
     factionId: FactionId,
     settlementsByMun: Map<MunicipalityId, SettlementId[]>
 ): number {
-    const strainByMun = state.war_control_strain ?? {};
-    const municipalities = state.municipalities ?? {};
+    const strainByMun = state.political.war_control_strain ?? {};
+    const municipalities = state.political.municipalities ?? {};
     let total = 0;
     for (const munId of Object.keys(municipalities) as MunicipalityId[]) {
         const sids = settlementsByMun.get(munId);

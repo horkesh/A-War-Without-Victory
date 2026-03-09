@@ -462,7 +462,7 @@ export class ClickableRegionManager {
                         if (result.report) setLastTurnReport(result.report as LastTurnReport);
                         const pf = this.playerFaction ?? 'RBiH';
 
-                        const lastEvents: Phase0Event[] = newState.phase0_events_log?.[newState.phase0_events_log.length - 1] ?? [];
+                        const lastEvents: Phase0Event[] = newState.political.phase0_events_log?.[newState.political.phase0_events_log.length - 1] ?? [];
                         const criticalEvent = findCriticalEvent(lastEvents);
                         if (criticalEvent) {
                             await showDeclarationModal(criticalEvent, pf);
@@ -497,7 +497,7 @@ export class ClickableRegionManager {
                     this.modalManager?.hideModal();
 
                     // Check for critical Phase 0 events (declarations, referendum)
-                    const lastEvents: Phase0Event[] = newState.phase0_events_log?.[newState.phase0_events_log.length - 1] ?? [];
+                    const lastEvents: Phase0Event[] = newState.political.phase0_events_log?.[newState.political.phase0_events_log.length - 1] ?? [];
                     const criticalEvent = findCriticalEvent(lastEvents);
                     if (criticalEvent) {
                         await showDeclarationModal(criticalEvent, pf ?? 'RBiH');
@@ -577,7 +577,7 @@ export class ClickableRegionManager {
 
         // INCOMING: WIA returning
         let wiaReturning = 0;
-        const formations = state.formations ?? {};
+        const formations = state.military.formations ?? {};
         for (const fid of Object.keys(formations).sort()) {
             const f = formations[fid];
             if (f?.faction === pf && f.wounded_pending && f.wounded_pending > 0) {

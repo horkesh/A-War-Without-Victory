@@ -165,7 +165,7 @@ export function applyTreatyMilitaryAnnex(
     const derivedFrontEdges = opts.derivedFrontEdges ?? [];
     const activeEdgeIds = new Set<string>();
     for (const edge of derivedFrontEdges) {
-        const seg = state.front_segments?.[edge.edge_id];
+        const seg = state.military.front_segments?.[edge.edge_id];
         if (seg && typeof seg === 'object' && (seg as any).active === true) {
             activeEdgeIds.add(edge.edge_id);
         }
@@ -221,13 +221,13 @@ export function applyTreatyMilitaryAnnex(
     }
 
     // Initialize ceasefire if needed
-    if (!state.ceasefire || typeof state.ceasefire !== 'object') {
-        state.ceasefire = {};
+    if (!state.political.ceasefire || typeof state.political.ceasefire !== 'object') {
+        state.political.ceasefire = {};
     }
 
     // Initialize negotiation_status if needed
-    if (!state.negotiation_status || typeof state.negotiation_status !== 'object') {
-        state.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
+    if (!state.political.negotiation_status || typeof state.political.negotiation_status !== 'object') {
+        state.political.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
     }
 
     // Determine base durations for each edge to freeze
@@ -298,13 +298,13 @@ export function applyTreatyMilitaryAnnex(
     // Merge with existing freeze entries deterministically
     let freezeEdgesAdded = 0;
     for (const edgeId of Array.from(edgesToFreeze).sort()) {
-        const existing = state.ceasefire[edgeId];
+        const existing = state.political.ceasefire[edgeId];
         const newDuration = finalDurations.get(edgeId) ?? null;
         const newUntilTurn = newDuration === null ? null : currentTurn + newDuration;
 
         if (!existing) {
             // New freeze entry
-            state.ceasefire[edgeId] = {
+            state.political.ceasefire[edgeId] = {
                 since_turn: currentTurn,
                 until_turn: newUntilTurn
             };
@@ -324,7 +324,7 @@ export function applyTreatyMilitaryAnnex(
                 mergedUntilTurn = Math.max(existingUntilTurn, newUntilTurn);
             }
 
-            state.ceasefire[edgeId] = {
+            state.political.ceasefire[edgeId] = {
                 since_turn: mergedSinceTurn,
                 until_turn: mergedUntilTurn
             };
@@ -337,13 +337,13 @@ export function applyTreatyMilitaryAnnex(
     }
 
     // Update negotiation status
-    state.negotiation_status.ceasefire_active = true;
-    state.negotiation_status.last_offer_turn = currentTurn;
+    state.political.negotiation_status.ceasefire_active = true;
+    state.political.negotiation_status.last_offer_turn = currentTurn;
 
     // Get final sorted list of frozen edges
-    const finalFrozenEdges = Object.keys(state.ceasefire ?? {})
+    const finalFrozenEdges = Object.keys(state.political.ceasefire ?? {})
         .filter((edgeId) => {
-            const entry = state.ceasefire?.[edgeId];
+            const entry = state.political.ceasefire?.[edgeId];
             if (!entry || typeof entry !== 'object') return false;
             const untilTurn = entry.until_turn;
             // Include if indefinite or not yet expired
@@ -389,10 +389,10 @@ function getNextLedgerSeq(
     factionId: string,
     kind: 'gain' | 'spend' | 'adjust'
 ): number {
-    if (!state.negotiation_ledger || !Array.isArray(state.negotiation_ledger)) {
+    if (!state.political.negotiation_ledger || !Array.isArray(state.political.negotiation_ledger)) {
         return 1;
     }
-    const matching = state.negotiation_ledger.filter(
+    const matching = state.political.negotiation_ledger.filter(
         (e) => e.turn === turn && e.faction_id === factionId && e.kind === kind
     );
     return matching.length + 1;
@@ -489,11 +489,11 @@ export function applyTreatyTerritorialAnnex(
     const validSettlementIds = new Set(settlementGraph.settlements.keys());
 
     // Initialize control_overrides and control_recognition if needed
-    if (!state.control_overrides || typeof state.control_overrides !== 'object') {
-        state.control_overrides = {};
+    if (!state.political.control_overrides || typeof state.political.control_overrides !== 'object') {
+        state.political.control_overrides = {};
     }
-    if (!state.control_recognition || typeof state.control_recognition !== 'object') {
-        state.control_recognition = {};
+    if (!state.political.control_recognition || typeof state.political.control_recognition !== 'object') {
+        state.political.control_recognition = {};
     }
 
     // Get proposer faction
@@ -613,7 +613,7 @@ export function applyTreatyTerritorialAnnex(
             }
 
             // Set control override to BRCKO_CONTROLLER_ID
-            state.control_overrides![sid] = {
+            state.political.control_overrides![sid] = {
                 side: BRCKO_CONTROLLER_ID,
                 kind: 'treaty_transfer',
                 treaty_id: treatyDraft.treaty_id,
@@ -621,7 +621,7 @@ export function applyTreatyTerritorialAnnex(
             };
 
             // Also write recognition
-            state.control_recognition![sid] = {
+            state.political.control_recognition![sid] = {
                 side: BRCKO_CONTROLLER_ID,
                 treaty_id: treatyDraft.treaty_id,
                 since_turn: currentTurn
@@ -686,7 +686,7 @@ export function applyTreatyTerritorialAnnex(
             }
 
             // Apply transfer
-            state.control_overrides![sid] = {
+            state.political.control_overrides![sid] = {
                 side: clause.receiver_side,
                 kind: 'treaty_transfer',
                 treaty_id: treatyDraft.treaty_id,
@@ -694,7 +694,7 @@ export function applyTreatyTerritorialAnnex(
             };
 
             // Also write recognition
-            state.control_recognition![sid] = {
+            state.political.control_recognition![sid] = {
                 side: clause.receiver_side,
                 treaty_id: treatyDraft.treaty_id,
                 since_turn: currentTurn
@@ -713,8 +713,8 @@ export function applyTreatyTerritorialAnnex(
     if (infeasibleSids.length > 0) {
         // Rollback any transfers we already applied
         for (const transfer of appliedTransfers) {
-            delete state.control_overrides![transfer.sid];
-            delete state.control_recognition![transfer.sid];
+            delete state.political.control_overrides![transfer.sid];
+            delete state.political.control_recognition![transfer.sid];
         }
         return {
             state,
@@ -764,7 +764,7 @@ export function applyTreatyTerritorialAnnex(
             }
 
             // Apply recognition (recognition-only, no control override)
-            state.control_recognition![sid] = {
+            state.political.control_recognition![sid] = {
                 side: recognizedSide,
                 treaty_id: treatyDraft.treaty_id,
                 since_turn: currentTurn
@@ -815,8 +815,8 @@ export function applyTreatyTerritorialAnnex(
             proposerFaction.negotiation.last_capital_change_turn = currentTurn;
 
             // Ensure ledger exists
-            if (!state.negotiation_ledger || !Array.isArray(state.negotiation_ledger)) {
-                state.negotiation_ledger = [];
+            if (!state.political.negotiation_ledger || !Array.isArray(state.political.negotiation_ledger)) {
+                state.political.negotiation_ledger = [];
             }
 
             // Append ledger entry
@@ -830,7 +830,7 @@ export function applyTreatyTerritorialAnnex(
                 amount: appliedCost,
                 reason: 'treaty_territory'
             };
-            state.negotiation_ledger.push(entry);
+            state.political.negotiation_ledger.push(entry);
             actualSpent = appliedCost;
         }
     }
@@ -970,11 +970,11 @@ export function applyTreatyCorridorRights(
     }
 
     // Initialize supply_rights if needed
-    if (!state.supply_rights || typeof state.supply_rights !== 'object') {
-        state.supply_rights = { corridors: [] };
+    if (!state.political.supply_rights || typeof state.political.supply_rights !== 'object') {
+        state.political.supply_rights = { corridors: [] };
     }
-    if (!Array.isArray(state.supply_rights.corridors)) {
-        state.supply_rights.corridors = [];
+    if (!Array.isArray(state.political.supply_rights.corridors)) {
+        state.political.supply_rights.corridors = [];
     }
 
     // Get proposer faction
@@ -1092,13 +1092,13 @@ export function applyTreatyCorridorRights(
         const key = `${clause.beneficiary}_${scopeHash}`;
 
         // Check for existing identical corridor (same beneficiary + same scope_hash)
-        const existingIndex = state.supply_rights.corridors.findIndex(
+        const existingIndex = state.political.supply_rights.corridors.findIndex(
             (c) => c.beneficiary === clause.beneficiary && generateCorridorScopeHash(c.scope) === scopeHash
         );
 
         if (existingIndex >= 0) {
             // Merge: extend until_turn if new is later, null wins
-            const existing = state.supply_rights.corridors[existingIndex];
+            const existing = state.political.supply_rights.corridors[existingIndex];
             const newUntilTurn = currentTurn + baseDuration;
             if (existing.until_turn === null) {
                 existing.until_turn = null; // null (indefinite) wins
@@ -1123,7 +1123,7 @@ export function applyTreatyCorridorRights(
                 until_turn: untilTurn
             };
 
-            state.supply_rights.corridors.push(corridor);
+            state.political.supply_rights.corridors.push(corridor);
             appliedCorridors.push({
                 id: corridorId,
                 beneficiary: clause.beneficiary,
@@ -1136,9 +1136,9 @@ export function applyTreatyCorridorRights(
     if (failures.length > 0) {
         // Rollback any corridors we added
         for (const corridor of appliedCorridors) {
-            const index = state.supply_rights.corridors.findIndex((c) => c.id === corridor.id);
+            const index = state.political.supply_rights.corridors.findIndex((c) => c.id === corridor.id);
             if (index >= 0) {
-                state.supply_rights.corridors.splice(index, 1);
+                state.political.supply_rights.corridors.splice(index, 1);
             }
         }
         return {
@@ -1160,8 +1160,8 @@ export function applyTreatyCorridorRights(
         proposerFaction.negotiation.last_capital_change_turn = currentTurn;
 
         // Ensure ledger exists
-        if (!state.negotiation_ledger || !Array.isArray(state.negotiation_ledger)) {
-            state.negotiation_ledger = [];
+        if (!state.political.negotiation_ledger || !Array.isArray(state.political.negotiation_ledger)) {
+            state.political.negotiation_ledger = [];
         }
 
         // Append ledger entry
@@ -1175,12 +1175,12 @@ export function applyTreatyCorridorRights(
             amount: totalCost,
             reason: 'treaty_corridor'
         };
-        state.negotiation_ledger.push(entry);
+        state.political.negotiation_ledger.push(entry);
         actualSpent = totalCost;
     }
 
     // Ensure corridors are sorted by id (deterministic ordering)
-    state.supply_rights.corridors.sort((a, b) => a.id.localeCompare(b.id));
+    state.political.supply_rights.corridors.sort((a, b) => a.id.localeCompare(b.id));
 
     // Sort results deterministically
     appliedCorridors.sort((a, b) => a.id.localeCompare(b.id));
@@ -1228,7 +1228,7 @@ export function applyTreaty(
     let endStateReason: string | undefined = undefined;
 
     // Check if end_state already exists
-    if (corridorResult.state.end_state) {
+    if (corridorResult.state.political.end_state) {
         endStateReason = 'already_in_end_state';
     } else {
         // Phase 12D.1: Check if treaty has territorial effects (including Brčko) or corridor effects
@@ -1262,8 +1262,8 @@ export function applyTreaty(
                         proposerFaction.negotiation.last_capital_change_turn = currentTurn;
 
                         // Ensure ledger exists
-                        if (!corridorResult.state.negotiation_ledger || !Array.isArray(corridorResult.state.negotiation_ledger)) {
-                            corridorResult.state.negotiation_ledger = [];
+                        if (!corridorResult.state.political.negotiation_ledger || !Array.isArray(corridorResult.state.political.negotiation_ledger)) {
+                            corridorResult.state.political.negotiation_ledger = [];
                         }
 
                         // Append ledger entry
@@ -1277,20 +1277,20 @@ export function applyTreaty(
                             amount: competenceCost,
                             reason: 'treaty_competence'
                         };
-                        corridorResult.state.negotiation_ledger.push(entry);
+                        corridorResult.state.political.negotiation_ledger.push(entry);
                     }
                 }
 
                 // Phase 12D.1: Set end_state and build snapshot
                 // Phase 13A.0: Include competence allocations in snapshot
-                corridorResult.state.end_state = {
+                corridorResult.state.political.end_state = {
                     kind: 'peace_treaty',
                     treaty_id: treatyDraft.treaty_id,
                     since_turn: currentTurn
                 };
                 // Build snapshot from post-apply state with competence allocations
                 const snapshot = buildEndStateSnapshot(corridorResult.state, competenceResult.allocations);
-                corridorResult.state.end_state.snapshot = snapshot;
+                corridorResult.state.political.end_state.snapshot = snapshot;
                 endStateSet = true;
             }
         } else {
@@ -1326,8 +1326,8 @@ export function applyTreaty(
             };
 
             // Phase 12D.1: Add snapshot info if end_state was set
-            if (endStateSet && corridorResult.state.end_state?.snapshot) {
-                const snapshot = corridorResult.state.end_state.snapshot;
+            if (endStateSet && corridorResult.state.political.end_state?.snapshot) {
+                const snapshot = corridorResult.state.political.end_state.snapshot;
                 base.outcome_hash = snapshot.outcome_hash;
                 base.settlements_by_controller = Object.fromEntries(snapshot.settlements_by_controller);
             }

@@ -40,8 +40,8 @@ export function updateLossOfControlTrends(
     const currentTurn = state.meta.turn;
 
     // Initialize or get existing trend exposure
-    if (!state.loss_of_control_trends) {
-        state.loss_of_control_trends = {
+    if (!state.political.loss_of_control_trends) {
+        state.political.loss_of_control_trends = {
             by_faction: {},
             by_settlement: {},
             by_edge: {},
@@ -49,7 +49,7 @@ export function updateLossOfControlTrends(
         };
     }
 
-    const trends = state.loss_of_control_trends;
+    const trends = state.political.loss_of_control_trends;
     const previousSnapshot = trends.previous_turn_snapshot;
 
     // Initialize faction trends
@@ -80,7 +80,7 @@ export function updateLossOfControlTrends(
         }
 
         // Set collapse_eligible directly from collapse_eligibility state
-        const collapseEligibility = state.collapse_eligibility?.[faction.id];
+        const collapseEligibility = state.political.collapse_eligibility?.[faction.id];
         factionTrend.collapse_eligible = collapseEligibility ? (
             collapseEligibility.eligible_authority ||
             collapseEligibility.eligible_cohesion ||
@@ -100,8 +100,8 @@ export function updateLossOfControlTrends(
     }
 
     // Also include settlements with collapse damage
-    if (state.collapse_damage?.by_entity) {
-        for (const sid of Object.keys(state.collapse_damage.by_entity)) {
+    if (state.political.collapse_damage?.by_entity) {
+        for (const sid of Object.keys(state.political.collapse_damage.by_entity)) {
             settlementSids.add(sid);
         }
     }
@@ -129,7 +129,7 @@ export function updateLossOfControlTrends(
             currentModifiers.pressure_cap_mult < 1
         );
         settlementTrend.supply_fragile = currentModifiers.supply_mult < 1;
-        settlementTrend.will_not_recover = !!(state.collapse_damage?.by_entity?.[sid]);
+        settlementTrend.will_not_recover = !!(state.political.collapse_damage?.by_entity?.[sid]);
 
         // Compute capacity trend from supply_mult (as proxy for overall degradation)
         // Note: "down" trend means supply_mult decreased (degradation worsening)
@@ -155,8 +155,8 @@ export function updateLossOfControlTrends(
         }
 
         const edgeTrend = trends.by_edge[edgeId];
-        const pressure = state.front_pressure?.[edgeId];
-        const segment = state.front_segments?.[edgeId];
+        const pressure = state.military.front_pressure?.[edgeId];
+        const segment = state.military.front_segments?.[edgeId];
 
         // Compute pressure trend
         const currentPressure = pressure?.value ?? 0;
@@ -207,8 +207,8 @@ export function updateLossOfControlTrends(
 
     // Snapshot edge pressure and friction
     for (const edgeId of sortedEdges) {
-        const pressure = state.front_pressure?.[edgeId];
-        const segment = state.front_segments?.[edgeId];
+        const pressure = state.military.front_pressure?.[edgeId];
+        const segment = state.military.front_segments?.[edgeId];
         if (pressure) {
             currentSnapshot.edge_pressure[edgeId] = pressure.value ?? 0;
         }

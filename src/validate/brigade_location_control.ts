@@ -17,7 +17,7 @@ export function validateBrigadeLocationControl(state: GameState): ValidationIssu
     const issues: ValidationIssue[] = [];
     if (state.meta?.phase !== 'war') return issues;
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const [formationId, f] of Object.entries(formations)) {
         if (!f || f.status !== 'active') continue;
         const kind = (f as { kind?: string }).kind;

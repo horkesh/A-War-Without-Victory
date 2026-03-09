@@ -62,7 +62,7 @@ const DEFAULT_MAX_DURATION = 6;
  * Returns an error string if invalid, or null if the order is valid.
  */
 export function validateOGOrder(state: GameState, order: OGActivationOrder): string | null {
-    const formations = state.formations;
+    const formations = state.military.formations;
     if (!formations) return `No formations in state`;
 
     // 1. Corps must exist, be active, kind=corps
@@ -72,7 +72,7 @@ export function validateOGOrder(state: GameState, order: OGActivationOrder): str
     if (corps.kind !== 'corps') return `Formation ${order.corps_id} is not a corps (kind=${corps.kind})`;
 
     // 2. Corps must have OG slot available
-    const corpsCmd = state.corps_command?.[order.corps_id];
+    const corpsCmd = state.military.corps_command?.[order.corps_id];
     if (!corpsCmd) return `Corps ${order.corps_id} has no command state`;
     if (corpsCmd.active_ogs.length >= corpsCmd.og_slots) {
         return `Corps ${order.corps_id} has no OG slots available (${corpsCmd.active_ogs.length}/${corpsCmd.og_slots})`;
@@ -118,7 +118,7 @@ export function validateOGOrder(state: GameState, order: OGActivationOrder): str
         return `No focus settlements specified`;
     }
 
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (pc) {
         for (const sid of order.focus_settlements) {
             const controller = pc[sid];
@@ -146,7 +146,7 @@ export function validateOGOrder(state: GameState, order: OGActivationOrder): str
  */
 export function activateOGs(state: GameState): OGActivationReport {
     const report: OGActivationReport = { activated: [], rejected: [] };
-    const orders = state.og_orders;
+    const orders = state.military.og_orders;
     if (!orders || orders.length === 0) return report;
 
     const sortedOrders = [...orders].sort((a, b) => strictCompare(a.corps_id, b.corps_id));
@@ -158,20 +158,20 @@ export function activateOGs(state: GameState): OGActivationReport {
             continue;
         }
 
-        if (!state.formations) continue;
+        if (!state.military.formations) continue;
 
         const ogId = `og-${order.corps_id}-t${state.meta.turn}`;
         const totalPersonnel = order.donors.reduce((s, d) => s + d.personnel_contribution, 0);
-        const corps = state.formations[order.corps_id];
+        const corps = state.military.formations[order.corps_id];
 
         for (const donor of order.donors) {
-            const brig = state.formations[donor.brigade_id];
+            const brig = state.military.formations[donor.brigade_id];
             brig.personnel = (brig.personnel ?? 0) - donor.personnel_contribution;
             brig.cohesion = Math.max(0, (brig.cohesion ?? 60) - DONOR_COHESION_STRAIN);
         }
 
         // Create OG formation entry
-        state.formations[ogId] = {
+        state.military.formations[ogId] = {
             id: ogId,
             faction: corps.faction,
             name: `OG ${order.corps_id.split('-').pop()} T${state.meta.turn}`,
@@ -188,7 +188,7 @@ export function activateOGs(state: GameState): OGActivationReport {
         };
 
         // Register OG with corps command
-        const corpsCmd = state.corps_command?.[order.corps_id];
+        const corpsCmd = state.military.corps_command?.[order.corps_id];
         if (corpsCmd) {
             corpsCmd.active_ogs.push(ogId);
         }
@@ -197,7 +197,7 @@ export function activateOGs(state: GameState): OGActivationReport {
     }
 
     // Clear processed orders
-    state.og_orders = [];
+    state.military.og_orders = [];
     return report;
 }
 
@@ -224,13 +224,13 @@ function getOGMaxDuration(formation: FormationState): number {
  */
 function returnOGPersonnel(state: GameState, og: FormationState): void {
     const corpsId = og.corps_id;
-    if (!corpsId || !state.formations) return;
+    if (!corpsId || !state.military.formations) return;
 
     // Find active donor brigades in the same corps and faction
     const donors: FormationState[] = [];
-    const formationIds = Object.keys(state.formations).sort(strictCompare);
+    const formationIds = Object.keys(state.military.formations).sort(strictCompare);
     for (const fid of formationIds) {
-        const f = state.formations[fid];
+        const f = state.military.formations[fid];
         if (
             f.kind === 'brigade' &&
             f.corps_id === corpsId &&
@@ -263,7 +263,7 @@ function returnOGPersonnel(state: GameState, og: FormationState): void {
  */
 export function updateOGLifecycle(state: GameState): FormationId[] {
     const dissolved: FormationId[] = [];
-    const formations = state.formations;
+    const formations = state.military.formations;
     if (!formations) return dissolved;
 
     const formationIds = Object.keys(formations).sort(strictCompare);
@@ -285,8 +285,8 @@ export function updateOGLifecycle(state: GameState): FormationId[] {
             returnOGPersonnel(state, f);
 
             // Remove from corps active_ogs
-            if (f.corps_id && state.corps_command?.[f.corps_id]) {
-                const ogs = state.corps_command[f.corps_id].active_ogs;
+            if (f.corps_id && state.military.corps_command?.[f.corps_id]) {
+                const ogs = state.military.corps_command[f.corps_id].active_ogs;
                 const idx = ogs.indexOf(fid);
                 if (idx >= 0) ogs.splice(idx, 1);
             }

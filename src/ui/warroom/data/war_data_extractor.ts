@@ -289,8 +289,8 @@ export function extractWarData(
 // ---------------------------------------------------------------------------
 
 function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
-    const formations = state.formations ?? {};
-    const movementState = state.brigade_movement_state ?? {};
+    const formations = state.military.formations ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
 
     const details: FormationDetail[] = [];
     let totalPersonnel = 0;
@@ -347,8 +347,8 @@ function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
 }
 
 function extractCasualties(state: GameState, pf: FactionId): CasualtiesSnapshot {
-    const ledger = state.casualty_ledger?.[pf];
-    const formations = state.formations ?? {};
+    const ledger = state.military.casualty_ledger?.[pf];
+    const formations = state.military.formations ?? {};
 
     let woundedPending = 0;
     for (const fid of Object.keys(formations).sort(sc)) {
@@ -384,7 +384,7 @@ function extractTerritory(
     pf: FactionId,
     osidAreas?: { totalArea: number; areas: Record<string, number> }
 ): TerritorySnapshot {
-    const controllers = state.political_controllers ?? {};
+    const controllers = state.political.political_controllers ?? {};
     const keys = Object.keys(controllers);
     const total = keys.length || 1;
     let controlled = 0;
@@ -418,11 +418,11 @@ function extractTerritory(
 }
 
 function extractDisplacement(state: GameState, pf: FactionId): DisplacementSnapshot {
-    const dispState = state.displacement_state ?? {};
-    const controllers = state.political_controllers ?? {};
-    const camps = state.displacement_camp_state ?? {};
-    const timers = state.hostile_takeover_timers ?? {};
-    const civCas = state.civilian_casualties;
+    const dispState = state.displacement.displacement_state ?? {};
+    const controllers = state.political.political_controllers ?? {};
+    const camps = state.displacement.displacement_camp_state ?? {};
+    const timers = state.displacement.hostile_takeover_timers ?? {};
+    const civCas = state.displacement.civilian_casualties;
 
     let totalOut = 0;
     let totalIn = 0;
@@ -448,8 +448,8 @@ function extractDisplacement(state: GameState, pf: FactionId): DisplacementSnaps
 }
 
 function extractExhaustion(state: GameState, pf: FactionId): ExhaustionSnapshot {
-    const level = state.war_exhaustion?.[pf] ?? 0;
-    const trends = state.loss_of_control_trends?.by_faction?.[pf];
+    const level = state.political.war_exhaustion?.[pf] ?? 0;
+    const trends = state.political.loss_of_control_trends?.by_faction?.[pf];
     return {
         level,
         trend: trends?.exhaustion_trend ?? 'flat',
@@ -457,8 +457,8 @@ function extractExhaustion(state: GameState, pf: FactionId): ExhaustionSnapshot 
 }
 
 function extractSupply(state: GameState, pf: FactionId): SupplySnapshot {
-    const sustState = state.sustainability_state ?? {};
-    const controllers = state.political_controllers ?? {};
+    const sustState = state.displacement.sustainability_state ?? {};
+    const controllers = state.political.political_controllers ?? {};
 
     let adequate = 0;
     let strained = 0;
@@ -502,8 +502,8 @@ function extractAuthority(state: GameState, pf: FactionId): AuthoritySnapshot {
 }
 
 function extractCorpsOps(state: GameState, pf: FactionId): CorpsOperationSnapshot[] {
-    const corpsCmd = state.corps_command ?? {};
-    const formations = state.formations ?? {};
+    const corpsCmd = state.military.corps_command ?? {};
+    const formations = state.military.formations ?? {};
     const results: CorpsOperationSnapshot[] = [];
 
     for (const corpsId of Object.keys(corpsCmd).sort(sc)) {
@@ -534,8 +534,8 @@ function extractDiplomacy(state: GameState, pf: FactionId): FactionDiplomacySnap
     } : null;
 
     // RBiH-HRHB state (Tier 1 for both RBiH and HRHB)
-    const rhs = state.rbih_hrhb_state;
-    const alliance = state.war_alliance_rbih_hrhb;
+    const rhs = state.political.rbih_hrhb_state;
+    const alliance = state.political.war_alliance_rbih_hrhb;
     const rbihHrhbState: RBiHDiplomacySnapshot | null =
         (pf === 'RBiH' || pf === 'HRHB') && rhs != null ? {
             allianceValue: alliance ?? 0,
@@ -564,7 +564,7 @@ function extractDiplomacy(state: GameState, pf: FactionId): FactionDiplomacySnap
     const constraintSeverity = pf === 'HRHB' ? (ps?.constraint_severity ?? null) : null;
 
     // Negotiation momentum (own faction's negotiation pressure)
-    const ivp = state.international_visibility_pressure;
+    const ivp = state.political.international_visibility_pressure;
     const negotiationMomentum = ivp?.negotiation_momentum ?? 0;
 
     return {
@@ -584,11 +584,11 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
     // Casualty ledger per-formation keys: enemy formations that took casualties = contacted
     const existingIds = new Set(results.map(r => r.formationId));
     for (const enemyFaction of enemies) {
-        const enemyLedger = state.casualty_ledger?.[enemyFaction];
+        const enemyLedger = state.military.casualty_ledger?.[enemyFaction];
         if (!enemyLedger?.per_formation) continue;
         for (const fmtId of Object.keys(enemyLedger.per_formation).sort(sc)) {
             if (existingIds.has(fmtId)) continue;
-            const f = state.formations[fmtId];
+            const f = state.military.formations[fmtId];
             if (!f) continue;
             results.push({
                 formationId: fmtId,
@@ -608,12 +608,12 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
 
 function extractFrontEdges(state: GameState, pf: FactionId): FrontEdgeSnapshot[] {
     const phase = state.meta?.phase as string | undefined;
-    const useOsid = phase === 'war' && (state.war_front_edges_osid?.length ?? 0) > 0;
-    const edges: FrontEdgeState[] = useOsid ? (state.war_front_edges_osid ?? []) : (state.front_edges ?? []);
-    const pressure: Record<string, FrontPressureState> = state.front_pressure ?? {};
-    const segments: Record<string, { friction: number }> = state.front_segments ?? {};
-    const garrison = state.militia_garrison ?? {};
-    const formations = state.formations ?? {};
+    const useOsid = phase === 'war' && (state.military.war_front_edges_osid?.length ?? 0) > 0;
+    const edges: FrontEdgeState[] = useOsid ? (state.military.war_front_edges_osid ?? []) : (state.military.front_edges ?? []);
+    const pressure: Record<string, FrontPressureState> = state.military.front_pressure ?? {};
+    const segments: Record<string, { friction: number }> = state.military.front_segments ?? {};
+    const garrison = state.military.militia_garrison ?? {};
+    const formations = state.military.formations ?? {};
     const osidToBrigade = new Set<string>();
     for (const fid of Object.keys(formations).sort(sc)) {
         const loc = (formations[fid] as { location_osid?: string }).location_osid;
@@ -653,9 +653,9 @@ function extractFrontEdges(state: GameState, pf: FactionId): FrontEdgeSnapshot[]
 }
 
 function extractBrigadeMovement(state: GameState, pf: FactionId): BrigadeMovementSnapshot {
-    const movementState: Record<string, BrigadeMovementState> = state.brigade_movement_state ?? {};
-    const formations = state.formations ?? {};
-    const encircled = state.brigade_encircled ?? {};
+    const movementState: Record<string, BrigadeMovementState> = state.military.brigade_movement_state ?? {};
+    const formations = state.military.formations ?? {};
+    const encircled = state.military.brigade_encircled ?? {};
 
     const packing: FormationId[] = [];
     const inTransit: FormationId[] = [];
@@ -688,8 +688,8 @@ function extractOfficersByFaction(
     state: GameState,
     playerFaction: FactionId
 ): Partial<Record<FactionId, OfficerListEntry[]>> {
-    const data = state.named_officer_data ?? [];
-    const officers = state.named_officers ?? {};
+    const data = state.military.named_officer_data ?? [];
+    const officers = state.military.named_officers ?? {};
     const list: OfficerListEntry[] = [];
     for (const d of data) {
         const id = typeof (d as { id?: string }).id === 'string' ? (d as { id: string }).id : '';
@@ -711,15 +711,15 @@ function extractOfficersByFaction(
 
 function extractExposedFront(state: GameState, pf: FactionId): SettlementId[] {
     const phase = state.meta?.phase as string | undefined;
-    const useOsid = phase === 'war' && (state.war_front_edges_osid?.length ?? 0) > 0;
-    const edges: FrontEdgeState[] = useOsid ? (state.war_front_edges_osid ?? []) : (state.front_edges ?? []);
-    const formations = state.formations ?? {};
+    const useOsid = phase === 'war' && (state.military.war_front_edges_osid?.length ?? 0) > 0;
+    const edges: FrontEdgeState[] = useOsid ? (state.military.war_front_edges_osid ?? []) : (state.military.front_edges ?? []);
+    const formations = state.military.formations ?? {};
     const osidToBrigade = new Set<string>();
     for (const fid of Object.keys(formations).sort(sc)) {
         const loc = (formations[fid] as { location_osid?: string }).location_osid;
         if (typeof loc === 'string' && loc) osidToBrigade.add(loc);
     }
-    const garrison = state.militia_garrison ?? {};
+    const garrison = state.military.militia_garrison ?? {};
 
     const frontSettlements = new Set<SettlementId>();
     for (const edge of edges) {

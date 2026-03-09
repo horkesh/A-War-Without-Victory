@@ -81,9 +81,9 @@ const TRUCE_BREAK_AGGRESSION_SPIKE = 0.25;
 
 /** Return true if the Graz Accords are currently active (fired and accepted by both). */
 export function isGrazAccordsActive(state: GameState): boolean {
-    if (state.vienna_declaration_turn == null) return false;
-    if ((state.meta?.turn ?? 0) < state.vienna_declaration_turn) return false;
-    const accepted = state.vienna_accepted;
+    if (state.political.vienna_declaration_turn == null) return false;
+    if ((state.meta?.turn ?? 0) < state.political.vienna_declaration_turn) return false;
+    const accepted = state.political.vienna_accepted;
     if (!accepted) return false;
     return accepted['RS' as FactionId] === true && accepted['HRHB' as FactionId] === true;
 }
@@ -93,12 +93,12 @@ export const isViennaDeclarationActive = isGrazAccordsActive;
 
 /** Return true if the Herzegovina corps-pair truce is active (not broken). */
 export function isHerzegovinaTruceActive(state: GameState): boolean {
-    return isGrazAccordsActive(state) && state.vienna_herzegovina_broken_by == null;
+    return isGrazAccordsActive(state) && state.political.vienna_herzegovina_broken_by == null;
 }
 
 /** Return true if the Kiseljak OSID exclusion is active (not broken). */
 export function isKiseljakExclusionActive(state: GameState): boolean {
-    return isGrazAccordsActive(state) && state.vienna_kiseljak_broken !== true;
+    return isGrazAccordsActive(state) && state.political.vienna_kiseljak_broken !== true;
 }
 
 /**
@@ -184,7 +184,7 @@ export function getTruceBreakAggressionBonus(faction: FactionId, state: GameStat
     const partner = getTrucePartner(faction);
     if (!partner) return 0;
 
-    const brokenTurn = state.truce_broken_turn?.[partner];
+    const brokenTurn = state.political.truce_broken_turn?.[partner];
     if (brokenTurn == null) return 0;
 
     const currentTurn = state.meta?.turn ?? 0;
@@ -206,18 +206,18 @@ export function getTruceBreakAggressionBonus(faction: FactionId, state: GameStat
  * Returns the narrative text if fired, or null if already fired or not yet time.
  */
 export function checkAndFireGrazAccords(state: GameState): string | null {
-    if (state.vienna_declaration_turn != null) return null; // already fired
+    if (state.political.vienna_declaration_turn != null) return null; // already fired
     if (state.meta?.phase !== 'war') return null;
     const turn = state.meta?.turn ?? 0;
     if (turn < GRAZ_ACCORDS_TURN) return null;
 
-    state.vienna_declaration_turn = turn;
+    state.political.vienna_declaration_turn = turn;
 
     // Auto-accept for both factions (bot behavior).
     // Player-controlled factions get accept/decline via IPC (future).
-    if (!state.vienna_accepted) state.vienna_accepted = {};
-    state.vienna_accepted['RS' as FactionId] = true;
-    state.vienna_accepted['HRHB' as FactionId] = true;
+    if (!state.political.vienna_accepted) state.political.vienna_accepted = {};
+    state.political.vienna_accepted['RS' as FactionId] = true;
+    state.political.vienna_accepted['HRHB' as FactionId] = true;
 
     return '6 May 1992 — Karadžić and Boban meet in Graz, Austria, and agree to divide Bosnia between them. '
         + 'Herzegovina Corps and HVO Southeast Herzegovina observe a ceasefire. '
@@ -243,10 +243,10 @@ export function recordTruceBroken(faction: FactionId, targetOsid: string, state:
 
     // Check if this is a Kiseljak exclusion break
     if (isKiseljakExclusionActive(state) && isKiseljakExcluded(targetOsid, faction)) {
-        state.vienna_kiseljak_broken = true;
-        if (!state.truce_broken_turn) state.truce_broken_turn = {};
-        if (state.truce_broken_turn[faction] == null) {
-            state.truce_broken_turn[faction] = state.meta?.turn ?? 0;
+        state.political.vienna_kiseljak_broken = true;
+        if (!state.political.truce_broken_turn) state.political.truce_broken_turn = {};
+        if (state.political.truce_broken_turn[faction] == null) {
+            state.political.truce_broken_turn[faction] = state.meta?.turn ?? 0;
         }
         return `Warning: ${factionName} are attacking ${partnerName}-held territory near Kiseljak, `
             + `breaking the Kiseljak exclusion zone. ${partnerName} forces will respond aggressively.`;
@@ -254,10 +254,10 @@ export function recordTruceBroken(faction: FactionId, targetOsid: string, state:
 
     // Check if this is a Herzegovina corps-pair break
     if (isHerzegovinaTruceActive(state)) {
-        state.vienna_herzegovina_broken_by = faction;
-        if (!state.truce_broken_turn) state.truce_broken_turn = {};
-        if (state.truce_broken_turn[faction] == null) {
-            state.truce_broken_turn[faction] = state.meta?.turn ?? 0;
+        state.political.vienna_herzegovina_broken_by = faction;
+        if (!state.political.truce_broken_turn) state.political.truce_broken_turn = {};
+        if (state.political.truce_broken_turn[faction] == null) {
+            state.political.truce_broken_turn[faction] = state.meta?.turn ?? 0;
         }
         return `Warning: ${factionName} are attacking ${partnerName}-held territory in Herzegovina, `
             + `breaking the Graz Accords ceasefire. ${partnerName} forces will respond aggressively.`;

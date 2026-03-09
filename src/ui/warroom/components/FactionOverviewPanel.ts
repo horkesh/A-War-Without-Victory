@@ -85,16 +85,16 @@ export class FactionOverviewPanel {
         let stabilityCount = 0;
         const controlCounts = { secure: 0, contested: 0, highlyContested: 0 };
 
-        if (this.gameState.municipalities) {
-            const munIds = Object.keys(this.gameState.municipalities).sort(strictCompare);
+        if (this.gameState.political.municipalities) {
+            const munIds = Object.keys(this.gameState.political.municipalities).sort(strictCompare);
             for (const munId of munIds) {
-                const mun = this.gameState.municipalities[munId];
+                const mun = this.gameState.political.municipalities[munId];
                 if (!mun) continue;
                 const op = mun.organizational_penetration;
                 if (!op) continue;
 
                 const ownPen = getFactionPartyPen(op, factionId);
-                const controller = this.gameState.political_controllers?.[munId];
+                const controller = this.gameState.political.political_controllers?.[munId];
                 const isControlled = controller === factionId;
 
                 // Count investments
@@ -130,7 +130,7 @@ export class FactionOverviewPanel {
             }
         }
 
-        const totalMuns = this.gameState.municipalities ? Object.keys(this.gameState.municipalities).length : 0;
+        const totalMuns = this.gameState.political.municipalities ? Object.keys(this.gameState.political.municipalities).length : 0;
         const orgCoverage = totalMuns > 0 ? (totalMunsWithPresence / totalMuns) * 100 : 0;
         const avgStability = stabilityCount > 0 ? stabilitySum / stabilityCount : 50;
 
@@ -171,7 +171,7 @@ export class FactionOverviewPanel {
             hrhbPressure,
             rsHasDeclared: rs?.declared ?? false,
             hrhbHasDeclared: hrhb?.declared ?? false,
-            rbihHrhbRelationship: this.gameState.phase0_relationships?.rbih_hrhb ?? null,
+            rbihHrhbRelationship: this.gameState.political.phase0_relationships?.rbih_hrhb ?? null,
             referendumHeld: this.gameState.meta.referendum_held ?? false,
             warCountdown,
             warnings,
@@ -587,7 +587,7 @@ export class FactionOverviewPanel {
         }
 
         // Exhaustion worsening
-        const trends = state.loss_of_control_trends?.by_faction?.[pf];
+        const trends = state.political.loss_of_control_trends?.by_faction?.[pf];
         if (trends?.exhaustion_increasing) {
             warnings.push('Exhaustion trend worsening');
         }

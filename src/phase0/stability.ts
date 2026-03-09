@@ -128,11 +128,11 @@ export function updateMunicipalityStabilityScore(
     munId: MunicipalityId,
     inputs: StabilityInputs
 ): number {
-    if (!state.municipalities) state.municipalities = {};
-    let mun = state.municipalities[munId];
+    if (!state.political.municipalities) state.political.municipalities = {};
+    let mun = state.political.municipalities[munId];
     if (!mun) {
         mun = {};
-        state.municipalities[munId] = mun;
+        state.political.municipalities[munId] = mun;
     }
     const score = computeStabilityScore(inputs);
     mun.stability_score = score;
@@ -153,10 +153,10 @@ export function updateAllStabilityScores(
         getGeographic?: (munId: MunicipalityId) => GeographicInputs | undefined;
     }
 ): void {
-    if (!state.municipalities) return;
-    const munIds = Object.keys(state.municipalities).slice().sort(strictCompare);
+    if (!state.political.municipalities) return;
+    const munIds = Object.keys(state.political.municipalities).slice().sort(strictCompare);
     for (const munId of munIds) {
-        const mun = state.municipalities[munId];
+        const mun = state.political.municipalities[munId];
         const controller = options?.getController?.(munId) ?? null;
         const controllerShare = options?.getControllerShare?.(munId);
         const geographic = options?.getGeographic?.(munId);

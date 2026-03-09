@@ -63,7 +63,7 @@ export function isPressureEligible(
     _factionId?: FactionId,
     canonicalToOperational?: CanonicalToOperationalMap
 ): boolean {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const keyA = resolveControlKey(edge.a, pc as Record<string, unknown>, canonicalToOperational);
     const keyB = resolveControlKey(edge.b, pc as Record<string, unknown>, canonicalToOperational);
     // Both settlements must be present in political control map

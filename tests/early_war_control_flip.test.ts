@@ -106,7 +106,7 @@ test('runControlFlip does not modify faction profile (authority) when flips occu
 
 test('runControlFlip with consolidation set skips that municipality', () => {
     const state = stateWithTwoAdjacentMuns();
-    state.war_consolidation_until = { MUN_A: 20 };
+    state.political.war_consolidation_until = { MUN_A: 20 };
     const report = runControlFlip({ state, turn: 10 });
     assert.strictEqual(report.flips.length, 0);
 });

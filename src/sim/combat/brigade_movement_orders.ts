@@ -31,9 +31,9 @@ export function applyBrigadeMovementOrders(
     reverseMap: OperationalToCanonicalReverseMap,
 ): BrigadeMovementReport {
     const report: BrigadeMovementReport = { moves_applied: 0, entrenchment_incremented: 0, disrupted_decremented: 0 };
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const adjacency = buildOsidAdjacency(edges);
-    const movementOrders = state.brigade_movement_orders ?? {};
+    const movementOrders = state.military.brigade_movement_orders ?? {};
     const formationIds = Object.keys(formations).filter(id => {
         const f = formations[id];
         return f?.status === 'active' && (f as { location_osid?: string }).location_osid != null && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom');
@@ -64,8 +64,8 @@ export function applyBrigadeMovementOrders(
         if (canMove && destOsid) {
             (f as { location_osid?: string }).location_osid = destOsid;
             (f as { entrenchment_turns?: number }).entrenchment_turns = 0;
-            if (state.brigade_movement_state) {
-                const m = state.brigade_movement_state[formationId];
+            if (state.military.brigade_movement_state) {
+                const m = state.military.brigade_movement_state[formationId];
                 if (m) m.status = 'deployed';
             }
             report.moves_applied += 1;
@@ -76,6 +76,6 @@ export function applyBrigadeMovementOrders(
         }
     }
 
-    state.brigade_movement_orders = undefined;
+    state.military.brigade_movement_orders = undefined;
     return report;
 }

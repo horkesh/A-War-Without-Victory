@@ -90,7 +90,7 @@ export function applyFormationCommitment(
     const activeEdgesByFactionSidePair = new Map<string, string[]>();
     for (const edge of derivedFrontEdges) {
         if (!edge.side_a || !edge.side_b) continue;
-        const seg = (state.front_segments as any)?.[edge.edge_id];
+        const seg = (state.military.front_segments as any)?.[edge.edge_id];
         if (!seg || typeof seg !== 'object' || (seg as any).active !== true) continue;
 
         // Add to side_a's active edges
@@ -251,7 +251,7 @@ export function applyFormationCommitment(
         }
 
         // Get base posture weights
-        const basePosture = state.front_posture?.[factionId];
+        const basePosture = state.military.front_posture?.[factionId];
         const assignments = basePosture?.assignments ?? {};
 
         // Compute effective weights per edge

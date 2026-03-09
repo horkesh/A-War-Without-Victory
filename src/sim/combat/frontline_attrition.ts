@@ -161,18 +161,18 @@ export function applyFrontlineAttrition(
         by_faction: {}
     };
 
-    const formations = state.formations;
+    const formations = state.military.formations;
     if (!formations) return report;
 
-    const sectors = state.corps_front_sectors;
+    const sectors = state.military.corps_front_sectors;
     if (!sectors) return report;
 
-    if (!state.casualty_ledger) {
+    if (!state.military.casualty_ledger) {
         const factionIds = (state.factions ?? []).map(f => f.id);
-        state.casualty_ledger = initializeCasualtyLedger(factionIds);
+        state.military.casualty_ledger = initializeCasualtyLedger(factionIds);
     }
 
-    const pools = (state.militia_pools ?? {}) as Record<string, MilitiaPoolState>;
+    const pools = (state.military.militia_pools ?? {}) as Record<string, MilitiaPoolState>;
 
     // Build brigade→sector lookup from assigned_brigade_ids.
     // A brigade takes frontline attrition if it appears in any sector's
@@ -238,8 +238,8 @@ export function applyFrontlineAttrition(
             const entry = facEntry?.by_osid?.find(e => e.osid === locationOsid);
             if (entry) {
                 let effectiveState = entry.state;
-                if (state.meta.supply_reserves_enabled && state.general_supply_reserve) {
-                    const reserveLevel = (state.general_supply_reserve as Record<string, number>)[factionId] ?? 100;
+                if (state.meta.supply_reserves_enabled && state.military.general_supply_reserve) {
+                    const reserveLevel = (state.military.general_supply_reserve as Record<string, number>)[factionId] ?? 100;
                     effectiveState = getEffectiveSupplyState(entry.state, reserveLevel);
                 }
                 if (effectiveState === 'critical') supplyMod = 2.0;
@@ -290,7 +290,7 @@ export function applyFrontlineAttrition(
         const killed = Math.floor(casualties * KIA_FRACTION);
         const wounded = Math.floor(casualties * WIA_FRACTION);
         const mia = Math.max(0, casualties - killed - wounded);
-        recordBattleCasualties(state.casualty_ledger!, factionId, fid, {
+        recordBattleCasualties(state.military.casualty_ledger!, factionId, fid, {
             killed, wounded, missing_captured: mia
         });
 

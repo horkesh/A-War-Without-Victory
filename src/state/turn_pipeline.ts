@@ -75,8 +75,8 @@ export function runOneTurn(
 
     if (working.meta.phase === 'peace') {
         // Ensure Phase 0 relationships are initialized (mirrors warroom logic)
-        if (!working.phase0_relationships) {
-            working.phase0_relationships = initializePhase0Relationships();
+        if (!working.political.phase0_relationships) {
+            working.political.phase0_relationships = initializePhase0Relationships();
         }
 
         // Bot AI: non-player factions invest (mirrors warroom run_phase0_turn.ts)

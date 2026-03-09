@@ -399,7 +399,7 @@ export class DiplomacyModal {
 
         // W5: RS territory > 40% (Tier 2)
         // We compute RS territory from political_controllers
-        const controllers = this.gameState.political_controllers ?? {};
+        const controllers = this.gameState.political.political_controllers ?? {};
         const sids = Object.keys(controllers).sort();
         const total = sids.length || 1;
         let rsCount = 0;

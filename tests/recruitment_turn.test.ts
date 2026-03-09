@@ -96,9 +96,9 @@ describe('accrueRecruitmentResources', () => {
         assert.strictEqual(accrual!.by_faction.length, 1);
         assert.strictEqual(accrual!.by_faction[0]!.capital_delta, 2);
         assert.strictEqual(accrual!.by_faction[0]!.equipment_delta, 16);
-        assert.strictEqual(state.recruitment_state!.recruitment_capital.RBiH.points, 12);
+        assert.strictEqual(state.military.recruitment_state!.recruitment_capital.RBiH.points, 12);
         // Embargo pool ceiling: Math.round(points_initial * (1 + embargoAccess)) = Math.round(10 * 1.7) = 17
-        assert.strictEqual(state.recruitment_state!.equipment_pools.RBiH.points, 17);
+        assert.strictEqual(state.military.recruitment_state!.equipment_pools.RBiH.points, 17);
     });
 });
 
@@ -145,7 +145,7 @@ describe('runOngoingRecruitment', () => {
         assert.ok(report);
         assert.strictEqual(report!.elective_recruited, 1);
         assert.strictEqual(report!.actions.length, 1);
-        assert.ok(state.formations['b1'] || state.formations['b2']);
+        assert.ok(state.military.formations['b1'] || state.military.formations['b2']);
     });
 
     test('retries mandatory brigade recruitment during ongoing phase', () => {
@@ -177,7 +177,7 @@ describe('runOngoingRecruitment', () => {
         assert.strictEqual(report!.mandatory_recruited, 1);
         assert.strictEqual(report!.actions.length, 1);
         assert.strictEqual(report!.actions[0]!.mandatory, true);
-        assert.ok(state.formations['mandatory_b1']);
+        assert.ok(state.military.formations['mandatory_b1']);
     });
 
     test('applies RS mandatory mobilization accrual across turns', () => {
@@ -240,7 +240,7 @@ describe('runOngoingRecruitment', () => {
         );
         assert.ok(reportTurn1);
         assert.strictEqual(reportTurn1!.mandatory_recruited, 1);
-        assert.ok(state.formations['rs_mandatory_1']);
+        assert.ok(state.military.formations['rs_mandatory_1']);
 
         const reportTurn2 = runOngoingRecruitment(
             state,
@@ -251,6 +251,6 @@ describe('runOngoingRecruitment', () => {
         );
         assert.ok(reportTurn2);
         assert.strictEqual(reportTurn2!.mandatory_recruited, 0);
-        assert.ok(state.formations['rs_mandatory_1']);
+        assert.ok(state.military.formations['rs_mandatory_1']);
     });
 });

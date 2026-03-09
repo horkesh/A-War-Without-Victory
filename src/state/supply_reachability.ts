@@ -132,8 +132,8 @@ export function computeSupplyReachability(
 
     // Phase 12C.3: Build active corridor rights by beneficiary
     const activeCorridorsByBeneficiary = new Map<string, Array<{ scope: { kind: 'region'; region_id: string } | { kind: 'edges'; edge_ids: string[] } | { kind: 'settlements'; sids: string[] }; edgeIds: Set<string>; nodeIds: Set<string> }>>();
-    if (state.supply_rights?.corridors) {
-        for (const corridor of state.supply_rights.corridors) {
+    if (state.political.supply_rights?.corridors) {
+        for (const corridor of state.political.supply_rights.corridors) {
             // Check if corridor is active (not expired)
             if (corridor.until_turn !== null && corridor.until_turn <= turn) {
                 continue; // expired

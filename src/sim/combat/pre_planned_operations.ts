@@ -398,7 +398,7 @@ function buildAxesFromDef(
     def: PrePlannedOp,
     state: GameState,
 ): { axes: OperationAxis[]; participating: FormationId[] } | null {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
 
@@ -471,10 +471,10 @@ function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participa
  * listed first) and queue the second.
  */
 export function injectPrePlannedOperations(state: GameState): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
 
     // Track which corps already got an op this injection pass
@@ -538,7 +538,7 @@ export function injectPrePlannedOperations(state: GameState): void {
  * Called when a corps completes an operation and has queued_operations.
  */
 export function injectQueuedOperation(state: GameState, corpsId: string): boolean {
-    const cmd = state.corps_command?.[corpsId];
+    const cmd = state.military.corps_command?.[corpsId];
     if (!cmd || cmd.active_operation) return false;
     if (!cmd.queued_operations?.length) return false;
 

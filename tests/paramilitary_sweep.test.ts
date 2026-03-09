@@ -178,10 +178,10 @@ describe('paramilitary_sweep', () => {
             // ETA was 1, decremented to 0 → capture
             expect(report.captured).toHaveLength(1);
             expect(report.captured[0].osid).toBe('D');
-            expect(state.political_controllers!['D']).toBe('RS');
+            expect(state.political.political_controllers!['D']).toBe('RS');
             // Formation dissolved
             expect(report.dissolved).toContain('para_rs_t3_0');
-            expect(state.formations!['para_rs_t3_0'].status).toBe('inactive');
+            expect(state.military.formations!['para_rs_t3_0'].status).toBe('inactive');
         });
 
         it('does not capture when ETA > 0', () => {
@@ -200,8 +200,8 @@ describe('paramilitary_sweep', () => {
             const report = advanceParamilitaries(state, reverseMap);
 
             expect(report.captured).toHaveLength(0);
-            expect(state.political_controllers!['D']).toBe('RBiH');
-            expect(state.formations!['para_rs_t3_0'].paramilitary_eta).toBe(1);
+            expect(state.political.political_controllers!['D']).toBe('RBiH');
+            expect(state.military.formations!['para_rs_t3_0'].paramilitary_eta).toBe(1);
         });
 
         it('records casualties in casualty ledger', () => {
@@ -220,11 +220,11 @@ describe('paramilitary_sweep', () => {
             advanceParamilitaries(state, reverseMap);
 
             // Check RS casualties recorded
-            const rsLedger = state.casualty_ledger!['RS'];
+            const rsLedger = state.military.casualty_ledger!['RS'];
             expect(rsLedger.killed + rsLedger.wounded + rsLedger.missing_captured).toBeGreaterThan(0);
 
             // Check civilian casualties recorded against RBiH
-            expect(state.civilian_casualties!['RBiH'].killed).toBeGreaterThan(0);
+            expect(state.displacement.civilian_casualties!['RBiH'].killed).toBeGreaterThan(0);
         });
 
         it('dissolves paramilitary that arrives at already-captured OSID', () => {

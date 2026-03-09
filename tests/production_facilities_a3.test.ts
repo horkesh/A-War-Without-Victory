@@ -42,8 +42,8 @@ function makeSettlements(): Map<string, SettlementRecord> {
 
 test('production facilities grant deterministic bonus by controlling faction', () => {
     const state = makeState();
-    state.political_controllers = {
-        ...(state.political_controllers ?? {}),
+    state.political.political_controllers = {
+        ...(state.political.political_controllers ?? {}),
         SK1: 'RBiH',
         SNT1: 'HRHB'
     };
@@ -55,9 +55,9 @@ test('production facilities grant deterministic bonus by controlling faction', (
 
 test('production bonus reduces supply-pressure growth without decreasing current pressure', () => {
     const state = makeState();
-    state.war_supply_pressure = { RBiH: 10, RS: 10, HRHB: 10 };
+    state.political.war_supply_pressure = { RBiH: 10, RS: 10, HRHB: 10 };
     // Alliance must be broken so the RBiH–HRHB edge counts as a front edge
-    state.war_alliance_rbih_hrhb = -1;
+    state.political.war_alliance_rbih_hrhb = -1;
     const edges: EdgeRecord[] = [{ a: 'SZ1', b: 'SV1' }];
     updateSupplyPressure(
         state,
@@ -74,6 +74,6 @@ test('production bonus reduces supply-pressure growth without decreasing current
         undefined,
         { RBiH: 5, RS: 0, HRHB: 0 }
     );
-    assert.ok((state.war_supply_pressure?.RBiH ?? 0) >= 10, 'pressure must remain monotonic');
-    assert.ok((state.war_supply_pressure?.RBiH ?? 0) < (state.war_supply_pressure?.HRHB ?? 0), 'production bonus should reduce growth relative to higher-isolation side');
+    assert.ok((state.political.war_supply_pressure?.RBiH ?? 0) >= 10, 'pressure must remain monotonic');
+    assert.ok((state.political.war_supply_pressure?.RBiH ?? 0) < (state.political.war_supply_pressure?.HRHB ?? 0), 'production bonus should reduce growth relative to higher-isolation side');
 });

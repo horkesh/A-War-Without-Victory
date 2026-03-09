@@ -90,12 +90,12 @@ function createAcceptedEvalReport(draft: TreatyDraft): TreatyAcceptanceReport {
 
 test('end_state: migration default is undefined', () => {
     const state = createTestState();
-    assert.strictEqual(state.end_state, undefined);
+    assert.strictEqual(state.political.end_state, undefined);
 
     // Serialize and deserialize to test migration
     const serialized = serializeState(state);
     const deserialized = deserializeState(serialized);
-    assert.strictEqual(deserialized.end_state, undefined);
+    assert.strictEqual(deserialized.political.end_state, undefined);
 });
 
 test('end_state: validator catches bad fields deterministically', () => {
@@ -132,8 +132,8 @@ test('end_state: applying treaty with territorial effect sets end_state', async 
     const graph = createTestSettlementGraph();
 
     // Set up control so RBiH controls sid1
-    if (!state.control_overrides) state.control_overrides = {};
-    state.control_overrides['sid1'] = {
+    if (!state.political.control_overrides) state.political.control_overrides = {};
+    state.political.control_overrides['sid1'] = {
         side: 'RBiH',
         kind: 'treaty_transfer',
         treaty_id: 'prev_treaty',
@@ -157,10 +157,10 @@ test('end_state: applying treaty with territorial effect sets end_state', async 
 
     const result = applyTreaty(state, draft, evalReport, { settlementGraph: graph });
 
-    assert.ok(result.state.end_state !== undefined);
-    assert.strictEqual(result.state.end_state?.kind, 'peace_treaty');
-    assert.strictEqual(result.state.end_state?.treaty_id, draft.treaty_id);
-    assert.strictEqual(result.state.end_state?.since_turn, 5);
+    assert.ok(result.state.political.end_state !== undefined);
+    assert.strictEqual(result.state.political.end_state?.kind, 'peace_treaty');
+    assert.strictEqual(result.state.political.end_state?.treaty_id, draft.treaty_id);
+    assert.strictEqual(result.state.political.end_state?.since_turn, 5);
     assert.ok(result.report.end_state?.set === true);
 });
 
@@ -191,7 +191,7 @@ test('end_state: applying treaty with corridor effect does NOT set end_state (de
     const result = applyTreaty(state, draft, evalReport, { settlementGraph: graph });
 
     // Phase 12D.1: Deprecated corridor clauses do NOT set end_state
-    assert.strictEqual(result.state.end_state, undefined);
+    assert.strictEqual(result.state.political.end_state, undefined);
     assert.ok(result.report.end_state?.set === false);
     assert.ok(result.report.corridor?.failures?.includes('deprecated_clause_noop'));
 });
@@ -214,7 +214,7 @@ test('end_state: military-only treaty does not set end_state', async () => {
 
     const result = applyTreaty(state, draft, evalReport);
 
-    assert.strictEqual(result.state.end_state, undefined);
+    assert.strictEqual(result.state.political.end_state, undefined);
     assert.ok(result.report.end_state?.set === false);
     assert.strictEqual(result.report.end_state?.reason, 'no_territorial_effects');
 });
@@ -224,15 +224,15 @@ test('end_state: if end_state already exists, treaty apply does not overwrite', 
     const graph = createTestSettlementGraph();
 
     // Set existing end_state
-    state.end_state = {
+    state.political.end_state = {
         kind: 'peace_treaty',
         treaty_id: 'existing_treaty',
         since_turn: 3
     };
 
     // Set up control so RBiH controls sid1
-    if (!state.control_overrides) state.control_overrides = {};
-    state.control_overrides['sid1'] = {
+    if (!state.political.control_overrides) state.political.control_overrides = {};
+    state.political.control_overrides['sid1'] = {
         side: 'RBiH',
         kind: 'treaty_transfer',
         treaty_id: 'prev_treaty',
@@ -257,9 +257,9 @@ test('end_state: if end_state already exists, treaty apply does not overwrite', 
     const result = applyTreaty(state, draft, evalReport, { settlementGraph: graph });
 
     // end_state should not be overwritten
-    assert.ok(result.state.end_state !== undefined);
-    assert.strictEqual(result.state.end_state?.treaty_id, 'existing_treaty');
-    assert.strictEqual(result.state.end_state?.since_turn, 3);
+    assert.ok(result.state.political.end_state !== undefined);
+    assert.strictEqual(result.state.political.end_state?.treaty_id, 'existing_treaty');
+    assert.strictEqual(result.state.political.end_state?.since_turn, 3);
     assert.ok(result.report.end_state?.set === false);
     assert.strictEqual(result.report.end_state?.reason, 'already_in_end_state');
 });
@@ -268,15 +268,15 @@ test('end_state: pipeline short-circuits when end_state exists', async () => {
     const state = createTestState(5);
 
     // Set end_state
-    state.end_state = {
+    state.political.end_state = {
         kind: 'peace_treaty',
         treaty_id: 'test_treaty',
         since_turn: 5
     };
 
     // Store initial state snapshot
-    const initialFrontSegments = JSON.stringify(state.front_segments);
-    const initialFrontPressure = JSON.stringify(state.front_pressure);
+    const initialFrontSegments = JSON.stringify(state.military.front_segments);
+    const initialFrontPressure = JSON.stringify(state.military.front_pressure);
     const initialTurn = state.meta.turn;
 
     // Run a turn
@@ -292,8 +292,8 @@ test('end_state: pipeline short-circuits when end_state exists', async () => {
     assert.strictEqual(nextState.meta.turn, initialTurn + 1);
 
     // Check that war mutation phases were skipped (key fields unchanged)
-    assert.strictEqual(JSON.stringify(nextState.front_segments), initialFrontSegments);
-    assert.strictEqual(JSON.stringify(nextState.front_pressure), initialFrontPressure);
+    assert.strictEqual(JSON.stringify(nextState.military.front_segments), initialFrontSegments);
+    assert.strictEqual(JSON.stringify(nextState.military.front_pressure), initialFrontPressure);
 
     // Check that only end_state_active phase ran
     assert.strictEqual(report.phases.length, 1);

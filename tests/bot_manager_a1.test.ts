@@ -49,8 +49,8 @@ test('bot manager decisions are deterministic with same seed and difficulty', ()
     const mgrB = new BotManager({ seed: 'same-seed', difficulty: 'medium' });
     const diagA = mgrA.runBots(stateA, FRONT_EDGES);
     const diagB = mgrB.runBots(stateB, FRONT_EDGES);
-    assert.deepStrictEqual(stateA.front_posture, stateB.front_posture);
-    assert.deepStrictEqual(stateA.formations, stateB.formations);
+    assert.deepStrictEqual(stateA.military.front_posture, stateB.military.front_posture);
+    assert.deepStrictEqual(stateA.military.formations, stateB.military.formations);
     assert.deepStrictEqual(diagA, diagB);
     assert.strictEqual(diagA.by_bot.length, 3);
 });
@@ -62,8 +62,8 @@ test('bot manager difficulty changes posture aggressiveness', () => {
     const hard = new BotManager({ seed: 'difficulty-seed', difficulty: 'hard' });
     easy.runBots(easyState, FRONT_EDGES);
     hard.runBots(hardState, FRONT_EDGES);
-    const easyPush = Object.values(easyState.front_posture).flatMap((x) => Object.values(x.assignments)).filter((a) => a.posture === 'push').length;
-    const hardPush = Object.values(hardState.front_posture).flatMap((x) => Object.values(x.assignments)).filter((a) => a.posture === 'push').length;
+    const easyPush = Object.values(easyState.military.front_posture).flatMap((x) => Object.values(x.assignments)).filter((a) => a.posture === 'push').length;
+    const hardPush = Object.values(hardState.military.front_posture).flatMap((x) => Object.values(x.assignments)).filter((a) => a.posture === 'push').length;
     assert.ok(hardPush >= easyPush, 'hard should be at least as aggressive as easy');
 });
 
@@ -71,14 +71,14 @@ test('RS adapts from broad 1992 aggression to narrower late-war posture', () => 
     const stateEarly = makeState();
     const stateLate = clone(makeState());
     // Ensure manpower is adequate so this test isolates time adaptation.
-    stateEarly.formations['F_S_1']!.personnel = 12000;
-    stateEarly.formations['F_S_2'] = { id: 'F_S_2', faction: 'RS', name: 'S2', created_turn: 1, status: 'active', assignment: null, personnel: 12000 };
-    stateEarly.formations['F_S_3'] = { id: 'F_S_3', faction: 'RS', name: 'S3', created_turn: 1, status: 'active', assignment: null, personnel: 12000 };
-    stateEarly.militia_pools = {
+    stateEarly.military.formations['F_S_1']!.personnel = 12000;
+    stateEarly.military.formations['F_S_2'] = { id: 'F_S_2', faction: 'RS', name: 'S2', created_turn: 1, status: 'active', assignment: null, personnel: 12000 };
+    stateEarly.military.formations['F_S_3'] = { id: 'F_S_3', faction: 'RS', name: 'S3', created_turn: 1, status: 'active', assignment: null, personnel: 12000 };
+    stateEarly.military.militia_pools = {
         'pool_rs': { mun_id: 'x', faction: 'RS', available: 12000, committed: 0, exhausted: 0, updated_turn: 15 }
     };
-    stateLate.formations = clone(stateEarly.formations);
-    stateLate.militia_pools = clone(stateEarly.militia_pools);
+    stateLate.military.formations = clone(stateEarly.military.formations);
+    stateLate.military.militia_pools = clone(stateEarly.military.militia_pools);
 
     const manyRsEdges: FrontEdge[] = [
         { edge_id: 'S200026__T1', a: 'S200026', b: 'T1', side_a: 'RS', side_b: 'RBiH' },
@@ -104,8 +104,8 @@ test('RS adapts from broad 1992 aggression to narrower late-war posture', () => 
     earlyManager.runBots(stateEarly, manyRsEdges);
     lateManager.runBots(stateLate, manyRsEdges);
 
-    const rsEarly = stateEarly.front_posture['RS']?.assignments ?? {};
-    const rsLate = stateLate.front_posture['RS']?.assignments ?? {};
+    const rsEarly = stateEarly.military.front_posture['RS']?.assignments ?? {};
+    const rsLate = stateLate.military.front_posture['RS']?.assignments ?? {};
     const earlyPush = Object.values(rsEarly).filter((a) => a.posture === 'push').length;
     const latePush = Object.values(rsLate).filter((a) => a.posture === 'push').length;
     assert.ok(earlyPush >= latePush, 'early RS should be at least as broadly aggressive as late RS');

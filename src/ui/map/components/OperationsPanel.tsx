@@ -392,7 +392,7 @@ export function OperationsPanel() {
 
                 {/* Commander */}
                 {(() => {
-                  const corpsFormation = loadedGameState.formations.find(f => f.id === selectedOperation.corps_id);
+                  const corpsFormation = loadedGameState.military.formations.find(f => f.id === selectedOperation.corps_id);
                   const commander = corpsFormation ? getFormationCommander(corpsFormation, loadedGameState) : null;
                   if (!commander) return null;
                   return (
@@ -408,7 +408,7 @@ export function OperationsPanel() {
                     <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">Allocated Assets</div>
                     <div className="flex flex-wrap gap-1">
                       {selectedOperation.participating_brigade_ids.map(bId => {
-                        const bName = loadedGameState.formations.find(f => f.id === bId)?.name ?? bId;
+                        const bName = loadedGameState.military.formations.find(f => f.id === bId)?.name ?? bId;
                         return (
                           <button
                             key={bId}

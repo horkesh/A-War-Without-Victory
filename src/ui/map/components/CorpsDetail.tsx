@@ -40,7 +40,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const setLoadError = useGameStore((s) => s.setLoadError);
 
   // Derived values needed by hooks — computed unconditionally so hooks are always called in the same order
-  const corpsFormation = loadedGameState?.formations.find(
+  const corpsFormation = loadedGameState?.military?.formations.find(
     (f) => f.id === selectedCorpsId && (f.kind === 'corps' || f.kind === 'corps_asset')
   ) ?? null;
   const corpsSectors = useMemo(
@@ -80,7 +80,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     : {};
   const corpsColor = corpsColorMap[selectedCorpsId] ?? '#888';
 
-  const subordinates = loadedGameState.formations.filter(
+  const subordinates = loadedGameState.military.formations.filter(
     (f) => f.corps_id === selectedCorpsId && f.kind === 'brigade'
   );
   const totalPersonnel = subordinates.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
@@ -202,7 +202,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
         {corpsFormation.combatSummary && (
           <CombatSummaryPanel
             summary={corpsFormation.combatSummary}
-            formations={loadedGameState.formations}
+            formations={loadedGameState.military.formations}
             onSelectFormation={setSelectedFormationId}
           />
         )}

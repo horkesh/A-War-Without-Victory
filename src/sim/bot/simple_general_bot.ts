@@ -25,8 +25,8 @@ export class SimpleGeneralBot implements Bot {
         // Peace-phase §4.8: Alliance-aware edge filtering
         // When RBiH/HRHB are allied or ceasefire active, skip edges where the opponent is the allied faction
         const rbihHrhbAllied = areRbihHrhbAllied(state);
-        const ceasefireActive = state.rbih_hrhb_state?.ceasefire_active === true;
-        const washingtonSigned = state.rbih_hrhb_state?.washington_signed === true;
+        const ceasefireActive = state.political.rbih_hrhb_state?.ceasefire_active === true;
+        const washingtonSigned = state.political.rbih_hrhb_state?.washington_signed === true;
         const isRbihOrHrhb = this.factionId === 'RBiH' || this.factionId === 'HRHB';
         const allyFaction = this.factionId === 'RBiH' ? 'HRHB' : this.factionId === 'HRHB' ? 'RBiH' : null;
 
@@ -70,7 +70,7 @@ export class SimpleGeneralBot implements Bot {
 
         const scoredEdges = relevantEdges
             .map((edge) => {
-                const pressureValue = state.front_pressure?.[edge.edge_id]?.value ?? 0;
+                const pressureValue = state.military.front_pressure?.[edge.edge_id]?.value ?? 0;
                 const sideSign = edge.side_a === this.factionId ? 1 : -1;
                 const disadvantaged = sideSign * pressureValue < 0 ? 1 : 0;
                 const objectiveBonus =
@@ -137,8 +137,8 @@ export class SimpleGeneralBot implements Bot {
         }
 
         const rankedEdgeIds = scoredEdges.map((x) => x.edge.edge_id);
-        if (state.formations) {
-            const myFormations = Object.values(state.formations)
+        if (state.military.formations) {
+            const myFormations = Object.values(state.military.formations)
                 .filter((f) => f.faction === this.factionId && f.status === 'active')
                 .sort((a, b) => a.id.localeCompare(b.id));
 
@@ -161,7 +161,7 @@ export class SimpleGeneralBot implements Bot {
 }
 
 function computeActivePersonnel(state: GameState, factionId: FactionId): number {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const formationIds = Object.keys(formations).sort((a, b) => a.localeCompare(b));
     let total = 0;
     for (const id of formationIds) {
@@ -173,7 +173,7 @@ function computeActivePersonnel(state: GameState, factionId: FactionId): number 
 }
 
 function computeAvailablePool(state: GameState, factionId: FactionId): number {
-    const pools = state.militia_pools ?? {};
+    const pools = state.military.militia_pools ?? {};
     const keys = Object.keys(pools).sort((a, b) => a.localeCompare(b));
     let total = 0;
     for (const key of keys) {

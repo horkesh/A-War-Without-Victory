@@ -172,10 +172,10 @@ export class Phase0DirectiveState {
                 coordinated: inv.coordinated === true
             });
             if (!result.ok) continue;
-            if (!state.phase0_relationships) {
-                state.phase0_relationships = initializePhase0Relationships();
+            if (!state.political.phase0_relationships) {
+                state.political.phase0_relationships = initializePhase0Relationships();
             }
-            updateAllianceAfterInvestment(state.phase0_relationships, inv.factionId, inv.coordinated === true);
+            updateAllianceAfterInvestment(state.political.phase0_relationships, inv.factionId, inv.coordinated === true);
             applied++;
         }
 

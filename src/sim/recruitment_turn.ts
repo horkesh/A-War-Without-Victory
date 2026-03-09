@@ -49,7 +49,7 @@ function municipalityControllerByMajority(
     state: GameState,
     settlements: Map<string, SettlementRecord>
 ): Map<MunicipalityId, FactionId | null> {
-    const controllers = state.political_controllers ?? {};
+    const controllers = state.political.political_controllers ?? {};
     const byMunFaction = new Map<MunicipalityId, Map<FactionId, number>>();
     const sids = Array.from(settlements.keys()).sort(strictCompare);
     for (const sid of sids) {
@@ -97,7 +97,7 @@ function municipalityControllerByMajority(
 }
 
 function capitalFromMilitiaPools(state: GameState, factionId: FactionId): number {
-    const pools = state.militia_pools ?? {};
+    const pools = state.military.militia_pools ?? {};
     const poolKeys = Object.keys(pools).sort(strictCompare);
     let totalMilitia = 0;
     for (const key of poolKeys) {
@@ -114,7 +114,7 @@ function displacementMultiplierByFaction(
     municipalityController: Map<MunicipalityId, FactionId | null>,
     factionId: FactionId
 ): number {
-    const displacement = state.displacement_state ?? {};
+    const displacement = state.displacement.displacement_state ?? {};
     const munIds = Object.keys(displacement).sort(strictCompare);
     let weightedSum = 0;
     let count = 0;
@@ -138,13 +138,13 @@ export function accrueRecruitmentResources(
     settlements: Map<string, SettlementRecord>,
     localProduction?: LocalProductionCapacityReport
 ): RecruitmentAccrualReport | null {
-    const resources = state.recruitment_state;
+    const resources = state.military.recruitment_state;
     if (!resources) return null;
 
     ensureProductionFacilities(state);
     const factions = sortedFactionIds(state);
     const factionsById = factionById(state);
-    const facilities = state.production_facilities ?? {};
+    const facilities = state.military.production_facilities ?? {};
     const facilityIds = Object.keys(facilities).sort(strictCompare);
     const municipalityController = municipalityControllerByMajority(state, settlements);
     const localCapacityByMun = new Map<MunicipalityId, number>();
@@ -228,7 +228,7 @@ export function runOngoingRecruitment(
     sidToMun: Map<SettlementId, MunicipalityId>,
     municipalityHqSettlement: Record<string, string>
 ): SetupPhaseRecruitmentReport | null {
-    const resources = state.recruitment_state;
+    const resources = state.military.recruitment_state;
     if (!resources) return null;
     const maxRecruitsPerFaction = resources.max_recruits_per_faction_per_turn ?? 1;
     applyRsMandatoryMobilizationAccrual(state, oobBrigades);
@@ -241,8 +241,8 @@ export function runOngoingRecruitment(
 }
 
 function applyRsMandatoryMobilizationAccrual(state: GameState, oobBrigades: OobBrigade[]): void {
-    const resources = state.recruitment_state;
-    const pools = state.militia_pools;
+    const resources = state.military.recruitment_state;
+    const pools = state.military.militia_pools;
     if (!resources || !pools) return;
     const recruited = new Set(resources.recruited_brigade_ids);
 

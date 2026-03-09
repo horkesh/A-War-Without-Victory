@@ -144,7 +144,7 @@ test('deprecated clause: corridor_right_of_way does not trigger end_state', asyn
     const result = applyTreaty(state, draft, evalReport, { settlementGraph: graph });
 
     // end_state should not be set because corridor is deprecated
-    assert.strictEqual(result.state.end_state, undefined);
+    assert.strictEqual(result.state.political.end_state, undefined);
     assert.ok(result.report.end_state?.set === false);
     assert.ok(result.report.corridor?.failures?.includes('deprecated_clause_noop'));
 });
@@ -199,9 +199,9 @@ test('brcko: applying brcko_special_status sets BRCKO_CONTROLLER_ID', async () =
 
     // Check that Brčko settlements have BRCKO_CONTROLLER_ID
     // Note: We need to check control_overrides
-    if (result.state.control_overrides) {
+    if (result.state.political.control_overrides) {
         const brckoSid = String(BRCKO_SIDS[0]);
-        const override = result.state.control_overrides[brckoSid];
+        const override = result.state.political.control_overrides[brckoSid];
         // Actually, the clause requires sids to match BRCKO_SIDS exactly, so this test needs adjustment
         // For now, just verify the clause was processed
         assert.ok(result.report.territorial?.applied_brcko !== undefined);
@@ -213,8 +213,8 @@ test('snapshot: created when end_state is set', async () => {
     const graph = createTestSettlementGraph();
 
     // Set up control so RBiH controls sid1
-    if (!state.control_overrides) state.control_overrides = {};
-    state.control_overrides['sid1'] = {
+    if (!state.political.control_overrides) state.political.control_overrides = {};
+    state.political.control_overrides['sid1'] = {
         side: 'RBiH',
         kind: 'treaty_transfer',
         treaty_id: 'prev_treaty',
@@ -239,11 +239,11 @@ test('snapshot: created when end_state is set', async () => {
     const result = applyTreaty(state, draft, evalReport, { settlementGraph: graph });
 
     // Check that snapshot was created
-    assert.ok(result.state.end_state?.snapshot !== undefined);
-    assert.strictEqual(result.state.end_state?.snapshot?.turn, 5);
-    assert.ok(result.state.end_state?.snapshot?.outcome_hash.length === 64);
-    assert.ok(Array.isArray(result.state.end_state?.snapshot?.controllers));
-    assert.ok(Array.isArray(result.state.end_state?.snapshot?.settlements_by_controller));
+    assert.ok(result.state.political.end_state?.snapshot !== undefined);
+    assert.strictEqual(result.state.political.end_state?.snapshot?.turn, 5);
+    assert.ok(result.state.political.end_state?.snapshot?.outcome_hash.length === 64);
+    assert.ok(Array.isArray(result.state.political.end_state?.snapshot?.controllers));
+    assert.ok(Array.isArray(result.state.political.end_state?.snapshot?.settlements_by_controller));
 });
 
 test('snapshot: hash is deterministic', async () => {
@@ -251,8 +251,8 @@ test('snapshot: hash is deterministic', async () => {
     const graph = createTestSettlementGraph();
 
     // Set up control
-    if (!state.control_overrides) state.control_overrides = {};
-    state.control_overrides['sid1'] = {
+    if (!state.political.control_overrides) state.political.control_overrides = {};
+    state.political.control_overrides['sid1'] = {
         side: 'RBiH',
         kind: 'treaty_transfer',
         treaty_id: 'prev_treaty',
@@ -275,7 +275,7 @@ test('snapshot: hash is deterministic', async () => {
     const evalReport = createAcceptedEvalReport(draft);
 
     const result1 = applyTreaty(state, draft, evalReport, { settlementGraph: graph });
-    const hash1 = result1.state.end_state?.snapshot?.outcome_hash;
+    const hash1 = result1.state.political.end_state?.snapshot?.outcome_hash;
 
     // Build snapshot again from the same state
     const snapshot2 = buildEndStateSnapshot(result1.state);
@@ -290,8 +290,8 @@ test('snapshot: frozen after creation', async () => {
     const graph = createTestSettlementGraph();
 
     // Set up control
-    if (!state.control_overrides) state.control_overrides = {};
-    state.control_overrides['sid1'] = {
+    if (!state.political.control_overrides) state.political.control_overrides = {};
+    state.political.control_overrides['sid1'] = {
         side: 'RBiH',
         kind: 'treaty_transfer',
         treaty_id: 'prev_treaty',
@@ -314,12 +314,12 @@ test('snapshot: frozen after creation', async () => {
     const evalReport = createAcceptedEvalReport(draft);
 
     const result = applyTreaty(state, draft, evalReport, { settlementGraph: graph });
-    const originalHash = result.state.end_state?.snapshot?.outcome_hash;
+    const originalHash = result.state.political.end_state?.snapshot?.outcome_hash;
 
     // Modify state (simulate another turn)
     result.state.meta.turn = 6;
-    if (result.state.control_overrides) {
-        result.state.control_overrides['sid2'] = {
+    if (result.state.political.control_overrides) {
+        result.state.political.control_overrides['sid2'] = {
             side: 'RS',
             kind: 'treaty_transfer',
             treaty_id: 'another_treaty',
@@ -328,6 +328,6 @@ test('snapshot: frozen after creation', async () => {
     }
 
     // Snapshot should remain unchanged
-    assert.strictEqual(result.state.end_state?.snapshot?.outcome_hash, originalHash);
-    assert.strictEqual(result.state.end_state?.snapshot?.turn, 5); // Original turn, not 6
+    assert.strictEqual(result.state.political.end_state?.snapshot?.outcome_hash, originalHash);
+    assert.strictEqual(result.state.political.end_state?.snapshot?.turn, 5); // Original turn, not 6
 });

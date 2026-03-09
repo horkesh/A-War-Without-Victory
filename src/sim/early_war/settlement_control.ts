@@ -68,7 +68,7 @@ function getOrgDefenseBonus(
     munId: MunicipalityId,
     holdoutFaction: FactionId
 ): number {
-    const op = state.municipalities?.[munId]?.organizational_penetration;
+    const op = state.political.municipalities?.[munId]?.organizational_penetration;
     if (!op || holdoutFaction == null) return 0;
     let bonus = 0;
     if (op.police_loyalty === 'loyal') bonus += ORG_DEFENSE_BONUS.police_loyalty;
@@ -138,9 +138,9 @@ function hasSupplyConnection(
     state: GameState,
     settlementAdj: Map<SettlementId, Set<SettlementId>>
 ): boolean {
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc) return false;
-    const holdouts = state.settlement_holdouts ?? {};
+    const holdouts = state.military.settlement_holdouts ?? {};
 
     // BFS from sid through same-faction-controlled settlements
     const visited = new Set<SettlementId>();
@@ -215,12 +215,12 @@ export function applyWaveFlip(
     const sids = settlementsByMun.get(munId);
     if (!sids?.length) return result;
 
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc) return result;
-    if (!state.settlement_holdouts) {
-        (state as GameState).settlement_holdouts = {};
+    if (!state.military.settlement_holdouts) {
+        (state as GameState).military.settlement_holdouts = {};
     }
-    const holdouts = state.settlement_holdouts!;
+    const holdouts = state.military.settlement_holdouts!;
 
     for (const sid of sids) {
         const key = controlKey(sid, canonicalToOperational);
@@ -309,9 +309,9 @@ export function processHoldoutCleanup(
     canonicalToOperational?: CanonicalToOperationalMap
 ): SettlementFlipEvent[] {
     const events: SettlementFlipEvent[] = [];
-    const holdouts = state.settlement_holdouts;
+    const holdouts = state.military.settlement_holdouts;
     if (!holdouts) return events;
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc) return events;
 
     const settlementAdj = buildSettlementAdjacency(edges);
@@ -364,7 +364,7 @@ export function processHoldoutCleanup(
 
         // Find formations that can clear this holdout
         let cleared = false;
-        const formations = state.formations ?? {};
+        const formations = state.military.formations ?? {};
         const formationIds = Object.keys(formations).sort(strictCompare);
 
         for (const fid of formationIds) {

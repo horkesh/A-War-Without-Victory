@@ -61,7 +61,7 @@ export function evaluateVictoryConditions(
     victoryConditions: ScenarioVictoryConditions | undefined
 ): VictoryEvaluation | null {
     if (!victoryConditions?.by_faction) return null;
-    const controllers = state.political_controllers ?? {};
+    const controllers = state.political.political_controllers ?? {};
     const byFactionCount = new Map<string, number>();
     for (const controller of Object.values(controllers)) {
         if (!controller) continue;

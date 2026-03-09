@@ -73,9 +73,9 @@ describe('runOngoingMobilization', () => {
                 }
             }
         });
-        const before = state.militia_pools![key].available;
+        const before = state.military.militia_pools![key].available;
         const report = runOngoingMobilization(state, settlements, pop1991);
-        const after = state.militia_pools![key].available;
+        const after = state.military.militia_pools![key].available;
         expect(after).toBeGreaterThanOrEqual(before);
         if (report.municipalities_contributing > 0) expect(after).toBeGreaterThan(before);
     });
@@ -152,9 +152,9 @@ describe('runOngoingMobilization', () => {
         runOngoingMobilization(baseline, rbihSettlements, rbihPop);
         runOngoingMobilization(boosted, rbihSettlements, rbihPop);
 
-        expect(boosted.militia_pools![militiaPoolKey('MUN_X', 'RBiH')].available)
-            .toBeGreaterThan(baseline.militia_pools![militiaPoolKey('MUN_X', 'RBiH')].available);
-        expect(boosted.militia_pools![militiaPoolKey('MUN_Y', 'RBiH')].available)
-            .toBe(baseline.militia_pools![militiaPoolKey('MUN_Y', 'RBiH')].available);
+        expect(boosted.military.militia_pools![militiaPoolKey('MUN_X', 'RBiH')].available)
+            .toBeGreaterThan(baseline.military.militia_pools![militiaPoolKey('MUN_X', 'RBiH')].available);
+        expect(boosted.military.militia_pools![militiaPoolKey('MUN_Y', 'RBiH')].available)
+            .toBe(baseline.military.militia_pools![militiaPoolKey('MUN_Y', 'RBiH')].available);
     });
 });

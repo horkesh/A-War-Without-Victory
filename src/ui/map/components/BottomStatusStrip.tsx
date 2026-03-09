@@ -15,7 +15,7 @@ export function BottomStatusStrip() {
   const controller = selectedOsid
     ? getByOsid(loadedGameState?.controlBySettlement, selectedOsid)
     : null;
-  const formationsAtOsid = getFormationsAtOsid(loadedGameState?.formations, selectedOsid ?? '');
+  const formationsAtOsid = getFormationsAtOsid(loadedGameState?.military?.formations, selectedOsid ?? '');
   const formationCount = formationsAtOsid.length;
   const controlBySettlement = loadedGameState?.controlBySettlement ?? {};
   const territoryTotals = { RS: 0, RBiH: 0, HRHB: 0 };

@@ -64,8 +64,8 @@ export async function updateNegotiationCapital(
     const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
 
     // Ensure ledger exists
-    if (!state.negotiation_ledger || !Array.isArray(state.negotiation_ledger)) {
-        state.negotiation_ledger = [];
+    if (!state.political.negotiation_ledger || !Array.isArray(state.political.negotiation_ledger)) {
+        state.political.negotiation_ledger = [];
     }
 
     const graph = settlementsGraph ?? (await loadSettlementGraph());
@@ -99,14 +99,14 @@ export async function updateNegotiationCapital(
         }
         const territorialControlBonus = (controlledValue / 100) * 0.1;
 
-        const ivp = state.international_visibility_pressure;
+        const ivp = state.political.international_visibility_pressure;
         const ivpPenalty = (ivp?.negotiation_momentum ?? 0) * 10.0;
 
         const patronCommitment = faction.patron_state?.patron_commitment ?? 0;
         const patronBonus = patronCommitment * 5.0;
 
         const enclavePenalty =
-            (state.enclaves ?? [])
+            (state.political.enclaves ?? [])
                 .filter((e) => e.faction_id === faction.id)
                 .reduce((sum, e) => sum + e.humanitarian_pressure, 0) * 10.0;
 
@@ -139,7 +139,7 @@ export async function updateNegotiationCapital(
                     amount,
                     reason
                 };
-                state.negotiation_ledger.push(entry);
+                state.political.negotiation_ledger.push(entry);
                 ledgerEntriesAdded += 1;
             }
         }
@@ -218,8 +218,8 @@ export function spendNegotiationCapital(
     faction.negotiation.last_capital_change_turn = currentTurn;
 
     // Ensure ledger exists
-    if (!state.negotiation_ledger || !Array.isArray(state.negotiation_ledger)) {
-        state.negotiation_ledger = [];
+    if (!state.political.negotiation_ledger || !Array.isArray(state.political.negotiation_ledger)) {
+        state.political.negotiation_ledger = [];
     }
 
     // Append ledger entry
@@ -232,5 +232,5 @@ export function spendNegotiationCapital(
         amount,
         reason
     };
-    state.negotiation_ledger.push(entry);
+    state.political.negotiation_ledger.push(entry);
 }

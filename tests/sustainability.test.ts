@@ -119,8 +119,8 @@ test('sustainability_score is monotonic decreasing', () => {
     const edges = createTestEdgesSurrounded();
 
     // Initialize sustainability state
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: true,
         unsupplied_turns: 0,
@@ -129,12 +129,12 @@ test('sustainability_score is monotonic decreasing', () => {
         last_updated_turn: 9
     };
 
-    const scoreBefore = state.sustainability_state['20168'].sustainability_score;
+    const scoreBefore = state.displacement.sustainability_state['20168'].sustainability_score;
 
     // Run update
     updateSustainability(state, settlements, edges);
 
-    const scoreAfter = state.sustainability_state['20168'].sustainability_score;
+    const scoreAfter = state.displacement.sustainability_state['20168'].sustainability_score;
 
     // Score should never increase
     assert.ok(
@@ -149,8 +149,8 @@ test('sustainability_score never increases', () => {
     const edges = createTestEdgesSurrounded();
 
     // Initialize with low score
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: false, // Not surrounded, so no degradation
         unsupplied_turns: 0,
@@ -159,12 +159,12 @@ test('sustainability_score never increases', () => {
         last_updated_turn: 9
     };
 
-    const scoreBefore = state.sustainability_state['20168'].sustainability_score;
+    const scoreBefore = state.displacement.sustainability_state['20168'].sustainability_score;
 
     // Run update (not surrounded, so should not degrade)
     updateSustainability(state, settlements, edges);
 
-    const scoreAfter = state.sustainability_state['20168'].sustainability_score;
+    const scoreAfter = state.displacement.sustainability_state['20168'].sustainability_score;
 
     // Score should not increase even if conditions improve
     assert.ok(
@@ -179,8 +179,8 @@ test('surrounded municipality degrades', () => {
     const edges = createTestEdgesSurrounded(); // No edges = isolated = surrounded
 
     // Initialize sustainability state
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: false,
         unsupplied_turns: 0,
@@ -189,12 +189,12 @@ test('surrounded municipality degrades', () => {
         last_updated_turn: 9
     };
 
-    const scoreBefore = state.sustainability_state['20168'].sustainability_score;
+    const scoreBefore = state.displacement.sustainability_state['20168'].sustainability_score;
 
     // Run update
     updateSustainability(state, settlements, edges);
 
-    const sustState = state.sustainability_state['20168'];
+    const sustState = state.displacement.sustainability_state['20168'];
     const scoreAfter = sustState.sustainability_score;
 
     // Should be surrounded and degraded
@@ -211,8 +211,8 @@ test('unsupplied acceleration applies after threshold', () => {
     const edges = createTestEdgesSurrounded();
 
     // Initialize with unsupplied_turns >= 2
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: true,
         unsupplied_turns: 2, // At threshold
@@ -224,12 +224,12 @@ test('unsupplied acceleration applies after threshold', () => {
     // Remove supply source to make it unsupplied
     state.factions[0].supply_sources = [];
 
-    const scoreBefore = state.sustainability_state['20168'].sustainability_score;
+    const scoreBefore = state.displacement.sustainability_state['20168'].sustainability_score;
 
     // Run update
     updateSustainability(state, settlements, edges);
 
-    const sustState = state.sustainability_state['20168'];
+    const sustState = state.displacement.sustainability_state['20168'];
     const scoreAfter = sustState.sustainability_score;
 
     // Should have degraded more than base (base=5, acceleration=5, total=10)
@@ -250,7 +250,7 @@ test('breach interaction adds degradation', () => {
     const edges = createTestEdgesSurrounded();
 
     // Add front segment and pressure to create breach
-    state.front_segments = {
+    state.military.front_segments = {
         'sid1__sid3': {
             edge_id: 'sid1__sid3',
             active: true,
@@ -263,7 +263,7 @@ test('breach interaction adds degradation', () => {
             max_friction: 0
         }
     };
-    state.front_pressure = {
+    state.military.front_pressure = {
         'sid1__sid3': {
             edge_id: 'sid1__sid3',
             value: 100, // High pressure = breach
@@ -276,8 +276,8 @@ test('breach interaction adds degradation', () => {
     edges.push({ a: 'sid1', b: 'sid3' });
 
     // Initialize sustainability state
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: true,
         unsupplied_turns: 0,
@@ -286,12 +286,12 @@ test('breach interaction adds degradation', () => {
         last_updated_turn: 9
     };
 
-    const scoreBefore = state.sustainability_state['20168'].sustainability_score;
+    const scoreBefore = state.displacement.sustainability_state['20168'].sustainability_score;
 
     // Run update
     updateSustainability(state, settlements, edges);
 
-    const sustState = state.sustainability_state['20168'];
+    const sustState = state.displacement.sustainability_state['20168'];
     const scoreAfter = sustState.sustainability_score;
 
     // Should have degraded more than base (base=5, breach=3, total=8)
@@ -308,8 +308,8 @@ test('displacement interaction adds degradation', () => {
     const edges = createTestEdgesSurrounded();
 
     // Add displacement state with high displacement ratio
-    if (!state.displacement_state) state.displacement_state = {};
-    state.displacement_state['20168'] = {
+    if (!state.displacement.displacement_state) state.displacement.displacement_state = {};
+    state.displacement.displacement_state['20168'] = {
         mun_id: '20168',
         original_population: 10000,
         displaced_out: 3000, // 30% > 25% threshold
@@ -319,8 +319,8 @@ test('displacement interaction adds degradation', () => {
     };
 
     // Initialize sustainability state
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: true,
         unsupplied_turns: 0,
@@ -329,12 +329,12 @@ test('displacement interaction adds degradation', () => {
         last_updated_turn: 9
     };
 
-    const scoreBefore = state.sustainability_state['20168'].sustainability_score;
+    const scoreBefore = state.displacement.sustainability_state['20168'].sustainability_score;
 
     // Run update
     updateSustainability(state, settlements, edges);
 
-    const sustState = state.sustainability_state['20168'];
+    const sustState = state.displacement.sustainability_state['20168'];
     const scoreAfter = sustState.sustainability_score;
 
     // Should have degraded more than base (base=5, displacement=5, total=10)
@@ -351,8 +351,8 @@ test('collapsed state is set when score reaches 0', () => {
     const edges = createTestEdgesSurrounded();
 
     // Initialize with low score
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: true,
         unsupplied_turns: 10, // High unsupplied turns
@@ -367,7 +367,7 @@ test('collapsed state is set when score reaches 0', () => {
     // Run update
     updateSustainability(state, settlements, edges);
 
-    const sustState = state.sustainability_state['20168'];
+    const sustState = state.displacement.sustainability_state['20168'];
 
     // Should be collapsed
     assert.ok(sustState.collapsed, 'Municipality should be collapsed when score <= 0');
@@ -380,8 +380,8 @@ test('collapsed never reverts', () => {
     const edges = createTestEdgesConnected(); // Connected = not surrounded
 
     // Initialize as collapsed
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: false,
         unsupplied_turns: 0,
@@ -393,7 +393,7 @@ test('collapsed never reverts', () => {
     // Run update (conditions improved - not surrounded)
     updateSustainability(state, settlements, edges);
 
-    const sustState = state.sustainability_state['20168'];
+    const sustState = state.displacement.sustainability_state['20168'];
 
     // Should remain collapsed
     assert.ok(sustState.collapsed, 'Collapsed state should never revert');
@@ -406,8 +406,8 @@ test('authority_degraded is set when score < 50', () => {
     const edges = createTestEdgesSurrounded();
 
     // Initialize with score < 50
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: true,
         unsupplied_turns: 0,
@@ -422,7 +422,7 @@ test('authority_degraded is set when score < 50', () => {
         updateSustainability(state, settlements, edges);
     }
 
-    const sustState = state.sustainability_state['20168'];
+    const sustState = state.displacement.sustainability_state['20168'];
     const report = updateSustainability(state, settlements, edges);
     const record = report.by_municipality.find((r) => r.mun_id === '20168');
 
@@ -439,8 +439,8 @@ test('negotiation pressure increment from collapsed municipalities', () => {
     const edges = createTestEdgesSurrounded();
 
     // Initialize as collapsed
-    if (!state.sustainability_state) state.sustainability_state = {};
-    state.sustainability_state['20168'] = {
+    if (!state.displacement.sustainability_state) state.displacement.sustainability_state = {};
+    state.displacement.sustainability_state['20168'] = {
         mun_id: '20168',
         is_surrounded: true,
         unsupplied_turns: 10,
@@ -467,7 +467,7 @@ test('surround detection correctness - isolated municipality', () => {
     // Run update
     updateSustainability(state, settlements, edges);
 
-    const sustState = state.sustainability_state?.['20168'];
+    const sustState = state.displacement.sustainability_state?.['20168'];
 
     assert.ok(sustState, 'Should have sustainability state');
     assert.ok(
@@ -499,7 +499,7 @@ test('surround detection correctness - connected municipality', () => {
     // Run update
     updateSustainability(state, settlements, edges);
 
-    const sustState = state.sustainability_state?.['20168'];
+    const sustState = state.displacement.sustainability_state?.['20168'];
 
     assert.ok(sustState, 'Should have sustainability state');
     // Connected municipality with path to supplied friendly municipality should not be surrounded
@@ -531,7 +531,7 @@ test('surround detection: friendly path exists, destination supplied → NOT sur
     ];
 
     updateSustainability(state, settlements, edges);
-    const sustState = state.sustainability_state?.['20168'];
+    const sustState = state.displacement.sustainability_state?.['20168'];
 
     assert.ok(sustState, 'Should have sustainability state');
     assert.strictEqual(
@@ -563,7 +563,7 @@ test('surround detection: friendly path exists, destination NOT supplied → IS 
     ];
 
     updateSustainability(state, settlements, edges);
-    const sustState = state.sustainability_state?.['20168'];
+    const sustState = state.displacement.sustainability_state?.['20168'];
 
     assert.ok(sustState, 'Should have sustainability state');
     // Since there are no supply sources, municipality 20045 is unsupplied
@@ -598,7 +598,7 @@ test('surround detection: friendly-controlled intermediate nodes, hostile destin
     ];
 
     updateSustainability(state, settlements, edges);
-    const sustState = state.sustainability_state?.['20168'];
+    const sustState = state.displacement.sustainability_state?.['20168'];
 
     assert.ok(sustState, 'Should have sustainability state');
     // Path exists through unsupplied friendly municipality to hostile destination
@@ -616,7 +616,7 @@ test('surround detection: no friendly path at all → IS surrounded', () => {
     const edges = createTestEdgesSurrounded(); // No edges = isolated
 
     updateSustainability(state, settlements, edges);
-    const sustState = state.sustainability_state?.['20168'];
+    const sustState = state.displacement.sustainability_state?.['20168'];
 
     assert.ok(sustState, 'Should have sustainability state');
     assert.strictEqual(
@@ -638,8 +638,8 @@ test('surround detection: determinism - same graph and state → same surrounded
     updateSustainability(state1, settlements, edges);
     updateSustainability(state2, settlements, edges);
 
-    const sustState1 = state1.sustainability_state?.['20168'];
-    const sustState2 = state2.sustainability_state?.['20168'];
+    const sustState1 = state1.displacement.sustainability_state?.['20168'];
+    const sustState2 = state2.displacement.sustainability_state?.['20168'];
 
     assert.ok(sustState1, 'Should have sustainability state 1');
     assert.ok(sustState2, 'Should have sustainability state 2');

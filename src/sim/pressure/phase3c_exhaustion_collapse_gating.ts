@@ -118,11 +118,11 @@ function getOrInitEligibilityState(
     state: GameState,
     factionId: FactionId
 ): CollapseEligibilityState {
-    if (!state.collapse_eligibility) {
-        state.collapse_eligibility = {};
+    if (!state.political.collapse_eligibility) {
+        state.political.collapse_eligibility = {};
     }
 
-    const existing = state.collapse_eligibility[factionId];
+    const existing = state.political.collapse_eligibility[factionId];
     if (existing) {
         return existing;
     }
@@ -140,7 +140,7 @@ function getOrInitEligibilityState(
         last_updated_turn: state.meta.turn
     };
 
-    state.collapse_eligibility[factionId] = newState;
+    state.political.collapse_eligibility[factionId] = newState;
     return newState;
 }
 
@@ -161,7 +161,7 @@ function checkAuthorityDegradation(state: GameState, factionId: FactionId): bool
  */
 function checkCohesionDegradation(state: GameState, factionId: FactionId): boolean {
     // Check formation fatigue/readiness
-    const formations = Object.values(state.formations ?? {})
+    const formations = Object.values(state.military.formations ?? {})
         .filter(f => f.faction === factionId && f.status === 'active');
 
     if (formations.length === 0) return false; // No formations = no cohesion to degrade
@@ -226,11 +226,11 @@ function getOrInitTier1EligibilityState(
     state: GameState,
     entityId: EntityId
 ): Tier1EntityEligibilityState {
-    if (!state.collapse_eligibility_tier1) {
-        state.collapse_eligibility_tier1 = {};
+    if (!state.political.collapse_eligibility_tier1) {
+        state.political.collapse_eligibility_tier1 = {};
     }
 
-    const existing = state.collapse_eligibility_tier1[entityId];
+    const existing = state.political.collapse_eligibility_tier1[entityId];
     if (existing) {
         return existing;
     }
@@ -251,7 +251,7 @@ function getOrInitTier1EligibilityState(
         immune: false
     };
 
-    state.collapse_eligibility_tier1[entityId] = newState;
+    state.political.collapse_eligibility_tier1[entityId] = newState;
     return newState;
 }
 
@@ -259,8 +259,8 @@ function getOrInitTier1EligibilityState(
  * Get or initialize local strain state.
  */
 function getOrInitLocalStrain(state: GameState): void {
-    if (!state.local_strain) {
-        state.local_strain = { by_entity: {} };
+    if (!state.political.local_strain) {
+        state.political.local_strain = { by_entity: {} };
     }
 }
 
@@ -271,11 +271,11 @@ function getOrInitLocalStrain(state: GameState): void {
 function updateLocalStrain(state: GameState, entityId: EntityId, exposure: number): number {
     getOrInitLocalStrain(state);
 
-    const current = state.local_strain!.by_entity[entityId] ?? 0;
+    const current = state.political.local_strain!.by_entity[entityId] ?? 0;
     const increment = exposure * STRAIN_FRACTION;
     const newStrain = Math.min(Math.max(0, current + increment), STRAIN_MAX);
 
-    state.local_strain!.by_entity[entityId] = newStrain;
+    state.political.local_strain!.by_entity[entityId] = newStrain;
     return newStrain;
 }
 

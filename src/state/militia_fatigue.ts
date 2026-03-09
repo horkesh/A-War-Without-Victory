@@ -88,7 +88,7 @@ export function updateMilitiaFatigue(
     settlementEdges: EdgeRecord[],
     exhaustionDeltas: Map<FactionId, number> // faction_id -> exhaustion delta this turn
 ): MilitiaFatigueStepReport {
-    const militiaPools = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+    const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
     if (!militiaPools || typeof militiaPools !== 'object') {
         return { by_municipality: [], by_faction: [] };
     }

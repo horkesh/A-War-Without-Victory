@@ -21,7 +21,7 @@ import { strictCompare } from '../state/validateGameState.js';
 
 export function captureAARSnapshot(state: GameState): AARSnapshot {
     const turn = state.meta?.turn ?? 0;
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     const arcs: Record<FormationId, NarrativeArc> = {};
     const decoration_tiers: Record<FormationId, string[]> = {};
@@ -47,8 +47,8 @@ export function captureAARSnapshot(state: GameState): AARSnapshot {
 
     return {
         turn,
-        supply: { ...state.general_supply_reserve },
-        heavy_munitions: { ...state.heavy_munitions_reserve },
+        supply: { ...state.military.general_supply_reserve },
+        heavy_munitions: { ...state.military.heavy_munitions_reserve },
         arcs,
         decoration_tiers,
         already_destroyed,
@@ -68,7 +68,7 @@ export function compileTurnSummary(
     const turn = state.meta?.turn ?? 0;
 
     // Pre-filter control_events once — used by both territory and battles sections
-    const turnControlEvents = (state.control_events ?? []).filter((e) => e.turn === turn);
+    const turnControlEvents = (state.political.control_events ?? []).filter((e) => e.turn === turn);
 
     return {
         turn,
@@ -94,7 +94,7 @@ function compileBattles(
     const rawBattles = report.attack_resolution_osid?.battles;
     if (!rawBattles?.length) return [];
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     // Group raw battle entries by target_osid
     const byOsid = new Map<string, typeof rawBattles>();
@@ -185,7 +185,7 @@ function compileTerritory(
 // ---------------------------------------------------------------------------
 
 function compileDisplacement(state: GameState, turn: number): Pick<TurnSummary, 'displacement_total' | 'displacement_by_ethnicity' | 'displacement_hotspot'> {
-    const events = (state.displacement_event_log ?? []).filter((e) => e.turn === turn);
+    const events = (state.displacement.displacement_event_log ?? []).filter((e) => e.turn === turn);
 
     let displacement_total = 0;
     const displacement_by_ethnicity: Partial<Record<FactionId, number>> = {};
@@ -220,7 +220,7 @@ function compileUnitEvents(
     state: GameState,
     snapshot: AARSnapshot,
 ): Pick<TurnSummary, 'decoration_awards' | 'arc_transitions' | 'formation_spawns' | 'formation_destructions'> {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     const decoration_awards: DecorationAward[] = [];
     const arc_transitions: ArcTransition[] = [];
@@ -296,12 +296,12 @@ function compileSupplyDeltas(
     const heavy_munitions_deltas: Partial<Record<FactionId, number>> = {};
 
     // Derive factions from actual state rather than a hardcoded literal
-    const factions = Object.keys(state.general_supply_reserve ?? snapshot.supply) as FactionId[];
+    const factions = Object.keys(state.military.general_supply_reserve ?? snapshot.supply) as FactionId[];
     for (const f of factions) {
-        const supplyDelta = (state.general_supply_reserve?.[f] ?? 0) - (snapshot.supply[f] ?? 0);
+        const supplyDelta = (state.military.general_supply_reserve?.[f] ?? 0) - (snapshot.supply[f] ?? 0);
         if (supplyDelta !== 0) supply_deltas[f] = supplyDelta;
 
-        const munDelta = (state.heavy_munitions_reserve?.[f] ?? 0) - (snapshot.heavy_munitions[f] ?? 0);
+        const munDelta = (state.military.heavy_munitions_reserve?.[f] ?? 0) - (snapshot.heavy_munitions[f] ?? 0);
         if (munDelta !== 0) heavy_munitions_deltas[f] = munDelta;
     }
 
@@ -316,7 +316,7 @@ function compileNotableEvents(state: GameState, turn: number): TurnNotableEvent[
     const events: TurnNotableEvent[] = [];
 
     // Graz Accords activated this turn
-    if (state.vienna_declaration_turn === turn) {
+    if (state.political.vienna_declaration_turn === turn) {
         events.push({
             kind: 'graz_accords_activated',
             description: 'Graz Accords activated — RS–HRHB non-aggression pact.',
@@ -324,7 +324,7 @@ function compileNotableEvents(state: GameState, turn: number): TurnNotableEvent[
     }
 
     // Truce broken this turn
-    const truce_breaks = state.truce_broken_turn ?? {};
+    const truce_breaks = state.political.truce_broken_turn ?? {};
     for (const [faction, breakTurn] of Object.entries(truce_breaks).sort(([a], [b]) => strictCompare(a, b))) {
         if (breakTurn === turn) {
             events.push({
@@ -336,7 +336,7 @@ function compileNotableEvents(state: GameState, turn: number): TurnNotableEvent[
     }
 
     // Washington Agreement signed this turn
-    const washingtonTurn = state.rbih_hrhb_state?.washington_turn;
+    const washingtonTurn = state.political.rbih_hrhb_state?.washington_turn;
     if (washingtonTurn === turn) {
         events.push({
             kind: 'washington_agreement',

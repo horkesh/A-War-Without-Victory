@@ -89,8 +89,8 @@ test('createOobFormations is idempotent and only creates when presence', () => {
     const r1 = createOobFormations(state, corps, brigades, hq, sidToMun);
     assert.strictEqual(r1.corps_created, 1);
     assert.strictEqual(r1.brigades_created, 1);
-    assert.ok(state.formations!['arbih_3rd_corps']);
-    assert.ok(state.formations!['arbih_7th_muslim']);
+    assert.ok(state.military.formations!['arbih_3rd_corps']);
+    assert.ok(state.military.formations!['arbih_7th_muslim']);
 
     const r2 = createOobFormations(state, corps, brigades, hq, sidToMun);
     assert.strictEqual(r2.corps_created, 0);
@@ -119,7 +119,7 @@ test('createOobFormations preserves army_hq corps kind', () => {
 
     const report = createOobFormations(state, corps, [], hq, sidToMun);
     assert.strictEqual(report.corps_created, 1);
-    assert.strictEqual(state.formations!['arbih_general_staff']?.kind, 'army_hq');
+    assert.strictEqual(state.military.formations!['arbih_general_staff']?.kind, 'army_hq');
 });
 
 test('createOobFormations uses faction-specific initial personnel defaults', () => {
@@ -144,9 +144,9 @@ test('createOobFormations uses faction-specific initial personnel defaults', () 
         makeBrigade({ id: 'hvo_1st', faction: 'HRHB', name: '1st', home_mun: 'mostar', kind: 'brigade' })
     ];
     createOobFormations(state, [], brigades, hq, sidToMun);
-    assert.strictEqual((state.formations!['vrs_1st'] as { personnel?: number }).personnel, 1200, 'RS brigade starts at 1200');
-    assert.strictEqual((state.formations!['arbih_7th'] as { personnel?: number }).personnel, 500, 'RBiH brigade starts at 500');
-    assert.strictEqual((state.formations!['hvo_1st'] as { personnel?: number }).personnel, 800, 'HRHB brigade starts at 800');
+    assert.strictEqual((state.military.formations!['vrs_1st'] as { personnel?: number }).personnel, 1200, 'RS brigade starts at 1200');
+    assert.strictEqual((state.military.formations!['arbih_7th'] as { personnel?: number }).personnel, 500, 'RBiH brigade starts at 500');
+    assert.strictEqual((state.military.formations!['hvo_1st'] as { personnel?: number }).personnel, 800, 'HRHB brigade starts at 800');
 });
 
 test('createOobFormations tags brigades with explicit home_osid as fixed placement', () => {
@@ -178,8 +178,8 @@ test('createOobFormations tags brigades with explicit home_osid as fixed placeme
 
     createOobFormations(state, [], brigades, hq, sidToMun);
     assert.deepStrictEqual(
-        state.formations?.vrs_fixed?.tags?.includes('placement:fixed_home_osid'),
+        state.military.formations?.vrs_fixed?.tags?.includes('placement:fixed_home_osid'),
         true,
     );
-    assert.strictEqual(state.formations?.vrs_fixed?.location_osid, 'op:prijedor:prijedor_2');
+    assert.strictEqual(state.military.formations?.vrs_fixed?.location_osid, 'op:prijedor:prijedor_2');
 });

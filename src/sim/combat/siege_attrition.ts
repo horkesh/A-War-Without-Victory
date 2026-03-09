@@ -57,14 +57,14 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
         by_faction: {}
     };
 
-    const counters = state.siege_turn_counters;
+    const counters = state.military.siege_turn_counters;
     if (!counters) return report;
 
-    const formations = state.formations ?? {};
-    const pools = (state.militia_pools ?? {}) as Record<string, MilitiaPoolState>;
-    if (!state.casualty_ledger) {
+    const formations = state.military.formations ?? {};
+    const pools = (state.military.militia_pools ?? {}) as Record<string, MilitiaPoolState>;
+    if (!state.military.casualty_ledger) {
         const factionIds = (state.factions ?? []).map(f => f.id);
-        state.casualty_ledger = initializeCasualtyLedger(factionIds);
+        state.military.casualty_ledger = initializeCasualtyLedger(factionIds);
     }
 
     // Build map: osid → list of formation IDs located there
@@ -145,7 +145,7 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
             const wounded = Math.floor(casualties * SIEGE_WIA_FRACTION);
             const missing = casualties - killed - wounded;
 
-            recordBattleCasualties(state.casualty_ledger!, besiegedFaction, fid, {
+            recordBattleCasualties(state.military.casualty_ledger!, besiegedFaction, fid, {
                 killed, wounded, missing_captured: missing
             });
 

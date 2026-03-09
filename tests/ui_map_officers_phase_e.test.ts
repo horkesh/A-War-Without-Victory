@@ -94,7 +94,7 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
         expect(result.namedOfficerStateById?.[officerId].battles).toBe(10);
         expect(result.namedOfficerStateById?.[officerId].victories).toBe(6);
 
-        const formation = result.formations.find((f) => f.id === formationId);
+        const formation = result.military.formations.find((f) => f.id === formationId);
         expect(formation).toBeDefined();
         expect(formation?.officer_quality).toBe(0.45);
     });

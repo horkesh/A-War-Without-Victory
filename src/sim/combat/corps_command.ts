@@ -94,14 +94,14 @@ const LARGE_CORPS_THRESHOLD = 6; // subordinate count for 2 OG slots
  *    recruitment but corps formations haven't been loaded)
  */
 export function initializeCorpsCommand(state: GameState): void {
-    if (!state.formations) return;
-    if (!state.corps_command) state.corps_command = {};
+    if (!state.military.formations) return;
+    if (!state.military.corps_command) state.military.corps_command = {};
 
     // Collect all corps IDs from formations AND from brigade corps_id references
     const corpsIdSet = new Set<string>();
-    const formationIds = Object.keys(state.formations).sort(strictCompare);
+    const formationIds = Object.keys(state.military.formations).sort(strictCompare);
     for (const fid of formationIds) {
-        const f = state.formations[fid];
+        const f = state.military.formations[fid];
         if ((f.kind === 'corps' || f.kind === 'corps_asset') && f.status === 'active') {
             corpsIdSet.add(fid);
         }
@@ -113,9 +113,9 @@ export function initializeCorpsCommand(state: GameState): void {
 
     for (const cid of corpsIds) {
         // Skip if already initialized
-        if (state.corps_command[cid]) continue;
+        if (state.military.corps_command[cid]) continue;
 
-        const corps = state.formations[cid];
+        const corps = state.military.formations[cid];
 
         // Determine command span from tags or default
         let commandSpan = DEFAULT_COMMAND_SPAN;
@@ -131,7 +131,7 @@ export function initializeCorpsCommand(state: GameState): void {
         // Count subordinate brigades
         let subordinateCount = 0;
         for (const fid of formationIds) {
-            const f = state.formations[fid];
+            const f = state.military.formations[fid];
             if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom') && f.status === 'active') {
                 subordinateCount++;
             }
@@ -140,7 +140,7 @@ export function initializeCorpsCommand(state: GameState): void {
         // OG slots: 2 for large corps, 1 otherwise
         const ogSlots = subordinateCount >= LARGE_CORPS_THRESHOLD ? 2 : 1;
 
-        state.corps_command[cid] = {
+        state.military.corps_command[cid] = {
             command_span: commandSpan,
             subordinate_count: subordinateCount,
             og_slots: ogSlots,
@@ -161,12 +161,12 @@ export function initializeCorpsCommand(state: GameState): void {
  * Army stance 'balanced' does not override; other values force a stance.
  */
 export function getEffectiveCorpsStance(state: GameState, corpsId: FormationId): CorpsStance {
-    const corps = state.formations?.[corpsId];
+    const corps = state.military.formations?.[corpsId];
     if (!corps) return 'balanced';
 
-    const armyStance = state.army_stance?.[corps.faction];
+    const armyStance = state.military.army_stance?.[corps.faction];
     if (!armyStance || armyStance === 'balanced') {
-        return state.corps_command?.[corpsId]?.stance ?? 'balanced';
+        return state.military.corps_command?.[corpsId]?.stance ?? 'balanced';
     }
 
     // Army stance overrides
@@ -174,7 +174,7 @@ export function getEffectiveCorpsStance(state: GameState, corpsId: FormationId):
     if (armyStance === 'general_defensive') return 'defensive';
     if (armyStance === 'total_mobilization') return 'reorganize';
 
-    return state.corps_command?.[corpsId]?.stance ?? 'balanced';
+    return state.military.corps_command?.[corpsId]?.stance ?? 'balanced';
 }
 
 // ---------------------------------------------------------------------------
@@ -201,11 +201,11 @@ export function getCorpsStanceModifiers(state: GameState, brigade: FormationStat
  * Returns modifiers based on the operation phase, or null if not in any operation.
  */
 export function getOperationModifiers(state: GameState, brigadeId: FormationId): StanceModifiers | null {
-    if (!state.corps_command) return null;
+    if (!state.military.corps_command) return null;
 
-    const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
+    const corpsIds = Object.keys(state.military.corps_command).sort(strictCompare);
     for (const cid of corpsIds) {
-        const cmd = state.corps_command[cid];
+        const cmd = state.military.corps_command[cid];
         const op = cmd.active_operation;
         if (!op) continue;
         if (!op.participating_brigades.includes(brigadeId)) continue;
@@ -235,11 +235,11 @@ export function getOperationModifiers(state: GameState, brigadeId: FormationId):
  * planning -> execution -> recovery -> complete (null).
  */
 export function advanceOperations(state: GameState): void {
-    if (!state.corps_command) return;
+    if (!state.military.corps_command) return;
 
-    const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
+    const corpsIds = Object.keys(state.military.corps_command).sort(strictCompare);
     for (const cid of corpsIds) {
-        const cmd = state.corps_command[cid];
+        const cmd = state.military.corps_command[cid];
         const op = cmd.active_operation;
         if (!op) continue;
         if (op.type === 'sector_attack') continue;
@@ -269,9 +269,9 @@ export function advanceOperations(state: GameState): void {
  * Iterates corps and brigades in deterministic (sorted) order.
  */
 export function applyCorpsEffects(state: GameState): void {
-    if (!state.formations || !state.corps_command) return;
+    if (!state.military.formations || !state.military.corps_command) return;
 
-    const corpsIds = Object.keys(state.corps_command).sort(strictCompare);
+    const corpsIds = Object.keys(state.military.corps_command).sort(strictCompare);
     for (const cid of corpsIds) {
         const effectiveStance = getEffectiveCorpsStance(state, cid);
         const mods = STANCE_MODIFIERS[effectiveStance];
@@ -279,9 +279,9 @@ export function applyCorpsEffects(state: GameState): void {
         // Update subordinate count while we iterate
         let subCount = 0;
 
-        const formationIds = Object.keys(state.formations).sort(strictCompare);
+        const formationIds = Object.keys(state.military.formations).sort(strictCompare);
         for (const fid of formationIds) {
-            const f = state.formations[fid];
+            const f = state.military.formations[fid];
             if (f.corps_id !== cid || f.kind !== 'brigade' || f.status !== 'active') continue;
             subCount++;
 
@@ -298,7 +298,7 @@ export function applyCorpsEffects(state: GameState): void {
         }
 
         // Refresh subordinate count
-        state.corps_command[cid].subordinate_count = subCount;
+        state.military.corps_command[cid].subordinate_count = subCount;
     }
 }
 
@@ -310,6 +310,6 @@ export function applyCorpsEffects(state: GameState): void {
  * Update army stance for a faction.
  */
 export function setArmyStance(state: GameState, faction: FactionId, stance: ArmyStance): void {
-    if (!state.army_stance) state.army_stance = {};
-    state.army_stance[faction] = stance;
+    if (!state.military.army_stance) state.military.army_stance = {};
+    state.military.army_stance[faction] = stance;
 }

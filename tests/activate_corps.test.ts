@@ -105,7 +105,7 @@ function makeBottomUpState(turn = 0): GameState {
 const EMPTY_SIDO_TO_MUN = new Map<string, string>();
 
 function formationIds(state: GameState): string[] {
-    return Object.keys(state.formations ?? {}).sort();
+    return Object.keys(state.military.formations ?? {}).sort();
 }
 
 // ---------------------------------------------------------------------------
@@ -117,7 +117,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         const state = makeBottomUpState(0);
         // Pre-seed RS corps (as createOobFormations would do)
         for (const c of RS_CORPS_OOB) {
-            state.formations![c.id] = {
+            state.military.formations![c.id] = {
                 id: c.id as import('../src/state/game_state.js').FormationId,
                 faction: c.faction,
                 name: c.name,
@@ -137,13 +137,13 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         expect(report.corps_ids).toHaveLength(0);
         // Only RS corps should be in state
         for (const c of RS_CORPS_OOB) {
-            expect(state.formations![c.id]).toBeDefined();
+            expect(state.military.formations![c.id]).toBeDefined();
         }
         for (const c of HRHB_CORPS_OOB) {
-            expect(state.formations![c.id]).toBeUndefined();
+            expect(state.military.formations![c.id]).toBeUndefined();
         }
         for (const c of ARBIH_CORPS_OOB) {
-            expect(state.formations![c.id]).toBeUndefined();
+            expect(state.military.formations![c.id]).toBeUndefined();
         }
     });
 
@@ -151,7 +151,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         const state = makeBottomUpState(10);
         // RS already exist
         for (const c of RS_CORPS_OOB) {
-            state.formations![c.id] = {
+            state.military.formations![c.id] = {
                 id: c.id as import('../src/state/game_state.js').FormationId,
                 faction: c.faction,
                 name: c.name,
@@ -168,12 +168,12 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
 
         expect(report.corps_activated).toBe(HRHB_CORPS_OOB.length);
         for (const c of HRHB_CORPS_OOB) {
-            expect(state.formations![c.id]).toBeDefined();
-            expect(state.formations![c.id]!.faction).toBe('HRHB');
+            expect(state.military.formations![c.id]).toBeDefined();
+            expect(state.military.formations![c.id]!.faction).toBe('HRHB');
         }
         // RBiH still absent
         for (const c of ARBIH_CORPS_OOB) {
-            expect(state.formations![c.id]).toBeUndefined();
+            expect(state.military.formations![c.id]).toBeUndefined();
         }
     });
 
@@ -181,7 +181,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         const state = makeBottomUpState(24);
         // Pre-seed RS + HRHB
         for (const c of [...RS_CORPS_OOB, ...HRHB_CORPS_OOB]) {
-            state.formations![c.id] = {
+            state.military.formations![c.id] = {
                 id: c.id as import('../src/state/game_state.js').FormationId,
                 faction: c.faction,
                 name: c.name,
@@ -198,8 +198,8 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
 
         expect(report.corps_activated).toBe(ARBIH_CORPS_OOB.length);
         for (const c of ARBIH_CORPS_OOB) {
-            expect(state.formations![c.id]).toBeDefined();
-            expect(state.formations![c.id]!.faction).toBe('RBiH');
+            expect(state.military.formations![c.id]).toBeDefined();
+            expect(state.military.formations![c.id]!.faction).toBe('RBiH');
         }
     });
 
@@ -207,7 +207,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         const state = makeBottomUpState(24);
         // Pre-seed RS corps as createOobFormations would at Peace phase entry
         for (const c of RS_CORPS_OOB) {
-            state.formations![c.id] = {
+            state.military.formations![c.id] = {
                 id: c.id as import('../src/state/game_state.js').FormationId,
                 faction: c.faction,
                 name: c.name,
@@ -247,7 +247,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         activateCorpsForTurn(state, ALL_CORPS_OOB, 10);
 
         for (const c of HRHB_CORPS_OOB) {
-            expect(state.formations![c.id]!.created_turn).toBe(10);
+            expect(state.military.formations![c.id]!.created_turn).toBe(10);
         }
     });
 
@@ -255,11 +255,11 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         const state = makeBottomUpState(10);
         activateCorpsForTurn(state, ALL_CORPS_OOB, 10);
 
-        const mainStaff = state.formations!['hvo_main_staff'];
+        const mainStaff = state.military.formations!['hvo_main_staff'];
         expect(mainStaff).toBeDefined();
         expect(mainStaff!.kind).toBe('army_hq');
 
-        const seOz = state.formations!['hvo_southeast_herzegovina'];
+        const seOz = state.military.formations!['hvo_southeast_herzegovina'];
         expect(seOz).toBeDefined();
         expect(seOz!.kind).toBe('corps_asset');
     });
@@ -269,7 +269,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         // Activate all corps
         activateCorpsForTurn(state, ALL_CORPS_OOB, 24);
 
-        for (const f of Object.values(state.formations!)) {
+        for (const f of Object.values(state.military.formations!)) {
             if (f.kind === 'corps_asset' || f.kind === 'army_hq') {
                 expect(f.location_osid).toBeUndefined();
             }
@@ -286,7 +286,7 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
 
         expect(report.corps_activated).toBe(ALL_CORPS_OOB.length);
         for (const c of ALL_CORPS_OOB) {
-            expect(state.formations![c.id]).toBeDefined();
+            expect(state.military.formations![c.id]).toBeDefined();
         }
     });
 });
@@ -327,7 +327,7 @@ describe('createOobFormations — bottom_up mode skipping', () => {
         const state = makeBottomUpState(0);
         // Control: all muns have presence for all factions
         const { sidToMun, pc } = buildPresence(ALL_MUNS, ['RS', 'RBiH', 'HRHB']);
-        state.political_controllers = pc;
+        state.political.political_controllers = pc;
 
         createOobFormations(
             state,
@@ -339,18 +339,18 @@ describe('createOobFormations — bottom_up mode skipping', () => {
 
         // RS corps should exist
         for (const c of RS_CORPS_OOB) {
-            expect(state.formations![c.id]).toBeDefined();
+            expect(state.military.formations![c.id]).toBeDefined();
         }
         // HRHB and RBiH corps should NOT exist
         for (const c of [...HRHB_CORPS_OOB, ...ARBIH_CORPS_OOB]) {
-            expect(state.formations![c.id]).toBeUndefined();
+            expect(state.military.formations![c.id]).toBeUndefined();
         }
     });
 
     it('bottom_up mode: only RS brigades are created at turn 0', () => {
         const state = makeBottomUpState(0);
         const { sidToMun, pc } = buildPresence(ALL_MUNS, ['RS', 'RBiH', 'HRHB']);
-        state.political_controllers = pc;
+        state.political.political_controllers = pc;
 
         createOobFormations(
             state,
@@ -361,17 +361,17 @@ describe('createOobFormations — bottom_up mode skipping', () => {
         );
 
         // RS brigade should exist
-        expect(state.formations!['rs_brig_01']).toBeDefined();
+        expect(state.military.formations!['rs_brig_01']).toBeDefined();
         // RBiH and HRHB brigades should NOT exist
-        expect(state.formations!['rbih_brig_01']).toBeUndefined();
-        expect(state.formations!['hrhb_brig_01']).toBeUndefined();
+        expect(state.military.formations!['rbih_brig_01']).toBeUndefined();
+        expect(state.military.formations!['hrhb_brig_01']).toBeUndefined();
     });
 
     it('auto_oob mode: all corps and brigades are created', () => {
         const state = makeBottomUpState(0);
         state.meta.recruitment_mode = undefined; // legacy mode
         const { sidToMun, pc } = buildPresence(ALL_MUNS, ['RS', 'RBiH', 'HRHB']);
-        state.political_controllers = pc;
+        state.political.political_controllers = pc;
 
         const report = createOobFormations(
             state,
@@ -390,7 +390,7 @@ describe('createOobFormations — bottom_up mode skipping', () => {
     it('bottom_up mode: report.corps_created counts only RS corps', () => {
         const state = makeBottomUpState(0);
         const { sidToMun, pc } = buildPresence(ALL_MUNS, ['RS', 'RBiH', 'HRHB']);
-        state.political_controllers = pc;
+        state.political.political_controllers = pc;
 
         const report = createOobFormations(
             state,

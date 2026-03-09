@@ -55,10 +55,10 @@ export function deriveAoRMembership(
         return result;
     }
 
-    const fp = state.front_pressure ?? {};
-    const segments = state.front_segments ?? {};
-    const pc = state.political_controllers ?? {};
-    const formations = state.formations ?? {};
+    const fp = state.military.front_pressure ?? {};
+    const segments = state.military.front_segments ?? {};
+    const pc = state.political.political_controllers ?? {};
+    const formations = state.military.formations ?? {};
 
     // Filter eligible edges to those with sustained pressure (active_streak >= AOR_EMERGENCE_PERSIST_TURNS)
     // and sufficient pressure gradient (|value| >= AOR_MIN_PRESSURE_THRESHOLD)

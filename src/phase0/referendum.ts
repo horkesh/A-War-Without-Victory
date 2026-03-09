@@ -136,7 +136,7 @@ export function applyWarTransition(state: GameState): boolean {
 
     meta.phase = 'war';
     const rsDeclared = getRs(state)?.declared === true;
-    state.war_jna = {
+    state.military.war_jna = {
         transition_begun: rsDeclared,
         withdrawal_progress: 0,
         asset_transfer_rs: 0

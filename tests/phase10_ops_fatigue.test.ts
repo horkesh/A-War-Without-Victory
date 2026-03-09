@@ -83,8 +83,8 @@ test('formation fatigue: assigned + unsupplied => fatigue increments by 1 per tu
     assert.strictEqual(record.supplied, false, 'formation should be unsupplied');
     assert.strictEqual(record.fatigue_before, 0, 'fatigue should start at 0');
     assert.strictEqual(record.fatigue_after, 1, 'fatigue should increment by 1');
-    assert.strictEqual(state.formations.F1.ops?.fatigue, 1, 'state should be updated');
-    assert.strictEqual(state.formations.F1.ops?.last_supplied_turn, null, 'last_supplied_turn should remain null');
+    assert.strictEqual(state.military.formations.F1.ops?.fatigue, 1, 'state should be updated');
+    assert.strictEqual(state.military.formations.F1.ops?.last_supplied_turn, null, 'last_supplied_turn should remain null');
 });
 
 test('formation fatigue: assigned + supplied => fatigue unchanged, last_supplied_turn set', () => {
@@ -135,8 +135,8 @@ test('formation fatigue: assigned + supplied => fatigue unchanged, last_supplied
     assert.strictEqual(record.supplied, true, 'formation should be supplied');
     assert.strictEqual(record.fatigue_before, 2, 'fatigue should start at 2');
     assert.strictEqual(record.fatigue_after, 2, 'fatigue should remain 2');
-    assert.strictEqual(state.formations.F1.ops?.fatigue, 2, 'state fatigue should remain 2');
-    assert.strictEqual(state.formations.F1.ops?.last_supplied_turn, 5, 'last_supplied_turn should be set to current turn');
+    assert.strictEqual(state.military.formations.F1.ops?.fatigue, 2, 'state fatigue should remain 2');
+    assert.strictEqual(state.military.formations.F1.ops?.last_supplied_turn, 5, 'last_supplied_turn should be set to current turn');
 });
 
 test('formation fatigue: unassigned formations do NOT accumulate fatigue even if faction is unsupplied', () => {
@@ -187,7 +187,7 @@ test('formation fatigue: unassigned formations do NOT accumulate fatigue even if
     assert.strictEqual(record.supplied, true, 'unassigned formation should be treated as supplied');
     assert.strictEqual(record.fatigue_before, 0, 'fatigue should start at 0');
     assert.strictEqual(record.fatigue_after, 0, 'fatigue should remain 0');
-    assert.strictEqual(state.formations.F1.ops?.fatigue, 0, 'state fatigue should remain 0');
+    assert.strictEqual(state.military.formations.F1.ops?.fatigue, 0, 'state fatigue should remain 0');
 });
 
 test('formation fatigue: inactive formations do not accumulate fatigue', () => {
@@ -234,7 +234,7 @@ test('formation fatigue: inactive formations do not accumulate fatigue', () => {
 
     // Inactive formations should not be processed
     assert.strictEqual(report.by_formation.length, 0, 'inactive formations should not appear in report');
-    assert.strictEqual(state.formations.F1.ops?.fatigue, 0, 'inactive formation fatigue should remain unchanged');
+    assert.strictEqual(state.military.formations.F1.ops?.fatigue, 0, 'inactive formation fatigue should remain unchanged');
 });
 
 // ============================================================================
@@ -496,7 +496,7 @@ test('militia fatigue: municipality unsupplied => fatigue increments by 1 per tu
     assert.strictEqual(record.supplied, false, 'municipality should be unsupplied');
     assert.strictEqual(record.fatigue_before, 0, 'fatigue should start at 0');
     assert.strictEqual(record.fatigue_after, 1, 'fatigue should increment by 1');
-    assert.strictEqual(state.militia_pools['MUN1'].fatigue, 1, 'state should be updated');
+    assert.strictEqual(state.military.militia_pools['MUN1'].fatigue, 1, 'state should be updated');
 });
 
 test('militia fatigue: municipality supplied => fatigue unchanged', () => {
@@ -548,7 +548,7 @@ test('militia fatigue: municipality supplied => fatigue unchanged', () => {
     assert.strictEqual(record.supplied, true, 'municipality should be supplied');
     assert.strictEqual(record.fatigue_before, 2, 'fatigue should start at 2');
     assert.strictEqual(record.fatigue_after, 2, 'fatigue should remain 2');
-    assert.strictEqual(state.militia_pools['MUN1'].fatigue, 2, 'state fatigue should remain 2');
+    assert.strictEqual(state.military.militia_pools['MUN1'].fatigue, 2, 'state fatigue should remain 2');
 });
 
 test('militia fatigue: exhaustion increase adds +1 fatigue to all pools for that faction', () => {

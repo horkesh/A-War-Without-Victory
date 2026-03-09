@@ -45,7 +45,7 @@ export function deriveRearPoliticalControlZones(
         return result;
     }
 
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const controlledSettlements = Object.keys(pc)
         .filter((sid) => pc[sid] !== null && pc[sid] !== undefined)
         .sort(strictCompare);

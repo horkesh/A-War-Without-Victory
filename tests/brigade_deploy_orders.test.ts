@@ -43,29 +43,29 @@ function makeTerrain(by_sid: TerrainScalarsData['by_sid']): TerrainScalarsData {
 describe('brigade deploy/undeploy staging', () => {
     it('undeploy order holds brigade in column packing state', () => {
         const state = makeState();
-        state.brigade_deploy_orders = { b1: 'undeploy' };
+        state.military.brigade_deploy_orders = { b1: 'undeploy' };
 
         processBrigadeMovement(state, EDGES);
 
-        expect(state.brigade_movement_state?.b1?.status).toBe('packing');
-        expect(state.brigade_movement_state?.b1?.stance).toBe('column');
-        expect(state.brigade_movement_state?.b1?.destination_sids).toEqual(['S1']);
-        expect(state.brigade_deploy_orders).toBeUndefined();
+        expect(state.military.brigade_movement_state?.b1?.status).toBe('packing');
+        expect(state.military.brigade_movement_state?.b1?.stance).toBe('column');
+        expect(state.military.brigade_movement_state?.b1?.destination_sids).toEqual(['S1']);
+        expect(state.military.brigade_deploy_orders).toBeUndefined();
     });
 
     it('deploy order transitions column packing to unpacking then deployed on next turn', () => {
         const state = makeState();
-        state.brigade_movement_state = {
+        state.military.brigade_movement_state = {
             b1: { status: 'packing', stance: 'column', destination_sids: ['S1'] },
         };
-        state.brigade_deploy_orders = { b1: 'deploy' };
+        state.military.brigade_deploy_orders = { b1: 'deploy' };
 
         processBrigadeMovement(state, EDGES);
-        expect(state.brigade_movement_state?.b1?.status).toBe('unpacking');
-        expect(state.brigade_movement_state?.b1?.stance).toBe('combat');
+        expect(state.military.brigade_movement_state?.b1?.status).toBe('unpacking');
+        expect(state.military.brigade_movement_state?.b1?.stance).toBe('combat');
 
         processBrigadeMovement(state, EDGES);
-        expect(state.brigade_movement_state?.b1).toBeUndefined();
+        expect(state.military.brigade_movement_state?.b1).toBeUndefined();
     });
 
     it('column movement uses composition and terrain/roads costs', () => {
@@ -124,7 +124,7 @@ describe('brigade deploy/undeploy staging', () => {
         });
 
         const heavy = makeState();
-        (heavy.formations.b1 as any).composition = {
+        (heavy.military.formations.b1 as any).composition = {
             infantry: 700,
             tanks: 260,
             artillery: 180,
@@ -139,14 +139,14 @@ describe('brigade deploy/undeploy staging', () => {
             recon: 30,
             command_comm: 60,
         };
-        heavy.brigade_movement_state = {
+        heavy.military.brigade_movement_state = {
             b1: { status: 'packing', stance: 'column', destination_sids: ['S3'] },
         };
         processBrigadeMovement(heavy, EDGES, roughTerrain);
-        const heavyTurns = heavy.brigade_movement_state?.b1?.turns_remaining ?? 0;
+        const heavyTurns = heavy.military.brigade_movement_state?.b1?.turns_remaining ?? 0;
 
         const light = makeState();
-        (light.formations.b1 as any).composition = {
+        (light.military.formations.b1 as any).composition = {
             infantry: 2100,
             tanks: 10,
             artillery: 8,
@@ -161,14 +161,14 @@ describe('brigade deploy/undeploy staging', () => {
             recon: 55,
             command_comm: 70,
         };
-        light.brigade_movement_state = {
+        light.military.brigade_movement_state = {
             b1: { status: 'packing', stance: 'column', destination_sids: ['S3'] },
         };
         processBrigadeMovement(light, EDGES, flatTerrain);
-        const lightTurns = light.brigade_movement_state?.b1?.turns_remaining ?? 0;
+        const lightTurns = light.military.brigade_movement_state?.b1?.turns_remaining ?? 0;
 
-        expect(heavy.brigade_movement_state?.b1?.status).toBe('in_transit');
-        expect(light.brigade_movement_state?.b1?.status).toBe('in_transit');
+        expect(heavy.military.brigade_movement_state?.b1?.status).toBe('in_transit');
+        expect(light.military.brigade_movement_state?.b1?.status).toBe('in_transit');
         expect(heavyTurns).toBeGreaterThan(lightTurns);
     });
 });

@@ -38,7 +38,7 @@ function minimalPhaseIIState(): GameState {
 test('AoR: no AoRs when peace phase', () => {
     const state = minimalPhaseIIState();
     state.meta.phase = 'war';
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);
     assert.strictEqual(Object.keys(aor.by_formation).length, 0, 'No AoRs in peace phase');
@@ -46,7 +46,7 @@ test('AoR: no AoRs when peace phase', () => {
 
 test('AoR: no AoRs when no eligible edges', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RBiH' }; // same control
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RBiH' }; // same control
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);
     assert.strictEqual(Object.keys(aor.by_formation).length, 0, 'No AoRs when no opposing control');
@@ -54,9 +54,9 @@ test('AoR: no AoRs when no eligible edges', () => {
 
 test('AoR: no AoRs when pressure below threshold', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 2, max_abs: 2, last_updated_turn: 10 } }; // below threshold (5)
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 0, since_turn: 0, last_active_turn: 10, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 } };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 2, max_abs: 2, last_updated_turn: 10 } }; // below threshold (5)
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 0, since_turn: 0, last_active_turn: 10, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 } };
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);
     assert.strictEqual(Object.keys(aor.by_formation).length, 0, 'No AoRs when pressure < threshold');
@@ -64,9 +64,9 @@ test('AoR: no AoRs when pressure below threshold', () => {
 
 test('AoR: no AoRs when active_streak below threshold', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 8, since_turn: 8, last_active_turn: 10, active_streak: 2, max_active_streak: 2, friction: 0, max_friction: 0 } }; // below threshold (3)
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 8, since_turn: 8, last_active_turn: 10, active_streak: 2, max_active_streak: 2, friction: 0, max_friction: 0 } }; // below threshold (3)
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);
     assert.strictEqual(Object.keys(aor.by_formation).length, 0, 'No AoRs when active_streak < threshold');
@@ -74,9 +74,9 @@ test('AoR: no AoRs when active_streak below threshold', () => {
 
 test('AoR: AoRs emerge when sustained conditions met (pressure + streak >= thresholds)', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } }; // >= 5
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } }; // >= 3
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } }; // >= 5
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } }; // >= 3
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);
     const formationIds = Object.keys(aor.by_formation).sort();
@@ -92,9 +92,9 @@ test('AoR: AoRs emerge when sustained conditions met (pressure + streak >= thres
 
 test('AoR: AoRs dissolve when conditions weaken (pressure drops)', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 3, max_abs: 10, last_updated_turn: 10 } }; // dropped below threshold
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 } };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 3, max_abs: 10, last_updated_turn: 10 } }; // dropped below threshold
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 5, max_active_streak: 5, friction: 0, max_friction: 0 } };
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);
     assert.strictEqual(Object.keys(aor.by_formation).length, 0, 'AoRs dissolve when pressure drops below threshold');
@@ -102,9 +102,9 @@ test('AoR: AoRs dissolve when conditions weaken (pressure drops)', () => {
 
 test('AoR: AoRs dissolve when active_streak resets', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 10, since_turn: 10, last_active_turn: 10, active_streak: 1, max_active_streak: 5, friction: 0, max_friction: 0 } }; // streak reset
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 10, since_turn: 10, last_active_turn: 10, active_streak: 1, max_active_streak: 5, friction: 0, max_friction: 0 } }; // streak reset
     const edges = [{ a: 'S1', b: 'S2' }];
     const aor = deriveAoRMembership(state, edges);
     assert.strictEqual(Object.keys(aor.by_formation).length, 0, 'AoRs dissolve when active_streak resets below threshold');
@@ -112,13 +112,13 @@ test('AoR: AoRs dissolve when active_streak resets', () => {
 
 test('AoR: overlapping allowed (multiple formations may have influence on same edge)', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
-    state.formations['F3'] = { id: 'F3', faction: 'RBiH', name: 'Brigade 3', created_turn: 0, status: 'active', assignment: null };
-    state.front_pressure = {
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
+    state.military.formations['F3'] = { id: 'F3', faction: 'RBiH', name: 'Brigade 3', created_turn: 0, status: 'active', assignment: null };
+    state.military.front_pressure = {
         'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 },
         'S2__S3': { edge_id: 'S2__S3', value: 8, max_abs: 8, last_updated_turn: 10 }
     };
-    state.front_segments = {
+    state.military.front_segments = {
         'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 },
         'S2__S3': { edge_id: 'S2__S3', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 }
     };
@@ -126,24 +126,24 @@ test('AoR: overlapping allowed (multiple formations may have influence on same e
     const aor = deriveAoRMembership(state, edges);
     const formationIds = Object.keys(aor.by_formation).sort();
     // RBiH formations (F1, F3) may both have influence on edges where RBiH has control
-    const rbihFormations = formationIds.filter((fid) => aor.by_formation[fid].formation_id.startsWith('F') && state.formations[fid]?.faction === 'RBiH');
+    const rbihFormations = formationIds.filter((fid) => aor.by_formation[fid].formation_id.startsWith('F') && state.military.formations[fid]?.faction === 'RBiH');
     assert.ok(rbihFormations.length >= 1, 'Multiple RBiH formations may have AoRs (overlapping allowed)');
 });
 
 test('AoR: AoR assignment does not flip control', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
-    const originalControl = { ...state.political_controllers };
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS' };
+    const originalControl = { ...state.political.political_controllers };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } };
     const edges = [{ a: 'S1', b: 'S2' }];
     deriveAoRMembership(state, edges); // should not mutate state.political_controllers
-    assert.deepStrictEqual(state.political_controllers, originalControl, 'AoR derivation does not flip control');
+    assert.deepStrictEqual(state.political.political_controllers, originalControl, 'AoR derivation does not flip control');
 });
 
 test('AoR: isSettlementFrontActive returns true for settlements on eligible edges', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const eligible = getEligiblePressureEdges(state, edges);
     assert.strictEqual(isSettlementFrontActive('S1', eligible), true, 'S1 is front-active');
@@ -153,7 +153,7 @@ test('AoR: isSettlementFrontActive returns true for settlements on eligible edge
 
 test('AoR: getFrontActiveSettlements returns all settlements on eligible edges', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'HRHB', 'S4': 'RBiH' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'HRHB', 'S4': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }, { a: 'S2', b: 'S3' }];
     const eligible = getEligiblePressureEdges(state, edges);
     const frontActive = getFrontActiveSettlements(eligible);

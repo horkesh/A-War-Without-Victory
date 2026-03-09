@@ -175,17 +175,17 @@ test('treaty apply: global ceasefire freezes all active edges deterministically'
     assert.strictEqual(report.military.duration_turns, 'indefinite');
 
     // Check ceasefire entries
-    assert.ok(updatedState.ceasefire);
-    assert.ok(updatedState.ceasefire!['sid1__sid3']);
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].since_turn, 5);
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].until_turn, null); // indefinite
-    assert.ok(updatedState.ceasefire!['sid2__sid4']);
-    assert.strictEqual(updatedState.ceasefire!['sid2__sid4'].since_turn, 5);
-    assert.strictEqual(updatedState.ceasefire!['sid2__sid4'].until_turn, null);
+    assert.ok(updatedState.political.ceasefire);
+    assert.ok(updatedState.political.ceasefire!['sid1__sid3']);
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].since_turn, 5);
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].until_turn, null); // indefinite
+    assert.ok(updatedState.political.ceasefire!['sid2__sid4']);
+    assert.strictEqual(updatedState.political.ceasefire!['sid2__sid4'].since_turn, 5);
+    assert.strictEqual(updatedState.political.ceasefire!['sid2__sid4'].until_turn, null);
 
     // Check negotiation status
-    assert.strictEqual(updatedState.negotiation_status?.ceasefire_active, true);
-    assert.strictEqual(updatedState.negotiation_status?.last_offer_turn, 5);
+    assert.strictEqual(updatedState.political.negotiation_status?.ceasefire_active, true);
+    assert.strictEqual(updatedState.political.negotiation_status?.last_offer_turn, 5);
 
     // Check sorted freeze_edges
     assert.deepStrictEqual(report.freeze_edges, ['sid1__sid3', 'sid2__sid4']);
@@ -213,11 +213,11 @@ test('treaty apply: freeze_region freezes only region active edges', () => {
     assert.strictEqual(report.military.freeze_edges_total, 1);
     assert.strictEqual(report.military.duration_turns, 6); // base 6 turns
 
-    assert.ok(updatedState.ceasefire);
-    assert.ok(updatedState.ceasefire!['sid1__sid3']);
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].since_turn, 5);
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].until_turn, 11); // 5 + 6
-    assert.ok(!updatedState.ceasefire!['sid2__sid4']); // not in region
+    assert.ok(updatedState.political.ceasefire);
+    assert.ok(updatedState.political.ceasefire!['sid1__sid3']);
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].since_turn, 5);
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].until_turn, 11); // 5 + 6
+    assert.ok(!updatedState.political.ceasefire!['sid2__sid4']); // not in region
 });
 
 test('treaty apply: freeze_edges freezes specified edges', () => {
@@ -240,10 +240,10 @@ test('treaty apply: freeze_edges freezes specified edges', () => {
     assert.strictEqual(report.military.freeze_edges_total, 1);
     assert.strictEqual(report.military.duration_turns, 4); // base 4 turns
 
-    assert.ok(updatedState.ceasefire);
-    assert.ok(updatedState.ceasefire!['sid1__sid3']);
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].since_turn, 5);
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].until_turn, 9); // 5 + 4
+    assert.ok(updatedState.political.ceasefire);
+    assert.ok(updatedState.political.ceasefire!['sid1__sid3']);
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].since_turn, 5);
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].until_turn, 9); // 5 + 4
 });
 
 test('treaty apply: monitoring modifies duration deterministically', () => {
@@ -266,7 +266,7 @@ test('treaty apply: monitoring modifies duration deterministically', () => {
     assert.strictEqual(report.military.monitoring_level, 'light');
     assert.strictEqual(report.military.duration_turns, 6); // 4 base + 2 light
 
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].until_turn, 11); // 5 + 6
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].until_turn, 11); // 5 + 6
 });
 
 test('treaty apply: monitoring_robust adds +4 turns', () => {
@@ -291,7 +291,7 @@ test('treaty apply: monitoring_robust adds +4 turns', () => {
     assert.strictEqual(report.military.monitoring_level, 'robust');
     assert.strictEqual(report.military.duration_turns, 10); // 6 base + 4 robust
 
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].until_turn, 15); // 5 + 10
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].until_turn, 15); // 5 + 10
 });
 
 test('treaty apply: monitoring does not affect indefinite freezes', () => {
@@ -311,20 +311,20 @@ test('treaty apply: monitoring does not affect indefinite freezes', () => {
     assert.strictEqual(report.military.monitoring_level, 'robust');
     assert.strictEqual(report.military.duration_turns, 'indefinite'); // monitoring doesn't change indefinite
 
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].until_turn, null);
-    assert.strictEqual(updatedState.ceasefire!['sid2__sid4'].until_turn, null);
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].until_turn, null);
+    assert.strictEqual(updatedState.political.ceasefire!['sid2__sid4'].until_turn, null);
 });
 
 test('treaty apply: merge behavior extends until_turn deterministically', () => {
     const state = createTestState();
     // Pre-existing freeze entry
-    state.ceasefire = {
+    state.political.ceasefire = {
         'sid1__sid3': {
             since_turn: 3,
             until_turn: 8 // expires at turn 8
         }
     };
-    state.negotiation_status = {
+    state.political.negotiation_status = {
         ceasefire_active: true,
         ceasefire_since_turn: 3,
         last_offer_turn: 3
@@ -345,14 +345,14 @@ test('treaty apply: merge behavior extends until_turn deterministically', () => 
 
     assert.strictEqual(report.applied, true);
     // Should keep earliest since_turn, extend until_turn
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].since_turn, 3); // kept earliest
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].until_turn, 9); // extended to 5 + 4 = 9 (max of 8 and 9)
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].since_turn, 3); // kept earliest
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].until_turn, 9); // extended to 5 + 4 = 9 (max of 8 and 9)
 });
 
 test('treaty apply: merge with indefinite keeps indefinite', () => {
     const state = createTestState();
     // Pre-existing indefinite freeze
-    state.ceasefire = {
+    state.political.ceasefire = {
         'sid1__sid3': {
             since_turn: 3,
             until_turn: null // indefinite
@@ -374,8 +374,8 @@ test('treaty apply: merge with indefinite keeps indefinite', () => {
 
     assert.strictEqual(report.applied, true);
     // Indefinite should win
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].since_turn, 3); // kept earliest
-    assert.strictEqual(updatedState.ceasefire!['sid1__sid3'].until_turn, null); // indefinite wins
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].since_turn, 3); // kept earliest
+    assert.strictEqual(updatedState.political.ceasefire!['sid1__sid3'].until_turn, null); // indefinite wins
 });
 
 test('treaty apply: determinism regression - same inputs => identical report and state', () => {
@@ -400,9 +400,9 @@ test('treaty apply: determinism regression - same inputs => identical report and
     assert.strictEqual(JSON.stringify(report1), JSON.stringify(report2));
 
     // State ceasefire entries should be identical
-    assert.deepStrictEqual(updatedState1.ceasefire, updatedState2.ceasefire);
-    assert.strictEqual(updatedState1.negotiation_status?.ceasefire_active, updatedState2.negotiation_status?.ceasefire_active);
-    assert.strictEqual(updatedState1.negotiation_status?.last_offer_turn, updatedState2.negotiation_status?.last_offer_turn);
+    assert.deepStrictEqual(updatedState1.political.ceasefire, updatedState2.political.ceasefire);
+    assert.strictEqual(updatedState1.political.negotiation_status?.ceasefire_active, updatedState2.political.negotiation_status?.ceasefire_active);
+    assert.strictEqual(updatedState1.political.negotiation_status?.last_offer_turn, updatedState2.political.negotiation_status?.last_offer_turn);
 });
 
 test('treaty apply: warning for inactive edge in freeze_edges', () => {

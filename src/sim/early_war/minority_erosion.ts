@@ -47,7 +47,7 @@ function getMunController(
     if (!sids?.length) return null;
     const counts: Record<string, number> = {};
     for (const sid of sids) {
-        const c = state.political_controllers?.[sid] ?? null;
+        const c = state.political.political_controllers?.[sid] ?? null;
         const key = c ?? '_null_';
         counts[key] = (counts[key] ?? 0) + 1;
     }
@@ -77,20 +77,20 @@ export function runMinorityErosion(
         by_mun: []
     };
 
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     if (!rhs) return report;
 
     // No erosion during ceasefire or post-Washington
     if (rhs.ceasefire_active || rhs.washington_signed) return report;
 
-    const allianceValue = state.war_alliance_rbih_hrhb ?? 1;
+    const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1;
     if (allianceValue > HOSTILE_THRESHOLD) return report;
 
     const mixedMuns = rhs.allied_mixed_municipalities;
     if (!mixedMuns?.length) return report;
 
-    const strengthByMun = state.war_militia_strength ?? {};
-    const formations = state.formations ?? {};
+    const strengthByMun = state.military.war_militia_strength ?? {};
+    const formations = state.military.formations ?? {};
 
     for (const munId of mixedMuns) {
         const controller = settlementsByMun
@@ -117,13 +117,13 @@ export function runMinorityErosion(
         // Apply erosion
         const eroded = Math.floor(militiaBefore * MINORITY_EROSION_RATE_PER_TURN);
         const militiaAfter = Math.max(0, militiaBefore - eroded);
-        if (!state.war_militia_strength) {
+        if (!state.military.war_militia_strength) {
             (state as any).war_militia_strength = {};
         }
-        if (!state.war_militia_strength![munId]) {
-            state.war_militia_strength![munId] = {};
+        if (!state.military.war_militia_strength![munId]) {
+            state.military.war_militia_strength![munId] = {};
         }
-        state.war_militia_strength![munId][minorityFaction] = militiaAfter;
+        state.military.war_militia_strength![munId][minorityFaction] = militiaAfter;
 
         // Displace formations if militia below threshold
         const displacedFormations: string[] = [];

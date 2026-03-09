@@ -77,7 +77,7 @@ function getBrigadePowerAtOsid(
     osid: Osid,
     factionFilter?: FactionId
 ): { power: number; totalPower: number; brigadeId: string | null; formation: FormationState | null; brigadeCount: number } {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     let bestPower = 0;
     let bestId: string | null = null;
     let bestFormation: FormationState | null = null;

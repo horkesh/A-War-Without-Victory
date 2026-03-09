@@ -11,11 +11,11 @@ import type { ValidationIssue } from './validate.js';
 export function validateControlOverrides(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    if (!state.control_overrides) {
+    if (!state.political.control_overrides) {
         return issues; // Optional field, absence is fine
     }
 
-    if (typeof state.control_overrides !== 'object' || Array.isArray(state.control_overrides)) {
+    if (typeof state.political.control_overrides !== 'object' || Array.isArray(state.political.control_overrides)) {
         issues.push({
             severity: 'error',
             code: 'control_overrides.invalid_type',
@@ -29,7 +29,7 @@ export function validateControlOverrides(state: GameState): ValidationIssue[] {
     const validFactionIds = new Set(state.factions.map((f) => f.id));
     const currentTurn = state.meta.turn;
 
-    for (const [sid, override] of Object.entries(state.control_overrides)) {
+    for (const [sid, override] of Object.entries(state.political.control_overrides)) {
         const path = `control_overrides.${sid}`;
 
         if (typeof sid !== 'string' || sid.length === 0) {
@@ -102,11 +102,11 @@ export function validateControlOverrides(state: GameState): ValidationIssue[] {
 export function validateControlRecognition(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    if (!state.control_recognition) {
+    if (!state.political.control_recognition) {
         return issues; // Optional field, absence is fine
     }
 
-    if (typeof state.control_recognition !== 'object' || Array.isArray(state.control_recognition)) {
+    if (typeof state.political.control_recognition !== 'object' || Array.isArray(state.political.control_recognition)) {
         issues.push({
             severity: 'error',
             code: 'control_recognition.invalid_type',
@@ -120,7 +120,7 @@ export function validateControlRecognition(state: GameState): ValidationIssue[] 
     const validFactionIds = new Set(state.factions.map((f) => f.id));
     const currentTurn = state.meta.turn;
 
-    for (const [sid, recognition] of Object.entries(state.control_recognition)) {
+    for (const [sid, recognition] of Object.entries(state.political.control_recognition)) {
         const path = `control_recognition.${sid}`;
 
         if (typeof sid !== 'string' || sid.length === 0) {

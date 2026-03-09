@@ -79,7 +79,7 @@ export function runMoraleDrift(
     const engagedSet = engagedFormationIds instanceof Set
         ? engagedFormationIds
         : new Set(engagedFormationIds);
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const formationIds = (Object.keys(formations) as FormationId[]).sort(strictCompare);
 
     for (const fId of formationIds) {
@@ -106,7 +106,7 @@ export function runMoraleDrift(
         }
 
         // 2. Encirclement reversal
-        const isEncircled = state.brigade_encircled?.[fId] === true;
+        const isEncircled = state.military.brigade_encircled?.[fId] === true;
         if (isEncircled) {
             if (affinity > ENCIRCLEMENT_AFFINITY_THRESHOLD) {
                 drift += ENCIRCLEMENT_OWN_POP_DRIFT;

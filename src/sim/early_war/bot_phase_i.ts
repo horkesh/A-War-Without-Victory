@@ -81,11 +81,11 @@ export function runEarlyWarBotPosture(
     frontEdges: FrontEdge[],
     botFactions: FactionId[]
 ): void {
-    if (!state.front_posture) state.front_posture = {};
+    if (!state.military.front_posture) state.military.front_posture = {};
 
     const turn = state.meta?.turn ?? 0;
-    const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
-    const rhs = state.rbih_hrhb_state;
+    const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
+    const rhs = state.political.rbih_hrhb_state;
     const rbihHrhbAllied = allianceValue >= 0.2 || rhs?.ceasefire_active || rhs?.washington_signed;
     const rbihHrhbAtWar = allianceValue < 0.0 && !rhs?.ceasefire_active && !rhs?.washington_signed;
 
@@ -126,10 +126,10 @@ export function runEarlyWarBotPosture(
         const probeCount = Math.floor(sorted.length * profile.probe_share);
 
         // Ensure faction posture state exists
-        if (!state.front_posture[faction]) {
-            state.front_posture[faction] = { assignments: {} };
+        if (!state.military.front_posture[faction]) {
+            state.military.front_posture[faction] = { assignments: {} };
         }
-        const assignments = state.front_posture[faction].assignments;
+        const assignments = state.military.front_posture[faction].assignments;
 
         // Assign postures
         for (let i = 0; i < sorted.length; i++) {

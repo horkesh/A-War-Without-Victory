@@ -28,14 +28,14 @@ export function buildEndStateSnapshot(
     // Get all settlements from control_overrides, control_recognition, and faction AoRs
     const allSids = new Set<string>();
 
-    if (state.control_overrides) {
-        for (const sid of Object.keys(state.control_overrides)) {
+    if (state.political.control_overrides) {
+        for (const sid of Object.keys(state.political.control_overrides)) {
             allSids.add(sid);
         }
     }
 
-    if (state.control_recognition) {
-        for (const sid of Object.keys(state.control_recognition)) {
+    if (state.political.control_recognition) {
+        for (const sid of Object.keys(state.political.control_recognition)) {
             allSids.add(sid);
         }
     }
@@ -72,8 +72,8 @@ export function buildEndStateSnapshot(
 
     // Optional: negotiation spend (if available)
     const negotiationSpend: Array<{ side_id: string; category: string; amount: number }> | undefined =
-        state.negotiation_ledger
-            ? state.negotiation_ledger
+        state.political.negotiation_ledger
+            ? state.political.negotiation_ledger
                 .filter((entry) => entry.kind === 'spend')
                 .map((entry) => ({
                     side_id: entry.faction_id,

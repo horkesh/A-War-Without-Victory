@@ -80,7 +80,7 @@ describe('updateEnclaveResilience — isolation tracking', () => {
         const state = makeMinimalState();
         const supply = makeCriticalSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
-        const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
+        const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(1);
         expect(entry.hardening_active).toBe(false);
     });
@@ -91,7 +91,7 @@ describe('updateEnclaveResilience — isolation tracking', () => {
         for (let i = 0; i < 5; i++) {
             updateEnclaveResilience(state, supply);
         }
-        const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
+        const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(5);
         expect(entry.resilience).toBeCloseTo(3.5, 5); // 5 turns × +2 × 0.35 growth_mult per critical turn
     });
@@ -104,7 +104,7 @@ describe('updateEnclaveResilience — isolation tracking', () => {
         });
         const supply = makeAdequateSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
-        const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
+        const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(0);
         expect(entry.resilience).toBe(9); // 10 - 1 decay
     });
@@ -119,7 +119,7 @@ describe('updateEnclaveResilience — hardening activation', () => {
         });
         const supply = makeCriticalSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
-        const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
+        const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(HARDENING_THRESHOLD);
         expect(entry.hardening_active).toBe(true);
     });
@@ -132,7 +132,7 @@ describe('updateEnclaveResilience — hardening activation', () => {
         });
         const supply = makeAdequateSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
-        const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
+        const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(0);
         expect(entry.hardening_active).toBe(false);
     });
@@ -228,7 +228,7 @@ describe('exhaustion — enclave reduction', () => {
         });
         // No enclave resilience → baseline exhaustion
         updateExhaustion(stateBase, []);
-        const baseExhaustion = stateBase.war_exhaustion!['RBiH'] ?? 0;
+        const baseExhaustion = stateBase.political.war_exhaustion!['RBiH'] ?? 0;
 
         const stateWithEnclave = makeMinimalState({
             war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
@@ -237,7 +237,7 @@ describe('exhaustion — enclave reduction', () => {
             }
         });
         updateExhaustion(stateWithEnclave, []);
-        const enclaveExhaustion = stateWithEnclave.war_exhaustion!['RBiH'] ?? 0;
+        const enclaveExhaustion = stateWithEnclave.political.war_exhaustion!['RBiH'] ?? 0;
 
         // With 20 resilience × 0.01 = 20% reduction
         expect(enclaveExhaustion).toBeCloseTo(baseExhaustion * (1.0 - 20 * RESILIENCE_EFFECT_SCALE), 5);
@@ -249,7 +249,7 @@ describe('exhaustion — enclave reduction', () => {
             war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
         });
         updateExhaustion(state1, []);
-        const rsBase = state1.war_exhaustion!['RS'] ?? 0;
+        const rsBase = state1.political.war_exhaustion!['RS'] ?? 0;
 
         const state2 = makeMinimalState({
             war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
@@ -258,7 +258,7 @@ describe('exhaustion — enclave reduction', () => {
             }
         });
         updateExhaustion(state2, []);
-        const rsWithEnclave = state2.war_exhaustion!['RS'] ?? 0;
+        const rsWithEnclave = state2.political.war_exhaustion!['RS'] ?? 0;
 
         expect(rsWithEnclave).toBeCloseTo(rsBase, 5); // No change for RS
     });
@@ -271,7 +271,7 @@ describe('migration from bare number', () => {
         });
         const supply = makeCriticalSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
-        const entry = state.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
+        const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(typeof entry).toBe('object');
         expect(entry.resilience).toBeCloseTo(15.7, 5); // 15 + 2 * 0.35 growth (srebrenica growth_mult)
         expect(entry.isolation_turns).toBe(1);

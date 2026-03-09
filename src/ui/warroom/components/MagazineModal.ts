@@ -63,14 +63,14 @@ export class MagazineModal {
      * Count municipalities where this faction has any organizational investment.
      */
     private countInvestedMunicipalities(factionId: FactionId): number {
-        if (!this.gameState.municipalities) return 0;
-        const munIds = Object.keys(this.gameState.municipalities).sort(strictCompare);
+        if (!this.gameState.political.municipalities) return 0;
+        const munIds = Object.keys(this.gameState.political.municipalities).sort(strictCompare);
         let count = 0;
 
         for (const munId of munIds) {
-            const op = this.gameState.municipalities[munId]?.organizational_penetration;
+            const op = this.gameState.political.municipalities[munId]?.organizational_penetration;
             if (!op) continue;
-            const isControlled = this.gameState.political_controllers?.[munId] === factionId;
+            const isControlled = this.gameState.political.political_controllers?.[munId] === factionId;
             if (hasFactionPresence(op, factionId, isControlled)) count++;
         }
         return count;
@@ -80,9 +80,9 @@ export class MagazineModal {
      * Count municipalities where this faction is political controller.
      */
     private countControlledMunicipalities(factionId: FactionId): number {
-        if (!this.gameState.political_controllers) return 1;
+        if (!this.gameState.political.political_controllers) return 1;
         let count = 0;
-        for (const controller of Object.values(this.gameState.political_controllers)) {
+        for (const controller of Object.values(this.gameState.political.political_controllers)) {
             if (controller === factionId) count++;
         }
         return Math.max(count, 1); // Avoid division by zero
@@ -92,15 +92,15 @@ export class MagazineModal {
      * Compute average stability in controlled municipalities.
      */
     private computeAvgStability(factionId: FactionId): number {
-        if (!this.gameState.municipalities) return 50;
-        const munIds = Object.keys(this.gameState.municipalities).sort(strictCompare);
+        if (!this.gameState.political.municipalities) return 50;
+        const munIds = Object.keys(this.gameState.political.municipalities).sort(strictCompare);
         let total = 0;
         let count = 0;
 
         for (const munId of munIds) {
-            const controller = this.gameState.political_controllers?.[munId];
+            const controller = this.gameState.political.political_controllers?.[munId];
             if (controller !== factionId) continue;
-            const stability = this.gameState.municipalities[munId]?.stability_score ?? 50;
+            const stability = this.gameState.political.municipalities[munId]?.stability_score ?? 50;
             total += stability;
             count++;
         }
@@ -111,16 +111,16 @@ export class MagazineModal {
      * Count municipalities by control status for this faction.
      */
     private countByControlStatus(factionId: FactionId): { secure: number; contested: number; highlyContested: number } {
-        if (!this.gameState.municipalities) return { secure: 0, contested: 0, highlyContested: 0 };
-        const munIds = Object.keys(this.gameState.municipalities).sort(strictCompare);
+        if (!this.gameState.political.municipalities) return { secure: 0, contested: 0, highlyContested: 0 };
+        const munIds = Object.keys(this.gameState.political.municipalities).sort(strictCompare);
         let secure = 0;
         let contested = 0;
         let highlyContested = 0;
 
         for (const munId of munIds) {
-            const controller = this.gameState.political_controllers?.[munId];
+            const controller = this.gameState.political.political_controllers?.[munId];
             if (controller !== factionId) continue;
-            const stability = this.gameState.municipalities[munId]?.stability_score ?? 50;
+            const stability = this.gameState.political.municipalities[munId]?.stability_score ?? 50;
             if (stability >= STABILITY_SECURE_MIN) secure++;
             else if (stability >= STABILITY_CONTESTED_MIN) contested++;
             else highlyContested++;

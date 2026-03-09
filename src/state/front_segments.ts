@@ -18,16 +18,16 @@ export function syncFrontSegments(state: GameState, derivedFrontEdges: FrontEdge
     const activeIdsSorted = Array.from(activeEdgeIds).sort();
 
     // Ensure container exists (migration should provide this, but keep defensive).
-    if (!state.front_segments || typeof state.front_segments !== 'object') {
-        state.front_segments = {};
+    if (!state.military.front_segments || typeof state.military.front_segments !== 'object') {
+        state.military.front_segments = {};
     }
 
     // Activate / upsert in deterministic order.
     for (const edge_id of activeIdsSorted) {
-        const existing = state.front_segments[edge_id] as FrontSegmentState | undefined;
+        const existing = state.military.front_segments[edge_id] as FrontSegmentState | undefined;
 
         if (!existing) {
-            state.front_segments[edge_id] = {
+            state.military.front_segments[edge_id] = {
                 edge_id,
                 active: true,
                 created_turn: turn,
@@ -68,10 +68,10 @@ export function syncFrontSegments(state: GameState, derivedFrontEdges: FrontEdge
     }
 
     // Deactivate segments not currently active (retain record), deterministic by key order.
-    const existingKeysSorted = Object.keys(state.front_segments).sort();
+    const existingKeysSorted = Object.keys(state.military.front_segments).sort();
     for (const edge_id of existingKeysSorted) {
         if (activeEdgeIds.has(edge_id)) continue;
-        const seg = state.front_segments[edge_id];
+        const seg = state.military.front_segments[edge_id];
         if (!seg) continue;
         seg.active = false;
         // Streak resets when inactive; max is retained.

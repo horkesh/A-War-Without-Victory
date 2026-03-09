@@ -38,11 +38,11 @@ export function aggregateSettlementDisplacementToMunicipalities(
         return report;
     }
 
-    const sd = state.settlement_displacement ?? {};
-    if (!state.municipality_displacement) {
-        (state as GameState & { municipality_displacement: Record<MunicipalityId, number> }).municipality_displacement = {};
+    const sd = state.displacement.settlement_displacement ?? {};
+    if (!state.displacement.municipality_displacement) {
+        (state as GameState & { municipality_displacement: Record<MunicipalityId, number> }).displacement.municipality_displacement = {};
     }
-    const md = state.municipality_displacement!;
+    const md = state.displacement.municipality_displacement!;
 
     const munIds = Array.from(settlementsByMun.keys()).sort(strictCompare);
 

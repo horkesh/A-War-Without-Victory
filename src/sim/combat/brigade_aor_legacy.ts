@@ -35,7 +35,7 @@ export function identifyFrontActiveSettlements(
     state: GameState,
     edges: EdgeRecord[]
 ): Set<SettlementId> {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const frontActive = new Set<SettlementId>();
 
     for (const edge of edges) {
@@ -188,7 +188,7 @@ export function computeBrigadeDensity(
     edges?: EdgeRecord[]
 ): number {
     const settlements = getBrigadeOperationalCoverageSettlements(state, formationId, edges);
-    const formation = state.formations?.[formationId];
+    const formation = state.military.formations?.[formationId];
     if (!formation) return 0;
     const personnel = formation.personnel ?? 1000;
     return personnel / Math.max(1, settlements.length);
@@ -208,19 +208,19 @@ export function getSettlementGarrison(
     if (formationId) {
         const coveredSettlements = getBrigadeOperationalCoverageSettlements(state, formationId, edges);
         if (coveredSettlements.includes(sid)) {
-            const formation = state.formations?.[formationId];
+            const formation = state.military.formations?.[formationId];
             if (formation) {
                 const personnel = formation.personnel ?? 1000;
                 let garrison = personnel / Math.max(1, coveredSettlements.length);
-                const mov = state.brigade_movement_state?.[formationId]?.status;
+                const mov = state.military.brigade_movement_state?.[formationId]?.status;
                 if (mov === 'packing' || mov === 'unpacking') garrison *= 0.5;
-                if (state.brigade_encircled?.[formationId]) garrison *= ENCIRCLED_GARRISON_MULT;
+                if (state.military.brigade_encircled?.[formationId]) garrison *= ENCIRCLED_GARRISON_MULT;
                 return garrison;
             }
         }
     }
     // Militia garrison; Peace phase: reduced by battle damage at this settlement
-    const militia = state.militia_garrison?.[sid] ?? 0;
-    const damage = Math.min(1, state.battle_damage?.[sid] ?? 0);
+    const militia = state.military.militia_garrison?.[sid] ?? 0;
+    const damage = Math.min(1, state.military.battle_damage?.[sid] ?? 0);
     return militia * (1 - damage);
 }

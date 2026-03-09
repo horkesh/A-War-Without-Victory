@@ -204,7 +204,7 @@ export function scoreConsolidationTarget(input: ConsolidationScoreInput): number
         settlementsByMun
     } = input;
 
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const controller = pc[targetSid];
     if (controller === attackerFaction) return 0; // already ours
     if (controller == null) return 0;

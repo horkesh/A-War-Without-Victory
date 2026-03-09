@@ -138,13 +138,13 @@ export function applyPostureOrders(state: GameState): PostureReport {
         postures_rejected: 0
     };
 
-    const orders = state.brigade_posture_orders;
+    const orders = state.military.brigade_posture_orders;
     if (!orders || orders.length === 0) {
-        state.brigade_posture_orders = [];
+        state.military.brigade_posture_orders = [];
         return report;
     }
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     // Sort orders deterministically by brigade_id
     const sortedOrders = [...orders].sort(
@@ -210,7 +210,7 @@ export function applyPostureOrders(state: GameState): PostureReport {
     }
 
     // Clear orders after processing
-    state.brigade_posture_orders = [];
+    state.military.brigade_posture_orders = [];
 
     return report;
 }
@@ -240,7 +240,7 @@ export function applyPostureOrders(state: GameState): PostureReport {
  * Cohesion is kept to 1 decimal place and clamped to [0, 100].
  */
 export function applyPostureCosts(state: GameState): void {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const ids = Object.keys(formations).sort(strictCompare);
 
     for (const id of ids) {

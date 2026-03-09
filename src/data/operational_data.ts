@@ -162,7 +162,7 @@ export function backfillFormationLocationOsid(
     state: { formations?: Record<string, { hq_sid?: string; location_osid?: string; kind?: string }> },
     canonicalToOperational: CanonicalToOperationalMap
 ): void {
-    const formations = state.formations;
+    const formations = state.military.formations;
     if (!formations || typeof formations !== 'object') return;
     const ids = Object.keys(formations).sort((a, b) => a.localeCompare(b));
     for (const id of ids) {

@@ -115,8 +115,8 @@ test('validateGameStateShape returns ok for GameState with Phase 0 municipalitie
     const state = phase0GameStateFixture();
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, true);
-    assert.ok(state.municipalities && state.municipalities['MUN_001'].stability_score === 65);
-    assert.ok(state.municipalities && state.municipalities['MUN_001'].control_status === 'SECURE');
+    assert.ok(state.political.municipalities && state.political.municipalities['MUN_001'].stability_score === 65);
+    assert.ok(state.political.municipalities && state.political.municipalities['MUN_001'].control_status === 'SECURE');
 });
 
 test('validateGameStateShape returns ok for GameState with Phase 0 faction prewar_capital and declaration fields', () => {
@@ -155,8 +155,8 @@ test('Phase 0 state serialization round-trip preserves Phase 0 fields', () => {
     assert.strictEqual(hydrated.meta.referendum_turn, null);
     assert.strictEqual(hydrated.meta.war_start_turn, null);
     assert.strictEqual(hydrated.meta.game_over, false);
-    assert.ok(hydrated.municipalities && hydrated.municipalities['MUN_001']);
-    assert.strictEqual(hydrated.municipalities!['MUN_001'].stability_score, 65);
+    assert.ok(hydrated.political.municipalities && hydrated.political.municipalities['MUN_001']);
+    assert.strictEqual(hydrated.political.municipalities!['MUN_001'].stability_score, 65);
     const rs = hydrated.factions.find((f) => f.id === 'RS');
     assert.ok(rs && rs.prewar_capital === 100 && rs.declaration_pressure === 50 && rs.declared === false && rs.declaration_turn === null);
 });

@@ -294,10 +294,10 @@ interface TurnMetrics {
 }
 
 function computePressureSum(state: GameState): number {
-    if (!state.front_pressure || typeof state.front_pressure !== 'object') return 0;
+    if (!state.military.front_pressure || typeof state.military.front_pressure !== 'object') return 0;
     let sum = 0;
-    for (const edgeId in state.front_pressure) {
-        const pressure = (state.front_pressure as any)[edgeId];
+    for (const edgeId in state.military.front_pressure) {
+        const pressure = (state.military.front_pressure as any)[edgeId];
         if (pressure && typeof pressure === 'object' && typeof pressure.value === 'number') {
             sum += Math.abs(pressure.value);
         }
@@ -353,7 +353,7 @@ function canonicalEdgeId(a: string, b: string): string {
 
 function computeNodePressureMap(state: GameState, seed?: BfsSeedContext): Map<string, number> {
     const m = new Map<string, number>();
-    const fp = state.front_pressure;
+    const fp = state.military.front_pressure;
     if (!fp || typeof fp !== 'object') return m;
     for (const edgeId in fp) {
         const pressure = (fp as any)[edgeId];
@@ -809,8 +809,8 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
         else factionB.areasOfResponsibility.push(sid);
     }
 
-    if (!state.front_segments || typeof state.front_segments !== 'object') state.front_segments = {};
-    if (!state.front_pressure || typeof state.front_pressure !== 'object') state.front_pressure = {};
+    if (!state.military.front_segments || typeof state.military.front_segments !== 'object') state.military.front_segments = {};
+    if (!state.military.front_pressure || typeof state.military.front_pressure !== 'object') state.military.front_pressure = {};
 
     const edgeValue: Record<string, number> = {};
     for (const sid of seed.nodes_bfs) {
@@ -846,7 +846,7 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
     // Materialize seeded tree edges as active front segments and pressure records.
     // (Derived front edges will be recomputed in the pipeline based on AoR; we keep segments here for determinism.)
     for (const eid of seed.tree_edge_ids) {
-        (state.front_segments as any)[eid] = {
+        (state.military.front_segments as any)[eid] = {
             edge_id: eid,
             active: true,
             created_turn: 0,
@@ -858,7 +858,7 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
             max_friction: 0
         };
         const v = edgeValue[eid] ?? 0;
-        (state.front_pressure as any)[eid] = {
+        (state.military.front_pressure as any)[eid] = {
             edge_id: eid,
             value: v,
             max_abs: v,
@@ -871,8 +871,8 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
     // to re-quantize only onto intra-cluster tree edges.
     if (seed.seed_method === 'weaklink_two_cluster_v1' && seed.weaklink_edge) {
         const eid = canonicalEdgeId(seed.weaklink_edge.a, seed.weaklink_edge.b);
-        if (!((state.front_segments as any)[eid])) {
-            (state.front_segments as any)[eid] = {
+        if (!((state.military.front_segments as any)[eid])) {
+            (state.military.front_segments as any)[eid] = {
                 edge_id: eid,
                 active: true,
                 created_turn: 0,
@@ -884,10 +884,10 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
                 max_friction: 0
             };
         } else {
-            (state.front_segments as any)[eid].active = true;
+            (state.military.front_segments as any)[eid].active = true;
         }
-        if (!((state.front_pressure as any)[eid])) {
-            (state.front_pressure as any)[eid] = { edge_id: eid, value: 0, max_abs: 0, last_updated_turn: 0 };
+        if (!((state.military.front_pressure as any)[eid])) {
+            (state.military.front_pressure as any)[eid] = { edge_id: eid, value: 0, max_abs: 0, last_updated_turn: 0 };
         }
     }
 }

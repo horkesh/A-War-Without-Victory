@@ -45,7 +45,7 @@ const COLLAPSE_DISPLACEMENT_MULTIPLIER = 1.5; // 50% increase when municipality 
  */
 function buildMunControlFromOsids(state: GameState): Map<MunicipalityId, Set<FactionId>> {
     const result = new Map<MunicipalityId, Set<FactionId>>();
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc || typeof pc !== 'object') return result;
     for (const [key, value] of Object.entries(pc)) {
         if (!key.startsWith('op:') || !value) continue;
@@ -166,11 +166,11 @@ function getOrInitDisplacementState(
     munId: MunicipalityId,
     originalPopulation: number
 ): DisplacementState {
-    if (!state.displacement_state) {
-        state.displacement_state = {};
+    if (!state.displacement.displacement_state) {
+        state.displacement.displacement_state = {};
     }
 
-    const existing = state.displacement_state[munId];
+    const existing = state.displacement.displacement_state[munId];
     if (existing) {
         return existing;
     }
@@ -184,7 +184,7 @@ function getOrInitDisplacementState(
         last_updated_turn: state.meta.turn
     };
 
-    state.displacement_state[munId] = newState;
+    state.displacement.displacement_state[munId] = newState;
     return newState;
 }
 
@@ -210,7 +210,7 @@ function isMunicipalityUnderPressure(
     // Check if any settlement in the municipality is part of an active front edge
     const munSettlementSet = new Set(munSettlements);
     for (const edge of frontEdges) {
-        const seg = (state.front_segments as any)?.[edge.edge_id];
+        const seg = (state.military.front_segments as any)?.[edge.edge_id];
         const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
         if (!isActive) continue;
 
@@ -390,7 +390,7 @@ function pushDisplacementEventLogFromMun(
 
     const totalPop = entries.reduce((s, e) => s + e.pop, 0) || 1;
     const totalDisplaced = (byFaction.RBiH ?? 0) + (byFaction.RS ?? 0) + (byFaction.HRHB ?? 0);
-    if (!state.displacement_event_log) state.displacement_event_log = [];
+    if (!state.displacement.displacement_event_log) state.displacement.displacement_event_log = [];
     if (totalDisplaced <= 0) return;
 
     const factions: FactionId[] = ['RBiH', 'RS', 'HRHB'];
@@ -420,7 +420,7 @@ function pushDisplacementEventLogFromMun(
             routedRem -= routedHere;
             lostRemF -= lostHere;
             if (routedHere <= 0 && lostHere <= 0) continue;
-            state.displacement_event_log.push({
+            state.displacement.displacement_event_log.push({
                 turn,
                 origin_mun: munId,
                 origin_osid: osid,
@@ -478,7 +478,7 @@ export function applyDisplacementFromFlips(
         const dispState = getOrInitDisplacementState(
             state,
             munId,
-            state.displacement_state?.[munId]?.original_population ?? defaultOriginalPopulation
+            state.displacement.displacement_state?.[munId]?.original_population ?? defaultOriginalPopulation
         );
         const remainingPopulation =
             dispState.original_population - dispState.displaced_out - dispState.lost_population;
@@ -537,7 +537,7 @@ export function applyDisplacementFromFlips(
                 munId,
                 fromFaction,
                 routedAmount,
-                state.displacement_state!,
+                state.displacement.displacement_state!,
                 mc
             );
             const totalRoutable = routableByFaction
@@ -547,7 +547,7 @@ export function applyDisplacementFromFlips(
                 const destState = getOrInitDisplacementState(
                     state,
                     route.to_mun,
-                    state.displacement_state![route.to_mun]?.original_population ?? defaultOriginalPopulation
+                    state.displacement.displacement_state![route.to_mun]?.original_population ?? defaultOriginalPopulation
                 );
                 destState.displaced_in += route.amount;
                 destState.last_updated_turn = turn;
@@ -578,7 +578,7 @@ export function applyDisplacementFromFlips(
             }
         }
 
-        const militiaPools = state.militia_pools as Record<string, MilitiaPoolState> | undefined;
+        const militiaPools = state.military.militia_pools as Record<string, MilitiaPoolState> | undefined;
         if (militiaPools && remainingPopulation > 0) {
             const poolKey = `${munId}:${fromFaction}`;
             const pool = militiaPools[poolKey];
@@ -646,7 +646,7 @@ export function updateDisplacement(
     population1991ByMun?: MunicipalityPopulation1991Map
 ): DisplacementStepReport {
     const currentTurn = state.meta.turn;
-    const militiaPools = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+    const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
 
     if (!militiaPools || typeof militiaPools !== 'object') {
         return { by_municipality: [], routing: [] };
@@ -706,7 +706,7 @@ export function updateDisplacement(
         const breachCount = breachCountByMun.get(munId) ?? 0;
 
         // Phase 22: Check if municipality is collapsed (sustainability collapse)
-        const sustState = state.sustainability_state?.[munId];
+        const sustState = state.displacement.sustainability_state?.[munId];
         const isCollapsed = sustState?.collapsed ?? false;
 
         // Calculate displacement amount
@@ -818,7 +818,7 @@ export function updateDisplacement(
                     munId,
                     factionId,
                     routedAmount,
-                    state.displacement_state!,
+                    state.displacement.displacement_state!,
                     munControl
                 );
 
@@ -830,7 +830,7 @@ export function updateDisplacement(
                     const destState = getOrInitDisplacementState(
                         state,
                         route.to_mun,
-                        state.displacement_state![route.to_mun]?.original_population ?? defaultOriginalPopulation
+                        state.displacement.displacement_state![route.to_mun]?.original_population ?? defaultOriginalPopulation
                     );
                     destState.displaced_in += route.amount;
                     destState.last_updated_turn = currentTurn;
@@ -902,9 +902,9 @@ export function updateDisplacement(
  * This reduces militia pool available if it exceeds the ceiling.
  */
 export function enforceRecruitmentCeilings(state: GameState): void {
-    const militiaPools = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+    const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
     if (!militiaPools || typeof militiaPools !== 'object') return;
-    if (!state.displacement_state || typeof state.displacement_state !== 'object') return;
+    if (!state.displacement.displacement_state || typeof state.displacement.displacement_state !== 'object') return;
 
     const currentTurn = state.meta.turn;
 
@@ -912,7 +912,7 @@ export function enforceRecruitmentCeilings(state: GameState): void {
         if (!pool || typeof pool !== 'object') continue;
 
         const munId = typeof pool.mun_id === 'string' ? pool.mun_id : key;
-        const dispState = state.displacement_state[munId];
+        const dispState = state.displacement.displacement_state[munId];
         if (!dispState) continue; // No displacement state means no ceiling enforcement needed
 
         // Calculate effective recruitment ceiling

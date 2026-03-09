@@ -104,7 +104,7 @@ export async function runPhaseITurn(
     report.pool_population = runPoolPopulation(working, graph.settlements);
 
     if (isFormationSpawnDirectiveActive(working)) {
-        const directive = working.formation_spawn_directive!;
+        const directive = working.military.formation_spawn_directive!;
         const kind = directive.kind === 'both' || directive.kind === 'militia' ? 'brigade' : (directive.kind ?? 'brigade');
         report.formation_spawn = spawnFormationsFromPools(working, {
             factionFilter: null,

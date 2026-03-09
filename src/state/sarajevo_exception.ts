@@ -37,7 +37,7 @@ function getSarajevoSettlementIds(graph: LoadedSettlementGraph): SettlementId[] 
 function getMajorityController(state: GameState, settlementIds: SettlementId[]): string | null {
     const counts: Record<string, number> = {};
     for (const sid of settlementIds) {
-        const controller = state.political_controllers?.[sid];
+        const controller = state.political.political_controllers?.[sid];
         const key = controller ?? '_null_';
         counts[key] = (counts[key] ?? 0) + 1;
     }
@@ -59,7 +59,7 @@ export function updateSarajevoState(
 ): SarajevoState {
     const settlementIds = getSarajevoSettlementIds(graph);
     const controller = getMajorityController(state, settlementIds);
-    const prev = state.sarajevo_state;
+    const prev = state.political.sarajevo_state;
     const turn = state.meta.turn;
 
     let supplyScoreSum = 0;
@@ -99,6 +99,6 @@ export function updateSarajevoState(
         last_updated_turn: turn
     };
 
-    state.sarajevo_state = sarajevo;
+    state.political.sarajevo_state = sarajevo;
     return sarajevo;
 }

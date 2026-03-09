@@ -33,12 +33,12 @@ type FormationsReportFile = {
 };
 
 function ensureFormations(state: GameState): void {
-    if (!state.formations || typeof state.formations !== 'object') state.formations = {};
+    if (!state.military.formations || typeof state.military.formations !== 'object') state.military.formations = {};
 }
 
 function generateDeterministicFormationId(state: GameState, faction: string): string {
     ensureFormations(state);
-    const formations = state.formations;
+    const formations = state.military.formations;
     const factionFormations = Object.values(formations)
         .filter((f) => f && typeof f === 'object' && (f as any).faction === faction)
         .map((f) => (f as any).id)
@@ -71,7 +71,7 @@ function normalizeTags(tagsInput: string | undefined): string[] {
 
 export function buildFormationsReport(state: GameState): FormationsReportFile {
     ensureFormations(state);
-    const formations = state.formations as Record<string, FormationState>;
+    const formations = state.military.formations as Record<string, FormationState>;
     const rows = Object.values(formations)
         .filter((f) => f && typeof f === 'object' && typeof f.id === 'string')
         .sort((a, b) => a.id.localeCompare(b.id))
@@ -338,7 +338,7 @@ async function main(): Promise<void> {
 
     if (opts.cmd === 'add') {
         const id = opts.id ?? generateDeterministicFormationId(state, opts.faction);
-        if (state.formations[id]) throw new Error(`Formation already exists: ${id}`);
+        if (state.military.formations[id]) throw new Error(`Formation already exists: ${id}`);
 
         const formation: FormationState = {
             id,
@@ -350,7 +350,7 @@ async function main(): Promise<void> {
             ...(opts.tags.length > 0 ? { tags: opts.tags } : {})
         };
 
-        state.formations[id] = formation;
+        state.military.formations[id] = formation;
 
         const out = opts.outPath ?? opts.savePath;
         await validateAndSave(state, out);
@@ -359,9 +359,9 @@ async function main(): Promise<void> {
     }
 
     if (opts.cmd === 'remove') {
-        const f = state.formations[opts.id];
+        const f = state.military.formations[opts.id];
         if (!f) throw new Error(`Formation not found: ${opts.id}`);
-        delete state.formations[opts.id];
+        delete state.military.formations[opts.id];
         const out = opts.outPath ?? opts.savePath;
         await validateAndSave(state, out);
         process.stdout.write(`removed formation ${opts.id} -> ${out}\n`);
@@ -369,7 +369,7 @@ async function main(): Promise<void> {
     }
 
     if (opts.cmd === 'assign') {
-        const f = state.formations[opts.id];
+        const f = state.military.formations[opts.id];
         if (!f) throw new Error(`Formation not found: ${opts.id}`);
         if (opts.region) {
             f.assignment = { kind: 'region', region_id: opts.region };
@@ -384,7 +384,7 @@ async function main(): Promise<void> {
     }
 
     if (opts.cmd === 'unassign') {
-        const f = state.formations[opts.id];
+        const f = state.military.formations[opts.id];
         if (!f) throw new Error(`Formation not found: ${opts.id}`);
         f.assignment = null;
         const out = opts.outPath ?? opts.savePath;

@@ -56,7 +56,7 @@ export function runMinorityMilitiaDecay(
     if (state.meta.phase !== 'war') return report;
     if (turn < warStart || turn > warStart + 2) return report;
 
-    const pools = state.militia_pools as Record<string, MilitiaPoolState> | undefined;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState> | undefined;
     if (!pools || typeof pools !== 'object') return report;
 
     const settlementsByMun = buildSettlementsByMun(settlements);
@@ -81,7 +81,7 @@ export function runMinorityMilitiaDecay(
         const controller = getMunicipalityController(state, sids, mun_id);
         if (controller === null || controller === faction) continue;
 
-        const authorityState = state.municipalities?.[mun_id]?.control ?? 'consolidated';
+        const authorityState = state.political.municipalities?.[mun_id]?.control ?? 'consolidated';
         if (authorityState !== 'consolidated') continue;
 
         const ethnicPct = getFactionShareInMun(population1991ByMun, mun_id, faction as FactionId);

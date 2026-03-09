@@ -62,7 +62,7 @@ const FACILITY_SEEDS: ProductionFacilitySeed[] = [
 ].sort((a, b) => a.facility_id.localeCompare(b.facility_id));
 
 export function ensureProductionFacilities(state: GameState): void {
-    if (state.production_facilities && Object.keys(state.production_facilities).length > 0) return;
+    if (state.military.production_facilities && Object.keys(state.military.production_facilities).length > 0) return;
     const out: Record<string, ProductionFacilityState> = {};
     for (const seed of FACILITY_SEEDS) {
         out[seed.facility_id] = {
@@ -79,7 +79,7 @@ export function ensureProductionFacilities(state: GameState): void {
             }
         };
     }
-    state.production_facilities = out;
+    state.military.production_facilities = out;
 }
 
 function getMunicipalityControllerByMajority(
@@ -87,7 +87,7 @@ function getMunicipalityControllerByMajority(
     settlements: Map<string, SettlementRecord>
 ): Map<MunicipalityId, string | null> {
     const counts = new Map<MunicipalityId, Map<string, number>>();
-    const controllers = state.political_controllers ?? {};
+    const controllers = state.political.political_controllers ?? {};
     const sids = Array.from(settlements.keys()).sort((a, b) => a.localeCompare(b));
     for (const sid of sids) {
         const rec = settlements.get(sid);
@@ -115,7 +115,7 @@ export function calculateFactionProductionBonus(
     settlements: Map<string, SettlementRecord>
 ): Record<string, number> {
     ensureProductionFacilities(state);
-    const facilities = state.production_facilities ?? {};
+    const facilities = state.military.production_facilities ?? {};
     const factionIds = (state.factions ?? []).map((f) => f.id).sort((a, b) => a.localeCompare(b));
     const bonuses: Record<string, number> = {};
     for (const fid of factionIds) bonuses[fid] = 0;

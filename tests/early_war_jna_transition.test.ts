@@ -64,7 +64,7 @@ function statePhaseIWithRSDeclared(overrides?: { war_jna?: { transition_begun: b
         }
     };
     if (overrides?.war_jna !== undefined) {
-        s.war_jna = overrides.war_jna;
+        s.military.war_jna = overrides.war_jna;
     }
     return s;
 }
@@ -73,7 +73,7 @@ test('runJNATransition starts JNA when RS declared and not yet begun', () => {
     const state = statePhaseIWithRSDeclared();
     const report = runJNATransition(state);
     assert.strictEqual(report.started, true);
-    assert.strictEqual(state.war_jna!.transition_begun, true);
+    assert.strictEqual(state.military.war_jna!.transition_begun, true);
     assert.strictEqual(report.withdrawal_after, 0.05);
     assert.strictEqual(report.asset_transfer_after, 0.05);
     assert.strictEqual(report.completed, false);
@@ -84,7 +84,7 @@ test('runJNATransition does not start when RS not declared', () => {
     state.factions!.find((f) => f.id === 'RS')!.declared = false;
     const report = runJNATransition(state);
     assert.strictEqual(report.started, false);
-    assert.strictEqual(state.war_jna!.transition_begun, false);
+    assert.strictEqual(state.military.war_jna!.transition_begun, false);
     assert.strictEqual(report.withdrawal_after, 0);
     assert.strictEqual(report.asset_transfer_after, 0);
 });

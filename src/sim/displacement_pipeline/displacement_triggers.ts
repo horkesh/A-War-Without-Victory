@@ -83,7 +83,7 @@ export function evaluateDisplacementTriggers(
     }
 
     const frontActive = getFrontActiveSettlements(eligible);
-    const fp = state.front_pressure ?? {};
+    const fp = state.military.front_pressure ?? {};
 
     // Stable ordering: sort settlement IDs
     const sortedSettlementIds = Array.from(frontActive).sort(strictCompare);

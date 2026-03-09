@@ -99,11 +99,11 @@ export function buildWeeklyReport(
     const factions = (state.factions ?? []).map((f) => ({
         id: f.id,
         exhaustion: f.profile?.exhaustion ?? 0,
-        supply_pressure: state.war_supply_pressure?.[f.id]
+        supply_pressure: state.political.war_supply_pressure?.[f.id]
     })).sort((a, b) => strictCompare(a.id, b.id));
 
     const control_counts: Record<string, number> = {};
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     for (const sid of sortedKeys(pc as Record<string, unknown>)) {
         const c = pc[sid] ?? 'null';
         const key = c === null ? 'null' : c;
@@ -119,9 +119,9 @@ export function buildWeeklyReport(
     let municipality_displacement_count = 0;
     let municipality_displacement_total = 0;
 
-    if (state.meta?.phase === 'war' && state.displacement_state && typeof state.displacement_state === 'object') {
+    if (state.meta?.phase === 'war' && state.displacement.displacement_state && typeof state.displacement.displacement_state === 'object') {
         // War displacement derivation: from displacement_state (displaced_out + lost_population)
-        const ds = state.displacement_state;
+        const ds = state.displacement.displacement_state;
         for (const munId of sortedKeys(ds as Record<string, unknown>)) {
             const d = ds[munId] as { displaced_out?: number; lost_population?: number } | undefined;
             const out = typeof d?.displaced_out === 'number' ? d.displaced_out : 0;
@@ -135,7 +135,7 @@ export function buildWeeklyReport(
         }
         settlement_displacement_count = municipality_displacement_count; // 1:1 proxy when only municipality-level displacement is available.
     } else {
-        const sd = state.settlement_displacement ?? {};
+        const sd = state.displacement.settlement_displacement ?? {};
         for (const sid of sortedKeys(sd as Record<string, unknown>)) {
             const v = sd[sid];
             if (typeof v === 'number' && v > 0) {
@@ -143,7 +143,7 @@ export function buildWeeklyReport(
                 settlement_displacement_total += v;
             }
         }
-        const md = state.municipality_displacement ?? {};
+        const md = state.displacement.municipality_displacement ?? {};
         for (const mid of sortedKeys(md as Record<string, unknown>)) {
             const v = md[mid];
             if (typeof v === 'number' && v > 0) {
@@ -156,8 +156,8 @@ export function buildWeeklyReport(
         // (always 0) due to the OSID key mismatch in isPressureEligible fixed by Phase 0.
         // Only aggregate System A when System C produced nothing, to prevent double-counting
         // once System C is repaired and starts producing non-zero totals.
-        if (municipality_displacement_total === 0 && state.displacement_state && typeof state.displacement_state === 'object') {
-            const ds = state.displacement_state;
+        if (municipality_displacement_total === 0 && state.displacement.displacement_state && typeof state.displacement.displacement_state === 'object') {
+            const ds = state.displacement.displacement_state;
             for (const munId of sortedKeys(ds as Record<string, unknown>)) {
                 const d = ds[munId] as { displaced_out?: number; lost_population?: number } | undefined;
                 const out = typeof d?.displaced_out === 'number' ? d.displaced_out : 0;

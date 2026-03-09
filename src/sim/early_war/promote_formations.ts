@@ -42,7 +42,7 @@ export interface PromotionReport {
  * Deterministic and pure — no mutations.
  */
 function factionHasCorps(state: GameState, faction: FactionId): boolean {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const f of Object.values(formations)) {
         const fs = f as FormationState;
         if (fs.faction !== faction) continue;
@@ -83,18 +83,18 @@ export function promoteFormations(
 ): PromotionReport {
     const report: PromotionReport = { promoted: 0, formations_promoted: [] };
 
-    if (!state.formations || typeof state.formations !== 'object') {
+    if (!state.military.formations || typeof state.military.formations !== 'object') {
         return report;
     }
 
     // Sort formation ids for deterministic iteration order
-    const formationIds = Object.keys(state.formations).sort(strictCompare);
+    const formationIds = Object.keys(state.military.formations).sort(strictCompare);
 
     // Build ordinal counters: Map<"faction:mun", number> of already-promoted brigades
     // keyed by origin_mun (or mun: tag). Start from existing brigades to get correct ordinals.
     const ordinalCounters = new Map<string, number>();
     for (const id of formationIds) {
-        const f = state.formations[id] as FormationState | undefined;
+        const f = state.military.formations[id] as FormationState | undefined;
         if (!f) continue;
         if (f.kind !== 'brigade') continue;
         const mun = getHomeMun(f);
@@ -104,7 +104,7 @@ export function promoteFormations(
     }
 
     for (const id of formationIds) {
-        const f = state.formations[id] as FormationState | undefined;
+        const f = state.military.formations[id] as FormationState | undefined;
         if (!f) continue;
 
         // Gate 1: must be militia kind

@@ -268,11 +268,11 @@ export function processOsidColumnMovement(
         column_arrivals: 0,
         column_blocked: 0
     };
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const adjacency = buildOsidAdjacency(edges);
-    const movementOrders = state.brigade_movement_orders ?? {};
-    if (!state.brigade_movement_state) state.brigade_movement_state = {};
-    const movementState = state.brigade_movement_state;
+    const movementOrders = state.military.brigade_movement_orders ?? {};
+    if (!state.military.brigade_movement_state) state.military.brigade_movement_state = {};
+    const movementState = state.military.brigade_movement_state;
 
     // Pass 1: Advance existing column transits (before processing new orders)
     const transitIds = Object.keys(movementState).sort(strictCompare) as FormationId[];
@@ -376,7 +376,7 @@ export function processOsidColumnMovement(
 
     // Update state — clean up empty movement state
     if (Object.keys(movementState).length === 0) {
-        state.brigade_movement_state = undefined;
+        state.military.brigade_movement_state = undefined;
     }
 
     return report;

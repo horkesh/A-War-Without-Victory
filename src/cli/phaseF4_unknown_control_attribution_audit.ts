@@ -64,7 +64,7 @@ async function main(): Promise<void> {
     await prepareNewGameState(state, graph);
 
     const settlementIds = Array.from(graph.settlements.keys()).sort((a, b) => a.localeCompare(b));
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const unknownEntries: UnknownEntry[] = [];
     const byReason: Record<ReasonBucket, number> = {
         mun1990_exception_null_controller: 0,

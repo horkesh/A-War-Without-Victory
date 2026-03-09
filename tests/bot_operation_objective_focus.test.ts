@@ -122,7 +122,7 @@ test('execution-phase operation attacks current objective even without a corps d
         osidPopulationMap: new Map(),
     });
 
-    assert.equal(state.brigade_attack_orders?.rs_1st_bratunac, 'op:bratunac:bratunac_2');
+    assert.equal(state.military.brigade_attack_orders?.rs_1st_bratunac, 'op:bratunac:bratunac_2');
 });
 
 test('execution-phase operation moves brigade toward an approach OSID for the current objective', () => {
@@ -185,10 +185,10 @@ test('execution-phase operation moves brigade toward an approach OSID for the cu
     });
 
     assert.equal(
-        state.brigade_movement_orders?.rs_1st_posavina_infantry?.destination_sids?.[0],
+        state.military.brigade_movement_orders?.rs_1st_posavina_infantry?.destination_sids?.[0],
         'op:test:approach'
     );
-    assert.equal(state.brigade_attack_orders?.rs_1st_posavina_infantry, undefined);
+    assert.equal(state.military.brigade_attack_orders?.rs_1st_posavina_infantry, undefined);
 });
 
 test('execution-phase operation falls back to maneuver toward a later reachable objective when the current objective has no friendly approach', () => {
@@ -251,10 +251,10 @@ test('execution-phase operation falls back to maneuver toward a later reachable 
     });
 
     assert.equal(
-        state.brigade_movement_orders?.rs_1st_posavina_infantry?.destination_sids?.[0],
+        state.military.brigade_movement_orders?.rs_1st_posavina_infantry?.destination_sids?.[0],
         'op:test:approach'
     );
-    assert.equal(state.brigade_attack_orders?.rs_1st_posavina_infantry, undefined);
+    assert.equal(state.military.brigade_attack_orders?.rs_1st_posavina_infantry, undefined);
 });
 
 test('execution-phase operation concentrates adjacent brigades on the current objective', () => {
@@ -351,8 +351,8 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
     });
 
     assert.ok(
-        state.brigade_attack_orders?.rs_1st_doboj_light_infantry === 'op:test:objective' ||
-        state.brigade_attack_orders?.rs_2nd_armored === 'op:test:objective'
+        state.military.brigade_attack_orders?.rs_1st_doboj_light_infantry === 'op:test:objective' ||
+        state.military.brigade_attack_orders?.rs_2nd_armored === 'op:test:objective'
     );
 });
 
@@ -423,7 +423,7 @@ test('execution-phase operation with momentum can probe the next objective from 
         osidPopulationMap: new Map(),
     });
 
-    assert.equal(state.brigade_attack_orders?.rs_1st_doboj_light_infantry, 'op:test:objective');
+    assert.equal(state.military.brigade_attack_orders?.rs_1st_doboj_light_infantry, 'op:test:objective');
 });
 
 test('execution-phase operation still moves assigned brigades when their current OSID is critical supply', () => {
@@ -495,7 +495,7 @@ test('execution-phase operation still moves assigned brigades when their current
     });
 
     assert.equal(
-        state.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
+        state.military.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
         'op:test:approach'
     );
 });
@@ -580,10 +580,10 @@ test('execution-phase operation still moves toward a risky approach OSID when th
     });
 
     assert.equal(
-        state.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
+        state.military.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
         'op:test:approach'
     );
-    assert.equal(state.brigade_attack_orders?.rs_1st_doboj_light_infantry, undefined);
+    assert.equal(state.military.brigade_attack_orders?.rs_1st_doboj_light_infantry, undefined);
 });
 
 test('planning-phase operation emits the first hop toward a distant staging OSID', () => {
@@ -647,7 +647,7 @@ test('planning-phase operation emits the first hop toward a distant staging OSID
     });
 
     assert.equal(
-        state.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
+        state.military.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
         'op:test:mid'
     );
 });
@@ -711,8 +711,8 @@ test('planning-phase operation keeps moving from staging into first-objective ap
     });
 
     assert.equal(
-        state.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
+        state.military.brigade_movement_orders?.rs_1st_doboj_light_infantry?.destination_sids?.[0],
         'op:test:approach'
     );
-    assert.equal(state.brigade_attack_orders?.rs_1st_doboj_light_infantry, undefined);
+    assert.equal(state.military.brigade_attack_orders?.rs_1st_doboj_light_infantry, undefined);
 });

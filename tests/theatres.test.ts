@@ -51,12 +51,12 @@ test('ensureDefaultTheatres builds one deterministic theatre per faction', () =>
     const state = makeState();
     ensureDefaultTheatres(state);
 
-    assert.ok(state.theatres?.RBiH_default);
-    assert.ok(state.theatres?.RS_default);
-    assert.strictEqual(state.army_theatre_assignment?.army_rbih, 'RBiH_default');
-    assert.strictEqual(state.army_theatre_assignment?.army_rs, 'RS_default');
-    assert.deepStrictEqual(state.theatres?.RBiH_default?.army_ids, ['army_rbih']);
-    assert.deepStrictEqual(state.theatres?.RS_default?.army_ids, ['army_rs']);
+    assert.ok(state.military.theatres?.RBiH_default);
+    assert.ok(state.military.theatres?.RS_default);
+    assert.strictEqual(state.military.army_theatre_assignment?.army_rbih, 'RBiH_default');
+    assert.strictEqual(state.military.army_theatre_assignment?.army_rs, 'RS_default');
+    assert.deepStrictEqual(state.military.theatres?.RBiH_default?.army_ids, ['army_rbih']);
+    assert.deepStrictEqual(state.military.theatres?.RS_default?.army_ids, ['army_rs']);
 });
 
 test('assignFrontSegmentTheatres attaches theatre_id deterministically', () => {

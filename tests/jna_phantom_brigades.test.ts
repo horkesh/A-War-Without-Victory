@@ -26,14 +26,14 @@ describe('JNA Phantom — Spawn', () => {
     it('spawns all 5 phantom brigades', () => {
         const state = makeState(0);
         spawnJnaPhantomBrigades(state);
-        const phantoms = Object.values(state.formations!).filter(f => f.kind === 'jna_phantom');
+        const phantoms = Object.values(state.military.formations!).filter(f => f.kind === 'jna_phantom');
         assert.equal(phantoms.length, 5);
     });
 
     it('phantom brigades have correct properties', () => {
         const state = makeState(0);
         spawnJnaPhantomBrigades(state);
-        const uzice = state.formations!['jna_uzice_corps_tg']!;
+        const uzice = state.military.formations!['jna_uzice_corps_tg']!;
         assert.equal(uzice.kind, 'jna_phantom');
         assert.equal(uzice.faction, 'RS');
         assert.equal(uzice.status, 'active');
@@ -50,7 +50,7 @@ describe('JNA Phantom — Spawn', () => {
         const state = makeState(0);
         spawnJnaPhantomBrigades(state);
         spawnJnaPhantomBrigades(state);
-        const phantoms = Object.values(state.formations!).filter(f => f.kind === 'jna_phantom');
+        const phantoms = Object.values(state.military.formations!).filter(f => f.kind === 'jna_phantom');
         assert.equal(phantoms.length, 5);
     });
 });
@@ -80,11 +80,11 @@ describe('JNA Phantom — Withdrawal', () => {
     it('removes phantom at withdrawal turn', () => {
         const state = makeState(4);
         spawnJnaPhantomBrigades(state);
-        assert.ok(state.formations!['jna_uzice_corps_tg']);
+        assert.ok(state.military.formations!['jna_uzice_corps_tg']);
         const events = processJnaWithdrawals(state);
         assert.equal(events.length, 1); // only Uzice at w4
         assert.equal(events[0]!.phantom_id, 'jna_uzice_corps_tg');
-        assert.equal(state.formations!['jna_uzice_corps_tg'], undefined);
+        assert.equal(state.military.formations!['jna_uzice_corps_tg'], undefined);
     });
 
     it('does not withdraw before withdrawal turn', () => {
@@ -92,15 +92,15 @@ describe('JNA Phantom — Withdrawal', () => {
         spawnJnaPhantomBrigades(state);
         const events = processJnaWithdrawals(state);
         assert.equal(events.length, 0);
-        assert.ok(state.formations!['jna_uzice_corps_tg']);
+        assert.ok(state.military.formations!['jna_uzice_corps_tg']);
     });
 
     it('withdraws multiple at same turn', () => {
         const state = makeState(6);
         spawnJnaPhantomBrigades(state);
         // Also force w4 and w5 phantoms to already be gone
-        delete state.formations!['jna_uzice_corps_tg'];
-        delete state.formations!['jna_mostar_garrison_tg'];
+        delete state.military.formations!['jna_uzice_corps_tg'];
+        delete state.military.formations!['jna_mostar_garrison_tg'];
         const events = processJnaWithdrawals(state);
         // w6: jna_17th_corps_tg and jna_4th_corps_tg
         assert.equal(events.length, 2);
@@ -112,7 +112,7 @@ describe('JNA Phantom — Equipment Handoff', () => {
         const state = makeState(4);
         spawnJnaPhantomBrigades(state);
         // Add a receiving brigade in same corps
-        state.formations!['rs_foa_brigade'] = {
+        state.military.formations!['rs_foa_brigade'] = {
             id: 'rs_foa_brigade' as FormationId,
             faction: 'RS' as FactionId,
             name: 'Foca Brigade',
@@ -137,7 +137,7 @@ describe('JNA Phantom — Equipment Handoff', () => {
         const events = processJnaWithdrawals(state);
         assert.equal(events.length, 1);
 
-        const brigade = state.formations!['rs_foa_brigade']!;
+        const brigade = state.military.formations!['rs_foa_brigade']!;
         // Light infantry ceiling: max_tanks=5, max_artillery=10, max_apcs=8
         // Phantom had: 30 tanks, 20 artillery, 8 APCs
         // Brigade gets: 5 tanks (ceiling), 8 more artillery (ceiling 10 - 2 existing = 8), some APCs
@@ -150,7 +150,7 @@ describe('JNA Phantom — Equipment Handoff', () => {
         const state = makeState(4);
         spawnJnaPhantomBrigades(state);
         // Brigade already at ceiling
-        state.formations!['rs_foa_brigade'] = {
+        state.military.formations!['rs_foa_brigade'] = {
             id: 'rs_foa_brigade' as FormationId,
             faction: 'RS' as FactionId,
             name: 'Foca Brigade',
@@ -173,7 +173,7 @@ describe('JNA Phantom — Equipment Handoff', () => {
         } as FormationState;
 
         const events = processJnaWithdrawals(state);
-        const brigade = state.formations!['rs_foa_brigade']!;
+        const brigade = state.military.formations!['rs_foa_brigade']!;
         // No room — everything goes to reserve
         assert.equal(brigade.composition!.tanks, 13); // unchanged
         assert.equal(brigade.composition!.artillery, 10); // unchanged
@@ -188,7 +188,7 @@ describe('JNA Phantom — Equipment Handoff', () => {
         const events = processJnaWithdrawals(state);
         assert.equal(events.length, 1);
         // All equipment should go to reserve
-        const reserve = state.corps_equipment_reserve?.['vrs_herzegovina'];
+        const reserve = state.military.corps_equipment_reserve?.['vrs_herzegovina'];
         assert.ok(reserve);
         assert.ok(reserve!.tanks > 0);
         assert.ok(reserve!.artillery > 0);
@@ -197,7 +197,7 @@ describe('JNA Phantom — Equipment Handoff', () => {
     it('removes phantom from active operation axes', () => {
         const state = makeState(4);
         spawnJnaPhantomBrigades(state);
-        state.corps_command = {
+        state.military.corps_command = {
             'vrs_herzegovina': {
                 stance: 'offensive' as any,
                 active_operation: {
@@ -232,7 +232,7 @@ describe('JNA Phantom — Equipment Handoff', () => {
         };
 
         processJnaWithdrawals(state);
-        const op = state.corps_command['vrs_herzegovina']!.active_operation!;
+        const op = state.military.corps_command['vrs_herzegovina']!.active_operation!;
         assert.ok(!op.participating_brigades.includes('jna_uzice_corps_tg' as any));
         assert.ok(op.participating_brigades.includes('rs_foa_brigade' as any));
         assert.ok(!op.axes![0]!.assigned_brigades.includes('jna_uzice_corps_tg' as any));

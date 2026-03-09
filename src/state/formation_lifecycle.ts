@@ -55,7 +55,7 @@ const AUTHORITY_FRAGMENTED = 0.2;
  */
 export function deriveMunicipalityAuthorityMap(state: GameState): Map<MunicipalityId, number> {
     const out = new Map<MunicipalityId, number>();
-    const muns = state.municipalities ?? {};
+    const muns = state.political.municipalities ?? {};
     const munIds = Object.keys(muns).sort(strictCompare);
     for (const munId of munIds) {
         const control = muns[munId]?.control;
@@ -288,7 +288,7 @@ export function updateFormationLifecycle(
     municipalityAuthorityByMun: Map<MunicipalityId, number>
 ): FormationLifecycleStepReport {
     const currentTurn = state.meta.turn;
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     const records: FormationLifecycleRecord[] = [];
     const factionStats = new Map<FactionId, {
@@ -356,7 +356,7 @@ export function updateFormationLifecycle(
         }
 
         // 4. Apply cohesion degradation (if unsupplied; Phase G: accelerated when encircled)
-        const encircled = state.brigade_encircled?.[formationId] === true;
+        const encircled = state.military.brigade_encircled?.[formationId] === true;
         formation.cohesion = applyCohesionDegradation(formation, supplied, encircled);
         const cohesionAfter = formation.cohesion;
 

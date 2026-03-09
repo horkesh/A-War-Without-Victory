@@ -270,8 +270,8 @@ function getSectorOffensiveProbeThreshold(
 }
 
 function isPartOfNamedOperation(state: GameState, formation: FormationState): boolean {
-    if (!formation.corps_id || !state.corps_command) return false;
-    const op = state.corps_command[formation.corps_id]?.active_operation;
+    if (!formation.corps_id || !state.military.corps_command) return false;
+    const op = state.military.corps_command[formation.corps_id]?.active_operation;
     if (!op) return false;
     return op.phase === 'execution' && isOperationParticipant(op, formation.id);
 }
@@ -343,7 +343,7 @@ function executeFactionDirectives(
     for (const brigade of brigades) {
         const loc = brigade.location_osid!;
         const corpsId = brigade.corps_id;
-        const cmd = corpsId ? state.corps_command?.[corpsId] : null;
+        const cmd = corpsId ? state.military.corps_command?.[corpsId] : null;
         const activeOp = cmd?.active_operation;
         const isActiveSectorOperationParticipant =
             activeOp?.type === 'sector_attack' &&
@@ -371,10 +371,10 @@ function executeFactionDirectives(
 
         // --- Sector march: brigade assigned to a sector but not on its front → column march ---
         // This overrides home defense: the corps needs this brigade at the front.
-        if (state.corps_front_sectors && !isActiveSectorOperationParticipant) {
+        if (state.military.corps_front_sectors && !isActiveSectorOperationParticipant) {
             let assignedSector: (typeof state.corps_front_sectors)[string] | null = null;
-            for (const sid of Object.keys(state.corps_front_sectors).sort(strictCompare)) {
-                const sec = state.corps_front_sectors[sid]!;
+            for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
+                const sec = state.military.corps_front_sectors[sid]!;
                 if (sec.assigned_brigade_ids.includes(brigade.id)) {
                     assignedSector = sec;
                     break;
@@ -479,7 +479,7 @@ const freeTarget = predictions.find(t =>
         // (mirrors getSupplyMult logic in combat_math.ts).
         const rawOsidSupplyState = getBrigadeSupplyState(brigade, supplyStateByOsid);
         const factionReserveLevel = state.meta?.supply_reserves_enabled
-            ? ((state.general_supply_reserve as Record<string, number> | undefined)?.[brigade.faction] ?? 100)
+            ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[brigade.faction] ?? 100)
             : 100;
         const brigadeSupplyState = state.meta?.supply_reserves_enabled
             ? getEffectiveSupplyState(rawOsidSupplyState, factionReserveLevel)
@@ -563,7 +563,7 @@ const freeTarget = predictions.find(t =>
                     const axisBrigades = getBrigadeAxis(activeOp15, brigade.id)?.assigned_brigades
                         ?? activeOp15.participating_brigades ?? [];
                     const adjacentOperationParticipants = axisBrigades.filter((brigadeId) => {
-                        const participant = state.formations?.[brigadeId];
+                        const participant = state.military.formations?.[brigadeId];
                         if (!participant?.location_osid || participant.status !== 'active') return false;
                         return (adjacency.get(participant.location_osid) ?? []).includes(currentObjective);
                     }).length;
@@ -661,7 +661,7 @@ const freeTarget = predictions.find(t =>
             if (adjEnemy.length > 0 && directive) {
                 const undefendedReorg = adjEnemy.filter(eo => {
                     if (!directive.offensive_targets.includes(eo)) return false;
-                    const fmtsReorg = state.formations ?? {};
+                    const fmtsReorg = state.military.formations ?? {};
                     // Order-independent: checking if any defender exists (length === 0)
                     const hasDefender = Object.values(fmtsReorg).some(
                         f => f != null && f.status === 'active' &&
@@ -766,7 +766,7 @@ const freeTarget = predictions.find(t =>
             }
         }
         // Sector offensive participation: override targets and thresholds
-        const activeOpLater = corpsId ? state.corps_command?.[corpsId]?.active_operation : null;
+        const activeOpLater = corpsId ? state.military.corps_command?.[corpsId]?.active_operation : null;
         const isInSectorOffensive = activeOpLater?.type === 'sector_attack' &&
             isOperationParticipant(activeOpLater, brigade.id);
         if (isInSectorOffensive && activeOpLater) {
@@ -775,7 +775,7 @@ const freeTarget = predictions.find(t =>
                 // A recovering brigade shouldn't ignore free territory right next door.
                 const undefendedAdj = adjEnemy.filter(eo => {
                     if (!directive?.offensive_targets.includes(eo)) return false;
-                    const fmtsAdj = state.formations ?? {};
+                    const fmtsAdj = state.military.formations ?? {};
                     // Order-independent: checking if any defender exists (length === 0)
                     const hasDefender = Object.values(fmtsAdj).some(
                         f => f != null && f.status === 'active' &&
@@ -1035,10 +1035,10 @@ const freeTarget = predictions.find(t =>
         // --- Rule 5b2: Sector reassignment from density equalization ---
         // Corps AI issued explicit reassignment orders — this brigade should column march
         // to its assigned sector. Only act if not heavily entrenched.
-        if (directive?.sector_reassignment_orders && state.corps_front_sectors) {
+        if (directive?.sector_reassignment_orders && state.military.corps_front_sectors) {
             const reassign = directive.sector_reassignment_orders.find(r => r.brigade_id === brigade.id);
             if (reassign) {
-                const targetSec = state.corps_front_sectors[reassign.to_sector_id];
+                const targetSec = state.military.corps_front_sectors[reassign.to_sector_id];
                 if (targetSec) {
                     const targetOsids = new Set<string>();
                     for (const ss of targetSec.sub_segments) {
@@ -1067,11 +1067,11 @@ const freeTarget = predictions.find(t =>
         // the directive flags under-density sectors, march to the nearest one.
         if (adjEnemy.length > 0 &&
             directive?.reinforce_sector_ids?.length &&
-            state.corps_front_sectors &&
+            state.military.corps_front_sectors &&
             countFactionBrigadesAtOsid(state, faction, loc) >= 2) {
             const targetOsids = new Set<string>();
             for (const sid of directive.reinforce_sector_ids) {
-                const sec = state.corps_front_sectors[sid];
+                const sec = state.military.corps_front_sectors[sid];
                 if (!sec) continue;
                 for (const ss of sec.sub_segments) {
                     for (const o of ss.friendly_osids) targetOsids.add(o);
@@ -1116,7 +1116,7 @@ const freeTarget = predictions.find(t =>
         // --- Rule 7: Interior — move toward front, preferring offensive targets ---
         // First: if directive has a priority sector, march toward it (offensive concentration).
         if (directive?.priority_sector_id) {
-            const prioritySec = state.corps_front_sectors?.[directive.priority_sector_id];
+            const prioritySec = state.military.corps_front_sectors?.[directive.priority_sector_id];
             if (prioritySec) {
                 const priorityOsids = new Set<string>();
                 for (const ss of prioritySec.sub_segments) {
@@ -1213,7 +1213,7 @@ export function generateAllBotOrdersOsid(
     const allEligibleAttackersByCorps: Record<FormationId, number> = {};
 
     for (const faction of sortedFactions) {
-        const fmtsBrigades = state.formations ?? {};
+        const fmtsBrigades = state.military.formations ?? {};
         const brigades = Object.keys(fmtsBrigades).sort(strictCompare).map(k => fmtsBrigades[k]!)
             .filter((f): f is FormationState =>
                 f != null &&
@@ -1244,7 +1244,7 @@ export function generateAllBotOrdersOsid(
         // Winter: attack_share_mult reduces effective slots (near-total stasis Dec-Jan).
         const turn = state.meta?.turn ?? 0;
         const seasonal = getSeasonalModifiers(turn, state.meta?.scenario_start_date);
-        const maxAttackShare = getEffectiveAttackShare(faction, turn, state.war_timeline) * seasonal.attack_share_mult;
+        const maxAttackShare = getEffectiveAttackShare(faction, turn, state.military.war_timeline) * seasonal.attack_share_mult;
 
         // Count brigades per corps
         const corpsSize = new Map<string, number>();
@@ -1257,7 +1257,7 @@ export function generateAllBotOrdersOsid(
         const attacksByCorps = new Map<string, Array<{ bid: FormationId; target: Osid; score: number }>>();
         for (const [bid, target] of Object.entries(result.attack_orders)) {
             if (target == null) continue;
-            const brig = state.formations?.[bid as FormationId];
+            const brig = state.military.formations?.[bid as FormationId];
             const cid = brig?.corps_id ?? '__nocorps__';
             if (!attacksByCorps.has(cid)) attacksByCorps.set(cid, []);
             attacksByCorps.get(cid)!.push({
@@ -1291,7 +1291,7 @@ export function generateAllBotOrdersOsid(
         // is forced to defend each turn (deterministic: turn % attackingBrigadeCount).
         // Simulates lack of unified command / warlord autonomy in early ARBiH.
         // D.4: Read warlord friction end week from war_timeline if available
-        const warlordFrictionEndWeek = state.war_timeline?.officer_config?.RBiH?.warlord_friction_end_week ?? 78;
+        const warlordFrictionEndWeek = state.military.war_timeline?.officer_config?.RBiH?.warlord_friction_end_week ?? 78;
         if (faction === 'RBiH' && turn < warlordFrictionEndWeek) {
             for (const [cid, attacks] of [...attacksByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
                 if (attacks.length <= 1) continue; // Need at least 2 attackers for friction
@@ -1320,11 +1320,11 @@ export function generateAllBotOrdersOsid(
     }
 
     // Write to state
-    if (!state.brigade_posture_orders) state.brigade_posture_orders = [];
-    state.brigade_posture_orders.push(...allPostureOrders);
+    if (!state.military.brigade_posture_orders) state.military.brigade_posture_orders = [];
+    state.military.brigade_posture_orders.push(...allPostureOrders);
 
     if (Object.keys(allAttackOrders).length > 0) {
-        state.brigade_attack_orders = allAttackOrders;
+        state.military.brigade_attack_orders = allAttackOrders;
     }
 
     // Movement orders: merge regular moves + column march destinations
@@ -1338,7 +1338,7 @@ export function generateAllBotOrdersOsid(
         mergedMovement[bid] = { destination_sids: [dest], stance: 'column' };
     }
     if (Object.keys(mergedMovement).length > 0) {
-        state.brigade_movement_orders = mergedMovement as Record<FormationId, { destination_sids: string[]; stance?: string }>;
+        state.military.brigade_movement_orders = mergedMovement as Record<FormationId, { destination_sids: string[]; stance?: string }>;
     }
 
     return {

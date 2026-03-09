@@ -109,7 +109,7 @@ describe('checkTriggeredOperations', () => {
 
     it('does not inject Posavina when 1KK has active op', () => {
         const state = makeState(5);
-        state.corps_command!['vrs_1st_krajina']!.active_operation = {
+        state.military.corps_command!['vrs_1st_krajina']!.active_operation = {
             name: 'Test Op',
             type: 'sector_attack',
             phase: 'execution',
@@ -120,7 +120,7 @@ describe('checkTriggeredOperations', () => {
 
     it('does not inject Posavina when EBK has active op', () => {
         const state = makeState(5);
-        state.corps_command!['vrs_east_bosnian']!.active_operation = {
+        state.military.corps_command!['vrs_east_bosnian']!.active_operation = {
             name: 'Test Op',
             type: 'sector_attack',
             phase: 'execution',
@@ -131,7 +131,7 @@ describe('checkTriggeredOperations', () => {
 
     it('does not inject Posavina when 1KK has queued ops', () => {
         const state = makeState(5);
-        state.corps_command!['vrs_1st_krajina']!.queued_operations = ['Operation Bosanski Novi'];
+        state.military.corps_command!['vrs_1st_krajina']!.queued_operations = ['Operation Bosanski Novi'];
         const injected = checkTriggeredOperations(state);
         assert.ok(!injected.includes('Operation Posavina Corridor'));
     });
@@ -139,7 +139,7 @@ describe('checkTriggeredOperations', () => {
     it('injects Kotor Varos at turn 10', () => {
         const state = makeState(10);
         // Block Posavina so it doesn't grab 1KK
-        state.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
+        state.military.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Kotor Varos'));
     });
@@ -164,21 +164,21 @@ describe('checkTriggeredOperations', () => {
 
     it('does not inject same operation twice', () => {
         const state = makeState(10);
-        state.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
+        state.military.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
         const first = checkTriggeredOperations(state);
         assert.ok(first.includes('Operation Kotor Varos'));
 
         // Clear the active op (it was just set)
         // But triggered_operations_accepted should prevent re-injection
-        delete state.corps_command!['vrs_1st_krajina']!.active_operation;
+        delete state.military.corps_command!['vrs_1st_krajina']!.active_operation;
         const second = checkTriggeredOperations(state);
         assert.ok(!second.includes('Operation Kotor Varos'));
     });
 
     it('respects declined operations with cooldown', () => {
         const state = makeState(12);
-        state.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
-        state.declined_operations = {
+        state.military.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
+        state.military.declined_operations = {
             'Operation Kotor Varos': { declined_turn: 10, decline_count: 1 },
         };
         // Turn 12, declined at 10, cooldown is 8 → still in cooldown
@@ -188,8 +188,8 @@ describe('checkTriggeredOperations', () => {
 
     it('re-offers after cooldown expires', () => {
         const state = makeState(20);
-        state.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
-        state.declined_operations = {
+        state.military.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
+        state.military.declined_operations = {
             'Operation Kotor Varos': { declined_turn: 10, decline_count: 1 },
         };
         // Turn 20, declined at 10, cooldown is 8 → 10 turns passed, past cooldown
@@ -199,8 +199,8 @@ describe('checkTriggeredOperations', () => {
 
     it('permanently dismisses after 3 declines', () => {
         const state = makeState(50);
-        state.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
-        state.declined_operations = {
+        state.military.corps_command!['vrs_east_bosnian']!.active_operation = { name: 'x' } as any;
+        state.military.declined_operations = {
             'Operation Kotor Varos': { declined_turn: 40, decline_count: 3 },
         };
         const injected = checkTriggeredOperations(state);
@@ -210,13 +210,13 @@ describe('checkTriggeredOperations', () => {
     it('creates multi-axis operation with correct structure', () => {
         const state = makeState(24);
         // Block other corps to only get Jajce
-        state.corps_command!['vrs_1st_krajina']!.active_operation = { name: 'x' } as any;
-        state.corps_command!['vrs_drina']!.active_operation = { name: 'x' } as any;
+        state.military.corps_command!['vrs_1st_krajina']!.active_operation = { name: 'x' } as any;
+        state.military.corps_command!['vrs_drina']!.active_operation = { name: 'x' } as any;
 
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Jajce'));
 
-        const jajceOp = state.corps_command!['vrs_2nd_krajina']!.active_operation;
+        const jajceOp = state.military.corps_command!['vrs_2nd_krajina']!.active_operation;
         assert.ok(jajceOp);
         assert.equal(jajceOp!.name, 'Operation Jajce');
         assert.ok(jajceOp!.axes);
@@ -230,13 +230,13 @@ describe('checkTriggeredOperations', () => {
     it('filters out already RS-controlled objectives', () => {
         const state = makeState(40);
         // Make some Cerska objectives already RS
-        state.political_controllers!['op:srebrenica:brezovice_2'] = 'RS';
-        state.political_controllers!['op:srebrenica:kalimanici'] = 'RS';
+        state.political.political_controllers!['op:srebrenica:brezovice_2'] = 'RS';
+        state.political.political_controllers!['op:srebrenica:kalimanici'] = 'RS';
 
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Cerska-Kamenica'));
 
-        const cerskaOp = state.corps_command!['vrs_drina']!.active_operation;
+        const cerskaOp = state.military.corps_command!['vrs_drina']!.active_operation;
         assert.ok(cerskaOp);
         // cerska_pocket axis should still exist with remaining objective
         const cerskaAxis = cerskaOp!.axes!.find(a => a.axis_id === 'cerska_pocket');

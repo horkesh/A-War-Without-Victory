@@ -133,7 +133,7 @@ export function computeLocalSupplyForEdges(
 
     for (const edge of edgesSorted) {
         const edge_id = edge.edge_id;
-        const seg = (state.front_segments as any)?.[edge_id];
+        const seg = (state.military.front_segments as any)?.[edge_id];
         const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
         if (!isActive) continue;
 
@@ -208,7 +208,7 @@ function getFormationSupplyMultiplier(
     if (!assignment || typeof assignment !== 'object') return 1;
 
     const factionId = formation?.faction;
-    const logisticsPriority = state.logistics_priority?.[factionId];
+    const logisticsPriority = state.military.logistics_priority?.[factionId];
 
     if (assignment.kind === 'edge' && typeof assignment.edge_id === 'string') {
         const pair = parseEdgeId(assignment.edge_id);

@@ -47,9 +47,9 @@ function defaultSpawnOptions() {
 
 test('spawn at 800: pool with 800 available spawns one brigade with personnel 800', () => {
     const state = baseState();
-    state.formation_spawn_directive = { kind: 'brigade' };
+    state.military.formation_spawn_directive = { kind: 'brigade' };
     const key = militiaPoolKey('MUN_X', 'RBiH');
-    state.militia_pools![key] = {
+    state.military.militia_pools![key] = {
         mun_id: 'MUN_X',
         faction: 'RBiH',
         available: 800,
@@ -57,12 +57,12 @@ test('spawn at 800: pool with 800 available spawns one brigade with personnel 80
         exhausted: 0,
         updated_turn: 10
     };
-    state.municipalities!['MUN_X'] = { control: 'consolidated' };
+    state.political.municipalities!['MUN_X'] = { control: 'consolidated' };
 
     const report = spawnFormationsFromPools(state, defaultSpawnOptions());
 
     assert.strictEqual(report.formations_created, 1);
-    const formation = Object.values(state.formations!)[0] as any;
+    const formation = Object.values(state.military.formations!)[0] as any;
     assert.ok(formation);
     assert.strictEqual(formation.personnel, MIN_BRIGADE_SPAWN);
     assert.strictEqual(formation.faction, 'RBiH');
@@ -70,9 +70,9 @@ test('spawn at 800: pool with 800 available spawns one brigade with personnel 80
 
 test('fragmented mun never spawns', () => {
     const state = baseState();
-    state.formation_spawn_directive = { kind: 'brigade' };
+    state.military.formation_spawn_directive = { kind: 'brigade' };
     const key = militiaPoolKey('MUN_FRAG', 'RS');
-    state.militia_pools![key] = {
+    state.military.militia_pools![key] = {
         mun_id: 'MUN_FRAG',
         faction: 'RS',
         available: 5000,
@@ -80,7 +80,7 @@ test('fragmented mun never spawns', () => {
         exhausted: 0,
         updated_turn: 10
     };
-    state.municipalities!['MUN_FRAG'] = { control: 'fragmented' };
+    state.political.municipalities!['MUN_FRAG'] = { control: 'fragmented' };
 
     const report = spawnFormationsFromPools(state, defaultSpawnOptions());
 
@@ -92,9 +92,9 @@ test('minority decay runs only in first 3 turns of Peace phase and reduces pool'
     state.meta.phase = 'war';
     state.meta.war_start_turn = 10;
     state.meta.turn = 10;
-    state.political_controllers = { s1: 'RS', s2: 'RS' };
+    state.political.political_controllers = { s1: 'RS', s2: 'RS' };
     const key = militiaPoolKey('MUN_NONURBAN', 'RBiH');
-    state.militia_pools![key] = {
+    state.military.militia_pools![key] = {
         mun_id: 'MUN_NONURBAN',
         faction: 'RBiH',
         available: 1000,
@@ -102,7 +102,7 @@ test('minority decay runs only in first 3 turns of Peace phase and reduces pool'
         exhausted: 0,
         updated_turn: 10
     };
-    state.municipalities!['MUN_NONURBAN'] = { control: 'consolidated' };
+    state.political.municipalities!['MUN_NONURBAN'] = { control: 'consolidated' };
     const settlements = new Map([
         ['s1', { sid: 's1', mun1990_id: 'MUN_NONURBAN', mun_code: 'MUN_NONURBAN' } as any],
         ['s2', { sid: 's2', mun1990_id: 'MUN_NONURBAN', mun_code: 'MUN_NONURBAN' } as any]
@@ -115,7 +115,7 @@ test('minority decay runs only in first 3 turns of Peace phase and reduces pool'
 
     assert.ok(report.pools_affected >= 1);
     assert.ok(report.manpower_removed > 0);
-    assert.ok(state.militia_pools![key].available < 1000);
+    assert.ok(state.military.militia_pools![key].available < 1000);
 });
 
 test('minority decay does not run outside first 3 turns of Peace phase', () => {
@@ -123,9 +123,9 @@ test('minority decay does not run outside first 3 turns of Peace phase', () => {
     state.meta.phase = 'war';
     state.meta.war_start_turn = 10;
     state.meta.turn = 14;
-    state.political_controllers = { s1: 'RS' };
+    state.political.political_controllers = { s1: 'RS' };
     const key = militiaPoolKey('MUN_X', 'RBiH');
-    state.militia_pools![key] = {
+    state.military.militia_pools![key] = {
         mun_id: 'MUN_X',
         faction: 'RBiH',
         available: 1000,
@@ -133,19 +133,19 @@ test('minority decay does not run outside first 3 turns of Peace phase', () => {
         exhausted: 0,
         updated_turn: 14
     };
-    state.municipalities!['MUN_X'] = { control: 'consolidated' };
+    state.political.municipalities!['MUN_X'] = { control: 'consolidated' };
     const settlements = new Map([['s1', { sid: 's1', mun1990_id: 'MUN_X', mun_code: 'MUN_X' } as any]]);
 
     const report = runMinorityMilitiaDecay(state, settlements);
 
     assert.strictEqual(report.pools_affected, 0);
     assert.strictEqual(report.manpower_removed, 0);
-    assert.strictEqual(state.militia_pools![key].available, 1000);
+    assert.strictEqual(state.military.militia_pools![key].available, 1000);
 });
 
 test('reinforce uses MIN_BRIGADE_SPAWN (800) when personnel absent', () => {
     const state = baseState();
-    state.formations!['F1'] = {
+    state.military.formations!['F1'] = {
         id: 'F1',
         faction: 'RBiH',
         name: 'Test',
@@ -155,7 +155,7 @@ test('reinforce uses MIN_BRIGADE_SPAWN (800) when personnel absent', () => {
         kind: 'brigade',
         tags: ['mun:MUN_Z']
     } as any;
-    state.militia_pools![militiaPoolKey('MUN_Z', 'RBiH')] = {
+    state.military.militia_pools![militiaPoolKey('MUN_Z', 'RBiH')] = {
         mun_id: 'MUN_Z',
         faction: 'RBiH',
         available: 2000,
@@ -166,15 +166,15 @@ test('reinforce uses MIN_BRIGADE_SPAWN (800) when personnel absent', () => {
 
     reinforceBrigadesFromPools(state);
 
-    const f = state.formations!['F1'] as any;
+    const f = state.military.formations!['F1'] as any;
     assert.ok(f.personnel !== undefined);
     assert.ok(f.personnel >= MIN_BRIGADE_SPAWN && f.personnel <= 2500);
 });
 
 test('spawn priority: reinforcement reserves one spawn batch when directive is active', () => {
     const state = baseState();
-    state.formation_spawn_directive = { kind: 'brigade' };
-    state.formations!['F1'] = {
+    state.military.formation_spawn_directive = { kind: 'brigade' };
+    state.military.formations!['F1'] = {
         id: 'F1',
         faction: 'RBiH',
         name: 'Existing Zenica Brigade',
@@ -186,8 +186,8 @@ test('spawn priority: reinforcement reserves one spawn batch when directive is a
         personnel: 1000,
         tags: ['mun:zenica']
     } as any;
-    state.municipalities!['zenica'] = { control: 'consolidated' };
-    state.militia_pools![militiaPoolKey('zenica', 'RBiH')] = {
+    state.political.municipalities!['zenica'] = { control: 'consolidated' };
+    state.military.militia_pools![militiaPoolKey('zenica', 'RBiH')] = {
         mun_id: 'zenica',
         faction: 'RBiH',
         available: 850,
@@ -201,5 +201,5 @@ test('spawn priority: reinforcement reserves one spawn batch when directive is a
 
     const spawn = spawnFormationsFromPools(state, defaultSpawnOptions());
     assert.strictEqual(spawn.formations_created, 1, 'reserved manpower should allow one new brigade spawn');
-    assert.strictEqual(Object.keys(state.formations ?? {}).length, 2, 'existing + newly spawned brigade expected');
+    assert.strictEqual(Object.keys(state.military.formations ?? {}).length, 2, 'existing + newly spawned brigade expected');
 });

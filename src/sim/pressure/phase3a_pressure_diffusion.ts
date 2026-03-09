@@ -100,7 +100,7 @@ function runPhase3APressureDiffusionInternal(
     effectiveEdges: EffectivePressureEdge[],
     strictNamespace: boolean
 ): Phase3ADiffusionResult {
-    const fp = state.front_pressure;
+    const fp = state.military.front_pressure;
     if (!fp || typeof fp !== 'object') {
         return {
             applied: false,

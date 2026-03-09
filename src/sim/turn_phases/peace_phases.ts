@@ -138,7 +138,7 @@ export const peacePhases: NamedPhase[] = [
         name: 'formation-spawn',
         run: async (context) => {
             if (!isFormationSpawnDirectiveActive(context.state)) return;
-            const directive = context.state.formation_spawn_directive!;
+            const directive = context.state.military.formation_spawn_directive!;
             const kind = directive.kind === 'both' || directive.kind === 'militia' ? 'brigade' : (directive.kind ?? 'brigade');
             let canonicalToOperational: import('../../data/operational_data.js').CanonicalToOperationalMap | undefined;
             try {

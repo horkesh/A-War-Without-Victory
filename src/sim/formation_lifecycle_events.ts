@@ -50,7 +50,7 @@ export async function loadLifecycleEvents(baseDir?: string): Promise<LifecycleEv
  * any OSID in the municipality.
  */
 function isMunicipalityLost(state: GameState, municipality: string, faction: FactionId): boolean {
-    const controllers = state.political_controllers ?? {};
+    const controllers = state.political.political_controllers ?? {};
     // Check if any OSID in the municipality is still controlled by this faction
     for (const [osid, controller] of Object.entries(controllers)) {
         if (osid.startsWith(`op:${municipality}:`) && controller === faction) {
@@ -72,7 +72,7 @@ export function processLifecycleEvents(
     let fired = 0;
 
     for (const event of events) {
-        const formation = state.formations?.[event.formation_id];
+        const formation = state.military.formations?.[event.formation_id];
         if (!formation) continue;
         if (formation.status !== 'active') continue;
         if (formation.lifecycle_status === 'disbanded' || formation.lifecycle_status === 'merged' || formation.lifecycle_status === 'destroyed') continue;
@@ -103,8 +103,8 @@ export function processLifecycleEvents(
                 fired++;
                 break;
             case 'merge':
-                if (event.target_id && state.formations?.[event.target_id]) {
-                    const target = state.formations[event.target_id];
+                if (event.target_id && state.military.formations?.[event.target_id]) {
+                    const target = state.military.formations[event.target_id];
                     // Transfer remaining personnel to target
                     target.personnel = (target.personnel ?? 0) + (formation.personnel ?? 0);
                     formation.status = 'inactive';

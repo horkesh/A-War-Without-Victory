@@ -62,8 +62,8 @@ export function deriveCorpsFrontMapping(
     faction: FactionId
 ): Map<FormationId, string[]> {
     const result = new Map<FormationId, string[]>();
-    const segments = state.assignable_front_segments ?? [];
-    const formations = state.formations ?? {};
+    const segments = state.military.assignable_front_segments ?? [];
+    const formations = state.military.formations ?? {};
 
     // Build brigade_osid → corps_id mapping
     const osidToCorps = new Map<string, Set<string>>();
@@ -231,21 +231,21 @@ export function generateCorpsDirectives(
     supplyByOsid?: SupplyStateByOsidReport | null,
     ethnicMap?: OsidEthnicComposition | null
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
     if (!reverseMap) return; // Need operational data for OSID targeting
 
     const corpsList = getFactionCorps(state, faction);
     const turn = state.meta?.turn ?? 0;
     const corpsFrontMapping = deriveCorpsFrontMapping(state, faction);
-    const sectorLookup = state.corps_front_sectors ?? {};
+    const sectorLookup = state.military.corps_front_sectors ?? {};
     const adjacency = buildOsidAdjacency(edges);
     const strategy = FACTION_STRATEGIES[faction];
-    const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.war_timeline);
+    const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.military.war_timeline);
 
     // Army stance is recorded but does not artificially constrain corps behavior.
     // Offensive/defensive posture emerges organically from material capacity.
-    const armyStance = state.army_stance?.[faction] ?? 'balanced';
+    const armyStance = state.military.army_stance?.[faction] ?? 'balanced';
     const armyAggressionBonus = 0;
     const armyReserveModifier = 0;
 
@@ -266,7 +266,7 @@ export function generateCorpsDirectives(
             .filter(s => s.corps_id === corps.id)
             .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
 
-        const pc = state.political_controllers ?? {};
+        const pc = state.political.political_controllers ?? {};
         let corpsSectors = rearrangeSectorsForCorps(
             rawCorpsSectors, corps.id, adjacency,
             {
@@ -337,7 +337,7 @@ export function generateCorpsDirectives(
                     });
                     if (hasEnemyNeighbor) continue;
                     // Must have enemy formation present (uncleared pocket/holdout)
-                    const fmtsEnemy = state.formations ?? {};
+                    const fmtsEnemy = state.military.formations ?? {};
                     // Order-independent: existence check via .some()
                     const hasEnemyFormation = Object.values(fmtsEnemy).some(f =>
                         f && f.status === 'active' && f.faction !== faction && f.location_osid === neighborOsid
@@ -351,7 +351,7 @@ export function generateCorpsDirectives(
         // Add targets from active named operation
         if (cmd.active_operation?.phase === 'execution' && cmd.active_operation.target_settlements) {
             for (const sid of cmd.active_operation.target_settlements) {
-                const pc = state.political_controllers ?? {};
+                const pc = state.political.political_controllers ?? {};
                 if (pc[sid] !== faction && !offensiveTargetSet.has(sid)) {
                     offensiveTargetSet.add(sid);
                 }
@@ -364,7 +364,7 @@ export function generateCorpsDirectives(
         // corps accumulate 60+ targets from distant undefended sectors they
         // cannot actually reach.
         {
-            const allSectors = state.corps_front_sectors ?? {};
+            const allSectors = state.military.corps_front_sectors ?? {};
             const corpsEnemyOsids = new Set<string>();
             for (const sec of corpsSectors) {
                 for (const sub of sec.sub_segments) {
@@ -411,11 +411,11 @@ export function generateCorpsDirectives(
             const corpsMunSet = new Set<string>(
                 armyPriorities.flatMap(p => p.target_municipalities ?? [])
             );
-            const pc = state.political_controllers ?? {};
+            const pc = state.political.political_controllers ?? {};
             const pocketSubLocations = new Set(subordinates.map(b => b.location_osid).filter(Boolean));
             // Skip rear pockets that already have a paramilitary dispatched — let paramilitaries handle them
             const paramilitaryTargets = new Set<string>();
-            for (const [fid, f] of Object.entries(state.formations ?? {})) {
+            for (const [fid, f] of Object.entries(state.military.formations ?? {})) {
                 if (f.kind === 'paramilitary' && f.status === 'active' && f.paramilitary_target && f.faction === faction) {
                     paramilitaryTargets.add(f.paramilitary_target);
                 }
@@ -514,7 +514,7 @@ export function generateCorpsDirectives(
         let geometry: FrontGeometryAssessment | null = null;
         if (allSectorFriendlyOsids.length > 0 && allSectorEnemyOsids.length > 0) {
             let ethnicNeckThreshold = 0.40;
-            if (state.named_officers && state.named_officer_data) {
+            if (state.military.named_officers && state.military.named_officer_data) {
                 const cmdr = getCorpsCommander(corps.id, state);
                 if (cmdr) {
                     ethnicNeckThreshold = 0.40 + (3 - cmdr.data.political_reliability) * 0.05;
@@ -532,7 +532,7 @@ export function generateCorpsDirectives(
         }
 
         if (geometry) {
-            const cmdr2 = state.named_officers && state.named_officer_data
+            const cmdr2 = state.military.named_officers && state.military.named_officer_data
                 ? getCorpsCommander(corps.id, state)
                 : null;
             const salientPriorityBoost = cmdr2 ? cmdr2.data.aggressiveness >= 4 : false;
@@ -582,7 +582,7 @@ export function generateCorpsDirectives(
         let aggressionModifier = (doctrinePhase?.aggression_modifier ?? 0) + armyAggressionBonus + seasonalAdj + truceBreakBonus;
 
         // C.1: Named officer aggressiveness shifts corps aggression
-        if (state.named_officers && state.named_officer_data) {
+        if (state.military.named_officers && state.military.named_officer_data) {
             const commander = getCorpsCommander(corps.id, state);
             if (commander) {
                 // Shift aggression by (aggressiveness - 3) × 0.08
@@ -641,7 +641,7 @@ export function generateCorpsDirectives(
         // Graz Accords truce: corps-pair truce (Herzegovina) + OSID-level Kiseljak exclusion.
         // Posavina and Krajina HRHB cells are NOT protected — VRS attacks freely.
         if (isGrazAccordsActive(state)) {
-            const pc = state.political_controllers ?? {};
+            const pc = state.political.political_controllers ?? {};
             for (let i = offensiveTargets.length - 1; i >= 0; i--) {
                 const osid = offensiveTargets[i]!;
                 if (shouldGrazBlockAttack(state, corps.id, faction, osid, pc[osid] ?? '')) {
@@ -708,7 +708,7 @@ export function generateCorpsDirectives(
         // Sector-intel target scoring: prefer thin sectors, deprioritize fortress sectors.
         // Soft weight (+/-2) applied within the supply-aware sort below.
         const intelScoreByOsid = new Map<string, number>();
-        if (state.sector_intel && corpsSectors.length > 0) {
+        if (state.military.sector_intel && corpsSectors.length > 0) {
             // target OSID -> friendly sector that faces it
             const targetToFriendlySector = new Map<string, string>();
             for (const sec of corpsSectors) {
@@ -718,7 +718,7 @@ export function generateCorpsDirectives(
             }
             // target OSID -> enemy sector that owns it
             const targetToEnemySector = new Map<string, string>();
-            for (const [sId, sec] of Object.entries(state.corps_front_sectors!)) {
+            for (const [sId, sec] of Object.entries(state.military.corps_front_sectors!)) {
                 if (sec.faction === faction) continue;
                 for (const ss of sec.sub_segments) {
                     for (const fo of ss.friendly_osids) targetToEnemySector.set(fo, sId);
@@ -728,7 +728,7 @@ export function generateCorpsDirectives(
                 const friendlySectorId = targetToFriendlySector.get(osid);
                 const enemySectorId = targetToEnemySector.get(osid);
                 if (!friendlySectorId || !enemySectorId) continue;
-                const rec = state.sector_intel[friendlySectorId]?.find(r => r.enemy_sector_id === enemySectorId);
+                const rec = state.military.sector_intel[friendlySectorId]?.find(r => r.enemy_sector_id === enemySectorId);
                 if (!rec || rec.confidence < CONFIDENCE_ROUGH_STRENGTH) continue;
                 if (rec.strength_category === 'thin') intelScoreByOsid.set(osid, -2);
                 else if (rec.strength_category === 'fortress') intelScoreByOsid.set(osid, 2);
@@ -743,7 +743,7 @@ export function generateCorpsDirectives(
         offensiveTargets.sort((a, b) => {
             const getSupplyPriority = (osid: string): number => {
                 if (!supplyByOsid?.factions) return 2;
-                const controller = (state.political_controllers ?? {})[osid];
+                const controller = (state.political.political_controllers ?? {})[osid];
                 if (!controller || controller === faction) return 2;
                 const facEntry = supplyByOsid.factions.find(f => f.faction_id === controller);
                 if (!facEntry) return 2;
@@ -797,7 +797,7 @@ export function generateCorpsDirectives(
 
         // High defensive_skill commanders prioritize reinforcing sectors with own salients
         if (geometry && geometry.own_salients.length > 0) {
-            const cmdr3 = state.named_officers && state.named_officer_data
+            const cmdr3 = state.military.named_officers && state.military.named_officer_data
                 ? getCorpsCommander(corps.id, state)
                 : null;
             if (cmdr3 && cmdr3.data.defensive_skill >= 4) {
@@ -847,9 +847,9 @@ export function generateCorpsDirectives(
             // Sectors where intel detects enemy offensive preparation or massing
             // get boosted threat weight, attracting more brigades proactively.
             const intelThreatBoost = new Map<string, number>();
-            if (state.sector_intel) {
+            if (state.military.sector_intel) {
                 for (const sec of directiveEligibleSectors) {
-                    const records = state.sector_intel[sec.sector_id];
+                    const records = state.military.sector_intel[sec.sector_id];
                     if (!records) continue;
                     let maxBoost = 0;
                     for (const rec of records) {
@@ -895,7 +895,7 @@ export function generateCorpsDirectives(
                 return strictCompare(a.sector_id, b.sector_id);
             });
             const alreadyMoved = new Set<string>();
-            const homeCache = state.home_distance_cache ?? {};
+            const homeCache = state.military.home_distance_cache ?? {};
             for (const deficit of deficitSectors) {
                 const needed = Math.ceil((sectorDesired.get(deficit.sector_id) ?? 0) * 0.7) - deficit.assigned_brigade_ids.length;
                 if (needed <= 0) continue;
@@ -910,7 +910,7 @@ export function generateCorpsDirectives(
                     const candidates = surplus.assigned_brigade_ids
                         .filter(bid => !alreadyMoved.has(bid))
                         .map(bid => {
-                            const bf = state.formations?.[bid];
+                            const bf = state.military.formations?.[bid];
                             const entrench = bf?.entrenchment_turns ?? 0;
                             const homeDist = homeCache[bid] ?? 0;
                             return { bid, entrench, homeDist };
@@ -938,8 +938,8 @@ export function generateCorpsDirectives(
         // Motorized and mechanized brigades are offensive tools, not line troops.
         // When the corps has a priority sector (offensive target), stage mech/moto
         // from reserves to the priority sector so they're available when ops launch.
-        if (prioritySectorId && state.corps_front_sectors) {
-            const prioritySec = state.corps_front_sectors[prioritySectorId];
+        if (prioritySectorId && state.military.corps_front_sectors) {
+            const prioritySec = state.military.corps_front_sectors[prioritySectorId];
             if (prioritySec && prioritySec.length_edges > 0) {
                 const alreadyReassigned = new Set(
                     sectorReassignmentOrders.map(r => r.brigade_id)
@@ -947,14 +947,14 @@ export function generateCorpsDirectives(
                 const mechStagingOrders: Array<{ brigade_id: string; to_sector_id: string }> = [];
 
                 // Scan ALL sectors of this corps for mech/moto reserves
-                for (const [secId, sec] of Object.entries(state.corps_front_sectors).sort(
+                for (const [secId, sec] of Object.entries(state.military.corps_front_sectors).sort(
                     (a, b) => strictCompare(a[0], b[0])
                 )) {
                     if (sec.corps_id !== corps.id) continue;
                     if (secId === prioritySectorId) continue; // already there
                     for (const bid of sec.reserve_brigade_ids ?? []) {
                         if (alreadyReassigned.has(bid)) continue;
-                        const f = state.formations?.[bid];
+                        const f = state.military.formations?.[bid];
                         if (!f || f.status !== 'active') continue;
                         const priority = getEquipmentOffensivePriority(resolveEquipmentClass(f));
                         if (priority >= 2) { // motorized (2) or mechanized (3)
@@ -1009,8 +1009,8 @@ export function generateCorpsDirectives(
                     .filter((b) => b.location_osid && clusterFriendlyOsids.has(b.location_osid))
                     .map((b) => b.id)
                     .sort((a, b) => {
-                        const fa = state.formations?.[a];
-                        const fb = state.formations?.[b];
+                        const fa = state.military.formations?.[a];
+                        const fb = state.military.formations?.[b];
                         const pa = getEquipmentOffensivePriority(fa ? resolveEquipmentClass(fa) : undefined);
                         const pb = getEquipmentOffensivePriority(fb ? resolveEquipmentClass(fb) : undefined);
                         if (pa !== pb) return pb - pa;
@@ -1049,8 +1049,8 @@ export function generateCorpsDirectives(
                         .filter((b) => b.location_osid && clusterFriendlyOsids.has(b.location_osid))
                         .map((b) => b.id)
                         .sort((a, b) => {
-                            const fa = state.formations?.[a];
-                            const fb = state.formations?.[b];
+                            const fa = state.military.formations?.[a];
+                            const fb = state.military.formations?.[b];
                             const pa = getEquipmentOffensivePriority(fa ? resolveEquipmentClass(fa) : undefined);
                             const pb = getEquipmentOffensivePriority(fb ? resolveEquipmentClass(fb) : undefined);
                             if (pa !== pb) return pb - pa;

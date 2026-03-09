@@ -59,10 +59,10 @@ export function updateHeavyEquipmentState(
     doctrineTempoByFormation?: Record<string, number>
 ): void {
     const turn = state.meta.turn;
-    const formationIds = Object.keys(state.formations ?? {}).sort((a, b) => a.localeCompare(b));
+    const formationIds = Object.keys(state.military.formations ?? {}).sort((a, b) => a.localeCompare(b));
 
     for (const fid of formationIds) {
-        const formation = state.formations[fid];
+        const formation = state.military.formations[fid];
         if (!formation) continue;
         ensureEquipmentState(formation, formation.faction, state);
         const eq = formation.equipment_state!;
@@ -123,7 +123,7 @@ export function updateHeavyEquipmentState(
 export function getFactionEquipmentPressureMultiplier(state: GameState): Record<FactionId, number> {
     const result: Record<FactionId, number> = {};
     for (const faction of state.factions) {
-        const formations = Object.values(state.formations ?? {}).filter((f) => f.faction === faction.id);
+        const formations = Object.values(state.military.formations ?? {}).filter((f) => f.faction === faction.id);
         if (formations.length === 0) {
             result[faction.id] = 1;
             continue;

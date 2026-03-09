@@ -313,7 +313,7 @@ export const useGameStore = create<GameStore>((set) => ({
         queueMicrotask(() => {
           try {
             set({ loadedGameState: state, loadError: null, lastLoadedStateFingerprint: fingerprint });
-            console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
+            console.log(`[gameStore] Loaded save: ${state.label} — ${state.military.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();
           } catch (e) {
             const message = e instanceof Error ? e.message : String(e);

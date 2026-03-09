@@ -57,8 +57,8 @@ export function activateCorpsForTurn(
 ): ActivateCorpsReport {
     const report: ActivateCorpsReport = { corps_activated: 0, corps_ids: [] };
 
-    if (!state.formations || typeof state.formations !== 'object') {
-        (state as GameState & { formations: Record<string, FormationState> }).formations = {};
+    if (!state.military.formations || typeof state.military.formations !== 'object') {
+        (state as GameState & { formations: Record<string, FormationState> }).military.formations = {};
     }
 
     // Sort by id for deterministic activation order
@@ -69,13 +69,13 @@ export function activateCorpsForTurn(
         // Only activate entries whose available_from turn has arrived
         if (c.available_from > currentTurn) continue;
         // Idempotent: skip if already exists
-        if (state.formations[c.id]) continue;
+        if (state.military.formations[c.id]) continue;
 
         // Faction presence check (optional — skip if sidToMun not provided)
         if (sidToMun) {
-            const pc = state.political_controllers ?? {};
+            const pc = state.political.political_controllers ?? {};
             let hasFactionPresence = false;
-            if (state.municipalities?.[c.hq_mun]?.control === 'fragmented') {
+            if (state.political.municipalities?.[c.hq_mun]?.control === 'fragmented') {
                 // Fragmented mun — skip
                 continue;
             }
@@ -108,7 +108,7 @@ export function activateCorpsForTurn(
             ...(hq_sid ? { hq_sid } : {})
             // Corps/army HQ formations are command structures, not map entities.
         };
-        state.formations[c.id] = formation;
+        state.military.formations[c.id] = formation;
         report.corps_activated += 1;
         report.corps_ids.push(c.id);
         anyCreated = true;

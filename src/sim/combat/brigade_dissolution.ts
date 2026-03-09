@@ -38,7 +38,7 @@ export interface DissolutionReport {
 
 export function dissolveCombatIneffectiveBrigades(state: GameState): DissolutionReport {
     const report: DissolutionReport = { dissolved_count: 0, dissolved_brigades: [] };
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const formationIds = Object.keys(formations).sort((a, b) => strictCompare(a, b));
 
     for (const fid of formationIds) {
@@ -59,10 +59,10 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);
 
         // Add personnel to strategic reserve
-        if (state.strategic_reserves && f.faction) {
-            const factionReserve = state.strategic_reserves[f.faction];
+        if (state.military.strategic_reserves && f.faction) {
+            const factionReserve = state.military.strategic_reserves[f.faction];
             if (typeof factionReserve === 'number') {
-                (state.strategic_reserves as Record<string, number>)[f.faction] = factionReserve + personnelToReserve;
+                (state.military.strategic_reserves as Record<string, number>)[f.faction] = factionReserve + personnelToReserve;
             }
         }
 

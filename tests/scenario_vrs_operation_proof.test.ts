@@ -37,7 +37,7 @@ type ProofFinalState = {
 };
 
 function getProgressedOperationIds(state: ProofFinalState): string[] {
-    const corpsCommand = state.corps_command ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
     return Object.keys(corpsCommand)
         .sort((a, b) => a.localeCompare(b))
         .filter((corpsId) => {

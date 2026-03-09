@@ -16,14 +16,14 @@ type SustainabilityReportFile = {
 };
 
 function ensureSustainabilityState(state: GameState): void {
-    if (!state.sustainability_state || typeof state.sustainability_state !== 'object') {
-        state.sustainability_state = {};
+    if (!state.displacement.sustainability_state || typeof state.displacement.sustainability_state !== 'object') {
+        state.displacement.sustainability_state = {};
     }
 }
 
 export function buildSustainabilityReport(state: GameState): SustainabilityReportFile {
     ensureSustainabilityState(state);
-    const sustainability = state.sustainability_state as Record<string, SustainabilityState>;
+    const sustainability = state.displacement.sustainability_state as Record<string, SustainabilityState>;
     const rows = Object.values(sustainability)
         .filter((s) => s && typeof s === 'object' && typeof s.mun_id === 'string')
         .sort((a, b) => a.mun_id.localeCompare(b.mun_id))
@@ -112,7 +112,7 @@ function printList(report: SustainabilityReportFile): void {
 
 function printInspect(state: GameState, munId: string): void {
     ensureSustainabilityState(state);
-    const sustainability = state.sustainability_state as Record<string, SustainabilityState>;
+    const sustainability = state.displacement.sustainability_state as Record<string, SustainabilityState>;
     const sust = sustainability[munId];
 
     if (!sust) {
@@ -132,7 +132,7 @@ function printInspect(state: GameState, munId: string): void {
     process.stdout.write(`  Last updated turn: ${sust.last_updated_turn}\n`);
 
     // Show militia pool if exists
-    const militiaPools = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+    const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
     if (militiaPools && typeof militiaPools === 'object') {
         const pool = militiaPools[munId];
         if (pool && typeof pool === 'object') {
@@ -144,7 +144,7 @@ function printInspect(state: GameState, munId: string): void {
     }
 
     // Show displacement state if exists
-    const displacement = state.displacement_state?.[munId];
+    const displacement = state.displacement.displacement_state?.[munId];
     if (displacement) {
         process.stdout.write(`\nDisplacement state:\n`);
         process.stdout.write(`  Original population: ${displacement.original_population}\n`);

@@ -118,13 +118,13 @@ function hasTimestampLike(text: string): boolean {
 }
 
 function ensureFactionMaps(state: GameState, faction: string): void {
-    if (!state.front_posture || typeof state.front_posture !== 'object') state.front_posture = {};
-    if (!state.front_posture[faction]) state.front_posture[faction] = { assignments: {} };
-    if (!state.front_posture[faction].assignments) state.front_posture[faction].assignments = {};
+    if (!state.military.front_posture || typeof state.military.front_posture !== 'object') state.military.front_posture = {};
+    if (!state.military.front_posture[faction]) state.military.front_posture[faction] = { assignments: {} };
+    if (!state.military.front_posture[faction].assignments) state.military.front_posture[faction].assignments = {};
 
-    if (!state.front_posture_regions || typeof state.front_posture_regions !== 'object') state.front_posture_regions = {};
-    if (!state.front_posture_regions[faction]) state.front_posture_regions[faction] = { assignments: {} };
-    if (!state.front_posture_regions[faction].assignments) state.front_posture_regions[faction].assignments = {};
+    if (!state.military.front_posture_regions || typeof state.military.front_posture_regions !== 'object') state.military.front_posture_regions = {};
+    if (!state.military.front_posture_regions[faction]) state.military.front_posture_regions[faction] = { assignments: {} };
+    if (!state.military.front_posture_regions[faction].assignments) state.military.front_posture_regions[faction].assignments = {};
 }
 
 export async function runPhase5CheckInProcess(
@@ -135,7 +135,7 @@ export async function runPhase5CheckInProcess(
     // Step 1: region posture set
     const state1 = structuredClone(baseState);
     ensureFactionMaps(state1, options.faction);
-    state1.front_posture_regions[options.faction].assignments[options.region_id] = { posture: 'push', weight: options.weight };
+    state1.military.front_posture_regions[options.faction].assignments[options.region_id] = { posture: 'push', weight: options.weight };
 
     const script = { schema: 1 as const, turns: {} as Record<string, any> };
     const { summary: summary1 } = await runScenarioDeterministic(state1, {
@@ -152,7 +152,7 @@ export async function runPhase5CheckInProcess(
     // Step 3: add explicit per-edge override (must not be overwritten)
     const state2 = structuredClone(state1);
     ensureFactionMaps(state2, options.faction);
-    state2.front_posture[options.faction].assignments[options.edge_id] = { edge_id: options.edge_id, posture: 'hold', weight: 0 };
+    state2.military.front_posture[options.faction].assignments[options.edge_id] = { edge_id: options.edge_id, posture: 'hold', weight: 0 };
 
     const { summary: summary2 } = await runScenarioDeterministic(state2, {
         turns: 2,
@@ -170,7 +170,7 @@ export async function runPhase5CheckInProcess(
 
     // Verify override after expansion step on turn 1 by executing a single turn and inspecting nextState.
     const { nextState: afterTurn1 } = await runTurn(state2, { seed: state2.meta.seed, settlementEdges: settlementEdges as any });
-    const got = (afterTurn1.front_posture as any)?.[options.faction]?.assignments?.[options.edge_id];
+    const got = (afterTurn1.military.front_posture as any)?.[options.faction]?.assignments?.[options.edge_id];
     assert.ok(got && typeof got === 'object', 'expected chosen edge to have a posture assignment after turn 1');
     assert.strictEqual(got.posture, 'hold', 'expected explicit per-edge override posture to remain after expansion');
     assert.strictEqual(got.weight, 0, 'expected explicit per-edge override weight to remain after expansion');
@@ -227,13 +227,13 @@ async function main(): Promise<void> {
     // Write temp saves for auditability
     const state1 = structuredClone(state);
     ensureFactionMaps(state1, opts.faction);
-    state1.front_posture_regions[opts.faction].assignments[chosenRegionId] = { posture: 'push', weight: opts.weight };
+    state1.military.front_posture_regions[opts.faction].assignments[chosenRegionId] = { posture: 'push', weight: opts.weight };
     const save1Path = resolve(opts.outdir, 'save_region.json');
     await writeFile(save1Path, serializeState(state1), 'utf8');
 
     const state2 = structuredClone(state1);
     ensureFactionMaps(state2, opts.faction);
-    (state2.front_posture as any)[opts.faction].assignments[chosenEdgeId] = { edge_id: chosenEdgeId, posture: 'hold', weight: 0 };
+    (state2.military.front_posture as any)[opts.faction].assignments[chosenEdgeId] = { edge_id: chosenEdgeId, posture: 'hold', weight: 0 };
     const save2Path = resolve(opts.outdir, 'save_region_plus_override.json');
     await writeFile(save2Path, serializeState(state2), 'utf8');
 

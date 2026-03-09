@@ -37,7 +37,7 @@ function recordFromFactionKeys(
 
 /** Count settlements with settlement_displacement > 0 from final state. */
 function displacementCount(state: { settlement_displacement?: Record<string, number> }): number {
-    const sd = state.settlement_displacement ?? {};
+    const sd = state.displacement.settlement_displacement ?? {};
     let n = 0;
     for (const v of Object.values(sd)) {
         if (typeof v === 'number' && v > 0) n += 1;

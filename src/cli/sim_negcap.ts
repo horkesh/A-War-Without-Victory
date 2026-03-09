@@ -181,7 +181,7 @@ async function runViewMode(opts: ViewOptions): Promise<void> {
             const output: any = {
                 turn: state.meta.turn,
                 negotiation_capital: capitalReport,
-                ledger_tail: state.negotiation_ledger?.slice(-10) ?? []
+                ledger_tail: state.political.negotiation_ledger?.slice(-10) ?? []
             };
             const outPath = opts.outPath ?? resolve('data', 'derived', `negotiation_capital_turn_${state.meta.turn}.json`);
             await mkdir(dirname(outPath), { recursive: true });
@@ -208,7 +208,7 @@ async function runViewMode(opts: ViewOptions): Promise<void> {
             }
 
             // Show ledger tail
-            const ledgerTail = state.negotiation_ledger?.slice(-10) ?? [];
+            const ledgerTail = state.political.negotiation_ledger?.slice(-10) ?? [];
             if (ledgerTail.length > 0) {
                 process.stdout.write(`Recent ledger entries (last 10):\n`);
                 for (const entry of ledgerTail) {

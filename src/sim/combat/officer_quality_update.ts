@@ -79,7 +79,7 @@ export function updateBrigadeOfficerQuality(
         avg_quality_by_faction: {},
     };
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
 
     // Track per-faction totals for average computation
@@ -97,7 +97,7 @@ export function updateBrigadeOfficerQuality(
 
         const faction = f.faction as string;
         // D.3: Read learning rate from war_timeline if available, else hardcoded fallback
-        const timelineConfig = state.war_timeline?.officer_config?.[faction];
+        const timelineConfig = state.military.war_timeline?.officer_config?.[faction];
         const learningRate = timelineConfig?.learning_rate ?? (FACTION_LEARNING_RATE[faction] ?? 1.0);
 
         // Ensure officer_quality is initialized

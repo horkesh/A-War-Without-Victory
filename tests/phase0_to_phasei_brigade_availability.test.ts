@@ -89,7 +89,7 @@ function runToSpawn(state: GameState): { poolAvailable: number; spawned: number 
     ]);
     runPoolPopulation(transitioned, settlements);
     const poolKey = 'TEST_MUN:RBiH';
-    const poolAvailable = transitioned.militia_pools?.[poolKey]?.available ?? 0;
+    const poolAvailable = transitioned.military.militia_pools?.[poolKey]?.available ?? 0;
     const spawnReport = spawnFormationsFromPools(transitioned, {
         batchSize: 1000,
         factionFilter: 'RBiH',
@@ -160,14 +160,14 @@ test('Coordinated directives update alliance state deterministically', () => {
     ];
     applyPhase0Directives(stateA, directives);
     applyPhase0Directives(stateB, directives);
-    assert.deepStrictEqual(stateA.phase0_relationships, stateB.phase0_relationships);
-    assert.ok((stateA.phase0_relationships?.rbih_hrhb ?? 0) > 0.5);
-    assert.ok((stateA.phase0_relationships?.rbih_rs ?? 0) < -0.2);
+    assert.deepStrictEqual(stateA.political.phase0_relationships, stateB.political.phase0_relationships);
+    assert.ok((stateA.political.phase0_relationships?.rbih_hrhb ?? 0) > 0.5);
+    assert.ok((stateA.political.phase0_relationships?.rbih_rs ?? 0) < -0.2);
 });
 
 test('Phase 0 to Peace phase handoff seeds uninvested municipalities with formula values', () => {
     const state = makePhase0State();
-    state.municipalities = {
+    state.political.municipalities = {
         TEST_MUN: {
             stability_score: 50,
             control: 'contested',
@@ -180,7 +180,7 @@ test('Phase 0 to Peace phase handoff seeds uninvested municipalities with formul
         }
     };
     // Handoff reads direct municipality keys when available.
-    state.political_controllers = {
+    state.political.political_controllers = {
         TEST_MUN: 'RS',
         TEST_MUN_2: 'RBiH'
     };
@@ -189,8 +189,8 @@ test('Phase 0 to Peace phase handoff seeds uninvested municipalities with formul
     }
 
     const next = runPhase0TurnAndAdvance(state, state.meta.seed ?? 'phase0-iv1-seed', 'RBiH');
-    const opA = next.municipalities?.TEST_MUN?.organizational_penetration;
-    const opB = next.municipalities?.TEST_MUN_2?.organizational_penetration;
+    const opA = next.political.municipalities?.TEST_MUN?.organizational_penetration;
+    const opB = next.political.municipalities?.TEST_MUN_2?.organizational_penetration;
     assert.ok(opA && opB);
     assert.ok((opA.sds_penetration ?? 0) > (opA.sda_penetration ?? 0));
     assert.ok((opB.sda_penetration ?? 0) > (opB.sds_penetration ?? 0));

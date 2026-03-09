@@ -78,8 +78,8 @@ test('migration canonicalizes formation faction IDs and preserves army labels as
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
 
-    assert.strictEqual(migrated.formations['F1'].faction, 'RBiH');
-    assert.strictEqual(migrated.formations['F1'].force_label, 'ARBiH');
+    assert.strictEqual(migrated.military.formations['F1'].faction, 'RBiH');
+    assert.strictEqual(migrated.military.formations['F1'].force_label, 'ARBiH');
 });
 
 test('migration sets default force_label when faction is already political and force_label missing', () => {
@@ -112,8 +112,8 @@ test('migration sets default force_label when faction is already political and f
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
 
-    assert.strictEqual(migrated.formations['F1'].faction, 'RS');
-    assert.strictEqual(migrated.formations['F1'].force_label, 'VRS');
+    assert.strictEqual(migrated.military.formations['F1'].faction, 'RS');
+    assert.strictEqual(migrated.military.formations['F1'].force_label, 'VRS');
 });
 
 test('migration canonicalizes militia pool faction IDs', () => {
@@ -146,7 +146,7 @@ test('migration canonicalizes militia pool faction IDs', () => {
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
 
-    assert.strictEqual(migrated.militia_pools['MUN1'].faction, 'RBiH');
+    assert.strictEqual(migrated.military.militia_pools['MUN1'].faction, 'RBiH');
 });
 
 test('migration canonicalizes negotiation ledger faction_id', () => {
@@ -172,7 +172,7 @@ test('migration canonicalizes negotiation ledger faction_id', () => {
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
 
-    assert.strictEqual(migrated.negotiation_ledger![0].faction_id, 'RBiH');
+    assert.strictEqual(migrated.political.negotiation_ledger![0].faction_id, 'RBiH');
 });
 
 test('validation rejects ARBiH/VRS/HVO as faction IDs (before migration)', () => {

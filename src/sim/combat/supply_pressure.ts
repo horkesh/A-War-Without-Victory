@@ -43,7 +43,7 @@ export function updateSupplyPressure(
 
     // Use OSID front edges when available (more accurate in OSID mode);
     // fall back to settlement-level front edges otherwise.
-    const osidFrontEdges = state.war_front_edges_osid;
+    const osidFrontEdges = state.military.war_front_edges_osid;
     const frontEdges = osidFrontEdges && osidFrontEdges.length > 0
         ? osidFrontEdges
         : computeFrontEdges(state, settlementEdges);
@@ -81,10 +81,10 @@ export function updateSupplyPressure(
         }
     }
 
-    if (!state.war_supply_pressure) {
-        (state as GameState & { war_supply_pressure: Record<FactionId, number> }).war_supply_pressure = {};
+    if (!state.political.war_supply_pressure) {
+        (state as GameState & { war_supply_pressure: Record<FactionId, number> }).political.war_supply_pressure = {};
     }
-    const pressure = state.war_supply_pressure!;
+    const pressure = state.political.war_supply_pressure!;
 
     for (const fid of factionIds) {
         const overextension = (frontEdgeCountByFaction.get(fid) ?? 0) * PRESSURE_PER_FRONT_EDGE;

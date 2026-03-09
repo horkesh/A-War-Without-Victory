@@ -97,16 +97,16 @@ export function applyInvestment(
         return { ok: false, reason: (spendResult as { reason: string }).reason };
     }
 
-    if (!state.municipalities) {
-        state.municipalities = {};
+    if (!state.political.municipalities) {
+        state.political.municipalities = {};
     }
 
     const increment = 15; // deterministic step per investment (0–100 scale)
     for (const munId of munIds) {
-        let mun = state.municipalities[munId];
+        let mun = state.political.municipalities[munId];
         if (!mun) {
             mun = {};
-            state.municipalities[munId] = mun;
+            state.political.municipalities[munId] = mun;
         }
         if (!mun.organizational_penetration) {
             mun.organizational_penetration = {};

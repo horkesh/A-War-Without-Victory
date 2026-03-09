@@ -64,7 +64,7 @@ function emptyReport(): ParamilitarySweepReport {
 /** Build a set of OSIDs that have an enemy defender, for O(1) lookup. */
 function buildDefendedOsids(state: GameState): Set<string> {
     const defended = new Set<string>();
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (!f || f.status !== 'active' || f.kind === 'paramilitary') continue;
@@ -77,7 +77,7 @@ function buildDefendedOsids(state: GameState): Set<string> {
 function isDefendedAgainst(defendedOsids: Set<string>, state: GameState, osid: string, attackerFaction: FactionId): boolean {
     if (!defendedOsids.has(osid)) return false;
     // Confirm at least one non-attacker active formation is there
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (!f || f.status !== 'active' || f.kind === 'paramilitary') continue;
@@ -124,7 +124,7 @@ export function detectParamilitaryTargets(
 
     // Existing paramilitary targets — avoid duplicates
     const existingTargets = new Set<string>();
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (f?.kind === 'paramilitary' && f.paramilitary_target) {
@@ -197,7 +197,7 @@ function spawnParamilitary(
     report: ParamilitarySweepReport
 ): void {
     const fid = makeParamilitaryId(faction, turn, index);
-    const formations = state.formations ??= {};
+    const formations = state.military.formations ??= {};
 
     formations[fid] = {
         id: fid,
@@ -236,7 +236,7 @@ export function advanceParamilitaries(
     reverseMap: OperationalToCanonicalReverseMap
 ): ParamilitarySweepReport {
     const report = emptyReport();
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
     const defendedOsids = buildDefendedOsids(state);
 
@@ -264,18 +264,18 @@ export function advanceParamilitaries(
         // Defended — paramilitary takes heavy casualties and retreats
         if (isDefendedAgainst(defendedOsids, state, targetOsid, f.faction)) {
             const casualties = Math.ceil(f.personnel! * PARAMILITARY_CASUALTY_RATE * 3);
-            if (state.casualty_ledger) {
-                recordBattleCasualties(state.casualty_ledger, f.faction, fid, splitCasualties(casualties));
+            if (state.military.casualty_ledger) {
+                recordBattleCasualties(state.military.casualty_ledger, f.faction, fid, splitCasualties(casualties));
             }
             dissolveParamilitary(state, fid, report);
             continue;
         }
 
         // Capture: flip control
-        const pc = state.political_controllers ??= {};
+        const pc = state.political.political_controllers ??= {};
         pc[targetOsid] = f.faction;
 
-        (state.control_events ??= []).push({
+        (state.political.control_events ??= []).push({
             turn,
             settlement_id: targetOsid,
             mechanism: 'combat' as const,
@@ -285,14 +285,14 @@ export function advanceParamilitaries(
 
         // Paramilitary casualties (suffered)
         const selfCas = Math.ceil((f.personnel ?? PARAMILITARY_UNIT_SIZE) * PARAMILITARY_CASUALTY_RATE);
-        if (state.casualty_ledger) {
-            recordBattleCasualties(state.casualty_ledger, f.faction, fid, splitCasualties(selfCas));
+        if (state.military.casualty_ledger) {
+            recordBattleCasualties(state.military.casualty_ledger, f.faction, fid, splitCasualties(selfCas));
         }
 
         // Civilian casualties inflicted (war crimes)
         const civCas = Math.ceil(PARAMILITARY_TARGET_AVG_POPULATION * PARAMILITARY_CIVILIAN_CASUALTY_RATE);
         if (currentController) {
-            const cc = state.civilian_casualties ??= {} as typeof state.civilian_casualties & Record<string, { killed?: number; fled_abroad?: number }>;
+            const cc = state.displacement.civilian_casualties ??= {} as typeof state.civilian_casualties & Record<string, { killed?: number; fled_abroad?: number }>;
             const civFaction = cc![currentController] ??= { killed: 0, fled_abroad: 0 };
             civFaction.killed = (civFaction.killed ?? 0) + civCas;
         }
@@ -313,7 +313,7 @@ export function advanceParamilitaries(
 
 /** Remove a paramilitary formation from state. */
 function dissolveParamilitary(state: GameState, fid: FormationId, report: ParamilitarySweepReport): void {
-    const f = (state.formations ?? {})[fid];
+    const f = (state.military.formations ?? {})[fid];
     if (f) {
         f.status = 'inactive';
         f.lifecycle_status = 'disbanded';

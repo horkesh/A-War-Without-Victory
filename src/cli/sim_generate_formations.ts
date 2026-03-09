@@ -51,12 +51,12 @@ type GenerationReportFile = {
 };
 
 function ensureFormations(state: GameState): void {
-    if (!state.formations || typeof state.formations !== 'object') state.formations = {};
+    if (!state.military.formations || typeof state.military.formations !== 'object') state.military.formations = {};
 }
 
 function ensureMilitiaPools(state: GameState): void {
-    if (!state.militia_pools || typeof state.militia_pools !== 'object') {
-        state.militia_pools = {};
+    if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') {
+        state.military.militia_pools = {};
     }
 }
 
@@ -234,7 +234,7 @@ export function generateFormationsFromPools(
     }
 
     const per_municipality: GenerationReportFile['per_municipality'] = [];
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
     for (const key of Array.from(byKey.keys()).sort()) {
         const [mun_id, faction] = key.split(':');
         const created = byKey.get(key)!;

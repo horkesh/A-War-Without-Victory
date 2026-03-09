@@ -118,9 +118,9 @@ export function computeLocalFrontDefensivePower(
  * Deterministic: processes segments in sorted order by front_id.
  */
 export function buildLocalFronts(state: GameState): Record<string, LocalFront> {
-    const segments = state.assignable_front_segments;
-    const assignments = state.brigade_front_assignment;
-    const formations = state.formations ?? {};
+    const segments = state.military.assignable_front_segments;
+    const assignments = state.military.brigade_front_assignment;
+    const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
 
     if (!segments || !assignments) return {};
@@ -184,14 +184,14 @@ export function getLocalFrontDensityModifier(
     formation: FormationState
 ): number {
     // Path 1: player-assigned front (legacy)
-    const frontId = state.brigade_front_assignment?.[formation.id];
+    const frontId = state.military.brigade_front_assignment?.[formation.id];
     if (frontId) {
-        const front = state.local_fronts?.[frontId];
+        const front = state.military.local_fronts?.[frontId];
         if (front) return frontDensityModifier(front.assigned_brigade_ids.length, front.coverage_length);
     }
 
     // Path 2: corps sector (bot/sim path)
-    const sectors = state.corps_front_sectors;
+    const sectors = state.military.corps_front_sectors;
     if (sectors) {
         for (const sid of Object.keys(sectors).sort(strictCompare)) {
             const sector = sectors[sid]!;

@@ -100,7 +100,7 @@ test('validateGameStateShape returns ok for GameState with only some War phase f
 
 test('validateGameStateShape rejects war_supply_pressure when value out of [0, 100]', () => {
     const state = warPhaseGameStateFixture();
-    state.war_supply_pressure!['RBiH'] = 150;
+    state.political.war_supply_pressure!['RBiH'] = 150;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_supply_pressure')));
@@ -108,7 +108,7 @@ test('validateGameStateShape rejects war_supply_pressure when value out of [0, 1
 
 test('validateGameStateShape rejects war_exhaustion when value negative', () => {
     const state = warPhaseGameStateFixture();
-    state.war_exhaustion!['RS'] = -1;
+    state.political.war_exhaustion!['RS'] = -1;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_exhaustion')));
@@ -119,9 +119,9 @@ test('War phase state serialization round-trip preserves War phase fields', () =
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(hydrated.war_supply_pressure, { RBiH: 25, RS: 30, HRHB: 15 });
-    assert.deepStrictEqual(hydrated.war_exhaustion, { RBiH: 12, RS: 18, HRHB: 10 });
-    assert.deepStrictEqual(hydrated.war_exhaustion_local, { 'SID_001': 2, 'SID_002': 3 });
+    assert.deepStrictEqual(hydrated.political.war_supply_pressure, { RBiH: 25, RS: 30, HRHB: 15 });
+    assert.deepStrictEqual(hydrated.political.war_exhaustion, { RBiH: 12, RS: 18, HRHB: 10 });
+    assert.deepStrictEqual(hydrated.political.war_exhaustion_local, { 'SID_001': 2, 'SID_002': 3 });
 });
 
 test('War phase state serialization reaches deterministic fixed-point after migration defaults', () => {

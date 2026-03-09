@@ -94,18 +94,18 @@ export function OpsPlanningModal() {
     // Build formation lookup for brigade stats
     const formationById = useMemo(() => {
         const map = new Map<string, FormationView>();
-        for (const f of loadedGameState?.formations ?? []) {
+        for (const f of loadedGameState?.military?.formations ?? []) {
             map.set(f.id, f);
         }
         return map;
-    }, [loadedGameState?.formations]);
+    }, [loadedGameState?.military?.formations]);
 
     const playerFaction = loadedGameState?.player_faction ?? '';
 
     // Build enemy strength per OSID for force-ratio display
     const enemyStrengthByOsid = useMemo(() => {
         const map = new Map<string, { brigadeCount: number; totalPersonnel: number; tanks: number; artillery: number }>();
-        for (const f of loadedGameState?.formations ?? []) {
+        for (const f of loadedGameState?.military?.formations ?? []) {
             if (!f.location_osid || f.faction === playerFaction || f.status !== 'active') continue;
             const existing = map.get(f.location_osid) ?? { brigadeCount: 0, totalPersonnel: 0, tanks: 0, artillery: 0 };
             existing.brigadeCount++;
@@ -115,7 +115,7 @@ export function OpsPlanningModal() {
             map.set(f.location_osid, existing);
         }
         return map;
-    }, [loadedGameState?.formations, playerFaction]);
+    }, [loadedGameState?.military?.formations, playerFaction]);
 
     // Initialize axes when sector changes
     useEffect(() => {

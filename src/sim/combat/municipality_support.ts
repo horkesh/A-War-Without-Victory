@@ -25,7 +25,7 @@ export function getActiveMunicipalitySupport(
     currentTurn: number
 ): MunicipalitySupportOrder | null {
     if (!faction) return null;
-    const order = state.municipality_support_orders?.[faction];
+    const order = state.military.municipality_support_orders?.[faction];
     if (!order) return null;
     if (order.faction !== faction) return null;
     if (order.mun_id !== munId) return null;

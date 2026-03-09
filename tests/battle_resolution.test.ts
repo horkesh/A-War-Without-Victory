@@ -129,13 +129,13 @@ test.skip('battle resolution: attacker wins on open terrain with superior force'
     const munMap = new Map([['S1', 'test_mun'], ['S2', 'test_mun'], ['S3', 'test_mun']]);
 
     const report = resolveBattleOrders(state, edges, terrain, munMap);
-    if (report.battles_fought !== 1) console.error('BATTLE FAILED:', JSON.stringify(report, null, 2), '\nSTATE:', JSON.stringify(state.formations, null, 2));
+    if (report.battles_fought !== 1) console.error('BATTLE FAILED:', JSON.stringify(report, null, 2), '\nSTATE:', JSON.stringify(state.military.formations, null, 2));
 
     assert.strictEqual(report.battles_fought, 1);
     assert.strictEqual(report.flips_applied, 1);
     assert.strictEqual(report.battles[0].outcome === 'attacker_victory' || report.battles[0].outcome === 'pyrrhic_victory', true);
     assert.strictEqual(report.battles[0].settlement_flipped, true);
-    assert.strictEqual(state.political_controllers!['S2'], 'RS');
+    assert.strictEqual(state.political.political_controllers!['S2'], 'RS');
 
     // Both sides took casualties
     assert.ok(report.total_attacker_casualties.killed + report.total_attacker_casualties.wounded > 0);
@@ -248,14 +248,14 @@ test.skip('battle resolution: casualty ledger tracks cumulative losses', () => {
     resolveBattleOrders(state, edges, terrain, munMap);
 
     // Casualty ledger should exist and have entries
-    assert.ok(state.casualty_ledger);
-    const rsTotal = getFactionTotalCasualties(state.casualty_ledger!, 'RS');
-    const rbihTotal = getFactionTotalCasualties(state.casualty_ledger!, 'RBiH');
+    assert.ok(state.military.casualty_ledger);
+    const rsTotal = getFactionTotalCasualties(state.military.casualty_ledger!, 'RS');
+    const rbihTotal = getFactionTotalCasualties(state.military.casualty_ledger!, 'RBiH');
     assert.ok(rsTotal > 0, `RS should have casualties, got ${rsTotal}`);
     assert.ok(rbihTotal > 0, `RBiH should have casualties, got ${rbihTotal}`);
 
     // Check per-formation tracking
-    const rsLedger = state.casualty_ledger!['RS'];
+    const rsLedger = state.military.casualty_ledger!['RS'];
     assert.ok(rsLedger.per_formation['F_RS_0001']);
     assert.ok(rsLedger.per_formation['F_RS_0001'].killed >= 0);
 });
@@ -292,8 +292,8 @@ test.skip('battle resolution: equipment losses reduce brigade composition', () =
     resolveBattleOrders(state, edges, makeTerrain({}), new Map([['S1', 'x'], ['S2', 'x']]));
 
     // After battle, equipment should be reduced or same (tanks may be lost)
-    const aTanks = state.formations['F_RS_0001'].composition!.tanks;
-    const dTanks = state.formations['F_RBiH_0001'].composition!.tanks;
+    const aTanks = state.military.formations['F_RS_0001'].composition!.tanks;
+    const dTanks = state.military.formations['F_RBiH_0001'].composition!.tanks;
     assert.ok(aTanks <= startAttackerTanks, `Attacker tanks should not increase: ${aTanks}`);
     assert.ok(dTanks <= startDefenderTanks, `Defender tanks should not increase: ${dTanks}`);
 });
@@ -313,7 +313,7 @@ test.skip('battle resolution: undefended settlement falls with minimal casualtie
 
     assert.strictEqual(report.battles_fought, 1);
     assert.strictEqual(report.flips_applied, 1);
-    assert.strictEqual(state.political_controllers!['S2'], 'RS');
+    assert.strictEqual(state.political.political_controllers!['S2'], 'RS');
     // Minimal attacker casualties for undefended
     assert.ok(report.total_attacker_casualties.killed + report.total_attacker_casualties.wounded <= 5);
     // Rear-cleanup / undefended: defender side still gets tracked casualties (militia/rear security)
@@ -359,7 +359,7 @@ test.skip('battle resolution: defender at or below MIN_COMBAT_PERSONNEL has non-
     const defenderCas = report.total_defender_casualties;
     const reportedDefenderLoss = defenderCas.killed + defenderCas.wounded + defenderCas.missing_captured;
     assert.ok(reportedDefenderLoss > 0, `reported defender casualties must be non-zero when defender present, got ${reportedDefenderLoss}`);
-    const defenderFormation = state.formations!['F_RBiH_0001'];
+    const defenderFormation = state.military.formations!['F_RBiH_0001'];
     assert.ok(
         (defenderFormation.personnel ?? 0) >= MIN_COMBAT_PERSONNEL,
         `defender formation must remain at or above MIN_COMBAT_PERSONNEL (${MIN_COMBAT_PERSONNEL}), got ${defenderFormation.personnel}`

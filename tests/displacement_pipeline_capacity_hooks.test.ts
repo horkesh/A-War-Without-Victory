@@ -61,7 +61,7 @@ test('buildDisplacementCapacityReport: deterministic and no control flips', () =
     assert.ok(report.municipalities_affected.includes('MUN_A'));
     assert.ok(report.settlements_affected.includes('S1') && report.settlements_affected.includes('S2'));
     assert.strictEqual(report.municipality_factors['MUN_A'], 0.7);
-    assert.deepStrictEqual(state.political_controllers, { S1: 'RBiH', S2: 'RS' });
+    assert.deepStrictEqual(state.political.political_controllers, { S1: 'RBiH', S2: 'RS' });
 });
 
 test('hooks return 1 when phase !== war', () => {

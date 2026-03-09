@@ -174,10 +174,10 @@ export function updateEnclaveResilience(
 ): EnclaveResilienceReport {
     const report: EnclaveResilienceReport = { enclaves_updated: 0, by_enclave: {} };
 
-    if (!state.enclave_resilience) {
-        (state as GameState & { enclave_resilience: Record<string, number | EnclaveResilienceEntry> }).enclave_resilience = {};
+    if (!state.political.enclave_resilience) {
+        (state as GameState & { enclave_resilience: Record<string, number | EnclaveResilienceEntry> }).political.enclave_resilience = {};
     }
-    const resilience = state.enclave_resilience!;
+    const resilience = state.political.enclave_resilience!;
 
     const sortedEnclaves = [...ENCLAVE_DEFINITIONS].sort((a, b) => strictCompare(a.id, b.id));
 
@@ -241,7 +241,7 @@ export function updateEnclaveResilience(
  * Used in attack_resolution_osid.ts to boost defender power.
  */
 export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
-    const resilience = state.enclave_resilience;
+    const resilience = state.political.enclave_resilience;
     if (!resilience) return 1.0;
 
     for (const enclave of ENCLAVE_DEFINITIONS) {
@@ -261,7 +261,7 @@ export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
  */
 export function getEnclaveCohesionRecovery(state: GameState, osid: string | undefined): number {
     if (!osid) return 0;
-    const resilience = state.enclave_resilience;
+    const resilience = state.political.enclave_resilience;
     if (!resilience) return 0;
 
     for (const enclave of ENCLAVE_DEFINITIONS) {
@@ -279,7 +279,7 @@ export function getEnclaveCohesionRecovery(state: GameState, osid: string | unde
  * Only RBiH has enclaves → only RBiH benefits.
  */
 export function getMaxEnclaveResilienceForFaction(state: GameState, factionId: FactionId): number {
-    const resilience = state.enclave_resilience;
+    const resilience = state.political.enclave_resilience;
     if (!resilience) return 0;
 
     let max = 0;

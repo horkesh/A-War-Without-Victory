@@ -27,8 +27,8 @@ test('syncFrontSegments is deterministic and persists inactive segments', () => 
     // Turn 1: create + activate
     const derived1 = computeFrontEdges(state, edges);
     syncFrontSegments(state, derived1);
-    assert.ok(state.front_segments['s1__s2'], 'segment should be created');
-    assert.deepStrictEqual(state.front_segments['s1__s2'], {
+    assert.ok(state.military.front_segments['s1__s2'], 'segment should be created');
+    assert.deepStrictEqual(state.military.front_segments['s1__s2'], {
         edge_id: 's1__s2',
         active: true,
         created_turn: 1,
@@ -44,13 +44,13 @@ test('syncFrontSegments is deterministic and persists inactive segments', () => 
     state.meta.turn = 2;
     const derived2 = computeFrontEdges(state, edges);
     syncFrontSegments(state, derived2);
-    assert.strictEqual(state.front_segments['s1__s2'].since_turn, 1);
-    assert.strictEqual(state.front_segments['s1__s2'].last_active_turn, 2);
-    assert.strictEqual(state.front_segments['s1__s2'].active, true);
-    assert.strictEqual(state.front_segments['s1__s2'].active_streak, 2);
-    assert.strictEqual(state.front_segments['s1__s2'].max_active_streak, 2);
-    assert.strictEqual(state.front_segments['s1__s2'].friction, 2);
-    assert.strictEqual(state.front_segments['s1__s2'].max_friction, 2);
+    assert.strictEqual(state.military.front_segments['s1__s2'].since_turn, 1);
+    assert.strictEqual(state.military.front_segments['s1__s2'].last_active_turn, 2);
+    assert.strictEqual(state.military.front_segments['s1__s2'].active, true);
+    assert.strictEqual(state.military.front_segments['s1__s2'].active_streak, 2);
+    assert.strictEqual(state.military.front_segments['s1__s2'].max_active_streak, 2);
+    assert.strictEqual(state.military.front_segments['s1__s2'].friction, 2);
+    assert.strictEqual(state.military.front_segments['s1__s2'].max_friction, 2);
 
     // Turn 3: change control so edge is not part of derived fronts (neutral side -> dropped)
     state.meta.turn = 3;
@@ -58,22 +58,22 @@ test('syncFrontSegments is deterministic and persists inactive segments', () => 
     const derived3 = computeFrontEdges(state, edges);
     assert.strictEqual(derived3.length, 0, 'edge should not be a front edge when one side is neutral');
     syncFrontSegments(state, derived3);
-    assert.strictEqual(state.front_segments['s1__s2'].active, false, 'segment should be retained but inactive');
-    assert.strictEqual(state.front_segments['s1__s2'].last_active_turn, 2, 'last_active_turn should not change when inactive');
-    assert.strictEqual(state.front_segments['s1__s2'].active_streak, 0, 'inactive segments should have active_streak=0');
-    assert.strictEqual(state.front_segments['s1__s2'].max_active_streak, 2, 'max_active_streak should be retained when inactive');
-    assert.strictEqual(state.front_segments['s1__s2'].friction, 1, 'inactive segments should decay friction by 1');
-    assert.strictEqual(state.front_segments['s1__s2'].max_friction, 2, 'max_friction should be retained when inactive');
+    assert.strictEqual(state.military.front_segments['s1__s2'].active, false, 'segment should be retained but inactive');
+    assert.strictEqual(state.military.front_segments['s1__s2'].last_active_turn, 2, 'last_active_turn should not change when inactive');
+    assert.strictEqual(state.military.front_segments['s1__s2'].active_streak, 0, 'inactive segments should have active_streak=0');
+    assert.strictEqual(state.military.front_segments['s1__s2'].max_active_streak, 2, 'max_active_streak should be retained when inactive');
+    assert.strictEqual(state.military.front_segments['s1__s2'].friction, 1, 'inactive segments should decay friction by 1');
+    assert.strictEqual(state.military.front_segments['s1__s2'].max_friction, 2, 'max_friction should be retained when inactive');
 
     // Turn 4: reactivate => active_streak resets, max retained
     state.meta.turn = 4;
     state.factions[1].areasOfResponsibility = ['s2']; // s2 becomes controlled again
     const derived4 = computeFrontEdges(state, edges);
     syncFrontSegments(state, derived4);
-    assert.strictEqual(state.front_segments['s1__s2'].active, true, 'segment should reactivate');
-    assert.strictEqual(state.front_segments['s1__s2'].active_streak, 1, 'reactivation should reset active_streak');
-    assert.strictEqual(state.front_segments['s1__s2'].max_active_streak, 2, 'max_active_streak should be preserved');
-    assert.strictEqual(state.front_segments['s1__s2'].friction, 2, 'reactivation should increment friction again');
-    assert.strictEqual(state.front_segments['s1__s2'].max_friction, 2, 'max_friction should be preserved');
+    assert.strictEqual(state.military.front_segments['s1__s2'].active, true, 'segment should reactivate');
+    assert.strictEqual(state.military.front_segments['s1__s2'].active_streak, 1, 'reactivation should reset active_streak');
+    assert.strictEqual(state.military.front_segments['s1__s2'].max_active_streak, 2, 'max_active_streak should be preserved');
+    assert.strictEqual(state.military.front_segments['s1__s2'].friction, 2, 'reactivation should increment friction again');
+    assert.strictEqual(state.military.front_segments['s1__s2'].max_friction, 2, 'max_friction should be preserved');
 });
 

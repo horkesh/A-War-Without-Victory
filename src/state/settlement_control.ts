@@ -24,8 +24,8 @@ export function getSettlementControlStatus(
     policy: AorFallbackPolicy = 'only_when_missing_controller_field'
 ): ControlStatus {
     const controller =
-        state.political_controllers && settlementId in state.political_controllers
-            ? state.political_controllers[settlementId]
+        state.political.political_controllers && settlementId in state.political.political_controllers
+            ? state.political.political_controllers[settlementId]
             : undefined;
 
     const controllerFieldMissing = controller === undefined;
@@ -73,7 +73,7 @@ export function getPoliticalControllerOSID(
     osid: string,
     operationalToCanonical?: Map<string, string[]>
 ): ControlSide | null {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const direct = pc[osid];
     if (direct !== undefined && direct !== null) return direct as ControlSide;
 

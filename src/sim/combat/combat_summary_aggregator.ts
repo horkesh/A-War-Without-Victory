@@ -16,7 +16,7 @@ import { strictCompare } from '../../state/validateGameState.js';
  * - Army HQ: aggregates all brigades in the same faction
  */
 export function computeCombatSummaries(state: GameState): void {
-    const formations = state.formations;
+    const formations = state.military.formations;
     if (!formations) return;
 
     const sortedIds = Object.keys(formations).sort(strictCompare);

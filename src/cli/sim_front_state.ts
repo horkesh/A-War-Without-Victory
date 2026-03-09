@@ -59,7 +59,7 @@ async function main(): Promise<void> {
 
     const turn = state.meta.turn;
 
-    const segmentsRecord = state.front_segments ?? {};
+    const segmentsRecord = state.military.front_segments ?? {};
     const keysSorted = Object.keys(segmentsRecord).sort();
 
     let totalSegments = 0;

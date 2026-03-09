@@ -106,11 +106,11 @@ describe('applyWaveFlip', () => {
         expect(result.flipped).toContain('S2');
 
         // S1 should have holdout state
-        expect(state.settlement_holdouts?.['S1']?.holdout).toBe(true);
-        expect(state.settlement_holdouts?.['S1']?.holdout_faction).toBe('RBiH');
-        expect(state.settlement_holdouts?.['S1']?.occupying_faction).toBe('RS');
+        expect(state.military.settlement_holdouts?.['S1']?.holdout).toBe(true);
+        expect(state.military.settlement_holdouts?.['S1']?.holdout_faction).toBe('RBiH');
+        expect(state.military.settlement_holdouts?.['S1']?.occupying_faction).toBe('RS');
         // Holdouts keep prior control until military cleanup/surrender resolves them.
-        expect(state.political_controllers?.['S1']).toBe('RBiH');
+        expect(state.political.political_controllers?.['S1']).toBe('RBiH');
     });
 
     it('skips settlements already controlled by new controller', () => {
@@ -183,10 +183,10 @@ describe('applyWaveFlip', () => {
         expect(resultNoScale.holdouts).toContain('S2');
         expect(resultWithScale.holdouts).toContain('S1');
         expect(resultWithScale.holdouts).toContain('S2');
-        const res1 = state.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
-        const res2 = state.settlement_holdouts?.['S2']?.holdout_resistance ?? 0;
-        const res1Scaled = state2.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
-        const res2Scaled = state2.settlement_holdouts?.['S2']?.holdout_resistance ?? 0;
+        const res1 = state.military.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
+        const res2 = state.military.settlement_holdouts?.['S2']?.holdout_resistance ?? 0;
+        const res1Scaled = state2.military.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
+        const res2Scaled = state2.military.settlement_holdouts?.['S2']?.holdout_resistance ?? 0;
         expect(res1Scaled).toBeGreaterThan(res1);
         expect(res2Scaled).toBeGreaterThan(res2);
         expect(res2Scaled).toBeGreaterThan(res1Scaled);
@@ -223,8 +223,8 @@ describe('applyWaveFlip', () => {
         applyWaveFlip(baseState, 'zvornik', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
         applyWaveFlip(boostedState, 'zvornik', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
 
-        const baseResistance = baseState.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
-        const boostedResistance = boostedState.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
+        const baseResistance = baseState.military.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
+        const boostedResistance = boostedState.military.settlement_holdouts?.['S1']?.holdout_resistance ?? 0;
         expect(boostedResistance).toBeGreaterThan(baseResistance);
     });
 });
@@ -277,7 +277,7 @@ describe('processHoldoutCleanup', () => {
         const events = processHoldoutCleanup(state, 11, edges, settlements);
 
         // Holdout should be cleared (brigade has strength 800*0.6=480 > 30*50/100=15)
-        expect(state.settlement_holdouts?.['S1']).toBeUndefined();
+        expect(state.military.settlement_holdouts?.['S1']).toBeUndefined();
         expect(events.length).toBe(1);
         expect(events[0].mechanism).toBe('holdout_cleared');
     });
@@ -308,7 +308,7 @@ describe('processHoldoutCleanup', () => {
 
         const events = processHoldoutCleanup(state, 11, edges, settlements);
 
-        expect(state.settlement_holdouts?.['S1']).toBeUndefined();
+        expect(state.military.settlement_holdouts?.['S1']).toBeUndefined();
         expect(events.length).toBe(1);
         expect(events[0].mechanism).toBe('holdout_surrendered');
     });
@@ -340,7 +340,7 @@ describe('processHoldoutCleanup', () => {
         processHoldoutCleanup(state, 11, edges, settlements);
 
         // Holdout faction (RBiH) still has S2 adjacent → supply exists → isolation reset
-        const holdout = state.settlement_holdouts?.['S1'];
+        const holdout = state.military.settlement_holdouts?.['S1'];
         expect(holdout?.isolated_turns).toBe(0);
         // Holdout still exists (no brigade to clear it)
         expect(holdout?.holdout).toBe(true);

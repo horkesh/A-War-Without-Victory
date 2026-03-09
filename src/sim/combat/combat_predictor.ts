@@ -158,7 +158,7 @@ export function predictCombatOutcome(
     slopeByOsid?: Record<string, number> | null,
     ethnicComposition?: OsidEthnicComposition | null
 ): CombatPrediction | null {
-    const attacker = state.formations?.[attackerId];
+    const attacker = state.military.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return null;
 
     const attackerLoc = attacker.location_osid;
@@ -171,11 +171,11 @@ export function predictCombatOutcome(
 
     const allAttackerIds = [attackerId, ...(additionalAttackers ?? [])];
     const attackerFormations = allAttackerIds
-        .map(id => state.formations?.[id])
+        .map(id => state.military.formations?.[id])
         .filter((f): f is FormationState => f != null && f.status === 'active');
     if (attackerFormations.length === 0) return null;
 
-    const defenderFormations = (Object.values(state.formations ?? {}) as FormationState[])
+    const defenderFormations = (Object.values(state.military.formations ?? {}) as FormationState[])
         .filter(f => f.status === 'active' && f.location_osid === targetOsid && f.faction !== attackerFaction)
         .sort((a, b) => strictCompare(a.id, b.id));
 
@@ -212,7 +212,7 @@ export function predictCombatOutcome(
         const sector = findSectorForEnemyOsid(state, targetOsid);
         const sectorBrigades = sector
             ? sector.assigned_brigade_ids
-                .map(id => state.formations?.[id])
+                .map(id => state.military.formations?.[id])
                 .filter((f): f is FormationState => f != null && f.status === 'active')
             : [];
         if (sectorBrigades.length > 0) {
@@ -314,7 +314,7 @@ export function predictAllAdjacentTargets(
     slopeByOsid?: Record<string, number> | null,
     ethnicComposition?: OsidEthnicComposition | null
 ): Array<{ osid: Osid; prediction: CombatPrediction }> {
-    const attacker = state.formations?.[attackerId];
+    const attacker = state.military.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return [];
     const loc = attacker.location_osid;
     if (!loc) return [];

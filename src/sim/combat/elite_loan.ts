@@ -57,10 +57,10 @@ export function processEliteLoanLifecycle(state: GameState): EliteLoanReport {
         permanently_degraded: 0,
     };
 
-    const formationIds = Object.keys(state.formations ?? {}).sort(strictCompare);
+    const formationIds = Object.keys(state.military.formations ?? {}).sort(strictCompare);
 
     for (const id of formationIds) {
-        const f = state.formations![id];
+        const f = state.military.formations![id];
         if (!f.elite_loan_state) continue;
         if (f.status !== 'active') continue;
 

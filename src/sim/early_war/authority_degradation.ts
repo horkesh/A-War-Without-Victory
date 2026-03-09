@@ -60,7 +60,7 @@ export function runAuthorityDegradation(state: GameState): AuthorityDegradationR
 
     const rsDeclared = rs?.declared === true;
     const hrhbDeclared = hrhb?.declared === true;
-    const jnaActive = state.war_jna?.transition_begun === true;
+    const jnaActive = state.military.war_jna?.transition_begun === true;
 
     // Legitimacy-based authority capping (Engine Invariants §16.A):
     // When a faction's average legitimacy is below threshold, authority

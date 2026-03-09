@@ -48,7 +48,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
     }
 
     // Phase 12D.0: If end_state exists, short-circuit to report-only mode
-    if (working.end_state) {
+    if (working.political.end_state) {
         working.meta = {
             ...working.meta,
             seed: input.seed,
@@ -60,12 +60,12 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
             phases: [{ name: 'end_state_active' }],
             end_state_active: true,
             end_state_info: {
-                kind: working.end_state.kind,
-                treaty_id: working.end_state.treaty_id,
-                since_turn: working.end_state.since_turn,
-                outcome_hash: working.end_state.snapshot?.outcome_hash,
-                settlements_by_controller: working.end_state.snapshot
-                    ? Object.fromEntries(working.end_state.snapshot.settlements_by_controller)
+                kind: working.political.end_state.kind,
+                treaty_id: working.political.end_state.treaty_id,
+                since_turn: working.political.end_state.since_turn,
+                outcome_hash: working.political.end_state.snapshot?.outcome_hash,
+                settlements_by_controller: working.political.end_state.snapshot
+                    ? Object.fromEntries(working.political.end_state.snapshot.settlements_by_controller)
                     : undefined
             }
         };
@@ -126,21 +126,21 @@ async function getEdgesForTurn(input: TurnInput): Promise<EdgeRecord[]> {
 
 async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Promise<void> {
     if (state.meta.phase !== 'war') {
-        state.war_front_edges_osid = undefined;
+        state.military.war_front_edges_osid = undefined;
     }
     const edges = await getEdgesForTurn(input);
     const derivedFrontEdges = computeFrontEdges(state, edges);
-    state.front_edges = derivedFrontEdges;
+    state.military.front_edges = derivedFrontEdges;
     ensureDefaultTheatres(state);
     const frontEdgesForSegments =
-        state.meta.phase === 'war' && state.war_front_edges_osid?.length
-            ? state.war_front_edges_osid
+        state.meta.phase === 'war' && state.military.war_front_edges_osid?.length
+            ? state.military.war_front_edges_osid
             : derivedFrontEdges;
     const segments = deriveAssignableFrontSegments(frontEdgesForSegments);
-    state.assignable_front_segments = assignFrontSegmentTheatres(state, segments);
+    state.military.assignable_front_segments = assignFrontSegmentTheatres(state, segments);
     if (state.meta.phase === 'war') {
         ensureBrigadeFrontAssignments(state);
-        state.local_fronts = buildLocalFronts(state);
+        state.military.local_fronts = buildLocalFronts(state);
     }
 }
 

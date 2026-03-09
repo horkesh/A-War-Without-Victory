@@ -69,12 +69,12 @@ describe('corps command - initializeCorpsCommand', () => {
 
         initializeCorpsCommand(state);
 
-        expect(state.corps_command).toBeDefined();
-        expect(state.corps_command!['rs-corps-1']).toBeDefined();
-        expect(state.corps_command!['rs-corps-1'].stance).toBe('balanced');
-        expect(state.corps_command!['rs-corps-1'].subordinate_count).toBe(2);
-        expect(state.corps_command!['rs-corps-1'].active_ogs).toEqual([]);
-        expect(state.corps_command!['rs-corps-1'].corps_exhaustion).toBe(0);
+        expect(state.military.corps_command).toBeDefined();
+        expect(state.military.corps_command!['rs-corps-1']).toBeDefined();
+        expect(state.military.corps_command!['rs-corps-1'].stance).toBe('balanced');
+        expect(state.military.corps_command!['rs-corps-1'].subordinate_count).toBe(2);
+        expect(state.military.corps_command!['rs-corps-1'].active_ogs).toEqual([]);
+        expect(state.military.corps_command!['rs-corps-1'].corps_exhaustion).toBe(0);
     });
 });
 
@@ -103,23 +103,23 @@ describe('corps command - applyCorpsEffects', () => {
         initializeCorpsCommand(state);
 
         // Set corps stance to reorganize
-        state.corps_command!['rs-corps-1'].stance = 'reorganize';
+        state.military.corps_command!['rs-corps-1'].stance = 'reorganize';
 
         // Set brigades to attack posture initially
-        state.formations['rs-brig-1'].posture = 'attack';
-        state.formations['rs-brig-2'].posture = 'attack';
-        state.formations['rs-brig-1'].cohesion = 50;
-        state.formations['rs-brig-2'].cohesion = 50;
+        state.military.formations['rs-brig-1'].posture = 'attack';
+        state.military.formations['rs-brig-2'].posture = 'attack';
+        state.military.formations['rs-brig-1'].cohesion = 50;
+        state.military.formations['rs-brig-2'].cohesion = 50;
 
         applyCorpsEffects(state);
 
         // Reorganize forces posture to 'defend'
-        expect(state.formations['rs-brig-1'].posture).toBe('defend');
-        expect(state.formations['rs-brig-2'].posture).toBe('defend');
+        expect(state.military.formations['rs-brig-1'].posture).toBe('defend');
+        expect(state.military.formations['rs-brig-2'].posture).toBe('defend');
 
         // Reorganize adds +2 cohesion recovery
-        expect(state.formations['rs-brig-1'].cohesion).toBe(52);
-        expect(state.formations['rs-brig-2'].cohesion).toBe(52);
+        expect(state.military.formations['rs-brig-1'].cohesion).toBe(52);
+        expect(state.military.formations['rs-brig-2'].cohesion).toBe(52);
     });
 });
 
@@ -129,7 +129,7 @@ describe('corps command - advanceOperations', () => {
         initializeCorpsCommand(state);
 
         // Start an operation in planning phase at turn 20
-        state.corps_command!['rs-corps-1'].active_operation = {
+        state.military.corps_command!['rs-corps-1'].active_operation = {
             name: 'Test Op',
             type: 'general_offensive',
             phase: 'planning',
@@ -141,26 +141,26 @@ describe('corps command - advanceOperations', () => {
         // Advance 3 turns (planning duration = 3) -> should transition to execution
         state.meta.turn = 23;
         advanceOperations(state);
-        expect(state.corps_command!['rs-corps-1'].active_operation!.phase).toBe('execution');
-        expect(state.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(23);
+        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase).toBe('execution');
+        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(23);
 
         // Advance 4 turns (execution duration = 4) -> should transition to recovery
         state.meta.turn = 27;
         advanceOperations(state);
-        expect(state.corps_command!['rs-corps-1'].active_operation!.phase).toBe('recovery');
-        expect(state.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(27);
+        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase).toBe('recovery');
+        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(27);
 
         // Advance 3 turns (recovery duration = 3) -> should complete (null)
         state.meta.turn = 30;
         advanceOperations(state);
-        expect(state.corps_command!['rs-corps-1'].active_operation).toBeNull();
+        expect(state.military.corps_command!['rs-corps-1'].active_operation).toBeNull();
     });
 
     it('does not auto-advance sector_attack operations', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
-        state.corps_command!['rs-corps-1'].active_operation = {
+        state.military.corps_command!['rs-corps-1'].active_operation = {
             name: 'Test Sector Op',
             type: 'sector_attack',
             phase: 'planning',
@@ -174,15 +174,15 @@ describe('corps command - advanceOperations', () => {
 
         state.meta.turn = 23;
         advanceOperations(state);
-        expect(state.corps_command!['rs-corps-1'].active_operation!.phase).toBe('planning');
-        expect(state.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(20);
+        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase).toBe('planning');
+        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(20);
 
-        state.corps_command!['rs-corps-1'].active_operation!.phase = 'execution';
-        state.corps_command!['rs-corps-1'].active_operation!.phase_started_turn = 23;
+        state.military.corps_command!['rs-corps-1'].active_operation!.phase = 'execution';
+        state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn = 23;
         state.meta.turn = 40;
         advanceOperations(state);
-        expect(state.corps_command!['rs-corps-1'].active_operation!.phase).toBe('execution');
-        expect(state.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(23);
+        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase).toBe('execution');
+        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(23);
     });
 });
 
@@ -232,7 +232,7 @@ describe('operational groups - activateOGs', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
-        state.og_orders = [
+        state.military.og_orders = [
             {
                 corps_id: 'rs-corps-1',
                 donors: [
@@ -253,20 +253,20 @@ describe('operational groups - activateOGs', () => {
         const ogId = report.activated[0];
 
         // OG formation should exist
-        expect(state.formations[ogId]).toBeDefined();
-        expect(state.formations[ogId].kind).toBe('og');
-        expect(state.formations[ogId].personnel).toBe(600);
-        expect(state.formations[ogId].faction).toBe('RS');
+        expect(state.military.formations[ogId]).toBeDefined();
+        expect(state.military.formations[ogId].kind).toBe('og');
+        expect(state.military.formations[ogId].personnel).toBe(600);
+        expect(state.military.formations[ogId].faction).toBe('RS');
 
         // Donor personnel deducted
-        expect(state.formations['rs-brig-1'].personnel).toBe(700);
-        expect(state.formations['rs-brig-2'].personnel).toBe(700);
+        expect(state.military.formations['rs-brig-1'].personnel).toBe(700);
+        expect(state.military.formations['rs-brig-2'].personnel).toBe(700);
 
         // Registered with corps
-        expect(state.corps_command!['rs-corps-1'].active_ogs).toContain(ogId);
+        expect(state.military.corps_command!['rs-corps-1'].active_ogs).toContain(ogId);
 
         // Orders cleared
-        expect(state.og_orders).toEqual([]);
+        expect(state.military.og_orders).toEqual([]);
     });
 });
 
@@ -277,7 +277,7 @@ describe('operational groups - updateOGLifecycle', () => {
 
         // Manually create an OG
         const ogId = 'og-rs-corps-1-t20';
-        state.formations[ogId] = {
+        state.military.formations[ogId] = {
             id: ogId,
             faction: 'RS',
             name: 'OG test',
@@ -292,20 +292,20 @@ describe('operational groups - updateOGLifecycle', () => {
             posture: 'attack',
             corps_id: 'rs-corps-1'
         };
-        state.corps_command!['rs-corps-1'].active_ogs = [ogId];
+        state.military.corps_command!['rs-corps-1'].active_ogs = [ogId];
 
         const dissolved = updateOGLifecycle(state);
 
         expect(dissolved).toContain(ogId);
-        expect(state.formations[ogId].status).toBe('inactive');
+        expect(state.military.formations[ogId].status).toBe('inactive');
 
         // Personnel returned to donor brigades (300 each for 2 brigades from 600 total)
         // Original was 1000 each, so now 1000 + 300 = 1300
-        expect(state.formations['rs-brig-1'].personnel).toBe(1300);
-        expect(state.formations['rs-brig-2'].personnel).toBe(1300);
+        expect(state.military.formations['rs-brig-1'].personnel).toBe(1300);
+        expect(state.military.formations['rs-brig-2'].personnel).toBe(1300);
 
         // Removed from corps active_ogs
-        expect(state.corps_command!['rs-corps-1'].active_ogs).not.toContain(ogId);
+        expect(state.military.corps_command!['rs-corps-1'].active_ogs).not.toContain(ogId);
     });
 
     it('dissolves OG when duration exceeded', () => {
@@ -313,7 +313,7 @@ describe('operational groups - updateOGLifecycle', () => {
         initializeCorpsCommand(state);
 
         const ogId = 'og-rs-corps-1-t15';
-        state.formations[ogId] = {
+        state.military.formations[ogId] = {
             id: ogId,
             faction: 'RS',
             name: 'OG test',
@@ -328,7 +328,7 @@ describe('operational groups - updateOGLifecycle', () => {
             posture: 'attack',
             corps_id: 'rs-corps-1'
         };
-        state.corps_command!['rs-corps-1'].active_ogs = [ogId];
+        state.military.corps_command!['rs-corps-1'].active_ogs = [ogId];
 
         // Turn 20, created at 15 -> 5 turns active, max_dur = 5 -> should dissolve (>= maxDur)
         state.meta.turn = 20;
@@ -336,6 +336,6 @@ describe('operational groups - updateOGLifecycle', () => {
         const dissolved = updateOGLifecycle(state);
 
         expect(dissolved).toContain(ogId);
-        expect(state.formations[ogId].status).toBe('inactive');
+        expect(state.military.formations[ogId].status).toBe('inactive');
     });
 });

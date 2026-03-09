@@ -118,12 +118,12 @@ test('ethnic_1991 init yields deterministic control (no null)', async () => {
 
     const stateA = makeBaseState('init-mode-ethnic-A');
     await prepareNewGameState(stateA, graph, undefined, { init_control_mode: 'ethnic_1991' });
-    const pcA = stateA.political_controllers ?? {};
+    const pcA = stateA.political.political_controllers ?? {};
     assertAllControllersAssigned(pcA);
 
     const stateB = makeBaseState('init-mode-ethnic-B');
     await prepareNewGameState(stateB, graph, undefined, { init_control_mode: 'ethnic_1991' });
-    const pcB = stateB.political_controllers ?? {};
+    const pcB = stateB.political.political_controllers ?? {};
     assert.deepStrictEqual(pcA, pcB, 'ethnic_1991 init should be deterministic');
 });
 
@@ -143,7 +143,7 @@ test('hybrid_1992 init yields deterministic control (no null)', async () => {
         init_control_mode: 'hybrid_1992',
         ethnic_override_threshold: 0.70
     });
-    const pcA = stateA.political_controllers ?? {};
+    const pcA = stateA.political.political_controllers ?? {};
     assertAllControllersAssigned(pcA);
 
     const stateB = makeBaseState('init-mode-hybrid-B');
@@ -151,6 +151,6 @@ test('hybrid_1992 init yields deterministic control (no null)', async () => {
         init_control_mode: 'hybrid_1992',
         ethnic_override_threshold: 0.70
     });
-    const pcB = stateB.political_controllers ?? {};
+    const pcB = stateB.political.political_controllers ?? {};
     assert.deepStrictEqual(pcA, pcB, 'hybrid_1992 init should be deterministic');
 });

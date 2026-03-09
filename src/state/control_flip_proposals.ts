@@ -171,8 +171,8 @@ export function applyControlFlipProposals(state: GameState, file: ControlFlipPro
                 if (!favored.areasOfResponsibility.includes(t.sid)) favored.areasOfResponsibility.push(t.sid);
             }
             // Update canonical political control (Engine Invariants §9.1).
-            if (state.political_controllers && typeof state.political_controllers === 'object') {
-                (state.political_controllers as Record<string, string | null>)[t.sid] = t.to;
+            if (state.political.political_controllers && typeof state.political.political_controllers === 'object') {
+                (state.political.political_controllers as Record<string, string | null>)[t.sid] = t.to;
             }
             applied += 1;
         }

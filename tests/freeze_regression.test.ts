@@ -264,7 +264,7 @@ test('freeze: scenario 1 - prolonged siege invariants', () => {
     }
 
     // Invariant 2: Final sustainability should be degraded
-    const finalSust = state.sustainability_state?.['MUN_A'];
+    const finalSust = state.displacement.sustainability_state?.['MUN_A'];
     assert.ok(
         finalSust && finalSust.sustainability_score < 100,
         'Final sustainability should be degraded after prolonged siege'
@@ -366,7 +366,7 @@ test('freeze: scenario 2 - temporary encirclement invariants', () => {
     }
 
     // Invariant: Should NOT collapse from temporary encirclement
-    const finalSust = state.sustainability_state?.['MUN_A'];
+    const finalSust = state.displacement.sustainability_state?.['MUN_A'];
     assert.ok(
         !finalSust || !finalSust.collapsed,
         'Temporary encirclement should not cause collapse'

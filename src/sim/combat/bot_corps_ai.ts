@@ -111,7 +111,7 @@ export interface CorpsAiReportEntry {
  * Deterministic: corps sorted by strictCompare.
  */
 export function extractCorpsAiReport(state: GameState, faction: FactionId): CorpsAiReportEntry[] {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return [];
 
     const entries: CorpsAiReportEntry[] = [];
@@ -217,9 +217,9 @@ export function generateAllCorpsOrders(
     generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap);
 
     // Final cleanup: prune any 0-edge ghost sectors (pocket containment artifacts)
-    if (state.corps_front_sectors) {
-        for (const [sid, sec] of Object.entries(state.corps_front_sectors)) {
-            if (sec.length_edges === 0) delete state.corps_front_sectors[sid];
+    if (state.military.corps_front_sectors) {
+        for (const [sid, sec] of Object.entries(state.military.corps_front_sectors)) {
+            if (sec.length_edges === 0) delete state.military.corps_front_sectors[sid];
         }
     }
 }

@@ -84,7 +84,7 @@ function computeFrontStabilityProxies(
     let activeCount = 0;
 
     for (const edgeId of activeEdgeIds) {
-        const seg = state.front_segments?.[edgeId];
+        const seg = state.military.front_segments?.[edgeId];
         if (seg && typeof seg === 'object' && (seg as any).active === true) {
             activeCount += 1;
             const friction = Number.isInteger((seg as any).friction) ? (seg as any).friction : 0;

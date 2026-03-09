@@ -74,7 +74,7 @@ test('seed function is deterministic for same inputs', () => {
     };
     seedOrganizationalPenetrationFromControl(left, settlements, options);
     seedOrganizationalPenetrationFromControl(right, settlements, options);
-    assert.deepStrictEqual(left.municipalities, right.municipalities);
+    assert.deepStrictEqual(left.political.municipalities, right.political.municipalities);
 });
 
 test('A/B/C factors create municipality variance in seeded organizational penetration', () => {
@@ -91,8 +91,8 @@ test('A/B/C factors create municipality variance in seeded organizational penetr
         }
     });
 
-    const munA = state.municipalities?.mun_a?.organizational_penetration;
-    const munB = state.municipalities?.mun_b?.organizational_penetration;
+    const munA = state.political.municipalities?.mun_a?.organizational_penetration;
+    const munB = state.political.municipalities?.mun_b?.organizational_penetration;
     assert.ok(munA && munB);
 
     assert.ok((munA.sds_penetration ?? 0) > (munB.sds_penetration ?? 0), 'RS signals in mun_a should raise SDS penetration');
@@ -114,8 +114,8 @@ test('mun id normalization bridges alias mismatches deterministically', () => {
         }
     });
 
-    const munA = state.municipalities?.mun_a?.organizational_penetration;
-    const munB = state.municipalities?.mun_b?.organizational_penetration;
+    const munA = state.political.municipalities?.mun_a?.organizational_penetration;
+    const munB = state.political.municipalities?.mun_b?.organizational_penetration;
     assert.ok(munA && munB);
     assert.ok((munA.sds_penetration ?? 0) > 20);
     assert.ok((munB.sda_penetration ?? 0) > 20);

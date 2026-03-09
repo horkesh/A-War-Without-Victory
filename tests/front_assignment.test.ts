@@ -62,17 +62,17 @@ function makeState(): GameState {
 test('ensureBrigadeFrontAssignments assigns brigades deterministically', () => {
     const state = makeState();
     ensureBrigadeFrontAssignments(state);
-    assert.strictEqual(state.brigade_front_assignment?.b1, 'RBiH__RS__S1__S2');
-    assert.strictEqual(state.brigade_front_assignment?.b2, 'RBiH__RS__S1__S2');
+    assert.strictEqual(state.military.brigade_front_assignment?.b1, 'RBiH__RS__S1__S2');
+    assert.strictEqual(state.military.brigade_front_assignment?.b2, 'RBiH__RS__S1__S2');
     assert.ok(isBrigadeAssignedToFront(state, 'b1'));
     assert.ok(isBrigadeAssignedToFront(state, 'b2'));
 });
 
 test('ensureBrigadeFrontAssignments repairs invalid assignments', () => {
     const state = makeState();
-    state.brigade_front_assignment = { b1: 'MISSING_FRONT', b2: null };
+    state.military.brigade_front_assignment = { b1: 'MISSING_FRONT', b2: null };
     ensureBrigadeFrontAssignments(state);
-    assert.strictEqual(state.brigade_front_assignment?.b1, 'RBiH__RS__S1__S2');
-    assert.strictEqual(state.brigade_front_assignment?.b2, 'RBiH__RS__S1__S2');
+    assert.strictEqual(state.military.brigade_front_assignment?.b1, 'RBiH__RS__S1__S2');
+    assert.strictEqual(state.military.brigade_front_assignment?.b2, 'RBiH__RS__S1__S2');
 });
 

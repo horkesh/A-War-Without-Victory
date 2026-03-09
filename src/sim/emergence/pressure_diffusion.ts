@@ -57,7 +57,7 @@ export function diffusePressure(
     const fraction = options?.fraction ?? DIFFUSE_FRACTION;
     const maxOutflow = options?.maxOutflow ?? DIFFUSE_MAX_OUTFLOW;
 
-    const fp = state.front_pressure ?? {};
+    const fp = state.military.front_pressure ?? {};
     if (typeof fp !== 'object') {
         return {
             state,
@@ -266,7 +266,7 @@ export function diffusePressure(
         conservationFixApplied = true;
     }
 
-    const fpWrite = state.front_pressure as Record<string, FpRec>;
+    const fpWrite = state.military.front_pressure as Record<string, FpRec>;
     for (const { eid, r } of roundedArr) {
         const rec = fpWrite[eid];
         const prevMax = Math.abs(rec?.max_abs ?? 0);

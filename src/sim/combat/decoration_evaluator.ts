@@ -164,7 +164,7 @@ export function evaluateBrigadeDecorations(
  */
 export function evaluateAllBrigadeDecorations(state: GameState): void {
     const turn = state.meta?.turn ?? 0;
-    const fmtsDecorations = state.formations ?? {};
+    const fmtsDecorations = state.military.formations ?? {};
     for (const fKey of Object.keys(fmtsDecorations).sort(strictCompare)) {
         const f = fmtsDecorations[fKey]!;
         if (f.status !== 'active') continue;

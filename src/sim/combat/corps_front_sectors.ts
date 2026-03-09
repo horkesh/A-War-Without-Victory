@@ -51,12 +51,12 @@ export function buildCorpsFrontSectors(
     edges: EdgeRecord[],
     reverseMap: Map<string, string[]> | null
 ): Record<string, CorpsFrontSector> {
-    const osidFrontEdges = state.war_front_edges_osid;
+    const osidFrontEdges = state.military.war_front_edges_osid;
     if (!osidFrontEdges || osidFrontEdges.length === 0) return {};
     if (!edges || edges.length === 0) return {};
 
     const adjacency = buildOsidAdjacency(edges);
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const factions = getFactions(state);
     const result: Record<string, CorpsFrontSector> = {};
 
@@ -116,7 +116,7 @@ function buildFactionSectors(
         if (ctrl === faction) friendlyOsids.add(osid);
     }
     // Also include political_controllers entries not in adjacency graph (interior OSIDs).
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     for (const [osid, ctrl] of Object.entries(pc)) {
         if (ctrl === faction) friendlyOsids.add(osid);
     }
@@ -695,7 +695,7 @@ function mapOsidsToCorps(
     // Also add all OSIDs from political_controllers that belong to this faction.
     // These may not appear in the adjacency graph (interior OSIDs with no edges)
     // but are needed for BFS seeding from corps HQ / subordinate locations.
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     for (const [osid, ctrl] of Object.entries(pc)) {
         if (ctrl === faction) friendlyOsids.add(osid);
     }
@@ -2235,7 +2235,7 @@ export function findSectorForEnemyOsid(
     state: GameState,
     targetOsid: string
 ): CorpsFrontSector | null {
-    const sectors = state.corps_front_sectors;
+    const sectors = state.military.corps_front_sectors;
     if (!sectors) return null;
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
@@ -2257,7 +2257,7 @@ export function getCorpsHqOsid(
 ): string | null {
     const corpsId = getFormationCorpsId(formation);
     if (!corpsId) return null;
-    const corpsFormation = state.formations?.[corpsId];
+    const corpsFormation = state.military.formations?.[corpsId];
     if (!corpsFormation) return null;
     return (corpsFormation as FormationState & { location_osid?: string }).location_osid ?? null;
 }

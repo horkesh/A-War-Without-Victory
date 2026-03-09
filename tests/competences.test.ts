@@ -215,12 +215,12 @@ test('competences: competence allocations appear in end_state snapshot when peac
     const applyResult = applyTreaty(state, draft, evalResult, { settlementGraph });
 
     // Should have end_state set
-    assert.ok(applyResult.state.end_state);
-    assert.strictEqual(applyResult.state.end_state?.kind, 'peace_treaty');
+    assert.ok(applyResult.state.political.end_state);
+    assert.strictEqual(applyResult.state.political.end_state?.kind, 'peace_treaty');
 
     // Should have competences in snapshot
-    assert.ok(applyResult.state.end_state?.snapshot?.competences);
-    const competences = applyResult.state.end_state!.snapshot!.competences!;
+    assert.ok(applyResult.state.political.end_state?.snapshot?.competences);
+    const competences = applyResult.state.political.end_state!.snapshot!.competences!;
     assert.strictEqual(competences.length, 2);
 
     // Check competences are sorted by competence ID
@@ -245,11 +245,11 @@ test('competences: competence allocations do not mutate active state before peac
     const applyResult = applyTreaty(state, draft, evalResult);
 
     // Should NOT have end_state
-    assert.strictEqual(applyResult.state.end_state, undefined);
+    assert.strictEqual(applyResult.state.political.end_state, undefined);
 
     // Competences should not appear anywhere in active state
     // (they only exist in end_state snapshot)
-    assert.strictEqual(applyResult.state.end_state, undefined);
+    assert.strictEqual(applyResult.state.political.end_state, undefined);
 });
 
 test('competences: snapshot hash changes deterministically when competences differ', () => {
@@ -265,7 +265,7 @@ test('competences: snapshot hash changes deterministically when competences diff
     const eval1 = createAcceptedEvalReport(draft1);
     const settlementGraph = createTestSettlementGraph();
     const apply1 = applyTreaty(state, draft1, eval1, { settlementGraph });
-    const hash1 = apply1.state.end_state?.snapshot?.outcome_hash;
+    const hash1 = apply1.state.political.end_state?.snapshot?.outcome_hash;
 
     // Second treaty with different competence
     const state2 = createTestState();
@@ -276,7 +276,7 @@ test('competences: snapshot hash changes deterministically when competences diff
     const draft2 = buildTreatyDraft(5, 'RBiH', clauses2);
     const eval2 = createAcceptedEvalReport(draft2);
     const apply2 = applyTreaty(state2, draft2, eval2, { settlementGraph });
-    const hash2 = apply2.state.end_state?.snapshot?.outcome_hash;
+    const hash2 = apply2.state.political.end_state?.snapshot?.outcome_hash;
 
     // Hashes should differ
     assert.notStrictEqual(hash1, hash2);
@@ -298,7 +298,7 @@ test('competences: snapshot freeze preserves competences across turns', () => {
     const applyResult = applyTreaty(state, draft, evalResult, { settlementGraph });
 
     // Get initial snapshot
-    const initialSnapshot = applyResult.state.end_state?.snapshot;
+    const initialSnapshot = applyResult.state.political.end_state?.snapshot;
     assert.ok(initialSnapshot);
     assert.ok(initialSnapshot.competences);
     assert.strictEqual(initialSnapshot.competences!.length, 1);

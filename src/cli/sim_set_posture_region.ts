@@ -99,11 +99,11 @@ async function main(): Promise<void> {
     const payload = await readFile(opts.savePath, 'utf8');
     const state = deserializeState(payload);
 
-    if (!state.front_posture_regions || typeof state.front_posture_regions !== 'object') state.front_posture_regions = {};
-    if (!state.front_posture_regions[opts.faction]) state.front_posture_regions[opts.faction] = { assignments: {} };
-    if (!state.front_posture_regions[opts.faction].assignments) state.front_posture_regions[opts.faction].assignments = {};
+    if (!state.military.front_posture_regions || typeof state.military.front_posture_regions !== 'object') state.military.front_posture_regions = {};
+    if (!state.military.front_posture_regions[opts.faction]) state.military.front_posture_regions[opts.faction] = { assignments: {} };
+    if (!state.military.front_posture_regions[opts.faction].assignments) state.military.front_posture_regions[opts.faction].assignments = {};
 
-    state.front_posture_regions[opts.faction].assignments[opts.region] = {
+    state.military.front_posture_regions[opts.faction].assignments[opts.region] = {
         posture: opts.posture,
         weight: opts.weight
     };

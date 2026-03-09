@@ -29,7 +29,7 @@ export function getAlliedFaction(faction: FactionId): FactionId | null {
  * Check if a municipality is in the mixed municipalities list.
  */
 export function isMixedMunicipality(state: GameState, munId: MunicipalityId): boolean {
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     if (!rhs) return false;
     return rhs.allied_mixed_municipalities.includes(munId);
 }
@@ -46,7 +46,7 @@ export function computeAlliedDefense(
     controllerFaction: FactionId,
     controllerMilitia: number
 ): number {
-    const allianceValue = state.war_alliance_rbih_hrhb;
+    const allianceValue = state.political.war_alliance_rbih_hrhb;
     if (allianceValue === undefined || allianceValue === null) {
         // Absent = allied; apply coordination bonus
         return controllerMilitia;
@@ -63,7 +63,7 @@ export function computeAlliedDefense(
     if (allianceValue <= ALLIED_THRESHOLD) return controllerMilitia;
 
     // Get ally militia in this mun
-    const strengthByMun = state.war_militia_strength ?? {};
+    const strengthByMun = state.military.war_militia_strength ?? {};
     const byFaction = strengthByMun[munId] ?? {};
     const allyMilitia = byFaction[ally] ?? 0;
 
@@ -83,10 +83,10 @@ export function computeAlliedDefense(
  * Called during alliance update to keep the list in sync with actual deployment.
  */
 export function updateMixedMunicipalitiesList(state: GameState): void {
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     if (!rhs) return;
 
-    const strengthByMun = state.war_militia_strength ?? {};
+    const strengthByMun = state.military.war_militia_strength ?? {};
     const mixedSet = new Set<string>(rhs.allied_mixed_municipalities);
 
     // Check all muns in militia_strength for dual RBiH+HRHB presence
@@ -100,7 +100,7 @@ export function updateMixedMunicipalitiesList(state: GameState): void {
     }
 
     // Also check formations
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const munFactionPresence = new Map<string, Set<string>>();
     for (const fid of Object.keys(formations)) {
         const f = formations[fid];

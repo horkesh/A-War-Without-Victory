@@ -127,9 +127,9 @@ export function applyRsJnaInheritanceBonus(
     population1991ByMun?: MunicipalityPopulation1991Map
 ): RsJnaInheritanceReport {
     const report: RsJnaInheritanceReport = { total_added: 0, pools_updated: 0 };
-    if (!state.militia_pools || typeof state.militia_pools !== 'object') return report;
+    if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') return report;
     if (!population1991ByMun || Object.keys(population1991ByMun).length === 0) return report;
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
 
     const rsPoolKeys = (Object.keys(pools) as string[]).filter((k) => pools[k].faction === 'RS').sort(strictCompare);
@@ -192,19 +192,19 @@ export function runDisplacedAndCrossEthnicContributions(
 ): DisplacedAndCrossEthnicReport {
     const report: DisplacedAndCrossEthnicReport = { displaced_contributions: 0 };
     let rbih10pctTotal = 0;
-    if (!state.militia_pools || typeof state.militia_pools !== 'object') {
-        (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).militia_pools = {};
+    if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') {
+        (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).military.militia_pools = {};
     }
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
     // Acute vs sustained displacement mobilization rate (global heuristic)
     const reinforcementRate = currentTurn <= ACUTE_DISPLACEMENT_WEEKS
         ? REINFORCEMENT_RATE_ACUTE
         : REINFORCEMENT_RATE_SUSTAINED;
-    const municipalities = state.municipalities ?? {};
+    const municipalities = state.political.municipalities ?? {};
     const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
     const settlementsByMun = buildSettlementsByMun(settlements);
-    const displacement = state.displacement_state ?? {};
+    const displacement = state.displacement.displacement_state ?? {};
     const displacementMunIds = (Object.keys(displacement) as MunicipalityId[]).slice().sort(strictCompare);
 
     for (const munId of displacementMunIds) {
@@ -268,7 +268,7 @@ export function runDisplacedAndCrossEthnicContributions(
         }
     }
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const hasRBiHBrigade = Object.values(formations).some(
         (f) => f && typeof f === 'object' && (f as { faction?: string; kind?: string }).faction === 'RBiH' && (f as { kind?: string }).kind === 'brigade'
     );
@@ -335,13 +335,13 @@ export function runPoolPopulation(
         displaced_contributions: 0
     };
 
-    if (!state.militia_pools || typeof state.militia_pools !== 'object') {
-        (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).militia_pools = {};
+    if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') {
+        (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).military.militia_pools = {};
     }
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
-    const strengthMap = state.war_militia_strength ?? {};
-    const municipalities = state.municipalities ?? {};
+    const strengthMap = state.military.war_militia_strength ?? {};
+    const municipalities = state.political.municipalities ?? {};
     const munIds = (Object.keys(municipalities) as MunicipalityId[]).slice().sort(strictCompare);
     const factionIds: FactionId[] = (state.factions ?? [])
         .map((f) => f.id)
@@ -370,7 +370,7 @@ export function runPoolPopulation(
                 : siegeRatio >= SIEGE_RATIO_PARTIAL ? 1.5
                 : 1.0;
             let derivedAvailable = Math.floor(strength * POOL_SCALE_FACTOR * populationWeight * factionScale * siegeMult);
-            const authorityState = state.municipalities?.[munId]?.control ?? 'consolidated';
+            const authorityState = state.political.municipalities?.[munId]?.control ?? 'consolidated';
             if (authorityState === 'contested') derivedAvailable = Math.floor(derivedAvailable * 0.85);
             else if (authorityState === 'fragmented') derivedAvailable = Math.floor(derivedAvailable * 0.7);
             const newAvailable = existing
@@ -429,11 +429,11 @@ export function applyCasualtyPoolExhaustion(
         by_faction: {}
     };
 
-    if (!state.militia_pools || typeof state.militia_pools !== 'object') return report;
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') return report;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
 
     for (const cas of battleCasualties) {
-        const formation = state.formations?.[cas.formation_id];
+        const formation = state.military.formations?.[cas.formation_id];
         if (!formation) continue;
         const originMun = formation.origin_mun;
         if (!originMun) continue;

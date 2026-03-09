@@ -21,16 +21,16 @@ function clampWeight(value: unknown): number {
  * No gameplay effects are applied.
  */
 export function normalizeFrontPosture(state: GameState): void {
-    if (!state.front_posture || typeof state.front_posture !== 'object') {
-        state.front_posture = {};
+    if (!state.military.front_posture || typeof state.military.front_posture !== 'object') {
+        state.military.front_posture = {};
         return;
     }
 
-    const segmentKeys = new Set(Object.keys(state.front_segments ?? {}));
-    const factionIdsSorted = Object.keys(state.front_posture).sort();
+    const segmentKeys = new Set(Object.keys(state.military.front_segments ?? {}));
+    const factionIdsSorted = Object.keys(state.military.front_posture).sort();
 
     for (const factionId of factionIdsSorted) {
-        const fp = (state.front_posture as any)[factionId];
+        const fp = (state.military.front_posture as any)[factionId];
         if (!fp || typeof fp !== 'object') continue;
         const assignments = (fp as any).assignments as Record<string, any> | undefined;
         if (!assignments || typeof assignments !== 'object') {
@@ -48,7 +48,7 @@ export function normalizeFrontPosture(state: GameState): void {
             // Remove stale edge assignments not present in front_segments.
             if (!segmentKeys.has(edge_id)) continue;
 
-            const seg = (state.front_segments as any)[edge_id];
+            const seg = (state.military.front_segments as any)[edge_id];
             const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
 
             const posture: PostureLevel = isPostureLevel((a as any).posture) ? (a as any).posture : 'hold';

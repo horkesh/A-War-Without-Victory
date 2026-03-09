@@ -104,7 +104,7 @@ function detectControlFlips(
     pf: FactionId,
     events: TurnEvent[],
 ): void {
-    const current = state.political_controllers ?? {};
+    const current = state.political.political_controllers ?? {};
     const previous = prev.politicalControllers;
 
     const allSids = new Set([...Object.keys(current), ...Object.keys(previous)]);
@@ -169,11 +169,11 @@ function detectBattleCasualties(
 
     for (const fid of factionIds) {
         const oldKilled = prev.casualtyTotals[fid]?.killed ?? 0;
-        const newKilled = state.casualty_ledger?.[fid]?.killed ?? 0;
+        const newKilled = state.military.casualty_ledger?.[fid]?.killed ?? 0;
         const deltaKilled = newKilled - oldKilled;
 
         const oldWounded = prev.casualtyTotals[fid]?.wounded ?? 0;
-        const newWounded = state.casualty_ledger?.[fid]?.wounded ?? 0;
+        const newWounded = state.military.casualty_ledger?.[fid]?.wounded ?? 0;
         const deltaWounded = newWounded - oldWounded;
 
         if (deltaKilled > 0 || deltaWounded > 0) {
@@ -199,10 +199,10 @@ function detectDisplacement(
     pf: FactionId,
     events: TurnEvent[],
 ): void {
-    if (!state.displacement_state) return;
+    if (!state.displacement.displacement_state) return;
 
     // Check hostile takeover timers (Record<MunicipalityId, HostileTakeoverTimerState>)
-    const timers = state.hostile_takeover_timers;
+    const timers = state.displacement.hostile_takeover_timers;
     if (timers) {
         for (const munId of Object.keys(timers).sort(sc)) {
             const timer = timers[munId];
@@ -232,12 +232,12 @@ function detectCivilianCasualties(
     pf: FactionId,
     events: TurnEvent[],
 ): void {
-    if (!state.civilian_casualties) return;
+    if (!state.displacement.civilian_casualties) return;
 
-    const fids = Object.keys(state.civilian_casualties).sort(sc);
+    const fids = Object.keys(state.displacement.civilian_casualties).sort(sc);
     for (const fid of fids) {
         const oldKilled = prev.civilianKilled[fid] ?? 0;
-        const newKilled = state.civilian_casualties[fid]?.killed ?? 0;
+        const newKilled = state.displacement.civilian_casualties[fid]?.killed ?? 0;
         const delta = newKilled - oldKilled;
 
         if (delta > 0) {
@@ -258,11 +258,11 @@ function detectFormationCreated(
     pf: FactionId,
     events: TurnEvent[],
 ): void {
-    if (!state.formations) return;
+    if (!state.military.formations) return;
 
-    const formIds = Object.keys(state.formations).sort(sc);
+    const formIds = Object.keys(state.military.formations).sort(sc);
     for (const fmId of formIds) {
-        const fm = state.formations[fmId];
+        const fm = state.military.formations[fmId];
         if (!fm) continue;
         // Formation was created this turn
         if (fm.created_turn === state.meta.turn) {
@@ -289,7 +289,7 @@ function detectAllianceChanges(
     events: TurnEvent[],
 ): void {
     const oldAlliance = prev.allianceValue;
-    const newAlliance = state.war_alliance_rbih_hrhb ?? null;
+    const newAlliance = state.political.war_alliance_rbih_hrhb ?? null;
 
     if (oldAlliance == null || newAlliance == null) return;
 
@@ -332,15 +332,15 @@ function detectSustainabilityCollapses(
     pf: FactionId,
     events: TurnEvent[],
 ): void {
-    if (!state.sustainability_state) return;
+    if (!state.displacement.sustainability_state) return;
 
     const prevCollapsed = new Set(prev.collapsedMunicipalities);
-    const munIds = Object.keys(state.sustainability_state).sort(sc);
+    const munIds = Object.keys(state.displacement.sustainability_state).sort(sc);
 
     for (const munId of munIds) {
-        const ss = state.sustainability_state[munId];
+        const ss = state.displacement.sustainability_state[munId];
         if (ss?.collapsed && !prevCollapsed.has(munId)) {
-            const controller = state.political_controllers?.[munId] ?? null;
+            const controller = state.political.political_controllers?.[munId] ?? null;
             events.push({
                 type: 'sustainability_collapse',
                 faction: controller ?? pf,
@@ -359,12 +359,12 @@ function detectExhaustionMilestones(
     pf: FactionId,
     events: TurnEvent[],
 ): void {
-    if (!state.war_exhaustion) return;
+    if (!state.political.war_exhaustion) return;
 
-    const fids = Object.keys(state.war_exhaustion).sort(sc);
+    const fids = Object.keys(state.political.war_exhaustion).sort(sc);
     for (const fid of fids) {
         const oldEx = (prev.exhaustion[fid] ?? 0) * 100; // convert to %
-        const newEx = (state.war_exhaustion[fid] ?? 0) * 100;
+        const newEx = (state.political.war_exhaustion[fid] ?? 0) * 100;
 
         for (const milestone of EXHAUSTION_MILESTONES) {
             if (oldEx < milestone && newEx >= milestone) {
@@ -389,7 +389,7 @@ function detectCeasefireWashington(
     pf: FactionId,
     events: TurnEvent[],
 ): void {
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     if (!rhs) return;
 
     // Ceasefire just started

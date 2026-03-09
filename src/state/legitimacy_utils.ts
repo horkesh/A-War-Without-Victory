@@ -29,8 +29,8 @@ export function getFactionLegitimacyAverages(state: GameState): Record<string, n
     for (const faction of state.factions) {
         totals[faction.id] = { sum: 0, count: 0 };
     }
-    const controllers = state.political_controllers ?? {};
-    const settlements = state.settlements ?? {};
+    const controllers = state.political.political_controllers ?? {};
+    const settlements = state.political.settlements ?? {};
     for (const [sid, controller] of Object.entries(controllers)) {
         if (!controller) continue;
         const leg = settlements[sid]?.legitimacy_state?.legitimacy_score;

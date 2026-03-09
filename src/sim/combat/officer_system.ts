@@ -77,8 +77,8 @@ export function getCorpsCommander(
     corpsId: string,
     state: GameState
 ): { data: NamedOfficer; state: NamedOfficerState } | null {
-    const officers = state.named_officers;
-    const officerData = state.named_officer_data;
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
     if (!officers || !officerData) return null;
 
     const officerIds = Object.keys(officers).sort(strictCompare);
@@ -99,8 +99,8 @@ export function getArmyCommander(
     faction: FactionId,
     state: GameState
 ): { data: NamedOfficer; state: NamedOfficerState } | null {
-    const officers = state.named_officers;
-    const officerData = state.named_officer_data;
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
     if (!officers || !officerData) return null;
 
     const officerIds = Object.keys(officers).sort(strictCompare);
@@ -171,7 +171,7 @@ export function getOfficerCombatMod(
 
     // Check for named corps commander
     const corpsId = formation.corps_id;
-    if (!corpsId || !state.named_officers || !state.named_officer_data) {
+    if (!corpsId || !state.military.named_officers || !state.military.named_officer_data) {
         return brigadeOfficerMod;
     }
 
@@ -205,8 +205,8 @@ export function selectOperationCommander(
     corpsId: string,
     faction: FactionId,
 ): string | null {
-    const officers = state.named_officers;
-    const officerData = state.named_officer_data;
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
     if (!officers || !officerData) return null;
 
     const candidates: NamedOfficer[] = [];
@@ -257,7 +257,7 @@ export function assignOperationCommander(
     if (!commanderId) return;
 
     op.commander_officer_id = commanderId;
-    const os = state.named_officers?.[commanderId];
+    const os = state.military.named_officers?.[commanderId];
     if (os) {
         os.status = 'active';
         os.assigned_operation = op.name;
@@ -272,7 +272,7 @@ export function releaseOperationCommander(
     op: import('../../state/game_state.js').CorpsOperation,
 ): void {
     if (!op.commander_officer_id) return;
-    const officers = state.named_officers;
+    const officers = state.military.named_officers;
     if (!officers) return;
 
     const os = officers[op.commander_officer_id];
@@ -294,8 +294,8 @@ export function initializeNamedOfficers(
     state: GameState,
     officerData: NamedOfficer[]
 ): void {
-    state.named_officer_data = officerData;
-    state.named_officers = {};
+    state.military.named_officer_data = officerData;
+    state.military.named_officers = {};
     const turn = state.meta?.turn ?? 0;
 
     // Sort for determinism
@@ -312,7 +312,7 @@ export function initializeNamedOfficers(
             ? officer.historical_corps_id
             : null;
 
-        state.named_officers[officer.id] = {
+        state.military.named_officers[officer.id] = {
             officer_id: officer.id,
             status: isStarter || assignedCorps ? 'active' : 'reserve',
             assigned_corps_id: assignedCorps,
@@ -358,8 +358,8 @@ export function processOfficerSuccession(
         generic_replacements: 0,
     };
 
-    const officers = state.named_officers;
-    const officerData = state.named_officer_data;
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
     if (!officers || !officerData) return report;
 
     const turn = state.meta?.turn ?? 0;
@@ -439,7 +439,7 @@ export function processOfficerSuccession(
         if (depData) departureFactions.set(depId, depData.faction);
     }
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const corpsFormationIds = Object.keys(formations)
         .filter(id => {
             const f = formations[id]!;
@@ -456,7 +456,7 @@ export function processOfficerSuccession(
             // C.3: HVO acting commanders get replaced once their delay is served
             if (existingCommander.state.acting_commander && existingCommander.data.faction === 'HRHB') {
                 // D.4: Read delays from war_timeline if available, else hardcoded fallback
-                const hvoConfig = state.war_timeline?.officer_config?.HRHB;
+                const hvoConfig = state.military.war_timeline?.officer_config?.HRHB;
                 const politicalDelay = hvoConfig?.political_replacement_delay ?? HVO_POLITICAL_REPLACEMENT_DELAY;
                 const combatDelay = hvoConfig?.combat_death_replacement_delay ?? HVO_COMBAT_DEATH_REPLACEMENT_DELAY;
                 // Acting commander: check if enough turns have passed
@@ -512,7 +512,7 @@ export function processOfficerSuccession(
             const prefix = faction === 'HRHB' && wasCombatDeath ? 'generic_combat_' : 'generic_';
             const genericId = `${prefix}${faction}_${corpsFormId}_t${turn}`;
             // D.4: Read generic replacement competence from war_timeline if available
-            const factionConfig = state.war_timeline?.officer_config?.[faction];
+            const factionConfig = state.military.war_timeline?.officer_config?.[faction];
             const genericComp = factionConfig?.generic_replacement_competence ?? 2;
 
             const genericData: NamedOfficer = {

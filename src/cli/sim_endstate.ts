@@ -47,7 +47,7 @@ function parseArgs(argv: string[]): { savePath: string; json: boolean; outPath: 
 }
 
 function formatEndState(state: GameState): string {
-    const endState = state.end_state;
+    const endState = state.political.end_state;
 
     if (!endState) {
         return 'war';
@@ -82,7 +82,7 @@ function formatEndState(state: GameState): string {
 }
 
 function formatEndStateJson(state: GameState): object {
-    const endState = state.end_state;
+    const endState = state.political.end_state;
 
     if (!endState) {
         return { status: 'war' };

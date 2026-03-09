@@ -40,9 +40,9 @@ function hasAnyOrgInvestment(op: OrganizationalPenetration): boolean {
 }
 
 function resolveMunicipalityController(state: GameState, munId: string): FactionId | null {
-    const direct = state.political_controllers?.[munId];
+    const direct = state.political.political_controllers?.[munId];
     if (direct === 'RBiH' || direct === 'RS' || direct === 'HRHB') return direct;
-    const op = state.municipalities?.[munId]?.organizational_penetration;
+    const op = state.political.municipalities?.[munId]?.organizational_penetration;
     if (!op) return null;
     const partyScores: Record<FactionId, number> = {
         RBiH: op.sda_penetration ?? 0,
@@ -70,9 +70,9 @@ function getFormationHomeMunicipality(formation: { tags?: string[] }): string | 
 
 function buildCurrentPlannedBrigadeByFaction(state: GameState, munId: string): Partial<Record<FactionId, boolean>> {
     const presence: Partial<Record<FactionId, boolean>> = {};
-    const formationIds = Object.keys(state.formations ?? {}).sort(strictCompare);
+    const formationIds = Object.keys(state.military.formations ?? {}).sort(strictCompare);
     for (const formationId of formationIds) {
-        const formation = state.formations?.[formationId];
+        const formation = state.military.formations?.[formationId];
         if (!formation) continue;
         if ((formation.kind ?? 'brigade') !== 'brigade') continue;
         if (getFormationHomeMunicipality(formation) !== munId) continue;
@@ -118,8 +118,8 @@ export function runPhase0TurnAndAdvance(
     const prevPhase: string = working.meta.phase;
 
     // Ensure Phase 0 relationships are initialized
-    if (!working.phase0_relationships) {
-        working.phase0_relationships = initializePhase0Relationships();
+    if (!working.political.phase0_relationships) {
+        working.political.phase0_relationships = initializePhase0Relationships();
     }
 
     // Snapshot pre-turn state for event generation
@@ -148,10 +148,10 @@ export function runPhase0TurnAndAdvance(
     }
 
     // 6. Append events to log
-    if (!working.phase0_events_log) {
-        working.phase0_events_log = [];
+    if (!working.political.phase0_events_log) {
+        working.political.phase0_events_log = [];
     }
-    working.phase0_events_log.push(events);
+    working.political.phase0_events_log.push(events);
 
     // 7. Advance turn
     const nextTurn = working.meta.turn + 1;
@@ -177,10 +177,10 @@ export function runPhase0TurnAndAdvance(
  */
 function applyPhaseIHandoff(state: GameState): void {
     // Seed org-pen for un-invested municipalities using the same deterministic formula family as init.
-    if (state.municipalities) {
-        const munIds = Object.keys(state.municipalities).sort(strictCompare);
+    if (state.political.municipalities) {
+        const munIds = Object.keys(state.political.municipalities).sort(strictCompare);
         for (const munId of munIds) {
-            const mun = state.municipalities[munId];
+            const mun = state.political.municipalities[munId];
             if (!mun) continue;
 
             // Skip municipalities that already have explicit investment
@@ -192,8 +192,8 @@ function applyPhaseIHandoff(state: GameState): void {
     }
 
     // Initialize Peace phase JNA transition state
-    if (!state.war_jna) {
-        state.war_jna = {
+    if (!state.military.war_jna) {
+        state.military.war_jna = {
             transition_begun: false,
             withdrawal_progress: 0,
             asset_transfer_rs: 0,

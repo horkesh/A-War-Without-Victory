@@ -58,7 +58,7 @@ export function assessCorpsSupplyHealth(
  *  from brigade corps_id — common when corps formations aren't loaded).
  */
 export function getFactionCorps(state: GameState, faction: FactionId): FormationState[] {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const result: FormationState[] = [];
     const seenIds = new Set<string>();
 
@@ -72,8 +72,8 @@ export function getFactionCorps(state: GameState, faction: FactionId): Formation
     }
 
     // 2. Corps that exist only in corps_command (discovered from brigade corps_id refs)
-    if (state.corps_command) {
-        for (const cid of Object.keys(state.corps_command).sort(strictCompare)) {
+    if (state.military.corps_command) {
+        for (const cid of Object.keys(state.military.corps_command).sort(strictCompare)) {
             if (seenIds.has(cid)) continue;
 
             // Determine faction from subordinate brigades
@@ -119,7 +119,7 @@ export function getFactionCorps(state: GameState, faction: FactionId): Formation
 
 /** Get active brigades subordinate to a given corps. */
 export function getCorpsSubordinates(state: GameState, corpsId: FormationId): FormationState[] {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const result: FormationState[] = [];
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
@@ -207,7 +207,7 @@ export function computeSectorThreat(
 
     // Count friendly vs enemy personnel
     // Friendly: only at corps positions. Enemy: anywhere in threat zone.
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     let ourPersonnel = 0;
     let enemyPersonnel = 0;
     for (const fid of Object.keys(formations).sort(strictCompare)) {

@@ -1501,7 +1501,7 @@ function deriveActiveOperations(state: Record<string, unknown>): LoadedGameState
     const activeOps: NonNullable<LoadedGameState['activeOperations']> = [];
     const formations = military.formations as Record<string, { faction: string }> | undefined;
     const namedOfficerData = military.named_officer_data as Array<{ id: string; name: string }> | undefined;
-    const politicalControllers = state.political_controllers as Record<string, string> | undefined;
+    const politicalControllers = state.political.political_controllers as Record<string, string> | undefined;
 
     for (const corpsId of Object.keys(cc).sort()) {
         const cmd = cc[corpsId];

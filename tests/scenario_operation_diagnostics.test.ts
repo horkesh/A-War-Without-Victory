@@ -224,8 +224,8 @@ describe('combat causality diagnostics', () => {
 
     it('does not flag execution stall when the operation already resolved a capture this turn', () => {
         const state = makeState();
-        state.corps_command!['corps_1']!.active_operation = {
-            ...state.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operation = {
+            ...state.military.corps_command!['corps_1']!.active_operation!,
             current_objective_index: 1,
             objectives: ['op:enemy:obj0', 'op:enemy:obj1'],
             objective_capture_count: 1,
@@ -262,8 +262,8 @@ describe('combat causality diagnostics', () => {
 
     it('does not invalidate a quiet week with no attacks and no invalid operations', () => {
         const state = makeState();
-        state.corps_command!['corps_1']!.active_operation = {
-            ...state.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operation = {
+            ...state.military.corps_command!['corps_1']!.active_operation!,
             phase: 'planning',
         } as any;
 
@@ -285,8 +285,8 @@ describe('combat causality diagnostics', () => {
     it('flags recovery-phase operation that never logged an objective attempt', () => {
         const state = makeState();
         state.meta.turn = 5 as any;
-        state.corps_command!['corps_1']!.active_operation = {
-            ...state.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operation = {
+            ...state.military.corps_command!['corps_1']!.active_operation!,
             phase: 'recovery',
             phase_started_turn: 5,
             attack_attempt_count: 0,
@@ -318,8 +318,8 @@ describe('combat causality diagnostics', () => {
     it('does not keep re-flagging recovery without logged attempt after the recovery entry turn', () => {
         const state = makeState();
         state.meta.turn = 8 as any;
-        state.corps_command!['corps_1']!.active_operation = {
-            ...state.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operation = {
+            ...state.military.corps_command!['corps_1']!.active_operation!,
             phase: 'recovery',
             phase_started_turn: 5,
             attack_attempt_count: 0,
@@ -342,8 +342,8 @@ describe('combat causality diagnostics', () => {
     it('does not flag recovery without logged attempt when the operation recorded maneuver progress', () => {
         const state = makeState();
         state.meta.turn = 5 as any;
-        state.corps_command!['corps_1']!.active_operation = {
-            ...state.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operation = {
+            ...state.military.corps_command!['corps_1']!.active_operation!,
             phase: 'recovery',
             phase_started_turn: 5,
             attack_attempt_count: 0,
@@ -366,8 +366,8 @@ describe('combat causality diagnostics', () => {
     it('does not flag recovery without logged attempt when attacks and battles happened', () => {
         const state = makeState();
         state.meta.turn = 5 as any;
-        state.corps_command!['corps_1']!.active_operation = {
-            ...state.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operation = {
+            ...state.military.corps_command!['corps_1']!.active_operation!,
             phase: 'recovery',
             phase_started_turn: 5,
             attack_attempt_count: 0,
@@ -399,8 +399,8 @@ describe('combat causality diagnostics', () => {
 
     it('surfaces persisted operation counters in diagnostics and summary', () => {
         const state = makeState();
-        state.corps_command!['corps_1']!.active_operation = {
-            ...state.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operation = {
+            ...state.military.corps_command!['corps_1']!.active_operation!,
             attack_attempt_count: 2,
             objective_capture_count: 1,
             movement_only_execution_turns: 3,

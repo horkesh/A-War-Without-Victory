@@ -155,7 +155,7 @@ async function main(): Promise<void> {
         process.exit(1);
     }
 
-    const settlements: SettlementRecord[] = Array.isArray(indexData.settlements) ? indexData.settlements : [];
+    const settlements: SettlementRecord[] = Array.isArray(indexData.political.settlements) ? indexData.political.settlements : [];
     const indexSids = new Set<string>();
     for (const s of settlements) {
         const sid = typeof s.sid === 'string' && s.sid ? s.sid : '';
@@ -164,7 +164,7 @@ async function main(): Promise<void> {
 
     const censusSids = new Set<string>();
     const censusMunName = new Map<string, string>();
-    const municipalities = censusData.municipalities ?? {};
+    const municipalities = censusData.political.municipalities ?? {};
     for (const [munCode, mun] of Object.entries(municipalities).sort(([a], [b]) => a.localeCompare(b))) {
         const name = typeof mun.n === 'string' ? mun.n : '';
         const sArr = Array.isArray(mun.s) ? mun.s : [];

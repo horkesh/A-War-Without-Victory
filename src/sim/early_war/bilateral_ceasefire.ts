@@ -55,7 +55,7 @@ export interface CeasefireCheckReport {
  * Evaluate ceasefire preconditions. Pure function of state.
  */
 export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreconditionResult {
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     const turn = state.meta.turn;
 
     // C1: war duration
@@ -64,11 +64,11 @@ export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreco
     const c1 = warDuration >= CEASEFIRE_MIN_WAR_DURATION;
 
     // C2: HRHB exhaustion
-    const hrhbExhaustion = state.war_exhaustion?.['HRHB'] ?? 0;
+    const hrhbExhaustion = state.political.war_exhaustion?.['HRHB'] ?? 0;
     const c2 = hrhbExhaustion > CEASEFIRE_HRHB_EXHAUSTION;
 
     // C3: RBiH exhaustion
-    const rbihExhaustion = state.war_exhaustion?.['RBiH'] ?? 0;
+    const rbihExhaustion = state.political.war_exhaustion?.['RBiH'] ?? 0;
     const c3 = rbihExhaustion > CEASEFIRE_RBIH_EXHAUSTION;
 
     // C4: stalemate
@@ -76,7 +76,7 @@ export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreco
     const c4 = stalemateturns >= CEASEFIRE_STALEMATE_MIN;
 
     // C5: IVP negotiation_momentum
-    const ivp = state.international_visibility_pressure;
+    const ivp = state.political.international_visibility_pressure;
     const negotiationMomentum = ivp?.negotiation_momentum ?? 0;
     const c5 = negotiationMomentum > CEASEFIRE_IVP_THRESHOLD;
 
@@ -101,7 +101,7 @@ export function evaluateCeasefirePreconditions(state: GameState): CeasefirePreco
  * Must run AFTER alliance update, BEFORE Washington check.
  */
 export function checkAndApplyCeasefire(state: GameState): CeasefireCheckReport {
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     if (!rhs) {
         return {
             preconditions: {

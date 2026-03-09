@@ -55,7 +55,7 @@ function getLookupValue<T>(source: Record<string, T> | undefined, normalized: Ma
  */
 function getMajorityController(state: GameState, sids: string[]): FactionId | null {
     const counts: Record<string, number> = { RBiH: 0, HRHB: 0, RS: 0, _null: 0 };
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     for (const sid of sids) {
         const c = pc[sid];
         const key = c ?? '_null';
@@ -112,7 +112,7 @@ export function seedOrganizationalPenetrationFromControl(
     options?: OrganizationalPenetrationSeedOptions
 ): void {
     if (
-        (!state.political_controllers || Object.keys(state.political_controllers).length === 0) &&
+        (!state.political.political_controllers || Object.keys(state.political.political_controllers).length === 0) &&
         !options?.municipality_controller_by_mun
     ) {
         return;
@@ -123,7 +123,7 @@ export function seedOrganizationalPenetrationFromControl(
     const normalizedControllers = buildNormalizedLookup(options?.municipality_controller_by_mun);
     const normalizedPlannedByMun = buildNormalizedLookup(options?.planned_war_start_brigade_by_mun);
 
-    if (!state.municipalities) state.municipalities = {};
+    if (!state.political.municipalities) state.political.municipalities = {};
     for (const munId of munIds) {
         const sids = byMun.get(munId);
         if (!sids?.length) continue;
@@ -145,10 +145,10 @@ export function seedOrganizationalPenetrationFromControl(
             aligned_population_share_by_faction: alignedShareByFaction,
             planned_war_start_brigade_by_faction: plannedWarStartByFaction
         });
-        let mun = state.municipalities[munId];
+        let mun = state.political.municipalities[munId];
         if (!mun) {
             mun = {};
-            state.municipalities[munId] = mun;
+            state.political.municipalities[munId] = mun;
         }
         mun.organizational_penetration = op;
     }

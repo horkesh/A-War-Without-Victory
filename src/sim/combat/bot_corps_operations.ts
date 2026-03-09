@@ -67,7 +67,7 @@ export function getOperationCatalog(faction: FactionId, state: GameState): Opera
                 { name: 'Tuzla Widening', type: 'sector_attack', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice'] },
                 { name: 'Bihac Pocket Defense', type: 'strategic_defense', target_municipalities: ['bihac', 'cazin', 'velika_kladusa'] },
             ];
-            const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
+            const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
             if (allianceValue < 0.0) {
                 ops.push({ name: 'Central Bosnia Defense', type: 'strategic_defense', target_municipalities: ['travnik', 'bugojno', 'vitez', 'novi_travnik'] });
             }
@@ -85,7 +85,7 @@ export function getOperationCatalog(faction: FactionId, state: GameState): Opera
                 { name: 'Posavina Defense', type: 'strategic_defense', target_municipalities: ['orasje', 'odzak', 'bosanski_brod'] },
             ];
             // Bilateral operations only when at war with RBiH
-            const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
+            const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
             if (allianceValue < 0.0) {
                 ops.push({ name: 'Lasva Valley Offensive', type: 'sector_attack', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'novi_travnik'] });
                 ops.push({ name: 'Mostar Division', type: 'sector_attack', target_municipalities: ['mostar', 'jablanica', 'konjic'] });
@@ -106,12 +106,12 @@ export function generateCorpsOperationOrders(
     edges: EdgeRecord[],
     sidToMun: Map<SettlementId, string>
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsList = getFactionCorps(state, faction);
     const turn = state.meta?.turn ?? 0;
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const catalog = getOperationCatalog(faction, state);
 
     for (const corps of corpsList) {
@@ -197,13 +197,13 @@ export function evaluateOperationProgress(
     state: GameState,
     faction: FactionId
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsList = getFactionCorps(state, faction);
     const turn = state.meta?.turn ?? 0;
-    const pc = state.political_controllers ?? {};
-    const formations = state.formations ?? {};
+    const pc = state.political.political_controllers ?? {};
+    const formations = state.military.formations ?? {};
 
     for (const corps of corpsList) {
         const cmd = corpsCommand[corps.id];
@@ -292,13 +292,13 @@ export function generateOGActivationOrders(
     faction: FactionId,
     edges: EdgeRecord[]
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsList = getFactionCorps(state, faction);
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
-    if (!state.og_orders) state.og_orders = [];
+    if (!state.military.og_orders) state.military.og_orders = [];
 
     for (const corps of corpsList) {
         const cmd = corpsCommand[corps.id];
@@ -347,7 +347,7 @@ export function generateOGActivationOrders(
             max_duration: OG_DEFAULT_DURATION
         };
 
-        state.og_orders.push(ogOrder);
+        state.military.og_orders.push(ogOrder);
     }
 }
 
@@ -365,12 +365,12 @@ export function generateEmergencyDefensiveOperations(
     edges: EdgeRecord[],
     sidToMun: Map<SettlementId, string>
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsList = getFactionCorps(state, faction);
     const turn = state.meta?.turn ?? 0;
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
 
     for (const corps of corpsList) {
         const cmd = corpsCommand[corps.id];

@@ -36,7 +36,7 @@ function clamp01(x: number): number {
  * Safe per-SID modifier reader. Defaults to all 1s.
  */
 export function getSidCapacityModifiers(state: GameState, sid: string): SidCapacityModifiers {
-    const rec = state.capacity_modifiers?.by_sid?.[sid] as Partial<SidCapacityModifiers> | undefined;
+    const rec = state.political.capacity_modifiers?.by_sid?.[sid] as Partial<SidCapacityModifiers> | undefined;
     if (!rec || typeof rec !== 'object') return DEFAULT_MODIFIERS;
     return {
         authority_mult: clamp01(rec.authority_mult ?? 1),

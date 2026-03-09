@@ -31,7 +31,7 @@ function main() {
   const t2 = Date.now();
   const state = parseGameState(json);
   console.log('parseGameState done in', Date.now() - t2, 'ms');
-  console.log('Result:', state.label, '| formations:', state.formations.length, '| control keys:', Object.keys(state.controlBySettlement).length);
+  console.log('Result:', state.label, '| formations:', state.military.formations.length, '| control keys:', Object.keys(state.controlBySettlement).length);
 
   if (!fs.existsSync(operationalPath)) {
     console.log('No operational_settlements.geojson, skipping overlay builders');
@@ -46,7 +46,7 @@ function main() {
   console.log('buildControlGeoJSON', Date.now() - t, 'ms');
 
   t = Date.now();
-  const frontLines = buildFrontLinesGeoJSON(controlled, state.war_alliance_rbih_hrhb);
+  const frontLines = buildFrontLinesGeoJSON(controlled, state.political.war_alliance_rbih_hrhb);
   console.log('buildFrontLinesGeoJSON', Date.now() - t, 'ms, features:', frontLines.features.length);
 
   t = Date.now();

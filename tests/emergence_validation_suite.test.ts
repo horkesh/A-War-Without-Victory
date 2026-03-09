@@ -41,7 +41,7 @@ function minimalPhaseIIState(): GameState {
 
 test('Phase E validation: pressure diffuses spatially and deterministically', () => {
     const state = minimalPhaseIIState();
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
     const edges = [{ a: 'S1', b: 'S2' }];
 
     const result1 = diffusePressure(state, edges);
@@ -61,8 +61,8 @@ test('Phase E validation: AoRs are emergent (only when sustained conditions met)
     assert.strictEqual(Object.keys(aor1.by_formation).length, 0, 'No AoRs when conditions not sustained');
 
     // Add sustained conditions (pressure >= 5, active_streak >= 3)
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } };
 
     const aor2 = deriveAoRMembership(state, edges);
     assert.ok(Object.keys(aor2.by_formation).length > 0, 'AoRs emerge when sustained conditions met');
@@ -70,15 +70,15 @@ test('Phase E validation: AoRs are emergent (only when sustained conditions met)
 
 test('Phase E validation: AoRs are reversible (dissolve when conditions weaken)', () => {
     const state = minimalPhaseIIState();
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } };
     const edges = [{ a: 'S1', b: 'S2' }];
 
     const aor1 = deriveAoRMembership(state, edges);
     assert.ok(Object.keys(aor1.by_formation).length > 0, 'AoRs exist when sustained');
 
     // Weaken conditions (pressure drops below threshold)
-    state.front_pressure['S1__S2'].value = 3;
+    state.military.front_pressure['S1__S2'].value = 3;
     const aor2 = deriveAoRMembership(state, edges);
     assert.strictEqual(Object.keys(aor2.by_formation).length, 0, 'AoRs dissolve when conditions weaken');
 });
@@ -92,9 +92,9 @@ test('Phase E validation: Rear Political Control Zones stabilize the rear', () =
     assert.ok(rearZone.settlement_ids.includes('S3'), 'S3 is in rear zone');
 
     // Rear zones do not flip control (read-only derivation)
-    const originalControl = { ...state.political_controllers };
+    const originalControl = { ...state.political.political_controllers };
     deriveRearPoliticalControlZones(state, edges);
-    assert.deepStrictEqual(state.political_controllers, originalControl, 'Rear zone detection does not flip control');
+    assert.deepStrictEqual(state.political.political_controllers, originalControl, 'Rear zone detection does not flip control');
 });
 
 test('Phase E validation: no negotiation logic in Phase E modules', async () => {
@@ -115,8 +115,8 @@ test('Phase E validation: no negotiation logic in Phase E modules', async () => 
 
 test('Phase E validation: Phase D invariants still hold (exhaustion monotonic)', async () => {
     const state = minimalPhaseIIState();
-    state.war_exhaustion = { RBiH: 5, RS: 8 };
-    const originalExhaustion = { ...state.war_exhaustion };
+    state.political.war_exhaustion = { RBiH: 5, RS: 8 };
+    const originalExhaustion = { ...state.political.war_exhaustion };
     const edges = [{ a: 'S1', b: 'S2' }];
 
     // Run one turn with Phase E active
@@ -126,14 +126,14 @@ test('Phase E validation: Phase D invariants still hold (exhaustion monotonic)',
     // Note: War phase consolidation may increase exhaustion; Phase E must not decrease it
     for (const fid of Object.keys(originalExhaustion)) {
         const original = originalExhaustion[fid] ?? 0;
-        const current = result.nextState.war_exhaustion?.[fid] ?? 0;
+        const current = result.nextState.political.war_exhaustion?.[fid] ?? 0;
         assert.ok(current >= original, `Exhaustion for ${fid} did not decrease (Phase D invariant)`);
     }
 });
 
 test('Phase E validation: Phase E does not flip control', async () => {
     const state = minimalPhaseIIState();
-    const originalControl = { ...state.political_controllers };
+    const originalControl = { ...state.political.political_controllers };
     const edges = [{ a: 'S1', b: 'S2' }];
 
     // Run Phase E derivations
@@ -142,7 +142,7 @@ test('Phase E validation: Phase E does not flip control', async () => {
     deriveRearPoliticalControlZones(state, edges);
 
     // Phase E must not flip control (read-only derivation)
-    assert.deepStrictEqual(state.political_controllers, originalControl, 'Phase E does not flip control');
+    assert.deepStrictEqual(state.political.political_controllers, originalControl, 'Phase E does not flip control');
 });
 
 test('Phase E validation: Phase E does not create end-state', async () => {
@@ -152,13 +152,13 @@ test('Phase E validation: Phase E does not create end-state', async () => {
     const result = await runTurn(state, { seed: 'test', settlementEdges: edges });
 
     // Phase E must not set end_state (negotiation/end-state belongs to Phase O)
-    assert.ok(!result.nextState.end_state, 'Phase E does not create end_state');
+    assert.ok(!result.nextState.political.end_state, 'Phase E does not create end_state');
 });
 
 test('Phase E validation: Phase E outputs are consumable by future phases', () => {
     const state = minimalPhaseIIState();
-    state.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
-    state.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } };
+    state.military.front_pressure = { 'S1__S2': { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 10 } };
+    state.military.front_segments = { 'S1__S2': { edge_id: 'S1__S2', active: true, created_turn: 7, since_turn: 7, last_active_turn: 10, active_streak: 3, max_active_streak: 3, friction: 0, max_friction: 0 } };
     const edges = [{ a: 'S1', b: 'S2' }];
 
     // Phase E outputs are well-typed and consumable

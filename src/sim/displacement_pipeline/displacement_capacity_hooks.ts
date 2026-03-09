@@ -23,7 +23,7 @@ export type CapacityFactor = number;
  */
 export function getMunicipalityDisplacementFactor(state: GameState, munId: MunicipalityId): CapacityFactor {
     if (state.meta?.phase !== 'war') return 1;
-    const v = state.municipality_displacement?.[munId];
+    const v = state.displacement.municipality_displacement?.[munId];
     if (typeof v !== 'number' || !Number.isFinite(v)) return 1;
     return Math.max(0, Math.min(1, 1 - v));
 }
@@ -35,7 +35,7 @@ export function getMunicipalityDisplacementFactor(state: GameState, munId: Munic
  */
 export function getSettlementDisplacementFactor(state: GameState, sid: SettlementId): CapacityFactor {
     if (state.meta?.phase !== 'war') return 1;
-    const v = state.settlement_displacement?.[sid];
+    const v = state.displacement.settlement_displacement?.[sid];
     if (typeof v !== 'number' || !Number.isFinite(v)) return 1;
     return Math.max(0, Math.min(1, 1 - v));
 }
@@ -62,7 +62,7 @@ export function buildDisplacementCapacityReport(state: GameState): DisplacementC
         return { municipalities_affected, settlements_affected, municipality_factors };
     }
 
-    const md = state.municipality_displacement ?? {};
+    const md = state.displacement.municipality_displacement ?? {};
     for (const munId of Object.keys(md).sort(strictCompare)) {
         const v = md[munId];
         if (typeof v === 'number' && v > 0) {
@@ -71,7 +71,7 @@ export function buildDisplacementCapacityReport(state: GameState): DisplacementC
         }
     }
 
-    const sd = state.settlement_displacement ?? {};
+    const sd = state.displacement.settlement_displacement ?? {};
     for (const sid of Object.keys(sd).sort(strictCompare)) {
         const v = sd[sid];
         if (typeof v === 'number' && v > 0) settlements_affected.push(sid);

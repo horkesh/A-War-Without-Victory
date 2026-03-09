@@ -101,7 +101,7 @@ test('validateGameStateShape returns ok for GameState with only some Phase F fie
 
 test('validateGameStateShape rejects settlement_displacement when value out of [0, 1]', () => {
     const state = phaseFGameStateFixture();
-    state.settlement_displacement!['SID_001'] = 1.5;
+    state.displacement.settlement_displacement!['SID_001'] = 1.5;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('settlement_displacement')));
@@ -109,7 +109,7 @@ test('validateGameStateShape rejects settlement_displacement when value out of [
 
 test('validateGameStateShape rejects municipality_displacement when value out of [0, 1]', () => {
     const state = phaseFGameStateFixture();
-    state.municipality_displacement!['MUN_A'] = -0.1;
+    state.displacement.municipality_displacement!['MUN_A'] = -0.1;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('municipality_displacement')));
@@ -120,9 +120,9 @@ test('Phase F state serialization round-trip preserves Phase F fields', () => {
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(hydrated.settlement_displacement, { 'SID_001': 0.2, 'SID_002': 0.5 });
-    assert.deepStrictEqual(hydrated.settlement_displacement_started_turn, { 'SID_001': 25, 'SID_002': 28 });
-    assert.deepStrictEqual(hydrated.municipality_displacement, { 'MUN_A': 0.3, 'MUN_B': 0.4 });
+    assert.deepStrictEqual(hydrated.displacement.settlement_displacement, { 'SID_001': 0.2, 'SID_002': 0.5 });
+    assert.deepStrictEqual(hydrated.displacement.settlement_displacement_started_turn, { 'SID_001': 25, 'SID_002': 28 });
+    assert.deepStrictEqual(hydrated.displacement.municipality_displacement, { 'MUN_A': 0.3, 'MUN_B': 0.4 });
 });
 
 test('Phase F state serialization reaches deterministic fixed-point after migration defaults', () => {

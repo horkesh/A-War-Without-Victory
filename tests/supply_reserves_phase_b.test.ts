@@ -49,8 +49,8 @@ describe('updateSiegeTurnCounters', () => {
             }]
         };
         const report = updateSiegeTurnCounters(state, supply);
-        expect(state.siege_turn_counters!['RBiH:op:srebrenica:center']).toBe(1);
-        expect(state.siege_turn_counters!['RBiH:op:tuzla:center']).toBeUndefined();
+        expect(state.military.siege_turn_counters!['RBiH:op:srebrenica:center']).toBe(1);
+        expect(state.military.siege_turn_counters!['RBiH:op:tuzla:center']).toBeUndefined();
         expect(report.active_sieges).toBe(1);
     });
 
@@ -67,7 +67,7 @@ describe('updateSiegeTurnCounters', () => {
             }]
         };
         updateSiegeTurnCounters(state, supply);
-        expect(state.siege_turn_counters!['RBiH:op:srebrenica:center']).toBe(4);
+        expect(state.military.siege_turn_counters!['RBiH:op:srebrenica:center']).toBe(4);
     });
 
     it('resets counter when no longer critical', () => {
@@ -83,7 +83,7 @@ describe('updateSiegeTurnCounters', () => {
             }]
         };
         const report = updateSiegeTurnCounters(state, supply);
-        expect(state.siege_turn_counters!['RBiH:op:srebrenica:center']).toBeUndefined();
+        expect(state.military.siege_turn_counters!['RBiH:op:srebrenica:center']).toBeUndefined();
         expect(report.counters_reset).toBe(1);
     });
 });
@@ -120,8 +120,8 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
         const adjacency = makeChainAdjacency(['op:a:1', 'op:a:2']);
         updateSiegeTurnCounters(state, supply, adjacency);
         // Counter frozen at 1 (was 10, now reset to 1)
-        expect(state.siege_turn_counters!['RBiH:op:a:1']).toBe(1);
-        expect(state.siege_turn_counters!['RBiH:op:a:2']).toBe(1);
+        expect(state.military.siege_turn_counters!['RBiH:op:a:1']).toBe(1);
+        expect(state.military.siege_turn_counters!['RBiH:op:a:2']).toBe(1);
     });
 
     it('escalates normally for large pockets (at or above SIEGE_MIN_POCKET_SIZE)', () => {
@@ -142,7 +142,7 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
         const adjacency = makeChainAdjacency(osids);
         updateSiegeTurnCounters(state, supply, adjacency);
         // Counter should increment normally (5 → 6)
-        expect(state.siege_turn_counters![`RBiH:${osids[0]}`]).toBe(6);
+        expect(state.military.siege_turn_counters![`RBiH:${osids[0]}`]).toBe(6);
     });
 
     it('handles mixed pockets: large escalate, small frozen', () => {
@@ -169,9 +169,9 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
 
         updateSiegeTurnCounters(state, supply, adjacency);
         // Large pocket escalates: 3 → 4
-        expect(state.siege_turn_counters![`RS:${largeOsids[0]}`]).toBe(4);
+        expect(state.military.siege_turn_counters![`RS:${largeOsids[0]}`]).toBe(4);
         // Singleton frozen at 1
-        expect(state.siege_turn_counters![`RS:${singleton}`]).toBe(1);
+        expect(state.military.siege_turn_counters![`RS:${singleton}`]).toBe(1);
     });
 
     it('backward compat: without adjacency, all OSIDs escalate', () => {
@@ -188,7 +188,7 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
         };
         // No adjacency passed → all escalate
         updateSiegeTurnCounters(state, supply);
-        expect(state.siege_turn_counters!['RS:op:outpost:1']).toBe(6);
+        expect(state.military.siege_turn_counters!['RS:op:outpost:1']).toBe(6);
     });
 
     it('SIEGE_MIN_POCKET_SIZE constant is 8', () => {
@@ -202,8 +202,8 @@ describe('updateSupplyReserves — siege drain', () => {
             siege_turn_counters: { 'RBiH:op:srebrenica:center': 5 }
         });
         ensureSupplyReserves(state);
-        const prevGeneral = state.general_supply_reserve!['RBiH']!;
-        const prevHeavy = state.heavy_munitions_reserve!['RBiH']!;
+        const prevGeneral = state.military.general_supply_reserve!['RBiH']!;
+        const prevHeavy = state.military.heavy_munitions_reserve!['RBiH']!;
 
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
 
@@ -215,7 +215,7 @@ describe('updateSupplyReserves — siege drain', () => {
         const rbihEntry = report.factions.find(f => f.faction_id === 'RBiH')!;
         expect(rbihEntry.siege_drain_general).toBeCloseTo(expectedGeneralDrain, 5);
         expect(rbihEntry.siege_drain_heavy).toBeCloseTo(expectedHeavyDrain, 5);
-        expect(state.general_supply_reserve!['RBiH']).toBeLessThan(prevGeneral);
+        expect(state.military.general_supply_reserve!['RBiH']).toBeLessThan(prevGeneral);
     });
 
     it('caps siege drain at MAX_SIEGE_PRESSURE_RATE', () => {
@@ -325,8 +325,8 @@ describe('updateSupplyReserves — determinism', () => {
         const report2 = updateSupplyReserves(state2, prod);
 
         expect(JSON.stringify(report1)).toBe(JSON.stringify(report2));
-        expect(state1.general_supply_reserve).toEqual(state2.general_supply_reserve);
-        expect(state1.heavy_munitions_reserve).toEqual(state2.heavy_munitions_reserve);
+        expect(state1.military.general_supply_reserve).toEqual(state2.military.general_supply_reserve);
+        expect(state1.military.heavy_munitions_reserve).toEqual(state2.military.heavy_munitions_reserve);
     });
 });
 
@@ -348,7 +348,7 @@ describe('updateSupplyReserves — combined update', () => {
             ] as any
         });
         ensureSupplyReserves(state);
-        const prevGeneral = state.general_supply_reserve!['RBiH']!;
+        const prevGeneral = state.military.general_supply_reserve!['RBiH']!;
         const report = updateSupplyReserves(state, { RBiH: 5, RS: 0, HRHB: 0 });
         const rbihEntry = report.factions.find(f => f.faction_id === 'RBiH')!;
 

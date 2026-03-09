@@ -32,8 +32,8 @@ export function promotePoliticalControllersToOsid(
     state: GameState,
     operationalToCanonical: OperationalToCanonicalReverseMap
 ): void {
-    const pcSid = state.political_controllers ?? {};
-    const contestedSid = state.contested_control ?? {};
+    const pcSid = state.political.political_controllers ?? {};
+    const contestedSid = state.political.contested_control ?? {};
     const controllersOsid: Record<string, FactionId | null> = {};
     const contestedOsid: Record<string, boolean> = {};
     const osids = Array.from(operationalToCanonical.keys()).sort((a, b) => a.localeCompare(b));
@@ -60,8 +60,8 @@ export function promotePoliticalControllersToOsid(
         controllersOsid[osid] = bestCount > 0 ? best : null;
         contestedOsid[osid] = contested;
     }
-    state.political_controllers = controllersOsid;
-    state.contested_control = contestedOsid;
+    state.political.political_controllers = controllersOsid;
+    state.political.contested_control = contestedOsid;
 }
 
 /**
@@ -75,19 +75,19 @@ export function applyOsidControlOverrides(
     state: GameState,
     overrides: Record<string, string>
 ): void {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const keys = Object.keys(overrides).sort((a, b) => a.localeCompare(b));
     for (const osid of keys) {
         const faction = overrides[osid];
         if (faction && CANONICAL_FACTION_IDS.includes(faction as (typeof CANONICAL_FACTION_IDS)[number])) {
             pc[osid] = faction as FactionId;
             // Mark as contested (historically these were disputed areas)
-            if (state.contested_control) {
-                state.contested_control[osid] = true;
+            if (state.political.contested_control) {
+                state.political.contested_control[osid] = true;
             }
         }
     }
-    state.political_controllers = pc;
+    state.political.political_controllers = pc;
 }
 
 /**
@@ -99,7 +99,7 @@ function isPoliticalControllersAlreadyOsidKeyed(
     state: GameState,
     operationalToCanonical: OperationalToCanonicalReverseMap
 ): boolean {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const osidSet = new Set(operationalToCanonical.keys());
     const keys = Object.keys(pc);
     return keys.length > 0 && keys.every((k) => osidSet.has(k));
@@ -115,7 +115,7 @@ export function migratePoliticalControllersToOsidIfNeeded(
     state: GameState,
     operationalToCanonical: OperationalToCanonicalReverseMap
 ): void {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const osidSet = new Set(operationalToCanonical.keys());
     const canonicalSids = new Set<string>();
     for (const sids of operationalToCanonical.values()) {
@@ -622,14 +622,14 @@ async function initializePoliticalControllersFromEthnic1991(
     applyRbihAlignedMunicipalityOverrides(controllersRecord, settlementGraph);
     const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
 
-    state.political_controllers = controllersRecord;
-    state.contested_control = contestedRecord;
-    if (!state.municipalities) state.municipalities = {};
+    state.political.political_controllers = controllersRecord;
+    state.political.contested_control = contestedRecord;
+    if (!state.political.municipalities) state.political.municipalities = {};
     const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => a.localeCompare(b));
     for (const [munId, control_status] of sortedMunicipalities) {
-        if (!state.municipalities[munId]) state.municipalities[munId] = {};
-        state.municipalities[munId].control_status = control_status;
-        state.municipalities[munId].control = controlStatusToAuthority(control_status);
+        if (!state.political.municipalities[munId]) state.political.municipalities[munId] = {};
+        state.political.municipalities[munId].control_status = control_status;
+        state.political.municipalities[munId].control = controlStatusToAuthority(control_status);
     }
 
     const audit = computePoliticalControlAudit(controllersRecord);
@@ -703,14 +703,14 @@ async function initializePoliticalControllersFromHybrid1992(
     applyRbihAlignedMunicipalityOverrides(controllersRecord, settlementGraph);
     const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
 
-    state.political_controllers = controllersRecord;
-    state.contested_control = contestedRecord;
-    if (!state.municipalities) state.municipalities = {};
+    state.political.political_controllers = controllersRecord;
+    state.political.contested_control = contestedRecord;
+    if (!state.political.municipalities) state.political.municipalities = {};
     const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => a.localeCompare(b));
     for (const [munId, control_status] of sortedMunicipalities) {
-        if (!state.municipalities[munId]) state.municipalities[munId] = {};
-        state.municipalities[munId].control_status = control_status;
-        state.municipalities[munId].control = controlStatusToAuthority(control_status);
+        if (!state.political.municipalities[munId]) state.political.municipalities[munId] = {};
+        state.political.municipalities[munId].control_status = control_status;
+        state.political.municipalities[munId].control = controlStatusToAuthority(control_status);
     }
 
     const audit = computePoliticalControlAudit(controllersRecord);
@@ -771,16 +771,16 @@ export async function applyMunicipalityControllersFromMun1990Only(
     applyRbihAlignedMunicipalityOverrides(controllersRecord, settlementGraph);
     const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
 
-    state.political_controllers = controllersRecord;
-    state.contested_control = contestedRecord;
-    if (!state.municipalities) state.municipalities = {};
+    state.political.political_controllers = controllersRecord;
+    state.political.contested_control = contestedRecord;
+    if (!state.political.municipalities) state.political.municipalities = {};
     const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => a.localeCompare(b));
     for (const [munId, control_status] of sortedMunicipalities) {
-        if (!state.municipalities[munId]) {
-            state.municipalities[munId] = {};
+        if (!state.political.municipalities[munId]) {
+            state.political.municipalities[munId] = {};
         }
-        state.municipalities[munId].control_status = control_status;
-        state.municipalities[munId].control = controlStatusToAuthority(control_status);
+        state.political.municipalities[munId].control_status = control_status;
+        state.political.municipalities[munId].control = controlStatusToAuthority(control_status);
     }
 
     const audit = computePoliticalControlAudit(controllersRecord);
@@ -817,7 +817,7 @@ export async function initializePoliticalControllers(
     initOptions?: PoliticalControlInitOptions
 ): Promise<PoliticalControlInitResult> {
     const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
-    const existing = state.political_controllers ?? {};
+    const existing = state.political.political_controllers ?? {};
     let definedCount = 0;
     let undefinedCount = 0;
     for (const sid of settlementIds) {
@@ -959,26 +959,26 @@ export async function initializePoliticalControllers(
     }
     applyRbihAlignedMunicipalityOverrides(controllersRecord, settlementGraph);
     const coercion = enforceNonNullStartControllers(settlementGraph, controllersRecord);
-    state.political_controllers = controllersRecord;
-    state.contested_control = contestedRecord;
+    state.political.political_controllers = controllersRecord;
+    state.political.contested_control = contestedRecord;
     if (initOptions?.operationalToCanonical) {
         if (!isPoliticalControllersAlreadyOsidKeyed(state, initOptions.operationalToCanonical)) {
             promotePoliticalControllersToOsid(state, initOptions.operationalToCanonical);
         }
     }
 
-    if (!state.municipalities) state.municipalities = {};
+    if (!state.political.municipalities) state.political.municipalities = {};
     const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) =>
         a.localeCompare(b)
     );
     for (const [munId, status] of sortedMunicipalities) {
-        if (!state.municipalities[munId]) {
-            state.municipalities[munId] = {};
+        if (!state.political.municipalities[munId]) {
+            state.political.municipalities[munId] = {};
         }
-        state.municipalities[munId].control_status = status.control_status;
-        state.municipalities[munId].control = controlStatusToAuthority(status.control_status);
+        state.political.municipalities[munId].control_status = status.control_status;
+        state.political.municipalities[munId].control = controlStatusToAuthority(status.control_status);
         if (status.stability_score !== undefined) {
-            state.municipalities[munId].stability_score = status.stability_score;
+            state.political.municipalities[munId].stability_score = status.stability_score;
         }
     }
 

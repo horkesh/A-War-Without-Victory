@@ -50,7 +50,7 @@ export function generateCorpsStanceOrders(
     edges: EdgeRecord[],
     sidToMun: Map<SettlementId, string>
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsList = getFactionCorps(state, faction);
@@ -88,7 +88,7 @@ export function generateCorpsStanceOrders(
         }
 
         // --- Doctrine phase influence (D3) ---
-        const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.war_timeline);
+        const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.military.war_timeline);
         if (doctrinePhase && stance === 'balanced') {
             // Doctrine provides a default bias when the situation is ambiguous
             stance = doctrinePhase.default_corps_stance;
@@ -123,7 +123,7 @@ export function generateCorpsStanceOrders(
             // E2: RBiH late-war counteroffensive eligibility (week 40+)
             if (turn >= 40 && stance === 'balanced' && avgPers >= 0.6 && avgCoh >= 50) {
                 // Check if faction controls enough territory for counteroffensive
-                const pc = state.political_controllers ?? {};
+                const pc = state.political.political_controllers ?? {};
                 const totalSids = Object.keys(pc).length;
                 let ownedSids = 0;
                 for (const k of Object.keys(pc)) { if (pc[k] === 'RBiH') ownedSids++; }
@@ -132,9 +132,9 @@ export function generateCorpsStanceOrders(
                 }
             }
             // E2: RBiH bilateral war awareness
-            const rhsRBiH = state.rbih_hrhb_state;
+            const rhsRBiH = state.political.rbih_hrhb_state;
             if (rhsRBiH && !rhsRBiH.washington_signed) {
-                const allianceVal = state.war_alliance_rbih_hrhb ?? 1.0;
+                const allianceVal = state.political.war_alliance_rbih_hrhb ?? 1.0;
                 if (allianceVal < 0.0) {
                     // Open war with HRHB: central Bosnia corps balanced (defend mixed municipalities)
                     const CENTRAL_BOSNIA_MUNS = new Set(['travnik', 'bugojno', 'vitez', 'novi_travnik', 'busovaca', 'kiseljak', 'zenica']);
@@ -158,9 +158,9 @@ export function generateCorpsStanceOrders(
                 }
             }
             // E3: Alliance-sensitive — check RBiH-HRHB war state
-            const rhs = state.rbih_hrhb_state;
+            const rhs = state.political.rbih_hrhb_state;
             if (rhs && !rhs.washington_signed) {
-                const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
+                const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
                 if (allianceValue < 0.0) {
                     // Open war: central Bosnia corps go offensive, Herzegovina stays defensive
                     if (!HERZEGOVINA_MUNS.has(corpsHomeMun ?? '')) {
@@ -204,21 +204,21 @@ export function setArmyStandingOrder(
     faction: FactionId
 ): void {
     const turn = state.meta?.turn ?? 0;
-    const order = getActiveStandingOrder(faction, turn, state.war_timeline);
+    const order = getActiveStandingOrder(faction, turn, state.military.war_timeline);
     if (!order) return;
 
     let stance = order.army_stance;
 
     // HRHB: Lasva Offensive only applies when at war with RBiH
     if (faction === 'HRHB' && order.name === 'Lasva Offensive') {
-        const allianceValue = state.war_alliance_rbih_hrhb ?? 1.0;
+        const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
         if (allianceValue >= 0.2) {
             stance = 'balanced'; // Not at war — no army-wide offensive
         }
     }
 
-    if (!state.army_stance) state.army_stance = {};
-    state.army_stance[faction] = stance;
+    if (!state.military.army_stance) state.military.army_stance = {};
+    state.military.army_stance[faction] = stance;
 }
 
 /**
@@ -237,10 +237,10 @@ export function coordinateMultiCorpsOffensive(
     faction: FactionId,
     edges: EdgeRecord[]
 ): void {
-    const armyStance = state.army_stance?.[faction];
+    const armyStance = state.military.army_stance?.[faction];
     if (armyStance !== 'general_offensive') return;
 
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsList = getFactionCorps(state, faction);

@@ -9,11 +9,11 @@ export function validateSupplyRights(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const currentTurn = state?.meta?.turn ?? 0;
 
-    if (!state.supply_rights) {
+    if (!state.political.supply_rights) {
         return issues; // optional field
     }
 
-    const supplyRights = state.supply_rights;
+    const supplyRights = state.political.supply_rights;
     if (typeof supplyRights !== 'object') {
         issues.push({
             severity: 'error',

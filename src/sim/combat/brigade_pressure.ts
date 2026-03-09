@@ -124,8 +124,8 @@ export function computeBrigadePressureByEdge(
     _allEdges?: EdgeRecord[]
 ): BrigadePressureResult {
     const result: BrigadePressureResult = { edge_pressure: {}, brigade_pressure: {} };
-    const pc = state.political_controllers ?? {};
-    const frontSegments = state.front_segments ?? {};
+    const pc = state.political.political_controllers ?? {};
+    const frontSegments = state.military.front_segments ?? {};
 
     for (const edge of frontEdges) {
         const controlA = pc[edge.a];
@@ -160,7 +160,7 @@ export function applyBrigadePressureToState(
     state: GameState,
     edges: EdgeRecord[]
 ): void {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
 
     // Collect front edges
     const frontEdges: Array<{ a: SettlementId; b: SettlementId }> = [];
@@ -175,15 +175,15 @@ export function applyBrigadePressureToState(
     const pressureResult = computeBrigadePressureByEdge(state, frontEdges, edges);
 
     // Update front_pressure state
-    if (!state.front_pressure) state.front_pressure = {};
+    if (!state.military.front_pressure) state.military.front_pressure = {};
     for (const [eid, pressure] of Object.entries(pressureResult.edge_pressure)) {
-        const existing = state.front_pressure[eid];
+        const existing = state.military.front_pressure[eid];
         if (existing) {
             existing.value += Math.round(pressure.delta);
             existing.max_abs = Math.max(existing.max_abs, Math.abs(existing.value));
             existing.last_updated_turn = state.meta.turn;
         } else {
-            state.front_pressure[eid] = {
+            state.military.front_pressure[eid] = {
                 edge_id: eid,
                 value: Math.round(pressure.delta),
                 max_abs: Math.abs(Math.round(pressure.delta)),

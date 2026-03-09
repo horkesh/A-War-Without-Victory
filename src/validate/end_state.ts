@@ -10,13 +10,13 @@ import type { ValidationIssue } from './validate.js';
 export function validateEndState(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    const endState = state.end_state;
+    const endState = state.political.end_state;
     if (endState === undefined || endState === null) {
         // end_state is optional, so undefined/null is valid
         // Phase 12D.1: But BRCKO_CONTROLLER_ID must not appear in control maps when end_state is not set
         // Check control_overrides for BRCKO_CONTROLLER_ID
-        if (state.control_overrides) {
-            for (const [sid, override] of Object.entries(state.control_overrides)) {
+        if (state.political.control_overrides) {
+            for (const [sid, override] of Object.entries(state.political.control_overrides)) {
                 if (override && typeof override === 'object' && override.side === BRCKO_CONTROLLER_ID) {
                     issues.push({
                         severity: 'error',

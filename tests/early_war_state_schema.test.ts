@@ -115,7 +115,7 @@ test('validateGameStateShape returns ok for GameState with only some Peace phase
 
 test('validateGameStateShape rejects war_jna when transition_begun is not boolean', () => {
     const state = peacePhaseGameStateFixture();
-    state.war_jna!.transition_begun = 1 as unknown as boolean;
+    state.military.war_jna!.transition_begun = 1 as unknown as boolean;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_jna')));
@@ -123,7 +123,7 @@ test('validateGameStateShape rejects war_jna when transition_begun is not boolea
 
 test('validateGameStateShape rejects war_jna when withdrawal_progress out of range', () => {
     const state = peacePhaseGameStateFixture();
-    state.war_jna!.withdrawal_progress = 1.5;
+    state.military.war_jna!.withdrawal_progress = 1.5;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('withdrawal_progress')));
@@ -131,7 +131,7 @@ test('validateGameStateShape rejects war_jna when withdrawal_progress out of ran
 
 test('validateGameStateShape rejects war_alliance_rbih_hrhb when out of [-1, 1]', () => {
     const state = peacePhaseGameStateFixture();
-    state.war_alliance_rbih_hrhb = 1.5;
+    state.political.war_alliance_rbih_hrhb = 1.5;
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('war_alliance_rbih_hrhb')));
@@ -142,15 +142,15 @@ test('Peace phase state serialization round-trip preserves Peace phase fields', 
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(hydrated.war_consolidation_until, { 'MUN_001': 14 });
-    assert.ok(hydrated.war_militia_strength);
-    assert.strictEqual(hydrated.war_militia_strength!['MUN_001'].RBiH, 60);
-    assert.strictEqual(hydrated.war_militia_strength!['MUN_001'].RS, 20);
-    assert.deepStrictEqual(hydrated.war_control_strain, { 'MUN_001': 5, 'MUN_002': 12 });
-    assert.strictEqual(hydrated.war_jna!.transition_begun, true);
-    assert.strictEqual(hydrated.war_jna!.withdrawal_progress, 0.25);
-    assert.strictEqual(hydrated.war_jna!.asset_transfer_rs, 0.2);
-    assert.strictEqual(hydrated.war_alliance_rbih_hrhb, 0.5);
+    assert.deepStrictEqual(hydrated.political.war_consolidation_until, { 'MUN_001': 14 });
+    assert.ok(hydrated.military.war_militia_strength);
+    assert.strictEqual(hydrated.military.war_militia_strength!['MUN_001'].RBiH, 60);
+    assert.strictEqual(hydrated.military.war_militia_strength!['MUN_001'].RS, 20);
+    assert.deepStrictEqual(hydrated.political.war_control_strain, { 'MUN_001': 5, 'MUN_002': 12 });
+    assert.strictEqual(hydrated.military.war_jna!.transition_begun, true);
+    assert.strictEqual(hydrated.military.war_jna!.withdrawal_progress, 0.25);
+    assert.strictEqual(hydrated.military.war_jna!.asset_transfer_rs, 0.2);
+    assert.strictEqual(hydrated.political.war_alliance_rbih_hrhb, 0.5);
 });
 
 test('Peace phase state serialization reaches deterministic fixed-point after migration defaults', () => {

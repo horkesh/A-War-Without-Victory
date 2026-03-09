@@ -19,7 +19,7 @@ export const COLUMN_MIN_MOVEMENT_RATE = 8;
 export const COLUMN_MAX_MOVEMENT_RATE = 14;
 
 function getHoldSid(state: GameState, formationId: FormationId): SettlementId | null {
-    const formation = state.formations?.[formationId];
+    const formation = state.military.formations?.[formationId];
     return formation?.hq_sid ?? null;
 }
 
@@ -28,7 +28,7 @@ function getHoldSid(state: GameState, formationId: FormationId): SettlementId | 
  * Baseline 12, reduced for heavy equipment density, slightly boosted for infantry-heavy mix.
  */
 function getColumnMovementRateForFormation(state: GameState, formationId: FormationId): number {
-    const formation = state.formations?.[formationId];
+    const formation = state.military.formations?.[formationId];
     const c = formation?.composition;
     if (!c) return COLUMN_BASE_MOVEMENT_RATE;
 
@@ -75,7 +75,7 @@ export function shortestPathThroughFriendly(
     toSids: SettlementId[],
     factionId: FactionId
 ): SettlementId[] | null {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const adj = buildAdjacencyFromEdges(edges);
     const goalSet = new Set(toSids);
     if (goalSet.has(fromSid)) return [fromSid];
@@ -133,9 +133,9 @@ export function transitTurnsForPath(
         }
     }
     let turns = Math.max(1, Math.ceil(travelCost / movementRate));
-    if (state?.battle_damage) {
+    if (state?.military?.battle_damage) {
         for (let i = 0; i < path.length; i++) {
-            if ((state.battle_damage[path[i]] ?? 0) > 0) turns += 1;
+            if ((state.military.battle_damage[path[i]] ?? 0) > 0) turns += 1;
         }
     }
     return turns;
@@ -152,11 +152,11 @@ export function processBrigadeMovement(
     edges: EdgeRecord[],
     terrainData?: TerrainScalarsData | null
 ): void {
-    const movementState = { ...(state.brigade_movement_state ?? {}) };
-    const movementOrders = state.brigade_movement_orders ?? {};
-    const deployOrders = state.brigade_deploy_orders ?? {};
-    const formations = state.formations ?? {};
-    const pc = state.political_controllers ?? {};
+    const movementState = { ...(state.military.brigade_movement_state ?? {}) };
+    const movementOrders = state.military.brigade_movement_orders ?? {};
+    const deployOrders = state.military.brigade_deploy_orders ?? {};
+    const formations = state.military.formations ?? {};
+    const pc = state.political.political_controllers ?? {};
 
     // Pass 0: apply deploy/undeploy posture orders.
     for (const formationId of Object.keys(deployOrders).sort(strictCompare) as FormationId[]) {
@@ -194,7 +194,7 @@ export function processBrigadeMovement(
     for (const formationId of Object.keys(movementOrders).sort(strictCompare) as FormationId[]) {
         const formation = formations[formationId];
         if (!formation || formation.faction == null || (formation.kind ?? 'brigade') !== 'brigade') continue;
-        if (state.brigade_encircled?.[formationId]) continue;
+        if (state.military.brigade_encircled?.[formationId]) continue;
         const factionId = formation.faction as FactionId;
         const order = movementOrders[formationId];
         const dest = order?.destination_sids;
@@ -279,7 +279,7 @@ export function processBrigadeMovement(
         }
     }
 
-    state.brigade_movement_state = Object.keys(movementState).length > 0 ? movementState : undefined;
-    state.brigade_movement_orders = undefined;
-    state.brigade_deploy_orders = undefined;
+    state.military.brigade_movement_state = Object.keys(movementState).length > 0 ? movementState : undefined;
+    state.military.brigade_movement_orders = undefined;
+    state.military.brigade_deploy_orders = undefined;
 }

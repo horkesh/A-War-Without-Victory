@@ -39,7 +39,7 @@ export function accumulateExhaustion(
 
     for (const edge of edgesSorted) {
         const edge_id = edge.edge_id;
-        const seg = (state.front_segments as any)?.[edge_id];
+        const seg = (state.military.front_segments as any)?.[edge_id];
         const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
         if (!isActive) continue;
 
@@ -77,7 +77,7 @@ export function accumulateExhaustion(
         const work_unsupplied = workUnsuppliedByFaction.get(f.id) ?? 0;
         const total_work = work_supplied + 2 * work_unsupplied;
         const inc = Math.floor(total_work / EXHAUSTION_WORK_DIVISOR);
-        const externalMod = getExhaustionExternalModifier(f.patron_state, state.international_visibility_pressure);
+        const externalMod = getExhaustionExternalModifier(f.patron_state, state.political.international_visibility_pressure);
         const legitimacy = legitimacyByFaction[f.id] ?? 0.5;
         const legitimacyMod = (1 - legitimacy) * EXHAUSTION_LEGITIMACY_MULTIPLIER;
         const scaled = Math.floor(inc * (1 + externalMod + legitimacyMod));

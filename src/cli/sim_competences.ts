@@ -179,7 +179,7 @@ function formatTreatyJson(treatyDraft: TreatyDraft): object {
 }
 
 function formatEndState(state: GameState): string {
-    const endState = state.end_state;
+    const endState = state.political.end_state;
 
     if (!endState) {
         return 'No end_state (war active).';
@@ -208,7 +208,7 @@ function formatEndState(state: GameState): string {
 }
 
 function formatEndStateJson(state: GameState): object {
-    const endState = state.end_state;
+    const endState = state.political.end_state;
 
     if (!endState) {
         return { status: 'war', competences: null };

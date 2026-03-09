@@ -70,9 +70,9 @@ describe('T1: first contact passive buildup', () => {
         const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1', 'e2'], ['oA'], ['oB']);
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1', 'e2'], ['oB'], ['oA']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
-        state.sector_intel = {};
+        state.military.sector_intel = {};
         deriveSectorIntel(state, 1);
-        const records = state.sector_intel!['sector:corps-A:0'] ?? [];
+        const records = state.military.sector_intel!['sector:corps-A:0'] ?? [];
         expect(records.length).toBe(1);
         const rec = records[0]!;
         expect(rec.enemy_sector_id).toBe('sector:corps-B:0');
@@ -89,12 +89,12 @@ describe('T2: confidence accumulates turn over turn', () => {
         const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
-        state.sector_intel = {};
+        state.military.sector_intel = {};
         // 10 turns of passive contact
         for (let t = 1; t <= 10; t++) {
             deriveSectorIntel(state, t);
         }
-        const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.confidence).toBe(1.0);
         expect(rec.turns_in_contact).toBe(10);
     });
@@ -108,15 +108,15 @@ describe('T3: no-contact decay', () => {
         const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
-        state.sector_intel = {};
+        state.military.sector_intel = {};
         // First turn: build contact
         deriveSectorIntel(state, 1);
-        const confAfterContact = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!.confidence;
+        const confAfterContact = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!.confidence;
         // Remove shared edge — no longer in contact
         sectorA.edge_ids = [];
         sectorA.sub_segments[0]!.edge_ids = [];
         deriveSectorIntel(state, 2);
-        const records = state.sector_intel!['sector:corps-A:0'] ?? [];
+        const records = state.military.sector_intel!['sector:corps-A:0'] ?? [];
         // Record should have decayed confidence
         const decayedConf = confAfterContact - FACTION_RECON_PROFILES['RBiH'].confidence_decay_per_turn;
         if (decayedConf > 0) {
@@ -141,7 +141,7 @@ describe('T4: strength_category thresholds', () => {
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RBiH', ['e1'], ['oB'], ['oA'], 0.3, ['brig-2']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
         // Inject a pre-existing record with confidence just below threshold
-        state.sector_intel = {
+        state.military.sector_intel = {
             'sector:corps-A:0': [{
                 enemy_sector_id: 'sector:corps-B:0',
                 enemy_faction: 'RBiH',
@@ -160,7 +160,7 @@ describe('T4: strength_category thresholds', () => {
         // RS passive=0.20; 0.15 + 0.20 = 0.35 > 0.20 threshold — so it will cross
         // Instead verify the 'thin' category for density 0.3
         deriveSectorIntel(state, 2);
-        const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         // After one more turn: 0.15 + 0.20 = 0.35 >= 0.20 => should be 'thin' (density=0.3 < 0.5)
         expect(rec.strength_category).toBe('thin');
     });
@@ -183,7 +183,7 @@ describe('T5: strength_category density bins', () => {
             const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA'], density, ['b1', 'b2']);
             const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
             // Pre-seed high confidence so threshold is met
-            state.sector_intel = {
+            state.military.sector_intel = {
                 'sector:corps-A:0': [{
                     enemy_sector_id: 'sector:corps-B:0',
                     enemy_faction: 'RS',
@@ -199,7 +199,7 @@ describe('T5: strength_category density bins', () => {
                 }],
             };
             deriveSectorIntel(state, 4);
-            const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+            const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
             expect(rec.strength_category).toBe(expected);
         });
     }
@@ -215,7 +215,7 @@ describe('T6: visible_brigade_ids below threshold', () => {
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
         // One turn passive: RBiH = 0.30 = exactly CONFIDENCE_FRONT_BRIGADES
         // To test below threshold, pre-seed below
-        state.sector_intel = {
+        state.military.sector_intel = {
             'sector:corps-A:0': [{
                 enemy_sector_id: 'sector:corps-B:0',
                 enemy_faction: 'RS',
@@ -237,9 +237,9 @@ describe('T6: visible_brigade_ids below threshold', () => {
         const sectorC = makeSector('sector:corps-C:0', 'corps-C', 'RS', ['e2'], ['oC'], ['oD']);
         const sectorD = makeSector('sector:corps-D:0', 'corps-D', 'RBiH', ['e2'], ['oD'], ['oC'], 1.0, ['brig-Z']);
         const state2 = makeMinimalState({ 'sector:corps-C:0': sectorC, 'sector:corps-D:0': sectorD });
-        state2.sector_intel = {};
+        state2.military.sector_intel = {};
         deriveSectorIntel(state2, 1);
-        const rec = (state2.sector_intel!['sector:corps-C:0'] ?? [])[0]!;
+        const rec = (state2.military.sector_intel!['sector:corps-C:0'] ?? [])[0]!;
         // RS passive_buildup = 0.20 < CONFIDENCE_FRONT_BRIGADES = 0.30
         expect(rec.confidence).toBeCloseTo(0.20, 5);
         expect(rec.visible_brigade_ids.length).toBe(0);
@@ -254,7 +254,7 @@ describe('T7: all assigned brigades visible at CONFIDENCE_FULL_STRENGTH', () => 
         const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA'], 1.0, ['brig-1', 'brig-2', 'brig-3']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
-        state.sector_intel = {
+        state.military.sector_intel = {
             'sector:corps-A:0': [{
                 enemy_sector_id: 'sector:corps-B:0',
                 enemy_faction: 'RS',
@@ -270,7 +270,7 @@ describe('T7: all assigned brigades visible at CONFIDENCE_FULL_STRENGTH', () => 
             }],
         };
         deriveSectorIntel(state, 6);
-        const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.visible_brigade_ids).toEqual(['brig-1', 'brig-2', 'brig-3'].sort());
     });
 });
@@ -283,7 +283,7 @@ describe('T8: reserve brigades visible with range>=2 at deep intel confidence', 
         const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA'], 1.0, ['brig-1'], ['reserve-1']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
-        state.sector_intel = {
+        state.military.sector_intel = {
             'sector:corps-A:0': [{
                 enemy_sector_id: 'sector:corps-B:0',
                 enemy_faction: 'RS',
@@ -299,7 +299,7 @@ describe('T8: reserve brigades visible with range>=2 at deep intel confidence', 
             }],
         };
         deriveSectorIntel(state, 11);
-        const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.visible_brigade_ids).toContain('reserve-1');
         expect(rec.visible_brigade_ids).toContain('brig-1');
     });
@@ -307,7 +307,7 @@ describe('T8: reserve brigades visible with range>=2 at deep intel confidence', 
         const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RS', ['e1'], ['oA'], ['oB']);
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RBiH', ['e1'], ['oB'], ['oA'], 1.0, ['brig-1'], ['reserve-1']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
-        state.sector_intel = {
+        state.military.sector_intel = {
             'sector:corps-A:0': [{
                 enemy_sector_id: 'sector:corps-B:0',
                 enemy_faction: 'RBiH',
@@ -323,7 +323,7 @@ describe('T8: reserve brigades visible with range>=2 at deep intel confidence', 
             }],
         };
         deriveSectorIntel(state, 11);
-        const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.visible_brigade_ids).not.toContain('reserve-1');
     });
 });
@@ -336,10 +336,10 @@ describe('T9: posture_observed below full-strength threshold', () => {
         const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA'], 1.0);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
-        state.sector_intel = {};
+        state.military.sector_intel = {};
         // RBiH after 1 turn: 0.30 < 0.50 threshold
         deriveSectorIntel(state, 1);
-        const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.posture_observed).toBe('unknown');
     });
 });
@@ -353,7 +353,7 @@ describe('T10: recon-by-force sets confidence to 1.0', () => {
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA'], 0.4, ['brig-X']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
         // Pre-seed with low confidence
-        state.sector_intel = {
+        state.military.sector_intel = {
             'sector:corps-A:0': [{
                 enemy_sector_id: 'sector:corps-B:0',
                 enemy_faction: 'RS',
@@ -370,7 +370,7 @@ describe('T10: recon-by-force sets confidence to 1.0', () => {
         };
         // Attack from oA (in sectorA) into oB (in sectorB)
         updateSectorIntelFromCombat(state, 'oA', 'oB', 2);
-        const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.confidence).toBe(1.0);
         expect(rec.strength_category).toBe('thin'); // density=0.4 < 0.5
         expect(rec.last_updated_turn).toBe(2);
@@ -385,7 +385,7 @@ describe('T11: recon-by-force no-op for same-faction sectors', () => {
         const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RBiH', ['e1'], ['oB'], ['oA']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
-        state.sector_intel = {
+        state.military.sector_intel = {
             'sector:corps-A:0': [{
                 enemy_sector_id: 'sector:corps-B:0',
                 enemy_faction: 'RBiH',
@@ -401,7 +401,7 @@ describe('T11: recon-by-force no-op for same-faction sectors', () => {
             }],
         };
         updateSectorIntelFromCombat(state, 'oA', 'oB', 2);
-        const rec = (state.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.confidence).toBe(0.2); // unchanged
     });
 });

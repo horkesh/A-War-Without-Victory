@@ -59,7 +59,7 @@ test('normalizeFrontPosture deterministically cleans and clamps assignments', ()
 
     normalizeFrontPosture(state);
 
-    assert.deepStrictEqual(state.front_posture, {
+    assert.deepStrictEqual(state.military.front_posture, {
         A: {
             assignments: {
                 a__b: { edge_id: 'a__b', posture: 'push', weight: 3 },

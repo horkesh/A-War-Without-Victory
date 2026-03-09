@@ -75,10 +75,10 @@ export function collectStrategicReserves(state: GameState): StrategicReserveColl
         by_faction: {}
     };
 
-    if (!state.militia_pools) return report;
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
-    if (!state.strategic_reserves) state.strategic_reserves = {};
-    const reserves = state.strategic_reserves as Record<string, number>;
+    if (!state.military.militia_pools) return report;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
+    if (!state.military.strategic_reserves) state.military.strategic_reserves = {};
+    const reserves = state.military.strategic_reserves as Record<string, number>;
 
     const poolKeys = Object.keys(pools).sort(strictCompare);
     for (const key of poolKeys) {
@@ -122,9 +122,9 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
         by_faction: {}
     };
 
-    if (!state.strategic_reserves) return report;
-    const reserves = state.strategic_reserves as Record<string, number>;
-    const formations = state.formations ?? {};
+    if (!state.military.strategic_reserves) return report;
+    const reserves = state.military.strategic_reserves as Record<string, number>;
+    const formations = state.military.formations ?? {};
     const currentTurn = state.meta?.turn ?? 0;
 
     const formationIds = Object.keys(formations).sort(strictCompare);
@@ -149,7 +149,7 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
 
         // Rate limit: reduced rate for reserve draws (logistics friction)
         const inCombat = isInCombat(f);
-        const factionMult = getFactionReinforcementMult(faction, currentTurn, state.war_timeline);
+        const factionMult = getFactionReinforcementMult(faction, currentTurn, state.military.war_timeline);
         const drawMult = FACTION_RESERVE_DRAW_RATE[poolFaction] ?? RESERVE_DRAW_RATE_MULT_DEFAULT;
         const baseRate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
         const rate = Math.max(1, Math.floor(baseRate * factionMult * drawMult));

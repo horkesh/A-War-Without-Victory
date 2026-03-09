@@ -84,11 +84,11 @@ function getOrInitCollapseDamage(
     state: GameState,
     entityId: EntityId
 ): { authority: number; cohesion: number; spatial: number } {
-    if (!state.collapse_damage) {
-        state.collapse_damage = { by_entity: {} };
+    if (!state.political.collapse_damage) {
+        state.political.collapse_damage = { by_entity: {} };
     }
 
-    const existing = state.collapse_damage.by_entity[entityId];
+    const existing = state.political.collapse_damage.by_entity[entityId];
     if (existing) {
         return existing;
     }
@@ -100,7 +100,7 @@ function getOrInitCollapseDamage(
         spatial: 0
     };
 
-    state.collapse_damage.by_entity[entityId] = newDamage;
+    state.political.collapse_damage.by_entity[entityId] = newDamage;
     return newDamage;
 }
 
@@ -111,11 +111,11 @@ function getOrInitCapacityModifiers(
     state: GameState,
     entityId: EntityId
 ): { authority_mult: number; cohesion_mult: number; supply_mult: number; pressure_cap_mult: number } {
-    if (!state.capacity_modifiers) {
-        state.capacity_modifiers = { by_sid: {} };
+    if (!state.political.capacity_modifiers) {
+        state.political.capacity_modifiers = { by_sid: {} };
     }
 
-    const existing = state.capacity_modifiers.by_sid[entityId];
+    const existing = state.political.capacity_modifiers.by_sid[entityId];
     if (existing) {
         return existing;
     }
@@ -128,7 +128,7 @@ function getOrInitCapacityModifiers(
         pressure_cap_mult: 1.0
     };
 
-    state.capacity_modifiers.by_sid[entityId] = newModifiers;
+    state.political.capacity_modifiers.by_sid[entityId] = newModifiers;
     return newModifiers;
 }
 
@@ -195,7 +195,7 @@ function updateCapacityModifiers(
  * as the Phase 3D resolution step uses.
  */
 export function recomputePhase3DCapacityModifiersFromDamage(state: GameState): void {
-    const byEntity = state.collapse_damage?.by_entity;
+    const byEntity = state.political.collapse_damage?.by_entity;
     if (!byEntity || typeof byEntity !== 'object') return;
     const entityIds = Object.keys(byEntity).sort((a, b) => a.localeCompare(b));
     for (const entityId of entityIds) {
@@ -260,7 +260,7 @@ export function applyPhase3DCollapseResolution(
     }
 
     // Check if Tier-1 eligibility state exists
-    if (!state.collapse_eligibility_tier1 || Object.keys(state.collapse_eligibility_tier1).length === 0) {
+    if (!state.political.collapse_eligibility_tier1 || Object.keys(state.political.collapse_eligibility_tier1).length === 0) {
         return {
             applied: false,
             reason_if_not_applied: 'no_tier1_eligibility_state',
@@ -278,7 +278,7 @@ export function applyPhase3DCollapseResolution(
     }
 
     // Check if local_strain state exists
-    if (!state.local_strain || !state.local_strain.by_entity) {
+    if (!state.political.local_strain || !state.political.local_strain.by_entity) {
         return {
             applied: false,
             reason_if_not_applied: 'no_local_strain_state',
@@ -295,8 +295,8 @@ export function applyPhase3DCollapseResolution(
         };
     }
 
-    const tier1Eligibility = state.collapse_eligibility_tier1;
-    const localStrain = state.local_strain.by_entity;
+    const tier1Eligibility = state.political.collapse_eligibility_tier1;
+    const localStrain = state.political.local_strain.by_entity;
 
     let entitiesEvaluated = 0;
     let collapsesAppliedCount = 0;

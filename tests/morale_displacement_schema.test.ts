@@ -70,7 +70,7 @@ function minimalFixture(overrides?: {
     };
 
     if (overrides?.events !== undefined) {
-        state.displacement_event_log = overrides.events;
+        state.displacement.displacement_event_log = overrides.events;
     }
 
     return state;
@@ -79,36 +79,36 @@ function minimalFixture(overrides?: {
 test('morale defaults to 60 when missing', () => {
     const raw = minimalFixture(); // no morale set
     const migrated = deserializeState(serializeState(raw));
-    const f = migrated.formations['test_bde_1'];
+    const f = migrated.military.formations['test_bde_1'];
     assert.strictEqual(f.morale, 60, 'morale should default to 60');
 });
 
 test('morale round-trips correctly', () => {
     const raw = minimalFixture({ morale: 75 });
     const migrated = deserializeState(serializeState(raw));
-    const f = migrated.formations['test_bde_1'];
+    const f = migrated.military.formations['test_bde_1'];
     assert.strictEqual(f.morale, 75, 'morale 75 should survive round-trip');
 });
 
 test('morale clamped to 100 when above range', () => {
     const raw = minimalFixture({ morale: 150 });
     const migrated = deserializeState(serializeState(raw));
-    const f = migrated.formations['test_bde_1'];
+    const f = migrated.military.formations['test_bde_1'];
     assert.strictEqual(f.morale, 100, 'morale should be clamped to 100');
 });
 
 test('morale clamped to 0 when below range', () => {
     const raw = minimalFixture({ morale: -10 });
     const migrated = deserializeState(serializeState(raw));
-    const f = migrated.formations['test_bde_1'];
+    const f = migrated.military.formations['test_bde_1'];
     assert.strictEqual(f.morale, 0, 'morale should be clamped to 0');
 });
 
 test('displacement_event_log defaults to empty array', () => {
     const raw = minimalFixture(); // no event log set
     const migrated = deserializeState(serializeState(raw));
-    assert.ok(Array.isArray(migrated.displacement_event_log), 'displacement_event_log should be array');
-    assert.strictEqual(migrated.displacement_event_log!.length, 0, 'should be empty by default');
+    assert.ok(Array.isArray(migrated.displacement.displacement_event_log), 'displacement_event_log should be array');
+    assert.strictEqual(migrated.displacement.displacement_event_log!.length, 0, 'should be empty by default');
 });
 
 test('displacement_event_log round-trips with events', () => {
@@ -138,16 +138,16 @@ test('displacement_event_log round-trips with events', () => {
     ];
     const raw = minimalFixture({ events });
     const migrated = deserializeState(serializeState(raw));
-    assert.strictEqual(migrated.displacement_event_log!.length, 2, 'should preserve 2 events');
-    assert.strictEqual(migrated.displacement_event_log![0].origin_mun, 'prijedor');
-    assert.strictEqual(migrated.displacement_event_log![0].displaced, 500);
-    assert.strictEqual(migrated.displacement_event_log![1].turn, 7);
-    assert.strictEqual(migrated.displacement_event_log![1].ethnicity, 'RBiH');
+    assert.strictEqual(migrated.displacement.displacement_event_log!.length, 2, 'should preserve 2 events');
+    assert.strictEqual(migrated.displacement.displacement_event_log![0].origin_mun, 'prijedor');
+    assert.strictEqual(migrated.displacement.displacement_event_log![0].displaced, 500);
+    assert.strictEqual(migrated.displacement.displacement_event_log![1].turn, 7);
+    assert.strictEqual(migrated.displacement.displacement_event_log![1].ethnicity, 'RBiH');
 });
 
 test('morale enclave initialization value (70) round-trips', () => {
     const raw = minimalFixture({ morale: 70 });
     const migrated = deserializeState(serializeState(raw));
-    const f = migrated.formations['test_bde_1'];
+    const f = migrated.military.formations['test_bde_1'];
     assert.strictEqual(f.morale, 70, 'enclave morale 70 should survive round-trip');
 });

@@ -39,14 +39,14 @@ export function updateExhaustion(
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     const staticFrontCount = fronts.filter((f) => f.stability === 'static').length;
-    const supplyPressure = state.war_supply_pressure ?? {};
+    const supplyPressure = state.political.war_supply_pressure ?? {};
     const legitimacyByFaction = getFactionLegitimacyAverages(state);
-    const sarajevo = state.sarajevo_state;
+    const sarajevo = state.political.sarajevo_state;
 
-    if (!state.war_exhaustion) {
-        (state as GameState & { war_exhaustion: Record<FactionId, number> }).war_exhaustion = {};
+    if (!state.political.war_exhaustion) {
+        (state as GameState & { war_exhaustion: Record<FactionId, number> }).political.war_exhaustion = {};
     }
-    const exhaustion = state.war_exhaustion!;
+    const exhaustion = state.political.war_exhaustion!;
 
     for (const fid of factionIds) {
         const current = typeof exhaustion[fid] === 'number' ? exhaustion[fid]! : 0;
@@ -55,7 +55,7 @@ export function updateExhaustion(
         const delta = Math.min(MAX_DELTA_PER_TURN, supplyContrib + staticContrib);
         const multiplier = frictionMultipliers?.[fid] ?? 1;
         const faction = state.factions.find((f) => f.id === fid);
-        const externalMod = getExhaustionExternalModifier(faction?.patron_state, state.international_visibility_pressure);
+        const externalMod = getExhaustionExternalModifier(faction?.patron_state, state.political.international_visibility_pressure);
         const legitimacy = legitimacyByFaction[fid] ?? 0.5;
         const legitimacyMod = (1 - legitimacy) * EXHAUSTION_LEGITIMACY_MULTIPLIER;
         const sarajevoExtra =

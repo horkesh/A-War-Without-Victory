@@ -58,11 +58,11 @@ function getOrInitSustainabilityState(
     state: GameState,
     munId: MunicipalityId
 ): SustainabilityState {
-    if (!state.sustainability_state) {
-        state.sustainability_state = {};
+    if (!state.displacement.sustainability_state) {
+        state.displacement.sustainability_state = {};
     }
 
-    const existing = state.sustainability_state[munId];
+    const existing = state.displacement.sustainability_state[munId];
     if (existing) {
         return existing;
     }
@@ -76,7 +76,7 @@ function getOrInitSustainabilityState(
         last_updated_turn: state.meta.turn
     };
 
-    state.sustainability_state[munId] = newState;
+    state.displacement.sustainability_state[munId] = newState;
     return newState;
 }
 
@@ -236,7 +236,7 @@ export function updateSustainability(
     settlementEdges: EdgeRecord[]
 ): SustainabilityStepReport {
     const currentTurn = state.meta.turn;
-    const militiaPools = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+    const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
 
     if (!militiaPools || typeof militiaPools !== 'object') {
         return { by_municipality: [], negotiation_pressure_increment: 0 };
@@ -317,7 +317,7 @@ export function updateSustainability(
             }
 
             // Displacement interaction
-            const dispState = state.displacement_state?.[munId] as DisplacementState | undefined;
+            const dispState = state.displacement.displacement_state?.[munId] as DisplacementState | undefined;
             if (dispState && dispState.original_population > 0) {
                 const displacementRatio = dispState.displaced_out / dispState.original_population;
                 if (displacementRatio >= DISPLACEMENT_DEGRADATION_THRESHOLD) {

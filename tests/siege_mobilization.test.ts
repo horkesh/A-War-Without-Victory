@@ -274,7 +274,7 @@ test('Pool growth: fully surrounded municipality gets 3.0× multiplier', () => {
     const stateNoSiege = makeStateWithStrength(munId, faction, strength);
     const settlementsNoSiege = makeSettlements([['S001', munId]]);
     runPoolPopulation(stateNoSiege, settlementsNoSiege);
-    const baseAvailable = (stateNoSiege.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
+    const baseAvailable = (stateNoSiege.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     // With full siege ratio
     const stateFullSiege = makeStateWithStrength(munId, faction, strength);
@@ -283,7 +283,7 @@ test('Pool growth: fully surrounded municipality gets 3.0× multiplier', () => {
         [`${munId}:${faction}`, SIEGE_RATIO_FULL]
     ]);
     runPoolPopulation(stateFullSiege, settingsFullSiege, undefined, fullSiegeMap);
-    const siegeAvailable = (stateFullSiege.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
+    const siegeAvailable = (stateFullSiege.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     assert.ok(baseAvailable > 0, 'Base pool should be positive');
     assert.strictEqual(siegeAvailable, baseAvailable * 3, `Full siege should give 3× pool growth (got ${siegeAvailable}, expected ${baseAvailable * 3})`);
@@ -297,14 +297,14 @@ test('Pool growth: partially surrounded gets 1.5× multiplier', () => {
     const stateNoSiege = makeStateWithStrength(munId, faction, strength);
     const settlementsNoSiege = makeSettlements([['S001', munId]]);
     runPoolPopulation(stateNoSiege, settlementsNoSiege);
-    const baseAvailable = (stateNoSiege.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
+    const baseAvailable = (stateNoSiege.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     const statePartialSiege = makeStateWithStrength(munId, faction, strength);
     const partialSiegeMap: SiegeRatioByMunFaction = new Map([
         [`${munId}:${faction}`, SIEGE_RATIO_PARTIAL]  // exactly 0.50
     ]);
     runPoolPopulation(statePartialSiege, makeSettlements([['S001', munId]]), undefined, partialSiegeMap);
-    const partialAvailable = (statePartialSiege.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
+    const partialAvailable = (statePartialSiege.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     assert.ok(baseAvailable > 0, 'Base pool should be positive');
     assert.strictEqual(partialAvailable, Math.floor(baseAvailable * 1.5), `Partial siege should give 1.5× pool growth (got ${partialAvailable}, expected ${Math.floor(baseAvailable * 1.5)})`);
@@ -317,14 +317,14 @@ test('Pool growth: unsurrounded municipality gets 1.0× (no change)', () => {
 
     const stateNoSiege = makeStateWithStrength(munId, faction, strength);
     runPoolPopulation(stateNoSiege, makeSettlements([['S001', munId]]));
-    const baseAvailable = (stateNoSiege.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
+    const baseAvailable = (stateNoSiege.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     const stateWithZeroRatio = makeStateWithStrength(munId, faction, strength);
     const zeroSiegeMap: SiegeRatioByMunFaction = new Map([
         [`${munId}:${faction}`, 0.0]  // not besieged
     ]);
     runPoolPopulation(stateWithZeroRatio, makeSettlements([['S001', munId]]), undefined, zeroSiegeMap);
-    const zeroSiegeAvailable = (stateWithZeroRatio.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
+    const zeroSiegeAvailable = (stateWithZeroRatio.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     assert.strictEqual(zeroSiegeAvailable, baseAvailable, 'No siege → pool should be identical to no-siege path');
 });
@@ -483,7 +483,7 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
 
     // Check that at least one formation has the displaced_origin tag
     const displacedOriginFormations = report.created.filter(f => {
-        const formation = state.formations?.[f.formation_id];
+        const formation = state.military.formations?.[f.formation_id];
         if (!formation || typeof formation !== 'object') return false;
         const tags = (formation as { tags?: string[] }).tags;
         return Array.isArray(tags) && tags.includes('displaced_origin');
@@ -541,7 +541,7 @@ test('Displacement spawn: dispIn below threshold → no extra detachment', () =>
 
     // Normal spawn may produce 1, but displaced-origin should NOT appear
     const displacedOriginFormations = report.created.filter(f => {
-        const formation = state.formations?.[f.formation_id];
+        const formation = state.military.formations?.[f.formation_id];
         if (!formation || typeof formation !== 'object') return false;
         const tags = (formation as { tags?: string[] }).tags;
         return Array.isArray(tags) && tags.includes('displaced_origin');
@@ -596,7 +596,7 @@ test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL → no extra det
     }, lowSiegeMap);
 
     const displacedOriginFormations = report.created.filter(f => {
-        const formation = state.formations?.[f.formation_id];
+        const formation = state.military.formations?.[f.formation_id];
         if (!formation || typeof formation !== 'object') return false;
         const tags = (formation as { tags?: string[] }).tags;
         return Array.isArray(tags) && tags.includes('displaced_origin');
@@ -615,11 +615,11 @@ test('runPoolPopulation: backward-compatible — omitting siegeRatios param give
 
     const stateA = makeStateWithStrength(munId, faction, strength);
     runPoolPopulation(stateA, makeSettlements([['S001', munId]]));
-    const availableA = (stateA.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
+    const availableA = (stateA.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     const stateB = makeStateWithStrength(munId, faction, strength);
     runPoolPopulation(stateB, makeSettlements([['S001', munId]]), undefined, new Map());
-    const availableB = (stateB.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
+    const availableB = (stateB.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     assert.strictEqual(availableA, availableB, 'Omitting siegeRatios param should behave identically to explicit empty map');
 });

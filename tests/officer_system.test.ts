@@ -346,11 +346,11 @@ describe('initializeNamedOfficers', () => {
         const state = makeMinimalState();
         initializeNamedOfficers(state, data);
 
-        assert.ok(state.named_officers);
-        assert.equal(state.named_officers['o1']?.status, 'active');
-        assert.equal(state.named_officers['o1']?.assigned_corps_id, 'vrs_1kk');
-        assert.equal(state.named_officers['o2']?.status, 'reserve');
-        assert.equal(state.named_officers['o2']?.assigned_corps_id, null);
+        assert.ok(state.military.named_officers);
+        assert.equal(state.military.named_officers['o1']?.status, 'active');
+        assert.equal(state.military.named_officers['o1']?.assigned_corps_id, 'vrs_1kk');
+        assert.equal(state.military.named_officers['o2']?.status, 'reserve');
+        assert.equal(state.military.named_officers['o2']?.assigned_corps_id, null);
     });
 
     it('skips officers not yet available', () => {
@@ -359,8 +359,8 @@ describe('initializeNamedOfficers', () => {
         ];
         const state = makeMinimalState({ meta: { turn: 0, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
         initializeNamedOfficers(state, data);
-        assert.ok(state.named_officers);
-        assert.equal(state.named_officers['o1'], undefined);
+        assert.ok(state.military.named_officers);
+        assert.equal(state.military.named_officers['o1'], undefined);
     });
 
     it('skips officers already departed', () => {
@@ -369,15 +369,15 @@ describe('initializeNamedOfficers', () => {
         ];
         const state = makeMinimalState({ meta: { turn: 0, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
         initializeNamedOfficers(state, data);
-        assert.ok(state.named_officers);
-        assert.equal(state.named_officers['o1'], undefined);
+        assert.ok(state.military.named_officers);
+        assert.equal(state.military.named_officers['o1'], undefined);
     });
 
     it('stores officer data on state', () => {
         const data = [makeOfficer({ id: 'o1', faction: 'RS' })];
         const state = makeMinimalState();
         initializeNamedOfficers(state, data);
-        assert.equal(state.named_officer_data?.length, 1);
+        assert.equal(state.military.named_officer_data?.length, 1);
     });
 });
 
@@ -393,14 +393,14 @@ describe('processOfficerSuccession', () => {
         // Initialize at turn 0 so the officer gets created
         const state = makeMinimalState({ meta: { turn: 0, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
         initializeNamedOfficers(state, data);
-        assert.ok(state.named_officers!['o1'], 'Officer should be initialized at turn 0');
-        assert.equal(state.named_officers!['o1']!.status, 'active');
+        assert.ok(state.military.named_officers!['o1'], 'Officer should be initialized at turn 0');
+        assert.equal(state.military.named_officers!['o1']!.status, 'active');
 
         // Advance to turn 5 where the officer should depart
         state.meta!.turn = 5;
         const report = processOfficerSuccession(state, new Set());
         assert.ok(report.departures.includes('o1'));
-        assert.equal(state.named_officers!['o1']!.status, 'retired');
+        assert.equal(state.military.named_officers!['o1']!.status, 'retired');
     });
 
     it('adds newly available officers to pool', () => {
@@ -408,20 +408,20 @@ describe('processOfficerSuccession', () => {
             makeOfficer({ id: 'o1', faction: 'RS', available_from_turn: 5 }),
         ];
         const state = makeMinimalState({ meta: { turn: 5, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
-        state.named_officer_data = data;
-        state.named_officers = {};
+        state.military.named_officer_data = data;
+        state.military.named_officers = {};
 
         const report = processOfficerSuccession(state, new Set());
         assert.ok(report.new_arrivals.includes('o1'));
-        assert.equal(state.named_officers!['o1']!.status, 'reserve');
+        assert.equal(state.military.named_officers!['o1']!.status, 'reserve');
     });
 
     it('casualty check can kill officers in engaged corps', () => {
         // Use an officer with very high vulnerability to make the hash very likely to trigger
         const data = makeOfficer({ id: 'high_vuln', faction: 'RS', casualty_vulnerability: 1.0 });
         const state = makeMinimalState({ meta: { turn: 0, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
-        state.named_officer_data = [data];
-        state.named_officers = {
+        state.military.named_officer_data = [data];
+        state.military.named_officers = {
             high_vuln: makeOfficerState({ officer_id: 'high_vuln', assigned_corps_id: 'vrs_1kk' }),
         };
 
@@ -430,8 +430,8 @@ describe('processOfficerSuccession', () => {
         for (let t = 0; t < 200; t++) {
             state.meta!.turn = t;
             // Reset status each iteration
-            state.named_officers!['high_vuln']!.status = 'active';
-            state.named_officers!['high_vuln']!.assigned_corps_id = 'vrs_1kk';
+            state.military.named_officers!['high_vuln']!.status = 'active';
+            state.military.named_officers!['high_vuln']!.assigned_corps_id = 'vrs_1kk';
             const report = processOfficerSuccession(state, new Set(['vrs_1kk']));
             if (report.casualties.length > 0) {
                 killed = true;
@@ -444,8 +444,8 @@ describe('processOfficerSuccession', () => {
     it('does not kill officers in corps that did not fight', () => {
         const data = makeOfficer({ id: 'o1', faction: 'RS', casualty_vulnerability: 1.0 });
         const state = makeMinimalState({ meta: { turn: 0, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
-        state.named_officer_data = [data];
-        state.named_officers = {
+        state.military.named_officer_data = [data];
+        state.military.named_officers = {
             o1: makeOfficerState({ officer_id: 'o1', assigned_corps_id: 'vrs_1kk' }),
         };
         // Pass empty engagedCorpsIds
@@ -456,19 +456,19 @@ describe('processOfficerSuccession', () => {
     it('advances turns_in_command for active officers', () => {
         const data = makeOfficer({ id: 'o1', faction: 'RS' });
         const state = makeMinimalState();
-        state.named_officer_data = [data];
-        state.named_officers = {
+        state.military.named_officer_data = [data];
+        state.military.named_officers = {
             o1: makeOfficerState({ officer_id: 'o1', assigned_corps_id: 'vrs_1kk', turns_in_command: 3 }),
         };
         processOfficerSuccession(state, new Set());
-        assert.equal(state.named_officers!['o1']!.turns_in_command, 4);
+        assert.equal(state.military.named_officers!['o1']!.turns_in_command, 4);
     });
 
     it('decrements penalty_turns_remaining', () => {
         const data = makeOfficer({ id: 'o1', faction: 'RS' });
         const state = makeMinimalState();
-        state.named_officer_data = [data];
-        state.named_officers = {
+        state.military.named_officer_data = [data];
+        state.military.named_officers = {
             o1: makeOfficerState({
                 officer_id: 'o1',
                 assigned_corps_id: 'vrs_1kk',
@@ -477,7 +477,7 @@ describe('processOfficerSuccession', () => {
             }),
         };
         processOfficerSuccession(state, new Set());
-        assert.equal(state.named_officers!['o1']!.penalty_turns_remaining, 2);
+        assert.equal(state.military.named_officers!['o1']!.penalty_turns_remaining, 2);
     });
 });
 
@@ -561,19 +561,19 @@ describe('succession assignment penalties', () => {
             makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_1kk', pool_tier: 'tier_a' }),
         ];
         const state = makeMinimalState();
-        state.formations = {
+        state.military.formations = {
             vrs_1kk: makeFormation({ id: 'vrs_1kk', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
         };
         initializeNamedOfficers(state, data);
         // Kill the commander
-        state.named_officers!['cmd']!.status = 'killed';
-        state.named_officers!['cmd']!.assigned_corps_id = null;
+        state.military.named_officers!['cmd']!.status = 'killed';
+        state.military.named_officers!['cmd']!.assigned_corps_id = null;
 
         processOfficerSuccession(state, new Set());
 
-        assert.equal(state.named_officers!['pool1']!.assigned_corps_id, 'vrs_1kk');
-        assert.equal(state.named_officers!['pool1']!.effective_competence_penalty, 0);
-        assert.equal(state.named_officers!['pool1']!.penalty_turns_remaining, 0);
+        assert.equal(state.military.named_officers!['pool1']!.assigned_corps_id, 'vrs_1kk');
+        assert.equal(state.military.named_officers!['pool1']!.effective_competence_penalty, 0);
+        assert.equal(state.military.named_officers!['pool1']!.penalty_turns_remaining, 0);
     });
 
     it('compatible corps gets -1 penalty for 8 turns', () => {
@@ -581,19 +581,19 @@ describe('succession assignment penalties', () => {
             makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_srk', compatible_corps_ids: ['vrs_1kk'], pool_tier: 'tier_a' }),
         ];
         const state = makeMinimalState();
-        state.formations = {
+        state.military.formations = {
             vrs_1kk: makeFormation({ id: 'vrs_1kk', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
         };
-        state.named_officer_data = data;
-        state.named_officers = {
+        state.military.named_officer_data = data;
+        state.military.named_officers = {
             pool1: makeOfficerState({ officer_id: 'pool1', status: 'reserve' }),
         };
 
         processOfficerSuccession(state, new Set());
 
-        assert.equal(state.named_officers!['pool1']!.assigned_corps_id, 'vrs_1kk');
-        assert.equal(state.named_officers!['pool1']!.effective_competence_penalty, 1);
-        assert.equal(state.named_officers!['pool1']!.penalty_turns_remaining, 8);
+        assert.equal(state.military.named_officers!['pool1']!.assigned_corps_id, 'vrs_1kk');
+        assert.equal(state.military.named_officers!['pool1']!.effective_competence_penalty, 1);
+        assert.equal(state.military.named_officers!['pool1']!.penalty_turns_remaining, 8);
     });
 
     it('incompatible corps gets -2 penalty for 12 turns', () => {
@@ -601,19 +601,19 @@ describe('succession assignment penalties', () => {
             makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a' }),
         ];
         const state = makeMinimalState();
-        state.formations = {
+        state.military.formations = {
             vrs_1kk: makeFormation({ id: 'vrs_1kk', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
         };
-        state.named_officer_data = data;
-        state.named_officers = {
+        state.military.named_officer_data = data;
+        state.military.named_officers = {
             pool1: makeOfficerState({ officer_id: 'pool1', status: 'reserve' }),
         };
 
         processOfficerSuccession(state, new Set());
 
-        assert.equal(state.named_officers!['pool1']!.assigned_corps_id, 'vrs_1kk');
-        assert.equal(state.named_officers!['pool1']!.effective_competence_penalty, 2);
-        assert.equal(state.named_officers!['pool1']!.penalty_turns_remaining, 12);
+        assert.equal(state.military.named_officers!['pool1']!.assigned_corps_id, 'vrs_1kk');
+        assert.equal(state.military.named_officers!['pool1']!.effective_competence_penalty, 2);
+        assert.equal(state.military.named_officers!['pool1']!.penalty_turns_remaining, 12);
     });
 });
 
@@ -624,18 +624,18 @@ describe('succession assignment penalties', () => {
 describe('generic replacement officers', () => {
     it('creates generic acting commander when pool is empty', () => {
         const state = makeMinimalState({ meta: { turn: 10, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
-        state.formations = {
+        state.military.formations = {
             vrs_1kk: makeFormation({ id: 'vrs_1kk', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
         };
-        state.named_officer_data = [];
-        state.named_officers = {};
+        state.military.named_officer_data = [];
+        state.military.named_officers = {};
 
         const report = processOfficerSuccession(state, new Set());
 
         assert.ok(report.generic_replacements > 0);
         const genericId = `generic_RS_vrs_1kk_t10`;
-        assert.ok(state.named_officers![genericId]);
-        assert.equal(state.named_officers![genericId]!.acting_commander, true);
+        assert.ok(state.military.named_officers![genericId]);
+        assert.equal(state.military.named_officers![genericId]!.acting_commander, true);
     });
 });
 

@@ -8,21 +8,21 @@ export interface SectorStanceOrderReport {
 }
 
 function collectAssignedBrigadeIds(state: GameState, order: SectorStanceOrder): FormationId[] {
-    const sector = state.corps_front_sectors?.[order.sector_id];
+    const sector = state.military.corps_front_sectors?.[order.sector_id];
     if (!sector) return [];
     return [...sector.assigned_brigade_ids].sort(strictCompare);
 }
 
 export function applySectorStanceOrders(state: GameState): SectorStanceOrderReport {
     const report: SectorStanceOrderReport = { postures_changed: 0, postures_rejected: 0 };
-    const orders = state.sector_stance_orders ?? [];
+    const orders = state.military.sector_stance_orders ?? [];
     if (orders.length === 0) {
-        state.sector_stance_orders = [];
+        state.military.sector_stance_orders = [];
         return report;
     }
 
-    const formations = state.formations ?? {};
-    const postureOrders = state.brigade_posture_orders ?? [];
+    const formations = state.military.formations ?? {};
+    const postureOrders = state.military.brigade_posture_orders ?? [];
     const normalizedOrders = [...orders].sort((a, b) =>
         strictCompare(a.sector_id, b.sector_id) || strictCompare(a.stance, b.stance)
     );
@@ -45,7 +45,7 @@ export function applySectorStanceOrders(state: GameState): SectorStanceOrderRepo
         }
     }
 
-    state.brigade_posture_orders = postureOrders;
-    state.sector_stance_orders = [];
+    state.military.brigade_posture_orders = postureOrders;
+    state.military.sector_stance_orders = [];
     return report;
 }

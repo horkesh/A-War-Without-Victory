@@ -174,7 +174,7 @@ export function runEquipmentProgression(state: GameState): EquipmentProgressionR
         by_faction: {}
     };
 
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const formationIds = Object.keys(formations).sort(strictCompare);
 
     for (const fid of formationIds) {

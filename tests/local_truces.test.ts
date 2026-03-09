@@ -44,8 +44,8 @@ function makeState(turn: number, overrides: Partial<GameState> = {}): GameState 
 
 function makeActiveState(turn: number = 10): GameState {
     const state = makeState(turn);
-    state.vienna_declaration_turn = 4;
-    state.vienna_accepted = { RS: true, HRHB: true } as Record<FactionId, boolean>;
+    state.political.vienna_declaration_turn = 4;
+    state.political.vienna_accepted = { RS: true, HRHB: true } as Record<FactionId, boolean>;
     return state;
 }
 
@@ -90,22 +90,22 @@ describe('isGrazAccordsActive', () => {
 
     it('returns false when current turn < declaration turn', () => {
         const state = makeState(3);
-        state.vienna_declaration_turn = 4;
-        state.vienna_accepted = { RS: true, HRHB: true } as Record<FactionId, boolean>;
+        state.political.vienna_declaration_turn = 4;
+        state.political.vienna_accepted = { RS: true, HRHB: true } as Record<FactionId, boolean>;
         assert.equal(isGrazAccordsActive(state), false);
     });
 
     it('returns false when not accepted by both factions', () => {
         const state = makeState(10);
-        state.vienna_declaration_turn = 4;
+        state.political.vienna_declaration_turn = 4;
         // No vienna_accepted set
         assert.equal(isGrazAccordsActive(state), false);
     });
 
     it('returns false when only one faction accepted', () => {
         const state = makeState(10);
-        state.vienna_declaration_turn = 4;
-        state.vienna_accepted = { RS: true } as Record<FactionId, boolean>;
+        state.political.vienna_declaration_turn = 4;
+        state.political.vienna_accepted = { RS: true } as Record<FactionId, boolean>;
         assert.equal(isGrazAccordsActive(state), false);
     });
 
@@ -242,19 +242,19 @@ describe('shouldGrazBlockAttack', () => {
 
     it('does not block after Herzegovina truce is broken', () => {
         const state = makeActiveState();
-        state.vienna_herzegovina_broken_by = 'RS';
+        state.political.vienna_herzegovina_broken_by = 'RS';
         assert.equal(shouldGrazBlockAttack(state, 'vrs_herzegovina', 'RS', 'op:mostar:mostar_2', 'HRHB'), false);
     });
 
     it('still blocks Kiseljak after Herzegovina truce is broken', () => {
         const state = makeActiveState();
-        state.vienna_herzegovina_broken_by = 'RS';
+        state.political.vienna_herzegovina_broken_by = 'RS';
         assert.equal(shouldGrazBlockAttack(state, 'vrs_sarajevo_romanija', 'RS', 'op:kiseljak:kiseljak_2', 'HRHB'), true);
     });
 
     it('does not block Kiseljak after Kiseljak truce is broken', () => {
         const state = makeActiveState();
-        state.vienna_kiseljak_broken = true;
+        state.political.vienna_kiseljak_broken = true;
         assert.equal(shouldGrazBlockAttack(state, 'vrs_sarajevo_romanija', 'RS', 'op:kiseljak:kiseljak_2', 'HRHB'), false);
     });
 });
@@ -267,7 +267,7 @@ describe('isHerzegovinaTruceActive', () => {
     });
     it('false when Herzegovina broken', () => {
         const state = makeActiveState();
-        state.vienna_herzegovina_broken_by = 'RS';
+        state.political.vienna_herzegovina_broken_by = 'RS';
         assert.equal(isHerzegovinaTruceActive(state), false);
     });
     it('false when accords not active', () => {
@@ -281,7 +281,7 @@ describe('isKiseljakExclusionActive', () => {
     });
     it('false when Kiseljak broken', () => {
         const state = makeActiveState();
-        state.vienna_kiseljak_broken = true;
+        state.political.vienna_kiseljak_broken = true;
         assert.equal(isKiseljakExclusionActive(state), false);
     });
 });
@@ -293,7 +293,7 @@ describe('checkAndFireGrazAccords', () => {
         const state = makeState(3);
         const result = checkAndFireGrazAccords(state);
         assert.equal(result, null);
-        assert.equal(state.vienna_declaration_turn, undefined);
+        assert.equal(state.political.vienna_declaration_turn, undefined);
     });
 
     it('fires at accords turn and sets state fields', () => {
@@ -302,24 +302,24 @@ describe('checkAndFireGrazAccords', () => {
         assert.ok(result !== null);
         assert.ok(result!.includes('Graz'));
         assert.ok(result!.includes('Karadžić'));
-        assert.equal(state.vienna_declaration_turn, 4);
-        assert.equal(state.vienna_accepted?.['RS' as FactionId], true);
-        assert.equal(state.vienna_accepted?.['HRHB' as FactionId], true);
+        assert.equal(state.political.vienna_declaration_turn, 4);
+        assert.equal(state.political.vienna_accepted?.['RS' as FactionId], true);
+        assert.equal(state.political.vienna_accepted?.['HRHB' as FactionId], true);
     });
 
     it('fires if turn > accords turn (first time)', () => {
         const state = makeState(7);
         const result = checkAndFireGrazAccords(state);
         assert.ok(result !== null);
-        assert.equal(state.vienna_declaration_turn, 7);
+        assert.equal(state.political.vienna_declaration_turn, 7);
     });
 
     it('does not fire again once already set', () => {
         const state = makeState(8);
-        state.vienna_declaration_turn = 4;
+        state.political.vienna_declaration_turn = 4;
         const result = checkAndFireGrazAccords(state);
         assert.equal(result, null);
-        assert.equal(state.vienna_declaration_turn, 4);
+        assert.equal(state.political.vienna_declaration_turn, 4);
     });
 
     it('does not fire in peace phase', () => {
@@ -350,8 +350,8 @@ describe('recordTruceBroken', () => {
         const result = recordTruceBroken('RS', 'op:kiseljak:kiseljak_2', state);
         assert.ok(result !== null);
         assert.ok(result!.includes('Kiseljak'));
-        assert.equal(state.vienna_kiseljak_broken, true);
-        assert.equal(state.truce_broken_turn?.['RS'], 10);
+        assert.equal(state.political.vienna_kiseljak_broken, true);
+        assert.equal(state.political.truce_broken_turn?.['RS'], 10);
     });
 
     it('records Herzegovina break when RS attacks non-Kiseljak HRHB OSID', () => {
@@ -360,8 +360,8 @@ describe('recordTruceBroken', () => {
         assert.ok(result !== null);
         assert.ok(result!.includes('Herzegovina'));
         assert.ok(result!.includes('Graz'));
-        assert.equal(state.vienna_herzegovina_broken_by, 'RS');
-        assert.equal(state.truce_broken_turn?.['RS'], 10);
+        assert.equal(state.political.vienna_herzegovina_broken_by, 'RS');
+        assert.equal(state.political.truce_broken_turn?.['RS'], 10);
     });
 
     it('returns null for OSID not covered by any truce', () => {
@@ -377,8 +377,8 @@ describe('recordTruceBroken', () => {
 
     it('does not overwrite existing Herzegovina break', () => {
         const state = makeActiveState();
-        state.vienna_herzegovina_broken_by = 'HRHB';
-        state.truce_broken_turn = { RS: 8 } as Record<FactionId, number>;
+        state.political.vienna_herzegovina_broken_by = 'HRHB';
+        state.political.truce_broken_turn = { RS: 8 } as Record<FactionId, number>;
         // Herzegovina already broken, Kiseljak not excluded
         const result = recordTruceBroken('RS', 'op:mostar:mostar_2', state);
         assert.equal(result, null); // both sub-truces already resolved for this OSID
@@ -400,28 +400,28 @@ describe('getTruceBreakAggressionBonus', () => {
 
     it('returns spike when partner (RS) broke truce this turn', () => {
         const state = makeActiveState();
-        state.truce_broken_turn = { RS: 10 } as Record<FactionId, number>;
+        state.political.truce_broken_turn = { RS: 10 } as Record<FactionId, number>;
         const bonus = getTruceBreakAggressionBonus('HRHB', state);
         assert.ok(bonus > 0);
     });
 
     it('returns spike within 6 turns of break', () => {
         const state = makeActiveState(14);
-        state.truce_broken_turn = { RS: 10 } as Record<FactionId, number>;
+        state.political.truce_broken_turn = { RS: 10 } as Record<FactionId, number>;
         const bonus = getTruceBreakAggressionBonus('HRHB', state);
         assert.ok(bonus > 0);
     });
 
     it('returns 0 after spike expires (6 turns later)', () => {
         const state = makeActiveState(16);
-        state.truce_broken_turn = { RS: 10 } as Record<FactionId, number>;
+        state.political.truce_broken_turn = { RS: 10 } as Record<FactionId, number>;
         const bonus = getTruceBreakAggressionBonus('HRHB', state);
         assert.equal(bonus, 0);
     });
 
     it('returns 0 for RBiH (no truce partner)', () => {
         const state = makeActiveState();
-        state.truce_broken_turn = { RS: 8, HRHB: 9 } as Record<FactionId, number>;
+        state.political.truce_broken_turn = { RS: 8, HRHB: 9 } as Record<FactionId, number>;
         assert.equal(getTruceBreakAggressionBonus('RBiH', state), 0);
     });
 });

@@ -71,7 +71,7 @@ export interface WashingtonCheckReport {
  * Deterministic: counts settlements keyed in political_controllers.
  */
 function computeRsTerritorialShare(state: GameState): number {
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc) return 0;
     const entries = Object.values(pc);
     if (entries.length === 0) return 0;
@@ -86,7 +86,7 @@ function computeRsTerritorialShare(state: GameState): number {
  * Evaluate Washington preconditions. Pure function of state.
  */
 export function evaluateWashingtonPreconditions(state: GameState): WashingtonPreconditionResult {
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     const turn = state.meta.turn;
 
     // W1: ceasefire active
@@ -98,7 +98,7 @@ export function evaluateWashingtonPreconditions(state: GameState): WashingtonPre
     const w2 = ceasefireDuration >= WASH_CEASEFIRE_DURATION;
 
     // W3: IVP negotiation_momentum
-    const ivp = state.international_visibility_pressure;
+    const ivp = state.political.international_visibility_pressure;
     const negotiationMomentum = ivp?.negotiation_momentum ?? 0;
     const w3 = negotiationMomentum > WASH_IVP_THRESHOLD;
 
@@ -112,8 +112,8 @@ export function evaluateWashingtonPreconditions(state: GameState): WashingtonPre
     const w5 = rsShare > WASH_RS_THREAT_SHARE;
 
     // W6: Combined exhaustion
-    const rbihExhaustion = state.war_exhaustion?.['RBiH'] ?? 0;
-    const hrhbExhaustion = state.war_exhaustion?.['HRHB'] ?? 0;
+    const rbihExhaustion = state.political.war_exhaustion?.['RBiH'] ?? 0;
+    const hrhbExhaustion = state.political.war_exhaustion?.['HRHB'] ?? 0;
     const combinedExhaustion = rbihExhaustion + hrhbExhaustion;
     const w6 = combinedExhaustion > WASH_COMBINED_EXHAUSTION;
 
@@ -132,10 +132,10 @@ export function evaluateWashingtonPreconditions(state: GameState): WashingtonPre
  * Apply post-Washington effects to HRHB capabilities, embargo, and alliance.
  */
 function applyWashingtonEffects(state: GameState): void {
-    const rhs = state.rbih_hrhb_state!;
+    const rhs = state.political.rbih_hrhb_state!;
 
     // Lock alliance
-    state.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
+    state.political.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
     rhs.washington_signed = true;
     rhs.washington_turn = state.meta.turn;
 
@@ -160,7 +160,7 @@ function applyWashingtonEffects(state: GameState): void {
     }
 
     // Enable COORDINATED_STRIKE for HRHB formations
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const formationIds = Object.keys(formations).sort(strictCompare);
     for (const fid of formationIds) {
         const f = formations[fid];
@@ -175,7 +175,7 @@ function applyWashingtonEffects(state: GameState): void {
  * Must run AFTER ceasefire check.
  */
 export function checkAndApplyWashington(state: GameState): WashingtonCheckReport {
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     if (!rhs) {
         return {
             preconditions: {

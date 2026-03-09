@@ -48,7 +48,7 @@ describe('emergent growth — no hardcoded ceilings', () => {
         const state = makeState({
             b1: { faction: 'RBiH', personnel: 1500, tags: ['mun:sarajevo_centar'] },
         });
-        state.militia_pools = {
+        state.military.militia_pools = {
             'sarajevo_centar:RBiH': {
                 mun_id: 'sarajevo_centar',
                 faction: 'RBiH',
@@ -69,7 +69,7 @@ describe('emergent growth — no hardcoded ceilings', () => {
         const state = makeState({
             b1: { faction: 'RBiH', personnel: 2500, tags: ['mun:sarajevo_centar'] },
         });
-        state.militia_pools = {
+        state.military.militia_pools = {
             'sarajevo_centar:RBiH': {
                 mun_id: 'sarajevo_centar',
                 faction: 'RBiH',
@@ -88,7 +88,7 @@ describe('emergent growth — no hardcoded ceilings', () => {
         const state = makeState({
             b1: { faction: 'RBiH', personnel: 1500, tags: ['mun:sarajevo_centar'] },
         });
-        state.militia_pools = {
+        state.military.militia_pools = {
             'sarajevo_centar:RBiH': {
                 mun_id: 'sarajevo_centar',
                 faction: 'RBiH',
@@ -107,7 +107,7 @@ describe('emergent growth — no hardcoded ceilings', () => {
         const state = makeState({
             b1: { faction: 'RS', personnel: MAX_BRIGADE_PERSONNEL, tags: ['mun:banja_luka'] },
         });
-        state.militia_pools = {
+        state.military.militia_pools = {
             'banja_luka:RS': {
                 mun_id: 'banja_luka',
                 faction: 'RS',
@@ -166,9 +166,9 @@ describe('lifecycle events', () => {
 
         const fired = processLifecycleEvents(state, events);
         assert.equal(fired, 1);
-        assert.equal(state.formations!['hvo_derventa'].status, 'inactive');
-        assert.equal(state.formations!['hvo_derventa'].lifecycle_status, 'destroyed');
-        assert.equal(state.formations!['hvo_derventa'].personnel, 0);
+        assert.equal(state.military.formations!['hvo_derventa'].status, 'inactive');
+        assert.equal(state.military.formations!['hvo_derventa'].lifecycle_status, 'destroyed');
+        assert.equal(state.military.formations!['hvo_derventa'].personnel, 0);
     });
 
     it('territory_loss trigger does NOT fire when faction still controls OSIDs', () => {
@@ -191,7 +191,7 @@ describe('lifecycle events', () => {
 
         const fired = processLifecycleEvents(state, events);
         assert.equal(fired, 0);
-        assert.equal(state.formations!['hvo_derventa'].status, 'active');
+        assert.equal(state.military.formations!['hvo_derventa'].status, 'active');
     });
 
     it('merge event transfers personnel to target', () => {
@@ -211,9 +211,9 @@ describe('lifecycle events', () => {
 
         const fired = processLifecycleEvents(state, events);
         assert.equal(fired, 1);
-        assert.equal(state.formations!['source'].status, 'inactive');
-        assert.equal(state.formations!['source'].lifecycle_status, 'merged');
-        assert.equal(state.formations!['target'].personnel, 2300);
+        assert.equal(state.military.formations!['source'].status, 'inactive');
+        assert.equal(state.military.formations!['source'].lifecycle_status, 'merged');
+        assert.equal(state.military.formations!['target'].personnel, 2300);
     });
 
     it('week trigger does not fire before turn', () => {

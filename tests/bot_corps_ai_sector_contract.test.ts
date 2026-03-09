@@ -125,11 +125,11 @@ test('generateCorpsDirectives ignores zero-edge containment sectors for reinforc
     } as GameState;
 
     initializeCorpsCommand(state);
-    assert.ok(state.corps_command?.[corpsId], 'corps command should initialize');
-    state.corps_command![corpsId].stance = 'balanced';
+    assert.ok(state.military.corps_command?.[corpsId], 'corps command should initialize');
+    state.military.corps_command![corpsId].stance = 'balanced';
     generateCorpsDirectives(state, 'RS', [], new Map(), null, null);
 
-    const directive = state.corps_command?.[corpsId]?.directive;
+    const directive = state.military.corps_command?.[corpsId]?.directive;
     assert.ok(directive, 'directive should be generated');
     assert.equal(directive.reinforce_sector_ids, undefined, 'zero-edge containment sectors must not become reinforcement targets');
     assert.notEqual(directive.priority_sector_id, 'sector:vrs_test_corps:pocket', 'zero-edge containment sectors must not become priority sectors');
@@ -196,8 +196,8 @@ test.skip('generateCorpsDirectives can synthesize a launchable offensive sector 
     } as GameState;
 
     initializeCorpsCommand(state);
-    assert.ok(state.corps_command?.[corpsId], 'corps command should initialize');
-    state.corps_command![corpsId].stance = 'balanced';
+    assert.ok(state.military.corps_command?.[corpsId], 'corps command should initialize');
+    state.military.corps_command![corpsId].stance = 'balanced';
 
     const edges = [
         { a: 'op:test:a', b: 'op:test:b' },
@@ -214,7 +214,7 @@ test.skip('generateCorpsDirectives can synthesize a launchable offensive sector 
 
     generateCorpsDirectives(state, 'RS', edges, reverseMap, null, null);
 
-    const activeOperation = state.corps_command?.[corpsId]?.active_operation;
+    const activeOperation = state.military.corps_command?.[corpsId]?.active_operation;
     assert.ok(activeOperation, 'adjacent thin sectors with overlapping targets should still launch a sector operation');
     assert.equal(activeOperation?.type, 'sector_attack');
 });
@@ -280,7 +280,7 @@ test.skip('generateCorpsDirectives concentrates based on live brigade positions,
     } as GameState;
 
     initializeCorpsCommand(state);
-    state.corps_command![corpsId].stance = 'balanced';
+    state.military.corps_command![corpsId].stance = 'balanced';
 
     const edges = [
         { a: 'op:test:a', b: 'op:test:b' },
@@ -297,7 +297,7 @@ test.skip('generateCorpsDirectives concentrates based on live brigade positions,
 
     generateCorpsDirectives(state, 'RS', edges, reverseMap, null, null);
 
-    const activeOperation = state.corps_command?.[corpsId]?.active_operation;
+    const activeOperation = state.military.corps_command?.[corpsId]?.active_operation;
     assert.ok(activeOperation, 'launch concentration must use live brigade locations when sector assigned lists are stale');
     assert.equal(activeOperation?.type, 'sector_attack');
 });
@@ -363,7 +363,7 @@ test.skip('generateCorpsDirectives can launch an operation from adjacent sectors
     } as GameState;
 
     initializeCorpsCommand(state);
-    state.corps_command![corpsId].stance = 'balanced';
+    state.military.corps_command![corpsId].stance = 'balanced';
 
     const edges = [
         { a: 'op:test:a', b: 'op:test:b' },
@@ -380,7 +380,7 @@ test.skip('generateCorpsDirectives can launch an operation from adjacent sectors
 
     generateCorpsDirectives(state, 'RS', edges, reverseMap, null, null);
 
-    const activeOperation = state.corps_command?.[corpsId]?.active_operation;
+    const activeOperation = state.military.corps_command?.[corpsId]?.active_operation;
     assert.ok(activeOperation, 'operation launch should cluster adjacent sectors temporarily even when permanent sector merge exceeds edge cap');
     assert.equal(activeOperation?.type, 'sector_attack');
 });

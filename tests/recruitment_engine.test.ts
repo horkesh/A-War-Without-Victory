@@ -188,13 +188,13 @@ describe('applyRecruitment', () => {
         applyRecruitment(state, result, resources);
 
         // Check formation created
-        assert.ok(state.formations!['arbih_7th']);
-        assert.strictEqual(state.formations!['arbih_7th'].name, '7th Muslim');
+        assert.ok(state.military.formations!['arbih_7th']);
+        assert.strictEqual(state.military.formations!['arbih_7th'].name, '7th Muslim');
 
         // Check resources deducted
         assert.strictEqual(resources.recruitment_capital.RBiH.points, 150 - 10); // default capital_cost
         assert.strictEqual(resources.equipment_pools.RBiH.points, 60 - 5); // mountain cost
-        assert.strictEqual(state.militia_pools![poolKey]!.available, 2000 - 800); // default manpower_cost
+        assert.strictEqual(state.military.militia_pools![poolKey]!.available, 2000 - 800); // default manpower_cost
 
         // Check tracking
         assert.ok(resources.recruited_brigade_ids.includes('arbih_7th'));
@@ -222,9 +222,9 @@ describe('runBotRecruitment', () => {
         const report = runBotRecruitment(state, corps, brigades, resources, sidToMun, { zenica: 's1' });
 
         assert.strictEqual(report.elective_recruited, 3);
-        assert.ok(state.formations!['b1']);
-        assert.ok(state.formations!['b2']);
-        assert.ok(state.formations!['b3']);
+        assert.ok(state.military.formations!['b1']);
+        assert.ok(state.military.formations!['b2']);
+        assert.ok(state.military.formations!['b3']);
     });
 
     test('mandatory brigades are recruited at zero cost', () => {
@@ -248,7 +248,7 @@ describe('runBotRecruitment', () => {
         const report = runBotRecruitment(state, corps, brigades, resources, sidToMun, { zenica: 's1' });
 
         assert.strictEqual(report.mandatory_recruited, 1);
-        assert.ok(state.formations!['b1']);
+        assert.ok(state.military.formations!['b1']);
         // Capital and equipment should not have been charged
         assert.strictEqual(resources.recruitment_capital.RBiH.points, 0);
         assert.strictEqual(resources.equipment_pools.RBiH.points, 0);
@@ -305,8 +305,8 @@ describe('runBotRecruitment', () => {
             sidToMun,
             { zenica: 's1' }
         );
-        assert.ok(state.formations['b_early']);
-        assert.ok(!state.formations['b_late']);
+        assert.ok(state.military.formations['b_early']);
+        assert.ok(!state.military.formations['b_late']);
         assert.strictEqual(report.elective_recruited, 1);
     });
 
@@ -376,8 +376,8 @@ describe('runBotRecruitment', () => {
 
         assert.strictEqual(report.mandatory_recruited, 1);
         assert.strictEqual(report.actions.filter((a) => a.mandatory).length, 1);
-        assert.ok(state.formations['rs_mand_1']);
-        assert.ok(!state.formations['rs_mand_2']);
+        assert.ok(state.military.formations['rs_mand_1']);
+        assert.ok(!state.military.formations['rs_mand_2']);
     });
 
     test('RS JNA override: RS mechanized and motorized get 40 tanks, 30 artillery', () => {
@@ -418,8 +418,8 @@ describe('runBotRecruitment', () => {
             { banja_luka: 's1' },
             { includeCorps: false, includeMandatory: true }
         );
-        const mech = state.formations['rs_1st_armored'] as FormationState;
-        const mot = state.formations['rs_1st_guards_motorized'] as FormationState;
+        const mech = state.military.formations['rs_1st_armored'] as FormationState;
+        const mot = state.military.formations['rs_1st_guards_motorized'] as FormationState;
         assert.ok(mech?.composition, 'RS mechanized should have composition');
         assert.ok(mot?.composition, 'RS motorized should have composition');
         assert.strictEqual(mech.composition!.tanks, 40, 'RS mechanized gets JNA heavy tanks');

@@ -248,12 +248,12 @@ function parseScenarioScriptFile(jsonText: string): ScenarioScriptFile {
 }
 
 function applyScriptedPostureUpdates(state: GameState, entries: ScenarioScriptEntry[]): void {
-    if (!state.front_posture || typeof state.front_posture !== 'object') state.front_posture = {};
+    if (!state.military.front_posture || typeof state.military.front_posture !== 'object') state.military.front_posture = {};
 
     for (const e of entries) {
-        if (!state.front_posture[e.faction]) state.front_posture[e.faction] = { assignments: {} };
-        if (!state.front_posture[e.faction].assignments) state.front_posture[e.faction].assignments = {};
-        state.front_posture[e.faction].assignments[e.edge_id] = {
+        if (!state.military.front_posture[e.faction]) state.military.front_posture[e.faction] = { assignments: {} };
+        if (!state.military.front_posture[e.faction].assignments) state.military.front_posture[e.faction].assignments = {};
+        state.military.front_posture[e.faction].assignments[e.edge_id] = {
             edge_id: e.edge_id,
             posture: e.posture,
             weight: e.weight
@@ -262,7 +262,7 @@ function applyScriptedPostureUpdates(state: GameState, entries: ScenarioScriptEn
 }
 
 function countActiveFrontSegments(state: GameState): number {
-    const segs = state.front_segments;
+    const segs = state.military.front_segments;
     if (!segs || typeof segs !== 'object') return 0;
     let count = 0;
     const keysSorted = Object.keys(segs).sort();
@@ -274,7 +274,7 @@ function countActiveFrontSegments(state: GameState): number {
 }
 
 function computePressureSummary(state: GameState, activeEdgeIds: string[]): { highestAbs: number; top: Array<{ edge_id: string; value: number; abs: number }> } {
-    const pressure = state.front_pressure as any;
+    const pressure = state.military.front_pressure as any;
     const out: Array<{ edge_id: string; value: number; abs: number }> = [];
 
     for (const edge_id of activeEdgeIds) {
@@ -334,7 +334,7 @@ export async function runScenarioDeterministic(
         const activeEdgeIdsSorted = derivedFrontEdges
             .map((e) => e.edge_id)
             .filter((edge_id) => {
-                const seg = (state.front_segments as any)?.[edge_id];
+                const seg = (state.military.front_segments as any)?.[edge_id];
                 return seg && typeof seg === 'object' && seg.active === true;
             })
             .sort();
@@ -408,7 +408,7 @@ export async function runScenarioDeterministic(
         const formationsAvgFatigue = activeFormationsCount > 0 ? Math.floor(totalFormationFatigue / activeFormationsCount) : 0;
 
         // Militia pools summary (scaffolding only; no effects yet)
-        const militiaPoolsRec = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+        const militiaPoolsRec = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
         const militiaPoolsArr = militiaPoolsRec && typeof militiaPoolsRec === 'object' ? Object.values(militiaPoolsRec) : [];
         let totalAvailable = 0;
         let totalCommitted = 0;
@@ -604,7 +604,7 @@ export async function runScenarioDeterministic(
                 }
                 // Sort by faction_id asc
                 capitalByFaction.sort((a, b) => a.faction_id.localeCompare(b.faction_id));
-                const ledgerEntriesTotal = state.negotiation_ledger && Array.isArray(state.negotiation_ledger) ? state.negotiation_ledger.length : 0;
+                const ledgerEntriesTotal = state.political.negotiation_ledger && Array.isArray(state.political.negotiation_ledger) ? state.political.negotiation_ledger.length : 0;
                 return {
                     by_faction: capitalByFaction,
                     ledger_entries_total: ledgerEntriesTotal
@@ -612,8 +612,8 @@ export async function runScenarioDeterministic(
             })(),
             negotiation: (() => {
                 // Phase 11B: Extract negotiation status
-                const negotiationStatus = state.negotiation_status;
-                const ceasefire = state.ceasefire;
+                const negotiationStatus = state.political.negotiation_status;
+                const ceasefire = state.political.ceasefire;
                 const ceasefireActive = negotiationStatus?.ceasefire_active ?? false;
                 const frozenEdgesCount = ceasefire && typeof ceasefire === 'object' ? Object.keys(ceasefire).length : 0;
                 const offersCount = turnReport.negotiation_offer?.offer ? 1 : 0;
@@ -629,7 +629,7 @@ export async function runScenarioDeterministic(
     }
 
     // Phase 12D.0: Extract end_state and calculate war_active_turns
-    const endState = state.end_state;
+    const endState = state.political.end_state;
     let warActiveTurns = options.turns; // Default: all turns if no end_state
 
     if (endState) {

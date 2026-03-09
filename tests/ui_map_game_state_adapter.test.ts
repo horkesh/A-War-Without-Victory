@@ -79,7 +79,7 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
     assert.strictEqual(parsed.brigadeFrontAssignment?.b1, 'RBiH__RS__S1__S2');
     assert.strictEqual(parsed.brigadeFrontAssignment?.b2, null);
     assert.strictEqual(parsed.armyTheatreAssignment?.army_rbih, 'RBiH_default');
-    assert.strictEqual(parsed.theatres?.RBiH_default?.faction, 'RBiH');
+    assert.strictEqual(parsed.military.theatres?.RBiH_default?.faction, 'RBiH');
     assert.ok(parsed.assignableFrontSegments && parsed.assignableFrontSegments.length === 1);
     assert.strictEqual(parsed.assignableFrontSegments?.[0]?.front_id, 'RBiH__RS__S1__S2');
 });
@@ -93,9 +93,9 @@ test('parseGameState treats phase_ii as war for formation location_osid', () => 
         political_controllers: {},
     });
     assert.strictEqual(parsed.phase, 'phase_ii');
-    assert.strictEqual(parsed.formations.length, 1);
-    assert.strictEqual(parsed.formations[0].location_osid, 'op:mun:xyz');
-    assert.deepStrictEqual(parsed.formations[0].aorSettlementIds, ['op:mun:xyz']);
+    assert.strictEqual(parsed.military.formations.length, 1);
+    assert.strictEqual(parsed.military.formations[0].location_osid, 'op:mun:xyz');
+    assert.deepStrictEqual(parsed.military.formations[0].aorSettlementIds, ['op:mun:xyz']);
 });
 
 test('parseGameState accepts formations as array', () => {
@@ -107,9 +107,9 @@ test('parseGameState accepts formations as array', () => {
         ],
         political_controllers: {},
     });
-    assert.strictEqual(parsed.formations.length, 2);
-    assert.strictEqual(parsed.formations[0].id, 'f1');
-    assert.strictEqual(parsed.formations[1].id, 'f2');
+    assert.strictEqual(parsed.military.formations.length, 2);
+    assert.strictEqual(parsed.military.formations[0].id, 'f1');
+    assert.strictEqual(parsed.military.formations[1].id, 'f2');
 });
 
 test('parseGameState unwraps { state: GameState } wrapper', () => {

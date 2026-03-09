@@ -22,7 +22,7 @@ test('War phase scenario with census seeds displacement_state from 1991 populati
     const scenarioPath = join(baseDir, 'data', 'scenarios', 'apr1992_definitive_52w.json');
     const state = await createStateFromScenario(scenarioPath, baseDir, { initialStateOnly: true });
 
-    assert(state.displacement_state != null && typeof state.displacement_state === 'object', 'displacement_state should exist');
+    assert(state.displacement.displacement_state != null && typeof state.displacement.displacement_state === 'object', 'displacement_state should exist');
 
     const censusPath = join(baseDir, 'data', 'derived', 'municipality_population_1991.json');
     const censusRaw = JSON.parse(await readFile(censusPath, 'utf8')) as {
@@ -46,7 +46,7 @@ test('War phase scenario with census seeds displacement_state from 1991 populati
     const expectedTotal = flat[sampleMunId];
     assert(Number.isFinite(expectedTotal) && expectedTotal > 0, 'sample mun should have positive total');
 
-    const disp = state.displacement_state[sampleMunId];
+    const disp = state.displacement.displacement_state[sampleMunId];
     assert(disp != null, `displacement_state should have entry for ${sampleMunId}`);
     assert.strictEqual(
         disp.original_population,

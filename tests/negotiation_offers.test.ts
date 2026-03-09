@@ -67,7 +67,7 @@ test('offer generation: triggers only when pressure threshold met', () => {
 
 test('offer generation: no offer when ceasefire active', () => {
     const state = createTestState();
-    state.negotiation_status = { ceasefire_active: true, ceasefire_since_turn: 3, last_offer_turn: 3 };
+    state.political.negotiation_status = { ceasefire_active: true, ceasefire_since_turn: 3, last_offer_turn: 3 };
     const derivedFrontEdges: FrontEdge[] = [];
     const edges: EdgeRecord[] = [];
 
@@ -79,7 +79,7 @@ test('offer generation: no offer when ceasefire active', () => {
 test('offer generation: generates offer when threshold met', () => {
     const state = createTestState();
     // Ensure edges are active in front_segments
-    state.front_segments = {
+    state.military.front_segments = {
         'sid1__sid3': { edge_id: 'sid1__sid3', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 3, max_friction: 3 },
         'sid2__sid4': { edge_id: 'sid2__sid4', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 4, max_active_streak: 4, friction: 2, max_friction: 2 }
     };
@@ -122,7 +122,7 @@ test('offer generation: deterministic selection and tie-breaks', () => {
 test('acceptance gating: enforceability check', () => {
     const state = createTestState();
     // Set low friction and streak to fail enforceability
-    state.front_segments = {
+    state.military.front_segments = {
         edge1: { edge_id: 'edge1', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 1, max_active_streak: 1, friction: 0, max_friction: 0 }
     };
     const offer: Offer = {
@@ -307,14 +307,14 @@ test('apply enforcement package: mutates state correctly', () => {
 
     applyEnforcementPackage(state, enforcementPackage);
 
-    strictEqual(state.negotiation_status?.ceasefire_active, true);
-    strictEqual(state.negotiation_status?.ceasefire_since_turn, 5);
-    strictEqual(state.negotiation_status?.last_offer_turn, 5);
-    ok(state.ceasefire);
-    strictEqual(state.ceasefire?.['edge1']?.since_turn, 5);
-    strictEqual(state.ceasefire?.['edge1']?.until_turn, 11); // 5 + 6
-    strictEqual(state.ceasefire?.['edge2']?.since_turn, 5);
-    strictEqual(state.ceasefire?.['edge2']?.until_turn, 11);
+    strictEqual(state.political.negotiation_status?.ceasefire_active, true);
+    strictEqual(state.political.negotiation_status?.ceasefire_since_turn, 5);
+    strictEqual(state.political.negotiation_status?.last_offer_turn, 5);
+    ok(state.political.ceasefire);
+    strictEqual(state.political.ceasefire?.['edge1']?.since_turn, 5);
+    strictEqual(state.political.ceasefire?.['edge1']?.until_turn, 11); // 5 + 6
+    strictEqual(state.political.ceasefire?.['edge2']?.since_turn, 5);
+    strictEqual(state.political.ceasefire?.['edge2']?.until_turn, 11);
 });
 
 test('apply enforcement package: indefinite duration', () => {
@@ -329,12 +329,12 @@ test('apply enforcement package: indefinite duration', () => {
 
     applyEnforcementPackage(state, enforcementPackage);
 
-    strictEqual(state.ceasefire?.['edge1']?.until_turn, null);
+    strictEqual(state.political.ceasefire?.['edge1']?.until_turn, null);
 });
 
 test('expire ceasefire entries: removes expired entries', () => {
     const state = createTestState();
-    state.ceasefire = {
+    state.political.ceasefire = {
         edge1: { since_turn: 1, until_turn: 3 }, // Expired
         edge2: { since_turn: 1, until_turn: 10 }, // Not expired
         edge3: { since_turn: 1, until_turn: null } // Indefinite
@@ -343,31 +343,31 @@ test('expire ceasefire entries: removes expired entries', () => {
 
     expireCeasefireEntries(state);
 
-    strictEqual(state.ceasefire?.['edge1'], undefined);
-    ok(state.ceasefire?.['edge2']);
-    ok(state.ceasefire?.['edge3']);
+    strictEqual(state.political.ceasefire?.['edge1'], undefined);
+    ok(state.political.ceasefire?.['edge2']);
+    ok(state.political.ceasefire?.['edge3']);
 });
 
 test('expire ceasefire entries: deactivates when all expired', () => {
     const state = createTestState();
-    state.negotiation_status = { ceasefire_active: true, ceasefire_since_turn: 1, last_offer_turn: 1 };
-    state.ceasefire = {
+    state.political.negotiation_status = { ceasefire_active: true, ceasefire_since_turn: 1, last_offer_turn: 1 };
+    state.political.ceasefire = {
         edge1: { since_turn: 1, until_turn: 3 }
     };
     state.meta.turn = 5;
 
     expireCeasefireEntries(state);
 
-    strictEqual(state.negotiation_status?.ceasefire_active, false);
-    strictEqual(Object.keys(state.ceasefire ?? {}).length, 0);
+    strictEqual(state.political.negotiation_status?.ceasefire_active, false);
+    strictEqual(Object.keys(state.political.ceasefire ?? {}).length, 0);
 });
 
 test('frozen edges: effective weight becomes 0', async () => {
     const state = createTestState();
-    state.ceasefire = {
+    state.political.ceasefire = {
         edge1: { since_turn: 5, until_turn: null }
     };
-    state.front_posture = {
+    state.military.front_posture = {
         faction_a: {
             assignments: {
                 edge1: { edge_id: 'edge1', posture: 'push', weight: 5 },
@@ -376,7 +376,7 @@ test('frozen edges: effective weight becomes 0', async () => {
         }
     };
     // Add formations to provide commitment so edge2 gets non-zero effective weight
-    state.formations = {
+    state.military.formations = {
         F1: {
             id: 'F1',
             faction: 'faction_a',

@@ -125,7 +125,7 @@ describe('promoteFormations', () => {
         const report = promoteFormations(state, 10, []);
         assert.strictEqual(report.promoted, 1);
         assert.ok(report.formations_promoted.includes('m1'));
-        assert.strictEqual((state.formations['m1'] as FormationState).kind, 'brigade');
+        assert.strictEqual((state.military.formations['m1'] as FormationState).kind, 'brigade');
     });
 
     // Test 2: personnel < 1500 → no promotion
@@ -136,7 +136,7 @@ describe('promoteFormations', () => {
         });
         const report = promoteFormations(state, 10, []);
         assert.strictEqual(report.promoted, 0);
-        assert.strictEqual((state.formations['m1'] as FormationState).kind, 'militia');
+        assert.strictEqual((state.military.formations['m1'] as FormationState).kind, 'militia');
     });
 
     // Test 3: cohesion < 40 → no promotion
@@ -147,7 +147,7 @@ describe('promoteFormations', () => {
         });
         const report = promoteFormations(state, 10, []);
         assert.strictEqual(report.promoted, 0);
-        assert.strictEqual((state.formations['m1'] as FormationState).kind, 'militia');
+        assert.strictEqual((state.military.formations['m1'] as FormationState).kind, 'militia');
     });
 
     // Test 4: turns_active < 4 → no promotion
@@ -159,7 +159,7 @@ describe('promoteFormations', () => {
         });
         const report = promoteFormations(state, 10, []);
         assert.strictEqual(report.promoted, 0);
-        assert.strictEqual((state.formations['m1'] as FormationState).kind, 'militia');
+        assert.strictEqual((state.military.formations['m1'] as FormationState).kind, 'militia');
     });
 
     // Test 5: kind !== 'militia' → no re-promotion
@@ -182,7 +182,7 @@ describe('promoteFormations', () => {
         });
         const report = promoteFormations(state, 10, []);
         assert.strictEqual(report.promoted, 0);
-        assert.strictEqual((state.formations['m1'] as FormationState).kind, 'militia');
+        assert.strictEqual((state.military.formations['m1'] as FormationState).kind, 'militia');
     });
 
     // Test 7: RS formation always promotes (corps from turn 0)
@@ -193,7 +193,7 @@ describe('promoteFormations', () => {
         });
         const report = promoteFormations(state, 10, []);
         assert.strictEqual(report.promoted, 1);
-        assert.strictEqual((state.formations['m1'] as FormationState).kind, 'brigade');
+        assert.strictEqual((state.military.formations['m1'] as FormationState).kind, 'brigade');
     });
 
     // Test 8: kind becomes 'brigade' on promotion
@@ -203,7 +203,7 @@ describe('promoteFormations', () => {
             m1: eligibleMilitia('m1', 'RBiH', 'bihac')
         });
         promoteFormations(state, 10, []);
-        assert.strictEqual((state.formations['m1'] as FormationState).kind, 'brigade');
+        assert.strictEqual((state.military.formations['m1'] as FormationState).kind, 'brigade');
     });
 
     // Test 9: cohesion += 10, capped at 100
@@ -213,7 +213,7 @@ describe('promoteFormations', () => {
             m1: eligibleMilitia('m1', 'RBiH', 'bihac', { cohesion: 50 })
         });
         promoteFormations(state, 10, []);
-        assert.strictEqual((state.formations['m1'] as FormationState).cohesion, 60);
+        assert.strictEqual((state.military.formations['m1'] as FormationState).cohesion, 60);
 
         // Test cap at 100
         const state2 = makeState({
@@ -221,7 +221,7 @@ describe('promoteFormations', () => {
             m2: eligibleMilitia('m2', 'RBiH', 'bihac', { cohesion: 95 })
         });
         promoteFormations(state2, 10, []);
-        assert.strictEqual((state2.formations['m2'] as FormationState).cohesion, 100);
+        assert.strictEqual((state2.military.formations['m2'] as FormationState).cohesion, 100);
     });
 
     // Test 10: readiness = 'active'
@@ -231,7 +231,7 @@ describe('promoteFormations', () => {
             m1: eligibleMilitia('m1', 'RBiH', 'bihac', { readiness: 'forming' })
         });
         promoteFormations(state, 10, []);
-        assert.strictEqual((state.formations['m1'] as FormationState).readiness, 'active');
+        assert.strictEqual((state.military.formations['m1'] as FormationState).readiness, 'active');
     });
 
     // Test 11: promoted_turn set to currentTurn
@@ -241,7 +241,7 @@ describe('promoteFormations', () => {
             m1: eligibleMilitia('m1', 'RBiH', 'bihac')
         });
         promoteFormations(state, 10, []);
-        assert.strictEqual((state.formations['m1'] as FormationState).promoted_turn, 10);
+        assert.strictEqual((state.military.formations['m1'] as FormationState).promoted_turn, 10);
     });
 
     // Test 12: two formations same mun → ordinal 1 gets first OOB name, ordinal 2 gets second
@@ -261,8 +261,8 @@ describe('promoteFormations', () => {
         });
         promoteFormations(state, 10, oobBrigades);
 
-        assert.strictEqual((state.formations['a_formation'] as FormationState).name, '502nd Mountain Brigade');
-        assert.strictEqual((state.formations['b_formation'] as FormationState).name, '517th Mountain Brigade');
+        assert.strictEqual((state.military.formations['a_formation'] as FormationState).name, '502nd Mountain Brigade');
+        assert.strictEqual((state.military.formations['b_formation'] as FormationState).name, '517th Mountain Brigade');
     });
 
     // Test 13: fallback name format
@@ -287,7 +287,7 @@ describe('promoteFormations', () => {
             m1: eligibleMilitia('m1', 'RBiH', 'bihac')
         });
         promoteFormations(state, 10, oobBrigades);
-        const f = state.formations['m1'] as FormationState;
+        const f = state.military.formations['m1'] as FormationState;
         assert.strictEqual(f.matched_oob_id, 'rbih-bihac-1');
         assert.ok(Array.isArray(f.tags));
         assert.ok(f.tags!.includes('oob:rbih-bihac-1'), 'oob: tag should be present');
@@ -307,7 +307,7 @@ describe('promoteFormations', () => {
             m1: eligibleMilitia('m1', 'RBiH', 'bihac')
         });
         promoteFormations(state, 10, [oob]);
-        const f = state.formations['m1'] as FormationState;
+        const f = state.military.formations['m1'] as FormationState;
         assert.ok(f.tags!.includes('equip:mountain'), 'equip: tag should be present');
     });
 
@@ -326,7 +326,7 @@ describe('promoteFormations', () => {
             })
         });
         promoteFormations(state, 10, oobBrigades);
-        const f = state.formations['m1'] as FormationState;
+        const f = state.military.formations['m1'] as FormationState;
         // Should match via origin_mun=prijedor, not home_mun=travnik
         assert.strictEqual(f.name, '17th Krajina Brigade');
         assert.strictEqual(f.matched_oob_id, 'rs-prijedor-1');
@@ -345,7 +345,7 @@ describe('promoteFormations', () => {
             })
         });
         promoteFormations(state, 10, oobBrigades);
-        const f = state.formations['m1'] as FormationState;
+        const f = state.military.formations['m1'] as FormationState;
         assert.strictEqual(f.name, '1st Travnik Brigade');
     });
 
@@ -394,7 +394,7 @@ describe('promoteFormations', () => {
             }
         });
         promoteFormations(state, 10, oobBrigades);
-        const f = state.formations['m1'] as FormationState;
+        const f = state.military.formations['m1'] as FormationState;
         assert.strictEqual(f.kind, 'brigade');
         assert.strictEqual(f.name, '3rd Corps Brigade');
     });

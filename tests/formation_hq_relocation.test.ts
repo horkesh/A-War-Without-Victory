@@ -70,7 +70,7 @@ test('relocates HQ from enemy-controlled settlement to friendly in same mun', ()
 
     assert.strictEqual(report.relocated, 1);
     assert.deepStrictEqual(report.formation_ids, ['f1']);
-    assert.strictEqual(state.formations!.f1!.hq_sid, 's1'); // same mun, first friendly
+    assert.strictEqual(state.military.formations!.f1!.hq_sid, 's1'); // same mun, first friendly
 });
 
 test('relocates HQ to adjacent mun when same mun has no friendly settlement', () => {
@@ -96,7 +96,7 @@ test('relocates HQ to adjacent mun when same mun has no friendly settlement', ()
     const report = runFormationHqRelocation(state, settlements, edges);
 
     assert.strictEqual(report.relocated, 1);
-    assert.strictEqual(state.formations!.f1!.hq_sid, 's2');
+    assert.strictEqual(state.military.formations!.f1!.hq_sid, 's2');
 });
 
 test('no relocation when HQ already in friendly territory', () => {
@@ -121,7 +121,7 @@ test('no relocation when HQ already in friendly territory', () => {
     const report = runFormationHqRelocation(state, settlements, edges);
 
     assert.strictEqual(report.relocated, 0);
-    assert.strictEqual(state.formations!.f1!.hq_sid, 's1');
+    assert.strictEqual(state.military.formations!.f1!.hq_sid, 's1');
 });
 
 test('no relocation when no friendly settlement in same or adjacent mun', () => {
@@ -147,7 +147,7 @@ test('no relocation when no friendly settlement in same or adjacent mun', () => 
     const report = runFormationHqRelocation(state, settlements, edges);
 
     assert.strictEqual(report.relocated, 0);
-    assert.strictEqual(state.formations!.f1!.hq_sid, 's1');
+    assert.strictEqual(state.military.formations!.f1!.hq_sid, 's1');
 });
 
 test('formation without hq_sid is skipped', () => {
@@ -200,7 +200,7 @@ test('phase II brigade HQ moves to depth-2 settlement behind front within AoR', 
     const report = runFormationHqRelocation(state, settlements, edges);
     assert.strictEqual(report.relocated, 1);
     assert.deepStrictEqual(report.formation_ids, ['b1']);
-    assert.strictEqual(state.formations!.b1!.hq_sid, 's2');
+    assert.strictEqual(state.military.formations!.b1!.hq_sid, 's2');
 });
 
 test.skip('phase II brigade HQ uses deepest available fallback when depth-2 not present', () => {
@@ -231,5 +231,5 @@ test.skip('phase II brigade HQ uses deepest available fallback when depth-2 not 
     const report = runFormationHqRelocation(state, settlements, edges);
     assert.strictEqual(report.relocated, 1);
     assert.deepStrictEqual(report.formation_ids, ['b1']);
-    assert.strictEqual(state.formations!.b1!.hq_sid, 's1');
+    assert.strictEqual(state.military.formations!.b1!.hq_sid, 's1');
 });

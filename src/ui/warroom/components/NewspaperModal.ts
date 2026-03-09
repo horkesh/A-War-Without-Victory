@@ -56,7 +56,7 @@ export class NewspaperModal {
      * Get the last turn's events from the event log.
      */
     private getLastTurnEvents(): Phase0Event[] {
-        const log = this.gameState.phase0_events_log;
+        const log = this.gameState.political.phase0_events_log;
         if (!log || log.length === 0) return [];
         return log[log.length - 1] ?? [];
     }
@@ -145,12 +145,12 @@ export class NewspaperModal {
         if (!succession) return [];
 
         const nameById = new Map<string, string>();
-        const data = this.gameState.named_officer_data ?? [];
+        const data = this.gameState.military.named_officer_data ?? [];
         for (const o of data) {
             nameById.set(o.id, o.name ?? o.id);
         }
         const corpsName = (corpsId: string): string =>
-            this.gameState.formations?.[corpsId]?.name ?? corpsId;
+            this.gameState.military.formations?.[corpsId]?.name ?? corpsId;
 
         const lines: string[] = [];
         const replacements = succession.replacements ?? [];

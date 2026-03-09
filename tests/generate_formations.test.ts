@@ -74,8 +74,8 @@ test('deterministic generation: same inputs produce identical outputs', () => {
 
 test('correct pool movement: available decreases, committed increases', () => {
     const state = createTestState();
-    const originalAvailable = state.militia_pools['20168'].available;
-    const originalCommitted = state.militia_pools['20168'].committed;
+    const originalAvailable = state.military.militia_pools['20168'].available;
+    const originalCommitted = state.military.militia_pools['20168'].committed;
 
     const report = generateFormationsFromPools(state, 300, null, null, null, [], true, null);
 
@@ -84,10 +84,10 @@ test('correct pool movement: available decreases, committed increases', () => {
     assert.strictEqual(report.totals.manpower_moved_available_to_committed, 600); // 300 + 300
 
     // Mun 20168 pool should be updated (1 formation = 300)
-    assert.strictEqual(state.militia_pools['20168'].available, originalAvailable - 300);
-    assert.strictEqual(state.militia_pools['20168'].committed, originalCommitted + 300);
-    assert.strictEqual(state.militia_pools['20168'].exhausted, 0); // Unchanged
-    assert.strictEqual(state.militia_pools['20168'].updated_turn, 5);
+    assert.strictEqual(state.military.militia_pools['20168'].available, originalAvailable - 300);
+    assert.strictEqual(state.military.militia_pools['20168'].committed, originalCommitted + 300);
+    assert.strictEqual(state.military.militia_pools['20168'].exhausted, 0); // Unchanged
+    assert.strictEqual(state.military.militia_pools['20168'].updated_turn, 5);
 });
 
 test('deterministic formation IDs across municipalities', () => {
@@ -96,8 +96,8 @@ test('deterministic formation IDs across municipalities', () => {
     const report = generateFormationsFromPools(state, 300, null, null, null, [], true, null);
 
     // With max_brigades_per_mun default 1: 1 formation per mun
-    const rBiHFormations = Object.values(state.formations).filter((f) => f.faction === 'RBiH');
-    const rsFormations = Object.values(state.formations).filter((f) => f.faction === 'RS');
+    const rBiHFormations = Object.values(state.military.formations).filter((f) => f.faction === 'RBiH');
+    const rsFormations = Object.values(state.military.formations).filter((f) => f.faction === 'RS');
 
     assert.strictEqual(rBiHFormations.length, 1);
     assert.strictEqual(rBiHFormations[0].id, 'F_RBiH_0001');
@@ -120,12 +120,12 @@ test('faction filter limits generation', () => {
     assert.strictEqual(report.totals.municipalities_touched, 1);
 
     // Only RBiH formations should exist
-    const allFormations = Object.values(state.formations);
+    const allFormations = Object.values(state.military.formations);
     assert.ok(allFormations.every((f) => f.faction === 'RBiH'));
 
     // RS pool should be unchanged
-    assert.strictEqual(state.militia_pools['20044'].available, 800);
-    assert.strictEqual(state.militia_pools['20044'].committed, 0);
+    assert.strictEqual(state.military.militia_pools['20044'].available, 800);
+    assert.strictEqual(state.military.militia_pools['20044'].committed, 0);
 });
 
 test('mun filter limits generation', () => {
@@ -139,8 +139,8 @@ test('mun filter limits generation', () => {
     assert.strictEqual(report.per_municipality[0].mun_id, '20044');
 
     // RBiH pool should be unchanged
-    assert.strictEqual(state.militia_pools['20168'].available, 1000);
-    assert.strictEqual(state.militia_pools['20168'].committed, 0);
+    assert.strictEqual(state.military.militia_pools['20168'].available, 1000);
+    assert.strictEqual(state.military.militia_pools['20168'].committed, 0);
 });
 
 test('max-per-mun cap respected', () => {
@@ -173,11 +173,11 @@ test('dry run changes nothing', () => {
     assert.strictEqual(originalSerialized, afterSerialized, 'state should be unchanged in dry run');
 
     // No formations should be added
-    assert.strictEqual(Object.keys(state.formations).length, 0);
+    assert.strictEqual(Object.keys(state.military.formations).length, 0);
 
     // Pools should be unchanged
-    assert.strictEqual(state.militia_pools['20168'].available, 1000);
-    assert.strictEqual(state.militia_pools['20168'].committed, 0);
+    assert.strictEqual(state.military.militia_pools['20168'].available, 1000);
+    assert.strictEqual(state.military.militia_pools['20168'].committed, 0);
 });
 
 test('custom tags are included', () => {
@@ -186,7 +186,7 @@ test('custom tags are included', () => {
     const report = generateFormationsFromPools(state, 300, 'RBiH', null, null, ['custom1', 'custom2'], true, null);
 
     // Check that formations have the expected tags
-    const formations = Object.values(state.formations).filter((f) => f.faction === 'RBiH');
+    const formations = Object.values(state.military.formations).filter((f) => f.faction === 'RBiH');
     assert.ok(formations.length > 0);
 
     for (const formation of formations) {
@@ -247,7 +247,7 @@ test('pools with null faction are skipped', () => {
     assert.strictEqual(mun21001Entry, undefined);
 
     // Pool should be unchanged
-    assert.strictEqual(state.militia_pools['21001'].available, 500);
+    assert.strictEqual(state.military.militia_pools['21001'].available, 500);
 });
 
 test('pools with insufficient available are skipped', () => {
@@ -260,7 +260,7 @@ test('pools with insufficient available are skipped', () => {
     assert.strictEqual(mun22001Entry, undefined);
 
     // Pool should be unchanged
-    assert.strictEqual(state.militia_pools['22001'].available, 250);
+    assert.strictEqual(state.military.militia_pools['22001'].available, 250);
 });
 
 test('remainder stays in available', () => {
@@ -269,8 +269,8 @@ test('remainder stays in available', () => {
     generateFormationsFromPools(state, 300, 'RBiH', null, null, [], true, null);
 
     // 1 formation (max_brigades_per_mun=1), 300 committed, remainder 700 in available
-    assert.strictEqual(state.militia_pools['20168'].available, 700);
-    assert.strictEqual(state.militia_pools['20168'].committed, 300);
+    assert.strictEqual(state.military.militia_pools['20168'].available, 700);
+    assert.strictEqual(state.military.militia_pools['20168'].committed, 300);
 });
 
 test('formation assignment is null', () => {
@@ -278,7 +278,7 @@ test('formation assignment is null', () => {
 
     generateFormationsFromPools(state, 300, null, null, null, [], true, null);
 
-    const formations = Object.values(state.formations);
+    const formations = Object.values(state.military.formations);
     assert.ok(formations.length > 0);
     for (const formation of formations) {
         assert.strictEqual(formation.assignment, null);
@@ -290,7 +290,7 @@ test('formation status is active', () => {
 
     generateFormationsFromPools(state, 300, null, null, null, [], true, null);
 
-    const formations = Object.values(state.formations);
+    const formations = Object.values(state.military.formations);
     assert.ok(formations.length > 0);
     for (const formation of formations) {
         assert.strictEqual(formation.status, 'active');
@@ -303,7 +303,7 @@ test('formation created_turn matches current turn', () => {
 
     generateFormationsFromPools(state, 300, null, null, null, [], true, null);
 
-    const formations = Object.values(state.formations);
+    const formations = Object.values(state.military.formations);
     assert.ok(formations.length > 0);
     for (const formation of formations) {
         assert.strictEqual(formation.created_turn, currentTurn);

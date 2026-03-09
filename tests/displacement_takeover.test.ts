@@ -71,9 +71,9 @@ const pop1991: MunicipalityPopulation1991Map = {
 test('does not start takeover timer for allied RBiH-HRHB flips before war turn', () => {
     const state = baseState();
     state.meta.turn = 5;
-    state.war_alliance_rbih_hrhb = 0.8;
+    state.political.war_alliance_rbih_hrhb = 0.8;
     const settlements = settlementsFixture();
-    state.political_controllers = {
+    state.political.political_controllers = {
         S_TR: 'RBiH'
     };
 
@@ -94,13 +94,13 @@ test('does not start takeover timer for allied RBiH-HRHB flips before war turn',
     );
 
     assert.strictEqual(report.timers_started, 0);
-    assert.deepStrictEqual(state.hostile_takeover_timers ?? {}, {});
+    assert.deepStrictEqual(state.displacement.hostile_takeover_timers ?? {}, {});
 });
 
 test.skip('east Bosnia Bosniak displacement routes to Srebrenica then Tuzla after camp delay', () => {
     const state = baseState();
     const settlements = settlementsFixture();
-    state.political_controllers = {
+    state.political.political_controllers = {
         S_ZV: 'RS',
         S_SR: 'RBiH',
         S_TZ: 'RBiH',
@@ -109,11 +109,11 @@ test.skip('east Bosnia Bosniak displacement routes to Srebrenica then Tuzla afte
         S_ZE: 'RBiH'
     };
     // Camp reroute requires faction to have a brigade in destination mun (canon 2026-02-19).
-    state.formations = {
+    state.military.formations = {
         rbih_1: { id: 'rbih_1', faction: 'RBiH', kind: 'brigade', status: 'active', name: 'RBiH 1', created_turn: 0, assignment: null }
     };
     (state as import('../src/state/game_state.js').GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState).brigade_aor = { S_SR: 'rbih_1', S_TZ: 'rbih_1' };
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         zvornik: { mun_id: 'zvornik', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
         srebrenica: { mun_id: 'srebrenica', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
         tuzla: { mun_id: 'tuzla', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
@@ -136,13 +136,13 @@ test.skip('east Bosnia Bosniak displacement routes to Srebrenica then Tuzla afte
         },
         pop1991
     );
-    assert.ok(state.hostile_takeover_timers?.zvornik, 'takeover timer should be created');
+    assert.ok(state.displacement.hostile_takeover_timers?.zvornik, 'takeover timer should be created');
 
     // Turn 4: timer matures and creates camp population.
     state.meta.turn = 4;
     const mature = processDisplacementTakeover(state, settlements, undefined, pop1991);
     assert.ok(mature.timers_matured > 0);
-    assert.ok((state.displacement_camp_state?.zvornik?.population ?? 0) > 0, 'camp should hold displaced population');
+    assert.ok((state.displacement.displacement_camp_state?.zvornik?.population ?? 0) > 0, 'camp should hold displaced population');
 
     // Turn 8: camp reroutes; east-bosnia order should prioritize Srebrenica then Tuzla.
     state.meta.turn = 8;
@@ -159,12 +159,12 @@ test.skip('east Bosnia Bosniak displacement routes to Srebrenica then Tuzla afte
 test('enclave overrun applies higher kill fraction on second displacement', () => {
     const state = baseState();
     const settlements = settlementsFixture();
-    state.political_controllers = {
+    state.political.political_controllers = {
         S_SR: 'RS',
         S_TZ: 'RBiH',
         S_GO: 'RBiH'
     };
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         srebrenica: {
             mun_id: 'srebrenica',
             original_population: 1000,
@@ -210,13 +210,13 @@ test('enclave overrun applies higher kill fraction on second displacement', () =
 test.skip('HRHB taking from RS expels 100% of Serbs (hostile share override)', () => {
     const state = baseState();
     state.meta.turn = 20;
-    state.war_alliance_rbih_hrhb = 0.1;
+    state.political.war_alliance_rbih_hrhb = 0.1;
     const settlements = settlementsFixture();
-    state.political_controllers = {
+    state.political.political_controllers = {
         S_PR: 'HRHB',
         S_MO: 'HRHB'
     };
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         prijedor: { mun_id: 'prijedor', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
 
@@ -234,14 +234,14 @@ test.skip('HRHB taking from RS expels 100% of Serbs (hostile share override)', (
 test('RBiH taking from RS displaces 50% of Serbs', () => {
     const state = baseState();
     state.meta.turn = 20;
-    state.war_alliance_rbih_hrhb = 0.1;
+    state.political.war_alliance_rbih_hrhb = 0.1;
     const settlements = settlementsFixture();
-    state.political_controllers = {
+    state.political.political_controllers = {
         S_PR: 'RBiH',
         S_TZ: 'RBiH',
         S_ZE: 'RBiH'
     };
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         prijedor: { mun_id: 'prijedor', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
 
@@ -263,14 +263,14 @@ test('RBiH taking from RS displaces 50% of Serbs', () => {
 test('Posavina Croats have higher flee-abroad fraction (70%)', () => {
     const state = baseState();
     state.meta.turn = 20;
-    state.war_alliance_rbih_hrhb = 0.1;
+    state.political.war_alliance_rbih_hrhb = 0.1;
     const settlements = settlementsFixture();
-    state.political_controllers = {
+    state.political.political_controllers = {
         S_OR: 'RS',
         S_MO: 'HRHB',
         S_TR: 'HRHB'
     };
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         orasje: { mun_id: 'orasje', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
 
@@ -298,13 +298,13 @@ test.skip('RS taking from RBiH expels 100% of Bosniaks/Croats', () => {
     const state = baseState();
     state.meta.turn = 5;
     const settlements = settlementsFixture();
-    state.political_controllers = {
+    state.political.political_controllers = {
         S_ZV: 'RS',
         S_SR: 'RS',
         S_TZ: 'RBiH',
         S_GO: 'RBiH'
     };
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         zvornik: { mun_id: 'zvornik', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
     };
 
@@ -317,9 +317,9 @@ test.skip('RS taking from RBiH expels 100% of Bosniaks/Croats', () => {
     state.meta.turn = 9;
     const mature = processDisplacementTakeover(state, settlements, undefined, pop1991);
     assert.ok(mature.displaced_total >= 900, 'RS should displace ~100% of Bosniaks/Croats (hostile_share=1.0)');
-    assert.ok(state.civilian_casualties?.RBiH, 'civilian_casualties.RBiH should exist (Bosniaks displaced)');
+    assert.ok(state.displacement.civilian_casualties?.RBiH, 'civilian_casualties.RBiH should exist (Bosniaks displaced)');
     assert.ok(
-        (state.civilian_casualties?.RBiH?.killed ?? 0) + (state.civilian_casualties?.RBiH?.fled_abroad ?? 0) > 0,
+        (state.displacement.civilian_casualties?.RBiH?.killed ?? 0) + (state.displacement.civilian_casualties?.RBiH?.fled_abroad ?? 0) > 0,
         'RBiH civilian casualties (killed + fled_abroad) should be positive'
     );
 });
@@ -327,20 +327,20 @@ test.skip('RS taking from RBiH expels 100% of Bosniaks/Croats', () => {
 test.skip('Croat from Prijedor routes to Livno first (Herzegovina urban centers)', () => {
     const state = baseState();
     state.meta.turn = 20;
-    state.war_alliance_rbih_hrhb = 0.1;
+    state.political.war_alliance_rbih_hrhb = 0.1;
     const settlements = settlementsFixture();
-    state.political_controllers = {
+    state.political.political_controllers = {
         S_PR: 'RS',
         S_LI: 'HRHB',
         S_MO: 'HRHB',
         S_TZ: 'RBiH'
     };
     // Camp reroute requires faction to have a brigade in destination mun (canon 2026-02-19).
-    state.formations = {
+    state.military.formations = {
         hrhb_1: { id: 'hrhb_1', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'HRHB 1', created_turn: 0, assignment: null, location_osid: 'S_LI' }
     };
     (state as import('../src/state/game_state.js').GameState & import('../src/state/game_state.js').LegacyBrigadeAoRState).brigade_aor = { S_LI: 'hrhb_1', S_MO: 'hrhb_1' };
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         prijedor: { mun_id: 'prijedor', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
         livno: { mun_id: 'livno', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
         mostar: { mun_id: 'mostar', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }

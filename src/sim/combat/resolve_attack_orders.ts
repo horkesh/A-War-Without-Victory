@@ -46,7 +46,7 @@ export function resolveAttackOrders(
     const terrain: TerrainScalarsData = terrainData ?? { by_sid: {} };
     const munMap: Map<string, string> = settlementToMun ?? new Map();
 
-    const orders = state.brigade_attack_orders ?? {};
+    const orders = state.military.brigade_attack_orders ?? {};
     const battleReport = resolveBattleOrders(state, edges, terrain, munMap);
 
     // Backfill flat fields for backward compatibility
@@ -60,7 +60,7 @@ export function resolveAttackOrders(
     const totalDefenderCas = battleReport.total_defender_casualties;
 
     const ordersByFaction: Record<string, number> = {};
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const b of battleReport.battles) {
         const faction = (formations[b.attacker_brigade] as { faction?: string } | undefined)?.faction ?? 'unknown';
         ordersByFaction[faction] = (ordersByFaction[faction] ?? 0) + 1;

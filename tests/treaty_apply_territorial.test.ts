@@ -114,17 +114,17 @@ test('territorial apply: transfer_settlements applies and creates control_overri
     assert.strictEqual(report.transfers[0].to, 'faction_b');
 
     // Check state changes
-    assert.ok(result.state.control_overrides);
-    assert.ok(result.state.control_overrides!['sid1']);
-    assert.strictEqual(result.state.control_overrides!['sid1'].side, 'faction_b');
-    assert.strictEqual(result.state.control_overrides!['sid1'].kind, 'treaty_transfer');
-    assert.strictEqual(result.state.control_overrides!['sid1'].treaty_id, draft.treaty_id);
-    assert.strictEqual(result.state.control_overrides!['sid1'].since_turn, 5);
+    assert.ok(result.state.political.control_overrides);
+    assert.ok(result.state.political.control_overrides!['sid1']);
+    assert.strictEqual(result.state.political.control_overrides!['sid1'].side, 'faction_b');
+    assert.strictEqual(result.state.political.control_overrides!['sid1'].kind, 'treaty_transfer');
+    assert.strictEqual(result.state.political.control_overrides!['sid1'].treaty_id, draft.treaty_id);
+    assert.strictEqual(result.state.political.control_overrides!['sid1'].since_turn, 5);
 
     // Check recognition was also written
-    assert.ok(result.state.control_recognition);
-    assert.ok(result.state.control_recognition!['sid1']);
-    assert.strictEqual(result.state.control_recognition!['sid1'].side, 'faction_b');
+    assert.ok(result.state.political.control_recognition);
+    assert.ok(result.state.political.control_recognition!['sid1']);
+    assert.strictEqual(result.state.political.control_recognition!['sid1'].side, 'faction_b');
 
     // Check effective control changed
     assert.strictEqual(getEffectiveSettlementSide(result.state, 'sid1'), 'faction_b');
@@ -137,8 +137,8 @@ test('territorial apply: transfer_settlements applies and creates control_overri
     assert.strictEqual(proposer.negotiation.spent_total, 2);
 
     // Check ledger entry
-    assert.ok(result.state.negotiation_ledger);
-    const ledgerEntry = result.state.negotiation_ledger.find((e) => e.reason === 'treaty_territory');
+    assert.ok(result.state.political.negotiation_ledger);
+    const ledgerEntry = result.state.political.negotiation_ledger.find((e) => e.reason === 'treaty_territory');
     assert.ok(ledgerEntry);
     assert.strictEqual(ledgerEntry.amount, 2);
     assert.strictEqual(ledgerEntry.kind, 'spend');
@@ -210,7 +210,7 @@ test('territorial apply: infeasible transfer fails cleanly', () => {
 
     // No state changes
     assert.strictEqual(getEffectiveSettlementSide(result.state, 'sid1'), 'faction_a');
-    assert.ok(!result.state.control_overrides || !result.state.control_overrides['sid1']);
+    assert.ok(!result.state.political.control_overrides || !result.state.political.control_overrides['sid1']);
 });
 
 test('territorial apply: recognize_control_settlements applies when effective control matches', () => {
@@ -241,10 +241,10 @@ test('territorial apply: recognize_control_settlements applies when effective co
     assert.strictEqual(report.recognitions[0].side, 'faction_a');
 
     // Check recognition was written
-    assert.ok(result.state.control_recognition);
-    assert.ok(result.state.control_recognition!['sid1']);
-    assert.strictEqual(result.state.control_recognition!['sid1'].side, 'faction_a');
-    assert.strictEqual(result.state.control_recognition!['sid1'].treaty_id, draft.treaty_id);
+    assert.ok(result.state.political.control_recognition);
+    assert.ok(result.state.political.control_recognition!['sid1']);
+    assert.strictEqual(result.state.political.control_recognition!['sid1'].side, 'faction_a');
+    assert.strictEqual(result.state.political.control_recognition!['sid1'].treaty_id, draft.treaty_id);
 
     // Recognition does not change effective control (no override)
     assert.strictEqual(getEffectiveSettlementSide(result.state, 'sid1'), 'faction_a');
@@ -310,7 +310,7 @@ test('territorial apply: deterministic report ordering', () => {
 
 test('territorial apply: ledger entry appended deterministically', () => {
     const state = createTestState(5);
-    state.negotiation_ledger = [
+    state.political.negotiation_ledger = [
         {
             id: 'NLED_5_faction_a_spend_1',
             turn: 5,
@@ -342,8 +342,8 @@ test('territorial apply: ledger entry appended deterministically', () => {
 
     assert.ok(result.report);
     // Should have 2 ledger entries now
-    assert.strictEqual(result.state.negotiation_ledger!.length, 2);
-    const territoryEntry = result.state.negotiation_ledger!.find((e) => e.reason === 'treaty_territory');
+    assert.strictEqual(result.state.political.negotiation_ledger!.length, 2);
+    const territoryEntry = result.state.political.negotiation_ledger!.find((e) => e.reason === 'treaty_territory');
     assert.ok(territoryEntry);
     assert.strictEqual(territoryEntry.id, 'NLED_5_faction_a_spend_treaty_territory_2'); // seq should be 2
 });

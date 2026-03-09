@@ -72,9 +72,9 @@ describe('Phase E municipality support', () => {
         reinforceBrigadesFromPools(baseline);
         reinforceBrigadesFromPools(boosted);
 
-        expect((boosted.formations!.b1.personnel ?? 0)).toBeGreaterThan(baseline.formations!.b1.personnel ?? 0);
-        expect((boosted.militia_pools![militiaPoolKey('MUN_X', 'RS')].available ?? 0))
-            .toBeLessThan(baseline.militia_pools![militiaPoolKey('MUN_X', 'RS')].available ?? 0);
+        expect((boosted.military.formations!.b1.personnel ?? 0)).toBeGreaterThan(baseline.military.formations!.b1.personnel ?? 0);
+        expect((boosted.military.militia_pools![militiaPoolKey('MUN_X', 'RS')].available ?? 0))
+            .toBeLessThan(baseline.military.militia_pools![militiaPoolKey('MUN_X', 'RS')].available ?? 0);
     });
 
     it('applies an HRHB support package as a local cohesion bonus when reinforcement occurs', () => {
@@ -93,7 +93,7 @@ describe('Phase E municipality support', () => {
         reinforceBrigadesFromPools(baseline);
         reinforceBrigadesFromPools(boosted);
 
-        expect(boosted.formations!.b1.personnel).toBe(baseline.formations!.b1.personnel);
-        expect((boosted.formations!.b1.cohesion ?? 0)).toBeGreaterThan(baseline.formations!.b1.cohesion ?? 0);
+        expect(boosted.military.formations!.b1.personnel).toBe(baseline.military.formations!.b1.personnel);
+        expect((boosted.military.formations!.b1.cohesion ?? 0)).toBeGreaterThan(baseline.military.formations!.b1.cohesion ?? 0);
     });
 });

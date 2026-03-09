@@ -88,13 +88,13 @@ export class ReportsModal {
      * Gather intelligence on municipalities where this faction has investment.
      */
     private gatherMunicipalityIntel(factionId: FactionId): MunicipalityIntel[] {
-        if (!this.gameState.municipalities) return [];
+        if (!this.gameState.political.municipalities) return [];
 
-        const munIds = Object.keys(this.gameState.municipalities).sort(strictCompare);
+        const munIds = Object.keys(this.gameState.political.municipalities).sort(strictCompare);
         const results: MunicipalityIntel[] = [];
 
         for (const munId of munIds) {
-            const mun = this.gameState.municipalities[munId];
+            const mun = this.gameState.political.municipalities[munId];
             if (!mun) continue;
             const op = mun.organizational_penetration;
             if (!op) continue;
@@ -102,7 +102,7 @@ export class ReportsModal {
             const ownPartyPen = getFactionPartyPen(op, factionId);
             const hasParamilitary = hasFactionParamilitary(op, factionId);
 
-            const controller = this.gameState.political_controllers?.[munId];
+            const controller = this.gameState.political.political_controllers?.[munId];
             const isControlled = controller === factionId;
             if (ownPartyPen <= 0 && !hasParamilitary && !isControlled) continue;
 

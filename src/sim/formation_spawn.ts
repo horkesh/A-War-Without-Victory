@@ -71,7 +71,7 @@ export interface SpawnFormationsReport {
 }
 
 function generateDeterministicFormationId(state: GameState, faction: string): string {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const factionFormations = Object.values(formations)
         .filter((f) => f && typeof f === 'object' && (f as FormationState).faction === faction)
         .map((f) => (f as FormationState).id)
@@ -97,7 +97,7 @@ function generateDeterministicFormationId(state: GameState, faction: string): st
  * Canon: roughly one brigade per municipality (two for large/mixed e.g. Sarajevo, Mostar).
  */
 function countBrigadesInMun(state: GameState, mun_id: string, faction: string): number {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const tag = `mun:${mun_id}`;
     let n = 0;
     for (const f of Object.values(formations)) {
@@ -116,7 +116,7 @@ function countBrigadesInMun(state: GameState, mun_id: string, faction: string): 
  * Deterministic: pure count, no ordering needed.
  */
 function countMilitiaFormationsInMun(state: GameState, mun_id: string, faction: string): number {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const tag = `mun:${mun_id}`;
     let n = 0;
     for (const f of Object.values(formations)) {
@@ -184,8 +184,8 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         manpower_added: 0,
         pools_touched: 0
     };
-    const formations = state.formations ?? {};
-    const pools = state.militia_pools as Record<string, MilitiaPoolState> | undefined;
+    const formations = state.military.formations ?? {};
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState> | undefined;
     if (!pools || typeof pools !== 'object') return report;
 
     const recruitmentMode = state.meta.recruitment_mode;
@@ -237,7 +237,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             if (!pool || pool.available <= 0) continue;
 
             // Rate limit: combat formations get half rate; faction-specific multiplier
-            const factionMult = getFactionReinforcementMult(faction, currentTurn, state.war_timeline);
+            const factionMult = getFactionReinforcementMult(faction, currentTurn, state.military.war_timeline);
             const baseRate = isInCombat(f) ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
             const rate = Math.max(1, Math.floor(baseRate * factionMult));
 
@@ -301,7 +301,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
 
         // Rate limit: combat brigades get half rate; faction-specific mobilization multiplier
         const currentTurnNum = state.meta?.turn ?? 0;
-        const factionMult = getFactionReinforcementMult(faction, currentTurnNum, state.war_timeline);
+        const factionMult = getFactionReinforcementMult(faction, currentTurnNum, state.military.war_timeline);
         const baseRate = isInCombat(f) ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
         const localSupport = getActiveMunicipalitySupport(state, faction, mun_id, currentTurnNum);
         const supportRateBonus =
@@ -364,14 +364,14 @@ export function spawnFormationsFromPools(
         created: []
     };
 
-    if (!state.formations || typeof state.formations !== 'object') {
-        (state as GameState & { formations: Record<string, FormationState> }).formations = {};
+    if (!state.military.formations || typeof state.military.formations !== 'object') {
+        (state as GameState & { formations: Record<string, FormationState> }).military.formations = {};
     }
-    if (!state.militia_pools || typeof state.militia_pools !== 'object') {
-        (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).militia_pools = {};
+    if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') {
+        (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).military.militia_pools = {};
     }
 
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
     const recruitmentMode = state.meta.recruitment_mode;
     const isBottomUp = recruitmentMode === 'bottom_up';
@@ -386,7 +386,7 @@ export function spawnFormationsFromPools(
             if (!pool || typeof pool !== 'object') continue;
             if (pool.faction === null || pool.faction === undefined) continue;
             const mun_id = typeof pool.mun_id === 'string' ? pool.mun_id : key;
-            if (state.municipalities?.[mun_id]?.control === 'fragmented') continue;
+            if (state.political.municipalities?.[mun_id]?.control === 'fragmented') continue;
             if (factionFilter !== null && pool.faction !== factionFilter) continue;
             if (munFilter !== null && mun_id !== munFilter) continue;
             // Only check the first two conditions for bottom_up (no emergent suppression check,
@@ -455,7 +455,7 @@ export function spawnFormationsFromPools(
             report.pools_touched += 1;
 
             if (applyChanges) {
-                state.formations![formationId] = formation;
+                state.military.formations![formationId] = formation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
                 pool.updated_turn = currentTurn;
@@ -483,7 +483,7 @@ export function spawnFormationsFromPools(
                 return strictCompare(a.faction, b.faction);
             });
 
-            const dispState = state.displacement_state;
+            const dispState = state.displacement.displacement_state;
             for (const { mun_id: dispMunId, faction: dispFaction } of dispPairs) {
                 const munDisp = dispState?.[dispMunId];
                 const dispIn = munDisp?.displaced_in_by_faction?.[dispFaction as import('../state/game_state.js').FactionId] ?? 0;
@@ -534,7 +534,7 @@ export function spawnFormationsFromPools(
                     ...(dispLocationOsid != null ? { location_osid: dispLocationOsid } : {})
                 };
 
-                state.formations![dispFormationId] = dispFormation;
+                state.military.formations![dispFormationId] = dispFormation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
                 pool.updated_turn = currentTurn;
@@ -556,7 +556,7 @@ export function spawnFormationsFromPools(
         if (!pool || typeof pool !== 'object') continue;
         if (pool.faction === null || pool.faction === undefined) continue;
         const mun_id = typeof pool.mun_id === 'string' ? pool.mun_id : key;
-        if (state.municipalities?.[mun_id]?.control === 'fragmented') continue;
+        if (state.political.municipalities?.[mun_id]?.control === 'fragmented') continue;
         if (factionFilter !== null && pool.faction !== factionFilter) continue;
         if (munFilter !== null && mun_id !== munFilter) continue;
         // Suppress emergent formation if a recruited OOB brigade already covers this (mun, faction)
@@ -638,7 +638,7 @@ export function spawnFormationsFromPools(
             report.manpower_committed += batchSize;
 
             if (applyChanges) {
-                state.formations![formationId] = formation;
+                state.military.formations![formationId] = formation;
                 pool.available -= batchSize;
                 pool.committed += batchSize;
                 pool.updated_turn = currentTurn;
@@ -667,7 +667,7 @@ export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
         formations_returned: 0,
         personnel_returned: 0
     };
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const brigadeIds = (Object.keys(formations) as string[])
         .filter((id) => (formations[id] as FormationState | undefined)?.kind === 'brigade')
         .sort(strictCompare);
@@ -698,7 +698,7 @@ export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
  * Returns true if formation spawn directive is active for the current turn.
  */
 export function isFormationSpawnDirectiveActive(state: GameState): boolean {
-    const directive = state.formation_spawn_directive;
+    const directive = state.military.formation_spawn_directive;
     if (!directive) return false;
     const turn = state.meta?.turn;
     if (typeof turn !== 'number') return false;

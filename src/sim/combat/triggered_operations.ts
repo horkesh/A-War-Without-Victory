@@ -54,7 +54,7 @@ interface TriggeredOpDef {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function corpsOpFinished(state: GameState, corpsId: string): boolean {
-    const cmd = state.corps_command?.[corpsId];
+    const cmd = state.military.corps_command?.[corpsId];
     if (!cmd) return false;
     // Finished = no active op AND no queued ops remaining
     return !cmd.active_operation && (!cmd.queued_operations || cmd.queued_operations.length === 0);
@@ -235,7 +235,7 @@ function buildOperation(
     state: GameState,
     turn: number,
 ): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]> } | null {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
@@ -304,17 +304,17 @@ function buildOperation(
  */
 export function checkTriggeredOperations(state: GameState): string[] {
     const turn = state.meta?.turn ?? 0;
-    const cc = state.corps_command;
+    const cc = state.military.corps_command;
     if (!cc) return [];
 
     const injected: string[] = [];
 
     for (const def of TRIGGERED_OPS) {
         // Already accepted?
-        if (state.triggered_operations_accepted?.[def.name]) continue;
+        if (state.military.triggered_operations_accepted?.[def.name]) continue;
 
         // Permanently declined (3 strikes)?
-        const declineInfo = state.declined_operations?.[def.name];
+        const declineInfo = state.military.declined_operations?.[def.name];
         if (declineInfo && declineInfo.decline_count >= MAX_DECLINE_COUNT) continue;
 
         // In re-offer cooldown?
@@ -350,8 +350,8 @@ export function checkTriggeredOperations(state: GameState): string[] {
         primaryCmd.stance = 'offensive';
 
         // Track acceptance
-        if (!state.triggered_operations_accepted) state.triggered_operations_accepted = {};
-        state.triggered_operations_accepted[def.name] = turn;
+        if (!state.military.triggered_operations_accepted) state.military.triggered_operations_accepted = {};
+        state.military.triggered_operations_accepted[def.name] = turn;
 
         injected.push(def.name);
     }

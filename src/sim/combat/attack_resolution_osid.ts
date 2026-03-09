@@ -203,7 +203,7 @@ export function displaceFormationsInEnemyTerritory(
     reverseMap: OperationalToCanonicalReverseMap
 ): void {
     const adjacency = buildOsidAdjacency(edges);
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (!f || f.status !== 'active') continue;
@@ -321,9 +321,9 @@ export function resolveAttackOrdersOsid(
     const currentTurn = state.meta?.turn ?? 0;
     const startDate = state.meta?.scenario_start_date;
 
-    const orders = state.brigade_attack_orders;
+    const orders = state.military.brigade_attack_orders;
     const adjacency = buildOsidAdjacency(edges);
-    const fmts = state.formations ?? {};
+    const fmts = state.military.formations ?? {};
     const allFormations = Object.keys(fmts).sort(strictCompare).map(k => fmts[k]!);
     if (!orders || typeof orders !== 'object') {
         // No orders this turn — still run displacement pass so formations left in enemy territory from a previous turn are fixed
@@ -364,15 +364,15 @@ export function resolveAttackOrdersOsid(
     const targetOsids = Array.from(targetToAttackers.keys()).sort(strictCompare);
     report.unique_attack_targets = targetOsids.length;
     for (const fid of formationIds) {
-        const f = state.formations?.[fid];
+        const f = state.military.formations?.[fid];
         if (!f) continue;
         const fac = f.faction as string;
         report.orders_by_faction[fac] = (report.orders_by_faction[fac] ?? 0) + 1;
     }
 
-    if (!state.casualty_ledger) {
+    if (!state.military.casualty_ledger) {
         const factionIds = (state.factions ?? []).map(f => f.id);
-        state.casualty_ledger = initializeCasualtyLedger(factionIds);
+        state.military.casualty_ledger = initializeCasualtyLedger(factionIds);
     }
 
     for (const targetOsid of targetOsids) {
@@ -380,7 +380,7 @@ export function resolveAttackOrdersOsid(
         if (attackerIds.length === 0) continue;
 
         const attackerFormations = attackerIds
-            .map(id => state.formations?.[id])
+            .map(id => state.military.formations?.[id])
             .filter((f): f is FormationState => f != null && f.status === 'active');
         if (attackerFormations.length === 0) continue;
 
@@ -413,7 +413,7 @@ export function resolveAttackOrdersOsid(
             const sector = findSectorForEnemyOsid(state, targetOsid);
             const sectorBrigades = sector
                 ? sector.assigned_brigade_ids
-                    .map(id => state.formations?.[id])
+                    .map(id => state.military.formations?.[id])
                     .filter((f): f is FormationState => f != null && f.status === 'active')
                 : [];
             if (sectorBrigades.length > 0) {
@@ -535,7 +535,7 @@ export function resolveAttackOrdersOsid(
                     osid: targetOsid, turn: state.meta?.turn ?? 0
                 };
             }
-            recordBattleCasualties(state.casualty_ledger!, a.faction, a.id, {
+            recordBattleCasualties(state.military.casualty_ledger!, a.faction, a.id, {
                 killed: Math.floor(cas * KIA_FRACTION),
                 wounded: Math.floor(cas * WIA_FRACTION),
                 missing_captured: Math.max(0, cas - Math.floor(cas * KIA_FRACTION) - Math.floor(cas * WIA_FRACTION))
@@ -547,7 +547,7 @@ export function resolveAttackOrdersOsid(
             if (aTanksLost > 0 || aArtLost > 0) {
                 aComp.tanks = Math.max(0, aComp.tanks - aTanksLost);
                 aComp.artillery = Math.max(0, aComp.artillery - aArtLost);
-                recordEquipmentLoss(state.casualty_ledger!, a.faction, { tanks: aTanksLost, artillery: aArtLost });
+                recordEquipmentLoss(state.military.casualty_ledger!, a.faction, { tanks: aTanksLost, artillery: aArtLost });
             }
         }
         if (defenderFormation) {
@@ -561,7 +561,7 @@ export function resolveAttackOrdersOsid(
                 : 0;
             const prevEntrenchment = (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
             (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = Math.max(0, prevEntrenchment - ENTRENCHMENT_DEGRADATION_PER_BATTLE);
-            recordBattleCasualties(state.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: dKia, wounded: dWia, missing_captured: dMia });
+            recordBattleCasualties(state.military.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: dKia, wounded: dWia, missing_captured: dMia });
             // Defender equipment losses
             const dComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
             const dTanksLost = dComp.tanks > 0 ? Math.max(1, Math.round(dComp.tanks * TANK_LOSS_RATE * 0.5)) : 0;
@@ -569,7 +569,7 @@ export function resolveAttackOrdersOsid(
             if (dTanksLost > 0 || dArtLost > 0) {
                 dComp.tanks = Math.max(0, dComp.tanks - dTanksLost);
                 dComp.artillery = Math.max(0, dComp.artillery - dArtLost);
-                recordEquipmentLoss(state.casualty_ledger!, defenderFormation.faction, { tanks: dTanksLost, artillery: dArtLost });
+                recordEquipmentLoss(state.military.casualty_ledger!, defenderFormation.faction, { tanks: dTanksLost, artillery: dArtLost });
             }
             // Snap: Commander Casualty
             if (defenderFormation.cohesion < 20) {
@@ -627,7 +627,7 @@ export function resolveAttackOrdersOsid(
         }
 
         // Part 6b: Supply reserve expenditure (Phase A)
-        if (state.meta.supply_reserves_enabled && state.general_supply_reserve && state.heavy_munitions_reserve) {
+        if (state.meta.supply_reserves_enabled && state.military.general_supply_reserve && state.military.heavy_munitions_reserve) {
             deductCombatExpenditure(state, attackerFaction, attackerFormations.length, powerRatio);
             if (defenderFormation) {
                 deductCombatExpenditure(state, defenderFormation.faction, 1, powerRatio * 0.5);
@@ -635,13 +635,13 @@ export function resolveAttackOrdersOsid(
         }
 
         // Part 6c: Facility combat damage (Phase B)
-        if (state.meta.supply_reserves_enabled && state.production_facilities) {
+        if (state.meta.supply_reserves_enabled && state.military.production_facilities) {
             const osidParts = targetOsid.split(':');
             if (osidParts.length >= 2) {
                 const munId = osidParts[1];
-                const facilityIds = Object.keys(state.production_facilities).sort((a, b) => a.localeCompare(b));
+                const facilityIds = Object.keys(state.military.production_facilities).sort((a, b) => a.localeCompare(b));
                 for (const fId of facilityIds) {
-                    const facility = state.production_facilities[fId];
+                    const facility = state.military.production_facilities[fId];
                     if (facility && facility.municipality_id === munId) {
                         facility.current_condition = Math.max(0, facility.current_condition - FACILITY_COMBAT_DAMAGE_RATE);
                     }
@@ -729,7 +729,7 @@ export function resolveAttackOrdersOsid(
                     if (extraCas > 0) {
                         applyPersonnelLoss(a, extraCas);
                         report.casualty_attacker += extraCas;
-                        recordBattleCasualties(state.casualty_ledger!, a.faction, a.id, {
+                        recordBattleCasualties(state.military.casualty_ledger!, a.faction, a.id, {
                             killed: Math.floor(extraCas * KIA_FRACTION),
                             wounded: Math.floor(extraCas * WIA_FRACTION),
                             missing_captured: Math.max(0, extraCas - Math.floor(extraCas * KIA_FRACTION) - Math.floor(extraCas * WIA_FRACTION))
@@ -744,7 +744,7 @@ export function resolveAttackOrdersOsid(
             if (extraDefenderTotal > 0) {
                 applyPersonnelLoss(defenderFormation, extraDefenderTotal);
                 report.casualty_defender += extraDefenderTotal;
-                recordBattleCasualties(state.casualty_ledger!, defenderFormation.faction, defenderFormation.id, {
+                recordBattleCasualties(state.military.casualty_ledger!, defenderFormation.faction, defenderFormation.id, {
                     killed: Math.floor(extraDefenderTotal * KIA_FRACTION),
                     wounded: Math.floor(extraDefenderTotal * WIA_FRACTION),
                     missing_captured: Math.max(0, extraDefenderTotal - Math.floor(extraDefenderTotal * KIA_FRACTION) - Math.floor(extraDefenderTotal * WIA_FRACTION))
@@ -753,12 +753,12 @@ export function resolveAttackOrdersOsid(
         }
 
         if (flip) {
-            if (!state.political_controllers) state.political_controllers = {};
-            const prevController = state.political_controllers[targetOsid] ?? null;
-            state.political_controllers[targetOsid] = attackerFaction;
+            if (!state.political.political_controllers) state.political.political_controllers = {};
+            const prevController = state.political.political_controllers[targetOsid] ?? null;
+            state.political.political_controllers[targetOsid] = attackerFaction;
             report.flips_applied += 1;
             // Record control event for GUI battle markers (does not affect simulation logic).
-            (state.control_events ??= []).push({
+            (state.political.control_events ??= []).push({
                 turn: state.meta?.turn ?? 0,
                 settlement_id: targetOsid,
                 mechanism: 'combat',
@@ -853,7 +853,7 @@ export function resolveAttackOrdersOsid(
                 (advanceFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
             }
             // Displace any other formations still in the flipped OSID (invariant: no brigade in enemy territory)
-            const formations = state.formations ?? {};
+            const formations = state.military.formations ?? {};
             for (const fid of Object.keys(formations).sort(strictCompare)) {
                 const f = formations[fid];
                 if (!f || f.status !== 'active' || (f as { location_osid?: string }).location_osid !== targetOsid) continue;
@@ -909,7 +909,7 @@ export function resolveAttackOrdersOsid(
     }
 
     // Final pass: displace any formation still in enemy territory (e.g. moved to an OSID that flipped in a later battle this turn)
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
         if (!f || f.status !== 'active') continue;
@@ -941,6 +941,6 @@ export function resolveAttackOrdersOsid(
         if (a.snap_type !== b.snap_type) return strictCompare(a.snap_type, b.snap_type);
         return strictCompare(a.trigger_phase, b.trigger_phase);
     });
-    state.brigade_attack_orders = undefined;
+    state.military.brigade_attack_orders = undefined;
     return report;
 }

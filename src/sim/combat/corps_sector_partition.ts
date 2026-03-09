@@ -152,8 +152,8 @@ export function partitionFrontIntoCorpsSectors(
     territory: Set<SettlementId>,
     edges: EdgeRecord[]
 ): CorpsSectorPartition {
-    const pc = state.political_controllers ?? {};
-    const formations = state.formations ?? {};
+    const pc = state.political.political_controllers ?? {};
+    const formations = state.military.formations ?? {};
 
     // Build adjacency restricted to faction AND territory
     const adj = new Map<SettlementId, SettlementId[]>();

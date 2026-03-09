@@ -42,7 +42,7 @@ export function computePressureExposureByEntity(
 ): Map<EntityId, number> {
     const exposure = new Map<EntityId, number>();
 
-    const fp = state.front_pressure;
+    const fp = state.military.front_pressure;
     if (!fp || typeof fp !== 'object') {
         return exposure;
     }

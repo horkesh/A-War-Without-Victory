@@ -111,7 +111,7 @@ export function applyPhase3BPressureExhaustion(
         };
     }
 
-    const fp = state.front_pressure;
+    const fp = state.military.front_pressure;
     if (!fp || typeof fp !== 'object') {
         return {
             applied: false,

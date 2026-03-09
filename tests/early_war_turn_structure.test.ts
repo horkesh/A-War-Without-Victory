@@ -98,8 +98,8 @@ test('war runTurn default path does not include legacy phase-i subphases', async
 
 test('war runTurn with formation_spawn_directive remains stable', async () => {
     const state = statePhaseI();
-    state.formation_spawn_directive = {};
+    state.military.formation_spawn_directive = {};
     const { nextState, report } = await runTurn(state, { seed: 'smoke-fixture' });
     assert.ok(report.phases.length > 0);
-    assert.ok(nextState.formations != null);
+    assert.ok(nextState.military.formations != null);
 });

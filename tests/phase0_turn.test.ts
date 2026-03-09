@@ -125,8 +125,8 @@ test('runPhase0Turn: runs referendum eligibility when both declared', () => {
 test('runPhase0Turn: runs stability update (municipalities get scores)', () => {
     const state = minimalPhase0State();
     runPhase0Turn(state, {});
-    assert.strictEqual(state.municipalities!.M1!.stability_score, 35);
-    assert.strictEqual(state.municipalities!.M2!.stability_score, 35);
+    assert.strictEqual(state.political.municipalities!.M1!.stability_score, 35);
+    assert.strictEqual(state.political.municipalities!.M2!.stability_score, 35);
 });
 
 test('runPhase0Turn: runs transition when war_start_turn', () => {

@@ -479,7 +479,7 @@ describe('computeBrigadePressureByEdge', () => {
             formations: { rs1: brigA, rbih1: brigB },
             brigadeAor: { sA: 'rs1', sB: 'rbih1' },
         });
-        state.assignable_front_segments = [
+        state.military.assignable_front_segments = [
             {
                 front_id: 'RBiH__RS__sA__sB',
                 edge_ids: ['sA__sB'],
@@ -488,7 +488,7 @@ describe('computeBrigadePressureByEdge', () => {
                 length_edges: 1,
             },
         ];
-        state.brigade_front_assignment = { rs1: null, rbih1: null };
+        state.military.brigade_front_assignment = { rs1: null, rbih1: null };
 
         const result = computeBrigadePressureByEdge(state, [{ a: 'sA', b: 'sB' }]);
         expect(result.edge_pressure['sA:sB'].side_a_pressure).toBe(0);

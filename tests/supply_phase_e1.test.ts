@@ -32,21 +32,21 @@ describe('Phase E1 — JNA Inheritance Bonus', () => {
         const state = makeState();
         ensureSupplyReserves(state);
         applyJnaInheritanceBonus(state);
-        expect(state.heavy_munitions_reserve!['RS']).toBe(INIT_HEAVY_MUNITIONS_RESERVE + JNA_INHERITANCE_HEAVY_BONUS);
+        expect(state.military.heavy_munitions_reserve!['RS']).toBe(INIT_HEAVY_MUNITIONS_RESERVE + JNA_INHERITANCE_HEAVY_BONUS);
     });
 
     it('clamps RS heavy munitions at 100', () => {
         const state = makeState();
-        state.heavy_munitions_reserve = { RS: 90, RBiH: 60, HRHB: 60 } as unknown as typeof state.heavy_munitions_reserve;
+        state.military.heavy_munitions_reserve = { RS: 90, RBiH: 60, HRHB: 60 } as unknown as typeof state.heavy_munitions_reserve;
         applyJnaInheritanceBonus(state);
-        expect(state.heavy_munitions_reserve!['RS']).toBe(100);
+        expect(state.military.heavy_munitions_reserve!['RS']).toBe(100);
     });
 
     it('is no-op when supply_reserves_enabled is false', () => {
         const state = makeState(false);
         ensureSupplyReserves(state);
         applyJnaInheritanceBonus(state);
-        expect(state.heavy_munitions_reserve!['RS']).toBe(INIT_HEAVY_MUNITIONS_RESERVE);
+        expect(state.military.heavy_munitions_reserve!['RS']).toBe(INIT_HEAVY_MUNITIONS_RESERVE);
     });
 
     it('does not affect non-RS factions', () => {
@@ -54,16 +54,16 @@ describe('Phase E1 — JNA Inheritance Bonus', () => {
         ensureSupplyReserves(state);
         applyJnaInheritanceBonus(state);
         // RBiH and HRHB use per-faction overrides (5 and 25 respectively), not the global default
-        expect(state.heavy_munitions_reserve!['RBiH']).toBe(5);
-        expect(state.heavy_munitions_reserve!['HRHB']).toBe(25);
+        expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(5);
+        expect(state.military.heavy_munitions_reserve!['HRHB']).toBe(25);
     });
 
     it('is idempotent — second call stays at 100 if already maxed', () => {
         const state = makeState();
-        state.heavy_munitions_reserve = { RS: 100, RBiH: 60, HRHB: 60 } as unknown as typeof state.heavy_munitions_reserve;
+        state.military.heavy_munitions_reserve = { RS: 100, RBiH: 60, HRHB: 60 } as unknown as typeof state.heavy_munitions_reserve;
         applyJnaInheritanceBonus(state);
         applyJnaInheritanceBonus(state);
-        expect(state.heavy_munitions_reserve!['RS']).toBe(100);
+        expect(state.military.heavy_munitions_reserve!['RS']).toBe(100);
     });
 });
 

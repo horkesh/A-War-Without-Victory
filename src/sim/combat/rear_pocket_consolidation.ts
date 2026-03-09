@@ -39,7 +39,7 @@ export function consolidateRearPockets(
     const report: RearPocketConsolidationReport = { flipped: [], total_flipped: 0 };
 
     const adjacency = buildOsidAdjacency(edges);
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     // Build set of OSIDs that have an active brigade present
     const defendedOsids = new Set<string>();
@@ -51,7 +51,7 @@ export function consolidateRearPockets(
     }
 
     const allOsids = [...adjacency.keys()].filter(k => k.startsWith('op:')).sort(strictCompare);
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const checked = new Set<string>();
 
     for (const osid of allOsids) {
@@ -107,9 +107,9 @@ export function consolidateRearPockets(
         if (!allSurrounded || !surroundingFaction || surroundingFaction === controller) continue;
 
         // Auto-flip entire cluster
-        if (!state.political_controllers) state.political_controllers = {};
+        if (!state.political.political_controllers) state.political.political_controllers = {};
         for (const c of cluster.sort(strictCompare)) {
-            state.political_controllers[c] = surroundingFaction;
+            state.political.political_controllers[c] = surroundingFaction;
             report.flipped.push({ osid: c, from: controller, to: surroundingFaction });
             report.total_flipped++;
         }

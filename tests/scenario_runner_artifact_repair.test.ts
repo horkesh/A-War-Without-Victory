@@ -39,7 +39,7 @@ describe('scenario runner artifact repair', () => {
 
         repairScenarioArtifactState(state, edges, operationalToCanonical);
 
-        expect(state.formations.arbih_test.location_osid).toBe('op:friendly:town');
-        expect(state.formations.arbih_test.status).toBe('active');
+        expect(state.military.formations.arbih_test.location_osid).toBe('op:friendly:town');
+        expect(state.military.formations.arbih_test.status).toBe('active');
     });
 });

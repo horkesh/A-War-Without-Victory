@@ -253,7 +253,7 @@ describe('resolveAttackOrdersOsid — sector coverage defense', () => {
             political_controllers,
             { 'sector:arbih_2nd:0': sector }
         );
-        state.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
+        state.military.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
 
         const edges: EdgeRecord[] = [
             { edge_id: 'e1', a: 'op:rs:1', b: 'op:rbih:1' } as EdgeRecord,
@@ -284,13 +284,13 @@ describe('resolveAttackOrdersOsid — sector coverage defense', () => {
     it('sector defense is weaker than direct defense (coverage penalty)', () => {
         // Direct: place brig2 at op:rbih:1 itself
         const { state: stateA, edges } = makeScenario();
-        (stateA.formations!['brig2'] as any).location_osid = 'op:rbih:1';
+        (stateA.military.formations!['brig2'] as any).location_osid = 'op:rbih:1';
         const reverseMap = new Map<string, string[]>();
         const reportDirect = resolveAttackOrdersOsid(stateA, edges, reverseMap);
 
         // Sector: brig2 stays at op:rbih:2
         const { state: stateB } = makeScenario();
-        stateB.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
+        stateB.military.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
         const reportSector = resolveAttackOrdersOsid(stateB, edges, reverseMap);
 
         const directRatio = reportDirect.battles[0]?.power_ratio ?? 999;
@@ -306,8 +306,8 @@ describe('resolveAttackOrdersOsid — sector coverage defense', () => {
     it('militia ghost fallback when sector has no brigades', () => {
         const { state, edges } = makeScenario();
         // Clear sector brigades
-        state.corps_front_sectors!['sector:arbih_2nd:0']!.assigned_brigade_ids = [];
-        state.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
+        state.military.corps_front_sectors!['sector:arbih_2nd:0']!.assigned_brigade_ids = [];
+        state.military.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
         const reverseMap = new Map<string, string[]>();
         const report = resolveAttackOrdersOsid(state, edges, reverseMap);
 
@@ -320,8 +320,8 @@ describe('resolveAttackOrdersOsid — sector coverage defense', () => {
     it('no battle when target OSID is friendly (attacker already controls it)', () => {
         const { state, edges } = makeScenario();
         // Make RS control op:rbih:1 — no battle should happen
-        state.political_controllers!['op:rbih:1'] = 'RS';
-        state.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
+        state.political.political_controllers!['op:rbih:1'] = 'RS';
+        state.military.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
         const reverseMap = new Map<string, string[]>();
         const report = resolveAttackOrdersOsid(state, edges, reverseMap);
         assert.equal(report.battles.length, 0);
@@ -416,7 +416,7 @@ describe('resolveAttackOrdersOsid — rout to corps HQ', () => {
             political_controllers,
             { 'sector:arbih_2nd:0': sector }
         );
-        state.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
+        state.military.brigade_attack_orders = { brig1: 'op:rbih:1' } as any;
 
         // Edges: brig1 at op:rs:1 can attack op:rbih:1.
         // op:rbih:island (where brig2 physically is) has NO adjacency at all — completely isolated.
@@ -435,7 +435,7 @@ describe('resolveAttackOrdersOsid — rout to corps HQ', () => {
         // If RS won, brig2 should be routed (still active, at corps HQ) not destroyed
         const battle = report.battles[0]!;
         if (battle.attacker_won) {
-            const brig2 = state.formations!['brig2']!;
+            const brig2 = state.military.formations!['brig2']!;
             assert.equal(brig2.status, 'active', 'Sector defender should survive as rout, not be destroyed');
             assert.equal((brig2 as any).location_osid, 'op:rbih:hq', 'Should be at corps HQ');
             assert.ok((brig2 as any).disrupted_turns >= 4, 'Should be heavily disrupted');

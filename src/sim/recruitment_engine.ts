@@ -96,7 +96,7 @@ function strategicAreaScore(faction: FactionId, munId: string): number {
 
 /** Rough frontline proximity heuristic based on municipality contested status. */
 function frontlineProximity(state: GameState, munId: MunicipalityId): number {
-    const munState = state.municipalities?.[munId];
+    const munState = state.political.municipalities?.[munId];
     if (!munState) return 10; // default mid-range
     if (munState.control === 'fragmented') return 0;
     if (munState.control_status === 'HIGHLY_CONTESTED') return 30;
@@ -315,7 +315,7 @@ function resolveValidHqSid(
     municipalityHqSettlement: Record<string, string>,
     sidToMun: Map<SettlementId, MunicipalityId>
 ): string | undefined {
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
     const defaultHq = municipalityHqSettlement[homeMun];
 
     // If default HQ is controlled by this faction, use it
@@ -376,11 +376,11 @@ export function recruitBrigade(
     const preferredPoolFaction = brigade.recruit_pool_faction ?? faction;
     let poolFaction = preferredPoolFaction;
     let poolKey = militiaPoolKey(home_mun, poolFaction);
-    let pool = state.militia_pools?.[poolKey];
+    let pool = state.military.militia_pools?.[poolKey];
     if ((!pool || pool.available < brigade.manpower_cost) && preferredPoolFaction !== faction) {
         poolFaction = faction;
         poolKey = militiaPoolKey(home_mun, poolFaction);
-        pool = state.militia_pools?.[poolKey];
+        pool = state.military.militia_pools?.[poolKey];
     }
     if (!pool || pool.available < brigade.manpower_cost) {
         return { success: false, reason: 'no_manpower' };
@@ -437,7 +437,7 @@ export function applyRecruitment(
 
     // Deduct manpower (use pool_faction for cross-faction recruitment)
     const poolKey = militiaPoolKey(action.home_mun, action.pool_faction ?? action.faction);
-    const pool = state.militia_pools![poolKey]!;
+    const pool = state.military.militia_pools![poolKey]!;
     pool.available -= action.manpower_spent;
     pool.committed += action.manpower_spent;
     pool.updated_turn = state.meta.turn;
@@ -449,8 +449,8 @@ export function applyRecruitment(
     resources.equipment_pools[action.faction]!.points -= action.equipment_spent;
 
     // Register formation
-    if (!state.formations) state.formations = {};
-    state.formations[formation.id] = formation;
+    if (!state.military.formations) state.military.formations = {};
+    state.military.formations[formation.id] = formation;
 
     // Track recruited ID
     resources.recruited_brigade_ids.push(action.brigade_id);
@@ -504,15 +504,15 @@ export function runBotRecruitment(
     const maxElectivePerFaction = options?.maxElectivePerFaction;
 
     // Step 0: Create corps formations (always free, same as legacy)
-    if (!state.formations) state.formations = {};
+    if (!state.military.formations) state.military.formations = {};
     if (includeCorps) {
         for (const c of oobCorps) {
-            if (state.formations[c.id]) continue;
+            if (state.military.formations[c.id]) continue;
             if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
             const hq_sid = resolveValidHqSid(state, c.faction, c.hq_mun, municipalityHqSettlement, sidToMun);
             const location_osid =
                 c.hq_osid ?? (options?.canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, options.canonicalToOperational) : undefined);
-            state.formations[c.id] = {
+            state.military.formations[c.id] = {
                 id: c.id as FormationId,
                 faction: c.faction,
                 name: c.name,
@@ -563,11 +563,11 @@ export function runBotRecruitment(
             const preferredPoolFaction = brigade.recruit_pool_faction ?? faction;
             let poolFaction = preferredPoolFaction;
             let poolKey = militiaPoolKey(brigade.home_mun, poolFaction);
-            let pool = state.militia_pools?.[poolKey];
+            let pool = state.military.militia_pools?.[poolKey];
             if ((!pool || pool.available <= 0) && preferredPoolFaction !== faction) {
                 poolFaction = faction;
                 poolKey = militiaPoolKey(brigade.home_mun, poolFaction);
-                pool = state.militia_pools?.[poolKey];
+                pool = state.military.militia_pools?.[poolKey];
             }
             const manpowerAvailable = pool ? pool.available : 0;
 
@@ -589,7 +589,7 @@ export function runBotRecruitment(
                 brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true, location_osid
             );
 
-            state.formations[brigade.id] = formation;
+            state.military.formations[brigade.id] = formation;
             resources.recruited_brigade_ids.push(brigade.id);
 
             if (pool && effectiveManpower > 0) {
@@ -689,15 +689,15 @@ export function isEmergentFormationSuppressed(
     munId: MunicipalityId,
     faction: FactionId
 ): boolean {
-    if (!state.recruitment_state) return false; // not using recruitment system
-    const formations = state.formations ?? {};
+    if (!state.military.recruitment_state) return false; // not using recruitment system
+    const formations = state.military.formations ?? {};
     const tag = `mun:${munId}`;
     for (const f of Object.values(formations)) {
         if (!f || f.faction !== faction) continue;
         if (f.kind !== 'brigade') continue;
         if (!f.tags?.includes(tag)) continue;
         // Check if this is a recruited OOB brigade (has an ID in the recruited list)
-        if (state.recruitment_state.recruited_brigade_ids.includes(f.id)) {
+        if (state.military.recruitment_state.recruited_brigade_ids.includes(f.id)) {
             return true;
         }
     }

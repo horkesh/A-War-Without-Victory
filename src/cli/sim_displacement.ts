@@ -16,14 +16,14 @@ type DisplacementReportFile = {
 };
 
 function ensureDisplacementState(state: GameState): void {
-    if (!state.displacement_state || typeof state.displacement_state !== 'object') {
-        state.displacement_state = {};
+    if (!state.displacement.displacement_state || typeof state.displacement.displacement_state !== 'object') {
+        state.displacement.displacement_state = {};
     }
 }
 
 export function buildDisplacementReport(state: GameState): DisplacementReportFile {
     ensureDisplacementState(state);
-    const displacements = state.displacement_state as Record<string, DisplacementState>;
+    const displacements = state.displacement.displacement_state as Record<string, DisplacementState>;
     const rows = Object.values(displacements)
         .filter((d) => d && typeof d === 'object' && typeof d.mun_id === 'string')
         .sort((a, b) => a.mun_id.localeCompare(b.mun_id))
@@ -114,7 +114,7 @@ function printList(report: DisplacementReportFile): void {
 
 function printInspect(state: GameState, munId: string): void {
     ensureDisplacementState(state);
-    const displacements = state.displacement_state as Record<string, DisplacementState>;
+    const displacements = state.displacement.displacement_state as Record<string, DisplacementState>;
     const disp = displacements[munId];
 
     if (!disp) {
@@ -135,7 +135,7 @@ function printInspect(state: GameState, munId: string): void {
     process.stdout.write(`  Last updated turn: ${disp.last_updated_turn}\n`);
 
     // Show militia pool if exists
-    const militiaPools = state.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+    const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
     if (militiaPools && typeof militiaPools === 'object') {
         const pool = militiaPools[munId];
         if (pool && typeof pool === 'object') {

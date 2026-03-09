@@ -35,14 +35,14 @@ export function runJNATransition(state: GameState): JNATransitionReport {
     const rsDeclared = state.factions?.some((f) => f.id === 'RS' && f.declared === true) ?? false;
     let started = false;
 
-    if (!state.war_jna) {
-        (state as GameState & { war_jna: JNATransitionState }).war_jna = {
+    if (!state.military.war_jna) {
+        (state as GameState & { war_jna: JNATransitionState }).military.war_jna = {
             transition_begun: false,
             withdrawal_progress: 0,
             asset_transfer_rs: 0
         };
     }
-    const jna = state.war_jna!;
+    const jna = state.military.war_jna!;
 
     if (!jna.transition_begun && rsDeclared) {
         jna.transition_begun = true;

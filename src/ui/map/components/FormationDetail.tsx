@@ -76,7 +76,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
   if (operationsPanelOpen || !selectedFormationId) return null;
 
-  const formation = loadedGameState?.formations.find((f) => f.id === selectedFormationId) ?? null;
+  const formation = loadedGameState?.military?.formations.find((f) => f.id === selectedFormationId) ?? null;
 
   if (!loadedGameState || !formation) {
     return (

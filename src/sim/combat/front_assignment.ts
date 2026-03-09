@@ -11,7 +11,7 @@ function parseEdgeEndpoints(edgeId: string): [SettlementId, SettlementId] | null
 }
 
 function activeBrigades(state: GameState): FormationState[] {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     return Object.keys(formations).sort(strictCompare).map(k => formations[k]!)
         .filter((f): f is FormationState =>
             f != null &&
@@ -22,10 +22,10 @@ function activeBrigades(state: GameState): FormationState[] {
 }
 
 export function hasValidFrontAssignment(state: GameState, formationId: FormationId): boolean {
-    const segments = state.assignable_front_segments ?? [];
+    const segments = state.military.assignable_front_segments ?? [];
     // Backward-compatible behavior for legacy saves/tests before segment derivation exists.
     if (segments.length === 0) return true;
-    const assignmentMap = state.brigade_front_assignment;
+    const assignmentMap = state.military.brigade_front_assignment;
     if (!assignmentMap || Object.keys(assignmentMap).length === 0) return true;
     const assignment = assignmentMap[formationId];
     if (!assignment) return false;
@@ -33,7 +33,7 @@ export function hasValidFrontAssignment(state: GameState, formationId: Formation
 }
 
 export function isBrigadeAssignedToFront(state: GameState, formationId: FormationId): boolean {
-    const formation = state.formations?.[formationId];
+    const formation = state.military.formations?.[formationId];
     if (!formation || (formation.kind ?? 'brigade') !== 'brigade') return false;
     return hasValidFrontAssignment(state, formationId);
 }
@@ -50,13 +50,13 @@ export function isBrigadeAssignedToFront(state: GameState, formationId: Formatio
  * Existing valid assignments are preserved. Missing/invalid assignments are repaired.
  */
 export function ensureBrigadeFrontAssignments(state: GameState): void {
-    if (!state.brigade_front_assignment || typeof state.brigade_front_assignment !== 'object') {
-        state.brigade_front_assignment = {};
+    if (!state.military.brigade_front_assignment || typeof state.military.brigade_front_assignment !== 'object') {
+        state.military.brigade_front_assignment = {};
     }
-    const assignments = state.brigade_front_assignment;
-    const segments = (state.assignable_front_segments ?? []).slice().sort((a, b) => a.front_id.localeCompare(b.front_id));
+    const assignments = state.military.brigade_front_assignment;
+    const segments = (state.military.assignable_front_segments ?? []).slice().sort((a, b) => a.front_id.localeCompare(b.front_id));
     const segmentIds = new Set(segments.map((segment) => segment.front_id));
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
 
     // Remove stale assignment keys (inactive formations).
     for (const id of Object.keys(assignments).sort(strictCompare)) {
@@ -79,7 +79,7 @@ export function ensureBrigadeFrontAssignments(state: GameState): void {
 
     // Build corps-to-front mapping from directives
     const corpsFrontIds = new Map<string, string[]>();
-    for (const [corpsId, cmd] of Object.entries(state.corps_command ?? {}).sort(([a], [b]) => strictCompare(a, b))) {
+    for (const [corpsId, cmd] of Object.entries(state.military.corps_command ?? {}).sort(([a], [b]) => strictCompare(a, b))) {
         if (cmd?.directive?.assigned_front_ids && cmd.directive.assigned_front_ids.length > 0) {
             // Filter to only existing segment IDs
             const valid = cmd.directive.assigned_front_ids.filter(fid => segmentIds.has(fid));

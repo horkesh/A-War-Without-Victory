@@ -43,11 +43,11 @@ function cloneState(s: GameState): GameState {
 test('friction multiplier is higher with higher exhaustion (deterministic)', () => {
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const stateLow = minimalPhaseIIState();
-    stateLow.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
-    stateLow.political_controllers = { S1: 'RBiH', S2: 'RS' };
+    stateLow.political.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
+    stateLow.political.political_controllers = { S1: 'RBiH', S2: 'RS' };
     const stateHigh = minimalPhaseIIState();
-    stateHigh.war_exhaustion = { RBiH: 80, RS: 80, HRHB: 80 };
-    stateHigh.political_controllers = { S1: 'RBiH', S2: 'RS' };
+    stateHigh.political.war_exhaustion = { RBiH: 80, RS: 80, HRHB: 80 };
+    stateHigh.political.political_controllers = { S1: 'RBiH', S2: 'RS' };
     const multLow = getCommandFrictionMultiplier(stateLow, 'RBiH', edges);
     const multHigh = getCommandFrictionMultiplier(stateHigh, 'RBiH', edges);
     assert.ok(multHigh > multLow);
@@ -59,8 +59,8 @@ test('exhaustion increment is larger under higher friction (higher multiplier)',
         { id: 'F1', edge_ids: ['e1'], created_turn: 10, stability: 'static' }
     ];
     const base = minimalPhaseIIState();
-    base.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
-    base.war_supply_pressure = { RBiH: 10, RS: 10, HRHB: 10 };
+    base.political.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
+    base.political.war_supply_pressure = { RBiH: 10, RS: 10, HRHB: 10 };
 
     const stateNoFriction = cloneState(base);
     updateExhaustion(stateNoFriction, fronts);
@@ -69,16 +69,16 @@ test('exhaustion increment is larger under higher friction (higher multiplier)',
     const highMultiplier = 2;
     updateExhaustion(stateWithFriction, fronts, { RBiH: highMultiplier, RS: 1, HRHB: 1 });
 
-    const deltaNoFriction = stateNoFriction.war_exhaustion!['RBiH']! - 0;
-    const deltaWithFriction = stateWithFriction.war_exhaustion!['RBiH']! - 0;
+    const deltaNoFriction = stateNoFriction.political.war_exhaustion!['RBiH']! - 0;
+    const deltaWithFriction = stateWithFriction.political.war_exhaustion!['RBiH']! - 0;
     assert.ok(deltaWithFriction >= deltaNoFriction, 'under higher multiplier (more friction), RBiH exhaustion delta should be at least as large');
 });
 
 test('supply pressure increment is larger under higher friction (higher multiplier)', () => {
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const base = minimalPhaseIIState();
-    base.political_controllers = { S1: 'RBiH', S2: 'RS' };
-    base.war_supply_pressure = { RBiH: 0, RS: 0, HRHB: 0 };
+    base.political.political_controllers = { S1: 'RBiH', S2: 'RS' };
+    base.political.war_supply_pressure = { RBiH: 0, RS: 0, HRHB: 0 };
 
     const stateNoFriction = cloneState(base);
     updateSupplyPressure(stateNoFriction, edges);
@@ -86,8 +86,8 @@ test('supply pressure increment is larger under higher friction (higher multipli
     const stateWithFriction = cloneState(base);
     updateSupplyPressure(stateWithFriction, edges, undefined, { RBiH: 2, RS: 1, HRHB: 1 });
 
-    const pressureNoFriction = stateNoFriction.war_supply_pressure!['RBiH'] ?? 0;
-    const pressureWithFriction = stateWithFriction.war_supply_pressure!['RBiH'] ?? 0;
+    const pressureNoFriction = stateNoFriction.political.war_supply_pressure!['RBiH'] ?? 0;
+    const pressureWithFriction = stateWithFriction.political.war_supply_pressure!['RBiH'] ?? 0;
     assert.ok(pressureWithFriction >= pressureNoFriction, 'under higher multiplier (more friction), RBiH supply pressure should be at least as high');
 });
 
@@ -97,14 +97,14 @@ test('friction wiring does not change political_controllers', () => {
         { id: 'F1', edge_ids: ['e1'], created_turn: 10, stability: 'static' }
     ];
     const state = minimalPhaseIIState();
-    state.political_controllers = { S1: 'RBiH', S2: 'RS', S3: 'HRHB' };
-    state.war_exhaustion = { RBiH: 50, RS: 50, HRHB: 50 };
-    state.war_supply_pressure = { RBiH: 20, RS: 20, HRHB: 20 };
-    const controllersBefore = { ...state.political_controllers };
+    state.political.political_controllers = { S1: 'RBiH', S2: 'RS', S3: 'HRHB' };
+    state.political.war_exhaustion = { RBiH: 50, RS: 50, HRHB: 50 };
+    state.political.war_supply_pressure = { RBiH: 20, RS: 20, HRHB: 20 };
+    const controllersBefore = { ...state.political.political_controllers };
 
     const frictionMultipliers = getCommandFrictionMultipliers(state, edges);
     updateSupplyPressure(state, edges, undefined, frictionMultipliers);
     updateExhaustion(state, fronts, frictionMultipliers);
 
-    assert.deepStrictEqual(state.political_controllers, controllersBefore);
+    assert.deepStrictEqual(state.political.political_controllers, controllersBefore);
 });

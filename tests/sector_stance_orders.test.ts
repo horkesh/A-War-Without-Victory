@@ -73,10 +73,10 @@ describe('applySectorStanceOrders', () => {
         const report = applySectorStanceOrders(state);
 
         expect(report.postures_changed).toBe(2);
-        expect(state.brigade_posture_orders).toEqual([
+        expect(state.military.brigade_posture_orders).toEqual([
             { brigade_id: 'rs-brig-1', posture: 'dig_in' },
             { brigade_id: 'rs-brig-2', posture: 'dig_in' },
         ]);
-        expect(state.sector_stance_orders).toEqual([]);
+        expect(state.military.sector_stance_orders).toEqual([]);
     });
 });

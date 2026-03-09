@@ -35,8 +35,8 @@ export function getEffectiveSettlementSide(
     sid: SettlementId
 ): PoliticalSideId | null {
     // Check control overrides first (negotiated control)
-    if (state.control_overrides && typeof state.control_overrides === 'object') {
-        const override = state.control_overrides[sid];
+    if (state.political.control_overrides && typeof state.political.control_overrides === 'object') {
+        const override = state.political.control_overrides[sid];
         if (override && typeof override === 'object' && typeof override.side === 'string') {
             return override.side;
         }

@@ -23,7 +23,7 @@ async function ensureRemoved(dir: string): Promise<void> {
 }
 
 function formationIdsFromState(state: { formations?: Record<string, unknown> }): string[] {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     return Object.keys(formations).sort((a, b) => a.localeCompare(b));
 }
 

@@ -116,7 +116,7 @@ test('applyInvestment Police deducts 5 and sets police_loyalty to loyal', () => 
     assert.strictEqual(result.ok, true);
     assert.strictEqual((result as { spent: number }).spent, 5);
     assert.strictEqual(getPrewarCapital(state, 'RS'), 95);
-    assert.strictEqual(state.municipalities!['MUN_A'].organizational_penetration?.police_loyalty, 'loyal');
+    assert.strictEqual(state.political.municipalities!['MUN_A'].organizational_penetration?.police_loyalty, 'loyal');
 });
 
 test('applyInvestment TO only for RBiH', () => {
@@ -131,7 +131,7 @@ test('applyInvestment TO for RBiH deducts 8 and sets to_control to controlled', 
     const result = applyInvestment(state, 'RBiH', 'to', { kind: 'municipality', mun_ids: ['MUN_B'] });
     assert.strictEqual(result.ok, true);
     assert.strictEqual((result as { spent: number }).spent, 8);
-    assert.strictEqual(state.municipalities!['MUN_B'].organizational_penetration?.to_control, 'controlled');
+    assert.strictEqual(state.political.municipalities!['MUN_B'].organizational_penetration?.to_control, 'controlled');
 });
 
 test('applyInvestment coordinated discount is applied for eligible factions', () => {
@@ -151,23 +151,23 @@ test('applyInvestment coordinated discount is applied for eligible factions', ()
 test('applyInvestment Party updates sds_penetration for RS', () => {
     const state = minimalPhase0StateWithCapital();
     applyInvestment(state, 'RS', 'party', { kind: 'municipality', mun_ids: ['MUN_C'] });
-    assert.strictEqual(state.municipalities!['MUN_C'].organizational_penetration?.sds_penetration, 15);
+    assert.strictEqual(state.political.municipalities!['MUN_C'].organizational_penetration?.sds_penetration, 15);
 });
 
 test('applyInvestment Party updates sda_penetration for RBiH, hdz_penetration for HRHB', () => {
     const state = minimalPhase0StateWithCapital();
     applyInvestment(state, 'RBiH', 'party', { kind: 'municipality', mun_ids: ['MUN_D'] });
     applyInvestment(state, 'HRHB', 'party', { kind: 'municipality', mun_ids: ['MUN_E'] });
-    assert.strictEqual(state.municipalities!['MUN_D'].organizational_penetration?.sda_penetration, 15);
-    assert.strictEqual(state.municipalities!['MUN_E'].organizational_penetration?.hdz_penetration, 15);
+    assert.strictEqual(state.political.municipalities!['MUN_D'].organizational_penetration?.sda_penetration, 15);
+    assert.strictEqual(state.political.municipalities!['MUN_E'].organizational_penetration?.hdz_penetration, 15);
 });
 
 test('applyInvestment Paramilitary updates patriotska_liga for RBiH, paramilitary_rs for RS', () => {
     const state = minimalPhase0StateWithCapital();
     applyInvestment(state, 'RBiH', 'paramilitary', { kind: 'municipality', mun_ids: ['MUN_F'] });
     applyInvestment(state, 'RS', 'paramilitary', { kind: 'municipality', mun_ids: ['MUN_G'] });
-    assert.strictEqual(state.municipalities!['MUN_F'].organizational_penetration?.patriotska_liga, 15);
-    assert.strictEqual(state.municipalities!['MUN_G'].organizational_penetration?.paramilitary_rs, 15);
+    assert.strictEqual(state.political.municipalities!['MUN_F'].organizational_penetration?.patriotska_liga, 15);
+    assert.strictEqual(state.political.municipalities!['MUN_G'].organizational_penetration?.paramilitary_rs, 15);
 });
 
 test('applyInvestment region scope uses region cost', () => {

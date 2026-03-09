@@ -102,8 +102,8 @@ function addToCamp(
     amount: number,
     report: MinorityFlightReport
 ): void {
-    if (!state.displacement_camp_state) state.displacement_camp_state = {};
-    const campMap = state.displacement_camp_state as Record<MunicipalityId, DisplacementCampState>;
+    if (!state.displacement.displacement_camp_state) state.displacement.displacement_camp_state = {};
+    const campMap = state.displacement.displacement_camp_state as Record<MunicipalityId, DisplacementCampState>;
     const existing = campMap[sourceMunId];
     const camp: DisplacementCampState = existing ?? {
         mun_id: sourceMunId,
@@ -123,7 +123,7 @@ function addToCamp(
  */
 function buildMunDominantController(state: GameState): Map<MunicipalityId, FactionId> {
     const counts = new Map<MunicipalityId, Map<FactionId, number>>();
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc || typeof pc !== 'object') return new Map();
     for (const [key, value] of Object.entries(pc)) {
         if (!key.startsWith('op:') || !value) continue;
@@ -178,7 +178,7 @@ export function processMinorityFlight(
                 ? MINORITY_FLIGHT_PHASE2_TO_4_FRACTION
                 : 1;
 
-    const timerMap = state.hostile_takeover_timers ?? {};
+    const timerMap = state.displacement.hostile_takeover_timers ?? {};
     // Skip minority flight only for settlements that have their own takeover timer.
     // (Takeover runs per-OSID for flipped settlements; RS-from-start settlements like Kozarska Dubica
     // never get a timer, so they must be handled by minority flight.)
@@ -190,8 +190,8 @@ export function processMinorityFlight(
         if (osid.startsWith('op:')) osidsWithTakeoverTimer.add(osid);
     }
 
-    if (!state.minority_flight_state) state.minority_flight_state = {};
-    const flightMap = state.minority_flight_state;
+    if (!state.displacement.minority_flight_state) state.displacement.minority_flight_state = {};
+    const flightMap = state.displacement.minority_flight_state;
 
     const munDominantController = buildMunDominantController(state);
 
@@ -200,7 +200,7 @@ export function processMinorityFlight(
     function getMunRemaining(munId: MunicipalityId): number {
         const cached = munRemainingPop.get(munId);
         if (cached !== undefined) return cached;
-        const ds = state.displacement_state?.[munId];
+        const ds = state.displacement.displacement_state?.[munId];
         const orig = ds?.original_population ?? 10000;
         const remaining = Math.max(0, orig - (ds?.displaced_out ?? 0) - (ds?.lost_population ?? 0));
         munRemainingPop.set(munId, remaining);
@@ -325,7 +325,7 @@ export function processMinorityFlight(
         const dispState = getOrInitDisplacementState(
             state,
             munId,
-            state.displacement_state?.[munId]?.original_population ?? 10000
+            state.displacement.displacement_state?.[munId]?.original_population ?? 10000
         );
         // displaced_out = only actually-routed to camps; lost_population = killed + fled
         const routedToCamps = routedRBiH + routedHRHB + routedRS;
@@ -354,7 +354,7 @@ export function processMinorityFlight(
         if (routedHRHB > 0) addToCamp(state, munId, 'HRHB', routedHRHB, report);
         if (routedRS > 0) addToCamp(state, munId, 'RS', routedRS, report);
 
-        if (!state.displacement_event_log) state.displacement_event_log = [];
+        if (!state.displacement.displacement_event_log) state.displacement.displacement_event_log = [];
         const factionData: [string, number, number, number, number][] = [
             ['RBiH', routedRBiH + killedRBiH + fleeRBiH, killedRBiH, fleeRBiH, routedRBiH],
             ['HRHB', routedHRHB + killedHRHB + fleeHRHB, killedHRHB, fleeHRHB, routedHRHB],
@@ -362,7 +362,7 @@ export function processMinorityFlight(
         ];
         for (const [ethnicity, displaced, killed, fled_abroad, settled] of factionData) {
             if (displaced <= 0) continue;
-            state.displacement_event_log.push({
+            state.displacement.displacement_event_log.push({
                 turn: currentTurn, origin_mun: munId, origin_osid: sid, dest_mun: munId,
                 ethnicity, displaced, killed, fled_abroad, settled,
             });

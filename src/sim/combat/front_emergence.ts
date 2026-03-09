@@ -71,7 +71,7 @@ export function detectFronts(
     }
 
     const turn = state.meta.turn;
-    const segments = state.front_segments ?? {};
+    const segments = state.military.front_segments ?? {};
     const descriptors: FrontDescriptor[] = [];
 
     const pairKeys = Array.from(byPair.keys()).sort(strictCompare);

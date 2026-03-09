@@ -7,7 +7,7 @@ import { deserializeState } from '../src/state/serialize.js';
 
 // Replicate the deterministic ID generation logic for testing
 function testGenerateId(state: GameState, faction: string): string {
-    const formations = state.formations || {};
+    const formations = state.military.formations || {};
     const factionFormations = Object.values(formations)
         .filter((f) => f && typeof f === 'object' && (f as any).faction === faction)
         .map((f) => (f as any).id)
@@ -48,7 +48,7 @@ test('deterministic formation ID generation', () => {
     assert.strictEqual(id1, 'F_A_0001');
 
     // Add a formation
-    state.formations['F_A_0001'] = {
+    state.military.formations['F_A_0001'] = {
         id: 'F_A_0001',
         faction: 'A',
         name: 'First',
@@ -62,7 +62,7 @@ test('deterministic formation ID generation', () => {
     assert.strictEqual(id2, 'F_A_0002');
 
     // Add another with custom ID
-    state.formations['custom'] = {
+    state.military.formations['custom'] = {
         id: 'custom',
         faction: 'A',
         name: 'Custom',
@@ -76,7 +76,7 @@ test('deterministic formation ID generation', () => {
     assert.strictEqual(id3, 'F_A_0002');
 
     // Add F_A_0005
-    state.formations['F_A_0005'] = {
+    state.military.formations['F_A_0005'] = {
         id: 'F_A_0005',
         faction: 'A',
         name: 'Fifth',
@@ -102,9 +102,9 @@ test('save migration defaults formations to empty object', () => {
     const serialized = JSON.stringify(rawState);
     const deserialized = deserializeState(serialized);
 
-    assert.ok(deserialized.formations);
-    assert.strictEqual(typeof deserialized.formations, 'object');
-    assert.strictEqual(Object.keys(deserialized.formations).length, 0);
+    assert.ok(deserialized.military.formations);
+    assert.strictEqual(typeof deserialized.military.formations, 'object');
+    assert.strictEqual(Object.keys(deserialized.military.formations).length, 0);
 });
 
 test('deterministic list ordering', () => {

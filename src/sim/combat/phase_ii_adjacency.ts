@@ -67,7 +67,7 @@ export function isSettlementSetContiguous(
  * Get all active brigades for a faction, sorted by formation ID.
  */
 export function getFactionBrigades(state: GameState, faction: FactionId): FormationState[] {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const result: FormationState[] = [];
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];

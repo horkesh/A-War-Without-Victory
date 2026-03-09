@@ -36,7 +36,7 @@ export interface OperationStormCheckReport {
 }
 
 function computeRsTerritorialShare(state: GameState): number {
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc) return 0;
     const keys = Object.keys(pc).sort(strictCompare);
     if (keys.length === 0) return 0;
@@ -52,18 +52,18 @@ function computeRsTerritorialShare(state: GameState): number {
  * All must be true: Washington signed, RS share >= threshold, combined exhaustion >= threshold, IVP >= threshold.
  */
 export function evaluateOperationStormPreconditions(state: GameState): OperationStormPreconditionResult {
-    const rhs = state.rbih_hrhb_state;
+    const rhs = state.political.rbih_hrhb_state;
     const washington_active = rhs?.washington_signed === true;
 
     const rsShare = computeRsTerritorialShare(state);
     const rs_threat = rsShare >= STORM_RS_THREAT_SHARE;
 
-    const rbihExhaustion = state.war_exhaustion?.['RBiH'] ?? 0;
-    const hrhbExhaustion = state.war_exhaustion?.['HRHB'] ?? 0;
+    const rbihExhaustion = state.political.war_exhaustion?.['RBiH'] ?? 0;
+    const hrhbExhaustion = state.political.war_exhaustion?.['HRHB'] ?? 0;
     const combinedExhaustion = rbihExhaustion + hrhbExhaustion;
     const combined_exhaustion = combinedExhaustion >= STORM_COMBINED_EXHAUSTION;
 
-    const ivp = state.international_visibility_pressure;
+    const ivp = state.political.international_visibility_pressure;
     const negotiationMomentum = ivp?.negotiation_momentum ?? 0;
     const ivp_momentum = negotiationMomentum >= STORM_IVP_MOMENTUM;
 

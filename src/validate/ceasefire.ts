@@ -8,7 +8,7 @@ import type { ValidationIssue } from './validate.js';
 export function validateCeasefire(state: GameState, derivedFrontEdges?: FrontEdge[]): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    const negotiationStatus = state.negotiation_status;
+    const negotiationStatus = state.political.negotiation_status;
     if (negotiationStatus !== undefined) {
         if (!negotiationStatus || typeof negotiationStatus !== 'object') {
             issues.push({
@@ -46,7 +46,7 @@ export function validateCeasefire(state: GameState, derivedFrontEdges?: FrontEdg
         }
     }
 
-    const ceasefire = state.ceasefire;
+    const ceasefire = state.political.ceasefire;
     if (ceasefire !== undefined) {
         if (!ceasefire || typeof ceasefire !== 'object') {
             issues.push({

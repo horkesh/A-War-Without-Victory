@@ -68,7 +68,7 @@ function stateWithPhaseI(overrides?: { war_displacement_initiated?: Record<strin
         }
     };
     if (overrides?.war_displacement_initiated !== undefined) {
-        s.war_displacement_initiated = overrides.war_displacement_initiated as Record<MunicipalityId, number>;
+        s.displacement.war_displacement_initiated = overrides.war_displacement_initiated as Record<MunicipalityId, number>;
     }
     return s;
 }
@@ -79,7 +79,7 @@ test('runDisplacementHooks with no flips returns empty report', () => {
     const report = runDisplacementHooks(state, 10, controlFlipReport, undefined);
     assert.strictEqual(report.hooks_created, 0);
     assert.strictEqual(report.by_mun.length, 0);
-    assert.strictEqual(state.war_displacement_initiated === undefined, true);
+    assert.strictEqual(state.displacement.war_displacement_initiated === undefined, true);
 });
 
 test('runDisplacementHooks with flips creates hooks and report is deterministic by mun_id', () => {
@@ -99,13 +99,13 @@ test('runDisplacementHooks with flips creates hooks and report is deterministic 
     assert.strictEqual(report.by_mun[0].initiated_turn, 10);
     assert.strictEqual(report.by_mun[1].mun_id, 'MUN_B');
     assert.strictEqual(report.by_mun[1].initiated_turn, 10);
-    assert.strictEqual(state.war_displacement_initiated!['MUN_A'], 10);
-    assert.strictEqual(state.war_displacement_initiated!['MUN_B'], 10);
+    assert.strictEqual(state.displacement.war_displacement_initiated!['MUN_A'], 10);
+    assert.strictEqual(state.displacement.war_displacement_initiated!['MUN_B'], 10);
 });
 
 test('runDisplacementHooks does not modify displacement_state or population totals', () => {
     const state = stateWithPhaseI();
-    state.displacement_state = {
+    state.displacement.displacement_state = {
         MUN_A: {
             mun_id: 'MUN_A' as MunicipalityId,
             original_population: 1000,
@@ -121,11 +121,11 @@ test('runDisplacementHooks does not modify displacement_state or population tota
         control_events: []
     };
     runDisplacementHooks(state, 10, controlFlipReport, undefined);
-    assert.ok(state.displacement_state !== undefined);
-    assert.strictEqual(state.displacement_state!['MUN_A'].original_population, 1000);
-    assert.strictEqual(state.displacement_state!['MUN_A'].displaced_out, 0);
-    assert.strictEqual(state.displacement_state!['MUN_A'].displaced_in, 0);
-    assert.strictEqual(state.displacement_state!['MUN_A'].lost_population, 0);
+    assert.ok(state.displacement.displacement_state !== undefined);
+    assert.strictEqual(state.displacement.displacement_state!['MUN_A'].original_population, 1000);
+    assert.strictEqual(state.displacement.displacement_state!['MUN_A'].displaced_out, 0);
+    assert.strictEqual(state.displacement.displacement_state!['MUN_A'].displaced_in, 0);
+    assert.strictEqual(state.displacement.displacement_state!['MUN_A'].lost_population, 0);
 });
 
 test('runDisplacementHooks does not create duplicate hook for same municipality', () => {
@@ -138,7 +138,7 @@ test('runDisplacementHooks does not create duplicate hook for same municipality'
     const report = runDisplacementHooks(state, 10, controlFlipReport, undefined);
     assert.strictEqual(report.hooks_created, 0);
     assert.strictEqual(report.by_mun.length, 0);
-    assert.strictEqual(state.war_displacement_initiated!['MUN_A'], 9);
+    assert.strictEqual(state.displacement.war_displacement_initiated!['MUN_A'], 9);
 });
 
 test('war runTurn default path omits phase_i displacement hooks report', async () => {

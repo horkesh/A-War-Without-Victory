@@ -140,7 +140,7 @@ function areFactionsAtWar(state: GameState, a: FactionId, b: FactionId): boolean
             ? state.meta.rbih_hrhb_war_earliest_turn
             : Number.MAX_SAFE_INTEGER;
     if (currentTurn < earliestTurn) return false;
-    const alliance = typeof state.war_alliance_rbih_hrhb === 'number' ? state.war_alliance_rbih_hrhb : 0;
+    const alliance = typeof state.political.war_alliance_rbih_hrhb === 'number' ? state.political.war_alliance_rbih_hrhb : 0;
     return alliance <= RBIH_HRHB_ALLIED_THRESHOLD;
 }
 
@@ -226,7 +226,7 @@ function buildFriendlyMunicipalitiesByFaction(
         HRHB: new Set<MunicipalityId>()
     };
     // OSID-level political_controllers: extract municipality from OSID "op:mun:slug"
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (pc && typeof pc === 'object') {
         const osids = Object.keys(pc).sort(strictCompare);
         for (const osid of osids) {
@@ -293,7 +293,7 @@ function routeDisplacedCohort(
         const targetState = getOrInitDisplacementState(
             state,
             targetMunId,
-            state.displacement_state?.[targetMunId]?.original_population ?? 10000
+            state.displacement.displacement_state?.[targetMunId]?.original_population ?? 10000
         );
         const targetCurrent = Math.max(
             0,
@@ -332,7 +332,7 @@ function routeDisplacedCohort(
                 reason: options.eventReason
             });
 
-            state.displacement_event_log!.push({
+            state.displacement.displacement_event_log!.push({
                 turn: currentTurn,
                 origin_mun: sourceMunId,
                 dest_mun: targetMunId,
@@ -354,7 +354,7 @@ function addOneTurnPoolContribution(
     state: GameState,
     routedByPoolKey: Map<string, { munId: MunicipalityId; faction: FactionId; amount: number }>
 ): void {
-    if (!state.militia_pools) state.militia_pools = {};
+    if (!state.military.militia_pools) state.military.militia_pools = {};
     const poolKeys = Array.from(routedByPoolKey.keys()).sort(strictCompare);
     for (const key of poolKeys) {
         const row = routedByPoolKey.get(key);
@@ -365,12 +365,12 @@ function addOneTurnPoolContribution(
         );
         if (contribution <= 0) continue;
         const currentTurn = state.meta.turn;
-        const pool = state.militia_pools[key];
+        const pool = state.military.militia_pools[key];
         if (pool) {
             pool.available += contribution;
             pool.updated_turn = currentTurn;
         } else {
-            state.militia_pools[key] = {
+            state.military.militia_pools[key] = {
                 mun_id: row.munId,
                 faction: row.faction,
                 available: contribution,
@@ -433,9 +433,9 @@ export function processDisplacementTakeover(
         };
     }
 
-    if (!state.hostile_takeover_timers) state.hostile_takeover_timers = {};
-    if (!state.displacement_camp_state) state.displacement_camp_state = {};
-    if (!state.displacement_event_log) state.displacement_event_log = [];
+    if (!state.displacement.hostile_takeover_timers) state.displacement.hostile_takeover_timers = {};
+    if (!state.displacement.displacement_camp_state) state.displacement.displacement_camp_state = {};
+    if (!state.displacement.displacement_event_log) state.displacement.displacement_event_log = [];
 
     const report: TakeoverDisplacementReport = {
         timers_started: 0,
@@ -453,13 +453,13 @@ export function processDisplacementTakeover(
     };
 
     const currentTurn = state.meta.turn;
-    const timerMap = state.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
-    const campMap = state.displacement_camp_state as Record<MunicipalityId, DisplacementCampState>;
+    const timerMap = state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
+    const campMap = state.displacement.displacement_camp_state as Record<MunicipalityId, DisplacementCampState>;
 
     // Build set of OSIDs on the front line (for front-adjacency gating in displacement seeding).
     // war_front_edges_osid.a/b are OSIDs in op:municipality:slug format.
     const frontOsids = new Set<string>();
-    for (const fe of state.war_front_edges_osid ?? []) {
+    for (const fe of state.military.war_front_edges_osid ?? []) {
         if (fe.a) frontOsids.add(fe.a);
         if (fe.b) frontOsids.add(fe.b);
     }
@@ -480,7 +480,7 @@ export function processDisplacementTakeover(
     const warStartTurn = typeof state.meta.war_start_turn === 'number' ? state.meta.war_start_turn : 0;
     if (currentTurn === warStartTurn + 1) {
         const allFactions: FactionId[] = ['HRHB', 'RBiH', 'RS'];
-        const pc = state.political_controllers;
+        const pc = state.political.political_controllers;
         if (pc) {
             const osids = Object.keys(pc).sort(strictCompare);
             for (const osid of osids) {
@@ -548,7 +548,7 @@ export function processDisplacementTakeover(
     // Count OSIDs per municipality once for per-OSID population split.
     const osidCountByMun = new Map<MunicipalityId, number>();
     {
-        const pc2 = state.political_controllers;
+        const pc2 = state.political.political_controllers;
         if (pc2) {
             for (const key of Object.keys(pc2)) {
                 if (!key.startsWith('op:')) continue;
@@ -572,7 +572,7 @@ export function processDisplacementTakeover(
         const osid = pipeIdx >= 0 ? timerKey.substring(0, pipeIdx) : timerKey;
 
         // Recapture check: if displaced faction regained control, delete timer
-        const currentController = state.political_controllers?.[osid] as FactionId | undefined;
+        const currentController = state.political.political_controllers?.[osid] as FactionId | undefined;
         if (currentController === timer.from_faction) {
             delete timerMap[timerKey];
             continue;
@@ -591,7 +591,7 @@ export function processDisplacementTakeover(
             const dispState = getOrInitDisplacementState(
                 state,
                 munId,
-                state.displacement_state?.[munId]?.original_population ?? 10000
+                state.displacement.displacement_state?.[munId]?.original_population ?? 10000
             );
 
             const osidRec = osidSettlements?.get(osid);
@@ -640,7 +640,7 @@ export function processDisplacementTakeover(
                 dispState.last_updated_turn = currentTurn;
 
                 const sourcePoolKey = militiaPoolKey(munId, timer.from_faction);
-                const sourcePool = state.militia_pools?.[sourcePoolKey];
+                const sourcePool = state.military.militia_pools?.[sourcePoolKey];
                 if (sourcePool && beforePop > 0) {
                     const ratio = displacementAmount / beforePop;
                     const reduction = Math.floor(sourcePool.available * ratio);
@@ -674,7 +674,7 @@ export function processDisplacementTakeover(
 
                 recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
 
-                state.displacement_event_log.push({
+                state.displacement.displacement_event_log.push({
                     turn: currentTurn,
                     origin_mun: munId,
                     origin_osid: osid,
@@ -719,7 +719,7 @@ export function processDisplacementTakeover(
             const dispState = getOrInitDisplacementState(
                 state,
                 munId,
-                state.displacement_state?.[munId]?.original_population ?? 10000
+                state.displacement.displacement_state?.[munId]?.original_population ?? 10000
             );
 
             const osidRecB = osidSettlements?.get(osid);
@@ -774,7 +774,7 @@ export function processDisplacementTakeover(
 
             // Reduce source militia pool proportionally
             const sourcePoolKey = militiaPoolKey(munId, timer.from_faction);
-            const sourcePool = state.militia_pools?.[sourcePoolKey];
+            const sourcePool = state.military.militia_pools?.[sourcePoolKey];
             if (sourcePool && beforePop > 0) {
                 const ratio = sustainedAmount / beforePop;
                 const reduction = Math.floor(sourcePool.available * ratio);
@@ -798,7 +798,7 @@ export function processDisplacementTakeover(
 
             recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
 
-            state.displacement_event_log.push({
+            state.displacement.displacement_event_log.push({
                 turn: currentTurn,
                 origin_mun: munId,
                 origin_osid: osid,

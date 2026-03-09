@@ -119,7 +119,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const activeMunicipalitySupport = playerFaction
     ? state.municipalitySupportOrders?.[playerFaction]
     : undefined;
-  const alliance = state.war_alliance_rbih_hrhb ?? 0;
+  const alliance = state.political.war_alliance_rbih_hrhb ?? 0;
   const alliancePct = Math.max(0, Math.min(100, ((alliance + 1) / 2) * 100));
   const alerts: string[] = [];
   const [convoyMessage, setConvoyMessage] = useState<string | null>(null);

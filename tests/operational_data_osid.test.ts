@@ -61,8 +61,8 @@ describe('operational_data', () => {
             }
         };
         backfillFormationLocationOsid(state, sampleMap);
-        expect(state.formations.f1.location_osid).toBe('op:banovici:banovici_2');
-        expect(state.formations.f2.location_osid).toBe('op:banovici:seona');
+        expect(state.military.formations.f1.location_osid).toBe('op:banovici:banovici_2');
+        expect(state.military.formations.f2.location_osid).toBe('op:banovici:seona');
     });
 
     it('backfillFormationLocationOsid skips formations that already have location_osid', () => {
@@ -72,7 +72,7 @@ describe('operational_data', () => {
             }
         };
         backfillFormationLocationOsid(state, sampleMap);
-        expect(state.formations.f1.location_osid).toBe('op:existing');
+        expect(state.military.formations.f1.location_osid).toBe('op:existing');
     });
 
     it('loadOperationalData loads map and builds reverse (integration)', async () => {

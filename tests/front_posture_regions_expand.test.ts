@@ -58,8 +58,8 @@ test('expandRegionPostureToEdges expands into active edges and preserves per-edg
     const res = expandRegionPostureToEdges(state, frontRegions);
     assert.strictEqual(res.expanded_edges_count, 1, 'only e1 should be expanded (e2 overridden, e3 inactive)');
 
-    assert.deepStrictEqual(state.front_posture.A.assignments.e1, { edge_id: 'e1', posture: 'push', weight: 3 });
-    assert.deepStrictEqual(state.front_posture.A.assignments.e2, { edge_id: 'e2', posture: 'hold', weight: 1 });
-    assert.ok(!('e3' in state.front_posture.A.assignments), 'inactive edge should not receive expansion');
+    assert.deepStrictEqual(state.military.front_posture.A.assignments.e1, { edge_id: 'e1', posture: 'push', weight: 3 });
+    assert.deepStrictEqual(state.military.front_posture.A.assignments.e2, { edge_id: 'e2', posture: 'hold', weight: 1 });
+    assert.ok(!('e3' in state.military.front_posture.A.assignments), 'inactive edge should not receive expansion');
 });
 

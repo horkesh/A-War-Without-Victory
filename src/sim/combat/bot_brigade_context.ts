@@ -36,7 +36,7 @@ export const MAX_CORPS_BRIGADES_PER_OSID = 2;
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function getFactionBrigades(state: GameState, faction: FactionId): FormationState[] {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const result: FormationState[] = [];
     for (const [, f] of Object.entries(formations)) {
         if (f.faction !== faction) continue;
@@ -57,7 +57,7 @@ export function getFactionBrigades(state: GameState, faction: FactionId): Format
  * largest sector as fallback.
  */
 export function findBrigadeSectorId(state: GameState, brigade: FormationState): string | null {
-    const sectors = state.corps_front_sectors;
+    const sectors = state.military.corps_front_sectors;
     if (!sectors || !brigade.corps_id || !brigade.location_osid) return null;
 
     const corpsId = brigade.corps_id;
@@ -135,7 +135,7 @@ export function findNearestFriendlyOsidInSet(
  * Corps-level rebalancing: a corps commander manages their own zone.
  * If corpsId is null/undefined, falls back to counting all faction brigades. */
 export function countCorpsBrigadesAtOsid(state: GameState, faction: FactionId, corpsId: FormationId | null | undefined, osid: Osid): number {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     let count = 0;
     for (const fid of Object.keys(formations)) {
         const f = formations[fid]!;
@@ -158,7 +158,7 @@ export function countCorpsBrigadesAtOsid(state: GameState, faction: FactionId, c
  * front-line gap-fill: a brigade should move to cover an undefended neighbor
  * only if at least 1 other faction brigade remains behind. */
 export function countFactionBrigadesAtOsid(state: GameState, faction: FactionId, osid: Osid): number {
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     let count = 0;
     for (const fid of Object.keys(formations)) {
         const f = formations[fid]!;

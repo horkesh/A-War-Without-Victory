@@ -376,7 +376,7 @@ export class Phase0PreparationMap {
             this.ctx.fill();
 
             if (this.layerOrgPen && munId) {
-                const op = this.gameState?.municipalities?.[munId]?.organizational_penetration;
+                const op = this.gameState?.political?.municipalities?.[munId]?.organizational_penetration;
                 const intensity = this.getOrgIntensity(op);
                 if (intensity > 0) {
                     this.ctx.save();
@@ -410,7 +410,7 @@ export class Phase0PreparationMap {
             return CONTROL_COLORS[controller] ?? CONTROL_COLORS.null;
         }
         if (this.layerStability && munId) {
-            const stability = this.gameState?.municipalities?.[munId]?.stability_score ?? 50;
+            const stability = this.gameState?.political?.municipalities?.[munId]?.stability_score ?? 50;
             return this.stabilityColor(stability);
         }
         return this.municipalityIdByMun1990.has(featureId) ? 'rgba(208, 191, 162, 0.86)' : 'rgba(185, 172, 148, 0.70)';
@@ -460,7 +460,7 @@ export class Phase0PreparationMap {
 
     private buildNormalizedMunicipalityLookup(): Map<string, MunicipalityId> {
         const out = new Map<string, MunicipalityId>();
-        const municipalityIds = Object.keys(this.gameState?.municipalities ?? {}).sort(strictCompare);
+        const municipalityIds = Object.keys(this.gameState?.political?.municipalities ?? {}).sort(strictCompare);
         for (const municipalityId of municipalityIds) {
             const normalized = normalizeMunKey(municipalityId);
             if (!out.has(normalized)) {
@@ -475,10 +475,10 @@ export class Phase0PreparationMap {
         normalizedLookup?: Map<string, MunicipalityId>
     ): MunicipalityId | null {
         const mapped = this.municipalityIdByMun1990.get(featureId) ?? (featureId as MunicipalityId);
-        if (!this.gameState?.municipalities) {
+        if (!this.gameState?.political?.municipalities) {
             return mapped;
         }
-        if (this.gameState.municipalities[mapped]) {
+        if (this.gameState.political.municipalities[mapped]) {
             return mapped;
         }
         const normalized = normalizedLookup ?? this.buildNormalizedMunicipalityLookup();
@@ -491,11 +491,11 @@ export class Phase0PreparationMap {
 
     private getMunicipalityController(munId: MunicipalityId | null): FactionId | null {
         if (!munId || !this.gameState) return null;
-        const direct = this.gameState.political_controllers?.[munId];
+        const direct = this.gameState.political.political_controllers?.[munId];
         if (direct === 'RBiH' || direct === 'RS' || direct === 'HRHB') {
             return direct;
         }
-        const op = this.gameState.municipalities?.[munId]?.organizational_penetration;
+        const op = this.gameState.political.municipalities?.[munId]?.organizational_penetration;
         if (!op) return null;
         const scores: Record<FactionId, number> = {
             RBiH: op.sda_penetration ?? 0,
@@ -775,7 +775,7 @@ export class Phase0PreparationMap {
         }
         const munId = this.resolveStateMunicipalityId(featureId);
         const munName = this.displayNameByMun1990.get(featureId) ?? (munId ? String(munId) : featureId);
-        const mun = munId ? this.gameState?.municipalities?.[munId] : undefined;
+        const mun = munId ? this.gameState?.political?.municipalities?.[munId] : undefined;
         const controller = this.getMunicipalityController(munId);
         const stability = mun?.stability_score ?? 50;
         const controlStatus = mun?.control_status ?? 'NEUTRAL';
@@ -826,7 +826,7 @@ export class Phase0PreparationMap {
     }
 
     private selectMunicipality(munId: MunicipalityId, munName: string): void {
-        const mun = this.gameState?.municipalities?.[munId];
+        const mun = this.gameState?.political?.municipalities?.[munId];
         const op: OrganizationalPenetration = mun?.organizational_penetration ?? {};
         const majority = this.getMajorityGroup(munId);
         const majorityLabel = majority === 'unknown' ? null : majority.charAt(0).toUpperCase() + majority.slice(1);

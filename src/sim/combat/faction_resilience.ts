@@ -41,7 +41,7 @@ const MIN_COHESION_FOR_PRESSURE_BONUS = 50;
 
 /** Count settlements controlled by a faction. */
 function countFactionSettlements(state: GameState, faction: FactionId): number {
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc) return 0;
     let count = 0;
     for (const sid of Object.keys(pc)) {
@@ -64,7 +64,7 @@ export function computeResilienceModifier(
 ): number {
     let modifier = 1.0;
 
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc) return modifier;
 
     const totalSettlements = Object.keys(pc).length;

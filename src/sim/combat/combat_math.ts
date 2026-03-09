@@ -278,21 +278,21 @@ export function getThreeTierOfficerMod(
     const turn = state.meta?.turn ?? 0;
 
     // Tier 1+2: named officers present
-    if (state.named_officers && state.named_officer_data) {
+    if (state.military.named_officers && state.military.named_officer_data) {
         const brigMod = getBrigadeOfficerMod(formation, turn);
         const corpsId = formation.corps_id;
         if (!corpsId) return brigMod;
 
         // C.4: VRS pre-planned/general_offensive ops use army commander (Mladić) modifier
         if (formation.faction === 'RS' && role === 'attack') {
-            const corps = state.corps_command?.[corpsId];
+            const corps = state.military.corps_command?.[corpsId];
             if (corps?.active_operation?.type === 'general_offensive' && corps.active_operation.phase === 'execution') {
                 // Find army commander instead of corps commander
-                const officerIds = Object.keys(state.named_officers).sort(strictCompare);
+                const officerIds = Object.keys(state.military.named_officers).sort(strictCompare);
                 for (const id of officerIds) {
-                    const os = state.named_officers[id]!;
+                    const os = state.military.named_officers[id]!;
                     if (os.status !== 'active') continue;
-                    const data = state.named_officer_data.find(o => o.id === id);
+                    const data = state.military.named_officer_data.find(o => o.id === id);
                     if (!data || data.faction !== 'RS' || data.rank !== 'army_commander') continue;
                     const penalty = os.penalty_turns_remaining > 0 ? os.effective_competence_penalty : 0;
                     const comp = Math.max(1, Math.min(5, data.competence - penalty));
@@ -303,12 +303,12 @@ export function getThreeTierOfficerMod(
         }
 
         // Operation commander: brigades in named ops answer to ops commander
-        const corpsCmd = state.corps_command?.[corpsId];
+        const corpsCmd = state.military.corps_command?.[corpsId];
         const activeOp = corpsCmd?.active_operation;
         if (activeOp?.commander_officer_id && activeOp.phase === 'execution' &&
             activeOp.participating_brigades.includes(formation.id)) {
-            const opsOs = state.named_officers[activeOp.commander_officer_id];
-            const opsData = opsOs ? state.named_officer_data.find(o => o.id === activeOp.commander_officer_id) : null;
+            const opsOs = state.military.named_officers[activeOp.commander_officer_id];
+            const opsData = opsOs ? state.military.named_officer_data.find(o => o.id === activeOp.commander_officer_id) : null;
             if (opsOs && opsData && opsOs.status === 'active') {
                 const penalty = opsOs.penalty_turns_remaining > 0 ? opsOs.effective_competence_penalty : 0;
                 const comp = Math.max(1, Math.min(5, opsData.competence - penalty));
@@ -320,11 +320,11 @@ export function getThreeTierOfficerMod(
         }
 
         // Find corps commander
-        const officerIds = Object.keys(state.named_officers).sort(strictCompare);
+        const officerIds = Object.keys(state.military.named_officers).sort(strictCompare);
         for (const id of officerIds) {
-            const os = state.named_officers[id]!;
+            const os = state.military.named_officers[id]!;
             if (os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
-            const data = state.named_officer_data.find(o => o.id === id);
+            const data = state.military.named_officer_data.find(o => o.id === id);
             if (!data) continue;
 
             // Compute effective competence with assignment penalty
@@ -363,8 +363,8 @@ export function getThreeTierOfficerMod(
  * Returns 1.0 when supply_reserves_enabled is false.
  */
 function getHeavyMunitionsMult(factionId: string, state: GameState): number {
-    if (!state.meta?.supply_reserves_enabled || !state.heavy_munitions_reserve) return 1.0;
-    const reserve = (state.heavy_munitions_reserve as Record<string, number>)[factionId] ?? 100;
+    if (!state.meta?.supply_reserves_enabled || !state.military.heavy_munitions_reserve) return 1.0;
+    const reserve = (state.military.heavy_munitions_reserve as Record<string, number>)[factionId] ?? 100;
     if (reserve >= RESERVE_ADEQUATE_THRESHOLD) return 1.0;
     if (reserve >= RESERVE_STRAINED_THRESHOLD) return 0.75;
     return 0.5;
@@ -504,8 +504,8 @@ export function getSupplyMult(
             let effectiveState: SupplyStateLevel = entry.state;
 
             // Phase A: When reserves enabled, combine reachability with reserves
-            if (state.meta.supply_reserves_enabled && state.general_supply_reserve) {
-                const reserveLevel = (state.general_supply_reserve as Record<string, number>)[factionId] ?? 100;
+            if (state.meta.supply_reserves_enabled && state.military.general_supply_reserve) {
+                const reserveLevel = (state.military.general_supply_reserve as Record<string, number>)[factionId] ?? 100;
                 effectiveState = getEffectiveSupplyState(entry.state, reserveLevel);
             }
 
@@ -520,14 +520,14 @@ export function getSupplyMult(
 }
 
 export function getCorpsStance(state: GameState, formation: FormationState): CorpsStance | null {
-    if (!formation.corps_id || !state.corps_command) return null;
-    const corps = state.corps_command[formation.corps_id];
+    if (!formation.corps_id || !state.military.corps_command) return null;
+    const corps = state.military.corps_command[formation.corps_id];
     return corps?.stance ?? null;
 }
 
 export function getOperationsMult(state: GameState, formation: FormationState): number {
-    if (!formation.corps_id || !state.corps_command) return 1.0;
-    const op = state.corps_command[formation.corps_id]?.active_operation;
+    if (!formation.corps_id || !state.military.corps_command) return 1.0;
+    const op = state.military.corps_command[formation.corps_id]?.active_operation;
     if (!op || !op.participating_brigades.includes(formation.id)) return 1.0;
     if (op.phase === 'execution') return 1.3;
     if (op.phase === 'planning') return 1.0;
@@ -617,7 +617,7 @@ export function getToTerrainDefenseMult(
  * Returns 1.0 if no cache or no entry (backwards compatible).
  */
 function getHomeDistanceMultFromCache(state: GameState, formation: FormationState): number {
-    const cache = state.home_distance_cache;
+    const cache = state.military.home_distance_cache;
     if (!cache) return 1.0;
     const hops = cache[formation.id];
     if (hops === undefined) return 1.0;

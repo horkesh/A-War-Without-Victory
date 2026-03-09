@@ -62,7 +62,7 @@ test('negotiation capital: defaults set correctly', () => {
     assert.strictEqual(state.factions[0].negotiation?.capital, 0);
     assert.strictEqual(state.factions[0].negotiation?.spent_total, 0);
     assert.strictEqual(state.factions[0].negotiation?.last_capital_change_turn, null);
-    assert.ok(Array.isArray(state.negotiation_ledger));
+    assert.ok(Array.isArray(state.political.negotiation_ledger));
 });
 
 test('negotiation capital: computation matches formula', async () => {
@@ -91,7 +91,7 @@ test('negotiation capital: ledger ids deterministic', async () => {
     await updateNegotiationCapital(state, undefined, undefined, undefined, EMPTY_GRAPH);
 
     // Should have ledger entries (base_capital, enclave_liability_penalty, ivp_penalty, patron_bonus)
-    const ledgerEntries = state.negotiation_ledger?.filter((e) => e.faction_id === 'faction_a' && e.turn === 10) ?? [];
+    const ledgerEntries = state.political.negotiation_ledger?.filter((e) => e.faction_id === 'faction_a' && e.turn === 10) ?? [];
     assert.strictEqual(ledgerEntries.length, 4);
     assert.strictEqual(ledgerEntries[0].id, 'NLED_10_faction_a_adjust_1');
     assert.strictEqual(ledgerEntries[0].reason, 'base_capital');
@@ -115,7 +115,7 @@ test('negotiation capital: spend reduces capital and increases spent_total', () 
     assert.strictEqual(state.factions[0].negotiation?.last_capital_change_turn, 5);
 
     // Check ledger entry
-    const ledgerEntries = state.negotiation_ledger?.filter((e) => e.faction_id === 'faction_a' && e.kind === 'spend') ?? [];
+    const ledgerEntries = state.political.negotiation_ledger?.filter((e) => e.faction_id === 'faction_a' && e.kind === 'spend') ?? [];
     assert.strictEqual(ledgerEntries.length, 1);
     assert.strictEqual(ledgerEntries[0].amount, 3);
     assert.strictEqual(ledgerEntries[0].reason, 'pre_treaty_reserve');
@@ -139,8 +139,8 @@ test('negotiation capital: determinism regression', async () => {
 
     // Results should be identical
     assert.strictEqual(state1.factions[0].negotiation?.capital, state2.factions[0].negotiation?.capital);
-    assert.strictEqual(state1.negotiation_ledger?.length, state2.negotiation_ledger?.length);
-    if (state1.negotiation_ledger && state2.negotiation_ledger) {
-        assert.deepStrictEqual(state1.negotiation_ledger, state2.negotiation_ledger);
+    assert.strictEqual(state1.political.negotiation_ledger?.length, state2.political.negotiation_ledger?.length);
+    if (state1.political.negotiation_ledger && state2.political.negotiation_ledger) {
+        assert.deepStrictEqual(state1.political.negotiation_ledger, state2.political.negotiation_ledger);
     }
 });

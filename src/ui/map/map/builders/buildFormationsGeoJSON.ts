@@ -37,7 +37,7 @@ export function buildFormationsGeoJSON(
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
   const unitsPerOsid = new Map<string, number>();
 
-  const orderedFormations = [...state.formations].sort((a, b) => a.id.localeCompare(b.id));
+  const orderedFormations = [...state.military.formations].sort((a, b) => a.id.localeCompare(b.id));
   const features: Array<Feature<Point, FormationMarkerProperties>> = [];
 
   for (const formation of orderedFormations) {

@@ -727,13 +727,13 @@ async function main(): Promise<void> {
                 try {
                     const text = reader.result as string;
                     const state = JSON.parse(text) as Record<string, unknown>;
-                    const pc = state.political_controllers as Record<string, string | null> | undefined;
+                    const pc = state.political.political_controllers as Record<string, string | null> | undefined;
                     if (pc && typeof pc === 'object') {
                         controlData = {
                             by_settlement_id: buildControlLookup(pc),
                             control_status_by_settlement_id: {}
                         };
-                        const contested = state.contested_control as Record<string, boolean> | undefined;
+                        const contested = state.political.contested_control as Record<string, boolean> | undefined;
                         if (contested && typeof contested === 'object') {
                             for (const [sid, isContested] of Object.entries(contested)) {
                                 if (isContested) controlData.control_status_by_settlement_id![controlKey(sid)] = 'CONTESTED';
@@ -746,7 +746,7 @@ async function main(): Promise<void> {
                         const phase = typeof meta.phase === 'string' ? meta.phase : '';
                         turnDisplay.textContent = phase ? `Turn ${turn} — ${phase}` : `Turn ${turn}`;
                     }
-                    const rawFormations = state.formations as Record<string, Record<string, unknown>> | undefined;
+                    const rawFormations = state.military.formations as Record<string, Record<string, unknown>> | undefined;
                     loadedFormations = [];
                     if (rawFormations && typeof rawFormations === 'object') {
                         for (const id of Object.keys(rawFormations).sort()) {

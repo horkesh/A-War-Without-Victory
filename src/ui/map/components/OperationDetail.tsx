@@ -94,7 +94,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
 
         {/* Commander */}
         {(() => {
-          const corpsFormation = loadedGameState.formations.find(f => f.id === op.corps_id);
+          const corpsFormation = loadedGameState.military.formations.find(f => f.id === op.corps_id);
           const commander = corpsFormation ? getFormationCommander(corpsFormation, loadedGameState) : null;
           if (!commander) return null;
           return <OfficerProfile officer={commander} label="Operation Commander" className="mb-4" />;

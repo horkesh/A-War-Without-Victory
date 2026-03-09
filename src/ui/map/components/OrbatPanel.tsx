@@ -18,12 +18,12 @@ export function OrbatPanel() {
 
     const corps = useMemo(() => {
         if (!loadedGameState || !selectedOrbatCorpsId) return null;
-        return loadedGameState.formations.find((f) => f.id === selectedOrbatCorpsId) ?? null;
+        return loadedGameState.military.formations.find((f) => f.id === selectedOrbatCorpsId) ?? null;
     }, [loadedGameState, selectedOrbatCorpsId]);
 
     const brigades = useMemo(() => {
         if (!loadedGameState || !selectedOrbatCorpsId) return [];
-        return loadedGameState.formations
+        return loadedGameState.military.formations
             .filter((f) => f.kind === 'brigade' && f.corps_id === selectedOrbatCorpsId)
             .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
     }, [loadedGameState, selectedOrbatCorpsId]);

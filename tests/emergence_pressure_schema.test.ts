@@ -42,8 +42,8 @@ test('missing front_pressure treated as empty on round-trip', () => {
     const payload = serializeState(state);
     const hydrated = deserializeState(payload);
     assert.ok('front_pressure' in hydrated);
-    assert.strictEqual(typeof hydrated.front_pressure, 'object');
-    const fp = hydrated.front_pressure ?? {};
+    assert.strictEqual(typeof hydrated.military.front_pressure, 'object');
+    const fp = hydrated.military.front_pressure ?? {};
     assert.strictEqual(Object.keys(fp).length >= 0, true);
 });
 

@@ -32,7 +32,7 @@ function minimalPhaseIIState(): GameState {
 test('Rear zone: no rear zones when peace', () => {
     const state = minimalPhaseIIState();
     state.meta.phase = 'peace';
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     assert.strictEqual(rearZone.settlement_ids.length, 0, 'No rear zones in peace');
@@ -40,7 +40,7 @@ test('Rear zone: no rear zones when peace', () => {
 
 test('Rear zone: all controlled settlements are rear when no eligible edges', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RBiH', 'S3': 'RBiH' }; // same control, no opposing
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RBiH', 'S3': 'RBiH' }; // same control, no opposing
     const edges = [{ a: 'S1', b: 'S2' }, { a: 'S2', b: 'S3' }];
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     assert.strictEqual(rearZone.settlement_ids.length, 3, 'All controlled settlements are rear when no fronts');
@@ -51,7 +51,7 @@ test('Rear zone: all controlled settlements are rear when no eligible edges', ()
 
 test('Rear zone: front-active settlements are NOT in rear zone', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }]; // S1–S2 is front edge (opposing control)
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     // S1 and S2 are front-active (on eligible edge); S3 is rear
@@ -62,7 +62,7 @@ test('Rear zone: front-active settlements are NOT in rear zone', () => {
 
 test('Rear zone: settlements with null control are NOT in rear zone', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': null, 'S4': 'RBiH' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': null, 'S4': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     // S3 has null control → not controlled → not in rear zone
@@ -72,7 +72,7 @@ test('Rear zone: settlements with null control are NOT in rear zone', () => {
 
 test('Rear zone: rear zones exist behind fronts', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH', 'S4': 'RBiH', 'S5': 'HRHB' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH', 'S4': 'RBiH', 'S5': 'HRHB' };
     const edges = [{ a: 'S1', b: 'S2' }, { a: 'S2', b: 'S5' }]; // S1–S2 (RBiH–RS) and S2–S5 (RS–HRHB) are front edges
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     // Front-active: S1, S2, S5 (on eligible edges with opposing control)
@@ -86,7 +86,7 @@ test('Rear zone: rear zones exist behind fronts', () => {
 
 test('Rear zone: isSettlementInRearZone returns correct values', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     assert.strictEqual(isSettlementInRearZone('S1', rearZone), false, 'S1 is not in rear zone');
@@ -96,7 +96,7 @@ test('Rear zone: isSettlementInRearZone returns correct values', () => {
 
 test('Rear zone: authority stabilization factor is lower for rear zones', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     const factorS1 = getRearZoneAuthorityStabilizationFactor('S1', rearZone); // front-active
@@ -108,16 +108,16 @@ test('Rear zone: authority stabilization factor is lower for rear zones', () => 
 
 test('Rear zone: rear zone detection does not flip control', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
-    const originalControl = { ...state.political_controllers };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH' };
+    const originalControl = { ...state.political.political_controllers };
     const edges = [{ a: 'S1', b: 'S2' }];
     deriveRearPoliticalControlZones(state, edges); // should not mutate state.political_controllers
-    assert.deepStrictEqual(state.political_controllers, originalControl, 'Rear zone detection does not flip control');
+    assert.deepStrictEqual(state.political.political_controllers, originalControl, 'Rear zone detection does not flip control');
 });
 
 test('Rear zone: rear zones reduce volatility (read-only stabilization factor)', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH', 'S4': 'RBiH' };
+    state.political.political_controllers = { 'S1': 'RBiH', 'S2': 'RS', 'S3': 'RBiH', 'S4': 'RBiH' };
     const edges = [{ a: 'S1', b: 'S2' }];
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     // Rear settlements S3, S4 have reduced authority volatility (stabilization factor 0.5)
@@ -127,12 +127,12 @@ test('Rear zone: rear zones reduce volatility (read-only stabilization factor)',
     assert.strictEqual(factorS3, 0.5, 'S3 (rear) has reduced volatility');
     assert.strictEqual(factorS4, 0.5, 'S4 (rear) has reduced volatility');
     // Authority stabilization is read-only; no mutation of state.municipalities or faction.profile.authority
-    assert.ok(!state.municipalities || Object.keys(state.municipalities).length === 0, 'No municipality state mutation');
+    assert.ok(!state.political.municipalities || Object.keys(state.political.municipalities).length === 0, 'No municipality state mutation');
 });
 
 test('Rear zone: deterministic ordering (settlement_ids sorted)', () => {
     const state = minimalPhaseIIState();
-    state.political_controllers = { 'S3': 'RBiH', 'S1': 'RBiH', 'S2': 'RS', 'S4': 'RBiH' };
+    state.political.political_controllers = { 'S3': 'RBiH', 'S1': 'RBiH', 'S2': 'RS', 'S4': 'RBiH' };
     const edges = [{ a: 'S2', b: 'S3' }]; // S2–S3 front edge
     const rearZone = deriveRearPoliticalControlZones(state, edges);
     // Rear: S1, S4 (not on eligible edge); should be sorted

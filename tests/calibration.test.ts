@@ -402,7 +402,7 @@ test('calibration: scenario 1 - prolonged siege', () => {
 
         if (sustRecord) {
             // Displacement report only has a row when displacementAmount > 0; use state for current values
-            const dispState = state.displacement_state?.['MUN_A'];
+            const dispState = state.displacement.displacement_state?.['MUN_A'];
             const originalPop = dispState?.original_population ?? 10000;
             const displacedRatio = dispState ? dispState.displaced_out / originalPop : 0;
 
@@ -494,7 +494,7 @@ test('calibration: scenario 2 - temporary encirclement', () => {
         const sustRecord = sustReport.by_municipality.find(r => r.mun_id === 'MUN_A');
 
         if (sustRecord) {
-            const dispState = state.displacement_state?.['MUN_A'];
+            const dispState = state.displacement.displacement_state?.['MUN_A'];
             const originalPop = dispState?.original_population ?? 10000;
             const displacedRatio = dispState ? dispState.displaced_out / originalPop : 0;
 
@@ -525,7 +525,7 @@ test('calibration: scenario 2 - temporary encirclement', () => {
         const sustRecord = sustReport.by_municipality.find(r => r.mun_id === 'MUN_A');
 
         if (sustRecord) {
-            const dispState = state.displacement_state?.['MUN_A'];
+            const dispState = state.displacement.displacement_state?.['MUN_A'];
             const originalPop = dispState?.original_population ?? 10000;
             const displacedRatio = dispState ? dispState.displaced_out / originalPop : 0;
 
@@ -612,12 +612,12 @@ test('calibration: scenario 3 - corridor lifeline', () => {
         const dispRecord = dispReport.by_municipality.find(r => r.mun_id === 'MUN_A');
 
         // Get sustainability score from state if not in report (not surrounded = no degradation)
-        const sustState = state.sustainability_state?.['MUN_A'];
+        const sustState = state.displacement.sustainability_state?.['MUN_A'];
         const sustainabilityScore = sustRecord?.sustainability_score_after ?? (sustState?.sustainability_score ?? 100);
         const isCollapsed = sustRecord?.collapsed ?? (sustState?.collapsed ?? false);
 
         // Always record metrics, even if no displacement record (to track sustainability)
-        const dispState = state.displacement_state?.['MUN_A'];
+        const dispState = state.displacement.displacement_state?.['MUN_A'];
         const originalPop = dispState?.original_population ?? 10000;
         const displacedRatio = dispState ? dispState.displaced_out / originalPop : 0;
 
@@ -651,12 +651,12 @@ test('calibration: scenario 3 - corridor lifeline', () => {
         const dispRecord = dispReport.by_municipality.find(r => r.mun_id === 'MUN_A');
 
         // Get sustainability score from state if not in report
-        const sustState = state.sustainability_state?.['MUN_A'];
+        const sustState = state.displacement.sustainability_state?.['MUN_A'];
         const sustainabilityScore = sustRecord?.sustainability_score_after ?? (sustState?.sustainability_score ?? 100);
         const isCollapsed = sustRecord?.collapsed ?? (sustState?.collapsed ?? false);
 
         // Always record metrics
-        const dispState = state.displacement_state?.['MUN_A'];
+        const dispState = state.displacement.displacement_state?.['MUN_A'];
         const originalPop = dispState?.original_population ?? 10000;
         const displacedRatio = dispState ? dispState.displaced_out / originalPop : 0;
 

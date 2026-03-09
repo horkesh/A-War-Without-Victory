@@ -157,8 +157,8 @@ test('militia_pools defaults to {} on deserialize', () => {
     const payload = serializeState(stateWithoutMilitia);
     const hydrated = deserializeState(payload);
 
-    assert.ok(hydrated.militia_pools);
-    assert.strictEqual(Object.keys(hydrated.militia_pools).length, 0);
+    assert.ok(hydrated.military.militia_pools);
+    assert.strictEqual(Object.keys(hydrated.military.militia_pools).length, 0);
 });
 
 test('validateMilitiaPools handles empty militia_pools', () => {

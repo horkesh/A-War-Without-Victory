@@ -34,6 +34,6 @@ export function buildOsidAdjacency(edges: EdgeRecord[]): Map<Osid, Osid[]> {
 
 /** Brigade is deployed if movement_state (from brigade_movement_state) is 'deployed' or absent. */
 export function isBrigadeDeployed(state: GameState, formationId: FormationId): boolean {
-    const status = state.brigade_movement_state?.[formationId]?.status;
+    const status = state.military.brigade_movement_state?.[formationId]?.status;
     return status === 'deployed' || status === undefined;
 }

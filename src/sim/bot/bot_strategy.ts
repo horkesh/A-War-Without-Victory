@@ -151,8 +151,8 @@ export function resolveAggression(profile: BotStrategyProfile, phase: PhaseName 
     // Peace-phase §4.8: Alliance-aware aggression modifiers
     let allianceMod = 0;
     if (state) {
-        const rhs = state.rbih_hrhb_state;
-        const allianceValue = state.war_alliance_rbih_hrhb;
+        const rhs = state.political.rbih_hrhb_state;
+        const allianceValue = state.political.war_alliance_rbih_hrhb;
         if (rhs && allianceValue !== undefined && allianceValue !== null) {
             if (profile.faction === 'HRHB') {
                 // HRHB: patron pressure drives confrontation — higher aggression when alliance strained

@@ -206,14 +206,14 @@ export function pickOperationName(
     state?: GameState,
 ): string {
     const pool = OPERATION_NAMES[faction] ?? RS_NAMES;
-    const used = state?.used_operation_names ?? {};
+    const used = state?.military?.used_operation_names ?? {};
     const key = `${corpsId}:${turn}`;
     const startIdx = simpleHash(key) % pool.length;
 
     function markUsed(name: string): string {
         if (state) {
-            if (!state.used_operation_names) state.used_operation_names = {};
-            state.used_operation_names[name] = turn;
+            if (!state.military.used_operation_names) state.military.used_operation_names = {};
+            state.military.used_operation_names[name] = turn;
         }
         return name;
     }

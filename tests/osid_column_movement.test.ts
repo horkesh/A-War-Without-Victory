@@ -248,7 +248,7 @@ describe('processOsidColumnMovement', () => {
         assert.equal(report.column_starts, 1);
         assert.equal(report.column_blocked, 0);
         // Brigade should be in_transit
-        const ms = state.brigade_movement_state?.brig1;
+        const ms = state.military.brigade_movement_state?.brig1;
         assert.ok(ms);
         assert.equal(ms.status, 'in_transit');
         assert.equal(ms.stance, 'column');
@@ -268,7 +268,7 @@ describe('processOsidColumnMovement', () => {
         const td = flatTerrain();
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_advances, 1);
-        const ms = state.brigade_movement_state?.brig1;
+        const ms = state.military.brigade_movement_state?.brig1;
         assert.ok(ms);
         assert.equal(ms.turns_remaining, 2);
     });
@@ -286,11 +286,11 @@ describe('processOsidColumnMovement', () => {
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_arrivals, 1);
         // Brigade should be at destination
-        assert.equal(state.formations?.brig1?.location_osid, 'D');
+        assert.equal(state.military.formations?.brig1?.location_osid, 'D');
         // Entrenchment reset on arrival
-        assert.equal((state.formations?.brig1 as any)?.entrenchment_turns, 0);
+        assert.equal((state.military.formations?.brig1 as any)?.entrenchment_turns, 0);
         // Movement state cleaned up
-        assert.equal(state.brigade_movement_state?.brig1, undefined);
+        assert.equal(state.military.brigade_movement_state?.brig1, undefined);
     });
 
     it('blocks column transit to unreachable destination', () => {
@@ -323,7 +323,7 @@ describe('processOsidColumnMovement', () => {
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_starts, 0);
         // Regular order should be preserved for movement step
-        assert.ok(state.brigade_movement_orders?.brig1);
+        assert.ok(state.military.brigade_movement_orders?.brig1);
     });
 
     it('new orders dont get immediate advance (1-turn delay)', () => {
@@ -341,6 +341,6 @@ describe('processOsidColumnMovement', () => {
         assert.equal(report.column_advances, 0); // No advance on start turn
         assert.equal(report.column_arrivals, 0); // No arrival on start turn
         // Brigade still at original location
-        assert.equal(state.formations?.brig1?.location_osid, 'A');
+        assert.equal(state.military.formations?.brig1?.location_osid, 'A');
     });
 });

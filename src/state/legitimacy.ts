@@ -41,7 +41,7 @@ function getInstitutionalLegitimacy(
 
 function isCoerciveFlip(state: GameState, munId: MunicipalityId | null): boolean {
     if (!munId) return false;
-    const mun = state.municipalities?.[munId];
+    const mun = state.political.municipalities?.[munId];
     if (!mun) return false;
     const status = mun.control_status;
     if (status === 'HIGHLY_CONTESTED') return true;
@@ -53,17 +53,17 @@ export async function updateLegitimacyState(
     state: GameState,
     graph: LoadedSettlementGraph
 ): Promise<void> {
-    if (!state.political_controllers) return;
-    if (!state.settlements) state.settlements = {};
+    if (!state.political.political_controllers) return;
+    if (!state.political.settlements) state.political.settlements = {};
     const turn = state.meta.turn;
     const populationData = await loadMunicipalityPopulation1991();
     const prewarControllers = await loadInitialMunicipalityControllers1990();
 
-    const sids = Object.keys(state.political_controllers).sort((a, b) => a.localeCompare(b));
+    const sids = Object.keys(state.political.political_controllers).sort((a, b) => a.localeCompare(b));
     for (const sid of sids) {
-        const controller = state.political_controllers[sid] ?? null;
+        const controller = state.political.political_controllers[sid] ?? null;
         const munId = getMunicipalityIdForSettlement(graph, sid);
-        const settlementState = state.settlements[sid] ?? {};
+        const settlementState = state.political.settlements[sid] ?? {};
         const legitimacy = settlementState.legitimacy_state;
 
         const demographic = clamp01(getFactionDemographicFraction(populationData, munId ?? '', controller));
@@ -100,6 +100,6 @@ export async function updateLegitimacyState(
         };
 
         settlementState.legitimacy_state = next;
-        state.settlements[sid] = settlementState;
+        state.political.settlements[sid] = settlementState;
     }
 }

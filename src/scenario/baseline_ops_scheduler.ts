@@ -44,10 +44,10 @@ export function applyBaselineOpsExhaustion(
     if (state.meta?.phase !== 'war') return;
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
-    if (!state.war_exhaustion) {
-        (state as GameState & { war_exhaustion: Record<FactionId, number> }).war_exhaustion = {};
+    if (!state.political.war_exhaustion) {
+        (state as GameState & { war_exhaustion: Record<FactionId, number> }).political.war_exhaustion = {};
     }
-    const exhaustion = state.war_exhaustion!;
+    const exhaustion = state.political.war_exhaustion!;
 
     const delta = BASELINE_OPS_EXHAUSTION_RATE * level * Math.max(0, scalar);
     for (const fid of factionIds) {
@@ -80,14 +80,14 @@ export function applyBaselineOpsDisplacement(
     const totalDelta = BASELINE_OPS_DISPLACEMENT_RATE * level * Math.max(0, scalar);
     const perSettlement = totalDelta / sortedIds.length;
 
-    if (!state.settlement_displacement) {
-        (state as GameState & { settlement_displacement: Record<SettlementId, number> }).settlement_displacement = {};
+    if (!state.displacement.settlement_displacement) {
+        (state as GameState & { settlement_displacement: Record<SettlementId, number> }).displacement.settlement_displacement = {};
     }
-    if (!state.settlement_displacement_started_turn) {
-        (state as GameState & { settlement_displacement_started_turn: Record<SettlementId, number> }).settlement_displacement_started_turn = {};
+    if (!state.displacement.settlement_displacement_started_turn) {
+        (state as GameState & { settlement_displacement_started_turn: Record<SettlementId, number> }).displacement.settlement_displacement_started_turn = {};
     }
-    const sd = state.settlement_displacement!;
-    const started = state.settlement_displacement_started_turn!;
+    const sd = state.displacement.settlement_displacement!;
+    const started = state.displacement.settlement_displacement_started_turn!;
     const turn = state.meta.turn;
 
     for (const sid of sortedIds) {

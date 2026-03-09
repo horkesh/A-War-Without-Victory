@@ -93,8 +93,8 @@ export function runFormationHqRelocation(
     settlements: Map<string, SettlementRecord>,
     edges: EdgeRecord[]
 ): FormationHqRelocationReport {
-    const pc = state.political_controllers ?? {};
-    const formations = state.formations ?? {};
+    const pc = state.political.political_controllers ?? {};
+    const formations = state.military.formations ?? {};
     const report: FormationHqRelocationReport = { relocated: 0, formation_ids: [] };
 
     const byMun = buildSettlementsByMun(settlements);

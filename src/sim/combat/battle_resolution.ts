@@ -297,13 +297,13 @@ function getUnsuppliedTurns(formation: FormationState, turn: number): number {
 }
 
 function getCorpsStance(state: GameState, formation: FormationState): CorpsStance | null {
-    if (!formation.corps_id || !state.corps_command) return null;
-    const corps = state.corps_command[formation.corps_id];
+    if (!formation.corps_id || !state.military.corps_command) return null;
+    const corps = state.military.corps_command[formation.corps_id];
     if (!corps) return null;
 
     // Check army stance override
     const faction = formation.faction;
-    const armyStance = state.army_stance?.[faction];
+    const armyStance = state.military.army_stance?.[faction];
     if (armyStance === 'general_defensive') return 'defensive';
     if (armyStance === 'general_offensive') return 'offensive';
     if (armyStance === 'total_mobilization') return 'reorganize';
@@ -312,8 +312,8 @@ function getCorpsStance(state: GameState, formation: FormationState): CorpsStanc
 }
 
 function getOperationMult(state: GameState, formation: FormationState, mode: 'pressure' | 'defense'): number {
-    if (!formation.corps_id || !state.corps_command) return 1.0;
-    const corps = state.corps_command[formation.corps_id];
+    if (!formation.corps_id || !state.military.corps_command) return 1.0;
+    const corps = state.military.corps_command[formation.corps_id];
     if (!corps?.active_operation) return 1.0;
     const op = corps.active_operation;
 
@@ -487,7 +487,7 @@ interface SnapContext {
 function isSurrounded(ctx: SnapContext): boolean {
     if (!ctx.defenderFormation) return false;
     const defFaction = ctx.defenderFormation.faction;
-    const pc = ctx.state.political_controllers ?? {};
+    const pc = ctx.state.political.political_controllers ?? {};
     const neighbors = ctx.adjacency.get(ctx.targetSid) ?? [];
     if (neighbors.length === 0) return false;
 
@@ -822,19 +822,19 @@ export function resolveBattleOrders(
         battles: []
     };
 
-    const orders = state.brigade_attack_orders;
+    const orders = state.military.brigade_attack_orders;
     if (!orders || typeof orders !== 'object') return report;
 
     // Ensure casualty ledger
-    if (!state.casualty_ledger) {
+    if (!state.military.casualty_ledger) {
         const factionIds = (state.factions ?? []).map(f => f.id).sort(strictCompare);
-        state.casualty_ledger = initializeCasualtyLedger(factionIds);
+        state.military.casualty_ledger = initializeCasualtyLedger(factionIds);
     }
 
     const adjacency = buildAdjacency(edges);
-    const pc = state.political_controllers ?? {};
-    const formations = state.formations ?? {};
-    const frontSegments = state.front_segments ?? {};
+    const pc = state.political.political_controllers ?? {};
+    const formations = state.military.formations ?? {};
+    const frontSegments = state.military.front_segments ?? {};
     const turn = state.meta.turn;
 
     const orderEntries = (Object.entries(orders) as [FormationId, SettlementId | null][])
@@ -882,7 +882,7 @@ export function resolveBattleOrders(
         if (isRbihVsHrhb) {
             const earliestTurn = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
             const beforeEarliestWar = turn < earliestTurn;
-            const rhs = state.rbih_hrhb_state;
+            const rhs = state.political.rbih_hrhb_state;
             const ceasefireActive = rhs?.ceasefire_active ?? false;
             const washingtonSigned = rhs?.washington_signed ?? false;
             const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state) || ceasefireActive || washingtonSigned;
@@ -903,7 +903,7 @@ export function resolveBattleOrders(
         for (const aid of attackerIds) {
             const rawGarrison = formations[aid]?.personnel ?? 0;
             const bp = computeCombatPower(state, formations[aid]!, rawGarrison, 'attack', 1.0, 0);
-            const ext = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid, state.war_timeline);
+            const ext = getExternalSupportMultiplier(attackerFaction, turn, settlementToMun, targetSid, state.military.war_timeline);
             combinedAttackerPower += bp.total_combat_power * ext * effN * ogMult;
         }
         const attackerPower = {
@@ -931,7 +931,7 @@ export function resolveBattleOrders(
         const defenderBrigadeId = undefined as FormationId | undefined;
         const defenderFormation = undefined as FormationState | undefined;
         const defenderFormationOrNull = defenderFormation ?? null;
-        const defGarrison = state.militia_garrison?.[targetSid] ?? 0;
+        const defGarrison = state.military.militia_garrison?.[targetSid] ?? 0;
 
         // --- Front hardening streak ---
         let activeStreak = 0;
@@ -986,7 +986,7 @@ export function resolveBattleOrders(
         }
 
         // --- Power ratio & outcome (Peace phase: battle damage modifies power) ---
-        const battleDamage = Math.min(1, state.battle_damage?.[targetSid] ?? 0);
+        const battleDamage = Math.min(1, state.military.battle_damage?.[targetSid] ?? 0);
         const aPower = attackerPower.total_combat_power * (1 - BATTLE_DAMAGE_ATTACKER_PENALTY * battleDamage);
         const dPower = (defenderPower?.total_combat_power ?? 0) * (1 + BATTLE_DAMAGE_DEFENDER_BONUS * battleDamage);
 const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
@@ -1033,7 +1033,7 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
         const settlementFlipped = outcome === 'attacker_victory' || outcome === 'pyrrhic_victory';
 
         if (settlementFlipped) {
-            (state.political_controllers as Record<SettlementId, FactionId>)[targetSid] = attackerFaction;
+            (state.political.political_controllers as Record<SettlementId, FactionId>)[targetSid] = attackerFaction;
             report.flips_applied += 1;
             if (defenderFormation) {
                 if (preBattleSnaps.isSurrenderCascade) {
@@ -1065,7 +1065,7 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
             remainingTankLoss -= thisTankLoss;
             remainingArtLoss -= thisArtLoss;
             applyEquipmentBattleLoss(af, thisTankLoss, thisArtLoss);
-            const ledger = state.casualty_ledger!;
+            const ledger = state.military.casualty_ledger!;
             recordBattleCasualties(ledger, attackerFaction, aid, {
                 killed: Math.floor(casualties.attacker.killed * share),
                 wounded: Math.floor(casualties.attacker.wounded * share),
@@ -1075,7 +1075,7 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
             recordFormationFatigue(af, 2);
         }
         // Record total attacker equipment loss once for the faction
-        recordEquipmentLoss(state.casualty_ledger!, attackerFaction, {
+        recordEquipmentLoss(state.military.casualty_ledger!, attackerFaction, {
             tanks: casualties.attacker.tanks_lost,
             artillery: casualties.attacker.artillery_lost
         });
@@ -1090,9 +1090,9 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
             recordFormationFatigue(defenderFormation, 1);
         } else if (defGarrison > 0) {
             const mun = settlementToMun.get(targetSid);
-            if (mun && state.militia_pools) {
+            if (mun && state.military.militia_pools) {
                 const poolKey = militiaPoolKey(mun, defenderFaction!);
-                const pool = state.militia_pools[poolKey];
+                const pool = state.military.militia_pools[poolKey];
                 if (pool && typeof pool.available === 'number') {
                     pool.available = Math.max(0, pool.available - totalPersonnelLoss(casualties.defender));
                 }
@@ -1113,7 +1113,7 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
         }
 
         if (defenderFormation && defenderBrigadeId) {
-            const ledger = state.casualty_ledger!;
+            const ledger = state.military.casualty_ledger!;
             recordBattleCasualties(ledger, defenderFaction!, defenderBrigadeId, {
                 killed: casualties.defender.killed,
                 wounded: casualties.defender.wounded,
@@ -1128,9 +1128,9 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
         // Peace phase: accumulate battle damage (monotonic, cap 1.0)
         const combinedCas = totalAttackerLoss + totalPersonnelLoss(casualties.defender);
         if (combinedCas > 0) {
-            if (!state.battle_damage) state.battle_damage = {};
-            const prev = (state.battle_damage as Record<SettlementId, number>)[targetSid] ?? 0;
-            (state.battle_damage as Record<SettlementId, number>)[targetSid] = Math.min(
+            if (!state.military.battle_damage) state.military.battle_damage = {};
+            const prev = (state.military.battle_damage as Record<SettlementId, number>)[targetSid] ?? 0;
+            (state.military.battle_damage as Record<SettlementId, number>)[targetSid] = Math.min(
                 1,
                 prev + combinedCas / BATTLE_DAMAGE_DIVISOR
             );
@@ -1168,7 +1168,7 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
     });
 
     // Clear consumed orders
-    delete state.brigade_attack_orders;
+    delete state.military.brigade_attack_orders;
 
     return report;
 }

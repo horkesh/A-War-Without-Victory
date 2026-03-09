@@ -41,8 +41,8 @@ type MilitiaPoolsReportFile = {
 };
 
 function ensureMilitiaPools(state: GameState): void {
-    if (!state.militia_pools || typeof state.militia_pools !== 'object') {
-        state.militia_pools = {};
+    if (!state.military.militia_pools || typeof state.military.militia_pools !== 'object') {
+        state.military.militia_pools = {};
     }
 }
 
@@ -57,7 +57,7 @@ function normalizeTags(tagsInput: string | undefined): string[] {
 
 export function buildMilitiaPoolsReport(state: GameState): MilitiaPoolsReportFile {
     ensureMilitiaPools(state);
-    const pools = state.militia_pools as Record<string, MilitiaPoolState>;
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
     const rows = Object.values(pools)
         .filter((p) => p && typeof p === 'object' && typeof p.mun_id === 'string')
         .sort((a, b) => a.mun_id.localeCompare(b.mun_id))
@@ -353,7 +353,7 @@ async function main(): Promise<void> {
 
     if (opts.cmd === 'set') {
         const poolKey = opts.faction !== null ? militiaPoolKey(opts.mun, opts.faction) : opts.mun;
-        const existing = state.militia_pools[poolKey];
+        const existing = state.military.militia_pools[poolKey];
         const pool: MilitiaPoolState = {
             mun_id: opts.mun,
             faction: opts.faction,
@@ -364,7 +364,7 @@ async function main(): Promise<void> {
             ...(opts.tags.length > 0 ? { tags: opts.tags } : {})
         };
 
-        state.militia_pools[poolKey] = pool;
+        state.military.militia_pools[poolKey] = pool;
 
         const out = opts.outPath ?? opts.savePath;
         await validateAndSave(state, out);
@@ -377,7 +377,7 @@ async function main(): Promise<void> {
 
     if (opts.cmd === 'adjust') {
         const poolKey = opts.faction !== null ? militiaPoolKey(opts.mun, opts.faction) : opts.mun;
-        const existing = state.militia_pools[poolKey];
+        const existing = state.military.militia_pools[poolKey];
         if (!existing) {
             throw new Error(`Militia pool not found for municipality: ${opts.mun}${opts.faction !== null ? ` faction=${opts.faction}` : ''}`);
         }
@@ -398,7 +398,7 @@ async function main(): Promise<void> {
             updated_turn: state.meta.turn
         };
 
-        state.militia_pools[poolKey] = pool;
+        state.military.militia_pools[poolKey] = pool;
 
         const out = opts.outPath ?? opts.savePath;
         await validateAndSave(state, out);
@@ -410,12 +410,12 @@ async function main(): Promise<void> {
 
     if (opts.cmd === 'clear') {
         const poolKey = opts.faction !== null ? militiaPoolKey(opts.mun, opts.faction) : opts.mun;
-        const existing = state.militia_pools[poolKey];
+        const existing = state.military.militia_pools[poolKey];
         if (!existing) {
             throw new Error(`Militia pool not found for municipality: ${opts.mun}${opts.faction !== null ? ` faction=${opts.faction}` : ''}`);
         }
 
-        delete state.militia_pools[poolKey];
+        delete state.military.militia_pools[poolKey];
 
         const out = opts.outPath ?? opts.savePath;
         await validateAndSave(state, out);

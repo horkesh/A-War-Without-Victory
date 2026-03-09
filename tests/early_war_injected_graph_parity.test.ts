@@ -81,19 +81,19 @@ test('Peace phase: injected settlementGraph produces same nextState as loadSettl
     assert.strictEqual(nextA.meta.turn, nextB.meta.turn, 'meta.turn must match');
     assert.strictEqual(nextA.meta.phase, nextB.meta.phase, 'meta.phase must match');
 
-    const keysA = Object.keys(nextA.political_controllers ?? {}).sort((a, b) => a.localeCompare(b));
-    const keysB = Object.keys(nextB.political_controllers ?? {}).sort((a, b) => a.localeCompare(b));
+    const keysA = Object.keys(nextA.political.political_controllers ?? {}).sort((a, b) => a.localeCompare(b));
+    const keysB = Object.keys(nextB.political.political_controllers ?? {}).sort((a, b) => a.localeCompare(b));
     assert.deepStrictEqual(keysA, keysB, 'political_controllers keys must match');
 
     for (const k of keysA) {
         assert.strictEqual(
-            (nextA.political_controllers as Record<string, string | null>)[k],
-            (nextB.political_controllers as Record<string, string | null>)[k],
+            (nextA.political.political_controllers as Record<string, string | null>)[k],
+            (nextB.political.political_controllers as Record<string, string | null>)[k],
             `political_controllers[${k}] must match`
         );
     }
 
-    const formationsA = Object.keys(nextA.formations ?? {}).sort((a, b) => a.localeCompare(b));
-    const formationsB = Object.keys(nextB.formations ?? {}).sort((a, b) => a.localeCompare(b));
+    const formationsA = Object.keys(nextA.military.formations ?? {}).sort((a, b) => a.localeCompare(b));
+    const formationsB = Object.keys(nextB.military.formations ?? {}).sort((a, b) => a.localeCompare(b));
     assert.deepStrictEqual(formationsA, formationsB, 'formation ids must match');
 });

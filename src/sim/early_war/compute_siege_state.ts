@@ -51,7 +51,7 @@ export function computeSiegeState(
     const result: SiegeRatioByMunFaction = new Map();
 
     // Collect mun_ids and faction ids, sorted for determinism
-    const munIds = Object.keys(state.municipalities ?? {}).slice().sort(strictCompare);
+    const munIds = Object.keys(state.political.municipalities ?? {}).slice().sort(strictCompare);
     const factionIds = (state.factions ?? [])
         .map((f) => f.id)
         .filter((x): x is string => typeof x === 'string')
@@ -70,7 +70,7 @@ export function computeSiegeState(
         osidsByMun.set(mun, list);
     }
 
-    const pc = state.political_controllers ?? {};
+    const pc = state.political.political_controllers ?? {};
 
     for (const munId of munIds) {
         const munOsids = osidsByMun.get(munId) ?? [];

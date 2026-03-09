@@ -113,10 +113,10 @@ test('displacement is deterministic', () => {
     const edges = createTestEdges();
 
     // Initialize displacement state for both
-    if (!state1.displacement_state) state1.displacement_state = {};
-    if (!state2.displacement_state) state2.displacement_state = {};
+    if (!state1.displacement.displacement_state) state1.displacement.displacement_state = {};
+    if (!state2.displacement.displacement_state) state2.displacement.displacement_state = {};
 
-    state1.displacement_state['20168'] = {
+    state1.displacement.displacement_state['20168'] = {
         mun_id: '20168',
         original_population: 10000,
         displaced_out: 0,
@@ -125,7 +125,7 @@ test('displacement is deterministic', () => {
         last_updated_turn: 9
     };
 
-    state2.displacement_state['20168'] = {
+    state2.displacement.displacement_state['20168'] = {
         mun_id: '20168',
         original_population: 10000,
         displaced_out: 0,
@@ -150,9 +150,9 @@ test('displacement is irreversible', () => {
     const settlements = createTestSettlements();
     const edges = createTestEdges();
 
-    if (!state.displacement_state) state.displacement_state = {};
+    if (!state.displacement.displacement_state) state.displacement.displacement_state = {};
 
-    state.displacement_state['20168'] = {
+    state.displacement.displacement_state['20168'] = {
         mun_id: '20168',
         original_population: 10000,
         displaced_out: 500,
@@ -161,13 +161,13 @@ test('displacement is irreversible', () => {
         last_updated_turn: 9
     };
 
-    const beforeOut = state.displacement_state['20168'].displaced_out;
-    const beforeLost = state.displacement_state['20168'].lost_population;
+    const beforeOut = state.displacement.displacement_state['20168'].displaced_out;
+    const beforeLost = state.displacement.displacement_state['20168'].lost_population;
 
     updateDisplacement(state, settlements, edges);
 
-    const afterOut = state.displacement_state['20168'].displaced_out;
-    const afterLost = state.displacement_state['20168'].lost_population;
+    const afterOut = state.displacement.displacement_state['20168'].displaced_out;
+    const afterLost = state.displacement.displacement_state['20168'].lost_population;
 
     // displaced_out and lost_population should never decrease
     assert.ok(afterOut >= beforeOut, 'displaced_out should never decrease');
@@ -179,10 +179,10 @@ test('recruitment ceiling enforcement', () => {
     const settlements = createTestSettlements();
     const edges = createTestEdges();
 
-    if (!state.displacement_state) state.displacement_state = {};
+    if (!state.displacement.displacement_state) state.displacement.displacement_state = {};
 
     // Set up displacement: 2000 displaced out, 500 lost
-    state.displacement_state['20168'] = {
+    state.displacement.displacement_state['20168'] = {
         mun_id: '20168',
         original_population: 10000,
         displaced_out: 2000,
@@ -195,12 +195,12 @@ test('recruitment ceiling enforcement', () => {
     // Current pool = 1000 + 200 = 1200 (within ceiling)
 
     // Set pool to exceed ceiling
-    state.militia_pools['20168'].available = 6000;
-    state.militia_pools['20168'].committed = 2000; // Total = 8000, exceeds 7500
+    state.military.militia_pools['20168'].available = 6000;
+    state.military.militia_pools['20168'].committed = 2000; // Total = 8000, exceeds 7500
 
     enforceRecruitmentCeilings(state);
 
-    const pool = state.militia_pools['20168'];
+    const pool = state.military.militia_pools['20168'];
     const ceiling = 10000 - 2000 - 500; // 7500
 
     // Pool total should not exceed ceiling
@@ -219,9 +219,9 @@ test('displacement reduces militia pool available', () => {
     const settlements = createTestSettlements();
     const edges = createTestEdges();
 
-    if (!state.displacement_state) state.displacement_state = {};
+    if (!state.displacement.displacement_state) state.displacement.displacement_state = {};
 
-    state.displacement_state['20168'] = {
+    state.displacement.displacement_state['20168'] = {
         mun_id: '20168',
         original_population: 10000,
         displaced_out: 0,
@@ -230,7 +230,7 @@ test('displacement reduces militia pool available', () => {
         last_updated_turn: 9
     };
 
-    const beforeAvailable = state.militia_pools['20168'].available;
+    const beforeAvailable = state.military.militia_pools['20168'].available;
 
     // Create conditions for displacement (unsupplied + pressure)
     // Note: This is a simplified test - in reality, displacement requires
@@ -244,7 +244,7 @@ test('displacement reduces militia pool available', () => {
 
     // If displacement occurred, available should be reduced
     // (exact amount depends on displacement triggers)
-    const afterAvailable = state.militia_pools['20168'].available;
+    const afterAvailable = state.military.militia_pools['20168'].available;
     // Note: This test may not trigger displacement if conditions aren't met
     // The important thing is that if displacement occurs, available is reduced
 });
@@ -256,8 +256,8 @@ test('displacement routing determinism', () => {
     const edges = createTestEdges();
 
     // Add a second municipality that can receive displaced population
-    state1.militia_pools['20044'].faction = 'RBiH';
-    state2.militia_pools['20044'].faction = 'RBiH';
+    state1.military.militia_pools['20044'].faction = 'RBiH';
+    state2.military.militia_pools['20044'].faction = 'RBiH';
 
     state1.factions[0].areasOfResponsibility.push('sid4');
     state2.factions[0].areasOfResponsibility.push('sid4');
@@ -273,10 +273,10 @@ test('displacement routing determinism', () => {
 
     edges.push({ a: 'sid2', b: 'sid4' }); // Connection between municipalities
 
-    if (!state1.displacement_state) state1.displacement_state = {};
-    if (!state2.displacement_state) state2.displacement_state = {};
+    if (!state1.displacement.displacement_state) state1.displacement.displacement_state = {};
+    if (!state2.displacement.displacement_state) state2.displacement.displacement_state = {};
 
-    state1.displacement_state['20168'] = {
+    state1.displacement.displacement_state['20168'] = {
         mun_id: '20168',
         original_population: 10000,
         displaced_out: 0,
@@ -285,7 +285,7 @@ test('displacement routing determinism', () => {
         last_updated_turn: 9
     };
 
-    state2.displacement_state['20168'] = {
+    state2.displacement.displacement_state['20168'] = {
         mun_id: '20168',
         original_population: 10000,
         displaced_out: 0,

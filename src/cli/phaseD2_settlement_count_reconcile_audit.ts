@@ -112,7 +112,7 @@ async function main(): Promise<void> {
         process.exit(1);
     }
 
-    const settlements: SettlementRecord[] = Array.isArray(indexData.settlements) ? indexData.settlements : [];
+    const settlements: SettlementRecord[] = Array.isArray(indexData.political.settlements) ? indexData.political.settlements : [];
     const indexSids = new Set<string>();
     const indexBySid = new Map<string, SettlementRecord>();
     for (const s of settlements) {
@@ -126,7 +126,7 @@ async function main(): Promise<void> {
     const censusSids = new Set<string>();
     const censusMunBySid = new Map<string, string>();
     const censusNameBySid = new Map<string, string>();
-    const municipalities = censusData.municipalities ?? {};
+    const municipalities = censusData.political.municipalities ?? {};
     const munCodes = Object.keys(municipalities).sort();
     for (const munCode of munCodes) {
         const mun = municipalities[munCode];

@@ -87,7 +87,7 @@ async function main(): Promise<void> {
     const mappingData = JSON.parse(mappingText) as ControllerMappingFile;
     const registryData = JSON.parse(registryText) as RegistryFile;
 
-    const settlements: SettlementRecord[] = Array.isArray(indexData.settlements) ? indexData.settlements : [];
+    const settlements: SettlementRecord[] = Array.isArray(indexData.political.settlements) ? indexData.political.settlements : [];
     const controllersByMun1990 = mappingData.controllers_by_mun1990_id ?? {};
     const registryRows: RegistryRow[] = Array.isArray(registryData.rows) ? registryData.rows : [];
 

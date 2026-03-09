@@ -50,36 +50,36 @@ test('Phase F: settlement and municipality displacement both move when triggered
     const triggered = pf.trigger_report?.triggered_settlements ?? [];
     if (triggered.length === 0) return; // no front-active in minimal graph
     assert.ok(
-        (after.settlement_displacement && Object.keys(after.settlement_displacement).length >= 0) ||
-        (after.municipality_displacement && Object.keys(after.municipality_displacement).length >= 0),
+        (after.displacement.settlement_displacement && Object.keys(after.displacement.settlement_displacement).length >= 0) ||
+        (after.displacement.municipality_displacement && Object.keys(after.displacement.municipality_displacement).length >= 0),
         'displacement state may be updated when settlements triggered'
     );
 });
 
 test('Phase F: displacement is monotonic across turns', async () => {
     const state = minimalPhaseIIState();
-    state.settlement_displacement = { S1: 0.1 };
-    state.municipality_displacement = { M1: 0.1 };
+    state.displacement.settlement_displacement = { S1: 0.1 };
+    state.displacement.municipality_displacement = { M1: 0.1 };
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { nextState: after } = await runTurn(state, { seed: 'pf-mon', settlementEdges: edges });
-    const sd = after.settlement_displacement ?? {};
-    const md = after.municipality_displacement ?? {};
+    const sd = after.displacement.settlement_displacement ?? {};
+    const md = after.displacement.municipality_displacement ?? {};
     for (const [sid, v] of Object.entries(sd)) {
-        const prev = state.settlement_displacement?.[sid] ?? 0;
+        const prev = state.displacement.settlement_displacement?.[sid] ?? 0;
         assert.ok(v >= prev, `settlement ${sid} displacement must not decrease`);
     }
     for (const [munId, v] of Object.entries(md)) {
-        const prev = state.municipality_displacement?.[munId] ?? 0;
+        const prev = state.displacement.municipality_displacement?.[munId] ?? 0;
         assert.ok(v >= prev, `municipality ${munId} displacement must not decrease`);
     }
 });
 
 test('Phase F: displacement does not directly flip control', async () => {
     const state = minimalPhaseIIState();
-    const pcBefore = { ...(state.political_controllers ?? {}) };
+    const pcBefore = { ...(state.political.political_controllers ?? {}) };
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { nextState: after } = await runTurn(state, { seed: 'pf-noflip', settlementEdges: edges });
-    const pcAfter = after.political_controllers ?? {};
+    const pcAfter = after.political.political_controllers ?? {};
     for (const sid of Object.keys(pcBefore)) {
         assert.strictEqual(
             pcAfter[sid],

@@ -81,12 +81,12 @@ describe('advanceSectorOffensives', () => {
 
         advanceSectorOffensives(state, null);
 
-        const op = state.corps_command?.['rs-corps-1']?.active_operation;
+        const op = state.military.corps_command?.['rs-corps-1']?.active_operation;
         expect(op?.phase).toBe('execution');
-        expect(state.formations['rs-brig-1'].cohesion).toBe(55);
-        expect(state.formations['rbih-brig-1'].dig_in_progress).toBe(0);
-        expect(state.formations['rbih-brig-1'].cohesion).toBe(60);
-        expect(state.heavy_munitions_reserve?.RS).toBe(3);
+        expect(state.military.formations['rs-brig-1'].cohesion).toBe(55);
+        expect(state.military.formations['rbih-brig-1'].dig_in_progress).toBe(0);
+        expect(state.military.formations['rbih-brig-1'].cohesion).toBe(60);
+        expect(state.military.heavy_munitions_reserve?.RS).toBe(3);
     });
 
     it('all-out tempo applies extra execution cohesion cost each turn', () => {
@@ -96,6 +96,6 @@ describe('advanceSectorOffensives', () => {
 
         advanceSectorOffensives(state, null);
 
-        expect(state.formations['rs-brig-1'].cohesion).toBe(54);
+        expect(state.military.formations['rs-brig-1'].cohesion).toBe(54);
     });
 });

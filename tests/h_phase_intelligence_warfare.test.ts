@@ -104,8 +104,8 @@ describe('H phase intelligence warfare', () => {
 
         deriveSectorIntel(state, 5);
 
-        expect(state.sector_intel?.friendly?.[0]?.offensive_signs).toBe(true);
-        expect(state.sector_intel?.friendly?.[0]?.posture_observed).toBe('offensive_prep');
+        expect(state.military.sector_intel?.friendly?.[0]?.offensive_signs).toBe(true);
+        expect(state.military.sector_intel?.friendly?.[0]?.posture_observed).toBe('offensive_prep');
     });
 
     it('probe operations clamp to two participating brigades and one-turn planning', () => {
@@ -154,7 +154,7 @@ describe('H phase intelligence warfare', () => {
 
         advanceSectorOffensives(state, null);
 
-        const op = state.corps_command?.rs_corps?.active_operation;
+        const op = state.military.corps_command?.rs_corps?.active_operation;
         expect(op?.participating_brigades).toEqual(['b1', 'b2']);
         expect(op?.planning_duration).toBe(1);
         expect(op?.phase).toBe('execution');
@@ -180,6 +180,6 @@ describe('H phase intelligence warfare', () => {
         const report = runCohesionDrift(state, []);
 
         expect(report.formations_updated).toBe(1);
-        expect(state.formations.rbih_1.cohesion).toBe(60.2);
+        expect(state.military.formations.rbih_1.cohesion).toBe(60.2);
     });
 });
