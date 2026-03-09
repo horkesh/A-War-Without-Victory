@@ -466,7 +466,9 @@ function reclassifyRearBrigades(
         if (frontSet.size === 0) continue;
 
         // Build hop-distance map from all front OSIDs (multi-source BFS)
-        // through friendly territory. Distance 0 = on front, 1 = one hop behind, etc.
+        // through friendly territory. No hop limit — every brigade in the
+        // sector's territory must be accounted for. Distance is used for
+        // sorting reserves (closest first), not for exclusion.
         const hopDistance = new Map<string, number>();
         const queue: Array<{ osid: string; dist: number }> = [];
         for (const fo of frontSet) {
@@ -476,7 +478,6 @@ function reclassifyRearBrigades(
         let head = 0;
         while (head < queue.length) {
             const { osid, dist } = queue[head++]!;
-            if (dist >= MAX_RESERVE_HOPS) continue;
             for (const n of (adjacency.get(osid as Osid) ?? []).slice().sort(strictCompare)) {
                 if (hopDistance.has(n)) continue;
                 if (!friendlyOsids.has(n)) continue;
@@ -485,54 +486,43 @@ function reclassifyRearBrigades(
             }
         }
 
-        // Classify assigned brigades: front/1-hop (keep assigned), 2..MAX_RESERVE_HOPS
-        // (candidate for reserve), or too far (drop from sector entirely)
+        // Classify: front/1-hop → assigned, deeper → reserve.
+        // Every brigade stays in its sector — corps needs full visibility
+        // of all manpower for planning and threat balancing.
         const keepAssigned: FormationId[] = [];
         const reserveCandidates: Array<{ bid: FormationId; dist: number }> = [];
         for (const bid of sector.assigned_brigade_ids) {
             const f = formations[bid];
             if (!f?.location_osid) { keepAssigned.push(bid); continue; }
-            const dist = hopDistance.get(f.location_osid);
-            if (dist === undefined) {
-                // Beyond MAX_RESERVE_HOPS or unreachable — drop from sector
-                continue;
-            }
+            const dist = hopDistance.get(f.location_osid) ?? 999;
             if (dist <= 1) {
-                // On front or 1-hop behind — stays assigned
                 keepAssigned.push(bid);
             } else {
-                // 2..MAX_RESERVE_HOPS — candidate for reserve
                 reserveCandidates.push({ bid, dist });
             }
         }
 
-        // Also re-validate existing reserves for proximity
+        // Re-validate existing reserves: promote to assigned if now at 0-1 hops
         for (const bid of sector.reserve_brigade_ids) {
             const f = formations[bid];
             if (!f?.location_osid) continue;
-            const dist = hopDistance.get(f.location_osid);
-            if (dist !== undefined && dist >= 2) {
-                reserveCandidates.push({ bid, dist });
-            } else if (dist !== undefined && dist <= 1) {
+            const dist = hopDistance.get(f.location_osid) ?? 999;
+            if (dist <= 1) {
                 keepAssigned.push(bid);
+            } else {
+                reserveCandidates.push({ bid, dist });
             }
-            // else: beyond range — dropped
         }
 
-        // Sort reserve candidates by distance (closest first), then deterministic tiebreak
+        // Sort reserves by distance (closest first) — closest reserves are
+        // most valuable for reinforcement and operation staging.
         reserveCandidates.sort((a, b) => a.dist - b.dist || strictCompare(a.bid, b.bid));
 
-        // Apply reserve cap: 1 for ≤10 edges, 2 for >10
-        const maxReserves = sector.length_edges > 10 ? 2 : 1;
-        const finalReserves = reserveCandidates
-            .slice(0, maxReserves)
-            .map(c => c.bid);
-
         sector.assigned_brigade_ids = keepAssigned.sort(strictCompare);
-        sector.reserve_brigade_ids = finalReserves.sort(strictCompare);
+        sector.reserve_brigade_ids = reserveCandidates.map(c => c.bid);
     }
 
-    // Recalculate density
+    // Recalculate density (assigned only — reserves don't count for front coverage)
     for (const s of sectors) {
         s.density = s.length_edges > 0
             ? s.assigned_brigade_ids.length / s.length_edges : 0;
