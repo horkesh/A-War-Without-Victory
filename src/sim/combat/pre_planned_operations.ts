@@ -44,6 +44,8 @@ interface PrePlannedOp {
     staging_osid: string;
     /** Minimum turn before this op can be injected (default: 0). */
     available_from?: number;
+    /** Override attack threshold — brigades attack even at worse predicted outcomes. */
+    min_attack_outcome?: CorpsOperation['min_attack_outcome'];
 }
 
 const VRS_PRE_PLANNED: PrePlannedOp[] = [
@@ -360,20 +362,20 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         corps: 'arbih_2nd_corps',
         faction: 'RBiH',
         name: 'Operation Teočak',
-        staging_osid: 'op:tuzla:simin_han_2',
-        available_from: 14,
+        staging_osid: 'op:kalesija:kalesija_grad_2',
+        available_from: 25,
+        min_attack_outcome: 'repulsed',
         axes: [
             {
-                axis_id: 'teocak_link',
-                name: 'Teočak Link',
+                axis_id: 'kalesija_assault',
+                name: 'Kalesija Assault',
                 brigades: [
-                    'arbih_120th_liberation_black_swans',
-                    'arbih_2nd_tuzla',
+                    'arbih_241st_spreca_muslim_light_gazije',
+                    'arbih_242nd_zvornik_muslim_light',
+                    'arbih_245th_mountain',
                 ],
-                objectives: [
-                    'op:zvornik:rastosnica_2',
-                ],
-                staging_osid: 'op:tuzla:simin_han_2',
+                objectives: ['op:zvornik:rastosnica_2'],
+                staging_osid: 'op:kalesija:kalesija_grad_2',
             },
         ],
     },
@@ -448,6 +450,7 @@ function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participa
         failure_count: 0,
         consecutive_failures_on_current: 0,
         staging_osid: def.staging_osid,
+        ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
     };
 }
 

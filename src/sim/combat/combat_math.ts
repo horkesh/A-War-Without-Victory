@@ -113,6 +113,25 @@ export const OUTCOME_DEFENDER_MOD: Record<string, number> = {
     stalemate: 0.8, repulsed: 0.5, catastrophic: 0.3
 };
 
+/**
+ * Power-ratio casualty scaling — stronger forces inflict proportionally more casualties.
+ * Returns [attackerMult, defenderMult].
+ * - High powerRatio (attacker advantage): defender takes more, attacker takes less
+ * - Low powerRatio (defender advantage): attacker takes more, defender takes less
+ * Uses cube-root scaling (exponent 0.33) for moderate effect — outcome modifiers
+ * already capture gross power differences, this adds continuous within-band scaling.
+ */
+export const POWER_RATIO_CASUALTY_EXPONENT = 0.33;
+export const POWER_RATIO_CASUALTY_MAX = 2.0;
+export const POWER_RATIO_CASUALTY_MIN = 0.4;
+
+export function getPowerRatioCasualtyMult(powerRatio: number): [attackerMult: number, defenderMult: number] {
+    const clamped = Math.max(0.1, Math.min(10, powerRatio));
+    const base = Math.pow(clamped, POWER_RATIO_CASUALTY_EXPONENT);
+    const clamp = (v: number) => Math.min(POWER_RATIO_CASUALTY_MAX, Math.max(POWER_RATIO_CASUALTY_MIN, v));
+    return [clamp(1 / base), clamp(base)];
+}
+
 // Cohesion deltas (§4.5)
 export const COHESION_ATTACKER: Record<string, number> = {
     decisive_victory: 2, victory: 1, costly_victory: -5,

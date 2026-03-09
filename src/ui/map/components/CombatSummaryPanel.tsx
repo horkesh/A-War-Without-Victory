@@ -18,6 +18,8 @@ interface CombatSummaryPanelProps {
     formations?: FormationView[];
     onSelectFormation?: (id: string) => void;
     compact?: boolean;
+    /** When true, omit top border (e.g. when already inside a bordered section). */
+    noTopBorder?: boolean;
 }
 
 function resolveName(id: string | null, formations?: FormationView[]): string | null {
@@ -25,12 +27,12 @@ function resolveName(id: string | null, formations?: FormationView[]): string | 
     return formations.find((f) => f.id === id)?.name ?? id;
 }
 
-export function CombatSummaryPanel({ summary, formations, onSelectFormation, compact }: CombatSummaryPanelProps) {
+export function CombatSummaryPanel({ summary, formations, onSelectFormation, compact, noTopBorder }: CombatSummaryPanelProps) {
     const territoryNet = summary.total_osids_captured - summary.total_osids_lost;
     const territorySign = territoryNet > 0 ? '+' : territoryNet < 0 ? '' : '±';
 
     return (
-        <div className="border-t border-panel-border pt-2 mb-3 text-[11px]">
+        <div className={`pt-2 mb-3 text-[11px] ${noTopBorder ? '' : 'border-t border-panel-border'}`}>
             <div className="text-text-secondary font-semibold mb-1.5 text-[10px] uppercase tracking-wide">
                 Combat Record
             </div>
@@ -60,15 +62,15 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
             {/* Casualties */}
             <div className="mt-1.5 space-y-0.5">
                 <div className="flex justify-between">
-                    <span className="text-text-secondary">Casualties Taken</span>
+                    <span className="text-text-secondary">Men lost</span>
                     <span className="text-red-400 tabular-nums">{summary.total_casualties_taken.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-text-secondary">Casualties Inflicted</span>
+                    <span className="text-text-secondary">Casualties inflicted</span>
                     <span className="text-green-400 tabular-nums">{summary.total_casualties_inflicted.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                    <span className="text-text-secondary">Exchange Ratio</span>
+                    <span className="text-text-secondary">Exchange ratio</span>
                     <span className="text-text-primary tabular-nums">
                         {summary.casualty_exchange_ratio.toFixed(2)}:1
                     </span>

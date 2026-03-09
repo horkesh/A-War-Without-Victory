@@ -60,7 +60,8 @@
     "srebrenica": 0.55
   },
   "osid_control_overrides": {
-    "op:brcko:brcko": "RS"
+    "op:brcko:brcko": "RS",
+    "op:ugljevik:teocak_krstac_2": "RBiH"
   },
   "avoided_osids_by_faction": {},
   "war_timeline": "apr1992",

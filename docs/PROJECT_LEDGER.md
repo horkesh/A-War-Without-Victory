@@ -7,6 +7,19 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-09] Combat Casualty Scaling, Home Defense Exemption, Sector Offensive Tuning (n438)
+
+Power-ratio casualty scaling + home defense operation exemption + sector offensive idle stall fix. Calibration: **87.2% area-weighted** (-2.2pp from n415 89.4%, expected regression from increased defender attrition).
+
+**Power-ratio casualty scaling** (combat_math.ts): New `getPowerRatioCasualtyMult()` — cube-root scaling (exponent 0.33) applied defender-only. Constants: `POWER_RATIO_CASUALTY_EXPONENT=0.33`, `POWER_RATIO_CASUALTY_MAX=2.0`, `POWER_RATIO_CASUALTY_MIN=0.4`. Example: 3:1 power ratio → defender takes 1.44x casualties. Applied in `attack_resolution_osid.ts` (resolver) and `combat_predictor.ts` (predictor).
+**Home defense operation exemption** (compute_home_defense.ts): New `isOperationParticipant()` — brigades in active operations (execution phase) exempted from `home_defense_active`. Root cause fix for Op Teocak: `canAdoptPosture()` silently rejected attack/assault for home defenders, preventing corps-ordered attacks from home municipality.
+**Operation min_attack_outcome** (pre_planned_operations.ts): New field on `PrePlannedOp` and `CorpsOperation` — overrides `getSectorOffensiveProbeThreshold()` attack threshold per-operation. Bot AI checks `activeOp.min_attack_outcome` before momentum-based thresholds.
+**Sector offensive tuning** (sector_offensive.ts): `MAX_TOTAL_FAILURES` 3→5, `MAX_CONSECUTIVE_FAILURES_ON_CURRENT` 2→3. Idle stall threshold `>=1` → `>=2` (both `updateMultiAxisResults` and `updateLegacyFlatResults`) — first execution turn is always a freebie due to pipeline phase ordering (`advance-sector-offensives` runs before `bot-brigade-orders`). Module-level constants extracted from inline values.
+**Operation Teocak redesign** (pre_planned_operations.ts): Brigades 120th + 2nd Tuzla → 241st + 242nd + 245th (Kalesija-based). Staging → `op:kalesija:kalesija_grad_2`. `available_from` 14→25. `min_attack_outcome: 'repulsed'`.
+
+**Files**: `combat_math.ts`, `attack_resolution_osid.ts`, `combat_predictor.ts`, `compute_home_defense.ts`, `pre_planned_operations.ts`, `bot_brigade_ai_osid.ts`, `sector_offensive.ts`
+**Report**: `docs/40_reports/implemented/20260309_COMBAT_CASUALTY_SCALING_OP_TEOCAK_HOME_DEFENSE.md`
+
 ## [2026-03-08] Audit Remediation Complete — Full 5-Phase Report + outcomeRank Unification
 
 Full implementation report created: `docs/40_reports/implemented/20260308_AUDIT_REMEDIATION_FULL_5_PHASES.md`. Covers all 5 phases (determinism, frozen front cascade, supply/morale, code health, terminology+splitting+simplify). Propagated to: context.md, REPO_MAP (bot AI module map), CONSOLIDATED_IMPLEMENTED, README.md, CALIBRATION_MASTER, PROJECT_LEDGER_KNOWLEDGE.
@@ -12054,3 +12067,46 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 **Files**: `src/sim/combat/corps_front_sectors.ts`
 **Calibration**: n403 = 86.9% ATH area-weighted. 73 total sectors, 17 zero-brigade. Troop: RBiH=120.5k (target 120k), RS=106.0k (target 102.6k), HRHB=44.2k (target 41.5k).
 **Report**: `docs/40_reports/20260308_SECTOR_SYSTEM_OVERHAUL.md`
+
+---
+
+## [2026-03-08] Orchestrator-led state-of-game evaluation started
+
+### What changed
+- Began a fresh Paradox team "state of the game" evaluation to replace the stale same-day draft in `docs/40_reports/convenes/20260308_PARADOX_TEAM_STATE_OF_THE_GAME_EVALUATION.md`
+- Scoped the review as a docs/reporting pass covering engine, combat, calibration, GUI, code health, canon, and system interoperability
+- Loaded orchestration, reporting, GUI, and process guidance before dispatching specialist reviews
+
+### Why
+- The existing draft report still flags issues already remediated later on 2026-03-08, so it is no longer a trustworthy snapshot of the current repo state
+- The user requested a fresh multi-role Paradox evaluation with structured recommendations and a report artifact under `docs/40_reports/`
+
+### Verification
+- Read current ledger, docs index, reports index, GUI master, life lessons, and the stale state-of-game draft
+- Confirmed the report belongs in `docs/40_reports/convenes/`
+
+---
+
+## [2026-03-08] State-of-game evaluation refreshed and synchronized
+
+### What changed
+- Rewrote `docs/40_reports/convenes/20260308_PARADOX_TEAM_STATE_OF_THE_GAME_EVALUATION.md` as a current-state report based on fresh specialist audits instead of the stale earlier same-day snapshot
+- Rebuilt `docs/60_visualisations/state_of_the_game_report.html` to match the rewritten report
+- Updated `docs/40_reports/README.md` so the reports index no longer repeats the stale summary
+- Updated `docs/40_reports/GUI_MASTER.md` to reflect the GUI findings from this evaluation session
+- Added a napkin rule to cross-check same-day reports against the latest ledger before reusing them
+
+### Why
+- The earlier same-day report still prioritized already-fixed issues (March 8 determinism and terminology items), which made it an unreliable basis for orchestration
+- The user asked for a full Paradox-style state-of-the-game evaluation, system-by-system grading, interoperability assessment, and recommendations in a structured docs artifact
+
+### Verification
+- `npm run typecheck` -> pass
+- `npm run test:vitest` -> 389 passed, 1 skipped
+- `npm run desktop:map:build` -> pass (non-blocking chunk-size / mixed dynamic-static import warnings remain)
+- Updated files:
+  - `docs/40_reports/convenes/20260308_PARADOX_TEAM_STATE_OF_THE_GAME_EVALUATION.md`
+  - `docs/60_visualisations/state_of_the_game_report.html`
+  - `docs/40_reports/README.md`
+  - `docs/40_reports/GUI_MASTER.md`
+  - `.claude/napkin.md`

@@ -25,6 +25,9 @@ function pointsByFaction(rec: Record<string, { points?: number }>): Record<strin
     return out;
 }
 
+const ATTACKER_WIN_OUTCOMES = ['decisive_victory', 'victory', 'costly_victory'];
+const ATTACKER_LOSS_OUTCOMES = ['repulsed', 'catastrophic'];
+
 function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
@@ -428,7 +431,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) theatres = out;
     }
 
-    // Index brigade_history so brigades can get a synthesized combatSummary.
+    // Brigade history lives on each formation (state.formations[id].brigade_history), not in a separate state.brigade_history.
+    // Fallback to state.brigade_history for any legacy save that might have used that shape.
     const brigadeHistoryRecord = state.brigade_history as Record<string, Record<string, unknown>> | undefined;
 
     const formations: FormationView[] = [];
@@ -517,9 +521,9 @@ export function parseGameState(json: unknown): LoadedGameState {
                 last_retreat_from: f.last_retreat_from as NonNullable<FormationView['last_retreat_from']> ?? undefined,
             };
 
-            // Brigade first battle milestone
-            if ((f.kind === 'brigade' || f.kind === 'operational_group') && brigadeHistoryRecord) {
-                const bh = brigadeHistoryRecord[id];
+            // Brigade first battle milestone and engagement log: use history on formation first (save has formations[id].brigade_history).
+            if (f.kind === 'brigade' || f.kind === 'operational_group') {
+                const bh = (f.brigade_history as Record<string, unknown> | undefined) ?? brigadeHistoryRecord?.[id];
                 if (bh && typeof bh === 'object') {
                     fv.firstBattleTurn = typeof bh.first_battle_turn === 'number' ? bh.first_battle_turn : null;
                     fv.firstBattleOsid = typeof bh.first_battle_osid === 'string' ? bh.first_battle_osid : null;
@@ -546,26 +550,51 @@ export function parseGameState(json: unknown): LoadedGameState {
                 }
             }
 
-            // Brigade fallback: synthesize combatSummary from brigade_history running tallies.
-            if (!combatSummary && (f.kind === 'brigade' || f.kind === 'operational_group') && brigadeHistoryRecord) {
-                const bh = brigadeHistoryRecord[id];
-                if (bh && typeof bh.battles_fought === 'number' && bh.battles_fought > 0) {
+            // Brigade fallback: synthesize combatSummary from brigade_history running tallies (on formation or legacy state.brigade_history).
+            if (!combatSummary && (f.kind === 'brigade' || f.kind === 'operational_group')) {
+                const bh = (f.brigade_history as Record<string, unknown> | undefined) ?? brigadeHistoryRecord?.[id];
+                if (bh && (typeof bh.battles_fought === 'number' ? bh.battles_fought > 0 : Array.isArray(bh.engagements) && (bh.engagements as unknown[]).length > 0)) {
                     const bf = finiteNumber(bh.battles_fought);
-                    const vic = finiteNumber(bh.victories);
-                    const taken = finiteNumber(bh.total_casualties_taken);
-                    const inflicted = finiteNumber(bh.total_casualties_inflicted);
+                    const engs = Array.isArray(bh.engagements) ? (bh.engagements as Array<Record<string, unknown>>) : [];
+                    const battlesFromEngagements = bf > 0 ? bf : engs.length;
+                    let vic = finiteNumber(bh.victories);
+                    let defeats = finiteNumber(bh.defeats);
+                    let stalemates = finiteNumber(bh.stalemates);
+                    let taken = finiteNumber(bh.total_casualties_taken);
+                    let inflicted = finiteNumber(bh.total_casualties_inflicted);
+                    let att = finiteNumber(bh.battles_as_attacker);
+                    let def = finiteNumber(bh.battles_as_defender);
+                    if (bf === 0 && engs.length > 0) {
+                        for (const e of engs) {
+                            const role = e.role === 'attacker' ? 'attacker' : 'defender';
+                            const out = typeof e.outcome === 'string' ? e.outcome : '';
+                            if (role === 'attacker') {
+                                if (ATTACKER_WIN_OUTCOMES.includes(out)) vic++;
+                                else if (ATTACKER_LOSS_OUTCOMES.includes(out)) defeats++;
+                                else stalemates++;
+                            } else {
+                                if (ATTACKER_LOSS_OUTCOMES.includes(out)) vic++;
+                                else if (ATTACKER_WIN_OUTCOMES.includes(out)) defeats++;
+                                else stalemates++;
+                            }
+                            taken += typeof e.casualties_taken === 'number' ? e.casualties_taken : 0;
+                            inflicted += typeof e.casualties_inflicted === 'number' ? e.casualties_inflicted : 0;
+                            if (role === 'attacker') att++;
+                            else def++;
+                        }
+                    }
                     combatSummary = {
-                        battles_fought: bf,
+                        battles_fought: battlesFromEngagements,
                         victories: vic,
-                        defeats: finiteNumber(bh.defeats),
-                        stalemates: finiteNumber(bh.stalemates),
-                        battles_as_attacker: finiteNumber(bh.battles_as_attacker),
-                        battles_as_defender: finiteNumber(bh.battles_as_defender),
+                        defeats,
+                        stalemates,
+                        battles_as_attacker: att,
+                        battles_as_defender: def,
                         total_casualties_taken: taken,
                         total_casualties_inflicted: inflicted,
                         total_osids_captured: finiteNumber(bh.total_osids_captured),
                         total_osids_lost: finiteNumber(bh.total_osids_lost),
-                        win_rate: bf > 0 ? vic / bf : 0,
+                        win_rate: battlesFromEngagements > 0 ? vic / battlesFromEngagements : 0,
                         casualty_exchange_ratio: taken > 0 ? inflicted / taken : (inflicted > 0 ? inflicted : 1),
                         current_personnel: personnel ?? 0,
                         peak_aggregate_personnel: finiteNumber(bh.peak_personnel),

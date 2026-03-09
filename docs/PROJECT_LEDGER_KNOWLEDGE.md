@@ -112,6 +112,11 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 13. **[2026-03-08] Corps HQ is organizational — not rendered on map**
    Do instead: `corps_asset`, `army_hq`, and `corps` formations filtered from `buildFormationsGeoJSON`. These are command abstractions, not physical map units.
 
+14. **[2026-03-09] Idle stall threshold must account for pipeline phase ordering**
+   Do instead: `advance-sector-offensives` runs before `bot-brigade-orders` in the turn pipeline. The first execution turn always has zero attacks and zero movement logged. Idle stall detection must use `>= 2` idle turns (not `>= 1`) before declaring an operation stalled. Apply this threshold in both `updateMultiAxisResults` and `updateLegacyFlatResults` paths. Failure limits: `MAX_TOTAL_FAILURES=5`, `MAX_CONSECUTIVE_FAILURES_ON_CURRENT=3`.
+15. **[2026-03-09] Operation `min_attack_outcome` overrides probe threshold**
+   Do instead: `PrePlannedOp` and `CorpsOperation` can specify `min_attack_outcome` to override `getSectorOffensiveProbeThreshold()`. Bot AI checks `activeOp.min_attack_outcome` first, then falls back to momentum-based thresholds. Use for operations that must attack even at unfavorable predicted outcomes (e.g., Op Teocak with `min_attack_outcome: 'repulsed'`).
+
 | 2026-03-08 | Entrenchment reduces passive frontline attrition | Entrenched brigades suffer less sniping/shelling/bombardment — sqrt diminishing returns, floor 0.40 | Reduces total passive casualties ~25-60% for long-entrenched units; affects calibration | combat |
 | 2026-01-24 | Municipality outlines can be single polygons | Union must handle single and multi | No rejection of valid single-polygon munis | architecture |
 | 2026-01-24 | Convex hull fallback when union fails | Union unreliable for some geometries | Deterministic fallback + inflation reporting | architecture |
@@ -680,6 +685,19 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 ### Legacy SID path status
 - `resolveBattleOrders()` in `battle_resolution.ts` lines 930-933: `defenderBrigadeId = undefined`, `defenderFormation = undefined`. This was an intentional stub after AoR removal ("legacy SID path: militia-only, no brigade_aor lookup"). It still runs in the pipeline (line 856 of war_phases.ts) alongside the OSID path but produces only trivial casualties (2 wounded per battle, no equipment).
 - **Decision:** Leave legacy SID path as-is; all real combat goes through OSID path. Legacy path exists for backward compat with SID-keyed scenarios.
+
+## 2026-03-09 - Power-ratio casualty scaling + home defense vs operations conflict
+
+### Power-ratio casualty scaling (combat_math.ts)
+- `getPowerRatioCasualtyMult(powerRatio)` returns `[attackerMult, defenderMult]`. Cube-root scaling: `Math.pow(clampedRatio, POWER_RATIO_CASUALTY_EXPONENT)`. Constants: `POWER_RATIO_CASUALTY_EXPONENT=0.33`, `POWER_RATIO_CASUALTY_MAX=2.0`, `POWER_RATIO_CASUALTY_MIN=0.4`.
+- **Defender-only application.** Applying to both sides double-counts the power advantage (outcome modifiers already capture the attacker's penalty via `OUTCOME_ATTACKER_MOD`). Defender-only adds within-band differentiation: 3:1 power ratio → defender takes 1.44x; 0.5:1 → defender takes 0.79x.
+- **Lesson:** Linear (1.0) exponent far too aggressive. Square-root (0.5) still caused noticeable regression. Cube-root (0.33) provides meaningful differentiation within outcome bands without destabilizing the overall casualty model.
+
+### Home defense vs operations conflict (compute_home_defense.ts)
+- `isOperationParticipant(state, corpsId, brigadeId)` checks if brigade is on any axis of the corps' active operation during execution phase.
+- **Root cause:** `canAdoptPosture()` in `brigade_posture.ts` silently returns false for brigades with `home_defense_active === true`, blocking attack/assault posture. No log, no warning — just a quiet no-op. Operations that assign brigades to attack from their home municipality silently fail.
+- **Lesson:** Silent posture rejection is dangerous. The exemption mechanism (execution-phase only — planning/staging brigades still defend home) is essential, but the underlying silent rejection pattern should be addressed with diagnostic logging.
+- **Impact:** This was the single root cause of Operation Teocak failure. Kalesija-based brigades (241st, 242nd, 245th) could not attack Rastosnica despite being ordered by corps.
 
 ## 2026-03-06 - Combat-causality recovery knowledge
 

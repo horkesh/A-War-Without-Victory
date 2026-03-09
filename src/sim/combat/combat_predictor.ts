@@ -60,6 +60,7 @@ import {
     buildTerrainMultByOsid,
     getBombardmentCasualtyMult,
     rankDefendersByPower,
+    getPowerRatioCasualtyMult,
 } from './combat_math.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { frontDensityModifier } from './local_front_defense.js';
@@ -255,8 +256,9 @@ export function predictCombatOutcome(
     const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
     const personnelDefender = defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
     const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
+    const [, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
     const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1);
-    const baseDefCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[predicted] ?? 1) * bombardmentMult;
+    const baseDefCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[predicted] ?? 1) * bombardmentMult * defCasMult;
     const expectedAttCas = Math.max(0, Math.round(baseAttCas));
     const expectedDefCas = Math.max(0, Math.round(baseDefCas));
 

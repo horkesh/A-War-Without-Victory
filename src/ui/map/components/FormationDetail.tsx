@@ -9,6 +9,8 @@ import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } fro
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { CombatSummaryPanel } from './CombatSummaryPanel';
+import type { FormationView } from '../data/types';
 
 const POSTURE_TOOLTIPS: Record<string, string> = {
   hold: '1.00x defense. No extra cohesion cost. Baseline holding posture.',
@@ -19,6 +21,30 @@ const POSTURE_TOOLTIPS: Record<string, string> = {
   dig_in: '1.35x defense when prepared. Builds fortifications over time.',
   attack: 'Offensive stance. Lower defense, higher attack willingness.',
   assault: 'Maximum offensive commitment. Highest casualties and cohesion burn.',
+};
+
+/** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
+const ZERO_BRIGADE_COMBAT_SUMMARY: NonNullable<FormationView['combatSummary']> = {
+  battles_fought: 0,
+  victories: 0,
+  defeats: 0,
+  stalemates: 0,
+  battles_as_attacker: 0,
+  battles_as_defender: 0,
+  total_casualties_taken: 0,
+  total_casualties_inflicted: 0,
+  total_osids_captured: 0,
+  total_osids_lost: 0,
+  win_rate: 0,
+  casualty_exchange_ratio: 0,
+  current_personnel: 0,
+  peak_aggregate_personnel: 0,
+  nadir_aggregate_personnel: 0,
+  arc_distribution: {},
+  brigade_count: 1,
+  active_brigade_count: 1,
+  most_casualties_brigade_id: null,
+  most_victories_brigade_id: null,
 };
 
 
@@ -363,64 +389,27 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             )}
 
 
-            {formation.kind === 'brigade' && formation.combatSummary && (
+            {formation.kind === 'brigade' && (
               <div className="pt-2 border-t border-panel-border space-y-2 pb-1">
-                <div className="text-xs text-text-secondary">Service Record</div>
+                <CombatSummaryPanel summary={formation.combatSummary ?? ZERO_BRIGADE_COMBAT_SUMMARY} compact noTopBorder />
 
-                {/* Win Rate & K/D Header */}
-                <div className="flex gap-4 p-2 bg-black/20 rounded border border-panel-border/30">
-                  <div className="flex-1 flex flex-col items-center justify-center border-r border-panel-border/30 pr-4">
-                    <span className="text-[10px] text-text-secondary uppercase tracking-wider mb-1">Win Rate</span>
-                    <div className="relative w-10 h-10 rounded-full border border-panel-border/50 flex items-center justify-center font-bold font-mono text-xs text-text-primary"
-                      style={{
-                        background: `conic-gradient(#d4a055 ${Math.round(formation.combatSummary.win_rate * 100)}%, transparent 0)`
-                      }}>
-                      {Math.round(formation.combatSummary.win_rate * 100)}%
-                    </div>
-                  </div>
-                  <div className="flex-1 flex flex-col items-center justify-center">
-                    <span className="text-[10px] text-text-secondary uppercase tracking-wider mb-1">K/D Ratio</span>
-                    <span className="text-lg font-mono text-accent-goldtabular-nums">
-                      {formation.combatSummary.casualty_exchange_ratio.toFixed(2)}
-                    </span>
-                    <span className="text-[9px] text-text-secondary italic mt-0.5">Inflicted / Taken</span>
-                  </div>
-                </div>
-
-                {/* Stat Grid */}
+                {/* Brigade-only: KIA/WIA estimate, streak, siege */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-1">
-                  <span className="text-text-secondary">Battles Fought</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.battles_fought.toLocaleString()}</span>
-
-                  <span className="text-text-secondary">Casualties Taken</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_casualties_taken.toLocaleString()}</span>
-
-                  <span className="text-text-secondary">Casualties Inflicted</span>
-                  <span className="text-text-primary tabular-nums">{formation.combatSummary.total_casualties_inflicted.toLocaleString()}</span>
-
                   <span className="text-text-secondary text-[10px] pl-2">— KIA (est.)</span>
-                  <span className="text-[#d45555] tabular-nums text-[10px]">{Math.round(formation.combatSummary.total_casualties_taken * 0.30).toLocaleString()}</span>
-
+                  <span className="text-[#d45555] tabular-nums text-[10px]">{Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.30).toLocaleString()}</span>
                   <span className="text-text-secondary text-[10px] pl-2">— WIA (est.)</span>
-                  <span className="text-[#d4d455] tabular-nums text-[10px]">{Math.round(formation.combatSummary.total_casualties_taken * 0.55).toLocaleString()}</span>
-
-                  <span className="text-text-secondary">OSIDs Captured</span>
-                  <span className="text-[#55d48a] tabular-nums font-semibold">{formation.combatSummary.total_osids_captured.toLocaleString()}</span>
-
-                  <span className="text-text-secondary">OSIDs Lost</span>
-                  <span className="text-[#d45555] tabular-nums">{formation.combatSummary.total_osids_lost.toLocaleString()}</span>
-
+                  <span className="text-[#d4d455] tabular-nums text-[10px]">{Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.55).toLocaleString()}</span>
                   {formation.brigade_history && (
                     <>
                       {formation.brigade_history.longest_victory_streak > 0 && (
                         <>
-                          <span className="text-text-secondary">Highest Win-Streak</span>
+                          <span className="text-text-secondary">Highest win streak</span>
                           <span className="text-accent-gold tabular-nums font-semibold">{formation.brigade_history.longest_victory_streak}</span>
                         </>
                       )}
                       {formation.brigade_history.turns_under_siege > 0 && (
                         <>
-                          <span className="text-text-secondary">Turns Under Siege</span>
+                          <span className="text-text-secondary">Turns under siege</span>
                           <span className="text-text-primary tabular-nums">{formation.brigade_history.turns_under_siege}</span>
                         </>
                       )}

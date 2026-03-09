@@ -43,10 +43,10 @@ const MAX_PARTICIPATING_BRIGADES = 12;
 const MOMENTUM_CAP = 3;
 
 /** Maximum total failures before abort. */
-const MAX_TOTAL_FAILURES = 3;
+const MAX_TOTAL_FAILURES = 5;
 
 /** Consecutive failures on same objective before skip. */
-const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 2;
+const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 3;
 const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
@@ -684,7 +684,7 @@ function updateMultiAxisResults(
                     axis.consecutive_failures_on_current += 1;
                 }
 
-                if (!anyMoved && !anyAttacked && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= 1) {
+                if (!anyMoved && !anyAttacked && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= 2) {
                     axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
                     axis.status = 'stalled';
                     continue;
@@ -805,7 +805,7 @@ function updateLegacyFlatResults(
                 op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
             }
 
-            if (!anyMoved && !anyAttacked && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 1) {
+            if (!anyMoved && !anyAttacked && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 2) {
                 op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);
                 beginRecovery(op, turn, 'no_logged_attempt');
                 return;

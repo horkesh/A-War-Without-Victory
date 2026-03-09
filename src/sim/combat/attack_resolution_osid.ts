@@ -72,6 +72,7 @@ import {
     computeAttackerPower,
     computeDefenderPower,
     buildTerrainMultByOsid,
+    getPowerRatioCasualtyMult,
     // Re-exported for test consumers
     getEquipmentRatio,
     getToTerrainDefenseMult,
@@ -502,8 +503,9 @@ export function resolveAttackOrdersOsid(
         // Militia-only defense: attacker takes far fewer casualties — scattered civilian resistance,
         // not organized military defense. A brigade sweeping an undefended settlement loses ~5 men, not 40.
         const militiaOnlyMult = defenderFormation ? 1.0 : 0.15;
+        const [, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
         const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult * militiaOnlyMult;
-        const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult;
+        const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult * defCasMult;
         const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
         const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(baseDefenderCas)));
 

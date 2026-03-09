@@ -264,6 +264,8 @@ function getSectorOffensiveProbeThreshold(
 ): PredictedOutcome {
     const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
     const momentum = axis ? (axis.momentum ?? 0) : (activeOp.momentum ?? 0);
+    // If the operation has an explicit min_attack_outcome, respect it.
+    if (activeOp.min_attack_outcome) return activeOp.min_attack_outcome;
     return momentum >= 2 ? 'stalemate' : 'costly_victory';
 }
 
@@ -495,6 +497,7 @@ const freeTarget = predictions.find(t =>
                     brigade.id,
                 );
                 if (planningApproachOsids.size > 0 && !planningApproachOsids.has(loc)) {
+                    // Not at an approach OSID — march toward one
                     const nearestApproach = findNearestFriendlyOsidInSet(
                         state,
                         faction,
@@ -506,7 +509,8 @@ const freeTarget = predictions.find(t =>
                     if (nearestApproach) {
                         result.column_march_orders[brigade.id] = nearestApproach;
                     }
-                } else {
+                } else if (planningApproachOsids.size === 0) {
+                    // No approach OSIDs found — fall back to staging area
                     const axisStaging = getBrigadeAxis(activeOp15, brigade.id)?.staging_osid ?? activeOp15.staging_osid;
                     if (axisStaging && loc !== axisStaging) {
                         const nearestStaging = findNearestFriendlyOsidInSet(
@@ -522,6 +526,7 @@ const freeTarget = predictions.find(t =>
                         }
                     }
                 }
+                // else: already at an approach OSID — stay in position
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 continue;
             }
