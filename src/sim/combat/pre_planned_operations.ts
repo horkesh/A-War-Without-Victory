@@ -22,6 +22,8 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
+import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Pre-planned operation definitions
@@ -305,7 +307,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 name: 'Corridor East',
                 brigades: [
                     'rs_43rd_prijedor_motorized',
-                    'rs_1st_guards_motorized',
                     'rs_27th_derventa_motorized',
                 ],
                 objectives: [
@@ -405,7 +406,12 @@ function buildAxesFromDef(
         const axisBrigades = axisDef.brigades.filter((fid) => {
             const formation = formations[fid];
             if (!formation) return false;
-            return isEligibleOperationFormation(formation);
+            if (!isEligibleOperationFormation(formation)) return false;
+            // Don't include brigades from exempt corps — they have no sector
+            // assignment and can't receive march orders to reach the front.
+            const corpsId = getFormationCorpsId(formation);
+            if (corpsId && EXEMPT_CORPS_IDS.has(corpsId)) return false;
+            return true;
         }).sort(strictCompare);
 
         if (axisBrigades.length === 0) continue;

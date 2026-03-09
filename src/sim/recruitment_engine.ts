@@ -523,7 +523,8 @@ export function runBotRecruitment(
                 kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
                 personnel: 0,
                 ...(hq_sid ? { hq_sid } : {}),
-                ...(location_osid != null ? { location_osid } : {})
+                // Corps/army HQ formations are command structures, not map entities.
+                // No location_osid — BFS seeding uses subordinate brigade positions.
             };
         }
     }

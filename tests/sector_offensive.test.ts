@@ -19,6 +19,8 @@ import {
     getMomentumMinOutcome
 } from '../src/sim/combat/sector_offensive.js';
 import { pickOperationName, OPERATION_NAMES } from '../src/sim/combat/operation_names.js';
+import { _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { EXEMPT_CORPS_IDS } from '../src/sim/combat/corps_front_sectors_constants.js';
 import type { GameState, FactionId, FormationState } from '../src/state/game_state.js';
 import type { SupplyStateByOsidReport } from '../src/state/supply_state_derivation.js';
 
@@ -40,6 +42,17 @@ function makeMinimalState(turn: number, formations: Record<string, Partial<Forma
         corps_front_sectors: {},
     } as GameState;
 }
+
+describe('Pre-planned Operations — No Exempt Corps Brigades', () => {
+    it('static definitions never assign brigades to exempt corps', () => {
+        for (const op of _ALL_PRE_PLANNED) {
+            assert.ok(
+                !EXEMPT_CORPS_IDS.has(op.corps),
+                `Operation "${op.name}" assigned to exempt corps "${op.corps}"`
+            );
+        }
+    });
+});
 
 describe('Sector Offensive — Planning Duration', () => {
     it('1-2 objectives → 1 turn', () => {
