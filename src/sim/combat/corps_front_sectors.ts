@@ -26,6 +26,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { findConnectedComponents } from '../../utils/graph.js';
 import {
     EXEMPT_CORPS_IDS,
+    MAX_RESERVE_HOPS,
     MAX_SECTOR_BRIGADES,
     MAX_SECTOR_EDGES,
     MAX_TERRITORY_OSIDS,
@@ -462,42 +463,76 @@ function reclassifyRearBrigades(
 ): void {
     for (const sector of sectors) {
         const frontSet = getSectorFrontOsids(sector);
+        if (frontSet.size === 0) continue;
 
-        // Build 1-hop-behind set
-        const oneHopBehind = new Set<string>();
-        for (const frontOsid of frontSet) {
-            for (const n of (adjacency.get(frontOsid as Osid) ?? [])) {
-                if (!frontSet.has(n) && friendlyOsids.has(n)) oneHopBehind.add(n);
+        // Build hop-distance map from all front OSIDs (multi-source BFS)
+        // through friendly territory. Distance 0 = on front, 1 = one hop behind, etc.
+        const hopDistance = new Map<string, number>();
+        const queue: Array<{ osid: string; dist: number }> = [];
+        for (const fo of frontSet) {
+            hopDistance.set(fo, 0);
+            queue.push({ osid: fo, dist: 0 });
+        }
+        let head = 0;
+        while (head < queue.length) {
+            const { osid, dist } = queue[head++]!;
+            if (dist >= MAX_RESERVE_HOPS) continue;
+            for (const n of (adjacency.get(osid as Osid) ?? []).slice().sort(strictCompare)) {
+                if (hopDistance.has(n)) continue;
+                if (!friendlyOsids.has(n)) continue;
+                hopDistance.set(n, dist + 1);
+                queue.push({ osid: n, dist: dist + 1 });
             }
         }
 
+        // Classify assigned brigades: front/1-hop (keep assigned), 2..MAX_RESERVE_HOPS
+        // (candidate for reserve), or too far (drop from sector entirely)
         const keepAssigned: FormationId[] = [];
-        const demote: FormationId[] = [];
+        const reserveCandidates: Array<{ bid: FormationId; dist: number }> = [];
         for (const bid of sector.assigned_brigade_ids) {
             const f = formations[bid];
             if (!f?.location_osid) { keepAssigned.push(bid); continue; }
-            if (frontSet.has(f.location_osid) || oneHopBehind.has(f.location_osid)) {
+            const dist = hopDistance.get(f.location_osid);
+            if (dist === undefined) {
+                // Beyond MAX_RESERVE_HOPS or unreachable — drop from sector
+                continue;
+            }
+            if (dist <= 1) {
+                // On front or 1-hop behind — stays assigned
                 keepAssigned.push(bid);
             } else {
-                demote.push(bid);
+                // 2..MAX_RESERVE_HOPS — candidate for reserve
+                reserveCandidates.push({ bid, dist });
             }
         }
 
-        if (demote.length === 0) continue;
-        sector.assigned_brigade_ids = keepAssigned;
-        sector.reserve_brigade_ids.push(...demote);
-        sector.reserve_brigade_ids.sort(strictCompare);
-    }
-
-    // Cap reserves: 1 for ≤10 edges, 2 for >10
-    for (const s of sectors) {
-        const maxReserves = s.length_edges > 10 ? 2 : 1;
-        if (s.reserve_brigade_ids.length > maxReserves) {
-            s.reserve_brigade_ids.length = maxReserves;
+        // Also re-validate existing reserves for proximity
+        for (const bid of sector.reserve_brigade_ids) {
+            const f = formations[bid];
+            if (!f?.location_osid) continue;
+            const dist = hopDistance.get(f.location_osid);
+            if (dist !== undefined && dist >= 2) {
+                reserveCandidates.push({ bid, dist });
+            } else if (dist !== undefined && dist <= 1) {
+                keepAssigned.push(bid);
+            }
+            // else: beyond range — dropped
         }
+
+        // Sort reserve candidates by distance (closest first), then deterministic tiebreak
+        reserveCandidates.sort((a, b) => a.dist - b.dist || strictCompare(a.bid, b.bid));
+
+        // Apply reserve cap: 1 for ≤10 edges, 2 for >10
+        const maxReserves = sector.length_edges > 10 ? 2 : 1;
+        const finalReserves = reserveCandidates
+            .slice(0, maxReserves)
+            .map(c => c.bid);
+
+        sector.assigned_brigade_ids = keepAssigned.sort(strictCompare);
+        sector.reserve_brigade_ids = finalReserves.sort(strictCompare);
     }
 
-    // Recalculate density for affected sectors
+    // Recalculate density
     for (const s of sectors) {
         s.density = s.length_edges > 0
             ? s.assigned_brigade_ids.length / s.length_edges : 0;
@@ -1090,6 +1125,9 @@ export { RESERVE_PER_EDGE_CAP } from './corps_front_sectors_constants.js';
 
 /** Maximum territory OSIDs a single sector can claim via Voronoi BFS. */
 export { MAX_TERRITORY_OSIDS } from './corps_front_sectors_constants.js';
+
+/** Maximum BFS hops from sector front for a brigade to qualify as reserve. */
+export { MAX_RESERVE_HOPS } from './corps_front_sectors_constants.js';
 
 /**
  * Decompose a corps' front edges into connected sub-segments via BFS.
