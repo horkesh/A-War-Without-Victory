@@ -934,6 +934,44 @@ export function generateCorpsDirectives(
             }
         }
 
+        // ─── Mech/Moto Staging: move offensive assets to priority sector ───
+        // Motorized and mechanized brigades are offensive tools, not line troops.
+        // When the corps has a priority sector (offensive target), stage mech/moto
+        // from reserves to the priority sector so they're available when ops launch.
+        if (prioritySectorId && state.corps_front_sectors) {
+            const prioritySec = state.corps_front_sectors[prioritySectorId];
+            if (prioritySec && prioritySec.length_edges > 0) {
+                const alreadyReassigned = new Set(
+                    sectorReassignmentOrders.map(r => r.brigade_id)
+                );
+                const mechStagingOrders: Array<{ brigade_id: string; to_sector_id: string }> = [];
+
+                // Scan ALL sectors of this corps for mech/moto reserves
+                for (const [secId, sec] of Object.entries(state.corps_front_sectors).sort(
+                    (a, b) => strictCompare(a[0], b[0])
+                )) {
+                    if (sec.corps_id !== corps.id) continue;
+                    if (secId === prioritySectorId) continue; // already there
+                    for (const bid of sec.reserve_brigade_ids ?? []) {
+                        if (alreadyReassigned.has(bid)) continue;
+                        const f = formations[bid];
+                        if (!f || f.status !== 'active') continue;
+                        const priority = getEquipmentOffensivePriority(f.equipment_class);
+                        if (priority >= 2) { // motorized (2) or mechanized (3)
+                            mechStagingOrders.push({ brigade_id: bid, to_sector_id: prioritySectorId });
+                            alreadyReassigned.add(bid);
+                        }
+                    }
+                }
+
+                if (mechStagingOrders.length > 0) {
+                    for (const order of mechStagingOrders) {
+                        sectorReassignmentOrders.push(order);
+                    }
+                }
+            }
+        }
+
         const directive: CorpsDirective = {
             assigned_front_ids: assignedFrontIds,
             offensive_targets: offensiveTargets,
