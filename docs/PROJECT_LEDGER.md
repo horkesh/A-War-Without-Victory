@@ -12260,3 +12260,14 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 - `npx tsc --noEmit` passes cleanly.
 - `npx vitest run` passes all tests.
 - `npm run sim:scenario:probe` confirms zero behavioral changes (identical operational results to the existing baseline).
+
+## 2026-03-09: Evaluation Remediation Plan - Consolidated Closure
+
+**Author:** Cursor (Agent)
+**Scope:** Consolidated report generation and doc propagation for the 4-phase Evaluation Remediation Plan.
+**Context:** All 4 phases (QA Unification, Warroom UI, Engine State Refactor, Bot AI Modularization) completed successfully with zero behavioral changes.
+
+**Changes:**
+- Authored `docs/40_reports/implemented/20260309_EVALUATION_REMEDIATION_CONSOLIDATED.md`.
+- Updated `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md` with the new reference.
+- Updated `docs/10_canon/context.md` with completion status.
