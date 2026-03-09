@@ -23,6 +23,7 @@ import { OpsPlanningModal } from './components/OpsPlanningModal';
 import { SupplyPanel } from './components/SupplyPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { AARPanel } from './components/AARPanel';
+import { OperationHistoryPanel } from './components/OperationHistoryPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore } from './store/gameStore';
@@ -80,6 +81,7 @@ function App() {
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
   const [aarOpen, setAarOpen] = useState(false);
+  const [opsHistoryOpen, setOpsHistoryOpen] = useState(false);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -125,13 +127,13 @@ function App() {
 
   // Phase C4: Attack confirmation modal payload and render
   const attackerFormation = pendingAttackConfirmation && loadedGameState
-    ? loadedGameState.formations.find((f) => f.id === pendingAttackConfirmation.attackerFormationId)
+    ? loadedGameState.military.formations.find((f) => f.id === pendingAttackConfirmation.attackerFormationId)
     : null;
   const targetDisplayName = pendingAttackConfirmation
     ? getOsidDisplayName(pendingAttackConfirmation.targetOsid, osidDisplayNames)
     : '';
   const defendersAtTarget = pendingAttackConfirmation && loadedGameState
-    ? getFormationsAtOsid(loadedGameState.formations, pendingAttackConfirmation.targetOsid).sort((a, b) => a.id.localeCompare(b.id))
+    ? getFormationsAtOsid(loadedGameState.military.formations, pendingAttackConfirmation.targetOsid).sort((a, b) => a.id.localeCompare(b.id))
     : [];
   const defenderFormation = defendersAtTarget[0] ?? null;
   const terrainSummary = pendingAttackConfirmation && osidPropertiesMap?.[pendingAttackConfirmation.targetOsid]
@@ -237,6 +239,7 @@ function App() {
         onOpenSummary={openSummary}
         onOpenEnclaves={() => setEnclaveDashboardOpen((current) => !current)}
         onOpenAAR={() => setAarOpen((current) => !current)}
+        onOpenOpsHistory={() => setOpsHistoryOpen((current) => !current)}
       />
       <CommandBriefingLayer
         onOpenSummary={openSummary}
@@ -297,6 +300,7 @@ function App() {
         onClose={() => setSummaryOpen(false)}
       />
       <AARPanel isOpen={aarOpen} onClose={() => setAarOpen(false)} />
+      <OperationHistoryPanel isOpen={opsHistoryOpen} onClose={() => setOpsHistoryOpen(false)} />
       <OpsPlanningModal />
       {loadedGameState && (
         <EnclaveDashboard

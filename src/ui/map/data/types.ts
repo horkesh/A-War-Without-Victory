@@ -442,5 +442,54 @@ export interface LoadedGameState {
     commandBriefing?: CommandBriefingView;
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
+    /** Completed operation AARs. */
+    operationHistory?: Array<{
+        operation_id: string;
+        operation_name: string;
+        corps_id: string;
+        faction: string;
+        started_turn: number;
+        ended_turn: number;
+        outcome: string;
+        commander_name?: string;
+        commander_rank?: string;
+        objectives_targeted: string[];
+        objectives_captured: string[];
+        total_attacks: number;
+        casualties_suffered: { killed: number; wounded: number };
+        casualties_inflicted: { killed: number; wounded: number };
+        equipment_lost: { tanks: number; artillery: number };
+        equipment_destroyed: { tanks: number; artillery: number };
+        equipment_captured: { tanks: number; artillery: number };
+        grade: { stars: number; verdict: string; factors: Record<string, number> };
+        duration_turns: number;
+        weekly_log: Array<{
+            turn: number; phase: string; attacks_this_turn: number;
+            objectives_captured_this_turn: string[]; notable_events: string[];
+            casualties_suffered: { killed: number; wounded: number };
+            casualties_inflicted: { killed: number; wounded: number };
+        }>;
+        axis_summaries?: Array<{
+            axis_id: string; axis_name: string; objectives_targeted: string[];
+            objectives_captured: string[]; total_attacks: number;
+            casualties_suffered: { killed: number; wounded: number };
+            casualties_inflicted: { killed: number; wounded: number };
+        }>;
+    }>;
+    /** Active (in-progress) operations. */
+    activeOperations?: Array<{
+        corps_id: string;
+        operation_name: string;
+        faction: string;
+        type: string;
+        phase: string;
+        started_turn: number;
+        participating_brigades: string[];
+        commander_name?: string;
+        objectives_count: number;
+        objectives_captured: number;
+        attacks: number;
+        weekly_log_length: number;
+    }>;
 }
 

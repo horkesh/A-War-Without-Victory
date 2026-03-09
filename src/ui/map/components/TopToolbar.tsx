@@ -42,9 +42,10 @@ interface TopToolbarProps {
   onOpenSummary?: (focus?: SummaryFocusSection) => void;
   onOpenEnclaves?: () => void;
   onOpenAAR?: () => void;
+  onOpenOpsHistory?: () => void;
 }
 
-export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR }: TopToolbarProps) {
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory }: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadSave = useGameStore((s) => s.loadSave);
@@ -273,6 +274,13 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
           AAR
         </button>
         <button
+          onClick={() => onOpenOpsHistory?.()}
+          disabled={!loadedGameState}
+          className={TOOLBAR_BUTTON_CLASS}
+        >
+          Ops
+        </button>
+        <button
           onClick={() => onOpenEnclaves?.()}
           disabled={!hasVisibleEnclaveDashboard}
           className={TOOLBAR_BUTTON_CLASS}
@@ -281,7 +289,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
         </button>
         {loadedGameState && (
           <span className="text-xs font-mono text-text-secondary glow-text whitespace-nowrap">
-            {formatTurnLabel(loadedGameState.label)} - {loadedGameState.formations.length} formations - {loadedGameState.phase.toUpperCase()}
+            {formatTurnLabel(loadedGameState.label)} - {loadedGameState.military.formations.length} formations - {loadedGameState.phase.toUpperCase()}
           </span>
         )}
       </div>
