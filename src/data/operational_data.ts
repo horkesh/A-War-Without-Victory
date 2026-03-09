@@ -159,7 +159,7 @@ export async function loadOsidAreas(baseDir?: string): Promise<OsidAreaData> {
 }
 
 export function backfillFormationLocationOsid(
-    state: { formations?: Record<string, { hq_sid?: string; location_osid?: string }> },
+    state: { formations?: Record<string, { hq_sid?: string; location_osid?: string; kind?: string }> },
     canonicalToOperational: CanonicalToOperationalMap
 ): void {
     const formations = state.formations;
@@ -168,6 +168,8 @@ export function backfillFormationLocationOsid(
     for (const id of ids) {
         const f = formations[id];
         if (!f || f.location_osid != null) continue;
+        // Corps/army HQ formations are command structures, not map entities.
+        if (f.kind === 'corps_asset' || f.kind === 'army_hq' || f.kind === 'corps') continue;
         const osid = resolveLocationOsid(f.hq_sid, canonicalToOperational);
         if (osid != null) {
             (f as { location_osid?: string }).location_osid = osid;
