@@ -3,6 +3,8 @@ import { deserializeState } from '../../state/serialize.js';
 import { ClickableRegionManager } from './ClickableRegionManager.js';
 import { HoverRenderer } from './HoverRenderer.js';
 import { ModalManager } from './components/ModalManager.js';
+import { SettingsModal } from './components/SettingsModal.js';
+
 import { NewspaperModal } from './components/NewspaperModal.js';
 import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
 import { TacticalMap } from './components/TacticalMap.js';
@@ -547,13 +549,8 @@ class WarroomApp {
         if (settingsBtn) {
             settingsBtn.onclick = () => {
                 if (!this.modalManager) return;
-                const panel = document.createElement('div');
-                panel.className = 'wr-dialog';
-                panel.innerHTML = `
-                    <h2>SETTINGS</h2>
-                    <div class="wr-dialog-notice">Settings panel coming soon.</div>
-                `;
-                this.modalManager.showModal(panel);
+                const modal = new SettingsModal(this.gameState);
+                this.modalManager.showModal(modal.render());
             };
         }
         if (helpBtn) {

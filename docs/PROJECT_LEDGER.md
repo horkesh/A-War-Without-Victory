@@ -7,6 +7,26 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-09] Phase 2: Warroom UI Completion
+
+### Summary
+- **Warroom Modals Implemented**: Replaced the remaining Phase E warroom placeholders to finalize the command narrative experience.
+- **Command Briefing Modal**: Linked to `command_briefing_folio`. Implemented the "what matters now" brief (urgent decisions, routed brigades, starvation alerts, enclave warnings, and convoy status). Removed the fallback that routed to Reports.
+- **Operational Situation Modal**: Linked to `desk_map`. Implemented a comprehensive summary of op health, sector stress (active offensives, frontline breaches), and logistics summary. This modal serves as a gateway to the tactical map.
+- **Settings Modal**: Replaced the "coming soon" stub with an interactive (but currently non-functional backend-wise) Audio/Video settings dialog.
+- **Test Automation**: Updated `warroom_smoke.test.ts` to navigate through the new `OperationalSituationModal` to reach the tactical map handler, mocked `extractWarData` and ensured the test continues to provide coverage.
+- **Documentation**: Updated `docs/40_reports/WARROOM_MASTER.md` to move these modals from "Proposed" to "Implemented" and updated the known gaps.
+
+### Changes
+- `src/ui/warroom/components/CommandBriefingModal.ts` (NEW)
+- `src/ui/warroom/components/OperationalSituationModal.ts` (NEW)
+- `src/ui/warroom/components/SettingsModal.ts` (NEW)
+- `src/ui/warroom/warroom.ts`
+- `src/ui/warroom/ClickableRegionManager.ts`
+- `tests/warroom_smoke.test.ts`
+- `docs/40_reports/WARROOM_MASTER.md`
+
+
 ## [2026-03-09] Sector Reserve Proximity, Dedup, and Motorized/Mechanized Priority (n440)
 
 Three sector system fixes. Calibration: **87.6% area-weighted** (+0.4pp from n438 87.2%). Zero duplicate brigade assignments. Reserve count 69→10.

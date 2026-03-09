@@ -99,8 +99,10 @@
 | News ticker | desk_radio | Radio toggle |
 | Declaration event | after advance (Phase 0) | Full-screen critical events (RS/HRHB declaration, referendum) |
 | War begins | peace→war transition | Full-screen “War begins” |
-| Settings | toolbar | Placeholder “coming soon” |
+| Settings | toolbar | Audio/Video settings dialog |
 | Help | toolbar | Warroom controls list |
+| Command Briefing | command_briefing_folio | “What matters now”: urgent decisions, front alarms, convoy questions, enclave warnings |
+| Operational Situation | desk_map | Op health, sector stress, logistics, routes to tactical map |
 
 ### Proposed (not yet implemented)
 
@@ -108,13 +110,21 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 | Priority | Proposed modal | One-line description |
 |----------|----------------|----------------------|
-| P0 | Command Briefing Modal | “What matters now”: urgent decisions, front alarms, convoy questions, enclave warnings, op failures (folio hotspot; currently opens Reports) |
-| P0 | Operational Situation Modal | Desk-map anchor: route to map, op health, sector stress, logistics, front summary |
 | P0 | Diplomatic Press Briefing (IVP) | IVP value → causes (civilian casualties, territorial aggression, shelling); expert asks dedicated panel/modal |
 | P1 | Turn-End Intelligence Packet | Front changes, enemy intent, humanitarian pressure, political risk, attention points |
 | P1 | Enclave Crisis Modal | Enclave resilience, isolation trend, airdrop posture, humanitarian risk |
 | P1 | Honors and Memorials Modal | Sacrifice, recognition, memory, faction continuity |
 | P1 | Commander Register Modal | Commanders, assignments, competence, notable service |
+
+---
+
+## Known gaps / placeholder flows (Phase E Trust-and-Baseline)
+
+Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md) “Recent GUI changes” and state-of-game evaluation.
+
+| Gap | Description | Where |
+|-----|-------------|--------|
+| Warroom smoke automation | “Load warroom → select map → no crash” is covered by unit test (desk_map click invokes tactical-map handler). Full browser/Electron smoke is manual or e2e. | Phase E deliverable |
 
 ---
 
@@ -131,6 +141,7 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-03-09 | **Phase 2 Completion (Modals):** Implemented `CommandBriefingModal` (linked to `command_briefing_folio`), `OperationalSituationModal` (linked to `desk_map`), and functional `SettingsModal` (toolbar). Removed placeholder routing. | This file § Modals |
 | 2026-03-08 | **Canonical anchor → modal mapping:** Added definitive table in § Current status: eight anchors (wall_flag_area, wall_calendar_area, desk_map, command_briefing_folio, newspaper_stack, intelligence_journal, diplomatic_telephone, desk_radio) with room object and modal for each. Fixed Implemented table so Reports = command_briefing_folio, Magazine = intelligence_journal. Prompts must show all eight distinct props. | This file § Current status, § Modals |
 | 2026-03-08 | **Missing shared regions file no longer black-screens startup:** Initial region loading is now non-fatal and tries multiple candidates (`override`, shared default, then faction files). This prevents `init()` from aborting when `hq_clickable_regions.json` is intentionally removed and only faction-specific files remain. | warroom.ts, this file |
 | 2026-03-08 | **Early Electron bridge init:** `window.awwv` is now read at the start of `init()` instead of after later async warroom/map loading. This fixes a startup race where clicking **New Campaign** quickly could hit `Desktop bridge unavailable.` before the preload bridge had been assigned to `this.desktopBridge`. | warroom.ts, this file |

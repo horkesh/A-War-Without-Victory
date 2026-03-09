@@ -43,6 +43,8 @@ import { NewsTicker } from './components/NewsTicker.js';
 import { Phase0DirectiveState, type StagedInvestment } from './components/Phase0DirectiveState.js';
 import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
 import { ReportsModal } from './components/ReportsModal.js';
+import { CommandBriefingModal } from './components/CommandBriefingModal.js';
+import { OperationalSituationModal } from './components/OperationalSituationModal.js';
 import { TacticalMap } from './components/TacticalMap.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { extractWarData } from './data/war_data_extractor.js';
@@ -244,10 +246,10 @@ export class ClickableRegionManager {
                 this.advanceTurn(gameState);
                 return;
             case 'desk_map':
-                this.openPrimaryMap(gameState);
+                this.openOperationalSituationModal(gameState);
                 return;
             case 'command_briefing_folio':
-                this.openReportsModal(gameState);
+                this.openCommandBriefingModal(gameState);
                 return;
             case 'newspaper_stack':
                 this.openNewspaperModal(gameState);
@@ -288,8 +290,10 @@ export class ClickableRegionManager {
                 this.openMagazineModal(gameState);
                 break;
             case 'open_reports_modal':
-            case 'open_command_briefing':
                 this.openReportsModal(gameState);
+                break;
+            case 'open_command_briefing':
+                this.openCommandBriefingModal(gameState);
                 break;
             case 'toggle_news_ticker':
             case 'transistor_radio':
@@ -641,6 +645,28 @@ export class ClickableRegionManager {
 
         const magazine = new MagazineModal(gameState as GameState);
         this.modalManager.showModal(magazine.render());
+    }
+
+    private openCommandBriefingModal(gameState: unknown): void {
+        if (!this.modalManager) {
+            console.warn('ModalManager not set');
+            return;
+        }
+
+        const modal = new CommandBriefingModal(gameState as GameState);
+        this.modalManager.showModal(modal.render());
+    }
+
+    private openOperationalSituationModal(gameState: unknown): void {
+        if (!this.modalManager) {
+            console.warn('ModalManager not set');
+            return;
+        }
+
+        const modal = new OperationalSituationModal(gameState as GameState, () => {
+            this.openPrimaryMap(gameState);
+        });
+        this.modalManager.showModal(modal.render());
     }
 
     private openReportsModal(gameState: unknown): void {
