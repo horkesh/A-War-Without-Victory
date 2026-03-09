@@ -130,6 +130,89 @@ export interface PendingOperationCasualties {
     attacks: number;
 }
 
+// ─── Grading Logic ─────────────────────────────────────────────────────────
+
+export interface GradeInput {
+    objectives_targeted: number;
+    objectives_captured: number;
+    casualties_suffered: number;  // total (killed + wounded)
+    casualties_inflicted: number; // total (killed + wounded)
+    initial_strength: number;
+    final_strength: number;
+    duration_turns: number;
+    expected_duration: number;
+}
+
+const VERDICTS: Record<number, [string, string]> = {
+    5: ['Brilliant Victory', 'Decisive Triumph'],
+    4: ['Solid Victory', 'Successful Advance'],
+    3: ['Partial Success', 'Indecisive'],
+    2: ['Costly Stalemate', 'Pyrrhic Advance'],
+    1: ['Disaster', 'Catastrophic Failure'],
+};
+
+function clamp(v: number, lo: number, hi: number): number {
+    return v < lo ? lo : v > hi ? hi : v;
+}
+
+export function gradeOperation(input: GradeInput): OperationGrade {
+    const {
+        objectives_targeted, objectives_captured,
+        casualties_suffered, casualties_inflicted,
+        initial_strength, final_strength,
+        duration_turns, expected_duration,
+    } = input;
+
+    // Star calculation: start at 3
+    let stars = 3;
+
+    const captureRatio = objectives_targeted > 0
+        ? objectives_captured / objectives_targeted
+        : 0;
+    const exchangeRatio = casualties_suffered > 0
+        ? casualties_inflicted / casualties_suffered
+        : (casualties_inflicted > 0 ? 10 : 1);
+    const forceLostFraction = initial_strength > 0
+        ? 1 - (final_strength / initial_strength)
+        : 0;
+
+    if (captureRatio >= 0.75) stars += 1;
+    if (exchangeRatio >= 2.0) stars += 1;
+    if (objectives_captured === 0) stars -= 1;
+    if (exchangeRatio < 0.5) stars -= 1;
+    if (forceLostFraction >= 0.30) stars -= 1;
+    if (expected_duration > 0 && duration_turns <= expected_duration * 1.5) stars += 1;
+
+    stars = clamp(stars, 1, 5) as 1 | 2 | 3 | 4 | 5;
+
+    // Factor scores (0-100)
+    const objective_completion = objectives_targeted > 0
+        ? (objectives_captured / objectives_targeted) * 100
+        : 0;
+    const exchange_ratio_score = clamp(
+        (casualties_inflicted / Math.max(casualties_suffered, 1)) * 33, 0, 100,
+    );
+    const tempo = clamp(
+        (1 - (duration_turns / (Math.max(expected_duration, 1) * 2))) * 100, 0, 100,
+    );
+    const preservation = (final_strength / Math.max(initial_strength, 1)) * 100;
+
+    // Verdict: first variant if objectives captured, second if not
+    const verdictPair = VERDICTS[stars];
+    const verdict = objectives_captured > 0 ? verdictPair[0] : verdictPair[1];
+
+    return {
+        stars: stars as 1 | 2 | 3 | 4 | 5,
+        verdict,
+        factors: {
+            objective_completion,
+            exchange_ratio: exchange_ratio_score,
+            tempo,
+            preservation,
+        },
+    };
+}
+
 /** Create a zeroed-out pending casualties accumulator. */
 export function emptyPendingCasualties(): PendingOperationCasualties {
     return {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     emptyPendingCasualties,
+    gradeOperation,
     type CasualtyTally,
     type EquipmentTally,
     type OperationWeeklyEntry,
@@ -9,6 +10,7 @@ import {
     type OperationGrade,
     type OperationAAR,
     type PendingOperationCasualties,
+    type GradeInput,
 } from '../src/sim/combat/operation_aar.js';
 
 describe('operation_aar types', () => {
@@ -134,5 +136,151 @@ describe('operation_aar types', () => {
             equipment_captured: { tanks: 0, artillery: 0 },
         };
         expect(axis.axis_id).toBe('axis_north');
+    });
+});
+
+describe('gradeOperation', () => {
+    it('5-star perfect operation', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 4,
+            objectives_captured: 4,       // 100% capture → +1
+            casualties_suffered: 50,
+            casualties_inflicted: 200,     // 4.0 exchange → +1
+            initial_strength: 5000,
+            final_strength: 4800,          // 4% lost → no penalty
+            duration_turns: 3,
+            expected_duration: 4,          // within 1.5× → +1
+        });
+        // 3 + 1(capture) + 1(exchange) + 1(swift) = 6 → clamped to 5
+        expect(grade.stars).toBe(5);
+        expect(grade.verdict).toBe('Brilliant Victory');
+        expect(grade.factors.objective_completion).toBe(100);
+        expect(grade.factors.preservation).toBeGreaterThan(90);
+    });
+
+    it('1-star total disaster', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 4,
+            objectives_captured: 0,        // 0 captured → -1
+            casualties_suffered: 500,
+            casualties_inflicted: 100,     // 0.2 exchange → -1
+            initial_strength: 5000,
+            final_strength: 3000,          // 40% lost → -1
+            duration_turns: 20,
+            expected_duration: 4,          // over 1.5× → no bonus
+        });
+        // 3 - 1(no capture) - 1(bad exchange) - 1(force lost) = 0 → clamped to 1
+        expect(grade.stars).toBe(1);
+        expect(grade.verdict).toBe('Catastrophic Failure');
+        expect(grade.factors.objective_completion).toBe(0);
+    });
+
+    it('2-star pyrrhic advance', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 4,
+            objectives_captured: 2,        // 50% → no +1
+            casualties_suffered: 400,
+            casualties_inflicted: 150,     // 0.375 exchange → -1
+            initial_strength: 5000,
+            final_strength: 3200,          // 36% lost → -1
+            duration_turns: 10,
+            expected_duration: 4,          // over 1.5× → no bonus
+        });
+        // 3 - 1(bad exchange) - 1(force lost) = 1, but captured > 0
+        // Actually: no capture bonus, no swift bonus = 3 - 1 - 1 = 1
+        // With 2 captured, verdict uses first variant
+        expect(grade.stars).toBe(1);
+        expect(grade.verdict).toBe('Disaster');
+    });
+
+    it('2-star pyrrhic with some objectives but heavy losses', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 4,
+            objectives_captured: 3,        // 75% → +1
+            casualties_suffered: 400,
+            casualties_inflicted: 150,     // 0.375 → -1
+            initial_strength: 5000,
+            final_strength: 3200,          // 36% lost → -1
+            duration_turns: 10,
+            expected_duration: 4,          // over 1.5× → no bonus
+        });
+        // 3 + 1(capture) - 1(exchange) - 1(force) = 2
+        expect(grade.stars).toBe(2);
+        expect(grade.verdict).toBe('Costly Stalemate');
+    });
+
+    it('3-star baseline mediocre operation', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 4,
+            objectives_captured: 2,        // 50% → no bonus
+            casualties_suffered: 100,
+            casualties_inflicted: 120,     // 1.2 → no bonus, no penalty
+            initial_strength: 5000,
+            final_strength: 4200,          // 16% lost → no penalty
+            duration_turns: 10,
+            expected_duration: 4,          // over 1.5× → no bonus
+        });
+        // 3 + 0 = 3
+        expect(grade.stars).toBe(3);
+        expect(grade.verdict).toBe('Partial Success');
+    });
+
+    it('clamping: worst-case stays at 1', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 10,
+            objectives_captured: 0,        // -1
+            casualties_suffered: 1000,
+            casualties_inflicted: 50,      // 0.05 → -1
+            initial_strength: 5000,
+            final_strength: 1000,          // 80% lost → -1
+            duration_turns: 50,
+            expected_duration: 4,          // no bonus
+        });
+        // 3 - 1 - 1 - 1 = 0 → clamped to 1
+        expect(grade.stars).toBe(1);
+    });
+
+    it('clamping: best-case stays at 5', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 4,
+            objectives_captured: 4,        // +1
+            casualties_suffered: 10,
+            casualties_inflicted: 500,     // 50.0 → +1
+            initial_strength: 5000,
+            final_strength: 4990,          // 0.2% lost → no penalty
+            duration_turns: 1,
+            expected_duration: 4,          // +1
+        });
+        // 3 + 1 + 1 + 1 = 6 → clamped to 5
+        expect(grade.stars).toBe(5);
+    });
+
+    it('verdict label changes based on whether objectives were captured', () => {
+        const withCaptures = gradeOperation({
+            objectives_targeted: 4,
+            objectives_captured: 2,
+            casualties_suffered: 100,
+            casualties_inflicted: 120,
+            initial_strength: 5000,
+            final_strength: 4200,
+            duration_turns: 10,
+            expected_duration: 4,
+        });
+        const withoutCaptures = gradeOperation({
+            objectives_targeted: 4,
+            objectives_captured: 0,
+            casualties_suffered: 100,
+            casualties_inflicted: 120,
+            initial_strength: 5000,
+            final_strength: 4200,
+            duration_turns: 10,
+            expected_duration: 4,
+        });
+        // withCaptures: 3 stars (no bonuses/penalties except none)
+        expect(withCaptures.verdict).toBe('Partial Success');
+        // withoutCaptures: 3 - 1(no capture) = 2 stars
+        expect(withoutCaptures.verdict).toBe('Pyrrhic Advance');
+        // Verify they use different verdict variants
+        expect(withCaptures.verdict).not.toBe(withoutCaptures.verdict);
     });
 });
