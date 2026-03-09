@@ -7,6 +7,18 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-09] Corps HQ Cleanup + Central Bosnia Sectors + Op Participant Filter (n458)
+
+**Corps HQ formations removed from map** (oob_early_war_entry.ts, activate_corps.ts, recruitment_engine.ts, operational_data.ts): Corps/army_hq formations (`kind: 'corps_asset'|'army_hq'`) no longer receive `location_osid`. Three creation paths fixed + backfill function skips corps. Formations still exist in `state.formations` for command structure but have no map presence. BFS seeding falls through to subordinate brigade positions.
+
+**hvo_central_bosnia un-exempted** (corps_front_sectors_constants.ts): Removed from `EXEMPT_CORPS_IDS`. 7 brigades in central Bosnia (Kiseljak, Vitez, Busovaca, Zepce area) now get sector assignment through normal pipeline. 6 sectors created. Graz Accords cold front still applies at combat level via `isColdFront()`.
+
+**Exempt-corps brigades filtered from pre-planned ops** (pre_planned_operations.ts): Removed `rs_1st_guards_motorized` (vrs_main_staff) from Operation Corridor definition. Added runtime safety filter in `buildAxesFromDef()` — rejects brigades whose corps is in `EXEMPT_CORPS_IDS`. Prevents stranded deep-rear participants with no sector/march orders.
+
+**Calibration**: n458 = 87.7% area-weighted (up from 87.2%). RS delta -53. 195 active brigades: 131 front (67.2%), 58 reserve, 6 unassigned. 6/17 mech/moto in active operations.
+
+---
+
 ## [2026-03-09] Territory-Based Classification + Mech/Moto Staging (n452)
 
 Three changes targeting brigade sector assignment and offensive staging. Calibration: **87.5% area-weighted** (stable from n438 87.2%). Unassigned non-exempt brigades: **3** (down from 44 at start of session → 15 → 3).
