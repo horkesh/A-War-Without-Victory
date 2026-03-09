@@ -24,6 +24,14 @@ import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findConnectedComponents } from '../../utils/graph.js';
+import {
+    EXEMPT_CORPS_IDS,
+    MAX_SECTOR_BRIGADES,
+    MAX_SECTOR_EDGES,
+    MAX_TERRITORY_OSIDS,
+    MIN_SECTOR_EDGES,
+    RESERVE_PER_EDGE_CAP,
+} from './corps_front_sectors_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Entry Point
@@ -65,6 +73,10 @@ export function buildCorpsFrontSectors(
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Per-Faction Sector Building
+// Pipeline steps (ownership): 1) mapOsidsToCorps (BFS), 2) partitionFrontEdges,
+// 3) consolidateCrossCorpsFronts, 4) buildMultiSectorsForCorps, 5) assignTerritoryVoronoi,
+// 6) classifyBrigadesByTerritory, 6b) equalizeSectorDensity, 7) ensureMinimumSectorCoverage,
+// 8) reclassifyRearBrigades, 9) prune empty sectors.
 // ═══════════════════════════════════════════════════════════════════════════
 
 function buildFactionSectors(
@@ -151,6 +163,10 @@ function buildFactionSectors(
     // After equalization and coverage, any assigned brigade not physically on a
     // front OSID or 1-hop behind is demoted to reserve (capped per sector).
     reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
+
+    // Step 8b: Deduplicate — steps 6b/7/8 can produce cross-sector duplicates
+    // when shared front OSIDs or coverage transfers create overlapping claims.
+    deduplicateBrigadesAcrossSectors(sectors);
 
     // Final prune: remove any sector with 0 front edges (ghost/pocket artifacts).
     const pruned = sectors.filter(s => s.length_edges > 0);
@@ -1061,19 +1077,19 @@ function consolidateCrossCorpsFronts(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Minimum front edges for a sub-segment to be promoted to its own sector. */
-export const MIN_SECTOR_EDGES = 5;
+export { MIN_SECTOR_EDGES } from './corps_front_sectors_constants.js';
 
 /** Maximum edges per sector before forced split at midpoint. */
-export const MAX_SECTOR_EDGES = 25;
+export { MAX_SECTOR_EDGES } from './corps_front_sectors_constants.js';
 
 /** Maximum brigades per sector before forced split. */
-export const MAX_SECTOR_BRIGADES = 8;
+export { MAX_SECTOR_BRIGADES } from './corps_front_sectors_constants.js';
 
 /** Maximum reserve brigades per front edge (proportional cap). ~1 per typical 10-18 edge sector. */
-export const RESERVE_PER_EDGE_CAP = 0.07;
+export { RESERVE_PER_EDGE_CAP } from './corps_front_sectors_constants.js';
 
 /** Maximum territory OSIDs a single sector can claim via Voronoi BFS. */
-export const MAX_TERRITORY_OSIDS = 40;
+export { MAX_TERRITORY_OSIDS } from './corps_front_sectors_constants.js';
 
 /**
  * Decompose a corps' front edges into connected sub-segments via BFS.
@@ -1657,16 +1673,6 @@ function ensureMinimumSectorCoverage(
     // Sort for determinism
     for (const s of allSectors) s.assigned_brigade_ids.sort(strictCompare);
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Own-Corps Orphan Assignment
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Corps IDs exempt from sector assignment (army staff, future-conflict reserves). */
-const EXEMPT_CORPS_IDS = new Set([
-    'arbih_general_staff', 'vrs_main_staff', 'hvo_general_staff',
-    'hvo_central_bosnia', // Reserved for Bosniak-Croat conflict
-]);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Brigade Deduplication

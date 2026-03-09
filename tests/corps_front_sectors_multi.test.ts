@@ -227,6 +227,68 @@ describe('Corps Front Sectors — Multi-Sector Promotion', () => {
         }
     });
 
+    it('no brigade appears in multiple sectors', () => {
+        // Use the 3-component scenario from the first test — after buildCorpsFrontSectors,
+        // no brigade should appear in more than one sector.
+        const rsOsids = ['op:west:1', 'op:east:1', 'op:mid:1', 'op:hq:1'];
+        const rbihOsids = [
+            'op:ew:1', 'op:ew:2', 'op:ew:3', 'op:ew:4', 'op:ew:5', 'op:ew:6',
+            'op:ee:1', 'op:ee:2', 'op:ee:3', 'op:ee:4', 'op:ee:5', 'op:ee:6', 'op:ee:7',
+            'op:em:1', 'op:em:2', 'op:em:3',
+        ];
+        const pc: Record<string, string> = {};
+        for (const o of rsOsids) pc[o] = 'RS';
+        for (const o of rbihOsids) pc[o] = 'RBiH';
+
+        const frontEdges = makeFrontEdges([
+            ['op:west:1', 'op:ew:1', 'RS', 'RBiH'],
+            ['op:west:1', 'op:ew:2', 'RS', 'RBiH'],
+            ['op:west:1', 'op:ew:3', 'RS', 'RBiH'],
+            ['op:west:1', 'op:ew:4', 'RS', 'RBiH'],
+            ['op:west:1', 'op:ew:5', 'RS', 'RBiH'],
+            ['op:west:1', 'op:ew:6', 'RS', 'RBiH'],
+            ['op:east:1', 'op:ee:1', 'RS', 'RBiH'],
+            ['op:east:1', 'op:ee:2', 'RS', 'RBiH'],
+            ['op:east:1', 'op:ee:3', 'RS', 'RBiH'],
+            ['op:east:1', 'op:ee:4', 'RS', 'RBiH'],
+            ['op:east:1', 'op:ee:5', 'RS', 'RBiH'],
+            ['op:east:1', 'op:ee:6', 'RS', 'RBiH'],
+            ['op:east:1', 'op:ee:7', 'RS', 'RBiH'],
+            ['op:mid:1', 'op:em:1', 'RS', 'RBiH'],
+            ['op:mid:1', 'op:em:2', 'RS', 'RBiH'],
+            ['op:mid:1', 'op:em:3', 'RS', 'RBiH'],
+        ]);
+
+        const allPairs: Array<[string, string]> = [];
+        for (const fe of frontEdges) allPairs.push([fe.a, fe.b]);
+        allPairs.push(['op:hq:1', 'op:west:1']);
+        allPairs.push(['op:hq:1', 'op:east:1']);
+        allPairs.push(['op:west:1', 'op:mid:1']);
+        const edges = makeEdges(allPairs);
+
+        const state = makeState({
+            formations: {
+                'corps_1kk': { faction: 'RS' as FactionId, kind: 'corps', status: 'active', location_osid: 'op:hq:1' },
+                'brig_w1': { faction: 'RS' as FactionId, corps_id: 'corps_1kk', location_osid: 'op:west:1' },
+                'brig_e1': { faction: 'RS' as FactionId, corps_id: 'corps_1kk', location_osid: 'op:east:1' },
+                'brig_m1': { faction: 'RS' as FactionId, corps_id: 'corps_1kk', location_osid: 'op:mid:1' },
+            },
+            political_controllers: pc,
+            war_front_edges_osid: frontEdges,
+        });
+
+        const result = buildCorpsFrontSectors(state, edges, null);
+        const seen = new Map<string, string>();
+        for (const [sectorId, sector] of Object.entries(result)) {
+            for (const bid of [...(sector.assigned_brigade_ids ?? []), ...(sector.reserve_brigade_ids ?? [])]) {
+                const prev = seen.get(bid);
+                assert.strictEqual(prev, undefined,
+                    `Brigade ${bid} appears in both ${prev} and ${sectorId}`);
+                seen.set(bid, sectorId);
+            }
+        }
+    });
+
     it('single large sub-segment produces one sector', () => {
         const pc: Record<string, string> = {};
         const rsOsids = ['op:f:1', 'op:hq:1'];
