@@ -185,7 +185,7 @@ export function createOobFormations(
             kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
             personnel: 0,
             ...(hq_sid ? { hq_sid } : {}),
-            ...(location_osid != null ? { location_osid } : {}),
+            // Corps/army HQ formations are command structures, not map entities.
             ...(c.initial_officer_quality != null ? { officer_quality: c.initial_officer_quality } : {}),
             ...(c.initial_cohesion != null ? { cohesion: c.initial_cohesion } : {}),
             ...(c.initial_morale != null ? { morale: c.initial_morale } : {}),

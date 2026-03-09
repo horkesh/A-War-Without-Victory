@@ -264,6 +264,18 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         expect(seOz!.kind).toBe('corps_asset');
     });
 
+    it('corps/army_hq formations have no location_osid (command structures, not map entities)', () => {
+        const state = makeBottomUpState(24);
+        // Activate all corps
+        activateCorpsForTurn(state, ALL_CORPS_OOB, 24);
+
+        for (const f of Object.values(state.formations!)) {
+            if (f.kind === 'corps_asset' || f.kind === 'army_hq') {
+                expect(f.location_osid).toBeUndefined();
+            }
+        }
+    });
+
     it('auto_oob mode (called directly): all corps with available_from <= turn are activated', () => {
         // Direct call: caller skips the pipeline guard; function activates by available_from only
         const state = makeBottomUpState(24);

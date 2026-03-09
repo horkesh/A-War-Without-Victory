@@ -105,8 +105,8 @@ export function activateCorpsForTurn(
             tags: [`mun:${c.hq_mun}`],
             kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
             personnel: 0,
-            ...(hq_sid ? { hq_sid } : {}),
-            ...(location_osid != null ? { location_osid } : {})
+            ...(hq_sid ? { hq_sid } : {})
+            // Corps/army HQ formations are command structures, not map entities.
         };
         state.formations[c.id] = formation;
         report.corps_activated += 1;
