@@ -954,7 +954,7 @@ export function generateCorpsDirectives(
                     if (secId === prioritySectorId) continue; // already there
                     for (const bid of sec.reserve_brigade_ids ?? []) {
                         if (alreadyReassigned.has(bid)) continue;
-                        const f = formations[bid];
+                        const f = state.formations?.[bid];
                         if (!f || f.status !== 'active') continue;
                         const priority = getEquipmentOffensivePriority(f.equipment_class);
                         if (priority >= 2) { // motorized (2) or mechanized (3)

@@ -150,6 +150,7 @@ function buildFactionSectors(
     // General staff units are exempt.
     classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids);
 
+
     // Step 6b: Equalize density across sectors within each corps.
     // Deep-rear brigades (Priority 5 in classification) tend to all land on the
     // nearest sector. Redistribute assigned brigades so each corps' sectors
@@ -321,6 +322,24 @@ function classifyBrigadesByTerritory(
         }
     }
 
+    // Build territory OSID lookup from Voronoi results (Step 5).
+    // This is the primary assignment mechanism for deep-rear brigades —
+    // every friendly OSID is in exactly one sector's territory.
+    const territoryOsidToSectorIdx = new Map<string, number>();
+    for (let i = 0; i < sectors.length; i++) {
+        for (const osid of sectors[i]!.territory_osids ?? []) {
+            // Don't override front entries — those are more specific.
+            // Reserve entries ARE included: a brigade may be 1-hop behind a
+            // different corps's front (Priority 2 fails on corps mismatch),
+            // but in its own corps's territory (Priority 4 should catch it).
+            if (!frontOsidToSectorIdx.has(osid)) {
+                if (!territoryOsidToSectorIdx.has(osid)) {
+                    territoryOsidToSectorIdx.set(osid, i);
+                }
+            }
+        }
+    }
+
     const sortedFormIds = Object.keys(formations).sort(strictCompare);
     for (const fid of sortedFormIds) {
         const f = formations[fid];
@@ -355,39 +374,26 @@ function classifyBrigadesByTerritory(
         }
 
         // No cross-corps reserve fallback — brigades 1-hop behind another corps's
-        // front should BFS to their own corps sector (Priority 5 below).
+        // front should use territory lookup (Priority 4 below).
 
-        // Priority 5: deeper rear — assign to nearest own-corps sector.
-        // Classified as assigned initially so equalizeSectorDensity and
-        // ensureMinimumSectorCoverage can redistribute them. A final
-        // reclassification pass (in buildFactionSectors) demotes non-front
-        // brigades to reserve after equalization is complete.
-        if (fCorpsId && friendlyOsids.has(loc)) {
-            const visited = new Set<string>([loc]);
-            const queue: string[] = [loc];
-            let head = 0;
-            let bestSectorIdx: number | null = null;
-            while (head < queue.length && bestSectorIdx === null) {
-                const osid = queue[head++]!;
-                const fi = frontOsidToSectorIdx.get(osid);
-                if (fi !== undefined && sectors[fi]!.corps_id === fCorpsId) {
-                    bestSectorIdx = fi;
-                    break;
-                }
-                for (const n of (adjacency.get(osid as Osid) ?? []).slice().sort(strictCompare)) {
-                    if (visited.has(n)) continue;
-                    if (!friendlyOsids.has(n)) continue;
-                    visited.add(n);
-                    queue.push(n);
-                }
-            }
-            if (bestSectorIdx !== null) {
-                sectors[bestSectorIdx]!.assigned_brigade_ids.push(fid);
-                continue;
-            }
+        // Priority 4: brigade in a sector's territory (from Voronoi BFS) + correct corps.
+        // This replaces the old Priority 5 BFS which failed when enemy-held OSIDs
+        // fragmented the friendly path between brigade location and sector front.
+        const terrIdx = territoryOsidToSectorIdx.get(loc);
+        if (terrIdx !== undefined && sectors[terrIdx]!.corps_id === fCorpsId) {
+            sectors[terrIdx]!.assigned_brigade_ids.push(fid);
+            continue;
         }
 
-        // Last resort: no own-corps sector reachable. Try any faction sector.
+        // Priority 5: territory match without corps restriction (cross-corps fallback)
+        if (terrIdx !== undefined) {
+            sectors[terrIdx]!.assigned_brigade_ids.push(fid);
+            continue;
+        }
+
+        // Last resort: brigade in friendly territory but not in any sector's territory.
+        // This can happen when territory_osids is capped at MAX_TERRITORY_OSIDS.
+        // BFS from brigade location to nearest front OSID of any sector.
         if (friendlyOsids.has(loc)) {
             const visited = new Set<string>([loc]);
             const queue: string[] = [loc];
