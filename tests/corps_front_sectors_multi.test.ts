@@ -13,6 +13,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildCorpsFrontSectors, MIN_SECTOR_EDGES } from '../src/sim/combat/corps_front_sectors.js';
+import { EXEMPT_CORPS_IDS } from '../src/sim/combat/corps_front_sectors_constants.js';
 import type { GameState, FormationState, FactionId } from '../src/state/game_state.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 
@@ -323,5 +324,9 @@ describe('Corps Front Sectors — Multi-Sector Promotion', () => {
 
         assert.equal(sectorIds.length, 1, 'Single large sub-segment → 1 sector');
         assert.ok(sectorIds[0]!.startsWith('sector:corps_y:0'));
+    });
+
+    it('hvo_central_bosnia should NOT be in EXEMPT_CORPS_IDS', () => {
+        assert.strictEqual(EXEMPT_CORPS_IDS.has('hvo_central_bosnia'), false);
     });
 });
