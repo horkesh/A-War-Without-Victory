@@ -1,7 +1,7 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { findNearestFriendlyOsidInSet, isMovementDestinationRisky } from './bot_brigade_context.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS } from './bot_brigade_movement_ai.js';
+import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS, findNearestOffensiveTarget } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid, countCorpsBrigadesAtOsid, MAX_CORPS_BRIGADES_PER_OSID } from './bot_brigade_context.js';
 import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -55,38 +55,7 @@ export function evaluateFrontCoverage(ctx: BrigadeEvaluationContext): boolean {
         const factionHere = countFactionBrigadesAtOsid(state, faction, loc);
         if (!hasAdjacentTarget && factionHere >= 2) {
             // BFS through friendly territory toward nearest offensive_target neighbor
-            const targetSet = redeployTargetSet;
-            const visited = new Set<Osid>([loc]);
-            const queue: Array<{ osid: Osid; firstStep: Osid }> = [];
-            for (const n of (adjacency.get(loc) ?? [])) {
-                const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-                if (ctrl === faction) {
-                    visited.add(n);
-                    queue.push({ osid: n, firstStep: n });
-                }
-            }
-            let redeployTarget: Osid | null = null;
-            let maxHops = 6; // Don't search too far
-            let idx = 0;
-            while (idx < queue.length && maxHops > 0) {
-                const cur = queue[idx++]!;
-                // Check if this OSID is adjacent to an offensive_target
-                const neighbors = adjacency.get(cur.osid) ?? [];
-                const nearTarget = neighbors.some(n => targetSet.has(n));
-                if (nearTarget) {
-                    redeployTarget = cur.firstStep;
-                    break;
-                }
-                maxHops--;
-                for (const n of neighbors) {
-                    if (visited.has(n)) continue;
-                    const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-                    if (ctrl === faction) {
-                        visited.add(n);
-                        queue.push({ osid: n, firstStep: cur.firstStep });
-                    }
-                }
-            }
+            const redeployTarget = findNearestOffensiveTarget(state, faction, loc, redeployTargetSet, adjacency, reverseMap, 6);
             if (redeployTarget) {
                 if (!isMovementDestinationRisky(redeployTarget, graphAnalysis)) {
                     result.movement_orders[brigade.id] = redeployTarget;

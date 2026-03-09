@@ -248,21 +248,25 @@ export function evaluateReorganize(ctx: BrigadeEvaluationContext): boolean {
     return false;
 }
 
+import { findBrigadeSectorId } from './bot_brigade_context.js';
+import type { PredictedOutcome } from './combat_predictor.js';
+
+const effectiveDirectiveDefault: import('../../state/game_state.js').CorpsDirective = {
+    assigned_front_ids: [],
+    offensive_targets: [],
+    hold_osids: [],
+    avoid_osids: [],
+    max_attackers_per_target: 2,
+    reserve_fraction: 0.2,
+    min_attack_outcome: 'stalemate' as const,
+    aggression_modifier: 0,
+};
+
 export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, corpsStance, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, loc, graphAnalysis } = ctx;
 
-    const effectiveDirectiveDefault: import('../../state/game_state.js').CorpsDirective = {
-        assigned_front_ids: [],
-        offensive_targets: [],
-        hold_osids: [],
-        avoid_osids: [],
-        max_attackers_per_target: 2,
-        reserve_fraction: 0.2,
-        min_attack_outcome: 'stalemate' as const,
-        aggression_modifier: 0,
-    };
-
     // --- Rule 4: Defensive stance → defend, with retreat-based counter-attack only ---
+
     if (corpsStance === 'defensive') {
         // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
         if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
@@ -328,25 +332,10 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
     return false;
 }
 
-// NOTE: To avoid making this file 1000 lines long, I'm exporting evaluateOffensive here as well.
-import { findBrigadeSectorId } from './bot_brigade_context.js';
-import type { PredictedOutcome } from './combat_predictor.js';
-
 export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, corpsStance, brigadeSupplyState, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, targetAdjacentCount, loc, corpsId } = ctx;
 
     if (adjEnemy.length === 0) return false;
-
-    const effectiveDirectiveDefault: import('../../state/game_state.js').CorpsDirective = {
-        assigned_front_ids: [],
-        offensive_targets: [],
-        hold_osids: [],
-        avoid_osids: [],
-        max_attackers_per_target: 2,
-        reserve_fraction: 0.2,
-        min_attack_outcome: 'stalemate' as const,
-        aggression_modifier: 0,
-    };
 
     // --- Rule 5: Offensive/Balanced — evaluate attacks ---
     // Multi-sector target preference: when corps has sector_targets, override

@@ -1,6 +1,6 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { findNearestFriendlyOsidInSet, isMovementDestinationRisky } from './bot_brigade_context.js';
-import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
+import { issueInteriorMovement, findNearestOffensiveTarget } from './bot_brigade_movement_ai.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { Osid } from './osid_adjacency.js';
 
@@ -29,37 +29,9 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
         }
     }
     if (directive && directive.offensive_targets.length > 0) {
-        // BFS through friendly territory toward nearest offensive_target neighbor
         const targetSet = new Set(directive.offensive_targets);
-        const visited = new Set<Osid>([loc]);
-        const queue: Array<{ osid: Osid; firstStep: Osid }> = [];
-        for (const n of (adjacency.get(loc) ?? [])) {
-            const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-            if (ctrl === faction) {
-                visited.add(n);
-                queue.push({ osid: n, firstStep: n });
-            }
-        }
-        let directiveTarget: Osid | null = null;
-        let idx = 0;
-        let maxSearch = 30;
-        while (idx < queue.length && maxSearch > 0) {
-            const cur = queue[idx++]!;
-            const neighbors = adjacency.get(cur.osid) ?? [];
-            if (neighbors.some(n => targetSet.has(n))) {
-                directiveTarget = cur.firstStep;
-                break;
-            }
-            maxSearch--;
-            for (const n of neighbors) {
-                if (visited.has(n)) continue;
-                const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-                if (ctrl === faction) {
-                    visited.add(n);
-                    queue.push({ osid: n, firstStep: cur.firstStep });
-                }
-            }
-        }
+        // BFS through friendly territory toward nearest offensive_target neighbor
+        const directiveTarget = findNearestOffensiveTarget(state, faction, loc, targetSet, adjacency, reverseMap, 30);
         if (directiveTarget) {
             if (!isMovementDestinationRisky(directiveTarget, graphAnalysis)) {
                 result.movement_orders[brigade.id] = directiveTarget;

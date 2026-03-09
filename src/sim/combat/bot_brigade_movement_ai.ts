@@ -336,3 +336,43 @@ export function issueInteriorMovement(
     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
     return true;
 }
+
+export function findNearestOffensiveTarget(
+    state: GameState,
+    faction: FactionId,
+    startLoc: Osid,
+    targetSet: Set<Osid>,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+    maxHops: number = 30
+): Osid | null {
+    const visited = new Set<Osid>([startLoc]);
+    const queue: Array<{ osid: Osid; firstStep: Osid }> = [];
+    for (const n of (adjacency.get(startLoc) ?? [])) {
+        const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
+        if (ctrl === faction) {
+            visited.add(n);
+            queue.push({ osid: n, firstStep: n });
+        }
+    }
+    let targetStep: Osid | null = null;
+    let idx = 0;
+    while (idx < queue.length && maxHops > 0) {
+        const cur = queue[idx++]!;
+        const neighbors = adjacency.get(cur.osid) ?? [];
+        if (neighbors.some(n => targetSet.has(n))) {
+            targetStep = cur.firstStep;
+            break;
+        }
+        maxHops--;
+        for (const n of neighbors) {
+            if (visited.has(n)) continue;
+            const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
+            if (ctrl === faction) {
+                visited.add(n);
+                queue.push({ osid: n, firstStep: cur.firstStep });
+            }
+        }
+    }
+    return targetStep;
+}
