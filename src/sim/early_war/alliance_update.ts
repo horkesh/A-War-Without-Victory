@@ -96,7 +96,7 @@ export function ensureRbihHrhbState(state: GameState, initValue?: number, initMi
         const mixed = initMixedMunicipalities
             ? [...initMixedMunicipalities].sort(strictCompare)
             : [...DEFAULT_MIXED_MUNICIPALITIES].sort(strictCompare);
-        (state as any).rbih_hrhb_state = {
+        (state as any).political.rbih_hrhb_state = {
             war_started_turn: null,
             ceasefire_active: false,
             ceasefire_since_turn: null,

@@ -1065,7 +1065,6 @@ export interface ControlOverrideState {
     since_turn: number;
 }
 
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
 export interface ControlRecognitionState {
     side: PoliticalSideId;
     treaty_id: string;
@@ -1132,7 +1131,6 @@ export interface CollapseEligibilityState {
     last_updated_turn: number;
 }
 
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
 export interface Tier1EntityEligibilityState {
     // Per-domain eligibility flags
     domains: {
@@ -1160,13 +1158,11 @@ export interface Tier1EntityEligibilityState {
     };
 }
 
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
 export interface LocalStrainState {
     // Per-entity (settlement SID) local strain accumulator
     by_entity: Record<string, number>; // EntityId -> strain value (monotonic, clamped)
 }
 
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
 export interface CollapseDamageState {
     // Per-entity (settlement SID) collapse damage accumulator
     by_entity: Record<string, {
@@ -1176,7 +1172,6 @@ export interface CollapseDamageState {
     }>;
 }
 
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
 export interface CapacityModifiersState {
     // Per-entity (settlement SID) capacity modifiers
     by_sid: Record<string, {
@@ -1187,7 +1182,6 @@ export interface CapacityModifiersState {
     }>;
 }
 
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
 // Exposes intended vs effective posture for visibility/debugging
 export interface EffectivePostureExposureState {
     // Per faction, per edge: intended vs effective posture data
@@ -1210,7 +1204,6 @@ export interface EffectivePostureExposureState {
     last_updated_turn: number;
 }
 
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 // Exposes trends and warnings derived from existing irreversible state
 export type TrendDirection = 'up' | 'flat' | 'down';
 
@@ -1309,35 +1302,6 @@ export interface GameState {
     schema_version: number;
     meta: StateMeta;
     factions: FactionState[];
-    // Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-    // scaffolding-only: stored intent/allocation (no resolution yet)
-    // player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-    // scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-    // Phase 11B: Negotiation status and ceasefire enforcement
-    // Phase 12A: Negotiation capital ledger
-    // Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-    // Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-    // Phase 12C.3: Supply rights registry (corridor traversal rights)
-    // Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-    // Phase 21: Population displacement tracking (per municipality)
-    // Phase 22: Sustainability collapse tracking (per municipality)
-    // Phase 3C: Collapse eligibility state (per faction, Tier-0)
-    // Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-    // Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-    // Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-    // Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-    // Phase 5B: Effective posture exposure (read-only, no new mechanics)
-    // Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-    // Target ID format: edge_id for edge assignments, region_id for region assignments
-    // Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-    // --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-    // --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-    // --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-    // --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-    // --- Brigade Operations System state (War phase: OSID-based) ---
-    // --- Phase 0 event log and relationship tracking ---
-    // --- Recruitment system state (recruitment_system_design_note.md) ---
-    // --- Battle resolution & casualty tracking ---
     // --- Control change events (Phase 5 GUI: battle markers) ---
     // --- Turn after-action reports (GUI only) ---
     /**
@@ -1443,1099 +1407,109 @@ export interface CivilianCasualtiesByFaction {
 }
 
 export interface MilitaryState {
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
 formations: Record<FormationId, FormationState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
 front_segments: Record<string, FrontSegmentState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
 front_posture: Record<FactionId, FrontPostureState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
 front_posture_regions: Record<FactionId, FrontRegionPostureState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 front_pressure: Record<string, FrontPressureState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** Municipality-level militia pools. Key: MunicipalityId (legacy) or "mun_id:faction" (composite). Plan: militia_and_brigade_formation_system. */
 militia_pools: Record<string, MilitiaPoolState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** Faction-level strategic manpower reserve. Excess pool.available from rear municipalities flows here;
      *  under-strength front-line brigades draw from it at reduced rate. Key: FactionId → available manpower. */
 strategic_reserves?: Record<string, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** War phase (Brigade AoR Redesign Phase B): Per-settlement militia garrison strength. Derived from militia_pools + org penetration; settlements with a brigade use brigade garrison instead. Recomputed each turn. */
 militia_garrison?: Record<SettlementId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** War phase (Brigade AoR Redesign Phase C): Per-brigade movement state (packing / in_transit / unpacking). When in_transit, brigade has no AoR. */
 brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** War phase (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
 brigade_movement_orders?: Record<FormationId, { destination_sids: SettlementId[] }>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** War phase: Pending reposition orders (consumed each turn). Set brigade AoR to exactly these 1–4 contiguous faction-controlled settlements; no physical move. */
 brigade_reposition_orders?: Record<FormationId, { settlement_ids: SettlementId[] }>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** War phase tactical deploy/undeploy staging (consumed each turn). */
 brigade_deploy_orders?: Record<FormationId, BrigadeDeployAction>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** War phase (Brigade AoR Redesign Phase G): Per-brigade encirclement (AoR entirely in enclave). Used for cohesion drain, garrison penalty, movement block. */
 brigade_encircled?: Record<FormationId, boolean>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** War phase (Brigade AoR Redesign Peace phase): Per-settlement cumulative battle damage [0, 1] (exhaustion-as-terrain). */
 battle_damage?: Record<SettlementId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** Formation spawn directive (FORAWWV H2.4). When set and active for current turn, formation spawn may run. */
 formation_spawn_directive?: FormationSpawnDirective;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
 /** Strategic production facilities (capturable local supply contributors). */
 production_facilities?: Record<string, ProductionFacilityState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
 logistics_priority?: Record<FactionId, Record<string, number>>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
 /** Sector-level defensive intent translated into brigade posture orders each turn. */
 sector_stance_orders?: SectorStanceOrder[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
 /** Militia strength [0, 100] per municipality per faction; Peace-phase §4.2. */
 war_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
 /** JNA withdrawal and asset transfer; Peace-phase §4.6. Does not start war. */
 war_jna?: JNATransitionState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
 /** Consecutive critical-supply turns per faction:OSID. Key: `${factionId}:${osid}`. Phase B siege. */
 siege_turn_counters?: Record<string, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
 /** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */
 general_supply_reserve?: Record<FactionId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
 /** Heavy munitions reserves per faction [0..100]. Consumed by combat; replenished by ammo facilities/patron. */
 heavy_munitions_reserve?: Record<FactionId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
 front_edges?: FrontEdgeState[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** OSID front-edge snapshot (War phase operational view) for HoI/OSID consumers. */
 war_front_edges_osid?: FrontEdgeState[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** HoI-style assignable front segments derived from canonical front_edges. */
 assignable_front_segments?: AssignableFrontSegmentState[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** HoI-style brigade assignment to an assignable front segment. null = reserve. */
 brigade_front_assignment?: Record<FormationId, string | null>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** HoI-style top-level theatre model. */
 theatres?: Record<string, TheatreState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Army (army_hq) to theatre assignment map. */
 army_theatre_assignment?: Record<FormationId, string>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /**
      * Corps front assignment (HoI-style): per-corps normalized edge_ids (e.g. "S1__S2").
      * Army front is derived as the union of corps fronts.
      */
 corps_front_edges?: Record<FormationId, string[]>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Optional fallback front lines for controlled withdrawal. */
 corps_fallback_front_edges?: Record<FormationId, string[]>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Player/bot desired AoR settlement cap per brigade (1–4). When set, overrides personnel-based cap. (Legacy; AoR removed.) */
 brigade_desired_aor_cap?: Record<FormationId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Pending brigade posture orders (consumed once per turn). */
 brigade_posture_orders?: BrigadePostureOrder[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Attack orders: one target settlement per brigade per turn; null = no attack (Brigade Realism plan §3.4). Consumed once per turn. */
 brigade_attack_orders?: Record<FormationId, SettlementId | null>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /**
      * Corps-level attack axis orders: target geometry compressed as ordered edge_ids.
      * Intent-only order surface; translated to brigade orders by deterministic assignment.
      */
 corps_attack_axis_orders?: Record<FormationId, { edge_ids: string[]; created_turn?: number }>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Corps command state. Key: corps FormationId. */
 corps_command?: Record<FormationId, CorpsCommandState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Equipment reserve per corps: excess from JNA phantom withdrawals. Drawn during brigade reinforcement. */
 corps_equipment_reserve?: Record<FormationId, { tanks: number; artillery: number; apcs: number }>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Triggered operations that have been offered and accepted (operation name → turn accepted). */
 triggered_operations_accepted?: Record<string, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Triggered operations that have been declined (operation name → { declined_turn, decline_count }). */
 declined_operations?: Record<string, { declined_turn: number; decline_count: number }>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Army-level stance per faction. */
 army_stance?: Record<FactionId, ArmyStance>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** OG activation orders (consumed once per turn). */
 og_orders?: OGActivationOrder[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Optional OG subfront extent as front edge IDs (subset of parent corps front). */
 og_subfront_edges?: Record<FormationId, string[]>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
 /** Settlement holdout state (Peace phase settlement-level control). Key: SettlementId. */
 settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
 /** Recruitment resources: capital pools, equipment pools, recruited brigade tracking. */
 recruitment_state?: RecruitmentResourceState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** Cumulative casualty ledger (killed, wounded, missing/captured) per faction and formation. */
 casualty_ledger?: CasualtyLedger;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** Local fronts: bot/player-defined defensive sectors with coverage-based power. Derived each turn. */
 local_fronts?: Record<string, LocalFront>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
 corps_front_sectors?: Record<string, CorpsFrontSector>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** Sector-facing intelligence: per-friendly-sector intelligence records (one per facing enemy sector). Derived each turn. */
 sector_intel?: Record<string, SectorIntelRecord[]>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. */
 home_distance_cache?: Record<string, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** War timeline: externalized faction temporal profiles (doctrine, cohesion, reinforcement, etc). Loaded from data/scenarios/timelines/{id}.json. */
 war_timeline?: import('./war_timeline.js').WarTimeline;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** Named officer static data (loaded from JSON). Immutable during simulation. */
 named_officer_data?: import('./officer_types.js').NamedOfficer[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** Named officer mutable state keyed by officer ID. */
 named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
 /** Player-entered humanitarian airdrop split by enclave id. */
@@ -2555,205 +1529,20 @@ used_operation_names?: Record<string, number>;
 }
 
 export interface PoliticalState {
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
 negotiation_status?: NegotiationStatus;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
 ceasefire?: Record<string, CeasefireFreezeEntry>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
 negotiation_ledger?: NegotiationLedgerEntry[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
 control_overrides?: Record<SettlementId, ControlOverrideState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
 control_recognition?: Record<SettlementId, ControlRecognitionState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
 supply_rights?: SupplyRightsState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
 end_state?: EndState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
 collapse_eligibility?: Record<FactionId, CollapseEligibilityState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
 collapse_eligibility_tier1?: Record<string, Tier1EntityEligibilityState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
 local_strain?: LocalStrainState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
 collapse_damage?: CollapseDamageState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
 capacity_modifiers?: CapacityModifiersState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
 effective_posture_exposure?: EffectivePostureExposureState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 loss_of_control_trends?: LossOfControlTrendExposureState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 /**
      * Political control substrate (per settlement, independent of AoR).
      * CANONICAL: Political control is authoritative at political_controllers; no duplicate storage permitted.
@@ -2761,480 +1550,48 @@ loss_of_control_trends?: LossOfControlTrendExposureState;
      * Initialized deterministically before fronts/AoR/pressure (Engine Invariants §9.2).
      */
 political_controllers?: Record<SettlementId, FactionId | null>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 /**
      * Political control contested flag (per settlement).
      * true => contested at initialization; false => uncontested.
      */
 contested_control?: Record<SettlementId, boolean>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 /** Phase 0: Per-municipality state (stability_score, organizational_penetration). Hand-off to Peace phase. */
 municipalities?: Record<MunicipalityId, MunicipalityState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 /** System 4: Settlement-level state (legitimacy, etc). */
 settlements?: Record<SettlementId, SettlementState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 /** System 1: International Visibility Pressure (IVP). */
 international_visibility_pressure?: InternationalVisibilityPressure;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 /** Active IVP threshold consequences. */
 ivp_consequences_active?: string[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 /** System 5: Enclave integrity tracking. */
 enclaves?: EnclaveState[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
 /** System 6: Sarajevo exception state. */
 sarajevo_state?: SarajevoState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
 /** Turn (inclusive) until which municipality cannot flip control; keyed by MunicipalityId. */
 war_consolidation_until?: Record<MunicipalityId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
 /** Control strain accumulated per municipality; Peace-phase §4.5. */
 war_control_strain?: Record<MunicipalityId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
 /** RBiH–HRHB alliance relationship [-1, 1]; Peace-phase §4.8. */
 war_alliance_rbih_hrhb?: number;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
 /** Peace-phase §4.8: RBiH–HRHB bilateral state (war tracking, ceasefire, Washington Agreement). */
 rbih_hrhb_state?: RbihHrhbState;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
 /** B4: Coercion pressure [0, 1] per municipality; reduces flip threshold (makes flip easier). Scenario/init can supply (e.g. Prijedor, Zvornik). */
 coercion_pressure_by_municipality?: Record<MunicipalityId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
 /** Supply pressure per faction [0, 100]; higher = worse. Constrains effectiveness; no free replenishment. */
 war_supply_pressure?: Record<FactionId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
 /** Faction-level exhaustion (monotonic, irreversible). Engine Invariants §8. */
 war_exhaustion?: Record<FactionId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
 /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */
 war_exhaustion_local?: Record<SettlementId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
 /** Enclave resilience per enclave ID. Phase C: EnclaveResilienceEntry; old saves: bare number. */
 enclave_resilience?: Record<string, number | EnclaveResilienceEntry>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
 /** Phase 0 event log: array of per-turn event arrays. Index = turn number. */
 phase0_events_log?: Phase0Event[][];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
 /** Phase 0 relationship tracking (bilateral numeric values). */
 phase0_relationships?: {
         rbih_rs: number;
         rbih_hrhb: number;
     };
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 // --- Control change events (Phase 5 GUI: battle markers) ---
 /**
      * Per-turn log of OSID control changes. Cleared at the start of each attack-resolution step,
@@ -3270,217 +1627,24 @@ vienna_herzegovina_broken_by?: FactionId;
 }
 
 export interface DisplacementDomainState {
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
 displacement_state?: Record<MunicipalityId, DisplacementState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
 /** War phase: delayed hostile takeover timers (per OSID). */
 hostile_takeover_timers?: Record<string, HostileTakeoverTimerState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
 /** War phase: temporary camp holding pools before rerouting (per municipality). */
 displacement_camp_state?: Record<MunicipalityId, DisplacementCampState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
 /** War phase: non-takeover minority flight state (per settlement). Canon: displacement redesign 2026-02-17. */
 minority_flight_state?: Record<SettlementId, MinorityFlightStateEntry>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
 /** Cumulative displacement event log, sorted by (turn, origin_mun). */
 displacement_event_log?: DisplacementEvent[];
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
 sustainability_state?: Record<MunicipalityId, SustainabilityState>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
 /** Peace-phase §4.4: displacement initiated turn per municipality (hook only; no population change). */
 war_displacement_initiated?: Record<MunicipalityId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
 /** Settlement-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
 settlement_displacement?: Record<SettlementId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
 /** Turn when displacement began at this settlement (optional; for reporting only). */
 settlement_displacement_started_turn?: Record<SettlementId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
 /** Municipality-level displacement (capacity degradation) [0, 1]. Monotonic; never decreases. */
 municipality_displacement?: Record<MunicipalityId, number>;
-// Persistent formation roster (scaffolding only; no gameplay effects in this phase)
-// scaffolding-only: stored intent/allocation (no resolution yet)
-// player-facing scaffolding: region-level posture assignments, expanded deterministically into per-edge posture
-// scaffolding-only: persistent pressure accumulator per segment (no resolution yet)
-// Phase 11B: Negotiation status and ceasefire enforcement
-// Phase 12A: Negotiation capital ledger
-// Phase 12C.2: Negotiated control overrides (applied after AoR control resolution)
-// Phase 12C.2: Control recognition registry (legal claim without ownership transfer)
-// Phase 12C.3: Supply rights registry (corridor traversal rights)
-// Phase 12D.0: Peace end-state marker (war ends when territorial treaty is applied)
-// Phase 21: Population displacement tracking (per municipality)
-// Phase 22: Sustainability collapse tracking (per municipality)
-// Phase 3C: Collapse eligibility state (per faction, Tier-0)
-// Phase 3C Tier-1: Per-entity (settlement SID) eligibility state
-// Phase 3C: Local strain accumulator (proxy until per-entity exhaustion exists)
-// Phase 3D: Collapse damage tracks (irreversible degradation per entity per domain)
-// Phase 3D: Capacity modifiers (derived from collapse damage, consumed by later phases)
-// Phase 5B: Effective posture exposure (read-only, no new mechanics)
-// Phase 5C: Logistics prioritization (player intent injection, no new mechanics)
-// Target ID format: edge_id for edge assignments, region_id for region assignments
-// Phase 5D: Loss-of-control trend exposure (read-only, no new mechanics)
-// --- Peace phase (Early War) state (Phase_I_Specification_v0_3_0.md) ---
-// --- War phase (Mid-War / Consolidation) state (Phase D; Engine Invariants §4, §6, §8) ---
-// --- Supply Reserves (Phase A — SUPPLY_AMMO_SYSTEM_PLAN.md §3) ---
-// --- Phase F (Displacement & Population Dynamics) — stored, not derived (ROADMAP Phase F) ---
-// --- Brigade Operations System state (War phase: OSID-based) ---
-// --- Phase 0 event log and relationship tracking ---
-// --- Recruitment system state (recruitment_system_design_note.md) ---
-// --- Battle resolution & casualty tracking ---
 /** Cumulative civilian displacement casualties (killed, fled_abroad) by ethnicity-aligned faction. */
 civilian_casualties?: CivilianCasualtiesByFaction;
 }

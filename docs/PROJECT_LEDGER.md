@@ -12243,3 +12243,20 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 - `npx tsc --noEmit` -> pass with 0 errors across codebase.
 - `npx vitest run` -> all 436 tests passed.
 - UI mapping adapters validated against newly structured type definitions.
+
+## 2026-03-09: Phase 4 Bot AI Modularization
+
+**Author:** Cursor (Agent)
+**Scope:** Refactored the monolithic ~1000-line evaluator in `bot_brigade_ai_osid.ts`.
+**Context:** Phase 4 of the 2026-03-09 Evaluation Remediation Plan to prevent priority collisions and improve bot maintainability.
+
+**Changes:**
+- Extracted purely functional evaluation modules into separate files: `bot_brigade_eval_hold.ts`, `bot_brigade_eval_attack.ts`, `bot_brigade_eval_front.ts`, and `bot_brigade_eval_movement.ts`.
+- Created `bot_brigade_eval_types.ts` to define the `BrigadeEvaluationContext` interface and structure the evaluator chain.
+- Refactored `executeFactionDirectives` to pass the context down a sequentially composed chain of evaluations, exiting early when a condition is met.
+- Fixed minor TypeScript issues in types passing between legacy components and the new evaluator.
+
+**Validation:**
+- `npx tsc --noEmit` passes cleanly.
+- `npx vitest run` passes all tests.
+- `npm run sim:scenario:probe` confirms zero behavioral changes (identical operational results to the existing baseline).

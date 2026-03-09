@@ -1628,9 +1628,9 @@ export const warPhases: NamedPhase[] = [
 
             // Initialize if needed
             if (!context.state.political.effective_posture_exposure) {
-                (context.state as any).effective_posture_exposure = {};
+                (context.state as any).political.effective_posture_exposure = {};
             }
-            (context.state as any).effective_posture_exposure = exposure;
+            (context.state as any).political.effective_posture_exposure = exposure;
         }
     },
     {
