@@ -444,3 +444,202 @@ export function recordOperationWeeklyEntries(
         delete op.pending_casualties;
     }
 }
+
+// ─── Finalize Operation AAR ────────────────────────────────────────────────
+
+/**
+ * Build and persist a complete OperationAAR when a sector_attack operation ends.
+ * Must be called BEFORE `cmd.active_operation = null`.
+ */
+export function finalizeOperationAAR(
+    state: GameState,
+    corpsId: string,
+    op: CorpsOperation,
+): void {
+    // 1. Collect all objectives
+    const objectives = collectObjectives(op);
+
+    // 2. Derive faction from first participating brigade
+    let faction: string = '';
+    for (const bdeId of op.participating_brigades) {
+        const fmn = state.military.formations[bdeId as FormationId];
+        if (fmn) { faction = fmn.faction; break; }
+    }
+
+    // 3. Check which objectives are currently held by that faction
+    const capturedObjectives: string[] = [];
+    for (const osid of objectives) {
+        const controller = getPoliticalControllerOSID(state, osid);
+        if (controller === faction) {
+            capturedObjectives.push(osid);
+        }
+    }
+
+    // 4. Derive outcome from recovery_reason + objectives held
+    let outcome: OperationAAR['outcome'];
+    const reason = op.recovery_reason;
+    const allHeld = capturedObjectives.length === objectives.length && objectives.length > 0;
+    const someHeld = capturedObjectives.length > 0;
+
+    if (reason === 'orphaned_sector') {
+        outcome = 'orphaned';
+    } else if (reason === 'completed') {
+        outcome = allHeld ? 'success' : 'partial';
+    } else {
+        // max_failures, no_logged_attempt, manual_termination, or undefined
+        outcome = someHeld ? 'partial' : 'failure';
+    }
+
+    // 5. Aggregate totals from weekly_log
+    const log = op.weekly_log ?? [];
+    let totalAttacks = 0;
+    const totalSuffered: CasualtyTally = { killed: 0, wounded: 0 };
+    const totalInflicted: CasualtyTally = { killed: 0, wounded: 0 };
+    const totalEqLost: EquipmentTally = { tanks: 0, artillery: 0 };
+    const totalEqDestroyed: EquipmentTally = { tanks: 0, artillery: 0 };
+    const totalEqCaptured: EquipmentTally = { tanks: 0, artillery: 0 };
+
+    for (const entry of log) {
+        totalAttacks += entry.attacks_this_turn;
+        totalSuffered.killed += entry.casualties_suffered.killed;
+        totalSuffered.wounded += entry.casualties_suffered.wounded;
+        totalInflicted.killed += entry.casualties_inflicted.killed;
+        totalInflicted.wounded += entry.casualties_inflicted.wounded;
+        totalEqLost.tanks += entry.equipment_lost.tanks;
+        totalEqLost.artillery += entry.equipment_lost.artillery;
+        totalEqDestroyed.tanks += entry.equipment_destroyed.tanks;
+        totalEqDestroyed.artillery += entry.equipment_destroyed.artillery;
+        totalEqCaptured.tanks += entry.equipment_captured.tanks;
+        totalEqCaptured.artillery += entry.equipment_captured.artillery;
+    }
+
+    // 6. Compute final_strength from participating brigades' current personnel
+    let finalStrength = 0;
+    for (const bdeId of op.participating_brigades) {
+        const fmn = state.military.formations[bdeId as FormationId];
+        if (fmn) finalStrength += fmn.personnel ?? 0;
+    }
+
+    // 7. Denormalize OiC from named_officer_data
+    let commanderName: string | undefined;
+    let commanderRank: string | undefined;
+    if (op.commander_officer_id && state.military.named_officer_data) {
+        const officer = state.military.named_officer_data.find(
+            o => o.id === op.commander_officer_id,
+        );
+        if (officer) {
+            commanderName = officer.name;
+            commanderRank = officer.rank;
+        }
+    }
+
+    // 8. Compute grade
+    const initialStrength = op.initial_strength ?? finalStrength;
+    const durationTurns = Math.max(1, state.meta.turn - op.started_turn);
+    const expectedDuration = (op.planning_duration ?? Math.max(1, objectives.length)) * 4;
+
+    const grade = gradeOperation({
+        objectives_targeted: objectives.length,
+        objectives_captured: capturedObjectives.length,
+        casualties_suffered: totalSuffered.killed + totalSuffered.wounded,
+        casualties_inflicted: totalInflicted.killed + totalInflicted.wounded,
+        initial_strength: initialStrength,
+        final_strength: finalStrength,
+        duration_turns: durationTurns,
+        expected_duration: expectedDuration,
+    });
+
+    // 9. Build axis_summaries from op.axes + aggregated weekly axis entries
+    let axisSummaries: AxisAAR[] | undefined;
+    if (op.axes) {
+        axisSummaries = [];
+        for (const axis of op.axes) {
+            // Aggregate from weekly_log axis_entries for this axis
+            const axSuffered: CasualtyTally = { killed: 0, wounded: 0 };
+            const axInflicted: CasualtyTally = { killed: 0, wounded: 0 };
+            const axEqLost: EquipmentTally = { tanks: 0, artillery: 0 };
+            const axEqDestroyed: EquipmentTally = { tanks: 0, artillery: 0 };
+            const axEqCaptured: EquipmentTally = { tanks: 0, artillery: 0 };
+            let axAttacks = 0;
+            const axObjsCaptured: string[] = [];
+
+            for (const entry of log) {
+                const ae = entry.axis_entries?.[axis.axis_id];
+                if (!ae) continue;
+                axAttacks += ae.attacks_this_turn;
+                axSuffered.killed += ae.casualties_suffered.killed;
+                axSuffered.wounded += ae.casualties_suffered.wounded;
+                axInflicted.killed += ae.casualties_inflicted.killed;
+                axInflicted.wounded += ae.casualties_inflicted.wounded;
+                axEqLost.tanks += ae.equipment_lost.tanks;
+                axEqLost.artillery += ae.equipment_lost.artillery;
+                axEqDestroyed.tanks += ae.equipment_destroyed.tanks;
+                axEqDestroyed.artillery += ae.equipment_destroyed.artillery;
+                axEqCaptured.tanks += ae.equipment_captured.tanks;
+                axEqCaptured.artillery += ae.equipment_captured.artillery;
+                for (const cap of ae.objectives_captured_this_turn) {
+                    if (!axObjsCaptured.includes(cap)) axObjsCaptured.push(cap);
+                }
+            }
+
+            // Also check which axis objectives are currently held
+            const axisObjsHeld: string[] = [];
+            for (const osid of axis.objectives) {
+                const controller = getPoliticalControllerOSID(state, osid);
+                if (controller === faction && !axisObjsHeld.includes(osid)) {
+                    axisObjsHeld.push(osid);
+                }
+            }
+
+            axisSummaries.push({
+                axis_id: axis.axis_id,
+                axis_name: axis.name,
+                brigades: [...axis.assigned_brigades],
+                objectives_targeted: [...axis.objectives],
+                objectives_captured: axisObjsHeld,
+                total_attacks: axAttacks,
+                casualties_suffered: axSuffered,
+                casualties_inflicted: axInflicted,
+                equipment_lost: axEqLost,
+                equipment_destroyed: axEqDestroyed,
+                equipment_captured: axEqCaptured,
+            });
+        }
+    }
+
+    // 10. Construct OperationAAR and push to state.operation_history
+    const aar: OperationAAR = {
+        operation_id: `${corpsId}:${op.name}:t${op.started_turn}`,
+        operation_name: op.name,
+        corps_id: corpsId,
+        faction,
+        type: op.type,
+        started_turn: op.started_turn,
+        ended_turn: state.meta.turn,
+        outcome,
+        objectives_targeted: objectives,
+        objectives_captured: capturedObjectives,
+        duration_turns: durationTurns,
+        total_attacks: totalAttacks,
+        casualties_suffered: totalSuffered,
+        casualties_inflicted: totalInflicted,
+        equipment_lost: totalEqLost,
+        equipment_destroyed: totalEqDestroyed,
+        equipment_captured: totalEqCaptured,
+        participating_brigades: [...op.participating_brigades],
+        initial_strength: initialStrength,
+        final_strength: finalStrength,
+        grade,
+        weekly_log: log,
+    };
+
+    if (op.commander_officer_id) {
+        aar.commander_officer_id = op.commander_officer_id;
+    }
+    if (commanderName) aar.commander_name = commanderName;
+    if (commanderRank) aar.commander_rank = commanderRank;
+    if (axisSummaries) aar.axis_summaries = axisSummaries;
+
+    if (!state.operation_history) state.operation_history = [];
+    state.operation_history.push(aar);
+}

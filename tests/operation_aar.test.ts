@@ -3,6 +3,7 @@ import {
     emptyPendingCasualties,
     gradeOperation,
     recordOperationWeeklyEntries,
+    finalizeOperationAAR,
     type CasualtyTally,
     type EquipmentTally,
     type OperationWeeklyEntry,
@@ -840,5 +841,387 @@ describe('recordOperationWeeklyEntries', () => {
         recordOperationWeeklyEntries(state, null);
 
         expect(op.weekly_log).toBeUndefined();
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// finalizeOperationAAR
+// ═══════════════════════════════════════════════════════════════════════════
+
+function makeFinalizeState(
+    ops: Record<string, CorpsOperation>,
+    formations: Record<string, any>,
+    politicalControllers: Record<string, string> = {},
+    turn = 10,
+    namedOfficerData?: any[],
+) {
+    const corps_command: Record<string, any> = {};
+    for (const [corpsId, op] of Object.entries(ops)) {
+        corps_command[corpsId] = {
+            command_span: 5,
+            subordinate_count: 3,
+            og_slots: 2,
+            active_ogs: [],
+            corps_exhaustion: 0,
+            stance: 'offensive',
+            active_operation: op,
+        };
+    }
+    const state: any = {
+        meta: { turn, phase: 'war' },
+        military: { formations, corps_command },
+        political: { political_controllers: politicalControllers },
+    };
+    if (namedOfficerData) {
+        state.military.named_officer_data = namedOfficerData;
+    }
+    return state;
+}
+
+function makeFinalizableOp(overrides: Partial<CorpsOperation> = {}): CorpsOperation {
+    return {
+        name: 'Op Corridor',
+        type: 'sector_attack',
+        phase: 'recovery',
+        started_turn: 5,
+        phase_started_turn: 9,
+        participating_brigades: ['bde_1', 'bde_2'],
+        objectives: ['op:brcko:brcko_1', 'op:brcko:brcko_2'],
+        recovery_reason: 'completed',
+        weekly_log: [
+            {
+                turn: 6,
+                phase: 'execution',
+                attacks_this_turn: 3,
+                objectives_captured_this_turn: ['op:brcko:brcko_1'],
+                objectives_lost_this_turn: [],
+                casualties_suffered: { killed: 10, wounded: 20 },
+                casualties_inflicted: { killed: 15, wounded: 30 },
+                equipment_lost: { tanks: 1, artillery: 0 },
+                equipment_destroyed: { tanks: 2, artillery: 1 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                brigade_count: 2,
+                momentum: 1,
+                notable_events: ['first_blood'],
+            },
+            {
+                turn: 7,
+                phase: 'execution',
+                attacks_this_turn: 2,
+                objectives_captured_this_turn: ['op:brcko:brcko_2'],
+                objectives_lost_this_turn: [],
+                casualties_suffered: { killed: 5, wounded: 10 },
+                casualties_inflicted: { killed: 8, wounded: 15 },
+                equipment_lost: { tanks: 0, artillery: 1 },
+                equipment_destroyed: { tanks: 1, artillery: 0 },
+                equipment_captured: { tanks: 1, artillery: 0 },
+                brigade_count: 2,
+                momentum: 2,
+                notable_events: ['breakthrough'],
+            },
+        ],
+        initial_strength: 3000,
+        ...overrides,
+    };
+}
+
+describe('finalizeOperationAAR', () => {
+    it('creates complete AAR with all fields populated', () => {
+        const op = makeFinalizableOp();
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active', corps_id: 'corps_1kr' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active', corps_id: 'corps_1kr' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(state.operation_history).toBeDefined();
+        expect(state.operation_history.length).toBe(1);
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.operation_id).toBe('corps_1kr:Op Corridor:t5');
+        expect(aar.operation_name).toBe('Op Corridor');
+        expect(aar.corps_id).toBe('corps_1kr');
+        expect(aar.faction).toBe('RS');
+        expect(aar.type).toBe('sector_attack');
+        expect(aar.started_turn).toBe(5);
+        expect(aar.ended_turn).toBe(10);
+        expect(aar.participating_brigades).toEqual(['bde_1', 'bde_2']);
+        expect(aar.initial_strength).toBe(3000);
+        expect(aar.final_strength).toBe(2500);
+        expect(aar.weekly_log.length).toBe(2);
+        expect(aar.grade).toBeDefined();
+        expect(aar.grade.stars).toBeGreaterThanOrEqual(1);
+        expect(aar.grade.stars).toBeLessThanOrEqual(5);
+    });
+
+    it('derives outcome=success from completed + all objectives held', () => {
+        const op = makeFinalizableOp({ recovery_reason: 'completed' });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(state.operation_history[0].outcome).toBe('success');
+    });
+
+    it('derives outcome=failure from max_failures + 0 objectives held', () => {
+        const op = makeFinalizableOp({ recovery_reason: 'max_failures' });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RBiH', 'op:brcko:brcko_2': 'RBiH' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(state.operation_history[0].outcome).toBe('failure');
+    });
+
+    it('derives outcome=partial from completed + some objectives held', () => {
+        const op = makeFinalizableOp({ recovery_reason: 'completed' });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RBiH' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(state.operation_history[0].outcome).toBe('partial');
+    });
+
+    it('derives outcome=orphaned from orphaned_sector', () => {
+        const op = makeFinalizableOp({ recovery_reason: 'orphaned_sector' });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(state.operation_history[0].outcome).toBe('orphaned');
+    });
+
+    it('denormalizes commander name/rank from named_officer_data', () => {
+        const op = makeFinalizableOp({ commander_officer_id: 'vrs_talic' });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+            10,
+            [
+                { id: 'vrs_talic', name: 'Momir Talić', rank: 'corps_commander', faction: 'RS' },
+                { id: 'vrs_mladic', name: 'Ratko Mladić', rank: 'army_commander', faction: 'RS' },
+            ],
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar = state.operation_history[0];
+        expect(aar.commander_officer_id).toBe('vrs_talic');
+        expect(aar.commander_name).toBe('Momir Talić');
+        expect(aar.commander_rank).toBe('corps_commander');
+    });
+
+    it('aggregates weekly_log totals correctly', () => {
+        const op = makeFinalizableOp();
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        // 3 + 2 = 5 total attacks
+        expect(aar.total_attacks).toBe(5);
+        // killed: 10+5=15, wounded: 20+10=30
+        expect(aar.casualties_suffered.killed).toBe(15);
+        expect(aar.casualties_suffered.wounded).toBe(30);
+        // killed: 15+8=23, wounded: 30+15=45
+        expect(aar.casualties_inflicted.killed).toBe(23);
+        expect(aar.casualties_inflicted.wounded).toBe(45);
+        // eq lost: tanks 1+0=1, artillery 0+1=1
+        expect(aar.equipment_lost.tanks).toBe(1);
+        expect(aar.equipment_lost.artillery).toBe(1);
+        // eq destroyed: tanks 2+1=3, artillery 1+0=1
+        expect(aar.equipment_destroyed.tanks).toBe(3);
+        expect(aar.equipment_destroyed.artillery).toBe(1);
+        // eq captured: tanks 0+1=1, artillery 0+0=0
+        expect(aar.equipment_captured.tanks).toBe(1);
+        expect(aar.equipment_captured.artillery).toBe(0);
+    });
+
+    it('builds axis_summaries for multi-axis ops', () => {
+        const op = makeFinalizableOp({
+            objectives: undefined,
+            axes: [
+                {
+                    axis_id: 'axis_north',
+                    name: 'Northern Push',
+                    assigned_brigades: ['bde_1'] as any[],
+                    objectives: ['op:brcko:brcko_1'],
+                    current_objective_index: 0,
+                    status: 'complete',
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                    momentum: 2,
+                    attack_attempt_count: 3,
+                    objective_capture_count: 1,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                },
+                {
+                    axis_id: 'axis_south',
+                    name: 'Southern Push',
+                    assigned_brigades: ['bde_2'] as any[],
+                    objectives: ['op:brcko:brcko_2'],
+                    current_objective_index: 0,
+                    status: 'complete',
+                    failure_count: 1,
+                    consecutive_failures_on_current: 0,
+                    momentum: 1,
+                    attack_attempt_count: 2,
+                    objective_capture_count: 1,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                },
+            ],
+            weekly_log: [
+                {
+                    turn: 6,
+                    phase: 'execution',
+                    attacks_this_turn: 2,
+                    objectives_captured_this_turn: [],
+                    objectives_lost_this_turn: [],
+                    casualties_suffered: { killed: 8, wounded: 16 },
+                    casualties_inflicted: { killed: 12, wounded: 24 },
+                    equipment_lost: { tanks: 1, artillery: 0 },
+                    equipment_destroyed: { tanks: 1, artillery: 1 },
+                    equipment_captured: { tanks: 0, artillery: 0 },
+                    brigade_count: 2,
+                    momentum: 0,
+                    notable_events: [],
+                    axis_entries: {
+                        axis_north: {
+                            attacks_this_turn: 1,
+                            objectives_captured_this_turn: [],
+                            objectives_lost_this_turn: [],
+                            casualties_suffered: { killed: 5, wounded: 10 },
+                            casualties_inflicted: { killed: 8, wounded: 16 },
+                            equipment_lost: { tanks: 1, artillery: 0 },
+                            equipment_destroyed: { tanks: 1, artillery: 0 },
+                            equipment_captured: { tanks: 0, artillery: 0 },
+                        },
+                        axis_south: {
+                            attacks_this_turn: 1,
+                            objectives_captured_this_turn: [],
+                            objectives_lost_this_turn: [],
+                            casualties_suffered: { killed: 3, wounded: 6 },
+                            casualties_inflicted: { killed: 4, wounded: 8 },
+                            equipment_lost: { tanks: 0, artillery: 0 },
+                            equipment_destroyed: { tanks: 0, artillery: 1 },
+                            equipment_captured: { tanks: 0, artillery: 0 },
+                        },
+                    },
+                },
+            ],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.axis_summaries).toBeDefined();
+        expect(aar.axis_summaries!.length).toBe(2);
+
+        const north = aar.axis_summaries!.find(a => a.axis_id === 'axis_north')!;
+        expect(north.axis_name).toBe('Northern Push');
+        expect(north.brigades).toEqual(['bde_1']);
+        expect(north.objectives_targeted).toEqual(['op:brcko:brcko_1']);
+        expect(north.objectives_captured).toEqual(['op:brcko:brcko_1']);
+        expect(north.total_attacks).toBe(1);
+        expect(north.casualties_suffered.killed).toBe(5);
+
+        const south = aar.axis_summaries!.find(a => a.axis_id === 'axis_south')!;
+        expect(south.axis_name).toBe('Southern Push');
+        expect(south.total_attacks).toBe(1);
+        expect(south.casualties_suffered.killed).toBe(3);
+    });
+
+    it('grades the operation (stars 1-5)', () => {
+        const op = makeFinalizableOp();
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.grade.stars).toBeGreaterThanOrEqual(1);
+        expect(aar.grade.stars).toBeLessThanOrEqual(5);
+        expect(aar.grade.verdict).toBeTruthy();
+        expect(aar.grade.factors.objective_completion).toBeGreaterThanOrEqual(0);
+        expect(aar.grade.factors.exchange_ratio).toBeGreaterThanOrEqual(0);
+        expect(aar.grade.factors.tempo).toBeGreaterThanOrEqual(0);
+        expect(aar.grade.factors.preservation).toBeGreaterThanOrEqual(0);
+    });
+
+    it('appends to existing operation_history', () => {
+        const op = makeFinalizableOp();
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+        state.operation_history = [{ operation_id: 'existing' } as any];
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(state.operation_history.length).toBe(2);
+        expect(state.operation_history[0].operation_id).toBe('existing');
+        expect(state.operation_history[1].operation_id).toBe('corps_1kr:Op Corridor:t5');
     });
 });

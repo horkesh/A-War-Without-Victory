@@ -38,6 +38,7 @@ import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { releaseOperationCommander } from './officer_system.js';
+import { finalizeOperationAAR } from './operation_aar.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Equipment priority
@@ -254,9 +255,9 @@ function collectObjectiveApproachOsids(
     objectives: string[]
 ): Set<string> {
     const approachOsids = new Set<string>();
-    if (!state.corps_front_sectors || objectives.length === 0) return approachOsids;
+    if (!state.military.corps_front_sectors || objectives.length === 0) return approachOsids;
     const objectiveSet = new Set(objectives);
-    for (const sector of Object.values(state.corps_front_sectors)) {
+    for (const sector of Object.values(state.military.corps_front_sectors)) {
         if (sector.corps_id !== corpsId) continue;
         for (const subSegment of sector.sub_segments ?? []) {
             const touchesObjective = subSegment.enemy_osids.some((osid) => objectiveSet.has(osid));
@@ -279,7 +280,7 @@ function areParticipantsReadyForExecution(
     const objectiveApproachOsids = collectObjectiveApproachOsids(state, corpsId, objectives);
     let activeParticipantCount = 0;
     for (const brigadeId of participatingBrigades) {
-        const brigade = state.formations?.[brigadeId];
+        const brigade = state.military.formations?.[brigadeId];
         if (!brigade || brigade.status !== 'active') continue;
         const location = brigade.location_osid;
         if (typeof location !== 'string' || location.length === 0) return false;
@@ -340,7 +341,7 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
 
 function applyCohesionDelta(state: GameState, brigadeIds: FormationId[], delta: number): void {
     for (const brigadeId of [...brigadeIds].sort(strictCompare)) {
-        const brigade = state.formations?.[brigadeId];
+        const brigade = state.military.formations?.[brigadeId];
         if (!brigade || brigade.status !== 'active') continue;
         const next = Math.max(0, Math.min(100, (brigade.cohesion ?? 100) + delta));
         brigade.cohesion = Math.round(next * 10) / 10;
@@ -349,7 +350,7 @@ function applyCohesionDelta(state: GameState, brigadeIds: FormationId[], delta: 
 
 function applyDigInOnHalt(state: GameState, brigadeIds: FormationId[]): void {
     for (const brigadeId of [...brigadeIds].sort(strictCompare)) {
-        const brigade = state.formations?.[brigadeId];
+        const brigade = state.military.formations?.[brigadeId];
         if (!brigade || brigade.status !== 'active') continue;
         brigade.posture = 'dig_in';
     }
@@ -363,12 +364,12 @@ function applyArtilleryPreparation(
     if (!operation.artillery_preparation || operation.artillery_preparation_consumed) return;
     const currentObjective = operation.objectives?.[operation.current_objective_index ?? 0];
     if (typeof currentObjective !== 'string' || currentObjective.length === 0) return;
-    if (!state.heavy_munitions_reserve) state.heavy_munitions_reserve = {};
-    const currentReserve = state.heavy_munitions_reserve[faction] ?? 0;
+    if (!state.military.heavy_munitions_reserve) state.military.heavy_munitions_reserve = {};
+    const currentReserve = state.military.heavy_munitions_reserve[faction] ?? 0;
     if (currentReserve < BOMBARDMENT_PREP_COST) return;
-    state.heavy_munitions_reserve[faction] = Math.max(0, currentReserve - BOMBARDMENT_PREP_COST);
-    for (const formationId of Object.keys(state.formations ?? {}).sort(strictCompare)) {
-        const formation = state.formations?.[formationId];
+    state.military.heavy_munitions_reserve[faction] = Math.max(0, currentReserve - BOMBARDMENT_PREP_COST);
+    for (const formationId of Object.keys(state.military.formations ?? {}).sort(strictCompare)) {
+        const formation = state.military.formations?.[formationId];
         if (!formation || formation.status !== 'active') continue;
         if (formation.location_osid !== currentObjective || formation.faction === faction) continue;
         formation.dig_in_progress = 0;
@@ -378,8 +379,8 @@ function applyArtilleryPreparation(
 }
 
 function fullyRevealProbeSectorIntel(state: GameState, operation: CorpsOperation): void {
-    if (operation.type !== 'probe' || !operation.sector_id || !state.sector_intel?.[operation.sector_id]) return;
-    for (const record of state.sector_intel[operation.sector_id]) {
+    if (operation.type !== 'probe' || !operation.sector_id || !state.military.sector_intel?.[operation.sector_id]) return;
+    for (const record of state.military.sector_intel[operation.sector_id]) {
         record.confidence = 1;
     }
 }
@@ -389,11 +390,11 @@ function resolveOperationSectorId(
     corpsId: FormationId,
     objectives: string[],
 ): string | null {
-    if (!state.corps_front_sectors || objectives.length === 0) return null;
+    if (!state.military.corps_front_sectors || objectives.length === 0) return null;
     const objectiveSet = new Set(objectives);
     let bestSectorId: string | null = null;
     let bestOverlap = 0;
-    for (const sector of Object.values(state.corps_front_sectors)) {
+    for (const sector of Object.values(state.military.corps_front_sectors)) {
         if (sector.corps_id !== corpsId) continue;
         let overlap = 0;
         for (const ss of sector.sub_segments ?? []) {
@@ -429,12 +430,12 @@ function computeSupplyReadiness(
     for (const e of fac.by_osid) osidState.set(e.osid, e.state);
 
     const reserveLevel = state.meta?.supply_reserves_enabled
-        ? ((state.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
+        ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
         : 100;
 
     let adequate = 0;
     for (const bid of participatingBrigades) {
-        const b = state.formations?.[bid];
+        const b = state.military.formations?.[bid];
         if (!b || b.status !== 'active') continue;
         const rawSt = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
         const st = state.meta?.supply_reserves_enabled
@@ -459,7 +460,7 @@ export function advanceSectorOffensives(
     state: GameState,
     supplyByOsid?: SupplyStateByOsidReport | null
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
@@ -470,7 +471,7 @@ export function advanceSectorOffensives(
         if (op.type !== 'sector_attack' && op.type !== 'feint' && op.type !== 'probe') continue;
 
         const turn = state.meta?.turn ?? 0;
-        const corps = state.formations?.[corpsId];
+        const corps = state.military.formations?.[corpsId];
         const faction = (corps?.faction ?? 'RS') as FactionId;
         const multiAxis = isMultiAxis(op);
 
@@ -483,8 +484,8 @@ export function advanceSectorOffensives(
         }
 
         // Validate sector still exists
-        if (op.sector_id && state.corps_front_sectors) {
-            if (!state.corps_front_sectors[op.sector_id]) {
+        if (op.sector_id && state.military.corps_front_sectors) {
+            if (!state.military.corps_front_sectors[op.sector_id]) {
                 if (op.phase !== 'recovery') {
                     const anyAttempts = multiAxis
                         ? sumAxesField(op.axes!, 'attack_attempt_count') > 0
@@ -525,8 +526,8 @@ export function advanceSectorOffensives(
 
             if (op.type === 'feint' && elapsed >= FEINT_PLANNING_TURNS) {
                 applyCohesionDelta(state, allBrigades, -5);
-                if (!state.general_supply_reserve) state.general_supply_reserve = {};
-                state.general_supply_reserve[faction] = Math.max(0, (state.general_supply_reserve[faction] ?? 0) - 0.5);
+                if (!state.military.general_supply_reserve) state.military.general_supply_reserve = {};
+                state.military.general_supply_reserve[faction] = Math.max(0, (state.military.general_supply_reserve[faction] ?? 0) - 0.5);
                 beginRecovery(op, turn, 'manual_termination');
                 continue;
             }
@@ -548,8 +549,8 @@ export function advanceSectorOffensives(
                     op.idle_execution_turn_streak = 0;
                 }
 
-                if (op.sector_id && Array.isArray(state.opsec_sectors)) {
-                    state.opsec_sectors = state.opsec_sectors.filter((sectorId) => sectorId !== op.sector_id);
+                if (op.sector_id && Array.isArray(state.military.opsec_sectors)) {
+                    state.military.opsec_sectors = state.military.opsec_sectors.filter((sectorId) => sectorId !== op.sector_id);
                 }
                 if (forcedLaunch) {
                     applyCohesionDelta(state, allBrigades, -EARLY_LAUNCH_COHESION_PENALTY);
@@ -594,6 +595,9 @@ export function advanceSectorOffensives(
             if (elapsed >= recoveryDuration) {
                 const exhaustionCost = op.type === 'feint' || op.type === 'probe' ? 5 : 15;
                 cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + exhaustionCost);
+                if (op.type === 'sector_attack') {
+                    finalizeOperationAAR(state, corpsId, op);
+                }
                 releaseOperationCommander(state, op);
                 cmd.active_operation = null;
             }
@@ -617,7 +621,7 @@ export function updateSectorOffensiveResults(
     state: GameState,
     reverseMap?: OperationalToCanonicalReverseMap | null
 ): void {
-    const corpsCommand = state.corps_command;
+    const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
@@ -627,7 +631,7 @@ export function updateSectorOffensiveResults(
         const op = cmd.active_operation;
         if ((op.type !== 'sector_attack' && op.type !== 'probe') || op.phase !== 'execution') continue;
 
-        const corps = state.formations?.[corpsId];
+        const corps = state.military.formations?.[corpsId];
         const faction = (corps?.faction ?? 'RS') as FactionId;
         const turn = state.meta?.turn ?? 0;
 
@@ -686,12 +690,12 @@ function updateMultiAxisResults(
             // Check if any of THIS AXIS's brigades attacked this objective
             const adjacentFriendlyOsids = collectAdjacentFriendlyOsids(state, corpsId, currentObjective);
             const anyAttacked = axis.assigned_brigades.some(bid => {
-                const b = state.formations?.[bid];
+                const b = state.military.formations?.[bid];
                 if (!b || (b.posture !== 'attack' && b.posture !== 'assault')) return false;
                 return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
             });
             const anyMoved = axis.assigned_brigades.some(bid => {
-                const movement = state.brigade_movement_orders?.[bid];
+                const movement = state.military.brigade_movement_orders?.[bid];
                 return Array.isArray(movement?.destination_sids) && movement.destination_sids.length > 0;
             });
 
@@ -767,8 +771,8 @@ function updateMultiAxisResults(
 /** Collect friendly OSIDs adjacent to a target objective for attack detection. */
 function collectAdjacentFriendlyOsids(state: GameState, corpsId: FormationId, targetOsid: string): Set<string> {
     const result = new Set<string>();
-    if (!state.corps_front_sectors) return result;
-    for (const sector of Object.values(state.corps_front_sectors)) {
+    if (!state.military.corps_front_sectors) return result;
+    for (const sector of Object.values(state.military.corps_front_sectors)) {
         if (sector.corps_id !== corpsId) continue;
         for (const ss of sector.sub_segments) {
             if (ss.enemy_osids.includes(targetOsid)) {
@@ -807,12 +811,12 @@ function updateLegacyFlatResults(
     } else {
         const adjacentFriendlyOsids = collectAdjacentFriendlyOsids(state, corpsId, currentObjective);
         const anyAttacked = op.participating_brigades.some(bid => {
-            const b = state.formations?.[bid];
+            const b = state.military.formations?.[bid];
             if (!b || (b.posture !== 'attack' && b.posture !== 'assault')) return false;
             return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
         });
         const anyMoved = op.participating_brigades.some(bid => {
-            const movement = state.brigade_movement_orders?.[bid];
+            const movement = state.military.brigade_movement_orders?.[bid];
             return Array.isArray(movement?.destination_sids) && movement.destination_sids.length > 0;
         });
 
@@ -922,7 +926,7 @@ export function evaluateSectorOffensiveLaunch(
 
     // Sort by equipment priority (mechanized/motorized first) before reserve slicing.
     // Best offensive assets become participants; weakest held back as reserves.
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     const sortedByPriority = [...sectorBrigadeIds].sort((a, b) => {
         const fa = formations[a];
         const fb = formations[b];
@@ -938,7 +942,7 @@ export function evaluateSectorOffensiveLaunch(
 
     // Pick staging OSID: first friendly OSID in the sector (deterministic, sorted)
     let stagingOsid: string | undefined;
-    const sector = state.corps_front_sectors?.[sectorId];
+    const sector = state.military.corps_front_sectors?.[sectorId];
     if (sector) {
         const friendlyOsids: string[] = [];
         for (const ss of sector.sub_segments) {
