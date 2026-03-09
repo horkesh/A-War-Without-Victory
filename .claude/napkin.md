@@ -137,10 +137,12 @@
    (5) Sector reserves: `reserve_brigade_ids`, `reserve_fraction` (10-30% by stance).
    (6) Territory assignment: brigade-presence-first in `mapOsidsToCorps` (Phase 1 lock + Phase 2 BFS gap-fill).
    REMAINING: Elite/professional brigades should get flatter home distance curve (floor 0.85 vs 0.70).
-2. **[2026-03-09] Reserve proximity gating — MAX_RESERVE_HOPS=3**
-   Do instead: Reserves must be within 3 BFS hops of sector front through friendly territory. `reclassifyRearBrigades` uses multi-source BFS from front OSIDs. Cap sorted by distance (closest first), not alphabetical. Brigades beyond range dropped from sector entirely. Faction-wide `deduplicateBrigadesAcrossSectors` runs after Step 8 to prevent cross-sector duplicates.
-3. **[2026-03-09] Motorized/mechanized priority for offensive ops**
-   Do instead: `getEquipmentOffensivePriority()` in `sector_offensive.ts` (mechanized=3, motorized=2, mountain=1, default=0). Operation participant lists sorted by equipment priority before reserve slicing. Applied in `evaluateSectorOffensiveLaunch` and `bot_corps_directives.ts` clustering. Best offensive assets participate, weakest held as reserves.
+2. **[2026-03-09] Territory-based classification — territory_osids lookup**
+   Do instead: `classifyBrigadesByTerritory` uses `territoryOsidToSectorIdx` from Voronoi Step 5 as Priority 4/5. Replaces broken Priority 5 BFS that failed on fragmented friendly territory. Reserve-zone OSIDs included in territory map (cross-corps 1-hop fallback). Last-resort BFS kept for MAX_TERRITORY_OSIDS cap edge cases. Result: 3 unassigned (down from 44).
+3. **[2026-03-09] Every brigade stays in its sector — no reserve cap**
+   Do instead: Reserve cap REMOVED from both `reclassifyRearBrigades` and `rearrangeSectorsForCorps`. Corps needs full visibility of all manpower. Reserves sorted by proximity (closest first). `deduplicateBrigadesAcrossSectors` prevents cross-sector duplicates after Step 8.
+4. **[2026-03-09] Mech/moto staging + priority for offensive ops**
+   Do instead: `getEquipmentOffensivePriority()` in `sector_offensive.ts` (mechanized=3, motorized=2, mountain=1, default=0). Staging pass in `bot_corps_directives.ts`: scans reserves for mech/moto (priority ≥ 2), issues `sector_reassignment_orders` to priority sector. Op participant lists sorted by equipment priority. Mech/moto are offensive tools, not line troops.
 4. **[2026-03-07] Sector intel replaces recon_intelligence (DELETED) — fog LIVE**
    Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war is LIVE: `GameStateAdapter` derives `fogOfWar` from `sector_intel` + `corps_front_sectors`; `buildFogOfWarGeoJSON` renders it; `MapContainer` toggles via `fogVisible`. `ReconIntelligenceView` + `reconIntelligence` field fully removed. `recon_intelligence.ts` is DELETED — do not reference it.
 5. **[2026-03-07] Sector orders + OPSEC are sector-state, not brigade hacks**

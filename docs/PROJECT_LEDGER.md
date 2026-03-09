@@ -7,6 +7,22 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-09] Territory-Based Classification + Mech/Moto Staging (n452)
+
+Three changes targeting brigade sector assignment and offensive staging. Calibration: **87.5% area-weighted** (stable from n438 87.2%). Unassigned non-exempt brigades: **3** (down from 44 at start of session → 15 → 3).
+
+**Territory-based classification** (corps_front_sectors.ts): Build `territoryOsidToSectorIdx` from Voronoi `territory_osids` (Step 5) and use as Priority 4/5 in `classifyBrigadesByTerritory` (Step 6). Priority 4: territory match + correct corps. Priority 5: territory match cross-corps fallback. Last-resort BFS kept for brigades in unclaimed territory (MAX_TERRITORY_OSIDS cap). Fixed reserve-zone exclusion bug: brigades 1-hop behind a different corps's front were excluded from territory map, preventing Priority 4 from finding them.
+
+**Reserve cap removal** (sector_rearrangement.ts, corps_front_sectors.ts): Removed the 1-2 per-sector reserve cap from both `reclassifyRearBrigades` (already done in prior commit) and `rearrangeSectorsForCorps`. Corps needs full visibility of all manpower for planning, threat balancing, and proactive mech/moto staging. Reserves sorted by proximity (closest first) for reinforcement priority.
+
+**Mech/moto staging** (bot_corps_directives.ts): After density equalization, new staging pass scans all corps sectors' reserves for motorized/mechanized brigades (equipment priority ≥ 2) and issues `sector_reassignment_orders` to move them to the priority sector. Corps AI now proactively stages offensive tools before launching operations.
+
+### Changes
+- `src/sim/combat/corps_front_sectors.ts` — territory_osids lookup in classification, remove reserve-zone exclusion
+- `src/sim/combat/sector_rearrangement.ts` — remove reserve cap
+- `src/sim/combat/bot_corps_directives.ts` — mech/moto staging pass
+
+
 ## [2026-03-09] Phase 2: Warroom UI Completion
 
 ### Summary
