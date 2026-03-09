@@ -149,6 +149,8 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'paramilitary_deployment_count',
     // Turn AAR summaries (per-turn compiled report data)
     'turn_summaries',
+    // Operation After-Action Reports (persisted for GUI + artifact export)
+    'operation_history',
 ]);
 
 /**

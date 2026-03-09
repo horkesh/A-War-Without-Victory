@@ -28,6 +28,7 @@
  * - Phase 21/22 displacement and sustainability types
  */
 import type { BrigadeHistory } from './brigade_history.js';
+import type { OperationWeeklyEntry, PendingOperationCasualties, OperationAAR } from '../sim/combat/operation_aar.js';
 import type { CasualtyLedger } from './casualty_ledger.js';
 import type { CombatSummary } from './combat_summary.js';
 import type { BrigadeDecoration } from './decoration_types.js';
@@ -246,6 +247,16 @@ export interface CorpsOperation {
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
+
+    // --- AAR accumulator fields (populated during lifecycle) ---
+    /** Per-turn log entries for the operation AAR. */
+    weekly_log?: OperationWeeklyEntry[];
+    /** Total personnel of participating brigades at operation start. */
+    initial_strength?: number;
+    /** Pending casualties from battles this turn (drained into weekly_log). */
+    pending_casualties?: PendingOperationCasualties;
+    /** Previous turn's objective control snapshot for diff (OSID→faction). */
+    _prev_objective_state?: Record<string, string | null>;
 }
 
 export interface SectorStanceOrder {
@@ -1563,6 +1574,8 @@ export interface GameState {
     opsec_sectors?: string[];
     /** Tracks which operation names have been used (name → turn used). Sequential consumption, no repeats. */
     used_operation_names?: Record<string, number>;
+    /** Completed operation After-Action Reports (persisted for GUI + artifact export). */
+    operation_history?: OperationAAR[];
 
     // --- Local Truces (Graz Accords, 6 May 1992) ---
     /**
