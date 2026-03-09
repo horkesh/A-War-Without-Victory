@@ -199,16 +199,11 @@ export function predictCombatOutcome(
 
     const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
     const fogMult = learnedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
-    if (defenderFormations.length > 0) {
-        // Brigade physically at the OSID — standard resolution
-        defenderHasBrigade = true;
-        const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-        defenderPower = totalPower * fogMult;
-        defenderFormation = primary;
-        defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
-        defenderCohesion = defenderFormation.cohesion ?? 60;
-    } else if (isEnemyControlled) {
-        // No brigade at the OSID. Try sector-pooled defense: mirror of resolver logic.
+
+    // ── Unified sector defense model (mirrors resolver) ──────────────
+    // Defense at any OSID in a sector = total sector power / edges × density.
+    // No distinction between "brigade at OSID" vs "sector coverage".
+    if (isEnemyControlled) {
         const sector = findSectorForEnemyOsid(state, targetOsid, controller);
         const sectorBrigades = sector
             ? sector.assigned_brigade_ids
@@ -217,15 +212,32 @@ export function predictCombatOutcome(
             : [];
         if (sectorBrigades.length > 0) {
             defenderHasBrigade = true;
-            const coverageMult = frontDensityModifier(sector!.assigned_brigade_ids.length, sector!.length_edges) * SECTOR_COVERAGE_PENALTY;
+            const densityMod = frontDensityModifier(sectorBrigades.length, sector!.length_edges);
+            const edgeShare = sector!.length_edges > 0 ? 1 / sector!.length_edges : 1;
             const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-            defenderPower = totalPower * coverageMult * fogMult;
+            defenderPower = totalPower * edgeShare * densityMod * fogMult;
             defenderFormation = primary;
+            defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
+            defenderCohesion = defenderFormation.cohesion ?? 60;
+        } else if (defenderFormations.length > 0) {
+            // Brigade at OSID but not in any sector (enclave/garrison edge case)
+            defenderHasBrigade = true;
+            const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+            defenderPower = totalPower * fogMult;
+            defenderFormation = primary;
+            defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
             defenderCohesion = defenderFormation.cohesion ?? 60;
         } else {
-            // Truly undefended: militia ghost only
+            // Truly undefended: no sector, no brigade — militia ghost only
             defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
         }
+    } else if (defenderFormations.length > 0) {
+        defenderHasBrigade = true;
+        const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+        defenderPower = totalPower * fogMult;
+        defenderFormation = primary;
+        defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
+        defenderCohesion = defenderFormation.cohesion ?? 60;
     } else {
         return null;
     }

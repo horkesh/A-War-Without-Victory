@@ -73,16 +73,22 @@ export function resolveEquipmentClass(f: { equipment_class?: string; tags?: stri
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Minimum brigades in sector to launch an offensive. */
-const MIN_BRIGADES_FOR_OFFENSIVE = 3;
+const MIN_BRIGADES_FOR_OFFENSIVE = 1;
 
 /** Maximum objectives per offensive. */
 const MAX_OBJECTIVES = 6;
 
 /** Maximum brigades participating in a single sector offensive. */
-const MAX_PARTICIPATING_BRIGADES = 12;
+const MAX_PARTICIPATING_BRIGADES = 20;
 
 /** Momentum cap. */
 const MOMENTUM_CAP = 3;
+
+/** Corps exhaustion decay per turn when idle (no active operation). */
+const EXHAUSTION_DECAY_IDLE = 3;
+
+/** Corps exhaustion decay per turn while running an operation. */
+const EXHAUSTION_DECAY_ACTIVE = 1;
 
 /** Maximum total failures before abort. */
 const MAX_TOTAL_FAILURES = 5;
@@ -463,6 +469,18 @@ export function advanceSectorOffensives(
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
+    // ── Per-turn corps exhaustion decay ────────────────────────────────────
+    // Corps recover from operational exhaustion each turn. Without decay,
+    // corps permanently exhaust after 2 operations and the war stalls.
+    const allCorpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    for (const cid of allCorpsIds) {
+        const cmd = corpsCommand[cid];
+        if (!cmd || cmd.corps_exhaustion <= 0) continue;
+        // Faster recovery when idle (no active op), slower when operating
+        const decayRate = cmd.active_operation ? EXHAUSTION_DECAY_ACTIVE : EXHAUSTION_DECAY_IDLE;
+        cmd.corps_exhaustion = Math.max(0, Math.round((cmd.corps_exhaustion - decayRate) * 10) / 10);
+    }
+
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
     for (const corpsId of corpsIds) {
         const cmd = corpsCommand[corpsId];
@@ -687,19 +705,26 @@ function updateMultiAxisResults(
             axis.consecutive_failures_on_current = 0;
             fullyRevealProbeSectorIntel(state, op);
         } else {
-            // Check if any of THIS AXIS's brigades attacked this objective
+            // Check if any of THIS AXIS's brigades attacked (objective or intermediate)
             const adjacentFriendlyOsids = collectAdjacentFriendlyOsids(state, corpsId, currentObjective);
-            const anyAttacked = axis.assigned_brigades.some(bid => {
+            const anyAttackedObjective = axis.assigned_brigades.some(bid => {
                 const b = state.military.formations?.[bid];
                 if (!b || (b.posture !== 'attack' && b.posture !== 'assault')) return false;
                 return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
             });
+            // Also count brigades attacking intermediate targets (fighting through)
+            const anyAttackedAnything = axis.assigned_brigades.some(bid => {
+                const b = state.military.formations?.[bid];
+                return b != null && (b.posture === 'attack' || b.posture === 'assault');
+            });
+            const anyAttacked = anyAttackedObjective || anyAttackedAnything;
             const anyMoved = axis.assigned_brigades.some(bid => {
                 const movement = state.military.brigade_movement_orders?.[bid];
                 return Array.isArray(movement?.destination_sids) && movement.destination_sids.length > 0;
             });
 
-            if (anyAttacked) {
+            if (anyAttackedObjective) {
+                // Direct attack on current objective — standard failure tracking
                 axis.attack_attempt_count += 1;
                 axis.idle_execution_turn_streak = 0;
                 axis.last_result = 'failed';
@@ -712,6 +737,14 @@ function updateMultiAxisResults(
                     axis.current_objective_index = currentIdx + 1;
                     axis.consecutive_failures_on_current = 0;
                 }
+            } else if (anyAttackedAnything) {
+                // Intermediate attack (fighting through toward objective)
+                // Counts as approach progress, not a failure on the current objective
+                axis.attack_attempt_count += 1;
+                axis.idle_execution_turn_streak = 0;
+                axis.last_result = 'approach';
+                axis.momentum = 0;
+                axis.movement_only_execution_turns += 1;
             } else {
                 if (anyMoved) {
                     // Approach movement: brigade is marching toward objective.
@@ -729,7 +762,7 @@ function updateMultiAxisResults(
                     axis.consecutive_failures_on_current += 1;
                 }
 
-                if (!anyMoved && !anyAttacked && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= 2) {
+                if (!anyMoved && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= 2) {
                     axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
                     axis.status = 'stalled';
                     continue;
@@ -810,17 +843,21 @@ function updateLegacyFlatResults(
         fullyRevealProbeSectorIntel(state, op);
     } else {
         const adjacentFriendlyOsids = collectAdjacentFriendlyOsids(state, corpsId, currentObjective);
-        const anyAttacked = op.participating_brigades.some(bid => {
+        const anyAttackedObjective = op.participating_brigades.some(bid => {
             const b = state.military.formations?.[bid];
             if (!b || (b.posture !== 'attack' && b.posture !== 'assault')) return false;
             return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
+        });
+        const anyAttackedAnything = op.participating_brigades.some(bid => {
+            const b = state.military.formations?.[bid];
+            return b != null && (b.posture === 'attack' || b.posture === 'assault');
         });
         const anyMoved = op.participating_brigades.some(bid => {
             const movement = state.military.brigade_movement_orders?.[bid];
             return Array.isArray(movement?.destination_sids) && movement.destination_sids.length > 0;
         });
 
-        if (anyAttacked) {
+        if (anyAttackedObjective) {
             op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
             op.idle_execution_turn_streak = 0;
             op.last_result = 'failed';
@@ -833,6 +870,13 @@ function updateLegacyFlatResults(
                 op.current_objective_index = currentIdx + 1;
                 op.consecutive_failures_on_current = 0;
             }
+        } else if (anyAttackedAnything) {
+            // Intermediate attack: fighting through toward objective
+            op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
+            op.idle_execution_turn_streak = 0;
+            op.last_result = 'approach';
+            op.momentum = 0;
+            op.movement_only_execution_turns = (op.movement_only_execution_turns ?? 0) + 1;
         } else {
             if (anyMoved) {
                 // Approach movement: brigade is marching toward objective.
@@ -850,7 +894,7 @@ function updateLegacyFlatResults(
                 op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
             }
 
-            if (!anyMoved && !anyAttacked && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 2) {
+            if (!anyMoved && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 2) {
                 op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);
                 beginRecovery(op, turn, 'no_logged_attempt');
                 return;
@@ -903,8 +947,8 @@ export function evaluateSectorOffensiveLaunch(
     // Must have enough brigades
     if (sectorBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
 
-    // Must have enough enemy targets
-    if (sectorEnemyOsids.length < 2) return null;
+    // Must have at least one enemy target adjacent to sector
+    if (sectorEnemyOsids.length < 1) return null;
 
     // Record supply readiness for diagnostics and downstream brigade-level attack gating.
     // Launch itself is allowed even under poor sector-wide supply so the force can stage and
@@ -935,7 +979,8 @@ export function evaluateSectorOffensiveLaunch(
         if (pa !== pb) return pb - pa; // Higher priority first
         return strictCompare(a, b); // Deterministic tiebreak
     });
-    const reserveCount = Math.max(1, Math.floor(sortedByPriority.length * 0.15));
+    // Reserve: 15% of force, but no reserve for small ops (≤3 brigades — every unit needed)
+    const reserveCount = sortedByPriority.length <= 3 ? 0 : Math.max(1, Math.floor(sortedByPriority.length * 0.15));
     const participating = sortedByPriority
         .slice(0, sortedByPriority.length - reserveCount)
         .slice(0, MAX_PARTICIPATING_BRIGADES);

@@ -53,27 +53,7 @@ export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
         if ((brigade.counterattack_window_turns ?? 0) > 0) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
         } else {
-            const homeDirective = cmd?.directive ?? null;
-            if (homeDirective && homeDirective.offensive_targets.length > 0) {
-                const homeTargetSet = new Set(homeDirective.offensive_targets);
-                const homeAdjEnemy = getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap);
-                const homeTargets = homeAdjEnemy.filter(o => homeTargetSet.has(o));
-                if (homeTargets.length > 0) {
-                    const predictions = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
-                    const freeTarget = predictions.find(t =>
-                        homeTargets.includes(t.osid) &&
-                        !t.prediction.defender_has_brigade &&
-                        (chosenTargets.get(t.osid) ?? 0) < (homeDirective.max_attackers_per_target)
-                    );
-                    if (freeTarget) {
-                        result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
-                        result.attack_orders[brigade.id] = freeTarget.osid;
-                        result.attack_scores[brigade.id] = 800;
-                        chosenTargets.set(freeTarget.osid, (chosenTargets.get(freeTarget.osid) ?? 0) + 1);
-                        return true;
-                    }
-                }
-            }
+            // Home defense: defend in place. Attacks only through operations.
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         }
         return true;
@@ -199,6 +179,29 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 }
             }
 
+            // ── Attack through: fight toward objective ─────────────────
+            // If not adjacent to objective, attack the best adjacent enemy
+            // OSID to open a path. Real armies fight through intermediate
+            // positions — they don't sit idle waiting for a clear approach.
+            if (targets.length > 0) {
+                const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
+                // Prefer targets closer to the objective (on the path)
+                const bestIntermediate = targets.find((t) => {
+                    const alreadyAt = chosenTargets.get(t.osid) ?? 0;
+                    if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;
+                    return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, probeThreshold);
+                });
+                if (bestIntermediate) {
+                    const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
+                    result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
+                    result.attack_orders[brigade.id] = bestIntermediate.osid;
+                    result.attack_scores[brigade.id] = 800; // Slightly below direct objective attack (900)
+                    chosenTargets.set(bestIntermediate.osid, (chosenTargets.get(bestIntermediate.osid) ?? 0) + 1);
+                    return true;
+                }
+            }
+
+            // No attackable targets — try to march toward approach position
             const objectiveApproachOsids = getSectorOffensiveApproachOsids(
                 state,
                 activeOp15,
@@ -217,9 +220,6 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     reverseMap,
                     objectiveApproachOsids
                 );
-                // Named operations own their brigades: allow approach movement even when
-                // the intermediate front OSID is risky, otherwise execution can stall
-                // one hop short of a valid objective approach position.
                 if (approachStep) {
                     result.movement_orders[brigade.id] = approachStep;
                 }
@@ -234,7 +234,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
 
 export function evaluateReorganize(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, corpsStance, adjEnemy, directive, state, faction, result, chosenTargets, graphAnalysis, loc, adjacency } = ctx;
-    // --- Rule 3: Corps stance reorganize → rest, but grab adjacent undefended targets ---
+    // --- Rule 3: Corps stance reorganize → rest, defend in place ---
     if (corpsStance === 'reorganize') {
         // Deep-rear brigades should march toward front, not sit idle in reorganize
         if (adjEnemy.length === 0) {
@@ -246,26 +246,6 @@ export function evaluateReorganize(ctx: BrigadeEvaluationContext): boolean {
                     return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
                 });
                 if (!nearFront) return false; // deep rear — fall through to interior movement
-            }
-        }
-        if (adjEnemy.length > 0 && directive) {
-            const undefendedReorg = adjEnemy.filter(eo => {
-                if (!directive.offensive_targets.includes(eo)) return false;
-                const fmtsReorg = state.military.formations ?? {};
-                // Order-independent: checking if any defender exists (length === 0)
-                const hasDefender = Object.values(fmtsReorg).some(
-                    f => f != null && f.status === 'active' &&
-                        f.location_osid === eo && f.faction !== faction
-                );
-                return !hasDefender;
-            });
-            if (undefendedReorg.length > 0) {
-                const target = undefendedReorg[0]!;
-                result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
-                result.attack_orders[brigade.id] = target;
-                result.attack_scores[brigade.id] = 600;
-                chosenTargets.set(target, (chosenTargets.get(target) ?? 0) + 1);
-                return true;
             }
         }
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -307,7 +287,9 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
             }
         }
         // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
-        if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
+        // AND the brigade is not disrupted (routed brigades can't counter-attack)
+        const disruptedTurns = (brigade as { disrupted_turns?: number }).disrupted_turns ?? 0;
+        if (counterAttackTarget && adjEnemy.includes(counterAttackTarget) && disruptedTurns === 0) {
             const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
             const effDir = directive ?? effectiveDirectiveDefault;
             const maxAtt = effDir.max_attackers_per_target;
@@ -319,32 +301,6 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
                 result.attack_orders[brigade.id] = counter.osid;
                 result.attack_scores[brigade.id] = 1000; // Counter-attack: high priority
                 chosenTargets.set(counter.osid, (chosenTargets.get(counter.osid) ?? 0) + 1);
-                return true;
-            }
-        }
-        // Directive offensive target (rare during defensive but possible if corps has specific targets)
-        if (adjEnemy.length > 0 && directive && directive.offensive_targets.length > 0) {
-            const defOffTargetSet = new Set(directive.offensive_targets);
-            const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
-            const maxAtt = directive.max_attackers_per_target;
-            const viable = targets.find(t => {
-                if ((chosenTargets.get(t.osid) ?? 0) >= maxAtt) return false;
-                if (faction === 'HRHB' && isAlliedWithRBiH) {
-                    const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
-                    if (ctrl === 'RBiH') return false;
-                }
-                if (faction === 'RBiH' && isAlliedWithRBiH) {
-                    const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
-                    if (ctrl === 'HRHB') return false;
-                }
-                return defOffTargetSet.has(t.osid) &&
-                    isOutcomeSufficientForAttack(t.prediction.predicted_outcome, directive.min_attack_outcome);
-            });
-            if (viable) {
-                result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
-                result.attack_orders[brigade.id] = viable.osid;
-                result.attack_scores[brigade.id] = 500; // Defensive directive target: important
-                chosenTargets.set(viable.osid, (chosenTargets.get(viable.osid) ?? 0) + 1);
                 return true;
             }
         }
@@ -371,243 +327,27 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
 }
 
 export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsStance, brigadeSupplyState, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, targetAdjacentCount, loc, corpsId } = ctx;
+    const { brigade, corpsStance, adjEnemy, result } = ctx;
 
+    // ── Ops-only attack doctrine ──────────────────────────────────────────
+    // Brigades NEVER attack independently. All attacks go through operations
+    // (handled by evaluateSectorAttack). This function only handles non-op
+    // brigades in offensive/balanced stance: they defend on the front line
+    // and wait for the corps to assign them to an operation.
+    //
+    // The sole brigade-level exception is counter-attacks, handled in
+    // evaluateDefensive() — a brigade that lost a position last turn may
+    // counter-attack to retake it.
+
+    if (corpsStance !== 'offensive' && corpsStance !== 'balanced') return false;
     if (adjEnemy.length === 0) return false;
 
-    // --- Rule 5: Offensive/Balanced — evaluate attacks ---
-    // Multi-sector target preference: when corps has sector_targets, override
-    // offensive_targets with sector-specific targets for this brigade's sector.
-    let effectiveDirective = directive ?? effectiveDirectiveDefault;
-    if (directive?.sector_targets && Object.keys(directive.sector_targets).length > 0) {
-        const brigadeSectorId = findBrigadeSectorId(state, brigade);
-        if (brigadeSectorId && directive.sector_targets[brigadeSectorId]) {
-            effectiveDirective = {
-                ...directive,
-                offensive_targets: directive.sector_targets[brigadeSectorId]!,
-            };
-        }
-    }
-    // Supply strained: upgrade min_attack_outcome to 'victory', no pioneer attacks
-    const isSupplyStrained = brigadeSupplyState === 'strained';
-    if (isSupplyStrained) {
-        if ((OUTCOME_RANK[effectiveDirective.min_attack_outcome as PredictedOutcome] ?? 2) < (OUTCOME_RANK['victory'] ?? 5)) {
-            effectiveDirective = { ...effectiveDirective, min_attack_outcome: 'victory' };
-        }
-    }
-    // Sector offensive participation: override targets and thresholds
-    const activeOpLater = corpsId ? state.military.corps_command?.[corpsId]?.active_operation : null;
-    const isInSectorOffensive = activeOpLater?.type === 'sector_attack' &&
-        (activeOpLater.participating_brigades ?? []).includes(brigade.id); // Or isOperationParticipant(activeOpLater, brigade.id)
-    
-    if (isInSectorOffensive && activeOpLater) {
-        if (activeOpLater.phase === 'recovery') {
-            // Recovery: defend by default, but still grab adjacent undefended targets.
-            // A recovering brigade shouldn't ignore free territory right next door.
-            const undefendedAdj = adjEnemy.filter(eo => {
-                if (!directive?.offensive_targets.includes(eo)) return false;
-                const fmtsAdj = state.military.formations ?? {};
-                // Order-independent: checking if any defender exists (length === 0)
-                const hasDefender = Object.values(fmtsAdj).some(
-                    f => f != null && f.status === 'active' &&
-                        f.location_osid === eo && f.faction !== faction
-                );
-                return !hasDefender;
-            });
-            if (undefendedAdj.length > 0) {
-                const target = undefendedAdj[0]!;
-                result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
-                result.attack_orders[brigade.id] = target;
-                result.attack_scores[brigade.id] = 800;
-                chosenTargets.set(target, (chosenTargets.get(target) ?? 0) + 1);
-                return true;
-            }
-            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-            return true;
-        }
-        if (activeOpLater.phase === 'execution') {
-            // Named operations are sequential: participating brigades should focus on the
-            // current objective, not opportunistically attack unrelated corps targets.
-            effectiveDirective = applySectorOffensiveDirectiveOverride(effectiveDirective, activeOpLater, brigade.id);
-            if (activeOpLater.min_attack_outcome) {
-                effectiveDirective = {
-                    ...effectiveDirective,
-                    min_attack_outcome: activeOpLater.min_attack_outcome,
-                };
-            }
-            if (activeOpLater.tempo === 'methodical') {
-                effectiveDirective = {
-                    ...effectiveDirective,
-                    aggression_modifier: effectiveDirective.aggression_modifier - 0.05,
-                    reserve_fraction: Math.min(0.5, effectiveDirective.reserve_fraction + 0.10),
-                    min_attack_outcome: outcomeFromRank(Math.min(6, outcomeRank(effectiveDirective.min_attack_outcome) + 1)),
-                };
-            } else if (activeOpLater.tempo === 'all_out') {
-                effectiveDirective = {
-                    ...effectiveDirective,
-                    aggression_modifier: effectiveDirective.aggression_modifier + 0.10,
-                    reserve_fraction: Math.max(0, effectiveDirective.reserve_fraction - 0.10),
-                    min_attack_outcome: outcomeFromRank(Math.max(1, outcomeRank(effectiveDirective.min_attack_outcome) - 1)),
-                };
-            }
-            // Apply momentum bonuses (per-axis when multi-axis)
-            const brigadeAxis = getBrigadeAxis(activeOpLater, brigade.id);
-            const momentum = brigadeAxis ? (brigadeAxis.momentum ?? 0) : (activeOpLater.momentum ?? 0);
-            if (momentum > 0) {
-                const momentumAggression = momentum >= 3 ? 0.15 : momentum >= 2 ? 0.10 : 0.05;
-                effectiveDirective = {
-                    ...effectiveDirective,
-                    aggression_modifier: effectiveDirective.aggression_modifier + momentumAggression,
-                };
-                // Relax min_attack_outcome based on momentum
-                const rank: Record<string, number> = { decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1 };
-                const baseRank = rank[effectiveDirective.min_attack_outcome] ?? 2;
-                if (momentum >= 3 && baseRank > 2) {
-                    effectiveDirective = { ...effectiveDirective, min_attack_outcome: 'stalemate' };
-                } else if (momentum >= 2 && baseRank > 3) {
-                    effectiveDirective = { ...effectiveDirective, min_attack_outcome: 'costly_victory' };
-                }
-            }
-        }
-    }
-    // Cache directive arrays as Sets for O(1) lookups in hot scoring loops
-    const _offensiveTargetSet = new Set(effectiveDirective.offensive_targets);
-    const _holdOsidSet = new Set(effectiveDirective.hold_osids);
-    const _avoidOsidSet = new Set(effectiveDirective.avoid_osids);
-
-    // Alliance filter: don't attack allied faction's territory
-    let filteredEnemy = adjEnemy;
-    if (faction === 'HRHB' && isAlliedWithRBiH) {
-        filteredEnemy = adjEnemy.filter(o => getPoliticalControllerOSID(state, o, reverseMap) !== 'RBiH');
-    } else if (faction === 'RBiH' && isAlliedWithRBiH) {
-        filteredEnemy = adjEnemy.filter(o => getPoliticalControllerOSID(state, o, reverseMap) !== 'HRHB');
-    }
-
-    if (filteredEnemy.length > 0) {
-        const supplyPenalty = getAttackerSupplyPenalty(loc, faction, supplyStateByOsid);
-        const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
-
-        // Filter targets: respect alliance, respect avoid_osids
-        const validTargets = targets.filter(t => {
-            if (faction === 'HRHB' && isAlliedWithRBiH) {
-                const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
-                if (ctrl === 'RBiH') return false;
-            }
-            if (faction === 'RBiH' && isAlliedWithRBiH) {
-                const ctrl = getPoliticalControllerOSID(state, t.osid, reverseMap);
-                if (ctrl === 'HRHB') return false;
-            }
-            return true;
-        });
-
-        const scored = validTargets.map(t => {
-            const defenderFaction = getPoliticalControllerOSID(state, t.osid, reverseMap);
-            const schwerpunktBonus = activeOpLater?.schwerpunkt_osid === t.osid ? 200 : 0;
-            return {
-                ...t,
-                finalScore: scoreTargetFromDirective(t.osid, t.prediction, effectiveDirective, faction, ethnicMap, undefined, _offensiveTargetSet, _avoidOsidSet)
-                    + supplyPenalty
-                    + (counterAttackTarget === t.osid ? 180 : 0) // Retreat-based counter-attack bonus
-                    + schwerpunktBonus
-                    + getRsVsHrhbPenalty(t.osid, faction, defenderFaction)
-            };
-        }).sort((a, b) => {
-            if (b.finalScore !== a.finalScore) return b.finalScore - a.finalScore;
-            return strictCompare(a.osid, b.osid);
-        });
-
-        const maxAtt = effectiveDirective.max_attackers_per_target;
-        let bestTarget: typeof scored[0] | null = null;
-        for (const s of scored) {
-            const existing = chosenTargets.get(s.osid) ?? 0;
-            if (existing >= maxAtt) continue;
-
-            // Pioneer: directive target — attack to seed concentration.
-            // Only for offensive/balanced corps stance (not defensive).
-            // Bypasses finalScore filter since repulsed outcomes have negative score.
-            // Adequate supply: pioneer at 'repulsed' bar (any chance is fine).
-            // Strained supply: pioneer only at 'victory' bar (need decent odds).
-            // Critical supply: blocked entirely by outer gate (brigade already skipped).
-            if (existing === 0 && (corpsStance === 'offensive' || corpsStance === 'balanced') &&
-                _offensiveTargetSet.has(s.osid)) {
-                const pioneerBar = isSupplyStrained ? 'victory' : 'repulsed';
-                // Standard pioneer: individual prediction sufficient
-                if (isOutcomeSufficientForAttack(s.prediction.predicted_outcome, pioneerBar)) {
-                    bestTarget = s;
-                    break;
-                }
-                // Coordinated pioneer (adequate supply only): if enough allies adjacent,
-                // pioneer even with weaker individual prediction.
-                if (!isSupplyStrained && corpsStance === 'offensive') {
-                    const adjAllies = targetAdjacentCount.get(s.osid) ?? 0;
-                    if (adjAllies >= 2) {
-                        const coordinated = estimateConcentratedOutcome(s.prediction.power_ratio, adjAllies - 1);
-                        if (coordinated && isOutcomeSufficientForAttack(coordinated, effectiveDirective.min_attack_outcome)) {
-                            bestTarget = s;
-                            break;
-                        }
-                    }
-                }
-            }
-            // Concentration: join an existing pioneer attack.
-            // Use full concentration potential (all adjacent allies) rather than just
-            // existing attackers — subsequent brigades will also join this turn.
-            if (existing > 0 && effectiveDirective.offensive_targets.includes(s.osid)) {
-                const adjAllies = targetAdjacentCount.get(s.osid) ?? 0;
-                const thresholdRelax = activeOpLater?.schwerpunkt_osid === s.osid ? 1 : 0;
-                const potentialTotal = Math.max(existing + 1 + thresholdRelax, adjAllies);
-                const combined = estimateConcentratedOutcome(s.prediction.power_ratio, potentialTotal - 1);
-                if (combined && isOutcomeSufficientForAttack(combined, effectiveDirective.min_attack_outcome)) {
-                    bestTarget = s;
-                    break;
-                }
-            }
-
-            // Directive discipline: brigades only attack corps-ordered targets.
-            // Counter-attacks (brigade retreated from this OSID last turn) are the sole autonomous exception.
-            if (!effectiveDirective.offensive_targets.includes(s.osid) && counterAttackTarget !== s.osid) continue;
-
-            if (s.finalScore <= 0) continue;
-
-            // Check outcome threshold from directive
-            const outcomeOk = isOutcomeSufficientForAttack(s.prediction.predicted_outcome, effectiveDirective.min_attack_outcome);
-            // Counter-attack: this brigade retreated from this OSID last turn — relaxed threshold
-            const isRetreatCounter = (counterAttackTarget === s.osid);
-
-            if (outcomeOk || (isRetreatCounter && isOutcomeSufficientForAttack(s.prediction.predicted_outcome, 'stalemate'))) {
-                bestTarget = s;
-                break;
-            }
-            // Concentration: estimate combined outcome with co-attackers
-            if (existing > 0) {
-                const combined = estimateConcentratedOutcome(s.prediction.power_ratio, existing);
-                if (combined && isOutcomeSufficientForAttack(combined, effectiveDirective.min_attack_outcome)) {
-                    bestTarget = s;
-                    break;
-                }
-            }
-        }
-
-        if (bestTarget) {
-            // Assault posture: only assign when corps is offensive AND brigade cohesion is high.
-            // Otherwise fall back to standard attack posture.
-            const attackPosture: BrigadePosture = (corpsStance === 'offensive' && (brigade.cohesion ?? 0) >= 60)
-                ? 'assault'
-                : 'attack';
-            result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
-            result.attack_orders[brigade.id] = bestTarget.osid;
-            result.attack_scores[brigade.id] = bestTarget.finalScore;
-            chosenTargets.set(bestTarget.osid, (chosenTargets.get(bestTarget.osid) ?? 0) + 1);
-            return true;
-        }
-    }
-
-    // Hold brigade fallback: no viable attack found — defend at the hold position.
-    // Don't redeploy or move away from a chokepoint.
-    if (ctx.isHoldBrigade) {
+    // Offensive/balanced brigade on the front with no active op: defend in place.
+    // High cohesion → dig in for better entrenchment.
+    if ((brigade.cohesion ?? 0) >= 40) {
+        result.posture_orders.push({ brigade_id: brigade.id, posture: 'dig_in' });
+    } else {
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-        return true;
     }
-
-    return false;
+    return true;
 }

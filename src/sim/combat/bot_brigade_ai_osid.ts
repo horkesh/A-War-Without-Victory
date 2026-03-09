@@ -273,7 +273,10 @@ export function getSectorOffensiveProbeThreshold(
     const momentum = axis ? (axis.momentum ?? 0) : (activeOp.momentum ?? 0);
     // If the operation has an explicit min_attack_outcome, respect it.
     if (activeOp.min_attack_outcome) return activeOp.min_attack_outcome;
-    return momentum >= 2 ? 'stalemate' : 'costly_victory';
+    // Brigades follow orders — they attack unless the predicted outcome is
+    // catastrophic. The corps commander decided this objective matters;
+    // brigades execute. With momentum, even stalemate predictions trigger attacks.
+    return momentum >= 2 ? 'stalemate' : 'repulsed';
 }
 
 function isPartOfNamedOperation(state: GameState, formation: FormationState): boolean {

@@ -58,6 +58,7 @@ import {
     COORDINATION_PENALTY_3PLUS,
     STACKING_DEFENDER_SUPPORT,
     ENTRENCHMENT_DEGRADATION_PER_BATTLE,
+    POSTURE_ATTACK,
     OUTCOME_ATTACKER_MOD,
     OUTCOME_DEFENDER_MOD,
     COHESION_ATTACKER,
@@ -194,8 +195,91 @@ function getFriendlyRetreatDestinations(
 }
 
 /**
+ * Find any friendly OSID for a faction as an emergency retreat destination.
+ * Priority: home_osid → fallback_osid → any friendly OSID (deterministic: sorted).
+ */
+function findEmergencyRetreatOsid(
+    state: GameState,
+    formation: FormationState,
+    reverseMap: OperationalToCanonicalReverseMap
+): string | null {
+    const factionId = formation.faction as FactionId;
+    const pc = state.political?.political_controllers ?? {};
+
+    // 1. Try home_osid
+    const homeOsid = (formation as { home_osid?: string }).home_osid;
+    if (homeOsid && getPoliticalControllerOSID(state, homeOsid, reverseMap) === factionId) {
+        return homeOsid;
+    }
+
+    // 2. Try fallback_osid
+    const fallbackOsid = (formation as { fallback_osid?: string }).fallback_osid;
+    if (fallbackOsid && getPoliticalControllerOSID(state, fallbackOsid, reverseMap) === factionId) {
+        return fallbackOsid;
+    }
+
+    // 3. Try corps HQ
+    const hqOsid = getCorpsHqOsid(state, formation);
+    if (hqOsid && getPoliticalControllerOSID(state, hqOsid, reverseMap) === factionId) {
+        return hqOsid;
+    }
+
+    // 4. Any friendly OSID (sorted for determinism)
+    const osids = Object.keys(pc).sort(strictCompare);
+    for (const osid of osids) {
+        if (pc[osid] === factionId) return osid;
+    }
+
+    return null;
+}
+
+/** Personnel retain fraction for emergency long-distance retreat (e.g. displaced from behind enemy lines). */
+const EMERGENCY_RETREAT_PERSONNEL_RETAIN = 0.60;
+/** Cohesion loss on emergency retreat. */
+const EMERGENCY_RETREAT_COHESION_LOSS = 20;
+/** Disruption turns on emergency retreat. */
+const EMERGENCY_RETREAT_DISRUPTED_TURNS = 3;
+
+/**
+ * Force-retreat a formation to a friendly OSID with heavy penalties.
+ * Never destroys the brigade — worst case it goes to reserve status with minimal personnel.
+ */
+function forceRetreatWithPenalties(
+    state: GameState,
+    formation: FormationState,
+    reverseMap: OperationalToCanonicalReverseMap,
+    sourceOsid: string,
+    personnelRetain: number = EMERGENCY_RETREAT_PERSONNEL_RETAIN,
+    cohesionLoss: number = EMERGENCY_RETREAT_COHESION_LOSS,
+    disruptedTurns: number = EMERGENCY_RETREAT_DISRUPTED_TURNS
+): void {
+    const dest = findEmergencyRetreatOsid(state, formation, reverseMap);
+    const f = formation as FormationState & { location_osid?: string; entrenchment_turns?: number; defense_streak?: number; disrupted_turns?: number; last_retreat_from?: { osid: string; turn: number } };
+    if (dest != null) {
+        f.location_osid = dest;
+        f.entrenchment_turns = 0;
+        f.defense_streak = 0;
+        f.disrupted_turns = disruptedTurns;
+        formation.cohesion = Math.max(0, (formation.cohesion ?? 60) - cohesionLoss);
+        formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((formation.personnel ?? 0) * personnelRetain));
+        f.last_retreat_from = { osid: sourceOsid, turn: state.meta?.turn ?? 0 };
+    } else {
+        // Absolute last resort: no friendly territory exists at all — brigade disperses
+        // This should only happen if the entire faction's territory is lost
+        f.location_osid = undefined;
+        f.entrenchment_turns = 0;
+        f.defense_streak = 0;
+        f.disrupted_turns = disruptedTurns;
+        formation.cohesion = Math.max(0, (formation.cohesion ?? 60) - cohesionLoss);
+        formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((formation.personnel ?? 0) * personnelRetain));
+        formation.status = 'inactive';
+    }
+}
+
+/**
  * Displace any active formation that has location_osid in an OSID not controlled by its faction.
  * Used after attack resolution (and optionally at end of turn) to enforce invariant: no brigade in enemy territory.
+ * Brigades are NEVER destroyed — they retreat with penalties.
  */
 export function displaceFormationsInEnemyTerritory(
     state: GameState,
@@ -215,16 +299,13 @@ export function displaceFormationsInEnemyTerritory(
         const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
         const dest = retreatDests[0];
         if (dest != null) {
+            // Adjacent friendly OSID — simple displacement, no penalties
             otherFormation.location_osid = dest;
             (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
             (otherFormation as { defense_streak?: number }).defense_streak = 0;
-        } else if (otherFormation.fallback_osid && getPoliticalControllerOSID(state, otherFormation.fallback_osid, reverseMap) === factionId) {
-            otherFormation.location_osid = otherFormation.fallback_osid;
-            (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-            (otherFormation as { defense_streak?: number }).defense_streak = 0;
         } else {
-            otherFormation.personnel = 0;
-            otherFormation.status = 'inactive';
+            // No adjacent friendly — emergency retreat with penalties
+            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc);
         }
     }
 }
@@ -344,13 +425,8 @@ export function resolveAttackOrdersOsid(
                 otherFormation.location_osid = dest;
                 (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
                 (otherFormation as { defense_streak?: number }).defense_streak = 0;
-            } else if (otherFormation.fallback_osid && getPoliticalControllerOSID(state, otherFormation.fallback_osid, reverseMap) === factionId) {
-                otherFormation.location_osid = otherFormation.fallback_osid;
-                (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                (otherFormation as { defense_streak?: number }).defense_streak = 0;
             } else {
-                otherFormation.personnel = 0;
-                otherFormation.status = 'inactive';
+                forceRetreatWithPenalties(state, otherFormation, reverseMap, loc);
             }
         }
         return report;
@@ -404,16 +480,17 @@ export function resolveAttackOrdersOsid(
         let defenderPower: number;
         let defenderFormation: FormationState | null = null;
         let isSectorCoverageDefense = false;
+        let sectorDefenseBrigades: FormationState[] | null = null;
         const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
         const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
-        if (defenderFormations.length > 0) {
-            // Brigade physically at the OSID — standard resolution
-            const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-            defenderPower = totalPower;
-            defenderFormation = primary;
-        } else if (isEnemyControlled) {
-            // No brigade at the OSID. Try sector-pooled defense: brigades in the owning sector
-            // cover the entire sector frontline even when not physically at this OSID.
+
+        // ── Unified sector defense model ──────────────────────────────
+        // The front is a continuous locked line. Defense at any OSID in a
+        // sector is: total sector brigade power / sector edges × density mod.
+        // Whether a specific brigade sits on this OSID or not is irrelevant —
+        // the line distributes force evenly. Casualties go to the closest
+        // brigade primarily, then proportionally to the rest.
+        if (isEnemyControlled) {
             const sector = findSectorForEnemyOsid(state, targetOsid, controller);
             const sectorBrigades = sector
                 ? sector.assigned_brigade_ids
@@ -421,15 +498,28 @@ export function resolveAttackOrdersOsid(
                     .filter((f): f is FormationState => f != null && f.status === 'active')
                 : [];
             if (sectorBrigades.length > 0) {
-                const coverageMult = frontDensityModifier(sector!.assigned_brigade_ids.length, sector!.length_edges) * SECTOR_COVERAGE_PENALTY;
+                // Continuous line defense: total power / edges × density modifier
+                const densityMod = frontDensityModifier(sectorBrigades.length, sector!.length_edges);
+                const edgeShare = sector!.length_edges > 0 ? 1 / sector!.length_edges : 1;
                 const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-                defenderPower = totalPower * coverageMult;
+                defenderPower = totalPower * edgeShare * densityMod;
                 defenderFormation = primary;
                 isSectorCoverageDefense = true;
+                sectorDefenseBrigades = sectorBrigades;
+            } else if (defenderFormations.length > 0) {
+                // Brigade at OSID but not in any sector (edge case: garrison, enclave)
+                const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+                defenderPower = totalPower;
+                defenderFormation = primary;
             } else {
-                // Truly undefended: militia ghost only (no brigades in sector)
+                // Truly undefended: no sector, no brigade — militia ghost only
                 defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
             }
+        } else if (defenderFormations.length > 0) {
+            // Non-enemy OSID with defenders (shouldn't happen, but safe fallback)
+            const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+            defenderPower = totalPower;
+            defenderFormation = primary;
         } else {
             continue;
         }
@@ -462,8 +552,15 @@ export function resolveAttackOrdersOsid(
         const seasonal = getSeasonalModifiers(currentTurn, startDate, targetSlope);
         const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
         const concentrationBonus = getConcentrationBonus(attackerFormations.length);
-        const attackerPower = attackerFormations.reduce((s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, undefined, targetTerrainMult), 0)
-            * coordPenalty * seasonal.attack_mult * concentrationBonus;
+        // Formations with attack orders attack at their posture — but postures with
+        // zero attack mult (defend, hold, dig_in) use 'attack' as minimum, since the
+        // attack order itself implies attack intent. Preserves 'assault' (1.2×) bonus.
+        const attackerPower = attackerFormations.reduce((s, a) => {
+            const posture = a.posture ?? 'defend';
+            const atkMult = POSTURE_ATTACK[posture] ?? 0;
+            const effectivePosture = atkMult > 0 ? posture : 'attack';
+            return s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult);
+        }, 0) * coordPenalty * seasonal.attack_mult * concentrationBonus;
         defenderPower *= seasonal.defense_mult;
 
         const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
@@ -532,8 +629,12 @@ export function resolveAttackOrdersOsid(
             applyPersonnelLoss(a, cas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
 
-            // Sweeping undefended territory (militia only) is far less exhausting than real combat.
+            // Sweeping undefended territory is less exhausting than real combat but not free —
+            // logistics, occupation duties, scattered resistance, and advance tempo take a toll.
             recordFormationFatigue(a, defenderFormation ? 2 : 0.5);
+
+            // Record battle outcome for morale drift (victory boost / defeat penalty).
+            (a as { recent_battle_outcome?: string }).recent_battle_outcome = outcome;
 
             if (outcome === 'costly_victory') (a as { disrupted_turns?: number }).disrupted_turns = 1;
             if (outcome === 'repulsed' || outcome === 'catastrophic') {
@@ -558,18 +659,60 @@ export function resolveAttackOrdersOsid(
             }
         }
         if (defenderFormation) {
-            applyPersonnelLoss(defenderFormation, finalDefenderCas);
-            defenderFormation.cohesion = Math.max(0, Math.min(100, (defenderFormation.cohesion ?? 60) + (COHESION_DEFENDER[outcome] ?? 0)));
+            // ── Sector casualty distribution ──────────────────────────────
+            // When the defense is a continuous sector line, casualties are
+            // distributed across all brigades in the sector. The closest
+            // brigade (primary) takes 50%, the rest share 50% proportionally
+            // by personnel. This models the front absorbing the blow.
+            const defBrigades = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
+                ? sectorDefenseBrigades : [defenderFormation];
+            const primaryShare = defBrigades.length > 1 ? 0.5 : 1.0;
+            const secondaryPool = finalDefenderCas * (1 - primaryShare);
+            const primaryCas = Math.round(finalDefenderCas * primaryShare);
 
+            // Apply to primary (closest) brigade
+            applyPersonnelLoss(defenderFormation, primaryCas);
+            const primaryKia = Math.floor(primaryCas * KIA_FRACTION);
+            const primaryWia = Math.floor(primaryCas * WIA_FRACTION);
+            const primaryMia = Math.max(0, primaryCas - primaryKia - primaryWia);
+            recordBattleCasualties(state.military.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: primaryKia, wounded: primaryWia, missing_captured: primaryMia });
+
+            // Apply to secondary brigades (rest of sector)
+            if (defBrigades.length > 1) {
+                const secondaries = defBrigades.filter(b => b.id !== defenderFormation!.id);
+                const totalSecPers = secondaries.reduce((s, b) => s + (b.personnel ?? 0), 0);
+                for (const sec of secondaries) {
+                    const frac = totalSecPers > 0 ? (sec.personnel ?? 0) / totalSecPers : 1 / secondaries.length;
+                    const secCas = Math.round(secondaryPool * frac);
+                    if (secCas > 0) {
+                        applyPersonnelLoss(sec, secCas);
+                        const sKia = Math.floor(secCas * KIA_FRACTION);
+                        const sWia = Math.floor(secCas * WIA_FRACTION);
+                        const sMia = Math.max(0, secCas - sKia - sWia);
+                        recordBattleCasualties(state.military.casualty_ledger!, sec.faction, sec.id, { killed: sKia, wounded: sWia, missing_captured: sMia });
+                    }
+                }
+            }
+
+            // Apply cohesion/fatigue/morale to primary defender
+            defenderFormation.cohesion = Math.max(0, Math.min(100, (defenderFormation.cohesion ?? 60) + (COHESION_DEFENDER[outcome] ?? 0)));
             recordFormationFatigue(defenderFormation, 1);
+
+            // Record battle outcome for morale drift — defender's perspective is inverted
+            (defenderFormation as { recent_battle_outcome?: string }).recent_battle_outcome =
+                outcome === 'decisive_victory' ? 'catastrophic' :
+                outcome === 'victory' ? 'repulsed' :
+                outcome === 'costly_victory' ? 'stalemate' :
+                outcome === 'stalemate' ? 'costly_victory' :
+                outcome === 'repulsed' ? 'victory' :
+                outcome === 'catastrophic' ? 'decisive_victory' : outcome;
 
             (defenderFormation as { defense_streak?: number }).defense_streak = (outcome === 'stalemate' || outcome === 'repulsed' || outcome === 'catastrophic')
                 ? Math.min(MAX_RESILIENCE_STREAK, ((defenderFormation as { defense_streak?: number }).defense_streak ?? 0) + 1)
                 : 0;
             const prevEntrenchment = (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
             (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = Math.max(0, prevEntrenchment - ENTRENCHMENT_DEGRADATION_PER_BATTLE);
-            recordBattleCasualties(state.military.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: dKia, wounded: dWia, missing_captured: dMia });
-            // Defender equipment losses
+            // Defender equipment losses (primary only)
             const dComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
             const dTanksLost = dComp.tanks > 0 ? Math.max(1, Math.round(dComp.tanks * TANK_LOSS_RATE * 0.5)) : 0;
             const dArtLost = dComp.artillery > 0 ? Math.max(1, Math.round(dComp.artillery * ARTILLERY_LOSS_RATE * 0.5)) : 0;
@@ -779,6 +922,7 @@ export function resolveAttackOrdersOsid(
             const retreatDests = surrenderCascade ? [] : getFriendlyRetreatDestinations(state, defenderFormation, adjacency, reverseMap);
             const dest = retreatDests[0];
             if (dest != null) {
+                // Adjacent friendly OSID — standard retreat
                 (defenderFormation as { location_osid?: string }).location_osid = dest;
                 (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
                 (defenderFormation as { defense_streak?: number }).defense_streak = 0;
@@ -788,48 +932,14 @@ export function resolveAttackOrdersOsid(
                 if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
                 else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
             } else if (isSectorCoverageDefense) {
-                // Sector-coverage defenders with no retreat path rout to their corps HQ.
-                // They were not physically at the OSID, so destruction is historically wrong —
-                // the unit still exists, just shattered and pulled back to reform.
-                const hqOsid = getCorpsHqOsid(state, defenderFormation);
-                const hqController = hqOsid ? getPoliticalControllerOSID(state, hqOsid, reverseMap) : null;
-                if (hqOsid && hqController === defenderFormation.faction) {
-                    (defenderFormation as { location_osid?: string }).location_osid = hqOsid;
-                    (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                    (defenderFormation as { defense_streak?: number }).defense_streak = 0;
-                    (defenderFormation as { disrupted_turns?: number }).disrupted_turns = SECTOR_ROUT_DISRUPTED_TURNS;
-                    defenderFormation.cohesion = Math.max(0, (defenderFormation.cohesion ?? 60) - SECTOR_ROUT_COHESION_LOSS);
-                    defenderFormation.personnel = Math.floor((defenderFormation.personnel ?? 0) * SECTOR_ROUT_PERSONNEL_RETAIN);
-                    (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
-                        osid: targetOsid, turn: state.meta?.turn ?? 0
-                    };
-                } else {
-                    // HQ also lost or unknown — brigade destroyed
-                    defenderFormation.personnel = 0;
-                    defenderFormation.status = 'inactive';
-                }
-            } else if ((defenderFormation as { fallback_osid?: string }).fallback_osid) {
-                // Fallback retreat: brigade reforms at fallback OSID only if it is still friendly
-                const fallback = (defenderFormation as { fallback_osid?: string }).fallback_osid!;
-                const fallbackController = getPoliticalControllerOSID(state, fallback, reverseMap);
-                if (fallbackController === defenderFormation.faction) {
-                    (defenderFormation as { location_osid?: string }).location_osid = fallback;
-                    (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                    (defenderFormation as { defense_streak?: number }).defense_streak = 0;
-                    (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 3;
-                    defenderFormation.cohesion = Math.max(0, (defenderFormation.cohesion ?? 60) - 20);
-                    defenderFormation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((defenderFormation.personnel ?? 0) * 0.6));
-                    (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
-                        osid: targetOsid, turn: state.meta?.turn ?? 0
-                    };
-                } else {
-                    // Fallback OSID is enemy-controlled; no valid retreat — treat as destroyed
-                    defenderFormation.personnel = 0;
-                    defenderFormation.status = 'inactive';
-                }
+                // Sector-coverage defenders with no adjacent retreat — rout with heavy penalties
+                forceRetreatWithPenalties(
+                    state, defenderFormation, reverseMap, targetOsid,
+                    SECTOR_ROUT_PERSONNEL_RETAIN, SECTOR_ROUT_COHESION_LOSS, SECTOR_ROUT_DISRUPTED_TURNS
+                );
             } else {
-                defenderFormation.personnel = 0;
-                defenderFormation.status = 'inactive';
+                // Direct defender with no adjacent retreat — emergency retreat with penalties
+                forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid);
             }
         }
 
@@ -872,13 +982,8 @@ export function resolveAttackOrdersOsid(
                     otherFormation.location_osid = dest;
                     (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
                     (otherFormation as { defense_streak?: number }).defense_streak = 0;
-                } else if (otherFormation.fallback_osid && getPoliticalControllerOSID(state, otherFormation.fallback_osid, reverseMap) === otherFormation.faction) {
-                    otherFormation.location_osid = otherFormation.fallback_osid;
-                    (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                    (otherFormation as { defense_streak?: number }).defense_streak = 0;
                 } else {
-                    otherFormation.personnel = 0;
-                    otherFormation.status = 'inactive';
+                    forceRetreatWithPenalties(state, otherFormation, reverseMap, targetOsid);
                 }
             }
         }
@@ -932,13 +1037,8 @@ export function resolveAttackOrdersOsid(
             otherFormation.location_osid = dest;
             (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
             (otherFormation as { defense_streak?: number }).defense_streak = 0;
-        } else if (otherFormation.fallback_osid && getPoliticalControllerOSID(state, otherFormation.fallback_osid, reverseMap) === factionId) {
-            otherFormation.location_osid = otherFormation.fallback_osid;
-            (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-            (otherFormation as { defense_streak?: number }).defense_streak = 0;
         } else {
-            otherFormation.personnel = 0;
-            otherFormation.status = 'inactive';
+            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc);
         }
     }
 

@@ -1017,7 +1017,7 @@ export function generateCorpsDirectives(
                         return strictCompare(a, b);
                     });
 
-                while (secBrigadeIds.length < 3) {
+                while (secBrigadeIds.length < 1) {
                     const donorCandidates = directiveEligibleSectors
                         .filter((candidate) =>
                             !clusterSectors.includes(candidate) &&
