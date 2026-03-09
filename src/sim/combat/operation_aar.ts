@@ -7,6 +7,11 @@
  * compiled into a full OperationAAR and stored in GameState.operation_history.
  */
 
+import type { GameState, CorpsOperation, FormationId } from '../../state/game_state.js';
+import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { strictCompare } from '../../state/validateGameState.js';
+
 // ─── Sub-ledgers ────────────────────────────────────────────────────────────
 
 /** Casualty sub-ledger (killed + wounded). */
@@ -223,4 +228,219 @@ export function emptyPendingCasualties(): PendingOperationCasualties {
         equipment_captured: { tanks: 0, artillery: 0 },
         attacks: 0,
     };
+}
+
+// ─── Weekly Log Entry Recording ───────────────────────────────────────────────
+
+/** Collect all objective OSIDs from an operation (axes or flat list). */
+function collectObjectives(op: CorpsOperation): string[] {
+    const objs: string[] = [];
+    if (op.axes) {
+        for (const axis of op.axes) {
+            if (axis.objectives) {
+                for (const o of axis.objectives) {
+                    if (!objs.includes(o)) objs.push(o);
+                }
+            }
+        }
+    } else if (op.objectives) {
+        for (const o of op.objectives) {
+            if (!objs.includes(o)) objs.push(o);
+        }
+    }
+    return objs;
+}
+
+/** Get the overall momentum of an operation. */
+function getOperationMomentum(op: CorpsOperation): number {
+    if (op.axes) {
+        let max = 0;
+        for (const axis of op.axes) {
+            if ((axis.momentum ?? 0) > max) max = axis.momentum ?? 0;
+        }
+        return max;
+    }
+    return op.momentum ?? 0;
+}
+
+/** Create a zeroed AxisWeeklyEntry. */
+function emptyAxisEntry(): AxisWeeklyEntry {
+    return {
+        attacks_this_turn: 0,
+        objectives_captured_this_turn: [],
+        objectives_lost_this_turn: [],
+        casualties_suffered: { killed: 0, wounded: 0 },
+        casualties_inflicted: { killed: 0, wounded: 0 },
+        equipment_lost: { tanks: 0, artillery: 0 },
+        equipment_destroyed: { tanks: 0, artillery: 0 },
+        equipment_captured: { tanks: 0, artillery: 0 },
+    };
+}
+
+// Suppress unused warning for emptyAxisEntry — reserved for future axis-level objective diff
+void emptyAxisEntry;
+
+/**
+ * Drain pending_casualties into a weekly log entry, diff objective control,
+ * detect notable events, and record initial_strength on first entry.
+ * Runs AFTER update-sector-offensive-results each turn.
+ */
+export function recordOperationWeeklyEntries(
+    state: GameState,
+    reverseMap: OperationalToCanonicalReverseMap | null,
+): void {
+    const cc = state.military.corps_command;
+    if (!cc) return;
+
+    const corpsIds = Object.keys(cc).sort(strictCompare);
+
+    for (const corpsId of corpsIds) {
+        const cmd = cc[corpsId];
+        const op = cmd?.active_operation;
+        if (!op || op.type !== 'sector_attack') continue;
+
+        // Init weekly_log if missing
+        if (!op.weekly_log) op.weekly_log = [];
+
+        // Record initial_strength on first entry
+        if (op.initial_strength === undefined) {
+            let total = 0;
+            for (const bdeId of op.participating_brigades) {
+                const fmn = state.military.formations[bdeId as FormationId];
+                if (fmn) total += fmn.personnel ?? 0;
+            }
+            op.initial_strength = total;
+        }
+
+        // Collect objectives and diff control
+        const objectives = collectObjectives(op);
+        const prevState = op._prev_objective_state ?? {};
+        const capturedThisTurn: string[] = [];
+        const lostThisTurn: string[] = [];
+
+        // Derive faction from first participating brigade
+        let opFaction: string | null = null;
+        for (const bdeId of op.participating_brigades) {
+            const fmn = state.military.formations[bdeId as FormationId];
+            if (fmn) { opFaction = fmn.faction; break; }
+        }
+
+        const currentObjState: Record<string, string | null> = {};
+        for (const osid of objectives) {
+            const controller = getPoliticalControllerOSID(
+                state, osid, reverseMap ?? undefined,
+            );
+            currentObjState[osid] = controller;
+
+            const prev = prevState[osid] ?? null;
+            if (opFaction) {
+                if (controller === opFaction && prev !== opFaction) {
+                    capturedThisTurn.push(osid);
+                } else if (controller !== opFaction && prev === opFaction) {
+                    lostThisTurn.push(osid);
+                }
+            }
+        }
+
+        // Drain pending_casualties
+        const pc = op.pending_casualties;
+        const suffered: CasualtyTally = pc
+            ? { killed: pc.suffered.killed, wounded: pc.suffered.wounded }
+            : { killed: 0, wounded: 0 };
+        const inflicted: CasualtyTally = pc
+            ? { killed: pc.inflicted.killed, wounded: pc.inflicted.wounded }
+            : { killed: 0, wounded: 0 };
+        const eqLost: EquipmentTally = pc
+            ? { tanks: pc.equipment_lost.tanks, artillery: pc.equipment_lost.artillery }
+            : { tanks: 0, artillery: 0 };
+        const eqDestroyed: EquipmentTally = pc
+            ? { tanks: pc.equipment_destroyed.tanks, artillery: pc.equipment_destroyed.artillery }
+            : { tanks: 0, artillery: 0 };
+        const eqCaptured: EquipmentTally = pc
+            ? { tanks: pc.equipment_captured.tanks, artillery: pc.equipment_captured.artillery }
+            : { tanks: 0, artillery: 0 };
+        const attacksThisTurn = pc?.attacks ?? 0;
+
+        // Build axis_entries from pending_casualties.by_axis
+        let axisEntries: Record<string, AxisWeeklyEntry> | undefined;
+        if (pc?.by_axis) {
+            axisEntries = {};
+            const axisIds = Object.keys(pc.by_axis).sort(strictCompare);
+            for (const axisId of axisIds) {
+                const ax = pc.by_axis[axisId];
+                axisEntries[axisId] = {
+                    attacks_this_turn: ax.attacks,
+                    objectives_captured_this_turn: [],
+                    objectives_lost_this_turn: [],
+                    casualties_suffered: { killed: ax.suffered.killed, wounded: ax.suffered.wounded },
+                    casualties_inflicted: { killed: ax.inflicted.killed, wounded: ax.inflicted.wounded },
+                    equipment_lost: { tanks: ax.equipment_lost.tanks, artillery: ax.equipment_lost.artillery },
+                    equipment_destroyed: { tanks: ax.equipment_destroyed.tanks, artillery: ax.equipment_destroyed.artillery },
+                    equipment_captured: { tanks: ax.equipment_captured.tanks, artillery: ax.equipment_captured.artillery },
+                };
+            }
+        }
+
+        // Count active brigades
+        let brigadeCount = 0;
+        for (const bdeId of op.participating_brigades) {
+            const fmn = state.military.formations[bdeId as FormationId];
+            if (fmn && fmn.status === 'active') brigadeCount++;
+        }
+
+        // Detect notable events
+        const notableEvents: string[] = [];
+        const totalCasualties = suffered.killed + suffered.wounded;
+
+        // first_blood: first turn with attacks > 0 in op history
+        if (attacksThisTurn > 0) {
+            const hadPriorAttacks = op.weekly_log.some(e => e.attacks_this_turn > 0);
+            if (!hadPriorAttacks) notableEvents.push('first_blood');
+        }
+
+        // breakthrough: objective captured this turn
+        if (capturedThisTurn.length > 0) notableEvents.push('breakthrough');
+
+        // stalled: 3+ consecutive turns with 0 attacks during execution
+        if (op.phase === 'execution' && attacksThisTurn === 0) {
+            let streak = 0;
+            for (let i = op.weekly_log.length - 1; i >= 0; i--) {
+                if (op.weekly_log[i].attacks_this_turn === 0) streak++;
+                else break;
+            }
+            // Current turn (not yet pushed) would make streak+1
+            if (streak + 1 >= 3) notableEvents.push('stalled');
+        }
+
+        // heavy_losses: casualties > 10% of initial_strength this turn
+        if (op.initial_strength > 0 && totalCasualties > op.initial_strength * 0.10) {
+            notableEvents.push('heavy_losses');
+        }
+
+        // Build and push entry
+        const entry: OperationWeeklyEntry = {
+            turn: state.meta.turn,
+            phase: op.phase,
+            attacks_this_turn: attacksThisTurn,
+            objectives_captured_this_turn: capturedThisTurn,
+            objectives_lost_this_turn: lostThisTurn,
+            casualties_suffered: suffered,
+            casualties_inflicted: inflicted,
+            equipment_lost: eqLost,
+            equipment_destroyed: eqDestroyed,
+            equipment_captured: eqCaptured,
+            brigade_count: brigadeCount,
+            momentum: getOperationMomentum(op),
+            notable_events: notableEvents,
+        };
+        if (axisEntries) entry.axis_entries = axisEntries;
+
+        op.weekly_log.push(entry);
+
+        // Update prev objective state for next turn's diff
+        op._prev_objective_state = currentObjState;
+
+        // Clean up pending_casualties
+        delete op.pending_casualties;
+    }
 }

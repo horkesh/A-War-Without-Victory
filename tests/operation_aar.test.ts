@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
     emptyPendingCasualties,
     gradeOperation,
+    recordOperationWeeklyEntries,
     type CasualtyTally,
     type EquipmentTally,
     type OperationWeeklyEntry,
@@ -575,5 +576,269 @@ describe('attributeOperationCasualties', () => {
 
         attributeOperationCasualties(state, report);
         expect(op.pending_casualties).toBeUndefined();
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// recordOperationWeeklyEntries
+// ═══════════════════════════════════════════════════════════════════════════
+
+function makeWeeklyState(
+    ops: Record<string, CorpsOperation>,
+    formations: Record<string, any>,
+    politicalControllers: Record<string, string> = {},
+    turn = 5,
+) {
+    const corps_command: Record<string, any> = {};
+    for (const [corpsId, op] of Object.entries(ops)) {
+        corps_command[corpsId] = {
+            command_span: 5,
+            subordinate_count: 3,
+            og_slots: 2,
+            active_ogs: [],
+            corps_exhaustion: 0,
+            stance: 'offensive',
+            active_operation: op,
+        };
+    }
+    return {
+        meta: { turn, phase: 'war' },
+        military: { formations, corps_command },
+        political: { political_controllers: politicalControllers },
+    } as any;
+}
+
+describe('recordOperationWeeklyEntries', () => {
+    it('creates weekly entry draining pending casualties', () => {
+        const op = makeOp({
+            participating_brigades: ['bde_1', 'bde_2'],
+            objectives: ['op:test:obj_1'],
+            phase: 'execution',
+            pending_casualties: {
+                suffered: { killed: 10, wounded: 20 },
+                inflicted: { killed: 15, wounded: 30 },
+                equipment_lost: { tanks: 1, artillery: 0 },
+                equipment_destroyed: { tanks: 2, artillery: 1 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                attacks: 3,
+            },
+        });
+        const state = makeWeeklyState(
+            { corps_a: op },
+            {
+                bde_1: { personnel: 1000, faction: 'RS', status: 'active', corps_id: 'corps_a' },
+                bde_2: { personnel: 800, faction: 'RS', status: 'active', corps_id: 'corps_a' },
+            },
+            { 'op:test:obj_1': 'RBiH' },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        expect(op.weekly_log).toBeDefined();
+        expect(op.weekly_log!.length).toBe(1);
+        const entry = op.weekly_log![0];
+        expect(entry.turn).toBe(5);
+        expect(entry.phase).toBe('execution');
+        expect(entry.attacks_this_turn).toBe(3);
+        expect(entry.casualties_suffered.killed).toBe(10);
+        expect(entry.casualties_suffered.wounded).toBe(20);
+        expect(entry.casualties_inflicted.killed).toBe(15);
+        expect(entry.casualties_inflicted.wounded).toBe(30);
+        expect(entry.equipment_lost.tanks).toBe(1);
+        expect(entry.equipment_destroyed.tanks).toBe(2);
+        expect(entry.brigade_count).toBe(2);
+        // pending_casualties should be cleared
+        expect(op.pending_casualties).toBeUndefined();
+    });
+
+    it('records initial_strength on first entry', () => {
+        const op = makeOp({
+            participating_brigades: ['bde_1', 'bde_2'],
+            objectives: ['op:test:obj_1'],
+            phase: 'execution',
+        });
+        const state = makeWeeklyState(
+            { corps_a: op },
+            {
+                bde_1: { personnel: 1500, faction: 'RS', status: 'active', corps_id: 'corps_a' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active', corps_id: 'corps_a' },
+            },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        expect(op.initial_strength).toBe(2700);
+        expect(op.weekly_log!.length).toBe(1);
+
+        // Second call should not change initial_strength
+        recordOperationWeeklyEntries(state, null);
+        expect(op.initial_strength).toBe(2700);
+        expect(op.weekly_log!.length).toBe(2);
+    });
+
+    it('detects breakthrough when objective captured', () => {
+        const op = makeOp({
+            participating_brigades: ['bde_1'],
+            objectives: ['op:test:obj_1'],
+            phase: 'execution',
+            _prev_objective_state: { 'op:test:obj_1': 'RBiH' },
+            pending_casualties: {
+                ...emptyPendingCasualties(),
+                attacks: 1,
+            },
+        });
+        // Now objective is controlled by RS (the op's faction)
+        const state = makeWeeklyState(
+            { corps_a: op },
+            { bde_1: { personnel: 1000, faction: 'RS', status: 'active', corps_id: 'corps_a' } },
+            { 'op:test:obj_1': 'RS' },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        const entry = op.weekly_log![0];
+        expect(entry.objectives_captured_this_turn).toContain('op:test:obj_1');
+        expect(entry.notable_events).toContain('breakthrough');
+    });
+
+    it('detects first_blood on first attack', () => {
+        const op = makeOp({
+            participating_brigades: ['bde_1'],
+            objectives: ['op:test:obj_1'],
+            phase: 'execution',
+            pending_casualties: {
+                ...emptyPendingCasualties(),
+                attacks: 1,
+            },
+        });
+        const state = makeWeeklyState(
+            { corps_a: op },
+            { bde_1: { personnel: 1000, faction: 'RS', status: 'active', corps_id: 'corps_a' } },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        const entry = op.weekly_log![0];
+        expect(entry.notable_events).toContain('first_blood');
+
+        // Second turn with attacks should NOT trigger first_blood again
+        op.pending_casualties = { ...emptyPendingCasualties(), attacks: 2 };
+        recordOperationWeeklyEntries(state, null);
+        const entry2 = op.weekly_log![1];
+        expect(entry2.notable_events).not.toContain('first_blood');
+    });
+
+    it('handles op with no pending casualties (zeroed entry)', () => {
+        const op = makeOp({
+            participating_brigades: ['bde_1'],
+            objectives: ['op:test:obj_1'],
+            phase: 'execution',
+        });
+        // No pending_casualties set at all
+        const state = makeWeeklyState(
+            { corps_a: op },
+            { bde_1: { personnel: 1000, faction: 'RS', status: 'active', corps_id: 'corps_a' } },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        expect(op.weekly_log!.length).toBe(1);
+        const entry = op.weekly_log![0];
+        expect(entry.attacks_this_turn).toBe(0);
+        expect(entry.casualties_suffered.killed).toBe(0);
+        expect(entry.casualties_suffered.wounded).toBe(0);
+        expect(entry.casualties_inflicted.killed).toBe(0);
+        expect(entry.equipment_lost.tanks).toBe(0);
+    });
+
+    it('updates _prev_objective_state for next diff', () => {
+        const op = makeOp({
+            participating_brigades: ['bde_1'],
+            objectives: ['op:test:obj_1', 'op:test:obj_2'],
+            phase: 'execution',
+        });
+        const state = makeWeeklyState(
+            { corps_a: op },
+            { bde_1: { personnel: 1000, faction: 'RS', status: 'active', corps_id: 'corps_a' } },
+            { 'op:test:obj_1': 'RS', 'op:test:obj_2': 'RBiH' },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        expect(op._prev_objective_state).toBeDefined();
+        expect(op._prev_objective_state!['op:test:obj_1']).toBe('RS');
+        expect(op._prev_objective_state!['op:test:obj_2']).toBe('RBiH');
+    });
+
+    it('detects stalled after 3+ consecutive zero-attack turns', () => {
+        const zeroEntry: OperationWeeklyEntry = {
+            turn: 3, phase: 'execution', attacks_this_turn: 0,
+            objectives_captured_this_turn: [], objectives_lost_this_turn: [],
+            casualties_suffered: { killed: 0, wounded: 0 },
+            casualties_inflicted: { killed: 0, wounded: 0 },
+            equipment_lost: { tanks: 0, artillery: 0 },
+            equipment_destroyed: { tanks: 0, artillery: 0 },
+            equipment_captured: { tanks: 0, artillery: 0 },
+            brigade_count: 1, momentum: 0, notable_events: [],
+        };
+        const op = makeOp({
+            participating_brigades: ['bde_1'],
+            objectives: ['op:test:obj_1'],
+            phase: 'execution',
+            weekly_log: [
+                { ...zeroEntry, turn: 3 },
+                { ...zeroEntry, turn: 4 },
+            ],
+        });
+        const state = makeWeeklyState(
+            { corps_a: op },
+            { bde_1: { personnel: 1000, faction: 'RS', status: 'active', corps_id: 'corps_a' } },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        const entry = op.weekly_log![2];
+        expect(entry.notable_events).toContain('stalled');
+    });
+
+    it('detects heavy_losses when casualties exceed 10% of initial_strength', () => {
+        const op = makeOp({
+            participating_brigades: ['bde_1'],
+            objectives: ['op:test:obj_1'],
+            phase: 'execution',
+            initial_strength: 1000,
+            pending_casualties: {
+                suffered: { killed: 60, wounded: 60 },
+                inflicted: { killed: 5, wounded: 10 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                attacks: 2,
+            },
+        });
+        const state = makeWeeklyState(
+            { corps_a: op },
+            { bde_1: { personnel: 880, faction: 'RS', status: 'active', corps_id: 'corps_a' } },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        const entry = op.weekly_log![0];
+        expect(entry.notable_events).toContain('heavy_losses');
+    });
+
+    it('skips non-sector_attack operations', () => {
+        const op = makeOp({
+            type: 'general_offensive',
+            participating_brigades: ['bde_1'],
+        });
+        const state = makeWeeklyState(
+            { corps_a: op },
+            { bde_1: { personnel: 1000, faction: 'RS', status: 'active', corps_id: 'corps_a' } },
+        );
+
+        recordOperationWeeklyEntries(state, null);
+
+        expect(op.weekly_log).toBeUndefined();
     });
 });

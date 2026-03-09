@@ -3,6 +3,7 @@
 // --- Domain imports (paths adjusted: one directory deeper than turn_pipeline.ts) ---
 
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
+import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
 import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
@@ -924,6 +925,15 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             const reverseMap = od?.opData?.operationalToCanonical ?? null;
             updateSectorOffensiveResults(context.state, reverseMap);
+        }
+    },
+    {
+        name: 'record-operation-weekly-entry',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            const reverseMap = od?.opData?.operationalToCanonical ?? null;
+            recordOperationWeeklyEntries(context.state, reverseMap);
         }
     },
     {
