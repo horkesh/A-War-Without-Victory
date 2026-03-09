@@ -726,7 +726,7 @@ async function main(): Promise<void> {
             reader.onload = () => {
                 try {
                     const text = reader.result as string;
-                    const state = JSON.parse(text) as Record<string, unknown>;
+                    const state = JSON.parse(text) as any;
                     const pc = state.political.political_controllers as Record<string, string | null> | undefined;
                     if (pc && typeof pc === 'object') {
                         controlData = {

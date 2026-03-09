@@ -20,26 +20,23 @@ function seg(edge_id: string, active: boolean): GameState['military']['front_seg
 }
 
 test('expandRegionPostureToEdges expands into active edges and preserves per-edge overrides', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'seed' },
         factions: [],
-        formations: {},
-        front_segments: {
+        military: { formations: {}, front_segments: {
             e1: seg('e1', true),
             e2: seg('e2', true),
             e3: seg('e3', false) // should be skipped (inactive)
-        },
-        front_posture: {
+        }, front_posture: {
             // Explicit per-edge override for e2 must win.
             A: { assignments: { e2: { edge_id: 'e2', posture: 'hold', weight: 1 } } }
-        },
-        front_posture_regions: {
+        }, front_posture_regions: {
             A: { assignments: { 'A--B::e1': { posture: 'push', weight: 3 } } }
-        },
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontRegions: FrontRegionsFile = {
         schema: 1,

@@ -126,7 +126,7 @@ test('generateCorpsDirectives ignores zero-edge containment sectors for reinforc
             'op:test:pocket_enemy': 'RBiH',
         }
   } as any,
-} as GameState;
+} as unknown as GameState;
 
     initializeCorpsCommand(state);
     assert.ok(state.military.corps_command?.[corpsId], 'corps command should initialize');
@@ -201,7 +201,7 @@ test.skip('generateCorpsDirectives can synthesize a launchable offensive sector 
             'op:doboj:t3': 'RBiH',
         }
   } as any,
-} as GameState;
+} as unknown as GameState;
 
     initializeCorpsCommand(state);
     assert.ok(state.military.corps_command?.[corpsId], 'corps command should initialize');
@@ -289,7 +289,7 @@ test.skip('generateCorpsDirectives concentrates based on live brigade positions,
             'op:doboj:t3': 'RBiH',
         }
   } as any,
-} as GameState;
+} as unknown as GameState;
 
     initializeCorpsCommand(state);
     state.military.corps_command![corpsId].stance = 'balanced';
@@ -376,7 +376,7 @@ test.skip('generateCorpsDirectives can launch an operation from adjacent sectors
             'op:doboj:t3': 'RBiH',
         }
   } as any,
-} as GameState;
+} as unknown as GameState;
 
     initializeCorpsCommand(state);
     state.military.corps_command![corpsId].stance = 'balanced';

@@ -76,7 +76,8 @@ function makeLinearScenario(): { state: GameState; edges: EdgeRecord[] } {
     political_controllers: pc,
     war_alliance_rbih_hrhb: -0.5
   } as any,
-} as GameState;
+  displacement: {} as any,
+} as unknown as GameState;
 
     return { state, edges };
 }
@@ -123,9 +124,9 @@ describe('computeBrigadeDensity', () => {
   factions: [
                 { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             ] as any,
-  formations,
   brigade_aor: brigadeAor,
   military: {
+    formations,
     front_segments: {},
     front_posture: {},
     front_posture_regions: {},
@@ -135,7 +136,7 @@ describe('computeBrigadeDensity', () => {
   political: {
     political_controllers: pc
   } as any,
-} as GameState;
+} as unknown as GameState;
 
         const density = computeBrigadeDensity(state, formationId);
         expect(density).toBeCloseTo(3000 / 4, 6);
@@ -168,7 +169,7 @@ describe('computeBrigadeDensity', () => {
   political: {
     political_controllers: pc
   } as any,
-} as GameState;
+} as unknown as GameState;
 
         expect(getSettlementGarrison(state, 'S001')).toBe(1200);
     });

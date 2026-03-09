@@ -67,7 +67,7 @@ function makeState(opts: {
     political_controllers: opts.politicalControllers,
     municipalities: {}
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 /**

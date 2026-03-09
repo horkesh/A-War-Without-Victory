@@ -77,6 +77,7 @@ function makeState(): GameState {
             'op:enemy:obj1': 'RBiH',
         }
   } as any,
+  displacement: {} as any,
 } as unknown as GameState;
 }
 

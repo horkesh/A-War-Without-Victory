@@ -110,8 +110,7 @@ function buildTinyState(): { state: GameState; edges: EdgeRecord[] } {
 
     return { state, edges,
         
-        political: {} as any,
-        displacement: {} as any
+        
     };
 }
 

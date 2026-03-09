@@ -58,7 +58,7 @@ function makeState(): GameState {
             },
         ]
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 test('ensureBrigadeFrontAssignments assigns brigades deterministically', () => {

@@ -42,7 +42,7 @@ function makeState(overrides?: Partial<GameState>): GameState {
   political: {
     political_controllers: {}
   } as any,
-};
+} as unknown as GameState;
 }
 
 describe('initializeRecruitmentResources', () => {

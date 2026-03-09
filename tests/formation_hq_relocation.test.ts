@@ -15,17 +15,10 @@ function minimalState(formations: GameState['military']['formations'], political
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'test', phase: 'war', referendum_held: false, referendum_turn: null, war_start_turn: null },
         factions: [],
-        formations,
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: political_controllers ?? {},
-        municipalities: {},
-        war_consolidation_until: {},
-        war_militia_strength: {}
-    };
+        military: { formations, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: political_controllers ?? {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 }
 
 function settlementsMap(entries: Array<{ sid: string; mun: string; mun_code: string; mun1990_id?: string }>): Map<string, SettlementRecord> {
@@ -44,7 +37,7 @@ function settlementsMap(entries: Array<{ sid: string; mun: string; mun_code: str
 
 test('relocates HQ from enemy-controlled settlement to friendly in same mun', () => {
     // M1: s1 (RBiH), s2 (RS). M2: s3 (RBiH). Edge s1-s3 so M1 and M2 adjacent.
-    const formations: GameState['formations'] = {
+    const formations: GameState['military']['formations'] = {
         f1: {
             id: 'f1' as FormationId,
             faction: 'RBiH',
@@ -75,7 +68,7 @@ test('relocates HQ from enemy-controlled settlement to friendly in same mun', ()
 
 test('relocates HQ to adjacent mun when same mun has no friendly settlement', () => {
     // M1: s1 (RS only). M2: s2 (RBiH). Edge s1-s2.
-    const formations: GameState['formations'] = {
+    const formations: GameState['military']['formations'] = {
         f1: {
             id: 'f1' as FormationId,
             faction: 'RBiH',
@@ -100,7 +93,7 @@ test('relocates HQ to adjacent mun when same mun has no friendly settlement', ()
 });
 
 test('no relocation when HQ already in friendly territory', () => {
-    const formations: GameState['formations'] = {
+    const formations: GameState['military']['formations'] = {
         f1: {
             id: 'f1' as FormationId,
             faction: 'RBiH',
@@ -126,7 +119,7 @@ test('no relocation when HQ already in friendly territory', () => {
 
 test('no relocation when no friendly settlement in same or adjacent mun', () => {
     // M1: s1 (RS). M2: s2 (RS). No other muns; formation RBiH with HQ at s1 stays without friendly option.
-    const formations: GameState['formations'] = {
+    const formations: GameState['military']['formations'] = {
         f1: {
             id: 'f1' as FormationId,
             faction: 'RBiH',
@@ -151,7 +144,7 @@ test('no relocation when no friendly settlement in same or adjacent mun', () => 
 });
 
 test('formation without hq_sid is skipped', () => {
-    const formations: GameState['formations'] = {
+    const formations: GameState['military']['formations'] = {
         f1: {
             id: 'f1' as FormationId,
             faction: 'RBiH',
@@ -169,7 +162,7 @@ test('formation without hq_sid is skipped', () => {
 });
 
 test('phase II brigade HQ moves to depth-2 settlement behind front within AoR', () => {
-    const formations: GameState['formations'] = {
+    const formations: GameState['military']['formations'] = {
         b1: {
             id: 'b1' as FormationId,
             faction: 'RBiH',
@@ -204,7 +197,7 @@ test('phase II brigade HQ moves to depth-2 settlement behind front within AoR', 
 });
 
 test.skip('phase II brigade HQ uses deepest available fallback when depth-2 not present', () => {
-    const formations: GameState['formations'] = {
+    const formations: GameState['military']['formations'] = {
         b1: {
             id: 'b1' as FormationId,
             faction: 'RBiH',

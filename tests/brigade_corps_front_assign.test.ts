@@ -29,11 +29,16 @@ function makeState(overrides?: Partial<GameState & LegacyBrigadeAoRState>): Game
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
-    militia_pools: {}
-  } as any,
+    militia_pools: {},
+      ...(overrides?.military || {})
+} as any,
   political: {
-    political_controllers: {}
-  } as any,
+    political_controllers: {},
+      ...(overrides?.political || {})
+} as any,
+  displacement: {
+      ...(overrides?.displacement || {})
+} as any,
 } as GameState & LegacyBrigadeAoRState;
 }
 
@@ -48,7 +53,7 @@ describe('corps_front_assign', () => {
             } as any
   } as any,
   political: {
-    political_controllers: { S1: 'RBiH', S2: 'RS' }
+    political_controllers: { S1: 'RBiH', S2: 'RS' },
   } as any,
 });
         // brigade_aor is never populated in pipeline; function always returns {}
@@ -68,7 +73,7 @@ describe('corps_front_assign', () => {
     corps_front_edges: { corps_rbih: ['S1__S2', 'S3__S4'] }
   } as any,
   political: {
-    political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RBiH', S4: 'RS' }
+    political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RBiH', S4: 'RS' },
   } as any,
 });
         applyCorpsFrontAutoDistributionForCorps(state, 'corps_rbih');
@@ -89,7 +94,7 @@ describe('corps_front_assign', () => {
     corps_attack_axis_orders: { corps_rbih: { edge_ids: ['S1__S2', 'S3__S4'] } }
   } as any,
   political: {
-    political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RBiH', S4: 'RS' }
+    political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RBiH', S4: 'RS' },
   } as any,
 });
         applyCorpsAttackAxisOrders(state);

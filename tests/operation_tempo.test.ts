@@ -76,7 +76,7 @@ function makeState(): GameState {
   political: {
     political_controllers: { 'op:test:objective': 'RBiH' }
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 describe('advanceSectorOffensives', () => {

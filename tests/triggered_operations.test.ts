@@ -70,7 +70,7 @@ function makeState(turn: number): GameState {
             phase: 'war',
             scenario_start_date: { year: 1992, month: 4, day: 6 },
             seed: 'test',
-        } as GameState['meta'],
+        } as unknown as GameState['meta'],
   factions: [{ id: 'RS' as FactionId }] as GameState['factions'],
   formations,
   military: {
@@ -79,7 +79,7 @@ function makeState(turn: number): GameState {
   political: {
     political_controllers: politicalControllers
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 describe('triggered operations definitions', () => {

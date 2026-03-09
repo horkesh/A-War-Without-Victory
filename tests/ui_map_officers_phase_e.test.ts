@@ -69,6 +69,7 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
     political_controllers: {},
     control_events: []
   } as any,
+  displacement: {} as any,
 };
 
         const result = parseGameState(state);

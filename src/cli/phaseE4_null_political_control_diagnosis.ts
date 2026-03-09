@@ -60,7 +60,7 @@ async function main(): Promise<void> {
     const indexData = JSON.parse(indexText) as SettlementsIndex;
     const mappingData = JSON.parse(mappingText) as ControllerMappingFile;
 
-    const settlements: SettlementRecord[] = Array.isArray(indexData.political.settlements) ? indexData.political.settlements : [];
+    const settlements: SettlementRecord[] = Array.isArray((indexData as any).political.settlements) ? (indexData as any).political.settlements : [];
     const controllersByMun1990 = mappingData.controllers_by_mun1990_id ?? {};
 
     // Sort settlements deterministically

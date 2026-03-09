@@ -70,7 +70,7 @@ function makeState(overrides?: Partial<GameState>): GameState {
     front_pressure: {},
     militia_pools: {}
   } as any,
-};
+} as unknown as GameState;
 }
 
 // ── Alliance Update Tests ──

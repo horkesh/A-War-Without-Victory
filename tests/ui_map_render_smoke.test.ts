@@ -62,8 +62,7 @@ describe('Tactical map render smoke', () => {
   aorOrders: [],
   recentControlEvents: [],
   latestTurnSummary: null,
-  military: {
-    formations: [
+  formations: [
         {
           id: 'b1',
           faction: 'RBiH',
@@ -79,7 +78,6 @@ describe('Tactical map render smoke', () => {
           personnel: 2000,
         },
       ]
-  } as any,
 };
     const controlledGeo = buildControlGeoJSON(minimalBaseGeo, minimalState.controlBySettlement);
     const result = buildFormationsGeoJSON(minimalState, controlledGeo);

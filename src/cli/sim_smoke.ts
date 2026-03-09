@@ -124,12 +124,8 @@ function computeSmokeSummary(state: GameState, graph: Awaited<ReturnType<typeof 
   displacement_total: displacementTotal,
   negotiation_pressure_total: negotiationPressureTotal,
   exhaustion_total: exhaustionTotal,
-  military: {
-    front_edges: frontEdges.length
-  } as any,
-  political: {
-    end_state: state.political.end_state !== null && state.political.end_state !== undefined
-  } as any,
+  front_edges: frontEdges.length,
+  end_state: state.political.end_state !== null && state.political.end_state !== undefined
 };
 }
 

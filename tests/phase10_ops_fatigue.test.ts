@@ -36,7 +36,7 @@ function edge(edge_id: string, side_a: string, side_b: string): FrontEdge {
 // ============================================================================
 
 test('formation fatigue: assigned + unsupplied => fatigue increments by 1 per turn', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -53,7 +53,7 @@ test('formation fatigue: assigned + unsupplied => fatigue increments by 1 per tu
                 supply_sources: []
             }
         ],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -63,13 +63,10 @@ test('formation fatigue: assigned + unsupplied => fatigue increments by 1 per tu
                 assignment: { kind: 'edge', edge_id: 's1__s2' },
                 ops: { fatigue: 0, last_supplied_turn: null }
             }
-        },
-        front_segments: { 's1__s2': seg('s1__s2', true) },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_segments: { 's1__s2': seg('s1__s2', true) }, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('s1__s2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 5, regions: [] };
@@ -88,7 +85,7 @@ test('formation fatigue: assigned + unsupplied => fatigue increments by 1 per tu
 });
 
 test('formation fatigue: assigned + supplied => fatigue unchanged, last_supplied_turn set', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -105,7 +102,7 @@ test('formation fatigue: assigned + supplied => fatigue unchanged, last_supplied
                 supply_sources: []
             }
         ],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -115,13 +112,10 @@ test('formation fatigue: assigned + supplied => fatigue unchanged, last_supplied
                 assignment: { kind: 'edge', edge_id: 's1__s2' },
                 ops: { fatigue: 2, last_supplied_turn: null }
             }
-        },
-        front_segments: { 's1__s2': seg('s1__s2', true) },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_segments: { 's1__s2': seg('s1__s2', true) }, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('s1__s2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 5, regions: [] };
@@ -140,7 +134,7 @@ test('formation fatigue: assigned + supplied => fatigue unchanged, last_supplied
 });
 
 test('formation fatigue: unassigned formations do NOT accumulate fatigue even if faction is unsupplied', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -157,7 +151,7 @@ test('formation fatigue: unassigned formations do NOT accumulate fatigue even if
                 supply_sources: []
             }
         ],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -167,13 +161,10 @@ test('formation fatigue: unassigned formations do NOT accumulate fatigue even if
                 assignment: null, // Unassigned
                 ops: { fatigue: 0, last_supplied_turn: null }
             }
-        },
-        front_segments: { 's1__s2': seg('s1__s2', true) },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_segments: { 's1__s2': seg('s1__s2', true) }, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('s1__s2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 5, regions: [] };
@@ -191,7 +182,7 @@ test('formation fatigue: unassigned formations do NOT accumulate fatigue even if
 });
 
 test('formation fatigue: inactive formations do not accumulate fatigue', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -208,7 +199,7 @@ test('formation fatigue: inactive formations do not accumulate fatigue', () => {
                 supply_sources: []
             }
         ],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -218,13 +209,10 @@ test('formation fatigue: inactive formations do not accumulate fatigue', () => {
                 assignment: { kind: 'edge', edge_id: 's1__s2' },
                 ops: { fatigue: 0, last_supplied_turn: null }
             }
-        },
-        front_segments: { 's1__s2': seg('s1__s2', true) },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_segments: { 's1__s2': seg('s1__s2', true) }, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('s1__s2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 5, regions: [] };
@@ -242,7 +230,7 @@ test('formation fatigue: inactive formations do not accumulate fatigue', () => {
 // ============================================================================
 
 test('commitment penalty: supplied, fatigue=0 => commit points = 1000', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -261,7 +249,7 @@ test('commitment penalty: supplied, fatigue=0 => commit points = 1000', () => {
                 command_capacity: 0
             }
         ],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -271,15 +259,12 @@ test('commitment penalty: supplied, fatigue=0 => commit points = 1000', () => {
                 assignment: { kind: 'edge', edge_id: 's1__s2' },
                 ops: { fatigue: 0, last_supplied_turn: 5 } // Supplied this turn
             }
-        },
-        front_segments: { 's1__s2': seg('s1__s2', true) },
-        front_posture: {
+        }, front_segments: { 's1__s2': seg('s1__s2', true) }, front_posture: {
             A: { assignments: { 's1__s2': { edge_id: 's1__s2', posture: 'push', weight: 1 } } }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('s1__s2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 5, regions: [] };
@@ -292,7 +277,7 @@ test('commitment penalty: supplied, fatigue=0 => commit points = 1000', () => {
 });
 
 test('commitment penalty: unsupplied, fatigue=0 => commit points = 500', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -311,7 +296,7 @@ test('commitment penalty: unsupplied, fatigue=0 => commit points = 500', () => {
                 command_capacity: 0
             }
         ],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -321,15 +306,12 @@ test('commitment penalty: unsupplied, fatigue=0 => commit points = 500', () => {
                 assignment: { kind: 'edge', edge_id: 's1__s2' },
                 ops: { fatigue: 0, last_supplied_turn: null } // Unsupplied
             }
-        },
-        front_segments: { 's1__s2': seg('s1__s2', true) },
-        front_posture: {
+        }, front_segments: { 's1__s2': seg('s1__s2', true) }, front_posture: {
             A: { assignments: { 's1__s2': { edge_id: 's1__s2', posture: 'push', weight: 1 } } }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('s1__s2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 5, regions: [] };
@@ -342,7 +324,7 @@ test('commitment penalty: unsupplied, fatigue=0 => commit points = 500', () => {
 });
 
 test('commitment penalty: unsupplied, fatigue=3 => commit points = 350', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -361,7 +343,7 @@ test('commitment penalty: unsupplied, fatigue=3 => commit points = 350', () => {
                 command_capacity: 0
             }
         ],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -371,15 +353,12 @@ test('commitment penalty: unsupplied, fatigue=3 => commit points = 350', () => {
                 assignment: { kind: 'edge', edge_id: 's1__s2' },
                 ops: { fatigue: 3, last_supplied_turn: null } // Unsupplied, fatigue=3
             }
-        },
-        front_segments: { 's1__s2': seg('s1__s2', true) },
-        front_posture: {
+        }, front_segments: { 's1__s2': seg('s1__s2', true) }, front_posture: {
             A: { assignments: { 's1__s2': { edge_id: 's1__s2', posture: 'push', weight: 1 } } }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('s1__s2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 5, regions: [] };
@@ -393,7 +372,7 @@ test('commitment penalty: unsupplied, fatigue=3 => commit points = 350', () => {
 });
 
 test('commitment penalty: supplied, fatigue=3 => commit points = 850 (fatigue penalty applies even when supplied)', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -412,7 +391,7 @@ test('commitment penalty: supplied, fatigue=3 => commit points = 850 (fatigue pe
                 command_capacity: 0
             }
         ],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -422,15 +401,12 @@ test('commitment penalty: supplied, fatigue=3 => commit points = 850 (fatigue pe
                 assignment: { kind: 'edge', edge_id: 's1__s2' },
                 ops: { fatigue: 3, last_supplied_turn: 5 } // Supplied, fatigue=3
             }
-        },
-        front_segments: { 's1__s2': seg('s1__s2', true) },
-        front_posture: {
+        }, front_segments: { 's1__s2': seg('s1__s2', true) }, front_posture: {
             A: { assignments: { 's1__s2': { edge_id: 's1__s2', posture: 'push', weight: 1 } } }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('s1__s2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 5, regions: [] };
@@ -448,7 +424,7 @@ test('commitment penalty: supplied, fatigue=3 => commit points = 850 (fatigue pe
 // ============================================================================
 
 test('militia fatigue: municipality unsupplied => fatigue increments by 1 per turn', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -459,12 +435,7 @@ test('militia fatigue: municipality unsupplied => fatigue increments by 1 per tu
                 supply_sources: [] // No supply sources => unsupplied
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+        military: { formations: {}, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {
             'MUN1': {
                 mun_id: 'MUN1',
                 faction: 'A',
@@ -474,8 +445,10 @@ test('militia fatigue: municipality unsupplied => fatigue increments by 1 per tu
                 updated_turn: 1,
                 fatigue: 0
             }
-        }
-    };
+        }, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     // Create synthetic settlements: one settlement in MUN1, not reachable from supply
     const settlements = new Map<string, SettlementRecord>();
@@ -500,7 +473,7 @@ test('militia fatigue: municipality unsupplied => fatigue increments by 1 per tu
 });
 
 test('militia fatigue: municipality supplied => fatigue unchanged', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -511,12 +484,7 @@ test('militia fatigue: municipality supplied => fatigue unchanged', () => {
                 supply_sources: ['s1'] // Supply source => supplied
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+        military: { formations: {}, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {
             'MUN1': {
                 mun_id: 'MUN1',
                 faction: 'A',
@@ -526,8 +494,10 @@ test('militia fatigue: municipality supplied => fatigue unchanged', () => {
                 updated_turn: 1,
                 fatigue: 2
             }
-        }
-    };
+        }, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     // Create synthetic settlements: one settlement in MUN1, reachable from supply
     const settlements = new Map<string, SettlementRecord>();
@@ -552,7 +522,7 @@ test('militia fatigue: municipality supplied => fatigue unchanged', () => {
 });
 
 test('militia fatigue: exhaustion increase adds +1 fatigue to all pools for that faction', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -563,12 +533,7 @@ test('militia fatigue: exhaustion increase adds +1 fatigue to all pools for that
                 supply_sources: ['s1'] // Supplied, and s2 is reachable via edge
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+        military: { formations: {}, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {
             'MUN1': {
                 mun_id: 'MUN1',
                 faction: 'A',
@@ -587,8 +552,10 @@ test('militia fatigue: exhaustion increase adds +1 fatigue to all pools for that
                 updated_turn: 1,
                 fatigue: 1
             }
-        }
-    };
+        }, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     // Create synthetic settlements: both municipalities have reachable settlements
     // s1 is in supply_sources, s2 is reachable via edge from s1
@@ -628,7 +595,7 @@ test('militia fatigue: exhaustion increase adds +1 fatigue to all pools for that
 });
 
 test('militia fatigue: deterministic municipal supply uses settlement reachability + mun_code mapping', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 5, seed: 'seed' },
         factions: [
@@ -639,12 +606,7 @@ test('militia fatigue: deterministic municipal supply uses settlement reachabili
                 supply_sources: ['s1'] // Only s1 is reachable
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+        military: { formations: {}, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {
             'MUN1': {
                 mun_id: 'MUN1',
                 faction: 'A',
@@ -663,8 +625,10 @@ test('militia fatigue: deterministic municipal supply uses settlement reachabili
                 updated_turn: 1,
                 fatigue: 0
             }
-        }
-    };
+        }, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     // Create synthetic settlements:
     // MUN1 has s1 (reachable) and s2 (not reachable) - should be supplied (at least one reachable)
@@ -713,7 +677,7 @@ test('determinism: same scenario run twice produces identical scenario_summary.j
         { a: 's1', b: 's3' } // canonical edge_id s1__s3
     ];
 
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
             turn: 0,
@@ -739,7 +703,7 @@ test('determinism: same scenario run twice produces identical scenario_summary.j
                 command_capacity: 0
             }
         ],
-        formations: {
+        military: { formations: {
             F_A_0001: {
                 id: 'F_A_0001',
                 faction: 'A',
@@ -749,12 +713,7 @@ test('determinism: same scenario run twice produces identical scenario_summary.j
                 assignment: { kind: 'edge', edge_id: 's1__s2' },
                 ops: { fatigue: 0, last_supplied_turn: null }
             }
-        },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+        }, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {
             'MUN1': {
                 mun_id: 'MUN1',
                 faction: 'A',
@@ -764,8 +723,10 @@ test('determinism: same scenario run twice produces identical scenario_summary.j
                 updated_turn: 0,
                 fatigue: 0
             }
-        }
-    };
+        }, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const script = {
         schema: 1 as const,

@@ -31,7 +31,10 @@ function minimalPhaseIIState(overrides?: Partial<{ militia_pools: Record<string,
     political_controllers: { S1: 'RS' },
     municipalities: { MUN_X: { stability_score: 50, control: 'consolidated' as const } }
   } as any,
-} as GameState;
+  displacement: {
+    displacement_state: {}
+  } as any,
+} as unknown as GameState;
 }
 
 const settlementRecord: SettlementRecord = { sid: 'S1', source_id: 's1', mun_code: 'MUN_X', mun: 'MUN_X', mun1990_id: 'MUN_X' };
@@ -128,19 +131,23 @@ describe('runOngoingMobilization', () => {
             [militiaPoolKey('MUN_X', 'RBiH')]: { mun_id: 'MUN_X', faction: 'RBiH', available: 100, committed: 0, exhausted: 0, updated_turn: 4 },
             [militiaPoolKey('MUN_Y', 'RBiH')]: { mun_id: 'MUN_Y', faction: 'RBiH', available: 100, committed: 0, exhausted: 0, updated_turn: 4 },
         };
+        const baselineState = minimalPhaseIIState({ militia_pools: structuredClone(basePools) });
         const baseline = {
-  ...minimalPhaseIIState({ militia_pools: structuredClone(basePools) }),
+  ...baselineState,
   political: {
+    ...baselineState.political,
     political_controllers: { S1: 'RBiH', S2: 'RBiH' },
     municipalities: {
                 MUN_X: { stability_score: 50, control: 'consolidated' as const },
                 MUN_Y: { stability_score: 50, control: 'consolidated' as const },
             }
   } as any,
-} as GameState;
+} as unknown as GameState;
+        const boostedState = minimalPhaseIIState({ militia_pools: structuredClone(basePools) });
         const boosted = {
-  ...minimalPhaseIIState({ militia_pools: structuredClone(basePools) }),
+  ...boostedState,
   military: {
+    ...boostedState.military,
     municipality_support_orders: {
                 RBiH: {
                     faction: 'RBiH',
@@ -151,13 +158,14 @@ describe('runOngoingMobilization', () => {
             }
   } as any,
   political: {
+    ...boostedState.political,
     political_controllers: { S1: 'RBiH', S2: 'RBiH' },
     municipalities: {
                 MUN_X: { stability_score: 50, control: 'consolidated' as const },
                 MUN_Y: { stability_score: 50, control: 'consolidated' as const },
             }
   } as any,
-} as GameState;
+} as unknown as GameState;
 
         runOngoingMobilization(baseline, rbihSettlements, rbihPop);
         runOngoingMobilization(boosted, rbihSettlements, rbihPop);

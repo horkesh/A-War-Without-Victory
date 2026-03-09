@@ -59,6 +59,8 @@ function makeBottomUpState(munAvailable = 150): GameState {
             }
         }
   } as any,
+  political: {} as any,
+  displacement: {} as any,
 } as unknown as GameState;
 }
 

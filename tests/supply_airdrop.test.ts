@@ -21,12 +21,17 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
   military: {
     general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 60 },
     heavy_munitions_reserve: { RBiH: 40, RS: 50, HRHB: 45 },
-    formations: {}
-  } as any,
+    formations: {},
+      ...(overrides?.military || {})
+} as any,
   political: {
     enclave_resilience: {},
-    political_controllers: {}
-  } as any,
+    political_controllers: {},
+      ...(overrides?.political || {})
+} as any,
+  displacement: {
+      ...(overrides?.displacement || {})
+} as any,
 } as unknown as GameState;
 }
 
@@ -46,7 +51,7 @@ describe('applyUnAirdrops', () => {
   political: {
     enclave_resilience: {
                 'op:gorazde:core': { resilience: 5, isolation_turns: AIRDROP_ISOLATION_THRESHOLD - 1, hardening_active: false },
-            }
+            },
   } as any,
 });
         applyUnAirdrops(state);
@@ -58,7 +63,7 @@ describe('applyUnAirdrops', () => {
   political: {
     enclave_resilience: {
                 'op:gorazde:core': { resilience: 5, isolation_turns: AIRDROP_ISOLATION_THRESHOLD, hardening_active: false },
-            }
+            },
   } as any,
 });
         applyUnAirdrops(state);
@@ -72,7 +77,7 @@ describe('applyUnAirdrops', () => {
                 'op:gorazde:core': { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 3, hardening_active: false },
                 'op:srebrenica:core': { resilience: 15, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 1, hardening_active: false },
                 'op:zepa:core': { resilience: 8, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 5, hardening_active: true },
-            }
+            },
   } as any,
 });
         applyUnAirdrops(state);
@@ -86,7 +91,7 @@ describe('applyUnAirdrops', () => {
         }
         const state = makeState({
   political: {
-    enclave_resilience: enclaves as GameState['political']['enclave_resilience']
+    enclave_resilience: enclaves as GameState['political']['enclave_resilience'],
   } as any,
 });
         state.military.general_supply_reserve!['RBiH'] = 0;
@@ -99,7 +104,7 @@ describe('applyUnAirdrops', () => {
   political: {
     enclave_resilience: {
                 'op:gorazde:core': { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
-            }
+            },
   } as any,
 });
         applyUnAirdrops(state);
@@ -111,7 +116,7 @@ describe('applyUnAirdrops', () => {
   political: {
     enclave_resilience: {
                 'op:gorazde:core': { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
-            }
+            },
   } as any,
 });
         applyUnAirdrops(state);
@@ -125,7 +130,7 @@ describe('applyUnAirdrops', () => {
   political: {
     enclave_resilience: {
                 'op:gorazde:core': { resilience: 20, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 5, hardening_active: false },
-            }
+            },
   } as any,
 });
         state.military.general_supply_reserve!['RBiH'] = 99.9;
@@ -138,13 +143,13 @@ describe('applyUnAirdrops', () => {
   military: {
     airdrop_allocation: {
                 gorazde: 0.5,
-            }
+            },
   } as any,
   political: {
     enclave_resilience: {
                 gorazde: { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
                 srebrenica: { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
-            }
+            },
   } as any,
 });
 

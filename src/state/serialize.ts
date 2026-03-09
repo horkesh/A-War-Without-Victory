@@ -168,15 +168,15 @@ function migrateState(raw: unknown): GameState {
         throw new Error('Cannot migrate: state is not an object');
     }
 
-    const candidate = structuredClonePolyfill(raw) as unknown as Record<string, unknown>;
+    const candidate = structuredClonePolyfill(raw) as unknown as any;
     const version = candidate.schema_version;
 
     switch (version) {
         case undefined:
         case CURRENT_SCHEMA_VERSION: {
             // Default new fields for older saves.
-            if (!('front_segments' in candidate) || candidate.military.front_segments === undefined) {
-                candidate.military.front_segments = {};
+            if (!('front_segments' in candidate) || (candidate as any).military.front_segments === undefined) {
+                (candidate as any).military.front_segments = {};
             }
             if (!('theatres' in candidate) || candidate.theatres === undefined) {
                 candidate.theatres = {};
@@ -206,7 +206,7 @@ function migrateState(raw: unknown): GameState {
                 candidate.militia_pools = {};
             }
             // Phase 0: Default meta referendum/war-start fields for older saves
-            const meta = candidate.meta as Record<string, unknown> | undefined;
+            const meta = candidate.meta as any | undefined;
             if (meta && typeof meta === 'object') {
                 if (!('referendum_held' in meta) || meta.referendum_held === undefined) meta.referendum_held = false;
                 if (!('referendum_turn' in meta) || meta.referendum_turn === undefined) meta.referendum_turn = null;
@@ -268,7 +268,7 @@ function migrateState(raw: unknown): GameState {
             }
 
             // Ensure deterministic defaulting for new FrontSegmentState fields.
-            const segments = candidate.military.front_segments as unknown;
+            const segments = (candidate as any).military.front_segments as unknown;
             if (segments && typeof segments === 'object') {
                 const segRec = segments as Record<string, any>;
                 const keysSorted = Object.keys(segRec).sort();
@@ -511,7 +511,7 @@ function migrateState(raw: unknown): GameState {
                 if (!('war_jna' in candidate) || candidate.war_jna === undefined) {
                     candidate.war_jna = { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 };
                 } else {
-                    const jna = candidate.war_jna as Record<string, unknown>;
+                    const jna = candidate.war_jna as any;
                     if (typeof jna.transition_begun !== 'boolean') jna.transition_begun = false;
                     if (typeof jna.withdrawal_progress !== 'number' || jna.withdrawal_progress < 0 || jna.withdrawal_progress > 1) {
                         jna.withdrawal_progress = 0;

@@ -48,14 +48,19 @@ function makeState(
     front_pressure: {},
     militia_pools: {
             [militiaPoolKey('MUN_X', faction)]: makePool('MUN_X', faction, 1000)
-        }
-  } as any,
+        },
+      ...(extra?.military || {})
+} as any,
   political: {
     political_controllers: {},
     municipalities: {
             MUN_X: { stability_score: 50, control: 'consolidated' as const }
-        }
-  } as any,
+        },
+      ...(extra?.political || {})
+} as any,
+  displacement: {
+      ...(extra?.displacement || {})
+} as any,
 } as unknown as GameState;
 }
 
@@ -63,12 +68,14 @@ describe('Phase E municipality support', () => {
     it('applies RS staff priority as a local reinforcement-rate boost without creating new pool manpower', () => {
         const baseline = makeState('RS');
         const boosted = makeState('RS', {
-            municipality_support_orders: {
-                RS: {
-                    faction: 'RS',
-                    mun_id: 'MUN_X',
-                    type: 'staff_priority',
-                    staged_turn: 5,
+            military: {
+                municipality_support_orders: {
+                    RS: {
+                        faction: 'RS',
+                        mun_id: 'MUN_X',
+                        type: 'staff_priority',
+                        staged_turn: 5,
+                    }
                 }
             }
         });
@@ -84,12 +91,14 @@ describe('Phase E municipality support', () => {
     it('applies an HRHB support package as a local cohesion bonus when reinforcement occurs', () => {
         const baseline = makeState('HRHB');
         const boosted = makeState('HRHB', {
-            municipality_support_orders: {
-                HRHB: {
-                    faction: 'HRHB',
-                    mun_id: 'MUN_X',
-                    type: 'croatian_support_package',
-                    staged_turn: 5,
+            military: {
+                municipality_support_orders: {
+                    HRHB: {
+                        faction: 'HRHB',
+                        mun_id: 'MUN_X',
+                        type: 'croatian_support_package',
+                        staged_turn: 5,
+                    }
                 }
             }
         });

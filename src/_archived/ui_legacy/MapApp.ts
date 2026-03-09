@@ -218,11 +218,11 @@ export class MapApp {
      */
     private ensureBrowserBridge(): void {
         // Skip if Electron bridge already present
-        if ((window as unknown as Record<string, unknown>).awwv) return;
+        if ((window as unknown as any).awwv) return;
         const self = this;
         const ok = () => Promise.resolve({ ok: true as const });
         const fail = (msg: string) => Promise.resolve({ ok: false as const, error: msg });
-        const state = () => self.lastRawGameState as Record<string, unknown> | null;
+        const state = () => self.lastRawGameState as any | null;
         const formations = () => (state()?.formations ?? {}) as Record<string, Record<string, unknown>>;
         const normalizeEdge = (id: string): string | null => {
             const parts = id.split('__');
@@ -231,7 +231,7 @@ export class MapApp {
             return a < b ? `${a}__${b}` : `${b}__${a}`;
         };
 
-        (window as unknown as Record<string, unknown>).awwv = {
+        (window as unknown as any).awwv = {
             stageCorpsFrontOrder: async (corpsId: string, edgeIds: string[]) => {
                 const s = state(); if (!s) return fail('No state loaded');
                 const corps = formations()[corpsId];
@@ -250,9 +250,9 @@ export class MapApp {
                 const normalized = edgeIds.map(normalizeEdge).filter((x): x is string => x !== null).sort();
                 if (!normalized.length) return fail('No valid edge IDs');
                 if (!s.corps_attack_axis_orders) s.corps_attack_axis_orders = {};
-                (s.corps_attack_axis_orders as Record<string, unknown>)[corpsId] = { edge_ids: [...new Set(normalized)].sort(), created_turn: ((s.meta as Record<string, unknown>)?.turn as number) ?? 0 };
+                (s.corps_attack_axis_orders as any)[corpsId] = { edge_ids: [...new Set(normalized)].sort(), created_turn: ((s.meta as any)?.turn as number) ?? 0 };
                 // Derive per-brigade attack orders from axis
-                const pc = (s.political.political_controllers ?? {}) as Record<string, string>;
+                const pc = ((s as any).political.political_controllers ?? {}) as Record<string, string>;
                 const corpsFaction = corps.faction as string;
                 const enemyTargets = new Set<string>();
                 for (const eid of normalized) {
@@ -296,15 +296,15 @@ export class MapApp {
             },
             stageBrigadeMovementOrder: async (brigadeId: string, targetSids: string[]) => {
                 const s = state(); if (!s) return fail('No state loaded');
-                if (!s.military.brigade_movement_orders) s.military.brigade_movement_orders = {};
-                (s.military.brigade_movement_orders as Record<string, string[]>)[brigadeId] = targetSids.sort();
+                if (!(s as any).military.brigade_movement_orders) (s as any).military.brigade_movement_orders = {};
+                ((s as any).military.brigade_movement_orders as Record<string, string[]>)[brigadeId] = targetSids.sort();
                 self.reloadFromRawState();
                 return ok();
             },
             stageBrigadeRepositionOrder: async (brigadeId: string, sids: string[]) => {
                 const s = state(); if (!s) return fail('No state loaded');
-                if (!s.military.brigade_reposition_orders) s.military.brigade_reposition_orders = {};
-                (s.military.brigade_reposition_orders as Record<string, { settlement_ids: string[] }>)[brigadeId] = { settlement_ids: [...sids].sort() };
+                if (!(s as any).military.brigade_reposition_orders) (s as any).military.brigade_reposition_orders = {};
+                ((s as any).military.brigade_reposition_orders as Record<string, { settlement_ids: string[] }>)[brigadeId] = { settlement_ids: [...sids].sort() };
                 self.reloadFromRawState();
                 return ok();
             },
@@ -378,9 +378,9 @@ export class MapApp {
             },
             clearOrders: async (brigadeId: string) => {
                 const s = state(); if (!s) return fail('No state loaded');
-                if (s.military.brigade_movement_orders) delete (s.military.brigade_movement_orders as Record<string, unknown>)[brigadeId];
-                if (s.military.brigade_reposition_orders) delete (s.military.brigade_reposition_orders as Record<string, unknown>)[brigadeId];
-                if (s.brigade_attack_orders) delete (s.brigade_attack_orders as Record<string, unknown>)[brigadeId];
+                if ((s as any).military.brigade_movement_orders) delete ((s as any).military.brigade_movement_orders as any)[brigadeId];
+                if ((s as any).military.brigade_reposition_orders) delete ((s as any).military.brigade_reposition_orders as any)[brigadeId];
+                if (s.brigade_attack_orders) delete (s.brigade_attack_orders as any)[brigadeId];
                 self.reloadFromRawState();
                 return ok();
             },
@@ -3135,9 +3135,9 @@ export class MapApp {
     /** Push raw game state to the embedded 3D operational map (if mounted). */
     private push3DState(rawState: unknown): void {
         // Store for deferred pickup if 3D map hasn't initialized yet
-        (window as unknown as Record<string, unknown>).__awwvPending3DState = rawState;
+        (window as unknown as any).__awwvPending3DState = rawState;
         try {
-            const fn = (window as unknown as Record<string, unknown>).__awwv3dApplySave;
+            const fn = (window as unknown as any).__awwv3dApplySave;
             if (typeof fn === 'function') (fn as (s: unknown) => void)(rawState);
         } catch (err) {
             console.warn('[MapApp] 3D state sync error (non-fatal):', err instanceof Error ? err.message : String(err));
@@ -3182,7 +3182,7 @@ export class MapApp {
         try {
             const raw = JSON.parse(stateJson) as unknown;
             const loaded = parseGameState(raw);
-            this.lastRawGameState = raw as Record<string, unknown>;
+            this.lastRawGameState = raw as any;
             this.applyLoadedGameState(loaded);
             this.push3DState(raw);
             this.ensureBrowserBridge();
@@ -3497,7 +3497,7 @@ export class MapApp {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const json = await res.json();
                 const loaded = parseGameState(json);
-                this.lastRawGameState = json as Record<string, unknown>;
+                this.lastRawGameState = json as any;
                 this.applyLoadedGameState(loaded);
                 this.push3DState(json);
                 this.ensureBrowserBridge();
@@ -5150,7 +5150,7 @@ export class MapApp {
 
     /** Resolve municipality display name and mun1990_id from feature (municipality_id or mun1990_id). */
     private resolveMunicipalityFromFeature(feature: SettlementFeature): { displayName: string; mun1990Id: string; idForDisplay: string } {
-        const props = feature.properties as Record<string, unknown>;
+        const props = feature.properties as any;
         const munId = feature.properties.municipality_id;
         const mun1990SlugRaw = props?.mun1990_id as string | undefined;
         const mun1990Slug = mun1990SlugRaw && String(mun1990SlugRaw).trim() ? String(mun1990SlugRaw).trim() : undefined;

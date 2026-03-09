@@ -48,8 +48,8 @@ function makeState(formations: Record<string, FormationState>): GameState {
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-  formations,
   military: {
+    formations,
     front_segments: {},
     front_posture: {},
     front_posture_regions: {},
@@ -59,7 +59,8 @@ function makeState(formations: Record<string, FormationState>): GameState {
   political: {
     political_controllers: {}
   } as any,
-};
+  displacement: {} as any
+} as unknown as GameState;
 }
 
 /** Create a minimal eligible militia formation. created_turn=4 → 6 turns active at turn 10. */

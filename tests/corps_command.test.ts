@@ -64,7 +64,7 @@ function makeCorpsState(): GameState {
   political: {
     political_controllers: { S1: 'RS', S2: 'RS', S3: 'RS', S4: 'RS' }
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 describe('corps command - initializeCorpsCommand', () => {

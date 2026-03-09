@@ -222,7 +222,7 @@ describe('runOngoingRecruitment', () => {
                 s1: 'RS'
             }
   } as any,
-} as GameState;
+} as unknown as GameState;
 
         const brigades: OobBrigade[] = [
             {

@@ -20,23 +20,20 @@ function seg(edge_id: string, active: boolean): GameState['military']['front_seg
 }
 
 test('computeFrontRegions derives deterministic connected components by side_pair', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 7, seed: 'seed' },
         factions: [],
-        formations: {},
-        front_segments: {
+        military: { formations: {}, front_segments: {
             e1: seg('e1', true),
             e2: seg('e2', true),
             e5: seg('e5', true),
             e3: seg('e3', true),
             e4: seg('e4', false) // should be ignored (inactive)
-        },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const derived: FrontEdge[] = [
         // side_pair A--B, component 1 (shared s2)

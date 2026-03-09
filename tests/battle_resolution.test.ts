@@ -96,7 +96,7 @@ function makeState(
   political: {
     political_controllers: pc
   } as any,
-} as GameState & LegacyBrigadeAoRState;
+} as unknown as GameState & LegacyBrigadeAoRState;
 }
 
 // --- Tests ---

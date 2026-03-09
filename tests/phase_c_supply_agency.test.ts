@@ -45,8 +45,9 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
   military: {
     formations: {},
     general_supply_reserve: { RS: 40, RBiH: 20, HRHB: 30 },
-    heavy_munitions_reserve: { RS: 20, RBiH: 5, HRHB: 10 }
-  } as any,
+    heavy_munitions_reserve: { RS: 20, RBiH: 5, HRHB: 10 },
+      ...(overrides?.military || {})
+} as any,
   political: {
     political_controllers: {
             enclave_1: 'RBiH',
@@ -91,8 +92,9 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
             international_focus: 0.5,
             humanitarian_pressure: 0.8,
             last_updated_turn: 64,
-        }
-  } as any,
+        },
+      ...(overrides?.political || {})
+} as any,
   displacement: {
     displacement_event_log: [
             {
@@ -105,8 +107,9 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
                 fled_abroad: 200,
                 settled: 2100,
             },
-        ]
-  } as any,
+        ],
+      ...(overrides?.displacement || {})
+} as any,
 } as GameState;
 }
 

@@ -28,13 +28,18 @@ function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
         ],
   ...overrides,
   military: {
-    formations: {}
-  } as any,
+    formations: {},
+      ...(overrides?.military || {})
+} as any,
   political: {
     settlements: [],
     municipalities: {},
-    political_controllers: {}
-  } as any,
+    political_controllers: {},
+      ...(overrides?.political || {})
+} as any,
+  displacement: {
+      ...(overrides?.displacement || {})
+} as any,
 } as unknown as GameState;
 }
 
@@ -61,7 +66,7 @@ describe('updateSiegeTurnCounters', () => {
     it('accumulates counter over multiple turns', () => {
         const state = makeMinimalState({
   military: {
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 3 }
+    siege_turn_counters: { 'RBiH:op:srebrenica:center': 3 },
   } as any,
 });
         const supply = {
@@ -79,7 +84,7 @@ describe('updateSiegeTurnCounters', () => {
     it('resets counter when no longer critical', () => {
         const state = makeMinimalState({
   military: {
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 5 }
+    siege_turn_counters: { 'RBiH:op:srebrenica:center': 5 },
   } as any,
 });
         const supply = {
@@ -113,7 +118,7 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
         // 2 connected critical OSIDs — below threshold of 5
         const state = makeMinimalState({
   military: {
-    siege_turn_counters: { 'RBiH:op:a:1': 10, 'RBiH:op:a:2': 10 }
+    siege_turn_counters: { 'RBiH:op:a:1': 10, 'RBiH:op:a:2': 10 },
   } as any,
 });
         const supply = {
@@ -142,7 +147,7 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
 
         const state = makeMinimalState({
   military: {
-    siege_turn_counters: counters
+    siege_turn_counters: counters,
   } as any,
 });
         const supply = {
@@ -169,7 +174,7 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
 
         const state = makeMinimalState({
   military: {
-    siege_turn_counters: counters
+    siege_turn_counters: counters,
   } as any,
 });
         const allOsids = [...largeOsids, singleton];
@@ -195,7 +200,7 @@ describe('updateSiegeTurnCounters — pocket-size threshold', () => {
     it('backward compat: without adjacency, all OSIDs escalate', () => {
         const state = makeMinimalState({
   military: {
-    siege_turn_counters: { 'RS:op:outpost:1': 5 }
+    siege_turn_counters: { 'RS:op:outpost:1': 5 },
   } as any,
 });
         const supply = {
@@ -220,7 +225,7 @@ describe('updateSupplyReserves — siege drain', () => {
     it('drains reserves based on siege turn counters', () => {
         const state = makeMinimalState({
   military: {
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 5 }
+    siege_turn_counters: { 'RBiH:op:srebrenica:center': 5 },
   } as any,
 });
         ensureSupplyReserves(state);
@@ -244,7 +249,7 @@ describe('updateSupplyReserves — siege drain', () => {
         // Very high counter → should be capped
         const state = makeMinimalState({
   military: {
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 1000 }
+    siege_turn_counters: { 'RBiH:op:srebrenica:center': 1000 },
   } as any,
 });
         ensureSupplyReserves(state);
@@ -338,7 +343,7 @@ describe('updateSupplyReserves — determinism', () => {
                 'b1': { id: 'b1', faction: 'RBiH', personnel: 1000 } as any,
                 'b2': { id: 'b2', faction: 'RS', personnel: 1000 } as any,
             },
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 3 }
+    siege_turn_counters: { 'RBiH:op:srebrenica:center': 3 },
   } as any,
 });
 
@@ -372,7 +377,7 @@ describe('updateSupplyReserves — combined update', () => {
     formations: {
                 'b1': { id: 'b1', faction: 'RBiH', personnel: 1000 } as any,
             },
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 2 }
+    siege_turn_counters: { 'RBiH:op:srebrenica:center': 2 },
   } as any,
 });
         ensureSupplyReserves(state);

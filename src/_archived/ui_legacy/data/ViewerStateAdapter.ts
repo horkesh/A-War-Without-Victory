@@ -3,13 +3,13 @@ import type { FactionId, FormationRecord, GameSave } from '../types';
 /** Parse canonical state JSON into the lighter 3D viewer shape. */
 export function toViewerSave(raw: unknown): GameSave | null {
     if (!raw || typeof raw !== 'object') return null;
-    const state = raw as Record<string, unknown>;
+    const state = raw as any;
     const formationsRaw = (state.formations ?? {}) as Record<string, Record<string, unknown>>;
     const formations: Record<string, FormationRecord> = {};
     for (const id of Object.keys(formationsRaw).sort()) {
         const f = formationsRaw[id] ?? {};
         const movementState = ((state.brigade_movement_state ?? {}) as Record<string, Record<string, unknown>>)[id] ?? {};
-        const compositionRaw = (f.composition ?? {}) as Record<string, unknown>;
+        const compositionRaw = (f.composition ?? {}) as any;
         formations[id] = {
             id,
             faction: String(f.faction ?? ''),
@@ -33,13 +33,13 @@ export function toViewerSave(raw: unknown): GameSave | null {
             },
         };
     }
-    const pcRaw = (state.political.political_controllers ?? {}) as Record<string, unknown>;
+    const pcRaw = (state.political.political_controllers ?? {}) as any;
     const politicalControllers: Record<string, FactionId> = {};
     for (const sid of Object.keys(pcRaw).sort()) {
         const v = pcRaw[sid];
         politicalControllers[sid] = v === 'RS' || v === 'RBiH' || v === 'HRHB' ? v : null;
     }
-    const phase = (state.meta as Record<string, unknown>)?.phase as string | undefined;
+    const phase = (state.meta as any)?.phase as string | undefined;
     const brigadeAor: Record<string, string | null> = {};
     if (phase === 'war') {
         for (const id of Object.keys(formationsRaw).sort()) {
@@ -47,19 +47,19 @@ export function toViewerSave(raw: unknown): GameSave | null {
             if (typeof loc === 'string' && loc) brigadeAor[loc] = id;
         }
     } else {
-        const brigadeAorRaw = (state.brigade_aor ?? {}) as Record<string, unknown>;
+        const brigadeAorRaw = (state.brigade_aor ?? {}) as any;
         for (const sid of Object.keys(brigadeAorRaw).sort()) {
             const v = brigadeAorRaw[sid];
             brigadeAor[sid] = typeof v === 'string' ? v : null;
         }
     }
-    const frontAssignmentRaw = (state.brigade_front_assignment ?? {}) as Record<string, unknown>;
+    const frontAssignmentRaw = (state.brigade_front_assignment ?? {}) as any;
     const brigadeFrontAssignment: Record<string, string | null> = {};
     for (const formationId of Object.keys(frontAssignmentRaw).sort()) {
         const v = frontAssignmentRaw[formationId];
         brigadeFrontAssignment[formationId] = typeof v === 'string' ? v : null;
     }
-    const armyTheatreAssignmentRaw = (state.army_theatre_assignment ?? {}) as Record<string, unknown>;
+    const armyTheatreAssignmentRaw = (state.army_theatre_assignment ?? {}) as any;
     const armyTheatreAssignment: Record<string, string> = {};
     for (const armyId of Object.keys(armyTheatreAssignmentRaw).sort()) {
         const theatreId = armyTheatreAssignmentRaw[armyId];
@@ -100,7 +100,7 @@ export function toViewerSave(raw: unknown): GameSave | null {
         }
         theatres[theatreId] = entry;
     }
-    const csbsRaw = (state.control_status_by_settlement_id ?? {}) as Record<string, unknown>;
+    const csbsRaw = (state.control_status_by_settlement_id ?? {}) as any;
     const controlStatusBySettlementId: Record<string, string> = {};
     for (const sid of Object.keys(csbsRaw).sort()) {
         controlStatusBySettlementId[sid] = String(csbsRaw[sid] ?? 'controlled');
@@ -128,7 +128,7 @@ export function toViewerSave(raw: unknown): GameSave | null {
             confirmed_empty: Array.isArray(factionRecon?.confirmed_empty) ? [...factionRecon.confirmed_empty].sort() : [],
         };
     }
-    const displacementRaw = (state.settlement_displacement ?? {}) as Record<string, unknown>;
+    const displacementRaw = (state.settlement_displacement ?? {}) as any;
     const settlementDisplacement: Record<string, number> = {};
     for (const sid of Object.keys(displacementRaw).sort()) {
         const v = displacementRaw[sid];
@@ -182,7 +182,7 @@ export function toViewerSave(raw: unknown): GameSave | null {
             .sort((a, b) => a.edge_id.localeCompare(b.edge_id));
     };
     const frontEdges = normalizeFrontEdges(state.front_edges);
-    const frontEdgesOsid = normalizeFrontEdges((state as Record<string, unknown>).war_front_edges_osid);
+    const frontEdgesOsid = normalizeFrontEdges((state as any).war_front_edges_osid);
     const assignableFrontSegmentsRaw = Array.isArray(state.assignable_front_segments)
         ? state.assignable_front_segments as Array<Record<string, unknown>>
         : [];
@@ -236,7 +236,7 @@ export function toViewerSave(raw: unknown): GameSave | null {
             last_updated_turn: Number.isFinite(lastUpdatedTurn) ? lastUpdatedTurn : 0,
         };
     }
-    const meta = (state.meta ?? {}) as Record<string, unknown>;
+    const meta = (state.meta ?? {}) as any;
     return {
         political_controllers: politicalControllers,
         control_status_by_settlement_id: controlStatusBySettlementId,

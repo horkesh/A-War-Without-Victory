@@ -118,7 +118,7 @@ describe('displacement reporting fix — scenario_reporting.ts', () => {
     it('War phase buildWeeklyReport returns zero when both System A and System C are empty', () => {
         const state = makePhaseIIStateWithDisplacementState();
         // Remove displacement_state
-        delete (state as { displacement_state?: unknown }).displacement_state;
+        delete (state as any).displacement.displacement_state;
         const report = buildWeeklyReport(state);
 
         expect(report.municipality_displacement_total).toBe(0);
@@ -187,10 +187,12 @@ describe('displacement OSID fix — isPressureEligible', () => {
     it('returns false with map when both sides have same controller', () => {
         const sameControlState: GameState = {
             ...osidKeyedState,
-            political_controllers: {
-                'op:banovici:banovici_2': 'RS',
-                'op:banovici:seona': 'RS'
-            }
+            political: {
+                political_controllers: {
+                    'op:banovici:banovici_2': 'RS',
+                    'op:banovici:seona': 'RS'
+                }
+            } as any
         } as unknown as GameState;
         const result = isPressureEligible(
             sameControlState,

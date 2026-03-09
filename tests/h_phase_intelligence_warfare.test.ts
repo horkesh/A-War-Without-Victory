@@ -104,6 +104,7 @@ describe('H phase intelligence warfare', () => {
   political: {
     political_controllers: {}
   } as any,
+  displacement: {} as any,
 } as unknown as GameState;
 
         deriveSectorIntel(state, 5);
@@ -185,6 +186,8 @@ describe('H phase intelligence warfare', () => {
             },
     opsec_sectors: ['secure_sector']
   } as any,
+  political: { enclave_resilience: {} } as any,
+  displacement: {} as any
 } as unknown as GameState;
 
         const report = runCohesionDrift(state, []);

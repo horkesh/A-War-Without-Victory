@@ -14,13 +14,18 @@ function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
         ],
   ...overrides,
   military: {
-    formations: {}
-  } as any,
+    formations: {},
+      ...(overrides?.military || {})
+} as any,
   political: {
     settlements: [],
     municipalities: {},
-    political_controllers: {}
-  } as any,
+    political_controllers: {},
+      ...(overrides?.political || {})
+} as any,
+  displacement: {
+      ...(overrides?.displacement || {})
+} as any,
 } as unknown as GameState;
 }
 
@@ -40,7 +45,7 @@ describe('ensureSupplyReserves', () => {
         const state = makeMinimalState({
   military: {
     general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 } as any,
-    heavy_munitions_reserve: { RBiH: 40, RS: 40, HRHB: 40 } as any
+    heavy_munitions_reserve: { RBiH: 40, RS: 40, HRHB: 40 } as any,
   } as any,
 });
         ensureSupplyReserves(state);
@@ -57,7 +62,7 @@ describe('updateSupplyReserves', () => {
                 'b1': { id: 'b1', faction: 'RBiH', personnel: 1000 } as any,
                 'b2': { id: 'b2', faction: 'RBiH', personnel: 1000 } as any,
                 'b3': { id: 'b3', faction: 'RS', personnel: 1000 } as any,
-            }
+            },
   } as any,
 });
         ensureSupplyReserves(state);
@@ -98,7 +103,7 @@ describe('updateSupplyReserves', () => {
                 'rs1': { id: 'rs1', faction: 'RS', personnel: 3000, composition: { tanks: 30, artillery: 20, infantry: 0, aa_systems: 0 } } as any,
                 'rs2': { id: 'rs2', faction: 'RS', personnel: 2000, composition: { tanks: 0, artillery: 10, infantry: 0, aa_systems: 0 } } as any,
                 'rbih1': { id: 'rbih1', faction: 'RBiH', personnel: 2000, composition: { tanks: 0, artillery: 5, infantry: 0, aa_systems: 0 } } as any,
-            }
+            },
   } as any,
 });
         ensureSupplyReserves(state);
@@ -129,7 +134,7 @@ describe('updateSupplyReserves', () => {
     heavy_munitions_reserve: { RBiH: 1, RS: 99, HRHB: 50 } as any,
     formations: Object.fromEntries(
                 Array.from({ length: 50 }, (_, i) => [`b${i}`, { id: `b${i}`, faction: 'RBiH', personnel: 1000 }])
-            ) as any
+            ) as any,
   } as any,
 });
         updateSupplyReserves(state, { RBiH: 0, RS: 50, HRHB: 0 });
@@ -158,7 +163,7 @@ describe('deductCombatExpenditure', () => {
         const state = makeMinimalState({
   military: {
     heavy_munitions_reserve: { RBiH: 0.001, RS: 60, HRHB: 60 } as any,
-    general_supply_reserve: { RBiH: 0.001, RS: 80, HRHB: 80 } as any
+    general_supply_reserve: { RBiH: 0.001, RS: 80, HRHB: 80 } as any,
   } as any,
 });
         deductCombatExpenditure(state, 'RBiH', 10, 5.0);

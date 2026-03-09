@@ -45,7 +45,7 @@ function makePostureState(overrides?: Partial<{ formations: Record<string, Forma
   political: {
     political_controllers: { S1: 'RS' }
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 describe('brigade posture - canAdoptPosture', () => {

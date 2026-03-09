@@ -55,7 +55,7 @@ function makeState(
   meta: {
             turn: 5, phase: 'war', seed: 'test',
             scenario_start_date: { year: 1992, month: 4, day: 6 }
-        } as GameState['meta'],
+        } as unknown as GameState['meta'],
   factions: [
             { id: 'RS' as FactionId },
             { id: 'RBiH' as FactionId },
@@ -66,7 +66,7 @@ function makeState(
   military: {
     corps_command: {}
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 function makeSubSegment(

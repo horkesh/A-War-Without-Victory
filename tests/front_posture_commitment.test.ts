@@ -26,19 +26,14 @@ function edge(edge_id: string, side_a: string, side_b: string): FrontEdge {
 }
 
 test('commitment: zero commitment => effective weight = 0', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'seed' },
         factions: [{ id: 'A', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0 }],
-        formations: {},
-        front_segments: { e1: seg('e1', true) },
-        front_posture: {
-            A: { assignments: { e1: { edge_id: 'e1', posture: 'push', weight: 5 } } }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        military: { formations: {}, front_segments: { e1: seg('e1', true) }, front_posture: { A: { assignments: { e1: { edge_id: 'e1', posture: 'push', weight: 5 } } } }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('e1', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 1, regions: [] };
@@ -52,11 +47,11 @@ test('commitment: zero commitment => effective weight = 0', () => {
 });
 
 test('commitment: edge assignment contributes 1000 milli-points', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'seed' },
         factions: [{ id: 'A', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0 }],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -66,15 +61,10 @@ test('commitment: edge assignment contributes 1000 milli-points', () => {
                 assignment: { kind: 'edge', edge_id: 'e1' },
                 ops: { fatigue: 0, last_supplied_turn: 1 } // Phase 10: supplied this turn, no fatigue
             }
-        },
-        front_segments: { e1: seg('e1', true) },
-        front_posture: {
-            A: { assignments: { e1: { edge_id: 'e1', posture: 'push', weight: 1 } } }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_segments: { e1: seg('e1', true) }, front_posture: { A: { assignments: { e1: { edge_id: 'e1', posture: 'push', weight: 1 } } } }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('e1', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 1, regions: [] };
@@ -88,11 +78,11 @@ test('commitment: edge assignment contributes 1000 milli-points', () => {
 });
 
 test('commitment: region assignment splits evenly across active edges', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'seed' },
         factions: [{ id: 'A', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0 }],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -102,13 +92,11 @@ test('commitment: region assignment splits evenly across active edges', () => {
                 assignment: { kind: 'region', region_id: 'A--B::e1' },
                 ops: { fatigue: 0, last_supplied_turn: 1 } // Phase 10: supplied this turn, no fatigue
             }
-        },
-        front_segments: {
+        }, front_segments: {
             e1: seg('e1', true),
             e2: seg('e2', true),
             e3: seg('e3', true)
-        },
-        front_posture: {
+        }, front_posture: {
             A: {
                 assignments: {
                     e1: { edge_id: 'e1', posture: 'push', weight: 1 },
@@ -116,11 +104,10 @@ test('commitment: region assignment splits evenly across active edges', () => {
                     e3: { edge_id: 'e3', posture: 'push', weight: 1 }
                 }
             }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('e1', 'A', 'B'), edge('e2', 'A', 'B'), edge('e3', 'A', 'B')];
     const frontRegions: FrontRegionsFile = {
@@ -152,11 +139,11 @@ test('commitment: region assignment splits evenly across active edges', () => {
 });
 
 test('commitment: partial commitment reduces effective weight', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'seed' },
         factions: [{ id: 'A', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0 }],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -166,15 +153,10 @@ test('commitment: partial commitment reduces effective weight', () => {
                 assignment: { kind: 'edge', edge_id: 'e1' },
                 ops: { fatigue: 0, last_supplied_turn: 1 } // Phase 10: supplied this turn, no fatigue
             }
-        },
-        front_segments: { e1: seg('e1', true) },
-        front_posture: {
-            A: { assignments: { e1: { edge_id: 'e1', posture: 'push', weight: 3 } } }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_segments: { e1: seg('e1', true) }, front_posture: { A: { assignments: { e1: { edge_id: 'e1', posture: 'push', weight: 3 } } } }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('e1', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 1, regions: [] };
@@ -188,11 +170,11 @@ test('commitment: partial commitment reduces effective weight', () => {
 });
 
 test('commitment: command capacity applies global scaling', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'seed' },
         factions: [{ id: 'A', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 5 }],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -209,23 +191,20 @@ test('commitment: command capacity applies global scaling', () => {
                 status: 'active',
                 assignment: { kind: 'edge', edge_id: 'e2' }
             }
-        },
-        front_segments: {
+        }, front_segments: {
             e1: seg('e1', true),
             e2: seg('e2', true)
-        },
-        front_posture: {
+        }, front_posture: {
             A: {
                 assignments: {
                     e1: { edge_id: 'e1', posture: 'push', weight: 5 },
                     e2: { edge_id: 'e2', posture: 'push', weight: 5 }
                 }
             }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('e1', 'A', 'B'), edge('e2', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 1, regions: [] };
@@ -242,11 +221,11 @@ test('commitment: command capacity applies global scaling', () => {
 });
 
 test('commitment: determinism - same inputs produce same outputs', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'seed' },
         factions: [{ id: 'A', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0 }],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -255,13 +234,11 @@ test('commitment: determinism - same inputs produce same outputs', () => {
                 status: 'active',
                 assignment: { kind: 'region', region_id: 'A--B::e1' }
             }
-        },
-        front_segments: {
+        }, front_segments: {
             e1: seg('e1', true),
             e2: seg('e2', true),
             e3: seg('e3', true)
-        },
-        front_posture: {
+        }, front_posture: {
             A: {
                 assignments: {
                     e1: { edge_id: 'e1', posture: 'push', weight: 1 },
@@ -269,11 +246,10 @@ test('commitment: determinism - same inputs produce same outputs', () => {
                     e3: { edge_id: 'e3', posture: 'push', weight: 1 }
                 }
             }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('e1', 'A', 'B'), edge('e2', 'A', 'B'), edge('e3', 'A', 'B')];
     const frontRegions: FrontRegionsFile = {
@@ -305,11 +281,11 @@ test('commitment: determinism - same inputs produce same outputs', () => {
 });
 
 test('commitment: explicit override precedence - friction applies to overrides too', () => {
-    const state: GameState = {
+    const state = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'seed' },
         factions: [{ id: 'A', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0 }],
-        formations: {
+        military: { formations: {
             F1: {
                 id: 'F1',
                 faction: 'A',
@@ -318,16 +294,13 @@ test('commitment: explicit override precedence - friction applies to overrides t
                 status: 'active',
                 assignment: { kind: 'edge', edge_id: 'e1' }
             }
-        },
-        front_segments: { e1: seg('e1', true) },
-        front_posture: {
+        }, front_segments: { e1: seg('e1', true) }, front_posture: {
             // Explicit per-edge override
             A: { assignments: { e1: { edge_id: 'e1', posture: 'push', weight: 5 } } }
-        },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+        }, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any
+    } as unknown as GameState;
 
     const frontEdges: FrontEdge[] = [edge('e1', 'A', 'B')];
     const frontRegions: FrontRegionsFile = { schema: 1, turn: 1, regions: [] };

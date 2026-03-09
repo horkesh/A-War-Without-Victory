@@ -38,19 +38,22 @@ function makeBaseState(overrides?: Partial<GameState>): GameState {
   ...overrides,
   military: {
     formations: {},
-    casualty_ledger: initializeCasualtyLedger(['RS', 'RBiH', 'HRHB'])
-  } as any,
+    casualty_ledger: initializeCasualtyLedger(['RS', 'RBiH', 'HRHB']),
+      ...(overrides?.military || {})
+} as any,
   political: {
     political_controllers: {},
-    municipalities: {}
-  } as any,
+    municipalities: {},
+      ...(overrides?.political || {})
+} as any,
   displacement: {
     civilian_casualties: {
             RS: { killed: 0, fled_abroad: 0 },
             RBiH: { killed: 0, fled_abroad: 0 },
             HRHB: { killed: 0, fled_abroad: 0 },
-        }
-  } as any,
+        },
+      ...(overrides?.displacement || {})
+} as any,
 } as GameState;
 }
 
@@ -70,7 +73,7 @@ describe('paramilitary_sweep', () => {
     political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
     municipalities: {
                     // OSID municipality from 'op:a' → '' (no colon), but for test we add an entry
-                }
+                },
   } as any,
 });
 
@@ -89,7 +92,7 @@ describe('paramilitary_sweep', () => {
             const state = makeBaseState({
   meta: { turn: 25, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
   political: {
-    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' }
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' },
   } as any,
 });
 
@@ -105,7 +108,7 @@ describe('paramilitary_sweep', () => {
             const state = makeBaseState({
   meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
   political: {
-    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' }
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
   } as any,
 });
 
@@ -125,7 +128,7 @@ describe('paramilitary_sweep', () => {
   meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
   paramilitary_policy: 'always_deny',
   political: {
-    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' }
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
   } as any,
 });
 
@@ -145,10 +148,10 @@ describe('paramilitary_sweep', () => {
                         status: 'active', assignment: null, kind: 'brigade',
                         location_osid: 'op:d', personnel: 1000,
                     } as FormationState,
-                }
+                },
   } as any,
   political: {
-    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' }
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' },
   } as any,
 });
 
@@ -168,10 +171,10 @@ describe('paramilitary_sweep', () => {
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'op:d', paramilitary_eta: 1, personnel: 150,
                     } as FormationState,
-                }
+                },
   } as any,
   political: {
-    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' }
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
   } as any,
 });
 
@@ -192,10 +195,10 @@ describe('paramilitary_sweep', () => {
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'D', paramilitary_eta: 1, personnel: 150,
                     } as FormationState,
-                }
+                },
   } as any,
   political: {
-    political_controllers: { A: 'RS', D: 'RBiH' }
+    political_controllers: { A: 'RS', D: 'RBiH' },
   } as any,
 });
 
@@ -220,10 +223,10 @@ describe('paramilitary_sweep', () => {
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'D', paramilitary_eta: 2, personnel: 150,
                     } as FormationState,
-                }
+                },
   } as any,
   political: {
-    political_controllers: { A: 'RS', D: 'RBiH' }
+    political_controllers: { A: 'RS', D: 'RBiH' },
   } as any,
 });
 
@@ -244,10 +247,10 @@ describe('paramilitary_sweep', () => {
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'D', paramilitary_eta: 1, personnel: 150,
                     } as FormationState,
-                }
+                },
   } as any,
   political: {
-    political_controllers: { A: 'RS', D: 'RBiH' }
+    political_controllers: { A: 'RS', D: 'RBiH' },
   } as any,
 });
 
@@ -271,10 +274,10 @@ describe('paramilitary_sweep', () => {
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'D', paramilitary_eta: 1, personnel: 150,
                     } as FormationState,
-                }
+                },
   } as any,
   political: {
-    political_controllers: { A: 'RS', D: 'RS' }
+    political_controllers: { A: 'RS', D: 'RS' },
   } as any,
 });
 

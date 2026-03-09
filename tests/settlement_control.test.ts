@@ -32,11 +32,16 @@ function makeState(overrides?: Partial<GameState>): GameState {
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
-    militia_pools: {}
-  } as any,
+    militia_pools: {},
+      ...(overrides?.military || {})
+} as any,
   political: {
-    political_controllers: {}
-  } as any,
+    political_controllers: {},
+      ...(overrides?.political || {})
+} as any,
+  displacement: {
+      ...(overrides?.displacement || {})
+} as any,
 } as GameState;
 }
 
@@ -66,7 +71,7 @@ describe('applyWaveFlip', () => {
                 S1: 'RBiH',
                 S2: 'RBiH',
                 S3: 'RBiH'
-            }
+            },
   } as any,
 });
 
@@ -96,7 +101,7 @@ describe('applyWaveFlip', () => {
     political_controllers: {
                 S1: 'RBiH',
                 S2: 'RBiH'
-            }
+            },
   } as any,
 });
 
@@ -127,7 +132,7 @@ describe('applyWaveFlip', () => {
     political_controllers: {
                 S1: 'RS', // Already RS
                 S2: 'RBiH'
-            }
+            },
   } as any,
 });
 
@@ -151,7 +156,7 @@ describe('applyWaveFlip', () => {
     political_controllers: {
                 S1: 'RBiH',
                 S2: 'RBiH'
-            }
+            },
   } as any,
 });
 
@@ -177,7 +182,7 @@ describe('applyWaveFlip', () => {
     it('scales holdout resistance by population and degree when scalingContext provided', () => {
         const state = makeState({
   political: {
-    political_controllers: { S1: 'RBiH', S2: 'RBiH' }
+    political_controllers: { S1: 'RBiH', S2: 'RBiH' },
   } as any,
 });
         const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
@@ -193,7 +198,7 @@ describe('applyWaveFlip', () => {
         const resultNoScale = applyWaveFlip(state, 'mun1', 'RS', 'RBiH', settlementsByMun, settlementData, 10);
         const state2 = makeState({
   political: {
-    political_controllers: { S1: 'RBiH', S2: 'RBiH' }
+    political_controllers: { S1: 'RBiH', S2: 'RBiH' },
   } as any,
 });
         const resultWithScale = applyWaveFlip(state2, 'mun1', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
@@ -223,7 +228,7 @@ describe('applyWaveFlip', () => {
         const baseState = makeState({
   political: {
     political_controllers: { S1: 'RBiH' },
-    municipalities: { zvornik: {} } as any
+    municipalities: { zvornik: {} } as any,
   } as any,
 });
         const boostedState = makeState({
@@ -237,7 +242,7 @@ describe('applyWaveFlip', () => {
                         patriotska_liga: 60,
                         sda_penetration: 70,
                     }
-                }
+                },
             } as any
   } as any,
 });
@@ -278,7 +283,7 @@ describe('processHoldoutCleanup', () => {
                     cohesion: 60,
                     tags: ['mun:mun1'],
                     hq_sid: 'S2'
-                }
+                },
             } as any
   } as any,
   political: {
@@ -286,7 +291,7 @@ describe('processHoldoutCleanup', () => {
                 S1: 'RS',  // controlled by RS (holdout of RBiH)
                 S2: 'RS',  // controlled by RS (normal)
                 S3: 'RBiH' // RBiH territory (holdout supply)
-            }
+            },
   } as any,
 });
 
@@ -321,13 +326,13 @@ describe('processHoldoutCleanup', () => {
                     isolated_turns: 3  // Will become 4 → surrender
                 }
             },
-    formations: {}
+    formations: {},
   } as any,
   political: {
     political_controllers: {
                 S1: 'RS',  // RS controls, RBiH holdout
                 S2: 'RS',  // RS territory (no RBiH connection)
-            }
+            },
   } as any,
 });
 
@@ -356,13 +361,13 @@ describe('processHoldoutCleanup', () => {
                     isolated_turns: 2
                 }
             },
-    formations: {}
+    formations: {},
   } as any,
   political: {
     political_controllers: {
                 S1: 'RS',   // RS controls, RBiH holdout
                 S2: 'RBiH', // RBiH still controls adjacent
-            }
+            },
   } as any,
 });
 

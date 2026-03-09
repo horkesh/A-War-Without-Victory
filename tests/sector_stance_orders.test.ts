@@ -67,7 +67,7 @@ function makeState(): GameState {
   political: {
     political_controllers: { S1: 'RS' }
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 describe('applySectorStanceOrders', () => {

@@ -30,7 +30,7 @@ function makeState(pc: Record<string, string>): GameState {
   political: {
     political_controllers: pc
   } as any,
-} as GameState;
+} as unknown as GameState;
 }
 
 test('isConnectedStrongholdSid returns true for Sapna S163520', () => {

@@ -21,10 +21,10 @@ function pointsByFaction(rec: Record<string, { points?: number }>): Record<strin
  * Validates required fields and extracts formations, militia pools, and control data.
  */
 export function parseGameState(json: unknown): LoadedGameState {
-    const state = json as Record<string, unknown>;
+    const state = json as any;
 
     // Validate required fields
-    const meta = state.meta as Record<string, unknown> | undefined;
+    const meta = state.meta as any | undefined;
     if (!meta || typeof meta.turn !== 'number') {
         throw new Error('Invalid game state: missing meta.turn');
     }
@@ -66,7 +66,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     let brigadeFrontAssignment: LoadedGameState['brigadeFrontAssignment'] | undefined;
-    const rawFrontAssignment = state.brigade_front_assignment as Record<string, unknown> | undefined;
+    const rawFrontAssignment = state.brigade_front_assignment as any | undefined;
     if (rawFrontAssignment && typeof rawFrontAssignment === 'object' && !Array.isArray(rawFrontAssignment)) {
         const out: NonNullable<LoadedGameState['brigadeFrontAssignment']> = {};
         for (const formationId of Object.keys(rawFrontAssignment).sort((a, b) => a.localeCompare(b))) {
@@ -77,7 +77,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     let armyTheatreAssignment: LoadedGameState['armyTheatreAssignment'] | undefined;
-    const rawArmyTheatreAssignment = state.army_theatre_assignment as Record<string, unknown> | undefined;
+    const rawArmyTheatreAssignment = state.army_theatre_assignment as any | undefined;
     if (rawArmyTheatreAssignment && typeof rawArmyTheatreAssignment === 'object' && !Array.isArray(rawArmyTheatreAssignment)) {
         const out: NonNullable<LoadedGameState['armyTheatreAssignment']> = {};
         for (const armyId of Object.keys(rawArmyTheatreAssignment).sort((a, b) => a.localeCompare(b))) {
@@ -130,7 +130,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 }
             }
 
-            const ops = f.ops as Record<string, unknown> | undefined;
+            const ops = f.ops as any | undefined;
 
             const hq_sid = typeof f.hq_sid === 'string' && f.hq_sid ? f.hq_sid : undefined;
             const location_osid = typeof (f as { location_osid?: string }).location_osid === 'string' && (f as { location_osid?: string }).location_osid ? (f as { location_osid?: string }).location_osid : undefined;
@@ -318,7 +318,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     // Extract recent control events for panel/event ticker.
     const recentControlEvents = (((state.military.control_events as unknown[]) ?? [])
         .map((entry) => {
-            const rec = entry as Record<string, unknown>;
+            const rec = entry as any;
             const turnRaw = Number(rec.turn ?? NaN);
             const settlementId = String(rec.settlement_id ?? '');
             const mechanism = String(rec.mechanism ?? 'unknown');
@@ -354,7 +354,7 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     // Extract recruitment state (capital and equipment by faction, deterministic key order).
     let recruitment: RecruitmentView | undefined;
-    const rawRecruitment = state.recruitment_state as Record<string, unknown> | undefined;
+    const rawRecruitment = state.recruitment_state as any | undefined;
     if (rawRecruitment) {
         const capitalByFaction = pointsByFaction(
             (rawRecruitment.recruitment_capital as Record<string, { points?: number }> | undefined) ?? {}
@@ -465,8 +465,8 @@ export function parseGameState(json: unknown): LoadedGameState {
             .sort((a, b) => a.edge_id.localeCompare(b.edge_id))
         : undefined;
 
-    const frontEdgesOsid: LoadedGameState['frontEdgesOsid'] = Array.isArray((state as Record<string, unknown>).war_front_edges_osid)
-        ? ((state as Record<string, unknown>).war_front_edges_osid as Array<Record<string, unknown>>)
+    const frontEdgesOsid: LoadedGameState['frontEdgesOsid'] = Array.isArray((state as any).war_front_edges_osid)
+        ? ((state as any).war_front_edges_osid as Array<Record<string, unknown>>)
             .map((edge) => {
                 const a = typeof edge.a === 'string' ? edge.a : '';
                 const b = typeof edge.b === 'string' ? edge.b : '';

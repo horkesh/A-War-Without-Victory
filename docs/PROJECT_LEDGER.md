@@ -12227,3 +12227,19 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
   - `docs/40_reports/README.md`
   - `docs/40_reports/GUI_MASTER.md`
   - `.claude/napkin.md`
+
+## 2026-03-08: Engine & State Refactoring (Phase 3 Complete)
+
+### What
+- Refactored `GameState` into nested domains (`military`, `political`, `displacement`) to compartmentalize state logic and enforce strict boundaries.
+- Refactored all tests, UI adapters, and scenario data to reflect the new nested object structure.
+- Enhanced state migration in `serialize.ts` to automatically map legacy un-nested states into the new nested structure on load.
+
+### Why
+- Monolithic `GameState` lacked clear boundaries and caused brittle coupling where UI modules inadvertently accessed or mutated unrelated sub-systems.
+- Provides a scalable foundation for Phase 4 (Bot AI Modularization).
+
+### Verification
+- `npx tsc --noEmit` -> pass with 0 errors across codebase.
+- `npx vitest run` -> all 436 tests passed.
+- UI mapping adapters validated against newly structured type definitions.

@@ -70,16 +70,11 @@ function baseState(overrides: Partial<GameState> = {}): GameState {
             ...((overrides.meta) ?? {})
         },
         factions: makeFactions(),
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {},
-        municipalities: {},
+        military: { formations: {}, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {}, war_militia_strength: {} } as any,
+        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        displacement: {} as any,
         ...overrides
-    };
+    } as unknown as GameState;
 }
 
 // Build a minimal adjacency map for OSIDs
@@ -120,13 +115,13 @@ test('computeSiegeState: municipality with all-enemy external neighbors → rati
     // mun_A has 1 OSID; its 4 neighbors all belong to other municipalities, all RS-controlled
     // We query from RBiH perspective
     const state = baseState({
-        municipalities: { mun_a: { stability_score: 50 } },
+        political: { municipalities: { mun_a: { stability_score: 50 } },
         political_controllers: {
             'op:mun_b:1': 'RS',
             'op:mun_b:2': 'RS',
             'op:mun_c:1': 'RS',
             'op:mun_c:2': 'RS'
-        }
+        } } as any
     });
     const adjacency = makeAdjacency([
         ['op:mun_a:1', 'op:mun_b:1'],
@@ -149,8 +144,8 @@ test('computeSiegeState: municipality with all-enemy external neighbors → rati
 test('computeSiegeState: municipality with no external neighbors → ratio 0.0', () => {
     // mun_a has 2 OSIDs, only connected internally to each other (no cross-mun edges)
     const state = baseState({
-        municipalities: { mun_a: { stability_score: 50 } },
-        political_controllers: {}
+        political: { municipalities: { mun_a: { stability_score: 50 } },
+        political_controllers: {} } as any
     });
     const adjacency = makeAdjacency([
         ['op:mun_a:1', 'op:mun_a:2']  // both same mun — internal
@@ -167,11 +162,11 @@ test('computeSiegeState: municipality with no external neighbors → ratio 0.0',
 test('computeSiegeState: mixed neighbors (50% enemy) → ratio ~0.5', () => {
     // mun_a has 2 external neighbors: 1 RS, 1 RBiH-controlled
     const state = baseState({
-        municipalities: { mun_a: { stability_score: 50 } },
+        political: { municipalities: { mun_a: { stability_score: 50 } },
         political_controllers: {
             'op:mun_b:1': 'RS',
             'op:mun_c:1': 'RBiH'
-        }
+        } } as any
     });
     const adjacency = makeAdjacency([
         ['op:mun_a:1', 'op:mun_b:1'],
@@ -191,11 +186,11 @@ test('computeSiegeState: mixed neighbors (50% enemy) → ratio ~0.5', () => {
 test('computeSiegeState: own-faction neighbors only → ratio 0.0', () => {
     // All external neighbors are RBiH-controlled; querying for RBiH → no enemies
     const state = baseState({
-        municipalities: { mun_a: { stability_score: 50 } },
+        political: { municipalities: { mun_a: { stability_score: 50 } },
         political_controllers: {
             'op:mun_b:1': 'RBiH',
             'op:mun_b:2': 'RBiH'
-        }
+        } } as any
     });
     const adjacency = makeAdjacency([
         ['op:mun_a:1', 'op:mun_b:1'],
@@ -214,11 +209,11 @@ test('computeSiegeState: own-faction neighbors only → ratio 0.0', () => {
 test('computeSiegeState: uncontrolled neighbors (undefined controller) do not count as enemy', () => {
     // mun_a has 3 external neighbors: 1 RS (enemy for RBiH), 2 uncontrolled
     const state = baseState({
-        municipalities: { mun_a: { stability_score: 50 } },
+        political: { municipalities: { mun_a: { stability_score: 50 } },
         political_controllers: {
             'op:mun_b:1': 'RS'
             // op:mun_c:1 and op:mun_d:1 deliberately absent → uncontrolled
-        }
+        } } as any
     });
     const adjacency = makeAdjacency([
         ['op:mun_a:1', 'op:mun_b:1'],
@@ -259,9 +254,8 @@ function makeStateWithStrength(
     strength: number
 ): GameState {
     return baseState({
-        municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
-        war_militia_strength: { [munId]: { [faction]: strength } },
-        militia_pools: {}
+        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        military: { war_militia_strength: { [munId]: { [faction]: strength } }, militia_pools: {} } as any
     });
 }
 
@@ -356,8 +350,8 @@ function makeStateWithMilitiaFormations(
         } as FormationState;
     }
     return baseState({
-        municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
-        formations,
+        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        military: { formations,
         militia_pools: {
             [`${munId}:${faction}`]: {
                 mun_id: munId,
@@ -367,7 +361,7 @@ function makeStateWithMilitiaFormations(
                 exhausted: 0,
                 updated_turn: 1
             }
-        }
+        } } as any
     });
 }
 
@@ -433,8 +427,8 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
 
     // No existing formations (below normal cap), pool has just enough
     const state = baseState({
-        municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
-        formations: {},
+        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        military: { formations: {},
         militia_pools: {
             [`${munId}:${faction}`]: {
                 mun_id: munId,
@@ -444,8 +438,8 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
                 exhausted: 0,
                 updated_turn: 1
             }
-        },
-        displacement_state: {
+        } } as any,
+        displacement: { displacement_state: {
             [munId]: {
                 mun_id: munId,
                 original_population: 50000,
@@ -457,7 +451,7 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
                 lost_population: 0,
                 last_updated_turn: 4
             }
-        }
+        } } as any
     });
 
     // Siege ratio at partial threshold
@@ -499,8 +493,8 @@ test('Displacement spawn: dispIn below threshold → no extra detachment', () =>
     const faction = 'RBiH';
 
     const state = baseState({
-        municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
-        formations: {},
+        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        military: { formations: {},
         militia_pools: {
             [`${munId}:${faction}`]: {
                 mun_id: munId,
@@ -510,8 +504,8 @@ test('Displacement spawn: dispIn below threshold → no extra detachment', () =>
                 exhausted: 0,
                 updated_turn: 1
             }
-        },
-        displacement_state: {
+        } } as any,
+        displacement: { displacement_state: {
             [munId]: {
                 mun_id: munId,
                 original_population: 50000,
@@ -523,7 +517,7 @@ test('Displacement spawn: dispIn below threshold → no extra detachment', () =>
                 lost_population: 0,
                 last_updated_turn: 4
             }
-        }
+        } } as any
     });
 
     const partialSiegeMap: SiegeRatioByMunFaction = new Map([
@@ -554,8 +548,8 @@ test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL → no extra det
     const faction = 'RBiH';
 
     const state = baseState({
-        municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
-        formations: {},
+        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        military: { formations: {},
         militia_pools: {
             [`${munId}:${faction}`]: {
                 mun_id: munId,
@@ -565,8 +559,8 @@ test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL → no extra det
                 exhausted: 0,
                 updated_turn: 1
             }
-        },
-        displacement_state: {
+        } } as any,
+        displacement: { displacement_state: {
             [munId]: {
                 mun_id: munId,
                 original_population: 50000,
@@ -578,7 +572,7 @@ test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL → no extra det
                 lost_population: 0,
                 last_updated_turn: 4
             }
-        }
+        } } as any
     });
 
     // Siege ratio BELOW partial threshold
@@ -630,11 +624,11 @@ test('runPoolPopulation: backward-compatible — omitting siegeRatios param give
 
 test('computeSiegeState: output is deterministic for same input', () => {
     const state = baseState({
-        municipalities: { mun_x: { stability_score: 50 }, mun_y: { stability_score: 50 } },
+        political: { municipalities: { mun_x: { stability_score: 50 }, mun_y: { stability_score: 50 } },
         political_controllers: {
             'op:mun_b:1': 'RS',
             'op:mun_c:1': 'RBiH'
-        }
+        } } as any
     });
     const adjacency = makeAdjacency([
         ['op:mun_x:1', 'op:mun_b:1'],
