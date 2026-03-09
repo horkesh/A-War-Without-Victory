@@ -19,8 +19,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'militia-fixture',
             phase: 'war',
@@ -29,7 +29,7 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
             war_start_turn: 10,
             ...overrides
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -55,14 +55,17 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS' },
-        municipalities: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS' },
+    municipalities: {
             MUN_A: {
                 stability_score: 60,
                 organizational_penetration: {
@@ -86,6 +89,8 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
                 }
             }
         }
+  } as any,
+        displacement: {} as any
     };
 }
 

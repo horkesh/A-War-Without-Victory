@@ -9,24 +9,29 @@ import { calculateFactionProductionBonus, ensureProductionFacilities } from '../
 
 function makeState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 30, seed: 'prod-test', phase: 'war' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 30, seed: 'prod-test', phase: 'war' },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {
             SZ1: 'RBiH',
             SZ2: 'RBiH',
             SV1: 'HRHB'
         }
+  } as any,
+        displacement: {} as any
     };
 }
 

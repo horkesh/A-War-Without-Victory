@@ -6,8 +6,8 @@ import { deserializeState, serializeState } from '../src/state/serialize.js';
 
 /** Base state includes all migration defaults that deserializeState adds, so round-trip matches (Phase B Step 1). */
 const baseState: GameState = {
-    schema_version: CURRENT_SCHEMA_VERSION,
-    meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
         turn: 0,
         seed: 'initial-seed',
         referendum_held: false,
@@ -21,7 +21,7 @@ const baseState: GameState = {
         game_over: false,
         outcome: undefined
     },
-    factions: [
+  factions: [
         {
             id: 'RBiH',
             profile: {
@@ -40,23 +40,28 @@ const baseState: GameState = {
             declaration_turn: null
         }
     ],
+  military: {
     formations: {},
     front_segments: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {},
+    theatres: {},
+    army_theatre_assignment: {},
+    assignable_front_segments: [],
+    brigade_front_assignment: {}
+  } as any,
+  political: {
     negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
     ceasefire: {},
     negotiation_ledger: [],
     supply_rights: { corridors: [] },
-    municipalities: {},
-    // Migration defaults: deserializeState adds these for backward compatibility with older saves
-    theatres: {},
-    army_theatre_assignment: {},
-    assignable_front_segments: [],
-    brigade_front_assignment: {},
+    municipalities: {}
+  } as any,
+  displacement: {
     displacement_event_log: []
+  } as any,
 };
 
 test('state serialization round trips cleanly', () => {

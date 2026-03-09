@@ -171,7 +171,7 @@ export function Minimap() {
           const controlGeo = buildControlGeoJSON(geojson, loadedGameState.controlBySettlement);
           controlSource.setData(controlGeo);
 
-          const frontGeo = buildFrontLinesGeoJSON(controlGeo, loadedGameState.political.war_alliance_rbih_hrhb);
+          const frontGeo = buildFrontLinesGeoJSON(controlGeo, loadedGameState.war_alliance_rbih_hrhb);
           frontSource.setData(frontGeo);
         } catch (e) {
           console.warn('[Minimap] Failed to update data:', e);

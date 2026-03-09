@@ -66,20 +66,20 @@ export function OOBSidebar() {
 
   const corpsFormationById = useMemo(() => {
     const map = new Map<string, FormationView>();
-    if (!loadedGameState?.military?.formations) return map;
-    for (const formation of loadedGameState.military.formations) {
+    if (!loadedGameState?.formations) return map;
+    for (const formation of loadedGameState.formations) {
       if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
         map.set(formation.id, formation);
       }
     }
     return map;
-  }, [loadedGameState?.military?.formations]);
+  }, [loadedGameState?.formations]);
 
   const reserveByFaction = useMemo(() => {
     const map = new Map<string, FormationView[]>();
-    if (!loadedGameState || !loadedGameState.military.formations) return map;
+    if (!loadedGameState || !loadedGameState.formations) return map;
     const hasFrontAssignments = Boolean(loadedGameState.brigadeFrontAssignment);
-    for (const formation of loadedGameState.military.formations) {
+    for (const formation of loadedGameState.formations) {
       if (formation.kind !== 'brigade') continue;
       const frontAssignment = loadedGameState.brigadeFrontAssignment?.[formation.id] ?? null;
       const isReserve = hasFrontAssignments ? !frontAssignment : !formation.corps_id;
@@ -95,10 +95,10 @@ export function OOBSidebar() {
   }, [loadedGameState]);
 
   const armyByFaction = useMemo(() => {
-    if (!loadedGameState || !loadedGameState.military.formations) return new Map<string, FormationView[]>();
+    if (!loadedGameState || !loadedGameState.formations) return new Map<string, FormationView[]>();
     const map = new Map<string, FormationView[]>();
     const reserveIds = new Set(Array.from(reserveByFaction.values()).flatMap((formations) => formations.map((f) => f.id)));
-    for (const f of loadedGameState.military.formations) {
+    for (const f of loadedGameState.formations) {
       if (f.kind !== 'brigade') continue;
       if (reserveIds.has(f.id)) continue;
       const list = map.get(f.faction) ?? [];

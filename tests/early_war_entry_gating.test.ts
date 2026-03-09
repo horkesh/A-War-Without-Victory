@@ -23,27 +23,32 @@ function minimalPhaseIState(overrides: Partial<GameState['meta']> = {}): GameSta
         ...overrides
     };
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta,
+  factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { 'SID_001': 'RBiH' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { 'SID_001': 'RBiH' }
+  } as any,
+        displacement: {} as any
     };
 }
 
 function minimalPhase0State(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 5,
             seed: 'phase0-fixture',
             phase: 'peace',
@@ -51,18 +56,23 @@ function minimalPhase0State(): GameState {
             referendum_turn: null,
             war_start_turn: null
         },
-        factions: [
+  factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { 'SID_001': 'RBiH' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { 'SID_001': 'RBiH' }
+  } as any,
+        displacement: {} as any
     };
 }
 

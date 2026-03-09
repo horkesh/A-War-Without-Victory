@@ -12,8 +12,8 @@ test('phase5 sanity: region expansion, edge override, deterministic + no timesta
     const derived: FrontEdge[] = [{ edge_id: 's1__s2', a: 's1', b: 's2', side_a: 'A', side_b: 'B' }];
 
     const base: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 0,
             seed: 'phase5-seed',
             phase: 'war',
@@ -21,14 +21,14 @@ test('phase5 sanity: region expansion, edge override, deterministic + no timesta
             referendum_turn: 0,
             war_start_turn: 0
         },
-        factions: [
+  factions: [
             // Supply sources so pressure path is stable; no special assertions here beyond determinism.
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s1'], supply_sources: ['s1'] },
             { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s2'], supply_sources: ['s2'] }
         ],
-        formations: {},
-        // Mark the edge active so computeFrontRegions can derive a region_id for selection.
-        front_segments: {
+  military: {
+    formations: {},
+    front_segments: {
             s1__s2: {
                 edge_id: 's1__s2',
                 active: true,
@@ -41,11 +41,13 @@ test('phase5 sanity: region expansion, edge override, deterministic + no timesta
                 max_friction: 0
             }
         },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const regions = computeFrontRegions(base, derived);
     assert.ok(regions.regions.length > 0);

@@ -15,9 +15,9 @@ import {
 
 function createTestState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'test-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'test-seed' },
+  factions: [
             {
                 id: 'faction_a',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 10 },
@@ -33,16 +33,19 @@ function createTestState(): GameState {
                 negotiation: { pressure: 12, last_change_turn: 4, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {
+  military: {
+    formations: {},
+    front_segments: {
             edge1: { edge_id: 'edge1', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 3, max_friction: 3 },
             edge2: { edge_id: 'edge2', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 4, max_active_streak: 4, friction: 2, max_friction: 2 }
         },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 }
 
 function createTestEdges(): EdgeRecord[] {

@@ -23,7 +23,7 @@ function canonicalSidePair(sideA: string, sideB: string): string {
  * Deterministically derive connected "front regions" (connected components) from active front edges.
  *
  * Rules:
- * - Consider only edges that are active in state.front_segments[edge_id]?.active === true
+ * - Consider only edges that are active in state.military.front_segments[edge_id]?.active === true
  * - Consider only derived front edges with non-null side_a and side_b
  * - Regionization is performed per canonical side-pair (A--B), based on shared endpoint settlement IDs
  * - Two edges are adjacent if they share any endpoint sid (a or b)

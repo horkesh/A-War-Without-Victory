@@ -27,14 +27,14 @@ import { CURRENT_SCHEMA_VERSION, type FormationState, type GameState } from '../
 /** Minimal GameState for testing spawn in bottom_up mode. */
 function makeBottomUpState(munAvailable = 150): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 1,
             seed: 'proto-brigade-test',
             phase: 'war',
             recruitment_mode: 'bottom_up'
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -42,12 +42,13 @@ function makeBottomUpState(munAvailable = 150): GameState {
                 supply_sources: []
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'test_mun:RBiH': {
                 mun_id: 'test_mun',
                 faction: 'RBiH',
@@ -57,7 +58,8 @@ function makeBottomUpState(munAvailable = 150): GameState {
                 updated_turn: 0
             }
         }
-    } as unknown as GameState;
+  } as any,
+} as unknown as GameState;
 }
 
 /** Minimal options for spawnFormationsFromPools. */

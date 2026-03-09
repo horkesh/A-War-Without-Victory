@@ -89,7 +89,7 @@ function compileBattles(
     state: GameState,
     report: TurnReport,
     turn: number,
-    turnControlEvents: NonNullable<GameState['control_events']>,
+    turnControlEvents: NonNullable<GameState['military']['control_events']>,
 ): TurnBattle[] {
     const rawBattles = report.attack_resolution_osid?.battles;
     if (!rawBattles?.length) return [];
@@ -156,7 +156,7 @@ function compileBattles(
 // ---------------------------------------------------------------------------
 
 function compileTerritory(
-    turnControlEvents: NonNullable<GameState['control_events']>,
+    turnControlEvents: NonNullable<GameState['military']['control_events']>,
 ): Pick<TurnSummary, 'territory_net' | 'notable_flips'> {
     const territory_net: Partial<Record<FactionId, number>> = {};
     for (const e of turnControlEvents) {

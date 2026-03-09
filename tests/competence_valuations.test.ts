@@ -20,9 +20,9 @@ import { buildTreatyDraft, createClause } from '../src/state/treaty_builder.js';
 
 function createTestState(): GameState {
     return {
-        schema_version: 1,
-        meta: { turn: 5, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 5, seed: 'test' },
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 10 },
@@ -45,13 +45,18 @@ function createTestState(): GameState {
                 negotiation: { pressure: 10, last_change_turn: 4, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_ledger: []
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_ledger: []
+  } as any,
+        displacement: {} as any
     };
 }
 

@@ -253,7 +253,7 @@ export interface OsidColumnMovementReport {
  * Pass order matters: advance FIRST, then start new. This way new orders don't get
  * an immediate advance on the same turn they're issued (realistic 1-turn delay).
  *
- * Mutates: state.formations[*].location_osid, state.brigade_movement_state, state.brigade_movement_orders.
+ * Mutates: state.formations[*].location_osid, state.brigade_movement_state, state.military.brigade_movement_orders.
  * Deterministic: formations processed in sorted ID order.
  */
 export function processOsidColumnMovement(

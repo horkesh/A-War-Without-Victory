@@ -22,10 +22,12 @@ function makeHeavyAttacker(factionId = 'RS'): FormationState {
 
 function makeStateWithMunitions(reserve: number, enabled = true): GameState {
     return {
-        meta: { supply_reserves_enabled: enabled },
-        heavy_munitions_reserve: { RS: reserve, RBiH: 60, HRHB: 60 },
-        general_supply_reserve: { RS: 80, RBiH: 80, HRHB: 80 },
-    } as unknown as GameState;
+  meta: { supply_reserves_enabled: enabled },
+  military: {
+    heavy_munitions_reserve: { RS: reserve, RBiH: 60, HRHB: 60 },
+    general_supply_reserve: { RS: 80, RBiH: 80, HRHB: 80 }
+  } as any,
+} as unknown as GameState;
 }
 
 describe('Phase E2 — getBombardmentCasualtyMult with heavy munitions', () => {

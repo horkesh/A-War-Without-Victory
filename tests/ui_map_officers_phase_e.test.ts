@@ -14,8 +14,10 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
         const officerId = 'off-rs-1';
         const formationId = 'f-brig-1';
         const state = {
-            meta: { turn: 10, phase: 'war' },
-            formations: {
+  meta: { turn: 10, phase: 'war' },
+  brigade_aor: {},
+  military: {
+    formations: {
                 [formationId]: {
                     id: formationId,
                     faction: 'RS',
@@ -30,11 +32,8 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
                     officer_quality: 0.45,
                 },
             },
-            militia_pools: {},
-            political_controllers: {},
-            control_events: [],
-            brigade_aor: {},
-            named_officer_data: [
+    militia_pools: {},
+    named_officer_data: [
                 {
                     id: officerId,
                     name: 'Test Commander',
@@ -52,7 +51,7 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
                     pool_tier: 'starter',
                 },
             ],
-            named_officers: {
+    named_officers: {
                 [officerId]: {
                     officer_id: officerId,
                     status: 'active',
@@ -64,8 +63,13 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
                     penalty_turns_remaining: 0,
                     acting_commander: false,
                 },
-            },
-        };
+            }
+  } as any,
+  political: {
+    political_controllers: {},
+    control_events: []
+  } as any,
+};
 
         const result = parseGameState(state);
 
@@ -94,7 +98,7 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
         expect(result.namedOfficerStateById?.[officerId].battles).toBe(10);
         expect(result.namedOfficerStateById?.[officerId].victories).toBe(6);
 
-        const formation = result.military.formations.find((f) => f.id === formationId);
+        const formation = result.formations.find((f) => f.id === formationId);
         expect(formation).toBeDefined();
         expect(formation?.officer_quality).toBe(0.45);
     });

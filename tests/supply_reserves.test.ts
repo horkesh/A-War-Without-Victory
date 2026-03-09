@@ -5,19 +5,23 @@ import type { GameState } from '../src/state/game_state.js';
 
 function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
     return {
-        schema_version: 1,
-        meta: { turn: 10, seed: 'test', phase: 'war', supply_reserves_enabled: true },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 10, seed: 'test', phase: 'war', supply_reserves_enabled: true },
+  factions: [
             { id: 'RBiH', supply_sources: [] },
             { id: 'RS', supply_sources: [] },
             { id: 'HRHB', supply_sources: [] }
         ],
-        formations: {},
-        settlements: [],
-        municipalities: {},
-        political_controllers: {},
-        ...overrides
-    } as unknown as GameState;
+  ...overrides,
+  military: {
+    formations: {}
+  } as any,
+  political: {
+    settlements: [],
+    municipalities: {},
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 }
 
 describe('ensureSupplyReserves', () => {
@@ -34,9 +38,11 @@ describe('ensureSupplyReserves', () => {
 
     it('does not overwrite existing reserves', () => {
         const state = makeMinimalState({
-            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 } as any,
-            heavy_munitions_reserve: { RBiH: 40, RS: 40, HRHB: 40 } as any
-        });
+  military: {
+    general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 } as any,
+    heavy_munitions_reserve: { RBiH: 40, RS: 40, HRHB: 40 } as any
+  } as any,
+});
         ensureSupplyReserves(state);
         expect(state.military.general_supply_reserve!['RBiH']).toBe(50);
         expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(40);
@@ -46,12 +52,14 @@ describe('ensureSupplyReserves', () => {
 describe('updateSupplyReserves', () => {
     it('drains maintenance from general supply proportional to formation count', () => {
         const state = makeMinimalState({
-            formations: {
+  military: {
+    formations: {
                 'b1': { id: 'b1', faction: 'RBiH', personnel: 1000 } as any,
                 'b2': { id: 'b2', faction: 'RBiH', personnel: 1000 } as any,
                 'b3': { id: 'b3', faction: 'RS', personnel: 1000 } as any,
             }
-        });
+  } as any,
+});
         ensureSupplyReserves(state);
         // Zero production
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
@@ -85,12 +93,14 @@ describe('updateSupplyReserves', () => {
 
     it('drains heavy munitions proportional to heavy weapon count (tanks + artillery)', () => {
         const state = makeMinimalState({
-            formations: {
+  military: {
+    formations: {
                 'rs1': { id: 'rs1', faction: 'RS', personnel: 3000, composition: { tanks: 30, artillery: 20, infantry: 0, aa_systems: 0 } } as any,
                 'rs2': { id: 'rs2', faction: 'RS', personnel: 2000, composition: { tanks: 0, artillery: 10, infantry: 0, aa_systems: 0 } } as any,
                 'rbih1': { id: 'rbih1', faction: 'RBiH', personnel: 2000, composition: { tanks: 0, artillery: 5, infantry: 0, aa_systems: 0 } } as any,
             }
-        });
+  } as any,
+});
         ensureSupplyReserves(state);
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
 
@@ -114,12 +124,14 @@ describe('updateSupplyReserves', () => {
 
     it('clamps reserves at 0 and 100', () => {
         const state = makeMinimalState({
-            general_supply_reserve: { RBiH: 1, RS: 99, HRHB: 50 } as any,
-            heavy_munitions_reserve: { RBiH: 1, RS: 99, HRHB: 50 } as any,
-            formations: Object.fromEntries(
+  military: {
+    general_supply_reserve: { RBiH: 1, RS: 99, HRHB: 50 } as any,
+    heavy_munitions_reserve: { RBiH: 1, RS: 99, HRHB: 50 } as any,
+    formations: Object.fromEntries(
                 Array.from({ length: 50 }, (_, i) => [`b${i}`, { id: `b${i}`, faction: 'RBiH', personnel: 1000 }])
             ) as any
-        });
+  } as any,
+});
         updateSupplyReserves(state, { RBiH: 0, RS: 50, HRHB: 0 });
 
         // RBiH: 1 - 50*0.025 = 1-1.25 = -0.25 → clamped to 0
@@ -144,9 +156,11 @@ describe('deductCombatExpenditure', () => {
 
     it('does not go below zero', () => {
         const state = makeMinimalState({
-            heavy_munitions_reserve: { RBiH: 0.001, RS: 60, HRHB: 60 } as any,
-            general_supply_reserve: { RBiH: 0.001, RS: 80, HRHB: 80 } as any
-        });
+  military: {
+    heavy_munitions_reserve: { RBiH: 0.001, RS: 60, HRHB: 60 } as any,
+    general_supply_reserve: { RBiH: 0.001, RS: 80, HRHB: 80 } as any
+  } as any,
+});
         deductCombatExpenditure(state, 'RBiH', 10, 5.0);
         expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(0);
         expect(state.military.general_supply_reserve!['RBiH']).toBe(0);

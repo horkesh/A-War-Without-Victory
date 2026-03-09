@@ -252,7 +252,7 @@ export class MapApp {
                 if (!s.corps_attack_axis_orders) s.corps_attack_axis_orders = {};
                 (s.corps_attack_axis_orders as Record<string, unknown>)[corpsId] = { edge_ids: [...new Set(normalized)].sort(), created_turn: ((s.meta as Record<string, unknown>)?.turn as number) ?? 0 };
                 // Derive per-brigade attack orders from axis
-                const pc = (s.political_controllers ?? {}) as Record<string, string>;
+                const pc = (s.political.political_controllers ?? {}) as Record<string, string>;
                 const corpsFaction = corps.faction as string;
                 const enemyTargets = new Set<string>();
                 for (const eid of normalized) {
@@ -296,15 +296,15 @@ export class MapApp {
             },
             stageBrigadeMovementOrder: async (brigadeId: string, targetSids: string[]) => {
                 const s = state(); if (!s) return fail('No state loaded');
-                if (!s.brigade_movement_orders) s.brigade_movement_orders = {};
-                (s.brigade_movement_orders as Record<string, string[]>)[brigadeId] = targetSids.sort();
+                if (!s.military.brigade_movement_orders) s.military.brigade_movement_orders = {};
+                (s.military.brigade_movement_orders as Record<string, string[]>)[brigadeId] = targetSids.sort();
                 self.reloadFromRawState();
                 return ok();
             },
             stageBrigadeRepositionOrder: async (brigadeId: string, sids: string[]) => {
                 const s = state(); if (!s) return fail('No state loaded');
-                if (!s.brigade_reposition_orders) s.brigade_reposition_orders = {};
-                (s.brigade_reposition_orders as Record<string, { settlement_ids: string[] }>)[brigadeId] = { settlement_ids: [...sids].sort() };
+                if (!s.military.brigade_reposition_orders) s.military.brigade_reposition_orders = {};
+                (s.military.brigade_reposition_orders as Record<string, { settlement_ids: string[] }>)[brigadeId] = { settlement_ids: [...sids].sort() };
                 self.reloadFromRawState();
                 return ok();
             },
@@ -378,8 +378,8 @@ export class MapApp {
             },
             clearOrders: async (brigadeId: string) => {
                 const s = state(); if (!s) return fail('No state loaded');
-                if (s.brigade_movement_orders) delete (s.brigade_movement_orders as Record<string, unknown>)[brigadeId];
-                if (s.brigade_reposition_orders) delete (s.brigade_reposition_orders as Record<string, unknown>)[brigadeId];
+                if (s.military.brigade_movement_orders) delete (s.military.brigade_movement_orders as Record<string, unknown>)[brigadeId];
+                if (s.military.brigade_reposition_orders) delete (s.military.brigade_reposition_orders as Record<string, unknown>)[brigadeId];
                 if (s.brigade_attack_orders) delete (s.brigade_attack_orders as Record<string, unknown>)[brigadeId];
                 self.reloadFromRawState();
                 return ok();

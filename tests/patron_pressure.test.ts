@@ -5,9 +5,9 @@ import { ensureInternationalVisibilityPressure, updateInternationalVisibilityPre
 
 test('updateInternationalVisibilityPressure accumulates sarajevo + enclave pressure', () => {
     const state: GameState = {
-        schema_version: 1,
-        meta: { turn: 12, seed: 'ivp-test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 12, seed: 'ivp-test' },
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -16,13 +16,16 @@ test('updateInternationalVisibilityPressure accumulates sarajevo + enclave press
                 negotiation: { pressure: 10, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
     const sarajevo: SarajevoState = {
         mun_id: '10529',
         settlement_ids: [],

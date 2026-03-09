@@ -13,8 +13,8 @@ import { serializeState } from '../src/state/serialize.js';
 
 function minimalPhaseIIState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 20,
             seed: 'det',
             phase: 'war',
@@ -22,18 +22,23 @@ function minimalPhaseIIState(): GameState {
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { S1: 'RBiH', S2: 'RS' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RS' }
+  } as any,
+        displacement: {} as any
     };
 }
 

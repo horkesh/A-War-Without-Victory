@@ -26,16 +26,19 @@ async function main(): Promise<void> {
     const applyBreaches = hasFlag('--apply-breaches');
     const graph = await loadSettlementGraph();
     const initial: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'sim-seed' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'sim-seed' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     await prepareNewGameState(initial, graph);
 

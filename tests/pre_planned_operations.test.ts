@@ -57,17 +57,21 @@ function makeMinimalState(): GameState {
     }
 
     return {
-        meta: {
+  meta: {
             turn: 0,
             phase: 'war',
             scenario_start_date: { year: 1992, month: 4, day: 6 },
             seed: 'test',
         } as GameState['meta'],
-        factions: [{ id: 'RS' as FactionId }, { id: 'RBiH' as FactionId }] as GameState['factions'],
-        formations,
-        corps_command: corpsCommand,
-        political_controllers: politicalControllers,
-    } as GameState;
+  factions: [{ id: 'RS' as FactionId }, { id: 'RBiH' as FactionId }] as GameState['factions'],
+  formations,
+  military: {
+    corps_command: corpsCommand
+  } as any,
+  political: {
+    political_controllers: politicalControllers
+  } as any,
+} as GameState;
 }
 
 describe('pre-planned operations', () => {

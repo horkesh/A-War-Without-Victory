@@ -67,8 +67,10 @@ test('non-execution sector offensive leaves directive targets unchanged', () => 
 
 test('execution-phase operation attacks current objective even without a corps directive', () => {
     const state = {
-        meta: { turn: 2, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 2, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_bratunac: {
                 id: 'rs_1st_bratunac',
                 kind: 'brigade',
@@ -84,7 +86,7 @@ test('execution-phase operation attacks current objective even without a corps d
                 location_osid: 'op:bratunac:slapasnica',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_drina: {
                 stance: 'offensive',
                 active_operation: {
@@ -102,14 +104,16 @@ test('execution-phase operation attacks current objective even without a corps d
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:bratunac:slapasnica': 'RS',
             'op:bratunac:bratunac_2': 'RBiH',
             'op:bratunac:polom': 'RS',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [
@@ -127,8 +131,10 @@ test('execution-phase operation attacks current objective even without a corps d
 
 test('execution-phase operation moves brigade toward an approach OSID for the current objective', () => {
     const state = {
-        meta: { turn: 3, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 3, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_posavina_infantry: {
                 id: 'rs_1st_posavina_infantry',
                 kind: 'brigade',
@@ -144,7 +150,7 @@ test('execution-phase operation moves brigade toward an approach OSID for the cu
                 location_osid: 'op:test:start',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_east_bosnian: {
                 stance: 'offensive',
                 active_operation: {
@@ -162,15 +168,17 @@ test('execution-phase operation moves brigade toward an approach OSID for the cu
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:test:base': 'RS',
             'op:test:start': 'RS',
             'op:test:approach': 'RS',
             'op:test:objective': 'RBiH',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [
@@ -193,8 +201,10 @@ test('execution-phase operation moves brigade toward an approach OSID for the cu
 
 test('execution-phase operation falls back to maneuver toward a later reachable objective when the current objective has no friendly approach', () => {
     const state = {
-        meta: { turn: 4, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 4, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_posavina_infantry: {
                 id: 'rs_1st_posavina_infantry',
                 kind: 'brigade',
@@ -210,7 +220,7 @@ test('execution-phase operation falls back to maneuver toward a later reachable 
                 location_osid: 'op:test:start',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_east_bosnian: {
                 stance: 'offensive',
                 active_operation: {
@@ -228,16 +238,18 @@ test('execution-phase operation falls back to maneuver toward a later reachable 
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:test:start': 'RS',
             'op:test:approach': 'RS',
             'op:test:blocked_objective': 'RBiH',
             'op:test:reachable_objective': 'RBiH',
             'op:test:enemy_buffer': 'RBiH',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [
@@ -259,8 +271,10 @@ test('execution-phase operation falls back to maneuver toward a later reachable 
 
 test('execution-phase operation concentrates adjacent brigades on the current objective', () => {
     const state = {
-        meta: { turn: 13, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 13, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_doboj_light_infantry: {
                 id: 'rs_1st_doboj_light_infantry',
                 kind: 'brigade',
@@ -303,7 +317,7 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
                 location_osid: 'op:test:objective',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
                 directive: {
@@ -331,14 +345,16 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:test:approach': 'RS',
             'op:test:rear': 'RS',
             'op:test:objective': 'RBiH',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [
@@ -358,8 +374,10 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
 
 test('execution-phase operation with momentum can probe the next objective from an adjacent approach', () => {
     const state = {
-        meta: { turn: 14, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 14, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_doboj_light_infantry: {
                 id: 'rs_1st_doboj_light_infantry',
                 kind: 'brigade',
@@ -388,7 +406,7 @@ test('execution-phase operation with momentum can probe the next objective from 
                 location_osid: 'op:test:objective',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
                 active_operation: {
@@ -406,13 +424,15 @@ test('execution-phase operation with momentum can probe the next objective from 
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:test:approach': 'RS',
             'op:test:objective': 'RBiH',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [
@@ -428,8 +448,10 @@ test('execution-phase operation with momentum can probe the next objective from 
 
 test('execution-phase operation still moves assigned brigades when their current OSID is critical supply', () => {
     const state = {
-        meta: { turn: 14, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 14, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_doboj_light_infantry: {
                 id: 'rs_1st_doboj_light_infantry',
                 kind: 'brigade',
@@ -445,7 +467,7 @@ test('execution-phase operation still moves assigned brigades when their current
                 location_osid: 'op:test:start',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
                 active_operation: {
@@ -463,15 +485,17 @@ test('execution-phase operation still moves assigned brigades when their current
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:test:start': 'RS',
             'op:test:approach': 'RS',
             'op:test:safe_rear': 'RS',
             'op:test:objective': 'RBiH',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [
@@ -502,8 +526,10 @@ test('execution-phase operation still moves assigned brigades when their current
 
 test('execution-phase operation still moves toward a risky approach OSID when that is the path to the current objective', () => {
     const state = {
-        meta: { turn: 18, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 18, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_doboj_light_infantry: {
                 id: 'rs_1st_doboj_light_infantry',
                 kind: 'brigade',
@@ -532,7 +558,7 @@ test('execution-phase operation still moves toward a risky approach OSID when th
                 location_osid: 'op:test:objective',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
                 active_operation: {
@@ -550,8 +576,10 @@ test('execution-phase operation still moves toward a risky approach OSID when th
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:test:start': 'RS',
             'op:test:approach': 'RS',
             'op:test:rear_a': 'RS',
@@ -560,9 +588,9 @@ test('execution-phase operation still moves toward a risky approach OSID when th
             'op:test:enemy_a': 'RBiH',
             'op:test:enemy_b': 'RBiH',
             'op:test:enemy_c': 'RBiH',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [
@@ -588,8 +616,10 @@ test('execution-phase operation still moves toward a risky approach OSID when th
 
 test('planning-phase operation emits the first hop toward a distant staging OSID', () => {
     const state = {
-        meta: { turn: 11, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 11, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_doboj_light_infantry: {
                 id: 'rs_1st_doboj_light_infantry',
                 kind: 'brigade',
@@ -605,7 +635,7 @@ test('planning-phase operation emits the first hop toward a distant staging OSID
                 location_osid: 'op:test:start',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
                 active_operation: {
@@ -625,15 +655,17 @@ test('planning-phase operation emits the first hop toward a distant staging OSID
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:test:start': 'RS',
             'op:test:mid': 'RS',
             'op:test:staging': 'RS',
             'op:test:objective': 'RBiH',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [
@@ -654,8 +686,10 @@ test('planning-phase operation emits the first hop toward a distant staging OSID
 
 test('planning-phase operation keeps moving from staging into first-objective approach positions', () => {
     const state = {
-        meta: { turn: 11, phase: 'war', seed: 'test-seed' },
-        formations: {
+  meta: { turn: 11, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
             rs_1st_doboj_light_infantry: {
                 id: 'rs_1st_doboj_light_infantry',
                 kind: 'brigade',
@@ -671,7 +705,7 @@ test('planning-phase operation keeps moving from staging into first-objective ap
                 location_osid: 'op:test:staging',
             },
         },
-        corps_command: {
+    corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
                 active_operation: {
@@ -691,14 +725,16 @@ test('planning-phase operation keeps moving from staging into first-objective ap
                 },
             },
         },
-        corps_front_directives: {},
-        political_controllers: {
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
             'op:test:staging': 'RS',
             'op:test:approach': 'RS',
             'op:test:objective': 'RBiH',
-        },
-        brigade_posture_orders: [],
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 
     generateAllBotOrdersOsid(state, ['RS'], {
         edges: [

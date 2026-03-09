@@ -372,7 +372,7 @@ function executeFactionDirectives(
         // --- Sector march: brigade assigned to a sector but not on its front → column march ---
         // This overrides home defense: the corps needs this brigade at the front.
         if (state.military.corps_front_sectors && !isActiveSectorOperationParticipant) {
-            let assignedSector: (typeof state.corps_front_sectors)[string] | null = null;
+            let assignedSector: (typeof state.military.corps_front_sectors)[string] | null = null;
             for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
                 const sec = state.military.corps_front_sectors[sid]!;
                 if (sec.assigned_brigade_ids.includes(brigade.id)) {

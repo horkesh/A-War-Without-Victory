@@ -23,22 +23,26 @@ function makeBrigade(overrides: Partial<OobBrigade> & Pick<OobBrigade, 'id' | 'f
 
 function makeState(overrides?: Partial<GameState>): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'test' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'test' },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {},
-        ...overrides
-    };
+  ...overrides,
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+};
 }
 
 describe('initializeRecruitmentResources', () => {
@@ -83,11 +87,15 @@ describe('recruitBrigade', () => {
     test('succeeds when all resources available', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const hq: Record<string, string> = { zenica: 's1' };
         const resources = initializeRecruitmentResources(['RBiH']);
@@ -111,11 +119,15 @@ describe('recruitBrigade', () => {
     test('fails when no control', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RS' }, // RS controls, not RBiH
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RS' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const resources = initializeRecruitmentResources(['RBiH']);
         const brigade = makeBrigade({ id: 'b1', faction: 'RBiH', name: 'Test', home_mun: 'zenica' });
@@ -128,11 +140,15 @@ describe('recruitBrigade', () => {
     test('fails when not enough capital', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 5 }); // only 5 capital
         const brigade = makeBrigade({ id: 'b1', faction: 'RBiH', name: 'Test', home_mun: 'zenica', capital_cost: 10 });
@@ -145,11 +161,15 @@ describe('recruitBrigade', () => {
     test('fails when not enough equipment', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 200 }, { RBiH: 3 }); // only 3 equipment
         const brigade = makeBrigade({
@@ -167,11 +187,15 @@ describe('applyRecruitment', () => {
     test('deducts resources and creates formation', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const resources = initializeRecruitmentResources(['RBiH']);
         const brigade = makeBrigade({
@@ -205,11 +229,15 @@ describe('runBotRecruitment', () => {
     test('recruits brigades for faction with available resources', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const resources = initializeRecruitmentResources(['RBiH']);
         const corps: OobCorps[] = [];
@@ -230,11 +258,15 @@ describe('runBotRecruitment', () => {
     test('mandatory brigades are recruited at zero cost', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 1000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 }); // zero capital/equip
         const corps: OobCorps[] = [];
@@ -257,11 +289,15 @@ describe('runBotRecruitment', () => {
     test('bot downgrades equipment when points scarce', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 1000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         // Only 3 equipment points -- not enough for mountain (5) or motorized (20)
         const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 100 }, { RBiH: 3 });
@@ -286,12 +322,16 @@ describe('runBotRecruitment', () => {
     test('respects available_from turn gate', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            meta: { turn: 4, seed: 'test' },
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  meta: { turn: 4, seed: 'test' },
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 4 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 200 }, { RBiH: 100 });
         const report = runBotRecruitment(
@@ -313,11 +353,15 @@ describe('runBotRecruitment', () => {
     test('respects per-faction elective recruit cap', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
-            political_controllers: { s1: 'RBiH' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 10000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'zenica']]);
         const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 500 }, { RBiH: 500 });
         const report = runBotRecruitment(
@@ -340,11 +384,15 @@ describe('runBotRecruitment', () => {
     test('respects per-faction mandatory recruit cap when configured', () => {
         const rsPoolKey = militiaPoolKey('prijedor', 'RS');
         const state = makeState({
-            political_controllers: { s1: 'RS' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [rsPoolKey]: { mun_id: 'prijedor', faction: 'RS', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RS' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'prijedor']]);
         const resources = initializeRecruitmentResources(['RS'], { RS: 0 }, { RS: 0 });
         const report = runBotRecruitment(
@@ -383,11 +431,15 @@ describe('runBotRecruitment', () => {
     test('RS JNA override: RS mechanized and motorized get 40 tanks, 30 artillery', () => {
         const rsPoolKey = militiaPoolKey('banja_luka', 'RS');
         const state = makeState({
-            political_controllers: { s1: 'RS' },
-            militia_pools: {
+  military: {
+    militia_pools: {
                 [rsPoolKey]: { mun_id: 'banja_luka', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
             }
-        });
+  } as any,
+  political: {
+    political_controllers: { s1: 'RS' }
+  } as any,
+});
         const sidToMun = new Map([['s1', 'banja_luka']]);
         const resources = initializeRecruitmentResources(['RS'], { RS: 0 }, { RS: 0 });
         runBotRecruitment(
@@ -437,19 +489,21 @@ describe('isEmergentFormationSuppressed', () => {
 
     test('returns true when recruited brigade exists in municipality', () => {
         const state = makeState({
-            formations: {
+  military: {
+    formations: {
                 b1: {
                     id: 'b1', faction: 'RBiH', name: 'Test', created_turn: 0,
                     status: 'active', assignment: null, kind: 'brigade',
                     tags: ['mun:zenica']
                 }
             },
-            recruitment_state: {
+    recruitment_state: {
                 recruitment_capital: {},
                 equipment_pools: {},
                 recruited_brigade_ids: ['b1']
             }
-        });
+  } as any,
+});
         assert.strictEqual(isEmergentFormationSuppressed(state, 'zenica', 'RBiH'), true);
         assert.strictEqual(isEmergentFormationSuppressed(state, 'zenica', 'RS'), false);
         assert.strictEqual(isEmergentFormationSuppressed(state, 'tuzla', 'RBiH'), false);

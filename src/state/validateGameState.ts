@@ -287,8 +287,8 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
             errors.push('hostile_takeover_timers must be an object (Record<string, HostileTakeoverTimerState>) when present');
         }
     }
-    if ('displacement_camp_state' in s && s.displacement_camp_state !== undefined) {
-        const camps = s.displacement_camp_state;
+    if ('displacement_camp_state' in s && s.displacement.displacement_camp_state !== undefined) {
+        const camps = s.displacement.displacement_camp_state;
         if (camps !== null && typeof camps === 'object' && !Array.isArray(camps)) {
             for (const [munId, raw] of Object.entries(camps)) {
                 if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
@@ -365,7 +365,7 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
 
     // political_controllers: every entry must have value defined (can be null)
     if (Object.prototype.hasOwnProperty.call(s, 'political_controllers')) {
-        const pc = s.political_controllers;
+        const pc = s.political.political_controllers;
         if (pc !== null && typeof pc === 'object' && !Array.isArray(pc)) {
             for (const [sid, val] of Object.entries(pc)) {
                 if (val !== null && typeof val !== 'string') {

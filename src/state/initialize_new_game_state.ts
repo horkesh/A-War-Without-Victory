@@ -28,7 +28,7 @@ export async function prepareNewGameState(
     initOptions?: PoliticalControlInitOptions
 ): Promise<PoliticalControlInitResult> {
     const result = await initializePoliticalControllers(state, settlementGraph, mappingPath, initOptions);
-    const pc = state.political_controllers;
+    const pc = state.political.political_controllers;
     if (!pc) {
         throw new Error(
             'Phase F3 invariant: political_controllers must exist after init. Init did not run correctly.'

@@ -343,8 +343,8 @@ export function queryBattleEvents(
     state: GameState
 ): { turn: number; events: BattleEventQueryEntry[] } {
     const turn = state.meta?.turn ?? 0;
-    const raw = Array.isArray((state as unknown as { control_events?: unknown[] }).control_events)
-        ? ((state as unknown as { control_events?: unknown[] }).control_events as unknown[])
+    const raw = Array.isArray((state as unknown as { military: { control_events?: unknown[] } }).military.control_events)
+        ? ((state as unknown as { military: { control_events?: unknown[] } }).military.control_events as unknown[])
         : [];
     const events: BattleEventQueryEntry[] = [];
     for (const item of raw) {

@@ -13,19 +13,24 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function minimalPhaseIIState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'pipeline-test', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'pipeline-test', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
+  factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { 'S1': 'RBiH', 'S2': 'RS' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { 'S1': 'RBiH', 'S2': 'RS' }
+  } as any,
+        displacement: {} as any
     };
 }
 

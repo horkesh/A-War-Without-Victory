@@ -44,14 +44,12 @@ function makeState(): GameState {
     };
 
     return {
-        schema_version: 1,
-        meta: { turn: 5, phase: 'war', seed: 'test' } as GameState['meta'],
-        factions: [{ id: 'RS' as FactionId }] as GameState['factions'],
-        formations,
-        political_controllers: {
-            'op:enemy:obj1': 'RBiH',
-        },
-        corps_command: {
+  schema_version: 1,
+  meta: { turn: 5, phase: 'war', seed: 'test' } as GameState['meta'],
+  factions: [{ id: 'RS' as FactionId }] as GameState['factions'],
+  formations,
+  military: {
+    corps_command: {
             corps_1: {
                 command_span: 0,
                 subordinate_count: 2,
@@ -73,7 +71,13 @@ function makeState(): GameState {
                 }
             } as any
         }
-    } as unknown as GameState;
+  } as any,
+  political: {
+    political_controllers: {
+            'op:enemy:obj1': 'RBiH',
+        }
+  } as any,
+} as unknown as GameState;
 }
 
 function makeOrderSnapshot(

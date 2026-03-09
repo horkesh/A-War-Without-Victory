@@ -12,19 +12,24 @@ import { serializeState } from '../src/state/serialize.js';
 import { runOneTurn } from '../src/state/turn_pipeline.js';
 
 const baseState: GameState = {
-    schema_version: CURRENT_SCHEMA_VERSION,
-    meta: { turn: 0, seed: 'initial-seed' },
-    factions: [],
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'initial-seed' },
+  factions: [],
+  military: {
     formations: {},
     front_segments: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
-    militia_pools: {},
+    militia_pools: {}
+  } as any,
+  political: {
     negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
     ceasefire: {},
     negotiation_ledger: [],
     supply_rights: { corridors: [] }
+  } as any,
+    displacement: {} as any
 };
 
 test('same state + same inputs yields identical output', () => {

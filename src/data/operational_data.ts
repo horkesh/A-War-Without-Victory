@@ -159,7 +159,7 @@ export async function loadOsidAreas(baseDir?: string): Promise<OsidAreaData> {
 }
 
 export function backfillFormationLocationOsid(
-    state: { formations?: Record<string, { hq_sid?: string; location_osid?: string; kind?: string }> },
+    state: { military: { formations?: Record<string, { hq_sid?: string; location_osid?: string; kind?: string }> } },
     canonicalToOperational: CanonicalToOperationalMap
 ): void {
     const formations = state.military.formations;

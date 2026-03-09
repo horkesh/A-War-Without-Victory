@@ -15,15 +15,19 @@ import type { GameState } from '../src/state/game_state.js';
 
 function makeState(overrides: Partial<GameState> = {}): GameState {
     return {
-        meta: { turn: 10, phase: 'war', supply_reserves_enabled: true },
-        general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 60 },
-        heavy_munitions_reserve: { RBiH: 40, RS: 50, HRHB: 45 },
-        enclave_resilience: {},
-        factions: [],
-        political_controllers: {},
-        formations: {},
-        ...overrides,
-    } as unknown as GameState;
+  meta: { turn: 10, phase: 'war', supply_reserves_enabled: true },
+  factions: [],
+  ...overrides,
+  military: {
+    general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 60 },
+    heavy_munitions_reserve: { RBiH: 40, RS: 50, HRHB: 45 },
+    formations: {}
+  } as any,
+  political: {
+    enclave_resilience: {},
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 }
 
 describe('applyUnAirdrops', () => {
@@ -39,32 +43,38 @@ describe('applyUnAirdrops', () => {
 
     it('no-op when no enclaves have reached isolation threshold', () => {
         const state = makeState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 'op:gorazde:core': { resilience: 5, isolation_turns: AIRDROP_ISOLATION_THRESHOLD - 1, hardening_active: false },
-            },
-        });
+            }
+  } as any,
+});
         applyUnAirdrops(state);
         expect(state.military.general_supply_reserve!['RBiH']).toBe(50);
     });
 
     it('airdrops begin exactly at isolation threshold', () => {
         const state = makeState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 'op:gorazde:core': { resilience: 5, isolation_turns: AIRDROP_ISOLATION_THRESHOLD, hardening_active: false },
-            },
-        });
+            }
+  } as any,
+});
         applyUnAirdrops(state);
         expect(state.military.general_supply_reserve!['RBiH']).toBeCloseTo(50 + AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE);
     });
 
     it('multiple eligible enclaves accumulate drops', () => {
         const state = makeState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 'op:gorazde:core': { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 3, hardening_active: false },
                 'op:srebrenica:core': { resilience: 15, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 1, hardening_active: false },
                 'op:zepa:core': { resilience: 8, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 5, hardening_active: true },
-            },
-        });
+            }
+  } as any,
+});
         applyUnAirdrops(state);
         expect(state.military.general_supply_reserve!['RBiH']).toBeCloseTo(50 + AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE * 3);
     });
@@ -74,7 +84,11 @@ describe('applyUnAirdrops', () => {
         for (let i = 0; i < 20; i++) {
             enclaves[`op:enclave${i}:core`] = { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 5, hardening_active: false };
         }
-        const state = makeState({ enclave_resilience: enclaves as GameState['enclave_resilience'] });
+        const state = makeState({
+  political: {
+    enclave_resilience: enclaves as GameState['political']['enclave_resilience']
+  } as any,
+});
         state.military.general_supply_reserve!['RBiH'] = 0;
         applyUnAirdrops(state);
         expect(state.military.general_supply_reserve!['RBiH']).toBe(AIRDROP_MAX_SUPPLY_PER_TURN);
@@ -82,20 +96,24 @@ describe('applyUnAirdrops', () => {
 
     it('heavy munitions are NOT affected — humanitarian only', () => {
         const state = makeState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 'op:gorazde:core': { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
-            },
-        });
+            }
+  } as any,
+});
         applyUnAirdrops(state);
         expect(state.military.heavy_munitions_reserve!['RBiH']).toBe(40);
     });
 
     it('non-RBiH factions not affected', () => {
         const state = makeState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 'op:gorazde:core': { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
-            },
-        });
+            }
+  } as any,
+});
         applyUnAirdrops(state);
         expect(state.military.general_supply_reserve!['RS']).toBe(70);
         expect(state.military.general_supply_reserve!['HRHB']).toBe(60);
@@ -104,10 +122,12 @@ describe('applyUnAirdrops', () => {
 
     it('reserve clamped at 100', () => {
         const state = makeState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 'op:gorazde:core': { resilience: 20, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 5, hardening_active: false },
-            },
-        });
+            }
+  } as any,
+});
         state.military.general_supply_reserve!['RBiH'] = 99.9;
         applyUnAirdrops(state);
         expect(state.military.general_supply_reserve!['RBiH']).toBe(100);
@@ -115,14 +135,18 @@ describe('applyUnAirdrops', () => {
 
     it('normalizes staged airdrop allocations across eligible enclaves', () => {
         const state = makeState({
-            enclave_resilience: {
-                gorazde: { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
-                srebrenica: { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
-            },
-            airdrop_allocation: {
+  military: {
+    airdrop_allocation: {
                 gorazde: 0.5,
             }
-        });
+  } as any,
+  political: {
+    enclave_resilience: {
+                gorazde: { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
+                srebrenica: { resilience: 10, isolation_turns: AIRDROP_ISOLATION_THRESHOLD + 2, hardening_active: false },
+            }
+  } as any,
+});
 
         applyUnAirdrops(state);
 

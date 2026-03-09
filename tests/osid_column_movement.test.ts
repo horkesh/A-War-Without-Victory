@@ -50,16 +50,20 @@ function makeState(formations: FormationState[], opts?: Partial<GameState>): Gam
     const formationsMap: Record<string, FormationState> = {};
     for (const f of formations) formationsMap[f.id] = f;
     return {
-        meta: { turn: 1, phase: 'war', schema_version: 1, scenario_id: 'test' },
-        factions: [{ id: 'RS' as FactionId }, { id: 'RBiH' as FactionId }, { id: 'HRHB' as FactionId }] as GameState['factions'],
-        formations: formationsMap,
-        political_controllers: {
+  meta: { turn: 1, phase: 'war', schema_version: 1, scenario_id: 'test' },
+  factions: [{ id: 'RS' as FactionId }, { id: 'RBiH' as FactionId }, { id: 'HRHB' as FactionId }] as GameState['factions'],
+  ...opts,
+  military: {
+    formations: formationsMap,
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {
             A: 'RS', B: 'RS', C: 'RS', D: 'RS', E: 'RBiH'
-        },
-        front_pressure: {},
-        militia_pools: {},
-        ...opts
-    } as GameState;
+        }
+  } as any,
+} as GameState;
 }
 
 function mockReverseMap(osids: string[]): OperationalToCanonicalReverseMap {
@@ -196,8 +200,10 @@ describe('dijkstraFriendlyPath', () => {
         const rm = mockReverseMap(['A', 'B', 'C', 'D', 'E']);
         // C is enemy-controlled, blocking A→D path
         const state = makeState([], {
-            political_controllers: { A: 'RS', B: 'RS', C: 'RBiH', D: 'RS', E: 'RBiH' }
-        });
+  political: {
+    political_controllers: { A: 'RS', B: 'RS', C: 'RBiH', D: 'RS', E: 'RBiH' }
+  } as any,
+});
         const td = flatTerrain();
         const result = dijkstraFriendlyPath('A', 'D', 'RS', adjacency, state, rm, td);
         assert.equal(result, null);
@@ -221,8 +227,10 @@ describe('dijkstraFriendlyPath', () => {
         const adjacency = buildOsidAdjacency(edges);
         const rm = mockReverseMap(['A', 'B', 'C', 'D']);
         const state = makeState([], {
-            political_controllers: { A: 'RS', B: 'RS', C: 'RS', D: 'RS' }
-        });
+  political: {
+    political_controllers: { A: 'RS', B: 'RS', C: 'RS', D: 'RS' }
+  } as any,
+});
         const flat: TerrainScalars = { road_access_index: 1.0, river_crossing_penalty: 0, elevation_mean_m: 100, elevation_stddev_m: 5, slope_index: 0, terrain_friction_index: 0 };
         const mountain: TerrainScalars = { road_access_index: 0, river_crossing_penalty: 0.8, elevation_mean_m: 1500, elevation_stddev_m: 300, slope_index: 0.8, terrain_friction_index: 0.8 };
         const td: TerrainScalarsData = { by_sid: { A: flat, B: flat, C: mountain, D: flat } };
@@ -239,10 +247,12 @@ describe('processOsidColumnMovement', () => {
         const rm = mockReverseMap(['A', 'B', 'C', 'D', 'E']);
         const f1 = makeFormation('brig1', 'RS', 'A');
         const state = makeState([f1], {
-            brigade_movement_orders: {
+  military: {
+    brigade_movement_orders: {
                 brig1: { destination_sids: ['D'], stance: 'column' }
             } as any
-        });
+  } as any,
+});
         const td = flatTerrain();
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_starts, 1);
@@ -261,10 +271,12 @@ describe('processOsidColumnMovement', () => {
         const rm = mockReverseMap(['A', 'B', 'C', 'D', 'E']);
         const f1 = makeFormation('brig1', 'RS', 'A');
         const state = makeState([f1], {
-            brigade_movement_state: {
+  military: {
+    brigade_movement_state: {
                 brig1: { status: 'in_transit', stance: 'column', destination_sids: ['D'], path: ['A', 'B', 'C', 'D'], turns_remaining: 3 }
             }
-        });
+  } as any,
+});
         const td = flatTerrain();
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_advances, 1);
@@ -278,10 +290,12 @@ describe('processOsidColumnMovement', () => {
         const rm = mockReverseMap(['A', 'B', 'C', 'D', 'E']);
         const f1 = makeFormation('brig1', 'RS', 'A');
         const state = makeState([f1], {
-            brigade_movement_state: {
+  military: {
+    brigade_movement_state: {
                 brig1: { status: 'in_transit', stance: 'column', destination_sids: ['D'], path: ['A', 'B', 'C', 'D'], turns_remaining: 1 }
             }
-        });
+  } as any,
+});
         const td = flatTerrain();
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_arrivals, 1);
@@ -299,11 +313,15 @@ describe('processOsidColumnMovement', () => {
         const f1 = makeFormation('brig1', 'RS', 'A');
         // C is enemy-controlled → no path from A to D
         const state = makeState([f1], {
-            political_controllers: { A: 'RS', B: 'RS', C: 'RBiH', D: 'RS', E: 'RBiH' },
-            brigade_movement_orders: {
+  military: {
+    brigade_movement_orders: {
                 brig1: { destination_sids: ['D'], stance: 'column' }
             } as any
-        });
+  } as any,
+  political: {
+    political_controllers: { A: 'RS', B: 'RS', C: 'RBiH', D: 'RS', E: 'RBiH' }
+  } as any,
+});
         const td = flatTerrain();
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_blocked, 1);
@@ -315,10 +333,12 @@ describe('processOsidColumnMovement', () => {
         const rm = mockReverseMap(['A', 'B', 'C', 'D', 'E']);
         const f1 = makeFormation('brig1', 'RS', 'A');
         const state = makeState([f1], {
-            brigade_movement_orders: {
+  military: {
+    brigade_movement_orders: {
                 brig1: { destination_sids: ['B'] } // No stance: 'column'
             } as any
-        });
+  } as any,
+});
         const td = flatTerrain();
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_starts, 0);
@@ -331,10 +351,12 @@ describe('processOsidColumnMovement', () => {
         const rm = mockReverseMap(['A', 'B', 'C', 'D', 'E']);
         const f1 = makeFormation('brig1', 'RS', 'A');
         const state = makeState([f1], {
-            brigade_movement_orders: {
+  military: {
+    brigade_movement_orders: {
                 brig1: { destination_sids: ['D'], stance: 'column' }
             } as any
-        });
+  } as any,
+});
         const td = flatTerrain();
         const report = processOsidColumnMovement(state, edges, rm, td);
         assert.equal(report.column_starts, 1);

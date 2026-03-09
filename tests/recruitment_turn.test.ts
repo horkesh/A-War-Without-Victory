@@ -10,9 +10,9 @@ import { militiaPoolKey } from '../src/state/militia_pool_key.js';
 function makeState(): GameState {
     const poolKey = militiaPoolKey('zenica', 'RBiH');
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 4, seed: 'test', phase: 'war' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 4, seed: 'test', phase: 'war' },
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 60, legitimacy: 60, control: 50, logistics: 50, exhaustion: 0 },
@@ -27,28 +27,16 @@ function makeState(): GameState {
                 }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 4 }
         },
-        political_controllers: {
-            s1: 'RBiH'
-        },
-        displacement_state: {
-            zenica: {
-                mun_id: 'zenica',
-                original_population: 1000,
-                displaced_out: 0,
-                displaced_in: 0,
-                lost_population: 0,
-                last_updated_turn: 4
-            }
-        },
-        production_facilities: {
+    production_facilities: {
             pf_zenica: {
                 facility_id: 'pf_zenica',
                 name: 'Zenica Foundry',
@@ -59,7 +47,7 @@ function makeState(): GameState {
                 required_inputs: { electricity: true, raw_materials: true, skilled_labor: true }
             }
         },
-        recruitment_state: initializeRecruitmentResources(
+    recruitment_state: initializeRecruitmentResources(
             ['RBiH'],
             { RBiH: 10 },
             { RBiH: 10 },
@@ -67,7 +55,25 @@ function makeState(): GameState {
             { RBiH: 2 },
             1
         )
-    };
+  } as any,
+  political: {
+    political_controllers: {
+            s1: 'RBiH'
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
+            zenica: {
+                mun_id: 'zenica',
+                original_population: 1000,
+                displaced_out: 0,
+                displaced_in: 0,
+                lost_population: 0,
+                last_updated_turn: 4
+            }
+        }
+  } as any,
+};
 }
 
 describe('accrueRecruitmentResources', () => {
@@ -183,9 +189,9 @@ describe('runOngoingRecruitment', () => {
     test('applies RS mandatory mobilization accrual across turns', () => {
         const rsPoolKey = militiaPoolKey('prijedor', 'RS');
         const state = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 4, seed: 'test', phase: 'war' },
-            factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 4, seed: 'test', phase: 'war' },
+  factions: [
                 {
                     id: 'RS',
                     profile: { authority: 60, legitimacy: 60, control: 50, logistics: 50, exhaustion: 0 },
@@ -200,19 +206,23 @@ describe('runOngoingRecruitment', () => {
                     }
                 }
             ],
-            formations: {},
-            front_segments: {},
-            front_posture: {},
-            front_posture_regions: {},
-            front_pressure: {},
-            militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
                 [rsPoolKey]: { mun_id: 'prijedor', faction: 'RS', available: 60, committed: 0, exhausted: 0, updated_turn: 4 }
             },
-            political_controllers: {
+    recruitment_state: initializeRecruitmentResources(['RS'], { RS: 0 }, { RS: 0 }, { RS: 0 }, { RS: 0 }, 1)
+  } as any,
+  political: {
+    political_controllers: {
                 s1: 'RS'
-            },
-            recruitment_state: initializeRecruitmentResources(['RS'], { RS: 0 }, { RS: 0 }, { RS: 0 }, { RS: 0 }, 1)
-        } as GameState;
+            }
+  } as any,
+} as GameState;
 
         const brigades: OobBrigade[] = [
             {

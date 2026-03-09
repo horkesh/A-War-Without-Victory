@@ -225,7 +225,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     let controlBySettlement: Record<string, string | null> = {};
     let statusBySettlement: Record<string, string> = {};
 
-    const pc = state.political_controllers as Record<string, string | null> | undefined;
+    const pc = state.political.political_controllers as Record<string, string | null> | undefined;
     if (pc) {
         controlBySettlement = buildControlLookup(pc);
     }
@@ -276,7 +276,7 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     // Extract settlement-level movement orders (Phase K).
     const movementOrdersSettlement: MovementOrderSettlementView[] = [];
-    const rawMovementOrders = state.brigade_movement_orders as Record<string, { destination_sids?: string[] }> | undefined;
+    const rawMovementOrders = state.military.brigade_movement_orders as Record<string, { destination_sids?: string[] }> | undefined;
     if (rawMovementOrders && typeof rawMovementOrders === 'object' && !Array.isArray(rawMovementOrders)) {
         for (const [brigadeId, order] of Object.entries(rawMovementOrders).sort((a, b) => a[0].localeCompare(b[0]))) {
             const sids = order?.destination_sids;
@@ -288,7 +288,7 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     // Extract reposition orders (1–4 settlements per brigade).
     const repositionOrders: RepositionOrderView[] = [];
-    const rawReposition = state.brigade_reposition_orders as Record<string, { settlement_ids?: string[] }> | undefined;
+    const rawReposition = state.military.brigade_reposition_orders as Record<string, { settlement_ids?: string[] }> | undefined;
     if (rawReposition && typeof rawReposition === 'object' && !Array.isArray(rawReposition)) {
         for (const [brigadeId, order] of Object.entries(rawReposition).sort((a, b) => a[0].localeCompare(b[0]))) {
             const sids = order?.settlement_ids;
@@ -316,7 +316,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     // Extract recent control events for panel/event ticker.
-    const recentControlEvents = (((state.control_events as unknown[]) ?? [])
+    const recentControlEvents = (((state.military.control_events as unknown[]) ?? [])
         .map((entry) => {
             const rec = entry as Record<string, unknown>;
             const turnRaw = Number(rec.turn ?? NaN);
@@ -407,7 +407,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     const displacementByMun: LoadedGameState['displacementByMun'] = {};
-    const rawDisplacement = state.displacement_state as Record<string, Record<string, unknown>> | undefined;
+    const rawDisplacement = state.displacement.displacement_state as Record<string, Record<string, unknown>> | undefined;
     if (rawDisplacement && typeof rawDisplacement === 'object' && !Array.isArray(rawDisplacement)) {
         for (const [munId, row] of Object.entries(rawDisplacement).sort((a, b) => a[0].localeCompare(b[0]))) {
             const originalPopulation =

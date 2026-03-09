@@ -11,7 +11,7 @@ import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.
 import { updateMilitiaFatigue } from '../src/state/militia_fatigue.js';
 
 // Helper to create a minimal front segment
-function seg(edge_id: string, active: boolean): GameState['front_segments'][string] {
+function seg(edge_id: string, active: boolean): GameState['military']['front_segments'][string] {
     return {
         edge_id,
         active,

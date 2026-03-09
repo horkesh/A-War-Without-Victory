@@ -9,15 +9,18 @@ import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 import { runOneTurn } from '../src/state/turn_pipeline.js';
 
 const baseState: GameState = {
-    schema_version: CURRENT_SCHEMA_VERSION,
-    meta: { turn: 0, seed: 'initial-seed' },
-    factions: [],
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'initial-seed' },
+  factions: [],
+  military: {
     formations: {},
     front_segments: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
 };
 
 const EXPECTED_ORDER = [

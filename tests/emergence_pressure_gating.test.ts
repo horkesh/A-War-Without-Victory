@@ -13,8 +13,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function minimalPeaceState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'gating-i',
             phase: 'peace',
@@ -22,28 +22,33 @@ function minimalPeaceState(): GameState {
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 5 },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s1: 'RBiH', s2: 'RS' },
-        municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
-        war_consolidation_until: {},
-        war_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH', s2: 'RS' },
+    municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
+    war_consolidation_until: {}
+  } as any,
+        displacement: {} as any
     };
 }
 
 function minimalPhaseIIState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 20,
             seed: 'gating-ii',
             phase: 'war',
@@ -51,18 +56,23 @@ function minimalPhaseIIState(): GameState {
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { S1: 'RBiH', S2: 'RS' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RS' }
+  } as any,
+        displacement: {} as any
     };
 }
 

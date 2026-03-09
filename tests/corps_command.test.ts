@@ -43,24 +43,28 @@ function makeCorpsState(): GameState {
     brig2.corps_id = 'rs-corps-1';
 
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'corps-test', phase: 'war' } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'corps-test', phase: 'war' } as any,
+  factions: [
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  brigade_aor: { S1: 'rs-brig-1', S2: 'rs-brig-1', S3: 'rs-brig-2', S4: 'rs-brig-2' },
+  military: {
+    formations: {
             'rs-corps-1': makeCorps('rs-corps-1', 'RS'),
             'rs-brig-1': brig1,
             'rs-brig-2': brig2
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { S1: 'RS', S2: 'RS', S3: 'RS', S4: 'RS' },
-        brigade_aor: { S1: 'rs-brig-1', S2: 'rs-brig-1', S3: 'rs-brig-2', S4: 'rs-brig-2' }
-    } as GameState;
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { S1: 'RS', S2: 'RS', S3: 'RS', S4: 'RS' }
+  } as any,
+} as GameState;
 }
 
 describe('corps command - initializeCorpsCommand', () => {

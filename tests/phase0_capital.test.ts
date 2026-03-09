@@ -61,16 +61,21 @@ function minimalPhase0State(withoutPrewarCapital = false): GameState {
         factions[2].prewar_capital = 40;
     }
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'cap-test', phase: 'peace' },
-        factions,
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        municipalities: {}
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'cap-test', phase: 'peace' },
+  factions,
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    municipalities: {}
+  } as any,
+        displacement: {} as any
     };
 }
 

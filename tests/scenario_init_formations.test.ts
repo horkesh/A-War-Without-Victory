@@ -22,7 +22,7 @@ async function ensureRemoved(dir: string): Promise<void> {
     }
 }
 
-function formationIdsFromState(state: { formations?: Record<string, unknown> }): string[] {
+function formationIdsFromState(state: { military: { formations?: Record<string, unknown> } }): string[] {
     const formations = state.military.formations ?? {};
     return Object.keys(formations).sort((a, b) => a.localeCompare(b));
 }
@@ -45,7 +45,7 @@ test('init_formations: apr1992_4w has 3 formations and run is deterministic', as
     assert(existsSync(resultB.paths.final_save), 'run B final_save should exist');
 
     const initialContent = await readFile(resultA.paths.initial_save, 'utf8');
-    const initialState = JSON.parse(initialContent) as { formations?: Record<string, unknown> };
+    const initialState = JSON.parse(initialContent) as { military: { formations?: Record<string, unknown> } };
     const initialIds = formationIdsFromState(initialState);
     // hybrid_1992 init_control produces more formations than the old ethnic_1991 mode.
     // The key assertion is determinism (identical runs), not a specific count.

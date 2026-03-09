@@ -7,18 +7,23 @@ import type { SupplyStateDerivationReport } from '../src/state/supply_state_deri
 
 test('updateSarajevoState derives siege status from supply', () => {
     const state: GameState = {
-        schema_version: 1,
-        meta: { turn: 12, seed: 'sarajevo-test', phase: 'war' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 12, seed: 'sarajevo-test', phase: 'war' },
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { SARA: 'RBiH' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { SARA: 'RBiH' }
+  } as any,
+        displacement: {} as any
     };
 
     const graph: LoadedSettlementGraph = {

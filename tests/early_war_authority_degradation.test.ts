@@ -13,8 +13,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function stateWithDeclarations(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'authority-fixture',
             phase: 'war',
@@ -22,7 +22,7 @@ function stateWithDeclarations(): GameState {
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -48,15 +48,20 @@ function stateWithDeclarations(): GameState {
                 declaration_turn: 6
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s1: 'RBiH', s2: 'RS' },
-        municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
-        war_jna: { transition_begun: true, withdrawal_progress: 0.2, asset_transfer_rs: 0.15 }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_jna: { transition_begun: true, withdrawal_progress: 0.2, asset_transfer_rs: 0.15 }
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH', s2: 'RS' },
+    municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } }
+  } as any,
+        displacement: {} as any
     };
 }
 

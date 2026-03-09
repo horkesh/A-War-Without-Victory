@@ -14,8 +14,8 @@ import { validateGameStateShape } from '../src/state/validateGameState.js';
 /** Minimal valid GameState with Phase 0 fields (passes validateState and validateGameStateShape). */
 function phase0GameStateFixture(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 0,
             seed: 'phase0-fixture',
             phase: 'peace',
@@ -27,7 +27,7 @@ function phase0GameStateFixture(): GameState {
             game_over: false,
             outcome: undefined
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -65,17 +65,20 @@ function phase0GameStateFixture(): GameState {
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: [],
-        supply_rights: { corridors: [] },
-        municipalities: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: [],
+    supply_rights: { corridors: [] },
+    municipalities: {
             'MUN_001': {
                 stability_score: 65,
                 control_status: 'SECURE',
@@ -93,6 +96,8 @@ function phase0GameStateFixture(): GameState {
                 organizational_penetration: { police_loyalty: 'mixed', to_control: 'contested' }
             }
         }
+  } as any,
+        displacement: {} as any
     };
 }
 

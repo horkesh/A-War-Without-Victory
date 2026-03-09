@@ -13,21 +13,26 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function stateWithOpposingControl(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 's', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 's', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
+  factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {
             S1__S2: { edge_id: 'S1__S2', value: 10, max_abs: 10, last_updated_turn: 0 }
         },
-        militia_pools: {},
-        political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RBiH' }
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RBiH' }
+  } as any,
+        displacement: {} as any
     };
 }
 

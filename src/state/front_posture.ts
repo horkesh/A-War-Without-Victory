@@ -13,7 +13,7 @@ function clampWeight(value: unknown): number {
 /**
  * Deterministically normalize front posture assignments (state hygiene only).
  *
- * - Removes stale edge assignments not present in state.front_segments.
+ * - Removes stale edge assignments not present in state.military.front_segments.
  * - Keeps assignments for inactive segments but forces weight=0.
  * - Clamps weight to integer >= 0.
  * - Coerces invalid posture values to "hold".

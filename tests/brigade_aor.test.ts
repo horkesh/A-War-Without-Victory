@@ -53,26 +53,30 @@ function makeLinearScenario(): { state: GameState; edges: EdgeRecord[] } {
     for (let i = 9; i <= 12; i++) pc[`S${i}`] = 'HRHB';
 
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'aor-test', phase: 'war', rbih_hrhb_war_earliest_turn: 1 } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'aor-test', phase: 'war', rbih_hrhb_war_earliest_turn: 1 } as any,
+  factions: [
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
         ] as any,
-        formations: {
+  military: {
+    formations: {
             'rs-brig-1': makeFormation('rs-brig-1', 'RS', 'S2'),
             'rbih-brig-1': makeFormation('rbih-brig-1', 'RBiH', 'S6'),
             'hrhb-brig-1': makeFormation('hrhb-brig-1', 'HRHB', 'S10'),
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: pc,
-        war_alliance_rbih_hrhb: -0.5
-    } as GameState;
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: pc,
+    war_alliance_rbih_hrhb: -0.5
+  } as any,
+} as GameState;
 
     return { state, edges };
 }
@@ -114,20 +118,24 @@ describe('computeBrigadeDensity', () => {
             brigadeAor[sid] = formationId;
         }
         const state: GameState = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'aor-cap-test', phase: 'war' } as any,
-            factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'aor-cap-test', phase: 'war' } as any,
+  factions: [
                 { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             ] as any,
-            formations,
-            front_segments: {},
-            front_posture: {},
-            front_posture_regions: {},
-            front_pressure: {},
-            militia_pools: {},
-            political_controllers: pc,
-            brigade_aor: brigadeAor
-        } as GameState;
+  formations,
+  brigade_aor: brigadeAor,
+  military: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: pc
+  } as any,
+} as GameState;
 
         const density = computeBrigadeDensity(state, formationId);
         expect(density).toBeCloseTo(3000 / 4, 6);
@@ -143,20 +151,24 @@ describe('computeBrigadeDensity', () => {
         const brigadeAor: Record<string, string> = { S001: formationId };
         pc['S001'] = 'RBiH';
         const state: GameState = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'sarajevo-cap-test', phase: 'war' } as any,
-            factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'sarajevo-cap-test', phase: 'war' } as any,
+  factions: [
                 { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             ] as any,
-            formations: { [formationId]: formation },
-            front_segments: {},
-            front_posture: {},
-            front_posture_regions: {},
-            front_pressure: {},
-            militia_pools: {},
-            political_controllers: pc,
-            brigade_aor: brigadeAor
-        } as GameState;
+  brigade_aor: brigadeAor,
+  military: {
+    formations: { [formationId]: formation },
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: pc
+  } as any,
+} as GameState;
 
         expect(getSettlementGarrison(state, 'S001')).toBe(1200);
     });

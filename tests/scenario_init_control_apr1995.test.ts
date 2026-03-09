@@ -56,7 +56,7 @@ test('init_control apr1995: municipal anchors match apr1995 source snapshot', as
 
     assert(existsSync(result.paths.initial_save), 'initial_save.json should exist');
     const initialContent = await readFile(result.paths.initial_save, 'utf8');
-    const state = JSON.parse(initialContent) as { political_controllers?: Record<string, string | null> };
+    const state = JSON.parse(initialContent) as { political: { political_controllers?: Record<string, string | null> } };
     const pc = state.political.political_controllers ?? {};
     const expectedContent = await readFile(
         join(process.cwd(), 'data', 'source', 'municipalities_1990_initial_political_controllers_apr1995.json'),

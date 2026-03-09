@@ -10,9 +10,9 @@ import { updateNegotiationPressure } from '../src/state/negotiation_pressure.js'
 
 function createTestState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'test-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'test-seed' },
+  factions: [
             {
                 id: 'faction_a',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 10 },
@@ -28,13 +28,16 @@ function createTestState(): GameState {
                 negotiation: { pressure: 10, last_change_turn: 4, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 }
 
 test('negotiation pressure: increases by exhaustion delta', () => {

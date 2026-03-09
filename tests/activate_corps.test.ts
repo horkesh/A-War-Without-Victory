@@ -78,27 +78,31 @@ const SAMPLE_BRIGADES: OobBrigade[] = [
 /** Minimal GameState for Peace phase with bottom_up mode. */
 function makeBottomUpState(turn = 0): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn,
             seed: 'activate-corps-test',
             phase: 'war',
             recruitment_mode: 'bottom_up'
         },
-        factions: [
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {},
-        municipalities: {}
-    } as unknown as GameState;
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {},
+    municipalities: {}
+  } as any,
+} as unknown as GameState;
 }
 
 /** Minimal sidToMun map — no entries — so presence check is bypassed. */

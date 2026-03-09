@@ -12,24 +12,29 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function baseState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'victory-test', phase: 'war' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'victory-test', phase: 'war' },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 10 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 40 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 20 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {
             S1: 'RBiH',
             S2: 'RBiH',
             S3: 'RS'
         }
+  } as any,
+        displacement: {} as any
     };
 }
 

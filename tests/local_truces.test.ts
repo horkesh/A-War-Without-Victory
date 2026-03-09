@@ -29,17 +29,19 @@ import type { FactionId, GameState } from '../src/state/game_state.js';
 
 function makeState(turn: number, overrides: Partial<GameState> = {}): GameState {
     return {
-        schema_version: 1,
-        meta: { phase: 'war', turn, scenario_start_date: '1992-04-06' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        ...overrides,
-    } as unknown as GameState;
+  schema_version: 1,
+  meta: { phase: 'war', turn, scenario_start_date: '1992-04-06' },
+  factions: [],
+  ...overrides,
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+} as unknown as GameState;
 }
 
 function makeActiveState(turn: number = 10): GameState {

@@ -25,8 +25,8 @@ export function OrderQueue() {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
   const formationNamesById = new Map<string, string>();
-  if (loadedGameState?.military?.formations) {
-    for (const f of loadedGameState.military.formations) {
+  if (loadedGameState?.formations) {
+    for (const f of loadedGameState.formations) {
       formationNamesById.set(f.id, f.name);
     }
   }

@@ -115,18 +115,22 @@ function computeSmokeSummary(state: GameState, graph: Awaited<ReturnType<typeof 
     }
 
     return {
-        turn: state.meta.turn,
-        factions: state.factions.length,
-        settlements_controlled: settlementsControlled,
-        front_edges: frontEdges.length,
-        front_regions: frontRegions.regions.length,
-        supply_isolated: totalIsolated,
-        sustainability_collapsed: collapsedCount,
-        displacement_total: displacementTotal,
-        negotiation_pressure_total: negotiationPressureTotal,
-        exhaustion_total: exhaustionTotal,
-        end_state: state.political.end_state !== null && state.political.end_state !== undefined
-    };
+  turn: state.meta.turn,
+  factions: state.factions.length,
+  settlements_controlled: settlementsControlled,
+  front_regions: frontRegions.regions.length,
+  supply_isolated: totalIsolated,
+  sustainability_collapsed: collapsedCount,
+  displacement_total: displacementTotal,
+  negotiation_pressure_total: negotiationPressureTotal,
+  exhaustion_total: exhaustionTotal,
+  military: {
+    front_edges: frontEdges.length
+  } as any,
+  political: {
+    end_state: state.political.end_state !== null && state.political.end_state !== undefined
+  } as any,
+};
 }
 
 function printSummary(summary: SmokeSummary): void {

@@ -77,22 +77,26 @@ function makeState(
         }
     }
     return {
-        schema_version: 1,
-        meta: { turn: 10, seed: 'test', phase: 'war' } as any,
-        factions: [
+  schema_version: 1,
+  meta: { turn: 10, seed: 'test', phase: 'war' } as any,
+  factions: [
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations,
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: pc,
-        brigade_aor: aor,
-        brigade_attack_orders: orders
-    } as GameState & LegacyBrigadeAoRState;
+  formations,
+  brigade_aor: aor,
+  military: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    brigade_attack_orders: orders
+  } as any,
+  political: {
+    political_controllers: pc
+  } as any,
+} as GameState & LegacyBrigadeAoRState;
 }
 
 // --- Tests ---

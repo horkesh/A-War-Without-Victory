@@ -22,23 +22,27 @@ test('defaultArmyLabelForSide returns correct army labels', () => {
 
 test('migration canonicalizes faction IDs in factions array', () => {
     const rawState = {
-        schema_version: 1,
-        meta: { turn: 0, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'test' },
+  factions: [
             { id: 'ARBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'VRS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HVO', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: []
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: []
+  } as any,
+};
 
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
@@ -50,12 +54,13 @@ test('migration canonicalizes faction IDs in factions array', () => {
 
 test('migration canonicalizes formation faction IDs and preserves army labels as force_label', () => {
     const rawState = {
-        schema_version: 1,
-        meta: { turn: 0, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'test' },
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  military: {
+    formations: {
             'F1': {
                 id: 'F1',
                 faction: 'ARBiH',
@@ -65,15 +70,18 @@ test('migration canonicalizes formation faction IDs and preserves army labels as
                 assignment: null
             }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: []
-    };
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: []
+  } as any,
+};
 
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
@@ -84,12 +92,13 @@ test('migration canonicalizes formation faction IDs and preserves army labels as
 
 test('migration sets default force_label when faction is already political and force_label missing', () => {
     const rawState = {
-        schema_version: 1,
-        meta: { turn: 0, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'test' },
+  factions: [
             { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  military: {
+    formations: {
             'F1': {
                 id: 'F1',
                 faction: 'RS',
@@ -99,15 +108,18 @@ test('migration sets default force_label when faction is already political and f
                 assignment: null
             }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: []
-    };
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: []
+  } as any,
+};
 
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
@@ -118,17 +130,18 @@ test('migration sets default force_label when faction is already political and f
 
 test('migration canonicalizes militia pool faction IDs', () => {
     const rawState = {
-        schema_version: 1,
-        meta: { turn: 0, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'test' },
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN1': {
                 mun_id: 'MUN1',
                 faction: 'ARBiH',
@@ -137,11 +150,14 @@ test('migration canonicalizes militia pool faction IDs', () => {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: []
-    };
+        }
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: []
+  } as any,
+};
 
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
@@ -151,23 +167,27 @@ test('migration canonicalizes militia pool faction IDs', () => {
 
 test('migration canonicalizes negotiation ledger faction_id', () => {
     const rawState = {
-        schema_version: 1,
-        meta: { turn: 0, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'test' },
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: [
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: [
             { id: 'NLED_0_ARBiH_gain_0', turn: 0, faction_id: 'ARBiH', kind: 'gain', amount: 10, reason: 'test' }
         ]
-    };
+  } as any,
+};
 
     const serialized = JSON.stringify(rawState);
     const migrated = deserializeState(serialized);
@@ -179,21 +199,25 @@ test('validation rejects ARBiH/VRS/HVO as faction IDs (before migration)', () =>
     // This test checks that validation rejects army labels as faction IDs
     // Note: In practice, migration happens before validation, so this tests the validator directly
     const invalidState = {
-        schema_version: 1,
-        meta: { turn: 0, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'test' },
+  factions: [
             { id: 'ARBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: []
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: []
+  } as any,
+};
 
     const issues = validateState(invalidState as any);
     const errors = issues.filter((i) => i.severity === 'error');
@@ -203,23 +227,27 @@ test('validation rejects ARBiH/VRS/HVO as faction IDs (before migration)', () =>
 
 test('validation accepts only POLITICAL_SIDES as faction IDs', () => {
     const validState = {
-        schema_version: 1,
-        meta: { turn: 0, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'test' },
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: []
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: []
+  } as any,
+};
 
     const issues = validateState(validState as any);
     const errors = issues.filter((i) => i.severity === 'error');

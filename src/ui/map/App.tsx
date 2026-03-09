@@ -127,13 +127,13 @@ function App() {
 
   // Phase C4: Attack confirmation modal payload and render
   const attackerFormation = pendingAttackConfirmation && loadedGameState
-    ? loadedGameState.military.formations.find((f) => f.id === pendingAttackConfirmation.attackerFormationId)
+    ? loadedGameState.formations.find((f) => f.id === pendingAttackConfirmation.attackerFormationId)
     : null;
   const targetDisplayName = pendingAttackConfirmation
     ? getOsidDisplayName(pendingAttackConfirmation.targetOsid, osidDisplayNames)
     : '';
   const defendersAtTarget = pendingAttackConfirmation && loadedGameState
-    ? getFormationsAtOsid(loadedGameState.military.formations, pendingAttackConfirmation.targetOsid).sort((a, b) => a.id.localeCompare(b.id))
+    ? getFormationsAtOsid(loadedGameState.formations, pendingAttackConfirmation.targetOsid).sort((a, b) => a.id.localeCompare(b.id))
     : [];
   const defenderFormation = defendersAtTarget[0] ?? null;
   const terrainSummary = pendingAttackConfirmation && osidPropertiesMap?.[pendingAttackConfirmation.targetOsid]

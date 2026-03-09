@@ -660,9 +660,9 @@ type ScenarioBuildContext = {
 
 function createBaseState(seedName: string): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: seedName },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: seedName },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -678,13 +678,18 @@ function createBaseState(seedName: string): GameState {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        displacement_state: {}
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  displacement: {
+    displacement_state: {}
+  } as any,
+        political: {} as any
     };
 }
 

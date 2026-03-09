@@ -10,19 +10,22 @@ test('accumulateExhaustion increments deterministically from supplied vs unsuppl
     // A supplied => total_work=6 => floor(6/10)=0
     // B unsupplied => total_work=2*6=12 => floor(12/10)=1
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 'seed' },
+  factions: [
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s1'], supply_sources: [] },
             { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s2'], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: { s1__s2: { edge_id: 's1__s2', active: true, created_turn: 1, since_turn: 1, last_active_turn: 1, active_streak: 1, max_active_streak: 1, friction: 0, max_friction: 0 } },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: { s1__s2: { edge_id: 's1__s2', active: true, created_turn: 1, since_turn: 1, last_active_turn: 1, active_streak: 1, max_active_streak: 1, friction: 0, max_friction: 0 } },
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const derivedFrontEdges: FrontEdge[] = [{ edge_id: 's1__s2', a: 's1', b: 's2', side_a: 'A', side_b: 'B' }];
     const pressureDeltasByEdge = new Map<string, number>([['s1__s2', 6]]);

@@ -64,16 +64,19 @@ function runStaticGuard(): { forbidden: boolean; filesChecked: string[]; forbidd
 async function main(): Promise<void> {
     const graph = await loadSettlementGraph();
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'phaseF2-audit' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'phaseF2-audit' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     await prepareNewGameState(state, graph);
 

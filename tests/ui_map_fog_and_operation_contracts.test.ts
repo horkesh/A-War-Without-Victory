@@ -6,18 +6,14 @@ import { buildFogOfWarGeoJSON } from '../src/ui/map/map/builders/buildFogOfWarGe
 
 test('parseGameState derives fog-of-war visibility from sector_intel', () => {
     const parsed = parseGameState({
-        meta: { turn: 12, phase: 'war', player_faction: 'RS' },
-        formations: {
+  meta: { turn: 12, phase: 'war', player_faction: 'RS' },
+  military: {
+    formations: {
             rs_corps: { id: 'rs_corps', faction: 'RS', name: 'RS Corps', kind: 'corps', tags: [] },
             rs_b1: { id: 'rs_b1', faction: 'RS', corps_id: 'rs_corps', name: 'RS Brigade', kind: 'brigade', location_osid: 'op:rs:front', tags: [] },
             rbih_b1: { id: 'rbih_b1', faction: 'RBiH', corps_id: 'rbih_corps', name: 'RBiH Brigade', kind: 'brigade', location_osid: 'op:rbih:deep', tags: [] },
         },
-        political_controllers: {
-            'op:rs:front': 'RS',
-            'op:rbih:frontline': 'RBiH',
-            'op:rbih:deep': 'RBiH',
-        },
-        corps_front_sectors: {
+    corps_front_sectors: {
             rs_sector: {
                 sector_id: 'rs_sector',
                 corps_id: 'rs_corps',
@@ -45,7 +41,7 @@ test('parseGameState derives fog-of-war visibility from sector_intel', () => {
                 defensive_power: 1,
             }
         },
-        sector_intel: {
+    sector_intel: {
             rs_sector: [
                 {
                     enemy_sector_id: 'rbih_sector',
@@ -62,7 +58,15 @@ test('parseGameState derives fog-of-war visibility from sector_intel', () => {
                 }
             ]
         }
-    });
+  } as any,
+  political: {
+    political_controllers: {
+            'op:rs:front': 'RS',
+            'op:rbih:frontline': 'RBiH',
+            'op:rbih:deep': 'RBiH',
+        }
+  } as any,
+});
 
     assert.ok(parsed.fogOfWar);
     assert.deepEqual(parsed.fogOfWar?.visibleEnemyOsids, ['op:rbih:deep', 'op:rbih:frontline']);

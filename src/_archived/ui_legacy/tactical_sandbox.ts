@@ -2878,7 +2878,7 @@ async function main(signal: AbortSignal): Promise<void> {
                     Object.assign(sandboxState.sliceData.formations[fid]!, f);
                 }
             }
-            const gsControllers = (gs as any).political_controllers ?? {};
+            const gsControllers = (gs as any).political.political_controllers ?? {};
             for (const [sid, faction] of Object.entries(gsControllers)) {
                 sandboxState.sliceData.political_controllers[sid] = faction as string | null;
             }
@@ -2912,7 +2912,7 @@ async function main(signal: AbortSignal): Promise<void> {
                         const currentCtrl = sandboxState.sliceData.political_controllers[sid];
                         if (!currentCtrl || currentCtrl === null) {
                             sandboxState.sliceData.political_controllers[sid] = sf.faction;
-                            (gs as any).political_controllers[sid] = sf.faction;
+                            (gs as any).political.political_controllers[sid] = sf.faction;
                         }
                     }
                 }
@@ -2985,7 +2985,7 @@ async function main(signal: AbortSignal): Promise<void> {
                 sandboxState.turnReports = data.turnReports ?? [];
 
                 if (sandboxState.sliceData) {
-                    Object.assign(sandboxState.sliceData.political_controllers, data.sliceData.political_controllers ?? {});
+                    Object.assign(sandboxState.sliceData.political_controllers, data.sliceData.political.political_controllers ?? {});
                     Object.assign(sandboxState.sliceData.formations, data.sliceData.formations ?? {});
                     Object.assign(sandboxState.sliceData.brigade_aor, data.sliceData.brigade_aor ?? {});
                 }
@@ -3081,8 +3081,8 @@ async function main(signal: AbortSignal): Promise<void> {
                             sliceFormation.posture = newPosture;
                             // Queue posture order in game state
                             const gs = sandboxState.gameState as any;
-                            if (!gs.brigade_posture_orders) gs.brigade_posture_orders = [];
-                            gs.brigade_posture_orders.push({ brigade_id: sliceFormation.id, posture: newPosture });
+                            if (!gs.military.brigade_posture_orders) gs.military.brigade_posture_orders = [];
+                            gs.military.brigade_posture_orders.push({ brigade_id: sliceFormation.id, posture: newPosture });
                             showFadingMessage(`${sliceFormation.name}: posture -> ${newPosture.toUpperCase()}`, 1500);
                         }
                     },

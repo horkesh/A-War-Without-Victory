@@ -371,14 +371,14 @@ export function MapContainer() {
             // Corps-colored fronts when sector data is available; else faction borders
             let frontLinesGeoJson;
             if (state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
-              const rbihHrhbAllied = state.political.war_alliance_rbih_hrhb != null
-                ? state.political.war_alliance_rbih_hrhb > 0.2 : undefined;
+              const rbihHrhbAllied = state.war_alliance_rbih_hrhb != null
+                ? state.war_alliance_rbih_hrhb > 0.2 : undefined;
               frontLinesGeoJson = buildCorpsFrontLinesGeoJSON(
                 controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
                 osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined,
                 state.frontPressureByEdge,
                 state.frontEdgesOsid,
-                Object.fromEntries(state.military.formations.map((formation) => [formation.id, { entrenchment_turns: formation.entrenchment_turns }]))
+                Object.fromEntries(state.formations.map((formation) => [formation.id, { entrenchment_turns: formation.entrenchment_turns }]))
               );
               // Corps colors on glow layers only; front-line-base/stripe stay black-white stripe.
               try {
@@ -389,7 +389,7 @@ export function MapContainer() {
                 console.warn('[MapContainer] Failed to set corps glow colors:', e);
               }
             } else {
-              frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson, state.political.war_alliance_rbih_hrhb);
+              frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson, state.war_alliance_rbih_hrhb);
             }
             (m2.getSource('front-lines') as GeoJSONSource)?.setData(frontLinesGeoJson);
 
@@ -1082,7 +1082,7 @@ export function MapContainer() {
       }
 
       // Find formation's faction, highlight all same-faction OSIDs
-      const formation = loadedGameState.military.formations.find((f) => f.id === selectedFormationId);
+      const formation = loadedGameState.formations.find((f) => f.id === selectedFormationId);
       if (!formation) return true;
 
       const faction = formation.faction;
@@ -1429,7 +1429,7 @@ export function MapContainer() {
 
     let targetOsid: string | null = null;
     if (selectedFormationId && loadedGameState) {
-      const formation = loadedGameState.military.formations.find((f) => f.id === selectedFormationId);
+      const formation = loadedGameState.formations.find((f) => f.id === selectedFormationId);
       if (formation) {
         targetOsid = resolveFormationLocationOsid(formation, lookup) ?? null;
       }

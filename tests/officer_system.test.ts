@@ -64,12 +64,16 @@ function makeOfficerState(overrides: Partial<NamedOfficerState> & { officer_id: 
 
 function makeMinimalState(overrides?: Partial<GameState>): GameState {
     return {
-        meta: { turn: 0, phase: 'war', scenario_id: 'test' },
-        factions: {},
-        settlements: {},
-        formations: {},
-        ...overrides,
-    } as unknown as GameState;
+  meta: { turn: 0, phase: 'war', scenario_id: 'test' },
+  factions: {},
+  ...overrides,
+  military: {
+    formations: {}
+  } as any,
+  political: {
+    settlements: {}
+  } as any,
+} as unknown as GameState;
 }
 
 function makeFormation(overrides: Partial<FormationState> & { id: string; faction: FactionId }): FormationState {
@@ -190,11 +194,13 @@ describe('getCorpsCommander', () => {
     it('returns the officer assigned to the corps', () => {
         const data = makeOfficer({ id: 'o1', faction: 'RS' });
         const state = makeMinimalState({
-            named_officer_data: [data],
-            named_officers: {
+  military: {
+    named_officer_data: [data],
+    named_officers: {
                 o1: makeOfficerState({ officer_id: 'o1', assigned_corps_id: 'vrs_1kk' }),
-            },
-        });
+            }
+  } as any,
+});
         const result = getCorpsCommander('vrs_1kk', state);
         assert.ok(result);
         assert.equal(result.data.id, 'o1');
@@ -203,11 +209,13 @@ describe('getCorpsCommander', () => {
     it('returns null when no officer is assigned', () => {
         const data = makeOfficer({ id: 'o1', faction: 'RS' });
         const state = makeMinimalState({
-            named_officer_data: [data],
-            named_officers: {
+  military: {
+    named_officer_data: [data],
+    named_officers: {
                 o1: makeOfficerState({ officer_id: 'o1', assigned_corps_id: 'vrs_srk' }),
-            },
-        });
+            }
+  } as any,
+});
         assert.equal(getCorpsCommander('vrs_1kk', state), null);
     });
 
@@ -221,11 +229,13 @@ describe('getArmyCommander', () => {
     it('finds the army commander for a faction', () => {
         const data = makeOfficer({ id: 'mladic', faction: 'RS', rank: 'army_commander' });
         const state = makeMinimalState({
-            named_officer_data: [data],
-            named_officers: {
+  military: {
+    named_officer_data: [data],
+    named_officers: {
                 mladic: makeOfficerState({ officer_id: 'mladic', assigned_corps_id: 'vrs_ghq' }),
-            },
-        });
+            }
+  } as any,
+});
         const result = getArmyCommander('RS', state);
         assert.ok(result);
         assert.equal(result.data.id, 'mladic');
@@ -234,11 +244,13 @@ describe('getArmyCommander', () => {
     it('returns null for faction without army commander', () => {
         const data = makeOfficer({ id: 'o1', faction: 'RS', rank: 'corps_commander' });
         const state = makeMinimalState({
-            named_officer_data: [data],
-            named_officers: {
+  military: {
+    named_officer_data: [data],
+    named_officers: {
                 o1: makeOfficerState({ officer_id: 'o1', assigned_corps_id: 'vrs_1kk' }),
-            },
-        });
+            }
+  } as any,
+});
         assert.equal(getArmyCommander('RS', state), null);
     });
 });
@@ -251,11 +263,13 @@ describe('getOfficerCombatMod', () => {
     it('returns brigadeOfficerMod × corpsMod when commander present', () => {
         const data = makeOfficer({ id: 'cmd', faction: 'RS', competence: 4, aggressiveness: 3 });
         const state = makeMinimalState({
-            named_officer_data: [data],
-            named_officers: {
+  military: {
+    named_officer_data: [data],
+    named_officers: {
                 cmd: makeOfficerState({ officer_id: 'cmd', assigned_corps_id: 'vrs_1kk' }),
-            },
-        });
+            }
+  } as any,
+});
         const formation = makeFormation({ id: 'bde1', faction: 'RS', corps_id: 'vrs_1kk', officer_quality: 0.50 });
         const mod = getOfficerCombatMod(formation, state, 'attack');
         const brigMod = 1.0 + (0.50 - 0.30) * 0.4; // 1.08
@@ -266,11 +280,13 @@ describe('getOfficerCombatMod', () => {
     it('returns brigadeOfficerMod only when no commander for corps', () => {
         const data = makeOfficer({ id: 'cmd', faction: 'RS' });
         const state = makeMinimalState({
-            named_officer_data: [data],
-            named_officers: {
+  military: {
+    named_officer_data: [data],
+    named_officers: {
                 cmd: makeOfficerState({ officer_id: 'cmd', assigned_corps_id: 'vrs_srk' }),
-            },
-        });
+            }
+  } as any,
+});
         const formation = makeFormation({ id: 'bde1', faction: 'RS', corps_id: 'vrs_1kk', officer_quality: 0.50 });
         const mod = getOfficerCombatMod(formation, state, 'attack');
         const expected = 1.0 + (0.50 - 0.30) * 0.4;
@@ -279,9 +295,11 @@ describe('getOfficerCombatMod', () => {
 
     it('returns brigadeOfficerMod when formation has no corps_id', () => {
         const state = makeMinimalState({
-            named_officer_data: [],
-            named_officers: {},
-        });
+  military: {
+    named_officer_data: [],
+    named_officers: {}
+  } as any,
+});
         const formation = makeFormation({ id: 'bde1', faction: 'RS', officer_quality: 0.50 });
         const mod = getOfficerCombatMod(formation, state, 'defend');
         const expected = 1.0 + (0.50 - 0.30) * 0.4;
@@ -297,11 +315,13 @@ describe('getThreeTierOfficerMod', () => {
     it('uses named officers path when named_officers present', () => {
         const data = makeOfficer({ id: 'cmd', faction: 'RS', competence: 4, aggressiveness: 3, defensive_skill: 4 });
         const state = makeMinimalState({
-            named_officer_data: [data],
-            named_officers: {
+  military: {
+    named_officer_data: [data],
+    named_officers: {
                 cmd: makeOfficerState({ officer_id: 'cmd', assigned_corps_id: 'vrs_1kk' }),
-            },
-        });
+            }
+  } as any,
+});
         const formation = makeFormation({ id: 'bde1', faction: 'RS', corps_id: 'vrs_1kk', officer_quality: 0.50 });
 
         const atkMod = getThreeTierOfficerMod(formation, state, 'attack');

@@ -36,11 +36,13 @@ function makeEliteFormation(overrides: Partial<FormationState> = {}): FormationS
 
 function makeState(formations: Record<string, FormationState>, turn = 10): GameState {
     return {
-        meta: { turn, phase: 'war', start_year: 1992, recruitment_mode: 'player_choice' },
-        formations,
-        factions: [],
-        political_controllers: {},
-    } as unknown as GameState;
+  meta: { turn, phase: 'war', start_year: 1992, recruitment_mode: 'player_choice' },
+  formations,
+  factions: [],
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 }
 
 describe('elite loan constants', () => {

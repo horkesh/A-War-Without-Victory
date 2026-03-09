@@ -33,8 +33,8 @@ import type { FormationState, GameState } from '../src/state/game_state.js';
 
 function makeState(formations: Record<string, FormationState>): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'promote-test',
             phase: 'war',
@@ -43,19 +43,23 @@ function makeState(formations: Record<string, FormationState>): GameState {
             war_start_turn: 3,
             recruitment_mode: 'bottom_up'
         },
-        factions: [
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations,
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {}
-    };
+  formations,
+  military: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+};
 }
 
 /** Create a minimal eligible militia formation. created_turn=4 → 6 turns active at turn 10. */

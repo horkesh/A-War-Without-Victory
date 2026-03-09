@@ -8,19 +8,22 @@ import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 
 test('computeControlFlipProposals proposes flipping only the losing-side endpoint', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['x'], supply_sources: [] },
             { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['y'], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const derived: FrontEdge[] = [{ edge_id: 'x__y', a: 'x', b: 'y', side_a: 'A', side_b: 'B' }];
 
@@ -48,21 +51,24 @@ test('computeControlFlipProposals proposes flipping only the losing-side endpoin
 
 test('computeControlFlipProposals selects a single 1-hop capture deterministically by score then sid', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             // favored controls b
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['b'], supply_sources: [] },
             // losing controls a and n1
             { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['a', 'n1'], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const derived: FrontEdge[] = [{ edge_id: 'a__b', a: 'a', b: 'b', side_a: 'A', side_b: 'B' }];
     const breaches: FrontBreach[] = [
@@ -93,19 +99,22 @@ test('computeControlFlipProposals selects a single 1-hop capture deterministical
 
 test('applyControlFlipProposals removes sid from all AoRs before adding to favored', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['y'], supply_sources: [] },
             { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['y'], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const file = {
         schema: 1 as const,

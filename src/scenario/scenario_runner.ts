@@ -192,16 +192,19 @@ export async function createInitialGameState(
             })
             : await loadSettlementGraph());
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed, phase: 'war' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed, phase: 'war' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
     const CANONICAL_IDS = ['RBiH', 'RS', 'HRHB'] as const;
     state.factions = CANONICAL_IDS.map((id) => {
         let supply_sources: string[] = [];

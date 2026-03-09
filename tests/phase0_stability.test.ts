@@ -26,20 +26,25 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function minimalStateWithMunicipalities(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'stab-test', phase: 'peace' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        municipalities: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'stab-test', phase: 'peace' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    municipalities: {
             M1: {},
             M2: { organizational_penetration: { police_loyalty: 'loyal', to_control: 'controlled' } },
             M3: { organizational_penetration: { police_loyalty: 'hostile', sds_penetration: 60 } }
         }
+  } as any,
+        displacement: {} as any
     };
 }
 

@@ -34,8 +34,8 @@ function minimalFixture(overrides?: {
     }
 
     const state: any = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'morale-test',
             phase: 'war',
@@ -47,7 +47,7 @@ function minimalFixture(overrides?: {
             game_over: false,
             outcome: undefined
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 5 },
@@ -61,13 +61,15 @@ function minimalFixture(overrides?: {
                 declaration_turn: null
             }
         ],
-        formations: { test_bde_1: formation },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: { test_bde_1: formation },
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+};
 
     if (overrides?.events !== undefined) {
         state.displacement.displacement_event_log = overrides.events;

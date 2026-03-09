@@ -31,16 +31,20 @@ function makeState(formations: Record<string, Partial<FormationState>>, override
         } as FormationState;
     }
     return {
-        meta: { turn: 10, phase: 'war', start_year: 1992, recruitment_mode: 'player_choice' },
-        formations: fullFormations,
-        factions: [
+  meta: { turn: 10, phase: 'war', start_year: 1992, recruitment_mode: 'player_choice' },
+  factions: [
             { id: 'RBiH', pool_scale: 0.18 },
             { id: 'RS', pool_scale: 0.25 },
             { id: 'HRHB', pool_scale: 2.1 },
         ],
-        political_controllers: {},
-        ...overrides,
-    } as unknown as GameState;
+  ...overrides,
+  military: {
+    formations: fullFormations
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 }
 
 describe('emergent growth — no hardcoded ceilings', () => {
@@ -150,11 +154,13 @@ describe('lifecycle events', () => {
         const state = makeState({
             hvo_derventa: { faction: 'HRHB', personnel: 1200 },
         }, {
-            political_controllers: {
+  political: {
+    political_controllers: {
                 'op:derventa:derventa_2': 'RS', // Derventa lost to RS
                 'op:derventa:derventa_3': 'RS',
-            },
-        });
+            }
+  } as any,
+});
 
         const events: LifecycleEventDef[] = [{
             type: 'disband',
@@ -175,11 +181,13 @@ describe('lifecycle events', () => {
         const state = makeState({
             hvo_derventa: { faction: 'HRHB', personnel: 1200 },
         }, {
-            political_controllers: {
+  political: {
+    political_controllers: {
                 'op:derventa:derventa_2': 'HRHB', // Still controlled
                 'op:derventa:derventa_3': 'RS',
-            },
-        });
+            }
+  } as any,
+});
 
         const events: LifecycleEventDef[] = [{
             type: 'disband',
@@ -240,8 +248,10 @@ describe('lifecycle events', () => {
         const state = makeState({
             hvo_derventa: { faction: 'HRHB', personnel: 0, status: 'inactive', lifecycle_status: 'destroyed' },
         }, {
-            political_controllers: {},
-        });
+  political: {
+    political_controllers: {}
+  } as any,
+});
 
         const events: LifecycleEventDef[] = [{
             type: 'disband',

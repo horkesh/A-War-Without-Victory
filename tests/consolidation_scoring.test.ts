@@ -16,17 +16,21 @@ import type { GameState } from '../src/state/game_state.js';
 
 function makeState(pc: Record<string, string>): GameState {
     return {
-        schema_version: 1,
-        meta: { turn: 5, seed: 'cons-test', phase: 'war' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: pc
-    } as GameState;
+  schema_version: 1,
+  meta: { turn: 5, seed: 'cons-test', phase: 'war' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: pc
+  } as any,
+} as GameState;
 }
 
 test('isConnectedStrongholdSid returns true for Sapna S163520', () => {

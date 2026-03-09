@@ -92,7 +92,7 @@ export function processDeploymentStates(
                     logs.push(`${fid}: deployed (War phase location_osid-only)`);
                     continue;
                 }
-                const pc = (state as any).political_controllers as Record<string, string | null> ?? {};
+                const pc = (state as any).political.political_controllers as Record<string, string | null> ?? {};
                 const formations = (state as any).formations as Record<string, { faction?: string; hq_sid?: string; personnel?: number }> ?? {};
                 const formation = formations[fid];
                 const faction = formation?.faction;
@@ -194,13 +194,13 @@ export function advanceSandboxTurn(
     const turnNumber = (state.meta?.turn ?? 0) + 1;
 
     // Ensure casualty ledger exists
-    if (!state.casualty_ledger) {
+    if (!state.military.casualty_ledger) {
         // Extract faction IDs from formations
         const factionIds = new Set<string>();
-        for (const f of Object.values(state.formations ?? {})) {
+        for (const f of Object.values(state.military.formations ?? {})) {
             if (f && f.faction) factionIds.add(f.faction);
         }
-        state.casualty_ledger = initializeCasualtyLedger([...factionIds].sort(strictCompare));
+        state.military.casualty_ledger = initializeCasualtyLedger([...factionIds].sort(strictCompare));
     }
 
     // 0. Process deployment states (sandbox-only mechanic, before movement)
@@ -211,27 +211,27 @@ export function advanceSandboxTurn(
 
     // 1. Apply posture orders
     let postureApplied = false;
-    if (state.brigade_posture_orders && state.brigade_posture_orders.length > 0) {
+    if (state.military.brigade_posture_orders && state.military.brigade_posture_orders.length > 0) {
         applyPostureOrders(state);
         postureApplied = true;
     }
 
     // 2. Process brigade movement
     let movementProcessed = false;
-    if (state.brigade_movement_orders && Object.keys(state.brigade_movement_orders).length > 0) {
+    if (state.military.brigade_movement_orders && Object.keys(state.military.brigade_movement_orders).length > 0) {
         processBrigadeMovement(state, edges);
         movementProcessed = true;
     }
 
     // 2b. Apply brigade reposition orders
     let repositionApplied = false;
-    if (state.brigade_reposition_orders && Object.keys(state.brigade_reposition_orders).length > 0) {
+    if (state.military.brigade_reposition_orders && Object.keys(state.military.brigade_reposition_orders).length > 0) {
         applyBrigadeRepositionOrders(state, edges);
         repositionApplied = true;
     }
 
     // 3. Equipment degradation (simplified: fixed maintenance=0.5)
-    const formations = state.formations ?? {};
+    const formations = state.military.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid as FormationId];
         if (!f) continue;

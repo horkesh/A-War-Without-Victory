@@ -11,8 +11,8 @@ import { runPhase0TurnAndAdvance } from '../src/ui/warroom/run_phase0_turn.js';
 
 function makePhase0State(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 0,
             seed: 'phase0-iv1-seed',
             phase: 'peace',
@@ -21,7 +21,7 @@ function makePhase0State(): GameState {
             war_start_turn: 0,
             player_faction: 'RBiH',
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -59,24 +59,29 @@ function makePhase0State(): GameState {
                 prewar_capital: 40,
             },
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        municipalities: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: {},
+    formation_spawn_directive: { kind: 'both' }
+  } as any,
+  political: {
+    municipalities: {
             TEST_MUN: {
                 stability_score: 50,
                 control: 'contested',
                 organizational_penetration: {},
             },
         },
-        political_controllers: {
+    political_controllers: {
             SID_TEST_1: 'RBiH',
-        },
-        war_militia_strength: {},
-        formation_spawn_directive: { kind: 'both' },
+        }
+  } as any,
+        displacement: {} as any
     };
 }
 

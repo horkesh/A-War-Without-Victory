@@ -17,8 +17,8 @@ import { prepareNewGameState } from '../src/state/initialize_new_game_state.js';
 
 function makeBaseState(seed: string): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 0,
             seed,
             phase: 'war',
@@ -26,7 +26,7 @@ function makeBaseState(seed: string): GameState {
             referendum_turn: 0,
             war_start_turn: 0
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -52,13 +52,16 @@ function makeBaseState(seed: string): GameState {
                 declaration_turn: 0
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 }
 
 function assertAllControllersAssigned(pc: Record<string, string | null>): void {

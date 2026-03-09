@@ -59,9 +59,9 @@ function createTestSettlements(munId: string, count: number = 2): Map<string, Se
  */
 function createProlongedSiegeState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'prolonged-siege-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'prolonged-siege-seed' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -70,12 +70,13 @@ function createProlongedSiegeState(): GameState {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -84,8 +85,10 @@ function createProlongedSiegeState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -95,6 +98,8 @@ function createProlongedSiegeState(): GameState {
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 }
 
@@ -108,9 +113,9 @@ function createProlongedSiegeState(): GameState {
  */
 function createTemporaryEncirclementState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'temporary-encirclement-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'temporary-encirclement-seed' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -126,12 +131,13 @@ function createTemporaryEncirclementState(): GameState {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -140,8 +146,10 @@ function createTemporaryEncirclementState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -151,6 +159,8 @@ function createTemporaryEncirclementState(): GameState {
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 }
 
@@ -164,9 +174,9 @@ function createTemporaryEncirclementState(): GameState {
  */
 function createCorridorLifelineState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'corridor-lifeline-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'corridor-lifeline-seed' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -175,12 +185,13 @@ function createCorridorLifelineState(): GameState {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -189,8 +200,10 @@ function createCorridorLifelineState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -200,6 +213,8 @@ function createCorridorLifelineState(): GameState {
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 }
 
@@ -212,9 +227,9 @@ function createCorridorLifelineState(): GameState {
  */
 function createMultiPocketStressState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'multi-pocket-stress-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'multi-pocket-stress-seed' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -237,12 +252,13 @@ function createMultiPocketStressState(): GameState {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -267,8 +283,10 @@ function createMultiPocketStressState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -294,6 +312,8 @@ function createMultiPocketStressState(): GameState {
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 }
 
@@ -306,9 +326,9 @@ function createMultiPocketStressState(): GameState {
  */
 function createAsymmetricCollapseState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'asymmetric-collapse-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'asymmetric-collapse-seed' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -324,12 +344,13 @@ function createAsymmetricCollapseState(): GameState {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -346,8 +367,10 @@ function createAsymmetricCollapseState(): GameState {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -365,6 +388,8 @@ function createAsymmetricCollapseState(): GameState {
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 }
 

@@ -55,10 +55,10 @@ describe('operational_data', () => {
 
     it('backfillFormationLocationOsid sets location_osid from hq_sid', () => {
         const state = {
-            formations: {
+            military: { formations: {
                 f1: { hq_sid: 'S100013', location_osid: undefined as string | undefined },
                 f2: { hq_sid: 'S100030', location_osid: undefined as string | undefined }
-            }
+            } }
         };
         backfillFormationLocationOsid(state, sampleMap);
         expect(state.military.formations.f1.location_osid).toBe('op:banovici:banovici_2');
@@ -67,9 +67,9 @@ describe('operational_data', () => {
 
     it('backfillFormationLocationOsid skips formations that already have location_osid', () => {
         const state = {
-            formations: {
+            military: { formations: {
                 f1: { hq_sid: 'S100013', location_osid: 'op:existing' }
-            }
+            } }
         };
         backfillFormationLocationOsid(state, sampleMap);
         expect(state.military.formations.f1.location_osid).toBe('op:existing');
@@ -94,41 +94,49 @@ describe('getPoliticalControllerOSID', () => {
 
     it('returns controller when state has OSID key (operational graph)', () => {
         const state = {
-            political_controllers: {
+  factions: [],
+  political: {
+    political_controllers: {
                 'op:test:cluster1': 'RS',
                 'op:test:cluster2': 'RBiH'
-            },
-            factions: []
-        } as unknown as GameState;
+            }
+  } as any,
+} as unknown as GameState;
         expect(getPoliticalControllerOSID(state, 'op:test:cluster1', reverseMap)).toBe('RS');
         expect(getPoliticalControllerOSID(state, 'op:test:cluster2', reverseMap)).toBe('RBiH');
     });
 
     it('derives majority from canonical SIDs when OSID not in state', () => {
         const state = {
-            political_controllers: {
+  factions: [],
+  political: {
+    political_controllers: {
                 S1: 'RS',
                 S2: 'RS',
                 S3: 'RBiH'
-            },
-            factions: []
-        } as unknown as GameState;
+            }
+  } as any,
+} as unknown as GameState;
         expect(getPoliticalControllerOSID(state, 'op:test:cluster1', reverseMap)).toBe('RS');
     });
 
     it('returns null when no controller in derived SIDs', () => {
         const state = {
-            political_controllers: {},
-            factions: []
-        } as unknown as GameState;
+  factions: [],
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
         expect(getPoliticalControllerOSID(state, 'op:test:cluster1', reverseMap)).toBe(null);
     });
 
     it('is deterministic: same state and OSID always same result', () => {
         const state = {
-            political_controllers: { S1: 'HRHB', S2: 'HRHB', S3: 'RBiH' },
-            factions: []
-        } as unknown as GameState;
+  factions: [],
+  political: {
+    political_controllers: { S1: 'HRHB', S2: 'HRHB', S3: 'RBiH' }
+  } as any,
+} as unknown as GameState;
         const a = getPoliticalControllerOSID(state, 'op:test:cluster1', reverseMap);
         const b = getPoliticalControllerOSID(state, 'op:test:cluster1', reverseMap);
         expect(a).toBe(b);

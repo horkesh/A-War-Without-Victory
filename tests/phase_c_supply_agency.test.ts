@@ -32,29 +32,33 @@ function makeFaction(id: FactionState['id']): FactionState {
 
 function makeState(overrides: Partial<GameState> = {}): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 64,
             seed: 'phase-c-test',
             phase: 'war',
             supply_reserves_enabled: true,
             player_faction: 'RS',
         } as GameState['meta'],
-        factions: [makeFaction('RS'), makeFaction('RBiH'), makeFaction('HRHB')],
-        formations: {},
-        political_controllers: {
+  factions: [makeFaction('RS'), makeFaction('RBiH'), makeFaction('HRHB')],
+  ...overrides,
+  military: {
+    formations: {},
+    general_supply_reserve: { RS: 40, RBiH: 20, HRHB: 30 },
+    heavy_munitions_reserve: { RS: 20, RBiH: 5, HRHB: 10 }
+  } as any,
+  political: {
+    political_controllers: {
             enclave_1: 'RBiH',
             enclave_2: 'RBiH',
             route_rs: 'RS',
             route_hrhb: 'HRHB',
         },
-        general_supply_reserve: { RS: 40, RBiH: 20, HRHB: 30 },
-        heavy_munitions_reserve: { RS: 20, RBiH: 5, HRHB: 10 },
-        enclave_resilience: {
+    enclave_resilience: {
             ENCL_test: { resilience: 10, isolation_turns: 6, hardening_active: false },
             sarajevo: { resilience: 5, isolation_turns: 22, hardening_active: true },
         },
-        enclaves: [
+    enclaves: [
             {
                 id: 'ENCL_test',
                 faction_id: 'RBiH',
@@ -76,7 +80,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
                 collapsed: false,
             },
         ],
-        sarajevo_state: {
+    sarajevo_state: {
             mun_id: 'centar_sarajevo',
             settlement_ids: ['sarajevo_1'],
             siege_status: 'BESIEGED',
@@ -87,8 +91,10 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
             international_focus: 0.5,
             humanitarian_pressure: 0.8,
             last_updated_turn: 64,
-        },
-        displacement_event_log: [
+        }
+  } as any,
+  displacement: {
+    displacement_event_log: [
             {
                 turn: 64,
                 origin_mun: 'foo',
@@ -99,9 +105,9 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
                 fled_abroad: 200,
                 settled: 2100,
             },
-        ],
-        ...overrides,
-    } as GameState;
+        ]
+  } as any,
+} as GameState;
 }
 
 describe('Phase C supply agency', () => {
@@ -127,7 +133,11 @@ describe('Phase C supply agency', () => {
     });
 
     it('derives atrocity visibility and tunnel-reduced Sarajevo pressure into composite IVP', () => {
-        const state = makeState({ sarajevo_tunnel_operational: true });
+        const state = makeState({
+  military: {
+    sarajevo_tunnel_operational: true
+  } as any,
+});
         ensureInternationalVisibilityPressure(state);
 
         const ivp = updateInternationalVisibilityPressure(
@@ -163,11 +173,13 @@ describe('Phase C supply agency', () => {
 
     it('applies smuggling allocation to ammo and food tracks and unlocks Sarajevo tunnel', () => {
         const state = makeState({
-            smuggling_allocation: {
+  military: {
+    smuggling_allocation: {
                 ENCL_test: { type: 'ammo', amount: 0.2 },
                 sarajevo: { type: 'food', amount: 0.3 },
-            },
-        });
+            }
+  } as any,
+});
         ensureInternationalVisibilityPressure(state);
         state.political.international_visibility_pressure!.enclave_humanitarian_pressure = 0.5;
 

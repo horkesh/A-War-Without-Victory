@@ -10,9 +10,9 @@ import { updateSustainability } from '../src/state/sustainability.js';
  */
 function createTestState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'test-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'test-seed' },
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -26,12 +26,13 @@ function createTestState(): GameState {
                 supply_sources: []
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             '20168': {
                 mun_id: '20168',
                 faction: 'RBiH',
@@ -49,7 +50,9 @@ function createTestState(): GameState {
                 updated_turn: 10
             }
         }
-    };
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 }
 
 /**

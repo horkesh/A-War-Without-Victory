@@ -27,11 +27,15 @@ function makeBrigade(id: string, overrides: Partial<FormationState> = {}): Forma
 test('WIA trickleback: out-of-combat brigade receives wounded back', () => {
     const f1 = makeBrigade('brigade_1', { personnel: 2000, wounded_pending: 200 });
     const state: GameState = {
-        meta: { turn: 5, phase: 'war', seed: 'test' },
-        factions: [{ id: 'RS' }],
-        formations: { brigade_1: f1 },
-        political_controllers: {}
-    } as unknown as GameState;
+  meta: { turn: 5, phase: 'war', seed: 'test' },
+  factions: [{ id: 'RS' }],
+  military: {
+    formations: { brigade_1: f1 }
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 
     const report = applyWiaTrickleback(state);
 
@@ -45,11 +49,15 @@ test('WIA trickleback: in-combat brigade does not receive wounded back', () => {
     const fAttack = makeBrigade('brigade_attack', { posture: 'attack', wounded_pending: 150, personnel: 1800 });
     const fDisrupted = makeBrigade('brigade_disrupted', { disrupted: true, wounded_pending: 100, personnel: 1900 });
     const state: GameState = {
-        meta: { turn: 5, phase: 'war', seed: 'test' },
-        factions: [{ id: 'RS' }],
-        formations: { brigade_attack: fAttack, brigade_disrupted: fDisrupted },
-        political_controllers: {}
-    } as unknown as GameState;
+  meta: { turn: 5, phase: 'war', seed: 'test' },
+  factions: [{ id: 'RS' }],
+  military: {
+    formations: { brigade_attack: fAttack, brigade_disrupted: fDisrupted }
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 
     const report = applyWiaTrickleback(state);
 
@@ -65,11 +73,15 @@ test('WIA trickleback: personnel cap at MAX_BRIGADE_PERSONNEL', () => {
     const nearCap = MAX_BRIGADE_PERSONNEL - 30;
     const f = makeBrigade('brigade_cap', { posture: 'defend', personnel: nearCap, wounded_pending: 200 });
     const state: GameState = {
-        meta: { turn: 5, phase: 'war', seed: 'test' },
-        factions: [{ id: 'RS' }],
-        formations: { brigade_cap: f },
-        political_controllers: {}
-    } as unknown as GameState;
+  meta: { turn: 5, phase: 'war', seed: 'test' },
+  factions: [{ id: 'RS' }],
+  military: {
+    formations: { brigade_cap: f }
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 
     const report = applyWiaTrickleback(state);
 

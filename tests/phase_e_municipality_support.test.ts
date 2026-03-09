@@ -20,12 +20,14 @@ function makeState(
     extra: Record<string, unknown> = {}
 ): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'phase-e-support', phase: 'war' as const, recruitment_mode: 'player_choice' as const },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'phase-e-support', phase: 'war' as const, recruitment_mode: 'player_choice' as const },
+  factions: [
             { id: faction, profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  ...extra,
+  military: {
+    formations: {
             b1: {
                 id: 'b1',
                 faction,
@@ -40,19 +42,21 @@ function makeState(
                 origin_mun: 'MUN_X',
             }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             [militiaPoolKey('MUN_X', faction)]: makePool('MUN_X', faction, 1000)
-        },
-        political_controllers: {},
-        municipalities: {
+        }
+  } as any,
+  political: {
+    political_controllers: {},
+    municipalities: {
             MUN_X: { stability_score: 50, control: 'consolidated' as const }
-        },
-        ...extra,
-    } as unknown as GameState;
+        }
+  } as any,
+} as unknown as GameState;
 }
 
 describe('Phase E municipality support', () => {

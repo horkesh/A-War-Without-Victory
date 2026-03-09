@@ -5,7 +5,7 @@ import type { FrontEdge } from '../src/map/front_edges.js';
 import { computeFrontRegions } from '../src/map/front_regions.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
 
-function seg(edge_id: string, active: boolean): GameState['front_segments'][string] {
+function seg(edge_id: string, active: boolean): GameState['military']['front_segments'][string] {
     return {
         edge_id,
         active,

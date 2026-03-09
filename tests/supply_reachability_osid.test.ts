@@ -11,9 +11,9 @@ import {
 
 test('computeSupplyReachabilityOsid with single source reaches connected controlled OSIDs', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -21,13 +21,18 @@ test('computeSupplyReachabilityOsid with single source reaches connected control
                 supply_sources: ['sid1']
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { o1: 'A', o2: 'A', o3: 'A' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { o1: 'A', o2: 'A', o3: 'A' }
+  } as any,
+        displacement: {} as any
     };
     const edges = [
         { a: 'o1', b: 'o2' },
@@ -54,16 +59,21 @@ test('computeSupplyReachabilityOsid with single source reaches connected control
 
 test('deriveSupplyStateByOsid yields by_osid state adequate/strained/critical', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [{ id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: ['s1'] }],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { o1: 'A', o2: 'A', o3: 'A' }
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [{ id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: ['s1'] }],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { o1: 'A', o2: 'A', o3: 'A' }
+  } as any,
+        displacement: {} as any
     };
     const edges = [
         { a: 'o1', b: 'o2' },
@@ -89,16 +99,21 @@ test('deriveSupplyStateByOsid yields by_osid state adequate/strained/critical', 
 
 test('cascade determinism: same state and edges yield same by_osid (Phase 2)', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 's' },
-        factions: [{ id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: ['s1'] }],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { o1: 'A', o2: 'A', o3: 'A' }
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 's' },
+  factions: [{ id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: ['s1'] }],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { o1: 'A', o2: 'A', o3: 'A' }
+  } as any,
+        displacement: {} as any
     };
     const edges = [{ a: 'o1', b: 'o2' }, { a: 'o2', b: 'o3' }];
     const c2o = { s1: 'o1' };
@@ -118,9 +133,9 @@ test('deriveSupplyStateByOsid: isolated source in pocket is strained (not adequa
     // it's a supply source. With detection, o5 is "strained" because its
     // pocket is disconnected from the heartland. Models Sarajevo UN airlift.
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -128,13 +143,18 @@ test('deriveSupplyStateByOsid: isolated source in pocket is strained (not adequa
                 supply_sources: ['s1', 's5'] // two sources: heartland + pocket
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { o1: 'A', o2: 'A', o3: 'A', o4: 'B', o5: 'A', o6: 'A' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { o1: 'A', o2: 'A', o3: 'A', o4: 'B', o5: 'A', o6: 'A' }
+  } as any,
+        displacement: {} as any
     };
     const edges = [
         { a: 'o1', b: 'o2' },
@@ -175,9 +195,9 @@ test('deriveSupplyStateByOsid: single-source faction — source is adequate, all
     // The source OSID itself is adequate (seeded). Non-source OSIDs may be
     // strained due to brittle corridors, but none should be critical.
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -185,13 +205,18 @@ test('deriveSupplyStateByOsid: single-source faction — source is adequate, all
                 supply_sources: ['s1']
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { o1: 'A', o2: 'A', o3: 'A' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { o1: 'A', o2: 'A', o3: 'A' }
+  } as any,
+        displacement: {} as any
     };
     const edges = [{ a: 'o1', b: 'o2' }, { a: 'o2', b: 'o3' }];
     const reachReport = computeSupplyReachabilityOsid(
@@ -211,9 +236,9 @@ test('deriveSupplyStateByOsid: single-source faction — source is adequate, all
 test('deriveSupplyStateByOsid: pocket without source is critical (not strained)', () => {
     // A disconnected group with NO source → isolated → critical
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -221,13 +246,18 @@ test('deriveSupplyStateByOsid: pocket without source is critical (not strained)'
                 supply_sources: ['s1'] // only heartland source
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { o1: 'A', o2: 'A', o3: 'B', o4: 'A' }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { o1: 'A', o2: 'A', o3: 'B', o4: 'A' }
+  } as any,
+        displacement: {} as any
     };
     const edges = [
         { a: 'o1', b: 'o2' },

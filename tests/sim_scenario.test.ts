@@ -12,8 +12,8 @@ function buildTinyState(): { state: GameState; edges: EdgeRecord[] } {
     ];
 
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 0,
             seed: 'scenario-seed',
             phase: 'war',
@@ -21,12 +21,13 @@ function buildTinyState(): { state: GameState; edges: EdgeRecord[] } {
             referendum_turn: 0,
             war_start_turn: 0
         },
-        factions: [
+  factions: [
             // Provide local supply so this test remains focused on determinism, not supply penalties.
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s1'], supply_sources: ['s1'] },
             { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s2', 's3'], supply_sources: ['s2'] }
         ],
-        formations: {
+  military: {
+    formations: {
             // Phase 9: Add 3 formations to provide sufficient commitment (3000 milli-points) for weight=3
             // This gives friction_factor = 3000/3000 = 1.0, so effective_weight = 3, matching pre-Phase 9 behavior
             F_A_0001: {
@@ -54,16 +55,18 @@ function buildTinyState(): { state: GameState; edges: EdgeRecord[] } {
                 assignment: { kind: 'edge', edge_id: 's1__s2' }
             }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {
             // Seed an existing pressure lane so both edges appear in top_pressures.
             s1__s3: { edge_id: 's1__s3', value: 6, max_abs: 6, last_updated_turn: 0 }
         },
-        militia_pools: {},
-        political_controllers: { s1: 'A', s2: 'B', s3: 'B' },
-        settlements: {
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { s1: 'A', s2: 'B', s3: 'B' },
+    settlements: {
             s1: {
                 legitimacy_state: {
                     legitimacy_score: 1,
@@ -101,9 +104,15 @@ function buildTinyState(): { state: GameState; edges: EdgeRecord[] } {
                 }
             }
         }
+  } as any,
+        displacement: {} as any
     };
 
-    return { state, edges };
+    return { state, edges,
+        
+        political: {} as any,
+        displacement: {} as any
+    };
 }
 
 test('sim:scenario emits deterministic per-turn summary (no apply)', async () => {

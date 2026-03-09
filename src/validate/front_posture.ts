@@ -11,7 +11,7 @@ export function validateFrontPosture(state: GameState): ValidationIssue[] {
     const fp = (state as any)?.front_posture as Record<string, any> | undefined;
     if (!fp || typeof fp !== 'object') return issues;
 
-    const segmentKeys = new Set(Object.keys((state as any)?.front_segments ?? {}));
+    const segmentKeys = new Set(Object.keys((state as any)?.military.front_segments ?? {}));
     const factionIds = Object.keys(fp).sort();
 
     for (const factionId of factionIds) {

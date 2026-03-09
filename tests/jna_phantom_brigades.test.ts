@@ -14,12 +14,16 @@ import type { FormationState, GameState, FactionId, FormationId } from '../src/s
 
 function makeState(turn: number): GameState {
     return {
-        meta: { turn, phase: 'war', scenario_start_date: { year: 1992, month: 4, day: 6 }, seed: 'test' } as GameState['meta'],
-        factions: [{ id: 'RS' as FactionId }] as GameState['factions'],
-        formations: {},
-        political_controllers: {},
-        corps_command: {},
-    } as GameState;
+  meta: { turn, phase: 'war', scenario_start_date: { year: 1992, month: 4, day: 6 }, seed: 'test' } as GameState['meta'],
+  factions: [{ id: 'RS' as FactionId }] as GameState['factions'],
+  military: {
+    formations: {},
+    corps_command: {}
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as GameState;
 }
 
 describe('JNA Phantom — Spawn', () => {

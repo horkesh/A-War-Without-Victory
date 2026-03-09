@@ -19,9 +19,9 @@ test('accumulateFrontPressure applies 50% penalty when one side locally unsuppli
     const adjacencyMap = buildAdjacencyMap(edges);
 
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 'seed' },
+  factions: [
             // A controls a,b and has source at a so b is reachable (a->b)
             {
                 id: 'A',
@@ -37,17 +37,20 @@ test('accumulateFrontPressure applies 50% penalty when one side locally unsuppli
                 supply_sources: []
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {
             A: { assignments: { 'b__c': { edge_id: 'b__c', posture: 'push', weight: 3 } } }, // intent 6
             B: { assignments: { 'b__c': { edge_id: 'b__c', posture: 'push', weight: 3 } } } // intent 6 -> eff 3
         },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { a: 'A', b: 'A', c: 'B' },
-        settlements: {
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { a: 'A', b: 'A', c: 'B' },
+    settlements: {
             a: {
                 legitimacy_state: {
                     legitimacy_score: 1,
@@ -85,6 +88,8 @@ test('accumulateFrontPressure applies 50% penalty when one side locally unsuppli
                 }
             }
         }
+  } as any,
+        displacement: {} as any
     };
 
     const derived = computeFrontEdges(state, edges);
@@ -112,9 +117,9 @@ test('accumulateFrontPressure yields no change when both sides locally supplied'
     const adjacencyMap = buildAdjacencyMap(edges);
 
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -128,17 +133,20 @@ test('accumulateFrontPressure yields no change when both sides locally supplied'
                 supply_sources: ['d']
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {
             A: { assignments: { 'b__c': { edge_id: 'b__c', posture: 'push', weight: 3 } } }, // intent 6
             B: { assignments: { 'b__c': { edge_id: 'b__c', posture: 'push', weight: 3 } } } // intent 6
         },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { a: 'A', b: 'A', c: 'B', d: 'B' },
-        settlements: {
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { a: 'A', b: 'A', c: 'B', d: 'B' },
+    settlements: {
             a: {
                 legitimacy_state: {
                     legitimacy_score: 1,
@@ -188,6 +196,8 @@ test('accumulateFrontPressure yields no change when both sides locally supplied'
                 }
             }
         }
+  } as any,
+        displacement: {} as any
     };
 
     const derived = computeFrontEdges(state, edges);

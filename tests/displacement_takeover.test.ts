@@ -8,9 +8,9 @@ import type { MunicipalityPopulation1991Map } from '../src/state/population_shar
 
 function baseState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'disp-takeover-test', phase: 'war', rbih_hrhb_war_earliest_turn: 20 },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'disp-takeover-test', phase: 'war', rbih_hrhb_war_earliest_turn: 20 },
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -30,13 +30,18 @@ function baseState(): GameState {
                 supply_sources: []
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {}
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+        displacement: {} as any
     };
 }
 

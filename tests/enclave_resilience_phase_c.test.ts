@@ -17,19 +17,23 @@ import {
 
 function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
     return {
-        schema_version: 1,
-        meta: { turn: 20, seed: 'test', phase: 'war' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 20, seed: 'test', phase: 'war' },
+  factions: [
             { id: 'RBiH', supply_sources: [] },
             { id: 'RS', supply_sources: [] },
             { id: 'HRHB', supply_sources: [] }
         ],
-        formations: {},
-        settlements: [],
-        municipalities: {},
-        political_controllers: {},
-        ...overrides
-    } as unknown as GameState;
+  ...overrides,
+  military: {
+    formations: {}
+  } as any,
+  political: {
+    settlements: [],
+    municipalities: {},
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 }
 
 function makeCriticalSupplyReport(enclavePrefix: string, faction: string = 'RBiH') {
@@ -98,10 +102,12 @@ describe('updateEnclaveResilience — isolation tracking', () => {
 
     it('resets isolation_turns on adequate supply', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: 10, isolation_turns: 5, hardening_active: false }
             }
-        });
+  } as any,
+});
         const supply = makeAdequateSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
@@ -113,10 +119,12 @@ describe('updateEnclaveResilience — isolation tracking', () => {
 describe('updateEnclaveResilience — hardening activation', () => {
     it('activates hardening after HARDENING_THRESHOLD isolation turns', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: 14, isolation_turns: HARDENING_THRESHOLD - 1, hardening_active: false }
             }
-        });
+  } as any,
+});
         const supply = makeCriticalSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
@@ -126,10 +134,12 @@ describe('updateEnclaveResilience — hardening activation', () => {
 
     it('deactivates hardening when isolation resets', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: 20, isolation_turns: 10, hardening_active: true }
             }
-        });
+  } as any,
+});
         const supply = makeAdequateSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
@@ -141,20 +151,24 @@ describe('updateEnclaveResilience — hardening activation', () => {
 describe('getEnclaveDefenseBonus — with hardening', () => {
     it('returns base bonus without hardening', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: 20, isolation_turns: 3, hardening_active: false }
             }
-        });
+  } as any,
+});
         const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
         expect(bonus).toBeCloseTo(1.0 + 20 * 0.005, 5); // 1.10
     });
 
     it('applies hardening defense bonus when active', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: 20, isolation_turns: 10, hardening_active: true }
             }
-        });
+  } as any,
+});
         const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
         const expected = (1.0 + 20 * 0.005) * (1.0 + HARDENING_DEFENSE_BONUS);
         expect(bonus).toBeCloseTo(expected, 5); // 1.10 × 1.05 = 1.155
@@ -162,10 +176,12 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
 
     it('max combined bonus at max resilience + hardening', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: MAX_ENCLAVE_RESILIENCE, isolation_turns: 10, hardening_active: true }
             }
-        });
+  } as any,
+});
         const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
         const expected = (1.0 + MAX_ENCLAVE_RESILIENCE * 0.005) * (1.0 + HARDENING_DEFENSE_BONUS);
         expect(bonus).toBeCloseTo(expected, 5); // 1.15 × 1.05 = 1.2075
@@ -173,10 +189,12 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
 
     it('returns 1.0 for non-enclave OSID', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: 20, isolation_turns: 10, hardening_active: true }
             }
-        });
+  } as any,
+});
         expect(getEnclaveDefenseBonus(state, 'op:banja_luka:center')).toBe(1.0);
     });
 });
@@ -184,17 +202,21 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
 describe('getEnclaveCohesionRecovery — structured entry', () => {
     it('works with structured entry', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: 25, isolation_turns: 5, hardening_active: false }
             }
-        });
+  } as any,
+});
         expect(getEnclaveCohesionRecovery(state, 'op:srebrenica:center')).toBe(2);
     });
 
     it('works with legacy bare number', () => {
         const state = makeMinimalState({
-            enclave_resilience: { srebrenica: 25 }
-        });
+  political: {
+    enclave_resilience: { srebrenica: 25 }
+  } as any,
+});
         expect(getEnclaveCohesionRecovery(state, 'op:srebrenica:center')).toBe(2);
     });
 });
@@ -202,21 +224,25 @@ describe('getEnclaveCohesionRecovery — structured entry', () => {
 describe('getMaxEnclaveResilienceForFaction', () => {
     it('returns max resilience across RBiH enclaves', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 bihac_pocket: { resilience: 10, isolation_turns: 5, hardening_active: false },
                 srebrenica: { resilience: 25, isolation_turns: 12, hardening_active: true },
                 gorazde: { resilience: 15, isolation_turns: 8, hardening_active: true },
             }
-        });
+  } as any,
+});
         expect(getMaxEnclaveResilienceForFaction(state, 'RBiH')).toBe(25);
     });
 
     it('returns 0 for RS (no enclaves)', () => {
         const state = makeMinimalState({
-            enclave_resilience: {
+  political: {
+    enclave_resilience: {
                 srebrenica: { resilience: 25, isolation_turns: 12, hardening_active: true }
             }
-        });
+  } as any,
+});
         expect(getMaxEnclaveResilienceForFaction(state, 'RS')).toBe(0);
     });
 });
@@ -224,18 +250,22 @@ describe('getMaxEnclaveResilienceForFaction', () => {
 describe('exhaustion — enclave reduction', () => {
     it('reduces RBiH exhaustion growth with enclave resilience', () => {
         const stateBase = makeMinimalState({
-            war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
-        });
+  political: {
+    war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any
+  } as any,
+});
         // No enclave resilience → baseline exhaustion
         updateExhaustion(stateBase, []);
         const baseExhaustion = stateBase.political.war_exhaustion!['RBiH'] ?? 0;
 
         const stateWithEnclave = makeMinimalState({
-            war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
-            enclave_resilience: {
+  political: {
+    war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
+    enclave_resilience: {
                 srebrenica: { resilience: 20, isolation_turns: 10, hardening_active: true }
             }
-        });
+  } as any,
+});
         updateExhaustion(stateWithEnclave, []);
         const enclaveExhaustion = stateWithEnclave.political.war_exhaustion!['RBiH'] ?? 0;
 
@@ -246,17 +276,21 @@ describe('exhaustion — enclave reduction', () => {
 
     it('does not reduce RS exhaustion (no enclaves)', () => {
         const state1 = makeMinimalState({
-            war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
-        });
+  political: {
+    war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any
+  } as any,
+});
         updateExhaustion(state1, []);
         const rsBase = state1.political.war_exhaustion!['RS'] ?? 0;
 
         const state2 = makeMinimalState({
-            war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
-            enclave_resilience: {
+  political: {
+    war_supply_pressure: { RBiH: 50, RS: 50, HRHB: 0 } as any,
+    enclave_resilience: {
                 srebrenica: { resilience: 30, isolation_turns: 15, hardening_active: true }
             }
-        });
+  } as any,
+});
         updateExhaustion(state2, []);
         const rsWithEnclave = state2.political.war_exhaustion!['RS'] ?? 0;
 
@@ -267,8 +301,10 @@ describe('exhaustion — enclave reduction', () => {
 describe('migration from bare number', () => {
     it('updateEnclaveResilience migrates bare numbers to structured entries', () => {
         const state = makeMinimalState({
-            enclave_resilience: { srebrenica: 15 }
-        });
+  political: {
+    enclave_resilience: { srebrenica: 15 }
+  } as any,
+});
         const supply = makeCriticalSupplyReport('op:srebrenica:');
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;

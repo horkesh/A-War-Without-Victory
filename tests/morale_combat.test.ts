@@ -39,20 +39,22 @@ function makeFormation(overrides: Partial<FormationState> & { id: string; factio
 
 function makeState(formations: Record<string, FormationState>, overrides?: Partial<GameState>): GameState {
     return {
-        schema_version: 1,
-        meta: { turn: 10, seed: 'test', phase: 'war', referendum_held: true, referendum_turn: 4, war_start_turn: 5, referendum_eligible_turn: null, referendum_deadline_turn: null, game_over: false, outcome: undefined },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 10, seed: 'test', phase: 'war', referendum_held: true, referendum_turn: 4, war_start_turn: 5, referendum_eligible_turn: null, referendum_deadline_turn: null, game_over: false, outcome: undefined },
+  factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 5 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, prewar_capital: 70, declaration_pressure: 0, declared: false, declaration_turn: null },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 5 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, prewar_capital: 70, declaration_pressure: 0, declared: false, declaration_turn: null },
         ],
-        formations,
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        ...overrides,
-    } as any;
+  formations,
+  ...overrides,
+  military: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+} as any;
 }
 
 describe('Population Affinity', () => {

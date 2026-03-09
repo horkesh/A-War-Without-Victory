@@ -13,18 +13,22 @@ import type { GameState } from '../src/state/game_state.js';
 
 function makeState(supplyEnabled = true): GameState {
     return {
-        schema_version: 1,
-        meta: { turn: 0, seed: 'test', phase: 'war', supply_reserves_enabled: supplyEnabled },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'test', phase: 'war', supply_reserves_enabled: supplyEnabled },
+  factions: [
             { id: 'RBiH', supply_sources: [] },
             { id: 'RS', supply_sources: [] },
             { id: 'HRHB', supply_sources: [] },
         ],
-        formations: {},
-        settlements: [],
-        municipalities: {},
-        political_controllers: {},
-    } as unknown as GameState;
+  military: {
+    formations: {}
+  } as any,
+  political: {
+    settlements: [],
+    municipalities: {},
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 }
 
 describe('Phase E1 — JNA Inheritance Bonus', () => {
@@ -37,7 +41,7 @@ describe('Phase E1 — JNA Inheritance Bonus', () => {
 
     it('clamps RS heavy munitions at 100', () => {
         const state = makeState();
-        state.military.heavy_munitions_reserve = { RS: 90, RBiH: 60, HRHB: 60 } as unknown as typeof state.heavy_munitions_reserve;
+        state.military.heavy_munitions_reserve = { RS: 90, RBiH: 60, HRHB: 60 } as unknown as typeof state.military.heavy_munitions_reserve;
         applyJnaInheritanceBonus(state);
         expect(state.military.heavy_munitions_reserve!['RS']).toBe(100);
     });
@@ -60,7 +64,7 @@ describe('Phase E1 — JNA Inheritance Bonus', () => {
 
     it('is idempotent — second call stays at 100 if already maxed', () => {
         const state = makeState();
-        state.military.heavy_munitions_reserve = { RS: 100, RBiH: 60, HRHB: 60 } as unknown as typeof state.heavy_munitions_reserve;
+        state.military.heavy_munitions_reserve = { RS: 100, RBiH: 60, HRHB: 60 } as unknown as typeof state.military.heavy_munitions_reserve;
         applyJnaInheritanceBonus(state);
         applyJnaInheritanceBonus(state);
         expect(state.military.heavy_munitions_reserve!['RS']).toBe(100);

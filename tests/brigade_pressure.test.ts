@@ -51,19 +51,23 @@ function makeState(opts: {
     turn?: number;
 }): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: opts.turn ?? 20, seed: 'test', phase: 'war' } as any,
-        formations: opts.formations ?? {},
-        political_controllers: opts.politicalControllers,
-        brigade_aor: opts.brigadeAor ?? {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        factions: [],
-        militia_pools: {},
-        municipalities: {}
-    } as GameState;
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: opts.turn ?? 20, seed: 'test', phase: 'war' } as any,
+  brigade_aor: opts.brigadeAor ?? {},
+  factions: [],
+  military: {
+    formations: opts.formations ?? {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: opts.politicalControllers,
+    municipalities: {}
+  } as any,
+} as GameState;
 }
 
 /**

@@ -227,8 +227,9 @@ describe('aggregateBrigadeHistories', () => {
 describe('computeCombatSummaries', () => {
     it('assigns combat_summary to corps formations', () => {
         const state = {
-            meta: { phase: 'war' },
-            formations: {
+  meta: { phase: 'war' },
+  military: {
+    formations: {
                 corps_1: makeFormation({ id: 'corps_1', kind: 'corps', faction: 'RBiH' }),
                 bde_1: makeFormation({
                     id: 'bde_1', kind: 'brigade', faction: 'RBiH', corps_id: 'corps_1',
@@ -238,8 +239,9 @@ describe('computeCombatSummaries', () => {
                     id: 'bde_2', kind: 'brigade', faction: 'RBiH', corps_id: 'corps_1',
                     brigade_history: makeHistory({ battles_fought: 3, victories: 1 }),
                 }),
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+} as unknown as GameState;
 
         computeCombatSummaries(state);
 
@@ -252,8 +254,9 @@ describe('computeCombatSummaries', () => {
 
     it('assigns combat_summary to army_hq formations (all faction brigades)', () => {
         const state = {
-            meta: { phase: 'war' },
-            formations: {
+  meta: { phase: 'war' },
+  military: {
+    formations: {
                 army_rbih: makeFormation({ id: 'army_rbih', kind: 'army_hq', faction: 'RBiH' }),
                 corps_1: makeFormation({ id: 'corps_1', kind: 'corps', faction: 'RBiH' }),
                 bde_1: makeFormation({
@@ -264,8 +267,9 @@ describe('computeCombatSummaries', () => {
                     id: 'bde_2', kind: 'brigade', faction: 'RS', corps_id: 'corps_rs',
                     brigade_history: makeHistory({ battles_fought: 4, victories: 2 }),
                 }),
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+} as unknown as GameState;
 
         computeCombatSummaries(state);
 
@@ -279,15 +283,17 @@ describe('computeCombatSummaries', () => {
 
     it('assigns combat_summary to corps_asset formations', () => {
         const state = {
-            meta: { phase: 'war' },
-            formations: {
+  meta: { phase: 'war' },
+  military: {
+    formations: {
                 corps_asset_1: makeFormation({ id: 'corps_asset_1', kind: 'corps_asset', faction: 'RS' }),
                 bde_1: makeFormation({
                     id: 'bde_1', kind: 'brigade', faction: 'RS', corps_id: 'corps_asset_1',
                     brigade_history: makeHistory({ battles_fought: 7, victories: 4 }),
                 }),
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+} as unknown as GameState;
 
         computeCombatSummaries(state);
 
@@ -300,8 +306,9 @@ describe('computeCombatSummaries', () => {
 
     it('excludes OG formations from brigade tallies', () => {
         const state = {
-            meta: { phase: 'war' },
-            formations: {
+  meta: { phase: 'war' },
+  military: {
+    formations: {
                 corps_1: makeFormation({ id: 'corps_1', kind: 'corps', faction: 'RBiH' }),
                 bde_1: makeFormation({
                     id: 'bde_1', kind: 'brigade', faction: 'RBiH', corps_id: 'corps_1',
@@ -312,8 +319,9 @@ describe('computeCombatSummaries', () => {
                     personnel: 3000,
                     brigade_history: makeHistory({ battles_fought: 2, victories: 1 }),
                 }),
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+} as unknown as GameState;
 
         computeCombatSummaries(state);
 
@@ -326,14 +334,16 @@ describe('computeCombatSummaries', () => {
 
     it('does not assign combat_summary to brigades', () => {
         const state = {
-            meta: { phase: 'war' },
-            formations: {
+  meta: { phase: 'war' },
+  military: {
+    formations: {
                 bde_1: makeFormation({
                     id: 'bde_1', kind: 'brigade', faction: 'RBiH',
                     brigade_history: makeHistory({ battles_fought: 5 }),
                 }),
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+} as unknown as GameState;
 
         computeCombatSummaries(state);
         assert.equal(state.military.formations!['bde_1'].combat_summary, undefined);

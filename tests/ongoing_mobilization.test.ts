@@ -13,21 +13,25 @@ import type { SettlementRecord } from '../src/map/settlements.js';
 
 function minimalPhaseIIState(overrides?: Partial<{ militia_pools: Record<string, MilitiaPoolState>; meta: { turn: number } }>): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'mob-test', phase: 'war' as const, ...overrides?.meta },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'mob-test', phase: 'war' as const, ...overrides?.meta },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: overrides?.militia_pools ?? {},
-        political_controllers: { S1: 'RS' },
-        municipalities: { MUN_X: { stability_score: 50, control: 'consolidated' as const } }
-    } as GameState;
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: overrides?.militia_pools ?? {}
+  } as any,
+  political: {
+    political_controllers: { S1: 'RS' },
+    municipalities: { MUN_X: { stability_score: 50, control: 'consolidated' as const } }
+  } as any,
+} as GameState;
 }
 
 const settlementRecord: SettlementRecord = { sid: 'S1', source_id: 's1', mun_code: 'MUN_X', mun: 'MUN_X', mun1990_id: 'MUN_X' };
@@ -125,21 +129,19 @@ describe('runOngoingMobilization', () => {
             [militiaPoolKey('MUN_Y', 'RBiH')]: { mun_id: 'MUN_Y', faction: 'RBiH', available: 100, committed: 0, exhausted: 0, updated_turn: 4 },
         };
         const baseline = {
-            ...minimalPhaseIIState({ militia_pools: structuredClone(basePools) }),
-            political_controllers: { S1: 'RBiH', S2: 'RBiH' },
-            municipalities: {
+  ...minimalPhaseIIState({ militia_pools: structuredClone(basePools) }),
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RBiH' },
+    municipalities: {
                 MUN_X: { stability_score: 50, control: 'consolidated' as const },
                 MUN_Y: { stability_score: 50, control: 'consolidated' as const },
-            },
-        } as GameState;
+            }
+  } as any,
+} as GameState;
         const boosted = {
-            ...minimalPhaseIIState({ militia_pools: structuredClone(basePools) }),
-            political_controllers: { S1: 'RBiH', S2: 'RBiH' },
-            municipalities: {
-                MUN_X: { stability_score: 50, control: 'consolidated' as const },
-                MUN_Y: { stability_score: 50, control: 'consolidated' as const },
-            },
-            municipality_support_orders: {
+  ...minimalPhaseIIState({ militia_pools: structuredClone(basePools) }),
+  military: {
+    municipality_support_orders: {
                 RBiH: {
                     faction: 'RBiH',
                     mun_id: 'MUN_X',
@@ -147,7 +149,15 @@ describe('runOngoingMobilization', () => {
                     staged_turn: 5,
                 }
             }
-        } as GameState;
+  } as any,
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RBiH' },
+    municipalities: {
+                MUN_X: { stability_score: 50, control: 'consolidated' as const },
+                MUN_Y: { stability_score: 50, control: 'consolidated' as const },
+            }
+  } as any,
+} as GameState;
 
         runOngoingMobilization(baseline, rbihSettlements, rbihPop);
         runOngoingMobilization(boosted, rbihSettlements, rbihPop);

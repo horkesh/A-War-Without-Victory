@@ -15,8 +15,8 @@ import { validateGameStateShape } from '../src/state/validateGameState.js';
 /** Minimal valid GameState with War phase fields present. Includes all War phase fields that migration defaults for round-trip. */
 function warPhaseGameStateFixture(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 20,
             seed: 'phase-ii-fixture',
             phase: 'war',
@@ -28,7 +28,7 @@ function warPhaseGameStateFixture(): GameState {
             game_over: false,
             outcome: undefined
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 5 },
@@ -66,21 +66,26 @@ function warPhaseGameStateFixture(): GameState {
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: [],
-        supply_rights: { corridors: [] },
-        political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS', 'SID_003': 'HRHB' },
-        municipalities: {},
-        war_supply_pressure: { RBiH: 25, RS: 30, HRHB: 15 },
-        war_exhaustion: { RBiH: 12, RS: 18, HRHB: 10 },
-        war_exhaustion_local: { 'SID_001': 2, 'SID_002': 3 }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: [],
+    supply_rights: { corridors: [] },
+    political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS', 'SID_003': 'HRHB' },
+    municipalities: {},
+    war_supply_pressure: { RBiH: 25, RS: 30, HRHB: 15 },
+    war_exhaustion: { RBiH: 12, RS: 18, HRHB: 10 },
+    war_exhaustion_local: { 'SID_001': 2, 'SID_002': 3 }
+  } as any,
+        displacement: {} as any
     };
 }
 

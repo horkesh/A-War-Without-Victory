@@ -21,9 +21,9 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function minimalPhase0State(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'decl-test', phase: 'peace' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'decl-test', phase: 'peace' },
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -58,13 +58,18 @@ function minimalPhase0State(): GameState {
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        municipalities: {}
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    municipalities: {}
+  } as any,
+        displacement: {} as any
     };
 }
 

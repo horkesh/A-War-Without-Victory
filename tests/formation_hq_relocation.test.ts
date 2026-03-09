@@ -10,7 +10,7 @@ import { runFormationHqRelocation } from '../src/sim/formation_hq_relocation.js'
 import type { FormationId, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
-function minimalState(formations: GameState['formations'], political_controllers: GameState['political_controllers']): GameState {
+function minimalState(formations: GameState['military']['formations'], political_controllers: GameState['political']['political_controllers']): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 1, seed: 'test', phase: 'war', referendum_held: false, referendum_turn: null, war_start_turn: null },

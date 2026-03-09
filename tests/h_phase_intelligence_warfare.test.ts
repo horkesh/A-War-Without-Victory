@@ -58,14 +58,14 @@ function makeBrigade(id: string, faction: 'RS' | 'RBiH', corpsId: string, locati
 describe('H phase intelligence warfare', () => {
     it('feint operations produce offensive signs in enemy sector intel', () => {
         const state = {
-            meta: { turn: 5, phase: 'war' },
-            formations: {},
-            political_controllers: {},
-            corps_front_sectors: {
+  meta: { turn: 5, phase: 'war' },
+  military: {
+    formations: {},
+    corps_front_sectors: {
                 friendly: makeSector('friendly', 'rbih_corps', 'RBiH', ['e1'], ['op:rbih:a'], ['op:rs:b']),
                 enemy: makeSector('enemy', 'rs_corps', 'RS', ['e1'], ['op:rs:b'], ['op:rbih:a']),
             },
-            corps_command: {
+    corps_command: {
                 rs_corps: {
                     command_span: 5,
                     subordinate_count: 1,
@@ -85,7 +85,7 @@ describe('H phase intelligence warfare', () => {
                     },
                 },
             },
-            sector_intel: {
+    sector_intel: {
                 friendly: [{
                     enemy_sector_id: 'enemy',
                     enemy_faction: 'RS',
@@ -99,8 +99,12 @@ describe('H phase intelligence warfare', () => {
                     visible_brigade_ids: [],
                     last_updated_turn: 4,
                 }],
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 
         deriveSectorIntel(state, 5);
 
@@ -110,24 +114,24 @@ describe('H phase intelligence warfare', () => {
 
     it('probe operations clamp to two participating brigades and one-turn planning', () => {
         const state = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 10, seed: 'probe-test', phase: 'war', supply_reserves_enabled: true } as any,
-            factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'probe-test', phase: 'war', supply_reserves_enabled: true } as any,
+  factions: [
                 { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             ],
-            formations: {
+  military: {
+    formations: {
                 rs_corps: { id: 'rs_corps', faction: 'RS', name: 'Corps', created_turn: 1, status: 'active', assignment: null, kind: 'corps', personnel: 50, cohesion: 80, hq_sid: 'S1', tags: [] },
                 b1: makeBrigade('b1', 'RS', 'rs_corps', 'op:test:staging'),
                 b2: makeBrigade('b2', 'RS', 'rs_corps', 'op:test:staging'),
                 b3: makeBrigade('b3', 'RS', 'rs_corps', 'op:test:staging'),
             },
-            political_controllers: { 'op:test:objective': 'RBiH' },
-            corps_front_sectors: {
+    corps_front_sectors: {
                 rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:test:staging'], ['op:test:objective']),
             },
-            general_supply_reserve: { RS: 10, RBiH: 10, HRHB: 10 },
-            heavy_munitions_reserve: { RS: 10, RBiH: 0, HRHB: 0 },
-            corps_command: {
+    general_supply_reserve: { RS: 10, RBiH: 10, HRHB: 10 },
+    heavy_munitions_reserve: { RS: 10, RBiH: 0, HRHB: 0 },
+    corps_command: {
                 rs_corps: {
                     command_span: 5,
                     subordinate_count: 3,
@@ -149,8 +153,12 @@ describe('H phase intelligence warfare', () => {
                         sector_id: 'rs_sector',
                     },
                 },
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+  political: {
+    political_controllers: { 'op:test:objective': 'RBiH' }
+  } as any,
+} as unknown as GameState;
 
         advanceSectorOffensives(state, null);
 
@@ -162,20 +170,22 @@ describe('H phase intelligence warfare', () => {
 
     it('opsec halves positive cohesion drift for formations in the marked sector', () => {
         const state = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 1, phase: 'war', seed: 'opsec-cohesion' } as any,
-            factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, phase: 'war', seed: 'opsec-cohesion' } as any,
+  factions: [
                 { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             ],
-            formations: {
+  military: {
+    formations: {
                 rbih_1: makeBrigade('rbih_1', 'RBiH', 'rbih_corps', 'op:rbih:a', 60),
             },
-            militia_pools: {},
-            corps_front_sectors: {
+    militia_pools: {},
+    corps_front_sectors: {
                 secure_sector: makeSector('secure_sector', 'rbih_corps', 'RBiH', ['e1'], ['op:rbih:a'], ['op:rs:b']),
             },
-            opsec_sectors: ['secure_sector'],
-        } as unknown as GameState;
+    opsec_sectors: ['secure_sector']
+  } as any,
+} as unknown as GameState;
 
         const report = runCohesionDrift(state, []);
 

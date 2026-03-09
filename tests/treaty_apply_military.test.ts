@@ -10,9 +10,9 @@ import { buildTreatyDraft, createClause } from '../src/state/treaty_builder.js';
 
 function createTestState(turn: number = 5): GameState {
     return {
-        schema_version: 1,
-        meta: { turn, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn, seed: 'test' },
+  factions: [
             {
                 id: 'faction_a',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 10 },
@@ -28,16 +28,21 @@ function createTestState(turn: number = 5): GameState {
                 negotiation: { pressure: 15, last_change_turn: 4, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {
+  military: {
+    formations: {},
+    front_segments: {
             'sid1__sid3': { edge_id: 'sid1__sid3', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 1, max_friction: 1 },
             'sid2__sid4': { edge_id: 'sid2__sid4', active: true, created_turn: 1, since_turn: 1, last_active_turn: 5, active_streak: 5, max_active_streak: 5, friction: 1, max_friction: 1 }
         },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_ledger: []
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_ledger: []
+  } as any,
+        displacement: {} as any
     };
 }
 

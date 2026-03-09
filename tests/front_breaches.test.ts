@@ -7,11 +7,12 @@ import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 
 test('computeFrontBreaches emits favored_side correctly and sorts deterministically', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 7, seed: 'seed' },
-        factions: [],
-        formations: {},
-        front_segments: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 7, seed: 'seed' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {
             'a__b': {
                 edge_id: 'a__b',
                 active: true,
@@ -35,14 +36,16 @@ test('computeFrontBreaches emits favored_side correctly and sorts deterministica
                 max_friction: 1
             }
         },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {
             'a__b': { edge_id: 'a__b', value: 20, max_abs: 20, last_updated_turn: 7 },
             'c__d': { edge_id: 'c__d', value: -20, max_abs: 20, last_updated_turn: 7 }
         },
-        militia_pools: {}
-    };
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const derived: FrontEdge[] = [
         { edge_id: 'c__d', a: 'c', b: 'd', side_a: 'A', side_b: 'B' },

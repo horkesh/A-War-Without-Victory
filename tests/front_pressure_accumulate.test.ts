@@ -13,24 +13,27 @@ test('accumulateFrontPressure deterministically accumulates from posture intent'
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
 
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 'seed' },
+  factions: [
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s1'], supply_sources: ['s1'] },
             { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s2'], supply_sources: ['s2'] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {
             // side_a will be A (controls s1), side_b will be B (controls s2)
             A: { assignments: { 's1__s2': { edge_id: 's1__s2', posture: 'push', weight: 3 } } }, // intent 6
             B: { assignments: { 's1__s2': { edge_id: 's1__s2', posture: 'probe', weight: 2 } } } // intent 2
         },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s1: 'A', s2: 'B' },
-        settlements: {
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { s1: 'A', s2: 'B' },
+    settlements: {
             s1: {
                 legitimacy_state: {
                     legitimacy_score: 1,
@@ -56,6 +59,8 @@ test('accumulateFrontPressure deterministically accumulates from posture intent'
                 }
             }
         }
+  } as any,
+        displacement: {} as any
     };
 
     // Ensure the segment exists and is active.

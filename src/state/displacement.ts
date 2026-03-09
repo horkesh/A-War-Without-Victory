@@ -448,7 +448,7 @@ export interface PhaseIDisplacementHooksInfo {
 
 /**
  * Apply one-time displacement for muns that flipped and had displacement initiated this turn.
- * Mutates state.displacement_state; uses same routing and killed/fled-abroad rules when census provided.
+ * Mutates state.displacement.displacement_state; uses same routing and killed/fled-abroad rules when census provided.
  */
 export function applyDisplacementFromFlips(
     state: GameState,

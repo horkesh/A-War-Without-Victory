@@ -936,7 +936,7 @@ export type PoliticalSideId = FactionId;
 /**
  * Settlement-level state (canonical). Reserved for future settlement-scoped fields.
  * Political control is authoritative at political_controllers; no duplicate storage permitted.
- * See GameState.political_controllers. Engine Invariants §9.1.
+ * See GameState.political.political_controllers. Engine Invariants §9.1.
  */
 export interface SettlementState {
     // Placeholder for future fields. political_controller is NOT stored here.

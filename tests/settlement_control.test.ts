@@ -12,8 +12,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 /** Create minimal GameState for testing. */
 function makeState(overrides?: Partial<GameState>): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'settlement-test',
             phase: 'war',
@@ -21,19 +21,23 @@ function makeState(overrides?: Partial<GameState>): GameState {
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
         ] as any,
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {},
-        ...overrides
-    } as GameState;
+  ...overrides,
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as GameState;
 }
 
 /** Settlement data with ethnicity info. */
@@ -57,12 +61,14 @@ function makeSettlementData(sids: Array<{ sid: string; serb: number; bosniak: nu
 describe('applyWaveFlip', () => {
     it('flips settlements with attacker demographic majority', () => {
         const state = makeState({
-            political_controllers: {
+  political: {
+    political_controllers: {
                 S1: 'RBiH',
                 S2: 'RBiH',
                 S3: 'RBiH'
             }
-        });
+  } as any,
+});
 
         const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
         settlementsByMun.set('mun1', ['S1', 'S2', 'S3']);
@@ -86,11 +92,13 @@ describe('applyWaveFlip', () => {
 
     it('creates holdouts for settlements where attacker has very low ethnic share', () => {
         const state = makeState({
-            political_controllers: {
+  political: {
+    political_controllers: {
                 S1: 'RBiH',
                 S2: 'RBiH'
             }
-        });
+  } as any,
+});
 
         const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
         settlementsByMun.set('mun1', ['S1', 'S2']);
@@ -115,11 +123,13 @@ describe('applyWaveFlip', () => {
 
     it('skips settlements already controlled by new controller', () => {
         const state = makeState({
-            political_controllers: {
+  political: {
+    political_controllers: {
                 S1: 'RS', // Already RS
                 S2: 'RBiH'
             }
-        });
+  } as any,
+});
 
         const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
         settlementsByMun.set('mun1', ['S1', 'S2']);
@@ -137,11 +147,13 @@ describe('applyWaveFlip', () => {
 
     it('generates correct event types', () => {
         const state = makeState({
-            political_controllers: {
+  political: {
+    political_controllers: {
                 S1: 'RBiH',
                 S2: 'RBiH'
             }
-        });
+  } as any,
+});
 
         const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
         settlementsByMun.set('mun1', ['S1', 'S2']);
@@ -164,8 +176,10 @@ describe('applyWaveFlip', () => {
 
     it('scales holdout resistance by population and degree when scalingContext provided', () => {
         const state = makeState({
-            political_controllers: { S1: 'RBiH', S2: 'RBiH' }
-        });
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RBiH' }
+  } as any,
+});
         const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
         settlementsByMun.set('mun1', ['S1', 'S2']);
         const settlementData = makeSettlementData([
@@ -177,7 +191,11 @@ describe('applyWaveFlip', () => {
             sidToDegree: new Map([['S1', 2], ['S2', 12]]),
         };
         const resultNoScale = applyWaveFlip(state, 'mun1', 'RS', 'RBiH', settlementsByMun, settlementData, 10);
-        const state2 = makeState({ political_controllers: { S1: 'RBiH', S2: 'RBiH' } });
+        const state2 = makeState({
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RBiH' }
+  } as any,
+});
         const resultWithScale = applyWaveFlip(state2, 'mun1', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
         expect(resultNoScale.holdouts).toContain('S1');
         expect(resultNoScale.holdouts).toContain('S2');
@@ -203,12 +221,15 @@ describe('applyWaveFlip', () => {
             sidToDegree: new Map([['S1', 6]]),
         };
         const baseState = makeState({
-            political_controllers: { S1: 'RBiH' },
-            municipalities: { zvornik: {} } as any,
-        });
+  political: {
+    political_controllers: { S1: 'RBiH' },
+    municipalities: { zvornik: {} } as any
+  } as any,
+});
         const boostedState = makeState({
-            political_controllers: { S1: 'RBiH' },
-            municipalities: {
+  political: {
+    political_controllers: { S1: 'RBiH' },
+    municipalities: {
                 zvornik: {
                     organizational_penetration: {
                         to_control: 'controlled',
@@ -217,8 +238,9 @@ describe('applyWaveFlip', () => {
                         sda_penetration: 70,
                     }
                 }
-            } as any,
-        });
+            } as any
+  } as any,
+});
 
         applyWaveFlip(baseState, 'zvornik', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
         applyWaveFlip(boostedState, 'zvornik', 'RS', 'RBiH', settlementsByMun, settlementData, 10, scalingContext);
@@ -232,12 +254,8 @@ describe('applyWaveFlip', () => {
 describe('processHoldoutCleanup', () => {
     it('clears holdouts when formation is adjacent', () => {
         const state = makeState({
-            political_controllers: {
-                S1: 'RS',  // controlled by RS (holdout of RBiH)
-                S2: 'RS',  // controlled by RS (normal)
-                S3: 'RBiH' // RBiH territory (holdout supply)
-            },
-            settlement_holdouts: {
+  military: {
+    settlement_holdouts: {
                 S1: {
                     holdout: true,
                     holdout_faction: 'RBiH',
@@ -247,7 +265,7 @@ describe('processHoldoutCleanup', () => {
                     isolated_turns: 0
                 }
             },
-            formations: {
+    formations: {
                 'brig-1': {
                     id: 'brig-1',
                     faction: 'RS',
@@ -262,7 +280,15 @@ describe('processHoldoutCleanup', () => {
                     hq_sid: 'S2'
                 }
             } as any
-        });
+  } as any,
+  political: {
+    political_controllers: {
+                S1: 'RS',  // controlled by RS (holdout of RBiH)
+                S2: 'RS',  // controlled by RS (normal)
+                S3: 'RBiH' // RBiH territory (holdout supply)
+            }
+  } as any,
+});
 
         const edges: EdgeRecord[] = [
             { a: 'S1', b: 'S2' },
@@ -284,11 +310,8 @@ describe('processHoldoutCleanup', () => {
 
     it('surrenders holdouts after isolation period', () => {
         const state = makeState({
-            political_controllers: {
-                S1: 'RS',  // RS controls, RBiH holdout
-                S2: 'RS',  // RS territory (no RBiH connection)
-            },
-            settlement_holdouts: {
+  military: {
+    settlement_holdouts: {
                 S1: {
                     holdout: true,
                     holdout_faction: 'RBiH',
@@ -298,8 +321,15 @@ describe('processHoldoutCleanup', () => {
                     isolated_turns: 3  // Will become 4 → surrender
                 }
             },
-            formations: {}
-        });
+    formations: {}
+  } as any,
+  political: {
+    political_controllers: {
+                S1: 'RS',  // RS controls, RBiH holdout
+                S2: 'RS',  // RS territory (no RBiH connection)
+            }
+  } as any,
+});
 
         const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
         const settlements = new Map<string, SettlementRecord>();
@@ -315,11 +345,8 @@ describe('processHoldoutCleanup', () => {
 
     it('resets isolation counter when supply connection exists', () => {
         const state = makeState({
-            political_controllers: {
-                S1: 'RS',   // RS controls, RBiH holdout
-                S2: 'RBiH', // RBiH still controls adjacent
-            },
-            settlement_holdouts: {
+  military: {
+    settlement_holdouts: {
                 S1: {
                     holdout: true,
                     holdout_faction: 'RBiH',
@@ -329,8 +356,15 @@ describe('processHoldoutCleanup', () => {
                     isolated_turns: 2
                 }
             },
-            formations: {}
-        });
+    formations: {}
+  } as any,
+  political: {
+    political_controllers: {
+                S1: 'RS',   // RS controls, RBiH holdout
+                S2: 'RBiH', // RBiH still controls adjacent
+            }
+  } as any,
+});
 
         const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
         const settlements = new Map<string, SettlementRecord>();

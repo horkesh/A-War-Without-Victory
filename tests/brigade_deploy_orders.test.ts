@@ -7,10 +7,11 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function makeState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'deploy-orders-test', phase: 'war' } as any,
-        factions: [{ id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true }] as any,
-        formations: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'deploy-orders-test', phase: 'war' } as any,
+  factions: [{ id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true }] as any,
+  military: {
+    formations: {
             b1: {
                 id: 'b1',
                 faction: 'RBiH',
@@ -22,13 +23,16 @@ function makeState(): GameState {
                 hq_sid: 'S1',
             } as any,
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { S1: 'RBiH', S2: 'RBiH', S3: 'RBiH' } as any,
-    } as GameState;
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RBiH', S3: 'RBiH' } as any
+  } as any,
+} as GameState;
 }
 
 const EDGES: EdgeRecord[] = [

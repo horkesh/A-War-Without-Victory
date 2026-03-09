@@ -8,28 +8,33 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function makeState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 15, seed: 'bot-test', phase: 'war' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 15, seed: 'bot-test', phase: 'war' },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  military: {
+    formations: {
             F_R_1: { id: 'F_R_1', faction: 'RBiH', name: 'R1', created_turn: 1, status: 'active', assignment: null },
             F_R_2: { id: 'F_R_2', faction: 'RBiH', name: 'R2', created_turn: 1, status: 'active', assignment: null },
             F_S_1: { id: 'F_S_1', faction: 'RS', name: 'S1', created_turn: 1, status: 'active', assignment: null },
             F_H_1: { id: 'F_H_1', faction: 'HRHB', name: 'H1', created_turn: 1, status: 'active', assignment: null }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {
             S1__S2: { edge_id: 'S1__S2', value: -10, max_abs: 10, last_updated_turn: 15 },
             S3__S4: { edge_id: 'S3__S4', value: 5, max_abs: 5, last_updated_turn: 15 }
         },
-        militia_pools: {},
-        political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RS', S4: 'HRHB' }
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RS', S4: 'HRHB' }
+  } as any,
+        displacement: {} as any
     };
 }
 

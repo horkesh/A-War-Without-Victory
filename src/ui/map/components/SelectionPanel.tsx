@@ -45,7 +45,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
     );
   }
 
-  const formations = getFormationsAtOsid(loadedGameState?.military?.formations, selectedOsid);
+  const formations = getFormationsAtOsid(loadedGameState?.formations, selectedOsid);
   const playerFaction =
     loadedGameState?.player_faction === 'RBiH' || loadedGameState?.player_faction === 'RS' || loadedGameState?.player_faction === 'HRHB'
       ? loadedGameState.player_faction
@@ -146,17 +146,17 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
     const attack =
       loadedGameState.attackOrders?.filter((o) => o.targetSettlementId === selectedOsid).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.military.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     const move =
       loadedGameState.movementOrdersSettlement?.filter((o) => o.targetSettlementIds?.includes(selectedOsid)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.military.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     const reposition =
       loadedGameState.repositionOrders?.filter((o) => o.settlementIds?.includes(selectedOsid)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.military.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     if (attack.length === 0 && move.length === 0 && reposition.length === 0) return undefined;
     return { attack, move, reposition };

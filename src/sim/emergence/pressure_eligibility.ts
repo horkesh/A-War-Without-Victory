@@ -45,7 +45,7 @@ function resolveControlKey(id: string, pc: Record<string, unknown>, canonicalToO
  * Hard gating: both settlements must have political control state; pressure flows
  * where opposing control meets (front edge). No geometry; uses contact/adjacency only.
  *
- * Fix (System C OSID key mismatch): state.political_controllers is OSID-keyed after War phase
+ * Fix (System C OSID key mismatch): state.political.political_controllers is OSID-keyed after War phase
  * initialization (promotePoliticalControllersToOsid), but edges from the canonical settlement
  * graph carry SID endpoints (e.g. "S100013"). When canonicalToOperational is provided, SID
  * endpoints are resolved to their OSIDs before the political_controllers lookup, so the

@@ -619,7 +619,7 @@ export function applySmugglingAllocation(state: GameState): void {
 
     const totalRequested = entries.reduce((sum, [, allocation]) => sum + allocation.amount, 0);
     const scale = totalRequested > budget ? budget / totalRequested : 1;
-    const normalized: NonNullable<GameState['smuggling_allocation']> = {};
+    const normalized: NonNullable<GameState['military']['smuggling_allocation']> = {};
 
     if (!state.military.heavy_munitions_reserve) state.military.heavy_munitions_reserve = {};
     const ivp = ensureInternationalVisibilityPressure(state);

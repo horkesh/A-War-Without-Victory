@@ -26,7 +26,7 @@ const CANONICAL_FACTION_IDS = ['RBiH', 'RS', 'HRHB'] as const;
 
 /**
  * Promote SID-keyed political_controllers and contested_control to OSID-keyed (majority per OSID).
- * Mutates state.political_controllers and state.contested_control. Deterministic: OSIDs and SIDs sorted.
+ * Mutates state.political.political_controllers and state.contested_control. Deterministic: OSIDs and SIDs sorted.
  */
 export function promotePoliticalControllersToOsid(
     state: GameState,
@@ -69,7 +69,7 @@ export function promotePoliticalControllersToOsid(
  * Runs after OSID promotion. Overwrites specific OSID controllers with scenario-specified values.
  * Used for historically accurate initial control that differs from municipality-level ethnic majority.
  * E.g. Brčko: city held by VRS despite municipality-level Bosniak majority.
- * Deterministic: overrides applied in sorted key order. Mutates state.political_controllers.
+ * Deterministic: overrides applied in sorted key order. Mutates state.political.political_controllers.
  */
 export function applyOsidControlOverrides(
     state: GameState,
@@ -91,7 +91,7 @@ export function applyOsidControlOverrides(
 }
 
 /**
- * True when state.political_controllers is already keyed by OSID (every key is in operationalToCanonical).
+ * True when state.political.political_controllers is already keyed by OSID (every key is in operationalToCanonical).
  * When true, promotePoliticalControllersToOsid must be skipped or it would overwrite valid OSID values
  * with null (it looks up pc[sid] for canonical SIDs, which are undefined when keys are OSIDs).
  */
@@ -106,7 +106,7 @@ function isPoliticalControllersAlreadyOsidKeyed(
 }
 
 /**
- * If operational data is present and state.political_controllers is SID-keyed (at least one key not an OSID
+ * If operational data is present and state.political.political_controllers is SID-keyed (at least one key not an OSID
  * and that key is a known canonical SID in the map), promote to OSID-keyed and mutate state.
  * Skips when keys look like test fixtures (e.g. S1, S2 not in map). No-op when already OSID-keyed.
  * Call after load (e.g. first turn) before running Peace/War phase steps.

@@ -26,22 +26,26 @@ function makeFormation(id: string, faction: FactionId, hq: string, personnel: nu
 
 function makePostureState(overrides?: Partial<{ formations: Record<string, FormationState> }>): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'posture-test', phase: 'war' } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'posture-test', phase: 'war' } as any,
+  factions: [
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: overrides?.formations ?? {
+  military: {
+    formations: overrides?.formations ?? {
             'rs-brig-1': makeFormation('rs-brig-1', 'RS', 'S1')
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { S1: 'RS' },
-        brigade_posture_orders: []
-    } as GameState;
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: { S1: 'RS' }
+  } as any,
+} as GameState;
 }
 
 describe('brigade posture - canAdoptPosture', () => {

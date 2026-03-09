@@ -35,15 +35,19 @@ function makeState(opts: {
         } as FormationState;
     }
     return {
-        meta: { turn: 5, phase: 'war', scenario_start_date: { year: 1992, month: 4, day: 6 }, seed: 'test' } as GameState['meta'],
-        factions: [
+  meta: { turn: 5, phase: 'war', scenario_start_date: { year: 1992, month: 4, day: 6 }, seed: 'test' } as GameState['meta'],
+  factions: [
             { id: 'RS' as FactionId },
             { id: 'RBiH' as FactionId },
         ] as GameState['factions'],
-        formations,
-        political_controllers: opts.political_controllers,
-        war_front_edges_osid: opts.war_front_edges_osid,
-    } as GameState;
+  formations,
+  military: {
+    war_front_edges_osid: opts.war_front_edges_osid
+  } as any,
+  political: {
+    political_controllers: opts.political_controllers
+  } as any,
+} as GameState;
 }
 
 function makeEdges(pairs: Array<[string, string]>): EdgeRecord[] {

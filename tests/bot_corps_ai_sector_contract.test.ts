@@ -77,9 +77,9 @@ function makeSector(
 test('generateCorpsDirectives ignores zero-edge containment sectors for reinforcement targeting', () => {
     const corpsId = 'vrs_test_corps';
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'sector-contract', phase: 'war' } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'sector-contract', phase: 'war' } as any,
+  factions: [
             {
                 id: 'RS',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -87,24 +87,18 @@ test('generateCorpsDirectives ignores zero-edge containment sectors for reinforc
                 supply_sources: []
             }
         ],
-        formations: {
+  military: {
+    formations: {
             [corpsId]: makeCorps(corpsId, 'RS'),
             brig_a: makeBrigade('brig_a', 'RS', corpsId, 'op:test:a'),
             brig_b: makeBrigade('brig_b', 'RS', corpsId, 'op:test:b'),
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
-            'op:test:a': 'RS',
-            'op:test:b': 'RS',
-            'op:test:c': 'RS',
-            'op:test:enemy_front': 'RBiH',
-            'op:test:pocket_enemy': 'RBiH',
-        },
-        corps_front_sectors: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    corps_front_sectors: {
             'sector:vrs_test_corps:front': makeSector(
                 'sector:vrs_test_corps:front',
                 corpsId,
@@ -121,8 +115,18 @@ test('generateCorpsDirectives ignores zero-edge containment sectors for reinforc
                 ['op:test:pocket_enemy'],
                 []
             ),
-        },
-    } as GameState;
+        }
+  } as any,
+  political: {
+    political_controllers: {
+            'op:test:a': 'RS',
+            'op:test:b': 'RS',
+            'op:test:c': 'RS',
+            'op:test:enemy_front': 'RBiH',
+            'op:test:pocket_enemy': 'RBiH',
+        }
+  } as any,
+} as GameState;
 
     initializeCorpsCommand(state);
     assert.ok(state.military.corps_command?.[corpsId], 'corps command should initialize');
@@ -138,9 +142,9 @@ test('generateCorpsDirectives ignores zero-edge containment sectors for reinforc
 test.skip('generateCorpsDirectives can synthesize a launchable offensive sector from adjacent thin sectors', () => {
     const corpsId = 'vrs_1st_krajina';
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'sector-concentration', phase: 'war' } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'sector-concentration', phase: 'war' } as any,
+  factions: [
             {
                 id: 'RS',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -148,26 +152,19 @@ test.skip('generateCorpsDirectives can synthesize a launchable offensive sector 
                 supply_sources: []
             }
         ],
-        formations: {
+  military: {
+    formations: {
             [corpsId]: makeCorps(corpsId, 'RS'),
             brig_a: makeBrigade('brig_a', 'RS', corpsId, 'op:test:a'),
             brig_b: makeBrigade('brig_b', 'RS', corpsId, 'op:test:b'),
             brig_c: makeBrigade('brig_c', 'RS', corpsId, 'op:test:c'),
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
-            'op:test:a': 'RS',
-            'op:test:b': 'RS',
-            'op:test:c': 'RS',
-            'op:doboj:t1': 'RBiH',
-            'op:doboj:t2': 'RBiH',
-            'op:doboj:t3': 'RBiH',
-        },
-        corps_front_sectors: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    corps_front_sectors: {
             'sector:vrs_1st_krajina:0': makeSector(
                 'sector:vrs_1st_krajina:0',
                 corpsId,
@@ -192,8 +189,19 @@ test.skip('generateCorpsDirectives can synthesize a launchable offensive sector 
                 ['op:doboj:t3'],
                 ['brig_c']
             ),
-        },
-    } as GameState;
+        }
+  } as any,
+  political: {
+    political_controllers: {
+            'op:test:a': 'RS',
+            'op:test:b': 'RS',
+            'op:test:c': 'RS',
+            'op:doboj:t1': 'RBiH',
+            'op:doboj:t2': 'RBiH',
+            'op:doboj:t3': 'RBiH',
+        }
+  } as any,
+} as GameState;
 
     initializeCorpsCommand(state);
     assert.ok(state.military.corps_command?.[corpsId], 'corps command should initialize');
@@ -222,9 +230,9 @@ test.skip('generateCorpsDirectives can synthesize a launchable offensive sector 
 test.skip('generateCorpsDirectives concentrates based on live brigade positions, not stale assigned sector lists', () => {
     const corpsId = 'vrs_1st_krajina';
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'sector-concentration-live-locations', phase: 'war' } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'sector-concentration-live-locations', phase: 'war' } as any,
+  factions: [
             {
                 id: 'RS',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -232,26 +240,19 @@ test.skip('generateCorpsDirectives concentrates based on live brigade positions,
                 supply_sources: []
             }
         ],
-        formations: {
+  military: {
+    formations: {
             [corpsId]: makeCorps(corpsId, 'RS'),
             brig_a: makeBrigade('brig_a', 'RS', corpsId, 'op:test:a'),
             brig_b: makeBrigade('brig_b', 'RS', corpsId, 'op:test:b'),
             brig_c: makeBrigade('brig_c', 'RS', corpsId, 'op:test:c'),
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
-            'op:test:a': 'RS',
-            'op:test:b': 'RS',
-            'op:test:c': 'RS',
-            'op:doboj:t1': 'RBiH',
-            'op:doboj:t2': 'RBiH',
-            'op:doboj:t3': 'RBiH',
-        },
-        corps_front_sectors: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    corps_front_sectors: {
             'sector:vrs_1st_krajina:0': makeSector(
                 'sector:vrs_1st_krajina:0',
                 corpsId,
@@ -276,8 +277,19 @@ test.skip('generateCorpsDirectives concentrates based on live brigade positions,
                 ['op:doboj:t3'],
                 []
             ),
-        },
-    } as GameState;
+        }
+  } as any,
+  political: {
+    political_controllers: {
+            'op:test:a': 'RS',
+            'op:test:b': 'RS',
+            'op:test:c': 'RS',
+            'op:doboj:t1': 'RBiH',
+            'op:doboj:t2': 'RBiH',
+            'op:doboj:t3': 'RBiH',
+        }
+  } as any,
+} as GameState;
 
     initializeCorpsCommand(state);
     state.military.corps_command![corpsId].stance = 'balanced';
@@ -305,9 +317,9 @@ test.skip('generateCorpsDirectives concentrates based on live brigade positions,
 test.skip('generateCorpsDirectives can launch an operation from adjacent sectors even when permanent sector merge is edge-capped', () => {
     const corpsId = 'vrs_1st_krajina';
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'sector-launch-cluster', phase: 'war' } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 20, seed: 'sector-launch-cluster', phase: 'war' } as any,
+  factions: [
             {
                 id: 'RS',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -315,26 +327,19 @@ test.skip('generateCorpsDirectives can launch an operation from adjacent sectors
                 supply_sources: []
             }
         ],
-        formations: {
+  military: {
+    formations: {
             [corpsId]: makeCorps(corpsId, 'RS'),
             brig_a: makeBrigade('brig_a', 'RS', corpsId, 'op:test:a'),
             brig_b: makeBrigade('brig_b', 'RS', corpsId, 'op:test:b'),
             brig_c: makeBrigade('brig_c', 'RS', corpsId, 'op:test:c'),
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
-            'op:test:a': 'RS',
-            'op:test:b': 'RS',
-            'op:test:c': 'RS',
-            'op:doboj:t1': 'RBiH',
-            'op:doboj:t2': 'RBiH',
-            'op:doboj:t3': 'RBiH',
-        },
-        corps_front_sectors: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    corps_front_sectors: {
             'sector:vrs_1st_krajina:0': makeSector(
                 'sector:vrs_1st_krajina:0',
                 corpsId,
@@ -359,8 +364,19 @@ test.skip('generateCorpsDirectives can launch an operation from adjacent sectors
                 ['op:doboj:t3'],
                 ['brig_c']
             ),
-        },
-    } as GameState;
+        }
+  } as any,
+  political: {
+    political_controllers: {
+            'op:test:a': 'RS',
+            'op:test:b': 'RS',
+            'op:test:c': 'RS',
+            'op:doboj:t1': 'RBiH',
+            'op:doboj:t2': 'RBiH',
+            'op:doboj:t3': 'RBiH',
+        }
+  } as any,
+} as GameState;
 
     initializeCorpsCommand(state);
     state.military.corps_command![corpsId].stance = 'balanced';

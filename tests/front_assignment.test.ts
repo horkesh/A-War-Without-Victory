@@ -7,10 +7,15 @@ import { ensureBrigadeFrontAssignments, isBrigadeAssignedToFront } from '../src/
 
 function makeState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 8, seed: 'test', phase: 'war' } as any,
-        factions: [],
-        formations: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 8, seed: 'test', phase: 'war' } as any,
+  factions: [],
+  brigade_aor: {
+            S1: 'b1',
+            S2: 'b2',
+        },
+  military: {
+    formations: {
             b1: {
                 id: 'b1',
                 faction: 'RBiH',
@@ -38,16 +43,12 @@ function makeState(): GameState {
                 location_osid: 'op:test_mun:s2',
             },
         } as any,
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        brigade_aor: {
-            S1: 'b1',
-            S2: 'b2',
-        },
-        assignable_front_segments: [
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    assignable_front_segments: [
             {
                 front_id: 'RBiH__RS__S1__S2',
                 edge_ids: ['S1__S2'],
@@ -55,8 +56,9 @@ function makeState(): GameState {
                 side_b: 'RS',
                 length_edges: 1,
             },
-        ],
-    } as GameState;
+        ]
+  } as any,
+} as GameState;
 }
 
 test('ensureBrigadeFrontAssignments assigns brigades deterministically', () => {

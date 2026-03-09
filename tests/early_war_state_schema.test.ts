@@ -16,8 +16,8 @@ import { validateGameStateShape } from '../src/state/validateGameState.js';
 /** Minimal valid GameState with Peace phase fields present. Includes all fields that migration defaults so round-trip is byte-identical. */
 function peacePhaseGameStateFixture(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'phase-i-fixture',
             phase: 'war',
@@ -29,7 +29,7 @@ function peacePhaseGameStateFixture(): GameState {
             game_over: false,
             outcome: undefined
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 },
@@ -67,35 +67,41 @@ function peacePhaseGameStateFixture(): GameState {
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: [],
-        supply_rights: { corridors: [] },
-        political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS' },
-        municipalities: {
-            'MUN_001': { stability_score: 70 },
-            'MUN_002': { stability_score: 50 }
-        },
-        war_consolidation_until: { 'MUN_001': 14 },
-        war_militia_strength: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: {
             'MUN_001': { RBiH: 60, RS: 20, HRHB: 10 },
             'MUN_002': { RBiH: 30, RS: 55, HRHB: 15 }
         },
-        war_control_strain: { 'MUN_001': 5, 'MUN_002': 12 },
-        war_jna: {
+    war_jna: {
             transition_begun: true,
             withdrawal_progress: 0.25,
             asset_transfer_rs: 0.2
-        } as JNATransitionState,
-        war_alliance_rbih_hrhb: 0.5,
-        war_displacement_initiated: {}
-    };
+        } as JNATransitionState
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: [],
+    supply_rights: { corridors: [] },
+    political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS' },
+    municipalities: {
+            'MUN_001': { stability_score: 70 },
+            'MUN_002': { stability_score: 50 }
+        },
+    war_consolidation_until: { 'MUN_001': 14 },
+    war_control_strain: { 'MUN_001': 5, 'MUN_002': 12 },
+    war_alliance_rbih_hrhb: 0.5
+  } as any,
+  displacement: {
+    war_displacement_initiated: {}
+  } as any,
+};
 }
 
 test('validateGameStateShape returns ok for GameState with Peace phase fields', () => {

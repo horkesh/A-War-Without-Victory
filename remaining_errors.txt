@@ -1,0 +1,819 @@
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(197,16): error TS2339: Property 'casualty_ledger' does not exist on type 'GameState'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(200,45): error TS2551: Property 'formations' does not exist on type 'GameState'. Did you mean 'factions'?
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(201,24): error TS2339: Property 'faction' does not exist on type '{}'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(201,50): error TS2339: Property 'faction' does not exist on type '{}'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(203,15): error TS2339: Property 'casualty_ledger' does not exist on type 'GameState'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(214,15): error TS2339: Property 'brigade_posture_orders' does not exist on type 'GameState'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(214,47): error TS2339: Property 'brigade_posture_orders' does not exist on type 'GameState'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(221,15): error TS2339: Property 'brigade_movement_orders' does not exist on type 'GameState'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(221,60): error TS2339: Property 'brigade_movement_orders' does not exist on type 'GameState'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(228,15): error TS2339: Property 'brigade_reposition_orders' does not exist on type 'GameState'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(228,62): error TS2339: Property 'brigade_reposition_orders' does not exist on type 'GameState'.
+src/_archived/ui_legacy/sandbox/sandbox_engine.ts(234,30): error TS2551: Property 'formations' does not exist on type 'GameState'. Did you mean 'factions'?
+src/cli/phase3a_ab_harness.ts(59,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phase3a_ab_harness.ts(108,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phase3a_ab_harness.ts(150,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phase3a_ab_harness.ts(206,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phase3a_ab_harness.ts(245,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phase3abc_audit_harness.ts(681,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phaseD0_political_control_inputs_audit.ts(90,59): error TS18046: 'indexData.political' is of type 'unknown'.
+src/cli/phaseD0_political_control_inputs_audit.ts(90,94): error TS18046: 'indexData.political' is of type 'unknown'.
+src/cli/phaseD2_settlement_count_reconcile_audit.ts(115,59): error TS18046: 'indexData.political' is of type 'unknown'.
+src/cli/phaseD2_settlement_count_reconcile_audit.ts(115,94): error TS18046: 'indexData.political' is of type 'unknown'.
+src/cli/phaseD2_settlement_count_reconcile_audit.ts(129,28): error TS18046: 'censusData.political' is of type 'unknown'.
+src/cli/phaseD3_trace_missing_census_settlements.ts(158,59): error TS18046: 'indexData.political' is of type 'unknown'.
+src/cli/phaseD3_trace_missing_census_settlements.ts(158,94): error TS18046: 'indexData.political' is of type 'unknown'.
+src/cli/phaseD3_trace_missing_census_settlements.ts(167,28): error TS18046: 'censusData.political' is of type 'unknown'.
+src/cli/phaseD3_trace_missing_census_settlements.ts(169,29): error TS18046: 'mun' is of type 'unknown'.
+src/cli/phaseD3_trace_missing_census_settlements.ts(169,50): error TS18046: 'mun' is of type 'unknown'.
+src/cli/phaseD3_trace_missing_census_settlements.ts(170,36): error TS18046: 'mun' is of type 'unknown'.
+src/cli/phaseD3_trace_missing_census_settlements.ts(170,45): error TS18046: 'mun' is of type 'unknown'.
+src/cli/phaseE4_null_political_control_diagnosis.ts(63,59): error TS18046: 'indexData.political' is of type 'unknown'.
+src/cli/phaseE4_null_political_control_diagnosis.ts(63,94): error TS18046: 'indexData.political' is of type 'unknown'.
+src/cli/phaseF0_null_political_control_settlements_report.ts(25,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phaseF0_null_political_control_settlements_report.ts(35,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/cli/phaseF1_unknown_control_behavior_audit.ts(33,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phaseF1_unknown_control_behavior_audit.ts(43,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/cli/phaseF2_controlstatus_migration_audit.ts(70,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phaseF4_unknown_control_attribution_audit.ts(56,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/phaseF4_unknown_control_attribution_audit.ts(67,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/cli/sim_displacement.ts(19,16): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_displacement.ts(19,51): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_displacement.ts(20,15): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_displacement.ts(26,33): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_displacement.ts(117,33): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_run.ts(32,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/cli/sim_smoke.ts(99,15): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_smoke.ts(100,48): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_smoke.ts(101,34): error TS18046: 'disp' is of type 'unknown'.
+src/cli/sim_smoke.ts(101,55): error TS18046: 'disp' is of type 'unknown'.
+src/cli/sim_smoke.ts(213,15): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_smoke.ts(213,50): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_smoke.ts(214,54): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_smoke.ts(215,35): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_smoke.ts(216,40): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/cli/sim_sustainability.ts(147,32): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/data/operational_data.ts(165,30): error TS2339: Property 'military' does not exist on type '{ formations?: Record<string, { hq_sid?: string | undefined; location_osid?: string | undefined; kind?: string | undefined; }> | undefined; }'.
+src/desktop/desktop_sim.ts(470,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/desktop/desktop_sim.ts(530,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/desktop/desktop_sim.ts(607,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/index.ts(12,5): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/phase0/bot_phase0.ts(154,30): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/phase0/bot_phase0.ts(204,60): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/phase0/phase0_options_builder.ts(79,20): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/phase0/phase0_options_builder.ts(88,54): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/phase0/phase0_options_builder.ts(115,20): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/phase0/phase0_options_builder.ts(201,23): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/oob_early_war_entry.ts(63,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_end_report.ts(37,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_probe_compare.ts(40,22): error TS2339: Property 'displacement' does not exist on type '{ settlement_displacement?: Record<string, number> | undefined; }'.
+src/scenario/scenario_reporting.ts(106,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_reporting.ts(122,46): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_reporting.ts(122,81): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_reporting.ts(124,26): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_reporting.ts(159,60): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_reporting.ts(159,95): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_reporting.ts(160,30): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_runner.ts(198,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+src/scenario/scenario_runner.ts(291,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_runner.ts(300,23): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+src/scenario/scenario_runner.ts(300,43): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+src/scenario/scenario_runner.ts(1017,30): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_runner.ts(1040,38): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_runner.ts(1046,27): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_runner.ts(1068,59): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_runner.ts(1072,23): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/scenario_runner.ts(1242,24): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_runner.ts(1242,50): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_runner.ts(1247,27): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_runner.ts(1248,23): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/scenario/scenario_runner.ts(1299,43): error TS2559: Type 'GameState' has no properties in common with type '{ formations?: Record<string, { hq_sid?: string | undefined; location_osid?: string | undefined; kind?: string | undefined; }> | undefined; }'.
+src/scenario/victory_conditions.ts(64,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/scenario/victory_conditions.ts(68,28): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+src/scenario/victory_conditions.ts(68,60): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+src/sim/combat/attack_resolution_osid.ts(756,24): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/attack_resolution_osid.ts(756,53): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/attack_resolution_osid.ts(757,42): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/attack_resolution_osid.ts(758,19): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/battle_resolution.ts(490,26): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/battle_resolution.ts(835,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/battle_resolution.ts(1036,20): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_brigade_ai_osid.ts(375,47): error TS2339: Property 'corps_front_sectors' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_corridor.ts(52,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_directives.ts(269,26): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_directives.ts(354,34): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_directives.ts(414,30): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_directives.ts(644,30): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_directives.ts(746,43): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_operations.ts(114,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_operations.ts(205,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_operations.ts(373,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/bot_corps_stance.ts(126,34): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/brigade_aor_legacy.ts(38,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/brigade_movement.ts(78,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/brigade_movement.ts(159,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/brigade_movement_query.ts(76,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/brigade_pressure.ts(127,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/brigade_pressure.ts(163,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/corps_front_assign.ts(88,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/corps_front_sectors.ts(119,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/corps_front_sectors.ts(698,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/corps_sector_partition.ts(155,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/faction_resilience.ts(44,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/faction_resilience.ts(67,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/jna_phantom_brigades.ts(161,24): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/jna_phantom_brigades.ts(161,53): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/jna_phantom_brigades.ts(163,23): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/militia_garrison.ts(62,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/ongoing_mobilization.ts(202,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/operation_storm.ts(39,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/operational_groups.ts(121,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/paramilitary_sweep.ts(275,26): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/paramilitary_sweep.ts(295,86): error TS2339: Property 'civilian_casualties' does not exist on type 'GameState'.
+src/sim/combat/rear_pocket_consolidation.ts(54,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/rear_pocket_consolidation.ts(110,20): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/rear_pocket_consolidation.ts(110,49): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/combat/rear_pocket_consolidation.ts(112,19): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/compile_turn_summary.ts(92,46): error TS2339: Property 'control_events' does not exist on type 'GameState'.
+src/sim/compile_turn_summary.ts(159,46): error TS2339: Property 'control_events' does not exist on type 'GameState'.
+src/sim/compile_turn_summary.ts(170,18): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/sim/compile_turn_summary.ts(171,16): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/sim/compile_turn_summary.ts(171,19): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/sim/compile_turn_summary.ts(172,15): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/sim/compile_turn_summary.ts(188,27): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/sim/compile_turn_summary.ts(188,65): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/sim/consolidation_scoring.ts(207,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/activate_corps.ts(76,30): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/compute_siege_state.ts(73,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/control_flip.ts(159,25): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/control_flip.ts(440,23): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/control_flip.ts(442,23): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/control_strain.ts(52,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/minority_erosion.ts(50,25): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/pool_population.ts(207,32): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/sim/early_war/settlement_control.ts(141,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/settlement_control.ts(218,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/settlement_control.ts(314,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/early_war/washington_agreement.ts(74,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/emergence/aor_instantiation.ts(60,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/emergence/pressure_eligibility.ts(66,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/emergence/rear_zone_detection.ts(48,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/formation_hq_relocation.ts(96,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/formation_lifecycle_events.ts(53,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/formation_spawn.ts(486,37): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/sim/recruitment_engine.ts(318,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/recruitment_turn.ts(52,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/sim/recruitment_turn.ts(117,32): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/sim/turn_phases/war_phases.ts(280,108): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(282,99): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(334,74): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(348,51): error TS2559: Type 'GameState' has no properties in common with type '{ formations?: Record<string, { hq_sid?: string | undefined; location_osid?: string | undefined; kind?: string | undefined; }> | undefined; }'.
+src/sim/turn_phases/war_phases.ts(411,28): error TS2339: Property 'military' does not exist on type 'TurnReport'.
+src/sim/turn_phases/war_phases.ts(428,28): error TS2339: Property 'political' does not exist on type 'TurnReport'.
+src/sim/turn_phases/war_phases.ts(627,44): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(893,44): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1072,48): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1099,42): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1101,47): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1107,23): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1166,23): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1191,67): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1241,23): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1423,66): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1472,34): error TS2339: Property 'political' does not exist on type 'EnclaveIntegrityReport'.
+src/sim/turn_phases/war_phases.ts(1644,28): error TS2339: Property 'military' does not exist on type 'TurnReport'.
+src/sim/turn_phases/war_phases.ts(1652,41): error TS2339: Property 'military' does not exist on type 'TurnReport'.
+src/sim/turn_phases/war_phases.ts(1770,88): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1783,23): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/sim/turn_phases/war_phases.ts(1797,87): error TS2339: Property 'political' does not exist on type 'LoadedSettlementGraph'.
+src/state/control_flip_proposals.ts(174,23): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/control_flip_proposals.ts(174,61): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/control_flip_proposals.ts(175,24): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/displacement.ts(48,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/displacement.ts(169,16): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(170,15): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(173,28): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(187,11): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(393,16): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/displacement.ts(393,46): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/displacement.ts(423,19): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/displacement.ts(481,19): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(540,23): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(550,27): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(821,27): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(833,31): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(907,16): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(907,51): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement.ts(915,33): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement_state_utils.ts(59,16): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement_state_utils.ts(59,42): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement_state_utils.ts(60,28): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement_state_utils.ts(70,11): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement_takeover.ts(229,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(296,19): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement_takeover.ts(335,19): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(437,16): error TS2339: Property 'displacement_camp_state' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(437,47): error TS2339: Property 'displacement_camp_state' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(438,16): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(438,46): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(457,27): error TS2339: Property 'displacement_camp_state' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(483,26): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(551,27): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(575,41): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(594,23): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement_takeover.ts(677,23): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/displacement_takeover.ts(722,23): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/displacement_takeover.ts(801,19): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/enclave_integrity.ts(61,24): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/enclave_integrity.ts(135,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/legitimacy.ts(56,16): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/legitimacy.ts(62,36): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/legitimacy.ts(64,34): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/legitimacy_utils.ts(32,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/legitimacy_utils.ts(38,31): error TS2538: Type '{}' cannot be used as an index type.
+src/state/minority_flight.ts(105,16): error TS2339: Property 'displacement_camp_state' does not exist on type 'GameState'.
+src/state/minority_flight.ts(105,47): error TS2339: Property 'displacement_camp_state' does not exist on type 'GameState'.
+src/state/minority_flight.ts(106,27): error TS2339: Property 'displacement_camp_state' does not exist on type 'GameState'.
+src/state/minority_flight.ts(126,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/minority_flight.ts(203,26): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/minority_flight.ts(328,19): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/minority_flight.ts(357,20): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/minority_flight.ts(357,50): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/minority_flight.ts(365,19): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/patron_pressure.ts(19,38): error TS2339: Property 'displacement_event_log' does not exist on type 'GameState'.
+src/state/patron_pressure.ts(20,18): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/state/patron_pressure.ts(21,18): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/state/patron_pressure.ts(21,23): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/state/political_control_init.ts(35,25): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(63,11): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(78,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(90,11): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(102,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(118,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(625,11): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(706,11): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(774,11): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(820,28): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/political_control_init.ts(962,11): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/production_facilities.ts(90,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/sarajevo_exception.ts(40,34): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/seed_organizational_penetration_from_control.ts(58,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/seed_organizational_penetration_from_control.ts(115,17): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/seed_organizational_penetration_from_control.ts(115,60): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/settlement_control.ts(27,15): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/settlement_control.ts(27,62): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/settlement_control.ts(28,21): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/settlement_control.ts(76,22): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/supply_reserves.ts(531,34): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/state/supply_state_derivation.ts(325,36): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/state/sustainability.ts(320,37): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/ui/map/App.tsx(130,23): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/App.tsx(130,49): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/App.tsx(136,43): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/ArmyDetail.tsx(32,38): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/ArmyDetail.tsx(32,66): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(33,39): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(34,46): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(35,43): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(35,48): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(47,55): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(64,35): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(169,41): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/ArmyDetail.tsx(186,24): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(186,27): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(187,23): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(188,62): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(189,68): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(189,73): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(215,33): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/ui/map/components/ArmyDetail.tsx(216,36): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/ui/map/components/BottomStatusStrip.tsx(18,65): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/CorpsDetail.tsx(43,43): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/CorpsDetail.tsx(44,6): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/CorpsDetail.tsx(83,40): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/CorpsDetail.tsx(84,6): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/CorpsDetail.tsx(86,47): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/ui/map/components/CorpsDetail.tsx(86,52): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/CorpsDetail.tsx(205,41): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/CorpsDetail.tsx(323,34): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/CorpsFrontPanel.tsx(84,42): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/CorpsFrontPanel.tsx(84,68): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/CorpsFrontPanel.tsx(90,34): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/CorpsFrontPanel.tsx(90,60): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/CorpsFrontPanel.tsx(94,34): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/CorpsFrontPanel.tsx(94,60): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/FormationDetail.tsx(79,38): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/FormationDetail.tsx(79,65): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/FormationDetail.tsx(190,47): error TS7006: Parameter 'dec' implicitly has an 'any' type.
+src/ui/map/components/FormationDetail.tsx(190,52): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/ui/map/components/FormationDetail.tsx(468,52): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/ui/map/components/FormationDetail.tsx(468,55): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/ui/map/components/FormationDetail.tsx(470,150): error TS7006: Parameter 'match' implicitly has an 'any' type.
+src/ui/map/components/Minimap.tsx(174,79): error TS2339: Property 'political' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OOBSidebar.tsx(69,27): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OOBSidebar.tsx(70,45): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OOBSidebar.tsx(76,24): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OOBSidebar.tsx(80,46): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OOBSidebar.tsx(82,45): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OOBSidebar.tsx(98,46): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OOBSidebar.tsx(101,37): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OperationDetail.tsx(97,50): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OperationDetail.tsx(97,75): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/OperationsPanel.tsx(395,58): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OperationsPanel.tsx(395,83): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/OperationsPanel.tsx(411,55): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OperationsPanel.tsx(411,80): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/OpsPlanningModal.tsx(97,42): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OpsPlanningModal.tsx(101,26): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OpsPlanningModal.tsx(108,42): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OpsPlanningModal.tsx(118,26): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OrbatPanel.tsx(21,32): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OrbatPanel.tsx(21,58): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/OrbatPanel.tsx(26,32): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OrbatPanel.tsx(27,22): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/components/OrbatPanel.tsx(28,20): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/ui/map/components/OrbatPanel.tsx(28,23): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/ui/map/components/OrbatPanel.tsx(38,45): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/ui/map/components/OrbatPanel.tsx(38,48): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/ui/map/components/OrbatPanel.tsx(88,40): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/ui/map/components/OrderQueue.tsx(28,24): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/OrderQueue.tsx(29,37): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/SelectionPanel.tsx(48,59): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/SelectionPanel.tsx(149,38): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/SelectionPanel.tsx(149,65): error TS7006: Parameter 'fr' implicitly has an 'any' type.
+src/ui/map/components/SelectionPanel.tsx(154,38): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/SelectionPanel.tsx(154,65): error TS7006: Parameter 'fr' implicitly has an 'any' type.
+src/ui/map/components/SelectionPanel.tsx(159,38): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/SelectionPanel.tsx(159,65): error TS7006: Parameter 'fr' implicitly has an 'any' type.
+src/ui/map/components/SituationTab.tsx(122,26): error TS2339: Property 'political' does not exist on type 'LoadedGameState'.
+src/ui/map/components/Tooltip.tsx(222,66): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/Tooltip.tsx(235,40): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/Tooltip.tsx(245,40): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/components/TopToolbar.tsx(292,73): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/data/GameStateAdapter.ts(85,26): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(340,30): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(344,32): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(388,32): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(399,38): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(410,25): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(615,29): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(672,24): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(732,22): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(748,23): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(757,29): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(772,31): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(783,27): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(809,36): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(830,28): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(843,27): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(854,31): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(869,35): error TS18046: 'state.displacement' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(883,20): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(894,49): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(895,12): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(899,50): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(900,12): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(923,39): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(923,92): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(925,28): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(941,23): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(951,24): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(954,26): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(965,39): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(966,34): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1014,27): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1025,28): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1026,25): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1073,43): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1073,97): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1076,27): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1083,28): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1084,34): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1185,69): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1186,12): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1218,23): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1220,31): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1238,30): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1253,24): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1314,52): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1345,24): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/map/data/GameStateAdapter.ts(1411,44): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/map/map/builders/buildFormationsGeoJSON.ts(40,39): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(201,39): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(201,64): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(204,37): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(216,95): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'FormationView | undefined'.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(217,117): error TS2339: Property 'faction' does not exist on type '{}'.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(224,97): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'FormationView | undefined'.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(227,105): error TS2339: Property 'faction' does not exist on type '{}'.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(238,99): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'FormationView | undefined'.
+src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts(240,117): error TS2339: Property 'faction' does not exist on type '{}'.
+src/ui/map/map/MapContainer.tsx(374,44): error TS2339: Property 'political' does not exist on type 'LoadedGameState'.
+src/ui/map/map/MapContainer.tsx(375,25): error TS2339: Property 'political' does not exist on type 'LoadedGameState'.
+src/ui/map/map/MapContainer.tsx(381,42): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/map/MapContainer.tsx(381,67): error TS7006: Parameter 'formation' implicitly has an 'any' type.
+src/ui/map/map/MapContainer.tsx(392,83): error TS2339: Property 'political' does not exist on type 'LoadedGameState'.
+src/ui/map/map/MapContainer.tsx(1085,41): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/map/MapContainer.tsx(1085,67): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/map/MapContainer.tsx(1432,41): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/map/MapContainer.tsx(1432,67): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/ui/map/scripts/debugLoadSave.ts(34,62): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/map/scripts/debugLoadSave.ts(49,63): error TS2339: Property 'political' does not exist on type 'LoadedGameState'.
+src/ui/map/store/gameStore.ts(316,76): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+src/ui/warroom/components/DiplomacyModal.ts(402,44): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/FactionOverviewPanel.ts(97,51): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/MagazineModal.ts(73,49): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/MagazineModal.ts(83,29): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/MagazineModal.ts(85,63): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/MagazineModal.ts(101,47): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/MagazineModal.ts(121,47): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/Phase0PreparationMap.ts(494,39): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/ReportsModal.ts(105,47): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/TacticalMap.ts(212,35): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/WarPlanningMap.ts(561,26): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/components/WarPlanningMap.ts(564,13): error TS2322: Type '{} | null' is not assignable to type 'string | null'.
+src/ui/warroom/components/WarPlanningMap.ts(1337,44): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/turn_event_generator.ts(107,27): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/turn_event_generator.ts(202,16): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/ui/warroom/data/turn_event_generator.ts(343,38): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/war_data_extractor.ts(387,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/war_data_extractor.ts(421,29): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/ui/warroom/data/war_data_extractor.ts(422,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/war_data_extractor.ts(423,25): error TS2339: Property 'displacement_camp_state' does not exist on type 'GameState'.
+src/ui/warroom/data/war_data_extractor.ts(461,31): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/warroom_state.ts(83,15): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/warroom_state.ts(84,45): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/warroom_state.ts(85,47): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/data/warroom_state.ts(109,15): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/ui/warroom/data/warroom_state.ts(110,47): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/ui/warroom/data/warroom_state.ts(111,30): error TS2551: Property 'displacement_state' does not exist on type 'GameState'. Did you mean 'displacement'?
+src/ui/warroom/data/warroom_state.ts(114,38): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+src/ui/warroom/map_viewer_app.ts(736,43): error TS18046: 'state.political' is of type 'unknown'.
+src/ui/warroom/map_viewer_app.ts(749,43): error TS18046: 'state.military' is of type 'unknown'.
+src/ui/warroom/run_phase0_turn.ts(43,26): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+tests/acceptance_brcko_completeness.test.ts(36,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/acceptance_constraints.test.ts(32,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/alliance_lifecycle.test.ts(64,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/alliance_lifecycle.test.ts(95,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(107,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(117,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(128,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(186,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(191,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(201,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(216,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(241,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(263,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(298,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(311,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(318,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(326,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(351,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(362,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(372,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(386,36): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(387,36): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(398,36): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(399,36): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(409,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/alliance_lifecycle.test.ts(423,35): error TS2353: Object literal may only specify known properties, and 'war_alliance_rbih_hrhb' does not exist in type 'Partial<GameState>'.
+tests/battle_resolution.test.ts(79,12): error TS2352: Conversion of type '{ schema_version: number; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 8 more ...; brigade_attack_orders: Record<...>; }' to type 'GameState & LegacyBrigadeAoRState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/bot_corps_ai_sector_contract.test.ts(79,30): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 7 more ...; corps_front_sectors: { ...; }; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/bot_corps_ai_sector_contract.test.ts(140,30): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 7 more ...; corps_front_sectors: { ...; }; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/bot_corps_ai_sector_contract.test.ts(224,30): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 7 more ...; corps_front_sectors: { ...; }; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/bot_corps_ai_sector_contract.test.ts(307,30): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 7 more ...; corps_front_sectors: { ...; }; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/bot_manager_a1.test.ts(18,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/brigade_aor.test.ts(55,30): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: any; formations: { 'rs-brig-1': FormationState; 'rbih-brig-1': FormationState; 'hrhb-brig-1': FormationState; }; ... 6 more ...; war_alliance_rbih_hrhb: number; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/brigade_aor.test.ts(116,34): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: any; formations: Record<string, FormationState>; front_segments: {}; front_posture: {}; front_posture_regions: {}; front_pressure: {}; militia_pools: {}; political_controllers: Record<...>; brigade_aor: Record<...>; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/brigade_aor.test.ts(145,34): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: any; formations: { "rbih-sarajevo-brig": FormationState; }; front_segments: {}; front_posture: {}; front_posture_regions: {}; front_pressure: {}; militia_pools: {}; political_controllers: Record<...>; brigade_aor: Record<...>; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/brigade_corps_front_assign.test.ts(39,13): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'Partial<GameState & LegacyBrigadeAoRState>'. Did you mean to write 'factions'?
+tests/brigade_corps_front_assign.test.ts(53,13): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'Partial<GameState & LegacyBrigadeAoRState>'. Did you mean to write 'factions'?
+tests/brigade_corps_front_assign.test.ts(71,13): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'Partial<GameState & LegacyBrigadeAoRState>'. Did you mean to write 'factions'?
+tests/brigade_deploy_orders.test.ts(9,12): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: any; formations: { b1: any; }; front_segments: {}; front_posture: {}; front_posture_regions: {}; front_pressure: {}; militia_pools: {}; political_controllers: any; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/brigade_posture.test.ts(28,12): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 7 more ...; brigade_posture_orders: never[]; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/brigade_pressure.test.ts(53,12): error TS2352: Conversion of type '{ schema_version: 1; meta: any; formations: Record<string, FormationState>; political_controllers: Record<string, string>; brigade_aor: Record<string, string>; ... 6 more ...; municipalities: {}; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/calibration.test.ts(73,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/calibration.test.ts(129,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/calibration.test.ts(178,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/calibration.test.ts(240,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/calibration.test.ts(327,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/capability_progression.test.ts(15,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/combat_command_friction.test.ts(26,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/combat_command_friction_effect.test.ts(29,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/combat_exhaustion.test.ts(23,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/combat_front_emergence.test.ts(36,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/combat_pipeline.test.ts(30,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/combat_pipeline.test.ts(56,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/combat_state_schema.test.ts(69,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/combat_supply_pressure.test.ts(25,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/competence_valuations.test.ts(48,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/competences.test.ts(71,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/consolidation_scoring.test.ts(18,12): error TS2352: Conversion of type '{ schema_version: number; meta: { turn: number; seed: string; phase: "war"; }; factions: never[]; formations: {}; front_segments: {}; front_posture: {}; front_posture_regions: {}; front_pressure: {}; militia_pools: {}; political_controllers: Record<...>; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/control_flip_proposals.test.ts(17,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/control_flip_proposals.test.ts(59,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/control_flip_proposals.test.ts(102,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/corps_command.test.ts(45,12): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 7 more ...; brigade_aor: { ...; }; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/corps_front_sectors_multi.test.ts(37,12): error TS2352: Conversion of type '{ meta: GameState["meta"]; factions: GameState["factions"]; formations: Record<string, FormationState>; political_controllers: Record<string, string>; war_front_edges_osid: { ...; }[]; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/dev_ui_phase17.test.ts(44,9): error TS2353: Object literal may only specify known properties, and 'front_segments' does not exist in type 'GameState'.
+tests/displacement.test.ts(29,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_pipeline_capacity_hooks.test.ts(33,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_pipeline_displacement_accumulation.test.ts(31,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_pipeline_displacement_triggers.test.ts(31,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_pipeline_municipality_aggregation.test.ts(30,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_pipeline_pipeline_integration.test.ts(31,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_pipeline_pipeline_integration.test.ts(57,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_pipeline_state_schema.test.ts(70,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_pipeline_validation.test.ts(34,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/displacement_takeover.test.ts(33,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_authority_degradation.test.ts(51,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_control_flip.test.ts(52,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_control_flip.test.ts(138,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_control_flip.test.ts(176,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_control_flip.test.ts(202,32): error TS2353: Object literal may only specify known properties, and 'coercion_pressure_by_municipality' does not exist in type 'GameState'.
+tests/early_war_control_flip.test.ts(221,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_control_flip.test.ts(272,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_control_strain.test.ts(51,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_displacement_hooks.test.ts(53,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_entry_gating.test.ts(33,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_entry_gating.test.ts(59,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_injected_graph_parity.test.ts(55,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_jna_transition.test.ts(52,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_militia_emergence.test.ts(58,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_pool_population.test.ts(24,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_state_schema.test.ts(70,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/early_war_turn_structure.test.ts(50,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/embargo_profiles.test.ts(15,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_aor_instantiation.test.ts(25,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_front_emergence.test.ts(33,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_front_emergence.test.ts(62,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_pipeline_integration.test.ts(22,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_pressure_determinism.test.ts(30,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_pressure_diffusion_basic.test.ts(22,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_pressure_gating.test.ts(30,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_pressure_gating.test.ts(59,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_pressure_schema.test.ts(22,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_rear_zone.test.ts(22,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/emergence_validation_suite.test.ts(28,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/enclave_integrity.test.ts(15,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/enclave_resilience_phase_c.test.ts(101,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(116,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(129,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(144,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(154,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(165,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(176,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(187,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(196,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(205,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(216,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(227,13): error TS2353: Object literal may only specify known properties, and 'war_supply_pressure' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(234,13): error TS2353: Object literal may only specify known properties, and 'war_supply_pressure' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(249,13): error TS2353: Object literal may only specify known properties, and 'war_supply_pressure' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(255,13): error TS2353: Object literal may only specify known properties, and 'war_supply_pressure' does not exist in type 'Partial<GameState>'.
+tests/enclave_resilience_phase_c.test.ts(270,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/end_state.test.ts(37,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/exhaustion_accumulate.test.ts(19,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/formation_hq_relocation.test.ts(13,45): error TS2339: Property 'formations' does not exist on type 'GameState'.
+tests/formation_hq_relocation.test.ts(13,93): error TS2339: Property 'political_controllers' does not exist on type 'GameState'.
+tests/formation_hq_relocation.test.ts(18,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/formation_hq_relocation.test.ts(47,33): error TS2339: Property 'formations' does not exist on type 'GameState'.
+tests/formation_hq_relocation.test.ts(78,33): error TS2339: Property 'formations' does not exist on type 'GameState'.
+tests/formation_hq_relocation.test.ts(103,33): error TS2339: Property 'formations' does not exist on type 'GameState'.
+tests/formation_hq_relocation.test.ts(129,33): error TS2339: Property 'formations' does not exist on type 'GameState'.
+tests/formation_hq_relocation.test.ts(154,33): error TS2339: Property 'formations' does not exist on type 'GameState'.
+tests/formation_hq_relocation.test.ts(172,33): error TS2339: Property 'formations' does not exist on type 'GameState'.
+tests/formation_hq_relocation.test.ts(207,33): error TS2339: Property 'formations' does not exist on type 'GameState'.
+tests/formations_deterministic.test.ts(38,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/formations_deterministic.test.ts(118,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/formations_validate.test.ts(17,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/formations_validate.test.ts(126,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/freeze_regression.test.ts(46,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/freeze_regression.test.ts(116,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/freeze_regression.test.ts(191,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/freeze_regression.test.ts(301,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/freeze_regression.test.ts(409,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/freeze_regression.test.ts(547,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_assignment.test.ts(9,12): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: never[]; formations: any; front_segments: {}; front_posture: {}; front_posture_regions: {}; front_pressure: {}; militia_pools: {}; brigade_aor: { S1: string; S2: string; }; assignable_front_segments: { ...; }[]; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/front_breaches.test.ts(13,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_commitment.test.ts(9,59): error TS2339: Property 'front_segments' does not exist on type 'GameState'.
+tests/front_posture_commitment.test.ts(33,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_commitment.test.ts(59,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_commitment.test.ts(95,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_commitment.test.ts(159,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_commitment.test.ts(195,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_commitment.test.ts(249,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_commitment.test.ts(312,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_normalize.test.ts(12,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_posture_regions_expand.test.ts(8,59): error TS2339: Property 'front_segments' does not exist on type 'GameState'.
+tests/front_posture_regions_expand.test.ts(27,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_pressure_accumulate.test.ts(22,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_pressure_supply_modulation.test.ts(40,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_pressure_supply_modulation.test.ts(131,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_regions.test.ts(8,59): error TS2339: Property 'front_segments' does not exist on type 'GameState'.
+tests/front_regions.test.ts(27,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_segments.test.ts(19,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/front_segments_validate.test.ts(16,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/game_state_shape.test.ts(18,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/generate_formations.test.ts(17,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/init_control_mode_ethnic_hybrid.test.ts(55,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/jna_phantom_brigades.test.ts(16,12): error TS2352: Conversion of type '{ meta: GameState["meta"]; factions: GameState["factions"]; formations: {}; political_controllers: {}; corps_command: {}; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/legitimacy_helpers.test.ts(13,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/militia_pools.test.ts(16,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/militia_pools.test.ts(112,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/militia_pools.test.ts(149,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/militia_pools.test.ts(169,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/militia_rework.test.ts(25,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/minority_flight.test.ts(18,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/negotiation_capital.test.ts(29,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/negotiation_offers.test.ts(36,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/negotiation_pressure.test.ts(31,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/officer_system.test.ts(193,13): error TS2353: Object literal may only specify known properties, and 'named_officer_data' does not exist in type 'Partial<GameState>'.
+tests/officer_system.test.ts(206,13): error TS2353: Object literal may only specify known properties, and 'named_officer_data' does not exist in type 'Partial<GameState>'.
+tests/officer_system.test.ts(224,13): error TS2353: Object literal may only specify known properties, and 'named_officer_data' does not exist in type 'Partial<GameState>'.
+tests/officer_system.test.ts(237,13): error TS2353: Object literal may only specify known properties, and 'named_officer_data' does not exist in type 'Partial<GameState>'.
+tests/officer_system.test.ts(254,13): error TS2353: Object literal may only specify known properties, and 'named_officer_data' does not exist in type 'Partial<GameState>'.
+tests/officer_system.test.ts(269,13): error TS2353: Object literal may only specify known properties, and 'named_officer_data' does not exist in type 'Partial<GameState>'.
+tests/officer_system.test.ts(282,13): error TS2353: Object literal may only specify known properties, and 'named_officer_data' does not exist in type 'Partial<GameState>'.
+tests/officer_system.test.ts(300,13): error TS2353: Object literal may only specify known properties, and 'named_officer_data' does not exist in type 'Partial<GameState>'.
+tests/ongoing_mobilization.test.ts(15,12): error TS2352: Conversion of type '{ schema_version: 1; meta: { turn: number; seed: string; phase: "war"; }; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 7 more ...; municipalities: { ...; }; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/oob_early_war_entry.test.ts(23,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/oob_early_war_entry.test.ts(41,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/oob_early_war_entry.test.ts(73,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/oob_early_war_entry.test.ts(105,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/oob_early_war_entry.test.ts(130,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/oob_early_war_entry.test.ts(157,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/operation_tempo.test.ts(26,12): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 9 more ...; corps_command: { ...; }; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/operational_data_osid.test.ts(64,22): error TS2339: Property 'military' does not exist on type '{ formations: { f1: { hq_sid: string; location_osid: string | undefined; }; f2: { hq_sid: string; location_osid: string | undefined; }; }; }'.
+tests/operational_data_osid.test.ts(65,22): error TS2339: Property 'military' does not exist on type '{ formations: { f1: { hq_sid: string; location_osid: string | undefined; }; f2: { hq_sid: string; location_osid: string | undefined; }; }; }'.
+tests/operational_data_osid.test.ts(75,22): error TS2339: Property 'military' does not exist on type '{ formations: { f1: { hq_sid: string; location_osid: string; }; }; }'.
+tests/organizational_penetration_seed_from_control.test.ts(32,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/osid_column_movement.test.ts(199,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/osid_column_movement.test.ts(224,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/osid_column_movement.test.ts(242,13): error TS2353: Object literal may only specify known properties, and 'brigade_movement_orders' does not exist in type 'Partial<GameState>'.
+tests/osid_column_movement.test.ts(264,13): error TS2353: Object literal may only specify known properties, and 'brigade_movement_state' does not exist in type 'Partial<GameState>'.
+tests/osid_column_movement.test.ts(281,13): error TS2353: Object literal may only specify known properties, and 'brigade_movement_state' does not exist in type 'Partial<GameState>'.
+tests/osid_column_movement.test.ts(302,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/osid_column_movement.test.ts(318,13): error TS2353: Object literal may only specify known properties, and 'brigade_movement_orders' does not exist in type 'Partial<GameState>'.
+tests/osid_column_movement.test.ts(334,13): error TS2353: Object literal may only specify known properties, and 'brigade_movement_orders' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(63,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(83,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(97,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(114,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(127,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(146,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(166,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(190,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(210,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/paramilitary_sweep.test.ts(233,17): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/patron_pressure.test.ts(19,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_capital.test.ts(67,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_declaration_pressure.test.ts(61,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_e2e_helper.ts(61,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_investment.test.ts(63,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_referendum.test.ts(62,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_stability.test.ts(32,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_state_schema.test.ts(68,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_to_phasei_brigade_availability.test.ts(62,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase0_turn.test.ts(57,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(14,59): error TS2339: Property 'front_segments' does not exist on type 'GameState'.
+tests/phase10_ops_fatigue.test.ts(56,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(108,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(160,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(211,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(264,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(314,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(364,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(415,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(462,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(514,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(566,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(642,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase10_ops_fatigue.test.ts(742,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase5_check.test.ts(29,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/phase_c_supply_agency.test.ts(130,35): error TS2353: Object literal may only specify known properties, and 'sarajevo_tunnel_operational' does not exist in type 'Partial<GameState>'.
+tests/phase_c_supply_agency.test.ts(166,13): error TS2353: Object literal may only specify known properties, and 'smuggling_allocation' does not exist in type 'Partial<GameState>'.
+tests/phase_d_validation.test.ts(33,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/pre_planned_operations.test.ts(59,12): error TS2352: Conversion of type '{ meta: GameState["meta"]; factions: GameState["factions"]; formations: Record<string, FormationState>; corps_command: Record<string, CorpsCommandState>; political_controllers: Record<...>; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/production_facilities_a3.test.ts(19,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/promote_formations.test.ts(51,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/recruitment_engine.test.ts(33,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/recruitment_engine.test.ts(86,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(114,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(131,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(148,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(170,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(208,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(233,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(260,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(290,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(316,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(343,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(386,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/recruitment_engine.test.ts(440,13): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'Partial<GameState>'. Did you mean to write 'factions'?
+tests/recruitment_turn.test.ts(30,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/recruitment_turn.test.ts(185,23): error TS2352: Conversion of type '{ schema_version: 1; meta: { turn: number; seed: string; phase: "war"; }; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; embargo_profile: { ...; }; }[]; ... 7 more ...; recru...' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/sarajevo_exception.test.ts(15,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/scenario_init_control_apr1992.test.ts(54,22): error TS2339: Property 'political' does not exist on type '{ political_controllers?: Record<string, string | null> | undefined; }'.
+tests/scenario_init_control_apr1992.test.ts(62,23): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+tests/scenario_init_control_apr1992.test.ts(62,50): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+tests/scenario_init_control_apr1995.test.ts(60,22): error TS2339: Property 'political' does not exist on type '{ political_controllers?: Record<string, string | null> | undefined; }'.
+tests/scenario_init_control_apr1995.test.ts(74,23): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+tests/scenario_init_control_apr1995.test.ts(74,50): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+tests/scenario_init_formations.test.ts(26,30): error TS2339: Property 'military' does not exist on type '{ formations?: Record<string, unknown> | undefined; }'.
+tests/scenario_no_initial_brigades.test.ts(25,41): error TS2339: Property 'military' does not exist on type '{ formations?: Record<string, { kind?: string | undefined; }> | undefined; }'.
+tests/scenario_no_initial_brigades.test.ts(26,25): error TS2339: Property 'kind' does not exist on type '{}'.
+tests/scenario_vrs_operation_proof.test.ts(40,32): error TS2339: Property 'military' does not exist on type 'ProofFinalState'.
+tests/sector_coverage_defense.test.ts(54,12): error TS2352: Conversion of type '{ meta: GameState["meta"]; factions: GameState["factions"]; formations: Record<string, FormationState>; political_controllers: Record<string, string>; corps_front_sectors: Record<...>; corps_command: {}; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/sector_offensive.test.ts(36,12): error TS2352: Conversion of type '{ meta: GameState["meta"]; factions: GameState["factions"]; formations: Record<string, FormationState>; political_controllers: {}; corps_command: {}; corps_front_sectors: {}; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/sector_stance_orders.test.ts(25,12): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: { id: string; profile: { authority: number; legitimacy: number; control: number; logistics: number; exhaustion: number; }; areasOfResponsibility: never[]; supply_sources: never[]; }[]; ... 9 more ...; sector_stance_orders: { ...; }[]; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/serialize_gamestate_no_derived_fields.test.ts(17,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/serialize_gamestate_rejects_wrappers.test.ts(16,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/serialize_gamestate_stability.test.ts(17,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/settlement_control.test.ts(60,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(89,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(118,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(140,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(167,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(180,36): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(206,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(210,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(235,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(287,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/settlement_control.test.ts(318,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(73,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/siege_mobilization.test.ts(123,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(152,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(170,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(194,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(217,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(262,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(359,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(436,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(502,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(557,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/siege_mobilization.test.ts(633,9): error TS2353: Object literal may only specify known properties, and 'municipalities' does not exist in type 'Partial<GameState>'.
+tests/sim_formations_report.test.ts(15,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/sim_scenario.test.ts(29,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/state.test.ts(43,5): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_airdrop.test.ts(42,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/supply_airdrop.test.ts(52,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/supply_airdrop.test.ts(62,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/supply_airdrop.test.ts(77,35): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/supply_airdrop.test.ts(77,77): error TS2339: Property 'enclave_resilience' does not exist on type 'GameState'.
+tests/supply_airdrop.test.ts(85,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/supply_airdrop.test.ts(95,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/supply_airdrop.test.ts(107,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/supply_airdrop.test.ts(118,13): error TS2353: Object literal may only specify known properties, and 'enclave_resilience' does not exist in type 'Partial<GameState>'.
+tests/supply_phase_e1.test.ts(40,108): error TS2339: Property 'heavy_munitions_reserve' does not exist on type 'GameState'.
+tests/supply_phase_e1.test.ts(63,109): error TS2339: Property 'heavy_munitions_reserve' does not exist on type 'GameState'.
+tests/supply_reachability.test.ts(20,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability.test.ts(59,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability.test.ts(92,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability.test.ts(132,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability.test.ts(173,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability_osid.test.ts(24,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability_osid.test.ts(60,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability_osid.test.ts(95,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability_osid.test.ts(131,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability_osid.test.ts(188,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reachability_osid.test.ts(224,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/supply_reserves.test.ts(37,13): error TS2353: Object literal may only specify known properties, and 'general_supply_reserve' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves.test.ts(49,13): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'Partial<GameState>'. Did you mean to write 'factions'?
+tests/supply_reserves.test.ts(88,13): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'Partial<GameState>'. Did you mean to write 'factions'?
+tests/supply_reserves.test.ts(117,13): error TS2353: Object literal may only specify known properties, and 'general_supply_reserve' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves.test.ts(147,13): error TS2353: Object literal may only specify known properties, and 'heavy_munitions_reserve' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(59,13): error TS2353: Object literal may only specify known properties, and 'siege_turn_counters' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(75,13): error TS2353: Object literal may only specify known properties, and 'siege_turn_counters' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(107,13): error TS2353: Object literal may only specify known properties, and 'siege_turn_counters' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(133,42): error TS2353: Object literal may only specify known properties, and 'siege_turn_counters' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(156,42): error TS2353: Object literal may only specify known properties, and 'siege_turn_counters' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(179,13): error TS2353: Object literal may only specify known properties, and 'siege_turn_counters' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(202,13): error TS2353: Object literal may only specify known properties, and 'siege_turn_counters' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(224,13): error TS2353: Object literal may only specify known properties, and 'siege_turn_counters' does not exist in type 'Partial<GameState>'.
+tests/supply_reserves_phase_b.test.ts(307,13): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'Partial<GameState>'. Did you mean to write 'factions'?
+tests/supply_reserves_phase_b.test.ts(336,13): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'Partial<GameState>'. Did you mean to write 'factions'?
+tests/sustainability.test.ts(29,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/territorial_valuation.test.ts(38,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/theatres.test.ts(9,12): error TS2352: Conversion of type '{ schema_version: 1; meta: any; factions: any; formations: any; front_segments: {}; front_posture: {}; front_posture_regions: {}; front_pressure: {}; militia_pools: {}; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/treaty.test.ts(36,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/treaty_apply_military.test.ts(31,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/treaty_apply_territorial.test.ts(31,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/treaty_brcko.test.ts(38,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/triggered_operations.test.ts(67,12): error TS2352: Conversion of type '{ meta: GameState["meta"]; factions: GameState["factions"]; formations: Record<string, FormationState>; corps_command: Record<string, CorpsCommandState>; political_controllers: Record<...>; }' to type 'GameState' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+tests/troop_balance_lifecycle.test.ts(153,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/troop_balance_lifecycle.test.ts(178,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/troop_balance_lifecycle.test.ts(243,13): error TS2353: Object literal may only specify known properties, and 'political_controllers' does not exist in type 'Partial<GameState>'.
+tests/turn_pipeline.test.ts(18,5): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/turn_pipeline_determinism_smoke.test.ts(18,5): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/turn_pipeline_order.test.ts(15,5): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/turn_pipeline_weekly_increment.test.ts(15,5): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?
+tests/ui_map_game_state_adapter.test.ts(82,31): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+tests/ui_map_game_state_adapter.test.ts(96,31): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+tests/ui_map_game_state_adapter.test.ts(97,31): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+tests/ui_map_game_state_adapter.test.ts(98,35): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+tests/ui_map_game_state_adapter.test.ts(110,31): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+tests/ui_map_game_state_adapter.test.ts(111,31): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+tests/ui_map_game_state_adapter.test.ts(112,31): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+tests/ui_map_officers_phase_e.test.ts(97,34): error TS2339: Property 'military' does not exist on type 'LoadedGameState'.
+tests/ui_map_officers_phase_e.test.ts(97,60): error TS7006: Parameter 'f' implicitly has an 'any' type.
+tests/victory_conditions_a2.test.ts(22,9): error TS2561: Object literal may only specify known properties, but 'formations' does not exist in type 'GameState'. Did you mean to write 'factions'?

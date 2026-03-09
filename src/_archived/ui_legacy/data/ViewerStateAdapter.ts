@@ -33,7 +33,7 @@ export function toViewerSave(raw: unknown): GameSave | null {
             },
         };
     }
-    const pcRaw = (state.political_controllers ?? {}) as Record<string, unknown>;
+    const pcRaw = (state.political.political_controllers ?? {}) as Record<string, unknown>;
     const politicalControllers: Record<string, FactionId> = {};
     for (const sid of Object.keys(pcRaw).sort()) {
         const v = pcRaw[sid];
@@ -136,7 +136,7 @@ export function toViewerSave(raw: unknown): GameSave | null {
             settlementDisplacement[sid] = Math.max(0, Math.min(1, v));
         }
     }
-    const controlEventsRaw = Array.isArray(state.control_events) ? state.control_events as Array<Record<string, unknown>> : [];
+    const controlEventsRaw = Array.isArray(state.military.control_events) ? state.military.control_events as Array<Record<string, unknown>> : [];
     const controlEvents = controlEventsRaw
         .filter((ev) => typeof ev.turn === 'number' && typeof ev.settlement_id === 'string')
         .map((ev) => ({

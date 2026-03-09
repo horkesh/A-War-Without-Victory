@@ -5,8 +5,8 @@ import { runTurn } from '../src/sim/turn_pipeline.js';
 import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 
 const baseState: GameState = {
-    schema_version: CURRENT_SCHEMA_VERSION,
-    meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
         turn: 0,
         seed: 'initial-seed',
         phase: 'war',
@@ -14,13 +14,16 @@ const baseState: GameState = {
         referendum_turn: 0,
         war_start_turn: 0
     },
-    factions: [],
+  factions: [],
+  military: {
     formations: {},
     front_segments: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
 };
 
 test('runTurn is deterministic for same state and seed', async () => {

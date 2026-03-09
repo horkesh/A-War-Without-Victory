@@ -197,7 +197,7 @@ export const warPhases: NamedPhase[] = [
             const turn = context.state.meta.turn;
             const result = evaluateEvents(context.state, context.rng, turn);
             context.report.events_fired = result.fired;
-            // Graz Accords: fires at week 4 (6 May 1992), sets state.political.political.vienna_declaration_turn
+            // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
             const grazText = checkAndFireGrazAccords(context.state);
             if (grazText) {
                 context.report.events_fired!.push({ id: 'graz_accords', text: grazText });
@@ -216,11 +216,11 @@ export const warPhases: NamedPhase[] = [
             // for segment derivation. Canonical SID edges produce front_ids that can't be matched
             // against OSID-keyed political_controllers and brigade location_osid.
             const frontEdgesForSegments =
-                context.state.meta.phase === 'war' && context.state.military.military.war_front_edges_osid?.length
-                    ? context.state.military.military.war_front_edges_osid
+                context.state.meta.phase === 'war' && context.state.military.war_front_edges_osid?.length
+                    ? context.state.military.war_front_edges_osid
                     : derivedFrontEdges;
             const segments = deriveAssignableFrontSegments(frontEdgesForSegments);
-            context.state.military.military.assignable_front_segments = assignFrontSegmentTheatres(context.state, segments);
+            context.state.military.assignable_front_segments = assignFrontSegmentTheatres(context.state, segments);
         }
     },
     {
@@ -234,7 +234,7 @@ export const warPhases: NamedPhase[] = [
         name: 'compute-local-fronts',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.state.military.military.local_fronts = buildLocalFronts(context.state);
+            context.state.military.local_fronts = buildLocalFronts(context.state);
         }
     },
     {
@@ -277,9 +277,9 @@ export const warPhases: NamedPhase[] = [
             const corridorReport = deriveCorridors(context.state, adjacencyMap, supplyReport);
             const supplyStateReport = deriveSupplyState(context.state, adjacencyMap, supplyReport, corridorReport);
             const graph = await loadSettlementGraph();
-            const localProductionReport = deriveLocalProductionCapacity(context.state, supplyReport, graph.political.political.settlements);
+            const localProductionReport = deriveLocalProductionCapacity(context.state, supplyReport, graph.settlements);
             ensureProductionFacilities(context.state);
-            const productionBonusByFaction = calculateFactionProductionBonus(context.state, graph.political.political.settlements);
+            const productionBonusByFaction = calculateFactionProductionBonus(context.state, graph.settlements);
             context.report.supply_resolution = {
                 supply_state: supplyStateReport,
                 corridors: corridorReport,
@@ -331,7 +331,7 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const report = runFormationHqRelocation(context.state, graph.political.political.settlements, graph.edges);
+            const report = runFormationHqRelocation(context.state, graph.settlements, graph.edges);
             if (report.relocated > 0) {
                 context.report.formation_hq_relocation = report;
             }
@@ -356,7 +356,7 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { ensureBrigadeHistory } = await import('../combat/brigade_history_recorder.js');
-            for (const f of Object.values(context.state.military.military.formations ?? {})) {
+            for (const f of Object.values(context.state.military.formations ?? {})) {
                 if (f.kind === 'brigade' || !f.kind) {
                     ensureBrigadeHistory(f);
                 }
@@ -408,7 +408,7 @@ export const warPhases: NamedPhase[] = [
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
             const od = getOperationalData(context);
             const adjacency = od ? buildOsidAdjacency(od.edges) : undefined;
-            context.report.military.military.siege_turn_counters = updateSiegeTurnCounters(context.state, supplyByOsid, adjacency);
+            context.report.siege_turn_counters = updateSiegeTurnCounters(context.state, supplyByOsid, adjacency);
         }
     },
     {
@@ -425,7 +425,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-            context.report.political.political.enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
+            context.report.enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
             applyUnAirdrops(context.state);
         }
     },
@@ -473,11 +473,11 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) {
-                context.state.military.military.war_front_edges_osid = undefined;
+                context.state.military.war_front_edges_osid = undefined;
                 return;
             }
             const osidFrontEdges = computeFrontEdgesOsid(context.state, od.edges, od.opData.operationalToCanonical);
-            context.state.military.military.war_front_edges_osid = osidFrontEdges;
+            context.state.military.war_front_edges_osid = osidFrontEdges;
         }
     },
     {
@@ -486,7 +486,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-            context.state.military.military.corps_front_sectors = buildCorpsFrontSectors(
+            context.state.military.corps_front_sectors = buildCorpsFrontSectors(
                 context.state, od.edges, od.opData.operationalToCanonical
             );
         }
@@ -584,7 +584,7 @@ export const warPhases: NamedPhase[] = [
         name: 'inject-queued-operations',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const cc = context.state.military.military.corps_command;
+            const cc = context.state.military.corps_command;
             if (!cc) return;
             for (const corpsId of Object.keys(cc).sort()) {
                 const cmd = cc[corpsId];
@@ -608,8 +608,8 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.edges?.length) return;
             const adjacency = buildOsidAdjacency(od.edges);
-            const sortedIds = Object.keys(context.state.military.military.formations ?? {}).sort(strictCompare);
-            context.state.military.military.home_distance_cache = buildHomeDistanceCache(context.state.military.military.formations ?? {}, adjacency, sortedIds);
+            const sortedIds = Object.keys(context.state.military.formations ?? {}).sort(strictCompare);
+            context.state.military.home_distance_cache = buildHomeDistanceCache(context.state.military.formations ?? {}, adjacency, sortedIds);
         }
     },
     {
@@ -618,13 +618,13 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             // Ensure corps_command is initialized (handles brigades created by per-turn recruitment)
             initializeCorpsCommand(context.state);
-            if (!context.state.military.military.corps_command || Object.keys(context.state.military.military.corps_command).length === 0) return;
+            if (!context.state.military.corps_command || Object.keys(context.state.military.corps_command).length === 0) return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
                 ? context.input.settlementEdges
                 : graph.edges;
             const sidToMun = new Map<string, string>();
-            for (const [sid, rec] of graph.political.political.settlements.entries()) {
+            for (const [sid, rec] of graph.settlements.entries()) {
                 const munId = rec.mun1990_id ?? rec.mun_code;
                 if (munId) sidToMun.set(sid, munId);
             }
@@ -716,7 +716,7 @@ export const warPhases: NamedPhase[] = [
         name: 'apply-corps-front-orders',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.military.corps_front_edges) return;
+            if (!context.state.military.corps_front_edges) return;
             applyCorpsFrontAutoDistribution(context.state);
         }
     },
@@ -724,7 +724,7 @@ export const warPhases: NamedPhase[] = [
         name: 'apply-corps-attack-axis-orders',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.military.corps_attack_axis_orders) return;
+            if (!context.state.military.corps_attack_axis_orders) return;
             applyCorpsAttackAxisOrders(context.state);
         }
     },
@@ -732,7 +732,7 @@ export const warPhases: NamedPhase[] = [
         name: 'apply-brigade-reposition',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.military.brigade_reposition_orders || Object.keys(context.state.military.military.brigade_reposition_orders).length === 0) return;
+            if (!context.state.military.brigade_reposition_orders || Object.keys(context.state.military.brigade_reposition_orders).length === 0) return;
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
                 ? context.input.settlementEdges
@@ -758,7 +758,7 @@ export const warPhases: NamedPhase[] = [
         name: 'update-corps-effects',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.military.corps_command) return;
+            if (!context.state.military.corps_command) return;
             applyCorpsEffects(context.state);
         }
     },
@@ -766,7 +766,7 @@ export const warPhases: NamedPhase[] = [
         name: 'advance-corps-operations',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.military.corps_command) return;
+            if (!context.state.military.corps_command) return;
             advanceOperations(context.state);
         }
     },
@@ -774,7 +774,7 @@ export const warPhases: NamedPhase[] = [
         name: 'activate-operational-groups',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.military.og_orders?.length) return;
+            if (!context.state.military.og_orders?.length) return;
             activateOGs(context.state);
         }
     },
@@ -783,7 +783,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const turn = context.state.meta.turn ?? 0;
-            const formations = context.state.military.military.formations ?? {};
+            const formations = context.state.military.formations ?? {};
             for (const fid of Object.keys(formations).sort()) {
                 const f = formations[fid];
                 if (f.status !== 'active' || (f.kind !== 'brigade' && f.kind !== 'og')) continue;
@@ -792,7 +792,7 @@ export const warPhases: NamedPhase[] = [
                 const factionState = (context.state.factions ?? []).find(fac => fac.id === f.faction);
                 const baseMaintenance = (factionState as any)?.profile?.logistics ?? 50;
                 // C3: RS maintenance capacity decays over time (spare parts depletion)
-                const maintenanceMult = f.faction === 'RS' ? getRSMaintenanceCapacityMult(turn, context.state.military.military.war_timeline) : 1.0;
+                const maintenanceMult = f.faction === 'RS' ? getRSMaintenanceCapacityMult(turn, context.state.military.war_timeline) : 1.0;
                 const maintenance = (baseMaintenance / 100) * maintenanceMult;
                 degradeEquipment(f, f.posture, maintenance);
             }
@@ -822,9 +822,9 @@ export const warPhases: NamedPhase[] = [
             const playerFaction = context.state.meta.player_faction ?? null;
             if (!playerFaction) return;
             // Check if player has any attack orders targeting a truce-partner OSID
-            const orders = context.state.military.military.brigade_attack_orders;
+            const orders = context.state.military.brigade_attack_orders;
             if (!orders) return;
-            const pc = context.state.political.political.political_controllers ?? {};
+            const pc = context.state.political.political_controllers ?? {};
             for (const targetOsid of Object.values(orders)) {
                 if (!targetOsid) continue;
                 const controller = pc[targetOsid];
@@ -862,8 +862,8 @@ export const warPhases: NamedPhase[] = [
                 }
                 // Trim control_events to last 3 turns before adding new ones this turn.
                 const currentTurn = context.state.meta?.turn ?? 0;
-                if (context.state.political.political.control_events) {
-                    context.state.political.political.control_events = context.state.political.political.control_events.filter(
+                if (context.state.political.control_events) {
+                    context.state.political.control_events = context.state.political.control_events.filter(
                         (e) => e.turn >= currentTurn - 2
                     );
                 }
@@ -877,8 +877,8 @@ export const warPhases: NamedPhase[] = [
                     ethnicComp
                 );
                 // Sort control_events deterministically after resolution.
-                if (context.state.political.political.control_events?.length) {
-                    context.state.political.political.control_events.sort((a, b) => {
+                if (context.state.political.control_events?.length) {
+                    context.state.political.control_events.sort((a, b) => {
                         if (a.turn !== b.turn) return a.turn - b.turn;
                         return a.settlement_id < b.settlement_id ? -1 : a.settlement_id > b.settlement_id ? 1 : 0;
                     });
@@ -890,7 +890,7 @@ export const warPhases: NamedPhase[] = [
 
             const settlementToMun = new Map<string, string>();
             const sidToMunRecord: Record<string, string> = {};
-            for (const [sid, rec] of graph.political.political.settlements.entries()) {
+            for (const [sid, rec] of graph.settlements.entries()) {
                 const mun = rec.mun1990_id ?? rec.mun_code ?? rec.mun;
                 settlementToMun.set(sid, mun);
                 sidToMunRecord[sid] = mun;
@@ -988,7 +988,7 @@ export const warPhases: NamedPhase[] = [
             };
             const battleCasualties: Array<{ formation_id: string; faction: string; killed: number; missing_captured: number }> = [];
             for (const battle of osidReport.battles) {
-                const attP = context.state.military.military.formations?.[battle.attacker_brigade]?.personnel ?? 0;
+                const attP = context.state.military.formations?.[battle.attacker_brigade]?.personnel ?? 0;
                 const attCas = Math.round(attP * ATK_RATE * (ATK_MOD[battle.outcome] ?? 1.0));
                 if (attCas > 0) {
                     battleCasualties.push({
@@ -999,7 +999,7 @@ export const warPhases: NamedPhase[] = [
                     });
                 }
                 if (battle.defender_brigade) {
-                    const defP = context.state.military.military.formations?.[battle.defender_brigade]?.personnel ?? 0;
+                    const defP = context.state.military.formations?.[battle.defender_brigade]?.personnel ?? 0;
                     const defCas = Math.round(defP * DEF_RATE * (DEF_MOD[battle.outcome] ?? 1.0));
                     if (defCas > 0) {
                         battleCasualties.push({
@@ -1069,7 +1069,7 @@ export const warPhases: NamedPhase[] = [
             const osidReport = context.report.attack_resolution_osid;
             if (osidReport?.battles?.length) {
                 const munToSid = new Map<string, string>();
-                for (const [sid, rec] of graph.political.political.settlements.entries()) {
+                for (const [sid, rec] of graph.settlements.entries()) {
                     const mun = rec.mun1990_id ?? rec.mun_code ?? (rec as { mun?: string }).mun;
                     if (mun && !munToSid.has(mun)) munToSid.set(mun, sid);
                 }
@@ -1096,15 +1096,15 @@ export const warPhases: NamedPhase[] = [
             try {
                 const opGraph = await loadSettlementGraph();
                 // Check if it's OSID-keyed (keys start with 'op:') — if so, use it
-                const firstKey = opGraph.political.political.settlements.keys().next().value;
+                const firstKey = opGraph.settlements.keys().next().value;
                 if (typeof firstKey === 'string' && firstKey.startsWith('op:')) {
-                    osidSettlements = opGraph.political.political.settlements;
+                    osidSettlements = opGraph.settlements;
                 }
             } catch { /* fallback: no OSID census data */ }
 
             context.report.takeover_displacement = processDisplacementTakeover(
                 context.state,
-                graph.political.political.settlements,
+                graph.settlements,
                 combinedReport,
                 context.input.municipalityPopulation1991,
                 osidSettlements
@@ -1158,12 +1158,12 @@ export const warPhases: NamedPhase[] = [
         name: 'recruitment',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.military.recruitment_state) return;
+            if (!context.state.military.recruitment_state) return;
 
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             const accrualReport = accrueRecruitmentResources(
                 context.state,
-                graph.political.political.settlements,
+                graph.settlements,
                 context.report.supply_resolution?.local_production
             );
 
@@ -1188,12 +1188,12 @@ export const warPhases: NamedPhase[] = [
 
             const catalog = await loadRecruitmentCatalog();
             if (catalog) {
-                let sidToMun = buildSidToMunFromSettlements(graph.political.political.settlements);
+                let sidToMun = buildSidToMunFromSettlements(graph.settlements);
                 // OSID-vs-SID fix: when political_controllers are OSID-keyed, rebuild sidToMun
                 // so factionHasPresenceInMun can match OSID keys to municipalities.
                 const opDataCache = getOperationalData(context);
                 if (opDataCache?.opData?.operationalToCanonical) {
-                    const pc = context.state.political.political.political_controllers ?? {};
+                    const pc = context.state.political.political_controllers ?? {};
                     const firstKey = Object.keys(pc)[0];
                     if (firstKey?.startsWith('op:')) {
                         sidToMun = buildOsidToMunFromReverseMap(
@@ -1218,8 +1218,8 @@ export const warPhases: NamedPhase[] = [
             const remaining_capital: Record<FactionId, number> = {} as Record<FactionId, number>;
             const remaining_equipment: Record<FactionId, number> = {} as Record<FactionId, number>;
             for (const factionId of factions) {
-                remaining_capital[factionId] = context.state.military.military.recruitment_state.recruitment_capital[factionId]?.points ?? 0;
-                remaining_equipment[factionId] = context.state.military.military.recruitment_state.equipment_pools[factionId]?.points ?? 0;
+                remaining_capital[factionId] = context.state.military.recruitment_state.recruitment_capital[factionId]?.points ?? 0;
+                remaining_equipment[factionId] = context.state.military.recruitment_state.equipment_pools[factionId]?.points ?? 0;
             }
 
             context.report.recruitment_report = {
@@ -1238,7 +1238,7 @@ export const warPhases: NamedPhase[] = [
             const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
             context.report.ongoing_mobilization = runOngoingMobilization(
                 context.state,
-                graph.political.political.settlements,
+                graph.settlements,
                 context.input.municipalityPopulation1991 ?? undefined
             );
         }
@@ -1271,12 +1271,12 @@ export const warPhases: NamedPhase[] = [
             const turn = context.state.meta?.turn ?? 0;
             const { VRS_EQUIPMENT_DECAY_START_WEEK, VRS_EQUIPMENT_DECAY_RATE, VRS_EQUIPMENT_DECAY_FLOOR } = await import('../../state/formation_constants.js');
             // Timeline-driven equipment decay when available
-            const timelineDecay = context.state.military.military.war_timeline?.equipment_decay?.find(c => c.faction === 'RS');
+            const timelineDecay = context.state.military.war_timeline?.equipment_decay?.find(c => c.faction === 'RS');
             const startWeek = timelineDecay?.start_week ?? VRS_EQUIPMENT_DECAY_START_WEEK;
             const ratePerWeek = timelineDecay?.rate_per_week ?? VRS_EQUIPMENT_DECAY_RATE;
             const floor = timelineDecay?.floor ?? VRS_EQUIPMENT_DECAY_FLOOR;
             if (turn < startWeek) return;
-            for (const f of Object.values(context.state.military.military.formations ?? {})) {
+            for (const f of Object.values(context.state.military.formations ?? {})) {
                 if (f.faction !== 'RS' || f.status !== 'active') continue;
                 const current = f.equipment_decay ?? 1.0;
                 f.equipment_decay = Math.max(floor, current - ratePerWeek);
@@ -1295,7 +1295,7 @@ export const warPhases: NamedPhase[] = [
         name: 'officer-succession',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.military.named_officers || !context.state.military.military.named_officer_data) return;
+            if (!context.state.military.named_officers || !context.state.military.named_officer_data) return;
             const { processOfficerSuccession } = await import('../combat/officer_system.js');
             // Collect corps IDs that had combat this turn from the OSID attack report
             const engagedCorpsIds = new Set<string>();
@@ -1303,11 +1303,11 @@ export const warPhases: NamedPhase[] = [
             if (osidReport?.battles) {
                 for (const battle of osidReport.battles) {
                     if (battle.attacker_brigade) {
-                        const f = context.state.military.military.formations?.[battle.attacker_brigade];
+                        const f = context.state.military.formations?.[battle.attacker_brigade];
                         if (f?.corps_id) engagedCorpsIds.add(f.corps_id);
                     }
                     if (battle.defender_brigade) {
-                        const f = context.state.military.military.formations?.[battle.defender_brigade];
+                        const f = context.state.military.formations?.[battle.defender_brigade];
                         if (f?.corps_id) engagedCorpsIds.add(f.corps_id);
                     }
                 }
@@ -1321,7 +1321,7 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { generateWarStoryForFormation } = await import('../war_stories.js');
-            const formations = context.state.military.military.formations ?? {};
+            const formations = context.state.military.formations ?? {};
             for (const fid of Object.keys(formations).sort()) {
                 const f = formations[fid];
                 if (!f || !f.brigade_history) continue;
@@ -1420,7 +1420,7 @@ export const warPhases: NamedPhase[] = [
             const c2o = od?.opData?.canonicalToOperational;
             const { deltas, report: triggerReport } = evaluateDisplacementTriggers(context.state, edges, c2o);
             applySettlementDisplacementDeltas(context.state, deltas);
-            const settlementsByMun = buildSettlementsByMun(graph.political.political.settlements);
+            const settlementsByMun = buildSettlementsByMun(graph.settlements);
             aggregateSettlementDisplacementToMunicipalities(context.state, settlementsByMun);
             context.report.phase_f_displacement = {
                 trigger_report: {
@@ -1469,7 +1469,7 @@ export const warPhases: NamedPhase[] = [
                 context.report.supply_resolution?.supply_state
             );
             context.report.enclave_integrity = {
-                enclaves: report.political.political.enclaves.length,
+                enclaves: report.enclaves.length,
                 humanitarian_pressure_total: report.humanitarian_pressure_total
             };
         }
@@ -1496,11 +1496,11 @@ export const warPhases: NamedPhase[] = [
             const enclavePressure = context.report.enclave_integrity?.humanitarian_pressure_total ?? 0;
             const ivp = updateInternationalVisibilityPressure(
                 context.state,
-                context.state.political.political.sarajevo_state,
+                context.state.political.sarajevo_state,
                 enclavePressure
             );
             const consequences = applyIvpConsequences(context.state, ivp);
-            updatePatronState(context.state, context.state.political.political.sarajevo_state, ivp);
+            updatePatronState(context.state, context.state.political.sarajevo_state, ivp);
             context.report.patron_ivp = {
                 sarajevo_visibility: ivp.sarajevo_siege_visibility,
                 enclave_pressure: ivp.enclave_humanitarian_pressure,
@@ -1519,7 +1519,7 @@ export const warPhases: NamedPhase[] = [
             applyHumanitarianConvoyDecisions(context.state);
             (context.report as TurnReport & { humanitarian_convoys?: { created: number; pending: number } }).humanitarian_convoys = {
                 created: created.length,
-                pending: context.state.military.military.pending_convoy_decisions?.length ?? 0,
+                pending: context.state.military.pending_convoy_decisions?.length ?? 0,
             };
         }
     },
@@ -1529,7 +1529,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const graph = await loadSettlementGraph();
             await updateLegitimacyState(context.state, graph);
-            context.report.legitimacy_update = { settlements: Object.keys(context.state.political.political.settlements ?? {}).length };
+            context.report.legitimacy_update = { settlements: Object.keys(context.state.political.settlements ?? {}).length };
         }
     },
     {
@@ -1556,7 +1556,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             updateDoctrineState(context.state, context.report.supply_resolution?.supply_state, (context as any).effectivePosture);
-            context.report.doctrine_update = { formations: Object.keys(context.state.military.military.formations ?? {}).length };
+            context.report.doctrine_update = { formations: Object.keys(context.state.military.formations ?? {}).length };
         }
     },
     {
@@ -1564,11 +1564,11 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const doctrineTempoByFormation: Record<string, number> = {};
-            for (const formation of Object.values(context.state.military.military.formations ?? {})) {
+            for (const formation of Object.values(context.state.military.formations ?? {})) {
                 doctrineTempoByFormation[formation.id] = getDoctrineTempoMultiplier(formation);
             }
             updateHeavyEquipmentState(context.state, (context as any).effectivePosture, doctrineTempoByFormation);
-            context.report.equipment_update = { formations: Object.keys(context.state.military.military.formations ?? {}).length };
+            context.report.equipment_update = { formations: Object.keys(context.state.military.formations ?? {}).length };
         }
     },
     {
@@ -1593,8 +1593,8 @@ export const warPhases: NamedPhase[] = [
                 const edgeId = edgeAudit.edge_id;
 
                 // Find which faction(s) this edge belongs to by checking base posture assignments
-                for (const factionId of Object.keys(context.state.military.military.front_posture || {})) {
-                    const assignment = context.state.military.military.front_posture[factionId]?.assignments?.[edgeId];
+                for (const factionId of Object.keys(context.state.military.front_posture || {})) {
+                    const assignment = context.state.military.front_posture[factionId]?.assignments?.[edgeId];
                     if (!assignment || assignment.weight === 0) continue;
 
                     // Verify this audit matches this faction by checking effective posture
@@ -1627,7 +1627,7 @@ export const warPhases: NamedPhase[] = [
             }
 
             // Initialize if needed
-            if (!context.state.political.political.effective_posture_exposure) {
+            if (!context.state.political.effective_posture_exposure) {
                 (context.state as any).effective_posture_exposure = {};
             }
             (context.state as any).effective_posture_exposure = exposure;
@@ -1641,7 +1641,7 @@ export const warPhases: NamedPhase[] = [
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
             const adjacencyMap = buildAdjacencyMap(edges);
             const effectivePosture = (context as any).effectivePosture;
-            context.report.military.military.front_pressure = accumulateFrontPressure(context.state, derivedFrontEdges, adjacencyMap, effectivePosture);
+            context.report.front_pressure = accumulateFrontPressure(context.state, derivedFrontEdges, adjacencyMap, effectivePosture);
         }
     },
     {
@@ -1649,7 +1649,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             const edges = context.input.settlementEdges;
             if (!edges) return;
-            const step = context.report.military.military.front_pressure;
+            const step = context.report.front_pressure;
             if (!step) return;
 
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
@@ -1767,7 +1767,7 @@ export const warPhases: NamedPhase[] = [
 
             // Load settlement graph to get settlements map
             const graph = await loadSettlementGraph();
-            context.report.militia_fatigue = updateMilitiaFatigue(context.state, graph.political.political.settlements, edges, exhaustionDeltas);
+            context.report.militia_fatigue = updateMilitiaFatigue(context.state, graph.settlements, edges, exhaustionDeltas);
         }
     },
     {
@@ -1780,7 +1780,7 @@ export const warPhases: NamedPhase[] = [
             const graph = await loadSettlementGraph();
             context.report.displacement = updateDisplacement(
                 context.state,
-                graph.political.political.settlements,
+                graph.settlements,
                 edges,
                 context.input.municipalityPopulation1991
             );
@@ -1794,7 +1794,7 @@ export const warPhases: NamedPhase[] = [
 
             // Load settlement graph to get settlements map
             const graph = await loadSettlementGraph();
-            context.report.sustainability = updateSustainability(context.state, graph.political.political.settlements, edges);
+            context.report.sustainability = updateSustainability(context.state, graph.settlements, edges);
         }
     },
     {

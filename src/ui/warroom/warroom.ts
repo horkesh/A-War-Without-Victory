@@ -245,26 +245,30 @@ class WarroomApp {
 
         // September 1991 starting state (Phase 0); minimal shape for runPhase0Turn
         this.gameState = {
-            schema_version: 1,
-            meta: { turn: 0, seed: 'start_1991_09', phase: 'peace' },
-            factions: [
+  schema_version: 1,
+  meta: { turn: 0, seed: 'start_1991_09', phase: 'peace' },
+  factions: [
                 { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null },
                 { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null },
                 { id: 'HRHB', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null }
             ],
-            political_controllers: politicalControllers,
-            formations: {},
-            front_segments: {},
-            front_posture: {},
-            front_posture_regions: {},
-            front_pressure: {},
-            militia_pools: {},
-            municipalities: {},
-            negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-            ceasefire: {},
-            negotiation_ledger: [],
-            supply_rights: { corridors: [] }
-        } as unknown as GameState;
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: politicalControllers,
+    municipalities: {},
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: [],
+    supply_rights: { corridors: [] }
+  } as any,
+} as unknown as GameState;
 
         setScenarioStartDate(this.gameState.meta.scenario_start_date);
         this.updateUIOverlay();

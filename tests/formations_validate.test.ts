@@ -8,13 +8,14 @@ import { validateFormations } from '../src/validate/formations.js';
 
 test('validateFormations emits deterministic errors/warnings', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  military: {
+    formations: {
             ok1: {
                 id: 'ok1',
                 faction: 'RBiH',
@@ -73,12 +74,14 @@ test('validateFormations emits deterministic errors/warnings', () => {
                 assignment: null
             }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const frontRegions: FrontRegionsFile = {
         schema: 1,
@@ -118,12 +121,13 @@ test('validateFormations emits deterministic errors/warnings', () => {
 
 test('validateFormations accepts valid formations', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  military: {
+    formations: {
             valid1: {
                 id: 'valid1',
                 faction: 'RBiH',
@@ -150,12 +154,14 @@ test('validateFormations accepts valid formations', () => {
                 tags: ['tag1', 'tag2']
             }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const frontRegions: FrontRegionsFile = {
         schema: 1,

@@ -16,7 +16,7 @@ async function ensureRemoved(dir: string): Promise<void> {
     }
 }
 
-function formationCounts(state: { formations?: Record<string, { kind?: string }> }): {
+function formationCounts(state: { military: { formations?: Record<string, { kind?: string }> } }): {
     brigades: number;
     corpsLike: number;
 } {
@@ -53,10 +53,10 @@ test('player_choice + no_initial_brigade_formations starts with corps only, then
     const result = await runScenario({ scenarioPath: SCENARIO_PATH, outDirBase: BASE_OUT });
 
     const initialState = JSON.parse(await readFile(result.paths.initial_save, 'utf8')) as {
-        formations?: Record<string, { kind?: string }>;
+        military: { formations?: Record<string, { kind?: string }> };
     };
     const finalState = JSON.parse(await readFile(result.paths.final_save, 'utf8')) as {
-        formations?: Record<string, { kind?: string }>;
+        military: { formations?: Record<string, { kind?: string }> };
     };
 
     const initial = formationCounts(initialState);

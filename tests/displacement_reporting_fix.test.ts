@@ -20,8 +20,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 /** Minimal War phase GameState fixture with System A displacement data. */
 function makePhaseIIStateWithDisplacementState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 20,
             seed: 'disp-fix-test',
             phase: 'war',
@@ -29,7 +29,7 @@ function makePhaseIIStateWithDisplacementState(): GameState {
             referendum_turn: 4,
             war_start_turn: 6
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 40, legitimacy: 40, control: 40, logistics: 40, exhaustion: 0 },
@@ -55,19 +55,22 @@ function makePhaseIIStateWithDisplacementState(): GameState {
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        // OSID-keyed political_controllers (as they are after Peace phase → War phase transition)
-        political_controllers: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {
             'op:banovici:banovici_2': 'RS',
             'op:banovici:seona': 'RBiH'
-        },
-        // System A: real displacement data from Peace phase
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'banovici': {
                 displaced_out: 15000,
                 displaced_in: 3000,
@@ -79,10 +82,10 @@ function makePhaseIIStateWithDisplacementState(): GameState {
                 lost_population: 5000
             }
         },
-        // System C: currently 0 (broken — verifying fix reports System A instead)
-        settlement_displacement: {},
-        municipality_displacement: {}
-    } as unknown as GameState;
+    settlement_displacement: {},
+    municipality_displacement: {}
+  } as any,
+} as unknown as GameState;
 }
 
 describe('displacement reporting fix — scenario_reporting.ts', () => {
@@ -137,20 +140,24 @@ describe('displacement reporting fix — scenario_reporting.ts', () => {
 describe('displacement OSID fix — isPressureEligible', () => {
     /** GameState with OSID-keyed political_controllers (post-promotion War phase state) */
     const osidKeyedState: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'osid-test', phase: 'war' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'osid-test', phase: 'war' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {
             'op:banovici:banovici_2': 'RS',
             'op:banovici:seona': 'RBiH'
         }
-    } as unknown as GameState;
+  } as any,
+} as unknown as GameState;
 
     const sidToOsid = {
         S100013: 'op:banovici:banovici_2',

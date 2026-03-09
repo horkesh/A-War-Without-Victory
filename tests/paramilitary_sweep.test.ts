@@ -30,22 +30,28 @@ function makeReverseMap(osids: string[]): OperationalToCanonicalReverseMap {
 
 function makeBaseState(overrides?: Partial<GameState>): GameState {
     return {
-        meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', ...(overrides?.meta ?? {}) } as GameState['meta'],
-        factions: [
+  meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', ...(overrides?.meta ?? {}) } as GameState['meta'],
+  factions: [
             { id: 'RS' } as FactionState,
             { id: 'RBiH' } as FactionState,
         ],
-        formations: {},
-        political_controllers: {},
-        municipalities: {},
-        casualty_ledger: initializeCasualtyLedger(['RS', 'RBiH', 'HRHB']),
-        civilian_casualties: {
+  ...overrides,
+  military: {
+    formations: {},
+    casualty_ledger: initializeCasualtyLedger(['RS', 'RBiH', 'HRHB'])
+  } as any,
+  political: {
+    political_controllers: {},
+    municipalities: {}
+  } as any,
+  displacement: {
+    civilian_casualties: {
             RS: { killed: 0, fled_abroad: 0 },
             RBiH: { killed: 0, fled_abroad: 0 },
             HRHB: { killed: 0, fled_abroad: 0 },
-        },
-        ...overrides,
-    } as GameState;
+        }
+  } as any,
+} as GameState;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -60,11 +66,13 @@ describe('paramilitary_sweep', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:c'], ['op:a', 'op:d'], ['op:b', 'op:d'], ['op:c', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:c', 'op:d']);
             const state = makeBaseState({
-                political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
-                municipalities: {
+  political: {
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
+    municipalities: {
                     // OSID municipality from 'op:a' → '' (no colon), but for test we add an entry
-                },
-            });
+                }
+  } as any,
+});
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
 
@@ -79,9 +87,11 @@ describe('paramilitary_sweep', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:d'], ['op:b', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:d']);
             const state = makeBaseState({
-                meta: { turn: 25, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
-                political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' },
-            });
+  meta: { turn: 25, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
+  political: {
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' }
+  } as any,
+});
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
             expect(report.spawned).toHaveLength(0);
@@ -93,9 +103,11 @@ describe('paramilitary_sweep', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:c'], ['op:a', 'op:d'], ['op:b', 'op:d'], ['op:c', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:c', 'op:d']);
             const state = makeBaseState({
-                meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
-                political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
-            });
+  meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
+  political: {
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' }
+  } as any,
+});
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
 
@@ -110,10 +122,12 @@ describe('paramilitary_sweep', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:c'], ['op:a', 'op:d'], ['op:b', 'op:d'], ['op:c', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:c', 'op:d']);
             const state = makeBaseState({
-                meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
-                political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
-                paramilitary_policy: 'always_deny',
-            });
+  meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test', player_faction: 'RS' } as GameState['meta'],
+  paramilitary_policy: 'always_deny',
+  political: {
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' }
+  } as any,
+});
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
             expect(report.pending_player_requests).toBe(0);
@@ -124,15 +138,19 @@ describe('paramilitary_sweep', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:d'], ['op:b', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:d']);
             const state = makeBaseState({
-                political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' },
-                formations: {
+  military: {
+    formations: {
                     'rbih_bde_1': {
                         id: 'rbih_bde_1', faction: 'RBiH', name: 'Test', created_turn: 0,
                         status: 'active', assignment: null, kind: 'brigade',
                         location_osid: 'op:d', personnel: 1000,
                     } as FormationState,
-                },
-            });
+                }
+  } as any,
+  political: {
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' }
+  } as any,
+});
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
             // Defended pocket should not generate a spawn
@@ -143,15 +161,19 @@ describe('paramilitary_sweep', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:c'], ['op:a', 'op:d'], ['op:b', 'op:d'], ['op:c', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:c', 'op:d']);
             const state = makeBaseState({
-                political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' },
-                formations: {
+  military: {
+    formations: {
                     'para_rs_t3_0': {
                         id: 'para_rs_t3_0', faction: 'RS', name: 'Para', created_turn: 3,
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'op:d', paramilitary_eta: 1, personnel: 150,
                     } as FormationState,
-                },
-            });
+                }
+  } as any,
+  political: {
+    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:c': 'RS', 'op:d': 'RBiH' }
+  } as any,
+});
 
             const report = detectParamilitaryTargets(state, edges, reverseMap);
             // op:d already targeted — should not spawn another
@@ -163,15 +185,19 @@ describe('paramilitary_sweep', () => {
         it('decrements ETA and captures at ETA=0', () => {
             const reverseMap = makeReverseMap(['A', 'D']);
             const state = makeBaseState({
-                political_controllers: { A: 'RS', D: 'RBiH' },
-                formations: {
+  military: {
+    formations: {
                     'para_rs_t3_0': {
                         id: 'para_rs_t3_0', faction: 'RS', name: 'Para', created_turn: 3,
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'D', paramilitary_eta: 1, personnel: 150,
                     } as FormationState,
-                },
-            });
+                }
+  } as any,
+  political: {
+    political_controllers: { A: 'RS', D: 'RBiH' }
+  } as any,
+});
 
             const report = advanceParamilitaries(state, reverseMap);
 
@@ -187,15 +213,19 @@ describe('paramilitary_sweep', () => {
         it('does not capture when ETA > 0', () => {
             const reverseMap = makeReverseMap(['A', 'D']);
             const state = makeBaseState({
-                political_controllers: { A: 'RS', D: 'RBiH' },
-                formations: {
+  military: {
+    formations: {
                     'para_rs_t3_0': {
                         id: 'para_rs_t3_0', faction: 'RS', name: 'Para', created_turn: 3,
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'D', paramilitary_eta: 2, personnel: 150,
                     } as FormationState,
-                },
-            });
+                }
+  } as any,
+  political: {
+    political_controllers: { A: 'RS', D: 'RBiH' }
+  } as any,
+});
 
             const report = advanceParamilitaries(state, reverseMap);
 
@@ -207,15 +237,19 @@ describe('paramilitary_sweep', () => {
         it('records casualties in casualty ledger', () => {
             const reverseMap = makeReverseMap(['A', 'D']);
             const state = makeBaseState({
-                political_controllers: { A: 'RS', D: 'RBiH' },
-                formations: {
+  military: {
+    formations: {
                     'para_rs_t3_0': {
                         id: 'para_rs_t3_0', faction: 'RS', name: 'Para', created_turn: 3,
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'D', paramilitary_eta: 1, personnel: 150,
                     } as FormationState,
-                },
-            });
+                }
+  } as any,
+  political: {
+    political_controllers: { A: 'RS', D: 'RBiH' }
+  } as any,
+});
 
             advanceParamilitaries(state, reverseMap);
 
@@ -230,15 +264,19 @@ describe('paramilitary_sweep', () => {
         it('dissolves paramilitary that arrives at already-captured OSID', () => {
             const reverseMap = makeReverseMap(['A', 'D']);
             const state = makeBaseState({
-                political_controllers: { A: 'RS', D: 'RS' }, // D already RS
-                formations: {
+  military: {
+    formations: {
                     'para_rs_t3_0': {
                         id: 'para_rs_t3_0', faction: 'RS', name: 'Para', created_turn: 3,
                         status: 'active', assignment: null, kind: 'paramilitary',
                         paramilitary_target: 'D', paramilitary_eta: 1, personnel: 150,
                     } as FormationState,
-                },
-            });
+                }
+  } as any,
+  political: {
+    political_controllers: { A: 'RS', D: 'RS' }
+  } as any,
+});
 
             const report = advanceParamilitaries(state, reverseMap);
 

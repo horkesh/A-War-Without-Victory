@@ -29,7 +29,7 @@ export function ArmyDetail({ railSlot }: ArmyDetailProps) {
   if (!selectedArmyId || !loadedGameState) return null;
 
   const faction = selectedArmyId;
-  const formations = loadedGameState.military.formations.filter((f) => f.faction === faction);
+  const formations = loadedGameState.formations.filter((f) => f.faction === faction);
   const brigades = formations.filter((f) => f.kind === 'brigade');
   const corpsFormations = formations.filter((f) => f.kind === 'corps' || f.kind === 'corps_asset');
   const totalPersonnel = brigades.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
@@ -166,7 +166,7 @@ export function ArmyDetail({ railSlot }: ArmyDetailProps) {
         {armyCombatSummary && (
           <CombatSummaryPanel
             summary={armyCombatSummary}
-            formations={loadedGameState.military.formations}
+            formations={loadedGameState.formations}
             onSelectFormation={setSelectedFormationId}
           />
         )}

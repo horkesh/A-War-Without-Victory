@@ -10,11 +10,12 @@ test('validateFrontSegments returns deterministic issues for malformed records',
     const settlementIds = ['a', 'b', 'c', 'd'];
 
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 2, seed: 'seed' },
-        factions: [],
-        formations: {},
-        front_segments: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 2, seed: 'seed' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {
             // valid
             'a__b': {
                 edge_id: 'a__b',
@@ -88,11 +89,13 @@ test('validateFrontSegments returns deterministic issues for malformed records',
                 max_friction: 2
             }
         },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const issues = validateFrontSegments(state, settlementEdges, { settlementIds });
 

@@ -34,13 +34,17 @@ function makeMinimalState(turn: number, formations: Record<string, Partial<Forma
         } as FormationState;
     }
     return {
-        meta: { turn, phase: 'war', scenario_start_date: { year: 1992, month: 4, day: 6 }, seed: 'test' } as GameState['meta'],
-        factions: [{ id: 'RS' as FactionId }] as GameState['factions'],
-        formations: fmts,
-        political_controllers: {},
-        corps_command: {},
-        corps_front_sectors: {},
-    } as GameState;
+  meta: { turn, phase: 'war', scenario_start_date: { year: 1992, month: 4, day: 6 }, seed: 'test' } as GameState['meta'],
+  factions: [{ id: 'RS' as FactionId }] as GameState['factions'],
+  military: {
+    formations: fmts,
+    corps_command: {},
+    corps_front_sectors: {}
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as GameState;
 }
 
 describe('Pre-planned Operations — No Exempt Corps Brigades', () => {

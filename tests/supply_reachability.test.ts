@@ -7,9 +7,9 @@ import { computeSupplyReachability } from '../src/state/supply_reachability.js';
 
 test('computeSupplyReachability with single source reaches all connected controlled', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -17,13 +17,16 @@ test('computeSupplyReachability with single source reaches all connected control
                 supply_sources: ['s1']
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     // Line graph: s1—s2—s3
     const adjacencyMap = buildAdjacencyMap([
@@ -46,9 +49,9 @@ test('computeSupplyReachability with single source reaches all connected control
 
 test('computeSupplyReachability with empty sources yields all isolated', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -56,13 +59,16 @@ test('computeSupplyReachability with empty sources yields all isolated', () => {
                 supply_sources: []
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const adjacencyMap = buildAdjacencyMap([
         { a: 's1', b: 's2' },
@@ -79,9 +85,9 @@ test('computeSupplyReachability with empty sources yields all isolated', () => {
 
 test('computeSupplyReachability with control split isolates disconnected', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -89,13 +95,16 @@ test('computeSupplyReachability with control split isolates disconnected', () =>
                 supply_sources: ['s1']
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     // Line graph: s1—s2—s3 (s2 not controlled)
     const adjacencyMap = buildAdjacencyMap([
@@ -113,9 +122,9 @@ test('computeSupplyReachability with control split isolates disconnected', () =>
 
 test('computeSupplyReachability ignores sources not controlled by faction', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'A',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -129,13 +138,16 @@ test('computeSupplyReachability ignores sources not controlled by faction', () =
                 supply_sources: []
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const adjacencyMap = buildAdjacencyMap([
         { a: 's1', b: 's2' }
@@ -154,9 +166,9 @@ test('computeSupplyReachability ignores sources not controlled by faction', () =
 
 test('computeSupplyReachability deterministically orders factions and results', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             {
                 id: 'Z',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -170,13 +182,16 @@ test('computeSupplyReachability deterministically orders factions and results', 
                 supply_sources: ['s2']
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const adjacencyMap = buildAdjacencyMap([
         { a: 's1', b: 's2' }

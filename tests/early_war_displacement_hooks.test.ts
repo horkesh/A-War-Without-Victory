@@ -15,8 +15,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function stateWithPhaseI(overrides?: { war_displacement_initiated?: Record<string, number> }): GameState {
     const s: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'disp-hooks-fixture',
             phase: 'war',
@@ -24,7 +24,7 @@ function stateWithPhaseI(overrides?: { war_displacement_initiated?: Record<strin
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -50,22 +50,27 @@ function stateWithPhaseI(overrides?: { war_displacement_initiated?: Record<strin
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s1: 'RBiH', s2: 'RS' },
-        municipalities: {
-            MUN_A: { stability_score: 40 },
-            MUN_B: { stability_score: 50 }
-        },
-        war_consolidation_until: {},
-        war_militia_strength: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: {
             MUN_A: { RBiH: 25, RS: 60, HRHB: 10 },
             MUN_B: { RBiH: 20, RS: 80, HRHB: 5 }
         }
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH', s2: 'RS' },
+    municipalities: {
+            MUN_A: { stability_score: 40 },
+            MUN_B: { stability_score: 50 }
+        },
+    war_consolidation_until: {}
+  } as any,
+        displacement: {} as any
     };
     if (overrides?.war_displacement_initiated !== undefined) {
         s.displacement.war_displacement_initiated = overrides.war_displacement_initiated as Record<MunicipalityId, number>;

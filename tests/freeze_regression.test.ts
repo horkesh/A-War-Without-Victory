@@ -32,9 +32,9 @@ test.skip('freeze: displacement constants match frozen values', () => {
     // Test ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.10 (10% per turn when encircled)
     // This is simpler to test than unsupplied pressure (which requires 3 consecutive turns)
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'freeze-test' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'freeze-test' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -43,12 +43,13 @@ test.skip('freeze: displacement constants match frozen values', () => {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -57,8 +58,10 @@ test.skip('freeze: displacement constants match frozen values', () => {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -68,6 +71,8 @@ test.skip('freeze: displacement constants match frozen values', () => {
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 
     const settlements = new Map<string, SettlementRecord>();
@@ -102,9 +107,9 @@ test.skip('freeze: displacement constants match frozen values', () => {
 
 test('freeze: sustainability constants match frozen values', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'freeze-sust-test' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'freeze-sust-test' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -113,12 +118,13 @@ test('freeze: sustainability constants match frozen values', () => {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -128,6 +134,9 @@ test('freeze: sustainability constants match frozen values', () => {
                 updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any,
+        displacement: {} as any
     };
 
     const settlements = new Map<string, SettlementRecord>();
@@ -177,9 +186,9 @@ test('freeze: sustainability constants match frozen values', () => {
  */
 test('freeze: scenario 1 - prolonged siege invariants', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'prolonged-siege-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'prolonged-siege-seed' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -188,12 +197,13 @@ test('freeze: scenario 1 - prolonged siege invariants', () => {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -202,8 +212,10 @@ test('freeze: scenario 1 - prolonged siege invariants', () => {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -213,6 +225,8 @@ test('freeze: scenario 1 - prolonged siege invariants', () => {
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 
     const settlements = new Map<string, SettlementRecord>();
@@ -280,9 +294,9 @@ test('freeze: scenario 1 - prolonged siege invariants', () => {
 
 test('freeze: scenario 2 - temporary encirclement invariants', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'temporary-encirclement-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'temporary-encirclement-seed' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -298,12 +312,13 @@ test('freeze: scenario 2 - temporary encirclement invariants', () => {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -312,8 +327,10 @@ test('freeze: scenario 2 - temporary encirclement invariants', () => {
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -323,6 +340,8 @@ test('freeze: scenario 2 - temporary encirclement invariants', () => {
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 
     const settlements = new Map<string, SettlementRecord>();
@@ -381,9 +400,9 @@ test('freeze: scenario 2 - temporary encirclement invariants', () => {
 
 test('freeze: scenario 4 - multi-pocket negotiation pressure monotonicity', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'multi-pocket-stress-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'multi-pocket-stress-seed' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -406,12 +425,13 @@ test('freeze: scenario 4 - multi-pocket negotiation pressure monotonicity', () =
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -436,8 +456,10 @@ test('freeze: scenario 4 - multi-pocket negotiation pressure monotonicity', () =
                 exhausted: 0,
                 updated_turn: 0
             }
-        },
-        displacement_state: {
+        }
+  } as any,
+  displacement: {
+    displacement_state: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 original_population: 10000,
@@ -463,6 +485,8 @@ test('freeze: scenario 4 - multi-pocket negotiation pressure monotonicity', () =
                 last_updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any
     };
 
     const settlements = new Map<string, SettlementRecord>();
@@ -533,9 +557,9 @@ test('freeze: no control flips from sustainability collapse', () => {
     // This test verifies that sustainability collapse does not directly flip control
     // (control flips are separate proposals, not automatic from collapse)
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'no-flip-test' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'no-flip-test' },
+  factions: [
             {
                 id: 'FACTION_A',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -544,12 +568,13 @@ test('freeze: no control flips from sustainability collapse', () => {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
                 faction: 'FACTION_A',
@@ -559,6 +584,9 @@ test('freeze: no control flips from sustainability collapse', () => {
                 updated_turn: 0
             }
         }
+  } as any,
+        political: {} as any,
+        displacement: {} as any
     };
 
     const settlements = new Map<string, SettlementRecord>();

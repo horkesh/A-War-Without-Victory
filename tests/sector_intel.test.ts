@@ -54,12 +54,16 @@ function makeSector(
 
 function makeMinimalState(sectors: Record<string, CorpsFrontSector>): GameState {
     return {
-        meta: { turn: 1, phase: 'war', scenario_id: 'test', week: 1, year: 1992 },
-        formations: {},
-        political_controllers: {},
-        corps_front_sectors: sectors,
-        sector_intel: {},
-    } as unknown as GameState;
+  meta: { turn: 1, phase: 'war', scenario_id: 'test', week: 1, year: 1992 },
+  military: {
+    formations: {},
+    corps_front_sectors: sectors,
+    sector_intel: {}
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 }
 
 // ---------------------------------------------------------------------------

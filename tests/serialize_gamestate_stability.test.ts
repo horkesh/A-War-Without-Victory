@@ -11,24 +11,29 @@ import { serializeGameState } from '../src/state/serializeGameState.js';
 /** Minimal valid GameState with out-of-order record keys (political_controllers, formations). */
 function fixtureWithOutOfOrderKeys(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'stability-fixture' },
-        factions: [],
-        formations: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 'stability-fixture' },
+  factions: [],
+  military: {
+    formations: {
             'form_z': { id: 'form_z', faction: 'RBiH', name: 'Z', created_turn: 0, status: 'active', assignment: null },
             'form_a': { id: 'form_a', faction: 'RS', name: 'A', created_turn: 0, status: 'active', assignment: null },
             'form_m': { id: 'form_m', faction: 'HRHB', name: 'M', created_turn: 0, status: 'active', assignment: null }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {
             'sid_zzz': 'RBiH',
             'sid_aaa': null,
             'sid_mmm': 'RS'
         }
+  } as any,
+        displacement: {} as any
     };
 }
 

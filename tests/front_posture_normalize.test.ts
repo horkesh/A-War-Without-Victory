@@ -6,11 +6,12 @@ import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 
 test('normalizeFrontPosture deterministically cleans and clamps assignments', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'seed' },
-        factions: [],
-        formations: {},
-        front_segments: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 'seed' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {
             'a__b': {
                 edge_id: 'a__b',
                 active: true,
@@ -34,7 +35,7 @@ test('normalizeFrontPosture deterministically cleans and clamps assignments', ()
                 max_friction: 0
             }
         },
-        front_posture: {
+    front_posture: {
             A: {
                 assignments: {
                     // active edge with weight 3, posture push
@@ -52,10 +53,12 @@ test('normalizeFrontPosture deterministically cleans and clamps assignments', ()
                 }
             }
         },
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     normalizeFrontPosture(state);
 

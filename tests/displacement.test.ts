@@ -10,9 +10,9 @@ import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.
  */
 function createTestState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'test-seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'test-seed' },
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 },
@@ -26,8 +26,9 @@ function createTestState(): GameState {
                 supply_sources: []
             }
         ],
-        formations: {},
-        front_segments: {
+  military: {
+    formations: {},
+    front_segments: {
             'sid1__sid3': {
                 edge_id: 'sid1__sid3',
                 active: true,
@@ -40,9 +41,9 @@ function createTestState(): GameState {
                 max_friction: 0
             }
         },
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {
             'sid1__sid3': {
                 edge_id: 'sid1__sid3',
                 value: 25,
@@ -50,7 +51,7 @@ function createTestState(): GameState {
                 last_updated_turn: 10
             }
         },
-        militia_pools: {
+    militia_pools: {
             '20168': {
                 mun_id: '20168',
                 faction: 'RBiH',
@@ -68,7 +69,9 @@ function createTestState(): GameState {
                 updated_turn: 10
             }
         }
-    };
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 }
 
 /**

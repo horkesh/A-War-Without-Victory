@@ -6,9 +6,9 @@ import { spendNegotiationCapital, updateNegotiationCapital } from '../src/state/
 
 function createTestState(): GameState {
     return {
-        schema_version: 1,
-        meta: { turn: 5, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn: 5, seed: 'test' },
+  factions: [
             {
                 id: 'faction_a',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 10 },
@@ -26,21 +26,24 @@ function createTestState(): GameState {
                 patron_state: { material_support_level: 0.5, diplomatic_isolation: 0, constraint_severity: 0.3, patron_commitment: 0.5, last_updated: 0 }
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_ledger: [],
-        international_visibility_pressure: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_ledger: [],
+    international_visibility_pressure: {
             sarajevo_siege_visibility: 0,
             enclave_humanitarian_pressure: 0,
             atrocity_visibility: 0,
             negotiation_momentum: 0.2,
             last_major_shift: null
         },
-        enclaves: [
+    enclaves: [
             {
                 id: 'ENCL_TEST',
                 faction_id: 'faction_a',
@@ -52,6 +55,8 @@ function createTestState(): GameState {
                 collapsed: false
             }
         ]
+  } as any,
+        displacement: {} as any
     };
 }
 

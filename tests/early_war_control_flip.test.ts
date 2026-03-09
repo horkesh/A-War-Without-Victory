@@ -14,8 +14,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function stateWithTwoAdjacentMuns(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 10,
             seed: 'control-flip-fixture',
             phase: 'war',
@@ -23,7 +23,7 @@ function stateWithTwoAdjacentMuns(): GameState {
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -49,25 +49,30 @@ function stateWithTwoAdjacentMuns(): GameState {
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
-            s1: 'RBiH',
-            s2: 'RS'
-        },
-        municipalities: {
-            MUN_A: { stability_score: 30 },
-            MUN_B: { stability_score: 70 }
-        },
-        war_consolidation_until: {},
-        war_militia_strength: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: {
             MUN_A: { RBiH: 25, RS: 60, HRHB: 10 },
             MUN_B: { RBiH: 20, RS: 80, HRHB: 5 }
         }
+  } as any,
+  political: {
+    political_controllers: {
+            s1: 'RBiH',
+            s2: 'RS'
+        },
+    municipalities: {
+            MUN_A: { stability_score: 30 },
+            MUN_B: { stability_score: 70 }
+        },
+    war_consolidation_until: {}
+  } as any,
+        displacement: {} as any
     };
 }
 
@@ -128,29 +133,34 @@ test('war runTurn is not gated by war_start_turn in two-phase model', async () =
 
 test('large-settlement resistance: mun in LARGE_SETTLEMENT_MUN_IDS with zero defender militia does not flip', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'large-mun-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'large-mun-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 5 },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { sid_sarajevo: 'RBiH', sid_other: 'RS' },
-        municipalities: {
-            centar_sarajevo: { stability_score: 30 },
-            other_mun: { stability_score: 50 }
-        },
-        war_consolidation_until: {},
-        war_militia_strength: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: {
             centar_sarajevo: { RBiH: 0, RS: 80, HRHB: 0 },
             other_mun: { RBiH: 0, RS: 80, HRHB: 0 }
         }
+  } as any,
+  political: {
+    political_controllers: { sid_sarajevo: 'RBiH', sid_other: 'RS' },
+    municipalities: {
+            centar_sarajevo: { stability_score: 30 },
+            other_mun: { stability_score: 50 }
+        },
+    war_consolidation_until: {}
+  } as any,
+        displacement: {} as any
     };
     const settlements = new Map([
         ['sid_sarajevo', { sid: 'sid_sarajevo', mun1990_id: 'centar_sarajevo', mun_code: 'centar_sarajevo' } as any],
@@ -166,29 +176,34 @@ test('large-settlement resistance: mun in LARGE_SETTLEMENT_MUN_IDS with zero def
 
 test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so flip outcome can differ', () => {
     const baseState: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'coercion-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'coercion-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 5 },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s_a: 'RBiH', s_b: 'RS' },
-        municipalities: {
-            MUN_A: { stability_score: 30 },
-            MUN_B: { stability_score: 70 }
-        },
-        war_consolidation_until: {},
-        war_militia_strength: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: {
             MUN_A: { RBiH: 40, RS: 0, HRHB: 0 },
             MUN_B: { RBiH: 0, RS: 20, HRHB: 0 }
         }
+  } as any,
+  political: {
+    political_controllers: { s_a: 'RBiH', s_b: 'RS' },
+    municipalities: {
+            MUN_A: { stability_score: 30 },
+            MUN_B: { stability_score: 70 }
+        },
+    war_consolidation_until: {}
+  } as any,
+        displacement: {} as any
     };
     const settlements = new Map([
         ['s_a', { sid: 's_a', mun1990_id: 'MUN_A', mun_code: 'MUN_A' } as any],
@@ -197,9 +212,18 @@ test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so f
     const edges = [{ a: 's_a', b: 's_b' }];
     const input = { turn: 10, settlements, edges };
 
-    const reportWithout = runControlFlip({ state: { ...baseState }, ...input });
+    const reportWithout = runControlFlip({ state: { ...baseState,
+        military: {} as any, political: {} as any, displacement: {} as any
+    }, ...input });
     const reportWith = runControlFlip({
-        state: { ...baseState, coercion_pressure_by_municipality: { MUN_A: 1 } },
+        state: {
+  ...baseState,
+  political: {
+    coercion_pressure_by_municipality: { MUN_A: 1 }
+  } as any,
+  military: {} as any,
+  displacement: {} as any
+},
         ...input
     });
 
@@ -211,29 +235,34 @@ test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so f
 
 test('runControlFlip militaryActionOnly branch disables militia-only flips without adjacent brigades', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'military-action-only-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'military-action-only-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s_a: 'RBiH', s_b: 'RS' },
-        municipalities: {
-            MUN_A: { stability_score: 20 },
-            MUN_B: { stability_score: 70 }
-        },
-        war_consolidation_until: {},
-        war_militia_strength: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: {
             MUN_A: { RBiH: 0, RS: 0, HRHB: 0 },
             MUN_B: { RBiH: 0, RS: 90, HRHB: 0 }
         }
+  } as any,
+  political: {
+    political_controllers: { s_a: 'RBiH', s_b: 'RS' },
+    municipalities: {
+            MUN_A: { stability_score: 20 },
+            MUN_B: { stability_score: 70 }
+        },
+    war_consolidation_until: {}
+  } as any,
+        displacement: {} as any
     };
     const settlements = new Map([
         ['s_a', { sid: 's_a', mun1990_id: 'MUN_A', mun_code: 'MUN_A' } as any],
@@ -262,29 +291,34 @@ test('runControlFlip militaryActionOnly branch disables militia-only flips witho
 
 test('RS border intervention bonus applies in early-war FRY-adjacent municipalities only', () => {
     const makeState = (turn: number): GameState => ({
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn, seed: 'border-intervention-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 0 },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn, seed: 'border-intervention-fixture', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 0 },
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 0 },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s_target: 'RBiH', s_attacker: 'RS' },
-        municipalities: {
-            bijeljina: { stability_score: 30 },
-            src_mun: { stability_score: 60 },
-        },
-        war_consolidation_until: {},
-        war_militia_strength: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    war_militia_strength: {
             bijeljina: { RBiH: 40, RS: 0, HRHB: 0 },
             src_mun: { RBiH: 0, RS: 10, HRHB: 0 },
         }
+  } as any,
+  political: {
+    political_controllers: { s_target: 'RBiH', s_attacker: 'RS' },
+    municipalities: {
+            bijeljina: { stability_score: 30 },
+            src_mun: { stability_score: 60 },
+        },
+    war_consolidation_until: {}
+  } as any,
+        displacement: {} as any
     });
     const settlements = new Map([
         ['s_target', { sid: 's_target', mun1990_id: 'bijeljina', mun_code: 'bijeljina' } as any],

@@ -12,19 +12,24 @@ import { validateGameStateShape } from '../src/state/validateGameState.js';
 /** Minimal valid GameState for Phase A1.1 shape (meta + optional political_controllers). */
 function minimalValidGameState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'phase-a1.1-fixture' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'phase-a1.1-fixture' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: {
             'SID_001': 'RBiH',
             'SID_002': null
         }
+  } as any,
+        displacement: {} as any
     };
 }
 

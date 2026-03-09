@@ -6,13 +6,14 @@ import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.
 
 test('buildFormationsReport is deterministic and has no timestamps', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 3, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 3, seed: 'seed' },
+  factions: [
             { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  military: {
+    formations: {
             z1: {
                 id: 'z1',
                 faction: 'B',
@@ -30,12 +31,14 @@ test('buildFormationsReport is deterministic and has no timestamps', () => {
                 assignment: null
             }
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const report = buildFormationsReport(state);
     assert.strictEqual(report.schema, 1);

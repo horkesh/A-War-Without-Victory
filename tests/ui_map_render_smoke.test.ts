@@ -51,10 +51,19 @@ describe('Tactical map render smoke', () => {
 
   it('buildFormationsGeoJSON does not throw with minimal state and returns points', () => {
     const minimalState: LoadedGameState = {
-      label: 'Turn 1',
-      turn: 1,
-      phase: 'war',
-      formations: [
+  label: 'Turn 1',
+  turn: 1,
+  phase: 'war',
+  militiaPools: [],
+  controlBySettlement: { 'op:sarajevo': 'RBiH', 'op:pale': 'RS' },
+  statusBySettlement: {},
+  brigadeAorByFormationId: { b1: ['op:sarajevo'] },
+  attackOrders: [],
+  aorOrders: [],
+  recentControlEvents: [],
+  latestTurnSummary: null,
+  military: {
+    formations: [
         {
           id: 'b1',
           faction: 'RBiH',
@@ -69,16 +78,9 @@ describe('Tactical map render smoke', () => {
           location_osid: 'op:sarajevo',
           personnel: 2000,
         },
-      ],
-      militiaPools: [],
-      controlBySettlement: { 'op:sarajevo': 'RBiH', 'op:pale': 'RS' },
-      statusBySettlement: {},
-      brigadeAorByFormationId: { b1: ['op:sarajevo'] },
-      attackOrders: [],
-      aorOrders: [],
-      recentControlEvents: [],
-      latestTurnSummary: null,
-    };
+      ]
+  } as any,
+};
     const controlledGeo = buildControlGeoJSON(minimalBaseGeo, minimalState.controlBySettlement);
     const result = buildFormationsGeoJSON(minimalState, controlledGeo);
     expect(result.type).toBe('FeatureCollection');

@@ -7,13 +7,14 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function makeState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'test', phase: 'war' } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'test', phase: 'war' } as any,
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
         ] as any,
-        formations: {
+  military: {
+    formations: {
             army_rbih: {
                 id: 'army_rbih',
                 faction: 'RBiH',
@@ -39,12 +40,13 @@ function makeState(): GameState {
                 tags: [],
             },
         } as any,
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-    } as GameState;
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+} as GameState;
 }
 
 test('ensureDefaultTheatres builds one deterministic theatre per faction', () => {

@@ -6,12 +6,9 @@ import { repairScenarioArtifactState } from '../src/scenario/scenario_runner.js'
 describe('scenario runner artifact repair', () => {
     it('displaces active formations out of enemy-controlled OSIDs before artifact serialization', () => {
         const state = {
-            meta: { phase: 'war', turn: 4, seed: 'artifact-repair' },
-            political_controllers: {
-                'op:enemy:town': 'RS',
-                'op:friendly:town': 'RBiH',
-            },
-            formations: {
+  meta: { phase: 'war', turn: 4, seed: 'artifact-repair' },
+  military: {
+    formations: {
                 arbih_test: {
                     id: 'arbih_test',
                     faction: 'RBiH',
@@ -27,8 +24,15 @@ describe('scenario runner artifact repair', () => {
                     posture: 'hold',
                     tags: [],
                 },
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+  political: {
+    political_controllers: {
+                'op:enemy:town': 'RS',
+                'op:friendly:town': 'RBiH',
+            }
+  } as any,
+} as unknown as GameState;
         const edges: EdgeRecord[] = [
             { a: 'op:enemy:town', b: 'op:friendly:town' },
         ];

@@ -219,7 +219,7 @@ export function Tooltip() {
           osidDisplayNames={osidDisplayNames}
           osidPropertiesMap={osidPropertiesMap}
           controlBySettlement={loadedGameState?.controlBySettlement}
-          formationsAtOsid={getFormationsAtOsid(loadedGameState?.military?.formations, delayedTarget.id).map((f) => ({
+          formationsAtOsid={getFormationsAtOsid(loadedGameState?.formations, delayedTarget.id).map((f) => ({
             id: f.id,
             name: f.name,
             faction: f.faction,
@@ -232,7 +232,7 @@ export function Tooltip() {
       {delayedTarget.type === 'formation' && (
         <FormationTooltipContent
           formationId={delayedTarget.id}
-          formations={loadedGameState?.military?.formations}
+          formations={loadedGameState?.formations}
           attackOrders={loadedGameState?.attackOrders}
           osidDisplayNames={osidDisplayNames}
         />
@@ -242,7 +242,7 @@ export function Tooltip() {
           edgeId={delayedTarget.id}
           frontEdgesOsid={loadedGameState?.frontEdgesOsid}
           frontPressureByEdge={loadedGameState?.frontPressureByEdge}
-          formations={loadedGameState?.military?.formations}
+          formations={loadedGameState?.formations}
           assignableFrontSegments={loadedGameState?.assignableFrontSegments}
           corpsFrontSectors={loadedGameState?.corpsFrontSectors}
         />

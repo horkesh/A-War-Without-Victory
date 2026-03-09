@@ -1334,7 +1334,7 @@ export class WarPlanningMap {
         const orgPen: OrganizationalPenetration = mun?.organizational_penetration ?? {};
 
         // Get controller
-        const controller = this.gameState?.political?.political_controllers?.[munId] ?? null;
+        const controller = this.gameState?.political.political_controllers?.[munId] ?? null;
 
         // Get majority ethnicity from first settlement in this municipality
         let majorityEthnicity: string | null = null;

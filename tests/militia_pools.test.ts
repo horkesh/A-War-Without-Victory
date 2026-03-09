@@ -7,18 +7,19 @@ import { validateMilitiaPools } from '../src/validate/militia_pools.js';
 
 test('validateMilitiaPools emits deterministic errors', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             { id: 'ARBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'VRS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             '20168': {
                 mun_id: '20168',
                 faction: 'RBiH',
@@ -85,7 +86,9 @@ test('validateMilitiaPools emits deterministic errors', () => {
                 updated_turn: 5
             }
         }
-    };
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const validMunicipalityIds = new Set(['20168', '20044', '21001', '22001', '23001', '24001', '25001']);
     const issues = validateMilitiaPools(state, validMunicipalityIds);
@@ -104,17 +107,18 @@ test('validateMilitiaPools emits deterministic errors', () => {
 
 test('validateMilitiaPools accepts valid militia pools', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {
             '20168': {
                 mun_id: '20168',
                 faction: 'RBiH',
@@ -133,7 +137,9 @@ test('validateMilitiaPools accepts valid militia pools', () => {
                 tags: ['tag1', 'tag2']
             }
         }
-    };
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const validMunicipalityIds = new Set(['20168', '20044']);
     const issues = validateMilitiaPools(state, validMunicipalityIds);
@@ -143,16 +149,19 @@ test('validateMilitiaPools accepts valid militia pools', () => {
 
 test('militia_pools defaults to {} on deserialize', () => {
     const stateWithoutMilitia: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'seed' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'seed' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const payload = serializeState(stateWithoutMilitia);
     const hydrated = deserializeState(payload);
@@ -163,16 +172,19 @@ test('militia_pools defaults to {} on deserialize', () => {
 
 test('validateMilitiaPools handles empty militia_pools', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'seed' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'seed' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {} as any, displacement: {} as any
+};
 
     const validMunicipalityIds = new Set<string>();
     const issues = validateMilitiaPools(state, validMunicipalityIds);

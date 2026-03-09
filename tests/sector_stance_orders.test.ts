@@ -23,12 +23,13 @@ function makeBrigade(id: string, faction: FactionId, corpsId: string): Formation
 
 function makeState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'sector-stance-test', phase: 'war' } as any,
-        factions: [
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'sector-stance-test', phase: 'war' } as any,
+  factions: [
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {
+  military: {
+    formations: {
             'rs-corps-1': {
                 id: 'rs-corps-1', faction: 'RS', name: 'I Krajina', created_turn: 1, status: 'active',
                 assignment: null, kind: 'corps', personnel: 50, cohesion: 80, hq_sid: 'S1', tags: []
@@ -36,14 +37,13 @@ function makeState(): GameState {
             'rs-brig-1': makeBrigade('rs-brig-1', 'RS', 'rs-corps-1'),
             'rs-brig-2': makeBrigade('rs-brig-2', 'RS', 'rs-corps-1'),
         },
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { S1: 'RS' },
-        brigade_posture_orders: [],
-        corps_front_sectors: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {},
+    brigade_posture_orders: [],
+    corps_front_sectors: {
             'sector:rs-corps-1': {
                 sector_id: 'sector:rs-corps-1',
                 corps_id: 'rs-corps-1',
@@ -62,8 +62,12 @@ function makeState(): GameState {
                 offensive_signs: false,
             }
         },
-        sector_stance_orders: [{ sector_id: 'sector:rs-corps-1', stance: 'dig_in' }]
-    } as GameState;
+    sector_stance_orders: [{ sector_id: 'sector:rs-corps-1', stance: 'dig_in' }]
+  } as any,
+  political: {
+    political_controllers: { S1: 'RS' }
+  } as any,
+} as GameState;
 }
 
 describe('applySectorStanceOrders', () => {

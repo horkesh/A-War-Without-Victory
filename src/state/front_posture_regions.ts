@@ -19,7 +19,7 @@ function clampWeight(value: unknown): number {
  *   - For each region_id assignment (sorted):
  *     - Find region in frontRegions by region_id (missing => ignore)
  *     - For each edge_id in region.edge_ids (already sorted):
- *       - Skip inactive segments (state.front_segments[edge_id]?.active !== true)
+ *       - Skip inactive segments (state.military.front_segments[edge_id]?.active !== true)
  *       - If edge posture already exists for this faction, do nothing (edge overrides region)
  *       - Else write edge posture = region posture/weight (clamped/coerced)
  *

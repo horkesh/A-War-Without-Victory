@@ -17,17 +17,22 @@ function makeBrigade(partial: Pick<OobBrigade, 'id' | 'faction' | 'name' | 'home
 
 test('factionHasPresenceInMun returns false for fragmented mun', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 's' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s1: 'RS' },
-        municipalities: { prijedor: { control: 'fragmented' } }
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 's' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { s1: 'RS' },
+    municipalities: { prijedor: { control: 'fragmented' } }
+  } as any,
+        displacement: {} as any
     };
     const sidToMun = new Map([['s1', 'prijedor']]);
     assert.strictEqual(factionHasPresenceInMun(state, 'RS', 'prijedor', sidToMun), false);
@@ -35,17 +40,22 @@ test('factionHasPresenceInMun returns false for fragmented mun', () => {
 
 test('factionHasPresenceInMun returns true when controller matches', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 's' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s1: 'RS', s2: 'RBiH' },
-        municipalities: { prijedor: { control: 'consolidated' } }
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 's' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { s1: 'RS', s2: 'RBiH' },
+    municipalities: { prijedor: { control: 'consolidated' } }
+  } as any,
+        displacement: {} as any
     };
     const sidToMun = new Map([['s1', 'prijedor'], ['s2', 'prijedor']]);
     assert.strictEqual(factionHasPresenceInMun(state, 'RS', 'prijedor', sidToMun), true);
@@ -67,17 +77,22 @@ test('buildSidToMunFromSettlements includes only entries with mun1990_id', () =>
 
 test('createOobFormations is idempotent and only creates when presence', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 's' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { sid_zenica: 'RBiH' },
-        municipalities: { zenica: { control: 'consolidated' }, mostar: { control: 'consolidated' } }
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 's' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { sid_zenica: 'RBiH' },
+    municipalities: { zenica: { control: 'consolidated' }, mostar: { control: 'consolidated' } }
+  } as any,
+        displacement: {} as any
     };
     const sidToMun = new Map([['sid_zenica', 'zenica'], ['sid_mostar', 'mostar']]);
     const hq: Record<string, string> = { zenica: 'sid_zenica', mostar: 'sid_mostar' };
@@ -99,17 +114,22 @@ test('createOobFormations is idempotent and only creates when presence', () => {
 
 test('createOobFormations preserves army_hq corps kind', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 's' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { sid_sarajevo: 'RBiH' },
-        municipalities: { centar_sarajevo: { control: 'consolidated' } }
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 's' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { sid_sarajevo: 'RBiH' },
+    municipalities: { centar_sarajevo: { control: 'consolidated' } }
+  } as any,
+        displacement: {} as any
     };
     const sidToMun = new Map([['sid_sarajevo', 'centar_sarajevo']]);
     const hq: Record<string, string> = { centar_sarajevo: 'sid_sarajevo' };
@@ -124,17 +144,22 @@ test('createOobFormations preserves army_hq corps kind', () => {
 
 test('createOobFormations uses faction-specific initial personnel defaults', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 's' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s_rs: 'RS', s_rbih: 'RBiH', s_hrhb: 'HRHB' },
-        municipalities: { prijedor: { control: 'consolidated' }, zenica: { control: 'consolidated' }, mostar: { control: 'consolidated' } }
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 's' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { s_rs: 'RS', s_rbih: 'RBiH', s_hrhb: 'HRHB' },
+    municipalities: { prijedor: { control: 'consolidated' }, zenica: { control: 'consolidated' }, mostar: { control: 'consolidated' } }
+  } as any,
+        displacement: {} as any
     };
     const sidToMun = new Map([['s_rs', 'prijedor'], ['s_rbih', 'zenica'], ['s_hrhb', 'mostar']]);
     const hq: Record<string, string> = { prijedor: 's_rs', zenica: 's_rbih', mostar: 's_hrhb' };
@@ -151,17 +176,22 @@ test('createOobFormations uses faction-specific initial personnel defaults', () 
 
 test('createOobFormations tags brigades with explicit home_osid as fixed placement', () => {
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 's' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s_rs: 'RS' },
-        municipalities: { prijedor: { control: 'consolidated' } }
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1, seed: 's' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { s_rs: 'RS' },
+    municipalities: { prijedor: { control: 'consolidated' } }
+  } as any,
+        displacement: {} as any
     };
     const sidToMun = new Map([['s_rs', 'prijedor']]);
     const hq: Record<string, string> = { prijedor: 's_rs' };

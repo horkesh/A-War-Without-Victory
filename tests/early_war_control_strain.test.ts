@@ -13,8 +13,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function stateWithMunicipalitiesAndControl(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 12,
             seed: 'strain-fixture',
             phase: 'war',
@@ -22,7 +22,7 @@ function stateWithMunicipalitiesAndControl(): GameState {
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
@@ -48,18 +48,23 @@ function stateWithMunicipalitiesAndControl(): GameState {
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { s1: 'RBiH', s2: 'RS', s3: 'RBiH' },
-        municipalities: {
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH', s2: 'RS', s3: 'RBiH' },
+    municipalities: {
             MUN_A: { stability_score: 60 },
             MUN_B: { stability_score: 50 }
         },
-        war_control_strain: {}
+    war_control_strain: {}
+  } as any,
+        displacement: {} as any
     };
 }
 

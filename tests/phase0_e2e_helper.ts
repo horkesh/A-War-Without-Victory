@@ -47,28 +47,33 @@ export function buildMinimalPhase0State(opts?: {
     const seed = opts?.seed ?? 'e2e-seed';
 
     const state: GameState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn,
             seed,
             phase: 'peace'
         },
-        factions: [
+  factions: [
             { id: 'RBiH', ...DEFAULT_FACTION },
             { id: 'RS', ...DEFAULT_FACTION },
             { id: 'HRHB', ...DEFAULT_FACTION }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: [],
-        supply_rights: { corridors: [] },
-        municipalities: { M1: {}, M2: {} }
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: [],
+    supply_rights: { corridors: [] },
+    municipalities: { M1: {}, M2: {} }
+  } as any,
+        displacement: {} as any
     };
 
     if (opts?.bothDeclared) {

@@ -198,10 +198,10 @@ export function buildOrderArrowsGeoJSON(
   controlledOsidGeoJson: FeatureCollection,
 ): FeatureCollection {
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
-  const formationById = new Map(state.military.formations.map((f) => [f.id, f] as const));
+  const formationById = new Map(state.formations.map((f) => [f.id, f] as const));
   const sourceByBrigadeId = new Map<string, string | null>();
 
-  for (const formation of [...state.military.formations].sort((a, b) => a.id.localeCompare(b.id))) {
+  for (const formation of [...state.formations].sort((a, b) => a.id.localeCompare(b.id))) {
     sourceByBrigadeId.set(formation.id, resolveFormationLocationOsid(formation, centroidLookup));
   }
 

@@ -289,7 +289,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
         </button>
         {loadedGameState && (
           <span className="text-xs font-mono text-text-secondary glow-text whitespace-nowrap">
-            {formatTurnLabel(loadedGameState.label)} - {loadedGameState.military.formations.length} formations - {loadedGameState.phase.toUpperCase()}
+            {formatTurnLabel(loadedGameState.label)} - {loadedGameState.formations.length} formations - {loadedGameState.phase.toUpperCase()}
           </span>
         )}
       </div>

@@ -16,8 +16,8 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 function minimalPhaseIIState(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 25,
             seed: 'pf-cap',
             phase: 'war',
@@ -25,21 +25,27 @@ function minimalPhaseIIState(): GameState {
             referendum_turn: 6,
             war_start_turn: 10
         },
-        factions: [
+  factions: [
             { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        political_controllers: { S1: 'RBiH', S2: 'RS' },
-        settlement_displacement: { S1: 0.2, S2: 0.5 },
-        municipality_displacement: { MUN_A: 0.3 }
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    political_controllers: { S1: 'RBiH', S2: 'RS' }
+  } as any,
+  displacement: {
+    settlement_displacement: { S1: 0.2, S2: 0.5 },
+    municipality_displacement: { MUN_A: 0.3 }
+  } as any,
+};
 }
 
 test('getMunicipalityDisplacementFactor returns 1 - displacement in [0, 1]', () => {

@@ -16,9 +16,9 @@ import { evaluateTreatyAcceptance } from '../src/state/treaty_acceptance.js';
 // Helper: Create minimal game state
 function createMinimalGameState(turn: number = 1): GameState {
     return {
-        schema_version: 1,
-        meta: { turn, seed: 'test' },
-        factions: [
+  schema_version: 1,
+  meta: { turn, seed: 'test' },
+  factions: [
             {
                 id: 'RBiH',
                 areasOfResponsibility: ['1', '2'],
@@ -41,15 +41,20 @@ function createMinimalGameState(turn: number = 1): GameState {
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             }
         ],
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        formations: {},
-        militia_pools: {},
-        control_overrides: {},
-        control_recognition: {},
-        negotiation_ledger: []
+  military: {
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    formations: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    control_overrides: {},
+    control_recognition: {},
+    negotiation_ledger: []
+  } as any,
+        displacement: {} as any
     };
 }
 

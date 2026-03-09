@@ -179,8 +179,10 @@ describe('notable moments', () => {
 describe('generateWarStories', () => {
     it('generates stories for all brigades with history', () => {
         const state = {
-            meta: { turn: 52, phase: 'war', start_year: 1992 },
-            formations: {
+  meta: { turn: 52, phase: 'war', start_year: 1992 },
+  factions: [],
+  military: {
+    formations: {
                 b1: makeFormation({
                     id: 'b1',
                     brigade_history: makeHistory({ battles_fought: 10, victories: 7, peak_personnel: 2000 }),
@@ -191,10 +193,12 @@ describe('generateWarStories', () => {
                     brigade_history: makeHistory({ battles_fought: 1 }),
                 }),
                 corps1: makeFormation({ id: 'corps1', kind: 'corps' }), // Should be skipped
-            },
-            factions: [],
-            political_controllers: {},
-        } as unknown as GameState;
+            }
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 
         const stories = generateWarStories(state);
         assert.equal(stories.length, 2);
@@ -204,13 +208,17 @@ describe('generateWarStories', () => {
 
     it('skips formations without history', () => {
         const state = {
-            meta: { turn: 52, phase: 'war', start_year: 1992 },
-            formations: {
+  meta: { turn: 52, phase: 'war', start_year: 1992 },
+  factions: [],
+  military: {
+    formations: {
                 b1: makeFormation({ id: 'b1' }), // No brigade_history
-            },
-            factions: [],
-            political_controllers: {},
-        } as unknown as GameState;
+            }
+  } as any,
+  political: {
+    political_controllers: {}
+  } as any,
+} as unknown as GameState;
 
         const stories = generateWarStories(state);
         assert.equal(stories.length, 0);

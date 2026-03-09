@@ -50,7 +50,7 @@ test('init_control apr1992 ethnic: zvornik has ethnic overrides (split), bijelji
 
     assert(existsSync(result.paths.initial_save), 'initial_save.json should exist');
     const initialContent = await readFile(result.paths.initial_save, 'utf8');
-    const state = JSON.parse(initialContent) as { political_controllers?: Record<string, string | null> };
+    const state = JSON.parse(initialContent) as { political: { political_controllers?: Record<string, string | null> } };
     const pc = state.political.political_controllers ?? {};
     const targetMuns = ['zvornik', 'bijeljina'];
     const countsByMun = new Map<string, Map<string, number>>();

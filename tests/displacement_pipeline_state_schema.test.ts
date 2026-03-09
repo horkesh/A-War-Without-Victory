@@ -16,8 +16,8 @@ import { validateGameStateShape } from '../src/state/validateGameState.js';
 /** Minimal valid GameState with Phase F displacement fields present. */
 function phaseFGameStateFixture(): GameState {
     return {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: {
             turn: 30,
             seed: 'phase-f-fixture',
             phase: 'war',
@@ -29,7 +29,7 @@ function phaseFGameStateFixture(): GameState {
             game_over: false,
             outcome: undefined
         },
-        factions: [
+  factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 5 },
@@ -67,22 +67,28 @@ function phaseFGameStateFixture(): GameState {
                 declaration_turn: null
             }
         ],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {},
-        negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-        ceasefire: {},
-        negotiation_ledger: [],
-        supply_rights: { corridors: [] },
-        political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS', 'SID_003': 'HRHB' },
-        municipalities: {},
-        settlement_displacement: { 'SID_001': 0.2, 'SID_002': 0.5 },
-        settlement_displacement_started_turn: { 'SID_001': 25, 'SID_002': 28 },
-        municipality_displacement: { 'MUN_A': 0.3, 'MUN_B': 0.4 }
-    };
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+  political: {
+    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+    ceasefire: {},
+    negotiation_ledger: [],
+    supply_rights: { corridors: [] },
+    political_controllers: { 'SID_001': 'RBiH', 'SID_002': 'RS', 'SID_003': 'HRHB' },
+    municipalities: {}
+  } as any,
+  displacement: {
+    settlement_displacement: { 'SID_001': 0.2, 'SID_002': 0.5 },
+    settlement_displacement_started_turn: { 'SID_001': 25, 'SID_002': 28 },
+    municipality_displacement: { 'MUN_A': 0.3, 'MUN_B': 0.4 }
+  } as any,
+};
 }
 
 test('validateGameStateShape returns ok for GameState with Phase F fields', () => {

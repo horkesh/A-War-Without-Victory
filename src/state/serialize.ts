@@ -175,8 +175,8 @@ function migrateState(raw: unknown): GameState {
         case undefined:
         case CURRENT_SCHEMA_VERSION: {
             // Default new fields for older saves.
-            if (!('front_segments' in candidate) || candidate.front_segments === undefined) {
-                candidate.front_segments = {};
+            if (!('front_segments' in candidate) || candidate.military.front_segments === undefined) {
+                candidate.military.front_segments = {};
             }
             if (!('theatres' in candidate) || candidate.theatres === undefined) {
                 candidate.theatres = {};
@@ -268,7 +268,7 @@ function migrateState(raw: unknown): GameState {
             }
 
             // Ensure deterministic defaulting for new FrontSegmentState fields.
-            const segments = candidate.front_segments as unknown;
+            const segments = candidate.military.front_segments as unknown;
             if (segments && typeof segments === 'object') {
                 const segRec = segments as Record<string, any>;
                 const keysSorted = Object.keys(segRec).sort();
@@ -532,7 +532,7 @@ function migrateState(raw: unknown): GameState {
                 (candidate as any).war_exhaustion !== undefined ||
                 (candidate as any).war_exhaustion_local !== undefined ||
                 (candidate as any).hostile_takeover_timers !== undefined ||
-                (candidate as any).displacement_camp_state !== undefined;
+                (candidate as any).displacement.displacement_camp_state !== undefined;
             if (hasAnyPhaseII) {
                 if (!('war_supply_pressure' in candidate) || (candidate as any).war_supply_pressure === undefined) {
                     (candidate as any).war_supply_pressure = {};
@@ -546,8 +546,8 @@ function migrateState(raw: unknown): GameState {
                 if (!('hostile_takeover_timers' in candidate) || (candidate as any).hostile_takeover_timers === undefined) {
                     (candidate as any).hostile_takeover_timers = {};
                 }
-                if (!('displacement_camp_state' in candidate) || (candidate as any).displacement_camp_state === undefined) {
-                    (candidate as any).displacement_camp_state = {};
+                if (!('displacement_camp_state' in candidate) || (candidate as any).displacement.displacement_camp_state === undefined) {
+                    (candidate as any).displacement.displacement_camp_state = {};
                 }
             }
 
@@ -569,8 +569,8 @@ function migrateState(raw: unknown): GameState {
             }
 
             // Displacement event log: default to empty array
-            if (!(candidate as any).displacement_event_log) {
-                (candidate as any).displacement_event_log = [];
+            if (!(candidate as any).displacement.displacement_event_log) {
+                (candidate as any).displacement.displacement_event_log = [];
             }
 
             // AoR phase-out: strip legacy keys so serialization allowlist passes (War phase uses location_osid only)

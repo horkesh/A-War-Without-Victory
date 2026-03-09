@@ -8,7 +8,7 @@ export function validateFrontPressure(state: GameState): ValidationIssue[] {
     if (!rec || typeof rec !== 'object') return issues;
 
     const currentTurn = Number.isInteger(state?.meta?.turn) ? (state.meta.turn as number) : null;
-    const segmentKeys = new Set(Object.keys((state as any)?.front_segments ?? {}));
+    const segmentKeys = new Set(Object.keys((state as any)?.military.front_segments ?? {}));
 
     const keys = Object.keys(rec).sort();
     for (const key of keys) {

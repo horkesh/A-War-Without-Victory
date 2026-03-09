@@ -65,9 +65,10 @@ describe('equipment offensive priority', () => {
 describe('sector offensive idle recovery', () => {
     it('moves a zero-eligibility execution operation into recovery after two consecutive idle turns', () => {
         const state = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 9, phase: 'war', seed: 'idle-recovery' } as any,
-            formations: {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 9, phase: 'war', seed: 'idle-recovery' } as any,
+  military: {
+    formations: {
                 rs_corps: {
                     id: 'rs_corps',
                     faction: 'RS',
@@ -84,14 +85,10 @@ describe('sector offensive idle recovery', () => {
                 b1: makeBrigade('b1', 'op:rear:staging'),
                 b2: makeBrigade('b2', 'op:rear:staging'),
             },
-            political_controllers: {
-                'op:target:objective': 'RBiH',
-                'op:rear:staging': 'RS',
-            },
-            corps_front_sectors: {
+    corps_front_sectors: {
                 rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
             },
-            corps_command: {
+    corps_command: {
                 rs_corps: {
                     command_span: 5,
                     subordinate_count: 2,
@@ -117,8 +114,15 @@ describe('sector offensive idle recovery', () => {
                         sector_id: 'rs_sector',
                     },
                 },
-            },
-        } as unknown as GameState;
+            }
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RBiH',
+                'op:rear:staging': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
 
         updateSectorOffensiveResults(state);
 

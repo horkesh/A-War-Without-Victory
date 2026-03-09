@@ -12,7 +12,7 @@ export function validateFrontSegments(
     const turn = state?.meta?.turn;
     const currentTurn = Number.isInteger(turn) ? (turn as number) : null;
 
-    const segments = (state as any)?.front_segments as Record<string, any> | undefined;
+    const segments = (state as any)?.military.front_segments as Record<string, any> | undefined;
     if (!segments || typeof segments !== 'object') return issues;
 
     // Deterministic key iteration.

@@ -52,19 +52,21 @@ function makeState(
     corps_front_sectors: Record<string, CorpsFrontSector> = {}
 ): GameState {
     return {
-        meta: {
+  meta: {
             turn: 5, phase: 'war', seed: 'test',
             scenario_start_date: { year: 1992, month: 4, day: 6 }
         } as GameState['meta'],
-        factions: [
+  factions: [
             { id: 'RS' as FactionId },
             { id: 'RBiH' as FactionId },
         ] as GameState['factions'],
-        formations,
-        political_controllers,
-        corps_front_sectors,
-        corps_command: {},
-    } as GameState;
+  formations,
+  political_controllers,
+  corps_front_sectors,
+  military: {
+    corps_command: {}
+  } as any,
+} as GameState;
 }
 
 function makeSubSegment(

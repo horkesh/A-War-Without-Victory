@@ -10,32 +10,36 @@ import { validateGameStateShape } from '../src/state/validateGameState.js';
 
 test('meta.turn must be non-negative integer (weeks)', () => {
     const state = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 5, seed: 'x' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 5, seed: 'x' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+};
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, true);
 });
 
 test('meta.turn as float is rejected', () => {
     const state = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1.5, seed: 'x' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 1.5, seed: 'x' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+};
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some(e => e.includes('integer')));
@@ -43,16 +47,18 @@ test('meta.turn as float is rejected', () => {
 
 test('meta.turn negative is rejected', () => {
     const state = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: -1, seed: 'x' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: -1, seed: 'x' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+};
     const result = validateGameStateShape(state);
     assert.strictEqual(result.ok, false);
     assert.ok((result as { errors: string[] }).errors.some(e => e.includes('non-negative') || e.includes('integer')));
@@ -60,16 +66,18 @@ test('meta.turn negative is rejected', () => {
 
 test('state has no timestamp or date fields in meta (contract: meta only turn + seed + optional phase)', () => {
     const state = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'x' },
-        factions: [],
-        formations: {},
-        front_segments: {},
-        front_posture: {},
-        front_posture_regions: {},
-        front_pressure: {},
-        militia_pools: {}
-    };
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 0, seed: 'x' },
+  factions: [],
+  military: {
+    formations: {},
+    front_segments: {},
+    front_posture: {},
+    front_posture_regions: {},
+    front_pressure: {},
+    militia_pools: {}
+  } as any,
+};
     const meta = state.meta as Record<string, unknown>;
     const allowed = new Set(['turn', 'seed', 'phase']);
     for (const key of Object.keys(meta)) {
