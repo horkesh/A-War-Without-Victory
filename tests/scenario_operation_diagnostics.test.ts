@@ -198,7 +198,9 @@ describe('combat causality diagnostics', () => {
                 power_ratio: 1.2,
                 attacker_won: true,
                 defender_brigade: null,
-                snap_events: []
+                snap_events: [],
+                attacker_casualties: 0,
+                defender_casualties: 0
             }])
         );
 
@@ -218,7 +220,9 @@ describe('combat causality diagnostics', () => {
                 power_ratio: 1.2,
                 attacker_won: true,
                 defender_brigade: null,
-                snap_events: []
+                snap_events: [],
+                attacker_casualties: 0,
+                defender_casualties: 0
             }])
         );
 
@@ -394,7 +398,9 @@ describe('combat causality diagnostics', () => {
                 power_ratio: 1.2,
                 attacker_won: true,
                 defender_brigade: null,
-                snap_events: []
+                snap_events: [],
+                attacker_casualties: 0,
+                defender_casualties: 0
             }])
         );
 
@@ -424,7 +430,9 @@ describe('combat causality diagnostics', () => {
                 power_ratio: 1.2,
                 attacker_won: true,
                 defender_brigade: null,
-                snap_events: []
+                snap_events: [],
+                attacker_casualties: 0,
+                defender_casualties: 0
             }])
         );
 
@@ -444,7 +452,9 @@ describe('combat causality diagnostics', () => {
                 power_ratio: 1.2,
                 attacker_won: true,
                 defender_brigade: null,
-                snap_events: []
+                snap_events: [],
+                attacker_casualties: 0,
+                defender_casualties: 0
             }])
         );
 
@@ -490,7 +500,9 @@ describe('combat causality diagnostics', () => {
                 power_ratio: 1.2,
                 attacker_won: true,
                 defender_brigade: null,
-                snap_events: []
+                snap_events: [],
+                attacker_casualties: 0,
+                defender_casualties: 0
             }])
         );
         const summary = buildCombatCausalitySummary(
@@ -505,7 +517,9 @@ describe('combat causality diagnostics', () => {
                 power_ratio: 1.2,
                 attacker_won: true,
                 defender_brigade: null,
-                snap_events: []
+                snap_events: [],
+                attacker_casualties: 0,
+                defender_casualties: 0
             }])
         );
         const attribution = {

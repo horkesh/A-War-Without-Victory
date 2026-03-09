@@ -276,6 +276,10 @@ export interface AttackResolutionOsidReport {
         attacker_won: boolean;
         defender_brigade: FormationId | null;
         snap_events: AttackResolutionOsidSnapEvent[];
+        /** Actual total attacker casualties (KIA+WIA+MIA) from this battle. */
+        attacker_casualties: number;
+        /** Actual total defender casualties (KIA+WIA+MIA) from this battle. */
+        defender_casualties: number;
     }>;
 }
 
@@ -410,7 +414,7 @@ export function resolveAttackOrdersOsid(
         } else if (isEnemyControlled) {
             // No brigade at the OSID. Try sector-pooled defense: brigades in the owning sector
             // cover the entire sector frontline even when not physically at this OSID.
-            const sector = findSectorForEnemyOsid(state, targetOsid);
+            const sector = findSectorForEnemyOsid(state, targetOsid, controller);
             const sectorBrigades = sector
                 ? sector.assigned_brigade_ids
                     .map(id => state.military.formations?.[id])
@@ -483,17 +487,6 @@ export function resolveAttackOrdersOsid(
         let outcome: CombatOutcome = surrenderCascade ? 'decisive_victory' : classifyOutcome(powerRatio);
 
         report.orders_processed += attackerIds.length;
-        report.battles.push({
-            attacker_brigade: firstAttacker.id,
-            attacker_faction: attackerFaction,
-            defender_faction: (controller ?? attackerFaction) as FactionId,
-            target_osid: targetOsid,
-            outcome,
-            power_ratio: powerRatio,
-            attacker_won: outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory',
-            defender_brigade: defenderFormation?.id ?? null,
-            snap_events: battleSnapEvents
-        });
         for (const a of attackerFormations) report.engaged_formation_ids.push(a.id);
         if (defenderFormation) report.engaged_formation_ids.push(defenderFormation.id);
 
@@ -508,6 +501,20 @@ export function resolveAttackOrdersOsid(
         const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult * defCasMult;
         const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
         const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(baseDefenderCas)));
+
+        report.battles.push({
+            attacker_brigade: firstAttacker.id,
+            attacker_faction: attackerFaction,
+            defender_faction: (controller ?? attackerFaction) as FactionId,
+            target_osid: targetOsid,
+            outcome,
+            power_ratio: powerRatio,
+            attacker_won: outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory',
+            defender_brigade: defenderFormation?.id ?? null,
+            snap_events: battleSnapEvents,
+            attacker_casualties: finalAttackerCas,
+            defender_casualties: finalDefenderCas,
+        });
 
         const aKia = Math.floor(finalAttackerCas * KIA_FRACTION);
         const aWia = Math.floor(finalAttackerCas * WIA_FRACTION);

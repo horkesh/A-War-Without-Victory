@@ -4,7 +4,7 @@
 
 **Rules:** Max 10 items per category. Re-prioritize on every read (highest first). Merge duplicates, remove stale. Each entry: date + short title + "Do instead".
 
-**Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`. Do instead: When doing calibration, GUI, or warroom work, read the relevant master first and update it during the session.
+**Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`. Do instead: When doing calibration, GUI, warroom, or realism work, read the relevant master first and update it during the session.
 
 ## Execution & Validation
 1. **[2026-03-07] Classify phases by real code impact, not plan labels**
@@ -77,7 +77,9 @@
     Do instead: Autonomous paramilitary units spawn when rear enemy pocket clusters detected (1-3 connected same-controller OSIDs, ALL external neighbors faction-controlled, BFS cluster detection, `op:` prefix filtering). Instant capture (MARCH_TURNS=0). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30. Casualties (inflicted+suffered) count in casualty_ledger; civilian casualties init via `??=`. Bot corps AI defers (excludes paramilitary targets from opportunistic targeting). Pipeline: `paramilitary-detect` + `paramilitary-advance` after `partition-corps-front-sectors`. Player: `pending_paramilitary_requests`; bot auto-approves. `FormationKind='paramilitary'` excluded from reinforcement/bot AI.
 
 ## Bot AI & Combat
-1. **[2026-03-06] RS stays offensive permanently — organic tempo decay (n159 audit)**
+1. **[2026-03-09] FIXED: VRS sector territory gaps + deep-rear brigades**
+   Do instead: Both bugs fixed in n473 session. Territory gaps: post-Voronoi sweep claims orphan OSIDs + `findSectorForEnemyOsid` territory_osids fallback. Deep-rear brigades: 7 distinct bugs in brigade AI evaluation chain, column march destination, and transit reset. Details in `docs/40_reports/REAL_WAR_MASTER.md`. RS deep rear 15→0. Remaining RBiH/HRHB deep rear is geographic fragmentation.
+2. **[2026-03-06] RS stays offensive permanently — organic tempo decay (n159 audit)**
    Do instead: RS has 2 doctrine phases (both offensive). No stance switch to balanced/defensive. Tempo decay emerges organically from fatigue (+2/battle, recovery every 2 turns), supply drain (MAINTENANCE_DRAIN 0.045/formation), and entrenchment wall (sqrt curve). RS_EARLY_WAR_END_WEEK=20 still marks reduced aggression (0.15→0.05) and max_attack_share (0.28→0.22). Weekly RS attacks decline 8→1 by w40.
 2. **[2026-03-08] Brigade discipline + fatigue + garrison + dissolution + siege + equipment**
    Do instead: Hard block — brigades ONLY attack `effectiveDirective.offensive_targets`. Fatigue: +1.5/turn frontline, +2 attacker/+1 defender per battle. Recovery: -1 every 3 turns, ONLY when OFF frontline (must rotate). **BUG FIXED (n304)**: `updateFormationFatigue` was resetting fractional fatigue to 0 via `Number.isInteger` check — replaced with `typeof !== 'number'` check. `garrison: true` on OOB → defend-only (VRS 65th Protection). Dissolution: `brigade_dissolution.ts` triple criteria. Siege bombardment: `siege_attrition.ts`. Equipment loss: OSID path (`attack_resolution_osid.ts`) now records equipment losses (was missing entirely — only legacy SID path had it). TANK_LOSS_RATE=0.08, ARTILLERY_LOSS_RATE=0.04, min 1 per battle if unit has equipment. Defender rates at 0.5×. Supply embargo: PATRON_AID_SCALE=10, faction efficiency (RBiH=0.3, RS=1.0, HRHB=0.8), caps (RBiH=45, RS=90, HRHB=70). **n304 ATH=93.8% (up from n290=88.1%) — fatigue+equipment naturally limit RS offensives.**

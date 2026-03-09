@@ -131,6 +131,37 @@ export function findNearestFriendlyOsidInSet(
     return null;
 }
 
+/** Like findNearestFriendlyOsidInSet, but returns the actual target OSID
+ *  instead of the first step. Used for column march destinations where the
+ *  pathfinder (Dijkstra) handles the multi-hop route. */
+export function findNearestFriendlyOsidDestination(
+    state: GameState,
+    faction: FactionId,
+    startOsid: Osid,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+    targetOsids: Set<string>
+): Osid | null {
+    const visited = new Set<string>();
+    const queue: Osid[] = [startOsid];
+    visited.add(startOsid);
+    let head = 0;
+    while (head < queue.length) {
+        const osid = queue[head++]!;
+        if (targetOsids.has(osid)) return osid;
+        const neighbors = adjacency.get(osid) ?? [];
+        for (const n of [...neighbors].sort(strictCompare)) {
+            if (visited.has(n)) continue;
+            visited.add(n);
+            const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
+            if (ctrl === faction) {
+                queue.push(n as Osid);
+            }
+        }
+    }
+    return null;
+}
+
 /** Count how many active brigades from the same corps are at a given OSID.
  * Corps-level rebalancing: a corps commander manages their own zone.
  * If corpsId is null/undefined, falls back to counting all faction brigades. */

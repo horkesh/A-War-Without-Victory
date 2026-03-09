@@ -257,6 +257,50 @@ function assignTerritoryVoronoi(
         }
     }
 
+    // Post-Voronoi sweep: claim any unclaimed friendly OSIDs that BFS missed.
+    // These are interior OSIDs not reachable from front edges because all paths
+    // to them went through territory belonging to a different corps. Assign them
+    // to the nearest sector (by hop count through friendly territory, ignoring
+    // corps boundaries) so they get sector-pooled defense.
+    const unclaimed: string[] = [];
+    for (const osid of friendlyOsids) {
+        if (!claimed.has(osid)) unclaimed.push(osid);
+    }
+    if (unclaimed.length > 0) {
+        // Build reverse lookup: claimed OSID → sector index (already in `claimed`)
+        // BFS from each unclaimed OSID to find nearest claimed OSID
+        unclaimed.sort(strictCompare);
+        for (const orphan of unclaimed) {
+            const visited = new Set<string>([orphan]);
+            let frontier = [orphan];
+            let found = false;
+            for (let hop = 0; hop < 20 && !found; hop++) {
+                const next: string[] = [];
+                for (const curr of frontier) {
+                    const neighbors = adjacency.get(curr as Osid) ?? [];
+                    for (const n of neighbors) {
+                        if (visited.has(n)) continue;
+                        visited.add(n);
+                        if (claimed.has(n)) {
+                            // Assign orphan to the same sector as this neighbor
+                            const sIdx = claimed.get(n)!;
+                            const count = sectorClaimCount.get(sIdx) ?? 0;
+                            if (count < MAX_TERRITORY_OSIDS) {
+                                claimed.set(orphan, sIdx);
+                                sectorClaimCount.set(sIdx, count + 1);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (friendlyOsids.has(n)) next.push(n);
+                    }
+                    if (found) break;
+                }
+                frontier = next;
+            }
+        }
+    }
+
     // Assign territory_osids to each sector
     const perSector: string[][] = sectors.map(() => []);
     for (const [osid, sectorIdx] of claimed) {
@@ -2233,15 +2277,24 @@ function getFactions(state: GameState): FactionId[] {
  */
 export function findSectorForEnemyOsid(
     state: GameState,
-    targetOsid: string
+    targetOsid: string,
+    defenderFaction?: string | null,
 ): CorpsFrontSector | null {
     const sectors = state.military.corps_front_sectors;
     if (!sectors) return null;
+    // First pass: check front-edge friendly_osids (primary — direct front defense)
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
+        if (defenderFaction && sector.faction !== defenderFaction) continue;
         for (const sub of sector.sub_segments) {
             if (sub.friendly_osids.includes(targetOsid)) return sector;
         }
+    }
+    // Second pass: check territory_osids (fallback — depth territory claimed by post-Voronoi sweep)
+    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sid]!;
+        if (defenderFaction && sector.faction !== defenderFaction) continue;
+        if (sector.territory_osids?.includes(targetOsid)) return sector;
     }
     return null;
 }

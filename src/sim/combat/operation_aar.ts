@@ -475,7 +475,9 @@ export function finalizeOperationAAR(
         }
     }
 
-    // 4. Derive outcome from recovery_reason + objectives held
+    // 4. Derive outcome from objectives held + recovery_reason
+    //    All objectives held at finalization → success, regardless of recovery path.
+    //    (Multi-axis ops can hit max_failures on one axis but still hold all objectives.)
     let outcome: OperationAAR['outcome'];
     const reason = op.recovery_reason;
     const allHeld = capturedObjectives.length === objectives.length && objectives.length > 0;
@@ -483,11 +485,12 @@ export function finalizeOperationAAR(
 
     if (reason === 'orphaned_sector') {
         outcome = 'orphaned';
-    } else if (reason === 'completed') {
-        outcome = allHeld ? 'success' : 'partial';
+    } else if (allHeld) {
+        outcome = 'success';
+    } else if (someHeld) {
+        outcome = 'partial';
     } else {
-        // max_failures, no_logged_attempt, manual_termination, or undefined
-        outcome = someHeld ? 'partial' : 'failure';
+        outcome = 'failure';
     }
 
     // 5. Aggregate totals from weekly_log

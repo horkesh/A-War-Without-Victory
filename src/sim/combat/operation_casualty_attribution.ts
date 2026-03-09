@@ -4,32 +4,24 @@
  * Scans battle results from attack resolution and credits casualties +
  * equipment losses to active operations. Runs as a pipeline step after
  * attack resolution and before sector offensive result updates.
+ *
+ * Uses actual casualty numbers from the battle report (attacker_casualties,
+ * defender_casualties) rather than re-estimating — ensures AAR totals match
+ * the real combat resolution including all modifiers (bombardment, militia,
+ * power ratio scaling, morale absorption, etc.).
  */
 
 import type { GameState, FormationId, CorpsOperation } from '../../state/game_state.js';
 import type { AttackResolutionOsidReport } from './attack_resolution_osid.js';
-import type { CombatOutcome } from './combat_math.js';
 import { emptyPendingCasualties, type PendingOperationCasualties } from './operation_aar.js';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const BASE_ATTACKER_LOSS_RATE = 0.04;
-const BASE_DEFENDER_LOSS_RATE = 0.028;
 const KIA_FRACTION = 0.30;
 const WIA_FRACTION = 0.55;
 const TANK_LOSS_RATE = 0.08;
 const ARTILLERY_LOSS_RATE = 0.04;
 const DEFENDER_EQUIPMENT_LOSS_SCALE = 0.5;
-
-/** Outcome modifiers: [attacker_mult, defender_mult]. */
-const OUTCOME_MODIFIERS: Record<CombatOutcome, [number, number]> = {
-    decisive_victory: [0.4, 1.6],
-    victory:          [0.6, 1.2],
-    costly_victory:   [1.2, 0.9],
-    stalemate:        [1.0, 0.8],
-    repulsed:         [1.3, 0.6],
-    catastrophic:     [1.8, 0.3],
-};
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -69,39 +61,37 @@ function getBrigadeAxisId(op: CorpsOperation, brigadeId: FormationId): string | 
     return null;
 }
 
-interface EstimatedLosses {
-    killed: number;
-    wounded: number;
-    tanks: number;
-    artillery: number;
+/** Split total casualties into KIA/WIA using standard fractions. */
+function splitCasualties(total: number): { killed: number; wounded: number } {
+    return {
+        killed: Math.round(total * KIA_FRACTION),
+        wounded: Math.round(total * WIA_FRACTION),
+    };
 }
 
-function estimateLosses(
+/** Estimate equipment losses from a brigade's composition + outcome. */
+function estimateEquipmentLosses(
     state: GameState,
     brigadeId: FormationId,
-    outcome: CombatOutcome,
+    totalCasualties: number,
     isAttacker: boolean,
-): EstimatedLosses {
+): { tanks: number; artillery: number } {
     const formation = state.military.formations?.[brigadeId];
-    if (!formation) return { killed: 0, wounded: 0, tanks: 0, artillery: 0 };
-
+    if (!formation) return { tanks: 0, artillery: 0 };
     const personnel = formation.personnel ?? 0;
-    const baseLossRate = isAttacker ? BASE_ATTACKER_LOSS_RATE : BASE_DEFENDER_LOSS_RATE;
-    const [attMod, defMod] = OUTCOME_MODIFIERS[outcome] ?? [1.0, 1.0];
-    const mod = isAttacker ? attMod : defMod;
+    if (personnel <= 0 || totalCasualties <= 0) return { tanks: 0, artillery: 0 };
 
-    const totalCasualties = Math.round(personnel * baseLossRate * mod);
-    const killed = Math.round(totalCasualties * KIA_FRACTION);
-    const wounded = Math.round(totalCasualties * WIA_FRACTION);
-
+    // Equipment loss proportional to casualty fraction of total personnel
+    const lossFraction = Math.min(1, totalCasualties / personnel);
     const comp = formation.composition;
     const tankCount = comp?.tanks ?? 0;
     const artilleryCount = comp?.artillery ?? 0;
     const eqScale = isAttacker ? 1.0 : DEFENDER_EQUIPMENT_LOSS_SCALE;
-    const tanks = Math.round(tankCount * TANK_LOSS_RATE * mod * eqScale);
-    const artillery = Math.round(artilleryCount * ARTILLERY_LOSS_RATE * mod * eqScale);
 
-    return { killed, wounded, tanks, artillery };
+    return {
+        tanks: Math.round(tankCount * TANK_LOSS_RATE * lossFraction * eqScale * 10),
+        artillery: Math.round(artilleryCount * ARTILLERY_LOSS_RATE * lossFraction * eqScale * 10),
+    };
 }
 
 function ensureAxisEntry(pending: PendingOperationCasualties, axisId: string): void {
@@ -118,57 +108,39 @@ function ensureAxisEntry(pending: PendingOperationCasualties, axisId: string): v
     }
 }
 
-function addSuffered(
-    pending: PendingOperationCasualties,
-    losses: EstimatedLosses,
-    axisId: string | null,
-): void {
-    pending.suffered.killed += losses.killed;
-    pending.suffered.wounded += losses.wounded;
-    pending.equipment_lost.tanks += losses.tanks;
-    pending.equipment_lost.artillery += losses.artillery;
+interface CasualtyCredit {
+    suffered: { killed: number; wounded: number };
+    inflicted: { killed: number; wounded: number };
+    equipment_lost: { tanks: number; artillery: number };
+    equipment_destroyed: { tanks: number; artillery: number };
+    equipment_captured: { tanks: number; artillery: number };
+}
+
+function addCredit(pending: PendingOperationCasualties, credit: CasualtyCredit, axisId: string | null): void {
+    pending.suffered.killed += credit.suffered.killed;
+    pending.suffered.wounded += credit.suffered.wounded;
+    pending.inflicted.killed += credit.inflicted.killed;
+    pending.inflicted.wounded += credit.inflicted.wounded;
+    pending.equipment_lost.tanks += credit.equipment_lost.tanks;
+    pending.equipment_lost.artillery += credit.equipment_lost.artillery;
+    pending.equipment_destroyed.tanks += credit.equipment_destroyed.tanks;
+    pending.equipment_destroyed.artillery += credit.equipment_destroyed.artillery;
+    pending.equipment_captured.tanks += credit.equipment_captured.tanks;
+    pending.equipment_captured.artillery += credit.equipment_captured.artillery;
 
     if (axisId != null) {
         ensureAxisEntry(pending, axisId);
         const ax = pending.by_axis![axisId];
-        ax.suffered.killed += losses.killed;
-        ax.suffered.wounded += losses.wounded;
-        ax.equipment_lost.tanks += losses.tanks;
-        ax.equipment_lost.artillery += losses.artillery;
-    }
-}
-
-function addInflicted(
-    pending: PendingOperationCasualties,
-    enemyLosses: EstimatedLosses,
-    axisId: string | null,
-): void {
-    pending.inflicted.killed += enemyLosses.killed;
-    pending.inflicted.wounded += enemyLosses.wounded;
-    pending.equipment_destroyed.tanks += enemyLosses.tanks;
-    pending.equipment_destroyed.artillery += enemyLosses.artillery;
-
-    if (axisId != null && pending.by_axis?.[axisId]) {
-        const ax = pending.by_axis[axisId];
-        ax.inflicted.killed += enemyLosses.killed;
-        ax.inflicted.wounded += enemyLosses.wounded;
-        ax.equipment_destroyed.tanks += enemyLosses.tanks;
-        ax.equipment_destroyed.artillery += enemyLosses.artillery;
-    }
-}
-
-function addCaptured(
-    pending: PendingOperationCasualties,
-    captured: { tanks: number; artillery: number },
-    axisId: string | null,
-): void {
-    pending.equipment_captured.tanks += captured.tanks;
-    pending.equipment_captured.artillery += captured.artillery;
-
-    if (axisId != null && pending.by_axis?.[axisId]) {
-        const ax = pending.by_axis[axisId];
-        ax.equipment_captured.tanks += captured.tanks;
-        ax.equipment_captured.artillery += captured.artillery;
+        ax.suffered.killed += credit.suffered.killed;
+        ax.suffered.wounded += credit.suffered.wounded;
+        ax.inflicted.killed += credit.inflicted.killed;
+        ax.inflicted.wounded += credit.inflicted.wounded;
+        ax.equipment_lost.tanks += credit.equipment_lost.tanks;
+        ax.equipment_lost.artillery += credit.equipment_lost.artillery;
+        ax.equipment_destroyed.tanks += credit.equipment_destroyed.tanks;
+        ax.equipment_destroyed.artillery += credit.equipment_destroyed.artillery;
+        ax.equipment_captured.tanks += credit.equipment_captured.tanks;
+        ax.equipment_captured.artillery += credit.equipment_captured.artillery;
     }
 }
 
@@ -177,6 +149,7 @@ function addCaptured(
 /**
  * Scan battle results and credit casualties + equipment losses to active operations.
  *
+ * Uses actual casualty numbers from the battle report rather than re-estimating.
  * For each battle:
  * - If the attacker brigade is in a sector_attack operation, credit losses to that op.
  * - If the defender brigade is in a sector_attack operation, credit losses to that op.
@@ -193,33 +166,35 @@ export function attributeOperationCasualties(
             attacker_brigade,
             attacker_faction,
             defender_brigade,
-            outcome,
             attacker_won,
+            attacker_casualties,
+            defender_casualties,
         } = battle;
 
-        // Estimate losses for attacker
-        const attackerLosses = estimateLosses(state, attacker_brigade, outcome, true);
-
-        // Estimate losses for defender (if present)
-        const defenderLosses = defender_brigade
-            ? estimateLosses(state, defender_brigade, outcome, false)
-            : { killed: 0, wounded: 0, tanks: 0, artillery: 0 };
+        const attackerCas = splitCasualties(attacker_casualties);
+        const defenderCas = splitCasualties(defender_casualties);
+        const attackerEqLoss = estimateEquipmentLosses(state, attacker_brigade, attacker_casualties, true);
+        const defenderEqLoss = defender_brigade
+            ? estimateEquipmentLosses(state, defender_brigade, defender_casualties, false)
+            : { tanks: 0, artillery: 0 };
 
         // Equipment captured: only ARBiH attacker who won
         const capturedByAttacker = (attacker_faction === 'RBiH' && attacker_won)
-            ? { tanks: defenderLosses.tanks, artillery: defenderLosses.artillery }
-            : null;
+            ? { ...defenderEqLoss }
+            : { tanks: 0, artillery: 0 };
 
         // --- Attacker's operation ---
         const attackerCtx = getBrigadeOpContext(state, attacker_brigade);
         if (attackerCtx) {
             const op = attackerCtx.op;
             if (!op.pending_casualties) op.pending_casualties = emptyPendingCasualties();
-            addSuffered(op.pending_casualties, attackerLosses, attackerCtx.axisId);
-            addInflicted(op.pending_casualties, defenderLosses, attackerCtx.axisId);
-            if (capturedByAttacker) {
-                addCaptured(op.pending_casualties, capturedByAttacker, attackerCtx.axisId);
-            }
+            addCredit(op.pending_casualties, {
+                suffered: attackerCas,
+                inflicted: defenderCas,
+                equipment_lost: attackerEqLoss,
+                equipment_destroyed: defenderEqLoss,
+                equipment_captured: capturedByAttacker,
+            }, attackerCtx.axisId);
             op.pending_casualties.attacks += 1;
             if (attackerCtx.axisId != null && op.pending_casualties.by_axis?.[attackerCtx.axisId]) {
                 op.pending_casualties.by_axis[attackerCtx.axisId].attacks += 1;
@@ -232,8 +207,13 @@ export function attributeOperationCasualties(
             if (defenderCtx) {
                 const op = defenderCtx.op;
                 if (!op.pending_casualties) op.pending_casualties = emptyPendingCasualties();
-                addSuffered(op.pending_casualties, defenderLosses, defenderCtx.axisId);
-                addInflicted(op.pending_casualties, attackerLosses, defenderCtx.axisId);
+                addCredit(op.pending_casualties, {
+                    suffered: defenderCas,
+                    inflicted: attackerCas,
+                    equipment_lost: defenderEqLoss,
+                    equipment_destroyed: attackerEqLoss,
+                    equipment_captured: { tanks: 0, artillery: 0 },
+                }, defenderCtx.axisId);
                 op.pending_casualties.attacks += 1;
                 if (defenderCtx.axisId != null && op.pending_casualties.by_axis?.[defenderCtx.axisId]) {
                     op.pending_casualties.by_axis[defenderCtx.axisId].attacks += 1;

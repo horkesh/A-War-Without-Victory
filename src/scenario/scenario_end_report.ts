@@ -1027,7 +1027,7 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
             const inflicted = aar.casualties_inflicted.killed + aar.casualties_inflicted.wounded;
             const exchange = suffered > 0
                 ? `${(inflicted / suffered).toFixed(1)}:1 exchange`
-                : (inflicted > 0 ? 'inf:1 exchange' : '0:0 exchange');
+                : (inflicted > 0 ? 'INF:1 exchange' : '— exchange');
             lines.push(
                 `${stars} ${aar.operation_name} (w${aar.started_turn}-w${aar.ended_turn})  ` +
                 `${oic}    ${aar.objectives_captured.length}/${aar.objectives_targeted.length} obj  ${exchange}  ` +

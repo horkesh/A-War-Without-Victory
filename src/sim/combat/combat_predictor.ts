@@ -209,7 +209,7 @@ export function predictCombatOutcome(
         defenderCohesion = defenderFormation.cohesion ?? 60;
     } else if (isEnemyControlled) {
         // No brigade at the OSID. Try sector-pooled defense: mirror of resolver logic.
-        const sector = findSectorForEnemyOsid(state, targetOsid);
+        const sector = findSectorForEnemyOsid(state, targetOsid, controller);
         const sectorBrigades = sector
             ? sector.assigned_brigade_ids
                 .map(id => state.military.formations?.[id])

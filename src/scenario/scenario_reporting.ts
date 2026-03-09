@@ -3,9 +3,11 @@
  * Do NOT add fields to GameState for reporting. Stable ordering throughout.
  */
 
-import type { GameState } from '../state/game_state.js';
+import type { GameState, FormationId, FactionId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { OperationCombatDiagnostic } from './combat_causality.js';
+import type { CombatOutcome } from '../sim/combat/combat_math.js';
+import type { Osid } from '../sim/combat/osid_adjacency.js';
 
 /** Phase H1.7: Per-week activity diagnostics (counts only; derived reporting). */
 export interface WeeklyActivityCounts {
@@ -74,6 +76,22 @@ export interface WeeklyReportRow {
     behavioral_health?: WeeklyBehavioralHealthSummary;
     /** Per-operation diagnostics for invalid-causality debugging. */
     operation_diagnostics?: OperationCombatDiagnostic[];
+    /** Per-battle results from attack resolution (raw data for diagnostics). */
+    battles?: WeeklyBattleEntry[];
+}
+
+/** Compact per-battle entry persisted in weekly report for diagnostics. */
+export interface WeeklyBattleEntry {
+    attacker_brigade: FormationId;
+    attacker_faction: FactionId;
+    defender_faction: FactionId;
+    target_osid: Osid;
+    outcome: CombatOutcome;
+    power_ratio: number;
+    attacker_won: boolean;
+    defender_brigade: FormationId | null;
+    attacker_casualties: number;
+    defender_casualties: number;
 }
 
 function sortedKeys(obj: Record<string, unknown>): string[] {
@@ -91,7 +109,8 @@ export function buildWeeklyReport(
     corpsSummary?: WeeklyCorpsSummaryEntry[],
     combatCausality?: WeeklyCombatCausalitySummary,
     controlChangeAttribution?: WeeklyControlChangeAttributionSummary,
-    operationDiagnostics?: OperationCombatDiagnostic[]
+    operationDiagnostics?: OperationCombatDiagnostic[],
+    battles?: WeeklyBattleEntry[]
 ): WeeklyReportRow {
     const week_index = state.meta.turn;
     const phase = state.meta.phase;
@@ -208,6 +227,9 @@ export function buildWeeklyReport(
     }
     if (operationDiagnostics !== undefined && operationDiagnostics.length > 0) {
         row.operation_diagnostics = operationDiagnostics;
+    }
+    if (battles !== undefined && battles.length > 0) {
+        row.battles = battles;
     }
     return row;
 }

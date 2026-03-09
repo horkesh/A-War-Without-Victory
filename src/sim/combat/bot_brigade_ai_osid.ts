@@ -398,6 +398,12 @@ function executeFactionDirectives(
             result
         };
 
+        // Skip brigades already in column transit — re-issuing orders resets progress.
+        const existingTransit = state.military.brigade_movement_state?.[brigade.id];
+        if (existingTransit?.stance === 'column' && existingTransit?.status === 'in_transit') {
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            continue;
+        }
         if (evaluateGarrisonAndDetachments(ctx)) continue;
         if (evaluateSectorMarch(ctx)) continue;
         if (evaluateHomeDefense(ctx)) continue;

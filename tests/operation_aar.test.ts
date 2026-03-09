@@ -346,6 +346,8 @@ describe('attributeOperationCasualties', () => {
                 attacker_won: true,
                 defender_brigade: 'bde_def',
                 snap_events: [],
+                attacker_casualties: 24,
+                defender_casualties: 27,
             },
         ]);
 
@@ -354,15 +356,13 @@ describe('attributeOperationCasualties', () => {
         expect(op.pending_casualties).toBeDefined();
         const pc = op.pending_casualties!;
         expect(pc.attacks).toBe(1);
-        // Attacker suffered losses (victory: attacker mod 0.6)
-        // 1000 * 0.04 * 0.6 = 24 total -> killed=Math.round(24*0.30)=7, wounded=Math.round(24*0.55)=13
+        // Attacker suffered losses: 24 total -> killed=Math.round(24*0.30)=7, wounded=Math.round(24*0.55)=13
         expect(pc.suffered.killed).toBe(7);
         expect(pc.suffered.wounded).toBe(13);
-        // Attacker inflicted on defender (victory: defender mod 1.2)
-        // 800 * 0.028 * 1.2 = 26.88 -> 27 total -> killed=Math.round(27*0.30)=8, wounded=Math.round(27*0.55)=15
+        // Attacker inflicted on defender: 27 total -> killed=Math.round(27*0.30)=8, wounded=Math.round(27*0.55)=15
         expect(pc.inflicted.killed).toBe(8);
         expect(pc.inflicted.wounded).toBe(15);
-        // Equipment lost: tanks 10*0.08*0.6=0.48->0, artillery 5*0.04*0.6=0.12->0
+        // Equipment lost: lossFraction=24/1000=0.024, tanks=round(10*0.08*0.024*1.0*10)=0, art=round(5*0.04*0.024*1.0*10)=0
         expect(pc.equipment_lost.tanks).toBe(0);
         expect(pc.equipment_lost.artillery).toBe(0);
         // Equipment captured: not ARBiH so none
@@ -401,11 +401,13 @@ describe('attributeOperationCasualties', () => {
             attacker_won: true,
             defender_brigade: 'bde_vrs',
             snap_events: [],
+            attacker_casualties: 16,
+            defender_casualties: 100,
         }]);
 
         attributeOperationCasualties(stateRBiH, reportWin);
         const pcWin = opRBiH.pending_casualties!;
-        // Defender equipment losses at decisive: tanks 20*0.08*1.6*0.5=1.28->1, art 10*0.04*1.6*0.5=0.32->0
+        // Defender equipment captured: lossFraction=100/800=0.125, tanks=round(20*0.08*0.125*0.5*10)=1
         expect(pcWin.equipment_captured.tanks).toBe(1);
         expect(pcWin.equipment_captured.artillery).toBe(0);
 
@@ -428,6 +430,8 @@ describe('attributeOperationCasualties', () => {
             attacker_won: false,
             defender_brigade: 'bde_vrs2',
             snap_events: [],
+            attacker_casualties: 52,
+            defender_casualties: 13,
         }]);
 
         attributeOperationCasualties(stateRBiH2, reportLose);
@@ -454,6 +458,8 @@ describe('attributeOperationCasualties', () => {
             attacker_won: true,
             defender_brigade: 'bde_def_rs',
             snap_events: [],
+            attacker_casualties: 16,
+            defender_casualties: 36,
         }]);
 
         attributeOperationCasualties(stateRS, reportRS);
@@ -518,6 +524,8 @@ describe('attributeOperationCasualties', () => {
                 attacker_won: true,
                 defender_brigade: 'bde_def1',
                 snap_events: [],
+                attacker_casualties: 24,
+                defender_casualties: 20,
             },
             {
                 attacker_brigade: 'bde_south',
@@ -529,6 +537,8 @@ describe('attributeOperationCasualties', () => {
                 attacker_won: false,
                 defender_brigade: 'bde_def2',
                 snap_events: [],
+                attacker_casualties: 32,
+                defender_casualties: 16,
             },
         ]);
 
@@ -573,6 +583,8 @@ describe('attributeOperationCasualties', () => {
             attacker_won: true,
             defender_brigade: 'bde_def',
             snap_events: [],
+            attacker_casualties: 24,
+            defender_casualties: 27,
         }]);
 
         attributeOperationCasualties(state, report);

@@ -1,5 +1,5 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
-import { findNearestFriendlyOsidInSet, isMovementDestinationRisky } from './bot_brigade_context.js';
+import { findNearestFriendlyOsidInSet, findNearestFriendlyOsidDestination, isMovementDestinationRisky } from './bot_brigade_context.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS, findNearestOffensiveTarget } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid, countCorpsBrigadesAtOsid, MAX_CORPS_BRIGADES_PER_OSID } from './bot_brigade_context.js';
@@ -8,16 +8,22 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { Osid } from './osid_adjacency.js';
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result } = ctx;
+    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis } = ctx;
 
-    // --- Sector march: brigade assigned to a sector but not on its front → column march ---
+    // --- Sector march: brigade assigned/reserve in a sector but not on its front → column march ---
     // This overrides home defense: the corps needs this brigade at the front.
     if (state.military.corps_front_sectors && !isActiveSectorOperationParticipant) {
         let assignedSector: (typeof state.military.corps_front_sectors)[string] | null = null;
+        let isReserve = false;
         for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
             const sec = state.military.corps_front_sectors[sid]!;
             if (sec.assigned_brigade_ids.includes(brigade.id)) {
                 assignedSector = sec;
+                break;
+            }
+            if (sec.reserve_brigade_ids.includes(brigade.id)) {
+                assignedSector = sec;
+                isReserve = true;
                 break;
             }
         }
@@ -27,9 +33,20 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 for (const o of ss.friendly_osids) frontSet.add(o);
             }
             if (!frontSet.has(loc)) {
-                // Not on sector front — column march there
+                // Reserve brigades only column march if deep rear (2+ hops).
+                // 1-hop reserves stay put — they're the immediate reinforcement pool.
+                if (isReserve) {
+                    const neighbors = adjacency.get(loc as Osid) ?? [];
+                    const nearFront = neighbors.some(n => {
+                        const nAnalysis = graphAnalysis.osid_analysis.get(n as Osid);
+                        return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
+                    });
+                    if (nearFront) return false; // 1-hop reserve — let later evaluations handle
+                }
+                // Not on sector front — column march there (use actual destination
+                // for multi-hop Dijkstra pathfinding, not just first step)
                 if (frontSet.size > 0) {
-                    const dest = findNearestFriendlyOsidInSet(state, faction, loc, adjacency, reverseMap, frontSet);
+                    const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, frontSet);
                     if (dest) {
                         result.column_march_orders[brigade.id] = dest;
                         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });

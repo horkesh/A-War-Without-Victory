@@ -30,7 +30,7 @@ export function evaluateGarrisonAndDetachments(ctx: BrigadeEvaluationContext): b
 }
 
 export function evaluateReserve(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsId, directive, adjEnemy, corpsReserve, graphAnalysis, loc, result } = ctx;
+    const { brigade, corpsId, directive, adjEnemy, corpsReserve, graphAnalysis, loc, adjacency, result } = ctx;
 
     // --- Reserve check: should this brigade be in reserve? ---
     if (directive && corpsId) {
@@ -41,6 +41,15 @@ export function evaluateReserve(ctx: BrigadeEvaluationContext): boolean {
             if (reserveInfo.reserved < maxReserve && adjEnemy.length === 0) {
                 const osidAnalysis = graphAnalysis.osid_analysis.get(loc);
                 if (!osidAnalysis || osidAnalysis.enemy_neighbors.length === 0) {
+                    // Only hold as reserve if within 1 hop of the front.
+                    // Deep-rear brigades (2+ hops) should march toward the front
+                    // instead of sitting idle — fall through to interior movement.
+                    const neighbors = adjacency.get(loc as import('./osid_adjacency.js').Osid) ?? [];
+                    const nearFront = neighbors.some(n => {
+                        const nAnalysis = graphAnalysis.osid_analysis.get(n as import('./osid_adjacency.js').Osid);
+                        return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
+                    });
+                    if (!nearFront) return false; // deep rear — let interior movement handle it
                     reserveInfo.reserved++;
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                     return true;

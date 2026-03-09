@@ -120,6 +120,7 @@ import {
 } from './scenario_probe_compare.js';
 import type {
     WeeklyActivityCounts,
+    WeeklyBattleEntry,
     WeeklyCombatCausalitySummary,
     WeeklyControlChangeAttributionSummary,
     WeeklyCorpsSummaryEntry,
@@ -1902,6 +1903,21 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     }));
             }
 
+            // Extract per-battle results from attack resolution report
+            const weeklyBattles: WeeklyBattleEntry[] | undefined =
+                turnReport.attack_resolution_osid?.battles?.map(b => ({
+                    attacker_brigade: b.attacker_brigade,
+                    attacker_faction: b.attacker_faction,
+                    defender_faction: b.defender_faction,
+                    target_osid: b.target_osid,
+                    outcome: b.outcome,
+                    power_ratio: Math.round(b.power_ratio * 100) / 100,
+                    attacker_won: b.attacker_won,
+                    defender_brigade: b.defender_brigade,
+                    attacker_casualties: b.attacker_casualties,
+                    defender_casualties: b.defender_casualties,
+                }));
+
             const reportRow = buildWeeklyReport(
                 state,
                 activity,
@@ -1909,7 +1925,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 corpsSummary,
                 weeklyCombatCausalityForReport,
                 weeklyControlChangeAttributionForReport,
-                operationDiagnosticsForReport
+                operationDiagnosticsForReport,
+                weeklyBattles
             );
             // Attach movement diagnostics from turn report
             const rowAny = reportRow as unknown as Record<string, unknown>;

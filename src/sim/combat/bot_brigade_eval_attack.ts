@@ -32,10 +32,24 @@ import {
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
 
 export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, cmd, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, isActiveSectorOperationParticipant } = ctx;
+    const { brigade, cmd, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, isActiveSectorOperationParticipant, graphAnalysis, adjEnemy } = ctx;
 
     // --- Home-ground brigades: defend or counterattack only, never attack ---
     if (brigade.home_defense_active === true && !isActiveSectorOperationParticipant) {
+        // Deep-rear home defense brigades (no enemy adjacent, 2+ hops from front)
+        // should NOT be trapped here — they must march toward the front via
+        // evaluateInteriorMovement instead of sitting idle in the rear.
+        if (adjEnemy.length === 0) {
+            const osidAnalysis = graphAnalysis.osid_analysis.get(loc);
+            if (!osidAnalysis || osidAnalysis.enemy_neighbors.length === 0) {
+                const neighbors = adjacency.get(loc as Osid) ?? [];
+                const nearFront = neighbors.some(n => {
+                    const nAnalysis = graphAnalysis.osid_analysis.get(n as Osid);
+                    return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
+                });
+                if (!nearFront) return false; // deep rear — fall through to interior movement
+            }
+        }
         if ((brigade.counterattack_window_turns ?? 0) > 0) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
         } else {
@@ -219,9 +233,21 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
 }
 
 export function evaluateReorganize(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsStance, adjEnemy, directive, state, faction, result, chosenTargets } = ctx;
+    const { brigade, corpsStance, adjEnemy, directive, state, faction, result, chosenTargets, graphAnalysis, loc, adjacency } = ctx;
     // --- Rule 3: Corps stance reorganize → rest, but grab adjacent undefended targets ---
     if (corpsStance === 'reorganize') {
+        // Deep-rear brigades should march toward front, not sit idle in reorganize
+        if (adjEnemy.length === 0) {
+            const osidAnalysis = graphAnalysis.osid_analysis.get(loc);
+            if (!osidAnalysis || osidAnalysis.enemy_neighbors.length === 0) {
+                const neighbors = adjacency.get(loc as Osid) ?? [];
+                const nearFront = neighbors.some(n => {
+                    const nAnalysis = graphAnalysis.osid_analysis.get(n as Osid);
+                    return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
+                });
+                if (!nearFront) return false; // deep rear — fall through to interior movement
+            }
+        }
         if (adjEnemy.length > 0 && directive) {
             const undefendedReorg = adjEnemy.filter(eo => {
                 if (!directive.offensive_targets.includes(eo)) return false;
@@ -268,6 +294,18 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
     // --- Rule 4: Defensive stance → defend, with retreat-based counter-attack only ---
 
     if (corpsStance === 'defensive') {
+        // Deep-rear brigades should march toward front, not sit idle in defensive
+        if (adjEnemy.length === 0) {
+            const osidAnalysis = graphAnalysis.osid_analysis.get(loc);
+            if (!osidAnalysis || osidAnalysis.enemy_neighbors.length === 0) {
+                const neighbors = adjacency.get(loc as Osid) ?? [];
+                const nearFront = neighbors.some(n => {
+                    const nAnalysis = graphAnalysis.osid_analysis.get(n as Osid);
+                    return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
+                });
+                if (!nearFront) return false; // deep rear — fall through to interior movement
+            }
+        }
         // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
         if (counterAttackTarget && adjEnemy.includes(counterAttackTarget)) {
             const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
