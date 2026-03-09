@@ -51,6 +51,8 @@
    Do instead: For browser-reachable code, extract Node-only imports to `*_utils.ts` files.
 4. **[2026-02-28] Vitest .js import path parity**
    Do instead: For test imports using `.js` paths into `src`, ensure target base path exists. If module moved, repoint import.
+5. **[2026-03-08] Warroom/vitest jsdom for DOM-dependent tests**
+   Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environment: 'node' and environmentMatchGlobs for the test file to 'jsdom'; add jsdom devDependency.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
@@ -135,23 +137,23 @@
    (5) Sector reserves: `reserve_brigade_ids`, `reserve_fraction` (10-30% by stance).
    (6) Territory assignment: brigade-presence-first in `mapOsidsToCorps` (Phase 1 lock + Phase 2 BFS gap-fill).
    REMAINING: Elite/professional brigades should get flatter home distance curve (floor 0.85 vs 0.70).
-2. **[2026-03-07] Sector intel replaces recon_intelligence (DELETED) — fog LIVE**
+2. **[2026-03-09] Reserve proximity gating — MAX_RESERVE_HOPS=3**
+   Do instead: Reserves must be within 3 BFS hops of sector front through friendly territory. `reclassifyRearBrigades` uses multi-source BFS from front OSIDs. Cap sorted by distance (closest first), not alphabetical. Brigades beyond range dropped from sector entirely. Faction-wide `deduplicateBrigadesAcrossSectors` runs after Step 8 to prevent cross-sector duplicates.
+3. **[2026-03-09] Motorized/mechanized priority for offensive ops**
+   Do instead: `getEquipmentOffensivePriority()` in `sector_offensive.ts` (mechanized=3, motorized=2, mountain=1, default=0). Operation participant lists sorted by equipment priority before reserve slicing. Applied in `evaluateSectorOffensiveLaunch` and `bot_corps_directives.ts` clustering. Best offensive assets participate, weakest held as reserves.
+4. **[2026-03-07] Sector intel replaces recon_intelligence (DELETED) — fog LIVE**
    Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war is LIVE: `GameStateAdapter` derives `fogOfWar` from `sector_intel` + `corps_front_sectors`; `buildFogOfWarGeoJSON` renders it; `MapContainer` toggles via `fogVisible`. `ReconIntelligenceView` + `reconIntelligence` field fully removed. `recon_intelligence.ts` is DELETED — do not reference it.
-3. **[2026-03-07] Sector orders + OPSEC are sector-state, not brigade hacks**
+5. **[2026-03-07] Sector orders + OPSEC are sector-state, not brigade hacks**
    Do instead: Stage defensive intent in `sector_stance_orders`, then translate it through `applySectorStanceOrders()` into ordinary `brigade_posture_orders`. Keep reserve brigades out of that translation unless design explicitly changes. Store OPSEC in `state.opsec_sectors`, halve passive intel buildup against those sectors, and auto-clear OPSEC when the sector's operation enters execution.
-4. **[2026-03-06] Proof lane + eligible-attacker boundary**
+6. **[2026-03-06] Proof lane + eligible-attacker boundary**
    Do instead: Before wide calibration work, run `tests/scenario_vrs_operation_proof.test.ts` / `data/scenarios/apr1992_vrs_operation_proof_4w.json` to prove one VRS opening op can attack, battle, and advance. In combat-causality, treat `execution_without_eligible_attackers` as a separate root-cause boundary from `execution_without_attack_orders`.
 5. **[2026-03-06] Sector rearrangement + maneuver interpretation**
    Do instead: Keep `rearrangeSectorsForCorps()` + `concentrateSectorsForOffensive()` in `generateCorpsDirectives()`. Execution-phase ops with `brigade_movement_orders` but zero attack orders are still maneuvering — only true inert turns count as `execution_without_attack_orders`. Planning ends once one full turn elapsed and participants are staged or at friendly approach positions.
 6. **[2026-03-05] `sector_attack` phase timing + no-progress budget**
    Do instead: `src/sim/combat/sector_offensive.ts` owns phase advances — `corps_command.ts:advanceOperations()` must skip `sector_attack` ops. If execution produces no objective attempt, treat it as failure/stalemate in `updateSectorOffensiveResults()` so the op ends rather than hanging.
-7. **[2026-03-01] corps_id from tags, not field**
-   Do instead: Use `getFormationCorpsId(f)` from `corps_sector_partition.ts`. Brigade corps stored in tags (`corps:vrs_1st_krajina`), not `f.corps_id`. Applies everywhere — sectors, directives, and operations.
-8. **[2026-03-01] Sector exempt corps**
-   Do instead: arbih_general_staff, vrs_main_staff, hvo_general_staff (army reserves) + hvo_central_bosnia (Bosniak-Croat conflict) — don't assign their brigades to front sectors.
-9. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
+7. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
    Do instead: For April 1992 VRS opening ops, use explicit `participating_brigades`, `sector_id`, and `staging_osid`. If a brigade is in `active_operation.participating_brigades`, it routes through operation planning/execution/recovery first — `home_defense_active`, reserve logic, or generic corps targeting cannot retake control until `active_operation` is cleared.
-10. **[2026-03-07] Sector-only operation creation — no catalog ops, no rear dump**
+8. **[2026-03-07] Sector-only operation creation — no catalog ops, no rear dump**
     Do instead: Operations launch ONLY from `generateCorpsDirectives` sector offensive path. Old `generateCorpsOperationOrders` (catalog-based, picks 5 from whole corps) is disabled. Rear-area brigade supplementing removed — only sector-assigned brigades participate. `MAX_PARTICIPATING_BRIGADES=12` cap in `sector_offensive.ts`. If sector lacks brigades, no launch; density balancing reinforces first.
 
 ## GUI / HoI Map

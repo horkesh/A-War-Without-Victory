@@ -1,11 +1,32 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-08
+**Last Updated:** 2026-03-09
 **Status:** Post-MVP — War calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-09] Sector Reserve Proximity, Dedup, and Motorized/Mechanized Priority (n440)
+
+Three sector system fixes. Calibration: **87.6% area-weighted** (+0.4pp from n438 87.2%). Zero duplicate brigade assignments. Reserve count 69→10.
+
+**Faction-wide brigade dedup** (corps_front_sectors.ts): Added `deduplicateBrigadesAcrossSectors()` call after Step 8 in `buildFactionSectors`. Steps 6b/7/8 could produce cross-sector duplicates when shared front OSIDs or coverage transfers create overlapping claims. 8 duplicates eliminated.
+
+**Proximity-gated reserves** (corps_front_sectors.ts, corps_front_sectors_constants.ts): Rewrote `reclassifyRearBrigades` with multi-source BFS from sector front OSIDs. `MAX_RESERVE_HOPS=3` — brigades beyond 3 friendly hops dropped from sector entirely. Reserve cap (1 for ≤10 edges, 2 for >10) now sorts by hop distance (closest first) instead of alphabetically. Brigades at hop 0–1 stay assigned; hop 2–3 become reserve candidates. Result: 69→10 reserves, 49→6 "far" reserves.
+
+**Motorized/mechanized priority** (sector_offensive.ts, bot_corps_directives.ts): New `getEquipmentOffensivePriority()` helper (mechanized=3, motorized=2, mountain=1, default=0). Operation participant lists sorted by equipment priority before reserve slicing — best offensive assets participate, weakest held as reserves. Applied in both `evaluateSectorOffensiveLaunch` and directive clustering.
+
+**Files**: `corps_front_sectors.ts`, `corps_front_sectors_constants.ts`, `sector_offensive.ts`, `bot_corps_directives.ts`, `corps_front_sectors_multi.test.ts`, `sector_offensive_idle_recovery.test.ts`
+**Verification**: tsc clean (implicit via vitest), 395/395 vitest passing. 40w run n440: 87.6% area-weighted, RS delta -47 (improved from -50).
+
+## [2026-03-09] Paradox Team State of the Game Evaluation & Remediation Plan
+
+Conducted comprehensive state of the game evaluation across all domains.
+
+**Evaluation:** Architecture (A-), Simulation & AI (A-), UI/UX (B+), QA (B+). Identified technical debt in GameState monolithic structure, complex combat/front algorithms, missing UI placeholders (Warroom), and fragmented QA pipeline lacking coverage metrics.
+**Remediation Plan:** Created 4-phase execution plan: Phase 1 (QA Unification & Coverage), Phase 2 (Warroom UI Completion), Phase 3 (Engine & State Refactoring), Phase 4 (Bot AI Modularization).
+**Files**: `docs/40_reports/convenes/20260309_PARADOX_TEAM_EVALUATION.md`, `docs/plans/2026-03-09-evaluation-remediation-plan.md`
 
 ## [2026-03-09] Combat Casualty Scaling, Home Defense Exemption, Sector Offensive Tuning (n438)
 
@@ -19,6 +40,54 @@ Power-ratio casualty scaling + home defense operation exemption + sector offensi
 
 **Files**: `combat_math.ts`, `attack_resolution_osid.ts`, `combat_predictor.ts`, `compute_home_defense.ts`, `pre_planned_operations.ts`, `bot_brigade_ai_osid.ts`, `sector_offensive.ts`
 **Report**: `docs/40_reports/implemented/20260309_COMBAT_CASUALTY_SCALING_OP_TEOCAK_HOME_DEFENSE.md`
+
+## [2026-03-08] Trust and Baseline — Phase A: Derived-State Serialization Contract
+
+Single source of truth for derived vs persisted state; canon, save/load, and docs aligned. No behavior change; documentation and contract only.
+
+**Contract doc** (`docs/20_engineering/DERIVED_STATE_SERIALIZATION_CONTRACT.md`): (1) Derived-only (never serialized): top-level keys `fronts`, `corridors`, `derived`, `cache`, `phase_e_aor_membership`, `phase_e_aor_influence`, `phase_e_rear_zone`; brigade pressure/density/resilience modifier per Engine Invariants §13.3. (2) Intentionally persisted: all keys in `GAMESTATE_TOP_LEVEL_KEYS` in serializeGameState.ts (canonical state). (3) Persisted derived caches: `local_fronts`, `corps_front_sectors`, `sector_intel`, `home_distance_cache` — recomputed each turn but written to save for GUI/reporting; canon exception documented.
+**Canon**: Engine Invariants §13.1 — implementation note added referencing DERIVED_STATE_SERIALIZATION_CONTRACT.md and the four persisted caches.
+**Code**: serializeGameState.ts header comment references contract; validateGameState.ts denylist unchanged (already matched contract).
+**Docs**: context.md — DERIVED_STATE_SERIALIZATION_CONTRACT.md added to mandatory read list when touching save/load or GameState fields.
+
+**Determinism**: No change to serialization payload or ordering.
+**Files**: `docs/20_engineering/DERIVED_STATE_SERIALIZATION_CONTRACT.md`, `docs/10_canon/Engine_Invariants_v0_6_0.md`, `docs/10_canon/context.md`, `src/state/serializeGameState.ts`
+**Verification**: npx tsc --noEmit, npm run test:vitest (389 passed, 1 skipped).
+
+## [2026-03-08] Trust and Baseline — Phase C: Split and simplify corps_front_sectors.ts
+
+Constants extracted; pipeline step ownership documented. No behavior change.
+
+**New file:** `src/sim/combat/corps_front_sectors_constants.ts` — MIN_SECTOR_EDGES, MAX_SECTOR_EDGES, MAX_SECTOR_BRIGADES, RESERVE_PER_EDGE_CAP, MAX_TERRITORY_OSIDS, EXEMPT_CORPS_IDS. Main file imports from it and re-exports constants for existing consumers (sector_rearrangement.ts, corps_front_sectors_multi.test.ts).
+**Main file:** Pipeline steps (build → partition → consolidate → multi-sector → territory → classify → equalize → ensureMin → reclassify → prune) documented in a comment block above buildFactionSectors for clear ownership.
+**Determinism:** No change to sector semantics or ordering.
+**Files:** `src/sim/combat/corps_front_sectors_constants.ts`, `src/sim/combat/corps_front_sectors.ts`
+**Verification:** npx tsc --noEmit, npm run test:vitest (389 passed, 1 skipped).
+
+## [2026-03-08] Trust and Baseline — Phase D: Sector-offensive launch and eligible-attacker gates
+
+Launch and eligible-attacker gates documented in code. No behavior change.
+
+**sector_offensive.ts:** Added file-header comment block "Launch and eligible-attacker gates (Phase D Trust-and-Baseline)": launch requires ≥ MIN_BRIGADES_FOR_OFFENSIVE (3), planning duration, transition to execution when elapsed ≥ planning_duration or force_launch; eligible attacker = in participating_brigades, can adopt attack posture (home_defense_active exempt for operation participants), target in effectiveDirective.offensive_targets. References bot_brigade_ai_osid and combat-causality invalidation "operation_execution_without_eligible_attackers".
+**Files:** `src/sim/combat/sector_offensive.ts`
+
+## [2026-03-08] Trust and Baseline — Phase E: Warroom runtime maturity and render-level/warroom tests
+
+Warroom known gaps documented; tactical map render smoke and warroom smoke tests added.
+**WARROOM_MASTER:** New § "Known gaps / placeholder flows (Phase E Trust-and-Baseline)": Settings placeholder, Operational Situation modal, Command Briefing vs Reports, warroom smoke automation coverage.
+**Tactical map render smoke** (`tests/ui_map_render_smoke.test.ts`): buildControlGeoJSON, buildFogOfWarGeoJSON, buildFormationsGeoJSON with minimal state — no throw, valid FeatureCollection.
+**Warroom smoke** (`tests/warroom_smoke.test.ts`): jsdom; desk_map click invokes setTacticalMapOpenHandler; click outside does not. Vitest environmentMatchGlobs for warroom_smoke → jsdom; jsdom devDependency added.
+**GUI_MASTER:** Recent GUI changes row for Phase E.
+**Files:** `docs/40_reports/WARROOM_MASTER.md`, `docs/40_reports/GUI_MASTER.md`, `tests/ui_map_render_smoke.test.ts`, `tests/warroom_smoke.test.ts`, `vitest.config.ts`, `package.json`
+
+## [2026-03-08] Trust and Baseline — Phase B: Re-prove and bless post-remediation ceiling
+
+Verification run n439 executed; current ceiling documented in CALIBRATION_MASTER.
+
+**Run:** `npm run sim:scenario:run:40w` → run ID `apr1992_definitive_40w__05c8e7a070f0350d__w40_n439`, final_state_hash `df2f5e61abedd929`. Artifacts in `runs/apr1992_definitive_40w__05c8e7a070f0350d__w40_n439/` (run_summary.json, weekly_report.jsonl, behavioral_health, control_change_attribution).
+**Ceiling statement:** CALIBRATION_MASTER updated with "Current ceiling (post–Trust-and-Baseline Phase B)": accepted current best-known ceiling = **n415 at 89.4% area-weighted**; n439 confirms deterministic 40w completion on branch.
+**Determinism:** No code changes; scenario run is deterministic (same hash for same inputs).
+**Files:** `docs/40_reports/CALIBRATION_MASTER.md`, `runs/apr1992_definitive_40w__05c8e7a070f0350d__w40_n439/*`
 
 ## [2026-03-08] Audit Remediation Complete — Full 5-Phase Report + outcomeRank Unification
 
