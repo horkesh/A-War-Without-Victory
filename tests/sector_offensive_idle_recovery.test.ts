@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
+import { updateSectorOffensiveResults, getEquipmentOffensivePriority } from '../src/sim/combat/sector_offensive.js';
 import type { CorpsFrontSector, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -52,6 +52,15 @@ function makeBrigade(id: string, locationOsid: string): FormationState {
         tags: [],
     };
 }
+
+describe('equipment offensive priority', () => {
+    it('mechanized > motorized > mountain > light_infantry priority', () => {
+        expect(getEquipmentOffensivePriority('mechanized')).toBeGreaterThan(getEquipmentOffensivePriority('motorized'));
+        expect(getEquipmentOffensivePriority('motorized')).toBeGreaterThan(getEquipmentOffensivePriority('mountain'));
+        expect(getEquipmentOffensivePriority('mountain')).toBeGreaterThan(getEquipmentOffensivePriority('light_infantry'));
+        expect(getEquipmentOffensivePriority('light_infantry')).toBe(getEquipmentOffensivePriority(undefined));
+    });
+});
 
 describe('sector offensive idle recovery', () => {
     it('moves a zero-eligibility execution operation into recovery after two consecutive idle turns', () => {

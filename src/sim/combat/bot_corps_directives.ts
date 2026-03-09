@@ -29,7 +29,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
-import { evaluateSectorOffensiveLaunch } from './sector_offensive.js';
+import { evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
 import { getTruceBreakAggressionBonus, shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
@@ -970,7 +970,14 @@ export function generateCorpsDirectives(
                 let secBrigadeIds = subordinates
                     .filter((b) => b.location_osid && clusterFriendlyOsids.has(b.location_osid))
                     .map((b) => b.id)
-                    .sort(strictCompare);
+                    .sort((a, b) => {
+                        const fa = state.formations?.[a];
+                        const fb = state.formations?.[b];
+                        const pa = getEquipmentOffensivePriority(fa?.equipment_class);
+                        const pb = getEquipmentOffensivePriority(fb?.equipment_class);
+                        if (pa !== pb) return pb - pa;
+                        return strictCompare(a, b);
+                    });
 
                 while (secBrigadeIds.length < 3) {
                     const donorCandidates = directiveEligibleSectors
@@ -1003,7 +1010,14 @@ export function generateCorpsDirectives(
                     secBrigadeIds = subordinates
                         .filter((b) => b.location_osid && clusterFriendlyOsids.has(b.location_osid))
                         .map((b) => b.id)
-                        .sort(strictCompare);
+                        .sort((a, b) => {
+                            const fa = state.formations?.[a];
+                            const fb = state.formations?.[b];
+                            const pa = getEquipmentOffensivePriority(fa?.equipment_class);
+                            const pb = getEquipmentOffensivePriority(fb?.equipment_class);
+                            if (pa !== pb) return pb - pa;
+                            return strictCompare(a, b);
+                        });
                 }
 
                 const secEnemyOsids = [...clusterEnemyOsids].sort(strictCompare);

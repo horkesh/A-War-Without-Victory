@@ -8,6 +8,19 @@
  *   advance-sector-offensives  (after corps orders, before brigade orders)
  *   update-sector-offensive-results (after attack resolution)
  *
+ * **Launch and eligible-attacker gates (Phase D Trust-and-Baseline):**
+ * - Launch: Corps may launch when sector has ≥ MIN_BRIGADES_FOR_OFFENSIVE (3) assigned,
+ *   no existing sector op for that corps, and sector has valid offensive targets. Planning
+ *   duration is computed from objective count; force_launch can shorten.
+ * - Transition to execution: when planning_elapsed >= planning_duration (or force_launch
+ *   and elapsed >= 1). Supply readiness is recorded but does not block launch.
+ * - Eligible attacker: a brigade that may actually attack in execution is one that is in
+ *   participating_brigades, assigned to the operation's sector (or explicitly in the op),
+ *   can adopt attack/assault posture (not blocked by home_defense_active unless exempt as
+ *   operation participant), and has the target in effectiveDirective.offensive_targets.
+ *   See bot_brigade_ai_osid.ts (attack order generation) and combat-causality invalidation
+ *   "operation_execution_without_eligible_attackers" when execution runs with zero such brigades.
+ *
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */
 
@@ -25,6 +38,24 @@ import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { releaseOperationCommander } from './officer_system.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Equipment priority
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Equipment class priority for operation participant ordering.
+ * Higher = selected first for offensive operations.
+ * Motorized/mechanized brigades are the most valuable offensive assets.
+ */
+export function getEquipmentOffensivePriority(equipmentClass: string | undefined): number {
+    switch (equipmentClass) {
+        case 'mechanized': return 3;
+        case 'motorized': return 2;
+        case 'mountain': return 1;
+        default: return 0; // light_infantry, police, special, undefined
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -879,10 +910,20 @@ export function evaluateSectorOffensiveLaunch(
     const planningDuration = computePlanningDuration(objectives.length);
     const name = pickOperationName(corpsId, turn, faction, state);
 
-    // Reserve fraction: keep 1 brigade in reserve, rest participate (capped)
-    const reserveCount = Math.max(1, Math.floor(sectorBrigadeIds.length * 0.15));
-    const participating = sectorBrigadeIds
-        .slice(0, sectorBrigadeIds.length - reserveCount)
+    // Sort by equipment priority (mechanized/motorized first) before reserve slicing.
+    // Best offensive assets become participants; weakest held back as reserves.
+    const formations = state.formations ?? {};
+    const sortedByPriority = [...sectorBrigadeIds].sort((a, b) => {
+        const fa = formations[a];
+        const fb = formations[b];
+        const pa = getEquipmentOffensivePriority(fa?.equipment_class);
+        const pb = getEquipmentOffensivePriority(fb?.equipment_class);
+        if (pa !== pb) return pb - pa; // Higher priority first
+        return strictCompare(a, b); // Deterministic tiebreak
+    });
+    const reserveCount = Math.max(1, Math.floor(sortedByPriority.length * 0.15));
+    const participating = sortedByPriority
+        .slice(0, sortedByPriority.length - reserveCount)
         .slice(0, MAX_PARTICIPATING_BRIGADES);
 
     // Pick staging OSID: first friendly OSID in the sector (deterministic, sorted)
