@@ -29,7 +29,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
-import { evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority } from './sector_offensive.js';
+import { evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
 import { getTruceBreakAggressionBonus, shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
@@ -956,7 +956,7 @@ export function generateCorpsDirectives(
                         if (alreadyReassigned.has(bid)) continue;
                         const f = state.formations?.[bid];
                         if (!f || f.status !== 'active') continue;
-                        const priority = getEquipmentOffensivePriority(f.equipment_class);
+                        const priority = getEquipmentOffensivePriority(resolveEquipmentClass(f));
                         if (priority >= 2) { // motorized (2) or mechanized (3)
                             mechStagingOrders.push({ brigade_id: bid, to_sector_id: prioritySectorId });
                             alreadyReassigned.add(bid);
@@ -1011,8 +1011,8 @@ export function generateCorpsDirectives(
                     .sort((a, b) => {
                         const fa = state.formations?.[a];
                         const fb = state.formations?.[b];
-                        const pa = getEquipmentOffensivePriority(fa?.equipment_class);
-                        const pb = getEquipmentOffensivePriority(fb?.equipment_class);
+                        const pa = getEquipmentOffensivePriority(fa ? resolveEquipmentClass(fa) : undefined);
+                        const pb = getEquipmentOffensivePriority(fb ? resolveEquipmentClass(fb) : undefined);
                         if (pa !== pb) return pb - pa;
                         return strictCompare(a, b);
                     });
@@ -1051,8 +1051,8 @@ export function generateCorpsDirectives(
                         .sort((a, b) => {
                             const fa = state.formations?.[a];
                             const fb = state.formations?.[b];
-                            const pa = getEquipmentOffensivePriority(fa?.equipment_class);
-                            const pb = getEquipmentOffensivePriority(fb?.equipment_class);
+                            const pa = getEquipmentOffensivePriority(fa ? resolveEquipmentClass(fa) : undefined);
+                            const pb = getEquipmentOffensivePriority(fb ? resolveEquipmentClass(fb) : undefined);
                             if (pa !== pb) return pb - pa;
                             return strictCompare(a, b);
                         });

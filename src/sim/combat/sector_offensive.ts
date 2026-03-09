@@ -57,6 +57,16 @@ export function getEquipmentOffensivePriority(equipmentClass: string | undefined
     }
 }
 
+/**
+ * Resolve a formation's equipment class from `equipment_class` field or `equip:` tag.
+ * OOB early-war entry doesn't set the field, but does set the tag.
+ */
+export function resolveEquipmentClass(f: { equipment_class?: string; tags?: string[] }): string | undefined {
+    if (f.equipment_class) return f.equipment_class;
+    const tag = f.tags?.find(t => t.startsWith('equip:'));
+    return tag ? tag.slice(6) : undefined;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
@@ -916,8 +926,8 @@ export function evaluateSectorOffensiveLaunch(
     const sortedByPriority = [...sectorBrigadeIds].sort((a, b) => {
         const fa = formations[a];
         const fb = formations[b];
-        const pa = getEquipmentOffensivePriority(fa?.equipment_class);
-        const pb = getEquipmentOffensivePriority(fb?.equipment_class);
+        const pa = getEquipmentOffensivePriority(fa ? resolveEquipmentClass(fa) : undefined);
+        const pb = getEquipmentOffensivePriority(fb ? resolveEquipmentClass(fb) : undefined);
         if (pa !== pb) return pb - pa; // Higher priority first
         return strictCompare(a, b); // Deterministic tiebreak
     });
