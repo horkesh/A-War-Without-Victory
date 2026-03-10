@@ -78,10 +78,15 @@ import {
     getEquipmentRatio,
     getToTerrainDefenseMult,
     rankDefendersByPower,
+    MIN_DEFENSE_FLOOR_FRACTION,
+    MAX_EDGES_PER_BRIGADE,
+    SECTOR_RESERVE_RESPONSE_FRACTION,
+    REACTIVE_DEFENSE_RATIO,
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import { findSectorForEnemyOsid, getCorpsHqOsid } from './corps_front_sectors.js';
-import { frontDensityModifier } from './local_front_defense.js';
+import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital } from './enclave_resilience.js';
+// frontDensityModifier import removed — no longer used in sector defense
 
 // Backward-compat re-exports
 export type AttackOutcome = CombatOutcome;
@@ -99,7 +104,7 @@ export type { CombatOutcome };
  * "defending harder, taking more casualties, not yielding ground" behavior.
  * High multiplier = bloodier stalemates (historically accurate for Bosnian War).
  */
-const MORALE_ABSORPTION_CAS_MULT = 1.35;
+const MORALE_ABSORPTION_CAS_MULT = 1.6;
 
 /**
  * Power multiplier applied when sector brigades defend an OSID they are not physically at.
@@ -164,6 +169,39 @@ function buildSlopeByOsid(
  * Find friendly adjacent OSIDs for retreat. Sorted deterministically:
  * fewer enemy neighbors first, then by OSID name.
  */
+/**
+ * BFS distance from an OSID to a target through friendly territory.
+ * Returns hop count, or Infinity if unreachable.
+ */
+function bfsDistanceToCapital(
+    from: Osid,
+    target: Osid,
+    adjacency: Map<Osid, Osid[]>,
+    state: GameState,
+    factionId: FactionId,
+    reverseMap: OperationalToCanonicalReverseMap
+): number {
+    if (from === target) return 0;
+    const visited = new Set<string>([from]);
+    let frontier = [from];
+    let dist = 0;
+    while (frontier.length > 0 && dist < 50) {
+        dist++;
+        const next: Osid[] = [];
+        for (const osid of frontier) {
+            for (const n of (adjacency.get(osid) ?? [])) {
+                if (visited.has(n)) continue;
+                visited.add(n);
+                if (n === target) return dist;
+                const c = getPoliticalControllerOSID(state, n, reverseMap);
+                if (c === factionId) next.push(n);
+            }
+        }
+        frontier = next;
+    }
+    return Infinity;
+}
+
 function getFriendlyRetreatDestinations(
     state: GameState,
     formation: FormationState,
@@ -179,18 +217,47 @@ function getFriendlyRetreatDestinations(
         const c = getPoliticalControllerOSID(state, n, reverseMap);
         if (c === factionId) friendly.push(n);
     }
-    friendly.sort((a, b) => {
-        const aAdj = (adjacency.get(a) ?? []).filter(n => {
-            const c = getPoliticalControllerOSID(state, n, reverseMap);
-            return c !== null && c !== factionId;
-        }).length;
-        const bAdj = (adjacency.get(b) ?? []).filter(n => {
-            const c = getPoliticalControllerOSID(state, n, reverseMap);
-            return c !== null && c !== factionId;
-        }).length;
-        if (aAdj !== bAdj) return aAdj - bAdj;
-        return strictCompare(a, b);
-    });
+
+    // Enclave retreat gravity: brigades in enclaves prefer retreating toward the capital.
+    // BB2 p.479: beaten units fell back concentrically toward Goražde town.
+    const capitalOsid = getEnclaveCapitalOsid(loc);
+    if (capitalOsid) {
+        // Pre-compute BFS distance to capital for each candidate
+        const distCache = new Map<string, number>();
+        for (const f of friendly) {
+            distCache.set(f, bfsDistanceToCapital(f, capitalOsid, adjacency, state, factionId, reverseMap));
+        }
+        friendly.sort((a, b) => {
+            const dA = distCache.get(a) ?? Infinity;
+            const dB = distCache.get(b) ?? Infinity;
+            if (dA !== dB) return dA - dB; // Closer to capital = better
+            // Tie-break: fewer enemy neighbors = safer
+            const aAdj = (adjacency.get(a) ?? []).filter(n => {
+                const c = getPoliticalControllerOSID(state, n, reverseMap);
+                return c !== null && c !== factionId;
+            }).length;
+            const bAdj = (adjacency.get(b) ?? []).filter(n => {
+                const c = getPoliticalControllerOSID(state, n, reverseMap);
+                return c !== null && c !== factionId;
+            }).length;
+            if (aAdj !== bAdj) return aAdj - bAdj;
+            return strictCompare(a, b);
+        });
+    } else {
+        // Non-enclave: original logic (fewest enemy neighbors first)
+        friendly.sort((a, b) => {
+            const aAdj = (adjacency.get(a) ?? []).filter(n => {
+                const c = getPoliticalControllerOSID(state, n, reverseMap);
+                return c !== null && c !== factionId;
+            }).length;
+            const bAdj = (adjacency.get(b) ?? []).filter(n => {
+                const c = getPoliticalControllerOSID(state, n, reverseMap);
+                return c !== null && c !== factionId;
+            }).length;
+            if (aAdj !== bAdj) return aAdj - bAdj;
+            return strictCompare(a, b);
+        });
+    }
     return friendly;
 }
 
@@ -497,12 +564,32 @@ export function resolveAttackOrdersOsid(
                     .map(id => state.military.formations?.[id])
                     .filter((f): f is FormationState => f != null && f.status === 'active')
                 : [];
+            // (defense path tracking removed — use _defPathCounts diagnostic if needed)
             if (sectorBrigades.length > 0) {
-                // Continuous line defense: total power / edges × density modifier
-                const densityMod = frontDensityModifier(sectorBrigades.length, sector!.length_edges);
-                const edgeShare = sector!.length_edges > 0 ? 1 / sector!.length_edges : 1;
+                // Hybrid sector defense:
+                // 1. Physical defenders at the OSID fight at full power
+                // 2. Sector reserve responds proportional to attack pressure
+                // 3. Floor: continuous line guarantees minimum defense per edge
                 const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-                defenderPower = totalPower * edgeShare * densityMod;
+                // Physical defenders: brigades at the attacked OSID
+                const physicalDefenders = sectorBrigades.filter(
+                    f => (f as { location_osid?: string }).location_osid === targetOsid
+                );
+                let physicalPower = 0;
+                for (const pd of physicalDefenders) {
+                    physicalPower += computeDefenderPower(state, pd, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(pd));
+                }
+                // Reactive defense: reserves mobilize proportional to attack size.
+                // A 3-brigade assault draws more reserves than a 1-brigade probe.
+                const avgBrigadePower = totalPower / sectorBrigades.length;
+                const sectorReserves = totalPower - physicalPower;
+                const reactiveResponse = Math.min(
+                    sectorReserves,
+                    attackerFormations.length * avgBrigadePower * REACTIVE_DEFENSE_RATIO
+                );
+                defenderPower = physicalPower + reactiveResponse;
+                const minFloor = avgBrigadePower * MIN_DEFENSE_FLOOR_FRACTION;
+                defenderPower = Math.max(defenderPower, minFloor);
                 defenderFormation = primary;
                 isSectorCoverageDefense = true;
                 sectorDefenseBrigades = sectorBrigades;
@@ -523,6 +610,15 @@ export function resolveAttackOrdersOsid(
         } else {
             continue;
         }
+
+        // ── Enclave garrison bonus ──────────────────────────────────────
+        // Organized civilian defense (TDF, Patriotic League, police, volunteers)
+        // fights alongside regular brigades in besieged enclaves.
+        // Added to ALL defense paths — even ghost militia gets reinforced.
+        const garrisonPower = getEnclaveGarrisonPower(
+            state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0
+        );
+        defenderPower += garrisonPower;
 
         const battleSnapEvents: AttackResolutionOsidSnapEvent[] = [];
 
@@ -559,7 +655,7 @@ export function resolveAttackOrdersOsid(
             const posture = a.posture ?? 'defend';
             const atkMult = POSTURE_ATTACK[posture] ?? 0;
             const effectivePosture = atkMult > 0 ? posture : 'attack';
-            return s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult);
+            return s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
         }, 0) * coordPenalty * seasonal.attack_mult * concentrationBonus;
         defenderPower *= seasonal.defense_mult;
 
@@ -590,9 +686,10 @@ export function resolveAttackOrdersOsid(
         const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
         const personnelDefender = defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
         const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
-        // Militia-only defense: attacker takes far fewer casualties — scattered civilian resistance,
-        // not organized military defense. A brigade sweeping an undefended settlement loses ~5 men, not 40.
-        const militiaOnlyMult = defenderFormation ? 1.0 : 0.15;
+        // Militia-only defense: attacker takes reduced but non-trivial casualties.
+        // "Undefended" Bosniak villages had Patriotic League, police, armed residents.
+        // n536: raised 0.15→0.30 — sweeping a village costs more than 5 men.
+        const militiaOnlyMult = defenderFormation ? 1.0 : 0.30;
         const [, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
         const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult * militiaOnlyMult;
         const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult * defCasMult;
@@ -842,12 +939,34 @@ export function resolveAttackOrdersOsid(
             const defMorale = defenderFormation.morale ?? 60;
             const resistFloor = getMoraleResistFloor(defenderFaction);
             const coEthnicShare = getCoEthnicShare(targetOsid, defenderFaction, ethnicComposition);
+            // Enclave capital last stand: defenders at the capital absorb ALL outcomes
+            // except decisive_victory. BB2 p.479: "hung on at Gradina — the key to ARBiH defenses."
+            const capitalLastStand = isEnclaveCapital(targetOsid);
             // ARBiH homeland defense: fighters refuse to retreat even under heavy losses.
-            // In co-ethnic homeland (≥50%), absorb up to 'victory'; elsewhere absorb 'costly_victory' if morale holds.
+            // n536: In co-ethnic homeland (≥50%), absorb ALL outcomes including decisive_victory
+            // when morale ≥ 40. ARBiH didn't retreat from their villages — they stood and died,
+            // and the VRS paid in blood for every meter. This is the Bosnian War's defining
+            // characteristic. Both sides bleed (MORALE_ABSORPTION_CAS_MULT applies).
+            // At morale < 40, absorb costly_victory + victory only (exhaustion sets in).
             const homelandLastStand = defenderFaction === 'RBiH' && coEthnicShare >= 0.50;
-            const absorb = homelandLastStand
-                ? (outcome === 'costly_victory' || outcome === 'victory')
-                : (outcome === 'costly_victory' && defMorale >= resistFloor);
+            // n537: morale 40 too aggressive (4/6 fail). n538: morale 55 still too aggressive (3/6 fail).
+            // n539: morale 65 — only fresh, high-morale defenders absorb decisive_victory.
+            // As morale degrades from repeated attacks, defenders eventually break.
+            // This models the historical pattern: initial resistance is fierce, but sustained
+            // VRS pressure eventually overruns positions through attrition.
+            const homelandAbsorbDecisive = homelandLastStand && defMorale >= 65;
+            // All factions: any defender absorbs costly_victory at morale ≥ floor.
+            // n536: RS/HRHB also absorb 'victory' at high morale — professional forces
+            // don't retreat from a single costly engagement.
+            const professionalResilience = defMorale >= resistFloor
+                && (outcome === 'costly_victory' || outcome === 'victory');
+            const absorb = capitalLastStand
+                ? (outcome !== 'decisive_victory')
+                : homelandAbsorbDecisive
+                    ? (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
+                    : homelandLastStand
+                        ? (outcome === 'costly_victory' || outcome === 'victory')
+                        : professionalResilience;
             if (absorb && flip) {
                 flip = false;
                 moraleAbsorbed = true;
@@ -858,9 +977,13 @@ export function resolveAttackOrdersOsid(
                     attacker_brigade: firstAttacker.id,
                     target_osid: targetOsid,
                     affected_formation: defenderFormation.id,
-                    description: homelandLastStand
-                        ? 'ARBiH homeland last stand — absorbed defeat without retreating.'
-                        : 'Defender morale held — absorbed costly victory without retreating.',
+                    description: capitalLastStand
+                        ? 'Enclave capital last stand — defenders fight to the last.'
+                        : homelandAbsorbDecisive
+                            ? 'ARBiH homeland determination — refused to abandon homes, both sides bled.'
+                            : homelandLastStand
+                                ? 'ARBiH homeland last stand — absorbed defeat without retreating.'
+                                : 'Defender morale held — absorbed attack without retreating.',
                     effects: { flip_prevented: true, morale_drain: -5 },
                 };
                 battleSnapEvents.push(ev);
@@ -1049,5 +1172,6 @@ export function resolveAttackOrdersOsid(
         return strictCompare(a.trigger_phase, b.trigger_phase);
     });
     state.military.brigade_attack_orders = undefined;
+    // (defense path logging removed)
     return report;
 }

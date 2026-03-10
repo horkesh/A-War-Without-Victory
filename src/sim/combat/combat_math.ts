@@ -48,6 +48,51 @@ export const REPULSED_FLOOR = 0.5;
 
 export const MAX_ENTRENCHMENT = 6;
 export const ENTRENCHMENT_PER_TURN = 0.035;
+
+/**
+ * Maximum edges one brigade can effectively cover in a sector.
+ * Caps the edge denominator so thinly-held sectors don't collapse.
+ * E.g., 6 brigades × 4 = 24 max edges. A sector with 30 edges uses min(30, 24) = 24.
+ * This produces: 6 brigades averaging 840 each → totalPower 5040 / 24 × density.
+ * Without cap: 5040 / 30 = 168 per edge (trivial). With cap: 5040 / 24 = 210 per edge.
+ * Combined with density modifier (0.6× for thin sectors), this gives meaningful resistance.
+ *
+ * At 3: a single brigade sector with 15 edges → effective 3 → defense = totalPower/3
+ * which means a single attacker at equal power gets ratio ~3.0 → decisive but costly.
+ * At 4: more lenient, 6 brigades cover 24 edges before cap kicks in.
+ */
+export const MAX_EDGES_PER_BRIGADE = 2;
+
+/**
+ * Minimum sector defense floor as fraction of average brigade power.
+ * Secondary floor: even if edge cap doesn't apply (few edges), defense
+ * per edge is at least this fraction of one brigade's average power.
+ */
+export const MIN_DEFENSE_FLOOR_FRACTION = 0.75;
+
+/**
+ * Sector reserve response fraction.
+ * When a sector is attacked, brigades not at the OSID can partially respond.
+ * This fraction of the sector's remaining power (excluding physical defenders)
+ * reinforces the point of contact. Represents reserve mobilization, lateral
+ * movement, and fire support from adjacent positions.
+ *
+ * At 0.30: sector with 5 brigades (1 at OSID, 4 elsewhere) → physical defender
+ * fights at full power, plus 30% of the other 4 brigades' power reinforces.
+ * Total defense ≈ 1.0 + 0.30×4 = 2.2 brigade equivalents.
+ */
+export const SECTOR_RESERVE_RESPONSE_FRACTION = 0.45;
+
+/**
+ * Reactive defense ratio: brigade-equivalents the defender mobilizes per attacker brigade.
+ * When 3 brigades attack a sector point, the defender mobilizes 3 × 0.8 = 2.4 brigade
+ * equivalents of reserves to the point of contact (capped at available reserves).
+ * This prevents concentration from being an automatic win — defenders react.
+ *
+ * At 0.8: 3 attackers (3000 power with conc) vs 2400 reactive defense → ratio 1.25 (costly_victory)
+ * At 1.0: 3 attackers vs 3000 reactive defense → ratio 1.0 (stalemate)
+ */
+export const REACTIVE_DEFENSE_RATIO = 1.0;
 export const MAX_RESILIENCE_STREAK = 4;
 export const RESILIENCE_PER_DEFENSE = 0.025;
 
@@ -69,7 +114,7 @@ const MORALE_RESIST_FLOOR = 70;
  * HRHB: Croatian homeland defense → moderate-low threshold. */
 const FACTION_MORALE_RESIST_FLOOR: Record<string, number> = {
     RBiH: 50,
-    RS: 70,
+    RS: 55,
     HRHB: 60,
 };
 
@@ -77,11 +122,18 @@ export function getMoraleResistFloor(faction: string): number {
     return FACTION_MORALE_RESIST_FLOOR[faction] ?? MORALE_RESIST_FLOOR;
 }
 
-/** Reduced from 0.045 (n159 audit: att:def ratio 4.78:1, target 2.5-3:1). */
-export const BASE_ATTACKER_LOSS_RATE = 0.04;
-/** Increased from 0.02 (n159 audit: defenders losing too little relative to attackers). */
-export const BASE_DEFENDER_LOSS_RATE = 0.028;
-export const MILITIA_DEFENSE_RATIO = 0.03;
+/** Increased 0.04→0.06 (n482)→0.08 (n536: 24k casualties vs 40-60k historical).
+ * Historical: even VRS decisive victories cost blood. ARBiH stood and died,
+ * inflicting attacker losses even when overrun. BB1 p.462: 1992 was deadliest year. */
+export const BASE_ATTACKER_LOSS_RATE = 0.08;
+/** Increased 0.028→0.042 (n482)→0.06 (n536: defender casualties also too low).
+ * ARBiH fighters in homeland didn't retreat — they fought to the last, taking
+ * heavier losses but also bleeding the attacker. Op Corridor: HVO 918 KIA defending. */
+export const BASE_DEFENDER_LOSS_RATE = 0.06;
+/** n536: raised 0.03→0.05 — even "undefended" Bosniak settlements had Patriotic
+ * League, police, armed residents. 42% of early-war VRS attacks were against ghosts
+ * at trivial 37.5 defense power. Historical: JNA/VRS had to fight for villages. */
+export const MILITIA_DEFENSE_RATIO = 0.05;
 export const COORDINATION_PENALTY_2 = 0.9;
 export const COORDINATION_PENALTY_3PLUS = 0.8;
 export const STACKING_DEFENDER_SUPPORT = 0.3;
@@ -92,6 +144,26 @@ export const CONCENTRATION_BONUS_CAP = 0.30;
 
 /** Entrenchment degradation per battle — sustained offensives erode defensive positions. */
 export const ENTRENCHMENT_DEGRADATION_PER_BATTLE = 0.5;
+
+/**
+ * Hasty defense: formations that haven't been in position long enough get reduced
+ * posture defense effectiveness. At entrenchment_turns=0, posture contributes nothing
+ * beyond baseline (1.0×). Ramps to full over HASTY_DEFENSE_RAMP turns.
+ * Models the historical reality that improvised positions (barricades, roadblocks)
+ * are much weaker than prepared defensive works.
+ * Organic: driven by per-formation entrenchment_turns, not game clock.
+ */
+export const HASTY_DEFENSE_RAMP = 5;
+
+/**
+ * Defense environmental soft cap: diminishing returns on the product of
+ * terrain × entrenchment × corps × resilience × urban × density × enclave × etc.
+ * Prevents 17 small multipliers from compounding to absurd levels (3-4×).
+ * DEFENSE_ENV_CAP_THRESHOLD = bonus above 1.0 before compression starts.
+ * DEFENSE_ENV_COMPRESSION = fraction of excess bonus retained above threshold.
+ */
+export const DEFENSE_ENV_CAP_THRESHOLD = 0.5;
+export const DEFENSE_ENV_COMPRESSION = 0.5;
 
 /** Base experience multiplier — even green troops have some combat effectiveness. */
 export const EXPERIENCE_BASE = 0.6;
@@ -104,13 +176,16 @@ export const HONOR_MULT: Record<string, number> = { slavna: 1.10, viteska: 1.20 
 export const HONOR_DEFENSE_BONUS: Record<string, number> = { slavna: 0.10, viteska: 0.15 };
 
 // Outcome casualty modifiers (§4.2)
+// n536: decisive_victory raised 1.0→1.3 — even clean victories cost blood.
+// VRS paid for every village in Bosnia, even when they won overwhelmingly.
+// stalemate raised 1.0→1.2 — stalemated attacks still produce friction casualties.
 export const OUTCOME_ATTACKER_MOD: Record<string, number> = {
-    decisive_victory: 1.0, victory: 1.2, costly_victory: 1.8,
-    stalemate: 1.0, repulsed: 2.0, catastrophic: 3.0
+    decisive_victory: 1.3, victory: 1.4, costly_victory: 1.8,
+    stalemate: 1.2, repulsed: 2.0, catastrophic: 3.0
 };
 export const OUTCOME_DEFENDER_MOD: Record<string, number> = {
     decisive_victory: 2.5, victory: 1.8, costly_victory: 1.2,
-    stalemate: 0.8, repulsed: 0.5, catastrophic: 0.3
+    stalemate: 1.0, repulsed: 0.7, catastrophic: 0.3
 };
 
 /**
@@ -123,7 +198,11 @@ export const OUTCOME_DEFENDER_MOD: Record<string, number> = {
  */
 export const POWER_RATIO_CASUALTY_EXPONENT = 0.33;
 export const POWER_RATIO_CASUALTY_MAX = 2.0;
-export const POWER_RATIO_CASUALTY_MIN = 0.4;
+/** n536: raised 0.4→0.6 — attacker always takes ≥60% of base casualties even
+ * at huge power advantage. VRS had 400 tanks + 800 artillery vs zero ARBiH
+ * anti-armor, but still took meaningful losses from small arms, ambushes, IEDs,
+ * and stubborn village-by-village resistance. No free wars. */
+export const POWER_RATIO_CASUALTY_MIN = 0.6;
 
 export function getPowerRatioCasualtyMult(powerRatio: number): [attackerMult: number, defenderMult: number] {
     const clamped = Math.max(0.1, Math.min(10, powerRatio));
@@ -378,16 +457,23 @@ function getHeavyMunitionsMult(factionId: string, state: GameState): number {
  */
 export function getArtillerySuppression(attackers: FormationState[], attackerFactionId: string, state: GameState): number {
     if (attackers.length === 0) return 0;
-    let maxSuppression = 0;
+    // Best attacker provides full suppression; each additional attacker adds 30% of theirs.
+    // Models corps-level fire coordination: multiple batteries can suppress entrenchment
+    // more than one alone, but with diminishing returns from coordination overhead.
+    const suppressions: number[] = [];
     for (const attacker of attackers) {
         const comp = attacker.composition ?? ensureBrigadeComposition(attacker);
         const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
         const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
-        const suppression = (artEff * 1.0 + tankEff * 0.5) / 100;
-        if (suppression > maxSuppression) maxSuppression = suppression;
+        suppressions.push((artEff * 1.0 + tankEff * 0.5) / 100);
+    }
+    suppressions.sort((a, b) => b - a); // best first
+    let totalSuppression = suppressions[0] ?? 0;
+    for (let i = 1; i < suppressions.length; i++) {
+        totalSuppression += suppressions[i]! * 0.3;
     }
     const munitionsMult = getHeavyMunitionsMult(attackerFactionId, state);
-    return Math.min(0.7, maxSuppression) * munitionsMult;
+    return Math.min(0.7, totalSuppression) * munitionsMult;
 }
 
 /**
@@ -398,8 +484,8 @@ export function getArtillerySuppression(attackers: FormationState[], attackerFac
  * Returns 1.0 (no bonus) to MAX_BOMBARDMENT_CAS_MULT based on attacker firepower.
  * Uses same firepower formula as getArtillerySuppression but different scaling.
  */
-const MAX_BOMBARDMENT_CAS_MULT = 1.8;    // up to 80% extra defender casualties from bombardment
-const BOMBARDMENT_DIVISOR = 80;           // firepower units needed for full effect
+const MAX_BOMBARDMENT_CAS_MULT = 2.2;    // up to 120% extra defender casualties from bombardment
+const BOMBARDMENT_DIVISOR = 60;           // firepower units needed for full effect
 
 export function getBombardmentCasualtyMult(attackers: FormationState[], attackerFactionId: string, state: GameState): number {
     if (attackers.length === 0) return 1.0;
@@ -429,11 +515,15 @@ export function getBombardmentCasualtyMult(attackers: FormationState[], attacker
  *   terrainMult=1.5 → 0.50 (steep hills / river crossing, heavy penalty)
  *   terrainMult=1.7 → 0.30 (mountains, minimum effectiveness)
  */
-export function getHeavyWeaponsOffensiveMult(formation: FormationState, terrainMult = 1.0): number {
+export function getHeavyWeaponsOffensiveMult(formation: FormationState, terrainMult = 1.0, targetOsid?: string): number {
     const comp = formation.composition ?? ensureBrigadeComposition(formation);
     const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
     const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
-    const tankTerrainFactor = Math.max(0.3, 2.0 - terrainMult);
+    // Urban terrain is at least as bad for tanks as mountains — treat as terrainMult≥1.7
+    const effectiveTerrainMult = (targetOsid && isUrbanOsid(targetOsid))
+        ? Math.max(terrainMult, URBAN_TANK_TERRAIN_FLOOR)
+        : terrainMult;
+    const tankTerrainFactor = Math.max(0.3, 2.0 - effectiveTerrainMult);
     const heavyFirepower = tankEff * tankTerrainFactor * 10 + artEff * 8;
     return 1.0 + Math.min(1.5, heavyFirepower / 200);
 }
@@ -580,12 +670,31 @@ export function getConcentrationBonus(attackerCount: number): number {
     return 1.0 + Math.min(CONCENTRATION_BONUS_CAP, (attackerCount - 1) * CONCENTRATION_BONUS_PER_BRIGADE);
 }
 
-/** Urban defense multiplier: Sarajevo OSIDs get 1.5×. */
+/**
+ * Urban defense multiplier: Sarajevo OSIDs get 2.0×.
+ * Military doctrine: urban terrain requires 3:1 attacker advantage.
+ * Buildings provide cover, channelize movement, enable ambush.
+ */
 export function getUrbanMult(targetOsid: Osid): number {
     const lower = targetOsid.toLowerCase();
-    if (lower.includes('centar_sarajevo') || lower.includes('novo_sarajevo') || lower.includes('stari_grad') || lower.includes('sarajevo')) return 1.5;
+    if (lower.includes('centar_sarajevo') || lower.includes('novo_sarajevo') || lower.includes('stari_grad') || lower.includes('sarajevo')) return 2.0;
     return 1.0;
 }
+
+/**
+ * Check if an OSID is urban terrain (for heavy weapons penalty).
+ * Tanks in cities are death traps — Grozny, Mogadishu, Sarajevo.
+ * Confined streets, ambush from above, RPGs, no maneuver space.
+ */
+export function isUrbanOsid(osid: string): boolean {
+    const lower = osid.toLowerCase();
+    return lower.includes('centar_sarajevo') || lower.includes('novo_sarajevo')
+        || lower.includes('stari_grad') || lower.includes('sarajevo');
+}
+
+/** Minimum effective terrain mult for tank penalty in urban areas.
+ *  Tanks in urban terrain are at least as penalized as in mountains (terrainMult≥1.7). */
+export const URBAN_TANK_TERRAIN_FLOOR = 1.7;
 
 /**
  * Additional terrain defense multiplier for TO formations (tier !== 'brigade').
@@ -644,7 +753,8 @@ export function computeAttackerPower(
     formation: FormationState,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     overridePosture?: string,
-    targetTerrainMult = 1.0
+    targetTerrainMult = 1.0,
+    targetOsid?: string
 ): number {
     const base = basePower(formation);
     const posture = overridePosture ?? formation.posture ?? 'defend';
@@ -656,7 +766,7 @@ export function computeAttackerPower(
     const opMult = getOperationsMult(state, formation);
     const ogMult = getOgMult(formation);
     const disruptionMult = getDisruptionMult(formation, 'attack');
-    const heavyMult = getHeavyWeaponsOffensiveMult(formation, targetTerrainMult);
+    const heavyMult = getHeavyWeaponsOffensiveMult(formation, targetTerrainMult, targetOsid);
     const officerMult = getThreeTierOfficerMod(formation, state, 'attack');
     const fatigueMult = getFatigueMult(formation, 'attack');
     const homeMult = getHomeDistanceMultFromCache(state, formation);
@@ -675,13 +785,21 @@ export function computeDefenderPower(
 ): number {
     const base = basePower(formation);
     const posture = formation.posture ?? 'defend';
-    const postureMult = posture === 'dig_in'
+    const rawPostureMult = posture === 'dig_in'
         ? computeDigInDefMult(formation.dig_in_progress)
         : POSTURE_DEFENSE[posture] ?? 1;
     const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
     const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
     const entrenchmentTurns = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
     const suppressionFactor = 1.0 - artillerySuppression;
+
+    // ── Mechanic A: Hasty defense penalty ──────────────────────────────
+    // Formations that haven't been in position long enough get reduced posture
+    // defense effectiveness. At et=0, posture contributes nothing (1.0×).
+    // Ramps to full over HASTY_DEFENSE_RAMP turns.
+    const hastyFactor = Math.min(1.0, entrenchmentTurns / HASTY_DEFENSE_RAMP);
+    const postureMult = 1.0 + (rawPostureMult - 1.0) * hastyFactor;
+
     // Diminishing returns: sqrt curve — first turns of digging in matter most.
     // At 1 turn: 0.07 (was 0.035). At 6 turns: 0.07×√6 = 0.171 (was 0.21).
     const entrenchmentMult = 1.0 + Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_PER_TURN * 2 * suppressionFactor;
@@ -701,7 +819,21 @@ export function computeDefenderPower(
     const fatigueMult = getFatigueMult(formation, 'defend');
     const homeMult = getHomeDistanceMultFromCache(state, formation);
     const moralePenalty = getCriticalMoralePenalty(formation);
-    return base * postureMult * supplyMult * terrainMult * entrenchmentMult * corpsDefMult * resilienceMult * urbanMult * disruptionMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus * frontDensityMult * officerMult * ethnicMult * fatigueMult * homeMult * moralePenalty;
+
+    // ── Mechanic B: Defense environmental soft cap ─────────────────────
+    // The product of environmental defense multipliers uses diminishing returns
+    // above DEFENSE_ENV_CAP_THRESHOLD to prevent 17 small multipliers from
+    // compounding to absurd levels.
+    const envProduct = terrainMult * entrenchmentMult * corpsDefMult * resilienceMult
+        * urbanMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus
+        * frontDensityMult * ethnicMult;
+    const envBonus = envProduct - 1.0;
+    const cappedBonus = envBonus <= DEFENSE_ENV_CAP_THRESHOLD
+        ? envBonus
+        : DEFENSE_ENV_CAP_THRESHOLD + (envBonus - DEFENSE_ENV_CAP_THRESHOLD) * DEFENSE_ENV_COMPRESSION;
+    const cappedEnvMult = 1.0 + Math.max(0, cappedBonus);
+
+    return base * postureMult * supplyMult * cappedEnvMult * disruptionMult * officerMult * fatigueMult * homeMult * moralePenalty;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
