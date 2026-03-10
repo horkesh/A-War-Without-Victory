@@ -213,22 +213,26 @@ export { RS_EARLY_WAR_END_WEEK } from './bot_constants.js';
 
 export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
     RS: [
-        // n159 audit: RS stays offensive permanently. Tempo decay is organic (supply, fatigue, overstretch).
-        { start_week: 0, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.28, aggression_modifier: 0.15 },
-        { start_week: RS_EARLY_WAR_END_WEEK, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.22, aggression_modifier: 0.05 },
+        // n482: RS stays offensive permanently. Reduced aggression from 0.15→0.08 to curb +104 over-capture.
+        { start_week: 0, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.22, aggression_modifier: 0.08 },
+        { start_week: RS_EARLY_WAR_END_WEEK, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.18, aggression_modifier: 0.03 },
     ],
     RBiH: [
-        // Historical: ARBiH purely defensive first year. Minimal counteroffensives until mid-1993.
-        // Calibration: boosted for Jan 1993 painted targets — RBiH needs to hold more territory.
-        { start_week: 0, end_week: 20, default_corps_stance: 'defensive', max_attack_share_override: 0.10, aggression_modifier: -0.10 },
-        { start_week: 20, end_week: 40, default_corps_stance: 'defensive', max_attack_share_override: 0.15, aggression_modifier: -0.05 },
-        { start_week: 40, end_week: 56, default_corps_stance: 'defensive', max_attack_share_override: 0.20, aggression_modifier: 0.0 },
+        // Historical: ARBiH purely defensive first ~15 weeks, then local counteroffensives.
+        // BB1 p.404: Sarajevo breakout attempts, Visoko-Breza operations from summer 1992.
+        // Calibration: balanced from w15 enables local counterattacks that generate combat casualties.
+        { start_week: 0, end_week: 15, default_corps_stance: 'defensive', max_attack_share_override: 0.10, aggression_modifier: -0.10 },
+        { start_week: 15, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.20, aggression_modifier: 0.0 },
+        { start_week: 40, end_week: 56, default_corps_stance: 'balanced', max_attack_share_override: 0.20, aggression_modifier: 0.0 },
         { start_week: 56, end_week: 80, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0.05 },
         { start_week: 80, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.35, aggression_modifier: 0.15 },
     ],
     HRHB: [
-        { start_week: 0, end_week: 12, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0 },
-        { start_week: 12, end_week: 26, default_corps_stance: 'balanced', max_attack_share_override: 0.35, aggression_modifier: 0.05 },
+        // n482: HVO was offensively active Apr-Jun 1992 (Op Jackal, Posavina, Mostar liberation).
+        // Offensive stance w0-26 — HVO stayed active through late 1992 (Jajce defense, corridor ops).
+        // Graz Accords limit targets but corridor exceptions (Derventa, Orašje) allow some HRHB attacks.
+        { start_week: 0, end_week: 12, default_corps_stance: 'offensive', max_attack_share_override: 0.30, aggression_modifier: 0.10 },
+        { start_week: 12, end_week: 26, default_corps_stance: 'offensive', max_attack_share_override: 0.25, aggression_modifier: 0.05 },
         { start_week: 26, end_week: 9999, default_corps_stance: 'balanced', max_attack_share_override: 0.3, aggression_modifier: 0 },
     ],
 };

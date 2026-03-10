@@ -1,11 +1,108 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-09
+**Last Updated:** 2026-03-10
 **Status:** Post-MVP — War calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-10] Sector Contiguity Fix (Point-Contact Bridging) + Dev/Live Map Split (n554)
+
+**Engine fix:** `buildSharedBoundaryAdjacency()` in `osid_adjacency.ts` filters edges where `min_dist > 0` (point contacts vs real shared boundaries). Threaded through entire sector pipeline — Case B in `buildEdgeAdjacency` and `splitNonContiguousSectors` now uses shared-boundary adjacency for friendly-OSID checks. `bostahovine_2 ↔ pomol_2` (min_dist=1.7e-13) no longer bridge Srebrenica and Visegrad fronts. Removed `consolidateSharedFriendlyOsids` (~100 lines) and `consolidateSharedEdgesAcrossSectors` (~120 lines) — dead code from abandoned edge-movement approach.
+
+**Dev/live map split:** Single codebase with `devMode` boolean in `gameStore.ts`. `isDevMode()`: auto-ON in Vite dev, `?dev=1` opt-in, `?live=1` forces live. Dev mode: full load/run tools + DEV badge. Live mode: auto-loads `latest_run_final_save.json` as RBiH, merged Front/Sectors toggle, sector glow centered on front line (no offset, wider, `line-blur`), demarcation hidden.
+
+**Front lines as sectors (live mode):** Front line features carry `sector_id`; merge key changed from `corps_id` to `sector_id` — segments from different sectors won't merge, creating natural visual breaks at sector boundaries. Sector glow replaces front-line visually when selected.
+
+**Result:** n554 — 88.5% area-weighted (up from 87.0%), 78 sectors, 0 spanning Srebrenica+Visegrad. Report: `docs/40_reports/implemented/20260310_SECTOR_CONTIGUITY_FIX_AND_DEV_LIVE_MAP_SPLIT.md`.
+
+---
+
+## [2026-03-10] Triple-Junction Front-Line-Following — Sector Edge Adjacency Fix (n532)
+
+**Problem:** `buildEdgeAdjacency()` connected front edges whose friendly-side OSIDs were polygon-adjacent, walking through interior friendly territory instead of following the front line. This caused sectors to span enemy salients — e.g., 2nd Corps `sector:8` connected Zavidovići (north) and Kakanj (south) across an RS salient because hajderovici_2 and vukanovici are polygon-adjacent at 3m despite facing opposite sides of the salient.
+
+**Fix:** Replaced OSID adjacency walk with **triple-junction front-line-following** in three functions: `buildEdgeAdjacency`, `splitNonContiguousSectors`, `isSegmentAdjacent` (all in `corps_front_sectors.ts`). Two front edges connect iff they meet at a polygon triple junction: (A) same friendly OSID, hostile OSIDs adjacent; (B) same hostile OSID, friendly OSIDs adjacent.
+
+**Code cleanup:** Removed duplicate edge parsing loop in `splitNonContiguousSectors` (single-pass builds all four maps). Extracted `isOsidAdjacent` module-level helper replacing inline closures. Removed unused `_friendlyOsids` parameter from `isSegmentAdjacent` and `mergeUndersizedSubSegments`. Fixed O(n³) in `consolidateIsolatedCorpsPockets` with `osidToFrontEdgeIds` reverse index. Deleted dead `buildStrictOsidAdjacency` from `osid_adjacency.ts`.
+
+**Result:** Sectors 52→77. 2nd Corps Zavidovići separate from Kakanj. Max sector size 24. Area-weighted 87.0%. RS delta -19 (was +104 at n482). REAL_WAR_MASTER issue #13 FIXED.
+
+---
+
+## [2026-03-10] Sector Contiguity Enforcement + Demarcation Cleanup (n528)
+
+**Problem:** 3rd Corps (ARBiH) had 9 sectors including 5 isolated single-brigade pockets (Kakanj, Zavidovići, Gračanica, Vitez, Zenica) surrounded by 2nd Corps territory. Sector demarcation lines ran through deep rear, far from the front. Both structurally wrong and visually broken.
+
+**Engine fix:** New `consolidateIsolatedCorpsPockets` (Step 3c) in `corps_front_sectors.ts`. After cross-corps consolidation, detects isolated edge components per corps and reassigns them to the neighboring majority corps. Overrides brigade-presence protection for geographic contiguity.
+
+**Rendering fix:** `buildSectorDemarcationGeoJSON.ts` — front-proximity filter (only segments with vertex on contact line), O(n) endpoint-map merger, Douglas-Peucker simplification. `MapContainer.tsx` — two-layer styling (dark base + light dash).
+
+**Result:** 3rd Corps 9→4 sectors, 0 isolated pockets. RS delta +117 (was +104). No regression. Report: `docs/40_reports/implemented/20260310_SECTOR_CONTIGUITY_AND_DEMARCATION_CLEANUP.md`.
+
+---
+
+## [2026-03-10] Enclave Defense Overhaul — Sarajevo Holds (n524→n527)
+
+**Problem:** Sarajevo fell to RS by week 7 — the single most ahistorical outcome in the sim. 5 root causes identified:
+1. Supply misclassification (Sarajevo reads "adequate" under total siege → resilience decays)
+2. Enclave defense scaling too weak (0.005/resilience → 1.15× max bonus)
+3. No urban tank penalty (tanks at full power in city streets)
+4. Urban defense multiplier too low (1.5× vs doctrinal 3:1 requirement)
+5. No garrison power (4 brigades at 2,000 pers can't hold against 4 brigades at 5,100 pers + 160 tanks)
+
+**Changes:**
+- `enclave_resilience.ts`: `ALWAYS_BESIEGED_ENCLAVES` set (Sarajevo always "strained"); `initial_resilience: 20` for Sarajevo; defense scaling 0.005→0.02; new `getEnclaveGarrisonPower()` (pop × 5% × 15% × resilience) added to all defense paths
+- `combat_math.ts`: `URBAN_TANK_TERRAIN_FLOOR=1.7` + `isUrbanOsid()` penalizes tanks in cities; urban defense 1.5→2.0×; `computeAttackerPower` + `getHeavyWeaponsOffensiveMult` accept `targetOsid` for urban detection
+- `attack_resolution_osid.ts` + `combat_predictor.ts`: Garrison power added to sector/direct/ghost defense; `targetOsid` passed to attacker power chain
+
+**Result (n527):** Sarajevo RS 5 / RBiH 4 (was RS 9 / RBiH 0). Region match 67.7→80.6%. Drina 67.5→78.0%. Goražde RS 9 / RBiH 11 (was RS 16 / RBiH 4). Overall 87.1% area-weighted. Enclave resilience builds correctly (Sarajevo 44.6, hardening active).
+
+**Key lesson:** Personnel ratio trumps multipliers. Raw volume (garrison power) was needed, not just better multipliers.
+
+---
+
+## [2026-03-10] IVP Breakdown — Weights API + Diplomatic Press Briefing (P0)
+
+**Summary:** Player-visible IVP causality without new mechanics. Exported composite weights from `patron_pressure.ts` as `IVP_WEIGHT_*`; added `getIvpComponentContributions(ivp)` (fixed-order rows) and `formatIvpConsequenceLabel` for UI. Map SituationTab: fixed `data-summary-section="ivp"` anchor (was on Alliance block), full four-component breakdown with weighted contributions, thresholds 30/60/80. Warroom: new `IvpBreakdownModal` (Diplomatic Press Briefing), war-only, opened from Diplomacy telephone via "Press briefing" button. Command briefing "Review IVP" scrolls to IVP section (map); warroom can open same modal from Command Briefing when item targets IVP.
+
+**Determinism:** No simulation change; UI uses fixed-order arrays only. No timestamps or randomness in new UI paths.
+
+### Changes
+- `src/state/patron_pressure.ts` — IVP_WEIGHT_*, getIvpComponentContributions, formatIvpConsequenceLabel, IVP_CONSEQUENCE_ORDER
+- `src/ui/map/components/SituationTab.tsx` — IVP section anchor + breakdown + thresholds
+- `src/ui/warroom/components/IvpBreakdownModal.ts` (NEW)
+- `src/ui/warroom/ClickableRegionManager.ts` — Diplomacy modal footer + CommandBriefing IVP target
+- `docs/40_reports/WARROOM_MASTER.md`, `docs/40_reports/GUI_MASTER.md` — implemented status
+
+---
+
+## [2026-03-10] Ops-Only Attack Doctrine + Unified Sector Defense + Attack-Through (n500)
+
+Three structural combat engine changes that fundamentally reshape how attacks and defense work. Calibration: **6/6 benchmarks PASS**, RS 55.0% (target 55.3%), RBiH 32.9% (target 32.9%). 126 attacks (was 68 in n493).
+
+**Ops-only attack doctrine** (bot_brigade_eval_attack.ts, bot_brigade_ai_osid.ts): Brigades NEVER attack independently. All attacks flow through CorpsOperation. `evaluateOffensive`, `evaluateDefensive`, `evaluateReorganize`, `evaluateHomeDefense` stripped of independent attack logic. Counter-attacks (retake lost position) sole brigade-level exception. Probe threshold lowered to `repulsed` — brigades follow orders.
+
+**Unified sector defense** (attack_resolution_osid.ts, combat_predictor.ts): Defense at any OSID = `totalPower * (1/sector_edges) * densityMod`. No brigade-at-OSID vs sector-coverage distinction — front is a continuous locked line. Casualty distribution: 50% primary (closest brigade), 50% proportional by personnel to rest of sector brigades. SECTOR_COVERAGE_PENALTY eliminated.
+
+**Attack-through** (bot_brigade_eval_attack.ts, sector_offensive.ts): Brigades in execution attack best adjacent enemy OSID when not adjacent to objective (score 800 vs 900 for direct). `anyAttacked` split into `anyAttackedObjective` + `anyAttackedAnything` in both multi-axis and flat-field paths. Intermediate attacks tracked as approach progress, not objective failures.
+
+**Corps exhaustion decay** (sector_offensive.ts): EXHAUSTION_DECAY_IDLE=3/turn, EXHAUSTION_DECAY_ACTIVE=1/turn. Prevents permanent operation lockout after 2 ops. War continues through w36 (was dead at w26 pre-fix).
+
+**Brigade no-destruction** (attack_resolution_osid.ts): `forceRetreatWithPenalties()` replaces all 5 destruction paths. EMERGENCY_RETREAT_PERSONNEL_RETAIN=0.60, COHESION_LOSS=20, DISRUPTED_TURNS=3. `findEmergencyRetreatOsid`: home_osid → fallback_osid → corps HQ → any friendly.
+
+**Remaining issues:** 100% attack success rate (defense per-edge too thin). Bihać and Orašje anchor failures. HRHB 0 attacks. Casualties 26k (below 40-60k historical). Maneuverable brigade tagging not implemented.
+
+### Changes
+- `src/sim/combat/bot_brigade_eval_attack.ts` — ops-only doctrine, attack-through behavior
+- `src/sim/combat/bot_brigade_ai_osid.ts` — probe threshold lowered to 'repulsed'
+- `src/sim/combat/sector_offensive.ts` — exhaustion decay, anyAttacked split, idle stall fix
+- `src/sim/combat/attack_resolution_osid.ts` — unified sector defense, brigade no-destruction
+- `src/sim/combat/combat_predictor.ts` — mirrors unified sector defense model
+- `src/sim/combat/bot_corps_directives.ts` — cluster growth threshold (< 3 → < 1)
+
+---
 
 ## [2026-03-09] Corps HQ Cleanup + Central Bosnia Sectors + Op Participant Filter (n458)
 
@@ -12261,6 +12358,34 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 - `npx vitest run` passes all tests.
 - `npm run sim:scenario:probe` confirms zero behavioral changes (identical operational results to the existing baseline).
 
+## 2026-03-09: Early-War Offensive Window + Alliance Movement + War-or-Game Role (n482)
+
+**Author:** Claude (Orchestrator + Game Designer + Technical Architect)
+**Scope:** P0 attack outcome fix, alliance cross-faction movement, Bugojno OSID overrides, new Paradox role.
+**Context:** Real War audit found 83% of attacks ending in catastrophic defeat (n473). Root cause: posture bug + defense stacking.
+
+**Changes:**
+
+1. **CRITICAL BUG FIX — Attack posture override** (`attack_resolution_osid.ts`): Formations with attack orders but 'defend' posture computed 0 attack power → power_ratio=0 → catastrophic. 80% of "catastrophic" outcomes were fake. Now formations use minimum 'attack' posture when they have attack orders.
+
+2. **Hasty defense penalty** (`combat_math.ts`): HASTY_DEFENSE_RAMP=5. Formations at entrenchment_turns < 5 get reduced posture defense bonus. Constants: `HASTY_DEFENSE_RAMP`, `DEFENSE_ENV_CAP_THRESHOLD`, `DEFENSE_ENV_COMPRESSION`.
+
+3. **Defense environmental soft cap** (`combat_math.ts`): Diminishing returns on terrain×entrenchment×corps×etc. above 1.5× total. THRESHOLD=0.5, COMPRESSION=0.5.
+
+4. **Weighted artillery suppression** (`combat_math.ts`): Best attacker = full, each additional = +30% (was max-only).
+
+5. **Alliance cross-faction movement** (`alliance_update.ts`, `brigade_movement.ts`, `osid_column_movement.ts`, `brigade_movement_orders.ts`, `bot_brigade_context.ts`): New `isFriendlyFaction()` helper. RBiH and HRHB units can move through each other's territory when allied (alliance > 0.20). Reverts automatically if they go to war.
+
+6. **Bugojno OSID overrides** (`apr1992_definitive_40w.json`, `apr1992_definitive_52w.json`): `op:bugojno:brizina` and `op:bugojno:prijaci` painted RBiH in initial state.
+
+7. **War-or-Game Paradox role** (`.claude/skills/war-or-game/SKILL.md`, `.cursor/skills/war-or-game/SKILL.md`, `AGENT_TEAM_ROSTER.md`): Realism auditor. Primary owner of REAL_WAR_MASTER.md. Mandatory advisor on calibration. "What would a real Bosnian War commander find absurd?"
+
+**Calibration (n482):** Catastrophic 83.4%→25.3%, early war success 17%→76.7%, late war 14%→40.9%. RS delta +104 (over-capture). Casualties 21.4k (target 40-60k). All 6 bot benchmarks PASS.
+
+**Validation:** `npx tsc --noEmit` clean, `npm run test:vitest` 436/436 pass.
+
+---
+
 ## 2026-03-09: Evaluation Remediation Plan - Consolidated Closure
 
 **Author:** Cursor (Agent)
@@ -12271,3 +12396,39 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 - Authored `docs/40_reports/implemented/20260309_EVALUATION_REMEDIATION_CONSOLIDATED.md`.
 - Updated `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md` with the new reference.
 - Updated `docs/10_canon/context.md` with completion status.
+
+---
+
+## 2026-03-10: Brigade Dissolution Fix + RBiH/HRHB Doctrine Fix (n556→n560)
+
+**Author:** Claude (War-or-Game + Gameplay Programmer)
+**Scope:** Dissolution absolute floor bypass fix, RBiH/HRHB doctrine phase changes, timeline JSON as source of truth.
+**Context:** n524 run showed 12 destroyed brigades (zombie units auto-dissolving despite high morale/cohesion) and 0 RBiH/HRHB attacks in 40 weeks.
+
+**Changes:**
+
+1. **Dissolution absolute floor fix** (`brigade_dissolution.ts`): `DISSOLUTION_ABSOLUTE_FLOOR=150` previously bypassed the 2-of-3 criteria check — brigades below 150 pers auto-dissolved regardless of morale or cohesion. 12 brigades with morale 37-93 and cohesion 56+ were being destroyed. Fixed: absolute floor now counts as the "low personnel" criterion, still requiring 2-of-3 criteria (3-of-3 for enclave). Destroyed: 12→1.
+
+2. **RBiH doctrine phase** (`data/scenarios/timelines/apr1992.json` + `bot_strategy.ts`): Changed w15-40 from `defensive` → `balanced`, `max_attack_share_override` 0.15→0.20, `aggression_modifier` -0.05→0.0. Also w40-56 from `defensive` → `balanced`. Historical basis: ARBiH launched local counterattacks from summer 1992 (Sarajevo breakout attempts, Visoko-Breza operations).
+
+3. **HRHB doctrine phase** (`data/scenarios/timelines/apr1992.json` + `bot_strategy.ts`): Changed w12-26 from `balanced` → `offensive`, `max_attack_share_override` 0.35→0.25. Historical basis: HVO stayed offensively active through late 1992 (Jajce defense, corridor ops). Note: still produces 0 HRHB attacks because Graz Accords block all valid targets.
+
+4. **Key discovery: timeline overrides code** — `data/scenarios/timelines/apr1992.json` `doctrine_phases` overrides `FACTION_DOCTRINE_PHASES` in `bot_strategy.ts` via `getActiveDoctrinePhase()`. Changes to code-only constants had zero effect (n558, n559 identical to n556). The timeline JSON is the actual source of truth for doctrine phases.
+
+5. **Key discovery: `defensive` stance hard-gates operations** — Line 1001 of `bot_corps_directives.ts`: `stance === 'offensive' || stance === 'balanced'`. Defensive corps cannot launch sector offensives at all. This is why RBiH had exactly zero attacks for the entire 40-week window.
+
+**Calibration (n560):**
+
+| Metric | n556 (dissolution only) | n560 (+ doctrine) | Target |
+|---|---|---|---|
+| Destroyed brigades | 2 | **1** | Minimize |
+| Total KIA | 23,521 | **24,755** | 30-37k |
+| RS attack success | 91.4% | **91.7%** | >85% |
+| RBiH attacks | 0 | **24** | >0 |
+| HRHB attacks | 0 | 0 | Graz blocks |
+| Total battles | ~130 | **153** | — |
+| RBiH attack success | — | 37.5% (9/24) | — |
+
+**Files:** `src/sim/combat/brigade_dissolution.ts`, `src/sim/combat/bot_strategy.ts`, `data/scenarios/timelines/apr1992.json`
+**Validation:** `npx tsc --noEmit` clean. Tests pass.
+**REAL_WAR_MASTER.md:** Updated issues #7 (HVO passivity), #12 (suicide attacks/dissolution), H6 (ARBiH passivity), priority table.

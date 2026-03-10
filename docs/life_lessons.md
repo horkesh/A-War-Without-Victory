@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-08 (initial synthesis from 3 days of work)
+> Last updated: 2026-03-10 (daily review — 18 commits in last 24h)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -9,7 +9,13 @@
 
 ## Recently Violated (needs reinforcement)
 
-_No violations detected yet._
+### [Architecture] Port systems incrementally, not all-at-once (2026-03-08) — VIOLATED 2026-03-10
+- **Violation evidence**: Phase 3 GameState domain segregation (`6cf1038`) changed 64 files in one commit. Required 6 automated fixup tools (`fix_commas.cjs`, `fix_missing_domains_2.cjs`, `fix_spreads.cjs`, `fix_test_ast.ts`, `fix_test_overrides.ts`, `fix_test_spreads.cjs`) to repair broken tests. This is a big-bang refactor, not incremental porting.
+- **Mitigation**: The refactor was type-structural (moving fields into nested domains), not behavioral. Tests still passed after fixes. But the volume of fixup tooling signals the scope was too large for one pass.
+
+### [Process] Classify tasks by actual system impact, not plan labels (2026-03-07) — VIOLATED 2026-03-10
+- **Violation evidence**: n500 commit (`ebc6248`) bundled THREE structural engine changes into one commit: (1) ops-only attack doctrine, (2) unified sector defense, (3) attack-through. Each is independently significant. Now 100% attack success rate and defense is too weak per-edge — but attribution is impossible because all three landed together. Which change caused the defense collapse? Can't tell.
+- **Mitigation**: The commit message documents all three changes. But the calibration consequence is real — tuning requires understanding which change is responsible.
 
 ---
 
@@ -33,12 +39,6 @@ _No violations detected yet._
 - **Right approach**: Trace the actual data flow. Print fatigue values across turns. Check whether equipment loss code even exists in the code path being executed. The answer was "no."
 - **Do instead**: Before tuning constants, verify the mechanic is actually executing. Add a diagnostic tool/script to trace the value you're calibrating across turns. If the value isn't changing when it should, you have a bug, not a balance problem.
 
-### [Architecture] Port systems incrementally, not all-at-once (2026-03-08)
-- **Context**: Frontline attrition needed to move from legacy `brigade_front_assignment`/`local_fronts` to the new `corps_front_sectors` system.
-- **Wrong approach**: Trying to remove the entire legacy system at once. The legacy system is still used by fatigue, defense, GUI, and serialization — ripping it all out would break 4+ consumers.
-- **Right approach**: Port one consumer at a time (`frontline_attrition.ts` only). Leave legacy intact for other consumers. Each port is a clean, testable, commitable unit.
-- **Do instead**: When migrating to a new system, enumerate ALL consumers of the old system first. Port one at a time, verify calibration between each, and only delete the old system when the last consumer is ported.
-
 ### [Calibration] Data problems masquerade as engine bugs (2026-03-07)
 - **Context**: 84.2% calibration plateau. Combat loop looked broken — VRS wasn't capturing historically-held territory.
 - **Wrong approach**: Debugging the combat resolution engine, checking morale, checking attack thresholds. The engine was working correctly — VRS operations simply weren't targeting the right OSIDs.
@@ -50,12 +50,6 @@ _No violations detected yet._
 - **Wrong approach**: Using the narrowest scope (border OSIDs). Only 55% of RBiH brigades were at border-adjacent positions. Casualties dropped ~50%. The issue: many brigades are in the sector's depth zone, not directly at the border.
 - **Right approach**: Use `assigned_brigade_ids` — any brigade whose `location_osid` is within the sector's `territory_osids`. This captures brigades in the depth zone who still take sniping/shelling/disease attrition.
 - **Do instead**: When choosing which entities a system applies to, map out the full spatial hierarchy (border → territory → faction space) and pick the level that matches the mechanic's real-world scope. Passive attrition = entire sector territory. Active combat = border only.
-
-### [Process] Classify tasks by actual system impact, not plan labels (2026-03-07)
-- **Context**: A task labeled "GUI Phase 5" actually touched IPC contracts, bot AI logic, pipeline steps, and serialization schemas — all engine-critical.
-- **Wrong approach**: Treating it as "UI work" and skipping regression gates, running tasks in parallel that shared state, combining engine + UI commits.
-- **Right approach**: Before parallelizing or skipping regression, audit what the task actually touches. If it modifies schema, IPC, bot logic, pipeline, or serialization — it's engine work regardless of what the plan calls it.
-- **Do instead**: Read the actual file list before deciding task classification. If ANY file is in `src/sim/`, `src/state/`, or touches IPC contracts, add regression gates and separate commits.
 
 ### [Debugging] Override direction is critical and confusing (2026-03-04)
 - **Context**: RS territory calibration. RS was under-capturing some areas and over-capturing others.
@@ -80,6 +74,30 @@ _No violations detected yet._
 - **Wrong approach**: `anchor: "bihac"` — reports failure if any OSID in bihać municipality is lost, even if the pocket (Bihać city) is held.
 - **Right approach**: `anchor: "op:bihac:bihac_2"` — checks the specific OSID that represents the pocket core.
 - **Do instead**: Always use OSID-level anchors for calibration checkpoints. Municipality-level is too coarse for a 744-OSID map.
+
+### [Calibration] One structural change per calibration run (2026-03-10)
+- **Context**: n500 bundled ops-only attack doctrine + unified sector defense + attack-through into a single commit and calibration run. Result: 100% attack success rate, defense too weak per-edge, HRHB 0 attacks.
+- **Wrong approach**: Landing multiple structural combat changes together because "they're related." Each change shifts force balance independently. When the combined result is broken, you can't attribute which change caused which symptom.
+- **Right approach**: One structural change → one calibration run → measure delta → decide whether to keep, tune, or revert before adding the next structural change.
+- **Do instead**: Before committing a structural engine change, ask: "Can I measure this change's impact in isolation?" If the answer is no because other structural changes are uncommitted, commit and calibrate the first change alone.
+
+### [Debugging] Persistent symptoms = multi-layer failure (2026-03-10)
+- **Context**: Deep-rear brigade evacuation (`89cac36`) — RS had 15 brigades stuck in deep rear. Initial investigation expected 1-2 bugs. Found 7 across: brigade AI evaluation chain, column march destination calculation, transit state reset, territory classification lookup, sector Voronoi gaps, and bot context missing fields.
+- **Wrong approach**: Fixing the first bug found and expecting the symptom to resolve. Each fix revealed the next layer.
+- **Right approach**: When a symptom persists after the first fix, switch from "find the bug" to "enumerate all layers that could cause this symptom." Build a layer-by-layer diagnostic. The 7-bug fix worked because it systematically audited: evaluation → decision → movement → destination → territory → sector → context.
+- **Do instead**: If the first fix doesn't resolve the symptom, stop fixing and start mapping. List every system between input and output. Check each layer independently. Multi-layer failures are the norm in cross-system symptoms, not the exception.
+
+### [Process] Session-scoped infrastructure must be re-created every session (2026-03-10)
+- **Context**: Life-lessons daily cron (`3 6 * * *`) was documented in MEMORY.md but not in the napkin. Previous session didn't schedule it. Cron is session-only — dies when Claude exits.
+- **Wrong approach**: Documenting session-scoped infrastructure only in reference docs (MEMORY.md). The napkin is what gets actioned at session start; MEMORY.md is background context.
+- **Right approach**: Any session-scoped resource (crons, background tasks, watchers) must be in the napkin's Session Startup section with explicit "schedule this" instructions.
+- **Do instead**: When adding any session-scoped infrastructure, add it to the napkin Session Startup section immediately. If it's not in the napkin, it won't happen next session.
+
+### [GUI] GameStateAdapter field paths: always verify `state.military.*` (2026-03-10)
+- **Context**: Sectors stopped being clickable, hoverable, and highlighting. No white glow line. No zoom from Command. Investigation took hours across MapLibre layer timing, queryRenderedFeatures, line-offset, React race conditions — all red herrings.
+- **Wrong approach**: Debugging MapLibre layers, adding diagnostic click handlers, testing line-offset behavior. The entire rendering and interaction pipeline was correct — it simply had no data to work with.
+- **Right approach**: A single `console.warn` showing `frontEdgesOsid: undefined` in `runUpdate` revealed the root cause in seconds. `GameStateAdapter.ts:1201` read `(state as any).war_front_edges_osid` instead of `state.military.war_front_edges_osid`. The field was in the save data but at the wrong path — silently returning `undefined`, causing the entire downstream chain (source → layers → interactions → highlights) to never initialize.
+- **Do instead**: When a GUI feature "stops working," check `GameStateAdapter.ts` field paths first. Log the field value before any layer/interaction debugging. Watch for `(state as any).X` patterns that should be `state.military.X`. The `front_edges` field (line 1185) correctly uses `state.military.front_edges` — use it as a reference pattern.
 
 ### [GUI] Never show raw engine values to the player (2026-03-07)
 - **Context**: Officer stats were displayed as raw 1-5 integers. Players saw "Competence: 3" with no context.
@@ -188,6 +206,38 @@ _No violations detected yet._
 - **Wrong approach**: Running full 40w scenarios to discover that combat is fundamentally broken (no attack orders, wrong OSID keys, zero eligible brigades).
 - **Right approach**: Proof-lane test (`scenario_vrs_operation_proof_4w.json`) validates that one VRS opening op can attack, battle, and advance in 4 turns. Run this before any 40w calibration.
 - **Do instead**: Maintain a lightweight proof test that validates the critical path of the simulation. Run it before every calibration run. Saves 5-10 minutes per failed long run.
+
+### [Combat] Personnel ratio trumps multipliers (2026-03-10)
+- **Context**: Sarajevo fell despite enclave resilience, urban defense bonus, and terrain multipliers. 4 RBiH brigades (2,000 pers) vs 4 RS brigades (5,100 pers + 160 tanks + 120 artillery). Power ratio 3.5-18× at each OSID.
+- **Wrong approach**: Stacking more multipliers on defense (enclave 0.005→0.02, urban 1.5→2.0, tank penalty). Each helped marginally but none could bridge a 5:1 raw personnel + equipment gap. Multiplier-stacking cannot fix a volume problem.
+- **Right approach**: Add RAW VOLUME to the defense — enclave garrison power representing organized civilian defense (TDF, Patriotic League, police, volunteers). Formula: `population × 5% × 15% × resilienceMult`. This provides meaningful base defense regardless of how few brigades the OOB seeds.
+- **Do instead**: When a power ratio is extreme (>3:1), look for missing volume (troops, militia, civilian defense), not better multipliers. Multipliers scale what exists; if there's not enough to scale, they're useless.
+
+### [Combat] Enclave defense is multi-layered — all layers needed simultaneously (2026-03-10)
+- **Context**: Fixing Sarajevo required 5 simultaneous changes, none sufficient alone: supply detection, resilience scaling, urban tank penalty, urban defense, garrison volume.
+- **Wrong approach**: Trying each fix in isolation. Resilience scaling alone didn't matter because supply misclassified → resilience decayed. Urban tank penalty alone didn't matter because personnel ratio was extreme. Each fix addressed one layer of a multi-layer problem.
+- **Right approach**: Identify all the layers that should be contributing to defense, verify each is actually functioning, then fix all broken layers together. Test the combined effect.
+- **Do instead**: For complex outcomes (city defense, enclave survival), trace EVERY contributing system: supply state → resilience building → defense bonus → equipment penalties → urban terrain → garrison volume. If any layer reads wrong, the combined defense collapses.
+
+### [Tooling] weekly_report.jsonl uses `week_index` not `week` (2026-03-10)
+- **Context**: Extraction scripts used `w.week` and got `undefined` for all entries. Field name is `week_index`.
+- **Do instead**: For weekly report extraction, always use `week_index`. Check field names with `Object.keys(line)` before writing extraction scripts.
+
+### [Debugging] When same constants change nothing, check timing (2026-03-10)
+- **Context**: Changed enclave defense scaling from 0.005→0.02 (4× improvement) but battle results were identical. The reason: Sarajevo fell at week 2-7, before the changed system could accumulate enough resilience to matter.
+- **Do instead**: When tuning a system produces identical outcomes, check whether the battles happen BEFORE the tuned system activates. If the problem occurs at turn 2 and your fix accumulates over 20 turns, the fix is aimed at the wrong timescale.
+
+### [Architecture] Timeline JSON overrides code doctrine phases (2026-03-10)
+- **Context**: Changed `FACTION_DOCTRINE_PHASES` in `bot_strategy.ts` twice (n558, n559). Both runs produced IDENTICAL results to n556 because `data/scenarios/timelines/apr1992.json` has its own `doctrine_phases` that takes priority via `getActiveDoctrinePhase()`.
+- **Do instead**: When modifying faction doctrine phases, ALWAYS edit the timeline JSON (`data/scenarios/timelines/apr1992.json`) first. The hardcoded `FACTION_DOCTRINE_PHASES` in `bot_strategy.ts` is only a fallback for when no timeline is active. Keep both in sync, but the timeline is the source of truth.
+
+### [Debugging] Rate tuning cascades unpredictably (2026-03-10)
+- **Context**: Reducing frontline attrition (0.005→0.003) and increasing combat rates (0.08→0.10) both produced NET NEGATIVE results — fewer total KIA, more destroyed brigades. More surviving brigades changes battle dynamics in unpredictable ways.
+- **Do instead**: Prefer structural changes (enabling new attack sources, fixing gates) over rate tuning. When rate changes regress all metrics, revert immediately — the system is nonlinear and small rate changes have chaotic downstream effects.
+
+### [Debugging] Verify outcome field values before writing extraction scripts (2026-03-10)
+- **Context**: Diagnostic scripts used `b.outcome === 'decisive'` but the actual field is `'decisive_victory'`. RS attack success appeared as 5-10% when actual was 91%. Led to multiple wasted tuning attempts (REACTIVE_DEFENSE_RATIO, attrition rates) based on wrong data.
+- **Do instead**: Always check field values with `Object.keys()` or sample data before writing extraction logic. One wrong enum string can invalidate an entire investigation.
 
 ---
 

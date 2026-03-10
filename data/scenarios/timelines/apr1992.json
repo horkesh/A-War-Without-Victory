@@ -6,36 +6,36 @@
         "start_week": 0,
         "end_week": 20,
         "default_corps_stance": "offensive",
-        "max_attack_share_override": 0.28,
-        "aggression_modifier": 0.15
+        "max_attack_share_override": 0.22,
+        "aggression_modifier": 0.08
       },
       {
         "start_week": 20,
         "end_week": 9999,
         "default_corps_stance": "offensive",
-        "max_attack_share_override": 0.22,
-        "aggression_modifier": 0.05
+        "max_attack_share_override": 0.18,
+        "aggression_modifier": 0.03
       }
     ],
     "RBiH": [
       {
         "start_week": 0,
-        "end_week": 20,
+        "end_week": 15,
         "default_corps_stance": "defensive",
         "max_attack_share_override": 0.10,
         "aggression_modifier": -0.10
       },
       {
-        "start_week": 20,
+        "start_week": 15,
         "end_week": 40,
-        "default_corps_stance": "defensive",
-        "max_attack_share_override": 0.15,
-        "aggression_modifier": -0.05
+        "default_corps_stance": "balanced",
+        "max_attack_share_override": 0.20,
+        "aggression_modifier": 0.0
       },
       {
         "start_week": 40,
         "end_week": 56,
-        "default_corps_stance": "defensive",
+        "default_corps_stance": "balanced",
         "max_attack_share_override": 0.20,
         "aggression_modifier": 0.0
       },
@@ -58,15 +58,15 @@
       {
         "start_week": 0,
         "end_week": 12,
-        "default_corps_stance": "balanced",
-        "max_attack_share_override": 0.25,
-        "aggression_modifier": 0
+        "default_corps_stance": "offensive",
+        "max_attack_share_override": 0.30,
+        "aggression_modifier": 0.10
       },
       {
         "start_week": 12,
         "end_week": 26,
-        "default_corps_stance": "balanced",
-        "max_attack_share_override": 0.35,
+        "default_corps_stance": "offensive",
+        "max_attack_share_override": 0.25,
         "aggression_modifier": 0.05
       },
       {

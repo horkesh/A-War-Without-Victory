@@ -1,10 +1,14 @@
 /**
  * Brigade dissolution — automatically dissolve combat-ineffective brigades.
  *
- * Criteria (ALL must be true):
- * - personnel < DISSOLUTION_PERSONNEL_THRESHOLD (200)
- * - cohesion <= DISSOLUTION_COHESION_THRESHOLD (10)
- * - readiness === 'degraded'
+ * Criteria (TWO of three must be true):
+ * - personnel < DISSOLUTION_PERSONNEL_THRESHOLD (300)
+ * - cohesion <= DISSOLUTION_COHESION_THRESHOLD (15)
+ * - morale <= DISSOLUTION_MORALE_THRESHOLD (10)
+ *
+ * Historical: BB1 p.455 confirms brigades were destroyed (9th Grahovo LIB).
+ * BB1 p.443: After Srebrenica, survivors reconstituted into 28th Division —
+ * old units ceased to exist. Pattern: attrition → ineffectiveness → dissolution.
  *
  * On dissolution:
  * - status = 'inactive', lifecycle_status = 'destroyed'
@@ -18,8 +22,15 @@
 import type { FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-export const DISSOLUTION_PERSONNEL_THRESHOLD = 200;
-export const DISSOLUTION_COHESION_THRESHOLD = 10;
+export const DISSOLUTION_PERSONNEL_THRESHOLD = 300;
+export const DISSOLUTION_COHESION_THRESHOLD = 15;
+export const DISSOLUTION_MORALE_THRESHOLD = 10;
+/** Absolute floor: units below this dissolve regardless of other stats.
+ *  A unit of ~150 men is a company remnant — not a brigade. */
+export const DISSOLUTION_ABSOLUTE_FLOOR = 150;
+/** Enclave brigades use a lower absolute floor — they are last-line defenders
+ *  with nowhere to dissolve to. Historically survived at remnant strength (Goražde, Srebrenica). */
+export const ENCLAVE_DISSOLUTION_ABSOLUTE_FLOOR = 50;
 export const DISSOLUTION_PERSONNEL_TO_RESERVE_RATE = 0.5;
 export const DISSOLUTION_EQUIPMENT_TRANSFER_RATE = 0.7;
 
@@ -48,12 +59,23 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
 
         const personnel = f.personnel ?? 0;
         const cohesion = f.cohesion ?? 0;
-        const readiness = f.readiness;
+        const morale = f.morale ?? 50;
 
-        // Check dissolution criteria — ALL must be true
-        if (personnel >= DISSOLUTION_PERSONNEL_THRESHOLD) continue;
-        if (cohesion > DISSOLUTION_COHESION_THRESHOLD) continue;
-        if (readiness !== 'degraded') continue;
+        // Enclave brigades have a lower absolute floor — they are last-line defenders
+        // with nowhere to dissolve to, and require ALL THREE criteria (not two).
+        const isEnclave = Array.isArray(f.tags) && f.tags.includes('enclave');
+        const absFloor = isEnclave ? ENCLAVE_DISSOLUTION_ABSOLUTE_FLOOR : DISSOLUTION_ABSOLUTE_FLOOR;
+        const requiredCriteria = isEnclave ? 3 : 2;
+
+        // Dissolution criteria: always require at least requiredCriteria to be met.
+        // The absolute floor counts as the "low personnel" criterion automatically.
+        // A brigade at 140 pers but 60 morale and 56 cohesion is a company-strength
+        // unit still willing to fight — it shouldn't auto-dissolve just from being small.
+        const lowPersonnel = personnel < DISSOLUTION_PERSONNEL_THRESHOLD || personnel < absFloor;
+        const lowCohesion = cohesion <= DISSOLUTION_COHESION_THRESHOLD;
+        const lowMorale = morale <= DISSOLUTION_MORALE_THRESHOLD;
+        const criteriaCount = (lowPersonnel ? 1 : 0) + (lowCohesion ? 1 : 0) + (lowMorale ? 1 : 0);
+        if (criteriaCount < requiredCriteria) continue;
 
         // Dissolve
         const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);
