@@ -49,19 +49,19 @@ describe('Three-Sided Bot AI Validation', () => {
 
     // --- A3: RS early-war attack share boost ---
 
-    it('RS getEffectiveAttackShare returns 0.28 at turn 0 (doctrine phase)', () => {
+    it('RS getEffectiveAttackShare returns 0.35 at turn 0 (doctrine phase)', () => {
         const share = getEffectiveAttackShare('RS', 0);
-        expect(share).toBeCloseTo(0.28, 2);
+        expect(share).toBeCloseTo(0.35, 2);
     });
 
     it('RS getEffectiveAttackShare uses post-offensive phase at turn 30', () => {
         const share = getEffectiveAttackShare('RS', 30);
-        expect(share).toBeCloseTo(0.22, 2);
+        expect(share).toBeCloseTo(0.20, 2);
     });
 
     it('Non-RS factions use doctrine phase values', () => {
         expect(getEffectiveAttackShare('RBiH', 0)).toBeCloseTo(0.10, 2);
-        expect(getEffectiveAttackShare('HRHB', 0)).toBeCloseTo(0.25, 2);
+        expect(getEffectiveAttackShare('HRHB', 0)).toBeCloseTo(0.30, 2);
     });
 
     // --- D3: Doctrine phases ---
@@ -70,7 +70,7 @@ describe('Three-Sided Bot AI Validation', () => {
         const phase = getActiveDoctrinePhase('RS', 5);
         expect(phase).not.toBeNull();
         expect(phase!.default_corps_stance).toBe('offensive');
-        expect(phase!.max_attack_share_override).toBe(0.28);
+        expect(phase!.max_attack_share_override).toBe(0.35);
     });
 
     it('RBiH doctrine phase at turn 5 is defensive', () => {
@@ -79,11 +79,11 @@ describe('Three-Sided Bot AI Validation', () => {
         expect(phase!.default_corps_stance).toBe('defensive');
     });
 
-    it('RBiH doctrine phase at turn 45 is defensive (transition phase w40-56)', () => {
+    it('RBiH doctrine phase at turn 45 is balanced (transition phase w40-56)', () => {
         const phase = getActiveDoctrinePhase('RBiH', 45);
         expect(phase).not.toBeNull();
-        expect(phase!.default_corps_stance).toBe('defensive');
-        expect(phase!.max_attack_share_override).toBe(0.20);
+        expect(phase!.default_corps_stance).toBe('balanced');
+        expect(phase!.max_attack_share_override).toBe(0.15);
     });
 
     it('RS doctrine phase at turn 60 is still offensive — no artificial defensive regression', () => {

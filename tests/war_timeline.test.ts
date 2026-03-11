@@ -297,7 +297,7 @@ describe('backward compatibility: no timeline = same behavior', () => {
     it('getActiveDoctrinePhase without timeline returns hardcoded values', () => {
         const result = getActiveDoctrinePhase('RS', 10);
         expect(result?.default_corps_stance).toBe('offensive');
-        expect(result?.max_attack_share_override).toBe(0.28);
+        expect(result?.max_attack_share_override).toBe(0.35);
     });
 
     it('getFactionReinforcementMult without timeline returns hardcoded values', () => {

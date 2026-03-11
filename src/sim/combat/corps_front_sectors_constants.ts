@@ -12,14 +12,11 @@ export const MAX_SECTOR_EDGES = 25;
 /** Maximum brigades per sector before forced split. */
 export const MAX_SECTOR_BRIGADES = 8;
 
-/** Maximum reserve brigades per front edge (proportional cap). ~1 per typical 10-18 edge sector. */
-export const RESERVE_PER_EDGE_CAP = 0.07;
+/** Maximum reserve brigades per sector. One reserve, 1 hop behind the front. */
+export const MAX_RESERVES_PER_SECTOR = 1;
 
 /** Maximum territory OSIDs a single sector can claim via Voronoi BFS. */
 export const MAX_TERRITORY_OSIDS = 40;
-
-/** Maximum BFS hops from sector front for a brigade to qualify as reserve. */
-export const MAX_RESERVE_HOPS = 3;
 
 /** Corps IDs exempt from sector assignment (army staff, future-conflict reserves). */
 export const EXEMPT_CORPS_IDS = new Set<string>([

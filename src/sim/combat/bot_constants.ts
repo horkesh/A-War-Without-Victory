@@ -19,7 +19,7 @@
  * Calibration: 30→20 for Jan 1993 painted targets (RS was at 488 OSIDs by w20 in n233).
  * n246 result: RS=406 (target 416). 2.4% gap is within acceptable variance; extending to 22
  * backfires because RBiH's more-active doctrine starts at fixed w20, causing counterattacks. */
-export const RS_EARLY_WAR_END_WEEK = 20;
+export const RS_EARLY_WAR_END_WEEK = 26;
 
 // HRHB Lasva Offensive window removed — now handled by HRHB doctrine phase 1
 // (max_attack_share_override: 0.35, weeks 12-26) in timeline or FACTION_DOCTRINE_PHASES.

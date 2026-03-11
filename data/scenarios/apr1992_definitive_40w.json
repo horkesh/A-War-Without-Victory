@@ -61,7 +61,13 @@
   },
   "osid_control_overrides": {
     "op:brcko:brcko": "RS",
-    "op:ugljevik:teocak_krstac_2": "RBiH"
+    "op:ugljevik:teocak_krstac_2": "RBiH",
+    "op:bugojno:brizina": "RBiH",
+    "op:bugojno:prijaci": "RBiH",
+    "op:travnik:ovcarevo_2": "RBiH",
+    "op:travnik:cukle_2": "RBiH",
+    "op:nevesinje:hrusta_2": "RS",
+    "op:nevesinje:sopilja": "RS"
   },
   "avoided_osids_by_faction": {},
   "war_timeline": "apr1992",

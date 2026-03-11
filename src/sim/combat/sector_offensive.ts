@@ -36,9 +36,12 @@ import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supp
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import type { ControlSide } from '../../state/political_control_types.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { releaseOperationCommander } from './officer_system.js';
 import { finalizeOperationAAR } from './operation_aar.js';
+import { isEastHerzegovinaPair, isGrazAccordsActive } from '../local_truces.js';
+import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Equipment priority
@@ -617,6 +620,15 @@ export function advanceSectorOffensives(
                     finalizeOperationAAR(state, corpsId, op);
                 }
                 releaseOperationCommander(state, op);
+
+                // Activate east Herzegovina truce after Op Jackal (or any HRHB east-pair op) ends.
+                // Historical: VRS-HRHB ceasefire in east Herzegovina held after June 1992 offensive.
+                if (isGrazAccordsActive(state)
+                    && isEastHerzegovinaPair(corpsId)
+                    && state.political.graz_east_herzegovina_active_turn == null) {
+                    state.political.graz_east_herzegovina_active_turn = turn;
+                }
+
                 cmd.active_operation = null;
             }
         }
@@ -680,7 +692,14 @@ function updateMultiAxisResults(
         if (currentIdx >= axis.objectives.length) continue;
         const currentObj = axis.objectives[currentIdx]!;
         const controller = getPoliticalControllerOSID(state, currentObj, reverseMap ?? undefined);
-        if (controller === faction) capturedThisTurn.add(currentObj);
+        if (controller === faction || isFriendlyFactionCtrl(controller, faction, state)) {
+            capturedThisTurn.add(currentObj);
+        } else if (controller == null) {
+            // Null-controlled OSID: auto-claim — no enemy, no battle needed
+            if (!state.political.political_controllers) state.political.political_controllers = {};
+            state.political.political_controllers[currentObj] = faction;
+            capturedThisTurn.add(currentObj);
+        }
     }
 
     // Second pass: advance each axis
@@ -830,9 +849,16 @@ function updateLegacyFlatResults(
     if (currentIdx >= objectives.length) return;
 
     const currentObjective = objectives[currentIdx]!;
-    const controller = getPoliticalControllerOSID(state, currentObjective, reverseMap ?? undefined);
+    let effectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap ?? undefined);
 
-    if (controller === faction) {
+    // Null-controlled OSID: auto-claim — no enemy, no battle needed
+    if (effectiveController == null) {
+        if (!state.political.political_controllers) state.political.political_controllers = {};
+        state.political.political_controllers[currentObjective] = faction;
+        effectiveController = faction as ControlSide;
+    }
+
+    if (effectiveController === faction || isFriendlyFactionCtrl(effectiveController, faction, state)) {
         op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
         op.objective_capture_count = (op.objective_capture_count ?? 0) + 1;
         op.idle_execution_turn_streak = 0;
@@ -894,7 +920,7 @@ function updateLegacyFlatResults(
                 op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
             }
 
-            if (!anyMoved && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 2) {
+            if (!anyMoved && (op.idle_execution_turn_streak ?? 0) >= 2) {
                 op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);
                 beginRecovery(op, turn, 'no_logged_attempt');
                 return;

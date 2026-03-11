@@ -86,30 +86,30 @@ const DEFAULT_MOBILIZATION_SCALE = 1.0;
 function getMobilizationSurgeFactor(turn: number, faction: string): number {
     if (faction === 'RS') {
         // VRS: JNA inheritance → organized, lower initial rush, more sustained
-        if (turn <= 12) return 2.0;
-        if (turn <= 26) return 1.8;
-        if (turn <= 52) return 1.3;
-        if (turn <= 78) return 1.1;
-        if (turn <= 104) return 1.0;
-        return 0.6;
+        if (turn <= 12) return 1.6;
+        if (turn <= 26) return 1.4;
+        if (turn <= 52) return 1.1;
+        if (turn <= 78) return 0.9;
+        if (turn <= 104) return 0.8;
+        return 0.5;
     }
     if (faction === 'RBiH') {
         // ARBiH: desperate mass mobilization early, exhaustion-driven decline
-        if (turn <= 12) return 2.8;
-        if (turn <= 26) return 2.2;
-        if (turn <= 52) return 1.3;
-        if (turn <= 78) return 0.8;
-        if (turn <= 104) return 0.45;
-        return 0.3;
+        if (turn <= 12) return 2.0;
+        if (turn <= 26) return 1.6;
+        if (turn <= 52) return 1.1;
+        if (turn <= 78) return 0.7;
+        if (turn <= 104) return 0.40;
+        return 0.25;
     }
     if (faction === 'HRHB') {
         // HVO: capable early, slight growth boost, two-front stress decline late
-        if (turn <= 12) return 2.5;
-        if (turn <= 26) return 2.0;
-        if (turn <= 52) return 1.4;
-        if (turn <= 78) return 1.0;
-        if (turn <= 104) return 0.6;
-        return 0.4;
+        if (turn <= 12) return 2.0;
+        if (turn <= 26) return 1.6;
+        if (turn <= 52) return 1.2;
+        if (turn <= 78) return 0.8;
+        if (turn <= 104) return 0.5;
+        return 0.35;
     }
     // Default fallback
     if (turn <= 12) return 2.5;

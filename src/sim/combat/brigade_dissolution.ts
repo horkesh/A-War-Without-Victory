@@ -22,9 +22,9 @@
 import type { FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-export const DISSOLUTION_PERSONNEL_THRESHOLD = 300;
-export const DISSOLUTION_COHESION_THRESHOLD = 15;
-export const DISSOLUTION_MORALE_THRESHOLD = 10;
+export const DISSOLUTION_PERSONNEL_THRESHOLD = 400;
+export const DISSOLUTION_COHESION_THRESHOLD = 20;
+export const DISSOLUTION_MORALE_THRESHOLD = 15;
 /** Absolute floor: units below this dissolve regardless of other stats.
  *  A unit of ~150 men is a company remnant — not a brigade. */
 export const DISSOLUTION_ABSOLUTE_FLOOR = 150;

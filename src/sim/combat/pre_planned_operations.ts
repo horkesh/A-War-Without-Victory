@@ -24,6 +24,8 @@ import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
+// Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
+// on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Pre-planned operation definitions
@@ -345,7 +347,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 name: 'Novi Grad',
                 brigades: [
                     'rs_1st_novigrad_infantry',
-                    'rs_1st_banja_luka',
+                    'rs_1st_banja_luka_light_infantry',
                 ],
                 objectives: [
                     'op:bosanski_novi:novi_grad_3',
@@ -353,6 +355,54 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:bosanski_novi:suhaca_4',
                 ],
                 staging_osid: 'op:bosanski_novi:bosanski_novi_2',
+            },
+        ],
+    },
+];
+
+const HRHB_PRE_PLANNED: PrePlannedOp[] = [
+    {
+        corps: 'hvo_southeast_herzegovina',
+        faction: 'HRHB',
+        name: 'Operation Jackal',
+        staging_osid: 'op:capljina:capljina_2',
+        available_from: 8,
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                axis_id: 'stolac_sweep',
+                name: 'Stolac-Čapljina Sweep',
+                // Main effort: Čapljina → Tasovčići → Stolac → Hatelj
+                brigades: [
+                    'hrhb_stolac_units',
+                    'hrhb_apljina_brigade',
+                    'hrhb_1st_herzegovina_brigade_knez_domagoj',
+                    'hv_4th_guards_tg',
+                ],
+                objectives: [
+                    'op:capljina:tasovcici_2',
+                    'op:stolac:rotimlja_2',
+                    'op:stolac:pjesivac_kula_2',
+                    'op:stolac:stolac_2',
+                ],
+                staging_osid: 'op:capljina:capljina_2',
+            },
+            {
+                axis_id: 'mostar_hills',
+                name: 'Mostar Hills',
+                // Secondary: sweep RS from Kružanj/Vranjevići hills south of Mostar
+                // These positions overlook east Mostar and threaten ARBiH lines
+                brigades: [
+                    'hrhb_1st_brigade_mostar',
+                    'hrhb_2nd_brigade_mostar',
+                    'hrhb_mostar_brigade',
+                    'hv_116th_brigade_tg',
+                ],
+                objectives: [
+                    'op:mostar:vranjevici_2',
+                    'op:mostar:kruzanj_2',
+                ],
+                staging_osid: 'op:mostar:jasenica',
             },
         ],
     },
@@ -382,7 +432,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
     },
 ];
 
-const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...ARBIH_PRE_PLANNED];
+const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED, ...ARBIH_PRE_PLANNED];
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Injection
@@ -555,6 +605,19 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
 
     // Check available_from gating
     if (def.available_from != null && turn < def.available_from) return false;
+
+    // Skip if all objectives already achieved (faction-controlled) — op is moot.
+    // Without this, the queue entry blocks sector offensives forever.
+    const allObjectives = def.axes.flatMap(a => a.objectives);
+    const allAchieved = allObjectives.length > 0 && allObjectives.every(osid => {
+        const controller = getPoliticalControllerOSID(state, osid, undefined);
+        return controller === def.faction;
+    });
+    if (allAchieved) {
+        cmd.queued_operations.shift();
+        if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+        return false;
+    }
 
     // Build axes — brigades may not exist yet; keep queue entry for retry
     const result = buildAxesFromDef(def, state);

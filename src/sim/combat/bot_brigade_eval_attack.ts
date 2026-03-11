@@ -17,7 +17,9 @@ import { getAttackerSupplyPenalty, getRsVsHrhbPenalty } from './bot_brigade_supp
 import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
-import type { BrigadePosture } from '../../state/game_state.js';
+import type { BrigadePosture, FormationState } from '../../state/game_state.js';
+import { findSectorForEnemyOsid } from './corps_front_sectors.js';
+import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
 // We will import them appropriately. For now, I'll import from bot_brigade_ai_osid if needed, but they are pure.
@@ -73,6 +75,14 @@ export function evaluateSupplyGate(ctx: BrigadeEvaluationContext): boolean {
 export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result } = ctx;
 
+    // Combat ineffective gate: brigades below minimum personnel defend only.
+    // A 300-man brigade cannot execute an attack — it needs to reconstitute.
+    const COMBAT_INEFFECTIVE_PERSONNEL = 400;
+    if ((brigade.personnel ?? 0) < COMBAT_INEFFECTIVE_PERSONNEL) {
+        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+        return true;
+    }
+
     const activeOp15 = activeOp;
     if (isActiveSectorOperationParticipant && activeOp15?.type === 'sector_attack') {
         if (activeOp15.phase === 'planning') {
@@ -126,12 +136,17 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
 
         if (activeOp15.phase === 'execution') {
             const currentObjective = getSectorOffensiveCurrentObjective(activeOp15, brigade.id);
-            if (!currentObjective || getPoliticalControllerOSID(state, currentObjective, reverseMap) === faction) {
+            // Skip objective if controlled by own faction OR by an allied faction.
+            // Allied capture counts as mission success — advance to next objective.
+            const objController = currentObjective ? getPoliticalControllerOSID(state, currentObjective, reverseMap) : null;
+            const objCapturedByFriendly = objController === faction
+                || (objController != null && isFriendlyFaction(objController, faction, state));
+            if (!currentObjective || objCapturedByFriendly) {
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 return true;
             }
 
-            const targets = predictAllAdjacentTargets(
+            const allTargets = predictAllAdjacentTargets(
                 state,
                 brigade.id,
                 adjacency,
@@ -143,6 +158,14 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 undefined,
                 ethnicMap
             );
+            // Alliance filter: HRHB must not attack RBiH targets (and vice versa)
+            // when they are allied. Applies to ALL operation attack paths.
+            const targets = (faction === 'HRHB' || faction === 'RBiH') && areRbihHrhbAllied(state)
+                ? allTargets.filter(t => {
+                    const tc = getPoliticalControllerOSID(state, t.osid, reverseMap);
+                    return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
+                })
+                : allTargets;
             const directObjectiveAttack = targets.find((t) => t.osid === currentObjective);
             const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
             if (directObjectiveAttack) {
@@ -183,10 +206,18 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             // If not adjacent to objective, attack the best adjacent enemy
             // OSID to open a path. Real armies fight through intermediate
             // positions — they don't sit idle waiting for a clear approach.
-            if (targets.length > 0) {
+            // Filter: only attack intermediates held by the SAME faction as
+            // the objective. Prevents HRHB from capturing RBiH territory
+            // en route to RS objectives (historical: Op Jackal was joint,
+            // not HRHB conquering ARBiH land).
+            const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
+            const intermediateTargets = objectiveController
+                ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
+                : targets;
+            if (intermediateTargets.length > 0) {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
                 // Prefer targets closer to the objective (on the path)
-                const bestIntermediate = targets.find((t) => {
+                const bestIntermediate = intermediateTargets.find((t) => {
                     const alreadyAt = chosenTargets.get(t.osid) ?? 0;
                     if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;
                     return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, probeThreshold);
@@ -350,4 +381,70 @@ export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
     }
     return true;
+}
+
+/**
+ * Uncontested occupation: a brigade adjacent to an undefended enemy OSID
+ * can walk in without a formal CorpsOperation.
+ *
+ * "Undefended" = no enemy formations present AND no sector defense (no sector
+ * brigades covering it). In the real war, abandoned territory was occupied
+ * within hours to 1-2 days — no commander waits for a formal operation order.
+ *
+ * Guards: brigade must not be in an active operation, not disrupted, not in
+ * column march. Maximum 1 uncontested occupation per brigade per turn.
+ */
+export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): boolean {
+    const { brigade, loc, faction, adjacency, state, isActiveSectorOperationParticipant, result } = ctx;
+
+    // Don't interrupt active operations
+    if (isActiveSectorOperationParticipant) return false;
+
+    // Don't move disrupted or column-marching brigades
+    if ((brigade as { disrupted_turns?: number }).disrupted_turns != null &&
+        ((brigade as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0) return false;
+
+    const neighbors = adjacency.get(loc) ?? [];
+    const formations = state.military.formations ?? {};
+    const pc = state.political.political_controllers ?? {};
+
+    // Find adjacent enemy OSIDs that are truly undefended
+    for (const n of neighbors) {
+        if (!n.startsWith('op:')) continue;
+        const controller = pc[n] as string | undefined;
+        if (!controller || controller === faction) continue;
+
+        // Alliance guard: HRHB/RBiH don't occupy each other's territory while allied
+        if ((faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
+            && areRbihHrhbAllied(state)) continue;
+
+        // Check: no enemy formations physically at this OSID
+        let hasDefender = false;
+        for (const fid of Object.keys(formations)) {
+            const f = formations[fid] as FormationState | undefined;
+            if (f && f.status === 'active' && f.location_osid === n && f.faction === controller) {
+                hasDefender = true;
+                break;
+            }
+        }
+        if (hasDefender) continue;
+
+        // Check: no sector covering this OSID with active brigades
+        const sector = findSectorForEnemyOsid(state, n as Osid, controller);
+        if (sector) {
+            const sectorHasBrigades = sector.assigned_brigade_ids.some(bid => {
+                const f = formations[bid];
+                return f != null && f.status === 'active';
+            });
+            if (sectorHasBrigades) continue;
+        }
+
+        // Truly undefended — walk in
+        result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+        result.attack_orders[brigade.id] = n as Osid;
+        result.attack_scores[brigade.id] = 600; // lower priority than formal ops (800/900)
+        return true;
+    }
+
+    return false;
 }

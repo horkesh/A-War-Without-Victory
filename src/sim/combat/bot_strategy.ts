@@ -213,17 +213,18 @@ export { RS_EARLY_WAR_END_WEEK } from './bot_constants.js';
 
 export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
     RS: [
-        // n482: RS stays offensive permanently. Reduced aggression from 0.15→0.08 to curb +104 over-capture.
-        { start_week: 0, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.22, aggression_modifier: 0.08 },
-        { start_week: RS_EARLY_WAR_END_WEEK, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.18, aggression_modifier: 0.03 },
+        // n578: Three-phase RS doctrine — blitz (Apr-Jun), sustained (Jul-Oct), consolidation (Nov+)
+        { start_week: 0, end_week: 12, default_corps_stance: 'offensive', max_attack_share_override: 0.35, aggression_modifier: 0.15 },
+        { start_week: 12, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.25, aggression_modifier: 0.08 },
+        { start_week: RS_EARLY_WAR_END_WEEK, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.20, aggression_modifier: 0.05 },
     ],
     RBiH: [
         // Historical: ARBiH purely defensive first ~15 weeks, then local counteroffensives.
         // BB1 p.404: Sarajevo breakout attempts, Visoko-Breza operations from summer 1992.
         // Calibration: balanced from w15 enables local counterattacks that generate combat casualties.
         { start_week: 0, end_week: 15, default_corps_stance: 'defensive', max_attack_share_override: 0.10, aggression_modifier: -0.10 },
-        { start_week: 15, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.20, aggression_modifier: 0.0 },
-        { start_week: 40, end_week: 56, default_corps_stance: 'balanced', max_attack_share_override: 0.20, aggression_modifier: 0.0 },
+        { start_week: 15, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.12, aggression_modifier: -0.05 },
+        { start_week: 40, end_week: 56, default_corps_stance: 'balanced', max_attack_share_override: 0.15, aggression_modifier: -0.03 },
         { start_week: 56, end_week: 80, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0.05 },
         { start_week: 80, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.35, aggression_modifier: 0.15 },
     ],
