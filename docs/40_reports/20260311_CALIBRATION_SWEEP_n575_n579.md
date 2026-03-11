@@ -1,7 +1,7 @@
-# Calibration Sweep: n575 → n579
+# Calibration Sweep: n575 → n581
 
 **Date**: 2026-03-11
-**Runs**: n575 (baseline) → n576 → n577 → n578 → n579 (final)
+**Runs**: n575 (baseline) → n576 → n577 → n578 → n579 → n580 → n581 (final)
 **Scenario**: `apr1992_definitive_40w` (40 weeks, April 1992 → January 1993)
 
 ## Summary
@@ -69,9 +69,43 @@ From ~24.8k (n575 baseline) to ~41.1k (n579). Weekly tempo:
 
 Personnel still runs slightly high for RS and RBiH. The mobilization surge reduction helped but didn't fully solve it. Further reduction risks affecting other dynamics.
 
+## n580/n581: RBiH Offensive Paralysis Fix
+
+### Changes Applied (n580)
+| # | Change | File | Rationale |
+|---|--------|------|-----------|
+| 8 | Pass min_attack_outcome from directive to sector ops | `sector_offensive.ts`, `bot_corps_directives.ts` | Operations were created WITHOUT probe threshold from directive, falling to costly_victory default |
+| 9 | Lower default probe threshold: costly_victory→stalemate (0-mom), stalemate→repulsed (2+ mom) | `bot_brigade_ai_osid.ts` | costly_victory (1.0 ratio) impossible for outnumbered RBiH forces |
+| 10 | RBiH w15-40 attack share 0.12→0.18 | `timelines/apr1992.json`, `bot_strategy.ts` | 12% too restrictive — only 1 attack slot per large corps |
+
+### Changes Applied (n581)
+| # | Change | File | Rationale |
+|---|--------|------|-----------|
+| 11 | Movement-only stall detection (4 turns) | `sector_offensive.ts` | Operations marching brigades forever without attacking |
+
+### Results (n581 = n580 in outcomes)
+| Metric | n579 | n581 |
+|--------|------|------|
+| Benchmarks | 6/6 | 6/6 |
+| Area match | 85.3% | 85.4% |
+| RS delta | -24 | -33 |
+| Total orders | 210 | 193 |
+| RS orders | 158 | 147 |
+| **RBiH orders** | **20** | **27 (+35%)** |
+| HRHB orders | 32 | 19 |
+| RS w40 bench | 0.517 | 0.505 (marginal) |
+
+### Key Findings
+1. **Root cause**: `evaluateSectorOffensiveLaunch` created ops without `min_attack_outcome`. `getSectorOffensiveProbeThreshold` fell to `costly_victory` (1.0 ratio). RBiH at ~0.5:1 power ratio could never attack.
+2. **2nd Corps now active**: Tigar-Sloboda (16 attacks, 1/6 obj). 5th Corps operational: Čelik (4/5 obj).
+3. **1st/4th Corps paralysis persists** but is historically accurate: Sarajevo siege blocks 1st Corps offensives, 4th Corps too small (7 brigades).
+4. **Late-war doctrine still has zero calibration effect** — confirmed across n576-n581.
+
 ## Remaining Issues
-1. **RS w40 benchmark marginal** (0.517 vs 0.503-0.603 band) — close to lower bound
-2. **Area match below ATH** (85.3% vs 93.8% ATH at n304) — suggests other factors beyond doctrine
-3. **Personnel overshoot** for RS (113k vs 100k target) and RBiH (144k vs 130k target)
-4. **Drina region** still weakest (75.3% match) — enclave mechanics plus Rogatica holdouts
-5. **Central Bosnia** has scattered RS shortfall (18 sim vs 42 painted)
+1. **RS w40 benchmark razor-thin** (0.505 vs 0.503-0.603 band) — 0.002 margin
+2. **Area match below ATH** (85.4% vs 93.8% ATH at n304) — other factors beyond doctrine
+3. **Personnel overshoot** for RS (112k vs 100k target) and RBiH (144k vs 130k target)
+4. **Drina region** still weakest (~76% match) — enclave mechanics plus Rogatica holdouts
+5. **Central Bosnia** has scattered RS shortfall (25 sim vs 42 painted)
+6. **RS repeat-failure loop**: Lowered threshold lets RS attack same position 2-3x at declining ratios
+7. **Ghost attacks**: ~46% of battles have no defender present (pre-existing)
