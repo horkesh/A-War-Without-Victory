@@ -36,7 +36,7 @@
         "start_week": 15,
         "end_week": 40,
         "default_corps_stance": "balanced",
-        "max_attack_share_override": 0.12,
+        "max_attack_share_override": 0.18,
         "aggression_modifier": -0.05
       },
       {

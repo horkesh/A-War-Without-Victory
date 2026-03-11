@@ -98,6 +98,11 @@ const MAX_TOTAL_FAILURES = 5;
 
 /** Consecutive failures on same objective before skip. */
 const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 3;
+
+/** Maximum execution turns with movement but zero attacks before abort.
+ *  Prevents operations from marching brigades around indefinitely when
+ *  no brigade can find an attackable target (e.g. ARBiH 1st Corps under siege). */
+const MAX_MOVEMENT_ONLY_EXECUTION_TURNS = 4;
 const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
@@ -787,6 +792,13 @@ function updateMultiAxisResults(
                     continue;
                 }
 
+                // Movement-only stall: brigades marching but never attacking
+                if (axis.attack_attempt_count === 0 &&
+                    axis.movement_only_execution_turns >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
+                    axis.status = 'stalled';
+                    continue;
+                }
+
                 if (axis.consecutive_failures_on_current >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
                     axis.current_objective_index = currentIdx + 1;
                     axis.consecutive_failures_on_current = 0;
@@ -926,6 +938,15 @@ function updateLegacyFlatResults(
                 return;
             }
 
+            // Movement-only stall: brigades are marching but no one can attack.
+            // Happens when all brigades fail the probe threshold (e.g. weak ARBiH
+            // corps under siege). Abort before wasting the entire command cycle.
+            if ((op.attack_attempt_count ?? 0) === 0 &&
+                (op.movement_only_execution_turns ?? 0) >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
+                beginRecovery(op, turn, 'no_logged_attempt');
+                return;
+            }
+
             if ((op.consecutive_failures_on_current ?? 0) >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
                 op.current_objective_index = currentIdx + 1;
                 op.consecutive_failures_on_current = 0;
@@ -966,7 +987,8 @@ export function evaluateSectorOffensiveLaunch(
     sectorBrigadeIds: FormationId[],
     sectorEnemyOsids: string[],
     offensiveTargets: string[],
-    supplyByOsid?: SupplyStateByOsidReport | null
+    supplyByOsid?: SupplyStateByOsidReport | null,
+    minAttackOutcome?: CorpsOperation['min_attack_outcome']
 ): CorpsOperation | null {
     const turn = state.meta?.turn ?? 0;
 
@@ -1046,6 +1068,7 @@ export function evaluateSectorOffensiveLaunch(
         movement_only_execution_turns: 0,
         idle_execution_turn_streak: 0,
         ...(stagingOsid && { staging_osid: stagingOsid }),
+        ...(minAttackOutcome && { min_attack_outcome: minAttackOutcome }),
     };
 }
 

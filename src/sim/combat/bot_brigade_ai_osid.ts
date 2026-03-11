@@ -50,7 +50,7 @@ import {
     buildOsidAdjacency,
     type Osid
 } from './osid_adjacency.js';
-import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
+import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
@@ -59,7 +59,7 @@ import { getCorpsStance } from './combat_math.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
-import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive } from './bot_brigade_eval_attack.js';
+import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, evaluateUncontestedOccupation } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 
@@ -254,7 +254,8 @@ export function getSectorOffensiveApproachOsids(
     const approachOsids = new Set<Osid>();
     for (const objective of objectives.slice(currentIdx)) {
         for (const neighbor of adjacency.get(objective as Osid) ?? []) {
-            if (getPoliticalControllerOSID(state, neighbor, reverseMap) === faction) {
+            const neighborController = getPoliticalControllerOSID(state, neighbor, reverseMap);
+            if (neighborController === faction || isFriendlyFaction(neighborController, faction, state)) {
                 approachOsids.add(neighbor);
             }
         }
@@ -273,10 +274,9 @@ export function getSectorOffensiveProbeThreshold(
     const momentum = axis ? (axis.momentum ?? 0) : (activeOp.momentum ?? 0);
     // If the operation has an explicit min_attack_outcome, respect it.
     if (activeOp.min_attack_outcome) return activeOp.min_attack_outcome;
-    // Brigades follow orders — they attack unless the predicted outcome is
-    // catastrophic. The corps commander decided this objective matters;
-    // brigades execute. With momentum, even stalemate predictions trigger attacks.
-    return momentum >= 2 ? 'stalemate' : 'repulsed';
+    // Default: stalemate (ratio ≥ 0.7) — brigades probe at reasonable odds.
+    // With momentum ≥ 2: repulsed (≥ 0.5) — successful operations press the advantage.
+    return momentum >= 2 ? 'repulsed' : 'stalemate';
 }
 
 function isPartOfNamedOperation(state: GameState, formation: FormationState): boolean {
@@ -417,6 +417,7 @@ function executeFactionDirectives(
         if (evaluateReorganize(ctx)) continue;
         if (evaluateDefensive(ctx)) continue;
         if (evaluateOffensive(ctx)) continue;
+        if (evaluateUncontestedOccupation(ctx)) continue;
         if (evaluateFrontCoverage(ctx)) continue;
         evaluateInteriorMovement(ctx);
     }

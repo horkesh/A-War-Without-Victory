@@ -223,7 +223,7 @@ export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
         // BB1 p.404: Sarajevo breakout attempts, Visoko-Breza operations from summer 1992.
         // Calibration: balanced from w15 enables local counterattacks that generate combat casualties.
         { start_week: 0, end_week: 15, default_corps_stance: 'defensive', max_attack_share_override: 0.10, aggression_modifier: -0.10 },
-        { start_week: 15, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.12, aggression_modifier: -0.05 },
+        { start_week: 15, end_week: 40, default_corps_stance: 'balanced', max_attack_share_override: 0.18, aggression_modifier: -0.05 },
         { start_week: 40, end_week: 56, default_corps_stance: 'balanced', max_attack_share_override: 0.15, aggression_modifier: -0.03 },
         { start_week: 56, end_week: 80, default_corps_stance: 'balanced', max_attack_share_override: 0.25, aggression_modifier: 0.05 },
         { start_week: 80, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.35, aggression_modifier: 0.15 },

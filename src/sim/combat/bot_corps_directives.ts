@@ -32,6 +32,7 @@ import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
 import { getTruceBreakAggressionBonus, shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
+import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors } from './corps_front_sectors.js';
@@ -650,6 +651,20 @@ export function generateCorpsDirectives(
             }
         }
 
+        // RBiH–HRHB alliance: when allied, do not target each other's territory.
+        // Historical: ARBiH and HVO were allies in 1992, fighting RS together.
+        // Alliance degrades over time via alliance_update.ts; attacks unlock when
+        // war_alliance_rbih_hrhb drops below ALLIED_THRESHOLD (~Oct 1992+).
+        if (areRbihHrhbAllied(state) && (faction === 'RBiH' || faction === 'HRHB')) {
+            const allyFaction = faction === 'RBiH' ? 'HRHB' : 'RBiH';
+            const pc = state.political.political_controllers ?? {};
+            for (let i = offensiveTargets.length - 1; i >= 0; i--) {
+                if (pc[offensiveTargets[i]!] === allyFaction) {
+                    offensiveTargets.splice(i, 1);
+                }
+            }
+        }
+
         // Hard-enforce avoided_osids_by_faction before sector and sort steps:
         // remove any avoided OSID from offensive_targets regardless of how it got there.
         // Must run before sectorTargets is built so avoid list is respected in sector_targets too.
@@ -1001,7 +1016,20 @@ export function generateCorpsDirectives(
             (cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
 
-            for (const sec of directiveEligibleSectors) {
+            // Sort sectors: priority sector first, then by offensive target overlap (descending).
+            // This ensures pocket cleanup and high-value sectors get operations before quiet ones.
+            const targetSetForSort = new Set(offensiveTargets);
+            const sortedLaunchSectors = [...directiveEligibleSectors].sort((a, b) => {
+                // Priority sector always first
+                if (a.sector_id === prioritySectorId && b.sector_id !== prioritySectorId) return -1;
+                if (b.sector_id === prioritySectorId && a.sector_id !== prioritySectorId) return 1;
+                // Then by target overlap count
+                const overlapA = a.sub_segments.reduce((sum, ss) => sum + ss.enemy_osids.filter(eo => targetSetForSort.has(eo)).length, 0);
+                const overlapB = b.sub_segments.reduce((sum, ss) => sum + ss.enemy_osids.filter(eo => targetSetForSort.has(eo)).length, 0);
+                if (overlapB !== overlapA) return overlapB - overlapA;
+                return strictCompare(a.sector_id, b.sector_id);
+            });
+            for (const sec of sortedLaunchSectors) {
                 const clusterSectors = [sec];
                 const clusterFriendlyOsids = new Set(collectSectorFriendlyOsids(sec));
                 const clusterEnemyOsids = new Set(collectSectorEnemyOsids(sec));
@@ -1075,7 +1103,8 @@ export function generateCorpsDirectives(
 
                 const op = evaluateSectorOffensiveLaunch(
                     state, corps.id, sec.sector_id, faction,
-                    finalBrigadeIds, secEnemyOsids, reachableTargets, supplyByOsid
+                    finalBrigadeIds, secEnemyOsids, reachableTargets, supplyByOsid,
+                    bestMinOutcome
                 );
                 if (op) {
                     cmd.active_operation = op;
