@@ -375,6 +375,8 @@ export interface CorpsCommandState {
     directive?: CorpsDirective | null;
     /** Queue of operation names to inject when current op completes. */
     queued_operations?: string[];
+    /** Number of consecutive probe operations launched without a full attack. Reset on full op or completion. */
+    consecutive_probes?: number;
 }
 
 /** Operational group activation order. */

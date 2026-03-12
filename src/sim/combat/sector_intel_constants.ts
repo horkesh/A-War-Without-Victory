@@ -70,3 +70,23 @@ export const CONFIDENCE_FULL_STRENGTH = 0.5;
 
 /** At or above this confidence (and recon_range >= 2): offensive_signs detectable + second-echelon sectors + deeper brigades visible. */
 export const CONFIDENCE_DEEP_INTEL = 0.8;
+
+/**
+ * Intel confidence threshold for launching a full sector offensive.
+ * Below this: launch a probe-type operation to gather intel first.
+ * At or above: launch a sector_attack normally.
+ * Per-faction: VRS has JNA intel inheritance (lower threshold needed),
+ * ARBiH starts blind (higher threshold to compensate), HRHB moderate.
+ */
+export const INTEL_GATE_LAUNCH_THRESHOLD: Record<NonNullable<FactionId>, number> = {
+    RS: 0.25,    // JNA inheritance means they know enough to attack sooner
+    RBiH: 0.40,  // Starting blind — need more intel before committing
+    HRHB: 0.30,  // Croatian SIS provides moderate baseline
+};
+
+/**
+ * Maximum probe operations a corps can launch consecutively before
+ * forcing a full operation regardless of intel. Prevents infinite
+ * probe loops when intel never reaches threshold (e.g., decaying sectors).
+ */
+export const MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT = 2;

@@ -682,6 +682,7 @@ export function advanceSectorOffensives(
                     state.political.graz_east_herzegovina_active_turn = turn;
                 }
 
+                cmd.consecutive_probes = 0;
                 cmd.active_operation = null;
             }
         }

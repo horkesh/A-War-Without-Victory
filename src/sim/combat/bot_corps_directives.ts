@@ -30,7 +30,9 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive.js';
-import { CONFIDENCE_ROUGH_STRENGTH } from './sector_intel_constants.js';
+import { CONFIDENCE_ROUGH_STRENGTH, INTEL_GATE_LAUNCH_THRESHOLD, MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT } from './sector_intel_constants.js';
+import { getSectorIntelConfidence } from './sector_intel.js';
+import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
 import { getTruceBreakAggressionBonus, shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
@@ -49,6 +51,31 @@ export const AGGRESSION_FLOOR: Record<string, number> = {
     'defensive': -0.30,
     'reorganize': -0.50,
 };
+
+/**
+ * Should the bot launch a probe-type operation instead of a full sector_attack?
+ * Returns true when intel confidence is below the faction's threshold and the
+ * corps hasn't exhausted its consecutive probe limit.
+ *
+ * Exemptions:
+ * - RS during blitz phase (w0-12): JNA-style pre-planned ops attack blind.
+ * - Corps that already probed MAX_CONSECUTIVE_PROBES times: force commitment.
+ */
+export function shouldLaunchProbeInstead(
+    faction: FactionId,
+    sectorIntelConfidence: number,
+    consecutiveProbes: number,
+    turn?: number,
+): boolean {
+    // RS blitz phase exemption: JNA-trained forces attack without probing
+    if (faction === 'RS' && (turn ?? 999) <= RS_BLITZ_PHASE_END_WEEK) return false;
+
+    // Already probed enough — commit regardless
+    if (consecutiveProbes >= MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT) return false;
+
+    const threshold = INTEL_GATE_LAUNCH_THRESHOLD[faction as NonNullable<FactionId>] ?? 0.30;
+    return sectorIntelConfidence < threshold;
+}
 
 /**
  * Derive which front segments a corps covers, based on where its brigades are.
@@ -1101,6 +1128,34 @@ export function generateCorpsDirectives(
                     return neighbors.some((n) => getPoliticalControllerOSID(state, n, reverseMap) === faction);
                 });
 
+                // ── Intel gate: check sector confidence before committing ──
+                const sectorConfidence = getSectorIntelConfidence(state, sec.sector_id);
+                const consecutiveProbes = cmd.consecutive_probes ?? 0;
+                const turn = state.meta?.turn ?? 0;
+
+                if (shouldLaunchProbeInstead(faction, sectorConfidence, consecutiveProbes, turn)) {
+                    // Low intel — launch a probe operation instead of full attack.
+                    // Probes are smaller (max 2 brigades), shorter planning, and generate
+                    // recon-by-force intel when they engage.
+                    const probeBrigades = finalBrigadeIds.slice(0, 2);
+                    if (probeBrigades.length >= 1 && secEnemyOsids.length >= 1) {
+                        const probeOp = evaluateSectorOffensiveLaunch(
+                            state, corps.id, sec.sector_id, faction,
+                            probeBrigades, secEnemyOsids, reachableTargets.slice(0, 1), supplyByOsid,
+                            'repulsed' // Probes accept worse outcomes
+                        );
+                        if (probeOp) {
+                            probeOp.type = 'probe';
+                            probeOp.planning_duration = 1; // Fast planning
+                            cmd.active_operation = probeOp;
+                            cmd.consecutive_probes = consecutiveProbes + 1;
+                            assignOperationCommander(state, probeOp, corps.id, faction);
+                            break;
+                        }
+                    }
+                    // If probe launch fails, fall through to try full attack
+                }
+
                 const op = evaluateSectorOffensiveLaunch(
                     state, corps.id, sec.sector_id, faction,
                     finalBrigadeIds, secEnemyOsids, reachableTargets, supplyByOsid,
@@ -1108,6 +1163,7 @@ export function generateCorpsDirectives(
                 );
                 if (op) {
                     cmd.active_operation = op;
+                    cmd.consecutive_probes = 0; // Reset probe counter on full attack
                     assignOperationCommander(state, op, corps.id, faction);
                     break; // One offensive at a time per corps
                 }

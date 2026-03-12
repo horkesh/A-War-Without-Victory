@@ -285,8 +285,8 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
                 posture: 'defend',
                 cohesion: 70,
                 morale: 70,
-                personnel: 250,
-                equipment: { infantry: 250, tanks: 0, artillery: 0, air_defense: 0 },
+                personnel: 500,
+                equipment: { infantry: 500, tanks: 0, artillery: 0, air_defense: 0 },
                 location_osid: 'op:test:approach',
             },
             rs_2nd_armored: {
@@ -299,8 +299,8 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
                 posture: 'defend',
                 cohesion: 70,
                 morale: 70,
-                personnel: 250,
-                equipment: { infantry: 250, tanks: 0, artillery: 0, air_defense: 0 },
+                personnel: 500,
+                equipment: { infantry: 500, tanks: 0, artillery: 0, air_defense: 0 },
                 location_osid: 'op:test:approach',
             },
             arbih_defender: {
@@ -388,8 +388,8 @@ test('execution-phase operation with momentum can probe the next objective from 
                 posture: 'defend',
                 cohesion: 70,
                 morale: 70,
-                personnel: 250,
-                equipment: { infantry: 250, tanks: 0, artillery: 0, air_defense: 0 },
+                personnel: 500,
+                equipment: { infantry: 500, tanks: 0, artillery: 0, air_defense: 0 },
                 location_osid: 'op:test:approach',
             },
             arbih_defender: {

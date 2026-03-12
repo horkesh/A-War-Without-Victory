@@ -262,3 +262,22 @@ function findSectorByFriendlyOsid(sectors: Record<string, CorpsFrontSector>, osi
     }
     return null;
 }
+
+// ===============================================================
+// Intel Gate Helpers
+// ===============================================================
+
+/**
+ * Get the best (maximum) intel confidence for a friendly sector
+ * across all its facing enemy sector records.
+ * Returns 0 if no intel data exists.
+ */
+export function getSectorIntelConfidence(state: GameState, sectorId: string): number {
+    const records = state.military.sector_intel?.[sectorId];
+    if (!records || records.length === 0) return 0;
+    let best = 0;
+    for (const rec of records) {
+        if (rec.confidence > best) best = rec.confidence;
+    }
+    return best;
+}

@@ -64,8 +64,12 @@ export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
 }
 
 export function evaluateSupplyGate(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, brigadeSupplyState, result } = ctx;
+    const { brigade, brigadeSupplyState, isActiveSectorOperationParticipant, result } = ctx;
     if (brigadeSupplyState === 'critical') {
+        // Operation participants at critical supply still need to reposition —
+        // let them through to evaluateSectorAttack which handles movement-toward-approach.
+        // They won't attack (combat predictor penalizes critical supply), but they can march.
+        if (isActiveSectorOperationParticipant) return false;
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         return true;
     }
