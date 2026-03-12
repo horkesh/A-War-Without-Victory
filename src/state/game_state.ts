@@ -479,6 +479,8 @@ export interface FormationState {
     disrupted_turns?: number;
     /** Consecutive turns at morale 0; after 3+, 5% personnel attrition per turn. */
     zero_morale_turns?: number;
+    /** How many battle outcomes this formation has processed through morale drift. Used for habituation — diminishing morale effect of combat over time. */
+    battle_outcome_count?: number;
     /** WIA trickleback: wounded pending return to this formation (only return when out of combat). */
     wounded_pending?: number;
     /** Counter-attack tracking: OSID this brigade retreated from and the turn it happened.

@@ -10,7 +10,7 @@ import type { MunicipalityPopulation1991Map } from '../../state/population_share
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { CRITICAL_MORALE_THRESHOLD, HOME_GROUND_MORALE_FLOOR } from './combat_math.js';
+import { CRITICAL_MORALE_THRESHOLD } from './combat_math.js';
 
 /** Extract municipality ID from OSID (format: op:municipality:slug). */
 function munFromOsid(osid: string): string | undefined {
@@ -58,6 +58,49 @@ const BATTLE_MORALE_DRIFT: Record<string, number> = {
     'repulsed': -2,
     'catastrophic': -4,
 };
+
+/** Battle habituation: diminishing morale returns from repeated combat.
+ * Formula: 1 / (1 + battle_outcome_count * RATE).
+ * At 0 battles: 1.00×, at 10: 0.77×, at 20: 0.62×, at 40: 0.45×.
+ * Historical: all factions became "numb" to combat by late 1993 (BB2). */
+const BATTLE_HABITUATION_RATE = 0.03;
+
+/** Faction-differentiated morale sensitivity to VICTORIES (positive drift).
+ * RS 0.8: winning is expected (JNA inheritance) — each victory matters less.
+ * RBiH 1.3: each victory proves the army is real — huge morale boost.
+ * HRHB 1.0: baseline. */
+const FACTION_VICTORY_SENSITIVITY: Record<string, number> = {
+    RS: 0.8,
+    RBiH: 1.3,
+    HRHB: 1.0,
+};
+
+/** Faction-differentiated morale sensitivity to DEFEATS (negative drift).
+ * RS 1.3: losing is shocking for a professional army — defeats hit harder.
+ * RBiH 0.7: existential determination — expect to suffer, absorb losses.
+ * HRHB 1.0: baseline. */
+const FACTION_DEFEAT_SENSITIVITY: Record<string, number> = {
+    RS: 1.3,
+    RBiH: 0.7,
+    HRHB: 1.0,
+};
+
+/** Faction-differentiated home defense morale floors.
+ * Replaces flat HOME_GROUND_MORALE_FLOOR (15) from combat_math.ts.
+ * RBiH 30: nowhere to go — fight or die.
+ * HRHB 25: Croatian homeland, but Croatia exists as fallback.
+ * RS 20: can desert home to Serbia proper. */
+const FACTION_HOME_MORALE_FLOOR: Record<string, number> = {
+    RS: 20,
+    RBiH: 30,
+    HRHB: 25,
+};
+
+/** RBiH existential floor: ARBiH formations in co-ethnic majority areas (>50% Bosniak)
+ * get morale floor 25 even without home_defense_active.
+ * Models the "cornered rat" — no surrender option for Bosniaks. */
+const RBIH_EXISTENTIAL_FLOOR = 25;
+const EXISTENTIAL_AFFINITY_THRESHOLD = 0.50;
 
 export interface MoraleDriftReport {
     formations_updated: number;
@@ -147,10 +190,25 @@ export function runMoraleDrift(
             drift += EXHAUSTION_MORALE_PENALTY;
         }
 
-        // 4. Battle outcome morale boost/penalty
+        // 4. Battle outcome morale drift (with habituation + faction sensitivity)
         const recentOutcome = (f as { recent_battle_outcome?: string }).recent_battle_outcome;
         if (recentOutcome) {
-            drift += BATTLE_MORALE_DRIFT[recentOutcome] ?? 0;
+            const baseDrift = BATTLE_MORALE_DRIFT[recentOutcome] ?? 0;
+
+            // Habituation: combat-hardened troops become numb to battle outcomes
+            const battleCount = (f as { battle_outcome_count?: number }).battle_outcome_count ?? 0;
+            const habituation = 1 / (1 + battleCount * BATTLE_HABITUATION_RATE);
+
+            // Faction sensitivity: asymmetric reaction to victory vs defeat
+            const sensitivity = baseDrift >= 0
+                ? (FACTION_VICTORY_SENSITIVITY[f.faction] ?? 1.0)
+                : (FACTION_DEFEAT_SENSITIVITY[f.faction] ?? 1.0);
+
+            drift += Math.round(baseDrift * habituation * sensitivity);
+
+            // Increment battle counter (persists, never resets)
+            (f as { battle_outcome_count?: number }).battle_outcome_count = battleCount + 1;
+
             // Clear after consumption — one-shot per battle
             delete (f as { recent_battle_outcome?: string }).recent_battle_outcome;
         }
@@ -160,11 +218,18 @@ export function runMoraleDrift(
         const prev = f.morale;
         f.morale = Math.max(0, Math.min(100, f.morale + drift));
 
-        // Home ground morale floor: brigades defending their home municipality
-        // never drop below HOME_GROUND_MORALE_FLOOR (15) — models historical holdouts
-        // (e.g. Goražde defenders). Applied AFTER drift, as a hard minimum on the morale value.
+        // Home ground morale floor: faction-differentiated.
+        // RBiH 30 (nowhere to go), HRHB 25 (Croatia fallback), RS 20 (Serbia fallback).
         if (f.home_defense_active === true) {
-            f.morale = Math.max(f.morale, HOME_GROUND_MORALE_FLOOR);
+            const factionFloor = FACTION_HOME_MORALE_FLOOR[f.faction] ?? 15;
+            f.morale = Math.max(f.morale, factionFloor);
+        }
+
+        // RBiH existential floor: Bosniak troops in co-ethnic majority areas
+        // get morale floor 25 even without home_defense_active.
+        // Models the "cornered rat" — no surrender option for Bosniaks.
+        if (f.faction === 'RBiH' && affinity > EXISTENTIAL_AFFINITY_THRESHOLD) {
+            f.morale = Math.max(f.morale, RBIH_EXISTENTIAL_FLOOR);
         }
 
         // Critically demoralized formations lose cohesion — organic path to surrender.
