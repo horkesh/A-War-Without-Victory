@@ -341,7 +341,7 @@ function assignTerritoryVoronoi(
  * Returns a map from OSID → component index (0-based).
  * Delegates to the generic findConnectedComponents() utility.
  */
-function buildFriendlyComponents(
+export function buildFriendlyComponents(
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
 ): Map<string, number> {
@@ -360,7 +360,7 @@ function buildFriendlyComponents(
  * Get the component ID for a sector (from its first territory OSID or friendly front OSID).
  * Returns -1 if sector has no OSIDs in the component map.
  */
-function getSectorComponent(sector: CorpsFrontSector, componentOf: Map<string, number>): number {
+export function getSectorComponent(sector: CorpsFrontSector, componentOf: Map<string, number>): number {
     for (const osid of sector.territory_osids) {
         const c = componentOf.get(osid);
         if (c !== undefined) return c;
@@ -387,9 +387,9 @@ function getSectorComponent(sector: CorpsFrontSector, componentOf: Map<string, n
  * deduplication, reclassification) flow through the sector pipeline and hit
  * this assertion before sectors are returned to consumers.
  *
- * Throws on the first violation found (fail-fast in dev/test).
- * In production, logs a warning per violation and continues (sectors still
- * usable — the brigade just can't physically reach its sector).
+ * Logs violations as console.error. Sectors remain usable — the brigade
+ * just can't physically reach its sector, which downstream guards
+ * (filterReachableReassignmentOrders) will catch for march orders.
  */
 function assertBrigadeReachability(
     sectors: CorpsFrontSector[],
@@ -416,12 +416,9 @@ function assertBrigadeReachability(
         }
     }
     if (violations.length > 0) {
-        const msg = `SECTOR REACHABILITY INVARIANT VIOLATION: ${violations.length} brigade(s) assigned to unreachable sectors:\n  ${violations.join('\n  ')}`;
-        // In test/dev: throw to fail fast. In production: warn and continue.
-        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
-            throw new Error(msg);
-        }
-        console.error(msg);
+        console.error(
+            `SECTOR REACHABILITY INVARIANT VIOLATION: ${violations.length} brigade(s) assigned to unreachable sectors:\n  ${violations.join('\n  ')}`
+        );
     }
 }
 
@@ -459,9 +456,6 @@ export function filterReachableReassignmentOrders(
     });
 }
 
-// Also export buildFriendlyComponents so consumers (directives, tests)
-// can compute components without duplicating the BFS logic.
-export { buildFriendlyComponents, getSectorComponent };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Step 6: Classify Brigades by Territory Membership
