@@ -573,13 +573,13 @@ export function runBotRecruitment(
             }
             const manpowerAvailable = pool ? pool.available : 0;
 
-            // Mandatory brigades spawn if EITHER condition is met:
-            // 1. Pool has enough for full cost (low-cost enclave brigades like 285th)
-            // 2. Pool exceeds MIN_MANDATORY_SPAWN (partial spawn for high-cost brigades — historical:
-            //    formations existed even if undermanned, e.g. VRS brigades from JNA cadres)
-            // Skip only when BOTH fail — pool is truly insufficient.
-            const effectiveManpower = Math.min(brigade.manpower_cost, manpowerAvailable);
-            if (effectiveManpower < MIN_MANDATORY_SPAWN && manpowerAvailable < brigade.manpower_cost) {
+            // Mandatory drain = initial_personnel: the pool represents actual military-age
+            // males, so we drain exactly how many people the brigade takes. manpower_cost
+            // is only relevant for elective recruitment (organizational overhead).
+            // Spawn if pool has at least MIN_MANDATORY_SPAWN; skip only when truly empty.
+            const mandatoryDrain = brigade.initial_personnel ?? brigade.manpower_cost;
+            const effectiveManpower = Math.min(mandatoryDrain, manpowerAvailable);
+            if (effectiveManpower < MIN_MANDATORY_SPAWN && manpowerAvailable < mandatoryDrain) {
                 report.brigades_skipped_no_manpower++;
                 continue;
             }

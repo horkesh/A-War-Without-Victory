@@ -7,6 +7,23 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-12] Operation Preparation System — Player UI Wiring Complete
+
+**Problem:** Operation Preparation engine was fully implemented (state machine, probes, commander logic, 45 tests) but player-facing modals were disconnected — CommanderSelectionModal and OperationBriefingModal rendered but had no triggers or callbacks.
+
+**Changes (5 files):**
+1. `OpsPlanningModal.tsx` — After directive staged, opens CommanderSelectionModal via `setCommanderSelectionContext`
+2. `CorpsFrontPanel.tsx` — "Assessment Ready — Review" button (amber) appears when `preparation_sub_phase === 'assessment'|'ready'`, opens OperationBriefingModal
+3. `electron-main.cjs` — Two new IPC handlers: `stage-assign-operation-commander` (assigns officer to operation) and `stage-operation-decision` (launch/postpone/abort/probe)
+4. `preload.cjs` + `useIPC.ts` — Bridge bindings for both new IPC channels
+5. `App.tsx` — Wrappers pass `onSelect` and `onLaunch`/`onPostpone`/`onAbort`/`onOrderProbe` callbacks via IPC
+
+**Player flow:** Draft directive → Select commander → Engine prepares (intel/staging/supply/assessment) → Review briefing → Launch/Postpone/Abort/Probe
+
+**Tests:** 524 vitest pass. Typecheck clean. No engine changes.
+
+---
+
 ## [2026-03-12] Sector: osidToCorps protection in consolidation — Herzegovina/Sarajevo fix (n624)
 
 **Problem:** VRS Herzegovina Corps owned Sarajevo siege perimeter (Centar, Stari Grad, Novo Sarajevo, Ilidza, Vogosca). Historically this was Sarajevo-Romanija Corps (SRK) territory.

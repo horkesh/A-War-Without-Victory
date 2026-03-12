@@ -151,6 +151,7 @@ export function OpsPlanningModal() {
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const setLoadError = useGameStore((s) => s.setLoadError);
     const setOperationTargetOsids = useGameStore((s) => s.setOperationTargetOsids);
+    const setCommanderSelectionContext = useGameStore((s) => s.setCommanderSelectionContext);
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<maplibregl.Map | null>(null);
@@ -629,6 +630,10 @@ export function OpsPlanningModal() {
         setOperationTargetOsids(allObjs);
         setStatusMessage('Operation drafted and staged.');
         setOpsPlanningModalOpen(false);
+
+        // Open commander selection modal for the newly staged operation
+        const finalOpName = opName.trim() || `Operation ${sector.display_name}`;
+        setCommanderSelectionContext({ corpsId: sector.corps_id, operationName: finalOpName });
     }
 
     // --- Map initialization ---

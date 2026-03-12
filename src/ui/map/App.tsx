@@ -45,14 +45,57 @@ import {
 
 function CommanderSelectionModalWrapper() {
   const ctx = useGameStore((s) => s.commanderSelectionContext);
-  const close = useGameStore((s) => s.setCommanderSelectionContext);
-  return <CommanderSelectionModal isOpen={!!ctx} onClose={() => close(null)} />;
+  const setCtx = useGameStore((s) => s.setCommanderSelectionContext);
+  const ipc = useIPC();
+
+  const handleSelect = async (officerId: string) => {
+    if (!ctx) return;
+    try {
+      const result = await ipc.stageAssignOperationCommander({
+        corpsId: ctx.corpsId,
+        operationName: ctx.operationName,
+        officerId,
+      });
+      if (!result.ok) {
+        console.warn('[CommanderSelection] assign failed:', result.error);
+      }
+    } catch (err) {
+      console.warn('[CommanderSelection] assign error:', err);
+    }
+    setCtx(null);
+  };
+
+  return (
+    <CommanderSelectionModal
+      isOpen={!!ctx}
+      onClose={() => setCtx(null)}
+      onSelect={handleSelect}
+    />
+  );
 }
 
 function OperationBriefingModalWrapper() {
   const ctx = useGameStore((s) => s.operationBriefingContext);
   const close = useGameStore((s) => s.setOperationBriefingContext);
-  return <OperationBriefingModal isOpen={!!ctx} onClose={() => close(null)} />;
+  const ipc = useIPC();
+
+  if (!ctx) return <OperationBriefingModal isOpen={false} onClose={() => close(null)} />;
+
+  const handleDecision = (decision: 'launch' | 'postpone' | 'abort' | 'probe') => {
+    ipc.stageOperationDecision({ corpsId: ctx.corpsId, operationName: ctx.operationName, decision });
+    close(null);
+  };
+
+  return (
+    <OperationBriefingModal
+      isOpen
+      onClose={() => close(null)}
+      onLaunch={() => handleDecision('launch')}
+      onPostpone={() => handleDecision('postpone')}
+      onAbort={() => handleDecision('abort')}
+      onOrderProbe={() => handleDecision('probe')}
+    />
+  );
 }
 
 function App() {

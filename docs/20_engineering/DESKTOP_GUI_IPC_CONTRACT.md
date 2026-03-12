@@ -151,6 +151,16 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
     - Returns: `{ ok: boolean, error?: string }`
     - Behavior: creates a `CorpsOperation` on `state.corps_operations` for the given corps. If `axes` array provided, creates multi-axis operation with per-axis brigade assignment, objective chains, and optional staging OSIDs. Single-axis operations omit the `axes` field and use top-level `objectives`/`participatingBrigades`. Validates corps exists, at least one brigade, at least one objective. Sets operation status to `planning`, reserializes, sends state via `game-state-updated`. Consumer: OpsPlanningModal (`src/ui/map/components/OpsPlanningModal.tsx`). Operation name pre-generated from faction `OPERATION_NAMES` pools via `simpleHash(corps_id)` — user can override.
 
+- `stage-assign-operation-commander` (invoke)
+    - Payload: `{ corpsId: string, operationName: string, officerId: string }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: assigns a named officer as commander for a specific operation. Sets `op.commander_officer_id` on the matching `CorpsOperation`, updates the officer's `assigned_operation` and `assigned_corps_id` in `state.named_officers`. Triggered from CommanderSelectionModal after player drafts a directive. Reserializes, sends state via `game-state-updated`.
+
+- `stage-operation-decision` (invoke)
+    - Payload: `{ corpsId: string, operationName: string, decision: 'launch' | 'postpone' | 'abort' | 'probe' }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: player decision during Operation Briefing. `launch` sets `force_launch=true` on the operation; `postpone` increments `postponement_count`; `abort` sets `recovery_reason='commander_abort'`; `probe` creates `active_probe` on the operation. Triggered from OperationBriefingModal. Reserializes, sends state via `game-state-updated`.
+
 ### Read-only query channels (no state mutation)
 
 - `query-movement-range` (invoke)

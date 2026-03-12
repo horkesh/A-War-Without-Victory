@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 
-**Updated:** 2026-03-10
+**Updated:** 2026-03-12
 
 **Relationship:** Warroom is part of the canonical GUI. For overall GUI status use [GUI_MASTER.md](GUI_MASTER.md). This document is the warroom-specific control file — one place to see what exists, what’s proposed, and where to record changes.
 
@@ -109,6 +109,8 @@
 | Command Briefing | command_briefing_folio | “What matters now”: urgent decisions, front alarms, convoy questions, enclave warnings; when IVP ≥60% or consequences active, footer button opens IVP breakdown |
 | Operational Situation | desk_map | Op health, sector stress, logistics, routes to tactical map |
 | Diplomatic Press Briefing (IVP) | diplomatic_telephone (footer button) | Composite IVP + four weighted components (Sarajevo siege, enclave pressure, displacement visibility, negotiation momentum), thresholds 30/60/80%, active consequences; war only |
+| Commander Selection | command_briefing_folio (via OpsPlanningModal) | Officer roster with competence/aggressiveness ratings, regional fit, prep-time estimates; triggered from OpsPlanningModal submission |
+| Operation Briefing | command_briefing_folio (via CorpsFrontPanel) | Readiness gauges, commander assessment, Launch/Probe/Postpone/Abort actions; triggered from CorpsFrontPanel assessment-ready button |
 
 ### Proposed (not yet implemented)
 
@@ -148,6 +150,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-03-12 | **Operation Preparation System UI wired:** CommanderSelectionModal (officer roster with competence/aggressiveness, regional fit, prep-time estimates) + OperationBriefingModal (readiness gauges, commander assessment, Launch/Probe/Postpone/Abort actions) now connected via IPC to operation state machine. Triggered from OpsPlanningModal submission and CorpsFrontPanel assessment-ready button. | This file § Modals |
 | 2026-03-10 | **Twelve-anchor contract:** Prompt pack expanded from eight to twelve baked props — coatrack+cap/uniform (`commander_coatrack`), urgent folder (`enclave_dispatch_folder`), sealed packet (`intelligence_packet`), honors shelf/frame (`honors_memorial`). RS §9.6–9.10 blocks and shared core updated; §3a table in clean-room handover. | [20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §3a |
 | 2026-03-09 | **Phase 2 Completion (Modals):** Implemented `CommandBriefingModal` (linked to `command_briefing_folio`), `OperationalSituationModal` (linked to `desk_map`), and functional `SettingsModal` (toolbar). Removed placeholder routing. | This file § Modals |
 | 2026-03-08 | **Canonical anchor → modal mapping:** Added definitive table in § Current status: eight anchors (wall_flag_area, wall_calendar_area, desk_map, command_briefing_folio, newspaper_stack, intelligence_journal, diplomatic_telephone, desk_radio) with room object and modal for each. Fixed Implemented table so Reports = command_briefing_folio, Magazine = intelligence_journal. Prompts must show all eight distinct props. | This file § Current status, § Modals |

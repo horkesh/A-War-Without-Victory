@@ -54,11 +54,13 @@ contextBridge.exposeInMainWorld('awwv', {
   stageCorpsOperationOrder: (payload) => ipcRenderer.invoke('stage-corps-operation-order', payload),
   stageOperationHalt: (payload) => ipcRenderer.invoke('stage-operation-halt', payload),
   stageOperationForceLaunch: (payload) => ipcRenderer.invoke('stage-operation-force-launch', payload),
+  stageOperationDecision: (payload) => ipcRenderer.invoke('stage-operation-decision', payload),
   stageAirdropAllocation: (allocations) => ipcRenderer.invoke('stage-airdrop-allocation', { allocations }),
   stageConvoyDecision: (convoyId, decision) => ipcRenderer.invoke('stage-convoy-decision', { convoyId, decision }),
   stageOpsecToggle: (sectorId, active) => ipcRenderer.invoke('stage-opsec-toggle', { sectorId, active }),
   stageMunicipalitySupportOrder: (payload) => ipcRenderer.invoke('stage-municipality-support-order', payload),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
+  stageAssignOperationCommander: (payload) => ipcRenderer.invoke('stage-assign-operation-commander', payload),
   assignCommander: (officerId, corpsId) => ipcRenderer.invoke('assign-commander', { officerId, corpsId }),
 });

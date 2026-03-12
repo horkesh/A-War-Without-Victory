@@ -79,6 +79,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
+  const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
   const [activeTab, setActiveTab] = useState<'overview' | 'forces' | 'logistics' | 'ops'>('overview');
   const [sectorActionMessage, setSectorActionMessage] = useState<string | null>(null);
 
@@ -575,6 +576,19 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             )}
                             {op.force_ratio_estimate != null && (
                               <div className="text-[9px] mt-0.5 text-neutral-600">Force Ratio Est: {op.force_ratio_estimate.toFixed(2)}</div>
+                            )}
+                            {(op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready') && (
+                              <button
+                                type="button"
+                                onClick={() => setOperationBriefingContext({ corpsId: op.corps_id, operationName: op.name })}
+                                className={`kbd-focus mt-2 w-full text-[10px] uppercase font-bold py-1.5 border transition-colors ${
+                                  op.preparation_sub_phase === 'assessment'
+                                    ? 'bg-amber-400 hover:bg-amber-500 text-amber-900 border-amber-500'
+                                    : 'bg-neutral-200 hover:bg-neutral-300 text-neutral-800 border-neutral-400'
+                                }`}
+                              >
+                                {op.preparation_sub_phase === 'assessment' ? 'Assessment Ready \u2014 Review' : 'Review Briefing'}
+                              </button>
                             )}
                           </div>
                         )}

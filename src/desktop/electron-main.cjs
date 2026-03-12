@@ -1191,6 +1191,50 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('stage-operation-decision', async (_event, payload) => {
+    const { corpsId, operationName, decision } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string' || typeof decision !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    const validDecisions = ['launch', 'postpone', 'abort', 'probe'];
+    if (!validDecisions.includes(decision)) {
+      return { ok: false, error: `Invalid decision: ${decision}` };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const op = state.corps_command?.[corpsId]?.active_operation;
+      if (!op || op.name !== operationName) {
+        return { ok: false, error: 'Operation not found' };
+      }
+      switch (decision) {
+        case 'launch':
+          op.force_launch = true;
+          break;
+        case 'postpone':
+          op.postponement_count = (op.postponement_count || 0) + 1;
+          break;
+        case 'abort':
+          op.recovery_reason = 'commander_abort';
+          break;
+        case 'probe':
+          op.active_probe = {
+            target_osid: (op.objectives && op.objectives[op.current_objective_index || 0]) || (op.target_settlements && op.target_settlements[0]),
+            brigade_ids: [],
+            started_turn: state.meta?.turn ?? 0,
+            resolved: false,
+            result_confidence_gain: 0,
+          };
+          break;
+      }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('stage-airdrop-allocation', async (_event, payload) => {
     const allocations = payload?.allocations;
     if (!currentGameStateJson || !allocations || typeof allocations !== 'object' || Array.isArray(allocations)) {
@@ -1296,6 +1340,36 @@ app.whenReady().then(() => {
         type,
         staged_turn: state?.meta?.turn ?? 0,
       };
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('stage-assign-operation-commander', async (_event, payload) => {
+    const { corpsId, operationName, officerId } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string' || typeof officerId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const op = state.corps_command?.[corpsId]?.active_operation;
+      if (!op || op.name !== operationName) {
+        return { ok: false, error: 'Operation not found' };
+      }
+
+      // Validate officer exists
+      const officer = state.named_officers?.[officerId];
+      if (!officer) return { ok: false, error: `Officer ${officerId} not found` };
+
+      // Assign officer to operation
+      op.commander_officer_id = officerId;
+      officer.assigned_operation = operationName;
+      officer.assigned_corps_id = corpsId;
+
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };

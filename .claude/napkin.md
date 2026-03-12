@@ -59,13 +59,16 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers. Root cause: brigade posture gate blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation.
-2. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.
-3. **[2026-03-11] P1: No probe/recon operations — corps attack blind**: All orders are full attacks. Sector intel system exists but bot AI doesn't use it to gate offensives. See REAL_WAR_MASTER #21.
-4. **[2026-03-11] P3: 30 RBiH at 3,000 cap**: Cookie-cutter brigades. MAX_BRIGADE_PERSONNEL=3000 hit by all large ARBiH brigades. Historical range 500-5,000+. See REAL_WAR_MASTER #20.
+1. **[2026-03-12] Calibration recovery needed (n626: 83.4% → target ≥85%)**: Sector restructuring (n620→n626) dropped area match ~3pp from n617 baseline. Sector geometry now correct — needs dedicated calibration pass (operation targets, doctrine timing, overrides) to recover.
+2. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers. Root cause: brigade posture gate blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation.
+3. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.
+4. **[2026-03-12] Per-brigade personnel caps IMPLEMENTED (c4379e2, n626)**: `deriveMaxPersonnel()` from equipment_class + faction. Mech 3500, moto 3000, mountain 2200-2800, light_inf 2200-2500, police/special 1500. REAL_WAR_MASTER #20 addressed.
 5. **[2026-03-10] Donji Vakuf pocket remnant (5 OSIDs)**: 12/17 Krajina pocket OSIDs now RS; 5 remain RBiH. May need municipality priority tuning for 2KK.
 6. **[2026-03-11] Drina region RS shortfall (76 vs 95)**: ~13 OSIDs are Srebrenica enclave (realistic defense). ~6 are Rogatica holdouts. May need painted target revision.
-7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked. Needs fresh investigation — likely MapLibre fill-layer issue specific to modal map instance. Arrow geometry math correct on main map.
+7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked. Needs fresh investigation — likely MapLibre fill-layer issue specific to modal map instance.
+8. **[2026-03-12] REAL_WAR_MASTER #14: HVO Central Bosnia ghost front**: 13 front edges, 0 brigades. 7 HVO brigades unassigned in enclaves. BFS can't reach from pockets.
+9. **[2026-03-12] REAL_WAR_MASTER #15: Intra-corps density imbalance**: 16× ratios within corps. 1KK has 6 idle brigades in Banja Luka while Posavina under-manned.
+10. **[2026-03-12] REAL_WAR_MASTER #3: Per-formation casualty ledger**: State-level ledger works. Formation-level `casualty_ledger` field absent — data exists but not surfaced per-brigade.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
@@ -98,8 +101,8 @@
    Do instead: `ALWAYS_BESIEGED_ENCLAVES` forces Sarajevo strained supply. `initial_resilience=20`. `getEnclaveGarrisonPower()` adds civilian defense volume. Urban mult 2.0×. `URBAN_TANK_TERRAIN_FLOOR=1.7`. Key lesson: personnel ratio trumps multipliers — need raw volume.
 4. **[2026-03-11] RBiH defensive w0-15, restrained balanced w15-56**
    Do instead: ARBiH defensive through w15, then balanced with low attack share (0.12) and negative aggression (-0.05) through w40.
-5. **[2026-03-04] Morale retreat resistance: per-faction floor**
-   Do instead: `getMoraleResistFloor()`: RBiH=50, RS=70, HRHB=60. ARBiH homeland last stand absorbs 'victory' at ≥50% Bosniak co-ethnic.
+5. **[2026-03-12] Operation Preparation System IMPLEMENTED**
+   Do instead: `operation_preparation.ts` — 5-phase state machine (intel_gathering→force_staging→supply_check→assessment→ready). Commander personality drives tempo. Probes as sub-actions. `tickPreparation()` in pipeline. UI: `CommanderSelectionModal.tsx` + `OperationBriefingModal.tsx`. 45 tests. Player `force_launch` override. Intel-gated launch gate in `bot_corps_directives.ts`.
 6. **[2026-03-08] Graz Accords / Local Truces + cold fronts**
    Do instead: `src/sim/local_truces.ts` — fires at week 4. Corps-pair truce (Herzegovina) + Kiseljak OSID exclusion. NOT covered: Posavina, central Bosnia outside Kiseljak, Jajce. Cold fronts: `isColdFront()` exempts from attrition/bombardment.
 7. **[2026-03-07] Pre-planned VRS operations (5 corps only) + JNA ghost Kupres**
@@ -120,8 +123,8 @@
    Do instead: `vrs_main_staff` oq=0.75 coh=72, `hvo_main_staff` oq=0.50 coh=65, `arbih_general_staff` oq=0.12 coh=38 morale=45.
 
 ## OOB & Brigade Systems
-1. **[2026-03-06] Personnel ceilings REMOVED; organic troop strength via pool system**
-   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales, exhaustion, and FACTION_POOL_SCALE. RS JNA bonus=10k.
+1. **[2026-03-12] Per-brigade personnel caps via `deriveMaxPersonnel()` (n626)**
+   Do instead: Brigade max_personnel derived from equipment_class + faction. Replaces flat 3000 cap. Troop strength still emerges from pool demographics, mobilization scales, exhaustion, and FACTION_POOL_SCALE. RS JNA bonus=10k.
 2. **[2026-03-05] April 1992 startup: patch both OOB entry + recruitment engine; home_osid must be friendly**
    Do instead: Patch both `oob_early_war_entry.ts` and `recruitment_engine.ts`. Choose starting OSIDs that are already friendly-controlled.
 3. **[2026-03-02] VRS equipment decay**
