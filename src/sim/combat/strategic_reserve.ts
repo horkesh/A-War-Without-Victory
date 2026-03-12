@@ -24,6 +24,7 @@
 import {
     COMBAT_REINFORCEMENT_RATE,
     getFactionReinforcementMult,
+    getMaxPersonnel,
     isEligibleForReinforcement,
     isInCombat,
     MAX_BRIGADE_PERSONNEL,
@@ -140,7 +141,8 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
         if (!faction) continue;
 
         const current = f.personnel ?? MIN_BRIGADE_SPAWN;
-        if (current >= MAX_BRIGADE_PERSONNEL) continue;
+        const cap = getMaxPersonnel(f);
+        if (current >= cap) continue;
 
         // Check if faction has reserve available
         const poolFaction = f.recruit_pool_faction ?? faction;
@@ -154,7 +156,7 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
         const baseRate = inCombat ? COMBAT_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
         const rate = Math.max(1, Math.floor(baseRate * factionMult * drawMult));
 
-        const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
+        const need = Math.min(cap - current, rate);
         const transfer = Math.min(need, reserveAvail);
         if (transfer <= 0) continue;
 

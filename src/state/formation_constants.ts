@@ -104,8 +104,40 @@ export function isEligibleForReinforcement(f: { kind?: string; readiness?: strin
     return true;
 }
 
-/** Brigade can grow from pool up to this size; only then do we form a second brigade (if pool still has ≥ MIN_BRIGADE_SPAWN). Tuned for historical personnel band (~3k per brigade at full strength). */
+/** Default brigade personnel cap — used when no per-brigade override exists. Tuned for historical personnel band (~3k per brigade at full strength). */
 export const MAX_BRIGADE_PERSONNEL = 3_000;
+
+/** Get the effective personnel cap for a formation. Uses per-brigade override if set, else MAX_BRIGADE_PERSONNEL. */
+export function getMaxPersonnel(f: { max_personnel?: number }): number {
+    return f.max_personnel ?? MAX_BRIGADE_PERSONNEL;
+}
+
+/**
+ * Derive max personnel from equipment class and faction.
+ * Historical basis: Bosnian War brigades varied from 500 (enclave) to 3500+ (JNA-inherited mech).
+ * Prevents cookie-cutter 3000-cap uniformity (REAL_WAR_MASTER #20).
+ */
+export function deriveMaxPersonnel(equipmentClass: string, faction: string): number {
+    // Mechanized/motorized: JNA-inherited heavy formations, best organized
+    if (equipmentClass === 'mechanized') return 3500;
+    if (equipmentClass === 'motorized') return 3000;
+    // Mountain: standard organized infantry
+    if (equipmentClass === 'mountain') {
+        if (faction === 'RS') return 2800;    // VRS mountain brigades well-organized
+        if (faction === 'HRHB') return 2500;  // HVO smaller but organized
+        return 2200;                            // ARBiH mountain — still forming
+    }
+    // Light infantry: the bulk — varies by faction
+    if (equipmentClass === 'light_infantry') {
+        if (faction === 'RS') return 2500;    // VRS light infantry had JNA cadre
+        if (faction === 'HRHB') return 2200;  // HVO moderate
+        return 2500;                            // ARBiH — varied wildly, best brigades reached 3000+
+    }
+    // Police/special: smaller specialist formations
+    if (equipmentClass === 'police' || equipmentClass === 'special') return 1500;
+    // Fallback
+    return MAX_BRIGADE_PERSONNEL;
+}
 
 /** War phase hard operational frontage cap (settlements) per brigade. */
 export const BRIGADE_OPERATIONAL_FRONTAGE_CAP = 48;

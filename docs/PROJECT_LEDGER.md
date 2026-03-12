@@ -7,6 +7,14 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-12] Sector: osidToCorps protection in consolidation — Herzegovina/Sarajevo fix (n624)
+
+**Problem:** VRS Herzegovina Corps owned Sarajevo siege perimeter (Centar, Stari Grad, Novo Sarajevo, Ilidza, Vogosca). Historically this was Sarajevo-Romanija Corps (SRK) territory.
+**Root cause:** `consolidateCrossCorpsFronts` (Step 3b) finds connected components of front edges and assigns minority-corps edges to majority corps. Sarajevo siege front connected to Herzegovina's larger southern front through Trnovo → majority rule gave entire component to Herzegovina, overriding correct `mapOsidsToCorps` BFS mapping.
+**Fix:** Added `osidToCorps` parameter to `consolidateCrossCorpsFronts`. Edges whose friendly OSID is mapped to the minority corps by the home-based BFS are now protected from consolidation — same pattern as brigade-presence protection. Applied to both connected-component pass and hostile-OSID coherence pass.
+**Result:** SRK now owns 7 sectors / 75 edges covering Sarajevo siege ring, Ilijas, Pale. Herzegovina covers only Konjic/Trnovo southern approaches. 6/6 benchmarks pass, 83.2% area-weighted, 524 tests pass. Total sectors 78→85.
+**Files changed:** `src/sim/combat/corps_front_sectors.ts`
+
 ## [2026-03-12] Morale-Victory Feedback — Stage 1 (n618)
 
 **Design doc:** `docs/plans/2026-03-12-morale-victory-feedback-design.md`
@@ -12689,3 +12697,22 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 - **Tests**: 12 new (intel_gated_operations.test.ts), 501 total vitest passing.
 
 **Files:** `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/bot_brigade_eval_front.ts`, `src/sim/combat/enclave_resilience.ts`
+
+---
+
+## 2026-03-12: Sector Split — Shared-OSID Connectivity (n620)
+
+**Author:** Codex
+**Scope:** `corps_front_sectors.ts` sector splitting, `settlements_parse.ts` edge parsing.
+
+**Problem:** `splitNonContiguousSectors` used triple-junction connectivity (Case A: same friendly + hostile adj, Case B: same hostile + friendly adj) to determine whether two front edges belong to the same sector. This bridged physically disconnected fronts through `distance_contact` adjacencies — e.g. Srebrenica and Cerska were merged into one sector despite being separate pockets.
+
+**Fixes:**
+
+1. **Shared-OSID connectivity** (`corps_front_sectors.ts`): Replaced triple-junction adjacency in `splitNonContiguousSectors` with shared-OSID connectivity — two front edges are adjacent iff they share at least one OSID endpoint. Prevents sectors from spanning physically disconnected fronts.
+
+2. **Dead code removal** (`corps_front_sectors.ts`): Removed `splitDisconnectedTerritorySectors` — territory BFS could never split because RBiH territory IS connected even when the front line is not.
+
+3. **Edge field copy** (`settlements_parse.ts`): `parseEdges` now copies `type` and `min_dist` fields from operational contact graph edges.
+
+**Calibration (n620):** 6/6 benchmarks PASS. 82.8% area-weighted (was 86.3%). RS delta -23. Hash 269533c89e00314e. Sectors ~78 (was ~77). Srebrenica and Cerska correctly split into separate sectors.

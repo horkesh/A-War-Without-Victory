@@ -13,6 +13,7 @@ import {
     getBatchSizeForFaction,
     getFactionReinforcementMult,
     getMaxBrigadesPerMun,
+    getMaxPersonnel,
     isEligibleForReinforcement,
     isInCombat,
     MAX_BRIGADE_PERSONNEL,
@@ -220,7 +221,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             // Determine tier cap
             let tierCap: number;
             if (kind === 'brigade') {
-                tierCap = MAX_BRIGADE_PERSONNEL;
+                tierCap = getMaxPersonnel(f);
                 if (!isEligibleForReinforcement(f)) continue;
             } else {
                 // militia-kind: detachment or battalion — derive tier from personnel
@@ -294,7 +295,8 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         if (!isEligibleForReinforcement(f)) continue;
 
         const current = f.personnel ?? MIN_BRIGADE_SPAWN;
-        if (current >= MAX_BRIGADE_PERSONNEL) continue;
+        const cap = getMaxPersonnel(f);
+        if (current >= cap) continue;
 
         const poolFaction = f.recruit_pool_faction ?? faction;
         const key = militiaPoolKey(mun_id, poolFaction);
@@ -312,7 +314,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
                 : 0;
         const rate = Math.max(1, Math.floor(baseRate * factionMult) + supportRateBonus);
 
-        const need = Math.min(MAX_BRIGADE_PERSONNEL - current, rate);
+        const need = Math.min(cap - current, rate);
         const reserveForSpawn = reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive);
         const availableForReinforcement = Math.max(0, pool.available - reserveForSpawn);
         const transfer = Math.min(need, availableForReinforcement);
@@ -724,9 +726,10 @@ export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
         if (f.posture === 'attack' || f.disrupted) continue;
 
         const current = f.personnel ?? 0;
-        if (current >= MAX_BRIGADE_PERSONNEL) continue;
+        const cap = getMaxPersonnel(f);
+        if (current >= cap) continue;
 
-        const returned = Math.min(pending, WIA_TRICKLE_RATE, MAX_BRIGADE_PERSONNEL - current);
+        const returned = Math.min(pending, WIA_TRICKLE_RATE, cap - current);
         if (returned <= 0) continue;
 
         f.wounded_pending = pending - returned;

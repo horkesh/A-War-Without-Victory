@@ -85,7 +85,9 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 
 ## 10. Sectors & Operations
 
-1. **[2026-03-06] Maneuver-only execution turns are not dead execution**
+1. **[2026-03-12] consolidateCrossCorpsFronts can steal correct corps territory (n624 gotcha)**
+   Do instead: Step 3b majority-count consolidation finds connected components of front edges across corps boundaries and assigns minority-corps edges to the majority. Without osidToCorps protection, a corps with a larger connected front absorbs a smaller correct corps's territory — even when `mapOsidsToCorps` home-seed BFS correctly assigned it. Two protections required: (1) brigade presence at OSID, (2) `osidToCorps` mapping match. The BFS home-seed mapping is the authoritative source for corps territory — consolidation must not override it.
+2. **[2026-03-06] Maneuver-only execution turns are not dead execution**
    Do instead: In combat-causality diagnostics, do not flag `execution_without_attack_orders` when execution-phase operation participants emitted movement orders. Operation-owned brigades can be healthy while still closing on the current objective.
 2. **[2026-03-06] Planning phase must include movement into position**
    Do instead: Treat planning as the period where operation-owned brigades move toward staging and first-objective approach positions. Do not model planning as a passive timer detached from maneuver.

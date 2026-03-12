@@ -4,49 +4,47 @@
 
 **Rules:** Max 10 items per category. Re-prioritize on every read (highest first). Merge duplicates, remove stale. Each entry: date + short title + "Do instead".
 
-**Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`. Do instead: When doing calibration, GUI, warroom, or realism work, read the relevant master first and update it during the session.
+**Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`; Sectors → `docs/40_reports/SECTOR_MASTER.md`. Do instead: When doing calibration, GUI, warroom, sector, or realism work, read the relevant master first and update it during the session.
 
 ## Session Startup (do these EVERY session — BEFORE any work)
 1. **[2026-03-12] Check cron and schedule if missing — ALWAYS**
-   Do instead: Run `CronList` at session start. If no life-lessons cron exists, immediately `CronCreate` with cron `3 6 * * *` — life-lessons daily review (gather 24h git activity, detect violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`). Crons are session-only and auto-expire after 3 days. **Because of the 3-day expiry, you MUST check and re-schedule every session** — the cron from a previous session is always gone. This check is mandatory every session startup — no exceptions.
+   Do instead: Run `CronList` at session start. If no life-lessons cron exists, immediately `CronCreate` with cron `3 6 * * *` — life-lessons daily review (gather 24h git activity, detect violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`). Crons are session-only and auto-expire after 3 days. **Because of the 3-day expiry, you MUST check and re-schedule every session** — the cron from a previous session is always gone.
 
 ## Execution & Validation
 1. **[2026-03-11] NEVER claim a fix works without running the scenario and verifying the output**
-   Do instead: After any bug fix, run a fresh scenario (`npm run sim:scenario:run:40w`), then write a diagnostic script to verify the specific bug is gone. Check for related issues (e.g. other code paths that do the same wrong thing). The first n596 run after the "fix" still had 12 bugs because `ensureMinimumSectorCoverage` was a second assignment path that wasn't patched. Always verify with data, never with assumptions.
-2. **[2026-03-07] Classify phases by real code impact, not plan labels**
-   Do instead: Before parallelizing or skipping regression, audit the task list. If a phase touches schema, IPC, bot logic, pipeline, or serialization, treat it as engine-touching even if the plan calls it UI-only; split the task or add the regression gate and separate commit.
-2. **[2026-03-06] Preserve fractional run-summary metrics**
-   Do instead: In scenario summary normalization, never round fields ending in `share`, `ratio`, `rate`, `tolerance`, or `deviation`. Benchmark fractions are historical-fit evidence, not counts.
-3. **[2026-02-25] Determinism is sacred**
+   Do instead: After any bug fix, run a fresh scenario (`npm run sim:scenario:run:40w`), then write a diagnostic script to verify the specific bug is gone. Check for related issues (e.g. other code paths that do the same wrong thing). Always verify with data, never with assumptions.
+2. **[2026-03-11] One-change-then-verify calibration protocol (MANDATORY)**
+   Do instead: (1) Change ONE parameter or fix ONE bug. Never bundle. (2) Run fresh 40w scenario. (3) Run comparison tool. (4) Run /war-or-game insanity check — brigade states, casualty ratios, tempo, troop strength, equipment (`composition` field). (5) Record result in CALIBRATION_MASTER.md.
+3. **[2026-03-07] Classify phases by real code impact, not plan labels**
+   Do instead: Before parallelizing or skipping regression, audit the task list. If a phase touches schema, IPC, bot logic, pipeline, or serialization, treat it as engine-touching even if the plan calls it UI-only.
+4. **[2026-02-25] Determinism is sacred**
    Do instead: No `Math.random()`, no timestamps, no `Date.now()` in run folders. Sorted iteration via `strictCompare`. Monotonic `.run_counter` for run folders.
-4. **[2026-02-21] Smoke-test triad after every change**
+5. **[2026-02-21] Smoke-test triad after every change**
    Do instead: Run `tsc --noEmit`, `vitest run`, and `desktop:map:build` as standard smoke check.
-5. **[2026-02-20] Fix ALL failing tests**
+6. **[2026-02-20] Fix ALL failing tests**
    Do instead: Fix all failing tests even if unrelated to current change. Standing directive.
-6. **[2026-02-22] Never auto-rebaseline golden tests**
-   Do instead: Keep failing baselines pending canon/data authority review. Refresh only after user/PM sign-off per `TEST_BASELINE_STRATEGY.md`.
-7. **[2026-02-21] Refactor-pass and code-simplifier between phases/checkpoints**
-   Do instead: After each implementation phase or between plan checkpoints, run /refactor-pass (dead code, duplication, over-engineered stubs, simplify conditionals; then tsc + vitest) and /code-simplifier on recently modified code. Plans (e.g. officers-phase-e-implementation) must instruct this between tasks.
-8. **[2026-02-13] Verify edits + close handoffs with evidence**
-   Do instead: After edits, verify with file reads + `git diff`. After roadmap or handoff, close with run evidence + decision memo + cross-link.
-9. **[2026-02-24] Scenario checkpoint lengths**
-   Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w for acceptance only.
-10. **[2026-03-11] One-change-then-verify calibration protocol (MANDATORY)**
-    Do instead: (1) Change ONE parameter or fix ONE bug. Never bundle. (2) Run fresh 40w scenario. (3) Run comparison tool. (4) Run /war-or-game insanity check — brigade states, casualty ratios, tempo, troop strength, equipment (`composition` field). (5) Record result in CALIBRATION_MASTER.md. See CALIBRATION_MASTER §One-change-then-verify for full checklist.
+7. **[2026-03-06] Preserve fractional run-summary metrics**
+   Do instead: In scenario summary normalization, never round fields ending in `share`, `ratio`, `rate`, `tolerance`, or `deviation`.
+8. **[2026-02-22] Never auto-rebaseline golden tests**
+   Do instead: Keep failing baselines pending canon/data authority review. Refresh only after user/PM sign-off.
+9. **[2026-02-21] Refactor-pass between phases/checkpoints**
+   Do instead: After each implementation phase, run /refactor-pass and /code-simplifier on recently modified code.
+10. **[2026-02-24] Scenario checkpoint lengths**
+    Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w for acceptance only.
 
 ## Shell & Platform
 1. **[2026-03-05] Existing-dir file generation: prefer `apply_patch` or script files**
-   Do instead: Use `apply_patch` for manual edits. For bulk/generated content, write a short script file and run it. Avoid helper workflows that recreate existing directories or rely on fragile heredocs.
-2. **[2026-03-05] `rg.exe` may be blocked in PowerShell**
-   Do instead: Try `rg` first for fast scans. If PowerShell returns access denied, fall back to `Get-ChildItem` + `Select-String` instead of burning time on shell debugging.
-3. **[2026-02-07] Windows shell separator**
+   Do instead: Use `apply_patch` for manual edits. For bulk/generated content, write a short script file and run it.
+2. **[2026-02-07] Windows shell separator**
    Do instead: On Windows PowerShell, use `;` not `&&` to chain commands.
-4. **[2026-02-07] tsx can hang on Windows**
+3. **[2026-02-07] tsx can hang on Windows**
    Do instead: Use `node_modules/.bin/tsx` directly (not `npx tsx`). Prefer `npm run test:vitest` over `npx tsx --test`.
-5. **[2026-02-28] Root tsc vs nested UI package**
-   Do instead: When `npx tsc --noEmit` at root fails on JSX config, verify changed UI package with its own build (`src/ui/map: npm run build`). Report root failures as pre-existing unless introduced by your edits.
-6. **[2026-02-13] Validate paths with glob before use**
+4. **[2026-02-28] Root tsc vs nested UI package**
+   Do instead: When `npx tsc --noEmit` at root fails on JSX config, verify changed UI package with its own build (`src/ui/map: npm run build`).
+5. **[2026-02-13] Validate paths with glob before use**
    Do instead: Stale paths break silently. Skills at `.claude/skills/*` — validate with glob.
+6. **[2026-03-12] Save file field names: `corps_id` not `corps`, `location_osid` not `current_osid`**
+   Do instead: In diagnostic .cjs scripts, use `f.corps_id` and `f.location_osid`. Using `f.corps` returns undefined, causing false cross-corps positives and phantom bugs.
 
 ## Imports & Build
 1. **[2026-02-07] Martinez ESM import**
@@ -58,246 +56,183 @@
 4. **[2026-02-28] Vitest .js import path parity**
    Do instead: For test imports using `.js` paths into `src`, ensure target base path exists. If module moved, repoint import.
 5. **[2026-03-08] Warroom/vitest jsdom for DOM-dependent tests**
-   Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environment: 'node' and environmentMatchGlobs for the test file to 'jsdom'; add jsdom devDependency.
+   Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers — brigades assigned but can't adopt attack posture. Root cause: brigade posture gate (`canAdoptPosture`) blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation to not assign posture-blocked brigades.
-2. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i` assigned to empty-territory sector. Low priority — 28→1 after connected component fix (n598). Enclave brigades now stay in pocket (n601).
+1. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers. Root cause: brigade posture gate blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation.
+2. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.
+3. **[2026-03-11] P1: No probe/recon operations — corps attack blind**: All orders are full attacks. Sector intel system exists but bot AI doesn't use it to gate offensives. See REAL_WAR_MASTER #21.
+4. **[2026-03-11] P3: 30 RBiH at 3,000 cap**: Cookie-cutter brigades. MAX_BRIGADE_PERSONNEL=3000 hit by all large ARBiH brigades. Historical range 500-5,000+. See REAL_WAR_MASTER #20.
+5. **[2026-03-10] Donji Vakuf pocket remnant (5 OSIDs)**: 12/17 Krajina pocket OSIDs now RS; 5 remain RBiH. May need municipality priority tuning for 2KK.
+6. **[2026-03-11] Drina region RS shortfall (76 vs 95)**: ~13 OSIDs are Srebrenica enclave (realistic defense). ~6 are Rogatica holdouts. May need painted target revision.
+7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked. Needs fresh investigation — likely MapLibre fill-layer issue specific to modal map instance. Arrow geometry math correct on main map.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
-   Do instead: Keep IVP consequence hysteresis in `patron_pressure.ts`; keep convoy generation/processing, smuggling allocation, and Sarajevo tunnel hooks in `supply_reserves.ts`; surface pending convoy decisions through state + desktop IPC rather than ad-hoc UI-only modals.
+   Do instead: Keep IVP consequence hysteresis in `patron_pressure.ts`; keep convoy/smuggling/tunnel hooks in `supply_reserves.ts`.
 2. **[2026-03-07] Composite IVP extends the existing patron-pressure system**
-   Do instead: Add new international-pressure behavior by extending `patron_pressure.ts` and `international_visibility_pressure`, not by creating a parallel IVP subsystem. `composite_ivp` is the UI/patron-facing summary value.
+   Do instead: Extend `patron_pressure.ts` and `international_visibility_pressure`, not a parallel IVP subsystem.
 3. **[2026-03-03] Supply reserves: gated + pocket threshold + isolated source + heavy weapon drain**
-   Do instead: All reserve logic gated by `state.meta.supply_reserves_enabled`. Constants: `supply_reserve_constants.ts`. Module: `supply_reserves.ts`. Siege drain: `SIEGE_MIN_POCKET_SIZE=8` — components below this get counter frozen at 1. Isolated source detection: `findHeartlandComponent()` in `supply_state_derivation.ts` — supply sources in disconnected pockets (Sarajevo, Bihać) produce "strained" not "adequate". Heavy weapon maintenance: `HEAVY_MAINTENANCE_PER_WEAPON=0.001` — per-tank/artillery drain on heavy_munitions_reserve.
+   Do instead: All reserve logic gated by `state.meta.supply_reserves_enabled`. SIEGE_MIN_POCKET_SIZE=8. `findHeartlandComponent()` for isolated sources. HEAVY_MAINTENANCE_PER_WEAPON=0.001.
 4. **[2026-03-01] OSID/SID mismatch — never use getEffectiveSettlementSide for control**
-   Do instead: `political_controllers` keyed by OSIDs in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()` for municipality control. `getEffectiveSettlementSide()` does SID lookup → always null → false encirclement.
+   Do instead: `political_controllers` keyed by OSIDs in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()`.
 5. **[2026-03-11] Displacement: per-OSID census, non-overlapping buckets, static routing, UI removal count**
-   Do instead: Use `getOsidCensusPopulation(osidRec)` and `getOsidCensusHostileShare(osidRec, faction)`, not mun averages. `displaced_out` = routed amount. `lost_population` = killed + fled_abroad + unrouted overflow. Set `cumulative_displaced = displacementAmount` after initial fire (prevents double-counting). Routing tables in `displacement_routing_data.ts` are static (47 sub-regions × 3 ethnicities). Don't add `state` param to route lookup. **UI adapter**: `departedByOsid` must count `displaced + killed + fled_abroad` (the FULL removal), not just `displaced`. Event log path: `state.displacement.displacement_event_log` (nested, not top-level). Smoke test: Kamičani (Prijedor) should show ~0% Bosniak after displacement.
+   Do instead: Use `getOsidCensusPopulation(osidRec)`. `departedByOsid` must count `displaced+killed+fled_abroad` (full removal). Event log: `state.displacement.displacement_event_log`.
 6. **[2026-02-24] OSID-keyed political_controllers init + load migration**
-   Do instead: When init fills by OSID, do NOT call `promotePoliticalControllersToOsid`. Check `isPoliticalControllersAlreadyOsidKeyed()` first. On load: `migratePoliticalControllersToOsidIfNeeded` only for canonical SIDs (skip test fixtures S1/S2).
+   Do instead: Check `isPoliticalControllersAlreadyOsidKeyed()` first. `migratePoliticalControllersToOsidIfNeeded` only for canonical SIDs.
 7. **[2026-02-28] Operational control: majority then plurality**
-   Do instead: Assign faction by ethnic majority (>50%), else plurality. Not "first ≥40%" — that made Vozuća RBiH despite 54.5% Serb.
-8. **[2026-03-01] Test fixtures: phase + referendum required**
-   Do instead: Test fixtures flowing through `runTurn` or scenario runners must set `meta.phase` (`peace`/`war`) + referendum fields. Missing phase hard-fails.
-9. **[2026-02-22] Pipeline step no-ops for missing data**
+   Do instead: Assign faction by ethnic majority (>50%), else plurality. Not "first ≥40%".
+8. **[2026-02-22] Pipeline step no-ops for missing data**
    Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
-10. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
-    Do instead: Autonomous paramilitary units spawn when rear enemy pocket clusters detected (1-3 connected same-controller OSIDs, ALL external neighbors faction-controlled, BFS cluster detection, `op:` prefix filtering). Instant capture (MARCH_TURNS=0). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30. Casualties (inflicted+suffered) count in casualty_ledger; civilian casualties init via `??=`. Bot corps AI defers (excludes paramilitary targets from opportunistic targeting). Pipeline: `paramilitary-detect` + `paramilitary-advance` after `partition-corps-front-sectors`. Player: `pending_paramilitary_requests`; bot auto-approves. `FormationKind='paramilitary'` excluded from reinforcement/bot AI.
+9. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
+   Do instead: Autonomous paramilitary units for rear enemy pocket clusters (1-3 OSIDs, ALL external neighbors faction-controlled). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30.
+10. **[2026-02-24] Test fixtures: phase + referendum required**
+    Do instead: Test fixtures flowing through `runTurn` or scenario runners must set `meta.phase` + referendum fields.
 
 ## Bot AI & Combat
-1. **[2026-03-10] Enclave defense overhaul — Sarajevo holds (n524→n527)**
-   Do instead: Sarajevo fell at w2-7 because 5:1 personnel ratio overwhelms any multiplier. Fix: (1) `ALWAYS_BESIEGED_ENCLAVES` forces Sarajevo to read 'strained' supply even when adequate (resilience builds from turn 0). (2) `initial_resilience=20` for Sarajevo (established siege from day 1). (3) `getEnclaveGarrisonPower()` adds raw defense volume from civilian defense (population×0.05×0.15×resilienceMult). (4) Urban defense mult 1.5→2.0 for Sarajevo OSIDs. (5) `URBAN_TANK_TERRAIN_FLOOR=1.7` penalizes tanks in urban terrain. Result: Sarajevo core holds (RS 5/RBiH 4 splits), Goražde flips (RS 9→RBiH 11). Key lesson: personnel ratio trumps multipliers — need raw volume (garrison power), not bigger multipliers.
-2. **[2026-03-10] FIXED (n532): `buildEdgeAdjacency` now uses triple-junction front-line-following**
-   Do instead: Replaced OSID adjacency walk with triple-junction connectivity. Two front edges connect iff they meet at a polygon triple junction: (A) same friendly + hostile adj, (B) same hostile + friendly adj. Changed in `buildEdgeAdjacency`, `splitNonContiguousSectors`, `isSegmentAdjacent`. Sectors 52→77. RS delta -19 (was +104). Area-weighted 87.0%.
+1. **[2026-03-12] Shared-OSID sector split replaces triple-junction in splitNonContiguousSectors (n620)**
+   Do instead: `splitNonContiguousSectors` uses shared-OSID connectivity — two front edges adjacent iff they share an OSID endpoint. `buildEdgeAdjacency` still uses triple-junction (Case A/B) for sub-segment construction. Prevents sectors spanning disconnected fronts (Srebrenica↔Cerska fix).
 2. **[2026-03-11] RS three-phase doctrine — organic tempo decay (n579)**
-   Do instead: RS has 3 doctrine phases (all offensive): w0-12 blitz (0.35/0.15), w12-26 sustained (0.25/0.08), w26+ consolidation (0.20/0.05). RS_EARLY_WAR_END_WEEK=26. Late-war params have ZERO calibration effect (bottleneck is combat effectiveness, not doctrine). Early-war intensity is the primary calibration lever.
-2. **[2026-03-08] Brigade discipline + fatigue + garrison + dissolution + siege + equipment**
-   Do instead: Hard block — brigades ONLY attack `effectiveDirective.offensive_targets`. Fatigue: +1.5/turn frontline, +2 attacker/+1 defender per battle. Recovery: -1 every 3 turns, ONLY when OFF frontline (must rotate). **BUG FIXED (n304)**: `updateFormationFatigue` was resetting fractional fatigue to 0 via `Number.isInteger` check — replaced with `typeof !== 'number'` check. `garrison: true` on OOB → defend-only (VRS 65th Protection). Dissolution: `brigade_dissolution.ts` triple criteria. Siege bombardment: `siege_attrition.ts`. Equipment loss: OSID path (`attack_resolution_osid.ts`) now records equipment losses (was missing entirely — only legacy SID path had it). TANK_LOSS_RATE=0.08, ARTILLERY_LOSS_RATE=0.04, min 1 per battle if unit has equipment. Defender rates at 0.5×. Supply embargo: PATRON_AID_SCALE=10, faction efficiency (RBiH=0.3, RS=1.0, HRHB=0.8), caps (RBiH=45, RS=90, HRHB=70). **n304 ATH=93.8% (up from n290=88.1%) — fatigue+equipment naturally limit RS offensives.**
-3. **[2026-03-04] Morale retreat resistance: per-faction floor (updated)**
-   Do instead: `getMoraleResistFloor()`: RBiH=**50**, RS=70, HRHB=**60**. Morale ≥ floor + costly_victory → absorb. Decisive always retreats. ARBiH homeland last stand (≥50% Bosniak co-ethnic) also absorbs 'victory' outcomes regardless of morale. Added in n439 session.
-4. **[2026-03-08] Graz Accords / Local Truces (RS-HRHB non-aggression) + cold fronts**
-   Do instead: `src/sim/local_truces.ts` — fires at week 4; sets `state.vienna_declaration_turn`. Two mechanisms: (1) Corps-pair truce (Herzegovina): `vrs_2nd_krajina↔hvo_tomislavgrad`, `vrs_herzegovina↔hvo_southeast_herzegovina`. (2) Kiseljak OSID-level exclusion (9 HRHB + 7 VRS OSIDs). NOT covered: Posavina, central Bosnia outside Kiseljak, Krajina HRHB cells (including Jajce). Player truce-break: `check-truce-break` step; sets `state.truce_broken_turn[faction]`, opponent gets +0.25 aggression for 6 turns. **Cold fronts**: RS↔HRHB front segments exempt from frontline attrition + bombardment FP calc (`isColdFront()` in `frontline_attrition.ts`) — only for corps in Graz pairs. HRHB siege drain skipped while Graz active (`supply_reserves.ts`). Terminology: "Graz Accords" (not "Vienna Declaration") — state field remains `vienna_declaration_turn` for backwards compat.
-5. **[2026-03-10] FIXED: Stuck queued ops + sector offensive priority sort (n534→n535)**
-   Do instead: (1) `injectQueuedOperation` now skips ops whose objectives are all faction-controlled (prevents zombie queue blocking corps). (2) Wrong brigade ID fixed: `rs_1st_banja_luka` → `rs_1st_banja_luka_light_infantry` in Operation Bosanski Novi. (3) Sector offensive launch now sorts sectors by priority-sector-first then offensive-target-overlap (was arbitrary order → ops launched at low-value sectors). Result: Krajina pocket 93.1%→98.5%, area-weighted 88.0%→89.1%.
-6. **[2026-03-07] Pre-planned VRS operations (5 corps only) + JNA ghost Kupres**
-   Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only the original 5 corps (EBK/Drina/SRK/Herzegovina/1KK). 2KK has NO pre-planned op (−6.7pp regression). Kupres captured by JNA ghost phantom (`jna_9th_corps_tg`): `capture_osids` flips control at spawn, `no_equipment_handoff` dissolves without equipment distribution. No post_op_stance/stance_cap mechanism.
-6. **[2026-03-11] RBiH defensive w0-15, restrained balanced w15-56**
-   Do instead: ARBiH defensive through w15, then balanced with low attack share (0.12) and negative aggression (-0.05) through w40. This prevents premature counterattacking while allowing local ops from w15.
-7. **[2026-02-25] Aggression scoring: additive + multiplicative**
-   Do instead: Flat additive (`aggression_modifier × 120`) PLUS multiplicative (`× (1 + aggression_modifier)`). Multiplier alone ineffective on low base scores.
-8. **[2026-02-22] Pioneer attack seeding**
-   Do instead: First brigade seeds concentration with 'repulsed' outcome; subsequent join via `estimateConcentratedOutcome()`.
-9. **[2026-03-10] Cross-corps sector assignment must stay hard-blocked**
-   Do instead: In `classifyBrigadesByTerritory`, never assign a brigade to another corps sector because it is physically on that frontage or because generic territory/BFS fallback found a nearer foreign sector. All fallback paths must preserve brigade corps ownership.
-10. **[2026-02-24] CorpsDirective must be complete**
-    Do instead: Include `offensive_targets`, `hold_osids`, `avoid_osids`, `max_attackers_per_target`, `reserve_fraction`, `min_attack_outcome`, `aggression_modifier`.
+   Do instead: w0-12 blitz (0.35/0.15), w12-26 sustained (0.25/0.08), w26+ consolidation (0.20/0.05). Late-war params have ZERO calibration effect. Early-war intensity is the primary lever.
+3. **[2026-03-10] Enclave defense overhaul — Sarajevo holds (n524→n527)**
+   Do instead: `ALWAYS_BESIEGED_ENCLAVES` forces Sarajevo strained supply. `initial_resilience=20`. `getEnclaveGarrisonPower()` adds civilian defense volume. Urban mult 2.0×. `URBAN_TANK_TERRAIN_FLOOR=1.7`. Key lesson: personnel ratio trumps multipliers — need raw volume.
+4. **[2026-03-11] RBiH defensive w0-15, restrained balanced w15-56**
+   Do instead: ARBiH defensive through w15, then balanced with low attack share (0.12) and negative aggression (-0.05) through w40.
+5. **[2026-03-04] Morale retreat resistance: per-faction floor**
+   Do instead: `getMoraleResistFloor()`: RBiH=50, RS=70, HRHB=60. ARBiH homeland last stand absorbs 'victory' at ≥50% Bosniak co-ethnic.
+6. **[2026-03-08] Graz Accords / Local Truces + cold fronts**
+   Do instead: `src/sim/local_truces.ts` — fires at week 4. Corps-pair truce (Herzegovina) + Kiseljak OSID exclusion. NOT covered: Posavina, central Bosnia outside Kiseljak, Jajce. Cold fronts: `isColdFront()` exempts from attrition/bombardment.
+7. **[2026-03-07] Pre-planned VRS operations (5 corps only) + JNA ghost Kupres**
+   Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only original 5 corps. 2KK has NO pre-planned op.
+8. **[2026-03-10] Cross-corps sector assignment must stay hard-blocked**
+   Do instead: In `classifyBrigadesByTerritory`, never assign a brigade to another corps sector. All fallback paths must preserve brigade corps ownership.
+9. **[2026-02-25] Aggression scoring: additive + multiplicative**
+   Do instead: Flat additive (`aggression_modifier × 120`) PLUS multiplicative (`× (1 + aggression_modifier)`).
+10. **[2026-03-08] Brigade discipline + fatigue + garrison + dissolution + equipment**
+    Do instead: Hard block — brigades ONLY attack `effectiveDirective.offensive_targets`. Fatigue recovery ONLY when OFF frontline. `garrison: true` → defend-only. Equipment: TANK_LOSS_RATE=0.08, ARTILLERY_LOSS_RATE=0.04. Dissolution: triple criteria.
 
 ## Officer Architecture
 1. **[2026-03-08] Named officers = corps and above only; brigades use abstracted officer_quality**
-   Do instead: Named officers (`officer_system.ts`) command corps and operations. Brigades have `officer_quality` [0,1] field → `getBrigadeOfficerMod()` in `combat_math.ts`. Army HQs feed into army_commander modifier for VRS general_offensive ops. Never suggest named officer assignment for brigades.
+   Do instead: Named officers command corps and operations. Brigades have `officer_quality` [0,1] → `getBrigadeOfficerMod()`. Never suggest named officer assignment for brigades.
 2. **[2026-03-08] distinction_potential replaces pre-awarded historical_decorations**
-   Do instead: Units that historically earned decorations start with `distinction_potential: 'tier_1'|'tier_2'|'tier_3'` + modest officer_quality seed. `decoration_evaluator.ts` reduces earning thresholds by 30–35%. Decorations are EARNED during the run, not given at war start. `historical_decorations` and `honor` fields stripped from OOB (46 brigades).
+   Do instead: Units start with `distinction_potential: 'tier_1'|'tier_2'|'tier_3'`. Decorations EARNED during run. `historical_decorations` and `honor` fields stripped from OOB.
 3. **[2026-03-08] Army HQs seeded with initial_officer_quality + cohesion**
-   Do instead: `vrs_main_staff` oq=0.75 coh=72, `hvo_main_staff` oq=0.50 coh=65, `arbih_general_staff` oq=0.12 coh=38 morale=45. Fields flow via `OobCorps` → `oob_early_war_entry.ts` → FormationState. ARBiH General Staff available_from=24; VRS/HVO from turn 0/10.
+   Do instead: `vrs_main_staff` oq=0.75 coh=72, `hvo_main_staff` oq=0.50 coh=65, `arbih_general_staff` oq=0.12 coh=38 morale=45.
 
 ## OOB & Brigade Systems
 1. **[2026-03-06] Personnel ceilings REMOVED; organic troop strength via pool system**
-   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales (`ongoing_mobilization.ts`: RBiH=0.10, RS=0.12, HRHB=0.29), exhaustion (MILITARY_AGE_MALE_FRACTION=0.28 denominator, threshold 0.25 half-rate, cap 0.50), and FACTION_POOL_SCALE (RBiH=0.25, RS=0.25, HRHB=1.05). RS JNA bonus=10k. n345 result: RBiH=119.2k (target 120k), RS=103.3k (target 102.6k), HRHB=43.4k (target 41.5k). Note: HRHB scale reduced from 1.60→1.05 after cold-front fix eliminated phantom attrition; RBiH raised from 0.18→0.25 to compensate cascade (healthier HRHB → changed territorial dynamics → less RBiH mobilization).
-2. **[2026-03-02] Decoration system replaces honor**
-   Do instead: `getDecorationAtkMult()` and `getDecorationDefBonus()` in `decoration_evaluator.ts` — replace direct honor lookups. Falls back to legacy honor when no decorations. Three tiers per faction. Pipeline step `evaluate-brigade-decorations`.
-3. **[2026-03-02] Brigade history recorder wired after each battle**
-   Do instead: `recordAttackerEngagements()` + `recordDefenderEngagement()` called in `attack_resolution_osid.ts` after morale effects. Uses outer-scope `currentTurn` (line 246). FIFO cap 200 entries.
-4. **[2026-03-02] VRS equipment decay**
-   Do instead: `equipment_decay` field on FormationState (NOT EquipmentState.condition_pct — doesn't exist). Applied as multiplier in `getEquipmentRatio()` in `combat_math.ts`. Starts w26, 0.5%/week, floor 0.60.
-5. **[2026-03-02] Elite loan lifecycle**
-   Do instead: `elite_loan.ts` — 6w loan, 4w cooldown (≥ not >), forced recall 30% casualties or morale <35, permanent degradation <50% personnel. Pipeline step `elite-loan-lifecycle`.
-6. **[2026-03-02] OOB data: 247 brigades total**
-   Do instead: After rework: RBiH 126, RS 80, HRHB 41. Removed 13 dupes, added 16 new. HVO Guard brigades at w80-88. `historical_decorations` on 46+ brigades. `is_elite` on guards + 65th.
-7. **[2026-03-02] War stories (end-of-game narrative)**
-   Do instead: `generateWarStories(state)` in `war_stories.ts`. 6 arcs: veteran/bloodied/shattered/risen/destroyed/garrison. Deterministic templates, no randomness. Not yet wired into final save JSON.
-8. **[2026-03-05] April 1992 startup: patch both OOB entry + recruitment engine; home_osid must be friendly**
-   Do instead: Patch both `src/scenario/oob_early_war_entry.ts` and `src/sim/recruitment_engine.ts` — legacy OOB path alone won't survive real scenario startup. Choose brigade starting OSIDs that are already friendly-controlled; enemy-held `home_osid` causes spread/re-homing and the intended opening operation won't launch from there.
-
-9. **[2026-03-07] Phase E municipality support stays asymmetric and pool-constrained**
-   Do instead: Use municipality_support_orders as one shared state surface, but keep faction effects distinct: RBiH local mobilization (weapons_shipment), RS reinforcement-rate boost (staff_priority), HRHB reinforcement cohesion bonus (croatian_support_package). One target, one turn, no global manpower rewrite.
+   Do instead: No hardcoded caps. Personnel emerges from pool demographics, mobilization scales, exhaustion, and FACTION_POOL_SCALE. RS JNA bonus=10k.
+2. **[2026-03-05] April 1992 startup: patch both OOB entry + recruitment engine; home_osid must be friendly**
+   Do instead: Patch both `oob_early_war_entry.ts` and `recruitment_engine.ts`. Choose starting OSIDs that are already friendly-controlled.
+3. **[2026-03-02] VRS equipment decay**
+   Do instead: `equipment_decay` field on FormationState. Applied as multiplier in `getEquipmentRatio()`. Starts w26, 0.5%/week, floor 0.60.
+4. **[2026-03-02] Elite loan lifecycle**
+   Do instead: `elite_loan.ts` — 6w loan, 4w cooldown, forced recall 30% casualties or morale <35.
+5. **[2026-03-07] Phase E municipality support stays asymmetric and pool-constrained**
+   Do instead: Faction-distinct effects: RBiH=weapons_shipment, RS=staff_priority, HRHB=croatian_support_package. One target, one turn.
 
 ## Sectors & Operations
-1. **[2026-03-08] Corps sector rework — ALL 6 ITEMS DONE**
-   Do instead: All items from the corps sector management plan are implemented and live:
-   (1) Home distance effectiveness: `home_distance.ts` → `combat_math.ts` (attack+defense), 1.0≤3 hops, -4%/hop, floor 0.70.
-   (2) Brigade movement to sectors: column march (`osid_column_movement.ts`) + `sector_reassignment_orders` on CorpsDirective.
-   (3) Density equalization: `bot_corps_ai.ts` surplus(>1.3×)→deficit(<0.7×), threat-weighted.
-   (4) Intel-driven reinforcement: `offensive_signs` 3× boost, `fortress` 2.5×, `dense` 2×.
-   (5) Sector reserves: `reserve_brigade_ids`, `reserve_fraction` (10-30% by stance).
-   (6) Territory assignment: brigade-presence-first in `mapOsidsToCorps` (Phase 1 lock + Phase 2 BFS gap-fill).
-   REMAINING: Elite/professional brigades should get flatter home distance curve (floor 0.85 vs 0.70).
+1. **[2026-03-12] consolidateCrossCorpsFronts must respect osidToCorps (n624 Herzegovina/Sarajevo gotcha)**
+   Do instead: Step 3b majority-count consolidation can steal territory from correct corps. The BFS home-seed mapping is authoritative — consolidation must protect edges where `osidToCorps` agrees with the minority corps. Without this, a larger connected front (Herzegovina) absorbs a smaller correct corps's edges (SRK Sarajevo).
 2. **[2026-03-12] Corps-driven brigade assignment with home-municipality affinity**
-   `classifyBrigadesByTerritory`: Phase 1 = frontline by position, Phase 2a = home-municipality affinity, Phase 2b = corps distributes by need (proportional to edges). `buildFriendlyComponents` for reachability. `munFromOsid()` helper. MAX_TERRITORY_OSIDS cap removed (every friendly OSID must belong to a sector). `equalizeSectorDensity` removed (corps pools handle distribution).
+   Do instead: `classifyBrigadesByTerritory`: Phase 1=frontline, Phase 2a=home-municipality affinity, Phase 2b=corps distributes by need. MAX_TERRITORY_OSIDS cap removed. `equalizeSectorDensity` removed.
 3. **[2026-03-09] Every brigade stays in its sector — no reserve cap**
-   Do instead: Reserve cap REMOVED from both `reclassifyRearBrigades` and `rearrangeSectorsForCorps`. Corps needs full visibility of all manpower. Reserves sorted by proximity (closest first). `deduplicateBrigadesAcrossSectors` prevents cross-sector duplicates after Step 8.
+   Do instead: Reserve cap REMOVED. Corps needs full visibility of all manpower. `deduplicateBrigadesAcrossSectors` prevents cross-sector duplicates.
 4. **[2026-03-09] Mech/moto staging + priority for offensive ops**
-   Do instead: `getEquipmentOffensivePriority()` in `sector_offensive.ts` (mechanized=3, motorized=2, mountain=1, default=0). Staging pass in `bot_corps_directives.ts`: scans reserves for mech/moto (priority ≥ 2), issues `sector_reassignment_orders` to priority sector. Op participant lists sorted by equipment priority. Mech/moto are offensive tools, not line troops.
-4. **[2026-03-07] Sector intel replaces recon_intelligence (DELETED) — fog LIVE**
-   Do instead: Use `sector_intel.ts` / `sector_intel_constants.ts`. `derive-sector-intel` pipeline step. Confidence model, recon-by-force, bot target weighting. GUI fog-of-war is LIVE: `GameStateAdapter` derives `fogOfWar` from `sector_intel` + `corps_front_sectors`; `buildFogOfWarGeoJSON` renders it; `MapContainer` toggles via `fogVisible`. `ReconIntelligenceView` + `reconIntelligence` field fully removed. `recon_intelligence.ts` is DELETED — do not reference it.
-5. **[2026-03-07] Sector orders + OPSEC are sector-state, not brigade hacks**
-   Do instead: Stage defensive intent in `sector_stance_orders`, then translate it through `applySectorStanceOrders()` into ordinary `brigade_posture_orders`. Keep reserve brigades out of that translation unless design explicitly changes. Store OPSEC in `state.opsec_sectors`, halve passive intel buildup against those sectors, and auto-clear OPSEC when the sector's operation enters execution.
-6. **[2026-03-06] Proof lane + eligible-attacker boundary**
-   Do instead: Before wide calibration work, run `tests/scenario_vrs_operation_proof.test.ts` / `data/scenarios/apr1992_vrs_operation_proof_4w.json` to prove one VRS opening op can attack, battle, and advance. In combat-causality, treat `execution_without_eligible_attackers` as a separate root-cause boundary from `execution_without_attack_orders`.
-5. **[2026-03-06] Sector rearrangement + maneuver interpretation**
-   Do instead: Keep `rearrangeSectorsForCorps()` + `concentrateSectorsForOffensive()` in `generateCorpsDirectives()`. Execution-phase ops with `brigade_movement_orders` but zero attack orders are still maneuvering — only true inert turns count as `execution_without_attack_orders`. Planning ends once one full turn elapsed and participants are staged or at friendly approach positions.
-6. **[2026-03-05] `sector_attack` phase timing + no-progress budget**
-   Do instead: `src/sim/combat/sector_offensive.ts` owns phase advances — `corps_command.ts:advanceOperations()` must skip `sector_attack` ops. If execution produces no objective attempt, treat it as failure/stalemate in `updateSectorOffensiveResults()` so the op ends rather than hanging.
-7. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
-   Do instead: For April 1992 VRS opening ops, use explicit `participating_brigades`, `sector_id`, and `staging_osid`. If a brigade is in `active_operation.participating_brigades`, it routes through operation planning/execution/recovery first — `home_defense_active`, reserve logic, or generic corps targeting cannot retake control until `active_operation` is cleared.
-8. **[2026-03-07] Sector-only operation creation — no catalog ops, no rear dump**
-    Do instead: Operations launch ONLY from `generateCorpsDirectives` sector offensive path. Old `generateCorpsOperationOrders` (catalog-based, picks 5 from whole corps) is disabled. Rear-area brigade supplementing removed — only sector-assigned brigades participate. `MAX_PARTICIPATING_BRIGADES=12` cap in `sector_offensive.ts`. If sector lacks brigades, no launch; density balancing reinforces first.
+   Do instead: `getEquipmentOffensivePriority()` (mechanized=3, motorized=2, mountain=1). Staging pass scans reserves for mech/moto. Mech/moto are offensive tools, not line troops.
+5. **[2026-03-07] Sector intel replaces recon_intelligence (DELETED) — fog LIVE**
+   Do instead: `sector_intel.ts`. GUI fog-of-war LIVE. `recon_intelligence.ts` is DELETED — do not reference it.
+6. **[2026-03-07] Sector orders + OPSEC are sector-state, not brigade hacks**
+   Do instead: `sector_stance_orders` → `applySectorStanceOrders()` → `brigade_posture_orders`. OPSEC in `state.opsec_sectors`.
+7. **[2026-03-07] Sector-only operation creation — no catalog ops, no rear dump**
+   Do instead: Operations launch ONLY from `generateCorpsDirectives` sector offensive path. `MAX_PARTICIPATING_BRIGADES=12`. Only sector-assigned brigades participate.
+8. **[2026-03-06] Proof lane + eligible-attacker boundary**
+   Do instead: Run `tests/scenario_vrs_operation_proof.test.ts` before wide calibration work.
+9. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
+   Do instead: For April 1992 VRS opening ops, use explicit `participating_brigades`, `sector_id`, `staging_osid`.
 
 ## GUI / HoI Map
-1. **[2026-03-07] Settlement panel: 3 horizontal tabs, nation labels, current ethnic**
-   Do instead: Settlement (right) panel has Overview | Military | Orders & events (same style as sector/operations). “Fled from this settlement” uses nation labels (Bosniaks, Serbs, Croats, Others) via `ethnicityOrFactionToNationLabel`. Current ethnic structure shown when computable via `getCurrentEthnicForOsid`. Control tab removed; controller/status live in Overview. For future settlement-panel work, keep tabs and data sources per TACTICAL_MAP_SYSTEM §13.2 and [20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md](docs/40_reports/implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md). For any GUI work, read docs/40_reports/GUI_MASTER.md first and update it during the session (same discipline as CALIBRATION_MASTER for calibration).
-2. **[2026-03-07] Command briefing and summary routing live in `App`, not the toolbar**
-   Do instead: Mount the high-level command briefing as a thin overlay in `App.tsx`, fed by `GameStateAdapter.commandBriefing`, and route it into existing panels/modals plus focused summary sections (`ivp`, `convoys`, `support`, `opsec`, etc.). Keep `TopToolbar.tsx` to compact command signals plus utility controls.
-3. **[2026-03-07] Selection, army, corps, sector, formation, and operation detail share one rail**
-   Do instead: Keep these panels on the same App-owned rail semantics via `panelRail.ts`. Do not let `SelectionPanel` drift back to its own far-right overlay rules.
+1. **[2026-03-11] GameStateAdapter is the single chokepoint — check paths FIRST**
+   Do instead: Fields live under namespaced paths (`state.military.*`, `state.displacement.*`). Wrong path silently returns `undefined`. `departedByOsid` must accumulate `displaced+killed+fled_abroad`. See `memory/gui_debugging.md`.
+2. **[2026-03-07] Settlement panel: 3 horizontal tabs, nation labels, current ethnic**
+   Do instead: Overview | Military | Orders & events. `ethnicityOrFactionToNationLabel`. `getCurrentEthnicForOsid`. See TACTICAL_MAP_SYSTEM §13.2.
+3. **[2026-03-07] Command briefing routing lives in `App`, not the toolbar**
+   Do instead: Mount briefing as thin overlay in `App.tsx`, fed by `GameStateAdapter.commandBriefing`.
 4. **[2026-03-07] Detail panels drill right; App owns precedence**
-   Do instead: Keep map detail flow on a right-side panel rail: overview -> primary detail -> secondary detail sliding further right. Preserve parent context, animate horizontal drill-downs, and let `App.tsx` mount panels from one deterministic selector instead of per-component hide/show guesses.
+   Do instead: Right-side panel rail: overview → primary → secondary. `App.tsx` mounts from one deterministic selector.
 5. **[2026-03-08] Warroom init races: bind Electron bridge before long async loads**
-   Do instead: In `src/ui/warroom/warroom.ts`, assign `window.awwv` / `this.desktopBridge` before asset or map-loading awaits. UI buttons are wired early, so bridge-dependent actions like `startNewCampaign()` must have the preload bridge available immediately, not after later async init work.
-6. **[2026-03-08] Warroom region loading: missing shared file must not abort init**
-   Do instead: Treat region JSON loading as optional during startup. If `hq_clickable_regions.json` is intentionally removed in favor of `hq_<faction>_clickable_regions.json`, try multiple candidates and continue booting even if the shared file is absent.
+   Do instead: Assign `window.awwv` / `this.desktopBridge` before asset or map-loading awaits.
 6. **[2026-03-08] Warroom image target: archival photograph, not AI concept art**
-   Do instead: In warroom prompt packs, make documentary / archival photo realism the top invariant. Say "real photographed room, not AI art, not concept art, not 3D render" explicitly. Keep visible year out of baked art; only the runtime calendar shows the year. Re-measure overlay quads per approved room image.
-6. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
-   Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions, then render `LoadedGameState.fogOfWar`. Do not wire map layers directly to raw engine intel structures.
-7. **[2026-03-06] Briefing panels: prefer stacked accordions over tabs**
-   Do instead: Use `AccordionHeader` for unified vertical briefing views in `CorpsFrontPanel` and `OOBSidebar` to maintain situational awareness. Review for unused `collapsed` state when refactoring.
+   Do instead: "Real photographed room, not AI art." Keep visible year out of baked art.
+7. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
+   Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions.
 8. **[2026-03-07] Officer display: use OfficerProfile component, never raw stat numbers**
-   Do instead: All officer displays use `OfficerProfile` component (archetype, pips, origin badge, combat record). Never show raw 1-5 values or `Math.round(x * 100)`. Character utilities in `officerCharacter.ts`. See MAP_UI_MASTER §12, §13.4.
+   Do instead: All officer displays use `OfficerProfile` (archetype, pips, origin badge, combat record).
 9. **[2026-03-01] Map load: validate + defer parse + timeout**
-   Do instead: Validate save (schema, meta.turn, formations/political_controllers shape). `parseGameState` unwraps `{ state }`/`{ gameState }`, treats `phase_ii` as war, accepts `formations` as object or array. Parse in requestIdleCallback (~150ms). 25s load timeout in toolbar. Show loadError on failure/timeout.
-10. **[2026-03-11] GameStateAdapter is the single chokepoint — check paths FIRST**
-    Do instead: After Phase 3 domain segregation, fields live under namespaced paths (`state.military.*`, `state.displacement.*`, etc). Wrong path silently returns `undefined`, killing entire downstream chains (ethnic display, "fled" breakdown, map modes). Two confirmed instances: (a) `state.military.front_edges` not `state.front_edges`; (b) `state.displacement.displacement_event_log` not `state.displacement_event_log`. Also: `departedByOsid` must accumulate `displaced+killed+fled_abroad` (full removal), not just `displaced` — killed/fled people are gone too. MapLibre `line-offset` breaks `queryRenderedFeatures`. See `memory/gui_debugging.md` and GUI_MASTER §Debugging.
+   Do instead: Validate save schema. `parseGameState` unwraps `{ state }`/`{ gameState }`. Parse in requestIdleCallback. 25s timeout.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**
-   Do instead: Single codebase `src/ui/map/`. When `npm run dev:map` is running, Electron's get-map-server-url tries ports 3002–3005 and uses the first that serves index.html so the in-app map is the dev map. Otherwise desktop serves built bundle from dist/tactical-map. No second "player-facing" map.
-2. **[2026-03-03] Desktop map: prefer HTTP + cache clear + version badge**
-   Do instead: showTacticalMapScene() re-queries getMapServerUrl() so we never use awwv fallback if map server is ready. createWindow() calls session.clearCache() so iframe gets fresh bundle. TopToolbar shows "map HH:MM" when embedded (__MAP_BUILD_TIME__) to confirm which bundle loaded.
-3. **[2026-03-03] Desktop map: HTTP server + routes**
-   Do instead: Map and warroom load assets from `http://127.0.0.1:<port>/...`; MapLibre blob workers do not work under awwv://. Server started in `electron-main.cjs startMapServer()`. Serves `data/source` and `data/runs`; path-traversal guard and .json-only for runs.
-4. **[2026-03-03] Desktop map build output**
-   Do instead: Map Vite build must output to `dist/tactical-map` for Electron; outDir in src/ui/map/vite.config.ts.
-5. **[2026-03-03] Map interaction layers: bind when present**
-   Do instead: Bind interactions (control, ethnic, density, front-edges) when layers exist; MapContainer uses 400ms delay after loadedGameState before useMapInteractions so layers are in style.
-6. **[2026-02-21] Electron init: EPIPE guard + first-paint + preload**
-   Do instead: Add EPIPE guard on init logging. `warroom-scene-hidden` for menu, `warroom-desk-hidden` for maps. Use Preload script + `getDataBaseUrl()` for iframe/Electron data fetches.
-7. **[2026-02-22] IPC read-only queries**
-   Do instead: Movement/combat preview as read-only (`query-*`) IPC handlers. Compute from deserialized state without mutating.
-8. **[2026-02-21] Corps staging: accept all formation kinds**
-   Do instead: `stageCorpsFrontOrder` and `stageCorpsAttackAxisOrder` must accept `corps_asset` and `army_hq`.
+   Do instead: Single codebase `src/ui/map/`. Electron tries ports 3002-3005 for dev map; otherwise serves built bundle.
+2. **[2026-03-03] Desktop map: HTTP server + routes**
+   Do instead: Map/warroom load from `http://127.0.0.1:<port>/...`. MapLibre blob workers don't work under awwv://.
+3. **[2026-03-03] Desktop map build output**
+   Do instead: Map Vite build outputs to `dist/tactical-map` for Electron.
+4. **[2026-02-21] Electron init: EPIPE guard + first-paint + preload**
+   Do instead: EPIPE guard on init logging. Preload script + `getDataBaseUrl()` for iframe/Electron data fetches.
 
 ## Map & Geometry
 1. **[2026-03-03] Front line style: black-white stripe — no chevrons**
-   Do instead: Front style = `front-line-base` (dark) + `front-line-dash` (white dash). User confirmed keep as-is. Do NOT propose or implement HoI4 chevron/barbed-wire variants.
+   Do instead: `front-line-base` (dark) + `front-line-dash` (white). Do NOT implement HoI4 chevron variants.
 2. **[2026-02-21] FRONT definition**
-   Do instead: FRONT = where two hostile settlements meet (not "where brigade is present"). Assign units after segment length/name.
+   Do instead: FRONT = where two hostile settlements meet (not "where brigade is present").
 3. **[2026-02-23] Front ribbons: border-based only, consecutive runs**
-   Do instead: No centroid-to-centroid fallback ribbons — they create dark rectangular artifacts. Collect shared vertices as consecutive runs along A's ring; one ribbon per run to prevent zig-zag. Use `borderVertexKey` with 1e6 rounding. Dedupe and smooth border runs before storing.
-4. **[2026-02-21] Front edges: 2D/3D single source**
-   Do instead: Both renderers read persisted `front_edges` from `LoadedGameState`/`ViewerSave`. `front_pressure` drives thickness/opacity.
-5. **[2026-02-07] Voronoi: post-merge validation**
-   Do instead: After boolean ops, add post-merge coverage/overlap validation per mun1990.
-6. **[2026-02-22] Split-muni audit before rebuild**
-   Do instead: Run `npm run map:audit:split-muni-duplicates` before any map rebuild.
+   Do instead: No centroid-to-centroid fallback ribbons. `borderVertexKey` with 1e6 rounding. Dedupe and smooth.
 
 ## User Directives
 1. **[Standing] working-on.md — task continuity across compaction**
-   Do instead: When context is visibly high (many tool calls, long session), OR before any major task boundary, write `working-on.md` to project root with: (1) current task in one sentence, (2) files actively being modified, (3) next 3 concrete steps. This is Claude's own responsibility — not a hook. At session start: if `working-on.md` exists, read it first and delete it (MEMORY.md step 4).
+   Do instead: When context is visibly high, write `working-on.md` to project root: (1) current task, (2) files being modified, (3) next 3 steps. At session start: read and delete if exists.
 2. **[Standing] Life lessons enforcement system (3 mechanisms)**
-   Do instead: (A) **Session start**: read `docs/life_lessons.md`, flag lessons relevant to current task, STOP if about to violate one. (B) **Pre-commit**: `/awwv_pre_commit_check` includes life-lessons compliance — each active lesson checked as PASS/FLAG against the diff. (C) **Daily cron**: schedule `3 6 * * *` at session start — gathers 24h activity, detects violations in git diffs, synthesizes new lessons, promotes/demotes based on compliance, regenerates `/visual-explainer`. Session-only cron — must re-schedule each session.
-3. **[2026-03-08] Cross-check same-day reports against the latest ledger**
-   Do instead: Before reusing a report, audit, or handover summary from the same day, read the newest `docs/PROJECT_LEDGER.md` entries first. This repo can change materially within hours, and stale summaries can keep already-fixed issues on the priority list.
-2. **[Standing] Absolute paths**
+   Do instead: (A) Session start: read `docs/life_lessons.md`, flag relevant lessons. (B) Pre-commit: `/awwv_pre_commit_check` includes life-lessons compliance. (C) Daily cron: `3 6 * * *` — re-schedule each session.
+3. **[Standing] Absolute paths**
    Do instead: Always use absolute paths for tool calls.
-3. **[Standing] Update napkin during work**
+4. **[Standing] Update napkin during work**
    Do instead: Update napkin after significant changes; don't wait until session end.
-4. **[2026-02-28] Maximize safe parallel execution**
+5. **[2026-02-28] Maximize safe parallel execution**
    Do instead: Run independent tasks in parallel; sequence only on shared-file or dependency gates.
-5. **[2026-02-28] Canon docs get implementation notes on tech changes**
-   Do instead: When stack changes (e.g. Canvas→MapLibre), add implementation notes in planning/spec doc. Keep aesthetic authority doc referenced from canon.
 6. **[2026-02-25] Counterattacks are correct**
-   Do instead: Captured territory SHOULD be immediately reclaimable. Counterattacks are mechanically correct.
+   Do instead: Captured territory SHOULD be immediately reclaimable.
 7. **[2026-02-22] Replay disabled by default**
-   Do instead: Only generate replay with `--video` flag (saves 13.6GB).
+   Do instead: Only generate replay with `--video` flag.
 8. **[2026-02-28] Canonical map is React+MapLibre**
    Do instead: `npm run dev:map`. Legacy map_hoi.html / tactical_map.html are archived.
-9. **[2026-03-02] ZoC fully removed**
-   Do instead: ZoC deleted. Movement via `brigade_movement_orders.ts` / `apply-brigade-movement`. Defense via `local_front_defense.ts` density. AoR legacy also fully removed (R1–R5, 2026-03-04) — no dead AoR code remains.
 
 ## Calibration
-1. **[2026-03-08] n371 = 88.2% — findSectorForEnemyOsid fix + elite home distance curve (neutral)**
-   Do instead: Fixed `findSectorForEnemyOsid` searching `enemy_osids` instead of `friendly_osids` in `corps_front_sectors.ts` — correctness fix, no calibration change. Elite home distance curve (floor 0.85 vs 0.70 for `elite_loan_state` brigades) — neutral (only 3 elite brigades). Bucovaca painted control fix (HRHB→RS) changes comparison hash. Undefended floor REMOVED (caused 82.5% regression). ATH remains n304=93.8%.
-2. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
-   Do instead: Cells like banja_luka:dragocaj, kotor_varos x4, mrkonjic_grad:baljvine_2, skender_vakuf:donji_koricani start HRHB but painting=RS. Adding RS overrides for these IS effective (n238: KRAJINA 89.4%→97.8%). RULE: add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only, etc.) — adding 10+ HRHB cells across multiple regions at once (n237) caused POSAVINA_NE −9.9pp and SARAJEVO −9.3pp cascade.
-3. **[2026-03-08] Rear pocket consolidation: cluster-aware version RE-ADDED**
-   Do instead: `rear_pocket_consolidation.ts` re-added with cluster-aware BFS detection (1-3 connected same-controller enemy OSIDs, ALL external neighbors faction-controlled). Post-week-20 auto-flip for surrounded enemy clusters without defending brigades. Original `consolidation_flips.ts` remains deleted — the new version is structural replacement. Paramilitary sweep handles w0-20; rear pocket consolidation handles w20+.
-4. **[2026-03-07] Pre-planned operation target chains drive regional match rate (n218)**
-   Do instead: 84.2% plateau caused by Operation Drina missing djulici/drinjaca/krizevici/paljevici/donja_kamenica (Zvornik) and Operation Koridor missing Brcko corridor (brcko:brcko/donji_rahic/krepsic/skakava_donja). Fix is data change to `src/sim/combat/pre_planned_operations.ts` + scenario anchor — not engine code. Municipality-level anchors for pockets (bihac) give false failures; use OSID-level anchor `op:bihac:bihac_2` instead. Post-H clean run `n248` confirms the remaining notable misses are still `srebrenica` municipality and `op:brcko:brka_2`, which fits this same pre-planned-op/scenario-anchor bucket rather than a combat-loop bug.
-   Load-bearing overrides: turbe_2 is RS over-capture but enables Donji Vakuf consolidation (3 correct cells) — adding to avoided_osids causes net −3pp loss (n463). Kalesija seher_2/gojcin_2 overrides redirect VRS → kupres:kupres_2 fix (n466). Test each override block in isolation.
-5. **[2026-03-06] Pool surplus absorbs mobilization scale changes — use initial pool lever**
-   Do instead: If faction pool has large surplus at w40 (RS=27k, HRHB=25k), reducing FACTION_MOBILIZATION_SCALE barely moves committed brigade personnel (1-2% drop for 12% scale cut). Primary lever for initial strength is RS_JNA_INHERITANCE_BONUS and FACTION_POOL_SCALE. For RS long-run, large scale cuts (0.17→0.12) combined with JNA reduction are needed to bring into band. HRHB POOL_SCALE=1.60 restores ~40k target.
-6. **[2026-03-05] Combat calibration needs causality, not just territory**
-   Do instead: Before trusting control deltas, verify non-zero attack orders and non-zero battles in `weekly_report.jsonl`, then separate combat flips from consolidation, drift, and init overrides. Update `docs/40_reports/CALIBRATION_MASTER.md` during the session. Current clean engine-valid baseline is `n248`: combat restored with `invalid_operation_count=0`, but territorial anchor drift remains a separate calibration problem.
-7. **[2026-03-06] Live attribution replaces Phase I flip logs**
-   Do instead: For current scenario runs, use `control_change_attribution` in `weekly_report.jsonl` / `run_summary.json`. `control_events.jsonl` was a leftover Phase I artifact and is no longer the live harness contract.
-8. **[2026-03-06] Quiet weeks are warnings, not automatic causality failures**
-   Do instead: In weekly combat-causality, invalidate `zero_battles` only when attack orders existed but resolved to no battles, or when the whole run totals zero battles. Keep battleless weeks visible under `behavioral_health.battleless_weeks`, but do not fail a healthy run just because of an operational lull.
-9. **[2026-03-08] NEVER override initial OSIDs — not an option**
-   Do instead: Initial OSID control comes from census/referendum data and is NEVER manually overridden. If sim doesn't match painted, fix the engine, OOB, operations, or scenario parameters — not init_control. This applies to ALL calibration work. No exceptions.
-10. **[2026-03-04] Override direction law — CRITICAL, confusing them causes -0.7pp regression**
-    Do instead: RS `avoided_osids` = fix RS OVER-captures (painted=RBiH/HRHB, sim=RS — prevent VRS from attacking there). RS `osid_control_overrides` = fix RS UNDER-captures (painted=RS, sim=RBiH — force-start RS control). Adding under-captures to avoided_osids makes RS even less likely to capture them.
+1. **[2026-03-08] NEVER override initial OSIDs — not an option**
+   Do instead: Initial OSID control from census/referendum is NEVER manually overridden. Fix engine, OOB, operations, or scenario params instead.
+2. **[2026-03-04] Override direction law — CRITICAL**
+   Do instead: RS `avoided_osids` = fix RS OVER-captures. RS `osid_control_overrides` = fix RS UNDER-captures. Confusing them causes -0.7pp regression.
+3. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
+   Do instead: Add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only). Adding 10+ across regions causes cascade.
+4. **[2026-03-08] Rear pocket consolidation: cluster-aware version (post-w20)**
+   Do instead: `rear_pocket_consolidation.ts` with BFS detection. 1-3 connected same-controller enemy OSIDs, ALL external neighbors faction-controlled. Paramilitary sweep handles w0-20.
+5. **[2026-03-07] Pre-planned operation target chains drive regional match rate**
+   Do instead: Remaining misses are pre-planned-op/scenario-anchor bucket. Load-bearing overrides: turbe_2 enables Donji Vakuf consolidation; removing causes -3pp.
+6. **[2026-03-06] Pool surplus absorbs mobilization scale changes — use initial pool lever**
+   Do instead: Primary lever for initial strength is RS_JNA_INHERITANCE_BONUS and FACTION_POOL_SCALE, not mobilization scale.
+7. **[2026-03-05] Combat calibration needs causality, not just territory**
+   Do instead: Verify non-zero attacks and battles in `weekly_report.jsonl` before trusting control deltas.
+8. **[2026-03-06] Live attribution replaces Phase I flip logs**
+   Do instead: Use `control_change_attribution` in `weekly_report.jsonl` / `run_summary.json`.
+9. **[2026-03-06] Quiet weeks are warnings, not automatic causality failures**
+   Do instead: Invalidate `zero_battles` only when attack orders existed but resolved to no battles.
+10. **[2026-03-08] Timeline JSON is doctrine source of truth**
+    Do instead: `apr1992.json` `doctrine_phases` overrides `FACTION_DOCTRINE_PHASES` in code. Always edit timeline JSON first.
+
 ## Engine Runtime Patterns
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
-   Do instead: `processDisplacementTakeover` Section 0 uses `currentTurn === warStartTurn + 1` (not warStartTurn). `runTurn()` increments turn BEFORE phases — first war turn = warStartTurn+1. Fixed in `displacement_takeover.ts`.
+   Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 2. **[2026-03-08] Phase I/II terminology fully removed — Peace/War only**
-   Do instead: No `PhaseI`, `PhaseII`, `phase_i_`, `phase_ii_` identifiers anywhere. Original `consolidation_flips.ts` deleted; replaced by cluster-aware `rear_pocket_consolidation.ts` (post-w20 auto-flip of surrounded 1-3 OSID clusters without defenders). Pipeline steps use clean names. Report keys use clean names. Canon v0.6: Peace and War phases only.
+   Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
 3. **[2026-03-08] Deep merging test mocks with nested state**
-   Do instead: When mocking nested state structures (e.g. GameState partitioned into military/political/displacement), standard `...overrides` in mock state generators will overwrite nested structures entirely. You must manually deep merge nested properties or explicitly place the `...(overrides?.domain || {})` spread *inside* the corresponding nested object literal to ensure tests can accurately override specific sub-properties without losing hardcoded defaults.
-
-## Backlog
-0. **[2026-03-11] FIXED (n587): Corps AoR BFS bug — Phase 1b municipality guard**
-   Do instead: Phase 1b in `mapOsidsToCorps()` now skips location seeds where another corps has home seeds in the same municipality. `homeMunCorps` map built from Phase 1a seeds, checked before each Phase 1b claim. 1st Corps covers Sarajevo, 4th Corps stays in Herzegovina. 6/6 benchmarks, 85.8% area, 220 orders.
-1. **[2026-03-11] BUG: Ops planning modal arrows invisible/broken** — HoI-style tapered arrows in `OpsPlanningModal.tsx` don't render reliably. Root causes investigated: (a) `setData()` on dynamically-created MapLibre GeoJSON sources doesn't trigger re-render in modal context — workaround: remove+re-add source on each update (`replaceArrowSourceData`). (b) Polygon winding — `ensureCCW()` added to `arrowGeometry.ts` but arrows still don't appear consistently. (c) Faction color fallback fixed (detect from sector brigades). Partial progress: arrow body/outline occasionally visible but not a proper arrow shape. **Status:** Parked. Needs fresh investigation — likely a MapLibre fill-layer rendering issue specific to the modal's map instance. The arrow geometry math (`buildTaperedArrowBody`, `buildArrowheadTriangle`, `buildBezierCurve` in `arrowGeometry.ts`) is correct and works on the main map. Files: `OpsPlanningModal.tsx` (arrow builder + source management), `arrowGeometry.ts` (shared geometry). Control display fix (game-state vs scenario-start) IS working.
-2. **[2026-03-10] Donji Vakuf pocket remnant (5 OSIDs)** — 12/17 Krajina pocket OSIDs now RS; 5 Donji Vakuf OSIDs remain RBiH. vrs_2nd_krajina sectors facing these have few brigades (1-2). May need municipality priority tuning for 2KK or density equalization adjustment.
-3. ~~**[2026-03-10] RBiH 0 attacks**~~ — **FIXED n560.** RBiH balanced from w15. 20 attacks in n579.
-4. ~~**[2026-03-10] HRHB 0 attacks**~~ — **FIXED n579.** HRHB has 32 attacks (Op Jackal + sector ops). SE Herzegovina corps active.
-5. **[2026-03-10] Timeline JSON is doctrine source of truth** — `apr1992.json` `doctrine_phases` overrides `FACTION_DOCTRINE_PHASES` in code. Always edit timeline JSON first, keep code fallback in sync.
-6. **[2026-03-11] Drina region RS shortfall (76 vs 95)** — ~13 OSIDs are Srebrenica enclave (realistic defense). ~6 are Rogatica holdouts. May need painted target revision rather than sim changes. Drina Corps ops degrade from 4/10 → 1/6 → 0/6 as ARBiH entrench.
-7. ~~**[2026-03-11] FALSE ALARM: Zero equipment**~~ — Field is `composition`, not `equipment`. RS=535 tanks/1158 arty. RBiH=106/329. HRHB=33/115. Equipment IS working.
-8. **[2026-03-11] FIXED (n588): Morale-0 zombie brigades** — Graduated desertion: morale 0=5%/turn, morale 1-14=2%/turn. Zombies actively draining. See REAL_WAR_MASTER #17.
-9. **[2026-03-11] FIXED (n590): Catastrophic casualty ratios** — Two bugs: (1) outcome mod 0.3→0.7 (n589), (2) `personnelDefender` used primary-only, not sector total (n590). Worst outlier 50:1→22.7:1. Avg catastrophic 8.5:1. Aggregate 0.88:1. See REAL_WAR_MASTER #18.
-10. **[2026-03-11] P1: No probe/recon operations — corps attack blind** — All 220 orders are full attacks. No reconnaissance-in-force, no probing. Sector intel system exists but bot AI doesn't use it to gate offensives. Need probe ops as distinct op type feeding intel + gating full commitment. See REAL_WAR_MASTER #21. **SEPARATE BACKLOG ITEM from #19 (static ops pattern).**
-11. ~~**[2026-03-11] FALSE ALARM: Static 2-ops pattern**~~ — `.ops` is config `{enabled,level}`, not op count. Actual ops: w1=6, w10=7, w20=11, w30=12. Healthy.
-12. **[2026-03-11] P3: 30 RBiH at 3,000 cap** — Cookie-cutter brigades. MAX_BRIGADE_PERSONNEL=3000 hit by all large ARBiH brigades. Historical range 500-5,000+. See REAL_WAR_MASTER #20.
+   Do instead: Standard `...overrides` overwrites nested structures entirely. Manually deep merge or spread inside the nested object literal.

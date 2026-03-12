@@ -132,7 +132,7 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
-### 5. Full-strength brigades at zero morale (n473)
+### 5. Full-strength brigades at zero morale (n473) — PARTIALLY ADDRESSED n588/n618
 
 **What we found:** 22 formations at morale=0, 66 at morale < 30. Some with full personnel (2,500+ men). In the real war, a unit at zero morale would be dissolving — desertions, refusals, retreats.
 
@@ -142,7 +142,11 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 **Evidence:** VRS morale was high in 1992 (they were advancing), yet sim produces zero-morale VRS brigades.
 
-**Status:** Needs both a victory-based morale boost and consequences for sustained zero morale (desertion, dissolution).
+**Fixes applied:**
+- **n588:** Organic desertion mechanic — morale 0: 5%/turn personnel loss; morale 1-14: 2%/turn. Cascade into dissolution criteria.
+- **n618:** Battle outcome morale drift with habituation (`1/(1 + count × 0.03)`) and faction sensitivity (victory: RS 0.8×, RBiH 1.3×, HRHB 1.0×; defeat: RS 1.3×, RBiH 0.7×, HRHB 1.0×). Faction home morale floors (RBiH 30, HRHB 25, RS 20 — replaces flat 15). RBiH existential floor (25 at >50% co-ethnic).
+
+**Status:** ADDRESSED (n588 + n618). Zero-morale consequences via desertion. Victory/defeat morale feedback via drift path. Remaining: shock path (immediate morale in `attack_resolution_osid.ts`) not yet modified — deferred to Stage 2 if drift-only proves insufficient.
 
 ---
 
@@ -156,25 +160,32 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
-### 7. HVO near-total passivity — 0 attacks in 40 weeks (n560, was 11 in n473)
+### 7. HVO near-total passivity — 0 attacks in n560, 30 orders in n618 — PARTIALLY STRUCTURAL
 
-**What we found:** HRHB conducted 0 attacks in n560 (was 11 in n473 before ops-only doctrine). This is historically very wrong.
+**What we found:** HRHB conducted 0 attacks in n560 (was 11 in n473 before ops-only doctrine). By n618, HRHB produces 30 orders — improved but still below historical 40-60.
 
-**Historical context:** HVO was one of the most offensively active factions in 1992:
-- **Operation Jackal** (Jun 7-26): HVO/HV liberated Mostar (Jun 11-12), captured Stolac (Jun 13), seized 1,800 km² — the first major VRS defeat of the war
-- **Posavina** (Mar-May): HVO/HV defended Bosanski Brod, counterattacked to capture Modrica and Derventa
-- **Posavina defense** (Jun-Oct): Sustained combat against Operation Corridor (HVO losses: 918 KIA, 4,254 WIA)
+**Historical context:** HVO was offensively active in 1992, but constrained:
+- **Operation Jackal** (Jun 7-26): HVO/HV liberated Mostar (Jun 11-12), captured Stolac (Jun 13), seized 1,800 km² — the first major VRS defeat of the war. After Jackal, east Herzegovina settled into de facto truce (the Graz Agreement).
+- **Posavina** (Mar-Oct): HVO/HV defended Bosanski Brod, counterattacked Modrica/Derventa. Critical: included **Croatian Army (HV) reinforcements** that the sim does not model.
 - **Kupres-Livno axis**: HVO stopped JNA advance at Suica and Livno (Apr 10-13)
-- **Central Bosnia** (Oct+): HVO actively consolidating Lasva Valley, Vitez, Busovaca
-- Realistic HVO offensive actions: **40-60** in this period, not 0
+- **Central Bosnia**: HVO consolidating Lašva Valley, but always keeping one eye on the uneasy RBiH alliance. Could not commit fully to anti-RS operations because they needed to protect their own enclaves.
+- **Jajce**: Joint HVO-RBiH defense against VRS. Sim does not model joint operations.
 
-**Root causes (n560 investigation):**
-1. **Graz Accords blocks ALL HRHB→RS targets**: Graz Agreement implemented as blanket RS-HRHB truce. Exceptions exist for corridor municipalities (Derventa, Orašje, etc.) but HRHB corps in those areas are too small or geographically separated to launch operations. HRHB Herzegovina corps pairs cannot attack their RS neighbors at all.
-2. **No HVO↔RBiH conflict in 1992**: The sim correctly models the 1992 alliance. HVO-ARBiH war doesn't start until 1993 (outside 40w window).
-3. **HRHB doctrine set to `offensive` w0-26 (n560)** — stance is correct, but with zero valid targets (all blocked by Graz), operations can never launch.
-4. HRHB territory fragmentation prevents brigades reaching active fronts.
+**Root causes (revised n618 investigation):**
 
-**Status:** The Graz mechanic needs sector-specific exceptions — HVO fought VRS actively in Posavina, Jajce, and around Mostar throughout 1992 despite Graz. The current exception list (Derventa, Orašje, etc.) is too narrow. Herzegovina operations (Op Jackal) need to be modeled as explicit Graz exceptions or pre-planned operations that bypass the truce filter.
+The original diagnosis ("Graz too broad") was **wrong**. The Graz Accords correctly model the Herzegovina truce only. Non-Herzegovina corps (hvo_northwest_bosnia, hvo_central_bosnia) are NOT Graz-blocked. The real causes:
+
+1. **HVO Posavina corps is under-strength**: `hvo_northwest_bosnia` has only 1 brigade in the scenario. Cannot launch sector offensives with 1 brigade. Historically, HVO Posavina had Croatian Army (HV) reinforcements — multiple HV brigades crossed the Sava. The sim does not model cross-border HV deployment.
+2. **Central Bosnia fragmentation**: `hvo_central_bosnia` has 6 brigades but scattered across disconnected enclaves (Kiseljak, Vitez, Busovača, Žepče). These can't mass for operations. This is **historically accurate** — HVO central Bosnia was always fragmented.
+3. **Uneasy RBiH alliance**: HVO in central Bosnia couldn't commit forces against RS because they needed to protect their enclaves from potential RBiH encroachment. The HVO-RBiH relationship was cooperative but tense throughout 1992, with HVO always hedging. This strategic constraint is real, not a bug.
+4. **No joint operations**: Jajce defense was joint HVO-RBiH, but the sim has no mechanism for cross-faction cooperative operations. HVO alone couldn't hold Jajce.
+5. **Herzegovina correctly Graz-blocked**: `hvo_southeast_herzegovina` and `hvo_tomislavgrad` are bound by Graz corps-pair truce. East Herzegovina pair only activates AFTER Op Jackal. This is correct — the Graz Agreement was literally a Serb-Croat truce for Herzegovina.
+
+**OSID analysis confirms RS targets exist** in HVO municipalities (Derventa 4 RS, Bosanski Brod 3 RS, Jajce 3 RS) — the issue is force availability, not target availability.
+
+**n618 status (30 HRHB orders):** Op Jackal pre-planned operation produces most HVO attacks in the east Herzegovina window. Some central Bosnia activity. Posavina remains quiet (1 brigade can't attack).
+
+**Status:** MOSTLY STRUCTURAL — not a Graz bug. Remaining gap (30 vs 40-60 historical) explained by: (a) no HV cross-border reinforcement for Posavina, (b) no joint HVO-RBiH operations for Jajce, (c) central Bosnia fragmentation is real. These are design limitations, not engine bugs. Future improvements: HV reinforcement modeling, joint operations system. Low priority — current behavior is defensible.
 
 ---
 
@@ -200,15 +211,20 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
-### 10. No morale boost from battlefield victory (n473)
+### 10. No morale boost from battlefield victory (n473) — FIXED n618
 
 **What we found:** The morale drift system (`morale_drift.ts`) only adjusts morale based on population affinity, encirclement, and exhaustion — never from winning or losing battles. A formation that wins 10 consecutive victories gets zero morale boost. A formation that loses everything gets no additional penalty beyond combat casualties.
 
 **Real war context:** Victory is the primary morale driver in real armies. VRS morale was high in 1992 because they were winning everywhere. ARBiH morale plummeted initially because they were losing, then recovered as they organized and achieved small victories. The sim has no mechanism for this.
 
-**Impact:** Combined with population-affinity drift, this means formations in ethnically-mismatched areas lose morale relentlessly regardless of combat success. A VRS brigade that conquers and holds Bosniak-majority territory will have zero morale despite winning every battle.
+**Fix (n618):** Battle outcome morale drift added to `morale_drift.ts`. Drift path (`BATTLE_MORALE_DRIFT`: decisive +5, victory +3, costly +1, stalemate 0, repulsed -2, catastrophic -4) now fires each turn based on `recent_battle_outcome`. Three modifiers:
+1. **Battle habituation**: `1/(1 + battle_outcome_count × 0.03)` — diminishing returns. After 20 battles: 62%, after 40: 45%.
+2. **Faction victory sensitivity**: RS 0.8× (expected victories), RBiH 1.3× (each win proves the army), HRHB 1.0×.
+3. **Faction defeat sensitivity**: RS 1.3× (expects to win, defeats sting more), RBiH 0.7× (expects to lose, numbed), HRHB 1.0×.
 
-**Status:** Needs a victory/defeat morale modifier in combat resolution or morale drift.
+**Calibration (n618):** 6/6 benchmarks PASS, 86.3% area-weighted, zero regression from n617. RS w40 0.517.
+
+**Status:** FIXED (n618). Drift-only approach — shock path unchanged (Stage 2 if needed).
 
 ---
 
@@ -422,8 +438,8 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | **P1** | #18 50:1 catastrophic casualty ratios | Defender near-invulnerable in catastrophic outcomes | **NEW n587** |
 | ~~**P1**~~ | ~~#21 No probe/recon operations~~ | ~~Corps attack blind~~ | **FIXED n617** |
 | **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
-| **P1** | #7 HVO passivity (10 attacks total) | Graz Accords blocks most HRHB→RS targets; need wider exceptions | Active |
-| **P1** | #5/#10 Morale system | No victory boost + no zero-morale consequence | Active |
+| **P3** | #7 HVO passivity (30 orders n618) | Mostly structural: under-strength Posavina (no HV), central Bosnia fragmentation, no joint ops | **MOSTLY STRUCTURAL** |
+| ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
 | **P1** | Casualty volume (~58k vs 40-60k target) | Now in range — monitor | Monitoring |
 | ~~**P1**~~ | ~~#12 Suicide attacks~~ | ~~Dissolution absolute floor bypass~~ | **Partially fixed n556** |
 | ~~**P1**~~ | ~~H6 ARBiH too passive~~ | ~~24→41 attacks~~ | **Partially fixed n560/n587** |

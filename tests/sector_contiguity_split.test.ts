@@ -106,4 +106,65 @@ describe('splitNonContiguousSectors', () => {
         const result = splitNonContiguousSectors([goodSector, badSector], adj);
         expect(result).toHaveLength(3); // 1 good + 2 from split bad
     });
+
+    // --- Tests using osidA__osidB edge IDs (shared-OSID connectivity path) ---
+
+    it('keeps edges connected when they share a hostile OSID (osidA__osidB format)', () => {
+        const adj = buildLinearAdjacency();
+        // Two edges sharing hostile op:x:x — connected via shared hostile
+        const subSeg = makeSubSeg('ss0',
+            ['op:a:a__op:x:x', 'op:b:b__op:x:x'],
+            ['op:a:a', 'op:b:b'],
+            ['op:x:x']);
+        const sector = makeSector('sector:test:0', 'test_corps', [subSeg], ['brig1']);
+
+        const result = splitNonContiguousSectors([sector], adj);
+        expect(result).toHaveLength(1);
+    });
+
+    it('keeps edges connected when they share a friendly OSID (osidA__osidB format)', () => {
+        const adj = buildLinearAdjacency();
+        // Two edges sharing friendly op:a:a — connected via shared friendly
+        const subSeg = makeSubSeg('ss0',
+            ['op:a:a__op:x:x', 'op:a:a__op:y:y'],
+            ['op:a:a'],
+            ['op:x:x', 'op:y:y']);
+        const sector = makeSector('sector:test:0', 'test_corps', [subSeg], ['brig1']);
+
+        const result = splitNonContiguousSectors([sector], adj);
+        expect(result).toHaveLength(1);
+    });
+
+    it('splits edges with no shared OSIDs even if territory is connected (osidA__osidB format)', () => {
+        const adj = buildLinearAdjacency();
+        // Group 1: op:a:a facing op:x:x
+        // Group 2: op:e:e facing op:y:y
+        // No shared OSID between groups — should split even though
+        // A-B-C-D-E are all connected in the adjacency graph
+        const subSeg = makeSubSeg('ss0',
+            ['op:a:a__op:x:x', 'op:e:e__op:y:y'],
+            ['op:a:a', 'op:e:e'],
+            ['op:x:x', 'op:y:y']);
+        const sector = makeSector('sector:test:0', 'test_corps', [subSeg],
+            ['brig1', 'brig2']);
+
+        const result = splitNonContiguousSectors([sector], adj);
+        expect(result).toHaveLength(2);
+        // Brigades assigned to largest component
+        const totalBrigades = result.flatMap(s => s.assigned_brigade_ids).length;
+        expect(totalBrigades).toBe(2);
+    });
+
+    it('chains edges through shared OSIDs across a front line (osidA__osidB format)', () => {
+        const adj = buildLinearAdjacency();
+        // Chain: A↔X, A↔Y, B↔Y, B↔Z — all connected through shared OSIDs
+        const subSeg = makeSubSeg('ss0',
+            ['op:a:a__op:x:x', 'op:a:a__op:y:y', 'op:b:b__op:y:y', 'op:b:b__op:z:z'],
+            ['op:a:a', 'op:b:b'],
+            ['op:x:x', 'op:y:y', 'op:z:z']);
+        const sector = makeSector('sector:test:0', 'test_corps', [subSeg]);
+
+        const result = splitNonContiguousSectors([sector], adj);
+        expect(result).toHaveLength(1);
+    });
 });

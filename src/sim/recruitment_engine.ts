@@ -13,7 +13,7 @@ import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/ope
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
 import { factionHasPresenceInMun } from '../scenario/oob_early_war_entry.js';
 import type { BrigadeDecoration } from '../state/decoration_types.js';
-import { MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
+import { deriveMaxPersonnel, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
 import type {
     BrigadeComposition,
@@ -233,6 +233,8 @@ function buildRecruitedFormation(
         ...(brigade.garrison ? { garrison: true } : {}),
         ...(hqSid ? { hq_sid: hqSid } : {}),
         ...(effectiveLocationOsid != null ? { location_osid: effectiveLocationOsid } : {}),
+        equipment_class: equipClass,
+        max_personnel: brigade.max_personnel ?? deriveMaxPersonnel(equipClass, brigade.faction),
         home_osid: brigade.home_osid ?? locationOsid
     };
 }

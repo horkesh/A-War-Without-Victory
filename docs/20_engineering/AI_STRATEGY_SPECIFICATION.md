@@ -160,6 +160,31 @@ Operations pass through a preparation phase between launch and execution. The pr
 
 **Full spec:** Systems Manual §7.6.
 
+## Morale-Victory Feedback (2026-03-12, n618)
+
+Battle outcomes now feed into morale drift with diminishing returns and faction-differentiated sensitivity. This prevents the RS steamroller (unchecked victory momentum) and ARBiH death spiral (cascading defeats).
+
+**Drift path** (`morale_drift.ts`): `BATTLE_MORALE_DRIFT` fires per formation per turn based on `recent_battle_outcome`. Formula: `finalDrift = round(baseDrift × habituation × sensitivity)`.
+
+**Battle habituation**: `1/(1 + battle_outcome_count × 0.03)`. Tracked per formation via `FormationState.battle_outcome_count`. Counter never resets. After 20 battles: 62% effectiveness. After 40: 45%.
+
+**Faction sensitivity multipliers** (applied after habituation):
+- Victory (positive drift): RS 0.8× (expected), RBiH 1.3× (proves the army), HRHB 1.0×
+- Defeat (negative drift): RS 1.3× (expects to win), RBiH 0.7× (numbed to defeat), HRHB 1.0×
+
+**Faction home morale floors** (replaces flat `HOME_GROUND_MORALE_FLOOR=15`):
+- RBiH: 30 (homeland defense, nowhere to go)
+- HRHB: 25 (Herceg-Bosna identity)
+- RS: 20 (Krajina identity, but can retreat to Serbia)
+
+**RBiH existential floor**: Morale floor 25 for ARBiH formations at OSIDs with >50% Bosniak population, even without `home_defense_active`.
+
+**Shock path** (`attack_resolution_osid.ts:1124-1142`): Unchanged in n618. Stage 2 candidate if drift-only proves insufficient.
+
+**Constants**: `BATTLE_HABITUATION_RATE=0.03`, `FACTION_VICTORY_SENSITIVITY`, `FACTION_DEFEAT_SENSITIVITY`, `FACTION_HOME_MORALE_FLOOR`, `RBIH_EXISTENTIAL_FLOOR=25`, `EXISTENTIAL_AFFINITY_THRESHOLD=0.50`. All in `morale_drift.ts`.
+
+**Tests**: `tests/morale_victory_feedback.test.ts` — 19 tests covering habituation, faction sensitivity, floors, existential floor.
+
 ## Intel-Gated Operation Launch (2026-03-12)
 
 Before launching sector offensives, the corps AI gates on sector intel confidence. Low-confidence sectors receive probe operations instead of full attacks, preventing blind overcommitment.

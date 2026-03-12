@@ -733,7 +733,8 @@ function getHomeDistanceMultFromCache(state: GameState, formation: FormationStat
     if (!cache) return 1.0;
     const hops = cache[formation.id];
     if (hops === undefined) return 1.0;
-    const isElite = !!(formation as { elite_loan_state?: unknown }).elite_loan_state;
+    const isElite = !!formation.elite_loan_state
+        || formation.equipment_class === 'mechanized' || formation.equipment_class === 'motorized';
     return getHomeDistanceMult(hops, isElite);
 }
 

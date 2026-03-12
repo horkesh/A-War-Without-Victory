@@ -117,7 +117,7 @@ function buildFactionSectors(
     // reassign the minority edges to the majority corps. Prevents pockets and
     // border settlements from being split between distant corps.
     // Brigade-locked edges (where a brigade of that corps is stationed) are protected.
-    consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency, formations);
+    consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency, formations, osidToCorps);
     // Step 3c: Consolidate isolated corps pockets.
     // After 3b, a corps may still have disconnected edge components (isolated
     // pockets protected by brigade presence). Reassign isolated pocket edges to
@@ -943,12 +943,34 @@ function bfsNearestClaimedCorps(
  *
  * Mutates corpsEdges in place.
  */
+/** Is this edge protected from corps reassignment by brigade presence or BFS territory mapping? */
+function isEdgeProtectedFromReassignment(
+    eid: string,
+    corpsId: FormationId,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    faction: FactionId,
+    osidBrigadeCorps: Map<string, Set<FormationId>>,
+    osidToCorps: Map<Osid, FormationId>,
+): boolean {
+    const meta = edgeMeta.get(eid);
+    if (!meta) return false;
+    const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
+    // Brigade presence protects
+    const brigCorps = osidBrigadeCorps.get(friendlyOsid);
+    if (brigCorps && brigCorps.has(corpsId)) return true;
+    // BFS home-seed mapping is authoritative — consolidation shouldn't override it.
+    const mappedCorps = osidToCorps.get(friendlyOsid as Osid);
+    if (mappedCorps === corpsId) return true;
+    return false;
+}
+
 function consolidateCrossCorpsFronts(
     corpsEdges: Map<FormationId, string[]>,
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
-    formations: Record<FormationId, FormationState>
+    formations: Record<FormationId, FormationState>,
+    osidToCorps: Map<Osid, FormationId>
 ): void {
     // Collect all edge_ids across all corps for this faction
     const allEdgeIds: string[] = [];
@@ -1053,13 +1075,7 @@ function consolidateCrossCorpsFronts(
             if (!currentCorps || currentCorps === majorityCorps) continue;
             if (protectedCorps.has(currentCorps)) continue;
 
-            // Protect edges where a brigade of the current corps is on the friendly OSID
-            const meta = edgeMeta.get(eid);
-            if (meta) {
-                const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
-                const brigCorps = osidBrigadeCorps.get(friendlyOsid);
-                if (brigCorps && brigCorps.has(currentCorps)) continue; // Brigade presence protects
-            }
+            if (isEdgeProtectedFromReassignment(eid, currentCorps, edgeMeta, faction, osidBrigadeCorps, osidToCorps)) continue;
 
             // Remove from current corps
             const currentList = corpsEdges.get(currentCorps);
@@ -1115,13 +1131,7 @@ function consolidateCrossCorpsFronts(
         for (const [cid, eids] of corpMap) {
             if (cid === majCorps) continue;
             for (const eid of eids) {
-                // Check brigade presence protection
-                const meta = edgeMeta.get(eid);
-                if (meta) {
-                    const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
-                    const brigCorps = osidBrigadeCorps.get(friendlyOsid);
-                    if (brigCorps && brigCorps.has(cid)) continue;
-                }
+                if (isEdgeProtectedFromReassignment(eid, cid, edgeMeta, faction, osidBrigadeCorps, osidToCorps)) continue;
                 // Reassign
                 const fromList = corpsEdges.get(cid);
                 if (fromList) {
@@ -1366,7 +1376,7 @@ function buildMultiSectorsForCorps(
 
     // Step 1: Find connected components
     // Use full osidAdjacency (not sharedBoundaryAdj) for triple-junction connectivity.
-    // Step 4c (splitDisconnectedTerritorySectors) handles disconnected territory splits.
+    // Step 4b (splitNonContiguousSectors) handles disconnected front splits via shared-OSID connectivity.
     let subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta, adjacency);
     // Proposal B: merge undersized sub-segments up to MIN_SECTOR_EDGES.
     // Do NOT pass friendlyOsids — merging should use direct OSID adjacency only,
@@ -1426,16 +1436,8 @@ function buildMultiSectorsForCorps(
     // a junction OSID has edges on both sides of a midpoint split.
     deduplicateBrigadesAcrossSectors(finalSectors);
 
-    // Step 4b: Split non-contiguous sectors (friendly OSIDs must form connected components via OSID adjacency)
+    // Step 4b: Split non-contiguous sectors (edges must share OSIDs to be on same front)
     const contiguousSectors = splitNonContiguousSectors(finalSectors, adjacency);
-
-    // Step 4c: Split sectors whose friendly OSIDs span disconnected territory.
-    // A sector's friendly OSIDs must be reachable through faction-controlled territory.
-    // Without this, triple-junction connectivity can bridge sectors across enemy territory
-    // (e.g. Srebrenica ↔ Cerska through a narrow hostile gap).
-    const territoryConnectedSectors = splitDisconnectedTerritorySectors(
-        contiguousSectors, adjacency, state, faction, corpsId
-    );
 
     // Brigade assignment (territory_osids, assigned/reserve classification) is now
     // handled faction-wide by assignTerritoryVoronoi + classifyBrigadesByTerritory
@@ -1443,7 +1445,7 @@ function buildMultiSectorsForCorps(
 
     // Filter ghost/orphan sectors: require at least 1 front edge.
     // Sectors with territory but 0 edges are pockets that lost their front — prune them.
-    return territoryConnectedSectors.filter(s => s.length_edges > 0);
+    return contiguousSectors.filter(s => s.length_edges > 0);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1909,137 +1911,27 @@ function deduplicateBrigadesAcrossSectors(sectors: CorpsFrontSector[]): void {
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Step 4c: Split Disconnected Territory Sectors
+// Step 4b: Split Non-Contiguous Sectors (shared-OSID connectivity)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Split sectors whose friendly OSIDs span disconnected territory.
+ * Split sectors whose front edges span disconnected fronts.
  *
- * Triple-junction connectivity can bridge front edges that are on the same
- * continuous front line but separated by enemy territory (e.g. Srebrenica and
- * Cerska pockets share a narrow hostile gap). A sector should only contain
- * front edges whose friendly OSIDs can reach each other through faction-
- * controlled territory.
+ * Uses shared-OSID connectivity: two front edges are adjacent iff they share
+ * at least one OSID endpoint (friendly or hostile). At polygon triple junctions,
+ * consecutive front-line edges always share one of the three meeting polygons,
+ * so this captures true front-line continuity. Unlike triple-junction with full
+ * osidAdjacency, this prevents bridging disconnected fronts through near-miss
+ * distance_contact adjacencies (e.g. Srebrenica ↔ Cerska).
  *
  * For each sector:
- *   1. Collect all unique friendly OSIDs from sub_segments
- *   2. Find connected components of those OSIDs within faction-controlled territory
- *   3. If >1 component, split the sector by reassigning edges to component-based sectors
+ *   1. Build shared-OSID edge adjacency graph
+ *   2. Find connected components
+ *   3. If >1 component, split into separate sectors
  */
-function splitDisconnectedTerritorySectors(
-    sectors: CorpsFrontSector[],
-    adjacency: Map<Osid, Osid[]>,
-    state: GameState,
-    faction: FactionId,
-    corpsId: FormationId,
-): CorpsFrontSector[] {
-    // Build set of faction-controlled OSIDs for BFS
-    const factionOsids = new Set<string>();
-    const pc = state.political?.political_controllers;
-    if (!pc) return sectors;
-    for (const [osid, ctrl] of Object.entries(pc)) {
-        if (ctrl === faction) factionOsids.add(osid);
-    }
-
-    const result: CorpsFrontSector[] = [];
-
-    for (const sector of sectors) {
-        // Collect all unique friendly OSIDs from sub_segments
-        const friendlyOsids = new Set<string>();
-        for (const ss of sector.sub_segments) {
-            for (const o of ss.friendly_osids) friendlyOsids.add(o);
-        }
-
-        if (friendlyOsids.size <= 1) {
-            result.push(sector);
-            continue;
-        }
-
-        // Find connected components of friendly OSIDs through faction territory
-        const components = findConnectedComponents(
-            friendlyOsids,
-            (osid) => (adjacency.get(osid as Osid) ?? []).filter(n => factionOsids.has(n)),
-        );
-
-        if (components.length <= 1) {
-            result.push(sector);
-            continue;
-        }
-
-        // Split: assign edges to the component their friendly OSID belongs to
-        const osidToComp = new Map<string, number>();
-        for (let ci = 0; ci < components.length; ci++) {
-            for (const osid of components[ci]!) osidToComp.set(osid, ci);
-        }
-
-        // Parse each edge to identify its friendly OSID
-        const compEdges: string[][] = components.map(() => []);
-        for (const ss of sector.sub_segments) {
-            const ssF = new Set(ss.friendly_osids);
-            for (const eid of ss.edge_ids) {
-                // Find a friendly OSID from this edge
-                const sep = eid.indexOf('__');
-                if (sep < 0) continue;
-                const a = eid.slice(0, sep);
-                const b = eid.slice(sep + 2);
-                const friendlyOsid = ssF.has(a) ? a : ssF.has(b) ? b : null;
-                if (!friendlyOsid) continue;
-                const ci = osidToComp.get(friendlyOsid) ?? 0;
-                compEdges[ci]!.push(eid);
-            }
-        }
-
-        // Build new sectors for each component
-        for (let ci = 0; ci < components.length; ci++) {
-            const edgeIds = compEdges[ci]!;
-            if (edgeIds.length === 0) continue;
-            edgeIds.sort(strictCompare);
-
-            const compFriendly = components[ci]!;
-            const compFriendlySet = new Set(compFriendly);
-            const compEnemy = new Set<string>();
-            for (const eid of edgeIds) {
-                const sep = eid.indexOf('__');
-                if (sep < 0) continue;
-                const a = eid.slice(0, sep);
-                const b = eid.slice(sep + 2);
-                if (!compFriendlySet.has(a)) compEnemy.add(a);
-                if (!compFriendlySet.has(b)) compEnemy.add(b);
-            }
-
-            const subSeg: CorpsFrontSubSegment = {
-                sub_segment_id: `subseg:${corpsId}:terr${ci}`,
-                edge_ids: edgeIds,
-                friendly_osids: [...compFriendly].sort(strictCompare),
-                enemy_osids: [...compEnemy].sort(strictCompare),
-                length_edges: edgeIds.length,
-            };
-
-            result.push({
-                sector_id: `sector:${corpsId}:${result.length}`,
-                corps_id: sector.corps_id,
-                faction: sector.faction,
-                opposing_factions: [...sector.opposing_factions],
-                edge_ids: edgeIds,
-                sub_segments: [subSeg],
-                length_edges: edgeIds.length,
-                territory_osids: sector.territory_osids.filter(o => compFriendlySet.has(o)),
-                assigned_brigade_ids: ci === 0 ? [...sector.assigned_brigade_ids] : [],
-                reserve_brigade_ids: ci === 0 ? [...sector.reserve_brigade_ids] : [],
-                density: 0,
-                threat_ratio: 0,
-                defensive_power: 0,
-            });
-        }
-    }
-
-    return result;
-}
-
 export function splitNonContiguousSectors(
     sectors: CorpsFrontSector[],
     osidAdjacency: Map<Osid, Osid[]>,
-    sharedBoundaryAdj?: Map<Osid, Osid[]>,
 ): CorpsFrontSector[] {
     const result: CorpsFrontSector[] = [];
 
@@ -2126,10 +2018,14 @@ export function splitNonContiguousSectors(
             continue;
         }
 
-        // Build edge adjacency using triple-junction connectivity (front-line-following).
-        // Two front edges are adjacent iff they meet at a polygon triple junction:
-        //   Case A: same friendly OSID, hostile OSIDs adjacent
-        //   Case B: same hostile OSID, friendly OSIDs adjacent
+        // Build edge adjacency using shared-OSID connectivity.
+        // Two front edges are adjacent iff they share at least one OSID endpoint
+        // (same friendly or same hostile). At polygon triple junctions,
+        // consecutive front-line edges always share one of the three meeting
+        // polygons — so this captures true front-line continuity.
+        // Unlike triple-junction with full osidAdjacency, this prevents bridging
+        // disconnected fronts through near-miss distance_contact adjacencies
+        // (e.g. Srebrenica ↔ Cerska where no edge OSIDs are shared).
         const edgeNeighbors = new Map<string, Set<string>>();
         const linkEdges = (ea: string, eb: string) => {
             if (ea === eb) return;
@@ -2139,33 +2035,20 @@ export function splitNonContiguousSectors(
             edgeNeighbors.get(eb)!.add(ea);
         };
 
-        // Both Case A and Case B use sharedBoundaryAdj (excludes distance contacts)
-        // when available. Distance contacts are near-miss polygon adjacencies, not
-        // true shared boundaries — the front line doesn't pass through them.
-        const caseAdj = sharedBoundaryAdj ?? osidAdjacency;
-
-        // Case A: same friendly OSID, hostile OSIDs share a true boundary
+        // Edges sharing the same friendly OSID are adjacent (front turns at this settlement)
         for (const edges of friendlyToEdges.values()) {
             for (let i = 0; i < edges.length; i++) {
-                const hi = edgeHostile.get(edges[i]!);
-                if (!hi) continue;
                 for (let j = i + 1; j < edges.length; j++) {
-                    const hj = edgeHostile.get(edges[j]!);
-                    if (!hj) continue;
-                    if (isOsidAdjacent(hi, hj, caseAdj)) linkEdges(edges[i]!, edges[j]!);
+                    linkEdges(edges[i]!, edges[j]!);
                 }
             }
         }
 
-        // Case B: same hostile OSID, friendly OSIDs share a true boundary
+        // Edges sharing the same hostile OSID are adjacent (front faces the same enemy)
         for (const edges of hostileToEdges.values()) {
             for (let i = 0; i < edges.length; i++) {
-                const fi = edgeFriendly.get(edges[i]!);
-                if (!fi) continue;
                 for (let j = i + 1; j < edges.length; j++) {
-                    const fj = edgeFriendly.get(edges[j]!);
-                    if (!fj) continue;
-                    if (isOsidAdjacent(fi, fj, caseAdj)) linkEdges(edges[i]!, edges[j]!);
+                    linkEdges(edges[i]!, edges[j]!);
                 }
             }
         }

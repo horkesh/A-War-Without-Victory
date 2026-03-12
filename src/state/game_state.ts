@@ -481,6 +481,8 @@ export interface FormationState {
     zero_morale_turns?: number;
     /** How many battle outcomes this formation has processed through morale drift. Used for habituation — diminishing morale effect of combat over time. */
     battle_outcome_count?: number;
+    /** Per-brigade personnel cap. When set, overrides MAX_BRIGADE_PERSONNEL for reinforcement. Derived from OOB max_personnel field. Varies by formation type and faction — historical brigades ranged from 1500 (enclave) to 3500 (mechanized). */
+    max_personnel?: number;
     /** WIA trickleback: wounded pending return to this formation (only return when out of combat). */
     wounded_pending?: number;
     /** Counter-attack tracking: OSID this brigade retreated from and the turn it happened.
