@@ -19,8 +19,25 @@
  * Deterministic: sorted iteration by formation ID via strictCompare.
  */
 
-import type { FormationState, GameState } from '../../state/game_state.js';
+import type { FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+
+/**
+ * Remove a brigade from its corps' active operation (participating_brigades + axes).
+ * Must be called BEFORE setting status='inactive' so corps_id is still readable.
+ * Follows the pattern established in jna_phantom_brigades.ts.
+ */
+export function removeFromActiveOperation(state: GameState, brigadeId: FormationId, corpsId: string | undefined | null): void {
+    if (!corpsId) return;
+    const op = state.military.corps_command?.[corpsId]?.active_operation;
+    if (!op) return;
+    op.participating_brigades = op.participating_brigades.filter(id => id !== brigadeId);
+    if (Array.isArray(op.axes)) {
+        for (const axis of op.axes) {
+            axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== brigadeId);
+        }
+    }
+}
 
 export const DISSOLUTION_PERSONNEL_THRESHOLD = 400;
 export const DISSOLUTION_COHESION_THRESHOLD = 20;
@@ -121,6 +138,9 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
             morale: f.morale ?? 0,
             personnel_to_reserve: personnelToReserve,
         });
+
+        // Remove from active operation before marking inactive
+        removeFromActiveOperation(state, fid, f.corps_id);
 
         // Mark as destroyed
         f.status = 'inactive';

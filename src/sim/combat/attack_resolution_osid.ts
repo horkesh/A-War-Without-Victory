@@ -45,6 +45,7 @@ import {
     getCoEthnicShare,
     getEthnicDefenseBonus,
 } from './ethnic_defense.js';
+import { removeFromActiveOperation } from './brigade_dissolution.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -386,6 +387,7 @@ function forceRetreatWithPenalties(
         f.disrupted_turns = disruptedTurns;
         formation.cohesion = Math.max(0, (formation.cohesion ?? 60) - cohesionLoss);
         formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((formation.personnel ?? 0) * personnelRetain));
+        removeFromActiveOperation(state, formation.id, formation.corps_id);
         formation.status = 'inactive';
     }
 }

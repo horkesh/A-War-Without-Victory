@@ -251,7 +251,7 @@ export function evaluateOperationProgress(
             const updatedParticipants: FormationId[] = [];
             for (const brigId of op.participating_brigades) {
                 const brig = formations[brigId];
-                if (!brig) continue;
+                if (!brig || brig.status !== 'active') continue;
                 const startPersonnel = MAX_BRIGADE_PERSONNEL; // approximate
                 const currentPersonnel = brig.personnel ?? 0;
                 const lossRate = 1 - (currentPersonnel / startPersonnel);

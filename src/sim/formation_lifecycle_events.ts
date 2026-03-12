@@ -11,6 +11,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type { FactionId, GameState, FormationState } from '../state/game_state.js';
+import { removeFromActiveOperation } from './combat/brigade_dissolution.js';
 
 /** A lifecycle event definition from the data file. */
 export interface LifecycleEventDef {
@@ -97,6 +98,7 @@ export function processLifecycleEvents(
 
         switch (event.type) {
             case 'disband':
+                removeFromActiveOperation(state, formation.id, formation.corps_id);
                 formation.status = 'inactive';
                 formation.lifecycle_status = 'destroyed';
                 formation.personnel = 0;
@@ -107,6 +109,7 @@ export function processLifecycleEvents(
                     const target = state.military.formations[event.target_id];
                     // Transfer remaining personnel to target
                     target.personnel = (target.personnel ?? 0) + (formation.personnel ?? 0);
+                    removeFromActiveOperation(state, formation.id, formation.corps_id);
                     formation.status = 'inactive';
                     formation.lifecycle_status = 'merged';
                     formation.personnel = 0;
