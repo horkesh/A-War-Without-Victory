@@ -84,6 +84,9 @@ const MIN_BRIGADES_FOR_OFFENSIVE = 1;
 /** Maximum objectives per offensive. */
 const MAX_OBJECTIVES = 6;
 
+/** Personnel floor below which a brigade cannot attack (mirrors bot_brigade_eval_attack gate). */
+const COMBAT_INEFFECTIVE_PERSONNEL = 400;
+
 /** Maximum brigades participating in a single sector offensive. */
 const MAX_PARTICIPATING_BRIGADES = 20;
 
@@ -1013,6 +1016,29 @@ function updateLegacyFlatResults(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Eligible attacker pre-screen
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check whether at least one brigade in the candidate list can adopt attack posture.
+ * Hard gates only: active status, personnel >= 400, not disrupted.
+ */
+function hasEligibleAttackersForLaunch(
+    formations: GameState['military']['formations'],
+    brigadeIds: FormationId[],
+): boolean {
+    for (const id of brigadeIds) {
+        const f = formations?.[id];
+        if (!f) continue;
+        if (f.status !== 'active') continue;
+        if ((f.personnel ?? 0) < COMBAT_INEFFECTIVE_PERSONNEL) continue;
+        if ((f.disrupted_turns ?? 0) > 0) continue;
+        return true;
+    }
+    return false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Evaluate & launch sector offensives
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1045,6 +1071,10 @@ export function evaluateSectorOffensiveLaunch(
     // Must have enough brigades
     if (sectorBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
 
+    // Must have at least one brigade that can actually attack (active, not disrupted, personnel >= 400)
+    const formations = state.military.formations ?? {};
+    if (!hasEligibleAttackersForLaunch(formations, sectorBrigadeIds)) return null;
+
     // Must have at least one enemy target adjacent to sector
     if (sectorEnemyOsids.length < 1) return null;
 
@@ -1068,7 +1098,6 @@ export function evaluateSectorOffensiveLaunch(
 
     // Sort by equipment priority (mechanized/motorized first) before reserve slicing.
     // Best offensive assets become participants; weakest held back as reserves.
-    const formations = state.military.formations ?? {};
     const sortedByPriority = [...sectorBrigadeIds].sort((a, b) => {
         const fa = formations[a];
         const fb = formations[b];

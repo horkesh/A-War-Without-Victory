@@ -62,11 +62,11 @@
 1. **[2026-03-12] Calibration recovery needed (n626: 83.4% → target ≥85%)**: Sector restructuring (n620→n626) dropped area match ~3pp from n617 baseline. Sector geometry now correct — needs dedicated calibration pass (operation targets, doctrine timing, overrides) to recover.
 2. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers. Root cause: brigade posture gate blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation.
 3. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.
-4. **[2026-03-12] Per-brigade personnel caps IMPLEMENTED (c4379e2, n626)**: `deriveMaxPersonnel()` from equipment_class + faction. Mech 3500, moto 3000, mountain 2200-2800, light_inf 2200-2500, police/special 1500. REAL_WAR_MASTER #20 addressed.
+4. **[2026-03-12] REAL_WAR_MASTER #14: HVO Central Bosnia ghost front — DEFERRED**: 13 front edges, 0 brigades. 7 HVO brigades in disconnected enclaves. Intentionally deferred — HVO-RBiH war breaks out April 1993; these brigades activate then. Don't fix now.
 5. **[2026-03-10] Donji Vakuf pocket remnant (5 OSIDs)**: 12/17 Krajina pocket OSIDs now RS; 5 remain RBiH. May need municipality priority tuning for 2KK.
 6. **[2026-03-11] Drina region RS shortfall (76 vs 95)**: ~13 OSIDs are Srebrenica enclave (realistic defense). ~6 are Rogatica holdouts. May need painted target revision.
 7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked. Needs fresh investigation — likely MapLibre fill-layer issue specific to modal map instance.
-8. **[2026-03-12] REAL_WAR_MASTER #14: HVO Central Bosnia ghost front**: 13 front edges, 0 brigades. 7 HVO brigades unassigned in enclaves. BFS can't reach from pockets.
+8. **[2026-03-12] HVO named officer roster critically incomplete**: 20% coverage vs VRS 90%. Needed for Croat-Bosniak war phase.
 9. **[2026-03-12] REAL_WAR_MASTER #15: Intra-corps density imbalance**: 16× ratios within corps. 1KK has 6 idle brigades in Banja Luka while Posavina under-manned.
 10. **[2026-03-12] REAL_WAR_MASTER #3: Per-formation casualty ledger**: State-level ledger works. Formation-level `casualty_ledger` field absent — data exists but not surfaced per-brigade.
 

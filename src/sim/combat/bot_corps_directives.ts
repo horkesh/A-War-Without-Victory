@@ -974,6 +974,53 @@ export function generateCorpsDirectives(
                     }
                 }
             }
+
+            // ── Cross-component pass: pull from rear (non-front) sectors ──
+            // Deficit sectors still below 0.7× desired can draw idle brigades
+            // from rear sectors (length_edges === 0) that aren't on any front.
+            // These brigades column-march across multiple hops to reach the front.
+            const rearSectors = corpsSectors.filter(sec => sec.length_edges === 0);
+            if (rearSectors.length > 0) {
+                for (const deficit of deficitSectors) {
+                    const desired = sectorDesired.get(deficit.sector_id) ?? 0;
+                    if (desired <= 0) continue;
+                    const currentCount = deficit.assigned_brigade_ids.length +
+                        sectorReassignmentOrders.filter(o => o.to_sector_id === deficit.sector_id).length;
+                    if (currentCount >= desired * 0.7) continue;
+                    const stillNeeded = Math.ceil(desired * 0.7) - currentCount;
+                    if (stillNeeded <= 0) continue;
+                    let crossMoved = 0;
+                    const MAX_CROSS_COMPONENT = 2;
+                    for (const rear of rearSectors) {
+                        if (crossMoved >= Math.min(stillNeeded, MAX_CROSS_COMPONENT)) break;
+                        const allRearBids = [
+                            ...rear.assigned_brigade_ids,
+                            ...(rear.reserve_brigade_ids ?? []),
+                        ];
+                        const candidates = allRearBids
+                            .filter(bid => !alreadyMoved.has(bid))
+                            .map(bid => {
+                                const bf = state.military.formations?.[bid];
+                                const entrench = bf?.entrenchment_turns ?? 0;
+                                const personnel = bf?.personnel ?? 0;
+                                const status = bf?.status;
+                                return { bid, entrench, personnel, status };
+                            })
+                            .filter(c => c.entrench <= 3 && c.personnel >= 400 && c.status === 'active')
+                            .sort((a, b) => {
+                                if (a.entrench !== b.entrench) return a.entrench - b.entrench;
+                                if (a.personnel !== b.personnel) return b.personnel - a.personnel;
+                                return strictCompare(a.bid, b.bid);
+                            });
+                        for (const c of candidates) {
+                            if (crossMoved >= Math.min(stillNeeded, MAX_CROSS_COMPONENT)) break;
+                            sectorReassignmentOrders.push({ brigade_id: c.bid, to_sector_id: deficit.sector_id });
+                            alreadyMoved.add(c.bid);
+                            crossMoved++;
+                        }
+                    }
+                }
+            }
         }
 
         // ─── Mech/Moto Staging: move offensive assets to priority sector ───
