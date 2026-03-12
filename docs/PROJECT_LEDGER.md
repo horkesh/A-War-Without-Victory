@@ -7,6 +7,26 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-12] Paradox Team State of the Game Convene
+
+**Report:** `docs/40_reports/convenes/20260312_PARADOX_TEAM_STATE_OF_THE_GAME_CONVENE.md`
+
+**All-roles assessment.** Current state: n601 baseline, 86.5% area-weighted, 6/6 benchmarks, 489 vitest tests, Operation Preparation System fully implemented (engine + UI + 30 tests), architecture cleanup Phases 1-4 complete. Project health rated 7.5/10.
+
+**Key findings across roles:**
+- **Game Designer**: Design promises delivered. Three mechanics gaps remain: intel-gated ops, morale-victory feedback, Graz regional exceptions
+- **War-or-Game**: No show-stopping absurdities. Blind attacks (#1 realism gap), morale divorced from victories (#2), HVO passivity (#3)
+- **Technical Architect**: Architecture A-grade. Two test regressions to fix (corps sector function ref, operation objective focus)
+- **Scenario/Historian**: April 1992 deeply modeled. HVO officer roster critically incomplete (20% vs VRS 90%)
+- **UI/UX**: Tactical map 7.5/10 (34 components, fog of war live). Warroom 6.5/10 (functionally complete, art missing)
+- **QA/PM**: Process discipline strong. Razor-thin RS w40 benchmark (0.505 vs 0.503 floor)
+
+**Single agreed priority:** Intel-gated operations — wire sector intel confidence into operation launch decisions. After fixing two test regressions.
+
+**Documentation updated this session:** Systems Manual §7.6 (Operation Preparation), Rulebook §14.3/§15.3, PIPELINE_ENTRYPOINTS, AI_STRATEGY_SPECIFICATION, GUI_MASTER — all now document the Operation Preparation System.
+
+---
+
 ## [2026-03-12] Architecture & QA/Engineering Cleanup — Phases 1–4 Complete
 
 **Plan doc:** `docs/plans/2026-03-12-architecture-qa-engineering-cleanup.md`

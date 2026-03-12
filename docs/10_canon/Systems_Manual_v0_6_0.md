@@ -225,6 +225,40 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **Operation commander (2026-03-07):** Named operations receive a dedicated commander from the reserve officer pool. Selection priority: home_corps_id match (regional), then compatible_corps_ids, then any reserve officer — sorted by competence, aggressiveness, then ID. During execution phase, participating brigades use the operation commander's modifier instead of the corps commander's (chain-of-command isolation). Commander assigned on operation creation (pre-planned, triggered, bot-generated, queued injection); released to reserve on operation completion. State: `CorpsOperation.commander_officer_id`, `NamedOfficerState.assigned_operation`. Combat integration: `getThreeTierOfficerMod` checks operation commander before corps commander. Module: `officer_system.ts` (`selectOperationCommander`, `assignOperationCommander`, `releaseOperationCommander`). Report: [20260307_OPERATIONS_COMMANDER_FEATURE.md](../40_reports/implemented/20260307_OPERATIONS_COMMANDER_FEATURE.md).
 
+### 7.6 Operation Preparation System
+
+**Implementation-note (2026-03-12):** Operations now pass through a preparation phase between launch and execution, modeled as a state machine within `CorpsOperation`. The preparation system gates execution on readiness and is shaped by commander personality.
+
+**Preparation sub-phases:** `intel_gathering` → `force_staging` → `supply_check` → `assessment` → `ready`. Each sub-phase advances once per turn via `tickPreparation()`. The state machine loops through sub-phases, building readiness, until the commander issues an assessment (`launch`, `postpone`, or `abort`).
+
+**Commander personality formulas:** The assigned operation commander's competence and aggressiveness drive preparation behavior:
+- `getRequiredConfidence(comp, agg)` — cautious commanders (high comp, low agg) demand higher intel confidence before launch.
+- `getRequiredForceRatio(comp, agg)` — aggressive commanders accept lower force ratios.
+- `getPreparationMaxTurns(comp, agg)` — aggressive commanders prepare faster (fewer max turns); cautious commanders take longer.
+- `getGoThreshold(comp, agg)` — composite readiness score threshold for a "launch" recommendation.
+
+**Intel integration:** `getOperationIntelConfidence()` reads from `state.military.sector_intel` for enemy sectors adjacent to the operation's objectives. Confidence feeds into the commander's assessment.
+
+**Probe mechanic:** During preparation, the commander may order a reconnaissance-in-force probe. `selectProbeBrigades()` chooses probe candidates (equipment priority, personnel floor ≥400, not disrupted). Probes resolve via `resolveActiveProbe()`, granting `result_confidence_gain` to the operation's intel and applying `PROBE_EXHAUSTION_COST=5` to probe brigades. Counter-probe: defenders gain `COUNTER_PROBE_CONFIDENCE_GAIN=0.15` intel about the probing force. Unresolved probes block preparation advancement. `autoResolveProbe()` resolves stale probes (≥2 turns).
+
+**Anti-paralysis safety valve:** If `preparation_turns_elapsed ≥ preparation_max_turns` and the commander hasn't issued `launch`, the system forces a launch to prevent indefinite preparation stalls.
+
+**Postponement:** Commander may postpone (up to `MAX_POSTPONEMENTS=2`), resetting the assessment sub-phase while preserving accumulated intel and readiness.
+
+**State fields on CorpsOperation:** `preparation_sub_phase`, `preparation_turns_elapsed`, `preparation_max_turns`, `intel_confidence_at_assessment`, `supply_readiness_at_assessment`, `force_ratio_estimate`, `commander_assessment`, `postponement_count`, `active_probe: OperationActiveProbe`.
+
+**Types:** `PreparationSubPhase`, `CommanderAssessment`, `OperationActiveProbe` defined in `game_state.ts`.
+
+**Pipeline integration:** `tickPreparation()` is called from `advanceSectorOffensives()` (step `advance-sector-offensives`). Operations in preparation do not enter execution until `preparation_sub_phase === 'ready'`. `PreparationEvent` records are collected for turn reports.
+
+**Player UI:** Commander Selection Modal (`CommanderSelectionModal.tsx`) — officer roster with competence/aggressiveness display, regional fit scoring (home/compatible/out-of-region), preparation time estimates, availability checks (KIA, captured, enclave lock, already assigned). Operation Briefing Modal (`OperationBriefingModal.tsx`) — readiness gauges (intelligence, supply, force cohesion), force ratio estimate, commander assessment badge, action buttons (Launch, Order Probe, Postpone, Abort). Store contexts in `gameStore.ts`; adapter mapping in `GameStateAdapter.ts`.
+
+**Constants:** `PROBE_FORCE_COMMITMENT_FACTOR=0.4`, `COUNTER_PROBE_CONFIDENCE_GAIN=0.15`, `PROBE_EXHAUSTION_COST=5`, `MAX_POSTPONEMENTS=2`. All constants inline in `operation_preparation.ts`.
+
+**Determinism:** Sub-phase advancement is pure arithmetic. Probe selection uses sorted iteration. No randomness.
+
+**Module:** `src/sim/combat/operation_preparation.ts`. Tests: `tests/probe_preparation.test.ts` (30 tests).
+
 **Bot AI integration:** (a) Corps commander aggressiveness modifies directive aggression: `shift = (aggressiveness - 3) × 0.05`. High-competence (≥4) commanders accept riskier attacks (min_attack_outcome downgraded to costly_victory). Module: `bot_corps_ai.ts`. (b) ARBiH warlord friction (pre-w78): for each corps with 2+ attackers, the `(turn % brigadeCount)`-th attacking brigade forced to defend. Deterministic, no probability. Module: `bot_brigade_ai_osid.ts`. (c) VRS Mladić override: pre-planned `general_offensive` operations in execution phase use army commander modifier instead of corps commander. Module: `combat_math.ts` (`getThreeTierOfficerMod`).
 
 **War timeline integration:** Per-faction `officer_config` in `war_timeline` JSON: learning rates, brain drain parameters, pool regeneration intervals, Zagreb cadre timing, warlord friction end week, generic replacement competence. All constants read from timeline with hardcoded fallback.

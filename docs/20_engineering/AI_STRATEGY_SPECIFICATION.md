@@ -130,4 +130,33 @@ Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-o
 - `src/scenario/scenario_types.ts` (`bot_difficulty`)
 - `src/scenario/scenario_loader.ts`
 - `src/scenario/scenario_runner.ts`
+- `src/sim/combat/operation_preparation.ts` (preparation state machine, probe mechanics, commander personality formulas)
+
+## Operation Preparation System (2026-03-12)
+
+Operations pass through a preparation phase between launch and execution. The preparation system is a state machine within `CorpsOperation`, driven by the assigned commander's personality.
+
+**Sub-phases:** `intel_gathering` → `force_staging` → `supply_check` → `assessment` → `ready`. Each advances once per turn via `tickPreparation()` in `advance-sector-offensives`.
+
+**Commander personality formulas:**
+- `getRequiredConfidence(comp, agg)` — cautious (high comp, low agg) commanders demand higher intel.
+- `getRequiredForceRatio(comp, agg)` — aggressive commanders accept lower force ratios.
+- `getPreparationMaxTurns(comp, agg)` — aggressive commanders prepare faster.
+- `getGoThreshold(comp, agg)` — composite readiness threshold for "launch" assessment.
+
+**Probe mechanic:** During preparation, commanders may order reconnaissance-in-force probes. `selectProbeBrigades()` chooses candidates (equipment priority, ≥400 personnel, not disrupted). Resolution via `resolveActiveProbe()`: `PROBE_FORCE_COMMITMENT_FACTOR=0.4`, `PROBE_EXHAUSTION_COST=5`. Counter-probe: defenders gain `COUNTER_PROBE_CONFIDENCE_GAIN=0.15` intel about the probing force. Unresolved probes block sub-phase advancement; `autoResolveProbe()` resolves stale probes (≥2 turns).
+
+**Safety valves:** Anti-paralysis forced launch at `preparation_max_turns`. `MAX_POSTPONEMENTS=2` limits commander postponements.
+
+**State fields (CorpsOperation):** `preparation_sub_phase`, `preparation_turns_elapsed`, `preparation_max_turns`, `intel_confidence_at_assessment`, `supply_readiness_at_assessment`, `force_ratio_estimate`, `commander_assessment`, `postponement_count`, `active_probe: OperationActiveProbe`.
+
+**Types (game_state.ts):** `PreparationSubPhase`, `CommanderAssessment`, `OperationActiveProbe`.
+
+**Player UI:** `CommanderSelectionModal.tsx` (officer roster, regional fit, prep time estimates, availability), `OperationBriefingModal.tsx` (readiness gauges, force ratio, assessment badge, Launch/Probe/Postpone/Abort). Store: `gameStore.ts` (commanderSelectionContext, operationBriefingContext). Adapter: `GameStateAdapter.ts` maps preparation fields to `OperationView`.
+
+**Bot integration:** Bot-launched operations automatically receive a commander via `selectOperationCommander()`. Preparation proceeds without player input; bot operations auto-launch when ready.
+
+**Tests:** `tests/probe_preparation.test.ts` — 30 tests covering personality formulas, intel confidence, probe selection, state machine lifecycle, probe resolution, constants validation.
+
+**Full spec:** Systems Manual §7.6.
 

@@ -314,6 +314,10 @@ In practice, this means the player can:
 - set brigade postures and attack orders on the line
 - set sector-level defensive intent for corps sectors
 - shape corps operations with tempo, artillery preparation, launch discipline, and target focus
+- review operation readiness during preparation: intelligence confidence, supply status, force ratio estimates, and commander assessment (launch/postpone/abort recommendation)
+- select operation commanders from the reserve officer pool, with regional fit and personality affecting preparation tempo and launch thresholds
+- order reconnaissance-in-force probes during operation preparation to improve intelligence before committing to execution
+- make go/no-go decisions on operations: force early launch, accept commander recommendation, postpone (up to 2×), or abort
 - manually assign corps commanders from the reserve pool (subject to alignment and reassignment delays)
 - use information-warfare tools such as OPSEC, feints, and probes
 - make constrained supply-agency decisions such as enclave airdrops, convoy approvals, smuggling allocation, and municipality support
@@ -350,7 +354,7 @@ The player commands through posture and targeting, not direct unit movement. Com
 Each turn the player:
 1. **Reviews** reports: front status, exhaustion, supply pressure, corps operations, recent battles
 2. **Sets brigade postures**, **sector defensive intent**, and **issues attack orders**
-3. **Manages corps operations**: front assignments, operational groups, attack axes, tempo, launch timing, and deception tools such as feints or probes
+3. **Manages corps operations**: front assignments, operational groups, attack axes, tempo, launch timing, and deception tools such as feints or probes. Operations now include a **preparation phase** before execution — the player reviews readiness briefings, selects commanders, may order probes, and makes go/no-go decisions. Commander personality (competence × aggressiveness) shapes preparation tempo and launch recommendations
 4. **Allocates constrained supply agency**: enclave airdrops, convoy decisions, smuggling focus, municipality support, and related relief choices where available
 5. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics, and international visibility pressure consequences
 6. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity (implementation-note: enclave protection for Srebrenica/Goražde/Cazin is not yet implemented; see CALIBRATION_REPORT_BOT_AI_FEB_2026.md §7)
