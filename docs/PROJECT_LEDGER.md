@@ -7,6 +7,29 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-12] Morale-Victory Feedback — Stage 1 (n618)
+
+**Design doc:** `docs/plans/2026-03-12-morale-victory-feedback-design.md`
+**Plan doc:** `docs/plans/2026-03-12-morale-victory-feedback-plan.md`
+
+Stage 1 morale-victory feedback: anti-steamroller + anti-death-spiral. Drift path only (shock in attack_resolution_osid.ts untouched).
+
+**Four mechanics implemented:**
+1. **Battle habituation** — `battle_outcome_count` on FormationState. Drift scaled by `1/(1 + count × 0.03)`. After 20 battles: 62% effect. After 40: 45%. Never resets.
+2. **Faction sensitivity** — Victory: RS 0.8×, RBiH 1.3×, HRHB 1.0×. Defeat: RS 1.3×, RBiH 0.7×, HRHB 1.0×. Applied after habituation.
+3. **Faction home morale floors** — RBiH 30, HRHB 25, RS 20 (replaces flat 15). Historically grounded: Bosniaks had nowhere to go, Serbs could desert to Serbia.
+4. **RBiH existential floor** — Morale floor 25 for ARBiH in >50% Bosniak areas even without home_defense_active. "Cornered rat" mechanic.
+
+**Calibration n618:** 6/6 benchmarks PASS, 86.3% area-weighted (unchanged from n617), RS delta -24, 216 orders. Zero regression.
+
+**War-or-Game audit:** Design approved with two monitoring notes: (1) shock path still gives RS +3 per decisive — may need Stage 2 if RS morale pinned at 100 by w12; (2) habituation symmetric for wins/losses — may need separate rates if RS doesn't decay organically.
+
+**REAL_WAR_MASTER issues addressed:** #5 (morale-0 zombie brigades) and #10 (no victory morale boost) — pending full close after longer runs confirm behavior.
+
+**Tests:** 19 new (morale_victory_feedback.test.ts), 520 total vitest pass.
+
+---
+
 ## [2026-03-12] Paradox Team State of the Game Convene
 
 **Report:** `docs/40_reports/convenes/20260312_PARADOX_TEAM_STATE_OF_THE_GAME_CONVENE.md`
