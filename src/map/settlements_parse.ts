@@ -23,6 +23,10 @@ export interface EdgeRecord {
     b: string;
     one_way?: boolean;
     allow_self_loop?: boolean;
+    /** Contact type from the operational contact graph (shared_border, distance_contact, point_touch). */
+    type?: string;
+    /** Minimum distance between polygon boundaries (0 = shared boundary, >0 = distance contact). */
+    min_dist?: number;
 }
 
 export interface LoadedSettlementGraph {
@@ -108,6 +112,8 @@ export function parseEdges(json: unknown): EdgeRecord[] {
         const edge: EdgeRecord = { a: item.a, b: item.b };
         if (typeof item.one_way === 'boolean') edge.one_way = item.one_way;
         if (typeof item.allow_self_loop === 'boolean') edge.allow_self_loop = item.allow_self_loop;
+        if (typeof item.type === 'string') edge.type = item.type;
+        if (typeof item.min_dist === 'number') edge.min_dist = item.min_dist;
         return edge;
     });
 }

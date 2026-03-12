@@ -1365,11 +1365,13 @@ function buildMultiSectorsForCorps(
     }
 
     // Step 1: Find connected components
-    let subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta, adjacency, sharedBoundaryAdj);
+    // Use full osidAdjacency (not sharedBoundaryAdj) for triple-junction connectivity.
+    // Step 4c (splitDisconnectedTerritorySectors) handles disconnected territory splits.
+    let subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta, adjacency);
     // Proposal B: merge undersized sub-segments up to MIN_SECTOR_EDGES.
     // Do NOT pass friendlyOsids — merging should use direct OSID adjacency only,
     // not unbounded BFS through rear territory (which merges distant segments).
-    subSegments = mergeUndersizedSubSegments(corpsId, subSegments, adjacency, sharedBoundaryAdj);
+    subSegments = mergeUndersizedSubSegments(corpsId, subSegments, adjacency);
     if (subSegments.length === 0) return [];
 
     // Step 2 (Phase 1D): Split oversized sub-segments
@@ -1425,7 +1427,15 @@ function buildMultiSectorsForCorps(
     deduplicateBrigadesAcrossSectors(finalSectors);
 
     // Step 4b: Split non-contiguous sectors (friendly OSIDs must form connected components via OSID adjacency)
-    const contiguousSectors = splitNonContiguousSectors(finalSectors, adjacency, sharedBoundaryAdj);
+    const contiguousSectors = splitNonContiguousSectors(finalSectors, adjacency);
+
+    // Step 4c: Split sectors whose friendly OSIDs span disconnected territory.
+    // A sector's friendly OSIDs must be reachable through faction-controlled territory.
+    // Without this, triple-junction connectivity can bridge sectors across enemy territory
+    // (e.g. Srebrenica ↔ Cerska through a narrow hostile gap).
+    const territoryConnectedSectors = splitDisconnectedTerritorySectors(
+        contiguousSectors, adjacency, state, faction, corpsId
+    );
 
     // Brigade assignment (territory_osids, assigned/reserve classification) is now
     // handled faction-wide by assignTerritoryVoronoi + classifyBrigadesByTerritory
@@ -1433,7 +1443,7 @@ function buildMultiSectorsForCorps(
 
     // Filter ghost/orphan sectors: require at least 1 front edge.
     // Sectors with territory but 0 edges are pockets that lost their front — prune them.
-    return contiguousSectors.filter(s => s.length_edges > 0);
+    return territoryConnectedSectors.filter(s => s.length_edges > 0);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1897,6 +1907,135 @@ function deduplicateBrigadesAcrossSectors(sectors: CorpsFrontSector[]): void {
  *
  * Deterministic: sorted iteration via strictCompare.
  */
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Step 4c: Split Disconnected Territory Sectors
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Split sectors whose friendly OSIDs span disconnected territory.
+ *
+ * Triple-junction connectivity can bridge front edges that are on the same
+ * continuous front line but separated by enemy territory (e.g. Srebrenica and
+ * Cerska pockets share a narrow hostile gap). A sector should only contain
+ * front edges whose friendly OSIDs can reach each other through faction-
+ * controlled territory.
+ *
+ * For each sector:
+ *   1. Collect all unique friendly OSIDs from sub_segments
+ *   2. Find connected components of those OSIDs within faction-controlled territory
+ *   3. If >1 component, split the sector by reassigning edges to component-based sectors
+ */
+function splitDisconnectedTerritorySectors(
+    sectors: CorpsFrontSector[],
+    adjacency: Map<Osid, Osid[]>,
+    state: GameState,
+    faction: FactionId,
+    corpsId: FormationId,
+): CorpsFrontSector[] {
+    // Build set of faction-controlled OSIDs for BFS
+    const factionOsids = new Set<string>();
+    const pc = state.political?.political_controllers;
+    if (!pc) return sectors;
+    for (const [osid, ctrl] of Object.entries(pc)) {
+        if (ctrl === faction) factionOsids.add(osid);
+    }
+
+    const result: CorpsFrontSector[] = [];
+
+    for (const sector of sectors) {
+        // Collect all unique friendly OSIDs from sub_segments
+        const friendlyOsids = new Set<string>();
+        for (const ss of sector.sub_segments) {
+            for (const o of ss.friendly_osids) friendlyOsids.add(o);
+        }
+
+        if (friendlyOsids.size <= 1) {
+            result.push(sector);
+            continue;
+        }
+
+        // Find connected components of friendly OSIDs through faction territory
+        const components = findConnectedComponents(
+            friendlyOsids,
+            (osid) => (adjacency.get(osid as Osid) ?? []).filter(n => factionOsids.has(n)),
+        );
+
+        if (components.length <= 1) {
+            result.push(sector);
+            continue;
+        }
+
+        // Split: assign edges to the component their friendly OSID belongs to
+        const osidToComp = new Map<string, number>();
+        for (let ci = 0; ci < components.length; ci++) {
+            for (const osid of components[ci]!) osidToComp.set(osid, ci);
+        }
+
+        // Parse each edge to identify its friendly OSID
+        const compEdges: string[][] = components.map(() => []);
+        for (const ss of sector.sub_segments) {
+            const ssF = new Set(ss.friendly_osids);
+            for (const eid of ss.edge_ids) {
+                // Find a friendly OSID from this edge
+                const sep = eid.indexOf('__');
+                if (sep < 0) continue;
+                const a = eid.slice(0, sep);
+                const b = eid.slice(sep + 2);
+                const friendlyOsid = ssF.has(a) ? a : ssF.has(b) ? b : null;
+                if (!friendlyOsid) continue;
+                const ci = osidToComp.get(friendlyOsid) ?? 0;
+                compEdges[ci]!.push(eid);
+            }
+        }
+
+        // Build new sectors for each component
+        for (let ci = 0; ci < components.length; ci++) {
+            const edgeIds = compEdges[ci]!;
+            if (edgeIds.length === 0) continue;
+            edgeIds.sort(strictCompare);
+
+            const compFriendly = components[ci]!;
+            const compFriendlySet = new Set(compFriendly);
+            const compEnemy = new Set<string>();
+            for (const eid of edgeIds) {
+                const sep = eid.indexOf('__');
+                if (sep < 0) continue;
+                const a = eid.slice(0, sep);
+                const b = eid.slice(sep + 2);
+                if (!compFriendlySet.has(a)) compEnemy.add(a);
+                if (!compFriendlySet.has(b)) compEnemy.add(b);
+            }
+
+            const subSeg: CorpsFrontSubSegment = {
+                sub_segment_id: `subseg:${corpsId}:terr${ci}`,
+                edge_ids: edgeIds,
+                friendly_osids: [...compFriendly].sort(strictCompare),
+                enemy_osids: [...compEnemy].sort(strictCompare),
+                length_edges: edgeIds.length,
+            };
+
+            result.push({
+                sector_id: `sector:${corpsId}:${result.length}`,
+                corps_id: sector.corps_id,
+                faction: sector.faction,
+                opposing_factions: [...sector.opposing_factions],
+                edge_ids: edgeIds,
+                sub_segments: [subSeg],
+                length_edges: edgeIds.length,
+                territory_osids: sector.territory_osids.filter(o => compFriendlySet.has(o)),
+                assigned_brigade_ids: ci === 0 ? [...sector.assigned_brigade_ids] : [],
+                reserve_brigade_ids: ci === 0 ? [...sector.reserve_brigade_ids] : [],
+                density: 0,
+                threat_ratio: 0,
+                defensive_power: 0,
+            });
+        }
+    }
+
+    return result;
+}
+
 export function splitNonContiguousSectors(
     sectors: CorpsFrontSector[],
     osidAdjacency: Map<Osid, Osid[]>,
