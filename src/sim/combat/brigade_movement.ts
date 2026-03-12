@@ -10,7 +10,8 @@ import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terr
 import type { FactionId, FormationId, GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { clamp } from '../../utils/math.js';
-import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
+import { buildAdjacencyFromEdges } from './war_adjacency.js';
 
 /** Settlements per turn (infantry march rate). Study: 3 settlements per turn. */
 export const MOVEMENT_RATE = 3;
@@ -91,7 +92,7 @@ export function shortestPathThroughFriendly(
         const sorted = [...neighbors].sort(strictCompare);
         for (const n of sorted) {
             if (visited.has(n)) continue;
-            if (pc[n] !== factionId) continue;
+            if (!isFriendlyFaction(pc[n], factionId, state)) continue;
             visited.add(n);
             parent.set(n, current);
             if (goalSet.has(n)) {
@@ -198,7 +199,7 @@ export function processBrigadeMovement(
         const factionId = formation.faction as FactionId;
         const order = movementOrders[formationId];
         const dest = order?.destination_sids;
-        if (dest?.length && dest.every(sid => pc[sid] === factionId)) {
+        if (dest?.length && dest.every(sid => isFriendlyFaction(pc[sid], factionId, state))) {
             const previousStance = movementState[formationId]?.stance ?? 'combat';
             movementState[formationId] = {
                 status: 'packing',

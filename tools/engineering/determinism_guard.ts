@@ -60,7 +60,7 @@ export function ensureStableSort<T>(arr: T[], keyFn: (item: T) => string | numbe
         const keyA = keyFn(a);
         const keyB = keyFn(b);
         if (typeof keyA === 'string' && typeof keyB === 'string') {
-            return keyA.localeCompare(keyB);
+            return keyA < keyB ? -1 : keyA > keyB ? 1 : 0;
         }
         return (keyA as number) - (keyB as number);
     });
@@ -70,7 +70,7 @@ export function ensureStableSort<T>(arr: T[], keyFn: (item: T) => string | numbe
  * Ensure object keys are sorted (for canonical JSON)
  */
 export function ensureSortedKeys<T extends Record<string, any>>(obj: T): T {
-    const sorted = Object.keys(obj).sort();
+    const sorted = Object.keys(obj).sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
     const result = {} as T;
     for (const key of sorted) {
         result[key as keyof T] = obj[key];

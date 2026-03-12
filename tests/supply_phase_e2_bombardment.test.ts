@@ -31,26 +31,28 @@ function makeStateWithMunitions(reserve: number, enabled = true): GameState {
 }
 
 describe('Phase E2 — getBombardmentCasualtyMult with heavy munitions', () => {
-    it('adequate munitions (>=50): full bombardment multiplier (1.8)', () => {
+    // Constants: MAX_BOMBARDMENT_CAS_MULT=2.2, BOMBARDMENT_DIVISOR=60
+    // makeHeavyAttacker: artEff=80, totalFirepower=80, fraction=min(1,80/60)=1.0 (saturated)
+    it('adequate munitions (>=50): full bombardment multiplier (2.2)', () => {
         const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(60));
-        expect(mult).toBeCloseTo(1.8, 1);
+        expect(mult).toBeCloseTo(2.2, 1);
     });
 
     it('strained munitions (20-49): bonus portion at 75%', () => {
         const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(30));
-        // 1.0 + (1.8 - 1.0) * 0.75 = 1.6
-        expect(mult).toBeCloseTo(1.6, 1);
+        // 1.0 + (2.2 - 1.0) * 1.0 * 0.75 = 1.9
+        expect(mult).toBeCloseTo(1.9, 1);
     });
 
     it('critical munitions (<20): bonus portion at 50%', () => {
         const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(10));
-        // 1.0 + (1.8 - 1.0) * 0.5 = 1.4
-        expect(mult).toBeCloseTo(1.4, 1);
+        // 1.0 + (2.2 - 1.0) * 1.0 * 0.5 = 1.6
+        expect(mult).toBeCloseTo(1.6, 1);
     });
 
     it('supply disabled: bombardment unaffected by munitions level', () => {
         const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(0, false));
-        expect(mult).toBeCloseTo(1.8, 1);
+        expect(mult).toBeCloseTo(2.2, 1);
     });
 
     it('no heavy weapons: base multiplier 1.0 regardless of munitions', () => {

@@ -213,7 +213,8 @@ export { RS_EARLY_WAR_END_WEEK } from './bot_constants.js';
 
 export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
     RS: [
-        // n578: Three-phase RS doctrine — blitz (Apr-Jun), sustained (Jul-Oct), consolidation (Nov+)
+        // Three-phase RS doctrine: blitz (Apr-Jun), sustained (Jul-Oct), consolidation (Nov+).
+        // Validated against both broken (n579) and correct (n583) force assignment models.
         { start_week: 0, end_week: 12, default_corps_stance: 'offensive', max_attack_share_override: 0.35, aggression_modifier: 0.15 },
         { start_week: 12, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.25, aggression_modifier: 0.08 },
         { start_week: RS_EARLY_WAR_END_WEEK, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.20, aggression_modifier: 0.05 },

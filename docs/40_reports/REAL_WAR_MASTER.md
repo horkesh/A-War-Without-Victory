@@ -298,30 +298,134 @@ The sim previously set all 5 ARBiH corps to `general_defensive` / `defensive` do
 
 ---
 
+### ~~16. Zero equipment on every brigade at w40~~ — FALSE ALARM (n587)
+
+**What we thought:** Every brigade has `equipment: {}`. VRS firepower missing.
+
+**What actually happened:** Equipment is stored in `composition` field (not `equipment`). RS has **535 tanks**, **1,158 artillery**. RBiH has 106 tanks, 329 artillery. HRHB has 33 tanks, 115 artillery. The insanity check script was reading the wrong field. Equipment is fully populated with condition tracking (operational/degraded/non_operational).
+
+**Lesson:** FormationState uses `composition` for equipment counts, `equipment_state` for aggregated heavy equipment tracking. There is no `equipment` field.
+
+---
+
+### 17. Morale-0 zombie brigades survive dissolution — criteria gap (n587)
+
+**What we found:** 4 brigades active at morale 0-5 with 476-1,030 personnel and cohesion 33-38:
+- `hvo_posusje_brigade`: 1,030 pers, morale=**0**, cohesion=38
+- `rs_2nd_ozren_light_infantry`: 579 pers, morale=**0**, cohesion=35
+- `rs_1st_novigrad_infantry`: 476 pers, morale=**5**, cohesion=33
+- `rs_4th_ozren_light_infantry`: 786 pers, morale=**5**, cohesion=37
+
+A brigade at morale 0 is not a military unit. Soldiers are walking home, officers hiding, command authority collapsed. The dissolution criteria (2-of-3: personnel<400, cohesion<=20, morale<=15) don't catch these because personnel is above 400 and cohesion above 20. Only 1-of-3 criteria met.
+
+**Historical context:** In the Bosnian War, units that lost morale collapsed rapidly — mass desertions at Kupres (HVO), the Derventa corridor collapse (HVO), various ARBiH units in eastern Bosnia. Zero morale = unit ceases to exist as a fighting force regardless of headcount.
+
+**Root cause:** The 2-of-3 design assumes all three criteria are roughly correlated. In practice, morale can collapse while personnel and cohesion remain. Need either: (a) morale<=5 as absolute dissolution trigger, or (b) severe consequence for zero morale (mass desertion draining personnel rapidly until dissolution criteria are met organically).
+
+**Fix (n588):** Extended desertion mechanic in `morale_drift.ts`. Morale 0: 5%/turn personnel loss (immediate, no 3-turn delay). Morale 1-14: 2%/turn (new range). Organic cascade: morale drops → desertion → personnel falls below 400 → 2-of-3 dissolution criteria met → dissolves. n588 confirms: posusje 1,030→805, 2nd ozren 579→429, 4th ozren 786→709. Units actively draining, will dissolve within ~10 turns.
+
+**Status:** FIXED n588 — organic desertion mechanic. Monitoring for full dissolution in longer runs.
+
+---
+
+### 18. Catastrophic attacks with 43-50:1 casualty ratios (n587→n590 FIXED)
+
+**What we found:** The 5 most lopsided battles show 43:1 to 50:1 attacker:defender casualty ratios:
+- w23: HRHB → RS at Vranjevici (Mostar): 649 dead vs 13 dead (50:1)
+- w36: RBiH → RS at Radava (Sarajevo): 528 dead vs 11 dead (48:1)
+- w32: RBiH → RS at Ripac (Bihac): 514 dead vs 11 dead (47:1)
+
+These aren't battles — they're massacres. The defender suffers ~11-17 casualties regardless of the fight's scale. In real war, even catastrophic attacks kill *some* defenders. Gallipoli had roughly 3:1 attacker:defender. Verdun was ~1:1 despite massive German advantages. 50:1 requires the defender to be essentially invulnerable.
+
+**Root causes (two bugs):**
+
+1. **Outcome modifier too low (n589):** `OUTCOME_DEFENDER_MOD['catastrophic'] = 0.3` — catastrophic defenders took only 30% of base casualties. Combined with power-ratio floor 0.6: `0.3 × 0.6 = 0.18×` (18% of base). Fixed: raised to 0.7.
+
+2. **Casualty base used one brigade, not sector (n590):** `personnelDefender` was the PRIMARY defender's personnel only (one brigade, ~500 men), but the defense POWER that determined the outcome came from the ENTIRE SECTOR (5+ brigades, 4,000+ men). Attacker casualty base correctly summed all attackers, but defender casualty base only counted one formation. This structural disconnect meant the sector generated enough defense power to cause catastrophic outcomes but only produced casualties from 500 men. Fixed: `personnelDefender` now uses total sector brigade personnel when sector defense is active.
+
+**After fix (n590):**
+
+| Metric | n587 (before) | n590 (after) |
+|---|---|---|
+| Overall att:def ratio | heavily skewed | **0.88:1** |
+| Worst outlier | 50:1 | **22.7:1** |
+| Avg catastrophic ratio | ~40:1 | **8.5:1** |
+| 50+:1 battles | several | **0** |
+| Def casualties | ~19k | **40,058** |
+| Benchmarks | 6/6 | **6/6** |
+| Area-weighted | 85.8% | **86.3%** |
+
+The remaining 22:1 outliers are concentrated at Lukavica (Novo Sarajevo) — the most fortified RS position in the Sarajevo siege. RBiH attacking head-on into that position SHOULD be lopsided. A real ARBiH commander would never make that attack without reconnaissance — which is the probe ops issue (#21).
+
+**Status:** FIXED (n590). Two structural bugs corrected. Remaining outliers (22:1 at fortified positions) are within historical range for truly hopeless attacks.
+
+---
+
+### ~~19. Static 2-ops pattern~~ — FALSE ALARM (n587)
+
+**What we thought:** Exactly 2 active operations every week for 40 weeks.
+
+**What actually happened:** The `.ops` field in `weekly_report.jsonl` is a config flag `{enabled: true, level: 0}` — NOT operation count. Actual operation count from `operation_diagnostics`: w1=6 (all VRS corps), w10=7 (+1 HVO), w20=11 (+4 ARBiH), w30=12 (all corps active). Operations are healthy — VRS dominates early, ARBiH and HVO join from w10-16, all corps eventually operate.
+
+**Lesson:** `weekly_report.ops` = baseline_ops config. `weekly_report.operation_diagnostics` = actual operations.
+
+---
+
+### 20. 30 RBiH brigades at uniform 3,000 personnel cap (n587)
+
+**What we found:** 30 ARBiH brigades are at exactly 3,000 personnel — a hard cap. All capped brigades are RBiH. No RS or HRHB brigades hit the cap. Historical ARBiH brigades varied wildly: 500-man "brigades" in Srebrenica, 5,000+ in Tuzla and Zenica.
+
+**Root cause:** `MAX_BRIGADE_PERSONNEL=3000` in formation_constants.ts. The reinforcement system fills brigades to this cap. Because ARBiH has the largest pool (120k), more brigades hit the ceiling.
+
+**Historical context:** ARBiH brigades were highly uneven. 17th Vitezka Mountain (Krajina) was one of the best-equipped with 3,500+. Mountain brigades in eastern enclaves were 500-800 men. The uniformity feels gamey — a Halilović would recognize a 500-man enclave "brigade" and a 4,000-man Tuzla brigade as fundamentally different formations.
+
+**Status:** P3 — cosmetic. The cap prevents runaway reinforcement. A more organic approach would tie max personnel to formation type and available pool, but this doesn't affect combat dynamics much.
+
+---
+
+### 21. No reconnaissance or probe operations — corps attack blind (n587)
+
+**What we found:** All 220 orders in the run are full attack operations. No probing attacks, no reconnaissance-in-force, no intelligence-gathering operations. Corps launch sector offensives into unknown defensive strength.
+
+**Historical context:** Intelligence gathering was critical in the Bosnian War. Before any major operation, both VRS and ARBiH conducted:
+- **Reconnaissance patrols**: Small-unit probes to test defensive positions, identify strong points, and map minefields.
+- **Reconnaissance in force**: Company-strength probes designed to draw fire and reveal defensive dispositions. Operation Corridor was preceded by extensive recon along the Posavina corridor.
+- **Artillery probing**: "Registering" fires to test positions without committing infantry.
+- **Intelligence preparation**: Corps intelligence officers compiled order-of-battle estimates. The VRS inherited JNA intelligence infrastructure; ARBiH built theirs through painful experience.
+- **Feints and diversions**: Corridor 92 included diversionary attacks at Gradačac and Brčko to fix ARBiH reserves.
+
+No commander — not Mladić, not Halilović, not Petković — would commit a multi-brigade operation without reconnaissance. Attacking blind into unknown defenses is how you get massacred (and may explain the 50:1 catastrophic ratios — forces walking into positions they didn't know existed).
+
+**Design impact:** The sector intel system (`sector_intel.ts`) exists and tracks per-sector confidence, but the bot AI doesn't use it to decide whether to probe before committing. Corps should: (1) probe sectors with low intel confidence before full attack, (2) use probe results to decide whether to commit, (3) abort if probes reveal overwhelming defense.
+
+**Status:** P1 — separate from the operations lifecycle issue (#19). This is a new mechanic: probe operations as a distinct operation type that feeds the sector intel system and gates full offensives.
+
+---
+
 ## Priority Ranking
 
-**Post-n560 state:** Dissolution fix + RBiH doctrine fix + HRHB doctrine fix shipped. 1 destroyed brigade (was 12). 24.8k KIA (was 23.5k). RS 91.7% success. RBiH launches 24 attacks from w17 (was 0). HRHB still 0 attacks (Graz blocking). 153 total battles (was ~130).
+**Post-n587 state:** Corps AoR fix. 6/6 benchmarks, 85.8% area-weighted, 220 orders, 202 battles. Equipment missing from save. Morale-0 zombies persist. Catastrophic ratios extreme. Operation pattern static. HRHB still marginal.
 
 | Priority | Issue | Impact | Status |
 |----------|-------|--------|--------|
+| ~~**P0**~~ | ~~#16 Zero equipment~~ | ~~False alarm — field is `composition`, not `equipment`~~ | **FALSE ALARM** |
 | ~~**P0**~~ | ~~#2 Attack outcomes inverted~~ | ~~Root cause~~ | **FIXED n482** |
-| ~~**P0**~~ | ~~#9 Entrenchment saturation~~ | ~~Contributes to #2~~ | **Partially fixed n482** |
-| ~~**P0**~~ | ~~#11 Sarajevo falls~~ | ~~5 root causes: supply detection, enclave scaling, urban tank penalty, urban defense, garrison power~~ | **FIXED n527** |
-| ~~**P0**~~ | ~~#13 Sectors span enemy territory~~ | ~~Edge adjacency walked through interior instead of following front — triple-junction fix~~ | **FIXED n532** |
-| **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK 25-edge sector with 519 men | Investigation needed |
-| **P1** | 100% early-war attack success | Target 70-80%. Every early attack succeeds — no defensive resistance | Active |
-| **P1** | Late-war success rate 88.6% (n527) | Target 30-50%; improved from 100% (n500) but still too high | Active |
-| ~~**P1**~~ | ~~#12 Suicide attacks (zombie brigades)~~ | ~~Dissolution absolute floor bypass~~ | **Partially fixed n556** (12→1 destroyed) |
-| **P1** | Casualty volume (~24.8k vs 30-37k) | Still below historical; +1.2k from RBiH doctrine fix | Active — RBiH now attacks |
-| **P1** | #7 HVO passivity (0 attacks) | Graz Accords blocks ALL HRHB→RS targets; need wider exceptions | Active |
+| ~~**P0**~~ | ~~#11 Sarajevo falls~~ | ~~5 root causes~~ | **FIXED n527** |
+| ~~**P0**~~ | ~~#13 Sectors span enemy territory~~ | ~~Triple-junction fix~~ | **FIXED n532** |
+| **P1** | #17 Morale-0 zombie brigades | 4 brigades at morale 0-5 still active — dissolution criteria gap | **NEW n587** |
+| **P1** | #18 50:1 catastrophic casualty ratios | Defender near-invulnerable in catastrophic outcomes | **NEW n587** |
+| **P1** | #21 No probe/recon operations | Corps attack blind — no intelligence gathering before committing | **NEW n587** — design needed |
+| **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
+| **P1** | #7 HVO passivity (10 attacks total) | Graz Accords blocks most HRHB→RS targets; need wider exceptions | Active |
 | **P1** | #5/#10 Morale system | No victory boost + no zero-morale consequence | Active |
-| ~~**P1**~~ | ~~H5 Casualty ratio inverted~~ | ~~Was 0.38 → now 0.87~~ | **Substantially fixed n524** |
-| ~~**P1**~~ | ~~Anchor failures: Bihać~~ | ~~Bihać holds in n524~~ | **Fixed n524** |
-| ~~**P1**~~ | ~~H6 ARBiH too passive~~ | ~~RBiH defensive all 40w → zero attacks~~ | **Partially fixed n560** (24 attacks from w17) |
-| **P2** | #14 HVO ghost front (13 edges, 0 brigades) | 10k HVO personnel unassigned — enclave BFS can't reach sector fronts | Planned |
-| **P2** | Anchor failures: Orašje | Corridor loss | Active |
+| **P1** | Casualty volume (~58k vs 40-60k target) | Now in range — monitor | Monitoring |
+| ~~**P1**~~ | ~~#12 Suicide attacks~~ | ~~Dissolution absolute floor bypass~~ | **Partially fixed n556** |
+| ~~**P1**~~ | ~~H6 ARBiH too passive~~ | ~~24→41 attacks~~ | **Partially fixed n560/n587** |
+| ~~**P2**~~ | ~~#19 Static 2-ops pattern~~ | ~~False alarm — `.ops` is config, not op count~~ | **FALSE ALARM** |
+| **P2** | #14 HVO ghost front (13 edges, 0 brigades) | 10k HVO unassigned — enclave BFS failure | Planned |
 | **P2** | #6/#8 Front coverage + stacking | Mitigated by reactive sector defense | Monitoring |
-| **P2** | H4 VRS armor not concentrated | Maneuverable brigade tagging not yet implemented | Open |
+| **P2** | H4 VRS armor not concentrated | Mech/moto staging exists; equipment IS present | Open |
+| **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | **NEW n587** |
 | **P3** | #3 Formation casualty_ledger | Design gap, data exists in state-level ledger | Open |
 
 ---

@@ -4,7 +4,8 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-03-07
+**Last updated:** 2026-03-10
+**Dev/live mode (2026-03-10):** Single codebase with `devMode` boolean in `gameStore.ts`. `isDevMode()`: auto-ON in Vite dev, `?dev=1` in production, `?live=1` forces live. Dev mode shows full load/run toolbar + DEV badge; separate Fronts/Sectors toggles; offset sector glow. Live mode auto-loads `latest_run_final_save.json` as RBiH; merged "Front" toggle (controls `sectorsVisible`); sector glow centered on front line (no offset, wider, `line-blur`); lateral demarcation hidden. Front line features carry `sector_id`; merge key by sector creates natural visual breaks at sector boundaries.
 
 > **See also:** [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) — original engineering reference.
 > This document is the **component-level master reference** covering current panel layout,
@@ -420,7 +421,7 @@ interface LoadedGameState {
   frontEdgesOsid?: FrontEdgeView[];
   frontPressureByEdge?: Record<string, FrontPressureView>;
   displacementByMun?: Record<string, { ... }>;
-  departedByOsid?: Record<string, Record<string, number>>;
+  departedByOsid?: Record<string, Record<string, number>>;  // Per-OSID per-faction TOTAL removed (displaced+killed+fled_abroad)
   militiaPools: MilitiaPoolView[];
 }
 ```
@@ -599,7 +600,8 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 | Layer ID | Purpose |
 |----------|---------|
 | `sector-fill` | Per-sector translucent fill |
-| `sector-demarcation-lines` | Lateral sector boundary lines |
+| `sector-demarcation-lines` | Lateral sector boundary (dark base) — front-proximity filtered, Douglas-Peucker simplified |
+| `sector-demarcation-lines-stripe` | Sector boundary dash stripe (lighter, on top of base) |
 | `sector-glow-pos` / `sector-glow-neg` | Sector boundary glows |
 | `sector-brigade-rings` | Brigade position rings |
 
@@ -614,8 +616,8 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 
 | Layer ID | Purpose |
 |----------|---------|
-| `front-edges-hover-pos` / `front-edges-hover-neg` | Invisible click hitboxes (offset per side) |
-| `front-edges-highlight-pos` / `front-edges-highlight-neg` | Sector highlight on hover (filter by sector_id, not feature-state) |
+| `front-edges-hover-pos` / `front-edges-hover-neg` | Invisible click hitboxes — NO `line-offset` (wide centered line, opacity 0.01) |
+| `front-edges-highlight-pos` / `front-edges-highlight-neg` | Sector highlight on hover (filter by sector_id, not feature-state); uses `line-offset` (visual only) |
 
 ### Sidebar Hover Layer
 
@@ -874,7 +876,29 @@ To improve immersion and readability, all raw simulation data must be processed 
 
 ---
 
-## 14. Paradox Team & Protocol Roles
+## 14. GUI Debugging Patterns
+
+These patterns emerged from multi-hour debugging sessions (2026-03-10). Check them first when diagnosing map GUI issues.
+
+### 14.1 GameStateAdapter field paths
+
+After Phase 3 state domain segregation, military fields live under `state.military.*`. `GameStateAdapter.ts` must read from the correct namespace. A wrong path (`(state as any).field` instead of `state.military.field`) silently returns `undefined`, causing source → layer → interaction chains to never initialize. **First diagnostic step**: log the adapter field value in `runUpdate` before debugging layers or interactions. Reference: `state.military.front_edges` (line 1185).
+
+### 14.2 MapLibre `line-offset` and `queryRenderedFeatures`
+
+In MapLibre GL JS v4, `line-offset` shifts visual rendering but does NOT update the spatial index. Clickable hitbox layers must use NO `line-offset` — use wider centered lines instead. Visual-only layers (highlights, glows) can safely use `line-offset`.
+
+### 14.3 Layer creation timing
+
+Map overlay sources are created in `runUpdate` inside nested `requestAnimationFrame` calls. Effects that poll for those sources (e.g. `ensureSectorLayers`) must return `false` (keep polling) when sources don't exist yet. Returning `true` too early stops the poll permanently — dependent layers are never created.
+
+### 14.4 Sector zoom vs map click
+
+Selecting a sector from the map (clicking a front edge) should NOT zoom — the user is already looking at it. Selecting from Command/sidebar should zoom to fit. `sectorSelectedFromMapRef` flag distinguishes the two cases. The pan/zoom effect uses `prevSectorIdRef` to detect sector changes.
+
+---
+
+## 15. Paradox Team & Protocol Roles
 
 The Map UI is maintained according to the **Paradox Team Protocols**.
 

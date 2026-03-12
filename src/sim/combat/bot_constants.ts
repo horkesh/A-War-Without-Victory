@@ -21,6 +21,9 @@
  * backfires because RBiH's more-active doctrine starts at fixed w20, causing counterattacks. */
 export const RS_EARLY_WAR_END_WEEK = 26;
 
+/** RS blitz phase end: JNA pre-planned operations bypass preparation gates before this week. */
+export const RS_BLITZ_PHASE_END_WEEK = 12;
+
 // HRHB Lasva Offensive window removed — now handled by HRHB doctrine phase 1
 // (max_attack_share_override: 0.35, weeks 12-26) in timeline or FACTION_DOCTRINE_PHASES.
 

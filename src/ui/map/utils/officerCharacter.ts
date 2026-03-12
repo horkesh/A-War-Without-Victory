@@ -141,3 +141,14 @@ export function formatTenure(turnsInCommand: number): string {
     const months = Math.round(turnsInCommand / 4.33);
     return `${months}mo in command`;
 }
+
+/** One-line personality summary from competence x aggressiveness quadrant. */
+export function getPersonalitySummary(comp: number, agg: number): string {
+    if (comp >= 4 && agg >= 4) return 'Fast prep, accepts risk';
+    if (comp >= 4 && agg <= 2) return 'Thorough prep, demands intel';
+    if (comp <= 2 && agg >= 4) return 'Reckless, attacks blind';
+    if (comp <= 2 && agg <= 2) return 'Hesitant, may never launch';
+    if (agg >= 4) return 'Aggressive, short preparation';
+    if (comp >= 4) return 'Methodical, balanced preparation';
+    return 'Standard preparation cycle';
+}

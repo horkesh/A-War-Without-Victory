@@ -67,6 +67,14 @@ export interface NamedOfficerView {
     turns_in_command: number;
     battles: number;
     victories: number;
+    /** Enclave lock: officer physically trapped in a pocket. */
+    enclave_lock?: { enclave_id: string; locked_until_turn?: number };
+    /** Currently assigned to an operation (name). */
+    assigned_operation?: string;
+    /** Compatible corps IDs for regional fit display. */
+    compatible_corps_ids?: string[];
+    /** Casualty vulnerability (0-1). High = shown as warning. */
+    casualty_vulnerability?: number;
 }
 
 export interface FormationView {
@@ -326,6 +334,22 @@ export interface CorpsFrontSectorView {
     offensive_signs: boolean;
     logistics_priority?: number;
     opsec_active?: boolean;
+    /** Sector combat power rating — offensive power aggregate. */
+    combat_offensive_power?: number;
+    /** Sector combat power rating — defensive power aggregate. */
+    combat_defensive_power?: number;
+    /** Sector combat power rating — defense per edge. */
+    combat_defense_per_edge?: number;
+    /** Sector combat power rating — strength classification. */
+    combat_strength_class?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical';
+    /** Sector combat power rating — average morale. */
+    combat_morale_avg?: number;
+    /** Sector combat power rating — average cohesion. */
+    combat_cohesion_avg?: number;
+    /** Sector combat power rating — average fatigue. */
+    combat_fatigue_avg?: number;
+    /** Sector combat power rating — total personnel. */
+    combat_personnel?: number;
 }
 
 export interface OperationView {
@@ -370,6 +394,26 @@ export interface OperationView {
         momentum: number;
         staging_osid?: string;
     }>;
+    /** Operation commander officer ID (if assigned). */
+    commander_officer_id?: string;
+    /** Preparation sub-phase (only during planning). */
+    preparation_sub_phase?: 'intel_gathering' | 'force_staging' | 'supply_check' | 'assessment' | 'ready';
+    /** Turns elapsed in preparation. */
+    preparation_turns_elapsed?: number;
+    /** Max preparation turns before forced decision. */
+    preparation_max_turns?: number;
+    /** Commander's go/no-go recommendation. */
+    commander_assessment?: 'launch' | 'postpone' | 'abort';
+    /** Intel confidence snapshot at assessment. */
+    intel_confidence_at_assessment?: number;
+    /** Supply readiness snapshot at assessment. */
+    supply_readiness_at_assessment?: number;
+    /** Commander's estimated force ratio. */
+    force_ratio_estimate?: number;
+    /** Number of postponements so far. */
+    postponement_count?: number;
+    /** Whether an active probe is in progress. */
+    has_active_probe?: boolean;
 }
 
 export interface LoadedGameState {

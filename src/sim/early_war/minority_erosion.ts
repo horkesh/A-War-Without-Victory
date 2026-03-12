@@ -137,8 +137,9 @@ export function runMinorityErosion(
                 if (!munTag) continue;
                 const formationMun = munTag.slice(4);
                 if (formationMun !== munId) continue;
-                // Displace: set status to inactive
+                // Displace: set status to inactive with proper lifecycle tracking
                 f.status = 'inactive';
+                f.lifecycle_status = 'displaced';
                 displacedFormations.push(fid);
             }
         }

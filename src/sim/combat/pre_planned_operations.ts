@@ -339,6 +339,41 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         corps: 'vrs_1st_krajina',
         faction: 'RS',
+        name: 'Operation Jajce',
+        staging_osid: 'op:mrkonjic_grad:bjelajce_2',
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                axis_id: 'vrbas_west',
+                name: 'Vrbas West',
+                brigades: [
+                    'rs_11th_mrkonji_light_infantry',
+                    'rs_22nd_krajina_infantry',
+                ],
+                objectives: [
+                    'op:jajce:divicani_2',
+                    'op:jajce:barevo_2',
+                    'op:jajce:jajce_3',
+                ],
+                staging_osid: 'op:mrkonjic_grad:bjelajce_2',
+            },
+            {
+                axis_id: 'vrbas_south',
+                name: 'Vrbas South',
+                brigades: [
+                    'rs_1st_sipovo_light_infantry',
+                ],
+                objectives: [
+                    'op:jajce:kruscica',
+                    'op:jajce:vinac_2',
+                ],
+                staging_osid: 'op:sipovo:brdjani',
+            },
+        ],
+    },
+    {
+        corps: 'vrs_1st_krajina',
+        faction: 'RS',
         name: 'Operation Bosanski Novi',
         staging_osid: 'op:bosanski_novi:novi_grad_3',
         axes: [
@@ -566,7 +601,7 @@ export function injectPrePlannedOperations(state: GameState): void {
     if (injectedCorps.has('vrs_1st_krajina')) {
         const cmd = corpsCommand['vrs_1st_krajina'];
         if (cmd && !cmd.queued_operations) {
-            cmd.queued_operations = ['Operation Corridor', 'Operation Bosanski Novi'];
+            cmd.queued_operations = ['Operation Corridor', 'Operation Jajce', 'Operation Bosanski Novi'];
         }
     }
 

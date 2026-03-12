@@ -20,13 +20,16 @@ import { SidePickerOverlay } from './components/SidePickerOverlay';
 import { RecruitmentModal } from './components/RecruitmentModal';
 import { WarSummaryModal } from './components/WarSummaryModal';
 import { OpsPlanningModal } from './components/OpsPlanningModal';
+import { CommanderSelectionModal } from './components/CommanderSelectionModal';
+import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { AARPanel } from './components/AARPanel';
 import { OperationHistoryPanel } from './components/OperationHistoryPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { derivePanelRailState } from './components/panelRail';
-import { useGameStore } from './store/gameStore';
+import { useGameStore, isDevMode } from './store/gameStore';
+import { loadLatestRunSaveAsText } from './data/DataLoader';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -39,6 +42,18 @@ import {
   fetchRecruitmentCatalog,
   startCampaignFromSidePicker,
 } from './desktop/campaignRecruitmentActions';
+
+function CommanderSelectionModalWrapper() {
+  const ctx = useGameStore((s) => s.commanderSelectionContext);
+  const close = useGameStore((s) => s.setCommanderSelectionContext);
+  return <CommanderSelectionModal isOpen={!!ctx} onClose={() => close(null)} />;
+}
+
+function OperationBriefingModalWrapper() {
+  const ctx = useGameStore((s) => s.operationBriefingContext);
+  const close = useGameStore((s) => s.setOperationBriefingContext);
+  return <OperationBriefingModal isOpen={!!ctx} onClose={() => close(null)} />;
+}
 
 function App() {
   // Phase C3: single key handler (Enter, 1–5, Escape)
@@ -117,6 +132,24 @@ function App() {
       setSidePickerOpen(true);
     }
   }, [ipc.isAvailable, loadedGameState, sidePickerDismissed]);
+
+  // Live mode: auto-load latest run save as RBiH on startup
+  useEffect(() => {
+    if (isDevMode()) return;
+    if (loadedGameState) return; // already loaded
+    (async () => {
+      try {
+        const text = await loadLatestRunSaveAsText();
+        const json = JSON.parse(text);
+        // Force RBiH perspective for live mode
+        if (json?.meta) json.meta.player_faction = 'RBiH';
+        await loadSave(json);
+      } catch (err) {
+        console.error('[Live] Failed to auto-load latest save:', err);
+        setLoadError(err instanceof Error ? err.message : String(err));
+      }
+    })();
+  }, []);
 
   // Dev: ?showPanel=1 shows the selection panel with a placeholder OSID for layout verification
   useEffect(() => {
@@ -302,6 +335,8 @@ function App() {
       <AARPanel isOpen={aarOpen} onClose={() => setAarOpen(false)} />
       <OperationHistoryPanel isOpen={opsHistoryOpen} onClose={() => setOpsHistoryOpen(false)} />
       <OpsPlanningModal />
+      <CommanderSelectionModalWrapper />
+      <OperationBriefingModalWrapper />
       {loadedGameState && (
         <EnclaveDashboard
           state={loadedGameState}

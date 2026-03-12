@@ -5,6 +5,7 @@ import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS, findNe
 import { countFactionBrigadesAtOsid, countCorpsBrigadesAtOsid, MAX_CORPS_BRIGADES_PER_OSID } from './bot_brigade_context.js';
 import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { isOsidInSameEnclave } from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
@@ -45,7 +46,14 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 }
                 // Not on sector front — column march there (use actual destination
                 // for multi-hop Dijkstra pathfinding, not just first step)
+                // Enclave brigades must NOT march outside their enclave — they defend their pocket.
+                // Without this, Goražde brigades march to Visoko via temporary corridors.
                 if (frontSet.size > 0) {
+                    const isEnclaveBrigade = brigade.tags?.includes('enclave') === true;
+                    if (isEnclaveBrigade) {
+                        const hasEnclaveTarget = [...frontSet].some(f => isOsidInSameEnclave(loc, f));
+                        if (!hasEnclaveTarget) return false; // Skip march — no enclave-local sector front
+                    }
                     const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, frontSet);
                     if (dest) {
                         result.column_march_orders[brigade.id] = dest;

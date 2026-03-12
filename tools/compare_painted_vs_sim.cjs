@@ -242,7 +242,7 @@ function main() {
   const simFile     = JSON.parse(fs.readFileSync(simPath, 'utf8'));
 
   const paintedCtrl = paintedFile.by_settlement_id; // osid → faction
-  const simCtrl     = simFile.political_controllers;  // osid → faction
+  const simCtrl     = simFile.political_controllers || simFile.political?.political_controllers;  // osid → faction
 
   if (!paintedCtrl) {
     console.error('ERROR: Painted file missing "by_settlement_id" field');

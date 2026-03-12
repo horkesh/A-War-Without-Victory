@@ -210,6 +210,7 @@ export function useMapInteractions(
   }
 
   const frontEdgeLayers = ['front-edges-hover-pos', 'front-edges-hover-neg'];
+  const frontEdgeHighlightLayers = ['front-edges-highlight-pos', 'front-edges-highlight-neg'];
 
   const handleFrontEdgeClick = (e: MapLayerMouseEvent) => {
     const feature = e.features?.[0];
@@ -222,6 +223,17 @@ export function useMapInteractions(
   };
 
   for (const layerId of frontEdgeLayers) {
+    if (onFrontEdgeClick) {
+      safeOn('click', layerId, handleFrontEdgeClick);
+    }
+    if (onFrontEdgeHover) {
+      safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
+      safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
+    }
+  }
+
+  // Bind same handlers to highlight layers so clicking the visible white sector line selects the sector (highlight is often on top of hover hitbox)
+  for (const layerId of frontEdgeHighlightLayers) {
     if (onFrontEdgeClick) {
       safeOn('click', layerId, handleFrontEdgeClick);
     }
@@ -254,6 +266,13 @@ export function useMapInteractions(
     }
     if (hoverTimeout) clearTimeout(hoverTimeout);
     for (const layerId of frontEdgeLayers) {
+      if (onFrontEdgeClick) {
+        safeOff('click', layerId, handleFrontEdgeClick);
+      }
+      safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
+      safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
+    }
+    for (const layerId of frontEdgeHighlightLayers) {
       if (onFrontEdgeClick) {
         safeOff('click', layerId, handleFrontEdgeClick);
       }

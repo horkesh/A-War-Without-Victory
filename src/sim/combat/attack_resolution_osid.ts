@@ -85,7 +85,7 @@ import {
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import { findSectorForEnemyOsid, getCorpsHqOsid } from './corps_front_sectors.js';
-import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital } from './enclave_resilience.js';
+import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital, isOsidInSameEnclave } from './enclave_resilience.js';
 // frontDensityModifier import removed — no longer used in sector defense
 
 // Backward-compat re-exports
@@ -212,7 +212,7 @@ function getFriendlyRetreatDestinations(
     const factionId = formation.faction as FactionId;
     if (!loc) return [];
     const neighbors = adjacency.get(loc) ?? [];
-    const friendly: Osid[] = [];
+    let friendly: Osid[] = [];
     for (const n of neighbors) {
         const c = getPoliticalControllerOSID(state, n, reverseMap);
         if (c === factionId) friendly.push(n);
@@ -222,6 +222,14 @@ function getFriendlyRetreatDestinations(
     // BB2 p.479: beaten units fell back concentrically toward Goražde town.
     const capitalOsid = getEnclaveCapitalOsid(loc);
     if (capitalOsid) {
+        // Enclave-tagged brigades MUST NOT retreat outside their enclave.
+        // Without this filter, brigades drift out through temporary corridors
+        // and end up 100km from their pocket (e.g., Goražde brigades in Visoko).
+        const isEnclaveBrigade = formation.tags?.includes('enclave') === true;
+        if (isEnclaveBrigade) {
+            friendly = friendly.filter(f => isOsidInSameEnclave(loc, f));
+        }
+
         // Pre-compute BFS distance to capital for each candidate
         const distCache = new Map<string, number>();
         for (const f of friendly) {
@@ -263,12 +271,18 @@ function getFriendlyRetreatDestinations(
 
 /**
  * Find any friendly OSID for a faction as an emergency retreat destination.
- * Priority: home_osid → fallback_osid → any friendly OSID (deterministic: sorted).
+ * Priority: home_osid → fallback_osid → BFS nearest (8 hops) → corps HQ → any friendly.
+ * BFS step keeps enclave brigades in their pocket instead of teleporting to corps HQ.
  */
+/** Max BFS hops when searching for nearest friendly OSID during emergency retreat. */
+const EMERGENCY_RETREAT_BFS_MAX_HOPS = 8;
+
 function findEmergencyRetreatOsid(
     state: GameState,
     formation: FormationState,
-    reverseMap: OperationalToCanonicalReverseMap
+    reverseMap: OperationalToCanonicalReverseMap,
+    adjacency?: Map<Osid, Osid[]>,
+    sourceOsid?: string
 ): string | null {
     const factionId = formation.faction as FactionId;
     const pc = state.political?.political_controllers ?? {};
@@ -285,13 +299,36 @@ function findEmergencyRetreatOsid(
         return fallbackOsid;
     }
 
-    // 3. Try corps HQ
+    // 3. BFS from current location: find nearest friendly OSID within limited radius.
+    //    Keeps enclave brigades inside their pocket instead of teleporting to corps HQ.
+    //    BB2 p.479: beaten units fell back concentrically toward Goražde town.
+    const origin = sourceOsid ?? (formation as { location_osid?: string }).location_osid;
+    if (adjacency && origin) {
+        const visited = new Set<string>([origin]);
+        let frontier = [origin as Osid];
+        for (let hop = 0; hop < EMERGENCY_RETREAT_BFS_MAX_HOPS && frontier.length > 0; hop++) {
+            const next: Osid[] = [];
+            for (const curr of frontier) {
+                for (const n of (adjacency.get(curr) ?? [])) {
+                    if (visited.has(n)) continue;
+                    visited.add(n);
+                    if (getPoliticalControllerOSID(state, n, reverseMap) === factionId) {
+                        return n;
+                    }
+                    next.push(n);
+                }
+            }
+            frontier = next;
+        }
+    }
+
+    // 4. Try corps HQ
     const hqOsid = getCorpsHqOsid(state, formation);
     if (hqOsid && getPoliticalControllerOSID(state, hqOsid, reverseMap) === factionId) {
         return hqOsid;
     }
 
-    // 4. Any friendly OSID (sorted for determinism)
+    // 5. Any friendly OSID (sorted for determinism)
     const osids = Object.keys(pc).sort(strictCompare);
     for (const osid of osids) {
         if (pc[osid] === factionId) return osid;
@@ -307,6 +344,14 @@ const EMERGENCY_RETREAT_COHESION_LOSS = 20;
 /** Disruption turns on emergency retreat. */
 const EMERGENCY_RETREAT_DISRUPTED_TURNS = 3;
 
+/** Options for force retreat penalty overrides. */
+interface ForceRetreatOptions {
+    personnelRetain?: number;
+    cohesionLoss?: number;
+    disruptedTurns?: number;
+    adjacency?: Map<Osid, Osid[]>;
+}
+
 /**
  * Force-retreat a formation to a friendly OSID with heavy penalties.
  * Never destroys the brigade — worst case it goes to reserve status with minimal personnel.
@@ -316,11 +361,12 @@ function forceRetreatWithPenalties(
     formation: FormationState,
     reverseMap: OperationalToCanonicalReverseMap,
     sourceOsid: string,
-    personnelRetain: number = EMERGENCY_RETREAT_PERSONNEL_RETAIN,
-    cohesionLoss: number = EMERGENCY_RETREAT_COHESION_LOSS,
-    disruptedTurns: number = EMERGENCY_RETREAT_DISRUPTED_TURNS
+    opts?: ForceRetreatOptions
 ): void {
-    const dest = findEmergencyRetreatOsid(state, formation, reverseMap);
+    const personnelRetain = opts?.personnelRetain ?? EMERGENCY_RETREAT_PERSONNEL_RETAIN;
+    const cohesionLoss = opts?.cohesionLoss ?? EMERGENCY_RETREAT_COHESION_LOSS;
+    const disruptedTurns = opts?.disruptedTurns ?? EMERGENCY_RETREAT_DISRUPTED_TURNS;
+    const dest = findEmergencyRetreatOsid(state, formation, reverseMap, opts?.adjacency, sourceOsid);
     const f = formation as FormationState & { location_osid?: string; entrenchment_turns?: number; defense_streak?: number; disrupted_turns?: number; last_retreat_from?: { osid: string; turn: number } };
     if (dest != null) {
         f.location_osid = dest;
@@ -372,7 +418,7 @@ export function displaceFormationsInEnemyTerritory(
             (otherFormation as { defense_streak?: number }).defense_streak = 0;
         } else {
             // No adjacent friendly — emergency retreat with penalties
-            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc);
+            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
         }
     }
 }
@@ -493,7 +539,7 @@ export function resolveAttackOrdersOsid(
                 (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
                 (otherFormation as { defense_streak?: number }).defense_streak = 0;
             } else {
-                forceRetreatWithPenalties(state, otherFormation, reverseMap, loc);
+                forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
             }
         }
         return report;
@@ -684,7 +730,14 @@ export function resolveAttackOrdersOsid(
         if (defenderFormation) report.engaged_formation_ids.push(defenderFormation.id);
 
         const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
-        const personnelDefender = defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
+        // Sector defense: all sector brigades contribute to the casualty base, matching
+        // the fact that defense POWER aggregates the entire sector. Without this, a 5-brigade
+        // sector generates massive defense power (→ catastrophic outcome for attacker) but
+        // bases defender casualties on one brigade's 500 personnel → absurd 44:1 ratios.
+        // In reality, the entire sector front absorbs the attack — all brigades take losses.
+        const personnelDefender = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
+            ? sectorDefenseBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
+            : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
         const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
         // Militia-only defense: attacker takes reduced but non-trivial casualties.
         // "Undefended" Bosniak villages had Patriotic League, police, armed residents.
@@ -1056,13 +1109,15 @@ export function resolveAttackOrdersOsid(
                 else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
             } else if (isSectorCoverageDefense) {
                 // Sector-coverage defenders with no adjacent retreat — rout with heavy penalties
-                forceRetreatWithPenalties(
-                    state, defenderFormation, reverseMap, targetOsid,
-                    SECTOR_ROUT_PERSONNEL_RETAIN, SECTOR_ROUT_COHESION_LOSS, SECTOR_ROUT_DISRUPTED_TURNS
-                );
+                forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, {
+                    personnelRetain: SECTOR_ROUT_PERSONNEL_RETAIN,
+                    cohesionLoss: SECTOR_ROUT_COHESION_LOSS,
+                    disruptedTurns: SECTOR_ROUT_DISRUPTED_TURNS,
+                    adjacency,
+                });
             } else {
                 // Direct defender with no adjacent retreat — emergency retreat with penalties
-                forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid);
+                forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, { adjacency });
             }
         }
 
@@ -1106,7 +1161,7 @@ export function resolveAttackOrdersOsid(
                     (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
                     (otherFormation as { defense_streak?: number }).defense_streak = 0;
                 } else {
-                    forceRetreatWithPenalties(state, otherFormation, reverseMap, targetOsid);
+                    forceRetreatWithPenalties(state, otherFormation, reverseMap, targetOsid, { adjacency });
                 }
             }
         }
@@ -1161,7 +1216,7 @@ export function resolveAttackOrdersOsid(
             (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
             (otherFormation as { defense_streak?: number }).defense_streak = 0;
         } else {
-            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc);
+            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
         }
     }
 

@@ -6,23 +6,49 @@ import type { Feature, FeatureCollection, LineString, MultiPolygon, Point, Polyg
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
-import { loadOperationalSettlements, loadOperationalPoliticalControl } from '../data/DataLoader';
+import { loadOperationalSettlements } from '../data/DataLoader';
 import { buildControlGeoJSON } from '../map/builders/buildControlGeoJSON';
 import { buildOsidCentroidLookup } from '../map/builders/geojsonLookup';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import styleJson from '../map/awwv_map_style.json';
 import { rewritePmtilesUrls } from '../map/rewritePmtilesUrls';
 import { buildCorpsFrontLinesGeoJSON } from '../map/builders/buildCorpsFrontLinesGeoJSON';
+import { buildBezierCurve, buildArrowheadTriangle, buildTaperedArrowBody } from '../map/builders/arrowGeometry';
 import type { FormationView } from '../data/types';
 import { OPERATION_NAMES, simpleHash } from '../../../sim/combat/operation_names';
 
-// --- Axis colors for map arrows and UI accents ---
-const AXIS_COLORS = [
-    { line: 'rgba(255,255,255,0.95)', head: 'rgba(0,0,0,0.75)', scratch: 'rgba(180,50,50,0.7)', label: '#ffffff', dot: 'bg-white' },
-    { line: 'rgba(100,200,255,0.95)', head: 'rgba(30,80,120,0.85)', scratch: 'rgba(100,200,255,0.5)', label: '#64c8ff', dot: 'bg-cyan-400' },
-    { line: 'rgba(255,180,60,0.95)', head: 'rgba(140,80,10,0.85)', scratch: 'rgba(255,180,60,0.5)', label: '#ffb43c', dot: 'bg-orange-400' },
-    { line: 'rgba(200,120,255,0.95)', head: 'rgba(90,40,120,0.85)', scratch: 'rgba(200,120,255,0.5)', label: '#c878ff', dot: 'bg-purple-400' },
+// --- Faction-colored axis palettes for map arrows and UI accents ---
+// Primary axis uses bold faction color; secondary axes use lighter/desaturated variants.
+const FACTION_AXIS_COLORS: Record<string, typeof AXIS_COLORS_FALLBACK> = {
+    RS: [
+        { line: 'rgba(220, 70, 70, 0.95)', head: 'rgba(180, 40, 40, 0.9)', scratch: 'rgba(220, 70, 70, 0.7)', label: '#e06060', dot: 'bg-red-400', glow: 'rgba(220, 70, 70, 0.25)' },
+        { line: 'rgba(255, 140, 100, 0.90)', head: 'rgba(180, 80, 50, 0.85)', scratch: 'rgba(255, 140, 100, 0.5)', label: '#ff9060', dot: 'bg-orange-400', glow: 'rgba(255, 140, 100, 0.20)' },
+        { line: 'rgba(200, 160, 80, 0.85)', head: 'rgba(140, 100, 40, 0.85)', scratch: 'rgba(200, 160, 80, 0.5)', label: '#c8a050', dot: 'bg-yellow-600', glow: 'rgba(200, 160, 80, 0.18)' },
+        { line: 'rgba(180, 100, 100, 0.80)', head: 'rgba(120, 60, 60, 0.85)', scratch: 'rgba(180, 100, 100, 0.4)', label: '#b46464', dot: 'bg-red-300', glow: 'rgba(180, 100, 100, 0.15)' },
+    ],
+    RBiH: [
+        { line: 'rgba(80, 190, 100, 0.95)', head: 'rgba(40, 140, 60, 0.9)', scratch: 'rgba(80, 190, 100, 0.7)', label: '#60c870', dot: 'bg-green-400', glow: 'rgba(80, 190, 100, 0.25)' },
+        { line: 'rgba(100, 200, 180, 0.90)', head: 'rgba(50, 130, 110, 0.85)', scratch: 'rgba(100, 200, 180, 0.5)', label: '#64c8b4', dot: 'bg-teal-400', glow: 'rgba(100, 200, 180, 0.20)' },
+        { line: 'rgba(150, 220, 100, 0.85)', head: 'rgba(90, 150, 50, 0.85)', scratch: 'rgba(150, 220, 100, 0.5)', label: '#96dc64', dot: 'bg-lime-400', glow: 'rgba(150, 220, 100, 0.18)' },
+        { line: 'rgba(80, 160, 120, 0.80)', head: 'rgba(40, 110, 70, 0.85)', scratch: 'rgba(80, 160, 120, 0.4)', label: '#50a078', dot: 'bg-green-300', glow: 'rgba(80, 160, 120, 0.15)' },
+    ],
+    HRHB: [
+        { line: 'rgba(80, 140, 220, 0.95)', head: 'rgba(40, 90, 170, 0.9)', scratch: 'rgba(80, 140, 220, 0.7)', label: '#5090dc', dot: 'bg-blue-400', glow: 'rgba(80, 140, 220, 0.25)' },
+        { line: 'rgba(120, 180, 255, 0.90)', head: 'rgba(60, 110, 180, 0.85)', scratch: 'rgba(120, 180, 255, 0.5)', label: '#78b4ff', dot: 'bg-blue-300', glow: 'rgba(120, 180, 255, 0.20)' },
+        { line: 'rgba(100, 160, 200, 0.85)', head: 'rgba(50, 100, 140, 0.85)', scratch: 'rgba(100, 160, 200, 0.5)', label: '#64a0c8', dot: 'bg-sky-400', glow: 'rgba(100, 160, 200, 0.18)' },
+        { line: 'rgba(80, 120, 180, 0.80)', head: 'rgba(40, 70, 130, 0.85)', scratch: 'rgba(80, 120, 180, 0.4)', label: '#5078b4', dot: 'bg-blue-200', glow: 'rgba(80, 120, 180, 0.15)' },
+    ],
+};
+const AXIS_COLORS_FALLBACK = [
+    { line: 'rgba(255,255,255,0.95)', head: 'rgba(200,200,200,0.75)', scratch: 'rgba(180,50,50,0.7)', label: '#ffffff', dot: 'bg-white', glow: 'rgba(255,255,255,0.20)' },
+    { line: 'rgba(100,200,255,0.95)', head: 'rgba(30,80,120,0.85)', scratch: 'rgba(100,200,255,0.5)', label: '#64c8ff', dot: 'bg-cyan-400', glow: 'rgba(100,200,255,0.18)' },
+    { line: 'rgba(255,180,60,0.95)', head: 'rgba(140,80,10,0.85)', scratch: 'rgba(255,180,60,0.5)', label: '#ffb43c', dot: 'bg-orange-400', glow: 'rgba(255,180,60,0.18)' },
+    { line: 'rgba(200,120,255,0.95)', head: 'rgba(90,40,120,0.85)', scratch: 'rgba(200,120,255,0.5)', label: '#c878ff', dot: 'bg-purple-400', glow: 'rgba(200,120,255,0.15)' },
 ];
+
+function getAxisColors(faction: string): typeof AXIS_COLORS_FALLBACK {
+    return FACTION_AXIS_COLORS[faction] ?? AXIS_COLORS_FALLBACK;
+}
 
 const OP_TYPE_TOOLTIPS: Record<string, string> = {
     sector_attack: 'Concentrated attack on enemy positions in this sector. Brigades advance along assigned axes toward objectives in sequence.',
@@ -40,6 +66,77 @@ interface AxisState {
 }
 
 type MapClickMode = 'objectives' | 'staging';
+
+// Arrow source+layer management — uses remove+re-add instead of setData
+// because setData on dynamically-created GeoJSON sources does not trigger
+// re-render in this modal's MapLibre instance.
+const ARROW_SOURCE_ID = 'ops-advance-arrows';
+
+function addArrowSourceAndLayers(map: maplibregl.Map, data: FeatureCollection) {
+    map.addSource(ARROW_SOURCE_ID, { type: 'geojson', data });
+    map.addLayer({
+        id: 'ops-advance-glow', type: 'line', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'advance-glow'],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 18, 'line-blur': 8, 'line-opacity': 1.0 },
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+    });
+    map.addLayer({
+        id: 'ops-advance-body', type: 'fill', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'advance-body'],
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
+    });
+    map.addLayer({
+        id: 'ops-advance-body-outline', type: 'line', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'advance-body'],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 1.5, 'line-opacity': 0.8 },
+    });
+    map.addLayer({
+        id: 'ops-advance-heads', type: 'fill', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'advance-head'],
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
+    });
+    map.addLayer({
+        id: 'ops-advance-head-outline', type: 'line', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'advance-head'],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 2, 'line-opacity': 1 },
+    });
+    map.addLayer({
+        id: 'ops-pencil-scratches', type: 'line', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'pencil-scratch'],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 2, 'line-blur': 0.5 },
+    });
+    map.addLayer({
+        id: 'ops-obj-labels', type: 'symbol', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'obj-label'],
+        layout: { 'text-field': ['get', 'label'], 'text-size': 14, 'text-font': ['Noto Sans Regular', 'Open Sans Bold'], 'text-allow-overlap': true, 'text-offset': [0, -1.2] },
+        paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
+    });
+    map.addLayer({
+        id: 'ops-staging-markers', type: 'fill', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'staging-marker'],
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.4 },
+    });
+    map.addLayer({
+        id: 'ops-staging-outline', type: 'line', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'staging-marker'],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 2 },
+    });
+    map.addLayer({
+        id: 'ops-staging-labels', type: 'symbol', source: ARROW_SOURCE_ID,
+        filter: ['==', ['get', 'type'], 'staging-label'],
+        layout: { 'text-field': ['get', 'label'], 'text-size': 12, 'text-font': ['Noto Sans Regular', 'Open Sans Bold'], 'text-allow-overlap': true, 'text-offset': [0, -1.0] },
+        paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
+    });
+}
+
+function updateArrowSourceData(map: maplibregl.Map, data: FeatureCollection) {
+    const source = map.getSource(ARROW_SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
+    if (source) {
+        source.setData(data);
+    } else {
+        addArrowSourceAndLayers(map, data);
+    }
+}
 
 let nextAxisCounter = 0;
 function makeAxisId(): string {
@@ -100,7 +197,17 @@ export function OpsPlanningModal() {
         return map;
     }, [loadedGameState?.formations]);
 
-    const playerFaction = loadedGameState?.player_faction ?? '';
+    const playerFaction = useMemo(() => {
+        if (loadedGameState?.player_faction) return loadedGameState.player_faction;
+        // Detect from sector brigades when player_faction not set (e.g. Vite dev)
+        if (sector?.assigned_brigade_ids) {
+            for (const bid of sector.assigned_brigade_ids) {
+                const f = formationById.get(bid);
+                if (f?.faction) return f.faction;
+            }
+        }
+        return '';
+    }, [loadedGameState?.player_faction, sector?.assigned_brigade_ids, formationById]);
 
     // Build enemy strength per OSID for force-ratio display
     const enemyStrengthByOsid = useMemo(() => {
@@ -153,6 +260,7 @@ export function OpsPlanningModal() {
         return s;
     }, [axes]);
     const allSchwerpunktOptions = useMemo(() => allObjectives.filter((o, i, arr) => arr.indexOf(o) === i), [allObjectives]);
+    const axisColors = useMemo(() => getAxisColors(playerFaction), [playerFaction]);
 
     // --- Helpers ---
 
@@ -180,30 +288,66 @@ export function OpsPlanningModal() {
     ): FeatureCollection<LineString | Polygon | Point> {
         const lookup = centroidLookupRef.current;
         const features: Feature<LineString | Polygon | Point>[] = [];
-
         for (let axisIdx = 0; axisIdx < currentAxes.length; axisIdx++) {
             const axis = currentAxes[axisIdx];
-            const colorSet = AXIS_COLORS[axisIdx % AXIS_COLORS.length];
+            const colorSet = axisColors[axisIdx % axisColors.length];
             if (axis.objectives.length === 0) continue;
 
-            // Compute axis origin: centroid of assigned brigade locations, fallback to sector centroid
-            let originX = 0, originY = 0, originCount = 0;
-            for (const bId of axis.brigadeIds) {
-                const f = formationById.get(bId);
-                if (f?.location_osid) {
-                    const pt = lookup.get(f.location_osid);
-                    if (pt) { originX += pt[0]; originY += pt[1]; originCount++; }
-                }
+            // Resolve first objective point (needed for edge-shift)
+            const firstObjPt = lookup.get(axis.objectives[0]);
+            if (!firstObjPt) continue;
+
+            // Compute origin: staging OSID → brigade centroid → sector centroid
+            let hasStaging = false;
+            let rawOrigin: [number, number] | null = null;
+            if (axis.stagingOsid) {
+                rawOrigin = lookup.get(axis.stagingOsid) ?? null;
+                if (rawOrigin) hasStaging = true;
             }
-            // Fallback to sector centroid
-            if (originCount === 0) {
+
+            // Sector centroid (used as fallback and minimum-distance backup)
+            let sectorCentroid: [number, number] | null = null;
+            {
+                let ox = 0, oy = 0, oc = 0;
                 for (const osid of sectorFriendlyOsids) {
                     const c = lookup.get(osid);
-                    if (c) { originX += c[0]; originY += c[1]; originCount++; }
+                    if (c) { ox += c[0]; oy += c[1]; oc++; }
                 }
+                if (oc > 0) sectorCentroid = [ox / oc, oy / oc];
             }
-            if (originCount === 0) continue;
-            const origin: [number, number] = [originX / originCount, originY / originCount];
+
+            if (!rawOrigin) {
+                // Brigade centroid
+                let ox = 0, oy = 0, oc = 0;
+                for (const bId of axis.brigadeIds) {
+                    const f = formationById.get(bId);
+                    if (f?.location_osid) {
+                        const pt = lookup.get(f.location_osid);
+                        if (pt) { ox += pt[0]; oy += pt[1]; oc++; }
+                    }
+                }
+                if (oc > 0) rawOrigin = [ox / oc, oy / oc];
+            }
+            if (!rawOrigin) rawOrigin = sectorCentroid;
+            if (!rawOrigin) continue;
+
+            // If origin is too close to first objective, fall back to sector centroid
+            const distToObj = Math.sqrt((rawOrigin[0] - firstObjPt[0]) ** 2 + (rawOrigin[1] - firstObjPt[1]) ** 2);
+            if (distToObj < 0.02 && sectorCentroid) {
+                rawOrigin = sectorCentroid;
+            }
+
+            // Shift staging origin toward target to approximate OSID edge (not centroid)
+            let origin: [number, number];
+            if (hasStaging) {
+                const shift = Math.min(0.4, 0.012 / Math.max(0.001, distToObj)); // Cap shift at 40% or ~1.2km
+                origin = [
+                    rawOrigin[0] + (firstObjPt[0] - rawOrigin[0]) * shift,
+                    rawOrigin[1] + (firstObjPt[1] - rawOrigin[1]) * shift,
+                ];
+            } else {
+                origin = rawOrigin;
+            }
 
             // Build chained arrows: origin→obj1→obj2→obj3
             const chain: [number, number][] = [origin];
@@ -220,45 +364,40 @@ export function OpsPlanningModal() {
                 const len = Math.sqrt(dx * dx + dy * dy);
                 if (len === 0) continue;
 
-                const midX = from[0] + dx * 0.5;
-                const midY = from[1] + dy * 0.5;
-                const nx = -dy / len;
-                const ny = dx / len;
-                const offsetMag = Math.min(0.015, len * 0.06) * (axisIdx % 2 === 0 ? 1 : -1);
-                const control: [number, number] = [midX + nx * offsetMag, midY + ny * offsetMag];
+                // Subtle lateral curve for HoI feel (alternates per axis)
+                const offsetMag = len * 0.03 * (axisIdx % 2 === 0 ? 1 : -1);
+                const curve = buildBezierCurve(from, to, offsetMag, 20);
 
-                const curve: [number, number][] = [];
-                for (let i = 0; i <= 20; i++) {
-                    const t = i / 20;
-                    const inv = 1 - t;
-                    curve.push([
-                        inv * inv * from[0] + 2 * inv * t * control[0] + t * t * to[0],
-                        inv * inv * from[1] + 2 * inv * t * control[1] + t * t * to[1],
-                    ]);
-                }
-
-                // Arrowhead
-                const tip = curve[curve.length - 1];
-                const prev = curve[curve.length - 2];
-                const udx = tip[0] - prev[0];
-                const udy = tip[1] - prev[1];
-                const ulen = Math.sqrt(udx * udx + udy * udy);
-                if (ulen > 0) {
-                    const ux = udx / ulen, uy = udy / ulen;
-                    const px = -uy, py = ux;
-                    const headLen = 0.014, headW = 0.006;
-                    const bx = tip[0] - ux * headLen, by = tip[1] - uy * headLen;
+                // Tapered body — proportional but restrained
+                const isFirst = seg === 0;
+                const baseHalfW = Math.max(0.003, len * (isFirst ? 0.030 : 0.025));
+                const tipHalfW = Math.max(0.001, len * 0.006);
+                const body = buildTaperedArrowBody(curve, baseHalfW, tipHalfW);
+                if (body) {
                     features.push({
                         type: 'Feature',
-                        geometry: { type: 'Polygon', coordinates: [[tip, [bx + px * headW, by + py * headW], [bx - px * headW, by - py * headW], tip]] },
+                        geometry: { type: 'Polygon', coordinates: [body] },
+                        properties: { type: 'advance-body', axisIdx, color: colorSet.line },
+                    });
+                }
+
+                // Arrowhead — prominent, wider than body tip
+                const headW = Math.max(0.005, len * 0.030);
+                const headL = headW * 2.0;
+                const triangle = buildArrowheadTriangle(curve, headL, headW);
+                if (triangle) {
+                    features.push({
+                        type: 'Feature',
+                        geometry: { type: 'Polygon', coordinates: [triangle] },
                         properties: { type: 'advance-head', axisIdx, color: colorSet.head },
                     });
                 }
 
+                // Glow behind the body
                 features.push({
                     type: 'Feature',
                     geometry: { type: 'LineString', coordinates: curve },
-                    properties: { type: 'advance-line', axisIdx, color: colorSet.line },
+                    properties: { type: 'advance-glow', axisIdx, color: colorSet.glow },
                 });
             }
 
@@ -317,9 +456,10 @@ export function OpsPlanningModal() {
         const sectorOverlay = buildOsidFilteredFeatures(controlGeoRef.current, sectorFriendlyOsids);
         const objectiveOverlay = buildOsidFilteredFeatures(controlGeoRef.current, allObjs);
         const arrows = buildMultiAxisArrows(currentAxes);
+
         (map.getSource('ops-sector-overlay') as maplibregl.GeoJSONSource | undefined)?.setData(sectorOverlay);
         (map.getSource('ops-objectives') as maplibregl.GeoJSONSource | undefined)?.setData(objectiveOverlay);
-        (map.getSource('ops-advance-arrows') as maplibregl.GeoJSONSource | undefined)?.setData(arrows);
+        updateArrowSourceData(map, arrows);
     }, [sectorFriendlyOsids, formationById]);
 
     // --- Axis management ---
@@ -376,7 +516,8 @@ export function OpsPlanningModal() {
                     : [...a.objectives, osid];
                 return { ...a, objectives: objs };
             });
-            setOperationTargetOsids(next.flatMap((a) => a.objectives));
+            // Defer store update to avoid setState-during-render (MapContainer subscribes to this)
+            queueMicrotask(() => setOperationTargetOsids(next.flatMap((a) => a.objectives)));
             return next;
         });
     }
@@ -388,6 +529,9 @@ export function OpsPlanningModal() {
             return { ...a, stagingOsid: a.stagingOsid === osid ? undefined : osid };
         }));
         setMapClickMode('objectives');
+        if (mapRef.current) {
+            mapRef.current.getCanvas().style.cursor = '';
+        }
     }
 
     function clearStagingOnActiveAxis() {
@@ -506,14 +650,16 @@ export function OpsPlanningModal() {
             attributionControl: false,
         });
         mapRef.current = map;
+        if (import.meta.env.DEV) {
+            (window as any).__debug_ops_map = map;
+        }
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
         const init = async () => {
             try {
-                const [geojson, byOsid] = await Promise.all([
-                    loadOperationalSettlements(),
-                    loadOperationalPoliticalControl(),
-                ]);
+                const geojson = await loadOperationalSettlements();
+                // Use current game-state control, not the static scenario-start file
+                const byOsid = loadedGameState?.controlBySettlement ?? {};
 
                 const centroidLookup = buildOsidCentroidLookup(geojson);
                 centroidLookupRef.current = centroidLookup;
@@ -575,60 +721,8 @@ export function OpsPlanningModal() {
                 map.addLayer({ id: 'ops-objectives-fill', type: 'fill', source: 'ops-objectives', paint: { 'fill-color': 'rgba(255,255,255,0.12)', 'fill-opacity': 1 } });
                 map.addLayer({ id: 'ops-objectives-line', type: 'line', source: 'ops-objectives', paint: { 'line-color': 'rgba(255,255,255,0.8)', 'line-width': 2, 'line-dasharray': [2, 1.5] } });
 
-                // Advance arrows (per-axis colored via data-driven styling)
-                map.addSource('ops-advance-arrows', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-                map.addLayer({
-                    id: 'ops-advance-lines', type: 'line', source: 'ops-advance-arrows',
-                    filter: ['==', ['get', 'type'], 'advance-line'],
-                    paint: { 'line-color': ['get', 'color'], 'line-width': 3 },
-                    layout: { 'line-cap': 'round', 'line-join': 'round' },
-                });
-                map.addLayer({
-                    id: 'ops-advance-heads', type: 'fill', source: 'ops-advance-arrows',
-                    filter: ['==', ['get', 'type'], 'advance-head'],
-                    paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
-                });
-                map.addLayer({
-                    id: 'ops-pencil-scratches', type: 'line', source: 'ops-advance-arrows',
-                    filter: ['==', ['get', 'type'], 'pencil-scratch'],
-                    paint: { 'line-color': ['get', 'color'], 'line-width': 2, 'line-blur': 0.5 }
-                });
-                // Objective number labels
-                map.addLayer({
-                    id: 'ops-obj-labels', type: 'symbol', source: 'ops-advance-arrows',
-                    filter: ['==', ['get', 'type'], 'obj-label'],
-                    layout: {
-                        'text-field': ['get', 'label'],
-                        'text-size': 14,
-                        'text-font': ['Open Sans Bold'],
-                        'text-allow-overlap': true,
-                        'text-offset': [0, -1.2],
-                    },
-                    paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
-                });
-                // Staging diamond markers
-                map.addLayer({
-                    id: 'ops-staging-markers', type: 'fill', source: 'ops-advance-arrows',
-                    filter: ['==', ['get', 'type'], 'staging-marker'],
-                    paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.4 },
-                });
-                map.addLayer({
-                    id: 'ops-staging-outline', type: 'line', source: 'ops-advance-arrows',
-                    filter: ['==', ['get', 'type'], 'staging-marker'],
-                    paint: { 'line-color': ['get', 'color'], 'line-width': 2 },
-                });
-                map.addLayer({
-                    id: 'ops-staging-labels', type: 'symbol', source: 'ops-advance-arrows',
-                    filter: ['==', ['get', 'type'], 'staging-label'],
-                    layout: {
-                        'text-field': ['get', 'label'],
-                        'text-size': 12,
-                        'text-font': ['Open Sans Bold'],
-                        'text-allow-overlap': true,
-                        'text-offset': [0, -1.0],
-                    },
-                    paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
-                });
+                // Advance arrows — source + layers created via addArrowSourceAndLayers
+                addArrowSourceAndLayers(map, { type: 'FeatureCollection', features: [] });
 
                 // Click handlers — dispatch via ref so closure captures latest mode
                 const handleClick = (event: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
@@ -637,8 +731,13 @@ export function OpsPlanningModal() {
                 };
                 for (const layerId of ['osid-control-fill', 'ops-sector-overlay-fill', 'ops-objectives-fill']) {
                     map.on('click', layerId, handleClick);
-                    map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });
-                    map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = ''; });
+                    map.on('mouseenter', layerId, () => {
+                        const mode = mapClickModeRef.current;
+                        map.getCanvas().style.cursor = mode === 'staging' ? 'crosshair' : 'pointer';
+                    });
+                    map.on('mouseleave', layerId, () => {
+                        map.getCanvas().style.cursor = '';
+                    });
                 }
 
                 refreshOverlaySources(axes);
@@ -682,11 +781,10 @@ export function OpsPlanningModal() {
 
         return (
             <label
-                className={`flex items-start gap-2 text-[11px] p-2 rounded border cursor-pointer transition-colors ${
-                    isAssigned
-                        ? 'bg-black/40 border-interactive/50 text-text-primary'
-                        : 'bg-panel-card border-panel-border text-text-secondary hover:border-interactive/30'
-                }`}
+                className={`flex items-start gap-2 text-[11px] p-2 rounded border cursor-pointer transition-colors ${isAssigned
+                    ? 'bg-black/40 border-interactive/50 text-text-primary'
+                    : 'bg-panel-card border-panel-border text-text-secondary hover:border-interactive/30'
+                    }`}
             >
                 <input
                     type="checkbox"
@@ -721,7 +819,7 @@ export function OpsPlanningModal() {
             <div className="bg-black/30 border border-panel-border rounded p-3 text-[11px] space-y-2">
                 <div className="text-accent-gold font-semibold uppercase tracking-widest text-[10px] border-b border-panel-border/50 pb-1">Plan Summary</div>
                 {axes.map((axis, idx) => {
-                    const colorSet = AXIS_COLORS[idx % AXIS_COLORS.length];
+                    const colorSet = axisColors[idx % axisColors.length];
                     if (axis.brigadeIds.size === 0 && axis.objectives.length === 0) return null;
                     return (
                         <div key={axis.id} className="space-y-0.5">
@@ -750,7 +848,7 @@ export function OpsPlanningModal() {
     }
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm crt-overlay">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm crt-overlay">
             <div className="panel-power-on weathered-panel w-[90vw] h-[90vh] rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-white/10 relative paper-grain">
                 {/* Header */}
                 <div className="flex bg-panel-card p-4 border-b border-panel-border shrink-0 justify-between items-center relative z-10">
@@ -846,16 +944,15 @@ export function OpsPlanningModal() {
                                 {/* Axis tabs */}
                                 <div className="flex gap-1 mb-3">
                                     {axes.map((axis, idx) => {
-                                        const colorSet = AXIS_COLORS[idx % AXIS_COLORS.length];
+                                        const colorSet = axisColors[idx % axisColors.length];
                                         const isActive = axis.id === activeAxisId;
                                         return (
                                             <button key={axis.id} type="button"
                                                 onClick={() => setActiveAxisId(axis.id)}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold transition-colors border ${
-                                                    isActive
-                                                        ? 'bg-black/40 border-interactive text-white'
-                                                        : 'bg-panel-card border-panel-border text-text-secondary hover:border-interactive/50'
-                                                }`}>
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold transition-colors border ${isActive
+                                                    ? 'bg-black/40 border-interactive text-white'
+                                                    : 'bg-panel-card border-panel-border text-text-secondary hover:border-interactive/50'
+                                                    }`}>
                                                 <span className={`w-2 h-2 rounded-full ${colorSet.dot}`} />
                                                 {axis.name}
                                                 <span className="text-[9px] text-text-secondary ml-1">({axis.brigadeIds.size}b/{axis.objectives.length}o)</span>
@@ -867,7 +964,7 @@ export function OpsPlanningModal() {
                                 {/* Active axis detail */}
                                 {activeAxis && (() => {
                                     const axisIdx = Math.max(0, axes.findIndex((a) => a.id === activeAxisId));
-                                    const colorSet = AXIS_COLORS[axisIdx % AXIS_COLORS.length];
+                                    const colorSet = axisColors[axisIdx % axisColors.length];
                                     return (
                                         <div className="space-y-3 bg-black/15 rounded p-3 border border-panel-border/30">
                                             {/* Axis name + delete */}
@@ -901,13 +998,15 @@ export function OpsPlanningModal() {
                                                         onClick={() => {
                                                             const next = mapClickMode === 'staging' ? 'objectives' : 'staging';
                                                             setMapClickMode(next);
+                                                            if (mapRef.current) {
+                                                                mapRef.current.getCanvas().style.cursor = next === 'staging' ? 'crosshair' : '';
+                                                            }
                                                         }}
-                                                        className={`text-[10px] px-2.5 py-1 rounded border transition-colors ${
-                                                            mapClickMode === 'staging'
-                                                                ? 'bg-accent-gold/20 border-accent-gold text-accent-gold'
-                                                                : 'bg-panel-card border-panel-border text-text-secondary hover:border-interactive/50'
-                                                        }`}>
-                                                        {mapClickMode === 'staging' ? 'Click map to set staging...' : 'Set Staging Area'}
+                                                        className={`text-[10px] px-2.5 py-1 rounded border transition-colors ${mapClickMode === 'staging'
+                                                            ? 'bg-accent-gold/20 border-accent-gold text-accent-gold animate-pulse'
+                                                            : 'bg-panel-card border-panel-border text-text-secondary hover:border-interactive/50'
+                                                            }`}>
+                                                        {mapClickMode === 'staging' ? 'CANCEL: Click map to set staging...' : 'Set Staging Area'}
                                                     </button>
                                                     {activeAxis.stagingOsid && (
                                                         <span className="text-[10px] text-text-primary flex items-center gap-1">
@@ -933,46 +1032,46 @@ export function OpsPlanningModal() {
                                                         axisFriendlyPersonnel += formationById.get(bId)?.personnel ?? 0;
                                                     }
                                                     return (
-                                                    <div className="space-y-1">
-                                                        {activeAxis.objectives.map((osid, objIdx) => {
-                                                            const enemy = enemyStrengthByOsid.get(osid);
-                                                            return (
-                                                                <div key={osid} className="flex items-center gap-1.5 p-1.5 bg-panel-card rounded border border-panel-border text-[11px]">
-                                                                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                                                                        style={{ backgroundColor: colorSet.line, color: '#000' }}>
-                                                                        {objIdx + 1}
-                                                                    </span>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <span className="text-text-primary truncate block">{getOsidDisplayName(osid, osidDisplayNames)}</span>
-                                                                        {enemy ? (
-                                                                            <span className={`text-[9px] ${axisFriendlyPersonnel > enemy.totalPersonnel * 1.5 ? 'text-green-400' : axisFriendlyPersonnel > enemy.totalPersonnel ? 'text-yellow-400' : 'text-red-400'}`}>
-                                                                                {axisFriendlyPersonnel.toLocaleString()} vs ~{enemy.totalPersonnel.toLocaleString()} est.
-                                                                                {enemy.tanks > 0 ? ` (${enemy.tanks}T` : ''}
-                                                                                {enemy.artillery > 0 ? `${enemy.tanks > 0 ? '/' : '('}${enemy.artillery}A)` : enemy.tanks > 0 ? ')' : ''}
-                                                                                {' '}&mdash; {enemy.brigadeCount} bde{enemy.brigadeCount !== 1 ? 's' : ''}
-                                                                            </span>
-                                                                        ) : (
-                                                                            <span className="text-[9px] text-text-secondary">No known enemy forces</span>
-                                                                        )}
+                                                        <div className="space-y-1">
+                                                            {activeAxis.objectives.map((osid, objIdx) => {
+                                                                const enemy = enemyStrengthByOsid.get(osid);
+                                                                return (
+                                                                    <div key={osid} className="flex items-center gap-1.5 p-1.5 bg-panel-card rounded border border-panel-border text-[11px]">
+                                                                        <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                                                                            style={{ backgroundColor: colorSet.line, color: '#000' }}>
+                                                                            {objIdx + 1}
+                                                                        </span>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <span className="text-text-primary truncate block">{getOsidDisplayName(osid, osidDisplayNames)}</span>
+                                                                            {enemy ? (
+                                                                                <span className={`text-[9px] ${axisFriendlyPersonnel > enemy.totalPersonnel * 1.5 ? 'text-green-400' : axisFriendlyPersonnel > enemy.totalPersonnel ? 'text-yellow-400' : 'text-red-400'}`}>
+                                                                                    {axisFriendlyPersonnel.toLocaleString()} vs ~{enemy.totalPersonnel.toLocaleString()} est.
+                                                                                    {enemy.tanks > 0 ? ` (${enemy.tanks}T` : ''}
+                                                                                    {enemy.artillery > 0 ? `${enemy.tanks > 0 ? '/' : '('}${enemy.artillery}A)` : enemy.tanks > 0 ? ')' : ''}
+                                                                                    {' '}&mdash; {enemy.brigadeCount} bde{enemy.brigadeCount !== 1 ? 's' : ''}
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="text-[9px] text-text-secondary">No known enemy forces</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <button type="button" onClick={() => moveObjective(activeAxis.id, objIdx, -1)}
+                                                                            disabled={objIdx === 0}
+                                                                            className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-white disabled:opacity-20 transition-colors">
+                                                                            &#9650;
+                                                                        </button>
+                                                                        <button type="button" onClick={() => moveObjective(activeAxis.id, objIdx, 1)}
+                                                                            disabled={objIdx === activeAxis.objectives.length - 1}
+                                                                            className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-white disabled:opacity-20 transition-colors">
+                                                                            &#9660;
+                                                                        </button>
+                                                                        <button type="button" onClick={() => toggleObjectiveOnActiveAxis(osid)}
+                                                                            className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors">
+                                                                            &#10005;
+                                                                        </button>
                                                                     </div>
-                                                                    <button type="button" onClick={() => moveObjective(activeAxis.id, objIdx, -1)}
-                                                                        disabled={objIdx === 0}
-                                                                        className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-white disabled:opacity-20 transition-colors">
-                                                                        &#9650;
-                                                                    </button>
-                                                                    <button type="button" onClick={() => moveObjective(activeAxis.id, objIdx, 1)}
-                                                                        disabled={objIdx === activeAxis.objectives.length - 1}
-                                                                        className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-white disabled:opacity-20 transition-colors">
-                                                                        &#9660;
-                                                                    </button>
-                                                                    <button type="button" onClick={() => toggleObjectiveOnActiveAxis(osid)}
-                                                                        className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors">
-                                                                        &#10005;
-                                                                    </button>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
                                                     );
                                                 })()}
                                             </div>
@@ -1035,7 +1134,7 @@ export function OpsPlanningModal() {
                             </div>
                             <div className="border-t border-panel-border/50 pt-3 space-y-2">
                                 {axes.map((axis, idx) => {
-                                    const colorSet = AXIS_COLORS[idx % AXIS_COLORS.length];
+                                    const colorSet = axisColors[idx % axisColors.length];
                                     return (
                                         <div key={axis.id} className="text-[11px]">
                                             <div className="font-semibold flex items-center gap-1.5" style={{ color: colorSet.label }}>

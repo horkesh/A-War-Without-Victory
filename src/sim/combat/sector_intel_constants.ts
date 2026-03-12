@@ -1,5 +1,5 @@
 /**
- * Sector-facing intelligence system � faction recon profiles and confidence thresholds.
+ * Sector-facing intelligence system � faction recon profiles and confidence thresholds.
  *
  * Faction profiles are faction-level constants (not unit-level).
  * ARBiH advantage is baked into higher passive_buildup_per_turn and longer recon range.
@@ -45,6 +45,18 @@ export const FACTION_RECON_PROFILES: Record<NonNullable<FactionId>, FactionRecon
         probe_confidence_gain: 0.35,
         probe_casualty_factor: 0.25,
     },
+};
+
+/**
+ * Faction-specific initial intel confidence for newly-encountered enemy sectors.
+ * VRS: 0.60 — JNA intelligence inheritance (signals intercepts, pre-war mapping, informant networks).
+ * RBiH: 0.05 — Near-zero; no institutional intelligence, only local knowledge.
+ * HRHB: 0.25 — Croatian SIS (SIS/HIS) in Herzegovina provides moderate starting intel.
+ */
+export const FACTION_INITIAL_INTEL_CONFIDENCE: Record<NonNullable<FactionId>, number> = {
+    RS: 0.60,
+    RBiH: 0.05,
+    HRHB: 0.25,
 };
 
 /** Below this confidence: strength=unknown, posture=unknown, no visible brigades. */

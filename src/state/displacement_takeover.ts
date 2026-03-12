@@ -108,7 +108,7 @@ export interface TakeoverBattleRecord {
     defender_faction: FactionId;
 }
 
-export interface PhaseIIBattleResolutionLike {
+export interface BattleResolutionLike {
     battles: TakeoverBattleRecord[];
 }
 
@@ -411,7 +411,7 @@ function getInitialDisplacementFraction(
 export function processDisplacementTakeover(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
-    battleReport?: PhaseIIBattleResolutionLike,
+    battleReport?: BattleResolutionLike,
     population1991ByMun?: MunicipalityPopulation1991Map,
     /** Optional OSID-keyed settlements with per-OSID census data (population_total, population_bosniaks, etc.). */
     osidSettlements?: Map<string, SettlementRecord>

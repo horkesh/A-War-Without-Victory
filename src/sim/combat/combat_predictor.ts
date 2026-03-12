@@ -61,8 +61,13 @@ import {
     getBombardmentCasualtyMult,
     rankDefendersByPower,
     getPowerRatioCasualtyMult,
+    MIN_DEFENSE_FLOOR_FRACTION,
+    MAX_EDGES_PER_BRIGADE,
+    SECTOR_RESERVE_RESPONSE_FRACTION,
+    REACTIVE_DEFENSE_RATIO,
 } from './combat_math.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
+import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 import { frontDensityModifier } from './local_front_defense.js';
 
 // Backward-compat re-export
@@ -187,6 +192,7 @@ export function predictCombatOutcome(
     let defenderHasBrigade = false;
     let defenderDisrupted = false;
     let defenderCohesion = 60;
+    let sectorDefBrigades: FormationState[] | null = null;
     const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
 
     // Fog of war: did this brigade previously fail at this target?
@@ -212,11 +218,27 @@ export function predictCombatOutcome(
             : [];
         if (sectorBrigades.length > 0) {
             defenderHasBrigade = true;
-            const densityMod = frontDensityModifier(sectorBrigades.length, sector!.length_edges);
-            const edgeShare = sector!.length_edges > 0 ? 1 / sector!.length_edges : 1;
+            // Reactive sector defense (mirrors resolver): reserves mobilize proportional to attack size
             const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-            defenderPower = totalPower * edgeShare * densityMod * fogMult;
+            const physicalDefenders = sectorBrigades.filter(
+                f => (f as { location_osid?: string }).location_osid === targetOsid
+            );
+            let physicalPower = 0;
+            for (const pd of physicalDefenders) {
+                physicalPower += computeDefenderPower(state, pd, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(pd));
+            }
+            const avgBrigadePower = totalPower / sectorBrigades.length;
+            const attackerCount = 1 + (additionalAttackers?.length ?? 0);
+            const sectorReserves = totalPower - physicalPower;
+            const reactiveResponse = Math.min(
+                sectorReserves,
+                attackerCount * avgBrigadePower * REACTIVE_DEFENSE_RATIO
+            );
+            let baseDef = physicalPower + reactiveResponse;
+            const minFloor = avgBrigadePower * MIN_DEFENSE_FLOOR_FRACTION;
+            defenderPower = Math.max(baseDef, minFloor) * fogMult;
             defenderFormation = primary;
+            sectorDefBrigades = sectorBrigades;
             defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
             defenderCohesion = defenderFormation.cohesion ?? 60;
         } else if (defenderFormations.length > 0) {
@@ -242,6 +264,12 @@ export function predictCombatOutcome(
         return null;
     }
 
+    // Enclave garrison: organized civilian defense (same as resolver)
+    const garrisonPower = getEnclaveGarrisonPower(
+        state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0
+    );
+    defenderPower += garrisonPower;
+
     const coordPenalty = attackerFormations.length >= 3 ? COORDINATION_PENALTY_3PLUS
         : attackerFormations.length === 2 ? COORDINATION_PENALTY_2 : 1.0;
     const targetSlope = slopeByOsid?.[targetOsid] ?? 0;
@@ -251,7 +279,7 @@ export function predictCombatOutcome(
     const effectivePosture = attackerPosture ?? 'attack';
     const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
     const attackerPower = attackerFormations.reduce(
-        (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult), 0
+        (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid), 0
     ) * coordPenalty * seasonal.attack_mult;
     defenderPower *= seasonal.defense_mult;
 
@@ -266,7 +294,10 @@ export function predictCombatOutcome(
     }
 
     const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
-    const personnelDefender = defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
+    // Sector defense: use total sector personnel as casualty base (mirrors resolver fix n590)
+    const personnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
+        ? sectorDefBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
+        : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
     const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
     const [, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
     const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1);

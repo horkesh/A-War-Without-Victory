@@ -8,11 +8,16 @@ import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations
 import { getPanelRailStyle } from './panelRail';
 import { useIPC } from '../desktop/useIPC';
 
-/** Density badge with color coding. */
-function DensityBadge({ density }: { density: number }) {
-  if (density < 0.5) return <span className="text-red-400 font-semibold">THIN</span>;
-  if (density > 1.0) return <span className="text-green-400 font-semibold">DENSE</span>;
-  return <span className="text-amber-300">Normal</span>;
+/** Strength class badge with color coding. */
+function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
+  switch (strengthClass) {
+    case 'fortress': return <span className="text-green-700 font-bold bg-green-100 px-1 rounded">FORTRESS</span>;
+    case 'strong': return <span className="text-green-600 font-semibold">STRONG</span>;
+    case 'adequate': return <span className="text-amber-600 font-semibold">ADEQUATE</span>;
+    case 'thin': return <span className="text-orange-600 font-semibold">THIN</span>;
+    case 'critical': return <span className="text-red-600 font-bold bg-red-100 px-1 rounded">CRITICAL</span>;
+    default: return <span className="text-neutral-400">—</span>;
+  }
 }
 
 /** Threat ratio badge with color coding. */
@@ -23,6 +28,33 @@ function ThreatBadge({ ratio }: { ratio: number }) {
 }
 
 
+
+const PREP_SUB_PHASES = ['intel_gathering', 'force_staging', 'supply_check', 'assessment', 'ready'] as const;
+const PREP_LABELS: Record<string, string> = {
+  intel_gathering: 'INTEL', force_staging: 'STAGING', supply_check: 'SUPPLY', assessment: 'ASSESS', ready: 'READY',
+};
+
+function PreparationProgressBar({ subPhase, turnsElapsed, maxTurns }: { subPhase: string; turnsElapsed: number; maxTurns: number }) {
+  const idx = PREP_SUB_PHASES.indexOf(subPhase as typeof PREP_SUB_PHASES[number]);
+  const timeProgress = maxTurns > 0 ? Math.min(1, turnsElapsed / maxTurns) : 0;
+  return (
+    <div>
+      <div className="flex gap-0.5 mb-0.5">
+        {PREP_SUB_PHASES.map((phase, i) => (
+          <div
+            key={phase}
+            className={`h-1.5 flex-1 rounded-sm ${i <= idx ? (phase === 'ready' ? 'bg-green-500' : 'bg-amber-500') : 'bg-neutral-200'}`}
+            title={PREP_LABELS[phase]}
+          />
+        ))}
+      </div>
+      <div className="flex justify-between text-[8px] text-neutral-500">
+        <span className="uppercase font-bold">{PREP_LABELS[subPhase] ?? subPhase}</span>
+        <span>{turnsElapsed}/{maxTurns}t ({Math.round(timeProgress * 100)}%)</span>
+      </div>
+    </div>
+  );
+}
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -228,6 +260,75 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           <div role="tabpanel" id="sector-intel-panel-overview" aria-labelledby="sector-intel-tab-overview" hidden={activeTab !== 'overview'} className="p-4 relative z-10">
             {activeTab === 'overview' && (
               <div className="space-y-3">
+                {/* Combat Power Summary */}
+                <div className="mb-2 p-2 bg-neutral-100 border border-neutral-300 rounded">
+                  <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1.5 border-b border-neutral-300 pb-1">Combat Power Assessment</div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Strength</span>
+                      <span className="font-medium">
+                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : <StrengthBadge strengthClass={sector.combat_strength_class} />}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Personnel</span>
+                      <span className="font-medium tabular-nums">
+                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : (sector.combat_personnel?.toLocaleString() ?? '—')}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Offensive Power</span>
+                      <span className="font-medium tabular-nums">
+                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : (sector.combat_offensive_power != null ? Math.round(sector.combat_offensive_power).toLocaleString() : '—')}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Defensive Power</span>
+                      <span className="font-medium tabular-nums">
+                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : (sector.combat_defensive_power != null ? Math.round(sector.combat_defensive_power).toLocaleString() : Math.round(sector.defensive_power).toLocaleString())}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Def/Edge</span>
+                      <span className="font-medium tabular-nums">
+                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : (sector.combat_defense_per_edge != null ? Math.round(sector.combat_defense_per_edge).toLocaleString() : '—')}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Risk Ratio</span>
+                      <span className="font-medium">
+                        {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : <ThreatBadge ratio={sector.threat_ratio} />}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Unit Condition */}
+                <div className="mb-2 p-2 bg-neutral-100 border border-neutral-300 rounded">
+                  <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1.5 border-b border-neutral-300 pb-1">Unit Condition</div>
+                  <div className="grid grid-cols-3 gap-x-3 gap-y-1.5">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Morale</span>
+                      <span className={`font-medium tabular-nums ${(sector.combat_morale_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_morale_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
+                        {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">RED</span> : (sector.combat_morale_avg != null ? Math.round(sector.combat_morale_avg) : '—')}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Cohesion</span>
+                      <span className={`font-medium tabular-nums ${(sector.combat_cohesion_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_cohesion_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
+                        {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">RED</span> : (sector.combat_cohesion_avg != null ? Math.round(sector.combat_cohesion_avg) : '—')}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Fatigue</span>
+                      <span className={`font-medium tabular-nums ${(sector.combat_fatigue_avg ?? 0) > 20 ? 'text-red-600' : (sector.combat_fatigue_avg ?? 0) > 10 ? 'text-amber-600' : ''}`}>
+                        {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">RED</span> : (sector.combat_fatigue_avg != null ? sector.combat_fatigue_avg.toFixed(1) : '—')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sector Details */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                   <div className="flex flex-col">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">Front Length</span>
@@ -237,31 +338,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     <span className="text-[9px] text-neutral-500">[{sector.sub_segment_count === 1 ? 'Contiguous' : `${sector.sub_segment_count} Segments`}]</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Density</span>
-                    <span className="font-medium">
-                      {sector.intel_confidence < 0.25 ? <span className="bg-black text-black select-none">REDACTED</span> : (
-                        <>
-                          {sector.density.toFixed(2)} <DensityBadge density={sector.density} />
-                        </>
-                      )}
-                    </span>
-                    <span className="text-[9px] text-neutral-500">[{sector.assigned_brigade_ids.length} Frontline]</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Risk Ratio</span>
-                    <span className="font-medium">
-                      {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : <ThreatBadge ratio={sector.threat_ratio} />}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Defensive Power</span>
-                    <span className="font-medium">
-                      {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : Math.round(sector.defensive_power).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex flex-col col-span-2">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Linked Settlements</span>
-                    <span className="font-medium">{sectorFriendlyOsids.length}</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Brigades</span>
+                    <span className="font-medium">{sector.assigned_brigade_ids.length} Front / {sector.reserve_brigade_ids.length} Reserve</span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">Sector Stance</span>
@@ -272,8 +350,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     <span className="font-medium">{(sector.logistics_priority ?? 1).toFixed(1)}x</span>
                   </div>
                   <div className="flex flex-col col-span-2">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">OPSEC</span>
-                    <span className="font-medium uppercase">{sector.opsec_active ? 'Active' : 'Inactive'}</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">Linked Settlements</span>
+                    <span className="font-medium">{sectorFriendlyOsids.length}</span>
                   </div>
                 </div>
 
@@ -481,6 +559,24 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">Supply Status</div>
                             <div className="text-[10px]">{sector.intel_confidence < 0.7 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(op.supply_readiness * 100)}% Readiness`}</div>
                           </>
+                        )}
+
+                        {op.preparation_sub_phase && op.phase === 'planning' && (
+                          <div className="mt-2 pt-2 border-t border-neutral-200 border-dashed">
+                            <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">Preparation</div>
+                            <PreparationProgressBar subPhase={op.preparation_sub_phase} turnsElapsed={op.preparation_turns_elapsed ?? 0} maxTurns={op.preparation_max_turns ?? 8} />
+                            {op.commander_assessment && (
+                              <div className={`text-[9px] mt-1 font-bold uppercase ${op.commander_assessment === 'launch' ? 'text-green-700' : op.commander_assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
+                                Cdr Assessment: {op.commander_assessment}
+                              </div>
+                            )}
+                            {op.has_active_probe && (
+                              <div className="text-[9px] mt-0.5 text-blue-700 font-semibold uppercase">Probe in progress</div>
+                            )}
+                            {op.force_ratio_estimate != null && (
+                              <div className="text-[9px] mt-0.5 text-neutral-600">Force Ratio Est: {op.force_ratio_estimate.toFixed(2)}</div>
+                            )}
+                          </div>
                         )}
 
                         {objective && (

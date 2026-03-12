@@ -155,6 +155,25 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
         }
     }
 
+    // Partition root validation: military, political, displacement
+    if (!Object.prototype.hasOwnProperty.call(s, 'military') || s.military == null || typeof s.military !== 'object' || Array.isArray(s.military)) {
+        errors.push('state.military must be a non-null object');
+    }
+    if (!Object.prototype.hasOwnProperty.call(s, 'political') || s.political == null || typeof s.political !== 'object' || Array.isArray(s.political)) {
+        errors.push('state.political must be a non-null object');
+    } else {
+        const pol = s.political as any;
+        if (!Object.prototype.hasOwnProperty.call(pol, 'political_controllers') || pol.political_controllers == null || typeof pol.political_controllers !== 'object' || Array.isArray(pol.political_controllers)) {
+            errors.push('state.political.political_controllers must be a non-null object');
+        }
+    }
+    // displacement is optional (may be undefined for pre-displacement saves)
+    if (Object.prototype.hasOwnProperty.call(s, 'displacement') && s.displacement !== undefined) {
+        if (s.displacement === null || typeof s.displacement !== 'object' || Array.isArray(s.displacement)) {
+            errors.push('state.displacement must be an object when present');
+        }
+    }
+
     // Peace phase: optional top-level Peace phase state (validate type when present)
     if ('war_jna' in s && s.war_jna !== undefined) {
         const jna = s.war_jna;

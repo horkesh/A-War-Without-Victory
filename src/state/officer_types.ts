@@ -55,6 +55,14 @@ export interface NamedOfficer {
     improvement_rate: number;
     /** Pool priority tier for succession ordering. */
     pool_tier: OfficerPoolTier;
+
+    /** If set, officer is physically trapped in an enclave and can only command ops within it. */
+    enclave_lock?: {
+        /** Enclave identifier (e.g. 'srebrenica', 'bihac', 'sarajevo', 'sarajevo_ring', 'orasje'). */
+        enclave_id: string;
+        /** Turn when enclave breaks out / officer evacuated. Undefined = permanent lock. */
+        locked_until_turn?: number;
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

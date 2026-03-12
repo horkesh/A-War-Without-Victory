@@ -14,6 +14,7 @@ import type {
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import {
     isBrigadeDeployed,
     type Osid
@@ -123,7 +124,7 @@ export function findNearestFriendlyOsidInSet(
             if (visited.has(n)) continue;
             visited.add(n);
             const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-            if (ctrl === faction) {
+            if (isFriendlyFaction(ctrl, faction, state)) {
                 queue.push({ osid: n, firstStep: firstStep ?? n });
             }
         }
@@ -154,7 +155,7 @@ export function findNearestFriendlyOsidDestination(
             if (visited.has(n)) continue;
             visited.add(n);
             const ctrl = getPoliticalControllerOSID(state, n, reverseMap);
-            if (ctrl === faction) {
+            if (isFriendlyFaction(ctrl, faction, state)) {
                 queue.push(n as Osid);
             }
         }

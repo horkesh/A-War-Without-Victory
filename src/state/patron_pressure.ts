@@ -15,6 +15,84 @@ export const INTERNATIONAL_SANCTIONS_THRESHOLD = 0.6;
 export const NATO_INTERVENTION_THRESHOLD = 0.8;
 export const IVP_HYSTERESIS = 0.1;
 
+/** Composite IVP weights — single source for engine and UI breakdown (must sum to 1.0 for linear combo). */
+export const IVP_WEIGHT_SARAJEVO_SIEGE = 0.4;
+export const IVP_WEIGHT_ENCLAVE_HUMANITARIAN = 0.3;
+export const IVP_WEIGHT_ATROCITY_VISIBILITY = 0.2;
+export const IVP_WEIGHT_NEGOTIATION_MOMENTUM = 0.1;
+
+/** Stable key order for UI lists — do not sort dynamically. */
+export type IvpComponentKey =
+    | 'sarajevo_siege_visibility'
+    | 'enclave_humanitarian_pressure'
+    | 'atrocity_visibility'
+    | 'negotiation_momentum';
+
+export interface IvpComponentContribution {
+    key: IvpComponentKey;
+    raw: number; // 0..1 clamped component value
+    weight: number;
+    /** Contribution before composite clamp — weight * raw */
+    contribution: number;
+}
+
+/**
+ * Read-only breakdown of IVP components for UI (Diplomatic Press Briefing, SituationTab).
+ * Fixed iteration order — deterministic, no sorting by value.
+ */
+/** Minimal shape for UI adapters that only surface the four components (+ optional composite). */
+export type IvpBreakdownInput = Pick<
+    InternationalVisibilityPressure,
+    'sarajevo_siege_visibility' | 'enclave_humanitarian_pressure' | 'atrocity_visibility' | 'negotiation_momentum'
+> &
+    Partial<Pick<InternationalVisibilityPressure, 'composite_ivp' | 'last_major_shift'>>;
+
+export function getIvpComponentContributions(ivp: IvpBreakdownInput | undefined): IvpComponentContribution[] {
+    if (!ivp) return [];
+    const s = clamp01(ivp.sarajevo_siege_visibility ?? 0);
+    const e = clamp01(ivp.enclave_humanitarian_pressure ?? 0);
+    const a = clamp01(ivp.atrocity_visibility ?? 0);
+    const n = clamp01(ivp.negotiation_momentum ?? 0);
+    return [
+        { key: 'sarajevo_siege_visibility', raw: s, weight: IVP_WEIGHT_SARAJEVO_SIEGE, contribution: s * IVP_WEIGHT_SARAJEVO_SIEGE },
+        { key: 'enclave_humanitarian_pressure', raw: e, weight: IVP_WEIGHT_ENCLAVE_HUMANITARIAN, contribution: e * IVP_WEIGHT_ENCLAVE_HUMANITARIAN },
+        { key: 'atrocity_visibility', raw: a, weight: IVP_WEIGHT_ATROCITY_VISIBILITY, contribution: a * IVP_WEIGHT_ATROCITY_VISIBILITY },
+        { key: 'negotiation_momentum', raw: n, weight: IVP_WEIGHT_NEGOTIATION_MOMENTUM, contribution: n * IVP_WEIGHT_NEGOTIATION_MOMENTUM },
+    ];
+}
+
+/** Human-readable labels for IVP consequence ids — stable order for display. */
+export const IVP_CONSEQUENCE_ORDER = ['drina_blockade', 'international_sanctions', 'nato_intervention_threat'] as const;
+
+export function formatIvpConsequenceLabel(id: string): string {
+    switch (id) {
+        case 'drina_blockade': return 'Drina blockade pressure';
+        case 'international_sanctions': return 'International sanctions';
+        case 'nato_intervention_threat': return 'NATO intervention threat';
+        default: return id;
+    }
+}
+
+/** Player-facing label for IVP component key — single source for map + warroom. */
+export function ivpComponentLabel(key: IvpComponentKey): string {
+    switch (key) {
+        case 'sarajevo_siege_visibility': return 'Sarajevo siege visibility';
+        case 'enclave_humanitarian_pressure': return 'Enclave humanitarian pressure';
+        case 'atrocity_visibility': return 'Displacement visibility';
+        case 'negotiation_momentum': return 'Negotiation momentum';
+        default: return key;
+    }
+}
+
+/** Stable sort for consequence id lists — deterministic display order. */
+export function sortIvpConsequenceIds(ids: readonly string[]): string[] {
+    return [...ids].sort(
+        (a, b) =>
+            IVP_CONSEQUENCE_ORDER.indexOf(a as (typeof IVP_CONSEQUENCE_ORDER)[number]) -
+                IVP_CONSEQUENCE_ORDER.indexOf(b as (typeof IVP_CONSEQUENCE_ORDER)[number]) || a.localeCompare(b)
+    );
+}
+
 function getCurrentTurnAtrocityVisibility(state: GameState): number {
     const displacedThisTurn = (state.displacement.displacement_event_log ?? [])
         .filter((event) => event.turn === state.meta.turn)
@@ -110,10 +188,10 @@ export function updateInternationalVisibilityPressure(
     const negotiationPressure = state.factions.reduce((sum, f) => sum + (f.negotiation?.pressure ?? 0), 0);
     ivp.negotiation_momentum = clamp01(negotiationPressure / 100);
     ivp.composite_ivp = clamp01(
-        ivp.sarajevo_siege_visibility * 0.4 +
-        ivp.enclave_humanitarian_pressure * 0.3 +
-        ivp.atrocity_visibility * 0.2 +
-        ivp.negotiation_momentum * 0.1
+        ivp.sarajevo_siege_visibility * IVP_WEIGHT_SARAJEVO_SIEGE +
+        ivp.enclave_humanitarian_pressure * IVP_WEIGHT_ENCLAVE_HUMANITARIAN +
+        ivp.atrocity_visibility * IVP_WEIGHT_ATROCITY_VISIBILITY +
+        ivp.negotiation_momentum * IVP_WEIGHT_NEGOTIATION_MOMENTUM
     );
 
     const totalDelta =
@@ -162,12 +240,14 @@ export function updatePatronState(
         const base = patronCommitmentBase(faction.id, year);
         const atrocity = ivp.atrocity_visibility;
         const momentum = ivp.negotiation_momentum;
-        const composite = ivp.composite_ivp ?? clamp01(
-            ivp.sarajevo_siege_visibility * 0.4 +
-            ivp.enclave_humanitarian_pressure * 0.3 +
-            ivp.atrocity_visibility * 0.2 +
-            ivp.negotiation_momentum * 0.1
-        );
+        const composite =
+            ivp.composite_ivp ??
+            clamp01(
+                ivp.sarajevo_siege_visibility * IVP_WEIGHT_SARAJEVO_SIEGE +
+                    ivp.enclave_humanitarian_pressure * IVP_WEIGHT_ENCLAVE_HUMANITARIAN +
+                    ivp.atrocity_visibility * IVP_WEIGHT_ATROCITY_VISIBILITY +
+                    ivp.negotiation_momentum * IVP_WEIGHT_NEGOTIATION_MOMENTUM
+            );
 
         let nextCommitment = clamp01(base * (1.0 - atrocity * 0.1) * (1.0 + momentum * 0.05));
         if (faction.id === 'RS') {

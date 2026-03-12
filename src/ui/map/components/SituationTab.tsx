@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
+import {
+    DRINA_BLOCKADE_THRESHOLD,
+    INTERNATIONAL_SANCTIONS_THRESHOLD,
+    NATO_INTERVENTION_THRESHOLD,
+    getIvpComponentContributions,
+    formatIvpConsequenceLabel,
+    ivpComponentLabel,
+    sortIvpConsequenceIds,
+} from '../../../state/patron_pressure.js';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -186,7 +195,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         })}
       </section>
 
-      <section data-summary-section="ivp" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+      <section data-summary-section="alliance" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alliance Gauge (RBiH-HRHB)</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-interactive" style={{ width: `${alliancePct}%` }} />
@@ -194,17 +203,30 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <div className="text-text-secondary tabular-nums">{alliance.toFixed(2)}</div>
       </section>
 
-      <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">International Pressure</div>
+      <section data-summary-section="ivp" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">International Pressure (IVP)</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-accent-gold/80" style={{ width: `${ivpScore}%` }} />
         </div>
         <div className="text-text-secondary">Composite IVP: {ivpScore.toFixed(0)}</div>
-        <div className="text-text-secondary">
-          Breakdown: Sarajevo {Math.round((state.internationalVisibilityPressure?.sarajevo_siege_visibility ?? 0) * 100)} / Enclaves {Math.round((state.internationalVisibilityPressure?.enclave_humanitarian_pressure ?? 0) * 100)} / Atrocities {Math.round((state.internationalVisibilityPressure?.atrocity_visibility ?? 0) * 100)}
+        <div className="text-text-secondary text-[10px] space-y-0.5">
+          {getIvpComponentContributions(state.internationalVisibilityPressure).map((row) => (
+            <div key={row.key} className="flex justify-between gap-2 tabular-nums">
+              <span>{ivpComponentLabel(row.key)}</span>
+              <span>
+                {Math.round(row.raw * 100)}% × {Math.round(row.weight * 100)}% → +{Math.round(row.contribution * 100)}%
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="text-text-secondary text-[10px]">
+          Thresholds: {Math.round(DRINA_BLOCKADE_THRESHOLD * 100)}% Drina · {Math.round(INTERNATIONAL_SANCTIONS_THRESHOLD * 100)}% sanctions · {Math.round(NATO_INTERVENTION_THRESHOLD * 100)}% NATO threat
         </div>
         <div className="text-text-secondary">
-          Consequences: {state.ivpConsequencesActive && state.ivpConsequencesActive.length > 0 ? state.ivpConsequencesActive.join(', ') : 'none'}
+          Consequences:{' '}
+          {state.ivpConsequencesActive?.length
+            ? sortIvpConsequenceIds(state.ivpConsequencesActive).map(formatIvpConsequenceLabel).join('; ')
+            : 'none'}
         </div>
         {state.sarajevoTunnelOperational && (
           <div className="text-text-secondary">Sarajevo tunnel operational.</div>

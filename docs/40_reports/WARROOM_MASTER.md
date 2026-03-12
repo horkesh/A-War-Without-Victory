@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 
-**Updated:** 2026-03-08
+**Updated:** 2026-03-10
 
 **Relationship:** Warroom is part of the canonical GUI. For overall GUI status use [GUI_MASTER.md](GUI_MASTER.md). This document is the warroom-specific control file — one place to see what exists, what’s proposed, and where to record changes.
 
@@ -48,6 +48,7 @@
 | **Scene plate + asset-generation brief** | [handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_BRIEF.md](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_BRIEF.md) — single-image warroom, hotspot mapping, modal anchors, generation rules |
 | **Unified room direction + military feel** | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) — guidance doc for the hybrid model: same room per faction, yearly war aging preserves geometry, **desk map stays empty for overlay**, **date / next-turn board stays flat for overlay**, **flag baked into art**, archival-photo target |
 | **Faction yearly rooms + overlay surfaces** | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) — copy-paste prompt pack for `prewar/year1/year2/year3/year4` per faction; staff-map base template; Gemini measurement prompts; baked flag + projected map/date board |
+| **External expert master handover (single file)** | [handovers/20260311_WARROOM_EXTERNAL_MASTER_HANDOVER.md](handovers/20260311_WARROOM_EXTERNAL_MASTER_HANDOVER.md) — consolidated brief: modals, prompt contracts, overlay alignment, assets, code entrypoints |
 | **Six nano banana prompts (6 assets)** | [handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md](handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md) — 2752×1536, prewar+war × RBiH/RS/HRHB, copy-paste blocks and modal placeholders |
 | **Overlay alignment + RBiH symbolism** | [handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md](handovers/20260307_WARROOM_OVERLAY_ALIGNMENT_AND_CREST.md) — flat/frontal flag & calendar zones, RBiH-era only on documents |
 | **Warroom implementation (scene, hotspots, identity)** | [implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md](implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md) — scene-plate contract, physical anchors, faction voice |
@@ -60,9 +61,9 @@
 ## Current status (summary)
 
 - **Scene:** Fixed plate **2752×1536**; faction-keyed background image. Current direction: **15 room images total** (`prewar/year1/year2/year3/year4` × 3 factions), **flag baked into room art**, **desk map projected as runtime overlay**, **date / next-turn board projected as runtime overlay**. Ticker/UI chrome remains engine-side as needed.
-- **Hotspots:** Physical anchors drive routing: `wall_flag_area`, `desk_map`, `wall_calendar_area`, `command_briefing_folio`, `newspaper_stack`, `intelligence_journal`, `diplomatic_telephone`, `desk_radio`. Legacy action strings kept for compatibility.
+- **Hotspots:** Physical anchors drive routing; **twelve-anchor contract** for baked plates (see [20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §3a). Implemented today: `wall_flag_area`, `desk_map`, `wall_calendar_area`, `command_briefing_folio`, `newspaper_stack`, `intelligence_journal`, `diplomatic_telephone`, `desk_radio`. **Planned anchors** (region JSON + ClickableRegionManager when modals land): `commander_coatrack`, `enclave_dispatch_folder`, `intelligence_packet`, `honors_memorial`. Legacy action strings kept for compatibility.
 
-**Canonical anchor → modal mapping (definitive).** Room art must show **eight distinct physical anchors**; each maps to one modal or behavior. Use this table when authoring prompts or region JSON.
+**Canonical anchor → modal mapping (definitive).** Room art must show **twelve distinct physical anchors** on the first bake so hotspot outlining never merges props. Items 1–8 are implemented; 9–12 are prompt-ready for P1 modals.
 
 **Flag (precise — avoid flat/pinned flag):** The flag must **hang down** from the pole: attached at or near the top of the pole, the cloth **drops vertically downward** under gravity (like a normal indoor flag). Do **not** show the flag stretched flat against the wall, pinned flat, taut horizontally, stiffened, or displayed like a banner. It must **hang down** from the pole.
 
@@ -76,6 +77,10 @@
 | intelligence_journal | Separate journal or magazine (distinct from newspaper) | Intelligence Journal / Magazine modal |
 | diplomatic_telephone | Telephone on desk | Diplomacy modal |
 | desk_radio | Radio on desk | News ticker |
+| commander_coatrack | Coatrack + military cap + uniform jacket hanging | Commander Register (planned) |
+| enclave_dispatch_folder | Single folder, urgent tag/elastic/stamp | Enclave Crisis (planned) |
+| intelligence_packet | Sealed envelope stack / typed-report packet | Turn-End Intelligence Packet (planned) |
+| honors_memorial | Shelf/corner: citation booklet with ribbon; medal ribbon bar; no framed photos; no candle | Honors and Memorials (planned) |
 
 - **Region data:** Click/hover geometry is in `public/data/ui/hq_clickable_regions.json`. Region bounds must match the scene plate; default JSON has `options.calendar_baked_in_art: true` so the runtime does not draw a second calendar when the room art already shows one. For a different room layout, use a custom region file (see § Region data and new room layout).
 - **Modals (implemented):** Newspaper, Magazine, Reports, Diplomacy, Faction Overview (COMMAND + commander assignment), Advance turn confirmation, Declaration event, War begins, Settings (placeholder), Help (warroom controls), “Line dead” (diplomacy in peace).
@@ -101,8 +106,9 @@
 | War begins | peace→war transition | Full-screen “War begins” |
 | Settings | toolbar | Audio/Video settings dialog |
 | Help | toolbar | Warroom controls list |
-| Command Briefing | command_briefing_folio | “What matters now”: urgent decisions, front alarms, convoy questions, enclave warnings |
+| Command Briefing | command_briefing_folio | “What matters now”: urgent decisions, front alarms, convoy questions, enclave warnings; when IVP ≥60% or consequences active, footer button opens IVP breakdown |
 | Operational Situation | desk_map | Op health, sector stress, logistics, routes to tactical map |
+| Diplomatic Press Briefing (IVP) | diplomatic_telephone (footer button) | Composite IVP + four weighted components (Sarajevo siege, enclave pressure, displacement visibility, negotiation momentum), thresholds 30/60/80%, active consequences; war only |
 
 ### Proposed (not yet implemented)
 
@@ -110,11 +116,12 @@ From [nano banana brief](handovers/20260307_WARROOM_NANO_BANANA_IMAGE_AND_MODAL_
 
 | Priority | Proposed modal | One-line description |
 |----------|----------------|----------------------|
-| P0 | Diplomatic Press Briefing (IVP) | IVP value → causes (civilian casualties, territorial aggression, shelling); expert asks dedicated panel/modal |
 | P1 | Turn-End Intelligence Packet | Front changes, enemy intent, humanitarian pressure, political risk, attention points |
 | P1 | Enclave Crisis Modal | Enclave resilience, isolation trend, airdrop posture, humanitarian risk |
 | P1 | Honors and Memorials Modal | Sacrifice, recognition, memory, faction continuity |
-| P1 | Commander Register Modal | Commanders, assignments, competence, notable service |
+| P1 | Commander Register Modal | Commanders, assignments, competence, notable service — **anchor:** `commander_coatrack` (cap/uniform on coatrack) |
+
+**Bake-in note:** All four P1 rows should be authored into the **same** scene plate up front (no second generation pass). Prompt pack updated in clean-room handover §3a + RS blocks 9.6–9.10.
 
 ---
 
@@ -141,6 +148,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-03-10 | **Twelve-anchor contract:** Prompt pack expanded from eight to twelve baked props — coatrack+cap/uniform (`commander_coatrack`), urgent folder (`enclave_dispatch_folder`), sealed packet (`intelligence_packet`), honors shelf/frame (`honors_memorial`). RS §9.6–9.10 blocks and shared core updated; §3a table in clean-room handover. | [20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §3a |
 | 2026-03-09 | **Phase 2 Completion (Modals):** Implemented `CommandBriefingModal` (linked to `command_briefing_folio`), `OperationalSituationModal` (linked to `desk_map`), and functional `SettingsModal` (toolbar). Removed placeholder routing. | This file § Modals |
 | 2026-03-08 | **Canonical anchor → modal mapping:** Added definitive table in § Current status: eight anchors (wall_flag_area, wall_calendar_area, desk_map, command_briefing_folio, newspaper_stack, intelligence_journal, diplomatic_telephone, desk_radio) with room object and modal for each. Fixed Implemented table so Reports = command_briefing_folio, Magazine = intelligence_journal. Prompts must show all eight distinct props. | This file § Current status, § Modals |
 | 2026-03-08 | **Missing shared regions file no longer black-screens startup:** Initial region loading is now non-fatal and tries multiple candidates (`override`, shared default, then faction files). This prevents `init()` from aborting when `hq_clickable_regions.json` is intentionally removed and only faction-specific files remain. | warroom.ts, this file |

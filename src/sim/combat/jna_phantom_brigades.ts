@@ -14,6 +14,7 @@
 
 import type {
     BrigadeComposition,
+    FactionId,
     FormationId,
     FormationState,
     GameState,
@@ -47,6 +48,8 @@ interface PhantomDef {
     id: FormationId;
     name: string;
     corps_id: FormationId;
+    /** Faction owning the phantom. Defaults to 'RS' for JNA phantoms. */
+    faction?: FactionId;
     location_osid: string;
     withdrawal_turn: number;
     tanks: number;
@@ -56,6 +59,8 @@ interface PhantomDef {
     capture_osids?: string[];
     /** If true, equipment disappears on withdrawal (not distributed to corps). */
     no_equipment_handoff?: boolean;
+    /** Kind tag for the formation. Defaults to 'jna_phantom'. */
+    kind_tag?: string;
 }
 
 const JNA_PHANTOM_DEFS: PhantomDef[] = [
@@ -74,6 +79,26 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         location_osid: 'op:foca:foca_3',
         withdrawal_turn: 5,
         tanks: 15, artillery: 15, apcs: 5,
+    },
+    {
+        id: 'jna_mostar_east_garrison' as FormationId,
+        name: 'JNA East Mostar Garrison',
+        corps_id: 'vrs_herzegovina' as FormationId,
+        location_osid: 'op:mostar:mostar_istok_2',
+        withdrawal_turn: 6,
+        tanks: 12, artillery: 10, apcs: 6,
+        // JNA controlled east bank positions from south Mostar hills down to Stolac/Čapljina.
+        // On withdrawal, VRS inherits → Op Jackal target.
+        // EXCLUDES mostar_istok_2, blagaj_2, hodbina_2: these remain RBiH (ARBiH 4th Corps
+        // home territory — joint HVO-TO defense held central east bank while JNA held outer hills).
+        capture_osids: [
+            'op:mostar:kruzanj_2',
+            'op:mostar:vranjevici_2',
+            'op:stolac:stolac_2',
+            'op:stolac:rotimlja_2',
+            'op:stolac:pjesivac_kula_2',
+            'op:capljina:tasovcici_2',
+        ],
     },
     {
         id: 'jna_17th_corps_tg' as FormationId,
@@ -111,29 +136,69 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
     },
 ];
 
+/**
+ * HV (Croatian Army) phantom brigades — temporary formations representing
+ * Croatian Army assets that supported HVO in Operation Jackal (June 1992).
+ *
+ * Historical: HV 116th Brigade and elements of 4th Guards Brigade deployed
+ * to Herzegovina to support the liberation of east Mostar and Stolac.
+ * Equipment returns to Croatia on withdrawal (no_equipment_handoff).
+ */
+const HV_PHANTOM_DEFS: PhantomDef[] = [
+    {
+        id: 'hv_116th_brigade_tg' as FormationId,
+        name: 'HV 116th Brigade Task Group',
+        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:mostar:mostar_zapad_2',
+        withdrawal_turn: 14,
+        tanks: 15, artillery: 12, apcs: 8,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    {
+        id: 'hv_4th_guards_tg' as FormationId,
+        name: 'HV 4th Guards Brigade TG',
+        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:capljina:capljina_2',
+        withdrawal_turn: 14,
+        tanks: 10, artillery: 8, apcs: 6,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+];
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Spawn
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** All phantom defs (JNA + HV). */
+const ALL_PHANTOM_DEFS: PhantomDef[] = [...JNA_PHANTOM_DEFS, ...HV_PHANTOM_DEFS];
+
 /**
- * Spawn JNA phantom brigades into the game state.
+ * Spawn phantom brigades into the game state.
  * Called once at scenario start (turn 0, before first runTurn).
+ * Handles both JNA (VRS) and HV (HRHB) phantoms.
  */
 export function spawnJnaPhantomBrigades(state: GameState): void {
     if (!state.military.formations) state.military.formations = {};
     const turn = state.meta?.turn ?? 0;
 
-    for (const def of JNA_PHANTOM_DEFS) {
+    for (const def of ALL_PHANTOM_DEFS) {
         if (state.military.formations[def.id]) continue; // already spawned
+
+        const faction = def.faction ?? 'RS';
+        const kindTag = def.kind_tag ?? 'jna_phantom';
 
         const formation: FormationState = {
             id: def.id,
-            faction: 'RS',
+            faction,
             name: def.name,
             created_turn: turn,
             status: 'active',
             assignment: null,
-            kind: 'jna_phantom',
+            kind: kindTag as FormationState['kind'],
             personnel: 2000,
             corps_id: def.corps_id,
             location_osid: def.location_osid,
@@ -143,7 +208,7 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
             morale: 90,
             experience: 0.6,
             equipment_class: 'mechanized',
-            tags: ['jna_phantom', `corps:${def.corps_id}`],
+            tags: [kindTag, `corps:${def.corps_id}`],
             composition: {
                 infantry: 1200,
                 tanks: def.tanks,
@@ -160,7 +225,7 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
         if (def.capture_osids) {
             if (!state.political.political_controllers) state.political.political_controllers = {};
             for (const osid of def.capture_osids) {
-                state.political.political_controllers[osid] = 'RS';
+                state.political.political_controllers[osid] = faction as FactionId;
             }
         }
     }
@@ -191,8 +256,12 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
     const turn = state.meta?.turn ?? 0;
     const events: JnaWithdrawalEvent[] = [];
 
+    const phantomKinds = new Set(['jna_phantom', 'hv_phantom']);
     const phantomIds = Object.keys(state.military.formations)
-        .filter(id => state.military.formations![id]?.kind === 'jna_phantom')
+        .filter(id => {
+            const k = state.military.formations![id]?.kind;
+            return k != null && phantomKinds.has(k);
+        })
         .sort(strictCompare);
 
     for (const phantomId of phantomIds) {
@@ -202,7 +271,7 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
 
         // This phantom withdraws now
         const corpsId = phantom.corps_id;
-        const phantomDef = JNA_PHANTOM_DEFS.find(d => d.id === phantomId);
+        const phantomDef = ALL_PHANTOM_DEFS.find(d => d.id === phantomId);
 
         // Ghost phantoms dissolve without equipment handoff
         if (phantomDef?.no_equipment_handoff) {
@@ -253,7 +322,7 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
                     f.id !== phantomId &&
                     f.kind === 'brigade' &&
                     f.status === 'active' &&
-                    f.faction === 'RS'
+                    f.faction === phantom.faction
                 )
                 .sort((a, b) => {
                     // Sort by proximity to phantom's location (same OSID first, then alphabetical)
@@ -380,8 +449,12 @@ export function getJnaWithdrawalCountdowns(state: GameState): JnaCountdownNotice
     const turn = state.meta?.turn ?? 0;
     const notices: JnaCountdownNotice[] = [];
 
+    const phantomKinds = new Set(['jna_phantom', 'hv_phantom']);
     const phantomIds = Object.keys(state.military.formations)
-        .filter(id => state.military.formations![id]?.kind === 'jna_phantom')
+        .filter(id => {
+            const k = state.military.formations![id]?.kind;
+            return k != null && phantomKinds.has(k);
+        })
         .sort(strictCompare);
 
     for (const id of phantomIds) {
@@ -401,4 +474,6 @@ export function getJnaWithdrawalCountdowns(state: GameState): JnaCountdownNotice
 
 /** Exported for testing. */
 export const _JNA_PHANTOM_DEFS = JNA_PHANTOM_DEFS;
+export const _HV_PHANTOM_DEFS = HV_PHANTOM_DEFS;
+export const _ALL_PHANTOM_DEFS = ALL_PHANTOM_DEFS;
 export const _EQUIPMENT_CEILINGS = EQUIPMENT_CEILINGS;

@@ -4,6 +4,7 @@ import type { StagedOrder } from '../../store/gameStore';
 import { buildOsidCentroidLookup, resolveOsidKey } from './geojsonLookup';
 import type { OsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
+import { hashString, buildBezierCurve, buildArrowheadTriangle } from './arrowGeometry';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,82 +41,6 @@ type OrderFeature =
   | Feature<LineString, ArrowGlowProperties>;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-function hashString(str: string): number {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-  }
-  return h;
-}
-
-/**
- * Build a quadratic Bezier curve from p0→p2 with a lateral offset for visual separation
- * when multiple arrows share endpoints.
- */
-function buildBezierCurve(
-  p0: [number, number],
-  p2: [number, number],
-  offsetMagnitude: number,
-  steps = 20
-): [number, number][] {
-  const dx = p2[0] - p0[0];
-  const dy = p2[1] - p0[1];
-  const midX = p0[0] + dx * 0.5;
-  const midY = p0[1] + dy * 0.5;
-
-  const len = Math.sqrt(dx * dx + dy * dy);
-  const nx = len > 0 ? -dy / len : 0;
-  const ny = len > 0 ? dx / len : 0;
-
-  const p1 = [midX + nx * offsetMagnitude, midY + ny * offsetMagnitude] as [number, number];
-
-  const curve: [number, number][] = [];
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const invT = 1 - t;
-    const x = invT * invT * p0[0] + 2 * invT * t * p1[0] + t * t * p2[0];
-    const y = invT * invT * p0[1] + 2 * invT * t * p1[1] + t * t * p2[1];
-    curve.push([x, y]);
-  }
-  return curve;
-}
-
-/**
- * Build a triangle polygon at the end of a curve to serve as an arrowhead.
- * The triangle points forward along the last segment of the curve.
- */
-function buildArrowheadTriangle(
-  curve: [number, number][],
-  headLengthDeg = 0.012,
-  headWidthDeg = 0.006,
-): [number, number][] | null {
-  if (curve.length < 2) return null;
-
-  const tip = curve[curve.length - 1];
-  const prev = curve[curve.length - 2];
-
-  const dx = tip[0] - prev[0];
-  const dy = tip[1] - prev[1];
-  const len = Math.sqrt(dx * dx + dy * dy);
-  if (len === 0) return null;
-
-  // Unit vectors: forward and perpendicular
-  const ux = dx / len;
-  const uy = dy / len;
-  const px = -uy;
-  const py = ux;
-
-  // Base of the triangle (pulled back from tip)
-  const baseX = tip[0] - ux * headLengthDeg;
-  const baseY = tip[1] - uy * headLengthDeg;
-
-  // Left and right wing points
-  const left: [number, number] = [baseX + px * headWidthDeg, baseY + py * headWidthDeg];
-  const right: [number, number] = [baseX - px * headWidthDeg, baseY - py * headWidthDeg];
-
-  return [tip, left, right, tip]; // closed ring
-}
 
 function pushArrow(
   features: OrderFeature[],

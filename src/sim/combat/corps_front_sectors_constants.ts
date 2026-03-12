@@ -15,8 +15,9 @@ export const MAX_SECTOR_BRIGADES = 8;
 /** Maximum reserve brigades per sector. One reserve, 1 hop behind the front. */
 export const MAX_RESERVES_PER_SECTOR = 1;
 
-/** Maximum territory OSIDs a single sector can claim via Voronoi BFS. */
-export const MAX_TERRITORY_OSIDS = 40;
+// MAX_TERRITORY_OSIDS removed — every friendly OSID must be claimed.
+// GOLDEN RULE: every brigade must be in a sector, which requires every
+// friendly OSID to belong to a sector's territory.
 
 /** Corps IDs exempt from sector assignment (army staff, future-conflict reserves). */
 export const EXEMPT_CORPS_IDS = new Set<string>([

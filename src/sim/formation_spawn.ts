@@ -8,6 +8,8 @@ import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/ope
 import {
     COMBAT_REINFORCEMENT_RATE,
     DISPLACED_FORMATION_THRESHOLD,
+    ENCLAVE_MAX_PERSONNEL,
+    ENCLAVE_REINFORCEMENT_RATE,
     getBatchSizeForFaction,
     getFactionReinforcementMult,
     getMaxBrigadesPerMun,
@@ -325,6 +327,48 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             const cohesion = typeof f.cohesion === 'number' ? f.cohesion : 0;
             f.cohesion = Math.min(100, cohesion + HRHB_SUPPORT_PACKAGE_COHESION_BONUS);
         }
+
+        report.formations_reinforced += 1;
+        report.manpower_added += transfer;
+        report.pools_touched += 1;
+    }
+
+    // --- Enclave local reinforcement: enclave brigades recruit from local pools ---
+    // Enclave brigades are isolated (no strategic reserve, no cross-mun pools) but
+    // historically recruited from local population. Goražde, Srebrenica, Žepa brigades
+    // survived until 1995 by local recruitment despite being cut off.
+    const enclaveBrigadeIds = (Object.keys(formations) as string[])
+        .filter((id) => {
+            const f = formations[id] as FormationState | undefined;
+            if (!f || f.status !== 'active' || f.kind !== 'brigade') return false;
+            return Array.isArray(f.tags) && f.tags.includes('enclave');
+        })
+        .sort(strictCompare);
+
+    for (const id of enclaveBrigadeIds) {
+        const f = formations[id] as FormationState;
+        const mun_id = getMunIdFromFormation(f);
+        const faction = f.faction;
+        if (!mun_id || !faction) continue;
+
+        const current = f.personnel ?? 0;
+        if (current >= ENCLAVE_MAX_PERSONNEL) continue;
+
+        const poolFaction = f.recruit_pool_faction ?? faction;
+        const key = militiaPoolKey(mun_id, poolFaction);
+        const pool = pools[key];
+        if (!pool || pool.available <= 0) continue;
+
+        const factionMult = getFactionReinforcementMult(faction, currentTurn, state.military.war_timeline);
+        const rate = Math.max(1, Math.floor(ENCLAVE_REINFORCEMENT_RATE * factionMult));
+        const need = Math.min(ENCLAVE_MAX_PERSONNEL - current, rate);
+        const transfer = Math.min(need, pool.available);
+        if (transfer <= 0) continue;
+
+        (f as FormationState & { personnel: number }).personnel = current + transfer;
+        pool.available -= transfer;
+        pool.committed += transfer;
+        pool.updated_turn = currentTurn;
 
         report.formations_reinforced += 1;
         report.manpower_added += transfer;

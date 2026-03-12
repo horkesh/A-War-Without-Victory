@@ -47,8 +47,11 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
   const ipc = useIPC();
   const [allocations, setAllocations] = useState<Record<string, number>>({});
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const enclaves = Object.entries(state.enclaveResilience ?? {})
-    .sort((a, b) => (a[1].display_name ?? a[0]).localeCompare(b[1].display_name ?? b[0]));
+  const enclaves = useMemo(
+    () => Object.entries(state.enclaveResilience ?? {})
+      .sort((a, b) => (a[1].display_name ?? a[0]).localeCompare(b[1].display_name ?? b[0])),
+    [state.enclaveResilience]
+  );
   const eligibleEnclaveIds = useMemo(
     () => enclaves
       .filter(([, enclave]) => enclave.faction === 'RBiH' && enclave.isolation_turns >= 4)

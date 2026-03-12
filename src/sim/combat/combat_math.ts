@@ -85,7 +85,7 @@ export const SECTOR_RESERVE_RESPONSE_FRACTION = 0.45;
 
 /**
  * Reactive defense ratio: brigade-equivalents the defender mobilizes per attacker brigade.
- * When 3 brigades attack a sector point, the defender mobilizes 3 × 0.8 = 2.4 brigade
+ * When 3 brigades attack a sector point, the defender mobilizes 3 × 1.0 = 3.0 brigade
  * equivalents of reserves to the point of contact (capped at available reserves).
  * This prevents concentration from being an automatic win — defenders react.
  *
@@ -183,9 +183,12 @@ export const OUTCOME_ATTACKER_MOD: Record<string, number> = {
     decisive_victory: 1.3, victory: 1.4, costly_victory: 1.8,
     stalemate: 1.2, repulsed: 2.0, catastrophic: 3.0
 };
+// catastrophic raised 0.3→0.7 — even a doomed assault inflicts casualties on the defender.
+// At 0.3 combined with power-ratio floor 0.6, defenders took only 18% of base casualties,
+// producing absurd 43-50:1 ratios. Real failed attacks still cost defenders meaningfully.
 export const OUTCOME_DEFENDER_MOD: Record<string, number> = {
     decisive_victory: 2.5, victory: 1.8, costly_victory: 1.2,
-    stalemate: 1.0, repulsed: 0.7, catastrophic: 0.3
+    stalemate: 1.0, repulsed: 0.7, catastrophic: 0.7
 };
 
 /**

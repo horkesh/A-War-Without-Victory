@@ -7,7 +7,7 @@
 
 import { computeFrontEdges } from '../../map/front_edges.js';
 import type { EdgeRecord } from '../../map/settlements.js';
-import type { GameState, FrontDescriptor, PhaseIIFrontStability } from '../../state/game_state.js';
+import type { GameState, FrontDescriptor, FrontStability } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Turns of sustained opposing control before a front segment is considered static (Engine Invariants §6). */
@@ -22,7 +22,7 @@ export const STABILIZATION_TURNS = 4;
 export function deriveFrontStability(
     edgeIds: string[],
     segments: Record<string, { active_streak?: number; max_active_streak?: number }>
-): PhaseIIFrontStability {
+): FrontStability {
     if (edgeIds.length === 0) return 'fluid';
     let minStreak = Number.MAX_SAFE_INTEGER;
     let hasOscillating = false;

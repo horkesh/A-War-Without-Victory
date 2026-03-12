@@ -22,6 +22,20 @@ import { strictCompare } from '../../state/validateGameState.js';
 /** Max cluster size for auto-flip. Clusters > 3 are too large to flip without military action. */
 const MAX_POCKET_CLUSTER = 3;
 
+/**
+ * Week threshold for Croat-Bosniak war onset (~April 1993, week 52 from Apr 1992 start).
+ * Before this, RBiH and HRHB are co-belligerent and treat each other's territory as friendly
+ * for consolidation purposes. After this, they are adversaries.
+ */
+const CROAT_BOSNIAK_WAR_WEEK = 52;
+
+/** Check if two factions are co-belligerent (allied) at the given turn. */
+function areCobelligerent(factionA: string, factionB: string, turn: number): boolean {
+    if (turn >= CROAT_BOSNIAK_WAR_WEEK) return false;
+    return (factionA === 'RBiH' && factionB === 'HRHB') ||
+           (factionA === 'HRHB' && factionB === 'RBiH');
+}
+
 export interface RearPocketConsolidationReport {
     flipped: Array<{ osid: Osid; from: string; to: string }>;
     total_flipped: number;
@@ -87,7 +101,9 @@ export function consolidateRearPockets(
         for (const c of clusterSet) checked.add(c);
         if (tooLarge || hasDefender) continue;
 
-        // Check: ALL external neighbors must be controlled by the same faction (different from controller)
+        // Check: ALL external neighbors must be controlled by the same faction (or co-belligerent ally),
+        // different from the pocket controller.
+        const currentTurn = state.meta?.turn ?? 0;
         let surroundingFaction: string | null = null;
         let allSurrounded = true;
         for (const c of cluster) {
@@ -98,7 +114,13 @@ export function consolidateRearPockets(
                 if (surroundingFaction === null) {
                     surroundingFaction = nCtrl;
                 } else if (nCtrl !== surroundingFaction) {
-                    allSurrounded = false; break;
+                    // Allow co-belligerents (RBiH+HRHB pre-1993) to count as same side
+                    if (!areCobelligerent(nCtrl, surroundingFaction, currentTurn)) {
+                        allSurrounded = false; break;
+                    }
+                    // When co-belligerents surround a pocket, assign to the faction with
+                    // the most surrounding OSIDs (tracked by surroundingFaction staying as
+                    // the first one found — good enough for small pockets)
                 }
             }
             if (!allSurrounded) break;

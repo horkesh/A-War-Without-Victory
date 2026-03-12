@@ -32,9 +32,11 @@ import { runPhaseITurn } from '../../sim/run_early_war_browser.js';
 import { runPhaseIITurn } from '../../sim/run_combat_browser.js';
 import type { FactionId, Phase0Event } from '../../state/game_state.js';
 import { GameState } from '../../state/game_state.js';
+import { INTERNATIONAL_SANCTIONS_THRESHOLD } from '../../state/patron_pressure.js';
 import { deserializeState } from '../../state/serialize.js';
 import { checkWarTransition, findCriticalEvent, findWarMilestoneEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
 import { DiplomacyModal } from './components/DiplomacyModal.js';
+import { IvpBreakdownModal } from './components/IvpBreakdownModal.js';
 import { FactionOverviewPanel } from './components/FactionOverviewPanel.js';
 import { MagazineModal } from './components/MagazineModal.js';
 import { ModalManager } from './components/ModalManager.js';
@@ -653,8 +655,32 @@ export class ClickableRegionManager {
             return;
         }
 
-        const modal = new CommandBriefingModal(gameState as GameState);
-        this.modalManager.showModal(modal.render());
+        const state = gameState as GameState;
+        const briefingRoot = new CommandBriefingModal(state).render();
+        const ivp = state.political.international_visibility_pressure;
+        const composite = ivp?.composite_ivp ?? 0;
+        const hasConsequences = Array.isArray(state.political.ivp_consequences_active) && state.political.ivp_consequences_active.length > 0;
+        if (state.meta.phase === 'war' && (composite >= INTERNATIONAL_SANCTIONS_THRESHOLD || hasConsequences)) {
+            const wrapper = document.createElement('div');
+            wrapper.appendChild(briefingRoot);
+            const footer = document.createElement('div');
+            footer.style.cssText = 'margin-top:12px;padding-top:10px;border-top:1px dashed #666;text-align:center;';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = `Review IVP (${Math.round(composite * 100)}%)`;
+            btn.style.cssText = 'padding:6px 12px;font-size:11px;cursor:pointer;background:#eee;color:#111;border:1px solid #333;border-radius:4px;';
+            btn.addEventListener('click', () => this.showIvpBreakdown(state));
+            footer.appendChild(btn);
+            wrapper.appendChild(footer);
+            this.modalManager.showModal(wrapper);
+            return;
+        }
+        this.modalManager.showModal(briefingRoot);
+    }
+
+    /** Opens IVP Diplomatic Press Briefing modal (warroom). */
+    private showIvpBreakdown(state: GameState): void {
+        this.modalManager?.showModal(new IvpBreakdownModal(state).render());
     }
 
     private openOperationalSituationModal(gameState: unknown): void {
@@ -704,8 +730,20 @@ export class ClickableRegionManager {
             return;
         }
 
-        const modal = new DiplomacyModal(state);
-        this.modalManager.showModal(modal.render());
+        const diplomacyRoot = new DiplomacyModal(state).render();
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(diplomacyRoot);
+        const footer = document.createElement('div');
+        footer.style.cssText = 'margin-top:16px;padding-top:12px;border-top:1px solid #333;text-align:center;';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'Diplomatic press briefing (IVP breakdown)';
+        btn.style.cssText = 'padding:8px 14px;font-size:12px;cursor:pointer;background:#1a1a2e;color:#d8d8e0;border:1px solid #444;border-radius:4px;';
+        btn.setAttribute('aria-label', 'Open international visibility pressure breakdown');
+        btn.addEventListener('click', () => this.showIvpBreakdown(state));
+        footer.appendChild(btn);
+        wrapper.appendChild(footer);
+        this.modalManager.showModal(wrapper);
     }
 
     private getDesktopBridge(): DesktopBridge | null {

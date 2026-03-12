@@ -13,7 +13,7 @@ import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { setScenarioStartDate, turnToCalendarMonthYear, turnToShortLabel } from './components/warroom_utils.js';
 // Asset URLs via Vite so dev server serves them from the module graph
 import bgUrl from './assets/hq_background_v3.png?url';
-import hqRbih1991Url from './assets/hq_rbih_1991.png?url';
+import hqRbih1991Url from './assets/hq_rbih_1991_display.png?url';
 // Flag assets — drawn dynamically on the wall per player faction
 import flagHrhbUrl from './assets/flag_HRHB.png?url';
 import flagRbihUrl from './assets/flag_RBiH.png?url';
@@ -26,8 +26,9 @@ import gameStartBgUrl from './assets/game start.png?url';
 
 type CampaignScenarioKey = 'sep_1991' | 'apr_1992';
 
-const WARROOM_SCENE_WIDTH = 2752;
-const WARROOM_SCENE_HEIGHT = 1536;
+/** Display resolution for runtime: half of authoring (2752×1536) to reduce decode and canvas memory. Region JSON stays 2752×1536; hit-test scales automatically. */
+const WARROOM_SCENE_WIDTH = 1376;
+const WARROOM_SCENE_HEIGHT = 768;
 const WARROOM_CALENDAR_REGION_IDS = ['wall_calendar_area', 'wall_calendar'] as const;
 
 const DEFAULT_REGIONS_URL = '/data/ui/hq_clickable_regions.json';

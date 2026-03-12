@@ -21,7 +21,7 @@ import {
     CORRIDOR_BREACH_MAX_STRIP_WIDTH,
     MAX_EXHAUSTION_FOR_OPERATION,
 } from './bot_constants.js';
-import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
+import { buildAdjacencyFromEdges } from './war_adjacency.js';
 import { assignOperationCommander } from './officer_system.js';
 import {
     countHealthyBrigades,

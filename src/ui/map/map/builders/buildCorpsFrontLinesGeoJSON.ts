@@ -11,6 +11,7 @@ interface CorpsGlowProperties {
     lineType: 'glow';
     faction: string;
     corps_id: string;
+    sector_id?: string;
     offset_side?: 1 | -1;
     pressure_intensity?: number;
 }
@@ -20,6 +21,7 @@ interface CorpsFrontProperties {
     factionA: string;
     factionB: string;
     corps_id: string;
+    sector_id?: string;
     avg_entrenchment?: number;
     tooth_rotation?: number;
 }
@@ -309,10 +311,15 @@ export function buildCorpsFrontLinesGeoJSON(
         const pressureData = frontPressureByEdge?.[pairKey];
         const pressureIntensity = pressureData && pressureData.max_abs > 0 ? Math.abs(pressureData.value) / pressureData.max_abs : 0;
 
+        const sectorIdA = sectorA?.sector_id;
+        const sectorIdB = sectorByEdgeAndFaction.get(`${pairKey}\0${ctrlB}`)?.sector_id;
+
         const glowPropsA: CorpsGlowProperties = { lineType: 'glow', faction: ctrlA, corps_id: corpsA, pressure_intensity: pressureIntensity };
         if (offsetA != null) glowPropsA.offset_side = offsetA;
+        if (sectorIdA) glowPropsA.sector_id = sectorIdA;
         const glowPropsB: CorpsGlowProperties = { lineType: 'glow', faction: ctrlB, corps_id: corpsB, pressure_intensity: pressureIntensity };
         if (offsetB != null) glowPropsB.offset_side = offsetB;
+        if (sectorIdB) glowPropsB.sector_id = sectorIdB;
 
         glowFeatures.push({
             type: 'Feature',
@@ -325,11 +332,13 @@ export function buildCorpsFrontLinesGeoJSON(
             geometry: { type: 'LineString', coordinates: coords },
         });
 
-        // Front line feature — group by the first faction's corps for merging
+        // Front line feature — group by sector_id for merging so that lines
+        // naturally break at sector boundaries (creating visual demarcation).
         const pairFactionKey = [ctrlA, ctrlB].sort().join('-');
-        const groupKey = `${corpsA}:${pairFactionKey}`;
+        const groupKey = sectorIdA ? `${sectorIdA}:${pairFactionKey}` : `${corpsA}:${pairFactionKey}`;
         if (!frontSegmentsByGroup.has(groupKey)) frontSegmentsByGroup.set(groupKey, []);
         const frontProps: CorpsFrontProperties = { lineType: 'front', factionA: ctrlA, factionB: ctrlB, corps_id: corpsA, avg_entrenchment: avgEntrenchment };
+        if (sectorIdA) frontProps.sector_id = sectorIdA;
         if (toothRotation != null) frontProps.tooth_rotation = toothRotation;
         frontSegmentsByGroup.get(groupKey)!.push({
             type: 'Feature',

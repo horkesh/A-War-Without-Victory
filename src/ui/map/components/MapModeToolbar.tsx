@@ -3,7 +3,7 @@
  * Horizontal bar centered at bottom, above BottomStatusStrip.
  * Styled per HOI §9.2 warm palette.
  */
-import { useGameStore, type MapMode } from '../store/gameStore';
+import { useGameStore, type MapMode, isDevMode } from '../store/gameStore';
 
 const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
   { id: 'political', label: '1: Political', key: '1' },
@@ -14,7 +14,7 @@ const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
   { id: 'operations', label: '6: Operations', key: '6' },
 ];
 
-const LAYER_TOGGLES = [
+const DEV_LAYER_TOGGLES = [
   { key: 'frontsVisible', setKey: 'setFrontsVisible', label: 'Fronts' },
   { key: 'formationsVisible', setKey: 'setFormationsVisible', label: 'Units' },
   { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
@@ -25,7 +25,21 @@ const LAYER_TOGGLES = [
   { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
 ] as const;
 
+// Live mode: no separate "Fronts" toggle — front lines ARE sectors.
+// "Front" toggle controls sectorsVisible (which drives front line visibility).
+const LIVE_LAYER_TOGGLES = [
+  { key: 'sectorsVisible', setKey: 'setSectorsVisible', label: 'Front' },
+  { key: 'formationsVisible', setKey: 'setFormationsVisible', label: 'Units' },
+  { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
+  { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
+  { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
+  { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
+  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
+] as const;
+
 export function MapModeToolbar() {
+  const devMode = useGameStore((s) => s.devMode);
+  const LAYER_TOGGLES = devMode ? DEV_LAYER_TOGGLES : LIVE_LAYER_TOGGLES;
   const mapMode = useGameStore((s) => s.mapMode);
   const setMapMode = useGameStore((s) => s.setMapMode);
   const frontsVisible = useGameStore((s) => s.frontsVisible);

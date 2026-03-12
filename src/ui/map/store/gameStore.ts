@@ -36,7 +36,23 @@ export interface StagedOrder {
   postureName?: string;
 }
 
+/** Dev mode: enables load-save tools, run-ID input, all-faction view.
+ *  Auto-enabled during Vite dev server; otherwise set via ?dev=1 URL param.
+ *  Force live mode during dev with ?live=1. */
+export function isDevMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  // ?live=1 forces live mode even during Vite dev
+  if (params.get('live') === '1') return false;
+  // Auto-enable in Vite dev server; explicit opt-in via ?dev=1 in production
+  if (import.meta.env.DEV) return true;
+  return params.get('dev') === '1';
+}
+
 export interface GameStore {
+  /** Dev mode flag — unlocks save loaders, run-ID input, and all-faction inspection tools. */
+  devMode: boolean;
+
   selectedOsid: string | null;
   setSelectedOsid: (osid: string | null) => void;
 
@@ -126,6 +142,14 @@ export interface GameStore {
   opsPlanningModalOpen: boolean;
   setOpsPlanningModalOpen: (v: boolean) => void;
 
+  /** Whether the Commander Selection Modal is open, and for which corps+operation. */
+  commanderSelectionContext: { corpsId: string; operationName: string } | null;
+  setCommanderSelectionContext: (v: { corpsId: string; operationName: string } | null) => void;
+
+  /** Whether the Operation Briefing Modal is open, and for which corps+operation. */
+  operationBriefingContext: { corpsId: string; operationName: string } | null;
+  setOperationBriefingContext: (v: { corpsId: string; operationName: string } | null) => void;
+
   /** Minimap visibility toggle. */
   minimapVisible: boolean;
   setMinimapVisible: (v: boolean) => void;
@@ -168,6 +192,8 @@ export interface GameStore {
 }
 
 export const useGameStore = create<GameStore>((set) => ({
+  devMode: isDevMode(),
+
   selectedOsid: null,
   setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null, selectedOrbatCorpsId: null }),
 
@@ -259,6 +285,12 @@ export const useGameStore = create<GameStore>((set) => ({
 
   opsPlanningModalOpen: false,
   setOpsPlanningModalOpen: (v) => set({ opsPlanningModalOpen: v }),
+
+  commanderSelectionContext: null,
+  setCommanderSelectionContext: (v) => set({ commanderSelectionContext: v }),
+
+  operationBriefingContext: null,
+  setOperationBriefingContext: (v) => set({ operationBriefingContext: v }),
 
   minimapVisible: true,
   setMinimapVisible: (v) => set({ minimapVisible: v }),

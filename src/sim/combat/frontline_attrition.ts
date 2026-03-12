@@ -51,7 +51,9 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
 /** Base weekly attrition rate for frontline brigades.
  * n159→0.003 (RS/HRHB running 2-3× historical). n303→0.005 (total casualties
  * too low at 97k/40w; first year was bloodiest with ~30k KIA target).
- * At 0.005: +67% frontline attrition → targets ~130k total casualties.
+ * n553: reducing to 0.003 lowered KIA (23.8k→21.1k) while increasing destroyed
+ * brigades (8→15). Reverted: attrition reduction cascades negatively.
+ * Enclave brigades protected via local reinforcement + dissolution protection.
  */
 const BASE_ATTRITION_RATE = 0.005;
 

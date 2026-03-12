@@ -246,6 +246,10 @@ All canon and engineering docs updated to use Peace/War terminology. Historical 
 **Scope:** All type/function/constant/pipeline-step renames completed. Phase I/II terminology fully purged from codebase.
 **Completed:** `PhaseIJNAState` → `JNATransitionState`; `PhaseIIFrontDescriptor` → `FrontDescriptor`; `createOobFormationsAtPhaseIEntry` → `createOobFormations`; `applyPhase0ToPhaseITransition` → `applyWarTransition`; `isPhaseIAllowed` → `isEarlyWarAllowed`; `processPhaseIIDisplacementTakeover` → `processDisplacementTakeover`; `runPhaseIICohesionDrift` → `runCohesionDrift`; `runPhaseIIMoraleDrift` → `runMoraleDrift`; pipeline steps: `phase-i-militia-emergence` → `militia-emergence`, `phase-ii-cohesion-drift` → `cohesion-drift`, etc.
 
+### ✅ Phase R6: Remaining Phase II Remnants — COMPLETE (2026-03-12)
+**Scope:** Three final Phase I/II remnants renamed; file renamed.
+**Completed:** `PhaseIIFrontStability` → `FrontStability` (game_state.ts + front_emergence.ts); `PhaseIIBattleResolutionLike` → `BattleResolutionLike` (displacement_takeover.ts); `phase_ii_adjacency.ts` → `war_adjacency.ts` (file rename + 4 import updates).
+
 ---
 
 ## Metrics

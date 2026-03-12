@@ -139,6 +139,7 @@ import {
 } from '../../state/supply_reserves.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
+import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { PARAMILITARY_FADE_WEEK } from '../../state/formation_constants.js';
@@ -497,6 +498,19 @@ export const warPhases: NamedPhase[] = [
     // because per-sector density would over-penalize overextended factions (VRS historically thin).
 
     {
+        name: 'compute-sector-combat-ratings',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.military.corps_front_sectors) return;
+            const supplyByOsid = context.report?.supply_resolution?.supply_state_by_osid ?? null;
+            const ratingReport = computeSectorCombatRatings(context.state, supplyByOsid);
+            if (ratingReport.sectors_rated > 0) {
+                context.report.sector_combat_ratings = ratingReport;
+            }
+        }
+    },
+
+    {
         name: 'paramilitary-detect',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -577,7 +591,10 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-            advanceSectorOffensives(context.state, supplyByOsid);
+            const prepEvents = advanceSectorOffensives(context.state, supplyByOsid);
+            if (prepEvents.length > 0) {
+                context.report.preparation_events = prepEvents;
+            }
         }
     },
     {

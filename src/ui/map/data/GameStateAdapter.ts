@@ -722,6 +722,16 @@ export function parseGameState(json: unknown): LoadedGameState {
                         momentum: typeof a.momentum === 'number' ? a.momentum : 0,
                         staging_osid: typeof a.staging_osid === 'string' ? a.staging_osid : undefined,
                     })) : undefined,
+                    commander_officer_id: typeof op.commander_officer_id === 'string' ? op.commander_officer_id : undefined,
+                    preparation_sub_phase: typeof op.preparation_sub_phase === 'string' ? op.preparation_sub_phase as OperationView['preparation_sub_phase'] : undefined,
+                    preparation_turns_elapsed: typeof op.preparation_turns_elapsed === 'number' ? op.preparation_turns_elapsed : undefined,
+                    preparation_max_turns: typeof op.preparation_max_turns === 'number' ? op.preparation_max_turns : undefined,
+                    commander_assessment: typeof op.commander_assessment === 'string' ? op.commander_assessment as OperationView['commander_assessment'] : undefined,
+                    intel_confidence_at_assessment: typeof op.intel_confidence_at_assessment === 'number' ? op.intel_confidence_at_assessment : undefined,
+                    supply_readiness_at_assessment: typeof op.supply_readiness_at_assessment === 'number' ? op.supply_readiness_at_assessment : undefined,
+                    force_ratio_estimate: typeof op.force_ratio_estimate === 'number' ? op.force_ratio_estimate : undefined,
+                    postponement_count: typeof op.postponement_count === 'number' ? op.postponement_count : undefined,
+                    has_active_probe: op.active_probe != null && typeof op.active_probe === 'object' ? true : undefined,
                 });
             }
         }
@@ -1048,6 +1058,12 @@ export function parseGameState(json: unknown): LoadedGameState {
                 turns_in_command: finiteNumber(os?.turns_in_command, 0),
                 battles: finiteNumber(os?.battles, 0),
                 victories: finiteNumber(os?.victories, 0),
+                enclave_lock: os?.enclave_lock != null && typeof os.enclave_lock === 'object'
+                    ? { enclave_id: String((os.enclave_lock as Record<string, unknown>).enclave_id ?? ''), locked_until_turn: typeof (os.enclave_lock as Record<string, unknown>).locked_until_turn === 'number' ? (os.enclave_lock as Record<string, unknown>).locked_until_turn as number : undefined }
+                    : undefined,
+                assigned_operation: typeof os?.assigned_operation === 'string' ? os.assigned_operation : undefined,
+                compatible_corps_ids: Array.isArray(data.compatible_corps_ids) ? (data.compatible_corps_ids as string[]).filter(s => typeof s === 'string') : undefined,
+                casualty_vulnerability: finiteNumber(os?.casualty_vulnerability, undefined) as number | undefined,
             });
         }
         if (officerList.length > 0) namedOfficerData = officerList;
@@ -1146,7 +1162,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     const departedByOsid: LoadedGameState['departedByOsid'] = {};
     const departedByMun: LoadedGameState['departedByMun'] = {};
     const displacementByOsid: LoadedGameState['displacementByOsid'] = {};
-    const rawEventLog = (state as any).displacement_event_log;
+    const rawEventLog = (state as any).displacement?.displacement_event_log;
     if (Array.isArray(rawEventLog)) {
         for (const evt of rawEventLog as Array<Record<string, unknown>>) {
             const displaced = finiteNumber(evt.displaced);
@@ -1167,16 +1183,19 @@ export function parseGameState(json: unknown): LoadedGameState {
                 if (!displacementByOsid[destOsid]) displacementByOsid[destOsid] = { out: 0, lost: 0, in: 0 };
                 displacementByOsid[destOsid].in += settled;
             }
-            if (displaced > 0 && ethnicity) {
+            // Count ALL removals (displaced + killed + fled_abroad) per ethnicity so
+            // the current-ethnic computation does not leave "ghost" residents behind.
+            const totalRemoved = displaced + killed + fledAbroad;
+            if (totalRemoved > 0 && ethnicity) {
                 if (originOsid) {
                     if (!departedByOsid[originOsid]) departedByOsid[originOsid] = {};
                     departedByOsid[originOsid][ethnicity] =
-                        (departedByOsid[originOsid][ethnicity] ?? 0) + displaced;
+                        (departedByOsid[originOsid][ethnicity] ?? 0) + totalRemoved;
                 }
                 if (originMun) {
                     if (!departedByMun[originMun]) departedByMun[originMun] = {};
                     departedByMun[originMun][ethnicity] =
-                        (departedByMun[originMun][ethnicity] ?? 0) + displaced;
+                        (departedByMun[originMun][ethnicity] ?? 0) + totalRemoved;
                 }
             }
         }
@@ -1198,8 +1217,8 @@ export function parseGameState(json: unknown): LoadedGameState {
             .sort((a, b) => a.edge_id.localeCompare(b.edge_id))
         : undefined;
 
-    const frontEdgesOsid: LoadedGameState['frontEdgesOsid'] = Array.isArray((state as any).war_front_edges_osid)
-        ? ((state as any).war_front_edges_osid as Array<Record<string, unknown>>)
+    const frontEdgesOsid: LoadedGameState['frontEdgesOsid'] = Array.isArray(state.military.war_front_edges_osid)
+        ? (state.military.war_front_edges_osid as Array<Record<string, unknown>>)
             .map((edge) => {
                 const a = typeof edge.a === 'string' ? edge.a : '';
                 const b = typeof edge.b === 'string' ? edge.b : '';
@@ -1318,6 +1337,22 @@ export function parseGameState(json: unknown): LoadedGameState {
                     : 1,
                 opsec_active: opsecSectorSet.has(sectorId),
             });
+        }
+        // Merge sector combat ratings if available
+        const rawRatings = state.military.sector_combat_ratings as Record<string, Record<string, unknown>> | undefined;
+        if (rawRatings && typeof rawRatings === 'object') {
+            for (const sv of out) {
+                const r = rawRatings[sv.sector_id];
+                if (!r) continue;
+                sv.combat_offensive_power = typeof r.offensive_power === 'number' ? r.offensive_power : undefined;
+                sv.combat_defensive_power = typeof r.defensive_power === 'number' ? r.defensive_power : undefined;
+                sv.combat_defense_per_edge = typeof r.defense_per_edge === 'number' ? r.defense_per_edge : undefined;
+                sv.combat_strength_class = typeof r.strength_class === 'string' ? r.strength_class as CorpsFrontSectorView['combat_strength_class'] : undefined;
+                sv.combat_morale_avg = typeof r.morale_avg === 'number' ? r.morale_avg : undefined;
+                sv.combat_cohesion_avg = typeof r.cohesion_avg === 'number' ? r.cohesion_avg : undefined;
+                sv.combat_fatigue_avg = typeof r.fatigue_avg === 'number' ? r.fatigue_avg : undefined;
+                sv.combat_personnel = typeof r.personnel === 'number' ? r.personnel : undefined;
+            }
         }
         if (out.length > 0) corpsFrontSectors = out;
     }

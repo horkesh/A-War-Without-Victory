@@ -7,6 +7,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { deriveSectorIntel, updateSectorIntelFromCombat } from '../src/sim/combat/sector_intel.js';
 import {
     FACTION_RECON_PROFILES,
+    FACTION_INITIAL_INTEL_CONFIDENCE,
     CONFIDENCE_ROUGH_STRENGTH,
     CONFIDENCE_FRONT_BRIGADES,
     CONFIDENCE_FULL_STRENGTH,
@@ -80,7 +81,7 @@ describe('T1: first contact passive buildup', () => {
         expect(records.length).toBe(1);
         const rec = records[0]!;
         expect(rec.enemy_sector_id).toBe('sector:corps-B:0');
-        expect(rec.confidence).toBeCloseTo(FACTION_RECON_PROFILES['RBiH'].passive_buildup_per_turn, 5);
+        expect(rec.confidence).toBeCloseTo(FACTION_INITIAL_INTEL_CONFIDENCE['RBiH'] + FACTION_RECON_PROFILES['RBiH'].passive_buildup_per_turn, 5);
         expect(rec.turns_in_contact).toBe(1);
     });
 });
@@ -234,18 +235,31 @@ describe('T6: visible_brigade_ids below threshold', () => {
                 last_updated_turn: 0,
             }],
         };
-        // Next turn passive adds 0.30 → total 0.15 >= 0.30? No: 0.15 + 0.30 = 0.45 > threshold
-        // So pre-seed to something that after +0.30 stays below — use 0.0 - 0.31 = negative
-        // Actually easier: pre-seed confidence=0.0, one turn +0.30 = 0.30 = threshold exactly → visible
-        // Use RS faction (passive=0.20) to get 0.0 + 0.20 = 0.20 < 0.30 threshold
+        // Pre-seed RS intel to a low value that after one passive turn stays below CONFIDENCE_FRONT_BRIGADES.
+        // RS passive_buildup = 0.20, initial floor = 0.40. Pre-seeding bypasses initial floor.
+        // Use pre-seeded confidence = 0.05 → after passive buildup: 0.05 + 0.20 = 0.25 < 0.30
         const sectorC = makeSector('sector:corps-C:0', 'corps-C', 'RS', ['e2'], ['oC'], ['oD']);
         const sectorD = makeSector('sector:corps-D:0', 'corps-D', 'RBiH', ['e2'], ['oD'], ['oC'], 1.0, ['brig-Z']);
         const state2 = makeMinimalState({ 'sector:corps-C:0': sectorC, 'sector:corps-D:0': sectorD });
-        state2.military.sector_intel = {};
-        deriveSectorIntel(state2, 1);
+        state2.military.sector_intel = {
+            'sector:corps-C:0': [{
+                enemy_sector_id: 'sector:corps-D:0',
+                enemy_faction: 'RBiH',
+                enemy_corps_id: 'corps-D' as any,
+                front_edge_count: 1,
+                strength_category: 'unknown',
+                posture_observed: 'unknown',
+                offensive_signs: false,
+                confidence: 0.05,
+                turns_in_contact: 1,
+                visible_brigade_ids: [],
+                last_updated_turn: 0,
+            }],
+        };
+        deriveSectorIntel(state2, 2);
         const rec = (state2.military.sector_intel!['sector:corps-C:0'] ?? [])[0]!;
-        // RS passive_buildup = 0.20 < CONFIDENCE_FRONT_BRIGADES = 0.30
-        expect(rec.confidence).toBeCloseTo(0.20, 5);
+        // Pre-seeded 0.05 + RS passive 0.20 = 0.25 < CONFIDENCE_FRONT_BRIGADES (0.30)
+        expect(rec.confidence).toBeCloseTo(0.25, 5);
         expect(rec.visible_brigade_ids.length).toBe(0);
     });
 });

@@ -200,6 +200,37 @@ export function getOfficerCombatMod(
  * Within each tier: sort by competence (desc), aggressiveness (desc), then id.
  * Returns null if no officer is available.
  */
+/**
+ * Map corps IDs to the enclave they are physically located in (if any).
+ * Officers with an enclave_lock can only command ops in corps within the same enclave.
+ */
+const CORPS_ENCLAVE_MAP: Record<string, string> = {
+    // ARBiH 1st Corps — besieged in Sarajevo
+    arbih_1st_corps: 'sarajevo',
+    // ARBiH 5th Corps — isolated in Bihać pocket
+    arbih_5th_corps: 'bihac',
+    // VRS Sarajevo-Romanija Corps — locked to Sarajevo siege ring
+    vrs_sarajevo_romanija: 'sarajevo_ring',
+    // HVO OZ Posavina — isolated in Orasje pocket
+    hvo_oz_posavina: 'orasje',
+    // Note: Srebrenica is subordinate to 2nd Corps but geographically isolated.
+    // Officers locked to 'srebrenica' can only command ops if the corps operating sector
+    // overlaps Srebrenica. For now, this is handled by the home_corps_id filter:
+    // Orić has home_corps_id=arbih_2nd_corps but enclave_lock=srebrenica.
+    // Since arbih_2nd_corps is NOT in CORPS_ENCLAVE_MAP, Orić is filtered out
+    // from all 2nd Corps ops (he can't leave Srebrenica to reach Tuzla).
+};
+
+/** Check whether an enclave-locked officer can command ops for a given corps. */
+function isEnclaveCompatible(data: NamedOfficer, corpsId: string, currentTurn: number): boolean {
+    if (!data.enclave_lock) return true; // No lock — always compatible
+    // Lock expired (enclave broke out / officer evacuated)
+    if (data.enclave_lock.locked_until_turn !== undefined && currentTurn >= data.enclave_lock.locked_until_turn) return true;
+    // Corps is in the same enclave as the officer
+    const corpsEnclave = CORPS_ENCLAVE_MAP[corpsId];
+    return corpsEnclave === data.enclave_lock.enclave_id;
+}
+
 export function selectOperationCommander(
     state: GameState,
     corpsId: string,
@@ -209,6 +240,7 @@ export function selectOperationCommander(
     const officerData = state.military.named_officer_data;
     if (!officers || !officerData) return null;
 
+    const currentTurn = state.meta?.turn ?? 0;
     const candidates: NamedOfficer[] = [];
 
     for (const data of officerData) {
@@ -220,6 +252,8 @@ export function selectOperationCommander(
         if (!os || os.status !== 'reserve') continue;
         // Already commanding another operation
         if (os.assigned_operation) continue;
+        // Enclave lock: officer physically cannot reach this corps
+        if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
 
         candidates.push(data);
     }
@@ -667,8 +701,25 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
             can_improve: o.can_improve === true,
             improvement_rate: typeof o.improvement_rate === 'number' ? o.improvement_rate : 0,
             pool_tier: (o.pool_tier as OfficerPoolTier) ?? 'tier_c',
+            enclave_lock: parseEnclaveLock(o.enclave_lock, id),
         });
     }
 
     return result;
+}
+
+function parseEnclaveLock(raw: unknown, officerId: string): NamedOfficer['enclave_lock'] {
+    if (raw === undefined || raw === null) return undefined;
+    if (typeof raw !== 'object') throw new Error(`Officer ${officerId}: enclave_lock must be an object`);
+    const lock = raw as Record<string, unknown>;
+    if (typeof lock.enclave_id !== 'string' || !lock.enclave_id) {
+        throw new Error(`Officer ${officerId}: enclave_lock.enclave_id must be a non-empty string`);
+    }
+    if (lock.locked_until_turn !== undefined && typeof lock.locked_until_turn !== 'number') {
+        throw new Error(`Officer ${officerId}: enclave_lock.locked_until_turn must be a number`);
+    }
+    return {
+        enclave_id: lock.enclave_id,
+        locked_until_turn: lock.locked_until_turn as number | undefined,
+    };
 }

@@ -41,11 +41,10 @@ function makeState(opts: {
             { id: 'RBiH' as FactionId },
         ] as GameState['factions'],
   formations,
+  political_controllers: opts.political_controllers,
+  corps_front_sectors: {},
   military: {
     war_front_edges_osid: opts.war_front_edges_osid
-  } as any,
-  political: {
-    political_controllers: opts.political_controllers
   } as any,
 } as unknown as GameState;
 }

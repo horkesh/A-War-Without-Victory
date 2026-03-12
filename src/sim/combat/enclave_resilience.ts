@@ -43,7 +43,17 @@ interface EnclaveDefinition {
     /** Turn before which resilience does not grow. Enclaves formed gradually through
      *  1992 as VRS advanced — they weren't "resilient enclaves" from day one. */
     resilience_start_turn?: number;
+    /** Initial resilience value at game start. Sarajevo had organized defense from
+     *  March 1 1992 (barricades, TDF activation, Patriotic League). */
+    initial_resilience?: number;
+    /** The OSID that serves as the enclave capital — defenders retreat toward this OSID
+     *  and fight to the last here. BB2 p.479: concentric retreat toward Goražde town. */
+    capital_osid?: string;
 }
+
+/** Multiplier for garrison power at the enclave capital OSID.
+ *  The capital concentrates defense — more fighters, better organization. */
+export const CAPITAL_GARRISON_MULT = 2.0;
 
 /**
  * Known enclaves — hard-coded OSID prefix sets.
@@ -72,13 +82,17 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
         id: 'gorazde',
         faction: 'RBiH',
         osid_prefixes: ['op:gorazde:'],
-        resilience_start_turn: 16,  // Goražde enclave formed mid-1992
+        resilience_start_turn: 0,   // BB2 p.478: organized TDF defense from April 1992
+        initial_resilience: 15,     // ~37k prewar pop; less than Sarajevo but significant
+        capital_osid: 'op:gorazde:gorazde_2',
     },
     {
         id: 'sarajevo',
         faction: 'RBiH',
         osid_prefixes: ['op:centar_sarajevo:', 'op:novo_sarajevo:', 'op:stari_grad_sarajevo:', 'op:novi_grad_sarajevo:'],
-        resilience_start_turn: 8,   // Siege began immediately but resilience adaptation takes time
+        resilience_start_turn: 0,   // Sarajevo barricades went up March 1 1992 — defense from day one
+        initial_resilience: 20,     // Pre-organized defense: Patriotic League, TDF, barricades, urban terrain knowledge
+        capital_osid: 'op:centar_sarajevo:centar_sarajevo',
     }
 ] as const;
 
@@ -121,14 +135,26 @@ function osidBelongsToEnclave(osid: string, enclave: EnclaveDefinition): boolean
     return false;
 }
 
+/**
+ * Enclaves known to be besieged from game start.
+ * Sarajevo was under siege from April 5 1992 — supply never "adequate".
+ * Even when technically connected, the siege created severe supply constraints.
+ */
+const ALWAYS_BESIEGED_ENCLAVES: ReadonlySet<string> = new Set(['sarajevo', 'gorazde']);
+
 /** Get the supply state of the majority of an enclave's OSIDs for a faction. */
 function getEnclaveSupplyState(
     enclave: EnclaveDefinition,
     supplyByOsid: SupplyStateByOsidReport | undefined | null
 ): 'critical' | 'strained' | 'adequate' {
-    if (!supplyByOsid?.factions) return 'adequate';
+    if (!supplyByOsid?.factions) {
+        // No supply data — besieged enclaves default to strained, others to adequate
+        return ALWAYS_BESIEGED_ENCLAVES.has(enclave.id) ? 'strained' : 'adequate';
+    }
     const facEntry = supplyByOsid.factions.find(f => f.faction_id === enclave.faction);
-    if (!facEntry?.by_osid) return 'adequate';
+    if (!facEntry?.by_osid) {
+        return ALWAYS_BESIEGED_ENCLAVES.has(enclave.id) ? 'strained' : 'adequate';
+    }
 
     let critical = 0;
     let strained = 0;
@@ -142,11 +168,16 @@ function getEnclaveSupplyState(
     }
 
     const total = critical + strained + adequate;
-    if (total === 0) return 'adequate';
+    if (total === 0) {
+        return ALWAYS_BESIEGED_ENCLAVES.has(enclave.id) ? 'strained' : 'adequate';
+    }
 
     // Majority rule: if most OSIDs are critical, enclave is critical
     if (critical >= strained && critical >= adequate) return 'critical';
     if (strained >= critical && strained >= adequate) return 'strained';
+
+    // Besieged enclaves never read as "adequate" — siege is always at least strained
+    if (ALWAYS_BESIEGED_ENCLAVES.has(enclave.id)) return 'strained';
     return 'adequate';
 }
 
@@ -184,7 +215,12 @@ export function updateEnclaveResilience(
     const currentTurn = state.meta?.turn ?? 0;
 
     for (const enclave of sortedEnclaves) {
-        const current = readEntry(resilience[enclave.id]);
+        let current = readEntry(resilience[enclave.id]);
+        // Seed initial resilience on first encounter (turn 1 or when enclave
+        // hasn't been tracked yet). Sarajevo had organized defense from day one.
+        if (current.resilience === 0 && current.isolation_turns === 0 && enclave.initial_resilience) {
+            current = { ...current, resilience: enclave.initial_resilience };
+        }
         const supplyState = getEnclaveSupplyState(enclave, supplyByOsid);
 
         // Resilience doesn't grow before the enclave historically formed
@@ -236,9 +272,15 @@ export function updateEnclaveResilience(
 
 /**
  * Get defense bonus multiplier for an OSID based on enclave resilience.
- * Base: 1.0 + resilience × 0.005 (max 1.15 at 30).
- * Hardened: × (1.0 + HARDENING_DEFENSE_BONUS) = ×1.05. Max combined: 1.2075.
+ * Base: 1.0 + resilience × 0.02 (at resilience 20: 1.40, at max 45: 1.90).
+ * Hardened: × (1.0 + HARDENING_DEFENSE_BONUS) = ×1.05. Max combined: ~2.0.
  * Used in attack_resolution_osid.ts to boost defender power.
+ *
+ * Historically, Sarajevo's urban terrain + organized defense made it
+ * 2-3× harder to assault than open terrain. Goražde's canyon terrain
+ * provided similar advantage. The resilience scaling represents not just
+ * fortifications but local knowledge, tunnel systems, sniping positions,
+ * and determination born from siege.
  */
 export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
     const resilience = state.political.enclave_resilience;
@@ -247,11 +289,112 @@ export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
     for (const enclave of ENCLAVE_DEFINITIONS) {
         if (osidBelongsToEnclave(osid, enclave)) {
             const entry = readEntry(resilience[enclave.id]);
-            const base = 1.0 + entry.resilience * 0.005; // Per-enclave max: Sarajevo 1.225, Bihac 1.20, Gorazde 1.175
+            const base = 1.0 + entry.resilience * 0.02; // At 20: 1.40, at 45: 1.90
             return entry.hardening_active ? base * (1.0 + HARDENING_DEFENSE_BONUS) : base;
         }
     }
     return 1.0;
+}
+
+// ── Enclave garrison constants ──────────────────────────────────────────────
+
+/**
+ * Fraction of OSID population that forms the enclave garrison.
+ * Represents Patriotic League, TDF, police, Green Berets, and civilian volunteers.
+ * Historical: Sarajevo had 30-40k fighters from ~300k population (~10-13%).
+ * Other enclaves: lower mobilization rate, smaller but still significant.
+ */
+const ENCLAVE_GARRISON_MOBILIZATION = 0.05;
+
+/**
+ * Effectiveness of garrison fighters relative to regular brigade personnel.
+ * Garrison fighters are motivated but poorly equipped/trained.
+ * Regular brigade basePower ≈ personnel × 0.5 × exp × cohesion ≈ pers × 0.3.
+ * Garrison: pers × GARRISON_EFFECTIVENESS ≈ pers × 0.15.
+ */
+const GARRISON_EFFECTIVENESS = 0.15;
+
+/**
+ * Get enclave garrison defense power for an OSID.
+ * Represents organized civilian defense (TDF, Patriotic League, police, volunteers)
+ * that fights alongside regular brigades in besieged enclaves.
+ *
+ * This is ADDED to regular defense — it's not a multiplier but raw power.
+ * Scales with:
+ *   - OSID population (more people = more defenders)
+ *   - Enclave resilience (organized defense improves over siege)
+ *   - Urban terrain (buildings, cover, knowledge of terrain)
+ *
+ * Historical rationale: Sarajevo's defense was never just the 4 brigades
+ * of the 1st Corps. Tens of thousands of armed civilians manned barricades,
+ * sniping positions, and strongpoints throughout the city. The Patriotic League
+ * had ~37,000 members across BiH, concentrated in Sarajevo. TDF had organized
+ * units. Police numbered ~3-5k. Even in April 1992, there were 10-15k fighters.
+ *
+ * @param state - Game state (for enclave resilience data)
+ * @param osid - Target OSID being attacked
+ * @param osidPopulation - Population of the target OSID
+ * @returns Raw defense power from garrison, or 0 if not in an enclave
+ */
+export function getEnclaveGarrisonPower(
+    state: GameState,
+    osid: string,
+    osidPopulation: number
+): number {
+    const resilience = state.political.enclave_resilience;
+
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        if (osidBelongsToEnclave(osid, enclave)) {
+            const entry = resilience ? readEntry(resilience[enclave.id]) : readEntry(undefined);
+            // At resilience 0 (no siege adaptation): garrison still forms but at base effectiveness
+            // At resilience 20 (initial Sarajevo): 1.0 + 20*0.02 = 1.4× garrison effectiveness
+            // At resilience 45 (max Sarajevo): 1.0 + 45*0.02 = 1.9× garrison effectiveness
+            const resilienceMult = 1.0 + entry.resilience * 0.02;
+            // Capital OSID gets extra garrison power — defense concentrates at the capital
+            const capitalMult = (enclave.capital_osid && osid === enclave.capital_osid)
+                ? CAPITAL_GARRISON_MULT : 1.0;
+            return osidPopulation * ENCLAVE_GARRISON_MOBILIZATION * GARRISON_EFFECTIVENESS * resilienceMult * capitalMult;
+        }
+    }
+    return 0;
+}
+
+/**
+ * Get the enclave capital OSID for an OSID if it belongs to an enclave with a capital.
+ * Used by retreat logic: retreating brigades in enclaves prefer moving toward the capital.
+ * BB2 p.479: beaten units fell back concentrically toward Goražde town.
+ */
+export function getEnclaveCapitalOsid(osid: string): string | null {
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        if (osidBelongsToEnclave(osid, enclave) && enclave.capital_osid) {
+            return enclave.capital_osid;
+        }
+    }
+    return null;
+}
+
+/**
+ * Check if two OSIDs belong to the same enclave.
+ * Used by retreat logic: enclave brigades must not retreat outside their pocket.
+ */
+export function isOsidInSameEnclave(a: string, b: string): boolean {
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        if (osidBelongsToEnclave(a, enclave) && osidBelongsToEnclave(b, enclave)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Check if an OSID is an enclave capital.
+ * Defenders at the capital get "last stand" behavior.
+ */
+export function isEnclaveCapital(osid: string): boolean {
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        if (enclave.capital_osid === osid) return true;
+    }
+    return false;
 }
 
 /**

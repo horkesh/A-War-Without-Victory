@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paradox Team Full Evaluation — AWWV State of the Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============ THEME (Editorial / Paper) ============ */
+    :root {
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+      --bg: #f6f4f0;
+      --surface: #fefdfb;
+      --surface2: #f0ebe3;
+      --surface-elevated: #ffffff;
+      --border: rgba(0, 0, 0, 0.06);
+      --border-bright: rgba(0, 0, 0, 0.12);
+      --text: #1c1917;
+      --text-dim: #57534e;
+      --accent: #4a5568;
+      --accent-dim: rgba(74, 85, 104, 0.08);
+      --grade-a: #047857;
+      --grade-a-dim: rgba(4, 120, 87, 0.1);
+      --grade-b: #1e40af;
+      --grade-b-dim: rgba(30, 64, 175, 0.08);
+      --grade-b-low: #b45309;
+      --grade-b-low-dim: rgba(180, 83, 9, 0.1);
+      --p0: #b91c1c;
+      --p0-dim: rgba(185, 28, 28, 0.08);
+      --p1: #a16207;
+      --p1-dim: rgba(161, 98, 7, 0.08);
+      --p2: #4b5563;
+      --p2-dim: rgba(75, 85, 99, 0.08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1917;
+        --surface: #292524;
+        --surface2: #44403c;
+        --surface-elevated: #3f3a36;
+        --border: rgba(255, 255, 255, 0.06);
+        --border-bright: rgba(255, 255, 255, 0.12);
+        --text: #e7e5e4;
+        --text-dim: #a8a29e;
+        --accent: #d6d3d1;
+        --accent-dim: rgba(255, 255, 255, 0.06);
+        --grade-a: #34d399;
+        --grade-a-dim: rgba(52, 211, 153, 0.12);
+        --grade-b: #93c5fd;
+        --grade-b-dim: rgba(147, 197, 253, 0.1);
+        --grade-b-low: #fcd34d;
+        --grade-b-low-dim: rgba(252, 211, 77, 0.12);
+        --p0: #f87171;
+        --p0-dim: rgba(248, 113, 113, 0.12);
+        --p1: #fbbf24;
+        --p1-dim: rgba(251, 191, 36, 0.12);
+        --p2: #9ca3af;
+        --p2-dim: rgba(156, 163, 175, 0.1);
+      }
+    }
+
+    /* ============ RESET + BASE ============ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse at 20% 0%, var(--accent-dim) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, var(--grade-b-dim) 0%, transparent 40%);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    /* ============ LAYOUT (TOC + MAIN) ============ */
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 40px 60px;
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0 32px;
+    }
+    .main { min-width: 0; }
+
+    /* ============ TOC ============ */
+    .toc {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      padding: 14px 0;
+      grid-row: 1 / -1;
+      max-height: calc(100dvh - 48px);
+      overflow-y: auto;
+    }
+    .toc::-webkit-scrollbar { width: 3px; }
+    .toc::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+    .toc-title {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      padding: 0 0 10px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc a {
+      display: block;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 5px;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      line-height: 1.4;
+      margin-bottom: 2px;
+    }
+    .toc a:hover { color: var(--text); background: var(--surface2); }
+    .toc a.active { color: var(--text); border-left-color: var(--accent); background: var(--accent-dim); }
+
+    @media (max-width: 1000px) {
+      .wrap { grid-template-columns: 1fr; padding: 16px 20px 40px; }
+      .toc {
+        position: sticky; top: 0; z-index: 200; max-height: none;
+        display: flex; gap: 6px; align-items: center;
+        overflow-x: auto; -webkit-overflow-scrolling: touch;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        padding: 10px 0; margin: 0 -20px; padding-left: 20px; padding-right: 20px;
+        grid-row: auto;
+      }
+      .toc::-webkit-scrollbar { display: none; }
+      .toc-title { display: none; }
+      .toc a { white-space: nowrap; flex-shrink: 0; border-left: none; border-bottom: 2px solid transparent; padding: 6px 10px; font-size: 10px; }
+      .toc a.active { border-left: none; border-bottom-color: var(--accent); background: var(--surface); }
+      .main { padding-top: 20px; }
+      .sec-head { scroll-margin-top: 52px; }
+    }
+
+    /* ============ ANIMATION ============ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { animation: fadeUp 0.4s ease-out both; animation-delay: calc(var(--i, 0) * 0.05s); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      margin-bottom: 32px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+    .hero-summary {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-dim);
+    }
+    .hero-summary strong { color: var(--text); }
+
+    /* ============ KPI ROW ============ */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .kpi-card__value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+    .kpi-card__value--a { color: var(--grade-a); }
+    .kpi-card__value--b { color: var(--grade-b); }
+    .kpi-card__value--blow { color: var(--grade-b-low); }
+    .kpi-card__label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* ============ SECTION HEAD ============ */
+    .sec-head {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-bright);
+      color: var(--text);
+    }
+
+    /* ============ TABLE WRAPPER ============ */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .data-table thead { position: sticky; top: 0; z-index: 2; }
+    .data-table th {
+      background: var(--surface2);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-dim);
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 2px solid var(--border-bright);
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .data-table tbody tr:nth-child(even) { background: var(--accent-dim); }
+    .data-table tbody tr:hover { background: var(--surface2); }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table .col-grade { width: 72px; text-align: center; }
+    .data-table .col-justify { min-width: 260px; max-width: 420px; }
+    .data-table code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: var(--surface2);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Grade badges */
+    .grade {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .grade--a { background: var(--grade-a-dim); color: var(--grade-a); }
+    .grade--b { background: var(--grade-b-dim); color: var(--grade-b); }
+    .grade--blow { background: var(--grade-b-low-dim); color: var(--grade-b-low); }
+
+    /* Priority badges */
+    .prio { font-family: var(--font-mono); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+    .prio--p0 { background: var(--p0-dim); color: var(--p0); }
+    .prio--p1 { background: var(--p1-dim); color: var(--p1); }
+    .prio--p2 { background: var(--p2-dim); color: var(--p2); }
+
+    /* ============ INTEROP CARDS ============ */
+    .interop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .interop-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      min-width: 0;
+    }
+    .interop-card h4 {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .interop-card p {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .interop-card p + p { margin-top: 6px; }
+
+    /* ============ WAR-OR-GAME BOX ============ */
+    .war-box {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-left: 4px solid var(--grade-b-low);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .war-box h4 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .war-box ul { margin-left: 18px; margin-top: 8px; }
+    .war-box li { margin-bottom: 4px; font-size: 13px; color: var(--text-dim); }
+    .war-box .grade { margin-left: 0; }
+
+    /* ============ COLLAPSIBLE ============ */
+    details.collapsible {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+    details.collapsible summary {
+      padding: 12px 18px;
+      background: var(--surface);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dim);
+    }
+    details.collapsible summary::-webkit-details-marker { display: none; }
+    details.collapsible summary::before { content: '▸'; font-size: 10px; transition: transform 0.15s; }
+    details.collapsible[open] summary::before { transform: rotate(90deg); }
+    details.collapsible .collapsible__body {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#s1">Summary</a>
+    <a href="#s2">Grades</a>
+    <a href="#s3">Interoperation</a>
+    <a href="#s4">Recommendations</a>
+    <a href="#s5">War-or-Game</a>
+  </nav>
+
+  <div class="main">
+
+    <div class="hero animate" style="--i:0">
+      <h1>Paradox Team Full Evaluation</h1>
+      <p class="subtitle">AWWV State of the Game — 2026-03-10</p>
+      <div class="hero-summary">
+        Eight domains graded by Technical Architect, Gameplay Programmer, UI/UX Developer, QA Engineer, Canon Compliance Reviewer, Game Designer, Systems Programmer, and <strong>War-or-Game</strong> (realism auditor). Engine is architecturally sound; combat plausible post-n482. Main gaps: calibration (RS over-capture, casualty volume), realism (HVO passivity, zero-morale), canon hygiene (Phase I/II remnants), operational maturity (CI, coverage, warroom placeholders).
+      </div>
+    </div>
+
+    <div id="s1" class="sec-head animate" style="--i:1">1 — Summary</div>
+    <div class="kpi-row animate" style="--i:2">
+      <div class="kpi-card">
+        <div class="kpi-card__value">8</div>
+        <div class="kpi-card__label">Domains</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__value kpi-card__value--a">1</div>
+        <div class="kpi-card__label">A−</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__value kpi-card__value--b">6</div>
+        <div class="kpi-card__label">B+</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__value kpi-card__value--blow">1</div>
+        <div class="kpi-card__label">B</div>
+      </div>
+    </div>
+
+    <div id="s2" class="sec-head animate" style="--i:3">2 — Grades at a Glance</div>
+    <div class="table-wrap animate" style="--i:4">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th class="col-grade">Grade</th>
+              <th class="col-justify">One-line justification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1. Architecture &amp; Data Flow</td>
+              <td class="col-grade"><span class="grade grade--b">B+</span></td>
+              <td class="col-justify">Partition + serialization strong; migration/validation and dual pipeline naming need tightening</td>
+            </tr>
+            <tr>
+              <td>2. Simulation Mechanics &amp; Bot AI</td>
+              <td class="col-grade"><span class="grade grade--b">B+</span></td>
+              <td class="col-justify">Combat spec-backed and fixed; calibration and morale gaps keep it short of A</td>
+            </tr>
+            <tr>
+              <td>3. UI/UX (Map &amp; Warroom)</td>
+              <td class="col-grade"><span class="grade grade--b">B+</span></td>
+              <td class="col-justify">Map feature-complete and coherent; warroom placeholders and missing modals</td>
+            </tr>
+            <tr>
+              <td>4. QA, Determinism &amp; Pipelines</td>
+              <td class="col-grade"><span class="grade grade--b">B+</span></td>
+              <td class="col-justify">Determinism enforced, qa:all unified; no CI, no coverage threshold, script fragmentation</td>
+            </tr>
+            <tr>
+              <td>5. Canon Compliance</td>
+              <td class="col-grade"><span class="grade grade--a">A−</span></td>
+              <td class="col-justify">Control, pipeline, OSID, determinism aligned; Phase I/II remnants and stale morale doc</td>
+            </tr>
+            <tr>
+              <td>6. Game Design &amp; Mechanics</td>
+              <td class="col-grade"><span class="grade grade--b">B+</span></td>
+              <td class="col-justify">Control/doctrine/supply/exhaustion match design; Phase 3B off, morale/ARBiH/Graz need clarity</td>
+            </tr>
+            <tr>
+              <td>7. Core Systems &amp; Determinism</td>
+              <td class="col-grade"><span class="grade grade--b">B+</span></td>
+              <td class="col-justify">Invariants and ordering strong; step-order test and localeCompare in tooling</td>
+            </tr>
+            <tr>
+              <td>8. Realism (War-or-Game)</td>
+              <td class="col-grade"><span class="grade grade--blow">B</span></td>
+              <td class="col-justify">Outcomes plausible post-n482; RS over-capture, casualties, HVO passivity, zero-morale still absurd</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="s3" class="sec-head animate" style="--i:5">3 — Interoperation</div>
+    <div class="interop-grid animate" style="--i:6">
+      <div class="interop-card">
+        <h4>State → Engine → UI</h4>
+        <p>GameState (partitioned) is the single source of truth. Pipeline steps mutate state in a fixed order; <code>GameStateAdapter</code> derives LoadedGameState for the map and warroom. No versioned view contract; adapter is the only UI boundary.</p>
+      </div>
+      <div class="interop-card">
+        <h4>Calibration ↔ Realism ↔ Canon</h4>
+        <p>CALIBRATION_MASTER defines behavioral health and historical-fit criteria; REAL_WAR_MASTER records what a commander would find absurd; canon constrains control, exhaustion, and supply. War-or-Game findings feed calibration targets and design clarifications.</p>
+      </div>
+      <div class="interop-card">
+        <h4>QA ↔ Engine ↔ Baselines</h4>
+        <p>Determinism enforced by static scan and stableStringify; baseline regression hashes lock artifact shape. No CI; <code>qa:all</code> is the manual gate. Coverage is measured but not enforced.</p>
+      </div>
+      <div class="interop-card">
+        <h4>Cross-cutting</h4>
+        <p>Phase I/II remnants affect canon, serialization, and UI adapter. Morale (victory boost, zero-morale consequence) spans design, sim, and realism. RS over-capture and HVO passivity span bot AI, calibration, and realism.</p>
+      </div>
+    </div>
+
+    <div id="s4" class="sec-head animate" style="--i:7">4 — Consolidated Top Recommendations</div>
+    <div class="table-wrap animate" style="--i:8">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:56px">Priority</th>
+              <th>Recommendation</th>
+              <th style="width:200px">Owner / domain</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="prio prio--p0">P0</span></td>
+              <td>Tune RS over-capture (aggression/avoided_osids, casualty constants toward 40–60k)</td>
+              <td>Gameplay Programmer + War-or-Game</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p0">P0</span></td>
+              <td>Implement IVP breakdown modal in warroom</td>
+              <td>UI/UX Developer</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p1">P1</span></td>
+              <td>Complete Phase I/II terminology cleanup (types, modules, adapter, displacement attribution)</td>
+              <td>Technical Architect + Canon Compliance</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p1">P1</span></td>
+              <td>Add victory-based morale boost and zero-morale consequence (dissolution/refusal)</td>
+              <td>Gameplay Programmer + Game Designer</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p1">P1</span></td>
+              <td>HVO passivity: Graz sector exceptions and/or offensive HVO corps stances</td>
+              <td>Gameplay Programmer + Game Designer</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p1">P1</span></td>
+              <td>Align migration with partition; enforce partition roots in validateGameStateShape</td>
+              <td>Technical Architect</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p2">P2</span></td>
+              <td>Add CI workflow (typecheck, node tests, Vitest, test:baselines)</td>
+              <td>QA Engineer / DevOps</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p2">P2</span></td>
+              <td>Reconcile Phase 3B (pressure→exhaustion) with negative-sum design (enable or document)</td>
+              <td>Game Designer</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p2">P2</span></td>
+              <td>Add war-phase step-order determinism test; replace localeCompare with strictCompare in tooling</td>
+              <td>Systems Programmer</td>
+            </tr>
+            <tr>
+              <td><span class="prio prio--p2">P2</span></td>
+              <td>Replace or clarify warroom placeholders; document fast gate for QA</td>
+              <td>UI/UX Developer, QA Engineer</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="s5" class="sec-head animate" style="--i:9">5 — War-or-Game (Realism)</div>
+    <div class="war-box animate" style="--i:10">
+      <h4>Grade: <span class="grade grade--blow">B</span></h4>
+      <p>Attack outcomes are now plausible (posture bug fixed in n482). A real commander would still find RS over-capture (+104 delta), low casualties (~17.5k vs 40–60k), HVO near-passivity, and zero-morale units fighting at full strength absurd.</p>
+      <p><strong>What now works:</strong> Attack outcome distribution (catastrophic ~25%, decisive ~53%), deep-rear brigades fixed, rear pocket cleanup, cold front phantom attrition fixed, partial victory morale boost.</p>
+      <p><strong>Still wrong:</strong></p>
+      <ul>
+        <li>RS over-capture (+104 delta) — P1</li>
+        <li>Casualty volume (~17.5k vs 40–60k) — P1</li>
+        <li>HVO passivity (Graz blanket truce; needs sector exceptions)</li>
+        <li>Zero-morale units still fight (no dissolution/refusal)</li>
+        <li>Attacker:defender ratio (1992 VRS firepower asymmetry not modeled)</li>
+      </ul>
+    </div>
+
+    <details class="collapsible animate" style="--i:11">
+      <summary>Source report</summary>
+      <div class="collapsible__body">
+        Full narrative: <code>docs/40_reports/convenes/20260310_PARADOX_TEAM_FULL_EVALUATION.md</code>. Synthesized from eight parallel subagent evaluations. War-or-Game used REAL_WAR_MASTER.md and latest run evidence.
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  const toc = document.getElementById('toc');
+  const links = toc.querySelectorAll('a');
+  const sections = [];
+  links.forEach(link => {
+    const id = link.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) {
+          match.link.classList.add('active');
+          if (window.innerWidth <= 1000) {
+            match.link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        }
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  sections.forEach(s => observer.observe(s.el));
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + id);
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

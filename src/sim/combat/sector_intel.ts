@@ -22,6 +22,7 @@ import type {
 } from '../../state/game_state.js';
 import {
     FACTION_RECON_PROFILES,
+    FACTION_INITIAL_INTEL_CONFIDENCE,
     CONFIDENCE_ROUGH_STRENGTH,
     CONFIDENCE_FRONT_BRIGADES,
     CONFIDENCE_FULL_STRENGTH,
@@ -65,13 +66,14 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
 
         const newRecords: SectorIntelRecord[] = [];
         const enemySectorIds = [...enemySectorEdgeCounts.keys()].sort(strictCompare);
+        const initialFloor = FACTION_INITIAL_INTEL_CONFIDENCE[sector.faction as NonNullable<FactionId>] ?? 0;
 
         for (const enemySectorId of enemySectorIds) {
             const edgeCount = enemySectorEdgeCounts.get(enemySectorId) ?? 0;
             const enemySector = sectors[enemySectorId];
             if (!enemySector) continue;
             const prev = prevByEnemySector.get(enemySectorId);
-            const prevConfidence = prev?.confidence ?? 0;
+            const prevConfidence = prev?.confidence ?? initialFloor;
             const prevTurnsInContact = prev?.turns_in_contact ?? 0;
             const passiveBuildup = (state.military.opsec_sectors ?? []).includes(enemySectorId)
                 ? profile.passive_buildup_per_turn * 0.5

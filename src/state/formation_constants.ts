@@ -73,10 +73,10 @@ export const MIN_MANDATORY_SPAWN = 100;
 export const MIN_COMBAT_PERSONNEL = 100;
 
 /** Minimum personnel to be eligible for offensive action. Below this, brigade can only defend.
- *  A sub-company-sized unit cannot assault positions — it lacks mass and fire support.
- *  Prevents death-spiral attacks where depleted brigades repeatedly throw 100-200 men
- *  at fortified positions with catastrophic outcomes every turn until destroyed. */
-export const MIN_ATTACK_PERSONNEL = 200;
+ *  A sub-battalion-sized unit cannot assault positions — it lacks mass and fire support.
+ *  Prevents death-spiral attacks where depleted brigades repeatedly throw 300-person
+ *  units at fortified positions. At 500, roughly company+ level — minimum for coordinated attack. */
+export const MIN_ATTACK_PERSONNEL = 500;
 
 /** Maximum fatigue a formation can accumulate. Shared across combat resolution, fatigue recovery, and combat power calculation. */
 export const FATIGUE_MAX = 30;
@@ -91,12 +91,13 @@ export function isInCombat(f: { posture?: string; disrupted?: boolean }): boolea
 
 /** Whether a formation is eligible to participate in operations (active brigade/OG/phantom). */
 export function isEligibleOperationFormation(f: { kind?: string; status: string }): boolean {
-    return (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom')
+    return (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom')
         && f.status === 'active';
 }
 
-/** Whether a brigade is eligible for reinforcement (not degraded, not forming, not enclave). */
-export function isEligibleForReinforcement(f: { kind?: string; readiness?: string; tags?: string[] }): boolean {
+/** Whether a brigade is eligible for reinforcement (not degraded, not forming, not enclave, not dead). */
+export function isEligibleForReinforcement(f: { kind?: string; readiness?: string; tags?: string[]; status?: string }): boolean {
+    if (f.status === 'inactive') return false;
     if (f.kind === 'paramilitary') return false;
     if (f.readiness === 'degraded' || f.readiness === 'forming') return false;
     if (Array.isArray(f.tags) && f.tags.includes('enclave')) return false;
@@ -135,6 +136,16 @@ export const REINFORCEMENT_RATE = 400;
  * 200/turn allows slow reinforcement even during operations.
  */
 export const COMBAT_REINFORCEMENT_RATE = 200;
+
+/**
+ * Enclave brigades recruit locally at a reduced rate — constrained by isolation.
+ * 80/turn barely offsets frontline attrition (~15-20/turn), keeping brigades alive
+ * at reduced strength rather than growing to full brigade size.
+ */
+export const ENCLAVE_REINFORCEMENT_RATE = 80;
+
+/** Enclave brigades never reach full strength — limited local supply/logistics. */
+export const ENCLAVE_MAX_PERSONNEL = 1500;
 
 /**
  * Faction-specific reinforcement rate multiplier by war phase.

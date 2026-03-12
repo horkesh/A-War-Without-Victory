@@ -5,6 +5,12 @@
  * area of responsibility. Multi-source BFS from corps HQ locations assigns each
  * friendly OSID to the nearest corps; front edges are then partitioned accordingly.
  *
+ * GOLDEN RULES:
+ *   1. Every active brigade MUST be assigned to a sector. No exceptions.
+ *   2. Brigades at a sector MUST be at the frontline. Exception: one reserve
+ *      brigade per sector sits 1 hop behind the front (recovery/reaction).
+ *      Deep-rear brigades are kept assigned and march forward via interior movement.
+ *
  * Derived each turn (Engine Invariants §13: no serialization of derived state).
  * Deterministic: sorted iteration via strictCompare, no Math.random().
  */
@@ -28,9 +34,13 @@ import {
     EXEMPT_CORPS_IDS,
     MAX_SECTOR_BRIGADES,
     MAX_SECTOR_EDGES,
-    MAX_TERRITORY_OSIDS,
     MIN_SECTOR_EDGES,
 } from './corps_front_sectors_constants.js';
+
+/** Extract municipality from OSID format "op:municipality:slug". */
+function munFromOsid(osid: string): string | undefined {
+    return osid.split(':')[1];
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Entry Point
@@ -73,10 +83,10 @@ export function buildCorpsFrontSectors(
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Per-Faction Sector Building
-// Pipeline steps (ownership): 1) mapOsidsToCorps (BFS), 2) partitionFrontEdges,
+// Pipeline steps: 1) mapOsidsToCorps (BFS), 2) partitionFrontEdges,
 // 3) consolidateCrossCorpsFronts, 4) buildMultiSectorsForCorps, 5) assignTerritoryVoronoi,
-// 6) classifyBrigadesByTerritory, 6b) equalizeSectorDensity, 7) ensureMinimumSectorCoverage,
-// 8) reclassifyRearBrigades, 9) prune empty sectors.
+// 6) classifyBrigades (frontline by position + corps distributes rest by need),
+// 7) ensureMinimumSectorCoverage, 8) reclassifyRearBrigades, 9) prune empty sectors.
 // ═══════════════════════════════════════════════════════════════════════════
 
 function buildFactionSectors(
@@ -150,34 +160,39 @@ function buildFactionSectors(
     // each sector's BFS can only claim OSIDs assigned to its corps.
     assignTerritoryVoronoi(sectors, adjacency, friendlyOsids, osidToCorps);
 
-    // Step 6: Classify brigades by territory membership.
-    // Brigades in a sector's territory_osids → assigned.
-    // Brigades in friendly territory but not in any sector → reserve of nearest sector.
+    // Pre-compute friendly territory connected components (used by steps 6 and 7).
+    const componentOf = buildFriendlyComponents(adjacency, friendlyOsids);
+
+    // Step 6: Classify brigades — corps-driven assignment.
+    // Phase 1: Frontline brigades assigned by position (you defend where you stand).
+    // Phase 2: Corps pools remaining brigades, distributes to sectors by need
+    //          (proportional to front edge count). No BFS proximity — corps decides.
     // General staff units are exempt.
-    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids);
-
-
-    // Step 6b: Equalize density across sectors within each corps.
-    // Deep-rear brigades (Priority 5 in classification) tend to all land on the
-    // nearest sector. Redistribute assigned brigades so each corps' sectors
-    // have brigade counts proportional to their front edge count.
-    equalizeSectorDensity(sectors, formations);
+    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf);
 
     // Step 7: Ensure every sector with front edges has at least one assigned brigade.
     // Transfer from adjacent surplus sectors only (geographic contiguity enforced).
-    ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids);
+    ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf);
 
-    // Step 8: Reclassify non-front assigned brigades as reserves.
-    // After equalization and coverage, any assigned brigade not physically on a
-    // front OSID or 1-hop behind is demoted to reserve (capped per sector).
+    // Step 8: Reclassify brigades by frontline proximity.
+    // Front → assigned, 1-hop → reserve (cap 1), deeper → stays assigned (marches forward).
+    // GOLDEN RULE: no brigade is ever dropped from its sector.
     reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
 
     // Step 8b: Deduplicate — steps 6b/7/8 can produce cross-sector duplicates
     // when shared front OSIDs or coverage transfers create overlapping claims.
     deduplicateBrigadesAcrossSectors(sectors);
 
-    // Final prune: remove any sector with 0 front edges (ghost/pocket artifacts).
-    const pruned = sectors.filter(s => s.length_edges > 0);
+    // Final prune: remove sectors that are ghost artifacts:
+    //  - 0 front edges (no enemy contact)
+    //  - 0 territory AND 0 assigned/reserve brigades (isolated pocket with nobody home)
+    const pruned = sectors.filter(s => {
+        if (s.length_edges === 0) return false;
+        if (s.territory_osids.length === 0
+            && s.assigned_brigade_ids.length === 0
+            && s.reserve_brigade_ids.length === 0) return false;
+        return true;
+    });
     pruned.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
     return pruned;
 }
@@ -235,12 +250,7 @@ function assignTerritoryVoronoi(
     // Multi-source BFS through friendly territory.
     // Corps boundary enforcement: each sector can only claim OSIDs that
     // mapOsidsToCorps assigned to its corps (or OSIDs not in the map at all).
-    // Territory cap: each sector can claim at most MAX_TERRITORY_OSIDS.
-    const sectorClaimCount = new Map<number, number>();
-    // Count seeds
-    for (const entry of queue) {
-        sectorClaimCount.set(entry.sectorIdx, (sectorClaimCount.get(entry.sectorIdx) ?? 0) + 1);
-    }
+    // No territory cap — every friendly OSID must belong to a sector.
     let head = 0;
     while (head < queue.length) {
         const { osid, sectorIdx } = queue[head++]!;
@@ -254,10 +264,10 @@ function assignTerritoryVoronoi(
                 const ownerCorps = osidToCorps.get(n as Osid);
                 if (ownerCorps && ownerCorps !== sectorCorps) continue;
             }
-            // Territory cap: don't exceed MAX_TERRITORY_OSIDS per sector
-            const count = sectorClaimCount.get(sectorIdx) ?? 0;
-            if (count >= MAX_TERRITORY_OSIDS) continue;
-            sectorClaimCount.set(sectorIdx, count + 1);
+            // No territory cap — every friendly OSID must belong to a sector.
+            // GOLDEN RULE: Every brigade must be in a sector. To achieve this,
+            // every friendly OSID must be claimed so brigade classification never
+            // falls through.
             claimed.set(n, sectorIdx);
             queue.push({ osid: n, sectorIdx });
         }
@@ -290,13 +300,10 @@ function assignTerritoryVoronoi(
                         if (claimed.has(n)) {
                             // Assign orphan to the same sector as this neighbor
                             const sIdx = claimed.get(n)!;
-                            const count = sectorClaimCount.get(sIdx) ?? 0;
-                            if (count < MAX_TERRITORY_OSIDS) {
-                                claimed.set(orphan, sIdx);
-                                sectorClaimCount.set(sIdx, count + 1);
-                                found = true;
-                                break;
-                            }
+                            // No territory cap — claim orphan unconditionally.
+                            claimed.set(orphan, sIdx);
+                            found = true;
+                            break;
                         }
                         if (friendlyOsids.has(n)) next.push(n);
                     }
@@ -318,6 +325,48 @@ function assignTerritoryVoronoi(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Friendly Territory Connected Components
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Partition friendly OSIDs into connected components via BFS.
+ * Returns a map from OSID → component index (0-based).
+ * Delegates to the generic findConnectedComponents() utility.
+ */
+function buildFriendlyComponents(
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+): Map<string, number> {
+    const components = findConnectedComponents(
+        friendlyOsids,
+        osid => (adjacency.get(osid as Osid) ?? []).filter(n => friendlyOsids.has(n)),
+    );
+    const componentOf = new Map<string, number>();
+    for (let i = 0; i < components.length; i++) {
+        for (const osid of components[i]!) componentOf.set(osid, i);
+    }
+    return componentOf;
+}
+
+/**
+ * Get the component ID for a sector (from its first territory OSID or friendly front OSID).
+ * Returns -1 if sector has no OSIDs in the component map.
+ */
+function getSectorComponent(sector: CorpsFrontSector, componentOf: Map<string, number>): number {
+    for (const osid of sector.territory_osids) {
+        const c = componentOf.get(osid);
+        if (c !== undefined) return c;
+    }
+    for (const ss of sector.sub_segments) {
+        for (const o of ss.friendly_osids) {
+            const c = componentOf.get(o);
+            if (c !== undefined) return c;
+        }
+    }
+    return -1;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Step 6: Classify Brigades by Territory Membership
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -325,9 +374,12 @@ function assignTerritoryVoronoi(
  * Classify brigades into sectors based on territory membership.
  *
  * - Brigade at an OSID in a sector's territory_osids → assigned to that sector.
- * - Brigade in friendly territory but not in any sector's territory → reserve
- *   of the nearest sector (BFS through friendly territory).
+ * - Brigade in friendly territory but not in any sector's territory → assigned
+ *   to the nearest sector (BFS through friendly territory).
  * - General staff units are exempt.
+ *
+ * GOLDEN RULE: Every active brigade MUST end up in a sector. If a brigade
+ * falls through all classification priorities, that's a bug — investigate.
  *
  * Clears existing assigned/reserve lists and rebuilds from scratch.
  * Deterministic: sorted iteration via strictCompare.
@@ -337,7 +389,8 @@ function classifyBrigadesByTerritory(
     faction: FactionId,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
-    friendlyOsids: Set<string>
+    friendlyOsids: Set<string>,
+    componentOf: Map<string, number>
 ): void {
     if (sectors.length === 0) return;
 
@@ -347,48 +400,20 @@ function classifyBrigadesByTerritory(
         s.reserve_brigade_ids = [];
     }
 
-    // Build per-sector front OSID set and 1-hop-behind reserve set.
-    // Assigned = on front OSID. Reserve = 1 hop behind front in friendly territory.
-    // Deeper rear brigades are not classified to any sector.
+    // ── Phase 1: Assign frontline brigades by position ──────────────────
+    // Brigades physically on a sector's front OSID are assigned to that sector.
+    // This is positional reality — you defend where you stand.
     const frontOsidToSectorIdx = new Map<string, number>();
-    const reserveOsidToSectorIdx = new Map<string, number>();
     for (let i = 0; i < sectors.length; i++) {
-        const sec = sectors[i]!;
-        const frontSet = new Set<string>();
-        for (const ss of sec.sub_segments) {
+        for (const ss of sectors[i]!.sub_segments) {
             for (const o of ss.friendly_osids) {
-                frontSet.add(o);
                 if (!frontOsidToSectorIdx.has(o)) frontOsidToSectorIdx.set(o, i);
-            }
-        }
-        // 1-hop behind: adjacent to front, in friendly territory, not itself a front OSID
-        for (const frontOsid of frontSet) {
-            for (const n of (adjacency.get(frontOsid as Osid) ?? [])) {
-                if (frontSet.has(n)) continue;
-                if (!friendlyOsids.has(n)) continue;
-                if (frontOsidToSectorIdx.has(n)) continue; // Front of another sector
-                if (!reserveOsidToSectorIdx.has(n)) reserveOsidToSectorIdx.set(n, i);
             }
         }
     }
 
-    // Build territory OSID lookup from Voronoi results (Step 5).
-    // This is the primary assignment mechanism for deep-rear brigades —
-    // every friendly OSID is in exactly one sector's territory.
-    const territoryOsidToSectorIdx = new Map<string, number>();
-    for (let i = 0; i < sectors.length; i++) {
-        for (const osid of sectors[i]!.territory_osids ?? []) {
-            // Don't override front entries — those are more specific.
-            // Reserve entries ARE included: a brigade may be 1-hop behind a
-            // different corps's front (Priority 2 fails on corps mismatch),
-            // but in its own corps's territory (Priority 4 should catch it).
-            if (!frontOsidToSectorIdx.has(osid)) {
-                if (!territoryOsidToSectorIdx.has(osid)) {
-                    territoryOsidToSectorIdx.set(osid, i);
-                }
-            }
-        }
-    }
+    // Per-corps unassigned brigade pool (corps decides where they go)
+    const corpsPool = new Map<FormationId, FormationId[]>();
 
     const sortedFormIds = Object.keys(formations).sort(strictCompare);
     for (const fid of sortedFormIds) {
@@ -402,57 +427,120 @@ function classifyBrigadesByTerritory(
 
         const loc = f.location_osid;
 
-        // Priority 1: brigade on a front OSID of its own corps → assigned
+        // Frontline brigade → assigned to sector it's physically on
         const frontIdx = frontOsidToSectorIdx.get(loc);
         if (frontIdx !== undefined && sectors[frontIdx]!.corps_id === fCorpsId) {
             sectors[frontIdx]!.assigned_brigade_ids.push(fid);
             continue;
         }
 
-        // Priority 2: brigade 1 hop behind front of its own corps → reserve
-        const reserveIdx = reserveOsidToSectorIdx.get(loc);
-        if (reserveIdx !== undefined && sectors[reserveIdx]!.corps_id === fCorpsId) {
-            sectors[reserveIdx]!.reserve_brigade_ids.push(fid);
+        // Not on front — goes to corps pool for corps-level assignment
+        if (fCorpsId) {
+            const pool = corpsPool.get(fCorpsId) ?? [];
+            pool.push(fid);
+            corpsPool.set(fCorpsId, pool);
+        }
+    }
+
+    // ── Phase 2: Corps distributes pooled brigades to sectors by need ───
+    // The corps decides: sectors with more front edges get more brigades.
+    // Constraint: a pooled brigade can only be assigned to a sector it can
+    // physically reach through friendly territory (same connected component).
+    // GOLDEN RULE: every brigade must end up in a sector.
+    const sectorsByCorps = new Map<FormationId, CorpsFrontSector[]>();
+    for (const s of sectors) {
+        if (s.length_edges === 0) continue;
+        const list = sectorsByCorps.get(s.corps_id) ?? [];
+        list.push(s);
+        sectorsByCorps.set(s.corps_id, list);
+    }
+
+    for (const [corpsId, pool] of [...corpsPool.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        const corpsSectors = sectorsByCorps.get(corpsId);
+        if (!corpsSectors || corpsSectors.length === 0) {
+            // No sectors for this corps — assign to any same-faction sector (fallback)
+            if (sectors.length > 0) {
+                for (const bid of pool) sectors[0]!.assigned_brigade_ids.push(bid);
+            }
             continue;
         }
 
-        // No cross-corps front fallback. A brigade physically sitting on another
-        // corps's front is an assignment error upstream, not a valid claim here.
-
-        // Priority 4: brigade in a sector's territory (from Voronoi BFS) + correct corps.
-        // This replaces the old Priority 5 BFS which failed when enemy-held OSIDs
-        // fragmented the friendly path between brigade location and sector front.
-        const terrIdx = territoryOsidToSectorIdx.get(loc);
-        if (terrIdx !== undefined && sectors[terrIdx]!.corps_id === fCorpsId) {
-            sectors[terrIdx]!.assigned_brigade_ids.push(fid);
-            continue;
+        // Build sector → municipality set from territory_osids for home-affinity matching.
+        // Brigades should defend their home municipality when possible.
+        const sectorMunicipalities = new Map<CorpsFrontSector, Set<string>>();
+        for (const s of corpsSectors) {
+            const muns = new Set<string>();
+            for (const osid of s.territory_osids) {
+                const m = munFromOsid(osid);
+                if (m) muns.add(m);
+            }
+            sectorMunicipalities.set(s, muns);
         }
 
-        // Last resort: brigade in friendly territory but not in any sector's territory.
-        // This can happen when territory_osids is capped at MAX_TERRITORY_OSIDS.
-        // BFS from brigade location to nearest front OSID of its own corps.
-        if (friendlyOsids.has(loc) && fCorpsId) {
-            const visited = new Set<string>([loc]);
-            const queue: string[] = [loc];
-            let head = 0;
-            let bestIdx: number | null = null;
-            while (head < queue.length && bestIdx === null) {
-                const osid = queue[head++]!;
-                const fi = frontOsidToSectorIdx.get(osid);
-                if (fi !== undefined && sectors[fi]!.corps_id === fCorpsId) {
-                    bestIdx = fi;
-                    break;
-                }
-                for (const n of (adjacency.get(osid as Osid) ?? []).slice().sort(strictCompare)) {
-                    if (visited.has(n)) continue;
-                    if (!friendlyOsids.has(n)) continue;
-                    visited.add(n);
-                    queue.push(n);
-                }
+        // Compute each sector's need and connected component.
+        // Pooled brigades can only reach sectors in the same component of friendly territory.
+        const sectorNeed: Array<{ sector: CorpsFrontSector; need: number; comp: number }> = [];
+        for (const s of corpsSectors) {
+            const comp = getSectorComponent(s, componentOf);
+            const need = Math.max(0, s.length_edges - s.assigned_brigade_ids.length);
+            sectorNeed.push({ sector: s, need, comp });
+        }
+
+        // Phase 2a: Home-affinity assignment — brigades prefer sectors covering
+        // their home municipality AND reachable (same component).
+        const unmatched: FormationId[] = [];
+        for (const bid of pool) {
+            const f = formations[bid];
+            const homeOsid = f?.home_osid;
+            const homeMun = homeOsid ? munFromOsid(homeOsid) : undefined;
+            const brigComp = f?.location_osid ? (componentOf.get(f.location_osid) ?? -2) : -2;
+
+            if (!homeMun) {
+                unmatched.push(bid);
+                continue;
             }
-            if (bestIdx !== null) {
-                sectors[bestIdx]!.assigned_brigade_ids.push(fid);
+
+            // Find reachable sectors with need > 0 that cover this brigade's home municipality
+            const homeSectors = sectorNeed
+                .filter(sn => sn.need > 0 && sn.comp === brigComp && sectorMunicipalities.get(sn.sector)?.has(homeMun))
+                .sort((a, b) => b.need - a.need || strictCompare(a.sector.sector_id, b.sector.sector_id));
+
+            if (homeSectors.length > 0) {
+                const target = homeSectors[0]!;
+                target.sector.assigned_brigade_ids.push(bid);
+                target.need = Math.max(0, target.need - 1);
+            } else {
+                unmatched.push(bid);
             }
+        }
+
+        // Phase 2b: Distribute remaining brigades round-robin to neediest
+        // REACHABLE sectors (same connected component).
+        for (let ri = 0; ri < unmatched.length; ri++) {
+            const bid = unmatched[ri]!;
+            const f = formations[bid];
+            const brigComp = f?.location_osid ? (componentOf.get(f.location_osid) ?? -2) : -2;
+
+            // Filter to reachable sectors only
+            const reachable = sectorNeed.filter(sn => sn.comp === brigComp);
+
+            // Fallback: if no reachable sector, assign to any corps sector
+            // (GOLDEN RULE: every brigade must be in a sector)
+            const candidates = reachable.length > 0 ? reachable : sectorNeed;
+
+            // Sort by need descending, break ties by sector_id
+            candidates.sort((a, b) => b.need - a.need || strictCompare(a.sector.sector_id, b.sector.sector_id));
+
+            // If all have 0 need, distribute evenly by fewest assigned
+            if (candidates[0]!.need === 0) {
+                candidates.sort((a, b) =>
+                    a.sector.assigned_brigade_ids.length - b.sector.assigned_brigade_ids.length
+                    || strictCompare(a.sector.sector_id, b.sector.sector_id));
+            }
+
+            const target = candidates[0]!;
+            target.sector.assigned_brigade_ids.push(bid);
+            target.need = Math.max(0, target.need - 1);
         }
     }
 
@@ -496,10 +584,16 @@ function classifyBrigadesByTerritory(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * After equalization and coverage, demote assigned brigades that are NOT
- * physically on the sector's front OSIDs to reserve (if 1 hop behind)
- * or unassign them (if deeper). Each sector holds at most 1 reserve
- * brigade, and that brigade must be exactly 1 hop behind the frontline.
+ * After equalization and coverage, classify assigned brigades by position:
+ * - On sector front OSID → stays assigned (frontline duty)
+ * - 1 hop behind front → reserve candidate (recovery/reaction force)
+ * - Deeper rear → stays assigned (will march toward front via interior movement)
+ *
+ * GOLDEN RULE 1: Every brigade MUST be in a sector. We never drop brigades.
+ * GOLDEN RULE 2: Brigades in a sector MUST be at the frontline, except
+ *   one reserve per sector (1 hop behind, recovering or reaction force).
+ *   Deep-rear brigades are kept assigned and will be marched forward by
+ *   evaluateInteriorMovement() each turn.
  */
 function reclassifyRearBrigades(
     sectors: CorpsFrontSector[],
@@ -532,10 +626,11 @@ function reclassifyRearBrigades(
                 keepAssigned.push(bid);
             } else if (oneHopBehind.has(f.location_osid)) {
                 reserveCandidates.push({ bid, personnel: f.personnel ?? 0 });
+            } else {
+                // Deep-rear brigade: keep assigned. Interior movement will march
+                // it toward the front. GOLDEN RULE: never drop a brigade from its sector.
+                keepAssigned.push(bid);
             }
-            // Deeper brigades are dropped from the sector entirely.
-            // They remain unassigned and available for strategic reserve
-            // or reassignment by other mechanisms.
         }
 
         // Cap: 1 reserve per sector. Pick the strongest brigade.
@@ -566,122 +661,6 @@ function getSectorFrontOsids(sector: CorpsFrontSector): Set<string> {
     return frontSet;
 }
 
-/**
- * Redistribute assigned brigades across sectors within each corps so that
- * brigade counts are proportional to front edge count.
- *
- * Only moves brigades that are NOT physically on a front OSID (i.e. deep-rear
- * brigades that were assigned by Priority 5 BFS). Front-line brigades stay put.
- *
- * Deterministic: sorted iteration via strictCompare.
- */
-function equalizeSectorDensity(
-    sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
-): void {
-    // Group sectors by corps
-    const byCorps = new Map<FormationId, CorpsFrontSector[]>();
-    for (const s of sectors) {
-        const list = byCorps.get(s.corps_id) ?? [];
-        list.push(s);
-        byCorps.set(s.corps_id, list);
-    }
-
-    // Pre-compute front OSID set per sector
-    const sectorFrontOsids = new Map<string, Set<string>>();
-    for (const s of sectors) {
-        sectorFrontOsids.set(s.sector_id, getSectorFrontOsids(s));
-    }
-
-    for (const [, corpsSectors] of [...byCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
-        const withFront = corpsSectors.filter(s => s.length_edges > 0);
-        if (withFront.length < 2) continue;
-
-        const totalEdges = withFront.reduce((sum, s) => sum + s.length_edges, 0);
-        const totalAssigned = withFront.reduce((sum, s) => sum + s.assigned_brigade_ids.length, 0);
-        if (totalAssigned === 0 || totalEdges === 0) continue;
-
-        // Compute target brigade count per sector (proportional to edges)
-        const targets = new Map<string, number>();
-        let assigned = 0;
-        for (const s of withFront) {
-            const target = Math.round(totalAssigned * (s.length_edges / totalEdges));
-            targets.set(s.sector_id, target);
-            assigned += target;
-        }
-        // Distribute rounding remainder to largest sectors
-        let remainder = totalAssigned - assigned;
-        if (remainder !== 0) {
-            const sorted = [...withFront].sort((a, b) => b.length_edges - a.length_edges || strictCompare(a.sector_id, b.sector_id));
-            for (const s of sorted) {
-                if (remainder === 0) break;
-                if (remainder > 0) {
-                    targets.set(s.sector_id, (targets.get(s.sector_id) ?? 0) + 1);
-                    remainder--;
-                } else {
-                    const cur = targets.get(s.sector_id) ?? 0;
-                    if (cur > 0) {
-                        targets.set(s.sector_id, cur - 1);
-                        remainder++;
-                    }
-                }
-            }
-        }
-
-        // Identify movable brigades from over-target sectors (not on front OSID)
-        const movable: { bid: FormationId; fromSector: CorpsFrontSector }[] = [];
-        for (const s of withFront) {
-            const target = targets.get(s.sector_id) ?? 0;
-            const excess = s.assigned_brigade_ids.length - target;
-            if (excess <= 0) continue;
-
-            const frontSet = sectorFrontOsids.get(s.sector_id) ?? new Set();
-            // Collect non-front-line brigades as movable, sorted deterministically
-            const candidates: FormationId[] = [];
-            for (const bid of s.assigned_brigade_ids) {
-                const f = formations[bid];
-                if (!f?.location_osid) continue;
-                if (frontSet.has(f.location_osid)) continue; // on front — stays
-                candidates.push(bid);
-            }
-            candidates.sort(strictCompare);
-            // Take up to `excess` movable brigades
-            for (let i = 0; i < Math.min(excess, candidates.length); i++) {
-                movable.push({ bid: candidates[i]!, fromSector: s });
-            }
-        }
-
-        if (movable.length === 0) continue;
-
-        // Assign movable brigades to under-target sectors (prefer largest deficit)
-        const underTarget = withFront
-            .filter(s => s.assigned_brigade_ids.length < (targets.get(s.sector_id) ?? 0))
-            .sort((a, b) => {
-                const defA = (targets.get(a.sector_id) ?? 0) - a.assigned_brigade_ids.length;
-                const defB = (targets.get(b.sector_id) ?? 0) - b.assigned_brigade_ids.length;
-                return defB - defA || strictCompare(a.sector_id, b.sector_id);
-            });
-
-        for (const { bid, fromSector } of movable) {
-            if (underTarget.length === 0) break;
-            const dest = underTarget[0]!;
-            const destTarget = targets.get(dest.sector_id) ?? 0;
-            // Move brigade (splice instead of filter to avoid new array allocation)
-            const idx = fromSector.assigned_brigade_ids.indexOf(bid);
-            if (idx >= 0) fromSector.assigned_brigade_ids.splice(idx, 1);
-            dest.assigned_brigade_ids.push(bid);
-            // If destination is now at target, remove from underTarget
-            if (dest.assigned_brigade_ids.length >= destTarget) {
-                underTarget.shift();
-            }
-        }
-
-        // Re-sort for determinism
-        for (const s of withFront) {
-            s.assigned_brigade_ids.sort(strictCompare);
-        }
-    }
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Step 2: Multi-Source BFS — Map OSIDs to Nearest Corps
@@ -718,30 +697,34 @@ function mapOsidsToCorps(
         if (ctrl === faction) friendlyOsids.add(osid);
     }
 
-    // ── Phase 1: Lock OSIDs by brigade presence ──
-    // For each friendly OSID where brigades are stationed, assign to the corps
-    // with the most brigades there. This makes corps boundaries emerge from
-    // actual force disposition rather than HQ proximity.
+    // ── Phase 1: Lock OSIDs by brigade HOME positions ──
+    // Corps territory is defined by where brigades BELONG (home_osid), not where
+    // they happen to be standing. A displaced 4th Corps brigade in Visoko doesn't
+    // make Visoko 4th Corps territory — Visoko belongs to 1st Corps because
+    // 1st Corps brigades are FROM there.
     const osidCorpsVotes = new Map<Osid, Map<FormationId, number>>();
     const sortedBrigadeIds = Object.keys(formations).sort(strictCompare);
     for (const fid of sortedBrigadeIds) {
         const f = formations[fid];
         if (!f || f.faction !== faction || f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid || !friendlyOsids.has(f.location_osid)) continue;
         const fCorpsId = getFormationCorpsId(f);
         if (!fCorpsId || !corpsIds.includes(fCorpsId)) continue;
-        let votes = osidCorpsVotes.get(f.location_osid);
-        if (!votes) { votes = new Map(); osidCorpsVotes.set(f.location_osid, votes); }
-        votes.set(fCorpsId, (votes.get(fCorpsId) ?? 0) + 1);
+
+        // Primary seed: home_osid (where the brigade belongs)
+        const homeOsid = f.home_osid;
+        if (homeOsid && friendlyOsids.has(homeOsid)) {
+            let votes = osidCorpsVotes.get(homeOsid);
+            if (!votes) { votes = new Map(); osidCorpsVotes.set(homeOsid, votes); }
+            votes.set(fCorpsId, (votes.get(fCorpsId) ?? 0) + 1);
+        }
     }
 
-    // Lock: assign each brigade-occupied OSID to the majority corps
+    // Lock: assign each home-OSID to the majority corps
     const lockedSeeds: Array<{ corpsId: FormationId; osid: Osid }> = [];
     const sortedOccupiedOsids = [...osidCorpsVotes.keys()].sort(strictCompare);
     for (const osid of sortedOccupiedOsids) {
         const votes = osidCorpsVotes.get(osid)!;
-        // Deterministic: sort by vote count desc, then corps ID asc for tie-break
         const sorted = [...votes.entries()].sort((a, b) => {
             if (b[1] !== a[1]) return b[1] - a[1];
             return strictCompare(a[0], b[0]);
@@ -751,9 +734,42 @@ function mapOsidsToCorps(
         lockedSeeds.push({ corpsId: winner, osid });
     }
 
+    // ── Phase 1b: Lock OSIDs by brigade CURRENT position (secondary) ──
+    // Only claims unclaimed OSIDs — home-based territory always wins.
+    // This handles brigades that have moved into genuinely new territory
+    // (captured areas not covered by any brigade's home).
+    // GUARD: Skip location seeds in municipalities where ANOTHER corps has home
+    // seeds. Prevents e.g. a 4th Corps brigade in Visoko from seeding 4th Corps
+    // territory when 1st Corps has home seeds there — BFS would then steal Sarajevo.
+    const homeMunCorps = new Map<string, Set<FormationId>>();
+    for (const seed of lockedSeeds) {
+        const mun = munFromOsid(seed.osid);
+        if (!mun) continue;
+        let corps = homeMunCorps.get(mun);
+        if (!corps) { corps = new Set(); homeMunCorps.set(mun, corps); }
+        corps.add(seed.corpsId);
+    }
+    for (const fid of sortedBrigadeIds) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid || !friendlyOsids.has(f.location_osid)) continue;
+        if (result.has(f.location_osid)) continue; // Home-based claim takes precedence
+        const fCorpsId = getFormationCorpsId(f);
+        if (!fCorpsId || !corpsIds.includes(fCorpsId)) continue;
+        // Skip if another corps has home seeds in this municipality
+        const locMun = munFromOsid(f.location_osid);
+        if (locMun) {
+            const munCorps = homeMunCorps.get(locMun);
+            if (munCorps && !munCorps.has(fCorpsId)) continue;
+        }
+        result.set(f.location_osid, fCorpsId);
+        lockedSeeds.push({ corpsId: fCorpsId, osid: f.location_osid });
+    }
+
     // ── Phase 2: BFS gap fill from locked seeds ──
-    // Fill unoccupied friendly OSIDs by expanding from locked brigade positions.
-    // Nearest brigade-occupied OSID determines ownership of interior territory.
+    // Fill unoccupied friendly OSIDs by expanding from home + position seeds.
+    // Nearest seed determines ownership of interior territory.
     const queue: Array<{ osid: Osid; corpsId: FormationId }> = [];
     for (const seed of lockedSeeds) {
         queue.push(seed);
@@ -1245,8 +1261,6 @@ export { MAX_SECTOR_EDGES } from './corps_front_sectors_constants.js';
 /** Maximum brigades per sector before forced split. */
 export { MAX_SECTOR_BRIGADES } from './corps_front_sectors_constants.js';
 
-/** Maximum territory OSIDs a single sector can claim via Voronoi BFS. */
-export { MAX_TERRITORY_OSIDS } from './corps_front_sectors_constants.js';
 
 /** Maximum reserve brigades per sector. */
 export { MAX_RESERVES_PER_SECTOR } from './corps_front_sectors_constants.js';
@@ -1355,7 +1369,7 @@ function buildMultiSectorsForCorps(
     // Proposal B: merge undersized sub-segments up to MIN_SECTOR_EDGES.
     // Do NOT pass friendlyOsids — merging should use direct OSID adjacency only,
     // not unbounded BFS through rear territory (which merges distant segments).
-    subSegments = mergeUndersizedSubSegments(corpsId, subSegments, adjacency);
+    subSegments = mergeUndersizedSubSegments(corpsId, subSegments, adjacency, sharedBoundaryAdj);
     if (subSegments.length === 0) return [];
 
     // Step 2 (Phase 1D): Split oversized sub-segments
@@ -1753,7 +1767,8 @@ function ensureMinimumSectorCoverage(
     allSectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
-    friendlyOsids: Set<string>
+    friendlyOsids: Set<string>,
+    componentOf: Map<string, number>
 ): void {
     // Group by corps — only transfer within the same corps
     const sectorsByCorps = new Map<FormationId, CorpsFrontSector[]>();
@@ -1766,6 +1781,8 @@ function ensureMinimumSectorCoverage(
     for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length > 0) continue;
+
+            const sectorComp = getSectorComponent(sector, componentOf);
 
             // Step 1: promote first connected reserve to assigned
             // Only promote reserves whose location is reachable from sector
@@ -1797,8 +1814,12 @@ function ensureMinimumSectorCoverage(
             // Step 3 fallback: if no non-front brigade available, take any brigade from
             // the highest-surplus donor (>2 assigned preferred, >1 as last resort).
             {
+                // Only transfer from sectors in the same connected component —
+                // brigades can't march through enemy territory to reach a pocket.
                 const surplusSectors = corpsSectors
-                    .filter(s => s.assigned_brigade_ids.length > 1 && s.sector_id !== sector.sector_id)
+                    .filter(s => s.assigned_brigade_ids.length > 1
+                        && s.sector_id !== sector.sector_id
+                        && getSectorComponent(s, componentOf) === sectorComp)
                     .sort((a, b) => b.assigned_brigade_ids.length - a.assigned_brigade_ids.length || strictCompare(a.sector_id, b.sector_id));
 
                 let transferred = false;
@@ -1979,7 +2000,12 @@ export function splitNonContiguousSectors(
             edgeNeighbors.get(eb)!.add(ea);
         };
 
-        // Case A: same friendly OSID, hostile OSIDs adjacent (front turns along friendly boundary)
+        // Both Case A and Case B use sharedBoundaryAdj (excludes distance contacts)
+        // when available. Distance contacts are near-miss polygon adjacencies, not
+        // true shared boundaries — the front line doesn't pass through them.
+        const caseAdj = sharedBoundaryAdj ?? osidAdjacency;
+
+        // Case A: same friendly OSID, hostile OSIDs share a true boundary
         for (const edges of friendlyToEdges.values()) {
             for (let i = 0; i < edges.length; i++) {
                 const hi = edgeHostile.get(edges[i]!);
@@ -1987,14 +2013,12 @@ export function splitNonContiguousSectors(
                 for (let j = i + 1; j < edges.length; j++) {
                     const hj = edgeHostile.get(edges[j]!);
                     if (!hj) continue;
-                    if (isOsidAdjacent(hi, hj, osidAdjacency)) linkEdges(edges[i]!, edges[j]!);
+                    if (isOsidAdjacent(hi, hj, caseAdj)) linkEdges(edges[i]!, edges[j]!);
                 }
             }
         }
 
-        // Case B: same hostile OSID, friendly OSIDs adjacent (front turns along hostile boundary)
-        // Use sharedBoundaryAdj (excludes point contacts) when available.
-        const caseBAdj = sharedBoundaryAdj ?? osidAdjacency;
+        // Case B: same hostile OSID, friendly OSIDs share a true boundary
         for (const edges of hostileToEdges.values()) {
             for (let i = 0; i < edges.length; i++) {
                 const fi = edgeFriendly.get(edges[i]!);
@@ -2002,7 +2026,7 @@ export function splitNonContiguousSectors(
                 for (let j = i + 1; j < edges.length; j++) {
                     const fj = edgeFriendly.get(edges[j]!);
                     if (!fj) continue;
-                    if (isOsidAdjacent(fi, fj, caseBAdj)) linkEdges(edges[i]!, edges[j]!);
+                    if (isOsidAdjacent(fi, fj, caseAdj)) linkEdges(edges[i]!, edges[j]!);
                 }
             }
         }
@@ -2110,6 +2134,7 @@ function isSegmentAdjacent(
     a: CorpsFrontSubSegment,
     b: CorpsFrontSubSegment,
     osidAdjacency: Map<Osid, Osid[]>,
+    sharedBoundaryAdj?: Map<Osid, Osid[]>,
 ): boolean {
     const aFriendlySet = new Set(a.friendly_osids);
     const bFriendlySet = new Set(b.friendly_osids);
@@ -2131,13 +2156,17 @@ function isSegmentAdjacent(
     const edgesA = parseEdges(a, aFriendlySet);
     const edgesB = parseEdges(b, bFriendlySet);
 
+    // Case B uses shared-boundary adjacency to avoid bridging through distance contacts
+    // (e.g. Srebrenica ↔ Cerska connected only by point-contact polygon adjacency).
+    const caseBAdj = sharedBoundaryAdj ?? osidAdjacency;
+
     // Check all pairs for triple-junction connectivity
     for (const ea of edgesA) {
         for (const eb of edgesB) {
             // Case A: same friendly, hostile OSIDs adjacent
             if (ea.friendly === eb.friendly && (osidAdjacency.get(ea.hostile) ?? []).includes(eb.hostile)) return true;
-            // Case B: same hostile, friendly OSIDs adjacent
-            if (ea.hostile === eb.hostile && (osidAdjacency.get(ea.friendly) ?? []).includes(eb.friendly)) return true;
+            // Case B: same hostile, friendly OSIDs adjacent (shared boundary only)
+            if (ea.hostile === eb.hostile && (caseBAdj.get(ea.friendly as Osid) ?? []).includes(eb.friendly)) return true;
         }
     }
 
@@ -2174,6 +2203,7 @@ function mergeUndersizedSubSegments(
     corpsId: FormationId,
     subSegments: CorpsFrontSubSegment[],
     osidAdjacency: Map<Osid, Osid[]>,
+    sharedBoundaryAdj?: Map<Osid, Osid[]>,
 ): CorpsFrontSubSegment[] {
     if (subSegments.length <= 1) return subSegments;
 
@@ -2207,7 +2237,7 @@ function mergeUndersizedSubSegments(
         for (let i = 0; i < segs.length; i++) {
             if (i === targetIdx) continue;
             const candidate = segs[i]!;
-            if (isSegmentAdjacent(target, candidate, osidAdjacency)) {
+            if (isSegmentAdjacent(target, candidate, osidAdjacency, sharedBoundaryAdj)) {
                 if (candidate.length_edges < bestSize ||
                     (candidate.length_edges === bestSize && bestIdx >= 0 &&
                      strictCompare(candidate.sub_segment_id, segs[bestIdx]!.sub_segment_id) < 0)) {

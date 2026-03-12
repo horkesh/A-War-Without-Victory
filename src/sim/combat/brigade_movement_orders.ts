@@ -13,6 +13,7 @@ import type { FormationId, GameState } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 
 export interface BrigadeMovementReport {
@@ -58,7 +59,7 @@ export function applyBrigadeMovementOrders(
         const destController = destOsid ? getPoliticalControllerOSID(state, destOsid, reverseMap) : null;
         const canMove = Boolean(
             destOsid && destOsid !== loc && neighbors.includes(destOsid) && factionId
-            && (destController === factionId || destController === null)
+            && (isFriendlyFaction(destController, factionId, state) || destController === null)
         );
 
         if (canMove && destOsid) {

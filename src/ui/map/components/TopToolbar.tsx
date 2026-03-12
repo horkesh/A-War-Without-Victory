@@ -48,6 +48,7 @@ interface TopToolbarProps {
 export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory }: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const devMode = useGameStore((s) => s.devMode);
   const loadSave = useGameStore((s) => s.loadSave);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const loadError = useGameStore((s) => s.loadError);
@@ -191,39 +192,48 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
         <span className="font-sans text-sm text-accent-gold tracking-wider uppercase font-semibold glow-text">
           A War Without Victory
         </span>
+        {devMode && (
+          <span className="ml-1 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-widest bg-amber-900/40 text-amber-400 border border-amber-700/50 rounded">
+            DEV
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        <button
-          onClick={handleLoadClick}
-          disabled={loading}
-          className={TOOLBAR_BUTTON_CLASS}
-        >
-          {loading ? 'Loading...' : 'Load Save'}
-        </button>
-        <button
-          onClick={handleLoadLatest}
-          disabled={loading}
-          className={TOOLBAR_BUTTON_CLASS}
-        >
-          {loading ? 'Loading...' : 'Load Latest'}
-        </button>
-        <span className="text-xs font-mono text-text-secondary">Run ID:</span>
-        <input
-          type="text"
-          value={runIdInput}
-          onChange={(e) => setRunIdInput(e.target.value)}
-          placeholder="e.g. apr1992_definitive_40w__…"
-          className="w-48 px-2 py-1 text-xs font-mono bg-panel-card border border-panel-border rounded text-text-primary placeholder:text-text-muted transition-colors focus:border-interactive/50 focus:outline-none focus:ring-1 focus:ring-interactive/20"
-          onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
-        />
-        <button
-          onClick={handleLoadRun}
-          disabled={loading || !runIdInput.trim()}
-          className={TOOLBAR_BUTTON_CLASS}
-        >
-          Load run
-        </button>
+        {devMode && (
+          <>
+            <button
+              onClick={handleLoadClick}
+              disabled={loading}
+              className={TOOLBAR_BUTTON_CLASS}
+            >
+              {loading ? 'Loading...' : 'Load Save'}
+            </button>
+            <button
+              onClick={handleLoadLatest}
+              disabled={loading}
+              className={TOOLBAR_BUTTON_CLASS}
+            >
+              {loading ? 'Loading...' : 'Load Latest'}
+            </button>
+            <span className="text-xs font-mono text-text-secondary">Run ID:</span>
+            <input
+              type="text"
+              value={runIdInput}
+              onChange={(e) => setRunIdInput(e.target.value)}
+              placeholder="e.g. apr1992_definitive_40w__…"
+              className="w-48 px-2 py-1 text-xs font-mono bg-panel-card border border-panel-border rounded text-text-primary placeholder:text-text-muted transition-colors focus:border-interactive/50 focus:outline-none focus:ring-1 focus:ring-interactive/20"
+              onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
+            />
+            <button
+              onClick={handleLoadRun}
+              disabled={loading || !runIdInput.trim()}
+              className={TOOLBAR_BUTTON_CLASS}
+            >
+              Load run
+            </button>
+          </>
+        )}
         <button
           onClick={handleAdvanceTurn}
           disabled={advancing || loading || !loadedGameState || !ipc.isAvailable}
@@ -300,13 +310,15 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
         </span>
       )}
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".json"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+      {devMode && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-10 (daily review — 18 commits in last 24h)
+> Last updated: 2026-03-12 (architecture cleanup + /simplify review)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -75,11 +75,11 @@
 - **Right approach**: `anchor: "op:bihac:bihac_2"` — checks the specific OSID that represents the pocket core.
 - **Do instead**: Always use OSID-level anchors for calibration checkpoints. Municipality-level is too coarse for a 744-OSID map.
 
-### [Calibration] One structural change per calibration run (2026-03-10)
-- **Context**: n500 bundled ops-only attack doctrine + unified sector defense + attack-through into a single commit and calibration run. Result: 100% attack success rate, defense too weak per-edge, HRHB 0 attacks.
-- **Wrong approach**: Landing multiple structural combat changes together because "they're related." Each change shifts force balance independently. When the combined result is broken, you can't attribute which change caused which symptom.
-- **Right approach**: One structural change → one calibration run → measure delta → decide whether to keep, tune, or revert before adding the next structural change.
-- **Do instead**: Before committing a structural engine change, ask: "Can I measure this change's impact in isolation?" If the answer is no because other structural changes are uncommitted, commit and calibrate the first change alone.
+### [Calibration] One change per run + mandatory insanity check (2026-03-11, updated from 2026-03-10)
+- **Context**: n500 bundled three structural changes — attribution impossible when defense collapsed. Separately, n587 insanity check found morale-0 zombie brigades and 50:1 casualty ratios that pure metrics (area%, benchmarks) never caught. Earlier, "brigades idling in deep rear" (#1) and "83% catastrophic attacks from posture bug" (#2) went undetected for multiple runs because nobody looked at the actual save state.
+- **Wrong approach**: (1) Bundling multiple changes into one run. (2) Trusting area% and benchmark pass/fail as sufficient evidence of healthy behavior. Metrics can pass while the sim produces absurdities.
+- **Right approach**: One change → one fresh 40w run → comparison tool → **/war-or-game insanity check**. The insanity check is NOT optional — it catches behavioral bugs that metrics miss. Check: brigade states (morale-0? stuck in rear? combat-ineffective attacking?), casualty ratios (>20:1?), tempo (zero-battle weeks?), troop strengths, equipment (`composition` field, NOT `equipment`).
+- **Do instead**: After every calibration run, invoke /war-or-game or manually inspect the save for absurdities. Record both metrics AND insanity-check findings in CALIBRATION_MASTER.md. If you skip the insanity check, you will eventually ship a run with a fundamental behavioral bug hidden behind passing benchmarks.
 
 ### [Debugging] Persistent symptoms = multi-layer failure (2026-03-10)
 - **Context**: Deep-rear brigade evacuation (`89cac36`) — RS had 15 brigades stuck in deep rear. Initial investigation expected 1-2 bugs. Found 7 across: brigade AI evaluation chain, column march destination calculation, transit state reset, territory classification lookup, sector Voronoi gaps, and bot context missing fields.
@@ -238,6 +238,31 @@
 ### [Debugging] Verify outcome field values before writing extraction scripts (2026-03-10)
 - **Context**: Diagnostic scripts used `b.outcome === 'decisive'` but the actual field is `'decisive_victory'`. RS attack success appeared as 5-10% when actual was 91%. Led to multiple wasted tuning attempts (REACTIVE_DEFENSE_RATIO, attrition rates) based on wrong data.
 - **Do instead**: Always check field values with `Object.keys()` or sample data before writing extraction logic. One wrong enum string can invalidate an entire investigation.
+
+### [Architecture] Connected components, not proxy checks, for reachability (2026-03-11)
+- **Context**: Brigades were being assigned to sectors they could never physically reach — e.g. 5th Corps brigades in Bihać pocket assigned to Kljuc/Sanski Most sectors on the other side of RS territory. The Bosnian War had real disconnected pockets (Sarajevo, Srebrenica, Bihać, Maglaj, Tesanj, Ozren).
+- **Wrong approach**: Checking `territory_osids.length === 0` as a proxy for "unreachable." Pockets HAVE territory (friendly-controlled OSIDs) — they're just disconnected from the main blob. This proxy silently passed while 28 brigades were assigned to sectors they could never reach.
+- **Right approach**: BFS connected components over the OSID adjacency graph (`operational_contact_graph.json`, 744 nodes, 3243 edges). Partition all friendly OSIDs into components. A brigade can only be assigned to a sector in its same connected component. Implemented as `buildFriendlyComponents()` + `getSectorComponent()` in `corps_front_sectors.ts`.
+- **Three code paths needed the fix**: (1) `classifyBrigadesByTerritory` Phase 2 pool distribution, (2) `ensureMinimumSectorCoverage` Step 2/3 surplus transfers, (3) the final sector prune. Fixing only one path left 12 bugs (n596). All three paths must filter by `brigComp === sectorComp`.
+- **Do instead**: When checking whether entity A can reach entity B on a war map, NEVER use proxy checks (empty territory, zero edges, same corps). Use BFS connected components through same-faction territory. The real invariant is physical connectivity, not data shape.
+
+### [Process] Multiple code paths = multiple fix points (2026-03-11)
+- **Context**: The disconnected brigade bug existed in three separate code paths that all performed brigade-to-sector assignment: `classifyBrigadesByTerritory` Phase 2, `ensureMinimumSectorCoverage` Steps 2-3, and the sector prune step.
+- **Wrong approach**: Fixed Phase 2, ran scenario, claimed "fixed." n596 still had 12 disconnected assignments because `ensureMinimumSectorCoverage` was a second path doing the same wrong assignment without the reachability check.
+- **Right approach**: After fixing one path, grep for ALL call sites that perform the same logical operation (in this case, "assign brigade to sector"). Fix ALL of them before claiming done.
+- **Do instead**: After any bug fix, search for every code path that performs the same operation. Use `Grep` for the key function/field names. One fix point is rarely enough for cross-cutting concerns.
+
+### [Architecture] Enclave brigades must not leave their pocket (2026-03-12)
+- **Context**: All 13 RBiH enclave brigades (Goražde, Srebrenica, Žepa) displaced from home pockets. 7 Goražde brigades in Visoko, 5 Srebrenica brigades scattered. Goražde fell to 2/20 RBiH OSIDs.
+- **Wrong approach**: Assumed the retreat system was the problem. Added BFS nearest-friendly to `findEmergencyRetreatOsid` and enclave filter to `getFriendlyRetreatDestinations`. Ran scenario — identical state hash. The brigades had full 1500 personnel = never retreated at all.
+- **Right approach**: The brigades marched out VOLUNTARILY via bot AI sector march orders (`evaluateSectorMarch`). At turn 0, Goražde is connected to the main RBiH blob (271/350 OSIDs in one component). Sector system assigns brigades to main blob sectors. March orders move them out. RS severs corridor. Stranded. The fix is an enclave march guard: enclave-tagged brigades skip march if destination is outside their enclave.
+- **Do instead**: When entities are "in the wrong place," check voluntary movement (bot AI orders, march, operations) BEFORE checking involuntary displacement (retreat, emergency). The bot AI is the most common cause of misplaced units. Also: if a code change produces the same state hash, the code path was never exercised — look for a different mechanism.
+
+### [Architecture] Options object beats trailing optional params (2026-03-12)
+- **Context**: `forceRetreatWithPenalties` grew to 8 params — 3 consecutive optional numerics followed by optional `adjacency`. 5 of 6 call sites passed `undefined, undefined, undefined, adjacency`.
+- **Wrong approach**: Adding optional params one at a time to a positional argument list. Each new param pushes the next one further right, and callers must pass `undefined` placeholders for all intermediate params they don't use.
+- **Right approach**: Group optional params into an options object: `{ personnelRetain?, cohesionLoss?, disruptedTurns?, adjacency? }`. Callers pass only what they need: `{ adjacency }`.
+- **Do instead**: When a function has 3+ optional params OR callers pass `undefined` to skip params, refactor to an options object. The signal is `undefined, undefined, undefined, X` at a call site.
 
 ---
 

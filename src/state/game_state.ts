@@ -129,6 +129,21 @@ export type CorpsStance = 'defensive' | 'balanced' | 'offensive' | 'reorganize';
 /** Army-level stance (overrides corps stances when set). */
 export type ArmyStance = 'general_defensive' | 'balanced' | 'general_offensive' | 'total_mobilization';
 
+/** Operation preparation sub-phase (within planning phase). */
+export type PreparationSubPhase = 'intel_gathering' | 'force_staging' | 'supply_check' | 'assessment' | 'ready';
+
+/** Commander's go/no-go recommendation at end of preparation. */
+export type CommanderAssessment = 'launch' | 'postpone' | 'abort';
+
+/** Active probe sub-action during operation preparation. */
+export interface OperationActiveProbe {
+    target_osid: string;
+    brigade_ids: FormationId[];
+    started_turn: number;
+    resolved: boolean;
+    result_confidence_gain?: number;
+}
+
 // --- Sector-facing intelligence (replaces legacy SID-keyed recon_intelligence) ---
 
 /** Estimated enemy sector strength from sector-pair observation. */
@@ -142,6 +157,33 @@ export type SectorPostureObserved = 'unknown' | 'defensive' | 'entrenched' | 'of
  * Keyed: sector_intel[friendly_sector_id] = SectorIntelRecord[].
  * One record per enemy sector that shares front edges with the friendly sector.
  */
+export type SectorStrengthClass = 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical';
+
+export interface SectorCombatRating {
+    sector_id: string;
+    faction: string;
+    /** Total attack power of all sector brigades. */
+    offensive_power: number;
+    /** Total defense power across all edges. */
+    defensive_power: number;
+    /** defensive_power / edge_count. */
+    defense_per_edge: number;
+    /** Raw headcount in sector. */
+    personnel: number;
+    /** Average morale (0-100). */
+    morale_avg: number;
+    /** Average cohesion (0-100). */
+    cohesion_avg: number;
+    /** Average fatigue (0-30). */
+    fatigue_avg: number;
+    /** Front edges to defend. */
+    edge_count: number;
+    /** Active brigades in sector. */
+    brigade_count: number;
+    /** Comparative strength class. */
+    strength_class: SectorStrengthClass;
+}
+
 export interface SectorIntelRecord {
     enemy_sector_id: string;
     enemy_faction: FactionId;
@@ -247,6 +289,26 @@ export interface CorpsOperation {
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
+
+    // --- Operation preparation sub-phases (within planning) ---
+    /** Current sub-phase of preparation (only meaningful when phase === 'planning'). */
+    preparation_sub_phase?: PreparationSubPhase;
+    /** Turns elapsed in preparation (incremented each turn while phase === 'planning'). */
+    preparation_turns_elapsed?: number;
+    /** Max preparation turns before forced decision (derived from commander aggressiveness). */
+    preparation_max_turns?: number;
+    /** Intel confidence snapshot at assessment time (for briefing display). */
+    intel_confidence_at_assessment?: number;
+    /** Supply readiness snapshot at assessment time (for briefing display). */
+    supply_readiness_at_assessment?: number;
+    /** Commander's estimated force ratio (accuracy depends on intel + competence). */
+    force_ratio_estimate?: number;
+    /** Commander's go/no-go recommendation. */
+    commander_assessment?: CommanderAssessment;
+    /** Number of postponements (max 2 before forced abort). */
+    postponement_count?: number;
+    /** Active probe sub-action within preparation. */
+    active_probe?: OperationActiveProbe;
 
     // --- AAR accumulator fields (populated during lifecycle) ---
     /** Per-turn log entries for the operation AAR. */
@@ -357,7 +419,7 @@ export interface FormationOpsState {
 export type FormationReadinessState = 'forming' | 'active' | 'overextended' | 'degraded';
 
 // Peace phase.0: Formation types (Systems Manual §4)
-export type FormationKind = 'militia' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq' | 'jna_phantom' | 'paramilitary';
+export type FormationKind = 'militia' | 'brigade' | 'operational_group' | 'corps_asset' | 'corps' | 'og' | 'army_hq' | 'jna_phantom' | 'hv_phantom' | 'paramilitary';
 
 export interface FormationState {
     id: FormationId;
@@ -413,6 +475,8 @@ export interface FormationState {
     defense_streak?: number;
     /** HoI: turns remaining disrupted (0 = not disrupted); set by push-back outcome. */
     disrupted_turns?: number;
+    /** Consecutive turns at morale 0; after 3+, 5% personnel attrition per turn. */
+    zero_morale_turns?: number;
     /** WIA trickleback: wounded pending return to this formation (only return when out of combat). */
     wounded_pending?: number;
     /** Counter-attack tracking: OSID this brigade retreated from and the turn it happened.
@@ -458,7 +522,7 @@ export interface FormationState {
     /** Elite loan lifecycle state (army-level elite units only). */
     elite_loan_state?: EliteLoanState;
     /** Formation lifecycle status. Default 'active'. Set by lifecycle event processing. */
-    lifecycle_status?: 'active' | 'forming' | 'disbanded' | 'merged' | 'destroyed' | 'withdrawn';
+    lifecycle_status?: 'active' | 'forming' | 'disbanded' | 'merged' | 'destroyed' | 'withdrawn' | 'displaced';
     /** Turn at which a JNA phantom brigade withdraws (equipment handed off, formation removed). */
     withdrawal_turn?: number;
     /** VRS equipment decay factor [0,1]. Applied as multiplier to equipment ratio. 1.0 = full effectiveness, 0.6 = floor. */
@@ -1243,7 +1307,7 @@ export interface LossOfControlTrendExposureState {
  * War phase: In-memory front descriptor (non-geometric). Not serialized (Engine Invariants §13.1).
  * Fronts are derived each turn from settlement-level interaction; this type describes one logical front.
  */
-export type PhaseIIFrontStability = 'fluid' | 'static' | 'oscillating';
+export type FrontStability = 'fluid' | 'static' | 'oscillating';
 
 export interface FrontDescriptor {
     /** Stable identifier for this front (e.g. "F_<edge_id_0>_<turn>"). */
@@ -1253,7 +1317,7 @@ export interface FrontDescriptor {
     /** Turn when this front was first detected. */
     created_turn: number;
     /** Stability: fluid (mobile), static (hardened), oscillating. */
-    stability: PhaseIIFrontStability;
+    stability: FrontStability;
 }
 
 // --- Phase E (Spatial & Interaction) — derived types only; not serialized (Engine Invariants §13.1) ---
@@ -1502,6 +1566,8 @@ casualty_ledger?: CasualtyLedger;
 local_fronts?: Record<string, LocalFront>;
 /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
 corps_front_sectors?: Record<string, CorpsFrontSector>;
+/** Sector combat power ratings: per-sector offensive/defensive power. Derived each turn after sector partition. */
+sector_combat_ratings?: Record<string, SectorCombatRating>;
 /** Sector-facing intelligence: per-friendly-sector intelligence records (one per facing enemy sector). Derived each turn. */
 sector_intel?: Record<string, SectorIntelRecord[]>;
 /** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. */
@@ -1624,6 +1690,9 @@ vienna_kiseljak_broken?: boolean;
 // --- Local Truces (Graz Accords, 6 May 1992) ---
 /** Which faction broke the Herzegovina corps-pair truce. null = unbroken. */
 vienna_herzegovina_broken_by?: FactionId;
+/** Turn at which east Herzegovina truce activates (after Op Jackal ends). null = not yet active.
+ * West Herzegovina truce activates at Graz Accords (w4). East pair is delayed until Op Jackal completes. */
+graz_east_herzegovina_active_turn?: number;
 }
 
 export interface DisplacementDomainState {

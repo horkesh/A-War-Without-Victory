@@ -11,7 +11,7 @@ import {
     transitTurnsForPath,
 } from './brigade_movement.js';
 import { clamp } from '../../utils/math.js';
-import { buildAdjacencyFromEdges } from './phase_ii_adjacency.js';
+import { buildAdjacencyFromEdges } from './war_adjacency.js';
 
 export interface MovementRangeQuery {
     start_sid: SettlementId | null;

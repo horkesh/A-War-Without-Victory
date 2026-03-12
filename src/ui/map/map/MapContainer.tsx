@@ -22,6 +22,7 @@ import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJ
 import { buildCorpsFrontLinesGeoJSON, buildCorpsColorExpression } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildSectorDemarcationGeoJSON } from './builders/buildSectorDemarcationGeoJSON';
 import { buildOperationTargetPointsGeoJSON, buildOperationTargetCrosshairsGeoJSON } from './builders/buildOperationTargetIconsGeoJSON';
+import { buildOperationArrowsGeoJSON } from './builders/buildOperationArrowsGeoJSON';
 import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
 import { buildOrderArrowsGeoJSON } from './builders/buildOrderArrowsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
@@ -78,6 +79,11 @@ const OP_TARGET_ICON_RING_LAYER_ID = 'operation-target-icon-ring';
 const OP_TARGET_ICON_INNER_RING_LAYER_ID = 'operation-target-icon-inner-ring';
 const OP_TARGET_ICON_DOT_LAYER_ID = 'operation-target-icon-dot';
 const OP_TARGET_ICON_CROSSHAIR_LAYER_ID = 'operation-target-icon-crosshair';
+const OP_ARROWS_SOURCE_ID = 'operation-arrows';
+const OP_ARROWS_GLOW_LAYER_ID = 'operation-arrows-glow';
+const OP_ARROWS_LINE_LAYER_ID = 'operation-arrows-line';
+const OP_ARROWS_HEAD_LAYER_ID = 'operation-arrows-head';
+const OP_ARROWS_ORIGIN_LAYER_ID = 'operation-arrows-origin';
 const FOG_OVERLAY_SOURCE_ID = 'fog-overlay';
 const FOG_FILL_LAYER_ID = 'fog-fill';
 const BATTLE_MARKERS_SOURCE_ID = 'battle-markers';
@@ -96,6 +102,9 @@ export function MapContainer() {
   const osidBaseRef = useRef<FeatureCollection | null>(null);
   const osidCentroidsRef = useRef<Map<string, [number, number]>>(new Map());
   const lastPanTargetRef = useRef<string | null>(null);
+  const prevSectorIdRef = useRef<string | null>(null);
+  /** When true, sector selection came from a map click — skip zoom. Cleared after the pan/zoom effect reads it. */
+  const sectorSelectedFromMapRef = useRef(false);
   const sourceUpdatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   /** Guard: only run heavy overlay build once per loadedGameState; poll must not run build (napkin). */
   const appliedStateRef = useRef<LoadedGameState | null>(null);
@@ -121,11 +130,14 @@ export function MapContainer() {
   const appliedStagedOrdersRef = useRef(stagedOrders);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
+  const devMode = useGameStore((s) => s.devMode);
   const frontsVisible = useGameStore((s) => s.frontsVisible);
   const formationsVisible = useGameStore((s) => s.formationsVisible);
   const labelsVisible = useGameStore((s) => s.labelsVisible);
   const mapMode = useGameStore((s) => s.mapMode);
   const sectorsVisible = useGameStore((s) => s.sectorsVisible);
+  // In live mode, front line visibility follows sectorsVisible (fronts ARE sectors).
+  const effectiveFrontsVisible = devMode ? frontsVisible : sectorsVisible;
   const fogVisible = useGameStore((s) => s.fogVisible);
   const battlesVisible = useGameStore((s) => s.battlesVisible);
   const strategicVisible = useGameStore((s) => s.strategicVisible);
@@ -189,6 +201,8 @@ export function MapContainer() {
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)['fog-overlay'] = { type: 'geojson', data: emptyGeoJson };
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[BATTLE_MARKERS_SOURCE_ID] = { type: 'geojson', data: emptyGeoJson };
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[STRATEGIC_POINTS_SOURCE_ID] = { type: 'geojson', data: emptyGeoJson };
+        // NOTE: front-edges-hover source is NOT pre-registered here — it's created via addSource
+        // in runUpdate so that addLayer calls in the same block also execute.
       } catch (e) {
         console.warn('Failed to pre-load OSID data:', e);
       }
@@ -261,12 +275,21 @@ export function MapContainer() {
             setOrderModeForFormation(null);
           } else {
             setSelectedOsid(osid);
+            // If this settlement belongs to a front sector, select that sector so it's visible on the map.
+            const sectorId = osidToSector.get(osid);
+            if (sectorId) {
+              sectorSelectedFromMapRef.current = true;
+              setSelectedCorpsFrontSectorId(sectorId);
+            }
           }
         },
         onFormationClick: (id) => setSelectedFormationId(id),
         onFrontEdgeClick: (_edgeId, props) => {
           const sectorId = props.sector_id as string | undefined;
-          if (sectorId) setSelectedCorpsFrontSectorId(sectorId);
+          if (sectorId) {
+            sectorSelectedFromMapRef.current = true;
+            setSelectedCorpsFrontSectorId(sectorId);
+          }
         },
         onOsidHover: (osid, point) => {
           if (osid) {
@@ -306,7 +329,7 @@ export function MapContainer() {
       clearTimeout(t);
       if (cleanup) cleanup();
     };
-  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError]);
+  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError, osidToSector]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -399,7 +422,8 @@ export function MapContainer() {
               const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid, state.corpsFrontSectors, centroidsForHover);
               if (!m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
                 m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
-                // Hitbox + highlight for positive-offset side (offset_side == 1)
+                // Hitbox layers: NO line-offset (MapLibre v4 doesn't index offset lines for queryRenderedFeatures).
+                // Wide centered line covers both faction sides; offset_side filter still separates them for highlight.
                 m2.addLayer(
                   {
                     id: FRONT_EDGES_HOVER_POS_LAYER_ID,
@@ -407,31 +431,86 @@ export function MapContainer() {
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
                     filter: ['==', ['get', 'offset_side'], 1],
                     paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 10, 10, 18, 14, 28],
-                      'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
-                      'line-opacity': 0,
-                      'line-color': 'transparent',
-                    },
-                  },
-                  'formation-markers'
-                );
-                m2.addLayer(
-                  {
-                    id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
-                    type: 'line',
-                    source: FRONT_EDGES_HOVER_SOURCE_ID,
-                    filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
-                    paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
-                      'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
-                      'line-opacity': 0.8,
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 14, 10, 24, 14, 36],
+                      'line-opacity': 0.01,
                       'line-color': '#ffffff',
                     },
-                    layout: { 'line-cap': 'round', 'line-join': 'round' },
                   },
                   'formation-markers'
                 );
-                // Hitbox + highlight for negative-offset side (offset_side == -1)
+                if (devMode) {
+                  // Dev mode: offset highlight layers (one per faction side)
+                  m2.addLayer(
+                    {
+                      id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
+                      type: 'line',
+                      source: FRONT_EDGES_HOVER_SOURCE_ID,
+                      filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+                      paint: {
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
+                        'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
+                        'line-opacity': 0.8,
+                        'line-color': '#ffffff',
+                      },
+                      layout: { 'line-cap': 'round', 'line-join': 'round' },
+                    },
+                    'formation-markers'
+                  );
+                  m2.addLayer(
+                    {
+                      id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
+                      type: 'line',
+                      source: FRONT_EDGES_HOVER_SOURCE_ID,
+                      filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+                      paint: {
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
+                        'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
+                        'line-opacity': 0.8,
+                        'line-color': '#ffffff',
+                      },
+                      layout: { 'line-cap': 'round', 'line-join': 'round' },
+                    },
+                    'formation-markers'
+                  );
+                } else {
+                  // Live mode: single centered highlight ON TOP of front lines.
+                  // No offset — glow replaces the front line for the selected sector.
+                  m2.addLayer(
+                    {
+                      id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
+                      type: 'line',
+                      source: FRONT_EDGES_HOVER_SOURCE_ID,
+                      filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+                      paint: {
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 5, 10, 9, 14, 14],
+                        'line-opacity': 0.95,
+                        'line-color': '#ffffff',
+                        'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 1, 10, 2, 14, 3],
+                      },
+                      layout: { 'line-cap': 'round', 'line-join': 'round' },
+                    },
+                    'formation-markers'
+                  );
+                  // Second highlight layer not needed in live (single centered glow),
+                  // but create it hidden so filter updates don't error.
+                  m2.addLayer(
+                    {
+                      id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
+                      type: 'line',
+                      source: FRONT_EDGES_HOVER_SOURCE_ID,
+                      filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+                      paint: {
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 5, 10, 9, 14, 14],
+                        'line-opacity': 0.95,
+                        'line-color': '#ffffff',
+                        'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 1, 10, 2, 14, 3],
+                      },
+                      layout: { 'line-cap': 'round', 'line-join': 'round' },
+                    },
+                    'formation-markers'
+                  );
+                }
+                // Hitbox layers (invisible, always present for click detection)
                 m2.addLayer(
                   {
                     id: FRONT_EDGES_HOVER_NEG_LAYER_ID,
@@ -439,27 +518,10 @@ export function MapContainer() {
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
                     filter: ['==', ['get', 'offset_side'], -1],
                     paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 10, 10, 18, 14, 28],
-                      'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
-                      'line-opacity': 0,
-                      'line-color': 'transparent',
-                    },
-                  },
-                  'formation-markers'
-                );
-                m2.addLayer(
-                  {
-                    id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
-                    type: 'line',
-                    source: FRONT_EDGES_HOVER_SOURCE_ID,
-                    filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
-                    paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
-                      'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
-                      'line-opacity': 0.8,
+                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 14, 10, 24, 14, 36],
+                      'line-opacity': 0.01,
                       'line-color': '#ffffff',
                     },
-                    layout: { 'line-cap': 'round', 'line-join': 'round' },
                   },
                   'formation-markers'
                 );
@@ -467,11 +529,12 @@ export function MapContainer() {
                 (m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
               }
 
-              // Sector demarcation lines: thin dashed lines between adjacent same-faction sectors
+              // Sector demarcation lines: clean solid lines between adjacent same-faction sectors
               if (state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
                 const demarcData = buildSectorDemarcationGeoJSON(controlledGeoJson, state.corpsFrontSectors, frontEdgesOsid);
                 if (!m2.getSource(SECTOR_DEMARCATION_SOURCE_ID)) {
                   m2.addSource(SECTOR_DEMARCATION_SOURCE_ID, { type: 'geojson', data: demarcData });
+                  // Dark base line (like front-line pattern: dark base + lighter dash on top)
                   m2.addLayer(
                     {
                       id: SECTOR_DEMARCATION_LAYER_ID,
@@ -480,14 +543,35 @@ export function MapContainer() {
                       paint: {
                         'line-color': [
                           'match', ['get', 'faction'],
-                          'RS', 'rgba(160, 60,  60,  0.5)',
-                          'RBiH', 'rgba(55,  130, 70,  0.5)',
-                          'HRHB', 'rgba(50,  100, 160, 0.5)',
-                          'rgba(80, 80, 90, 0.35)',
+                          'RS', 'rgba(100, 30,  30,  0.7)',
+                          'RBiH', 'rgba(30,  80,  40,  0.7)',
+                          'HRHB', 'rgba(30,  60,  110, 0.7)',
+                          'rgba(60, 60, 70, 0.5)',
                         ],
-                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.4, 10, 0.7, 14, 1.0],
-                        'line-dasharray': [2, 2],
-                        'line-opacity': 0.4,
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1.2, 10, 2.0, 14, 3.0],
+                        'line-opacity': 0.6,
+                      },
+                      layout: { 'line-cap': 'round', 'line-join': 'round' },
+                    },
+                    'faction-border-glow-pos'
+                  );
+                  // Lighter dash stripe on top
+                  m2.addLayer(
+                    {
+                      id: SECTOR_DEMARCATION_LAYER_ID + '-stripe',
+                      type: 'line',
+                      source: SECTOR_DEMARCATION_SOURCE_ID,
+                      paint: {
+                        'line-color': [
+                          'match', ['get', 'faction'],
+                          'RS', 'rgba(200, 120, 120, 0.8)',
+                          'RBiH', 'rgba(120, 200, 130, 0.8)',
+                          'HRHB', 'rgba(120, 160, 220, 0.8)',
+                          'rgba(160, 160, 170, 0.6)',
+                        ],
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.5, 10, 0.8, 14, 1.2],
+                        'line-dasharray': [4, 3],
+                        'line-opacity': 0.7,
                       },
                       layout: { 'line-cap': 'butt', 'line-join': 'round' },
                     },
@@ -522,6 +606,40 @@ export function MapContainer() {
                     const m = mapRef.current;
                     (m.getSource('formations') as GeoJSONSource)?.setData(formationsGeoJson);
                     (m.getSource('order-arrows') as GeoJSONSource)?.setData(orderArrowsGeoJson);
+
+                    // Operation arrows: sweeping military-style arrows for active operations
+                    const opArrowsGeoJson = buildOperationArrowsGeoJSON(state, osidCentroidsRef.current);
+                    if (!m.getSource(OP_ARROWS_SOURCE_ID)) {
+                      m.addSource(OP_ARROWS_SOURCE_ID, { type: 'geojson', data: opArrowsGeoJson });
+                      // Glow — wide, blurred, behind everything else
+                      m.addLayer({
+                        id: OP_ARROWS_GLOW_LAYER_ID, type: 'line', source: OP_ARROWS_SOURCE_ID,
+                        filter: ['==', ['get', 'type'], 'op-arrow-glow'],
+                        paint: { 'line-color': ['get', 'color'], 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 10, 10, 16, 14, 22], 'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 10, 14, 14], 'line-opacity': 1.0 },
+                        layout: { 'line-cap': 'round', 'line-join': 'round' },
+                      } as maplibregl.LayerSpecification, 'formation-markers');
+                      // Tapered body fill
+                      m.addLayer({
+                        id: OP_ARROWS_LINE_LAYER_ID, type: 'fill', source: OP_ARROWS_SOURCE_ID,
+                        filter: ['==', ['get', 'type'], 'op-arrow-body'],
+                        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1.0 },
+                      } as maplibregl.LayerSpecification, 'formation-markers');
+                      // Arrowheads
+                      m.addLayer({
+                        id: OP_ARROWS_HEAD_LAYER_ID, type: 'fill', source: OP_ARROWS_SOURCE_ID,
+                        filter: ['==', ['get', 'type'], 'op-arrow-head'],
+                        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1.0 },
+                      } as maplibregl.LayerSpecification, 'formation-markers');
+                      // Origin dots
+                      m.addLayer({
+                        id: OP_ARROWS_ORIGIN_LAYER_ID, type: 'circle', source: OP_ARROWS_SOURCE_ID,
+                        filter: ['==', ['get', 'type'], 'op-arrow-origin'],
+                        paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 2, 10, 3, 14, 4.5], 'circle-color': ['get', 'color'], 'circle-opacity': 0.8 },
+                      } as maplibregl.LayerSpecification, 'formation-markers');
+                    } else {
+                      (m.getSource(OP_ARROWS_SOURCE_ID) as GeoJSONSource)?.setData(opArrowsGeoJson);
+                    }
+
                     // Fog of war: cover enemy OSIDs not confirmed empty by player recon
                     const fogGeoJson = buildFogOfWarGeoJSON(base, state.controlBySettlement, state.player_faction, state.fogOfWar);
                     if (!safeHasLayer(m, FOG_FILL_LAYER_ID)) {
@@ -889,44 +1007,58 @@ export function MapContainer() {
           'faction-border-glow-pos'
         );
       }
-      // Sector edge glow layers (on front-edges-hover source, if it exists)
-      if (map.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
-        if (!safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
-          map.addLayer(
-            {
-              id: SECTOR_EDGE_GLOW_POS_LAYER_ID,
-              type: 'line',
-              source: FRONT_EDGES_HOVER_SOURCE_ID,
-              filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
-              paint: {
-                'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5, 14, 8],
-                'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
-                'line-opacity': 0.85,
-                'line-color': '#ffffff',
-              },
-              layout: { 'line-cap': 'round', 'line-join': 'round' },
+      // Sector edge glow layers (on front-edges-hover source)
+      // If source doesn't exist yet (created in runUpdate via double-RAF), return false to keep polling.
+      if (!map.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
+        return false;
+      }
+      if (!safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
+        map.addLayer(
+          {
+            id: SECTOR_EDGE_GLOW_POS_LAYER_ID,
+            type: 'line',
+            source: FRONT_EDGES_HOVER_SOURCE_ID,
+            filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+            paint: devMode ? {
+              'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5, 14, 8],
+              'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
+              'line-opacity': 0.85,
+              'line-color': '#ffffff',
+            } : {
+              // Live mode: centered glow on the front line, no offset
+              'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 10, 14, 16],
+              'line-opacity': 0.95,
+              'line-color': '#ffffff',
+              'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 1, 10, 2, 14, 3],
             },
-            'formation-markers'
-          );
-        }
-        if (!safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
-          map.addLayer(
-            {
-              id: SECTOR_EDGE_GLOW_NEG_LAYER_ID,
-              type: 'line',
-              source: FRONT_EDGES_HOVER_SOURCE_ID,
-              filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
-              paint: {
-                'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5, 14, 8],
-                'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
-                'line-opacity': 0.85,
-                'line-color': '#ffffff',
-              },
-              layout: { 'line-cap': 'round', 'line-join': 'round' },
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+          },
+          'formation-markers'
+        );
+      }
+      if (!safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
+        map.addLayer(
+          {
+            id: SECTOR_EDGE_GLOW_NEG_LAYER_ID,
+            type: 'line',
+            source: FRONT_EDGES_HOVER_SOURCE_ID,
+            filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+            paint: devMode ? {
+              'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5, 14, 8],
+              'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
+              'line-opacity': 0.85,
+              'line-color': '#ffffff',
+            } : {
+              // Live mode: centered glow (mirrors pos layer)
+              'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 10, 14, 16],
+              'line-opacity': 0.95,
+              'line-color': '#ffffff',
+              'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 1, 10, 2, 14, 3],
             },
-            'formation-markers'
-          );
-        }
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+          },
+          'formation-markers'
+        );
       }
       // C.3: Brigade selection rings (on formations source)
       if (map.getSource('formations') && !safeHasLayer(map, SECTOR_BRIGADE_RINGS_LAYER_ID)) {
@@ -968,7 +1100,7 @@ export function MapContainer() {
       const activeSectorId = selectedCorpsFrontSectorId || hoveredSectorId;
 
       if (!activeSectorId || !sectorsVisible) {
-        // Clear: hide sector fill + edge glow + brigade rings
+        // Clear: hide sector fill + edge glow + brigade rings + highlight lines
         try {
           map.setFilter(SECTOR_FILL_LAYER_ID, ['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification);
           if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
@@ -976,6 +1108,12 @@ export function MapContainer() {
           }
           if (safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
             map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+          }
+          if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID)) {
+            map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+          }
+          if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID)) {
+            map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, SECTOR_BRIGADE_RINGS_LAYER_ID)) {
             map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['==', ['get', 'id'], '__none__'] as maplibregl.FilterSpecification);
@@ -1003,13 +1141,20 @@ export function MapContainer() {
         console.warn('[MapContainer] sector fill filter failed:', e);
       }
 
-      // Sector edge glow: filter front-edges-hover features by sector_id
+      // Sector edge glow: filter front-edges-hover features by sector_id (same source as highlight)
       try {
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
           map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], activeSectorId]] as maplibregl.FilterSpecification);
         }
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
           map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], activeSectorId]] as maplibregl.FilterSpecification);
+        }
+        // Also drive the visible white highlight layers so selected/hovered sector shows the glow (they exist as soon as front-edges-hover source is added)
+        if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID)) {
+          map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], activeSectorId]] as maplibregl.FilterSpecification);
+        }
+        if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID)) {
+          map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], activeSectorId]] as maplibregl.FilterSpecification);
         }
       } catch (e) {
         console.warn('[MapContainer] sector edge glow filter failed:', e);
@@ -1041,7 +1186,7 @@ export function MapContainer() {
       if (applySectorHighlight()) clearInterval(poll);
     }, 250);
     return () => clearInterval(poll);
-  }, [mapReady, selectedCorpsFrontSectorId, sectorsVisible, loadedGameState]);
+  }, [mapReady, selectedCorpsFrontSectorId, sectorsVisible, loadedGameState, hoveredSectorId]);
 
   // Movement preview: highlight same-faction-controlled OSIDs when move mode is active.
   useEffect(() => {
@@ -1373,8 +1518,15 @@ export function MapContainer() {
     const applyVisibility = () => {
       let allExist = true;
       FRONT_LAYER_IDS.forEach((id) => {
-        if (!safeSetLayoutVisibility(map, id, frontsVisible)) allExist = false;
+        if (!safeSetLayoutVisibility(map, id, effectiveFrontsVisible)) allExist = false;
       });
+      // In live mode, hide lateral sector demarcation lines (front lines ARE the sectors).
+      if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID)) {
+        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID, devMode && sectorsVisible);
+      }
+      if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe')) {
+        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe', devMode && sectorsVisible);
+      }
       if (!safeSetLayoutVisibility(map, FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
       if (!safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
       // Map mode visibility: dedicated overlay per mode.
@@ -1404,7 +1556,7 @@ export function MapContainer() {
       map.off('load', onLoad);
       clearTimeout(retryId);
     };
-  }, [mapReady, frontsVisible, formationsVisible, labelsVisible, mapMode]);
+  }, [mapReady, frontsVisible, effectiveFrontsVisible, formationsVisible, labelsVisible, mapMode, devMode, sectorsVisible]);
 
   // Phase 5 toggles: fog / battles / strategic points — reactive visibility when store changes.
   useEffect(() => {
@@ -1427,6 +1579,39 @@ export function MapContainer() {
     const lookup = osidCentroidsRef.current;
     if (!mapReady || !map || lookup.size === 0) return;
 
+    const sectorJustChanged = selectedCorpsFrontSectorId !== prevSectorIdRef.current;
+    prevSectorIdRef.current = selectedCorpsFrontSectorId;
+
+    // When sector just changed from Command/sidebar (not from map click), zoom to fit sector.
+    const fromMap = sectorSelectedFromMapRef.current;
+    sectorSelectedFromMapRef.current = false;
+    if (sectorJustChanged && !fromMap && selectedCorpsFrontSectorId && loadedGameState?.corpsFrontSectors && loadedGameState?.frontEdgesOsid) {
+      const sector = loadedGameState.corpsFrontSectors.find(s => s.sector_id === selectedCorpsFrontSectorId);
+      if (sector) {
+        const friendlyOsids = collectSectorFriendlyOsids(sector, loadedGameState.frontEdgesOsid);
+        const coords: [number, number][] = [];
+        for (const osid of friendlyOsids) {
+          const c = lookup.get(osid);
+          if (c) coords.push(c);
+        }
+        if (coords.length > 0) {
+          const sectorPanKey = `sector:${selectedCorpsFrontSectorId}`;
+          if (lastPanTargetRef.current !== sectorPanKey) {
+            lastPanTargetRef.current = sectorPanKey;
+            const lngs = coords.map(c => c[0]);
+            const lats = coords.map(c => c[1]);
+            const minLng = Math.min(...lngs);
+            const maxLng = Math.max(...lngs);
+            const minLat = Math.min(...lats);
+            const maxLat = Math.max(...lats);
+            map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, maxZoom: 10, duration: 450 });
+          }
+        }
+      }
+      return;
+    }
+
+    // Prefer pan to formation or settlement when one is selected.
     let targetOsid: string | null = null;
     if (selectedFormationId && loadedGameState) {
       const formation = loadedGameState.formations.find((f) => f.id === selectedFormationId);
@@ -1435,23 +1620,17 @@ export function MapContainer() {
       }
     }
     if (!targetOsid && selectedOsid) targetOsid = selectedOsid;
-    if (!targetOsid && selectedCorpsFrontSectorId && loadedGameState?.corpsFrontSectors) {
-      const sector = loadedGameState.corpsFrontSectors.find(s => s.sector_id === selectedCorpsFrontSectorId);
-      if (sector && sector.edge_ids?.[0]) {
-        const edge = loadedGameState.frontEdgesOsid?.find(e => e.edge_id === sector.edge_ids[0]);
-        if (edge) targetOsid = edge.a;
+
+    if (targetOsid) {
+      const center = lookup.get(targetOsid);
+      if (center && lastPanTargetRef.current !== targetOsid) {
+        lastPanTargetRef.current = targetOsid;
+        map.easeTo({ center, duration: 450, essential: true });
       }
-    }
-    if (!targetOsid) {
-      lastPanTargetRef.current = null;
       return;
     }
-    const center = lookup.get(targetOsid);
-    if (!center) return;
-    if (lastPanTargetRef.current === targetOsid) return;
 
-    map.easeTo({ center, duration: 450, essential: true });
-    lastPanTargetRef.current = targetOsid;
+    lastPanTargetRef.current = null;
   }, [loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId]);
 
   // Pulse animation for staged orders

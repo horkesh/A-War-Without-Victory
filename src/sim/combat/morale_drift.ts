@@ -46,6 +46,19 @@ const EXHAUSTION_MORALE_PENALTY = -0.5;
 const CRITICAL_EXHAUSTION_THRESHOLD = 0.95;
 const CRITICAL_EXHAUSTION_PENALTY = -1.5;
 
+/** Morale drift from recent battle outcomes. Victory boosts morale, defeat drains it.
+ * Historical: VRS morale was high in 1992 because they were winning everywhere.
+ * ARBiH morale plummeted initially, recovered as they organized and won small victories.
+ * Applied once per turn based on most recent battle outcome, then cleared. */
+const BATTLE_MORALE_DRIFT: Record<string, number> = {
+    'decisive_victory': 5,
+    'victory': 3,
+    'costly_victory': 1,
+    'stalemate': 0,
+    'repulsed': -2,
+    'catastrophic': -4,
+};
+
 export interface MoraleDriftReport {
     formations_updated: number;
     by_faction: Record<string, number>;
@@ -134,6 +147,14 @@ export function runMoraleDrift(
             drift += EXHAUSTION_MORALE_PENALTY;
         }
 
+        // 4. Battle outcome morale boost/penalty
+        const recentOutcome = (f as { recent_battle_outcome?: string }).recent_battle_outcome;
+        if (recentOutcome) {
+            drift += BATTLE_MORALE_DRIFT[recentOutcome] ?? 0;
+            // Clear after consumption — one-shot per battle
+            delete (f as { recent_battle_outcome?: string }).recent_battle_outcome;
+        }
+
         if (drift === 0) continue;
 
         const prev = f.morale;
@@ -151,6 +172,21 @@ export function runMoraleDrift(
         // surrender triggers (existing mechanic at cohesion<10 + power ratio > 2.5).
         if ((f.morale ?? 50) < CRITICAL_MORALE_THRESHOLD) {
             f.cohesion = Math.max(0, (f.cohesion ?? 60) - 2);
+        }
+
+        // Morale collapse desertion: low morale causes personnel attrition (soldiers desert).
+        // Creates organic dissolution path: morale drops → desertion → personnel drops →
+        // dissolution criteria triggers (2-of-3 check in brigade_dissolution.ts).
+        // Graduated rates: morale 0 = 5%/turn, morale 1-14 = 2%/turn.
+        // Without this, brigades at morale 0 with 1,000+ personnel and decent cohesion
+        // survive indefinitely — a 1,000-man unit at zero morale is a mob, not a brigade.
+        const MIN_COMBAT = 100; // matches MIN_COMBAT_PERSONNEL from formation_constants
+        if (f.morale <= 0) {
+            // Morale collapse: 5% personnel loss per turn — rapid disintegration
+            f.personnel = Math.max(MIN_COMBAT, Math.floor((f.personnel ?? 0) * 0.95));
+        } else if ((f.morale ?? 50) < CRITICAL_MORALE_THRESHOLD) {
+            // Low morale desertion: 2% personnel loss per turn — steady hemorrhage
+            f.personnel = Math.max(MIN_COMBAT, Math.floor((f.personnel ?? 0) * 0.98));
         }
 
         if (f.morale !== prev) {

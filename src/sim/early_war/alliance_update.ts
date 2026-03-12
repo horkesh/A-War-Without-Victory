@@ -64,6 +64,23 @@ export function areRbihHrhbAllied(state: GameState): boolean {
     return value > ALLIED_THRESHOLD;
 }
 
+/**
+ * Check if territory controlled by `controller` is traversable by `factionId`.
+ * Allied factions (RBiH↔HRHB when alliance > threshold) can move through each other's territory.
+ */
+export function isFriendlyFaction(controller: string | null | undefined, factionId: string, state: GameState): boolean {
+    if (!controller) return false;
+    if (controller === factionId) return true;
+    // RBiH and HRHB can traverse each other's territory when allied
+    if (
+        (factionId === 'RBiH' && controller === 'HRHB') ||
+        (factionId === 'HRHB' && controller === 'RBiH')
+    ) {
+        return areRbihHrhbAllied(state);
+    }
+    return false;
+}
+
 export function isRbihHrhbAtWar(state: GameState): boolean {
     const value = state.political.war_alliance_rbih_hrhb;
     if (value === undefined || value === null) return false;

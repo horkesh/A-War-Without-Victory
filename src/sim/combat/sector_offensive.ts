@@ -42,6 +42,9 @@ import { releaseOperationCommander } from './officer_system.js';
 import { finalizeOperationAAR } from './operation_aar.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
+import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
+import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
+import type { PreparationEvent } from '../turn_pipeline_types.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Equipment priority
@@ -473,9 +476,10 @@ function computeSupplyReadiness(
 export function advanceSectorOffensives(
     state: GameState,
     supplyByOsid?: SupplyStateByOsidReport | null
-): void {
+): PreparationEvent[] {
+    const prepEvents: PreparationEvent[] = [];
     const corpsCommand = state.military.corps_command;
-    if (!corpsCommand) return;
+    if (!corpsCommand) return prepEvents;
 
     // ── Per-turn corps exhaustion decay ────────────────────────────────────
     // Corps recover from operational exhaustion each turn. Without decay,
@@ -538,6 +542,45 @@ export function advanceSectorOffensives(
                 op.planning_duration = 1;
                 op.participating_brigades = [...(op.participating_brigades ?? [])].sort(strictCompare).slice(0, 2);
             }
+
+            // ── Preparation sub-phase state machine (sector_attack only) ──
+            // Probes and feints skip preparation — they are too small/fast.
+            // force_launch bypasses preparation entirely (player override).
+            // RS blitz phase (w0-12): pre-planned JNA-style ops skip preparation.
+            const isPrePlannedBlitz = faction === 'RS' && turn <= RS_BLITZ_PHASE_END_WEEK;
+            if (op.type === 'sector_attack' && op.force_launch !== true && !isPrePlannedBlitz) {
+                // Auto-resolve any pending probes that didn't trigger combat
+                if (hasUnresolvedProbe(op) && (turn - (op.active_probe!.started_turn)) >= 1) {
+                    autoResolveProbe(state, op, faction);
+                }
+
+                const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0);
+
+                // Collect preparation event for turn report
+                prepEvents.push({
+                    corps_id: corpsId,
+                    operation_name: op.name,
+                    sub_phase: prepResult.sub_phase,
+                    intel_confidence: prepResult.intel_confidence,
+                    supply_readiness: prepResult.supply_readiness,
+                    force_ratio_estimate: prepResult.force_ratio_estimate,
+                    commander_assessment: prepResult.assessment,
+                    probe_ordered: prepResult.probe_ordered || undefined,
+                });
+
+                if (prepResult.aborted) {
+                    // Commander recommends abort — low exhaustion cost
+                    beginRecovery(op, turn, 'manual_termination');
+                    continue;
+                }
+
+                if (!prepResult.ready) {
+                    // Preparation still in progress — skip the planning→execution transition
+                    continue;
+                }
+                // Preparation complete (sub_phase === 'ready') — fall through to execution transition
+            }
+
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration
                 ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!) : 1);
@@ -557,7 +600,12 @@ export function advanceSectorOffensives(
                 beginRecovery(op, turn, 'manual_termination');
                 continue;
             }
-            if (elapsed > planDuration || stagedEarly || forcedLaunch) {
+
+            // For sector_attack with preparation: only reach here when preparation is 'ready'
+            // (or force_launch / probe / feint which skip preparation).
+            // Keep existing elapsed/staged/forcedLaunch gates for non-preparation ops.
+            const preparationReady = op.type === 'sector_attack' && op.preparation_sub_phase === 'ready';
+            if (preparationReady || elapsed > planDuration || stagedEarly || forcedLaunch) {
                 op.phase = 'execution';
                 op.phase_started_turn = turn;
                 op.recovery_reason = undefined;
@@ -638,6 +686,7 @@ export function advanceSectorOffensives(
             }
         }
     }
+    return prepEvents;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

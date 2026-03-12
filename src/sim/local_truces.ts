@@ -33,10 +33,20 @@ export const VIENNA_DECLARATION_TURN = GRAZ_ACCORDS_TURN;
 /**
  * Corps pairs bound by the Herzegovina truce.
  * When active, these corps do not generate attack orders against each other's territory.
+ *
+ * Design: West Herzegovina truce (2KK ↔ Tomislavgrad) is immediate at Graz (w4).
+ * East Herzegovina truce (VRS Herz ↔ HVO SE Herz) activates AFTER Op Jackal ends —
+ * historically, HVO-VRS fought for east Mostar / Stolac through June 1992.
  */
-export const GRAZ_CORPS_PAIRS: readonly [string, string][] = [
-    ['vrs_herzegovina', 'hvo_southeast_herzegovina'],
+export const GRAZ_CORPS_PAIRS_WEST: readonly [string, string][] = [
     ['vrs_2nd_krajina', 'hvo_tomislavgrad'],
+];
+export const GRAZ_CORPS_PAIRS_EAST: readonly [string, string][] = [
+    ['vrs_herzegovina', 'hvo_southeast_herzegovina'],
+];
+export const GRAZ_CORPS_PAIRS: readonly [string, string][] = [
+    ...GRAZ_CORPS_PAIRS_WEST,
+    ...GRAZ_CORPS_PAIRS_EAST,
 ];
 
 /**
@@ -120,6 +130,16 @@ export function isCorpsInGrazPair(corpsId: string): boolean {
     return getCorpsTrucePartner(corpsId) !== null;
 }
 
+/** Return true if this corps is in the EAST Herzegovina pair (VRS Herz ↔ HVO SE Herz). */
+export function isEastHerzegovinaPair(corpsId: string): boolean {
+    return GRAZ_CORPS_PAIRS_EAST.some(([a, b]) => corpsId === a || corpsId === b);
+}
+
+/** Return true if this corps is in the WEST Herzegovina pair (2KK ↔ Tomislavgrad). */
+export function isWestHerzegovinaPair(corpsId: string): boolean {
+    return GRAZ_CORPS_PAIRS_WEST.some(([a, b]) => corpsId === a || corpsId === b);
+}
+
 /**
  * Return the truce partner for a given faction under the Graz Accords.
  * RS ↔ HRHB. RBiH has no truce partner.
@@ -158,9 +178,21 @@ export function shouldGrazBlockAttack(
     if (!trucePartnerFaction) return false;
     if (targetController !== trucePartnerFaction) return false;
 
-    // Herzegovina corps-pair truce: block if corps is in a pair and truce is unbroken
+    // Herzegovina corps-pair truce: block if corps is in a pair and truce is unbroken.
+    // West pair (2KK ↔ Tomislavgrad) activates at Graz (w4).
+    // East pair (VRS Herz ↔ HVO SE Herz) activates only after Op Jackal ends.
     if (isHerzegovinaTruceActive(state) && isCorpsInGrazPair(corpsId)) {
-        return true;
+        if (isWestHerzegovinaPair(corpsId)) {
+            return true; // West truce is always active when Graz is active
+        }
+        if (isEastHerzegovinaPair(corpsId) && state.political.graz_east_herzegovina_active_turn != null) {
+            return true; // East truce only after Op Jackal ends
+        }
+        // East pair before Op Jackal ends → NOT blocked
+        if (isEastHerzegovinaPair(corpsId)) {
+            return false;
+        }
+        return true; // Fallback for any future pairs
     }
 
     // Kiseljak OSID exclusion: block specific OSIDs regardless of corps

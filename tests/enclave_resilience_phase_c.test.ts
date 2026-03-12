@@ -163,7 +163,7 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
   } as any,
 });
         const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
-        expect(bonus).toBeCloseTo(1.0 + 20 * 0.005, 5); // 1.10
+        expect(bonus).toBeCloseTo(1.0 + 20 * 0.02, 5); // 1.40
     });
 
     it('applies hardening defense bonus when active', () => {
@@ -175,8 +175,8 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
   } as any,
 });
         const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
-        const expected = (1.0 + 20 * 0.005) * (1.0 + HARDENING_DEFENSE_BONUS);
-        expect(bonus).toBeCloseTo(expected, 5); // 1.10 × 1.05 = 1.155
+        const expected = (1.0 + 20 * 0.02) * (1.0 + HARDENING_DEFENSE_BONUS);
+        expect(bonus).toBeCloseTo(expected, 5); // 1.40 × 1.05 = 1.47
     });
 
     it('max combined bonus at max resilience + hardening', () => {
@@ -188,8 +188,8 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
   } as any,
 });
         const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
-        const expected = (1.0 + MAX_ENCLAVE_RESILIENCE * 0.005) * (1.0 + HARDENING_DEFENSE_BONUS);
-        expect(bonus).toBeCloseTo(expected, 5); // 1.15 × 1.05 = 1.2075
+        const expected = (1.0 + MAX_ENCLAVE_RESILIENCE * 0.02) * (1.0 + HARDENING_DEFENSE_BONUS);
+        expect(bonus).toBeCloseTo(expected, 5); // 1.60 × 1.05 = 1.68
     });
 
     it('returns 1.0 for non-enclave OSID', () => {

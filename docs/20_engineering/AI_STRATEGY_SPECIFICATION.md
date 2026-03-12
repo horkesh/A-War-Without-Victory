@@ -111,7 +111,7 @@ War-phase bot decisions are organized in three layers, run in pipeline order:
 
 Shared helpers used by corps AI, brigade AI, and AoR rebalancing:
 
-- `src/sim/combat/phase_ii_adjacency.ts` — `buildAdjacencyFromEdges(edges)`, `getFactionBrigades(state, faction)` (deterministic, sorted iteration).
+- `src/sim/combat/war_adjacency.ts` — `buildAdjacencyFromEdges(edges)`, `getFactionBrigades(state, faction)` (deterministic, sorted iteration).
 
 Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-orders`. See [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md) §6.
 
@@ -122,7 +122,7 @@ Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-o
 - `src/sim/bot/simple_general_bot.ts`
 - `src/sim/bot/bot_manager.ts`
 - `src/sim/consolidation_scoring.ts`
-- `src/sim/combat/phase_ii_adjacency.ts` (shared adjacency and faction brigades)
+- `src/sim/combat/war_adjacency.ts` (shared adjacency and faction brigades)
 - `src/sim/combat/bot_corps_ai.ts` (corps stance, operations, OGs, corridor breach, standing orders)
 - `src/sim/combat/bot_brigade_ai_osid.ts` (posture, target scoring, attack orders)
 - `src/sim/combat/bot_strategy.ts` (war-phase faction profiles, doctrine phases, standing orders)

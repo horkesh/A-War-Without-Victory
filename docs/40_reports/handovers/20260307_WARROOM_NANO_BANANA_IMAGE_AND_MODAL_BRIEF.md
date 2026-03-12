@@ -396,6 +396,8 @@ This is the strongest pride-and-attachment modal.
 | Citation / memorial ledger | Honors and Memorials | P1 |
 | Personnel file tray | Commander Register | P1 |
 
+**Bake-in (2026-03-10):** For a **single plate** with no sprite follow-up, prompts must place **all** anchors in the first image. See [20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §3a — **commander_coatrack** (cap/uniform on coatrack) preferred over tray for Commander Register; **enclave_dispatch_folder**, **intelligence_packet**, **honors_memorial** must be distinct silhouettes.
+
 ---
 
 ## 9. `nano banana` master prompt
