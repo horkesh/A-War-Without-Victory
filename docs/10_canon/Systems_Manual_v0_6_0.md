@@ -259,6 +259,16 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **Module:** `src/sim/combat/operation_preparation.ts`. Tests: `tests/probe_preparation.test.ts` (30 tests).
 
+#### 7.6.1 Intel-Gated Operation Launch
+
+Before launching any new operation, the corps AI checks the target sector's intel confidence against a faction-specific threshold (`INTEL_GATE_LAUNCH_THRESHOLD`): RS 0.25, RBiH 0.40, HRHB 0.30. If confidence is below threshold, a probe operation is launched instead of a full sector attack: max 2 brigades, 1-turn planning, `repulsed` minimum attack outcome.
+
+**RS blitz exemption:** During the RS blitz phase (w0–12), JNA pre-planned operations bypass the intel gate entirely — they attack blind, reflecting inherited JNA operational plans.
+
+**Probe commitment limit:** `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT = 2`. After two consecutive probe operations on the same sector, the corps commits to a full attack regardless of intel confidence. The counter (`CorpsCommandState.consecutive_probes`) resets when a full attack launches or the operation completes.
+
+**Decision flow:** `getSectorIntelConfidence()` (in `sector_intel.ts`) reads the maximum confidence from sector intel records. `shouldLaunchProbeInstead()` (in `bot_corps_directives.ts`) checks faction threshold, RS blitz exemption, and the probe counter. If true, the operation downgrades to a probe; otherwise, normal sector_attack proceeds.
+
 **Bot AI integration:** (a) Corps commander aggressiveness modifies directive aggression: `shift = (aggressiveness - 3) × 0.05`. High-competence (≥4) commanders accept riskier attacks (min_attack_outcome downgraded to costly_victory). Module: `bot_corps_ai.ts`. (b) ARBiH warlord friction (pre-w78): for each corps with 2+ attackers, the `(turn % brigadeCount)`-th attacking brigade forced to defend. Deterministic, no probability. Module: `bot_brigade_ai_osid.ts`. (c) VRS Mladić override: pre-planned `general_offensive` operations in execution phase use army commander modifier instead of corps commander. Module: `combat_math.ts` (`getThreeTierOfficerMod`).
 
 **War timeline integration:** Per-faction `officer_config` in `war_timeline` JSON: learning rates, brain drain parameters, pool regeneration intervals, Zagreb cadre timing, warlord friction end week, generic replacement competence. All constants read from timeline with hardcoded fallback.

@@ -160,3 +160,19 @@ Operations pass through a preparation phase between launch and execution. The pr
 
 **Full spec:** Systems Manual §7.6.
 
+## Intel-Gated Operation Launch (2026-03-12)
+
+Before launching sector offensives, the corps AI gates on sector intel confidence. Low-confidence sectors receive probe operations instead of full attacks, preventing blind overcommitment.
+
+**Key functions:**
+- `getSectorIntelConfidence(state, sectorId, faction)` — reads the maximum confidence value from `state.military.sector_intel` records for the given sector. Module: `src/sim/combat/sector_intel.ts`.
+- `shouldLaunchProbeInstead(state, corpsId, sectorId, faction, globalWeek)` — returns true if intel confidence is below the faction's `INTEL_GATE_LAUNCH_THRESHOLD` (RS 0.25, RBiH 0.40, HRHB 0.30), subject to: (a) RS blitz phase exemption (w0–12 bypasses gate), (b) `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT=2` forces full attack after 2 probes. Module: `src/sim/combat/bot_corps_directives.ts`.
+
+**Wiring:** `bot_corps_directives.ts` lines ~1131–1157 — intel gate check inserted before operation launch in the sector offensive path. When gate triggers, operation is downgraded: max 2 brigades, 1-turn planning phase, `repulsed` minimum attack outcome.
+
+**State:** `CorpsCommandState.consecutive_probes` — incremented on each probe launch for the sector, reset to 0 when a full attack launches or the operation completes.
+
+**Constants:** `INTEL_GATE_LAUNCH_THRESHOLD` (`{ RS: 0.25, RBiH: 0.40, HRHB: 0.30 }`), `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT = 2`. Module: `src/sim/combat/bot_corps_directives.ts`.
+
+**Tests:** `tests/intel_gated_operations.test.ts` — 12 tests covering threshold checks, RS blitz exemption, probe downgrade mechanics, consecutive probe commitment.
+

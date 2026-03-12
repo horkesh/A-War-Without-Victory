@@ -12650,4 +12650,19 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 
 **Calibration (n601):** 6/6 benchmarks PASS. 86.5% area-weighted (was 86.6%). RS delta -23. Goražde: 14/20 RBiH (was 2/20). Srebrenica: 16/16 RBiH (was 8/16). All 13 enclave brigades in their home pockets.
 
+---
+
+## 2026-03-12: Intel-Gated Operations (n617)
+
+**Author:** Codex
+**Scope:** Bot AI — intel-gated operation launch.
+
+### n617 — Intel-gated operations (2026-03-12)
+- **Intel gate**: Bot AI checks sector intel confidence before launching operations. Low-confidence sectors get probe operations first (max 2 brigades, fast planning, repulsed min outcome).
+- **Thresholds**: RS 0.25, RBiH 0.40, HRHB 0.30. RS blitz phase (w0-12) exempt. MAX_CONSECUTIVE_PROBES=2.
+- **New exports**: `getSectorIntelConfidence()` (sector_intel.ts), `shouldLaunchProbeInstead()` (bot_corps_directives.ts)
+- **State**: `CorpsCommandState.consecutive_probes` — tracks probe count, reset on full attack or completion.
+- **Calibration**: 86.3% area-weighted (stable from 86.5%), 6/6 benchmarks PASS, RS w40 improved 0.505→0.517.
+- **Tests**: 12 new (intel_gated_operations.test.ts), 501 total vitest passing.
+
 **Files:** `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/bot_brigade_eval_front.ts`, `src/sim/combat/enclave_resilience.ts`
