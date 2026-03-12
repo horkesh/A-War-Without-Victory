@@ -7,6 +7,31 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-12] Disconnected Brigade Assignment Fix — Component-Guarded Sector Assignment (n635)
+
+**Problem:** 20 brigades assigned to sectors they can't physically reach (e.g. Srebrenica pocket brigades assigned to Vlasenica mainland sectors). Root cause: two fallback paths in `classifyBrigadesByTerritory()` ignored connected component boundaries.
+
+**Fixes (2 files):**
+1. **`corps_front_sectors.ts` line 529** (Phase 2b fallback): When no reachable sector exists for a brigade, skip instead of falling back to any corps sector. Brigade stays unassigned for `ensureMinimumSectorCoverage()`.
+2. **`corps_front_sectors.ts` line 463** (no-sectors-for-corps): Skip corps with no sectors instead of dumping all brigades into `sectors[0]`.
+3. **`bot_corps_directives.ts` cross-component density transfer**: Added `frontTerritoryOsids` guard — rear brigades only eligible for cross-component pull if their location_osid is in front sector territory. Prevents pulling pocket/enclave brigades to unreachable front sectors.
+
+**Result (n635):** 6/6 benchmarks PASS, **86.3% area-weighted** (+0.5pp from n631), RS w40 0.505, **0 disconnected assignments** (was 20). Hash 4a0306c7e6b1c0b7.
+
+---
+
+## [2026-03-12] P1 Bot AI Fixes — Eligible Attacker Pre-Screen + Cross-Component Density Transfer (n631)
+
+**Two fixes, one calibration run:**
+1. **Eligible attacker pre-screen** (`sector_offensive.ts`): `hasEligibleAttackersForLaunch()` checks ≥1 participating brigade has personnel≥400, is active, and not disrupted before launching an operation. Prevents launching hopeless operations.
+2. **Cross-component rear-to-front density transfer** (`bot_corps_directives.ts`): After same-component surplus/deficit pass, scans rear sectors (0 front edges) for idle brigades and issues column march orders to under-manned deficit front sectors. Max 2 transfers per deficit sector. Addresses 1KK Banja Luka idle brigades vs Posavina under-manned.
+
+**Result (n631):** 6/6 benchmarks PASS, **85.8% area-weighted** (+2.4pp from n626 83.4%), RS w40 0.518, 193 orders, 170 battles. Calibration target ≥85% MET. Hash 8a830346d250192c.
+
+**HVO Central Bosnia ghost front (#14):** Investigated and deferred — 7 HVO brigades inactive in disconnected enclaves, but Croat-Bosniak war breaks out April 1993. These brigades activate then. Not a bug.
+
+---
+
 ## [2026-03-12] Operation Preparation System — Player UI Wiring Complete
 
 **Problem:** Operation Preparation engine was fully implemented (state machine, probes, commander logic, 45 tests) but player-facing modals were disconnected — CommanderSelectionModal and OperationBriefingModal rendered but had no triggers or callbacks.

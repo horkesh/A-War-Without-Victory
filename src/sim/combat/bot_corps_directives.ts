@@ -979,8 +979,21 @@ export function generateCorpsDirectives(
             // Deficit sectors still below 0.7× desired can draw idle brigades
             // from rear sectors (length_edges === 0) that aren't on any front.
             // These brigades column-march across multiple hops to reach the front.
+            //
+            // Guard: only pull brigades whose location_osid is in the territory of
+            // a front sector (length_edges > 0). Brigades in disconnected pockets
+            // (enclaves, cut-off territory) can't physically reach the deficit sector.
             const rearSectors = corpsSectors.filter(sec => sec.length_edges === 0);
             if (rearSectors.length > 0) {
+                // Build set of all OSIDs that belong to front sectors — brigades
+                // must be in this territory to be eligible for cross-component pull.
+                const frontTerritoryOsids = new Set<string>();
+                for (const sec of corpsSectors) {
+                    if (sec.length_edges > 0) {
+                        for (const osid of sec.territory_osids) frontTerritoryOsids.add(osid);
+                    }
+                }
+
                 for (const deficit of deficitSectors) {
                     const desired = sectorDesired.get(deficit.sector_id) ?? 0;
                     if (desired <= 0) continue;
@@ -1004,9 +1017,15 @@ export function generateCorpsDirectives(
                                 const entrench = bf?.entrenchment_turns ?? 0;
                                 const personnel = bf?.personnel ?? 0;
                                 const status = bf?.status;
-                                return { bid, entrench, personnel, status };
+                                const loc = bf?.location_osid ?? '';
+                                return { bid, entrench, personnel, status, loc };
                             })
-                            .filter(c => c.entrench <= 3 && c.personnel >= 400 && c.status === 'active')
+                            .filter(c =>
+                                c.entrench <= 3 &&
+                                c.personnel >= 400 &&
+                                c.status === 'active' &&
+                                frontTerritoryOsids.has(c.loc), // must be in main front territory
+                            )
                             .sort((a, b) => {
                                 if (a.entrench !== b.entrench) return a.entrench - b.entrench;
                                 if (a.personnel !== b.personnel) return b.personnel - a.personnel;

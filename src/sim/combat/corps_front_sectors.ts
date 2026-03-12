@@ -458,10 +458,9 @@ function classifyBrigadesByTerritory(
     for (const [corpsId, pool] of [...corpsPool.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         const corpsSectors = sectorsByCorps.get(corpsId);
         if (!corpsSectors || corpsSectors.length === 0) {
-            // No sectors for this corps — assign to any same-faction sector (fallback)
-            if (sectors.length > 0) {
-                for (const bid of pool) sectors[0]!.assigned_brigade_ids.push(bid);
-            }
+            // No sectors for this corps — skip. These brigades remain unassigned
+            // rather than being dumped into an arbitrary sector they can't reach.
+            // ensureMinimumSectorCoverage() handles same-component transfers.
             continue;
         }
 
@@ -521,12 +520,14 @@ function classifyBrigadesByTerritory(
             const f = formations[bid];
             const brigComp = f?.location_osid ? (componentOf.get(f.location_osid) ?? -2) : -2;
 
-            // Filter to reachable sectors only
+            // Filter to reachable sectors only (same connected component)
             const reachable = sectorNeed.filter(sn => sn.comp === brigComp);
 
-            // Fallback: if no reachable sector, assign to any corps sector
-            // (GOLDEN RULE: every brigade must be in a sector)
-            const candidates = reachable.length > 0 ? reachable : sectorNeed;
+            // If no reachable sector, skip — brigade stays unassigned and will be
+            // picked up by ensureMinimumSectorCoverage() which respects components.
+            // Cross-component assignment creates phantom defense at unreachable sectors.
+            if (reachable.length === 0) continue;
+            const candidates = reachable;
 
             // Sort by need descending, break ties by sector_id
             candidates.sort((a, b) => b.need - a.need || strictCompare(a.sector.sector_id, b.sector.sector_id));
