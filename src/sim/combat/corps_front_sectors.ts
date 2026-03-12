@@ -2156,17 +2156,16 @@ function isSegmentAdjacent(
     const edgesA = parseEdges(a, aFriendlySet);
     const edgesB = parseEdges(b, bFriendlySet);
 
-    // Case B uses shared-boundary adjacency to avoid bridging through distance contacts
-    // (e.g. Srebrenica ↔ Cerska connected only by point-contact polygon adjacency).
-    const caseBAdj = sharedBoundaryAdj ?? osidAdjacency;
+    // Both cases use shared-boundary adjacency to avoid bridging through distance contacts.
+    const caseAdj = sharedBoundaryAdj ?? osidAdjacency;
 
     // Check all pairs for triple-junction connectivity
     for (const ea of edgesA) {
         for (const eb of edgesB) {
-            // Case A: same friendly, hostile OSIDs adjacent
-            if (ea.friendly === eb.friendly && (osidAdjacency.get(ea.hostile) ?? []).includes(eb.hostile)) return true;
-            // Case B: same hostile, friendly OSIDs adjacent (shared boundary only)
-            if (ea.hostile === eb.hostile && (caseBAdj.get(ea.friendly as Osid) ?? []).includes(eb.friendly)) return true;
+            // Case A: same friendly, hostile OSIDs share true boundary
+            if (ea.friendly === eb.friendly && (caseAdj.get(ea.hostile as Osid) ?? []).includes(eb.hostile)) return true;
+            // Case B: same hostile, friendly OSIDs share true boundary
+            if (ea.hostile === eb.hostile && (caseAdj.get(ea.friendly as Osid) ?? []).includes(eb.friendly)) return true;
         }
     }
 
@@ -2329,31 +2328,34 @@ function buildEdgeAdjacency(
             list.push(eid);
         }
 
-        // Case A: same friendly OSID, hostile OSIDs adjacent
+        // Both Case A and Case B use sharedBoundaryAdj to require true shared
+        // polygon boundaries (not distance contacts). Without this, degenerate
+        // triple junctions through near-miss polygon adjacency bridge disconnected
+        // front segments (e.g. Srebrenica ↔ Cerska via distance_contact hostiles).
+        const caseAdj = sharedBoundaryAdj ?? osidAdjacency;
+
+        // Case A: same friendly OSID, hostile OSIDs share a true boundary.
         // Front turns along the friendly polygon boundary at a triple junction.
         for (const edges of friendlyToEdges.values()) {
             for (let i = 0; i < edges.length; i++) {
                 const hi = edgeHostile.get(edges[i]!)!;
                 for (let j = i + 1; j < edges.length; j++) {
                     const hj = edgeHostile.get(edges[j]!)!;
-                    if (isOsidAdjacent(hi, hj, osidAdjacency)) {
+                    if (isOsidAdjacent(hi, hj, caseAdj)) {
                         link(edges[i]!, edges[j]!);
                     }
                 }
             }
         }
 
-        // Case B: same hostile OSID, friendly OSIDs adjacent
+        // Case B: same hostile OSID, friendly OSIDs share a true boundary.
         // Front turns along the hostile polygon boundary at a triple junction.
-        // Use sharedBoundaryAdj (excludes point contacts) when available, so that
-        // front edges don't bridge across enemy territory via polygon vertex touches.
-        const caseBAdj = sharedBoundaryAdj ?? osidAdjacency;
         for (const edges of hostileToEdges.values()) {
             for (let i = 0; i < edges.length; i++) {
                 const fi = edgeFriendly.get(edges[i]!)!;
                 for (let j = i + 1; j < edges.length; j++) {
                     const fj = edgeFriendly.get(edges[j]!)!;
-                    if (isOsidAdjacent(fi, fj, caseBAdj)) {
+                    if (isOsidAdjacent(fi, fj, caseAdj)) {
                         link(edges[i]!, edges[j]!);
                     }
                 }
