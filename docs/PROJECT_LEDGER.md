@@ -7,6 +7,22 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-12] Invariant Assertion Foolproofing (n648)
+
+**Five post-pipeline assertion steps wired into war_phases.ts (114→118 steps):**
+
+1. **assertSectorBrigadesActive** — no dissolved/inactive brigade in any sector's assigned or reserve lists. Runs inside `buildCorpsFrontSectors()` after `assertBrigadeReachability`.
+2. **assertControlEventConsistency** — every OSID flip during a turn must have a matching `control_event`. Uses snapshot-at-turn-start + diff-at-turn-end pattern. Typed accessors (`getPoliticalControlSnapshot`/`setPoliticalControlSnapshot`) in `turn_pipeline_types.ts`.
+3. **assertOperationLifecycle** — all `participating_brigades` in active operations must be active formations. Execution-phase ops with zero active participants flagged as stale. Runs after `advance-sector-offensives`.
+4. **assertFormationsInFriendlyTerritory** — every active brigade's `location_osid` must be in friendly-controlled territory (respects RBiH↔HRHB alliance via `isFriendlyFaction`). Runs near end of turn.
+
+**Also fixed:**
+- Removed `.sort(strictCompare)` from 5 counting-only loops (sort can't change a count — pure overhead, called 100s of times/turn).
+- `sector_offensive.ts`: `movement_only_execution_turns` counter now resets on capture and on attack (was never reset). Stall check relaxed — no longer requires `attack_attempt_count === 0`.
+
+**Tests:** 4 new test files (21 tests), 52 suites / 545 tests pass. Typecheck clean.
+**Plan:** `docs/40_reports/INVARIANT_FOOLPROOFING_PLAN.md` (updated to COMPLETE).
+
 ## [2026-03-12] Attack-Through March-First Fix + Enclave OSID Lists + Brigade Timing (n636)
 
 **Three fixes in this session:**

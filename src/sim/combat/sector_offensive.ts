@@ -776,6 +776,7 @@ function updateMultiAxisResults(
             axis.attack_attempt_count += 1;
             axis.objective_capture_count += 1;
             axis.idle_execution_turn_streak = 0;
+            axis.movement_only_execution_turns = 0; // reset: objective captured
             axis.last_result = 'captured';
             axis.momentum = Math.min(MOMENTUM_CAP, axis.momentum + 1);
             axis.current_objective_index = currentIdx + 1;
@@ -804,6 +805,7 @@ function updateMultiAxisResults(
                 // Direct attack on current objective — standard failure tracking
                 axis.attack_attempt_count += 1;
                 axis.idle_execution_turn_streak = 0;
+                axis.movement_only_execution_turns = 0; // reset: we ARE attacking
                 axis.last_result = 'failed';
                 axis.momentum = 0;
                 axis.failure_count += 1;
@@ -845,9 +847,8 @@ function updateMultiAxisResults(
                     continue;
                 }
 
-                // Movement-only stall: brigades marching but never attacking
-                if (axis.attack_attempt_count === 0 &&
-                    axis.movement_only_execution_turns >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
+                // Movement-only stall: brigades marching but not attacking objectives
+                if (axis.movement_only_execution_turns >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
                     axis.status = 'stalled';
                     continue;
                 }
@@ -927,6 +928,7 @@ function updateLegacyFlatResults(
         op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
         op.objective_capture_count = (op.objective_capture_count ?? 0) + 1;
         op.idle_execution_turn_streak = 0;
+        op.movement_only_execution_turns = 0; // reset: objective captured
         op.last_result = 'captured';
         op.momentum = Math.min(MOMENTUM_CAP, (op.momentum ?? 0) + 1);
         op.current_objective_index = currentIdx + 1;
@@ -951,6 +953,7 @@ function updateLegacyFlatResults(
         if (anyAttackedObjective) {
             op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
             op.idle_execution_turn_streak = 0;
+            op.movement_only_execution_turns = 0; // reset: we ARE attacking
             op.last_result = 'failed';
             op.momentum = 0;
             op.failure_count = (op.failure_count ?? 0) + 1;
@@ -991,11 +994,10 @@ function updateLegacyFlatResults(
                 return;
             }
 
-            // Movement-only stall: brigades are marching but no one can attack.
-            // Happens when all brigades fail the probe threshold (e.g. weak ARBiH
-            // corps under siege). Abort before wasting the entire command cycle.
-            if ((op.attack_attempt_count ?? 0) === 0 &&
-                (op.movement_only_execution_turns ?? 0) >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
+            // Movement-only stall: brigades are marching but not attacking objectives.
+            // Happens when brigades can't reach objectives or fail probe thresholds.
+            // Abort before wasting the entire command cycle.
+            if ((op.movement_only_execution_turns ?? 0) >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
                 beginRecovery(op, turn, 'no_logged_attempt');
                 return;
             }

@@ -266,6 +266,12 @@
 - **Right approach**: Group optional params into an options object: `{ personnelRetain?, cohesionLoss?, disruptedTurns?, adjacency? }`. Callers pass only what they need: `{ adjacency }`.
 - **Do instead**: When a function has 3+ optional params OR callers pass `undefined` to skip params, refactor to an options object. The signal is `undefined, undefined, undefined, X` at a call site.
 
+### [Architecture] Post-pipeline assertions beat per-path guards for cross-cutting invariants (2026-03-12)
+- **Context**: The disconnected brigade bug recurred 3 times (n598→n601→n635) despite knowing the invariant. Each recurrence was a new code path added without the component guard. Even the developer who wrote the fix added a new violating path in the same session (n631 density transfer, guarded in n635).
+- **Wrong approach**: Guarding each code path individually — every new path requires remembering to add the guard. With 6+ paths across 3 files, omission is inevitable.
+- **Right approach**: Single post-pipeline assertion (`assertBrigadeReachability`) runs AFTER all code paths have executed. Catches violations regardless of which path introduced them. Added as the last step in `buildCorpsFrontSectors()`. Pattern proven and then applied to 4 more systems: dissolved brigades in sectors, control event consistency, operation lifecycle, formation territory.
+- **Do instead**: For invariants with 3+ code paths that can violate them, add a single end-of-pipeline assertion rather than guarding each path. The assertion is the safety net; per-path guards are optimization. Five assertions now live in `war_phases.ts` (118 steps). Plan: `docs/40_reports/INVARIANT_FOOLPROOFING_PLAN.md`.
+
 ---
 
 ## Internalized (Consistently Applied)

@@ -232,6 +232,10 @@
 10. **[2026-03-08] Timeline JSON is doctrine source of truth**
     Do instead: `apr1992.json` `doctrine_phases` overrides `FACTION_DOCTRINE_PHASES` in code. Always edit timeline JSON first.
 
+## Invariant Assertions (n648)
+1. **[2026-03-12] 5 post-pipeline assertions in war_phases.ts (118 steps)**
+   Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
+
 ## Engine Runtime Patterns
 1. **[2026-03-05] Takeover displacement off-by-one FIXED**
    Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.

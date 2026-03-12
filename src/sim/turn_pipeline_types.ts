@@ -329,6 +329,16 @@ export function setSiegeStateCache(context: TurnContext, data: SiegeStateCache):
     (context as TurnContext & { siegeStateCache?: SiegeStateCache }).siegeStateCache = data;
 }
 
+/** Type-safe accessor for political control snapshot (assertion use). */
+export function getPoliticalControlSnapshot(context: TurnContext): Record<string, string | null> | undefined {
+    return (context as TurnContext & { controlSnapshot?: Record<string, string | null> }).controlSnapshot;
+}
+
+/** Type-safe setter for political control snapshot on context. */
+export function setPoliticalControlSnapshot(context: TurnContext, snapshot: Record<string, string | null>): void {
+    (context as TurnContext & { controlSnapshot?: Record<string, string | null> }).controlSnapshot = snapshot;
+}
+
 /** Load settlement graph and edges from context (or default). */
 export async function getGraphAndEdges(context: TurnContext): Promise<{ graph: LoadedSettlementGraph; edges: EdgeRecord[] }> {
     const graph = context.input.settlementGraph ?? (await loadSettlementGraph());

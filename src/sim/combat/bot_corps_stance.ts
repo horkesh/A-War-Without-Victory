@@ -124,9 +124,10 @@ export function generateCorpsStanceOrders(
             if (turn >= 40 && stance === 'balanced' && avgPers >= 0.6 && avgCoh >= 50) {
                 // Check if faction controls enough territory for counteroffensive
                 const pc = state.political.political_controllers ?? {};
-                const totalSids = Object.keys(pc).length;
+                const pcKeys = Object.keys(pc);
+                const totalSids = pcKeys.length;
                 let ownedSids = 0;
-                for (const k of Object.keys(pc)) { if (pc[k] === 'RBiH') ownedSids++; }
+                for (const k of pcKeys) { if (pc[k] === 'RBiH') ownedSids++; }
                 if (totalSids > 0 && ownedSids / totalSids >= 0.25) {
                     stance = 'offensive';
                 }

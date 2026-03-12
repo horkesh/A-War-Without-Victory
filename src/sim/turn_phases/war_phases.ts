@@ -2,6 +2,9 @@
 
 // --- Domain imports (paths adjusted: one directory deeper than turn_pipeline.ts) ---
 
+import { snapshotPoliticalControllers, assertControlEventConsistency } from '../combat/assert_control_events.js';
+import { assertFormationsInFriendlyTerritory } from '../combat/assert_formation_territory.js';
+import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
 import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
 import { buildAdjacencyMap } from '../../map/adjacency_map.js';
@@ -149,6 +152,7 @@ import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causali
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
+import { getPoliticalControlSnapshot, setPoliticalControlSnapshot } from '../turn_pipeline_types.js';
 import {
     getOperationalData,
     setOperationalData,
@@ -176,6 +180,13 @@ export const warPhases: NamedPhase[] = [
             const { setAARSnapshot } = await import('../turn_pipeline_types.js');
             const { captureAARSnapshot } = await import('../compile_turn_summary.js');
             setAARSnapshot(context, captureAARSnapshot(context.state));
+        }
+    },
+    {
+        name: 'snapshot-political-controllers',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            setPoliticalControlSnapshot(context, snapshotPoliticalControllers(context.state));
         }
     },
     {
@@ -595,6 +606,13 @@ export const warPhases: NamedPhase[] = [
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;
             }
+        }
+    },
+    {
+        name: 'assert-operation-lifecycle',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            assertOperationLifecycle(context.state);
         }
     },
     {
@@ -1903,6 +1921,21 @@ export const warPhases: NamedPhase[] = [
                     freeze_edges_count: 0
                 };
             }
+        }
+    },
+    {
+        name: 'assert-formations-in-friendly-territory',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            assertFormationsInFriendlyTerritory(context.state);
+        }
+    },
+    {
+        name: 'assert-control-event-consistency',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const snapshot = getPoliticalControlSnapshot(context);
+            if (snapshot) assertControlEventConsistency(context.state, snapshot);
         }
     },
     {

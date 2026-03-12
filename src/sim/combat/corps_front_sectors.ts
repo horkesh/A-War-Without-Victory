@@ -201,6 +201,7 @@ function buildFactionSectors(
     // deduplication, reclassification). If a new path is added that violates
     // connected component boundaries, this catches it immediately.
     assertBrigadeReachability(pruned, formations, componentOf);
+    assertSectorBrigadesActive(pruned, formations);
 
     return pruned;
 }
@@ -418,6 +419,55 @@ function assertBrigadeReachability(
     if (violations.length > 0) {
         console.error(
             `SECTOR REACHABILITY INVARIANT VIOLATION: ${violations.length} brigade(s) assigned to unreachable sectors:\n  ${violations.join('\n  ')}`
+        );
+    }
+}
+
+/**
+ * INVARIANT: No dissolved/inactive brigade may appear in any sector.
+ *
+ * Checks all assigned_brigade_ids and reserve_brigade_ids for:
+ *   - Formation exists in formations record
+ *   - f.status === 'active'
+ *   - f.lifecycle_status is NOT 'destroyed' or 'disbanded'
+ *
+ * Logs violations as console.error. Sectors remain usable — downstream
+ * combat logic simply ignores inactive formations, but their presence
+ * in a sector is a bug that must be surfaced.
+ */
+export function assertSectorBrigadesActive(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+): void {
+    const violations: string[] = [];
+    for (const sec of sectors) {
+        const allBids = [
+            ...sec.assigned_brigade_ids,
+            ...(sec.reserve_brigade_ids ?? []),
+        ].sort(strictCompare);
+        for (const bid of allBids) {
+            const f = formations[bid];
+            if (!f) {
+                violations.push(
+                    `${bid} in ${sec.sector_id}: formation not found in formations record`
+                );
+                continue;
+            }
+            if (f.status !== 'active') {
+                violations.push(
+                    `${bid} in ${sec.sector_id}: status='${f.status}' (expected 'active')`
+                );
+            } else if (f.lifecycle_status === 'destroyed' || f.lifecycle_status === 'disbanded') {
+                // Invariant: destroyed/disbanded must not have status='active'
+                violations.push(
+                    `${bid} in ${sec.sector_id}: status='active' but lifecycle_status='${f.lifecycle_status}'`
+                );
+            }
+        }
+    }
+    if (violations.length > 0) {
+        console.error(
+            `SECTOR BRIGADE STATUS INVARIANT VIOLATION: ${violations.length} inactive/dissolved brigade(s) found in sectors:\n  ${violations.join('\n  ')}`
         );
     }
 }
