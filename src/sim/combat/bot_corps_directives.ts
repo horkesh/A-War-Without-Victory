@@ -37,7 +37,7 @@ import { getTruceBreakAggressionBonus, shouldGrazBlockAttack, isGrazAccordsActiv
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
-import { splitNonContiguousSectors } from './corps_front_sectors.js';
+import { splitNonContiguousSectors, filterReachableReassignmentOrders, buildFriendlyComponents } from './corps_front_sectors.js';
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
 import {
     assessCorpsSupplyHealth,
@@ -268,6 +268,13 @@ export function generateCorpsDirectives(
     const corpsFrontMapping = deriveCorpsFrontMapping(state, faction);
     const sectorLookup = state.military.corps_front_sectors ?? {};
     const adjacency = buildOsidAdjacency(edges);
+    // Build friendly connected components once per faction (for reachability guards)
+    const controllers = state.political?.political_controllers ?? {};
+    const friendlyOsidSet = new Set<string>();
+    for (const [osid, ctrl] of Object.entries(controllers)) {
+        if (ctrl === faction) friendlyOsidSet.add(osid);
+    }
+    const componentOf = buildFriendlyComponents(adjacency, friendlyOsidSet);
     const strategy = FACTION_STRATEGIES[faction];
     const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.military.war_timeline);
 
@@ -1080,6 +1087,14 @@ export function generateCorpsDirectives(
             }
         }
 
+        // ── Reachability guard: filter out any orders to unreachable sectors ──
+        // This is the safety net for all march-order paths (surplus→deficit,
+        // cross-component rear pull, mech/moto staging). If a new code path
+        // above accidentally creates an unreachable order, this catches it.
+        const validOrders = filterReachableReassignmentOrders(
+            sectorReassignmentOrders, corpsSectors, state.military.formations ?? {}, componentOf
+        );
+
         const directive: CorpsDirective = {
             assigned_front_ids: assignedFrontIds,
             offensive_targets: offensiveTargets,
@@ -1092,7 +1107,7 @@ export function generateCorpsDirectives(
             sector_targets: Object.keys(sectorTargets).length > 0 ? sectorTargets : undefined,
             reinforce_sector_ids: reinforceSectorIds.length > 0 ? reinforceSectorIds : undefined,
             priority_sector_id: prioritySectorId,
-            sector_reassignment_orders: sectorReassignmentOrders.length > 0 ? sectorReassignmentOrders : undefined,
+            sector_reassignment_orders: validOrders.length > 0 ? validOrders : undefined,
         };
 
         cmd.directive = directive;

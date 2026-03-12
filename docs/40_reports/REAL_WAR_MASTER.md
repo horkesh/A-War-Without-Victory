@@ -10,6 +10,22 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ## Fixed
 
+### 22. Attack-through picking random targets instead of marching toward objective (n636)
+
+**What we found:** During operation execution, brigades not adjacent to their assigned objective were supposed to fight through enemy territory toward the objective. Instead, `predictAllAdjacentTargets()` returned targets sorted by `power_ratio` descending, and `.find()` picked the first passable one — the *easiest* adjacent target, regardless of direction. A code comment said "Prefer targets closer to the objective (on the path)" but NO distance calculation existed. This caused VRS brigades in Operation Koridor to attack Gradačac (sideways) instead of marching toward Brčko (their actual objective). A corps commander would court-martial a brigade CO who abandoned his assigned axis of advance to attack a random town because it looked easier.
+
+**Historical context:** Operation Corridor 92 was a focused VRS offensive to open the Posavina Corridor to Brčko. Forces were concentrated on the axis Modriča→Brčko, not scattered across the entire Posavina front attacking whatever looked weakest. Military operations have axes of advance; brigades don't freelance.
+
+**Root cause:** `bot_brigade_eval_attack.ts` — attack-through branch used `.find()` on power_ratio-sorted target list. The sorting was for combat prediction display, not for directional priority. The march-toward-objective path existed but was checked AFTER attack-through, making it dead code in practice.
+
+**Fix:** Flipped priority — (1) direct attack objective, (2) march through friendly territory toward objective, (3) attack-through as LAST RESORT only when no friendly path exists. Attack-through also filtered to targets held by same faction as objective.
+
+**Impact:** RS w40 dropped from 0.505 to 0.470 — VRS was previously "conquering" territory by accident through random sideways attacks. Needs rebalancing.
+
+**Lesson:** When a code comment says "prefer X" but the code uses `.find()` on a list sorted by something else, the comment is a lie. Always verify sorting logic.
+
+---
+
 ### 9. Non-contiguous corps sectors — 3rd Corps pockets in 2nd Corps territory (n528)
 
 **What we found:** The ARBiH 3rd Corps had 9 sectors including 5 isolated single-brigade pockets (Kakanj, Zavidovići, Gračanica, Vitez, Zenica) surrounded by 2nd Corps territory. A real corps commander would never have his sector boundaries drawn through another corps's deep rear. On the map, this produced sector demarcation lines running through territory far from any front line — visually and operationally absurd.

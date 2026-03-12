@@ -38,8 +38,11 @@ import { strictCompare } from '../../state/validateGameState.js';
 interface EnclaveDefinition {
     id: string;
     faction: FactionId;
-    /** OSID prefixes that belong to this enclave. */
-    osid_prefixes: string[];
+    /** OSID prefixes that belong to this enclave (municipality-wide enclaves like Bihać, Sarajevo). */
+    osid_prefixes?: string[];
+    /** Explicit OSID list for enclaves scoped to painted January 1993 territory only.
+     *  Takes precedence over osid_prefixes when present. */
+    osid_list?: string[];
     /** Turn before which resilience does not grow. Enclaves formed gradually through
      *  1992 as VRS advanced — they weren't "resilient enclaves" from day one. */
     resilience_start_turn?: number;
@@ -69,19 +72,41 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     {
         id: 'srebrenica',
         faction: 'RBiH',
-        osid_prefixes: ['op:srebrenica:'],
+        // Painted January 1993 RBiH OSIDs only — not entire municipality
+        osid_list: [
+            'op:srebrenica:bostahovine_2', 'op:srebrenica:brezovice_2',
+            'op:srebrenica:donji_potocari_2', 'op:srebrenica:kalimanici',
+            'op:srebrenica:lijesce', 'op:srebrenica:ljeskovik_2',
+            'op:srebrenica:luka_2', 'op:srebrenica:milacevici',
+            'op:srebrenica:osmace_2', 'op:srebrenica:radovcici',
+            'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
+            'op:srebrenica:sulice_2',
+        ],
         resilience_start_turn: 16,  // Enclave formed after Drina valley offensive (spring-summer 1992)
+        capital_osid: 'op:srebrenica:srebrenica_2',
     },
     {
         id: 'zepa',
         faction: 'RBiH',
-        osid_prefixes: ['op:rogatica:zepa'],
+        // Single painted RBiH OSID in Žepa area
+        osid_list: ['op:rogatica:zepa_2'],
         resilience_start_turn: 16,  // Same timeline as Srebrenica
+        capital_osid: 'op:rogatica:zepa_2',
     },
     {
         id: 'gorazde',
         faction: 'RBiH',
-        osid_prefixes: ['op:gorazde:'],
+        // Painted January 1993 RBiH OSIDs only — not entire municipality (20 total, 16 RBiH)
+        osid_list: [
+            'op:gorazde:bacci', 'op:gorazde:citluk_2',
+            'op:gorazde:faocici_2', 'op:gorazde:gorazde_2',
+            'op:gorazde:hrancici', 'op:gorazde:hrusanj',
+            'op:gorazde:kola', 'op:gorazde:kolovarice',
+            'op:gorazde:mravinjac_2', 'op:gorazde:novakovici',
+            'op:gorazde:osjecani_2', 'op:gorazde:semihova_2',
+            'op:gorazde:slatina_2', 'op:gorazde:ustipraca_2',
+            'op:gorazde:zorlaci', 'op:gorazde:zorovici',
+        ],
         resilience_start_turn: 0,   // BB2 p.478: organized TDF defense from April 1992
         initial_resilience: 15,     // ~37k prewar pop; less than Sarajevo but significant
         capital_osid: 'op:gorazde:gorazde_2',
@@ -127,10 +152,15 @@ function readEntry(entry: number | EnclaveResilienceEntry | undefined): EnclaveR
     return entry;
 }
 
-/** Check if an OSID belongs to an enclave. */
+/** Check if an OSID belongs to an enclave. Explicit osid_list takes precedence over prefix matching. */
 function osidBelongsToEnclave(osid: string, enclave: EnclaveDefinition): boolean {
-    for (const prefix of enclave.osid_prefixes) {
-        if (osid.startsWith(prefix)) return true;
+    if (enclave.osid_list) {
+        return enclave.osid_list.includes(osid);
+    }
+    if (enclave.osid_prefixes) {
+        for (const prefix of enclave.osid_prefixes) {
+            if (osid.startsWith(prefix)) return true;
+        }
     }
     return false;
 }

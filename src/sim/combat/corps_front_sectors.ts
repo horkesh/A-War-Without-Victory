@@ -194,6 +194,14 @@ function buildFactionSectors(
         return true;
     });
     pruned.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+
+    // ── INVARIANT: every assigned brigade must be reachable from its sector ──
+    // This assertion catches ALL paths that assign brigades to sectors
+    // (Phase 1 positional, Phase 2 pool, ensureMinimumSectorCoverage,
+    // deduplication, reclassification). If a new path is added that violates
+    // connected component boundaries, this catches it immediately.
+    assertBrigadeReachability(pruned, formations, componentOf);
+
     return pruned;
 }
 
@@ -365,6 +373,95 @@ function getSectorComponent(sector: CorpsFrontSector, componentOf: Map<string, n
     }
     return -1;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Reachability Invariant Assertion
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Assert that every assigned/reserve brigade can physically reach its sector
+ * through contiguous friendly territory (same connected component).
+ *
+ * This is the SINGLE enforcement point for the reachability invariant.
+ * All assignment paths (Phase 1 positional, Phase 2 pool, coverage transfers,
+ * deduplication, reclassification) flow through the sector pipeline and hit
+ * this assertion before sectors are returned to consumers.
+ *
+ * Throws on the first violation found (fail-fast in dev/test).
+ * In production, logs a warning per violation and continues (sectors still
+ * usable — the brigade just can't physically reach its sector).
+ */
+function assertBrigadeReachability(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    componentOf: Map<string, number>,
+): void {
+    const violations: string[] = [];
+    for (const sec of sectors) {
+        const secComp = getSectorComponent(sec, componentOf);
+        if (secComp === -1) continue; // sector has no mapped OSIDs — skip
+        const allBids = [
+            ...sec.assigned_brigade_ids,
+            ...(sec.reserve_brigade_ids ?? []),
+        ];
+        for (const bid of allBids) {
+            const f = formations[bid];
+            if (!f || !f.location_osid) continue;
+            const brigComp = componentOf.get(f.location_osid) ?? -2;
+            if (brigComp !== secComp) {
+                violations.push(
+                    `${bid} (at ${f.location_osid}, comp ${brigComp}) → ${sec.sector_id} (comp ${secComp})`
+                );
+            }
+        }
+    }
+    if (violations.length > 0) {
+        const msg = `SECTOR REACHABILITY INVARIANT VIOLATION: ${violations.length} brigade(s) assigned to unreachable sectors:\n  ${violations.join('\n  ')}`;
+        // In test/dev: throw to fail fast. In production: warn and continue.
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+            throw new Error(msg);
+        }
+        console.error(msg);
+    }
+}
+
+/**
+ * Validate that a set of sector reassignment orders only move brigades
+ * to sectors they can physically reach. Call this from directive generation
+ * (bot_corps_directives.ts) before issuing march orders.
+ *
+ * Returns the filtered list of valid orders (invalid orders are dropped
+ * with a console.warn).
+ */
+export function filterReachableReassignmentOrders(
+    orders: Array<{ brigade_id: string; to_sector_id: string }>,
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    componentOf: Map<string, number>,
+): Array<{ brigade_id: string; to_sector_id: string }> {
+    const sectorMap = new Map<string, CorpsFrontSector>();
+    for (const s of sectors) sectorMap.set(s.sector_id, s);
+
+    return orders.filter(order => {
+        const sec = sectorMap.get(order.to_sector_id);
+        if (!sec) return false;
+        const f = formations[order.brigade_id];
+        if (!f || !f.location_osid) return false;
+        const secComp = getSectorComponent(sec, componentOf);
+        const brigComp = componentOf.get(f.location_osid) ?? -2;
+        if (brigComp !== secComp) {
+            console.warn(
+                `[filterReachableReassignmentOrders] Dropped unreachable order: ${order.brigade_id} (comp ${brigComp}) → ${order.to_sector_id} (comp ${secComp})`
+            );
+            return false;
+        }
+        return true;
+    });
+}
+
+// Also export buildFriendlyComponents so consumers (directives, tests)
+// can compute components without duplicating the BFS logic.
+export { buildFriendlyComponents, getSectorComponent };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Step 6: Classify Brigades by Territory Membership

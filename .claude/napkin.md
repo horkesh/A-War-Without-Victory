@@ -59,7 +59,7 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-12] Calibration recovery needed (n626: 83.4% → target ≥85%)**: Sector restructuring (n620→n626) dropped area match ~3pp from n617 baseline. Sector geometry now correct — needs dedicated calibration pass (operation targets, doctrine timing, overrides) to recover.
+1. **[2026-03-12] Calibration: n636 = 86.3% area-weighted, RS w40 0.470 (BELOW FLOOR)**: March-first attack-through fix reduced RS conquest. RS w40 needs rebalancing back above 0.503. Likely lever: early-war blitz intensity or attack-share increase.
 2. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers. Root cause: brigade posture gate blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation.
 3. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.
 4. **[2026-03-12] REAL_WAR_MASTER #14: HVO Central Bosnia ghost front — DEFERRED**: 13 front edges, 0 brigades. 7 HVO brigades in disconnected enclaves. Intentionally deferred — HVO-RBiH war breaks out April 1993; these brigades activate then. Don't fix now.
@@ -111,8 +111,8 @@
    Do instead: In `classifyBrigadesByTerritory`, never assign a brigade to another corps sector. All fallback paths must preserve brigade corps ownership.
 9. **[2026-02-25] Aggression scoring: additive + multiplicative**
    Do instead: Flat additive (`aggression_modifier × 120`) PLUS multiplicative (`× (1 + aggression_modifier)`).
-10. **[2026-03-08] Brigade discipline + fatigue + garrison + dissolution + equipment**
-    Do instead: Hard block — brigades ONLY attack `effectiveDirective.offensive_targets`. Fatigue recovery ONLY when OFF frontline. `garrison: true` → defend-only. Equipment: TANK_LOSS_RATE=0.08, ARTILLERY_LOSS_RATE=0.04. Dissolution: triple criteria.
+10. **[2026-03-12] Attack-through is LAST RESORT — march-first (n636 gotcha)**
+    Do instead: During op execution, brigades march through friendly territory toward objective FIRST. Attack-through (fighting through enemy) only when no friendly path exists. Before this fix, brigades picked easiest adjacent target by power_ratio regardless of direction — code comment lied about "prefer closer to objective." `bot_brigade_eval_attack.ts` lines ~209-263.
 
 ## Officer Architecture
 1. **[2026-03-08] Named officers = corps and above only; brigades use abstracted officer_quality**

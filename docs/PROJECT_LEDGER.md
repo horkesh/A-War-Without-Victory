@@ -7,6 +7,31 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-12] Attack-Through March-First Fix + Enclave OSID Lists + Brigade Timing (n636)
+
+**Three fixes in this session:**
+
+### 1. Attack-through march-first priority (CRITICAL BUG FIX)
+**Problem:** During operation execution, brigades not adjacent to their objective would attack the easiest adjacent enemy OSID (highest power_ratio) regardless of direction. Code comment said "Prefer targets closer to the objective" but NO distance calculation existed — `predictAllAdjacentTargets()` returns targets sorted by power_ratio descending, and `.find()` picked the first one. This caused brigades to attack sideways (e.g. rs_3rd_posavina_light_infantry in Operation Koridor attacking Gradačac instead of marching toward Brčko objective).
+
+**Fix:** Flipped priority in `bot_brigade_eval_attack.ts` — (1) direct attack objective, (2) march through friendly territory toward objective, (3) attack-through as LAST RESORT only when no friendly path exists. Attack-through also now filters to targets held by the same faction as the objective.
+
+**Lesson:** When a code comment says "prefer X" but the code uses `.find()` on a list sorted by something entirely different, the comment is a lie. Always verify the actual sorting/filtering logic.
+
+### 2. Enclave explicit OSID lists
+**Problem:** Srebrenica/Žepa/Goražde enclave definitions used prefix-based matching (`op:srebrenica:*`), granting enclave resilience to all municipality OSIDs — including RS-controlled ones. Only painted January 1993 OSIDs should have enclave defense.
+
+**Fix:** Added `osid_list` field to `EnclaveDefinition` interface in `enclave_resilience.ts`. Srebrenica (13 OSIDs), Žepa (1), Goražde (16) now use explicit lists. Bihać and Sarajevo keep prefix-based (whole municipalities are RBiH). Updated tests with real OSID constants.
+
+### 3. Gradačac/Brčko brigade timing
+**Fix:** Changed `hrhb_107th_gradaac_brigade` and `hrhb_108th_brko_brigade` `available_from` from week 8 to week 2 in `oob_brigades.json`.
+
+**Calibration (n636):** 12/14 benchmarks, 86.3% area-weighted, RS w40 0.470 (below 0.503 floor). March-first fix significantly reduced RS territorial gain — separate rebalancing needed.
+
+**Files changed:** `bot_brigade_eval_attack.ts`, `enclave_resilience.ts`, `enclave_resilience_phase_c.test.ts`, `oob_brigades.json`
+
+---
+
 ## [2026-03-12] Disconnected Brigade Assignment Fix — Component-Guarded Sector Assignment (n635)
 
 **Problem:** 20 brigades assigned to sectors they can't physically reach (e.g. Srebrenica pocket brigades assigned to Vlasenica mainland sectors). Root cause: two fallback paths in `classifyBrigadesByTerritory()` ignored connected component boundaries.

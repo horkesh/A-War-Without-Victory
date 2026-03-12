@@ -41,30 +41,28 @@ function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
 } as unknown as GameState;
 }
 
-function makeCriticalSupplyReport(enclavePrefix: string, faction: string = 'RBiH') {
+// Real OSIDs from the Srebrenica enclave explicit list
+const SREB_OSID_1 = 'op:srebrenica:srebrenica_2';
+const SREB_OSID_2 = 'op:srebrenica:bostahovine_2';
+
+function makeCriticalSupplyReport(osids: string[], faction: string = 'RBiH') {
     return {
         schema: 1 as const,
         turn: 20,
         factions: [{
             faction_id: faction,
-            by_osid: [
-                { osid: `${enclavePrefix}center`, state: 'critical' as const },
-                { osid: `${enclavePrefix}north`, state: 'critical' as const },
-            ]
+            by_osid: osids.map(osid => ({ osid, state: 'critical' as const })),
         }]
     };
 }
 
-function makeAdequateSupplyReport(enclavePrefix: string, faction: string = 'RBiH') {
+function makeAdequateSupplyReport(osids: string[], faction: string = 'RBiH') {
     return {
         schema: 1 as const,
         turn: 20,
         factions: [{
             faction_id: faction,
-            by_osid: [
-                { osid: `${enclavePrefix}center`, state: 'adequate' as const },
-                { osid: `${enclavePrefix}north`, state: 'adequate' as const },
-            ]
+            by_osid: osids.map(osid => ({ osid, state: 'adequate' as const })),
         }]
     };
 }
@@ -87,7 +85,7 @@ describe('readResilience', () => {
 describe('updateEnclaveResilience — isolation tracking', () => {
     it('increments isolation_turns on critical supply', () => {
         const state = makeMinimalState();
-        const supply = makeCriticalSupplyReport('op:srebrenica:');
+        const supply = makeCriticalSupplyReport([SREB_OSID_1, SREB_OSID_2]);
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(1);
@@ -96,7 +94,7 @@ describe('updateEnclaveResilience — isolation tracking', () => {
 
     it('accumulates isolation_turns across multiple turns', () => {
         const state = makeMinimalState();
-        const supply = makeCriticalSupplyReport('op:srebrenica:');
+        const supply = makeCriticalSupplyReport([SREB_OSID_1, SREB_OSID_2]);
         for (let i = 0; i < 5; i++) {
             updateEnclaveResilience(state, supply);
         }
@@ -113,7 +111,7 @@ describe('updateEnclaveResilience — isolation tracking', () => {
             },
   } as any,
 });
-        const supply = makeAdequateSupplyReport('op:srebrenica:');
+        const supply = makeAdequateSupplyReport([SREB_OSID_1, SREB_OSID_2]);
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(0);
@@ -130,7 +128,7 @@ describe('updateEnclaveResilience — hardening activation', () => {
             },
   } as any,
 });
-        const supply = makeCriticalSupplyReport('op:srebrenica:');
+        const supply = makeCriticalSupplyReport([SREB_OSID_1, SREB_OSID_2]);
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(HARDENING_THRESHOLD);
@@ -145,7 +143,7 @@ describe('updateEnclaveResilience — hardening activation', () => {
             },
   } as any,
 });
-        const supply = makeAdequateSupplyReport('op:srebrenica:');
+        const supply = makeAdequateSupplyReport([SREB_OSID_1, SREB_OSID_2]);
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(entry.isolation_turns).toBe(0);
@@ -162,7 +160,7 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
             },
   } as any,
 });
-        const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
+        const bonus = getEnclaveDefenseBonus(state, SREB_OSID_1);
         expect(bonus).toBeCloseTo(1.0 + 20 * 0.02, 5); // 1.40
     });
 
@@ -174,7 +172,7 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
             },
   } as any,
 });
-        const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
+        const bonus = getEnclaveDefenseBonus(state, SREB_OSID_1);
         const expected = (1.0 + 20 * 0.02) * (1.0 + HARDENING_DEFENSE_BONUS);
         expect(bonus).toBeCloseTo(expected, 5); // 1.40 × 1.05 = 1.47
     });
@@ -187,7 +185,7 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
             },
   } as any,
 });
-        const bonus = getEnclaveDefenseBonus(state, 'op:srebrenica:center');
+        const bonus = getEnclaveDefenseBonus(state, SREB_OSID_1);
         const expected = (1.0 + MAX_ENCLAVE_RESILIENCE * 0.02) * (1.0 + HARDENING_DEFENSE_BONUS);
         expect(bonus).toBeCloseTo(expected, 5); // 1.60 × 1.05 = 1.68
     });
@@ -213,7 +211,7 @@ describe('getEnclaveCohesionRecovery — structured entry', () => {
             },
   } as any,
 });
-        expect(getEnclaveCohesionRecovery(state, 'op:srebrenica:center')).toBe(2);
+        expect(getEnclaveCohesionRecovery(state, SREB_OSID_1)).toBe(2);
     });
 
     it('works with legacy bare number', () => {
@@ -222,7 +220,7 @@ describe('getEnclaveCohesionRecovery — structured entry', () => {
     enclave_resilience: { srebrenica: 25 },
   } as any,
 });
-        expect(getEnclaveCohesionRecovery(state, 'op:srebrenica:center')).toBe(2);
+        expect(getEnclaveCohesionRecovery(state, SREB_OSID_1)).toBe(2);
     });
 });
 
@@ -310,7 +308,7 @@ describe('migration from bare number', () => {
     enclave_resilience: { srebrenica: 15 },
   } as any,
 });
-        const supply = makeCriticalSupplyReport('op:srebrenica:');
+        const supply = makeCriticalSupplyReport([SREB_OSID_1, SREB_OSID_2]);
         updateEnclaveResilience(state, supply);
         const entry = state.political.enclave_resilience!['srebrenica'] as EnclaveResilienceEntry;
         expect(typeof entry).toBe('object');

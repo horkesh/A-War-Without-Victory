@@ -206,37 +206,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 }
             }
 
-            // ── Attack through: fight toward objective ─────────────────
-            // If not adjacent to objective, attack the best adjacent enemy
-            // OSID to open a path. Real armies fight through intermediate
-            // positions — they don't sit idle waiting for a clear approach.
-            // Filter: only attack intermediates held by the SAME faction as
-            // the objective. Prevents HRHB from capturing RBiH territory
-            // en route to RS objectives (historical: Op Jackal was joint,
-            // not HRHB conquering ARBiH land).
-            const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
-            const intermediateTargets = objectiveController
-                ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
-                : targets;
-            if (intermediateTargets.length > 0) {
-                const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
-                // Prefer targets closer to the objective (on the path)
-                const bestIntermediate = intermediateTargets.find((t) => {
-                    const alreadyAt = chosenTargets.get(t.osid) ?? 0;
-                    if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;
-                    return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, probeThreshold);
-                });
-                if (bestIntermediate) {
-                    const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
-                    result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
-                    result.attack_orders[brigade.id] = bestIntermediate.osid;
-                    result.attack_scores[brigade.id] = 800; // Slightly below direct objective attack (900)
-                    chosenTargets.set(bestIntermediate.osid, (chosenTargets.get(bestIntermediate.osid) ?? 0) + 1);
-                    return true;
-                }
-            }
-
-            // No attackable targets — try to march toward approach position
+            // ── March toward objective first ─────────────────────────
+            // Brigades follow orders: move toward the objective through
+            // friendly territory. Only attack-through as a last resort
+            // when no friendly march path exists.
             const objectiveApproachOsids = getSectorOffensiveApproachOsids(
                 state,
                 activeOp15,
@@ -257,8 +230,36 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 );
                 if (approachStep) {
                     result.movement_orders[brigade.id] = approachStep;
+                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                    return true;
                 }
             }
+
+            // ── Attack through: last resort when march path blocked ──
+            // No friendly path to objective — must fight through enemy
+            // territory to open a route. Only attack intermediates held
+            // by the SAME faction as the objective.
+            const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
+            const intermediateTargets = objectiveController
+                ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
+                : targets;
+            if (intermediateTargets.length > 0) {
+                const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
+                const bestIntermediate = intermediateTargets.find((t) => {
+                    const alreadyAt = chosenTargets.get(t.osid) ?? 0;
+                    if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;
+                    return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, probeThreshold);
+                });
+                if (bestIntermediate) {
+                    const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
+                    result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
+                    result.attack_orders[brigade.id] = bestIntermediate.osid;
+                    result.attack_scores[brigade.id] = 800;
+                    chosenTargets.set(bestIntermediate.osid, (chosenTargets.get(bestIntermediate.osid) ?? 0) + 1);
+                    return true;
+                }
+            }
+
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             return true;
         }
