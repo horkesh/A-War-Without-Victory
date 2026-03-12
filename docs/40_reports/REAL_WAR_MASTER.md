@@ -361,6 +361,29 @@ The remaining 22:1 outliers are concentrated at Lukavica (Novo Sarajevo) — the
 
 ---
 
+### 21. No reconnaissance or probe operations — corps attack blind (n587→n617 FIXED)
+
+**What we found:** All 220 orders in the run are full attack operations. No probing attacks, no reconnaissance-in-force, no intelligence-gathering operations. Corps launch sector offensives into unknown defensive strength.
+
+**Historical context:** Intelligence gathering was critical in the Bosnian War. Before any major operation, both VRS and ARBiH conducted:
+- **Reconnaissance patrols**: Small-unit probes to test defensive positions, identify strong points, and map minefields.
+- **Reconnaissance in force**: Company-strength probes designed to draw fire and reveal defensive dispositions. Operation Corridor was preceded by extensive recon along the Posavina corridor.
+- **Artillery probing**: "Registering" fires to test positions without committing infantry.
+- **Intelligence preparation**: Corps intelligence officers compiled order-of-battle estimates. The VRS inherited JNA intelligence infrastructure; ARBiH built theirs through painful experience.
+- **Feints and diversions**: Corridor 92 included diversionary attacks at Gradačac and Brčko to fix ARBiH reserves.
+
+No commander — not Mladić, not Halilović, not Petković — would commit a multi-brigade operation without reconnaissance. Attacking blind into unknown defenses is how you get massacred (and may explain the 50:1 catastrophic ratios — forces walking into positions they didn't know existed).
+
+**Design impact:** The sector intel system (`sector_intel.ts`) exists and tracks per-sector confidence, but the bot AI doesn't use it to decide whether to probe before committing. Corps should: (1) probe sectors with low intel confidence before full attack, (2) use probe results to decide whether to commit, (3) abort if probes reveal overwhelming defense.
+
+**Fix (n617):** Intel-gated operation launch. `shouldLaunchProbeInstead()` in `bot_corps_directives.ts` checks sector intel confidence against per-faction thresholds (RS 0.25, RBiH 0.40, HRHB 0.30) before launching operations. Below threshold: probe operation (max 2 brigades, 1-turn planning, 'repulsed' min outcome). RS blitz phase (w0-12) exempt. `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT=2` prevents infinite loops. Probes generate recon-by-force intel (confidence→1.0 after engagement), naturally clearing the gate for subsequent full attacks.
+
+**After fix (n617):** RBiH orders increased 60% (20→32) — probes generating more activity. RS w40 improved 0.505→0.517. 6/6 benchmarks, 86.3% area-weighted. No calibration regression.
+
+**Lesson:** The intel system existed but wasn't wired into the launch decision. Adding a single gate function at the operation launch point (10 LOC) with proper faction differentiation and exemptions closed the realism gap without disrupting calibration.
+
+---
+
 ### ~~19. Static 2-ops pattern~~ — FALSE ALARM (n587)
 
 **What we thought:** Exactly 2 active operations every week for 40 weeks.
@@ -383,23 +406,6 @@ The remaining 22:1 outliers are concentrated at Lukavica (Novo Sarajevo) — the
 
 ---
 
-### 21. No reconnaissance or probe operations — corps attack blind (n587)
-
-**What we found:** All 220 orders in the run are full attack operations. No probing attacks, no reconnaissance-in-force, no intelligence-gathering operations. Corps launch sector offensives into unknown defensive strength.
-
-**Historical context:** Intelligence gathering was critical in the Bosnian War. Before any major operation, both VRS and ARBiH conducted:
-- **Reconnaissance patrols**: Small-unit probes to test defensive positions, identify strong points, and map minefields.
-- **Reconnaissance in force**: Company-strength probes designed to draw fire and reveal defensive dispositions. Operation Corridor was preceded by extensive recon along the Posavina corridor.
-- **Artillery probing**: "Registering" fires to test positions without committing infantry.
-- **Intelligence preparation**: Corps intelligence officers compiled order-of-battle estimates. The VRS inherited JNA intelligence infrastructure; ARBiH built theirs through painful experience.
-- **Feints and diversions**: Corridor 92 included diversionary attacks at Gradačac and Brčko to fix ARBiH reserves.
-
-No commander — not Mladić, not Halilović, not Petković — would commit a multi-brigade operation without reconnaissance. Attacking blind into unknown defenses is how you get massacred (and may explain the 50:1 catastrophic ratios — forces walking into positions they didn't know existed).
-
-**Design impact:** The sector intel system (`sector_intel.ts`) exists and tracks per-sector confidence, but the bot AI doesn't use it to decide whether to probe before committing. Corps should: (1) probe sectors with low intel confidence before full attack, (2) use probe results to decide whether to commit, (3) abort if probes reveal overwhelming defense.
-
-**Status:** P1 — separate from the operations lifecycle issue (#19). This is a new mechanic: probe operations as a distinct operation type that feeds the sector intel system and gates full offensives.
-
 ---
 
 ## Priority Ranking
@@ -414,7 +420,7 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | ~~**P0**~~ | ~~#13 Sectors span enemy territory~~ | ~~Triple-junction fix~~ | **FIXED n532** |
 | **P1** | #17 Morale-0 zombie brigades | 4 brigades at morale 0-5 still active — dissolution criteria gap | **NEW n587** |
 | **P1** | #18 50:1 catastrophic casualty ratios | Defender near-invulnerable in catastrophic outcomes | **NEW n587** |
-| **P1** | #21 No probe/recon operations | Corps attack blind — no intelligence gathering before committing | **NEW n587** — design needed |
+| ~~**P1**~~ | ~~#21 No probe/recon operations~~ | ~~Corps attack blind~~ | **FIXED n617** |
 | **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
 | **P1** | #7 HVO passivity (10 attacks total) | Graz Accords blocks most HRHB→RS targets; need wider exceptions | Active |
 | **P1** | #5/#10 Morale system | No victory boost + no zero-morale consequence | Active |
