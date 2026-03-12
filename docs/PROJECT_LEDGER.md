@@ -1,11 +1,93 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-10
+**Last Updated:** 2026-03-12
 **Status:** Post-MVP — War calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-12] Architecture & QA/Engineering Cleanup — Phases 1–4 Complete
+
+**Plan doc:** `docs/plans/2026-03-12-architecture-qa-engineering-cleanup.md`
+
+**Executed (4 phases, all non-calibration):**
+1. **Partition validation hardening** — `validateGameStateShape()` now enforces `military`, `political`, `displacement` partition roots exist as objects. Tests added.
+2. **Phase I/II terminology cleanup** — 3 renames: `PhaseIIFrontStability` → `FrontStability`, `PhaseIIBattleResolutionLike` → `BattleResolutionLike`, `phase_ii_adjacency.ts` → `war_adjacency.ts` (4 import sites updated).
+3. **War-phase step-order test** — `tests/war_phase_step_order.test.ts`: 6 ordering invariants, duplicate check, step count stability (81 steps).
+4. **localeCompare → strictCompare** in `determinism_guard.ts` line 73 — determinism enforcer was using locale-dependent sort.
+
+**Phase 5 (CI workflow) deferred** — needs GitHub Actions confirmation from user.
+
+**Post-execution /simplify review** found 4 additional fixes applied:
+- `forceRetreatWithPenalties`: 8 positional params → options object pattern (5 call sites cleaned)
+- `buildFriendlyComponents()`: computed twice per turn → computed once, passed as param
+- `Array.shift()` O(n²) in sector assignment loop → index-based O(n)
+- `ensureSortedKeys()`: default `.sort()` → explicit `(a, b) => a < b ? -1 : a > b ? 1 : 0`
+
+**Canon propagation:** 6 docs updated (`AI_STRATEGY_SPECIFICATION.md`, `Systems_Manual_v0_6_0.md`, `AOR_ZOC_LEGACY_AUDIT.md`, etc.)
+
+**All 489 vitest tests pass. Typecheck clean.**
+
+---
+
+## [2026-03-12] Operation Jajce + Home-Municipality Sector Assignment
+
+**Two changes implemented:**
+1. **Operation Jajce** added to `pre_planned_operations.ts` — VRS 1KK, 3 brigades, 2 axes (Vrbas West + South), 5 objectives. Queued after Corridor: `['Operation Corridor', 'Operation Jajce', 'Operation Bosanski Novi']`. Tested n592: captures 3/5 objectives (divicani_2, barevo_2, jajce_3). Regression 86.3%→81.7% expected to resolve when ops agent's changes land.
+2. **Home-municipality affinity** in `corps_front_sectors.ts` Phase 2 brigade assignment — pooled brigades now prefer sectors covering their home municipality before falling back to pure need-based distribution. Donji Vakuf brigade defends Donji Vakuf, not Jajce.
+
+**Also fixed:** `op:travnik:paklarevo` init control HRHB→RBiH in `operational_political_control.json` (master data already said RBiH).
+
+**Napkin corrected:** False claim that Jajce was in Graz Accords exception list removed from napkin and MEMORY.md.
+
+---
+
+## [2026-03-11] Operation Preparation System — Design Complete, Execution Plan Assigned
+
+**Design doc:** `docs/plans/2026-03-11-operation-preparation-system.md` (10 sections, Paradox team reviewed).
+
+**What it does:** Adds a preparation phase between "corps launches operation" and "brigades attack." Commander assesses intel, orders probes, stages forces, checks supply, makes go/no-go recommendation. Player selects commander (new), receives briefings (new), makes go/no-go decisions. Commander personality (comp×agg) drives preparation tempo — aggressive commanders attack fast, cautious ones demand intel.
+
+**Key additions:** Enclave lock on officers (Orić=Srebrenica, Dudaković=Bihać, etc.), `available_from_turn` fix (physical presence ≠ promotion eligibility), commander selection UI, operation briefing modal, probe-as-sub-action within preparation.
+
+**Execution plan (4 phases, sequential critical path):**
+- Phase 1: Foundation — Scenario Author (officer data fixes) ∥ Systems Programmer (schema) → Gameplay Programmer (core mechanic)
+- Phase 2: Probe mechanic — Gameplay Programmer
+- Phase 3: Player UI — UI/UX Developer (commander selection, briefings, op cards) ∥ Graphics Programmer (map dashed arrows)
+- Phase 4: Faction intel params + calibration — Scenario Author + War-or-Game
+
+**Single priority:** Phase 1. Data fixes start immediately.
+
+---
+
+## [2026-03-11] Catastrophic Casualty Ratio Fix (n589→n590, sector defense base bug)
+
+**Two compounding bugs fixed:**
+1. `OUTCOME_DEFENDER_MOD['catastrophic']` raised 0.3→0.7 (n589) — defenders in catastrophic outcomes now take proportional casualties
+2. `personnelDefender` in `attack_resolution_osid.ts` used single primary defender's personnel (~500) instead of total sector brigade personnel (2500+) when sector defense active (n590) — root cause of 44:1 ratios
+
+**Results (n590):** 6/6 benchmarks PASS, 86.3% area (+0.5pp), RS delta -23 (improved), 221 orders, att:def ratio 0.88:1 (was 2.8:1 at worst), zero 50:1 battles. Matching fix applied to `combat_predictor.ts`.
+
+---
+
+## [2026-03-11] Calibration Sweep: Three-Phase RS Doctrine (n575→n579, 6/6 benchmarks)
+
+**Seven calibration changes** moved from 4/6 benchmarks to **6/6 benchmarks passing** with historically plausible war dynamics:
+
+1. **Three-phase RS doctrine**: w0-12 blitz (0.35/0.15), w12-26 sustained (0.25/0.08), w26+ consolidation (0.20/0.05). RS_EARLY_WAR_END_WEEK extended 20→26.
+2. **RBiH restrained**: w15-40 share=0.12, aggression=-0.05. Prevents premature counterattacks.
+3. **Combat ineffective gate**: personnel<400 blocks attack posture in `bot_brigade_eval_attack.ts`.
+4. **Mobilization surge reduced** ~20-30% across all factions in `ongoing_mobilization.ts`.
+5. **Dissolution thresholds raised**: personnel 300→400, cohesion 15→20, morale 10→15.
+6. **Sector reserve overhaul**: max 1 per sector, must be 1-hop behind frontline.
+7. **Null-OSID auto-claim** in operations + Nevesinje painted RS.
+
+**Key finding**: Late-war RS doctrine has zero calibration effect — combat effectiveness (entrenchment, reinforced defenders) is the bottleneck, not doctrine limits. Early-war blitz intensity is the primary calibration lever.
+
+**Results**: 85.3% area match, RS delta -24, 210 orders (RS 158, RBiH 20, HRHB 32), 41.1k casualties. Drina shortfall (76 vs 95) mostly enclave defense (Srebrenica, ~13 OSIDs). Report: `docs/40_reports/20260311_CALIBRATION_SWEEP_n575_n579.md`.
+
+---
 
 ## [2026-03-10] Sector Contiguity Fix (Point-Contact Bridging) + Dev/Live Map Split (n554)
 
@@ -1268,25 +1350,31 @@ P0: Fix corps operation relaunch — investigate `generateCorpsDirectives()` and
 ## Current Phase
 
 **Phase:** Post-MVP — Active Development
-**Status:** Phase II + supply system live, GUI Phase 5 complete, AoR/ZoC fully removed
-**Focus:** Calibration n466 = 92.0% area-weighted (ATH). GUI Phase 6 scope TBD.
+**Status:** War phase live, supply system live, GUI Phase 5 complete, AoR/ZoC removed, Phase I/II terminology purged
+**Focus:** Calibration n601 = 86.5% area-weighted, 6/6 benchmarks PASS. Operation Preparation System design complete.
 
 **Completed milestones:**
 - Phase 6: MVP declared 2026-02-08; A1 base map stable and frozen
 - Phase 0 (tile pipeline): PMTiles restored 2026-03-02 — hillshade + OSM vector tiles live, 21 style layers, place labels
-- Phase II: Front-based combat, OSID political control, bot AI (Army→Corps→Brigade), corps front sectors
+- War phase: Front-based combat, OSID political control, bot AI (Army→Corps→Brigade), corps front sectors
 - Phase M: Year-one mechanics — morale drift, enclave deprivation, displacement routing, per-OSID census displacement depth
 - Phase C: GUI tooltips, keyboard shortcuts, attack modal, order queue
-- Peace/War lifecycle migration (replaced phase_i/phase_ii)
+- Peace/War lifecycle migration (replaced phase_i/phase_ii, 2026-03-07)
 - Supply reserves (Phases A–E): general + heavy reserves, siege drain, enclave hardening, patron aid, JNA inheritance, maintenance drain
 - OOB rework: 247 brigades, brigade history, decorations, elite loan, VRS equipment decay, lifecycle events
 - War timeline externalization: `src/state/war_timeline.ts` + `data/scenarios/timelines/apr1992.json`
 - GUI Phases 3–5: sector viz, desktop integration, battle markers, fog/layer toggles, corps op IPC, War Summary modal
 - AoR/ZoC legacy cleanup R1–R5 (2026-03-04): -2,883 lines, all dead code removed
+- Architecture & QA cleanup Phases 1–4 (2026-03-12): partition validation, terminology rename, step-order test, determinism guard fix
+- Triple-junction sector connectivity (n532, 2026-03-10): replaced OSID adjacency walk with front-line-following triple junctions
+- Connected component reachability (n598, 2026-03-11): BFS prevents cross-pocket brigade assignment
+- Enclave brigade retention (n601, 2026-03-12): march guard + retreat filter keep enclave brigades in pocket
+- Enclave defense overhaul (n527): garrison power, urban tank penalty, resilience scaling, Sarajevo holds
 
 **Active workstreams:**
-- Calibration: n466 = 92.0% area-weighted (670/744 count, ATH). Vienna Declaration truces live. 20 overrides + 16 RS avoided_osids.
-- Next: GUI Phase 6 scope decision (see Next Steps in AOR_ZOC_LEGACY_CLEANUP_R1_R5 report)
+- Calibration: n601 = 86.5% area-weighted (6/6 benchmarks). 221 orders (RS 161, RBiH 38, HRHB 22). Att:def ratio 0.88:1.
+- Operation Preparation System: design complete (`docs/plans/2026-03-11-operation-preparation-system.md`), implementation pending
+- CI workflow (GitHub Actions): deferred pending confirmation of repo hosting
 
 **Completed workstreams:**
 - Displacement system complete: n319 = 668k displaced (per-OSID census depth). See 20260301_DISPLACEMENT_DEPTH_CALIBRATION.md
@@ -1373,45 +1461,43 @@ P0: Fix corps operation relaunch — investigate `generateCorpsDirectives()` and
 
 ## Current State
 
-**Calibration:** n392 (40w) = 88.6% OSID match (667/753 → 744 after degenerate merge). RS=420 (painted 416), RBiH=246 (painted 248), HRHB=87 (painted 89). ATH. Area-weighted territory: RS 65.1%, RBiH 23.2%, HRHB 11.7%.
-**Displacement:** n319 = 668k total displaced (RBiH 458k, HRHB 150k, RS 60k). Per-OSID census depth complete. Hash `42ad78a39746d166`.
-**Sectors:** 61 sectors (Phase 1 complete). 187/205 brigades assigned (91.2%), max 25 edges/sector, 94 reserves populated.
+**Calibration:** n601 (40w) = 86.5% area-weighted. 6/6 benchmarks PASS. RS delta -23. 221 orders (RS 161, RBiH 38, HRHB 22). Att cas 35.2k, def cas 40.1k. Att:def ratio 0.88:1. ATH for area: n304 = 93.8%.
+**Displacement:** n319 = 668k total displaced (RBiH 458k, HRHB 150k, RS 60k). Per-OSID census depth complete.
+**Sectors:** 77 sectors (triple-junction connectivity). Connected-component reachability enforced. Enclave brigades pocket-locked.
 
 **Key files:**
-- Simulation: `src/sim/turn_pipeline.ts`, `src/sim/phase_ii/attack_resolution_osid.ts`, `src/sim/phase_ii/bot_corps_ai.ts`
+- Simulation: `src/sim/turn_pipeline.ts`, `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/bot_strategy.ts`
 - State: `src/state/game_state.ts`, `src/state/displacement.ts`, `src/state/displacement_takeover.ts`
 - GUI: `src/ui/map/` (React+MapLibre), `src/ui/map/map/MapContainer.tsx`
 - Scenarios: `data/scenarios/apr1992_definitive_40w.json`
 - OOB: `data/source/oob_brigades.json`
+- Corps sectors: `src/sim/combat/corps_front_sectors.ts`
 
 **Known gaps:**
-- Drina region 75.0% — RS can't sweep 12 municipalities with small Drina Corps
-- Bugojno: 8 RS overruns (should be HRHB)
-- VRS troop count 120k vs 100k target
+- RS w20 benchmark razor-thin (0.505 vs 0.503 lower bound)
+- HRHB passivity — insufficient offensive activity
+- Casualties still lower than historical targets
+- Density equalization across sectors needs tuning
 
 ---
 
 ## Next Tasks
 
-1. Continue combat calibration (recover from dig_in regression, target ATH n466=92.0%)
-2. Winter slowdown mechanic
-3. Probe posture (sector intel constants already defined)
-<!-- NOTE: minority flight confirmed running (493k displaced in 52w run, 2026-03-05).
-     GUI Phase 4+5 complete. takeover displacement = 0 — may be a gap. -->
+1. Operation Preparation System implementation (Phase 1: foundation — officer data + schema + core mechanic)
+2. Continue calibration — HRHB passivity, RS w20 margin, casualty targets
+3. CI workflow (GitHub Actions) — fast gate: typecheck + vitest + map build (pending repo hosting confirmation)
 
 ---
 
 ## Backlog
 
-1. M5 breakthrough retreat mechanic
-2. Enclave morale tuning (70→55 for Drina enclaves)
-3. Winter slowdown mechanic (intentional, not accidental dead weeks)
-5. War termination specification implementation
-6. Supply specification completion
-7. Scenario: full 52w historical (Apr 1992 → Oct 1993) acceptance run
-8. Drina Corps sweep capability (small corps, large AoR)
-9. AoR/SID legacy cleanup (address on encounter)
-10. Storybook component library for map UI
+1. Winter slowdown mechanic (intentional, not accidental dead weeks)
+2. War termination specification implementation
+3. Supply specification completion
+4. Scenario: full 52w historical (Apr 1992 → Oct 1993) acceptance run
+5. Density equalization across sectors
+6. Storybook component library for map UI
+7. Probe posture (sector intel constants already defined)
 
 ---
 
@@ -1422,7 +1508,7 @@ P0: Fix corps operation relaunch — investigate `generateCorpsDirectives()` and
 - `npm run sim:scenario:run:default` — 52w historical scenario
 - `npm run dev:map` — React+MapLibre GUI (port 3001)
 - `npm run desktop` — Electron app
-- `npm run test:vitest` — Vitest suite (193 tests)
+- `npm run test:vitest` — Vitest suite (489 tests)
 - `npm run typecheck` — TypeScript check
 - `npm run canon:check` — Determinism scan
 - `node tools/compare_painted_vs_sim.cjs <run_dir>` — Calibration comparison
@@ -12432,3 +12518,116 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 **Files:** `src/sim/combat/brigade_dissolution.ts`, `src/sim/combat/bot_strategy.ts`, `data/scenarios/timelines/apr1992.json`
 **Validation:** `npx tsc --noEmit` clean. Tests pass.
 **REAL_WAR_MASTER.md:** Updated issues #7 (HVO passivity), #12 (suicide attacks/dissolution), H6 (ARBiH passivity), priority table.
+
+---
+
+## 2026-03-10: Cross-Corps Sector Assignment Removed
+
+**Author:** Codex
+**Scope:** Corps-front sector brigade ownership, regression coverage, 40-week verification.
+**Context:** Latest run inspection showed `2nd Corps – Kalinovik, Trnovo` claiming a brigade owned by another corps because `classifyBrigadesByTerritory()` still allowed cross-corps fallback assignment.
+
+**Changes:**
+
+1. **Removed cross-corps brigade fallback** (`src/sim/combat/corps_front_sectors.ts`): brigades are no longer assigned to another corps sector just because they sit on that front OSID or share that sector's territory. The last-resort nearest-front BFS now only resolves to the brigade's own corps sector.
+
+2. **Added maintained regression coverage** (`tests/corps_front_sector_corps_ownership.test.ts`, `vitest.config.ts`): new Vitest contract proves that a brigade from `corps_beta` is not claimable by `corps_alpha`'s front sector even when physically located on `corps_alpha` frontage.
+
+**Determinism impact:** Deterministic behavior preserved. The change narrows brigade-to-sector eligibility without adding randomness, timestamps, or unstable ordering.
+
+**Validation:**
+- `npm.cmd run typecheck`
+- `npm.cmd run test:vitest`
+- `npm.cmd run desktop:map:build`
+- `npm.cmd run sim:scenario:run:40w`
+
+**Artifacts:**
+- 40w run: `runs/apr1992_definitive_40w__819a5354397182c1__w40_n567`
+- Latest save: `data/derived/latest_run_final_save.json`
+- Note: the run completed cleanly but the branch-level combat-causality report remains invalid (`invalid_operation_count = 88`), so this fix should be treated as a sector-ownership correction, not a full calibration recovery.
+
+---
+
+## 2026-03-11: Displacement Ethnic Tracking — Two Silent Bugs Fixed
+
+**Author:** Codex
+**Scope:** GUI ethnic composition display, displacement event log consumption, GameStateAdapter.
+**Context:** Settlement panel showed "breakdown by nation not recorded" for all settlements, current ethnic structure frozen at pre-war percentages (e.g. Kamičani in RS-controlled Prijedor still showing 90% Bosniak after ethnic cleansing).
+
+**Root causes:**
+
+1. **Event log path error** (`GameStateAdapter.ts` line ~1149): Adapter read `(state as any).displacement_event_log` (top-level, doesn't exist) instead of `(state as any).displacement?.displacement_event_log` (correct nested path). The displacement event log was always `undefined` in the UI — `departedByOsid`, `departedByMun`, and `displacementByOsid` were permanently empty.
+
+2. **Ghost residents in ethnic computation** (`GameStateAdapter.ts` line ~1170): `departedByOsid` only accumulated the `displaced` field from events, ignoring `killed` and `fled_abroad`. People killed or who fled abroad during displacement were still counted as present in the settlement's ethnic structure. Example: Kamičani had 688 killed/fled Bosniaks counted as living residents, producing 48% Bosniak / 51% Serb instead of the correct ~0% / ~100%.
+
+**Changes:**
+
+1. Fixed event log path: `(state as any).displacement_event_log` → `(state as any).displacement?.displacement_event_log`
+2. Changed `departedByOsid`/`departedByMun` accumulation: `displaced` → `displaced + killed + fledAbroad` (variable `totalRemoved`)
+
+**Impact:**
+- "Fled from this settlement" now shows per-nation breakdown (e.g. "Bosniaks 7,398, Croats 11")
+- Current ethnic structure reflects actual displacement (Kamičani: 0% Bosniak, 100% Serb)
+- Ethnic map mode shows wartime demographics, not frozen pre-war census
+- `buildEthnicGeoJSON` and `getCurrentEthnicForOsid` now receive correct departure data
+
+**Determinism impact:** None — changes are UI-only (GameStateAdapter). Simulation engine unaffected.
+
+**Validation:** `npx tsc --noEmit` clean.
+
+**Files:** `src/ui/map/data/GameStateAdapter.ts`
+**Docs:** GUI_MASTER.md (§Debugging #2, changelog), PROJECT_LEDGER_KNOWLEDGE.md, napkin.md
+
+---
+
+## 2026-03-11: Connected Component Reachability Fix (n597→n598)
+
+**Author:** Codex
+**Scope:** Corps front sectors — brigade-to-sector assignment reachability.
+**Context:** Brigades were assigned to sectors they could never physically reach. 5th Corps brigades in Bihać pocket assigned to Kljuc/Sanski Most sectors across RS territory. HVO Tomislavgrad brigades assigned to Jajce pockets. 28 disconnected assignments total in n596.
+
+**Root cause:** Brigade-to-sector assignment used no physical reachability check. Three code paths (`classifyBrigadesByTerritory` Phase 2, `ensureMinimumSectorCoverage` Steps 2-3, sector prune) all assigned brigades without verifying the brigade could reach the sector through friendly territory.
+
+**Fix:** Connected component BFS over OSID adjacency graph (`operational_contact_graph.json`, 744 nodes, 3243 edges):
+1. `buildFriendlyComponents()` — BFS partitions all friendly OSIDs into numbered connected components.
+2. `getSectorComponent()` — returns the component ID for a sector.
+3. All three assignment paths now filter by `brigComp === sectorComp`.
+4. First fix (n596) only patched Phase 2 — still had 12 bugs. Second fix patched all three paths.
+
+**Calibration (n598):** 6/6 benchmarks PASS. 86.6% area-weighted match. RS delta +6. 172 orders (RS 135, RBiH 21, HRHB 16). 1 remaining disconnected assignment (edge case: `arbih_712th_mountain` at fallback sector).
+
+**Key lessons:**
+- `territory_osids.length === 0` was a bad proxy for "unreachable" — pockets HAVE territory, they're just disconnected from the main blob.
+- Multiple code paths performing the same logical operation must ALL be fixed. One fix point is rarely enough.
+- Diagnostic tool: `tools/check_disconnected_sectors.cjs` — authoritative BFS reachability verification.
+
+**Files:** `src/sim/combat/corps_front_sectors.ts`, `tools/check_disconnected_sectors.cjs`
+**Docs:** life_lessons.md, corps_sectors.md (memory), napkin.md, PROJECT_LEDGER_KNOWLEDGE.md
+
+---
+
+## 2026-03-12: Enclave Brigade Retention Fix (n601)
+
+**Author:** Codex
+**Scope:** Enclave brigades (Goražde, Srebrenica, Žepa) — retreat and movement systems.
+**Context:** All 13 RBiH enclave brigades were displaced from their home pockets. 7 Goražde brigades sat idle in Visoko (100km away); 5 Srebrenica brigades scattered across 2nd Corps area. Goražde fell to 2/20 RBiH OSIDs (was 16/20 at start). First enclave annihilation ever observed.
+
+**Root cause (two layers):**
+
+1. **Bot AI sector march (primary)**: `evaluateSectorMarch()` in `bot_brigade_eval_front.ts` issued column march orders for enclave brigades to walk to sector front assignments outside their enclave. At turn 0, Goražde is connected to the main RBiH blob through a corridor (271/350 RBiH OSIDs in one component). The sector system assigns brigades to sectors in the main blob. Brigades march out. RS severs the corridor. Brigades stranded.
+
+2. **Emergency retreat fallback (secondary)**: `findEmergencyRetreatOsid()` in `attack_resolution_osid.ts` tried home_osid → fallback_osid → corps HQ, without searching nearby friendly OSIDs first. When an enclave's last OSID falls, brigades teleport to corps HQ instead of falling back within the pocket.
+
+**Fixes:**
+
+1. **Enclave march guard** (`bot_brigade_eval_front.ts`): Enclave-tagged brigades skip sector march if no sector front OSID is within the same enclave (`isOsidInSameEnclave`). They stay at their home position and defend locally.
+
+2. **BFS nearest-friendly retreat** (`attack_resolution_osid.ts`): New step 3 in `findEmergencyRetreatOsid`: BFS from current location (through any territory) within 8 hops to find nearest friendly OSID. Fires before corps HQ fallback. Keeps enclave brigades in their pocket even when all adjacent OSIDs are enemy.
+
+3. **Enclave retreat filter** (`attack_resolution_osid.ts`): `getFriendlyRetreatDestinations` filters retreat candidates for enclave-tagged brigades to same-enclave OSIDs only (`isOsidInSameEnclave`).
+
+4. **Helper** (`enclave_resilience.ts`): New `isOsidInSameEnclave(a, b)` — checks if two OSIDs belong to the same enclave definition.
+
+**Calibration (n601):** 6/6 benchmarks PASS. 86.5% area-weighted (was 86.6%). RS delta -23. Goražde: 14/20 RBiH (was 2/20). Srebrenica: 16/16 RBiH (was 8/16). All 13 enclave brigades in their home pockets.
+
+**Files:** `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/bot_brigade_eval_front.ts`, `src/sim/combat/enclave_resilience.ts`

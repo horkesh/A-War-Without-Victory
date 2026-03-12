@@ -1,6 +1,6 @@
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-03-06
+**Last Updated:** 2026-03-12
 **Purpose:** Knowledge accumulation by theme.
 
 **40_reports structure (2026-02-24):** Backlog is consolidated into themed docs (BACKLOG_*.md) in docs/40_reports/backlog/; originals archived to docs/_old/40_reports/backlog/. For historical fidelity, Phase 7, mobilization, etc., use the themed doc or the archived filename in _old. See docs/_old/README.md §40_reports/backlog and CONSOLIDATED_BACKLOG. Chronological record remains in `docs/PROJECT_LEDGER.md` (append-only).
@@ -116,6 +116,8 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
    Do instead: `advance-sector-offensives` runs before `bot-brigade-orders` in the turn pipeline. The first execution turn always has zero attacks and zero movement logged. Idle stall detection must use `>= 2` idle turns (not `>= 1`) before declaring an operation stalled. Apply this threshold in both `updateMultiAxisResults` and `updateLegacyFlatResults` paths. Failure limits: `MAX_TOTAL_FAILURES=5`, `MAX_CONSECUTIVE_FAILURES_ON_CURRENT=3`.
 15. **[2026-03-09] Operation `min_attack_outcome` overrides probe threshold**
    Do instead: `PrePlannedOp` and `CorpsOperation` can specify `min_attack_outcome` to override `getSectorOffensiveProbeThreshold()`. Bot AI checks `activeOp.min_attack_outcome` first, then falls back to momentum-based thresholds. Use for operations that must attack even at unfavorable predicted outcomes (e.g., Op Teocak with `min_attack_outcome: 'repulsed'`).
+16. **[2026-03-10] Cross-corps sector assignment is forbidden**
+   Do instead: In `classifyBrigadesByTerritory()`, only assign a brigade to sectors owned by its resolved corps. Do not keep "physically on another corps front" or "territory match without corps restriction" fallbacks. The last-resort nearest-front BFS must also filter to same-corps sectors.
 
 | 2026-03-08 | Entrenchment reduces passive frontline attrition | Entrenched brigades suffer less sniping/shelling/bombardment — sqrt diminishing returns, floor 0.40 | Reduces total passive casualties ~25-60% for long-entrenched units; affects calibration | combat |
 | 2026-01-24 | Municipality outlines can be single polygons | Union must handle single and multi | No rejection of valid single-polygon munis | architecture |
@@ -878,3 +880,27 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 - **HRHB 0 attacks despite offensive stance**: Graz Accords blocks ALL valid HRHB→RS targets. Even with `offensive` doctrine w0-26, HRHB has zero targets that pass the Graz filter. Exception list (corridor municipalities) too narrow — needs Herzegovina ops (Op Jackal) and Mostar area added.
 - **Key lesson: Rate tuning cascades unpredictably.** Reducing frontline attrition (0.005→0.003) or increasing combat rates (0.08→0.10) produced NET NEGATIVE results — more surviving brigades change battle dynamics. Revert and try structural changes instead.
 - **Key lesson: Counting bugs in diagnostic scripts.** `b.outcome === 'decisive'` vs actual `'decisive_victory'` field made RS success appear as 5-10% when actual was 91%. Led to wasted tuning. Always verify field values with `Object.keys()` before writing extraction scripts.
+
+## 2026-03-11 - Displacement ethnic tracking: two silent adapter bugs
+
+- **Event log path error**: `GameStateAdapter.ts` read `state.displacement_event_log` (top-level, undefined) instead of `state.displacement.displacement_event_log`. Same pattern as the `state.military.*` path bug — wrong namespace silently returns undefined, entire downstream chain dead. **All** per-OSID and per-mun departure tracking was empty. "Fled from this settlement" showed "breakdown by nation not recorded" for every settlement. Current ethnic structure and ethnic map mode were frozen at pre-war census.
+- **Ghost residents**: `departedByOsid` accumulated only `displaced`, not `killed + fled_abroad`. Killed/fled people still counted as living residents in ethnic computation. Kamičani example: 688 killed/fled Bosniaks → 48% Bosniak shown vs correct 0%. Fix: accumulate `displaced + killed + fledAbroad` as `totalRemoved`.
+- **Key lesson: The adapter is a single chokepoint.** All settlement ethnic display, ethnic map mode, and "fled" breakdown flow through `departedByOsid` in GameStateAdapter. A single wrong path or missing accumulation field silently breaks everything downstream — no error, no warning, just stale data. When ethnic/displacement display looks wrong, check the adapter FIRST, not the displacement engine or UI components.
+- **Key lesson: Test with known-displaced settlements.** Use Kamičani (Prijedor), Kozarac, or Srebrenica as smoke tests — RS-controlled with near-100% Bosniak pre-war population. If ethnic structure doesn't show ~0% Bosniak after displacement, the pipeline is broken.
+
+## 2026-03-11 - Connected component reachability for brigade assignment (n597→n598)
+
+- **Physical reachability via BFS connected components**: Brigade-to-sector assignment must verify the brigade can reach the sector through contiguous friendly territory. BFS over `operational_contact_graph.json` (744 nodes, 3243 edges) partitions friendly OSIDs into components. Brigades only assign to sectors in their own component. Implemented as `buildFriendlyComponents()` + `getSectorComponent()` in `corps_front_sectors.ts`.
+- **Proxy checks fail for fragmented maps**: Checking `territory_osids.length === 0` does NOT detect disconnected pockets — Sarajevo, Bihać, Srebrenica all have territory, they're just disconnected from the main blob. The correct invariant is BFS connectivity, not data shape.
+- **Multiple code paths require multiple fix points**: Three paths in `corps_front_sectors.ts` assign brigades to sectors: (1) `classifyBrigadesByTerritory` Phase 2 pool distribution, (2) `ensureMinimumSectorCoverage` Steps 2-3 surplus transfers, (3) final prune. Fixing only Phase 2 (n596) left 12 disconnected assignments. All three needed the `brigComp === sectorComp` filter.
+- **Diagnostic verification**: `tools/check_disconnected_sectors.cjs` — loads operational_contact_graph.json, runs BFS reachability, reports both disconnected brigade assignments and disconnected sector pockets. Authoritative post-fix verification tool.
+- **Calibration result**: n598 = 86.6% area-weighted, 6/6 benchmarks, RS delta +6, 172 orders, 1 remaining edge case (arbih_712th_mountain fallback). Previous: n590 = 86.3%, n579 = 85.3%.
+
+## 2026-03-12 - Enclave brigade retention: march guard + retreat filter (n601)
+
+- **Enclave brigades must not march out of their pocket**: At turn 0, enclaves are connected to the main blob via corridors. The sector system assigns enclave brigades to sectors in the main blob. Column march moves them there. RS severs the corridor. Brigades stranded 100km away with full personnel, never to return. Fix: `evaluateSectorMarch` skips march if no sector front OSID is in the same enclave.
+- **Emergency retreat needs BFS nearest-friendly before corps HQ**: `findEmergencyRetreatOsid` jumped from fallback_osid to corps HQ (100km away) without checking nearby friendly OSIDs. New step 3: BFS within 8 hops from current location finds nearest friendly OSID. Keeps brigades in their pocket.
+- **1-hop retreat must filter to same-enclave**: `getFriendlyRetreatDestinations` filtered retreat candidates for enclave-tagged brigades to same-enclave OSIDs only. Without this, brigades drift out through temporary corridors one hop at a time.
+- **Helper: `isOsidInSameEnclave(a, b)`** in `enclave_resilience.ts` — checks ENCLAVE_DEFINITIONS prefix matching for both OSIDs.
+- **Impact**: Goražde 2/20 → 14/20 RBiH OSIDs. Srebrenica 8/16 → 16/16. All 13 enclave brigades in home pockets. 6/6 benchmarks pass. 86.5% area-weighted match.
+- **Key insight**: The bug was NOT in the retreat system — it was in the bot AI march orders. The brigades marched out voluntarily before the corridor closed. The retreat fixes are defense-in-depth for when OSIDs flip under the brigade.
