@@ -65,6 +65,7 @@ import {
     MAX_EDGES_PER_BRIGADE,
     SECTOR_RESERVE_RESPONSE_FRACTION,
     REACTIVE_DEFENSE_RATIO,
+    DEFENDER_CASUALTY_ENGAGEMENT_CAP,
 } from './combat_math.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
@@ -295,9 +296,13 @@ export function predictCombatOutcome(
 
     const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
     // Sector defense: use total sector personnel as casualty base (mirrors resolver fix n590)
-    const personnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
+    // n647 fix: cap engaged defender personnel at DEFENDER_CASUALTY_ENGAGEMENT_CAP × attacker
+    const rawPersonnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
         ? sectorDefBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
         : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
+    const personnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
+        ? Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP)
+        : rawPersonnelDefender;
     const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
     const [, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
     const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1);

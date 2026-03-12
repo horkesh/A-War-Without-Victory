@@ -138,6 +138,54 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        corps: 'vrs_drina',
+        faction: 'RS',
+        name: 'Operation Podrinje Sweep',
+        staging_osid: 'op:rogatica:stara_gora',
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                axis_id: 'rogatica_sokolac',
+                name: 'Rogatica-Sokolac',
+                brigades: [
+                    'rs_1st_guards_motorized',
+                    'rs_65th_protection_motorized_regiment',
+                    'rs_2nd_romanija_brigade',
+                    'rs_1st_podrinje',
+                ],
+                objectives: [
+                    'op:rogatica:rogatica_2',
+                    'op:rogatica:brcigovo',
+                    'op:rogatica:kovanj',
+                    'op:rogatica:kramer_selo_2',
+                    'op:sokolac:knezina_2',
+                    'op:sokolac:meljine_2',
+                    'op:hanpijesak:godjenje_2',
+                    'op:hanpijesak:nevacka_3',
+                ],
+                staging_osid: 'op:rogatica:stara_gora',
+            },
+            {
+                axis_id: 'srebrenica_ring',
+                name: 'Srebrenica Ring',
+                brigades: [
+                    'rs_1st_bratunac',
+                    'rs_1st_milici',
+                    'rs_1st_birac',
+                ],
+                objectives: [
+                    'op:bratunac:vranesevici',
+                    'op:bratunac:zapolje_2',
+                    'op:srebrenica:kalimanici',
+                    'op:srebrenica:obadi',
+                    'op:srebrenica:petrica',
+                    'op:srebrenica:brezovice_2',
+                ],
+                staging_osid: 'op:bratunac:slapasnica',
+            },
+        ],
+    },
+    {
         corps: 'vrs_herzegovina',
         faction: 'RS',
         name: 'Operation Visegrad',
@@ -594,6 +642,14 @@ export function injectPrePlannedOperations(state: GameState): void {
         const cmd = corpsCommand['vrs_herzegovina'];
         if (focaDef && cmd && !cmd.queued_operations) {
             cmd.queued_operations = [focaDef.name];
+        }
+    }
+
+    // Queue Drina Corps: Operation Drina → Podrinje Sweep
+    if (injectedCorps.has('vrs_drina')) {
+        const cmd = corpsCommand['vrs_drina'];
+        if (cmd && !cmd.queued_operations) {
+            cmd.queued_operations = ['Operation Podrinje Sweep'];
         }
     }
 

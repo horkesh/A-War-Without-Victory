@@ -106,6 +106,61 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ## Open / Under Investigation
 
+### 23. Sector-wide casualty cascade — 0.1:1 defender-heavy battles (n647)
+
+**What we found:** Five decisive victories where the DEFENDER takes 10-15× the attacker's casualties:
+
+| Week | Target | Att cas | Def cas | Ratio |
+|------|--------|---------|---------|-------|
+| w38 | Donja Kamenica | 109 | 1,671 | 0.07:1 |
+| w39 | Donja Kamenica | 91 | 1,252 | 0.07:1 |
+| w20 | Kramer Selo | 119 | 1,594 | 0.07:1 |
+| w3 | Hotonj | 124 | 1,363 | 0.09:1 |
+| w12 | Budozelje | 105 | 919 | 0.11:1 |
+
+A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ brigades are all taking proportional hits from a pinprick attack. A real sector commander would absorb a probing attack on one edge without 1,600 casualties across his entire front.
+
+**Root cause:** The n590 fix changed `personnelDefender` from primary-brigade-only to total-sector-personnel. This correctly fixed the 50:1 attacker-heavy outliers but overcorrected — now when a small force attacks one edge of a large sector, the entire sector hemorrhages. The 50% proportional casualty distribution to non-primary sector brigades scales with the total sector base, not the engagement intensity.
+
+**Historical context:** In the Bosnian War, a probe against one sector of the ARBiH Tuzla corps wouldn't cause 1,671 casualties across the entire corps front. Losses concentrate at the point of engagement. Adjacent units might take some harassing fire but not proportional casualties from a battle they're barely involved in.
+
+**Proposed fix:** Scale the proportional casualty distribution by engagement intensity. When a small force attacks a large sector, cap the total defender casualties at some multiple of attacker personnel (e.g., 3-5×). Or reduce the 50% proportional share for non-primary brigades when attacker force is small relative to sector size.
+
+**Status:** P1 — NEW (n647). The 50:1 attacker-heavy ratios are fixed, but 15:1 defender-heavy ratios are the new overcorrection.
+
+---
+
+### 24. RS 89.1% attack success rate — too high for 1992 (n647)
+
+**What we found:** RS wins 82 of 92 attacks (89.1%). Only 10 RS attacks fail — 7 at catastrophic, 3 repulsed/stalemate.
+
+**Historical context:** VRS was dominant in 1992 but not at 89% success. Historical success rates were 60-75%. VRS took multiple attempts to break through at Brčko, Goražde held against repeated attacks, the Posavina corridor required massed forces and weeks of fighting. 89% success rate means almost nothing fails — that's not war, that's a steamroller with cosmetic resistance.
+
+**Evidence:** 62.4% decisive victory rate (73/117 battles). Nearly two-thirds of all battles end in decisive victory. The messy middle (costly victory, stalemate) represents only 10.3% combined. Historical warfare produces far more inconclusive engagements.
+
+**Likely root cause:** The unified sector defense model distributes defense thinly across all edges. When RS concentrates 2-3 brigades against one edge, the local power ratio is overwhelming. The defense model needs either stronger minimum-per-edge defense or concentration bonuses for the defender.
+
+**Status:** P1 — monitoring. Related to issue #23 (sector defense model produces extreme outcomes in both directions).
+
+---
+
+### 25. Operation Podrinje Sweep: 23 weeks for 7 captures (n647)
+
+**What we found:** Operation Podrinje Sweep runs w12-w34 (23 weeks) and captures only 7 objectives. The Rogatica-Sokolac axis (4 brigades including 1st Guards Motorized) takes 7 captures over 20 execution turns. The Srebrenica Ring axis (3 brigades) takes **0 of 6 objectives** in the same period. The operation stalls for 5 turns (w20-w25) at 4 captures.
+
+**Historical context:** VRS cleared the Rogatica-Sokolac-Han Pijesak corridor in 4-5 weeks (May-June 1992). The entire Drina valley ethnic cleansing campaign was largely complete by end of June 1992 (8-10 weeks). A 23-week operation for a motorized corps with elite units is absurd — Mladić would have fired the commander after week 8.
+
+**Root causes:**
+1. **3-turn planning phase for a follow-on operation.** Drina Corps just completed Op Drina (w1-w11). The same corps, same terrain, same enemy. Follow-on planning should be 1 turn, not 3.
+2. **Srebrenica Ring axis non-functional.** 3 brigades, 0 captures. Either the axis can't reach objectives or the brigades are too weak to attack.
+3. **Post-sweep: Operacija Kamen (bot-generated, w35-w40), 1 brigade, 0 captures.** A single-brigade "operation" is not an operation.
+
+**Result:** Drina region ends RS=51, RBiH=58 (total 109). RS doesn't hold a majority. Historical VRS controlled ~80-85% of the Drina valley outside enclaves by January 1993.
+
+**Status:** P2 — operational tempo in Drina too slow. Planning duration for follow-on operations needs reduction. Srebrenica Ring axis needs investigation.
+
+---
+
 ### 14. HVO Central Bosnia — 13-edge ghost front, 7 brigades unassigned (n528)
 
 **What we found:** `sector:hvo_central_bosnia:0` has 13 front edges facing RS — zero brigades, zero defensive power. But 7 HVO central_bosnia brigades (10,385 personnel) exist in Kiseljak, Vitez, Busovača, Žepče — all unassigned. The brigade classification BFS can't reach from enclave pockets to the sector's front edges through friendly territory.
@@ -442,27 +497,32 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 
 ## Priority Ranking
 
-**Post-n587 state:** Corps AoR fix. 6/6 benchmarks, 85.8% area-weighted, 220 orders, 202 battles. Equipment missing from save. Morale-0 zombies persist. Catastrophic ratios extreme. Operation pattern static. HRHB still marginal.
+**Post-n647 state:** 88.8% area-weighted, RS w40 0.489 (below 0.503 floor), 117 battles, 92 RS. Drina improved +8.8pp with elite unit transfer + Operation Podrinje Sweep. Sector casualty cascade overcorrection identified. RS success rate 89.1% (too high).
 
 | Priority | Issue | Impact | Status |
 |----------|-------|--------|--------|
-| ~~**P0**~~ | ~~#16 Zero equipment~~ | ~~False alarm — field is `composition`, not `equipment`~~ | **FALSE ALARM** |
+| **P1** | #23 Sector casualty cascade (0.1:1) | n590 overcorrection — 1,671 def casualties from 109 att attack | **NEW n647** |
+| **P1** | #24 RS 89.1% success rate | Too high for 1992 (historical 60-75%). 62.4% decisive victories | **NEW n647** |
+| ~~**P0**~~ | ~~#16 Zero equipment~~ | ~~False alarm~~ | **FALSE ALARM** |
 | ~~**P0**~~ | ~~#2 Attack outcomes inverted~~ | ~~Root cause~~ | **FIXED n482** |
 | ~~**P0**~~ | ~~#11 Sarajevo falls~~ | ~~5 root causes~~ | **FIXED n527** |
 | ~~**P0**~~ | ~~#13 Sectors span enemy territory~~ | ~~Triple-junction fix~~ | **FIXED n532** |
-| **P1** | #17 Morale-0 zombie brigades | 4 brigades at morale 0-5 still active — dissolution criteria gap | **NEW n587** |
-| **P1** | #18 50:1 catastrophic casualty ratios | Defender near-invulnerable in catastrophic outcomes | **NEW n587** |
+| ~~**P1**~~ | ~~#17 Morale-0 zombie brigades~~ | ~~Dissolution criteria gap~~ | **FIXED n588** |
+| ~~**P1**~~ | ~~#18 50:1 catastrophic casualty ratios~~ | ~~Defender near-invulnerable~~ | **FIXED n590** (overcorrection: #23) |
 | ~~**P1**~~ | ~~#21 No probe/recon operations~~ | ~~Corps attack blind~~ | **FIXED n617** |
 | **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
-| **P3** | #7 HVO passivity (30 orders n618) | Mostly structural: under-strength Posavina (no HV), central Bosnia fragmentation, no joint ops | **MOSTLY STRUCTURAL** |
+| **P2** | #25 Podrinje Sweep 23 weeks | Operation tempo too slow; Srebrenica Ring axis 0/6 | **NEW n647** |
+| **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
 | ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
-| **P1** | Casualty volume (~58k vs 40-60k target) | Now in range — monitor | Monitoring |
+| **P1** | Casualty volume — monitor | Defender casualties may be inflated by #23 | Monitoring |
 | ~~**P1**~~ | ~~#12 Suicide attacks~~ | ~~Dissolution absolute floor bypass~~ | **Partially fixed n556** |
 | ~~**P1**~~ | ~~H6 ARBiH too passive~~ | ~~24→41 attacks~~ | **Partially fixed n560/n587** |
-| ~~**P2**~~ | ~~#19 Static 2-ops pattern~~ | ~~False alarm — `.ops` is config, not op count~~ | **FALSE ALARM** |
+| ~~**P2**~~ | ~~#19 Static 2-ops pattern~~ | ~~False alarm~~ | **FALSE ALARM** |
 | **P2** | #14 HVO ghost front (13 edges, 0 brigades) | 10k HVO unassigned — enclave BFS failure | Planned |
 | **P2** | #6/#8 Front coverage + stacking | Mitigated by reactive sector defense | Monitoring |
 | **P2** | H4 VRS armor not concentrated | Mech/moto staging exists; equipment IS present | Open |
+| **P2** | Brčko/Gradačac anchor persist | RS overperforms Posavina, underperforms Drina | Persistent |
+| **P2** | 0 dissolved formations at w40 | Dissolution criteria may be too protective | **NEW n647** |
 | **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | **NEW n587** |
 | **P3** | #3 Formation casualty_ledger | Design gap, data exists in state-level ledger | Open |
 

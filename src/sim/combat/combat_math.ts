@@ -92,7 +92,21 @@ export const SECTOR_RESERVE_RESPONSE_FRACTION = 0.45;
  * At 0.8: 3 attackers (3000 power with conc) vs 2400 reactive defense → ratio 1.25 (costly_victory)
  * At 1.0: 3 attackers vs 3000 reactive defense → ratio 1.0 (stalemate)
  */
-export const REACTIVE_DEFENSE_RATIO = 1.0;
+export const REACTIVE_DEFENSE_RATIO = 1.5;
+
+/**
+ * Defender casualty engagement cap: maximum ratio of defender-to-attacker personnel
+ * used as the casualty base. Prevents a small probe (500 men) against a large sector
+ * (5,000 men) from inflicting 1,600+ defender casualties via the sector-wide
+ * proportional distribution. The engaged defender force is capped at
+ * personnelAttacker × this value.
+ *
+ * At 3.0: a 500-man attack engages at most 1,500 defender personnel for casualty purposes.
+ * At 5.0: more permissive — 500-man attack engages up to 2,500.
+ * The full sector still contributes to DEFENSE POWER (outcome determination),
+ * but only the engaged fraction takes casualties.
+ */
+export const DEFENDER_CASUALTY_ENGAGEMENT_CAP = 1.5;
 export const MAX_RESILIENCE_STREAK = 4;
 export const RESILIENCE_PER_DEFENSE = 0.025;
 

@@ -82,6 +82,7 @@ import {
     MAX_EDGES_PER_BRIGADE,
     SECTOR_RESERVE_RESPONSE_FRACTION,
     REACTIVE_DEFENSE_RATIO,
+    DEFENDER_CASUALTY_ENGAGEMENT_CAP,
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import { findSectorForEnemyOsid, getCorpsHqOsid } from './corps_front_sectors.js';
@@ -735,9 +736,14 @@ export function resolveAttackOrdersOsid(
         // sector generates massive defense power (→ catastrophic outcome for attacker) but
         // bases defender casualties on one brigade's 500 personnel → absurd 44:1 ratios.
         // In reality, the entire sector front absorbs the attack — all brigades take losses.
-        const personnelDefender = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
+        // n647 fix: cap engaged defender personnel at DEFENDER_CASUALTY_ENGAGEMENT_CAP × attacker
+        // personnel to prevent small probes from causing 1,600+ casualties across the sector.
+        const rawPersonnelDefender = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
             ? sectorDefenseBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
             : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
+        const personnelDefender = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
+            ? Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP)
+            : rawPersonnelDefender;
         const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
         // Militia-only defense: attacker takes reduced but non-trivial casualties.
         // "Undefended" Bosniak villages had Patriotic League, police, armed residents.
