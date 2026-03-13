@@ -416,8 +416,8 @@ function executeFactionDirectives(
         if (evaluateHold(ctx)) continue;
         if (evaluateReorganize(ctx)) continue;
         if (evaluateDefensive(ctx)) continue;
-        if (evaluateOffensive(ctx)) continue;
         if (evaluateUncontestedOccupation(ctx)) continue;
+        if (evaluateOffensive(ctx)) continue;
         if (evaluateFrontCoverage(ctx)) continue;
         evaluateInteriorMovement(ctx);
     }

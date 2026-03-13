@@ -102,6 +102,7 @@ export function processLifecycleEvents(
                 formation.status = 'inactive';
                 formation.lifecycle_status = 'destroyed';
                 formation.personnel = 0;
+                formation.destruction_turn = turn;
                 fired++;
                 break;
             case 'merge':

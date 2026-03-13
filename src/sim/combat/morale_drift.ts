@@ -11,12 +11,7 @@ import type { SupplyStateByOsidReport } from '../../state/supply_state_derivatio
 import { getFactionAlignedPopulationShare } from '../../state/population_share.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { CRITICAL_MORALE_THRESHOLD } from './combat_math.js';
-
-/** Extract municipality ID from OSID (format: op:municipality:slug). */
-function munFromOsid(osid: string): string | undefined {
-    const parts = osid.split(':');
-    return parts.length >= 2 ? parts[1] : undefined;
-}
+import { munFromOsid } from './osid_adjacency.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants

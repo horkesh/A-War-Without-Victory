@@ -48,6 +48,10 @@ export const DISSOLUTION_ABSOLUTE_FLOOR = 150;
 /** Enclave brigades use a lower absolute floor — they are last-line defenders
  *  with nowhere to dissolve to. Historically survived at remnant strength (Goražde, Srebrenica). */
 export const ENCLAVE_DISSOLUTION_ABSOLUTE_FLOOR = 50;
+/** Personnel cap: brigades above this can't dissolve from morale+cohesion alone.
+ *  A 1400-man brigade with low morale is demoralized, not destroyed —
+ *  combat multipliers already penalize it at 30% effectiveness. */
+export const DISSOLUTION_PERSONNEL_CAP = 800;
 export const DISSOLUTION_PERSONNEL_TO_RESERVE_RATE = 0.5;
 export const DISSOLUTION_EQUIPMENT_TRANSFER_RATE = 0.7;
 
@@ -83,6 +87,11 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         const isEnclave = Array.isArray(f.tags) && f.tags.includes('enclave');
         const absFloor = isEnclave ? ENCLAVE_DISSOLUTION_ABSOLUTE_FLOOR : DISSOLUTION_ABSOLUTE_FLOOR;
         const requiredCriteria = isEnclave ? 3 : 2;
+
+        // Personnel cap: brigades above DISSOLUTION_PERSONNEL_CAP can't dissolve from
+        // morale+cohesion alone. A 1400-man brigade with low morale is demoralized, not
+        // destroyed — combat multipliers already penalize it at 30% effectiveness.
+        if (personnel >= DISSOLUTION_PERSONNEL_CAP) continue;
 
         // Dissolution criteria: always require at least requiredCriteria to be met.
         // The absolute floor counts as the "low personnel" criterion automatically.
@@ -146,6 +155,8 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         f.status = 'inactive';
         f.lifecycle_status = 'destroyed';
         f.personnel = 0;
+        // Record destruction turn for reconstitution delay
+        f.destruction_turn = state.meta?.turn ?? 0;
 
         report.dissolved_count++;
     }

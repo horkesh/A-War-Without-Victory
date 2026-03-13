@@ -32,7 +32,7 @@ import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_ana
 import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanceOrders } from './bot_corps_stance.js';
 import { evaluateOperationProgress, generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
 import { attemptCorridorBreach } from './bot_corps_corridor.js';
-import { generateCorpsDirectives } from './bot_corps_directives.js';
+import { generateCorpsDirectives, evaluateSectorStances } from './bot_corps_directives.js';
 import { getFactionCorps, getCorpsSubordinates } from './bot_corps_helpers.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -214,6 +214,9 @@ export function generateAllCorpsOrders(
         const adjacency = buildOsidAdjacency(effectiveOsidEdges);
         graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
     }
+    // 6b. Evaluate sector stances (Layer B: independent sector stances)
+    evaluateSectorStances(state, faction);
+
     generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap);
 
     // Final cleanup: prune any 0-edge ghost sectors (pocket containment artifacts)

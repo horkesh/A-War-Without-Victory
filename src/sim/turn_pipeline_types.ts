@@ -53,6 +53,7 @@ import type { MinorityDecayReport } from './early_war/minority_militia_decay.js'
 import type { PoolPopulationReport } from './early_war/pool_population.js';
 import type { WashingtonCheckReport } from './early_war/washington_agreement.js';
 import type { DissolutionReport } from './combat/brigade_dissolution.js';
+import type { ReconstitutionReport } from './combat/brigade_reconstitution.js';
 import type { OperationStormCheckReport } from './combat/operation_storm.js';
 import type { AttackResolutionOsidReport } from './combat/attack_resolution_osid.js';
 import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.js';
@@ -173,6 +174,7 @@ export interface TurnReport {
     ongoing_mobilization?: OngoingMobilizationReport;
     brigade_reinforcement?: ReinforceBrigadesReport;
     brigade_dissolution?: DissolutionReport;
+    brigade_reconstitution?: ReconstitutionReport;
     strategic_reserve_collection?: StrategicReserveCollectionReport;
     strategic_reserve_reinforcement?: StrategicReserveReinforcementReport;
     wia_trickleback?: WiaTricklebackReport;

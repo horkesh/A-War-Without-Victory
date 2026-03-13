@@ -9,7 +9,8 @@
  */
 
 import type { EdgeRecord } from '../../map/settlements.js';
-import type { FormationId, GameState } from '../../state/game_state.js';
+import type { FormationId, GameState, SectorStance } from '../../state/game_state.js';
+import { SECTOR_STANCE_ENTRENCHMENT_RATE } from './combat_math.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
@@ -35,6 +36,15 @@ export function applyBrigadeMovementOrders(
     const formations = state.military.formations ?? {};
     const adjacency = buildOsidAdjacency(edges);
     const movementOrders = state.military.brigade_movement_orders ?? {};
+
+    // Build brigade→sector_stance lookup for entrenchment rate modifier (Layer B)
+    const brigadeStance = new Map<FormationId, SectorStance>();
+    const sectorLookup = state.military.corps_front_sectors ?? {};
+    for (const sec of Object.values(sectorLookup)) {
+        const stance = sec.sector_stance ?? 'defend';
+        for (const bid of sec.assigned_brigade_ids) brigadeStance.set(bid, stance);
+        for (const bid of sec.reserve_brigade_ids) brigadeStance.set(bid, stance);
+    }
     const formationIds = Object.keys(formations).filter(id => {
         const f = formations[id];
         return f?.status === 'active' && (f as { location_osid?: string }).location_osid != null && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom');
@@ -72,7 +82,10 @@ export function applyBrigadeMovementOrders(
             report.moves_applied += 1;
         } else {
             const et = (f as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
-            (f as { entrenchment_turns?: number }).entrenchment_turns = Math.min(12, et + 1);
+            // Sector stance entrenchment rate modifier (Layer B)
+            const stanceRate = SECTOR_STANCE_ENTRENCHMENT_RATE[brigadeStance.get(formationId) ?? 'defend'];
+            const increment = stanceRate; // 0.0 for screening, 2.0 for fortify, 1.2 for defend
+            (f as { entrenchment_turns?: number }).entrenchment_turns = Math.min(12, et + increment);
             report.entrenchment_incremented += 1;
         }
     }

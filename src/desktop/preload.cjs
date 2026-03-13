@@ -50,6 +50,7 @@ contextBridge.exposeInMainWorld('awwv', {
   clearOrders: (brigadeId) => ipcRenderer.invoke('clear-orders', { brigadeId }),
   stageCorpsStanceOrder: (corpsId, stance) => ipcRenderer.invoke('stage-corps-stance-order', { corpsId, stance }),
   stageSectorStanceOrder: (sectorId, stance) => ipcRenderer.invoke('stage-sector-stance-order', { sectorId, stance }),
+  resetSectorStanceToBot: (sectorId) => ipcRenderer.invoke('reset-sector-stance-to-bot', { sectorId }),
   stageLogisticsPriority: (faction, sectorId, priority) => ipcRenderer.invoke('stage-logistics-priority', { faction, sectorId, priority }),
   stageCorpsOperationOrder: (payload) => ipcRenderer.invoke('stage-corps-operation-order', payload),
   stageOperationHalt: (payload) => ipcRenderer.invoke('stage-operation-halt', payload),

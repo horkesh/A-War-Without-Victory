@@ -7,8 +7,10 @@
 **Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`; Sectors → `docs/40_reports/SECTOR_MASTER.md`. Do instead: When doing calibration, GUI, warroom, sector, or realism work, read the relevant master first and update it during the session.
 
 ## Session Startup (do these EVERY session — BEFORE any work)
-1. **[2026-03-12] Check cron and schedule if missing — ALWAYS**
-   Do instead: Run `CronList` at session start. If no life-lessons cron exists, immediately `CronCreate` with cron `3 6 * * *` — life-lessons daily review (gather 24h git activity, detect violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`). Crons are session-only and auto-expire after 3 days. **Because of the 3-day expiry, you MUST check and re-schedule every session** — the cron from a previous session is always gone.
+1. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
+   Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
+   **(A) Daily Paradox Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Paradox team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
+   **(B) Life-lessons review** — cron `3 6 * * *`. Gather 24h git activity, detect life-lesson violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`.
 
 ## Execution & Validation
 1. **[2026-03-11] NEVER claim a fix works without running the scenario and verifying the output**
@@ -59,7 +61,8 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-12] Calibration: n636 = 86.3% area-weighted, RS w40 0.470 (BELOW FLOOR)**: March-first attack-through fix reduced RS conquest. RS w40 needs rebalancing back above 0.503. Likely lever: early-war blitz intensity or attack-share increase.
+1. **[2026-03-13] IN PROGRESS: Sector Defense Rework — Layers A+B DONE (n668), Layer C pending**: Layer A: Distance-weighted reactive defense. Layer B: Independent sector stances (5 stances, bot AI, combat integration). Remaining: (C) Player UI (defense heat map, enhanced AARs, stance controls). Plan: `docs/40_reports/20260313_DISTANCE_WEIGHTED_REACTIVE_DEFENSE_PLAN.md`.
+2. **[2026-03-13] Calibration: n668 = 89.0% area-weighted, 6/6 benchmarks PASS, RS w40 0.519**: Layers A+B complete. RS delta -22. Hash 78a9d9943486d996. 585 tests.
 2. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers. Root cause: brigade posture gate blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation.
 3. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.
 4. **[2026-03-12] REAL_WAR_MASTER #14: HVO Central Bosnia ghost front — DEFERRED**: 13 front edges, 0 brigades. 7 HVO brigades in disconnected enclaves. Intentionally deferred — HVO-RBiH war breaks out April 1993; these brigades activate then. Don't fix now.
@@ -93,8 +96,8 @@
     Do instead: Test fixtures flowing through `runTurn` or scenario runners must set `meta.phase` + referendum fields.
 
 ## Bot AI & Combat
-1. **[2026-03-12] Shared-OSID sector split replaces triple-junction in splitNonContiguousSectors (n620)**
-   Do instead: `splitNonContiguousSectors` uses shared-OSID connectivity — two front edges adjacent iff they share an OSID endpoint. `buildEdgeAdjacency` still uses triple-junction (Case A/B) for sub-segment construction. Prevents sectors spanning disconnected fronts (Srebrenica↔Cerska fix).
+1. **[2026-03-13] Triple-junction adjacency for BOTH grouping AND splitting (n664)**
+   Do instead: `splitNonContiguousSectors` now uses `buildEdgeAdjacency` with triple-junction (Cases A/B), same as sub-segment construction. Shared-OSID was too permissive — bridged edges facing different directions at triple junctions (Zavidovići↔Kakanj). Front-edge OSIDs can belong to multiple sectors (shared territory). Brigade at shared OSID → neediest same-corps sector. Pipeline grouping and splitting MUST use compatible adjacency — using a stricter splitter over-fragments (31 sectors gotcha).
 2. **[2026-03-11] RS three-phase doctrine — organic tempo decay (n579)**
    Do instead: w0-12 blitz (0.35/0.15), w12-26 sustained (0.25/0.08), w26+ consolidation (0.20/0.05). Late-war params have ZERO calibration effect. Early-war intensity is the primary lever.
 3. **[2026-03-10] Enclave defense overhaul — Sarajevo holds (n524→n527)**
@@ -111,8 +114,8 @@
    Do instead: In `classifyBrigadesByTerritory`, never assign a brigade to another corps sector. All fallback paths must preserve brigade corps ownership.
 9. **[2026-02-25] Aggression scoring: additive + multiplicative**
    Do instead: Flat additive (`aggression_modifier × 120`) PLUS multiplicative (`× (1 + aggression_modifier)`).
-10. **[2026-03-12] Attack-through is LAST RESORT — march-first (n636 gotcha)**
-    Do instead: During op execution, brigades march through friendly territory toward objective FIRST. Attack-through (fighting through enemy) only when no friendly path exists. Before this fix, brigades picked easiest adjacent target by power_ratio regardless of direction — code comment lied about "prefer closer to objective." `bot_brigade_eval_attack.ts` lines ~209-263.
+10. **[2026-03-13] Flat reserve pooling hides corps organizational structure**
+    Do instead: When a higher-level system (corps) makes positioning decisions, the lower-level system (combat) MUST respect those decisions. If combat treats all reserves as interchangeable (`sectorReserves = totalPower - physicalPower`), corps home-affinity assignment is wasted. Per-entity contribution with spatial weighting (distance + home bonus) is required for non-uniform defense.
 
 ## Officer Architecture
 1. **[2026-03-08] Named officers = corps and above only; brigades use abstracted officer_quality**

@@ -91,6 +91,7 @@ export interface FormationView {
     municipalityId?: string;
     hq_sid?: string;
     location_osid?: string;
+    home_osid?: string;
     aorSettlementIds?: string[];
     personnel?: number;
     posture?: string;
@@ -350,6 +351,10 @@ export interface CorpsFrontSectorView {
     combat_fatigue_avg?: number;
     /** Sector combat power rating — total personnel. */
     combat_personnel?: number;
+    /** Sector stance: independent of corps stance, within corps constraints. */
+    sector_stance?: 'fortify' | 'defend' | 'elastic' | 'active_defense' | 'screening';
+    /** Who set this stance: 'bot' | 'player'. */
+    stance_source?: 'bot' | 'player';
 }
 
 export interface OperationView {

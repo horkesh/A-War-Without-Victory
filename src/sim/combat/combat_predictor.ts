@@ -30,6 +30,7 @@ import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import {
     buildOsidAdjacency,
+    munFromOsid,
     type Osid
 } from './osid_adjacency.js';
 import {
@@ -63,13 +64,15 @@ import {
     getPowerRatioCasualtyMult,
     MIN_DEFENSE_FLOOR_FRACTION,
     MAX_EDGES_PER_BRIGADE,
-    SECTOR_RESERVE_RESPONSE_FRACTION,
     REACTIVE_DEFENSE_RATIO,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
+    bfsDistanceFriendly,
+    getReactiveDistanceWeight,
+    HOME_DEFENSE_REACTIVE_BONUS,
+    SECTOR_STANCE_REACTIVE_BONUS,
 } from './combat_math.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
-import { frontDensityModifier } from './local_front_defense.js';
 
 // Backward-compat re-export
 export type PredictedOutcome = CombatOutcome;
@@ -83,8 +86,6 @@ export type { CombatOutcome };
 const FOG_DIRECT_VISIBILITY = 0.85;
 /** After failing an attack (retreat), fog lifts — brigade learned enemy strength. */
 const FOG_AFTER_RETREAT_VISIBILITY = 0.95;
-/** Mirror of resolver constant: power reduction for sector-coverage defense. */
-const SECTOR_COVERAGE_PENALTY = 0.5;
 
 /** Predicted outcome → numeric score for bot target scoring. */
 export const OUTCOME_SCORE: Record<CombatOutcome, number> = {
@@ -207,9 +208,9 @@ export function predictCombatOutcome(
     const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
     const fogMult = learnedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
 
-    // ── Unified sector defense model (mirrors resolver) ──────────────
-    // Defense at any OSID in a sector = total sector power / edges × density.
-    // No distinction between "brigade at OSID" vs "sector coverage".
+    // ── Distance-weighted sector defense (mirrors resolver) ─────────
+    // Physical defenders at OSID fight at full power. Reserves contribute
+    // proportional to BFS distance + home-municipality bonus.
     if (isEnemyControlled) {
         const sector = findSectorForEnemyOsid(state, targetOsid, controller);
         const sectorBrigades = sector
@@ -219,23 +220,38 @@ export function predictCombatOutcome(
             : [];
         if (sectorBrigades.length > 0) {
             defenderHasBrigade = true;
-            // Reactive sector defense (mirrors resolver): reserves mobilize proportional to attack size
             const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-            const physicalDefenders = sectorBrigades.filter(
-                f => (f as { location_osid?: string }).location_osid === targetOsid
-            );
-            let physicalPower = 0;
-            for (const pd of physicalDefenders) {
-                physicalPower += computeDefenderPower(state, pd, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(pd));
-            }
             const avgBrigadePower = totalPower / sectorBrigades.length;
             const attackerCount = 1 + (additionalAttackers?.length ?? 0);
-            const sectorReserves = totalPower - physicalPower;
+            const targetMun = munFromOsid(targetOsid);
+            const pc = state.political?.political_controllers ?? {};
+
+            // Per-brigade distance-weighted contribution
+            let physicalPower = 0;
+            let effectiveReserves = 0;
+            for (const b of sectorBrigades) {
+                const locOsid = (b as { location_osid?: string }).location_osid ?? '';
+                const bPower = computeDefenderPower(state, b, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(b));
+                if (locOsid === targetOsid) {
+                    physicalPower += bPower;
+                } else {
+                    const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
+                    const distWeight = getReactiveDistanceWeight(hops);
+                    const homeMun = munFromOsid((b as { home_osid?: string }).home_osid ?? '');
+                    const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
+                    effectiveReserves += bPower * distWeight * homeBonus;
+                }
+            }
+
+            // Apply sector stance reactive bonus (Layer B)
+            const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
+            const boostedReserves = effectiveReserves * stanceReactiveBonus;
+
             const reactiveResponse = Math.min(
-                sectorReserves,
+                boostedReserves,
                 attackerCount * avgBrigadePower * REACTIVE_DEFENSE_RATIO
             );
-            let baseDef = physicalPower + reactiveResponse;
+            const baseDef = physicalPower + reactiveResponse;
             const minFloor = avgBrigadePower * MIN_DEFENSE_FLOOR_FRACTION;
             defenderPower = Math.max(baseDef, minFloor) * fogMult;
             defenderFormation = primary;

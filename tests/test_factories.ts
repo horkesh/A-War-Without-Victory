@@ -136,5 +136,7 @@ export function makeSector(opts: {
         density: opts.density ?? (lengthEdges > 0 ? assignedBrigadeIds.length / lengthEdges : 0),
         threat_ratio: opts.threat_ratio ?? 1.0,
         defensive_power: opts.defensive_power ?? 100,
+        sector_stance: 'defend',
+        stance_source: 'bot' as const,
     };
 }

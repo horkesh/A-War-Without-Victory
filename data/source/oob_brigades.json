@@ -748,7 +748,7 @@
     "home_osid": "op:zepce:begov_han",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 8,
+    "available_from": 2,
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 40
@@ -796,7 +796,7 @@
     "home_osid": "op:zavidovici:cinovici",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 8,
+    "available_from": 2,
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 40,
@@ -812,7 +812,7 @@
     "home_osid": "op:kakanj:donja_papratnica",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 8,
+    "available_from": 2,
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 40
@@ -843,7 +843,7 @@
     "home_osid": "op:tesanj:kalosevic_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 8,
+    "available_from": 2,
     "mandatory": true,
     "initial_personnel": 480,
     "initial_cohesion": 40,
@@ -1231,7 +1231,7 @@
     "initial_personnel": 1200,
     "initial_cohesion": 50,
     "distinction_potential": "tier_2",
-    "initial_officer_quality": 0.10
+    "initial_officer_quality": 0.1
   },
   {
     "id": "arbih_17th_vitezka_mountain",
@@ -3359,7 +3359,7 @@
     "home_osid": "op:orasje:orasje",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 8,
+    "available_from": 2,
     "mandatory": true,
     "initial_personnel": 650,
     "initial_cohesion": 52,

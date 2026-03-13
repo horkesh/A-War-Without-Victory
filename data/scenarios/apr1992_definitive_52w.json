@@ -60,11 +60,12 @@
   },
   "osid_control_overrides": {
     "op:brcko:brcko": "RS",
-    "op:ugljevik:teocak_krstac_2": "RBiH",
     "op:bugojno:brizina": "RBiH",
     "op:bugojno:prijaci": "RBiH",
     "op:nevesinje:hrusta_2": "RS",
-    "op:nevesinje:sopilja": "RS"
+    "op:nevesinje:sopilja": "RS",
+    "op:kotor_varos:prisocka_2": "RS",
+    "op:kotor_varos:vrbanjci_2": "RS"
   },
   "avoided_osids_by_faction": {},
   "init_officers": "apr1992"

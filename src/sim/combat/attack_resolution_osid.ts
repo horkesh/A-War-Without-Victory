@@ -38,6 +38,7 @@ import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import {
     buildOsidAdjacency,
+    munFromOsid,
     type Osid
 } from './osid_adjacency.js';
 import {
@@ -81,9 +82,12 @@ import {
     rankDefendersByPower,
     MIN_DEFENSE_FLOOR_FRACTION,
     MAX_EDGES_PER_BRIGADE,
-    SECTOR_RESERVE_RESPONSE_FRACTION,
     REACTIVE_DEFENSE_RATIO,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
+    bfsDistanceFriendly,
+    getReactiveDistanceWeight,
+    HOME_DEFENSE_REACTIVE_BONUS,
+    SECTOR_STANCE_REACTIVE_BONUS,
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import { findSectorForEnemyOsid, getCorpsHqOsid } from './corps_front_sectors.js';
@@ -108,12 +112,7 @@ export type { CombatOutcome };
  */
 const MORALE_ABSORPTION_CAS_MULT = 1.6;
 
-/**
- * Power multiplier applied when sector brigades defend an OSID they are not physically at.
- * Reflects that a brigade spread across multiple front edges cannot concentrate at one point.
- * Combined with the sector's frontDensityModifier: thin sectors defend weakly, dense ones better.
- */
-const SECTOR_COVERAGE_PENALTY = 0.5;
+// SECTOR_COVERAGE_PENALTY removed — replaced by distance-weighted reactive defense (n666).
 
 /** Disruption turns applied to a brigade that is routed to its corps HQ after defending a lost sector OSID. */
 const SECTOR_ROUT_DISRUPTED_TURNS = 4;
@@ -597,15 +596,17 @@ export function resolveAttackOrdersOsid(
         let defenderFormation: FormationState | null = null;
         let isSectorCoverageDefense = false;
         let sectorDefenseBrigades: FormationState[] | null = null;
+        // Per-brigade reactive weights for distance-weighted casualty distribution
+        let sectorBrigadeWeights: Map<FormationId, number> | null = null;
         const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
         const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
+        const pc = state.political?.political_controllers ?? {};
 
-        // ── Unified sector defense model ──────────────────────────────
-        // The front is a continuous locked line. Defense at any OSID in a
-        // sector is: total sector brigade power / sector edges × density mod.
-        // Whether a specific brigade sits on this OSID or not is irrelevant —
-        // the line distributes force evenly. Casualties go to the closest
-        // brigade primarily, then proportionally to the rest.
+        // ── Distance-weighted sector defense model ───────────────────
+        // Physical defenders at the OSID fight at full power.
+        // Sector reserves contribute proportional to BFS distance through
+        // friendly territory + home-municipality motivation bonus.
+        // Casualties distributed by the same weights.
         if (isEnemyControlled) {
             const sector = findSectorForEnemyOsid(state, targetOsid, controller);
             const sectorBrigades = sector
@@ -613,27 +614,42 @@ export function resolveAttackOrdersOsid(
                     .map(id => state.military.formations?.[id])
                     .filter((f): f is FormationState => f != null && f.status === 'active')
                 : [];
-            // (defense path tracking removed — use _defPathCounts diagnostic if needed)
             if (sectorBrigades.length > 0) {
-                // Hybrid sector defense:
-                // 1. Physical defenders at the OSID fight at full power
-                // 2. Sector reserve responds proportional to attack pressure
-                // 3. Floor: continuous line guarantees minimum defense per edge
                 const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-                // Physical defenders: brigades at the attacked OSID
-                const physicalDefenders = sectorBrigades.filter(
-                    f => (f as { location_osid?: string }).location_osid === targetOsid
-                );
-                let physicalPower = 0;
-                for (const pd of physicalDefenders) {
-                    physicalPower += computeDefenderPower(state, pd, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(pd));
-                }
-                // Reactive defense: reserves mobilize proportional to attack size.
-                // A 3-brigade assault draws more reserves than a 1-brigade probe.
                 const avgBrigadePower = totalPower / sectorBrigades.length;
-                const sectorReserves = totalPower - physicalPower;
+                const targetMun = munFromOsid(targetOsid);
+
+                // Single-pass: compute per-brigade power, distance weight, and accumulate
+                let physicalPower = 0;
+                let effectiveReserves = 0;
+                const brigadeWeights = new Map<FormationId, number>();
+                for (const b of sectorBrigades) {
+                    const locOsid = (b as { location_osid?: string }).location_osid ?? '';
+                    const bPower = computeDefenderPower(state, b, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(b));
+                    const homeMun = munFromOsid((b as { home_osid?: string }).home_osid ?? '');
+                    const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
+
+                    if (locOsid === targetOsid) {
+                        // Physical defenders: full power, weight = 1.0 × homeBonus
+                        physicalPower += bPower;
+                        brigadeWeights.set(b.id, bPower * homeBonus);
+                    } else {
+                        // Reserve: distance-weighted contribution
+                        const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
+                        const distWeight = getReactiveDistanceWeight(hops);
+                        const contribution = bPower * distWeight * homeBonus;
+                        effectiveReserves += contribution;
+                        brigadeWeights.set(b.id, contribution);
+                    }
+                }
+
+                // Apply sector stance reactive bonus (Layer B)
+                const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
+                const boostedReserves = effectiveReserves * stanceReactiveBonus;
+
+                // Cap reactive response proportional to attack size
                 const reactiveResponse = Math.min(
-                    sectorReserves,
+                    boostedReserves,
                     attackerFormations.length * avgBrigadePower * REACTIVE_DEFENSE_RATIO
                 );
                 defenderPower = physicalPower + reactiveResponse;
@@ -642,6 +658,7 @@ export function resolveAttackOrdersOsid(
                 defenderFormation = primary;
                 isSectorCoverageDefense = true;
                 sectorDefenseBrigades = sectorBrigades;
+                sectorBrigadeWeights = brigadeWeights;
             } else if (defenderFormations.length > 0) {
                 // Brigade at OSID but not in any sector (edge case: garrison, enclave)
                 const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
@@ -817,39 +834,35 @@ export function resolveAttackOrdersOsid(
             }
         }
         if (defenderFormation) {
-            // ── Sector casualty distribution ──────────────────────────────
-            // When the defense is a continuous sector line, casualties are
-            // distributed across all brigades in the sector. The closest
-            // brigade (primary) takes 50%, the rest share 50% proportionally
-            // by personnel. This models the front absorbing the blow.
+            // ── Distance-weighted casualty distribution ───────────────────
+            // Casualties distributed proportionally to each brigade's reactive
+            // weight. Physical defenders (weight 1.0 × homeBonus) take the most.
+            // Distant reserves take almost nothing. No arbitrary 50/50 split.
             const defBrigades = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
                 ? sectorDefenseBrigades : [defenderFormation];
-            const primaryShare = defBrigades.length > 1 ? 0.5 : 1.0;
-            const secondaryPool = finalDefenderCas * (1 - primaryShare);
-            const primaryCas = Math.round(finalDefenderCas * primaryShare);
 
-            // Apply to primary (closest) brigade
-            applyPersonnelLoss(defenderFormation, primaryCas);
-            const primaryKia = Math.floor(primaryCas * KIA_FRACTION);
-            const primaryWia = Math.floor(primaryCas * WIA_FRACTION);
-            const primaryMia = Math.max(0, primaryCas - primaryKia - primaryWia);
-            recordBattleCasualties(state.military.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: primaryKia, wounded: primaryWia, missing_captured: primaryMia });
-
-            // Apply to secondary brigades (rest of sector)
-            if (defBrigades.length > 1) {
-                const secondaries = defBrigades.filter(b => b.id !== defenderFormation!.id);
-                const totalSecPers = secondaries.reduce((s, b) => s + (b.personnel ?? 0), 0);
-                for (const sec of secondaries) {
-                    const frac = totalSecPers > 0 ? (sec.personnel ?? 0) / totalSecPers : 1 / secondaries.length;
-                    const secCas = Math.round(secondaryPool * frac);
-                    if (secCas > 0) {
-                        applyPersonnelLoss(sec, secCas);
-                        const sKia = Math.floor(secCas * KIA_FRACTION);
-                        const sWia = Math.floor(secCas * WIA_FRACTION);
-                        const sMia = Math.max(0, secCas - sKia - sWia);
-                        recordBattleCasualties(state.military.casualty_ledger!, sec.faction, sec.id, { killed: sKia, wounded: sWia, missing_captured: sMia });
+            if (sectorBrigadeWeights && defBrigades.length > 1) {
+                // Distance-weighted distribution
+                const totalWeight = defBrigades.reduce((s, b) => s + (sectorBrigadeWeights!.get(b.id) ?? 0), 0);
+                for (const b of defBrigades) {
+                    const w = sectorBrigadeWeights.get(b.id) ?? 0;
+                    const frac = totalWeight > 0 ? w / totalWeight : 1 / defBrigades.length;
+                    const cas = Math.round(finalDefenderCas * frac);
+                    if (cas > 0) {
+                        applyPersonnelLoss(b, cas);
+                        const kia = Math.floor(cas * KIA_FRACTION);
+                        const wia = Math.floor(cas * WIA_FRACTION);
+                        const mia = Math.max(0, cas - kia - wia);
+                        recordBattleCasualties(state.military.casualty_ledger!, b.faction, b.id, { killed: kia, wounded: wia, missing_captured: mia });
                     }
                 }
+            } else {
+                // Single defender or no weights — all casualties to primary
+                applyPersonnelLoss(defenderFormation, finalDefenderCas);
+                const kia = Math.floor(finalDefenderCas * KIA_FRACTION);
+                const wia = Math.floor(finalDefenderCas * WIA_FRACTION);
+                const mia = Math.max(0, finalDefenderCas - kia - wia);
+                recordBattleCasualties(state.military.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: kia, wounded: wia, missing_captured: mia });
             }
 
             // Apply cohesion/fatigue/morale to primary defender

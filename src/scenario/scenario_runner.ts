@@ -1918,6 +1918,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     defender_casualties: b.defender_casualties,
                 }));
 
+            // Extract dissolution and reconstitution entries from turn report
+            const weeklyDissolution = turnReport.brigade_dissolution?.dissolved_brigades;
+            const weeklyReconstitution = turnReport.brigade_reconstitution?.reconstituted_brigades?.map(r => ({
+                id: r.id, name: r.name, faction: r.faction,
+                corps_id: r.corps_id, home_mun: r.home_mun,
+                personnel_spawned: r.personnel_spawned,
+            }));
+
             const reportRow = buildWeeklyReport(
                 state,
                 activity,
@@ -1926,7 +1934,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 weeklyCombatCausalityForReport,
                 weeklyControlChangeAttributionForReport,
                 operationDiagnosticsForReport,
-                weeklyBattles
+                weeklyBattles,
+                weeklyDissolution,
+                weeklyReconstitution
             );
             // Attach movement diagnostics from turn report
             const rowAny = reportRow as unknown as Record<string, unknown>;

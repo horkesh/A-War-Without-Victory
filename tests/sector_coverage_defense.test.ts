@@ -106,6 +106,8 @@ function makeSector(
         density: brigadeIds.length / Math.max(1, lengthEdges),
         threat_ratio: 1.0,
         defensive_power: 100,
+        sector_stance: 'defend',
+        stance_source: 'bot' as const,
     };
 }
 

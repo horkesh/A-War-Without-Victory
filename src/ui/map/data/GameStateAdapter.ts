@@ -502,6 +502,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 kind: (f.kind as string) ?? 'brigade', readiness: (f.readiness as string) ?? 'active',
                 cohesion: (f.cohesion as number) ?? 100, fatigue: (ops?.fatigue as number) ?? 0,
                 status: (f.status as string) ?? 'active', createdTurn: (f.created_turn as number) ?? 0,
+                home_osid: typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined,
                 tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
                 personnel, posture, home_defense_active, corps_id, movementStatus, movementStance,
                 narrativeArc,
@@ -1336,6 +1337,8 @@ export function parseGameState(json: unknown): LoadedGameState {
                     }, 0) / edgeIds.length
                     : 1,
                 opsec_active: opsecSectorSet.has(sectorId),
+                sector_stance: typeof s.sector_stance === 'string' ? s.sector_stance as CorpsFrontSectorView['sector_stance'] : 'defend',
+                stance_source: typeof s.stance_source === 'string' ? s.stance_source as CorpsFrontSectorView['stance_source'] : 'bot',
             });
         }
         // Merge sector combat ratings if available

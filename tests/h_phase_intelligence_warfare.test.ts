@@ -33,6 +33,8 @@ function makeSector(
         density: 1,
         threat_ratio: 1,
         defensive_power: 100,
+        sector_stance: 'defend',
+        stance_source: 'bot' as const,
     };
 }
 

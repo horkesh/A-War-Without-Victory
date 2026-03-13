@@ -1,11 +1,104 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-12
+**Last Updated:** 2026-03-13
 **Status:** Post-MVP — War calibration, GUI rework, Phase M complete
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-13] Layer B IMPLEMENTED — Independent Sector Stances (n668)
+
+**Status:** Layers A+B implemented and verified. Layer C pending.
+
+**Layer B adds five independent sector stances** that decouple sector posture from corps stance:
+
+| Stance | Reactive Bonus | Entrenchment Rate | Use Case |
+|--------|---------------|-------------------|----------|
+| **Fortify** | 1.30× | 2.0× | Outgunned sectors, dig in |
+| **Defend** | 1.15× | 1.2× | Default, standard defense |
+| **Elastic** | 1.00× | 0.8× | Defense in depth, op staging |
+| **Active Defense** | 0.85× | 0.6× | Patrols, raids, probe-ready |
+| **Screening** | 0.50× | 0.0× | Tripwire, cold fronts, quiet sectors |
+
+**Changes:**
+- `game_state.ts`: `SectorStance` type + `sector_stance`/`stance_source` fields on `CorpsFrontSector`
+- `combat_math.ts`: `SECTOR_STANCE_REACTIVE_BONUS`, `SECTOR_STANCE_ENTRENCHMENT_RATE`, `CORPS_STANCE_ALLOWED_SECTOR_STANCES`
+- `bot_corps_directives.ts`: `evaluateSectorStances()` — per-sector stance evaluation (cold front → screening, high threat → fortify, staging op → elastic, low threat + targets → active_defense)
+- `bot_corps_ai.ts`: Pipeline integration after sector construction, before directives
+- `sector_stance_orders.ts`: Full rework — sets `sector_stance` + derives brigade postures from it. Validates against corps stance ceiling.
+- `attack_resolution_osid.ts` + `combat_predictor.ts`: Stance reactive bonus multiplier on reactive reserves
+- `brigade_movement_orders.ts`: Stance entrenchment rate modifier on per-turn entrenchment growth
+- `corps_front_sectors.ts` + `sector_rearrangement.ts`: Default `sector_stance: 'defend', stance_source: 'bot'` on all new sectors
+
+**n668 calibration:** 6/6 benchmarks PASS. **89.0% area-weighted** (−0.3pp from n667 — within noise). RS w40 **0.519**. RS delta **−22**. Hash 78a9d9943486d996. 54 test files, **585 tests pass**. Zero calibration regression from Layer B.
+
+**Gate 2A (/simplify):** PASS — dead `SECTOR_STANCE_READINESS` constant removed, explicit `undefined` args cleaned up.
+**Gate 2B (scenario):** PASS — zero regression, all benchmarks hold.
+
+---
+
+## [2026-03-13] Layer A IMPLEMENTED — Distance-Weighted Reactive Defense (n666)
+
+**Status:** Layer A implemented and verified. Layers B+C pending.
+
+**Problem:** Current reactive defense treats all sector reserves as a flat pool — distance from the attacked OSID and home-municipality motivation are ignored. 74% of front OSIDs are empty, yet defense is nearly uniform. Sectors have no independent stance (mirror corps). Density map is a crude 3-tier classification. Battle reports hide secondary defenders.
+
+**Three Layers:**
+
+**(A) Distance-Weighted Reactive Defense (engine, HIGH calibration impact):**
+Per-brigade reserve contribution weighted by BFS distance (decay `0.60^hops`, max 5) + home-municipality motivation (1.5×). Casualty distribution by same weights (replaces 50/50 split). Corps Phase 2a assignment directly affects combat. Files: `combat_math.ts`, `attack_resolution_osid.ts`, `combat_predictor.ts`.
+
+**(B) Independent Sector Stances (engine + bot AI, MEDIUM calibration impact):**
+Five stances: Fortify / Defend / Elastic / Active Defense / Screening. Each has own reserve fraction, entrenchment rate, readiness, reactive defense bonus. Corps stance sets ceiling. Bot AI evaluates per-sector (threat_ratio, offensive targets, cold fronts). Player overrides persist. Files: `sector_stance_orders.ts`, `bot_corps_directives.ts`, `game_state.ts`.
+
+**(C) Player Visibility (UI only, no calibration impact):**
+1. Defense heat map (replaces 3-tier density layer) — per-OSID defense strength, continuous color gradient.
+2. Enhanced battle reports — `DefenderContribution[]` with per-brigade distance, home status, power, casualties.
+3. Sector stance controls in CorpsFrontPanel — real selector, effect summary, "Return to AI Control" reset.
+4. Home defense indicators + reactive defense preview on hover.
+Files: `buildDensityGeoJSON.ts` → `buildDefenseStrengthGeoJSON.ts`, `AARPanel.tsx`, `CorpsFrontPanel.tsx`.
+
+**n666 Result (Layer A):** 89.1% area-weighted (up from 87.9%). 5/6 benchmarks (RBiH soft fail — too strong from home bonus). RS w40 0.515, delta -25. 170 orders, 148 battles, att cas 23.6k, def cas 36.2k. 84 OSID flips. Hash d6bb204e84324efb. 20 new tests (565 total). `munFromOsid()` extracted to `osid_adjacency.ts`. New `bfsDistanceFriendly()` + `getReactiveDistanceWeight()` in `combat_math.ts`.
+
+**Plan:** `docs/40_reports/20260313_DISTANCE_WEIGHTED_REACTIVE_DEFENSE_PLAN.md`
+**Lessons:** `docs/life_lessons.md` — "Flat reserve pooling erases organizational structure", "Defense non-uniformity requires per-entity spatial weighting"
+
+## [2026-03-13] Sector Contiguity Fix — Triple-Junction Split + Shared Front-Edge Territory (n664)
+
+**Three-part fix ensuring sectors are contiguous front lines, not areas:**
+
+### 1. `splitNonContiguousSectors` upgraded to triple-junction adjacency
+**Problem:** Step 4b used shared-OSID connectivity — two edges adjacent if they share any OSID endpoint. At polygon triple junctions, this connected edges facing different directions (Zavidovići front ↔ Kakanj front bridged through `hajderovici_2`). The hostile sides (`vozuca_2` and `gornja_borovica_2`) have NO edge between them in the contact graph.
+**Fix:** Now calls `buildEdgeAdjacency` with faction info — same triple-junction logic as sub-segment construction. Correctly splits disconnected fronts.
+
+### 2. Shared front-edge territory in `assignTerritoryVoronoi`
+**Problem:** Territory OSIDs were exclusive (one sector per OSID). Front-edge OSIDs at sector junctions naturally belong to multiple sectors. Exclusivity caused single-OSID interruption between adjacent sectors (Olovo/Kladanj bug).
+**Fix:** Front-edge OSIDs can now be claimed by multiple sectors. Rear territory remains exclusive (BFS first-claim). 67 shared territory OSIDs across all factions.
+
+### 3. Need-based brigade assignment at shared front OSIDs
+**Problem:** Brigade at shared OSID could match multiple sectors.
+**Fix:** `frontOsidToSectorIndices` multi-mapping → neediest same-corps sector wins.
+
+**Key gotcha:** Pipeline grouping and splitting steps MUST use compatible adjacency. First attempt passed `sharedBoundaryAdj` (stricter than the grouper's `osidAdjacency`) → over-split to 31 sectors. Fix: use same `osidAdjacency` for both.
+
+**n664 calibration:** 6/6 benchmarks PASS. Area-weighted 88.7% (+0.8pp from n653). RS w40 0.525. RS delta -18. 90/92 sectors contiguous by strict triple-junction; 2 bending-front residuals in Doboj/Maglaj (under review). Hash 0ca780c065365530.
+
+**Report:** `docs/40_reports/20260313_SECTOR_CONTIGUITY_FIX_N664.md`
+
+## [2026-03-12] Central Bosnia Fixes — Uncontested Occupation + Kotor Varos Overrides (n653)
+
+**Two bugs fixed, +5.1pp calibration gain (82.8% → 87.9% area-weighted):**
+
+### 1. Uncontested occupation decision tree order (Skender Vakuf fix)
+**Problem:** VRS refused to walk into undefended HVO territory (Donji Koricani). `evaluateUncontestedOccupation` existed and worked, but was positioned AFTER `evaluateOffensive` in the brigade decision tree. `evaluateOffensive` catches all front-line offensive/balanced brigades and makes them defend-in-place, swallowing them before uncontested occupation could evaluate.
+**Fix:** Swapped order in `bot_brigade_ai_osid.ts` — `evaluateUncontestedOccupation` now runs before `evaluateOffensive`. Historically correct: abandoned territory was occupied within hours, no commander waits for formal operation orders.
+
+### 2. Kotor Varos political controller overrides (Bugojno displacement fix)
+**Problem:** 2 Kotor Varos OSIDs (`prisocka_2`, `vrbanjci_2`) incorrectly marked as RBiH in initial political controllers. Should be RS per historical painted data. Was fixed in commit 9a9f954 (osid_control_overrides) but accidentally deleted in e972966 (baseline sync). Brigade spreading algorithm then treated them as "undefended RBiH front" and teleported 705th Slavna Mountain from Bugojno there.
+**Fix:** Restored `osid_control_overrides` for both OSIDs in 40w and 52w scenarios.
+
+**n653 calibration:** 6/6 benchmarks PASS. Area-weighted 87.9% (ATH for this session). RS w40 0.522 (target 0.503-0.553). RS delta -20. Hash 10a33b05dbcb94a9.
 
 ## [2026-03-12] Invariant Assertion Foolproofing (n648)
 

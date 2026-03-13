@@ -321,9 +321,13 @@ export interface CorpsOperation {
     _prev_objective_state?: Record<string, string | null>;
 }
 
+/** Independent sector stances — each sector can differ from its corps stance. */
+export type SectorStance = 'fortify' | 'defend' | 'elastic' | 'active_defense' | 'screening';
+
 export interface SectorStanceOrder {
     sector_id: string;
-    stance: 'dig_in' | 'elastic_defense' | 'defend_at_all_costs' | 'hold';
+    /** New: sets sector_stance directly (not brigade postures). */
+    stance: SectorStance;
 }
 
 /**
@@ -529,6 +533,8 @@ export interface FormationState {
     elite_loan_state?: EliteLoanState;
     /** Formation lifecycle status. Default 'active'. Set by lifecycle event processing. */
     lifecycle_status?: 'active' | 'forming' | 'disbanded' | 'merged' | 'destroyed' | 'withdrawn' | 'displaced';
+    /** Turn when formation was destroyed (for reconstitution delay calculation). */
+    destruction_turn?: number;
     /** Turn at which a JNA phantom brigade withdraws (equipment handed off, formation removed). */
     withdrawal_turn?: number;
     /** VRS equipment decay factor [0,1]. Applied as multiplier to equipment ratio. 1.0 = full effectiveness, 0.6 = floor. */
@@ -1452,6 +1458,10 @@ export interface CorpsFrontSector {
     threat_ratio: number;
     /** Computed defensive power (same formula as LocalFront). */
     defensive_power: number;
+    /** Independent sector stance (Layer B). Defaults to 'defend'. */
+    sector_stance: SectorStance;
+    /** Who set this stance: bot AI or player. Player overrides persist until changed. */
+    stance_source: 'bot' | 'player';
 }
 
 /**

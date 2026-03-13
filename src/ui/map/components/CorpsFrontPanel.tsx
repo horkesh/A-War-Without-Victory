@@ -29,6 +29,26 @@ function ThreatBadge({ ratio }: { ratio: number }) {
 
 
 
+const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
+type SectorStanceType = typeof SECTOR_STANCES[number];
+const STANCE_LABELS: Record<SectorStanceType, string> = {
+  fortify: 'Fortify', defend: 'Defend', elastic: 'Elastic',
+  active_defense: 'Active Def', screening: 'Screening',
+};
+const STANCE_DESCRIPTIONS: Record<SectorStanceType, string> = {
+  fortify: 'All hands digging. Max entrenchment. +30% reactive.',
+  defend: 'Standard defense. Moderate entrenchment. +15% reactive.',
+  elastic: 'Defense in depth. Large reserve for counterattack.',
+  active_defense: 'Aggressive patrolling, raids. -15% reactive.',
+  screening: 'Tripwire. No entrenchment. -50% reactive.',
+};
+const CORPS_STANCE_ALLOWED: Record<string, readonly SectorStanceType[]> = {
+  offensive: ['active_defense', 'elastic', 'defend'],
+  balanced: SECTOR_STANCES,
+  defensive: ['fortify', 'defend', 'elastic'],
+  reorganize: ['fortify', 'defend', 'screening'],
+};
+
 const PREP_SUB_PHASES = ['intel_gathering', 'force_staging', 'supply_check', 'assessment', 'ready'] as const;
 const PREP_LABELS: Record<string, string> = {
   intel_gathering: 'INTEL', force_staging: 'STAGING', supply_check: 'SUPPLY', assessment: 'ASSESS', ready: 'READY',
@@ -135,17 +155,19 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     ? relatedOperations.reduce((sum, op) => sum + (op.supply_readiness ?? 0), 0) / relatedOperations.length
     : null;
   const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
-  const postureCounts = assignedFormations.reduce<Record<string, number>>((acc, formation) => {
-    const posture = formation.posture ?? 'hold';
-    acc[posture] = (acc[posture] ?? 0) + 1;
-    return acc;
-  }, {});
-  const effectiveSectorStance = Object.entries(postureCounts)
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? 'hold';
+  const allowedStances = new Set(CORPS_STANCE_ALLOWED[corpsStance] ?? SECTOR_STANCES);
+  const currentSectorStance = (sector.sector_stance ?? 'defend') as SectorStanceType;
+  const currentStanceSource = sector.stance_source ?? 'bot';
+  const sectorStanceLabel = STANCE_LABELS[currentSectorStance] ?? currentSectorStance.replace(/_/g, ' ');
 
-  const issueSectorStance = async (stance: 'dig_in' | 'elastic_defense' | 'defend_at_all_costs' | 'hold') => {
+  const issueSectorStance = async (stance: SectorStanceType) => {
     const result = await ipc.stageSectorStanceOrder(sector.sector_id, stance);
-    setSectorActionMessage(result.ok ? `Sector stance staged: ${stance}` : (result.error ?? 'Failed to stage sector stance'));
+    setSectorActionMessage(result.ok ? `Sector stance staged: ${STANCE_LABELS[stance]}` : (result.error ?? 'Failed to stage sector stance'));
+  };
+
+  const resetToAI = async () => {
+    const result = await ipc.resetSectorStanceToBot(sector.sector_id);
+    setSectorActionMessage(result.ok ? 'Stance returned to AI control' : (result.error ?? 'Failed to reset stance'));
   };
 
   const issueLogisticsPriority = async (priority: number) => {
@@ -214,7 +236,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           </div>
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
             <div><span className="font-bold text-neutral-800">FACTION:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{sector.faction}</span></div>
-            <div><span className="font-bold text-neutral-800">STANCE:</span> {corpsStance}</div>
+            <div><span className="font-bold text-neutral-800">CORPS STANCE:</span> {corpsStance}</div>
+            <div><span className="font-bold text-neutral-800">SECTOR STANCE:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ' (MANUAL)' : ''}</div>
             <div>
               <span className="font-bold text-neutral-800">OPSEC:</span>{' '}
               <span className={sector.opsec_active ? 'text-amber-700 font-bold' : 'text-neutral-700'}>
@@ -344,7 +367,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">Sector Stance</span>
-                    <span className="font-medium uppercase">{effectiveSectorStance.replace(/_/g, ' ')}</span>
+                    <span className="font-medium uppercase">
+                      {sectorStanceLabel}
+                      {currentStanceSource === 'player' && <span className="ml-1 text-[8px] text-amber-700 bg-amber-100 px-0.5 rounded font-bold">MANUAL</span>}
+                    </span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">Supply Priority</span>
@@ -358,24 +384,40 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
                 <div className="pt-2 border-t border-dashed border-neutral-300 space-y-2">
                   <div>
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Sector Orders</span>
-                    <div className="grid grid-cols-2 gap-1">
-                      {([
-                        ['dig_in', 'Dig In'],
-                        ['elastic_defense', 'Elastic'],
-                        ['defend_at_all_costs', 'At All Costs'],
-                        ['hold', 'Hold'],
-                      ] as const).map(([stance, label]) => (
-                        <button
-                          key={stance}
-                          type="button"
-                          onClick={() => void issueSectorStance(stance)}
-                          className="kbd-focus px-2 py-1 rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 text-[10px] font-bold uppercase"
-                        >
-                          {label}
-                        </button>
-                      ))}
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Sector Stance Orders</span>
+                    <div className="grid grid-cols-3 gap-1">
+                      {SECTOR_STANCES.map((stance) => {
+                        const isAllowed = allowedStances.has(stance);
+                        const isActive = currentSectorStance === stance;
+                        return (
+                          <button
+                            key={stance}
+                            type="button"
+                            disabled={!isAllowed}
+                            onClick={() => void issueSectorStance(stance)}
+                            title={isAllowed ? STANCE_DESCRIPTIONS[stance] : `Not allowed under ${corpsStance} corps stance`}
+                            className={`kbd-focus px-1.5 py-1 rounded border text-[9px] font-bold uppercase transition-colors ${
+                              !isAllowed
+                                ? 'border-neutral-200 bg-neutral-100 text-neutral-300 cursor-not-allowed'
+                                : isActive
+                                  ? 'border-accent-gold bg-amber-50 text-amber-800 ring-1 ring-accent-gold'
+                                  : 'border-neutral-400 bg-white/80 hover:bg-neutral-200 text-neutral-700'
+                            }`}
+                          >
+                            {STANCE_LABELS[stance]}
+                          </button>
+                        );
+                      })}
                     </div>
+                    {currentStanceSource === 'player' && (
+                      <button
+                        type="button"
+                        onClick={() => void resetToAI()}
+                        className="kbd-focus mt-1 w-full px-2 py-0.5 rounded border border-neutral-300 bg-neutral-50 hover:bg-neutral-200 text-[9px] text-neutral-600 font-semibold uppercase"
+                      >
+                        Return to AI Control
+                      </button>
+                    )}
                   </div>
                   <div>
                     <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Reinforcement Priority</span>

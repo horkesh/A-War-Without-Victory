@@ -21,6 +21,30 @@ export async function loadOperationalPoliticalControl(): Promise<Record<string, 
   return payload.by_settlement_id ?? {};
 }
 
+interface ContactGraphPayload {
+  nodes: { id: string }[];
+  edges: { a: string; b: string }[];
+}
+
+/**
+ * Load the OSID contact graph and build an adjacency Map.
+ * Used by the defense strength heat map for BFS distance computation.
+ */
+export async function loadOsidAdjacency(): Promise<Map<string, string[]>> {
+  const payload = await fetchJson<ContactGraphPayload>('/data/derived/operational/operational_contact_graph.json');
+  const adj = new Map<string, string[]>();
+  for (const edge of payload.edges) {
+    if (!edge.a || !edge.b) continue;
+    let listA = adj.get(edge.a);
+    if (!listA) { listA = []; adj.set(edge.a, listA); }
+    if (!listA.includes(edge.b)) listA.push(edge.b);
+    let listB = adj.get(edge.b);
+    if (!listB) { listB = []; adj.set(edge.b, listB); }
+    if (!listB.includes(edge.a)) listB.push(edge.a);
+  }
+  return adj;
+}
+
 /** Fetch latest run save as raw text. Use with loadSave(text) to parse after yielding so UI can show loading state. */
 export async function loadLatestRunSaveAsText(): Promise<string> {
   const response = await fetch('/data/derived/latest_run_final_save.json');

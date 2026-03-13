@@ -12,7 +12,8 @@ import { FATIGUE_MAX, getFormationTier } from '../../state/formation_constants.j
 import type {
     CorpsStance,
     FormationState,
-    GameState
+    GameState,
+    SectorStance,
 } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
@@ -93,6 +94,91 @@ export const SECTOR_RESERVE_RESPONSE_FRACTION = 0.45;
  * At 1.0: 3 attackers vs 3000 reactive defense → ratio 1.0 (stalemate)
  */
 export const REACTIVE_DEFENSE_RATIO = 1.5;
+
+// ── Distance-weighted reactive defense constants ────────────────────────────
+// Per-brigade reserve contribution decays exponentially with BFS distance.
+// Home-municipality brigades get a motivation bonus.
+
+/** Base for exponential distance decay: contribution = base^hops. */
+export const REACTIVE_DISTANCE_BASE = 0.60;
+
+/** Max BFS hops for reactive defense contribution. Beyond this = 0. */
+export const REACTIVE_DISTANCE_MAX_HOPS = 5;
+
+/** Multiplier when defending brigade's home municipality matches attacked OSID. */
+export const HOME_DEFENSE_REACTIVE_BONUS = 1.3;
+
+// ── Sector stance effect tables (Layer B) ────────────────────────────────────
+// Each sector stance modifies reactive defense, entrenchment growth, and readiness.
+
+/** Reactive defense multiplier per sector stance. Applied to reactive reserve response. */
+export const SECTOR_STANCE_REACTIVE_BONUS: Record<SectorStance, number> = {
+    fortify: 1.3,
+    defend: 1.15,
+    elastic: 1.0,
+    active_defense: 0.85,
+    screening: 0.5,
+};
+
+/** Entrenchment growth rate multiplier per sector stance. */
+export const SECTOR_STANCE_ENTRENCHMENT_RATE: Record<SectorStance, number> = {
+    fortify: 2.0,
+    defend: 1.2,
+    elastic: 0.8,
+    active_defense: 0.6,
+    screening: 0.0,
+};
+
+/** Which sector stances are allowed under each corps stance. */
+export const CORPS_STANCE_ALLOWED_SECTOR_STANCES: Record<string, SectorStance[]> = {
+    offensive: ['active_defense', 'elastic', 'defend'],
+    balanced: ['fortify', 'defend', 'elastic', 'active_defense', 'screening'],
+    defensive: ['fortify', 'defend', 'elastic'],
+    reorganize: ['fortify', 'defend', 'screening'],
+};
+
+/**
+ * Compute the reactive distance weight for a given number of BFS hops.
+ * Returns 0 for unreachable or beyond max hops.
+ */
+export function getReactiveDistanceWeight(hops: number): number {
+    if (!Number.isFinite(hops) || hops < 0 || hops > REACTIVE_DISTANCE_MAX_HOPS) return 0;
+    return Math.pow(REACTIVE_DISTANCE_BASE, hops);
+}
+
+/**
+ * BFS through friendly territory from `from` to `to`.
+ * Returns hop count, or Infinity if unreachable within maxHops.
+ * Only traverses OSIDs controlled by `factionId`.
+ * Deterministic: BFS is deterministic with sorted adjacency lists.
+ */
+export function bfsDistanceFriendly(
+    from: string,
+    to: string,
+    adjacency: Map<string, string[]>,
+    politicalControllers: Record<string, string | null | undefined>,
+    factionId: string,
+    maxHops: number = REACTIVE_DISTANCE_MAX_HOPS
+): number {
+    if (from === to) return 0;
+    const visited = new Set<string>([from]);
+    let frontier = [from];
+    let dist = 0;
+    while (frontier.length > 0 && dist < maxHops) {
+        dist++;
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const n of (adjacency.get(osid) ?? [])) {
+                if (visited.has(n)) continue;
+                visited.add(n);
+                if (n === to) return dist;
+                if (politicalControllers[n] === factionId) next.push(n);
+            }
+        }
+        frontier = next;
+    }
+    return Infinity;
+}
 
 /**
  * Defender casualty engagement cap: maximum ratio of defender-to-attacker personnel

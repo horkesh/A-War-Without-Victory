@@ -55,6 +55,7 @@ interface WindowAwwv {
     stageOgSubfrontOrder: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsStanceOrder: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
     stageSectorStanceOrder: (sectorId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
+    resetSectorStanceToBot: (sectorId: string) => Promise<{ ok: boolean; error?: string }>;
     stageLogisticsPriority: (faction: string, sectorId: string, priority: number) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
     stageOperationHalt: (payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => Promise<{ ok: boolean; error?: string }>;
@@ -184,6 +185,10 @@ export function useIPC() {
 
             stageSectorStanceOrder: awwv
                 ? (sectorId: string, stance: string) => awwv.stageSectorStanceOrder(sectorId, stance)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            resetSectorStanceToBot: awwv
+                ? (sectorId: string) => awwv.resetSectorStanceToBot(sectorId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             stageLogisticsPriority: awwv

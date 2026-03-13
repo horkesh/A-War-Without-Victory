@@ -58,11 +58,13 @@ function makeState(): GameState {
                 density: 1,
                 threat_ratio: 1,
                 defensive_power: 1000,
+                sector_stance: 'defend',
+                stance_source: 'bot' as const,
                 intel_confidence: 1,
                 offensive_signs: false,
             }
         },
-    sector_stance_orders: [{ sector_id: 'sector:rs-corps-1', stance: 'dig_in' }]
+    sector_stance_orders: [{ sector_id: 'sector:rs-corps-1', stance: 'fortify' }]
   } as any,
   political: {
     political_controllers: { S1: 'RS' }
@@ -76,7 +78,11 @@ describe('applySectorStanceOrders', () => {
 
         const report = applySectorStanceOrders(state);
 
-        expect(report.postures_changed).toBe(2);
+        expect(report.stances_applied).toBe(1);
+        expect(report.stances_rejected).toBe(0);
+        const sector = state.military.corps_front_sectors!['sector:rs-corps-1'];
+        expect(sector.sector_stance).toBe('fortify');
+        expect(sector.stance_source).toBe('player');
         expect(state.military.brigade_posture_orders).toEqual([
             { brigade_id: 'rs-brig-1', posture: 'dig_in' },
             { brigade_id: 'rs-brig-2', posture: 'dig_in' },

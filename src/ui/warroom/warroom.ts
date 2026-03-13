@@ -13,7 +13,11 @@ import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { setScenarioStartDate, turnToCalendarMonthYear, turnToShortLabel } from './components/warroom_utils.js';
 // Asset URLs via Vite so dev server serves them from the module graph
 import bgUrl from './assets/hq_background_v3.png?url';
-import hqRbih1991Url from './assets/hq_rbih_1991_display.png?url';
+import hqRbih1991Url from './assets/hq_rbih_1991.webp?url';
+import hqRbih1992Url from './assets/hq_rbih_1992.webp?url';
+import hqRbih1993Url from './assets/hq_rbih_1993.webp?url';
+import hqRbih1994Url from './assets/hq_rbih_1994.webp?url';
+import hqRbih1995Url from './assets/hq_rbih_1995.webp?url';
 // Flag assets — drawn dynamically on the wall per player faction
 import flagHrhbUrl from './assets/flag_HRHB.png?url';
 import flagRbihUrl from './assets/flag_RBiH.png?url';
@@ -61,11 +65,22 @@ function getInitialRegionCandidates(): string[] {
         getFactionRegionsUrl('HRHB')
     ];
 }
-const WARROOM_SCENE_PLATE_URLS: Record<FactionId, string> = {
-    RBiH: hqRbih1991Url,
-    RS: bgUrl,
-    HRHB: bgUrl
+/** Year-keyed plate URLs per faction. Plates switch each April. */
+const WARROOM_YEAR_PLATE_URLS: Record<FactionId, Record<number, string>> = {
+    RBiH: { 1991: hqRbih1991Url, 1992: hqRbih1992Url, 1993: hqRbih1993Url, 1994: hqRbih1994Url, 1995: hqRbih1995Url },
+    RS:   { 1991: bgUrl },
+    HRHB: { 1991: bgUrl }
 };
+
+/** Given a calendar year from the current turn, return the plate year (latest available <= calendarYear). */
+function getPlateYear(faction: FactionId, calendarYear: number): number {
+    const years = Object.keys(WARROOM_YEAR_PLATE_URLS[faction] ?? {}).map(Number).sort((a, b) => a - b);
+    let best = years[0] ?? 1991;
+    for (const y of years) {
+        if (y <= calendarYear) best = y;
+    }
+    return best;
+}
 
 interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
@@ -89,7 +104,8 @@ class WarroomApp {
     private hoverRenderer = new HoverRenderer();
     private modalManager = new ModalManager();
 
-    private scenePlateImages: Map<FactionId, HTMLImageElement> = new Map();
+    /** Keyed by "faction:year" e.g. "RBiH:1992" */
+    private scenePlateImages: Map<string, HTMLImageElement> = new Map();
     private flagImages: Map<string, HTMLImageElement> = new Map();
     private desktopBridge: DesktopBridge | null = null;
     /** Faction chosen in step 2, used when step 3 fires. */
@@ -222,10 +238,16 @@ class WarroomApp {
     }
 
     private async loadScenePlateAssets() {
-        const entries = Object.entries(WARROOM_SCENE_PLATE_URLS) as Array<[FactionId, string]>;
-        const loaded = await Promise.all(entries.map(async ([factionId, src]) => [factionId, await this.loadImage(src)] as const));
-        for (const [factionId, image] of loaded) {
-            this.scenePlateImages.set(factionId, image);
+        const tasks: Array<Promise<[string, HTMLImageElement]>> = [];
+        for (const [faction, yearMap] of Object.entries(WARROOM_YEAR_PLATE_URLS)) {
+            for (const [year, url] of Object.entries(yearMap)) {
+                const key = `${faction}:${year}`;
+                tasks.push(this.loadImage(url).then(img => [key, img]));
+            }
+        }
+        const loaded = await Promise.all(tasks);
+        for (const [key, image] of loaded) {
+            this.scenePlateImages.set(key, image);
         }
     }
 
@@ -609,7 +631,12 @@ class WarroomApp {
         const W = this.canvas.width;
         const H = this.canvas.height;
         const playerFaction = (this.gameState.meta.player_faction ?? this.gameState.factions[0]?.id ?? 'RBiH') as FactionId;
-        const scenePlate = this.scenePlateImages.get(playerFaction) ?? this.scenePlateImages.get('RBiH') ?? null;
+        const calYear = turnToCalendarMonthYear(this.gameState.meta.turn).year;
+        const plateYear = getPlateYear(playerFaction, calYear);
+        const scenePlate = this.scenePlateImages.get(`${playerFaction}:${plateYear}`)
+            ?? this.scenePlateImages.get(`RBiH:${plateYear}`)
+            ?? this.scenePlateImages.get('RBiH:1991')
+            ?? null;
 
         this.ctx.clearRect(0, 0, W, H);
 

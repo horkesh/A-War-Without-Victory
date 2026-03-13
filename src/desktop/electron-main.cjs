@@ -1104,7 +1104,7 @@ app.whenReady().then(() => {
     if (!currentGameStateJson || typeof sectorId !== 'string' || typeof stance !== 'string') {
       return { ok: false, error: 'No game loaded or invalid payload' };
     }
-    const validStances = ['dig_in', 'elastic_defense', 'defend_at_all_costs', 'hold'];
+    const validStances = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'];
     if (!validStances.includes(stance)) {
       return { ok: false, error: `Invalid sector stance: ${stance}` };
     }
@@ -1115,6 +1115,31 @@ app.whenReady().then(() => {
       const filtered = nextOrders.filter((order) => order?.sector_id !== sectorId);
       filtered.push({ sector_id: sectorId, stance });
       state.sector_stance_orders = filtered;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('reset-sector-stance-to-bot', async (_event, payload) => {
+    const { sectorId } = payload || {};
+    if (!currentGameStateJson || typeof sectorId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const sector = state.corps_front_sectors?.[sectorId];
+      if (!sector) {
+        return { ok: false, error: `Unknown sector: ${sectorId}` };
+      }
+      sector.stance_source = 'bot';
+      // Remove any pending stance order for this sector
+      if (Array.isArray(state.sector_stance_orders)) {
+        state.sector_stance_orders = state.sector_stance_orders.filter((order) => order?.sector_id !== sectorId);
+      }
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };

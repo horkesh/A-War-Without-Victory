@@ -10,9 +10,9 @@ import { useGameStore } from '../store/gameStore';
 import { collectSectorFriendlyOsids, buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
-import { loadOperationalPoliticalControl, loadOperationalSettlements } from '../data/DataLoader';
+import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
-import { buildDensityGeoJSON } from './builders/buildDensityGeoJSON';
+import { buildDefenseStrengthGeoJSON } from './builders/buildDefenseStrengthGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
 import { buildPressureGeoJSON } from './builders/buildPressureGeoJSON';
 import { buildSupplyGeoJSON } from './builders/buildSupplyGeoJSON';
@@ -100,6 +100,7 @@ export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const osidBaseRef = useRef<FeatureCollection | null>(null);
+  const osidAdjacencyRef = useRef<Map<string, string[]> | null>(null);
   const osidCentroidsRef = useRef<Map<string, [number, number]>>(new Map());
   const lastPanTargetRef = useRef<string | null>(null);
   const prevSectorIdRef = useRef<string | null>(null);
@@ -162,12 +163,14 @@ export function MapContainer() {
 
     const init = async () => {
       try {
-        const [geojson, byOsid] = await Promise.all([
+        const [geojson, byOsid, adjacency] = await Promise.all([
           loadOperationalSettlements(),
           loadOperationalPoliticalControl(),
+          loadOsidAdjacency(),
         ]);
 
         osidBaseRef.current = geojson;
+        osidAdjacencyRef.current = adjacency;
         osidCentroidsRef.current = buildOsidCentroidLookup(geojson);
         setOsidDisplayNames(buildOsidDisplayNameMap(geojson));
         const osidProps: Record<string, Record<string, unknown>> = {};

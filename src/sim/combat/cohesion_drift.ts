@@ -136,7 +136,8 @@ export function runCohesionDrift(
     for (const id of formationIds) {
         if (engagedSet.has(id)) continue;
         const f = formations[id] as FormationState | undefined;
-        if (!f || (f.kind !== 'brigade' && f.kind !== 'operational_group')) continue;
+        if (!f || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'operational_group') continue;
         const faction = f.faction;
         if (!faction) continue;
         let drift = getFactionCohesionDrift(faction, turn, state.military.war_timeline);

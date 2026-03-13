@@ -288,6 +288,8 @@ function createPocketContainmentSectors(
             density: 0,
             threat_ratio: 0,
             defensive_power: 0,
+            sector_stance: 'defend',
+            stance_source: 'bot',
         });
     }
 

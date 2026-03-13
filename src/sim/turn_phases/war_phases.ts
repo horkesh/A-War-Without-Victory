@@ -337,6 +337,18 @@ export const warPhases: NamedPhase[] = [
             }
         }
     },
+    // --- Brigade reconstitution (reform destroyed brigades from municipality manpower) ---
+    {
+        name: 'reconstitute-brigades',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { reconstituteBrigades } = await import('../combat/brigade_reconstitution.js');
+            const reconReport = reconstituteBrigades(context.state);
+            if (reconReport.reconstituted_count > 0) {
+                context.report.brigade_reconstitution = reconReport;
+            }
+        }
+    },
     // --- Brigade Operations Pipeline (War phase only) ---
     {
         name: 'formation-hq-relocation',

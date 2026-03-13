@@ -78,6 +78,31 @@ export interface WeeklyReportRow {
     operation_diagnostics?: OperationCombatDiagnostic[];
     /** Per-battle results from attack resolution (raw data for diagnostics). */
     battles?: WeeklyBattleEntry[];
+    /** Brigade dissolution report — which brigades dissolved and why. */
+    brigade_dissolution?: WeeklyDissolutionEntry[];
+    /** Brigade reconstitution report — which brigades reformed from municipality manpower. */
+    brigade_reconstitution?: WeeklyReconstitutionEntry[];
+}
+
+/** Compact per-dissolution entry persisted in weekly report. */
+export interface WeeklyDissolutionEntry {
+    id: string;
+    name: string;
+    faction: string;
+    personnel_remaining: number;
+    cohesion: number;
+    morale: number;
+    personnel_to_reserve: number;
+}
+
+/** Compact per-reconstitution entry persisted in weekly report. */
+export interface WeeklyReconstitutionEntry {
+    id: string;
+    name: string;
+    faction: string;
+    corps_id: string;
+    home_mun: string;
+    personnel_spawned: number;
 }
 
 /** Compact per-battle entry persisted in weekly report for diagnostics. */
@@ -110,7 +135,9 @@ export function buildWeeklyReport(
     combatCausality?: WeeklyCombatCausalitySummary,
     controlChangeAttribution?: WeeklyControlChangeAttributionSummary,
     operationDiagnostics?: OperationCombatDiagnostic[],
-    battles?: WeeklyBattleEntry[]
+    battles?: WeeklyBattleEntry[],
+    dissolutionEntries?: WeeklyDissolutionEntry[],
+    reconstitutionEntries?: WeeklyReconstitutionEntry[]
 ): WeeklyReportRow {
     const week_index = state.meta.turn;
     const phase = state.meta.phase;
@@ -230,6 +257,12 @@ export function buildWeeklyReport(
     }
     if (battles !== undefined && battles.length > 0) {
         row.battles = battles;
+    }
+    if (dissolutionEntries !== undefined && dissolutionEntries.length > 0) {
+        row.brigade_dissolution = dissolutionEntries;
+    }
+    if (reconstitutionEntries !== undefined && reconstitutionEntries.length > 0) {
+        row.brigade_reconstitution = reconstitutionEntries;
     }
     return row;
 }

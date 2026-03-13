@@ -34,18 +34,21 @@ export function buildOsidAdjacency(edges: EdgeRecord[]): Map<Osid, Osid[]> {
 
 
 /**
- * Build OSID adjacency that only includes edges with true shared boundaries
- * (min_dist === 0, exact). Excludes point contacts (min_dist > 0 but tiny)
- * and distance-based contacts (min_dist > threshold).
+ * Build OSID adjacency that only includes edges with true shared boundaries.
+ * Excludes genuinely distant contacts while tolerating GeoJSON floating-point
+ * precision gaps between adjacent polygons.
  *
- * Used by sector contiguity checks to prevent sectors from spanning across
- * enemy territory via triple-junction point contacts.
+ * Used by sector sub-segment construction (buildEdgeAdjacency) and segment
+ * adjacency checks (isSegmentAdjacent). NOT used by splitNonContiguousSectors
+ * (which uses shared-OSID connectivity).
  *
- * SHARED_BOUNDARY_THRESHOLD: Edges with min_dist ≤ this are "shared boundary".
- * Set to 0 to require exact boundary sharing; set higher to tolerate FP noise.
+ * SHARED_BOUNDARY_THRESHOLD: 0.00005 degrees ≈ 5.5 meters.
+ * The operational GeoJSON has float-precision gaps on most polygon boundaries —
+ * at threshold=0, only 4% of edges pass (131/3243). At 0.00005, 64% pass,
+ * capturing all true neighbors while excluding genuinely distant polygons.
  * Edges without min_dist are treated as shared boundaries (conservative).
  */
-const SHARED_BOUNDARY_THRESHOLD = 0;
+const SHARED_BOUNDARY_THRESHOLD = 0.00005;
 
 export function buildSharedBoundaryAdjacency(edges: EdgeRecord[]): Map<Osid, Osid[]> {
     const adj = new Map<Osid, Osid[]>();
@@ -62,6 +65,14 @@ export function buildSharedBoundaryAdjacency(edges: EdgeRecord[]): Map<Osid, Osi
     }
     for (const list of adj.values()) list.sort(strictCompare);
     return adj;
+}
+
+/**
+ * Extract municipality slug from an OSID.
+ * OSID format: `op:municipality:slug` → returns `municipality`.
+ */
+export function munFromOsid(osid: string): string | undefined {
+    return osid.split(':')[1];
 }
 
 /** Brigade is deployed if movement_state (from brigade_movement_state) is 'deployed' or absent. */
