@@ -7,6 +7,25 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-13] n692: Case B Split Threshold Tuning + Merge Safety
+
+**Problem:** n682's strict Case B at 5.5m over-fragmented sectors (144→131 after merge, 57 small sectors). The 5.5m threshold cut 34 legitimate triple-junction connections in the 5.5-16.6m range. Meanwhile, the merge step's Case B adjacency at 33m re-bridged sectors across enemy pockets.
+
+**Fix:** Three changes in `corps_front_sectors.ts`:
+1. **CASE_B_SPLIT_THRESHOLD = 0.00015 (~16.6m)**: Exploits natural gap in Case B distance distribution (15.5m → 24.6m has zero connections). Keeps all legitimate triple junctions while cutting pocket bridges.
+2. **Merge uses same 16.6m adjacency**: Prevents re-bridging connections the split just broke.
+3. **Post-split merge (Step 4c)**: `mergeUndersizedSectors` with friendly BFS component safety gate + 16.6m-constrained Case A+B adjacency.
+
+**Result:** 131 sectors, 0 disconnected, 16 ftsplit, 2 merged. 5/6 benchmarks (RBiH w40 survival_corridors over by 0.9pp). 88.2% area match. Hash `5a49833cdfbdbeef`. 585/585 tests pass.
+
+## [2026-03-13] n682: Strict Case B Contiguity Fix — Cross-Enemy Sector Elimination
+
+**Problem:** Sectors could span front edges on both sides of an enemy pocket (e.g. 3rd Corps Zavidovici with fronts in Ilijas AND Zavidovici, separated by RS Ozren territory). Case B edge adjacency bridged front edges facing the same enemy from opposite directions through GIS near-miss contacts.
+
+**Fix:** `buildEdgeAdjacencyStrictCaseB` in `corps_front_sectors.ts` — Case A always, Case B only when both friendly-hostile edges are in strict adjacency (≤5.5m shared boundary). Municipality guard on `mapOsidsToCorps` Phase 2 BFS prevents corps territory race conditions.
+
+**Result:** 0 sectors with disconnected friendly territory (all 144 verified). 6/6 benchmarks PASS. 585/585 tests pass. Hash `80ed2277198190ec`. Full details: `docs/40_reports/SECTOR_MASTER.md`.
+
 ## [2026-03-13] Layer C IMPLEMENTED — Player Visibility UI (Defense Heat Map, Battle Reports, Home Indicators)
 
 **Status:** All three layers (A+B+C) of the Sector Defense Rework are COMPLETE.

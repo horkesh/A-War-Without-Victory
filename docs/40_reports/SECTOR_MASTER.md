@@ -1,21 +1,46 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-03-13 (n668, 40w — Layer B sector stances IMPLEMENTED)
-**Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`
+**Updated:** 2026-03-13 (n692, 40w — Case B split threshold + merge alignment)
+**Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
 
-## Current State (n664)
+## Current State (n692)
 
 | Metric | Value |
 |---|---|
-| Total sectors | 92 |
-| Contiguous (strict triple-junction) | 90 |
-| Bending front (under review) | 2 |
-| Shared territory OSIDs (all factions) | 67 |
-| Calibration | 6/6 benchmarks, 88.7% area-weighted |
-| Hash | 0ca780c065365530 |
+| Total sectors | 131 |
+| Contiguous (friendly BFS) | 131 (0 violations) |
+| Bending front | 0 |
+| Calibration | 5/6 benchmarks, 88.2% area-weighted |
+
+### n692 Changes (Case B Split Threshold + Merge Alignment)
+
+**Problem:** n682's strict Case B threshold of 5.5m (`SHARED_BOUNDARY_THRESHOLD`) was too aggressive for the split step, causing over-fragmentation (144 sectors). Many legitimate triple-junction connections with distances in the 6-15m range were being severed.
+
+**Key insight — natural gap in Case B distance distribution:** Analysis of all Case B connections revealed a clean gap between 15.5m and 24.6m with zero connections. Connections below 15.5m are real triple-junction contacts; connections above 24.6m are phantom bridges across enemy pockets. The 16.6m threshold (`CASE_B_SPLIT_THRESHOLD`) sits squarely in this gap.
+
+**Changes:**
+1. **Split step (Step 4b):** `splitNonContiguousSectors` now uses `CASE_B_SPLIT_THRESHOLD` (16.6m) instead of `SHARED_BOUNDARY_THRESHOLD` (5.5m) for Case B adjacency. This preserves legitimate short-distance Case B connections while still catching cross-enemy-pocket bridges.
+2. **Merge step (Step 4c):** `areSectorsEdgeAdjacent` now uses the same 16.6m threshold for edge adjacency (both Case A and Case B constrained to 16.6m). This prevents the merge from re-bridging connections that the split just broke.
+3. **Result:** 144 → 131 sectors. 0 disconnected. 5/6 benchmarks pass. 88.2% area-weighted (+1.1pp from n682).
+
+### n682 Changes (Strict Case B — Cross-Enemy Sector Fix)
+
+**Problem:** Sectors could span front edges on BOTH sides of an enemy pocket (e.g. 3rd Corps Zavidovici sector with white front lines in Ilijas/Breza on the south AND Zavidovici/Olovo on the north, separated by RS Ozren territory). A soldier cannot walk along the front from one segment to the other without crossing enemy territory.
+
+**Root cause:** Case B edge adjacency (same hostile OSID, friendly OSIDs adjacent) bridges front edges facing the same enemy from different directions. Example: `dragoradi` (Ilijas, south of RS pocket) and `olovo_2` (Olovo, north of pocket) both face hostile `krivajevici` — Case B connects them even though the front lines are disconnected. The 33m threshold (`FRONT_EDGE_MAX_GAP`) was too permissive: `olovo_2↔krivajevici` is 16.9m apart (passes 33m but fails 5.5m strict shared boundary).
+
+**Fix — `buildEdgeAdjacencyStrictCaseB`:** New function replaces standard `buildEdgeAdjacency` in the `splitNonContiguousSectors` re-check:
+- **Case A** (same friendly, hostile adj): Always allowed — follows front along friendly polygon boundary
+- **Case B** (same hostile, friendly adj): Only when BOTH fi-H and fj-H are in strict adjacency (≤5.5m `SHARED_BOUNDARY_THRESHOLD`), ensuring a real polygon triple junction where all three polygons physically share a vertex
+
+**Supporting fix — Municipality guard on `mapOsidsToCorps` Phase 2 BFS:** Prevents BFS race conditions where a corps claims territory in municipalities where another corps has home seeds (e.g. 3rd Corps displaced brigades in Ilijas pulling territory from 1st Corps).
+
+**Files changed:** `corps_front_sectors.ts` (new `buildEdgeAdjacencyStrictCaseB`, call site in `splitNonContiguousSectors`, municipality guard in `mapOsidsToCorps`), `osid_adjacency.ts` (import of `buildSharedBoundaryAdjacency`).
+
+**Verification:** `tools/check_sector_contiguity_all.cjs` — BFS through all friendly territory from each sector's friendly OSIDs confirms 0 disconnected sectors across all ARBiH sectors. No sector spans Zavidovici+Ilijas.
 
 ### n664 Changes (Contiguity Fix)
 
@@ -45,7 +70,8 @@ Step 2:  mergeUndersizedSubSegments — merge segments < MIN_SECTOR_EDGES
 Step 3:  splitOversizedSubSegments — split segments > MAX_SECTOR_EDGES at midpoint
 Step 3b: buildSectorFromSubSegments — create CorpsFrontSector objects
 Step 4:  splitOversized sectors (> MAX_SECTOR_BRIGADES at 4+ edges)
-Step 4b: splitNonContiguousSectors — triple-junction connectivity split (n664, was shared-OSID n620)
+Step 4b: splitNonContiguousSectors — triple-junction split with Case B ≤16.6m threshold (n692, was 5.5m n682)
+Step 4c: mergeUndersizedSectors — merge small sectors using same 16.6m edge adjacency (n692)
 Step 5:  Filter ghost/orphan sectors (0 front edges)
 ```
 
@@ -73,7 +99,15 @@ Step 8:  deduplicateBrigadesAcrossSectors — remove cross-sector duplicates
 - Case B: same hostile OSID, friendly OSIDs adjacent
 Uses `sharedBoundaryAdj` when available, falls back to full `osidAdjacency`.
 
-**Triple-junction contiguity** (`splitNonContiguousSectors`, upgraded n664): Used for contiguity enforcement (Step 4b). Now uses the SAME triple-junction adjacency as sub-segment construction (via `buildEdgeAdjacency` with faction info). Previously used shared-OSID connectivity (n620), which was too permissive — connected edges facing different directions at the same polygon triple junction. The upgrade correctly splits disconnected fronts (Zavidovići↔Kakanj) while preserving connected fronts.
+**Strict triple-junction contiguity** (`splitNonContiguousSectors` + `buildEdgeAdjacencyStrictCaseB`, n682→n692): Used for contiguity enforcement (Step 4b) and merge eligibility (Step 4c). After standard edge adjacency finds a single component, re-checks with strict Case B:
+- Case A: always allowed (same friendly, hostile adj)
+- Case B: only when BOTH fi-H and fj-H distances are ≤16.6m (`CASE_B_SPLIT_THRESHOLD`)
+
+The 16.6m threshold exploits a natural gap in the Case B distance distribution (15.5m → 24.6m with zero connections). This catches phantom connections where Case B bridges front edges on opposite sides of enemy pockets (e.g. 16.9m+ gaps are cross-pocket bridges) while preserving legitimate short-distance triple-junction contacts that the original 5.5m threshold (n682) was incorrectly severing.
+
+The merge step (Step 4c, `areSectorsEdgeAdjacent`) uses the same 16.6m threshold for both Case A and Case B adjacency, ensuring it cannot re-bridge connections that the split step just broke.
+
+Previously (n664) used standard `buildEdgeAdjacency` which didn't distinguish — causing mega-sectors spanning disconnected fronts (Zavidovići↔Ilijas across RS Ozren pocket). n682 fixed this with 5.5m but over-fragmented (144 sectors). n692 found the optimal threshold at 16.6m (131 sectors).
 
 **Shared front-edge territory** (`assignTerritoryVoronoi`, n664): Front-edge OSIDs (on `sub_segments.friendly_osids`) can belong to multiple sectors simultaneously. Rear territory remains exclusive (BFS first-claim). This prevents single-OSID sectors interrupting contiguous fronts at sector boundaries. Brigade assignment at shared OSIDs uses need-based tiebreaking (neediest same-corps sector).
 
@@ -215,6 +249,14 @@ Density range improved from 100:1 (n623) to 33:1 (n624) after Herzegovina/SRK fi
 
 ## Fixed Issues
 
+### Cross-enemy-territory mega-sectors (n682)
+
+**Was:** 3rd Corps Zavidovici sector had front edges on BOTH sides of the RS Ozren/Vares pocket — Ilijas/Breza on the south and Zavidovici/Olovo on the north, separated by RS territory. Visible as two disconnected white front segments with red enemy territory between them.
+**Root cause:** Case B edge adjacency (same hostile, friendly adj) bridged front edges facing the same enemy pocket from opposite directions. Example: `dragoradi` (Ilijas) and `olovo_2` (Olovo) both face hostile `krivajevici` — connected by Case B even though 16.9m apart (passes 33m `FRONT_EDGE_MAX_GAP` but NOT a true shared boundary). Additionally, `mapOsidsToCorps` Phase 2 BFS had no municipality guard, allowing displaced 3rd Corps brigades in Ilijas to pull territory from 1st Corps via BFS race.
+**Fix:** (1) `buildEdgeAdjacencyStrictCaseB` — Case A always, Case B only when both fi-H and fj-H are in strict adjacency (≤5.5m initially, refined to ≤16.6m in n692). (2) Municipality guard on Phase 2 BFS: skip expansion into municipalities where another corps has home seeds.
+**Result:** 0 sectors with disconnected friendly territory (verified by `check_sector_contiguity_all.cjs`). 144 sectors (up from 92), later reduced to 131 (n692 threshold refinement). 6/6 benchmarks pass.
+**Key insight:** A sector is a contiguous segment of the front LINE. Case B can lie about front-line connectivity when two friendly polygons touch near an enemy polygon but the front edges face different directions. The Case B distance distribution has a natural gap at 15.5m–24.6m — the 16.6m threshold (n692) exploits this gap to filter phantom bridges without over-fragmenting.
+
 ### VRS Herzegovina stealing Sarajevo siege perimeter (n624)
 
 **Was:** Herzegovina Corps owned the Sarajevo siege ring (Centar, Stari Grad, Novo Sarajevo, Ilidza, Vogosca) — should be Sarajevo-Romanija Corps (SRK). SRK was pushed to Ilijas/Pale periphery.
@@ -249,6 +291,7 @@ Density range improved from 100:1 (n623) to 33:1 (n624) after Herzegovina/SRK fi
 | `tools/check_real_unassigned2.cjs` | Unassigned brigades + real cross-corps check |
 | `tools/insanity_check_n620.cjs` | War-or-game insanity check |
 | `tools/diag_vrs_sarajevo.cjs` | VRS corps Sarajevo sector/brigade diagnostics |
+| `tools/check_sector_contiguity_all.cjs` | Verify ALL ARBiH sectors have contiguous friendly territory (BFS) |
 | `tools/diag_bfs_seeds.cjs` | BFS seed tracing for corps territory mapping |
 
 ---
@@ -267,3 +310,5 @@ Density range improved from 100:1 (n623) to 33:1 (n624) after Herzegovina/SRK fi
 | n666 | 2026-03-13 | Layer A: distance-weighted reactive defense | 92 | 89.1% |
 | n667 | 2026-03-13 | Layer A tuning: home bonus 1.5→1.3 | 92 | 89.3% |
 | n668 | 2026-03-13 | Layer B: independent sector stances (5 stances, bot AI, combat integration) | 92 | 89.0% |
+| n682 | 2026-03-13 | Strict Case B contiguity — cross-enemy sector fix + municipality BFS guard | 144 | 87.1% |
+| n692 | 2026-03-13 | Case B split threshold 5.5m→16.6m, merge uses same threshold | 131 | 88.2% |
