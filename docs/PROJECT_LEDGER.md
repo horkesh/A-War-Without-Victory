@@ -7,9 +7,36 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-13] Layer C IMPLEMENTED — Player Visibility UI (Defense Heat Map, Battle Reports, Home Indicators)
+
+**Status:** All three layers (A+B+C) of the Sector Defense Rework are COMPLETE.
+
+**Five sub-features:**
+
+| Step | Feature | Files |
+|------|---------|-------|
+| **C1** | Defense strength heat map (mode 7) | `buildDefenseStrengthGeoJSON.ts`, `MapContainer.tsx`, `MapModeToolbar.tsx`, `gameStore.ts`, `useKeyboardShortcuts.ts` |
+| **C2** | Enhanced battle reports with `DefenderContribution[]` | `attack_resolution_osid.ts`, `turn_summary.ts`, `compile_turn_summary.ts`, `AARPanel.tsx` |
+| **C3** | Sector stance controls | *(pre-existing from Layer B)* |
+| **C4** | Home defense indicators (green ring + tooltip badge) | `buildFormationsGeoJSON.ts`, `MapContainer.tsx`, `Tooltip.tsx` |
+| **C5** | Reactive defense preview tooltip (defense mode hover) | `Tooltip.tsx` |
+
+**What the player sees:**
+- Press **7** for Defense map mode — continuous red→green gradient showing per-OSID defense strength (replaces crude 3-tier density)
+- Green ring around brigades defending their home municipality
+- **⌂ Home municipality** badge in formation tooltip
+- Hover any OSID in defense mode → sector stance, brigade count (physical vs reactive), defender names
+- Battle reports: expandable **"▸ N defenders"** breakdown with per-brigade hop distance, home status, casualties
+
+**Calibration impact:** Zero — Layer C is display only. 585 tests pass. tsc clean. Map build clean.
+
+**Also fixed:** Missing `buildDensityGeoJSON` import in MapContainer.tsx (latent bug — density mode would fail at runtime).
+
+---
+
 ## [2026-03-13] Layer B IMPLEMENTED — Independent Sector Stances (n668)
 
-**Status:** Layers A+B implemented and verified. Layer C pending.
+**Status:** Layers A+B+C all implemented and verified.
 
 **Layer B adds five independent sector stances** that decouple sector posture from corps stance:
 

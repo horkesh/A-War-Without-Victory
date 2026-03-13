@@ -12,6 +12,7 @@ import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
 import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
+import { buildDensityGeoJSON } from './builders/buildDensityGeoJSON';
 import { buildDefenseStrengthGeoJSON } from './builders/buildDefenseStrengthGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
 import { buildPressureGeoJSON } from './builders/buildPressureGeoJSON';
@@ -54,10 +55,14 @@ const OSID_SUPPLY_FILL_LAYER_ID = 'osid-supply-fill';
 const OSID_SUPPLY_SOURCE_ID = 'osid-supply';
 const OSID_OPERATIONS_FILL_LAYER_ID = 'osid-operations-fill';
 const OSID_OPERATIONS_SOURCE_ID = 'osid-operations';
+const OSID_DEFENSE_FILL_LAYER_ID = 'osid-defense-fill';
+const OSID_DEFENSE_SOURCE_ID = 'osid-defense';
 /** Layer ID for formation markers (formationsVisible). */
 const FORMATION_MARKERS_LAYER_ID = 'formation-markers';
 /** Layer ID for formation labels (labelsVisible). */
 const FORMATION_LABELS_LAYER_ID = 'formation-labels';
+/** Layer ID for home-defense badge on formations at their home municipality. */
+const FORMATION_HOME_BADGE_LAYER_ID = 'formation-home-badge';
 const FRONT_EDGES_HOVER_SOURCE_ID = 'front-edges-hover';
 const FRONT_EDGES_HOVER_POS_LAYER_ID = 'front-edges-hover-pos';
 const FRONT_EDGES_HOVER_NEG_LAYER_ID = 'front-edges-hover-neg';
@@ -1079,6 +1084,25 @@ export function MapContainer() {
           },
         });
       }
+      // C4: Home defense badge — small glow ring on brigades at their home municipality
+      if (map.getSource('formations') && !safeHasLayer(map, FORMATION_HOME_BADGE_LAYER_ID)) {
+        map.addLayer(
+          {
+            id: FORMATION_HOME_BADGE_LAYER_ID,
+            type: 'circle',
+            source: 'formations',
+            filter: ['==', ['get', 'is_home'], true],
+            paint: {
+              'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 7, 14, 11],
+              'circle-color': 'transparent',
+              'circle-stroke-width': 1.5,
+              'circle-stroke-color': '#88cc44',
+              'circle-stroke-opacity': 0.7,
+            },
+          },
+          'formation-markers'
+        );
+      }
       return true;
     };
 
@@ -1312,6 +1336,9 @@ export function MapContainer() {
       if (safeHasLayer(m, OSID_OPERATIONS_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations');
       }
+      if (safeHasLayer(m, OSID_DEFENSE_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, OSID_DEFENSE_FILL_LAYER_ID, mapMode === 'defense');
+      }
     });
     return () => {
       cancelled = true;
@@ -1356,6 +1383,64 @@ export function MapContainer() {
         (m.getSource(OSID_DENSITY_SOURCE_ID) as GeoJSONSource).setData(densityGeoJson);
       }
       safeSetLayoutVisibility(m, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density');
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [mapReady, mapMode, loadedGameState]);
+
+  // Defense map mode — per-OSID defense strength via Layer A distance-weighted reactive defense.
+  useEffect(() => {
+    const map = mapRef.current;
+    const baseGeoJson = osidBaseRef.current;
+    const adjacency = osidAdjacencyRef.current;
+    if (!mapReady || !map || !baseGeoJson || !adjacency
+      || !loadedGameState?.corpsFrontSectors || !loadedGameState?.frontEdgesOsid
+      || !loadedGameState?.formations) return;
+
+    let cancelled = false;
+    const rafId = requestAnimationFrame(() => {
+      if (cancelled || !mapRef.current || !loadedGameState) return;
+      const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
+      const defenseGeoJson = buildDefenseStrengthGeoJSON(
+        controlGeoJson,
+        loadedGameState.corpsFrontSectors!,
+        loadedGameState.frontEdgesOsid!,
+        loadedGameState.formations,
+        loadedGameState.controlBySettlement,
+        adjacency!,
+      );
+      if (cancelled || !mapRef.current) return;
+      const m = mapRef.current;
+      if (!m.getSource(OSID_DEFENSE_SOURCE_ID)) {
+        m.addSource(OSID_DEFENSE_SOURCE_ID, { type: 'geojson', data: defenseGeoJson });
+        m.addLayer(
+          {
+            id: OSID_DEFENSE_FILL_LAYER_ID,
+            type: 'fill',
+            source: OSID_DEFENSE_SOURCE_ID,
+            paint: {
+              'fill-color': [
+                'interpolate',
+                ['linear'],
+                ['get', 'defense_strength'],
+                0.0, 'rgba(204, 34, 34, 0.40)',
+                0.3, 'rgba(204, 102, 34, 0.38)',
+                0.7, 'rgba(204, 170, 34, 0.35)',
+                1.0, 'rgba(136, 170, 34, 0.35)',
+                1.5, 'rgba(68, 170, 68, 0.35)',
+                2.0, 'rgba(34, 136, 68, 0.35)',
+              ],
+              'fill-opacity': 1,
+            },
+          },
+          'faction-border-glow-pos'
+        );
+      } else {
+        (m.getSource(OSID_DEFENSE_SOURCE_ID) as GeoJSONSource).setData(defenseGeoJson);
+      }
+      safeSetLayoutVisibility(m, OSID_DEFENSE_FILL_LAYER_ID, mapMode === 'defense');
     });
     return () => {
       cancelled = true;
@@ -1532,6 +1617,9 @@ export function MapContainer() {
       }
       if (!safeSetLayoutVisibility(map, FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
       if (!safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
+      if (safeHasLayer(map, FORMATION_HOME_BADGE_LAYER_ID)) {
+        safeSetLayoutVisibility(map, FORMATION_HOME_BADGE_LAYER_ID, formationsVisible);
+      }
       // Map mode visibility: dedicated overlay per mode.
       const showPolitical = mapMode === 'political';
       if (!safeSetLayoutVisibility(map, 'osid-control-fill', showPolitical)) allExist = false;

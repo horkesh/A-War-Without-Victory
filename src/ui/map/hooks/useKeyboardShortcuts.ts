@@ -6,7 +6,7 @@
 import { useEffect } from 'react';
 import { useGameStore, type MapMode } from '../store/gameStore';
 
-const MAP_MODES_BY_KEY: MapMode[] = ['political', 'ethnic', 'supply', 'pressure', 'density', 'operations'];
+const MAP_MODES_BY_KEY: MapMode[] = ['political', 'ethnic', 'supply', 'pressure', 'density', 'operations', 'defense'];
 
 function isFocusInInput(): boolean {
   const tag = document.activeElement?.tagName?.toUpperCase();
@@ -46,7 +46,7 @@ export function useKeyboardShortcuts(): void {
       }
 
       const n = Number(event.key);
-      const digit = n >= 1 && n <= 6 ? n : 0;
+      const digit = n >= 1 && n <= 7 ? n : 0;
       if (digit >= 1 && digit <= MAP_MODES_BY_KEY.length) {
         const mode = MAP_MODES_BY_KEY[digit - 1];
         useGameStore.getState().setMapMode(mode);

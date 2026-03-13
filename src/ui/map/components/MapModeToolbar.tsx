@@ -12,6 +12,7 @@ const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
   { id: 'pressure', label: '4: Pressure', key: '4' },
   { id: 'density', label: '5: Density', key: '5' },
   { id: 'operations', label: '6: Operations', key: '6' },
+  { id: 'defense', label: '7: Defense', key: '7' },
 ];
 
 const DEV_LAYER_TOGGLES = [

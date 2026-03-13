@@ -1,7 +1,7 @@
 # Comprehensive Sector Defense Rework — Implementation Plan
 
 **Date:** 2026-03-13
-**Status:** Layers A+B IMPLEMENTED (n668). Layer C pending.
+**Status:** ALL THREE LAYERS IMPLEMENTED (n668 + Layer C). Complete.
 **Scope:** Three-layer rework: (A) Distance-weighted reactive defense engine, (B) Independent sector stance system, (C) Player visibility UI
 **Affects:** Calibration, sector defense model, casualty distribution, bot AI, map UI, battle reports
 

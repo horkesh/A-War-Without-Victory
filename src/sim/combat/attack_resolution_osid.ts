@@ -476,7 +476,21 @@ export interface AttackResolutionOsidReport {
         attacker_casualties: number;
         /** Actual total defender casualties (KIA+WIA+MIA) from this battle. */
         defender_casualties: number;
+        /** Per-brigade defender contributions (Layer A distance-weighted). */
+        defender_contributions?: DefenderContribution[];
     }>;
+}
+
+export interface DefenderContribution {
+    brigade_id: FormationId;
+    /** BFS hop distance from brigade location to battle OSID (0 = physically present). */
+    distance_hops: number;
+    /** Whether brigade is defending its home municipality. */
+    is_home_municipality: boolean;
+    /** Reactive weight used for power and casualty calculation. */
+    reactive_weight: number;
+    /** Casualties absorbed by this brigade in this battle. */
+    casualties_taken: number;
 }
 
 function pushSnapEvent(report: AttackResolutionOsidReport, event: AttackResolutionOsidSnapEvent): void {
@@ -598,6 +612,8 @@ export function resolveAttackOrdersOsid(
         let sectorDefenseBrigades: FormationState[] | null = null;
         // Per-brigade reactive weights for distance-weighted casualty distribution
         let sectorBrigadeWeights: Map<FormationId, number> | null = null;
+        // Per-brigade metadata for defender contribution records (Layer C)
+        let sectorBrigadeMeta: Map<FormationId, { hops: number; isHome: boolean }> | null = null;
         const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
         const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
         const pc = state.political?.political_controllers ?? {};
@@ -623,16 +639,19 @@ export function resolveAttackOrdersOsid(
                 let physicalPower = 0;
                 let effectiveReserves = 0;
                 const brigadeWeights = new Map<FormationId, number>();
+                const brigadeMeta = new Map<FormationId, { hops: number; isHome: boolean }>();
                 for (const b of sectorBrigades) {
                     const locOsid = (b as { location_osid?: string }).location_osid ?? '';
                     const bPower = computeDefenderPower(state, b, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(b));
                     const homeMun = munFromOsid((b as { home_osid?: string }).home_osid ?? '');
-                    const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
+                    const isHome = !!(homeMun && homeMun === targetMun);
+                    const homeBonus = isHome ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
 
                     if (locOsid === targetOsid) {
                         // Physical defenders: full power, weight = 1.0 × homeBonus
                         physicalPower += bPower;
                         brigadeWeights.set(b.id, bPower * homeBonus);
+                        brigadeMeta.set(b.id, { hops: 0, isHome });
                     } else {
                         // Reserve: distance-weighted contribution
                         const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
@@ -640,6 +659,7 @@ export function resolveAttackOrdersOsid(
                         const contribution = bPower * distWeight * homeBonus;
                         effectiveReserves += contribution;
                         brigadeWeights.set(b.id, contribution);
+                        brigadeMeta.set(b.id, { hops, isHome });
                     }
                 }
 
@@ -659,6 +679,7 @@ export function resolveAttackOrdersOsid(
                 isSectorCoverageDefense = true;
                 sectorDefenseBrigades = sectorBrigades;
                 sectorBrigadeWeights = brigadeWeights;
+                sectorBrigadeMeta = brigadeMeta;
             } else if (defenderFormations.length > 0) {
                 // Brigade at OSID but not in any sector (edge case: garrison, enclave)
                 const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
@@ -774,6 +795,25 @@ export function resolveAttackOrdersOsid(
         const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
         const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(baseDefenderCas)));
 
+        // Build defender contribution records for Layer C battle reports
+        let defenderContributions: DefenderContribution[] | undefined;
+        if (sectorBrigadeWeights && sectorBrigadeMeta && sectorDefenseBrigades && sectorDefenseBrigades.length > 1) {
+            const totalWeight = sectorDefenseBrigades.reduce((s, b) => s + (sectorBrigadeWeights!.get(b.id) ?? 0), 0);
+            defenderContributions = [];
+            for (const b of sectorDefenseBrigades) {
+                const w = sectorBrigadeWeights.get(b.id) ?? 0;
+                const meta = sectorBrigadeMeta.get(b.id);
+                const frac = totalWeight > 0 ? w / totalWeight : 1 / sectorDefenseBrigades.length;
+                defenderContributions.push({
+                    brigade_id: b.id,
+                    distance_hops: meta?.hops ?? 0,
+                    is_home_municipality: meta?.isHome ?? false,
+                    reactive_weight: Math.round(w * 100) / 100,
+                    casualties_taken: Math.round(finalDefenderCas * frac),
+                });
+            }
+        }
+
         report.battles.push({
             attacker_brigade: firstAttacker.id,
             attacker_faction: attackerFaction,
@@ -786,6 +826,7 @@ export function resolveAttackOrdersOsid(
             snap_events: battleSnapEvents,
             attacker_casualties: finalAttackerCas,
             defender_casualties: finalDefenderCas,
+            defender_contributions: defenderContributions,
         });
 
         const aKia = Math.floor(finalAttackerCas * KIA_FRACTION);

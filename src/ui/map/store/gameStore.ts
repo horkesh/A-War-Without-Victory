@@ -25,7 +25,7 @@ function buildStateFingerprint(jsonOrText: unknown | string): string | null {
 }
 
 /** Map overlay mode (HOI §3.1, §6). */
-export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure' | 'density' | 'operations';
+export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure' | 'density' | 'operations' | 'defense';
 
 /** Single staged order for the current turn (Phase C5). */
 export interface StagedOrder {

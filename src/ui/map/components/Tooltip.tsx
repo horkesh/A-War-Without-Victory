@@ -2,13 +2,14 @@
  * Rich tooltip system (Phase C1). HOI spec §7, §9.2.
  * 300ms delay, warm palette, pointer-events: none so tooltips never block clicks.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getFormationsAtOsid } from '../utils/formationAtOsid';
 import { stripFactionSuffix } from '../utils/sectorUtils';
 import { FACTION_COLORS } from '../utils/theme';
 import { SettlementDetailContent } from './SettlementDetailContent';
+import type { CorpsFrontSectorView, FormationView } from '../data/types';
 
 const TOOLTIP_DELAY_MS = 300;
 const TOOLTIP_OFFSET = 12;
@@ -21,7 +22,7 @@ function FormationTooltipContent({
   osidDisplayNames,
 }: {
   formationId: string;
-  formations: { id: string; name: string; faction: string; corps_id?: string; personnel?: number; cohesion?: number; posture?: string; aorSettlementIds?: string[] }[] | undefined;
+  formations: { id: string; name: string; faction: string; corps_id?: string; personnel?: number; cohesion?: number; posture?: string; aorSettlementIds?: string[]; home_osid?: string; location_osid?: string }[] | undefined;
   attackOrders: { brigadeId: string; targetSettlementId: string }[] | undefined;
   osidDisplayNames: Record<string, string> | null;
 }) {
@@ -49,6 +50,13 @@ function FormationTooltipContent({
           {corps.name} {formation.corps_id !== '_ungrouped' ? `(${formation.corps_id})` : ''}
         </div>
       )}
+      {formation.home_osid && formation.location_osid && (() => {
+        const munFrom = (o: string) => o.split(':')[1];
+        const isHome = munFrom(formation.home_osid!) === munFrom(formation.location_osid!);
+        return isHome ? (
+          <div className="text-[10px] text-green-400 mb-1">⌂ Home municipality</div>
+        ) : null;
+      })()}
       {formation.personnel != null && (
         <div className="text-[11px] text-text-secondary mb-1">
           Personnel: {formation.personnel.toLocaleString()}
@@ -171,12 +179,103 @@ function FrontTooltipContent({
   );
 }
 
+/** C5: Defense strength preview shown in defense map mode on OSID hover. */
+function DefensePreviewContent({
+  osid,
+  sectors,
+  formations,
+}: {
+  osid: string;
+  sectors: CorpsFrontSectorView[] | undefined;
+  formations: FormationView[] | undefined;
+}) {
+  const info = useMemo(() => {
+    if (!sectors || !formations) return null;
+    const formationMap = new Map(formations.map(f => [f.id, f]));
+
+    // Find the sector containing this OSID via edge_ids (format: "osidA::osidB")
+    const sector = sectors.find(s =>
+      s.edge_ids?.some((eid: string) => {
+        const parts = eid.split('::');
+        return parts[0] === osid || parts[1] === osid;
+      })
+    );
+    if (!sector) return null;
+
+    const brigadeIds = [...(sector.assigned_brigade_ids ?? []), ...(sector.reserve_brigade_ids ?? [])];
+    const munFromOsid = (o: string | undefined): string | undefined => o?.split(':')[1];
+    const targetMun = munFromOsid(osid);
+
+    let physicalCount = 0;
+    let reactiveCount = 0;
+    const brigades: { id: string; name: string; atOsid: boolean; isHome: boolean }[] = [];
+
+    for (const bid of brigadeIds) {
+      const f = formationMap.get(bid);
+      if (!f || !f.location_osid || !f.personnel || f.personnel <= 0) continue;
+      const atOsid = f.location_osid === osid;
+      const isHome = !!(munFromOsid(f.home_osid) && munFromOsid(f.home_osid) === targetMun);
+      if (atOsid) physicalCount++;
+      else reactiveCount++;
+      brigades.push({ id: bid, name: f.name, atOsid, isHome });
+    }
+
+    return {
+      sector_id: sector.sector_id,
+      stance: sector.sector_stance ?? 'defend',
+      physicalCount,
+      reactiveCount,
+      brigades: brigades.sort((a, b) => (a.atOsid === b.atOsid ? 0 : a.atOsid ? -1 : 1)),
+    };
+  }, [osid, sectors, formations]);
+
+  if (!info) return null;
+
+  const STANCE_LABEL: Record<string, string> = {
+    fortify: 'Fortify', defend: 'Defend', elastic: 'Elastic',
+    active_defense: 'Active Def.', screening: 'Screening',
+  };
+
+  return (
+    <div className="mt-2 pt-2 border-t border-panel-border/40">
+      <div className="text-[9px] text-text-muted uppercase tracking-wide mb-1">Defense Preview</div>
+      <div className="text-[10px] text-text-secondary flex gap-2">
+        <span>Sector stance: <span className="text-text-primary">{STANCE_LABEL[info.stance] ?? info.stance}</span></span>
+      </div>
+      <div className="text-[10px] text-text-secondary mt-0.5">
+        {info.physicalCount > 0
+          ? <span><span className="text-text-primary">{info.physicalCount}</span> at OSID</span>
+          : <span className="text-amber-400">No brigades at OSID</span>
+        }
+        {info.reactiveCount > 0 && (
+          <span className="ml-2"><span className="text-text-primary">{info.reactiveCount}</span> reactive</span>
+        )}
+      </div>
+      {info.brigades.length > 0 && (
+        <div className="mt-1 space-y-px">
+          {info.brigades.slice(0, 5).map(b => (
+            <div key={b.id} className="text-[9px] text-text-muted flex items-center gap-1">
+              <span className="text-text-secondary">{b.atOsid ? '⊕' : '↷'}</span>
+              {b.isHome && <span title="Home municipality">⌂</span>}
+              <span className="truncate">{b.name}</span>
+            </div>
+          ))}
+          {info.brigades.length > 5 && (
+            <div className="text-[9px] text-text-muted">+{info.brigades.length - 5} more</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Tooltip() {
   const tooltipTarget = useGameStore((s) => s.tooltipTarget);
   const tooltipPosition = useGameStore((s) => s.tooltipPosition);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const mapMode = useGameStore((s) => s.mapMode);
 
   const [visible, setVisible] = useState(false);
   const [delayedTarget, setDelayedTarget] = useState<typeof tooltipTarget>(null);
@@ -214,20 +313,29 @@ export function Tooltip() {
       style={style}
     >
       {delayedTarget.type === 'osid' && (
-        <SettlementDetailContent
-          osid={delayedTarget.id}
-          osidDisplayNames={osidDisplayNames}
-          osidPropertiesMap={osidPropertiesMap}
-          controlBySettlement={loadedGameState?.controlBySettlement}
-          formationsAtOsid={getFormationsAtOsid(loadedGameState?.formations, delayedTarget.id).map((f) => ({
-            id: f.id,
-            name: f.name,
-            faction: f.faction,
-            personnel: f.personnel,
-            kind: f.kind,
-          }))}
-          variant="tooltip"
-        />
+        <>
+          <SettlementDetailContent
+            osid={delayedTarget.id}
+            osidDisplayNames={osidDisplayNames}
+            osidPropertiesMap={osidPropertiesMap}
+            controlBySettlement={loadedGameState?.controlBySettlement}
+            formationsAtOsid={getFormationsAtOsid(loadedGameState?.formations, delayedTarget.id).map((f) => ({
+              id: f.id,
+              name: f.name,
+              faction: f.faction,
+              personnel: f.personnel,
+              kind: f.kind,
+            }))}
+            variant="tooltip"
+          />
+          {mapMode === 'defense' && (
+            <DefensePreviewContent
+              osid={delayedTarget.id}
+              sectors={loadedGameState?.corpsFrontSectors}
+              formations={loadedGameState?.formations}
+            />
+          )}
+        </>
       )}
       {delayedTarget.type === 'formation' && (
         <FormationTooltipContent

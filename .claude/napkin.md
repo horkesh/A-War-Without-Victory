@@ -61,7 +61,7 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-13] IN PROGRESS: Sector Defense Rework — Layers A+B DONE (n668), Layer C pending**: Layer A: Distance-weighted reactive defense. Layer B: Independent sector stances (5 stances, bot AI, combat integration). Remaining: (C) Player UI (defense heat map, enhanced AARs, stance controls). Plan: `docs/40_reports/20260313_DISTANCE_WEIGHTED_REACTIVE_DEFENSE_PLAN.md`.
+1. **[2026-03-13] DONE: Sector Defense Rework — All 3 Layers Complete (n668+C)**: Layer A: Distance-weighted reactive defense. Layer B: Independent sector stances. Layer C: Defense heat map (mode 7), enhanced battle reports with DefenderContribution[], home defense indicators, defense preview tooltip. Plan: `docs/40_reports/20260313_DISTANCE_WEIGHTED_REACTIVE_DEFENSE_PLAN.md`.
 2. **[2026-03-13] Calibration: n668 = 89.0% area-weighted, 6/6 benchmarks PASS, RS w40 0.519**: Layers A+B complete. RS delta -22. Hash 78a9d9943486d996. 585 tests.
 2. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers. Root cause: brigade posture gate blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation.
 3. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.

@@ -16,6 +16,8 @@ interface FormationMarkerProperties {
   personnel: number | null;
   location_osid: string;
   posture: string | null;
+  /** True when brigade is in its home municipality. */
+  is_home: boolean;
 }
 
 function getBrigadeType(name: string): string {
@@ -37,6 +39,7 @@ export function buildFormationsGeoJSON(
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
   const unitsPerOsid = new Map<string, number>();
 
+  const munFromOsid = (osid: string | undefined): string | undefined => osid?.split(':')[1];
   const orderedFormations = [...state.formations].sort((a, b) => a.id.localeCompare(b.id));
   const features: Array<Feature<Point, FormationMarkerProperties>> = [];
 
@@ -74,6 +77,7 @@ export function buildFormationsGeoJSON(
         personnel: typeof formation.personnel === 'number' ? formation.personnel : null,
         location_osid: osid,
         posture: formation.posture ?? null,
+        is_home: !!(munFromOsid(formation.home_osid) && munFromOsid(formation.home_osid) === munFromOsid(osid)),
       },
     });
   }

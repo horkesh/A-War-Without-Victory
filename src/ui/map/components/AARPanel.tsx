@@ -107,6 +107,49 @@ function FactionTag({ faction }: { faction: string }) {
     );
 }
 
+function DefenderBreakdown({ contributions, onSelectFormation }: {
+    contributions: NonNullable<TurnBattle['defender_contributions']>;
+    onSelectFormation?: (id: string) => void;
+}) {
+    const [expanded, setExpanded] = useState(false);
+    const sorted = [...contributions].sort((a, b) => b.reactive_weight - a.reactive_weight);
+    return (
+        <div className="ml-6 mt-0.5">
+            <button
+                type="button"
+                className="text-[9px] text-text-muted hover:text-interactive transition-colors"
+                onClick={() => setExpanded(!expanded)}
+            >
+                {expanded ? '▾' : '▸'} {sorted.length} defenders
+            </button>
+            {expanded && (
+                <div className="mt-0.5 space-y-px">
+                    {sorted.map((c) => (
+                        <div key={c.brigade_id} className="text-[9px] text-text-muted tabular-nums flex items-center gap-1">
+                            <span className="text-text-secondary w-3 text-right">{c.distance_hops === 0 ? '⊕' : `${c.distance_hops}↷`}</span>
+                            {c.is_home_municipality && <span title="Home municipality">⌂</span>}
+                            {onSelectFormation ? (
+                                <button
+                                    type="button"
+                                    className="hover:text-interactive transition-colors truncate"
+                                    onClick={() => onSelectFormation(c.brigade_id)}
+                                >
+                                    {c.brigade_id}
+                                </button>
+                            ) : (
+                                <span className="truncate">{c.brigade_id}</span>
+                            )}
+                            <span className="ml-auto shrink-0">
+                                {c.casualties_taken > 0 ? `−${c.casualties_taken}` : '—'}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 function BattleRow({ battle, onSelectFormation }: { battle: TurnBattle; onSelectFormation?: (id: string) => void }) {
     const label = humanizeOsid(battle.osid);
     const outcomeLabel = OUTCOME_LABEL[battle.outcome] ?? battle.outcome;
@@ -153,6 +196,9 @@ function BattleRow({ battle, onSelectFormation }: { battle: TurnBattle; onSelect
                         </>
                     )}
                 </div>
+            )}
+            {battle.defender_contributions && battle.defender_contributions.length > 1 && (
+                <DefenderBreakdown contributions={battle.defender_contributions} onSelectFormation={onSelectFormation} />
             )}
         </div>
     );

@@ -28,6 +28,14 @@ export interface TurnBattle {
     defender_casualties: number;
     territory_flipped: boolean;
     was_concentrated: boolean;
+    /** Per-brigade defender contributions from distance-weighted defense (Layer A). */
+    defender_contributions?: Array<{
+        brigade_id: string;
+        distance_hops: number;
+        is_home_municipality: boolean;
+        reactive_weight: number;
+        casualties_taken: number;
+    }>;
 }
 
 /** A territory control change deemed notable. */
