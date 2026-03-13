@@ -188,7 +188,11 @@
       "Bash(npm install)",
       "Bash(npm install --ignore-scripts)",
       "Bash(/f/A-War-Without-Victory/docs/PROJECT_LEDGER.md:*)",
-      "Bash(\"F:\\\\A-War-Without-Victory\\\\docs\\\\PROJECT_LEDGER.md\":*)"
+      "Bash(\"F:\\\\A-War-Without-Victory\\\\docs\\\\PROJECT_LEDGER.md\":*)",
+      "Bash(find f:/A-War-Without-Victory/tools -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(magick --version)",
+      "Bash(npx sharp-cli:*)",
+      "Bash(node -e \"require\\(''sharp''\\)\")"
     ]
   }
 }

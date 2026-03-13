@@ -1,0 +1,14 @@
+{
+  "volume_id": "BB1",
+  "page_number": 77,
+  "raw_text": "Section I\nIntroduction\nSlovenia 1990-1991\n41\n",
+  "clean_text": "Section I\nIntroduction\nSlovenia 1990-1991\n41\n",
+  "ocr_applied": false,
+  "text_hash": "69c802640f568d45e9fdfe57fb7c98ed68abfb2871275519003b494d765a0afe",
+  "clean_text_hash": "69c802640f568d45e9fdfe57fb7c98ed68abfb2871275519003b494d765a0afe",
+  "layout_blocks": [],
+  "tables": [],
+  "figures": [],
+  "map_regions": [],
+  "notes": []
+}

@@ -1,0 +1,509 @@
+{
+  "schema_version": "2.1",
+  "image_dimensions": {
+    "width": 2752,
+    "height": 1536
+  },
+  "regions": [
+    {
+      "id": "wall_flag_area",
+      "type": "sprite_overlay",
+      "bounds": {
+        "x": 1538,
+        "y": 465,
+        "width": 172,
+        "height": 632
+      },
+      "polygon": [
+        [
+          1612,
+          1097
+        ],
+        [
+          1636,
+          1084
+        ],
+        [
+          1681,
+          1057
+        ],
+        [
+          1710,
+          1036
+        ],
+        [
+          1700,
+          999
+        ],
+        [
+          1686,
+          862
+        ],
+        [
+          1681,
+          812
+        ],
+        [
+          1631,
+          534
+        ],
+        [
+          1628,
+          492
+        ],
+        [
+          1612,
+          465
+        ],
+        [
+          1607,
+          494
+        ],
+        [
+          1560,
+          793
+        ],
+        [
+          1538,
+          968
+        ],
+        [
+          1562,
+          1012
+        ],
+        [
+          1578,
+          1034
+        ],
+        [
+          1594,
+          1089
+        ]
+      ],
+      "action": "open_faction_overview",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Faction Overview",
+      "layer": "wall"
+    },
+    {
+      "id": "wall_cork_board",
+      "type": "dynamic_render",
+      "bounds": {
+        "x": 854,
+        "y": 576,
+        "width": 602,
+        "height": 325
+      },
+      "polygon": [
+        [
+          854,
+          584
+        ],
+        [
+          1456,
+          576
+        ],
+        [
+          1454,
+          896
+        ],
+        [
+          854,
+          901
+        ]
+      ],
+      "action": "open_strategic_map",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Strategic Map",
+      "layer": "wall"
+    },
+    {
+      "id": "wall_calendar_area",
+      "type": "dynamic_render",
+      "bounds": {
+        "x": 1774,
+        "y": 640,
+        "width": 304,
+        "height": 190
+      },
+      "polygon": [
+        [
+          1774,
+          642
+        ],
+        [
+          1776,
+          830
+        ],
+        [
+          2078,
+          825
+        ],
+        [
+          2075,
+          640
+        ]
+      ],
+      "action": "open_calendar",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Calendar",
+      "layer": "wall"
+    },
+    {
+      "id": "diplomatic_telephone",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 1800,
+        "y": 1158,
+        "width": 185,
+        "height": 77
+      },
+      "polygon": [
+        [
+          1890,
+          1235
+        ],
+        [
+          1964,
+          1224
+        ],
+        [
+          1967,
+          1208
+        ],
+        [
+          1985,
+          1208
+        ],
+        [
+          1983,
+          1192
+        ],
+        [
+          1977,
+          1190
+        ],
+        [
+          1972,
+          1176
+        ],
+        [
+          1948,
+          1163
+        ],
+        [
+          1919,
+          1158
+        ],
+        [
+          1898,
+          1158
+        ],
+        [
+          1869,
+          1163
+        ],
+        [
+          1864,
+          1171
+        ],
+        [
+          1858,
+          1182
+        ],
+        [
+          1824,
+          1184
+        ],
+        [
+          1803,
+          1187
+        ],
+        [
+          1800,
+          1198
+        ],
+        [
+          1805,
+          1205
+        ],
+        [
+          1813,
+          1213
+        ]
+      ],
+      "action": "open_diplomacy",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Diplomacy",
+      "layer": "desk"
+    },
+    {
+      "id": "desk_radio",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 1975,
+        "y": 1205,
+        "width": 116,
+        "height": 156
+      },
+      "polygon": [
+        [
+          1975,
+          1301
+        ],
+        [
+          2051,
+          1359
+        ],
+        [
+          2091,
+          1361
+        ],
+        [
+          2091,
+          1322
+        ],
+        [
+          2091,
+          1266
+        ],
+        [
+          2001,
+          1205
+        ],
+        [
+          1977,
+          1216
+        ]
+      ],
+      "action": "open_radio_intel",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Radio Intelligence",
+      "layer": "desk"
+    },
+    {
+      "id": "newspaper_stack",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 885,
+        "y": 1240,
+        "width": 302,
+        "height": 140
+      },
+      "polygon": [
+        [
+          904,
+          1375
+        ],
+        [
+          1137,
+          1380
+        ],
+        [
+          1168,
+          1322
+        ],
+        [
+          1187,
+          1272
+        ],
+        [
+          1174,
+          1248
+        ],
+        [
+          1166,
+          1242
+        ],
+        [
+          1142,
+          1245
+        ],
+        [
+          1105,
+          1256
+        ],
+        [
+          1044,
+          1253
+        ],
+        [
+          1002,
+          1242
+        ],
+        [
+          978,
+          1240
+        ],
+        [
+          967,
+          1253
+        ],
+        [
+          959,
+          1253
+        ],
+        [
+          885,
+          1340
+        ],
+        [
+          885,
+          1348
+        ],
+        [
+          891,
+          1356
+        ],
+        [
+          893,
+          1364
+        ]
+      ],
+      "action": "open_news",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "News & Press",
+      "layer": "desk"
+    },
+    {
+      "id": "command_briefing_folio",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 621,
+        "y": 1227,
+        "width": 291,
+        "height": 142
+      },
+      "polygon": [
+        [
+          626,
+          1364
+        ],
+        [
+          830,
+          1369
+        ],
+        [
+          912,
+          1285
+        ],
+        [
+          912,
+          1240
+        ],
+        [
+          729,
+          1227
+        ],
+        [
+          621,
+          1306
+        ]
+      ],
+      "action": "open_briefing",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Command Briefing",
+      "layer": "desk"
+    },
+    {
+      "id": "commander_coatrack",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 579,
+        "y": 769,
+        "width": 206,
+        "height": 254
+      },
+      "polygon": [
+        [
+          692,
+          769
+        ],
+        [
+          708,
+          782
+        ],
+        [
+          756,
+          804
+        ],
+        [
+          774,
+          875
+        ],
+        [
+          780,
+          931
+        ],
+        [
+          785,
+          994
+        ],
+        [
+          751,
+          994
+        ],
+        [
+          751,
+          1012
+        ],
+        [
+          716,
+          1020
+        ],
+        [
+          671,
+          1023
+        ],
+        [
+          637,
+          1020
+        ],
+        [
+          605,
+          1018
+        ],
+        [
+          608,
+          1002
+        ],
+        [
+          587,
+          1002
+        ],
+        [
+          579,
+          938
+        ],
+        [
+          581,
+          896
+        ],
+        [
+          589,
+          841
+        ],
+        [
+          608,
+          804
+        ],
+        [
+          661,
+          782
+        ]
+      ],
+      "action": "open_commander",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Commander",
+      "layer": "wall"
+    }
+  ]
+}

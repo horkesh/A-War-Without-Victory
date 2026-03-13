@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AWWV — Polygon Region Editor</title>
+<title>AWWV — Warroom Anchor Region Editor v2.1</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -79,6 +79,35 @@ body {
   padding: 2px 4px; border-radius: 3px;
 }
 .region-item .delete-btn:hover { color: #f44; background: rgba(255,0,0,0.1); }
+
+/* ── Anchor checklist ── */
+#anchor-checklist {
+  padding: 8px 16px;
+  border-bottom: 1px solid #333;
+}
+.checklist-header {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6a7a8e;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.checklist-item {
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  padding: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.checklist-item:hover { color: #fff; }
+.checklist-item .check { width: 14px; text-align: center; }
+.checklist-item.defined .check { color: #4ad97a; }
+.checklist-item.missing .check { color: #664; }
+.checklist-item.defined { color: #8a9aae; }
+.checklist-item.missing { color: #d9b44a; }
 
 #props-panel {
   border-top: 1px solid #333;
@@ -205,7 +234,7 @@ body {
 <body>
 
 <div id="sidebar">
-  <div id="sidebar-header"><span>AWWV</span> Polygon Region Editor</div>
+  <div id="sidebar-header"><span>AWWV</span> Warroom Anchor Editor v2.1</div>
 
   <div id="load-section">
     <label>Background image</label>
@@ -215,11 +244,28 @@ body {
     <input type="file" id="json-input" accept=".json">
   </div>
 
+  <div id="anchor-checklist">
+    <div class="checklist-header">ANCHOR CONTRACT (8/8)</div>
+    <div id="checklist-items"></div>
+  </div>
+
   <div id="region-list-container"></div>
 
   <div id="props-panel" class="hidden">
+    <label>Anchor preset</label>
+    <select id="prop-anchor-preset">
+      <option value="">— custom —</option>
+      <option value="wall_flag_area">wall_flag_area</option>
+      <option value="wall_cork_board">wall_cork_board</option>
+      <option value="wall_calendar_area">wall_calendar_area</option>
+      <option value="diplomatic_telephone">diplomatic_telephone</option>
+      <option value="desk_radio">desk_radio</option>
+      <option value="newspaper_stack">newspaper_stack</option>
+      <option value="command_briefing_folio">command_briefing_folio</option>
+      <option value="commander_coatrack">commander_coatrack</option>
+    </select>
     <label>ID</label>
-    <input type="text" id="prop-id" placeholder="e.g. faction_flag">
+    <input type="text" id="prop-id" placeholder="e.g. wall_flag_area">
     <label>Type</label>
     <select id="prop-type">
       <option value="sprite_overlay">sprite_overlay</option>
@@ -299,11 +345,24 @@ body {
 </div>
 
 <script>
+// ── Anchor presets (8-anchor contract) ──
+const ANCHOR_PRESETS = {
+  wall_flag_area:        { type: 'sprite_overlay',  action: 'open_faction_overview',  tooltip: 'Faction Overview',   layer: 'wall' },
+  wall_cork_board:       { type: 'dynamic_render',  action: 'open_strategic_map',     tooltip: 'Strategic Map',      layer: 'wall' },
+  wall_calendar_area:    { type: 'dynamic_render',  action: 'open_calendar',          tooltip: 'Calendar',           layer: 'wall' },
+  diplomatic_telephone:  { type: 'baked_prop',      action: 'open_diplomacy',         tooltip: 'Diplomacy',          layer: 'desk' },
+  desk_radio:            { type: 'baked_prop',      action: 'open_radio_intel',       tooltip: 'Radio Intelligence', layer: 'desk' },
+  newspaper_stack:       { type: 'baked_prop',      action: 'open_news',              tooltip: 'News & Press',       layer: 'desk' },
+  command_briefing_folio:{ type: 'baked_prop',      action: 'open_briefing',          tooltip: 'Command Briefing',   layer: 'desk' },
+  commander_coatrack:    { type: 'baked_prop',      action: 'open_commander',         tooltip: 'Commander',          layer: 'wall' }
+};
+const ANCHOR_IDS = Object.keys(ANCHOR_PRESETS);
+
 // ── State ──
 let regions = [];       // Each: { id, type, polygon:[[x,y],...], action, hover_style, cursor, tooltip, layer, disabled, color }
 let selectedIdx = -1;
 let bgImage = null;
-let imgW = 2048, imgH = 1152;
+let imgW = 2752, imgH = 1536;  // Warroom authoring resolution
 let zoom = 1;
 
 // Drawing state
@@ -341,6 +400,7 @@ const coordsEl = document.getElementById('coords');
 const zoomLabel = document.getElementById('zoom-label');
 const modeIndicator = document.getElementById('mode-indicator');
 
+const propAnchorPreset = document.getElementById('prop-anchor-preset');
 const propId = document.getElementById('prop-id');
 const propType = document.getElementById('prop-type');
 const propX = document.getElementById('prop-x');
@@ -480,6 +540,7 @@ jsonInput.addEventListener('change', (e) => {
         selectedIdx = -1;
         drawingPoints = [];
         renderRegionList();
+        renderChecklist();
         resizeCanvases();
         drawBg();
         redraw();
@@ -835,15 +896,20 @@ function finishPolygon() {
   const poly = drawingPoints.map(p => [Math.round(p[0]), Math.round(p[1])]);
   const centroidY = poly.reduce((s, p) => s + p[1], 0) / poly.length;
 
+  // Auto-assign next undefined anchor
+  const defined = getDefinedAnchors();
+  const nextAnchor = ANCHOR_IDS.find(a => !defined.has(a));
+  const preset = nextAnchor ? ANCHOR_PRESETS[nextAnchor] : null;
+
   regions.push({
-    id: `region_${idx}`,
-    type: 'baked_prop',
+    id: nextAnchor || `region_${idx}`,
+    type: preset ? preset.type : 'baked_prop',
     polygon: poly,
-    action: '',
+    action: preset ? preset.action : '',
     hover_style: 'glow',
     cursor: 'pointer',
-    tooltip: '',
-    layer: centroidY < imgH * 0.5 ? 'wall' : 'desk',
+    tooltip: preset ? preset.tooltip : '',
+    layer: preset ? preset.layer : (centroidY < imgH * 0.5 ? 'wall' : 'desk'),
     disabled: false,
     color: COLORS[idx % COLORS.length]
   });
@@ -852,6 +918,7 @@ function finishPolygon() {
   undoStack = [];
   selectRegion(idx);
   renderRegionList();
+  renderChecklist();
   redraw();
 
   propId.focus();
@@ -883,9 +950,10 @@ function renderRegionList() {
     const div = document.createElement('div');
     div.className = 'region-item' + (i === selectedIdx ? ' selected' : '');
     const bounds = computeBounds(r.polygon);
+    const isAnchor = !!ANCHOR_PRESETS[r.id];
     div.innerHTML = `
       <span class="color-swatch" style="background:${r.color || COLORS[i % COLORS.length]}"></span>
-      <span class="region-id">${r.id}</span>
+      <span class="region-id">${isAnchor ? '⚓ ' : ''}${r.id}</span>
       <span class="region-info">${r.polygon ? r.polygon.length + 'v' : '?'} ${bounds.width}x${bounds.height}</span>
       <button class="delete-btn" data-idx="${i}" title="Delete">&times;</button>
     `;
@@ -899,6 +967,7 @@ function renderRegionList() {
     });
     regionList.appendChild(div);
   });
+  renderChecklist();
 }
 
 function selectRegion(idx) {
@@ -926,6 +995,7 @@ function updatePropsFromRegion() {
   if (selectedIdx < 0) return;
   const r = regions[selectedIdx];
   const bounds = computeBounds(r.polygon);
+  propAnchorPreset.value = ANCHOR_PRESETS[r.id] ? r.id : '';
   propId.value = r.id;
   propType.value = r.type;
   propX.value = bounds.x;
@@ -952,6 +1022,8 @@ function updateRegionFromProps() {
   r.tooltip = propTooltip.value.trim();
   r.layer = propLayer.value;
   r.disabled = propDisabled.checked;
+  // Sync preset dropdown if ID matches an anchor
+  propAnchorPreset.value = ANCHOR_PRESETS[r.id] ? r.id : '';
   renderRegionList();
   redraw();
 }
@@ -961,6 +1033,56 @@ function updateRegionFromProps() {
   el.addEventListener('change', updateRegionFromProps);
 });
 propDisabled.addEventListener('change', updateRegionFromProps);
+
+// ── Anchor preset selection ──
+propAnchorPreset.addEventListener('change', () => {
+  if (selectedIdx < 0) return;
+  const key = propAnchorPreset.value;
+  if (!key || !ANCHOR_PRESETS[key]) return;
+  const preset = ANCHOR_PRESETS[key];
+  const r = regions[selectedIdx];
+  r.id = key;
+  r.type = preset.type;
+  r.action = preset.action;
+  r.tooltip = preset.tooltip;
+  r.layer = preset.layer;
+  r.hover_style = 'glow';
+  r.cursor = 'pointer';
+  updatePropsFromRegion();
+  renderRegionList();
+  renderChecklist();
+  redraw();
+});
+
+// ── Anchor checklist ──
+function getDefinedAnchors() {
+  const ids = new Set(regions.map(r => r.id));
+  return ids;
+}
+
+function renderChecklist() {
+  const defined = getDefinedAnchors();
+  const container = document.getElementById('checklist-items');
+  const count = ANCHOR_IDS.filter(a => defined.has(a)).length;
+  document.querySelector('.checklist-header').textContent = `ANCHOR CONTRACT (${count}/${ANCHOR_IDS.length})`;
+  container.innerHTML = ANCHOR_IDS.map(anchor => {
+    const done = defined.has(anchor);
+    return `<div class="checklist-item ${done ? 'defined' : 'missing'}" data-anchor="${anchor}">
+      <span class="check">${done ? '✓' : '○'}</span>
+      <span>${anchor}</span>
+    </div>`;
+  }).join('');
+  // Click to select existing or start new with that anchor
+  container.querySelectorAll('.checklist-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const anchor = el.dataset.anchor;
+      const idx = regions.findIndex(r => r.id === anchor);
+      if (idx >= 0) {
+        selectRegion(idx);
+      }
+    });
+  });
+}
 
 // ── Keyboard ──
 document.addEventListener('keydown', (e) => {
@@ -1019,7 +1141,7 @@ document.addEventListener('keydown', (e) => {
 // ── Export ──
 function buildJSON() {
   return {
-    schema_version: "2.0",
+    schema_version: "2.1",
     image_dimensions: { width: imgW, height: imgH },
     regions: regions.map(r => {
       const bounds = computeBounds(r.polygon);
@@ -1066,6 +1188,7 @@ document.getElementById('btn-clear-all').addEventListener('click', () => {
   selectedIdx = -1;
   drawingPoints = [];
   renderRegionList();
+  renderChecklist();
   redraw();
   propsPanel.classList.add('hidden');
 });
@@ -1074,6 +1197,7 @@ document.getElementById('btn-clear-all').addEventListener('click', () => {
 resizeCanvases();
 drawBg();
 fitZoom();
+renderChecklist();
 </script>
 </body>
 </html>
