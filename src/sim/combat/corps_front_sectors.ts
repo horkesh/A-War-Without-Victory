@@ -738,33 +738,84 @@ function classifyBrigadesByTerritory(
             }
         }
 
-        // Phase 2b: Distribute remaining brigades round-robin to neediest
-        // REACHABLE sectors (same connected component).
+        // Phase 2b: Distribute remaining brigades to neediest NEARBY sectors.
+        // Distance-weighted scoring: score = need / (1 + distance). Hard cap at
+        // MAX_ASSIGNMENT_HOPS — brigades beyond this defend in place rather than
+        // marching across the map to a far-away sector.
+        const MAX_ASSIGNMENT_HOPS = 8;
+
+        // Pre-compute each sector's front OSID set for BFS target matching.
+        const sectorFrontOsidSets = new Map<CorpsFrontSector, Set<string>>();
+        for (const sn of sectorNeed) {
+            const frontSet = new Set<string>();
+            for (const ss of sn.sector.sub_segments) {
+                for (const o of ss.friendly_osids) frontSet.add(o);
+            }
+            sectorFrontOsidSets.set(sn.sector, frontSet);
+        }
+
         for (let ri = 0; ri < unmatched.length; ri++) {
             const bid = unmatched[ri]!;
             const f = formations[bid];
-            const brigComp = f?.location_osid ? (componentOf.get(f.location_osid) ?? -2) : -2;
+            const brigLoc = f?.location_osid;
+            const brigComp = brigLoc ? (componentOf.get(brigLoc) ?? -2) : -2;
 
             // Filter to reachable sectors only (same connected component)
             const reachable = sectorNeed.filter(sn => sn.comp === brigComp);
 
             // If no reachable sector, skip — brigade stays unassigned and will be
             // picked up by ensureMinimumSectorCoverage() which respects components.
-            // Cross-component assignment creates phantom defense at unreachable sectors.
             if (reachable.length === 0) continue;
-            const candidates = reachable;
 
-            // Sort by need descending, break ties by sector_id
-            candidates.sort((a, b) => b.need - a.need || strictCompare(a.sector.sector_id, b.sector.sector_id));
-
-            // If all have 0 need, distribute evenly by fewest assigned
-            if (candidates[0]!.need === 0) {
-                candidates.sort((a, b) =>
-                    a.sector.assigned_brigade_ids.length - b.sector.assigned_brigade_ids.length
-                    || strictCompare(a.sector.sector_id, b.sector.sector_id));
+            // BFS from brigade location through friendly territory to find distance
+            // to each candidate sector's front OSIDs. Single BFS, multiple targets.
+            const sectorDist = new Map<CorpsFrontSector, number>();
+            if (brigLoc) {
+                const visited = new Set<string>([brigLoc]);
+                let frontier = [brigLoc];
+                let dist = 0;
+                // Check if brigade is already on a sector's front OSID (distance 0)
+                for (const sn of reachable) {
+                    if (sectorFrontOsidSets.get(sn.sector)?.has(brigLoc)) {
+                        sectorDist.set(sn.sector, 0);
+                    }
+                }
+                while (frontier.length > 0 && dist < MAX_ASSIGNMENT_HOPS) {
+                    dist++;
+                    const next: string[] = [];
+                    for (const osid of frontier) {
+                        for (const nb of (adjacency.get(osid as Osid) ?? [])) {
+                            if (visited.has(nb)) continue;
+                            visited.add(nb);
+                            if (!friendlyOsids.has(nb)) continue;
+                            next.push(nb);
+                            // Check if this OSID is on any sector's front
+                            for (const sn of reachable) {
+                                if (!sectorDist.has(sn.sector) && sectorFrontOsidSets.get(sn.sector)?.has(nb)) {
+                                    sectorDist.set(sn.sector, dist);
+                                }
+                            }
+                        }
+                    }
+                    frontier = next;
+                }
             }
 
-            const target = candidates[0]!;
+            // Score candidates: need / (1 + distance). Unreachable sectors get -Infinity.
+            const scored = reachable
+                .map(sn => {
+                    const dist = sectorDist.get(sn.sector);
+                    if (dist === undefined) return { sn, score: -Infinity };
+                    const effectiveNeed = Math.max(sn.need, 0.1); // floor so 0-need sectors still attract nearby brigades
+                    return { sn, score: effectiveNeed / (1 + dist) };
+                })
+                .filter(s => s.score > -Infinity)
+                .sort((a, b) => b.score - a.score || strictCompare(a.sn.sector.sector_id, b.sn.sector.sector_id));
+
+            // If no sector within MAX_ASSIGNMENT_HOPS, brigade defends in place
+            if (scored.length === 0) continue;
+
+            const target = scored[0]!.sn;
             target.sector.assigned_brigade_ids.push(bid);
             target.need = Math.max(0, target.need - 1);
         }
