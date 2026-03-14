@@ -13162,13 +13162,19 @@ Only transfers non-frontline brigades (not currently on a sector front OSID). Sa
 - **13/13 OSID anchors PASS** ✅
 - 139 battles (RS 112, RBiH 21, HRHB 6)
 - RS win rate: **88.4%** (target 60-75% — P1 open)
-- Att:def casualty ratio: **0.79:1** (defenders take 25% more — P1 open)
+- Att:def casualty ratio: **0.79:1** (defenders take 25% more — **CLOSED BY AUDIT** in n30: 0.79:1 is within H5 historical range 0.5:1–1.0:1)
 - Outcome distribution: decisive_victory 73.4%, catastrophic 10.1%, repulsed 6.5%, stalemate 6.5%
 - /war-or-game sign-off: ✅ COMMITTED
 
-**Open P1 items (not addressed in this sprint):**
-1. Att:def ratio inversion (0.79:1) — root cause investigation needed
-2. RS win rate 88.4% — same root cause likely (operation selection producing lopsided fights)
+**n30 audit result (avoided_osids extension + H5 closure):**
+- `avoided_osids_by_faction` extended to `evaluateSectorAttack` intermediate path + direct objective + `evaluateUncontestedOccupation`. Defense-in-depth: prevents brka_2 from being captured by corridor sweep if calibration shifts.
+- n26-n29 casualty mod tuning attempts (OUTCOME_ATTACKER_MOD 1.3→1.5-1.6, OUTCOME_DEFENDER_MOD 2.5→1.4) were based on a misread of H5. They produced historically incorrect 1.17-1.31:1 att:def ratios (too attacker-heavy for 1992 VRS blitz) and -7pp DRINA regression. REVERTED.
+- n30 hash: `6fd84077b3a383e2` (identical to n25 — no regression)
+
+**Open items:**
+1. RS win rate 88.4% — operation selection too selective (P1)
+2. #29 Zombie operations — MAX_CONSECUTIVE_FAILURES not aborting (P2)
+3. #30 ARBiH Foča expansion — structural sector boundary fix needed (P2)
 
 **New P2 items logged:**
 - #29 Zombie operations (Gracanica 8 turns, Žepa, Bihać 5th Corps)
