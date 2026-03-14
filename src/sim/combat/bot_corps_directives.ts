@@ -10,6 +10,7 @@ import type { OsidEthnicComposition } from './ethnic_defense.js';
 import type {
     CorpsDirective,
     CorpsFrontSector,
+    CorpsOperation,
     FactionId,
     FormationId,
     FormationState,
@@ -62,6 +63,60 @@ export const AGGRESSION_FLOOR: Record<string, number> = {
     'defensive': -0.30,
     'reorganize': -0.50,
 };
+
+/**
+ * After a completed operation, how many turns before the corps may launch ops in a DIFFERENT theater.
+ * 8 turns ≈ 2 months of reconsolidation. Prevents a corps from immediately pivoting to an
+ * opportunistic secondary theater the turn after its primary operation ends. Same-theater
+ * follow-on ops are always allowed regardless of cooldown (they share theater with the last op).
+ */
+export const SECONDARY_OP_COOLDOWN_TURNS = 8;
+
+/**
+ * Collect all objective OSIDs from an operation (from both the flat objectives list and
+ * all axis objectives). Used for theater-overlap detection.
+ */
+function getOperationObjectives(op: CorpsOperation): Set<string> {
+    const objectives = new Set<string>(op.objectives ?? []);
+    if (op.axes) {
+        for (const axis of op.axes) {
+            for (const obj of axis.objectives ?? []) objectives.add(obj);
+        }
+    }
+    return objectives;
+}
+
+/** Extract municipality slug from OSID (format: op:municipality:slug → municipality). */
+function getMunicipalityFromOsid(osid: string): string | undefined {
+    const parts = osid.split(':');
+    return parts.length >= 3 ? parts[1] : undefined;
+}
+
+/**
+ * Returns true when two operations share the same theater — same sector_id, at least one
+ * overlapping objective OSID, OR at least one overlapping objective municipality.
+ * Municipality-level overlap handles pre-planned ops (no sector_id) targeting the same
+ * area as auto-generated follow-on ops that have different but co-located objectives.
+ */
+function operationsShareTheater(op1: CorpsOperation, op2Sector: string | undefined, op2Objectives: Set<string>): boolean {
+    if (op1.sector_id && op2Sector && op1.sector_id === op2Sector) return true;
+    const op1Objectives = getOperationObjectives(op1);
+    // Direct OSID overlap
+    for (const obj of op1Objectives) {
+        if (op2Objectives.has(obj)) return true;
+    }
+    // Municipality-level overlap (e.g. Koridor → 'brcko' and follow-on Brcko ops)
+    const op1Municipalities = new Set<string>();
+    for (const obj of op1Objectives) {
+        const mun = getMunicipalityFromOsid(obj);
+        if (mun) op1Municipalities.add(mun);
+    }
+    for (const obj of op2Objectives) {
+        const mun = getMunicipalityFromOsid(obj);
+        if (mun && op1Municipalities.has(mun)) return true;
+    }
+    return false;
+}
 
 /**
  * Should the bot launch a probe-type operation instead of a full sector_attack?
@@ -1281,7 +1336,25 @@ export function generateCorpsDirectives(
                 if (overlapB !== overlapA) return overlapB - overlapA;
                 return strictCompare(a.sector_id, b.sector_id);
             });
+            // Theater-aware follow-on gate: after a completed op, suppress different-theater
+            // secondary ops for SECONDARY_OP_COOLDOWN_TURNS turns. Same-theater follow-ons
+            // benefit from reduced intel_gathering (corps already knows the area).
+            const lastCompletedOp = cmd.last_completed_operation ?? null;
+            const lastCompletedTurn = cmd.last_completed_operation_turn ?? -999;
+            const currentTurn = state.meta?.turn ?? 0;
+            const inCooldown = lastCompletedOp != null
+                && (currentTurn - lastCompletedTurn) <= SECONDARY_OP_COOLDOWN_TURNS;
+
             for (const sec of sortedLaunchSectors) {
+                if (inCooldown) {
+                    // Check whether this sector shares theater with the last completed op.
+                    const secEnemySet = new Set(collectSectorEnemyOsids(sec));
+                    const sameTheater = operationsShareTheater(lastCompletedOp, sec.sector_id, secEnemySet);
+                    if (!sameTheater) {
+                        // Different theater — skip during cooldown (corps still reconsolidating).
+                        continue;
+                    }
+                }
                 const clusterSectors = [sec];
                 const clusterFriendlyOsids = new Set(collectSectorFriendlyOsids(sec));
                 const clusterEnemyOsids = new Set(collectSectorEnemyOsids(sec));
@@ -1387,6 +1460,22 @@ export function generateCorpsDirectives(
                     bestMinOutcome
                 );
                 if (op) {
+                    // Same-theater follow-on: corps already has recon from previous op —
+                    // skip the full intel_gathering phase (cap preparation to 1 turn).
+                    if (lastCompletedOp != null) {
+                        const opObjSet = new Set(op.objectives ?? []);
+                        if (op.axes) {
+                            for (const axis of op.axes) {
+                                for (const obj of axis.objectives ?? []) opObjSet.add(obj);
+                            }
+                        }
+                        if (operationsShareTheater(lastCompletedOp, op.sector_id, opObjSet)) {
+                            op.preparation_sub_phase = 'intel_gathering';
+                            op.preparation_turns_elapsed = 0;
+                            op.preparation_max_turns = 1;
+                            op.postponement_count = 0;
+                        }
+                    }
                     cmd.active_operation = op;
                     cmd.consecutive_probes = 0; // Reset probe counter on full attack
                     assignOperationCommander(state, op, corps.id, faction);

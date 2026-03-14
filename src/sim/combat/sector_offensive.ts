@@ -712,6 +712,9 @@ export function advanceSectorOffensives(
                 }
 
                 cmd.consecutive_probes = 0;
+                // Save completed op for theater-aware follow-on suppression.
+                cmd.last_completed_operation = cmd.active_operation;
+                cmd.last_completed_operation_turn = turn;
                 cmd.active_operation = null;
             }
         }

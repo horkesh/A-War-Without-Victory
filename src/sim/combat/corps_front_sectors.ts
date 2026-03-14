@@ -2568,6 +2568,71 @@ function ensureMinimumSectorCoverage(
         }
     }
 
+    // ── Moderate-pressure reinforcement pass (Step 7d) ──────────────────────
+    // 7b only fires at threat > 300 (acute crisis). 7c only donates from quiet sectors
+    // (donor threat ≤ 25). Gap: thin sectors under moderate pressure (threat 50–300)
+    // that have no quiet donor available are never reinforced by either pass.
+    // This pass targets that gap: thin AND under moderate threat, pulling from
+    // over-dense sectors regardless of donor threat level.
+    //
+    // Safety: only takes non-frontline brigades from donors — same rule as 7b and 7c.
+    // Donor density gate (> 0.75) ensures only genuinely over-packed sectors donate.
+    const PASS_7D_RECIPIENT_MAX_DENSITY = 0.25;    // recipient must be thin
+    const PASS_7D_RECIPIENT_MIN_THREAT = 50;       // recipient must have real pressure
+    const PASS_7D_DONOR_MIN_DENSITY = 0.75;        // donor must be over-packed
+    const PASS_7D_MAX_TRANSFERS = 2;               // max donations per sector per turn
+
+    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        const recipients = corpsSectors
+            .filter(s =>
+                s.assigned_brigade_ids.length > 0
+                && s.length_edges > 0
+                && s.assigned_brigade_ids.length / s.length_edges < PASS_7D_RECIPIENT_MAX_DENSITY
+                && (s.threat_ratio ?? 0) >= PASS_7D_RECIPIENT_MIN_THREAT)
+            .sort((a, b) =>
+                (a.assigned_brigade_ids.length / a.length_edges)
+                - (b.assigned_brigade_ids.length / b.length_edges)
+                || strictCompare(a.sector_id, b.sector_id));
+
+        for (const recipient of recipients) {
+            const recipComp = getSectorComponent(recipient, componentOf);
+            let transferred = 0;
+
+            const donors = corpsSectors
+                .filter(s =>
+                    s.sector_id !== recipient.sector_id
+                    && s.assigned_brigade_ids.length > 1
+                    && s.length_edges > 0
+                    && s.assigned_brigade_ids.length / s.length_edges >= PASS_7D_DONOR_MIN_DENSITY
+                    && getSectorComponent(s, componentOf) === recipComp)
+                .sort((a, b) =>
+                    (b.assigned_brigade_ids.length / b.length_edges)
+                    - (a.assigned_brigade_ids.length / a.length_edges)
+                    || strictCompare(a.sector_id, b.sector_id));
+
+            for (const donor of donors) {
+                if (transferred >= PASS_7D_MAX_TRANSFERS) break;
+                // Re-check donor density still justifies transfer
+                if (donor.assigned_brigade_ids.length / donor.length_edges < PASS_7D_DONOR_MIN_DENSITY) continue;
+
+                const donorFront = getSectorFrontOsids(donor);
+                let bid: string | undefined;
+                for (const b of [...donor.assigned_brigade_ids].sort(strictCompare)) {
+                    const f = formations[b];
+                    if (f?.location_osid && !donorFront.has(f.location_osid)) { bid = b; break; }
+                }
+                if (!bid) continue;
+
+                const idx = donor.assigned_brigade_ids.indexOf(bid);
+                if (idx >= 0) {
+                    donor.assigned_brigade_ids.splice(idx, 1);
+                    recipient.assigned_brigade_ids.push(bid);
+                    transferred++;
+                }
+            }
+        }
+    }
+
     // Sort for determinism
     for (const s of allSectors) s.assigned_brigade_ids.sort(strictCompare);
 }

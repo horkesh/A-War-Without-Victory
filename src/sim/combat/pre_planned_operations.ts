@@ -589,6 +589,7 @@ function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participa
         failure_count: 0,
         consecutive_failures_on_current: 0,
         staging_osid: def.staging_osid,
+        is_pre_planned: true,
         ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
     };
 }
