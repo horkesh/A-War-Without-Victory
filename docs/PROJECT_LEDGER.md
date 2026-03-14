@@ -13118,3 +13118,59 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 - All regions: KRAJINA 99.6%, POSAVINA_NE 87.7%, DRINA 83.0%, CENTRAL_CORRIDOR 95.1%, CENTRAL_BOSNIA 83.4%, SARAJEVO 84.2%, HERZEGOVINA 90.4%
 - **13/13 OSID anchors PASS** (was 11/13 — brka_2 and teocak_krstac_2 now both passing)
 - 606/607 vitest tests pass
+
+---
+
+### n25 Engine Sprint — Goražde Enclave Guard + Idle Sector Equalization (2026-03-14)
+
+**Sprint objective:** Fix ARBiH Foča expansion (Goražde brigades redistributing to Foča front OSIDs in mixed sector) and add proactive idle brigade equalization to prevent home-municipality affinity from permanently stacking brigades on quiet sectors.
+
+---
+
+**Fix: Goražde enclave overstacking redistribution guard**
+
+**Problem:** `bot_brigade_eval_front.ts` overstacking redistribution branch (brigade IS on a sector front OSID, `corpsCountHere > MAX_CORPS_BRIGADES_PER_OSID`) had no enclave guard. `sector:arbih_1st_corps:8` spans both Goražde enclave territory and Foča area front OSIDs. Goražde brigades (tagged `enclave`) were being redistributed to Foča front OSIDs (donje_zesce, izbisno, ustikolina) because those had 0 brigades — fewer than Goražde fronts. Result: ARBiH brigades appeared at Foča positions historically held by VRS.
+
+**Fix (n25):** Added enclave filter to `otherFronts` candidates in the overstacking redistribution block. Enclave brigades are now filtered to only redistribute within their own enclave's front OSIDs:
+```typescript
+.filter(o => !isEnclaveBrigade || isOsidInSameEnclave(loc as string, o))
+```
+This closes the redistribution path for Goražde→Foča moves. The initial sector march guard (`evaluateSectorMarch`) already had this check; the overstacking branch did not.
+
+**Remaining structural issue:** Sector:8 itself spans Goražde+Foča territory. The initial march guard passes (`hasEnclaveTarget=true` via Goražde OSIDs in frontSet) even when the march destination resolves to a Foča OSID. Full fix requires splitting sector:8 at the enclave/non-enclave boundary — logged as Issue #30 in REAL_WAR_MASTER.md.
+
+---
+
+**Step 7c: Idle sector equalization pass**
+
+**Problem:** Brigade sector assignment Phase 2a (home-affinity) caused permanent stacking on quiet home sectors. A 1KK corps sector could accumulate 9 brigades (threat=6) while adjacent thin sectors (2 brigades, threat=37–57) went unreinforced. The density floor pass (Step 7b) only fires when recipients are under attack (threat > 300) — it provides no proactive equalization for idle imbalances.
+
+**Fix:** Added Step 7c to `corps_front_sectors.ts` after the density floor. Scans sectors by corps connected component and transfers 1 brigade per donor per turn from over-dense quiet sectors to thin sectors.
+
+Constants (conservative — tuned to avoid regression):
+- `EQUALIZATION_DONOR_MAX_THREAT = 25` — donor must be essentially inactive
+- `EQUALIZATION_MIN_DONOR_DENSITY = 0.90` — donor must be clearly over-packed (density ≥ 0.90)
+- `EQUALIZATION_MAX_RECIP_DENSITY = 0.25` — recipient must be clearly thin (density < 0.25)
+- `EQUALIZATION_MAX_TRANSFERS = 1` — 1 brigade per turn (conservative)
+
+Only transfers non-frontline brigades (not currently on a sector front OSID). Same connected component only (no cross-pocket transfers). First attempt (n24) used looser thresholds (DONOR=0.70, RECIP=0.35, MAX=2) and caused anchor regression (teocak_krstac_2 flipped RS, 12/13). Tightened thresholds restored 13/13 in n25.
+
+---
+
+**Calibration result (n25, hash `6fd84077b3a383e2`):**
+- Area-weighted match: **90.5%** (+0.1pp from n23 90.4%)
+- **13/13 OSID anchors PASS** ✅
+- 139 battles (RS 112, RBiH 21, HRHB 6)
+- RS win rate: **88.4%** (target 60-75% — P1 open)
+- Att:def casualty ratio: **0.79:1** (defenders take 25% more — P1 open)
+- Outcome distribution: decisive_victory 73.4%, catastrophic 10.1%, repulsed 6.5%, stalemate 6.5%
+- /war-or-game sign-off: ✅ COMMITTED
+
+**Open P1 items (not addressed in this sprint):**
+1. Att:def ratio inversion (0.79:1) — root cause investigation needed
+2. RS win rate 88.4% — same root cause likely (operation selection producing lopsided fights)
+
+**New P2 items logged:**
+- #29 Zombie operations (Gracanica 8 turns, Žepa, Bihać 5th Corps)
+- #30 ARBiH Foča expansion — structural sector boundary fix needed
+

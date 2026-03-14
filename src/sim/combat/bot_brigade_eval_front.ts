@@ -69,8 +69,13 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 const corpsCountHere = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc);
                 if (corpsCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
                     // Find least-covered other sector front OSID (prefer undefended, then lightly defended)
+                    // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
+                    // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
+                    // front OSIDs in the same sector when those OSIDs have fewer brigades.
+                    const isEnclaveBrigade = brigade.tags?.includes('enclave') === true;
                     const otherFronts = [...frontSet]
                         .filter(o => o !== loc)
+                        .filter(o => !isEnclaveBrigade || isOsidInSameEnclave(loc as string, o))
                         .sort((a, b) => {
                             const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a);
                             const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b);

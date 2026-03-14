@@ -106,6 +106,36 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ## Open / Under Investigation
 
+### 29. Zombie operations — MAX_CONSECUTIVE_FAILURES not aborting (n25)
+
+**What we found:** RS attacks `op:gracanica:gracanica_2` from w33 to w40 — **eight consecutive turns** — with outcomes stalemate, stalemate, repulsed, catastrophic (PR=0.35), catastrophic (PR=0.05), catastrophic (PR=0.16), catastrophic (PR=0.0), catastrophic (PR=0.0). An operation that has produced 4+ catastrophics should be long dead. Similarly, RS attacks Žepa at w38 (PR=0.48, 577 att / 83 def) and w39 (PR=0.11, 298 att / 59 def) — continued assault at near-zero power. RBiH 5th Corps attacks ripac repeatedly (W34 repulsed, W35 catastrophic 636/21, W40 catastrophic 720/23) at PR=0.29–0.43.
+
+**Historical context:** No corps commander in the Bosnian War kept hammering a position after 4+ catastrophic defeats. Gracanica (Tuzla suburb) was a defensive stronghold; VRS probed it but abandoned direct assault when losses mounted. Operations had finite lifespans — if the intelligence was wrong or the defense too strong, the operation was reassigned or cancelled. The 1992 VRS was doctrine-capable; they did not charge positions at PR=0.05 repeatedly.
+
+**Root cause hypothesis:** `MAX_CONSECUTIVE_FAILURES=5` and `MAX_TOTAL_FAILURES=5` should be terminating these operations. Either: (1) the failure counter is not incrementing on catastrophic outcomes — only on explicitly "failed" attack orders, (2) the operation is cycling through recovery/restart rather than terminal failure, or (3) `combat_causality` shows 19 invalid operations and 16 zero-eligible-attacker operations — the zombie op may be consuming turns as "movement-only" without registering battle failures.
+
+**Evidence (n25):** gracanica_2 attacked w33–w40 (8 turns). Žepa attacked twice at PR<0.5. Bihać ripac attacked at PR=0.29–0.43 three times. RS Gracanica at PR=0.0 in final turn — no power whatsoever.
+
+**Status:** P2 — open. Investigation needed into failure counter path for catastrophic outcomes.
+
+---
+
+### 30. ARBiH Foča expansion — Goražde enclave brigades marching to Foča front OSIDs (n25 state, ENCLAVE GUARD PARTIAL FIX n25)
+
+**What we found:** 3 Foča OSIDs (donje_zesce, izbisno, ustikolina) show RBiH control at w40 but are painted RS (expected RS in Jan 1993). Root cause: `sector:arbih_1st_corps:8` spans both Goražde enclave territory AND Foča territory. The overstacking redistribution branch in `bot_brigade_eval_front.ts` was redistributing Goražde enclave brigades to Foča front OSIDs in the same mixed sector (0 brigades there → picked as redistribution candidate).
+
+**Historical context:** ARBiH never held Foča town surroundings at any point in 1992 — Foča fell to VRS in April 1992 and remained RS throughout. ARBiH brigades in Goražde enclave were defending their pocket, not expanding into the Foča plateau. These are distinct theaters separated by hostile territory.
+
+**Root cause:** `sector:8` is a mixed sector spanning two geographically disconnected theaters: Goražde enclave (16 OSIDs) and the Foča area front. The march guard's `hasEnclaveTarget` check passes because Goražde OSIDs ARE in `frontSet`, allowing the march guard to proceed even when the actual destination is a Foča OSID.
+
+**Partial fix (n25):** Added enclave guard to the overstacking redistribution branch — enclave brigades now filtered from redistribution to non-enclave front OSIDs in the same sector. This closes the redistribution path. Remaining: initial sector march path (`findNearestFriendlyOsidDestination`) may still send Goražde brigades toward Foča front OSIDs if `dest` resolves through sector frontSet containing Foča OSIDs.
+
+**Structural fix needed:** Sector:8 should be split at the Goražde/Foča boundary so that Goražde brigades belong to a Goražde-only sector. This is a sector construction issue, not a brigade AI issue.
+
+**Status:** P2 — partial fix shipped (n25). Full fix requires sector split at enclave boundary.
+
+---
+
 ### 28. SRK abandons Sarajevo siege — opportunistic targeting has no Graz truce guard (n696)
 
 **What we found:** The Sarajevo-Romanija Corps (SRK, 5 brigades) launches "Operacija Bastion" at turn 28, committing its two strongest brigades (3rd and 4th Sarajevo) to an operation pushing northward: Kakanj → Vareš → Olovo → Visoko. At end of run, the 4th Sarajevo Light (2,788 men) is at Olovo, the 3rd Sarajevo is at Vareš. The Sarajevo siege ring — the corps's entire historical purpose — is left to 3 brigades covering 57 front edges.
@@ -561,12 +591,13 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 
 ## Priority Ranking
 
-**Post-n647 state:** 88.8% area-weighted, RS w40 0.489 (below 0.503 floor), 117 battles, 92 RS. Drina improved +8.8pp with elite unit transfer + Operation Podrinje Sweep. Sector casualty cascade overcorrection identified. RS success rate 89.1% (too high).
+**Post-n25 state:** 90.5% area-weighted, 13/13 anchors. Hash `6fd84077b3a383e2`. 139 battles (RS 112, RBiH 21, HRHB 6). RS win rate 88.4% (target 60-75%). Att:def ratio 0.79:1 (defenders take 25% more casualties than attackers). 73.4% decisive victories. brka_2 FIXED. Goražde enclave redistribution guard FIXED. SRK 0-assigned FIXED. Idle equalization Step 7c added.
 
 | Priority | Issue | Impact | Status |
 |----------|-------|--------|--------|
-| **P1** | #23 Sector casualty cascade (0.1:1) | n590 overcorrection — 1,671 def casualties from 109 att attack | **NEW n647** |
-| **P1** | #24 RS 89.1% success rate | Too high for 1992 (historical 60-75%). 62.4% decisive victories | **NEW n647** |
+| **P1** | #24 RS 88.4% success rate | Too high for 1992 (historical 60-75%). 73.4% decisive victories | **Open n25** |
+| **P1** | Att:def ratio 0.79:1 | Defenders take 25% more casualties than attackers globally | **Open n25** |
+| **P1** | #23 Sector casualty cascade (0.1:1) | n590 overcorrection — 1,671 def casualties from 109 att attack | **Open n647** |
 | ~~**P0**~~ | ~~#16 Zero equipment~~ | ~~False alarm~~ | **FALSE ALARM** |
 | ~~**P0**~~ | ~~#2 Attack outcomes inverted~~ | ~~Root cause~~ | **FIXED n482** |
 | ~~**P0**~~ | ~~#11 Sarajevo falls~~ | ~~5 root causes~~ | **FIXED n527** |
@@ -575,6 +606,8 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | ~~**P1**~~ | ~~#18 50:1 catastrophic casualty ratios~~ | ~~Defender near-invulnerable~~ | **FIXED n590** (overcorrection: #23) |
 | ~~**P1**~~ | ~~#21 No probe/recon operations~~ | ~~Corps attack blind~~ | **FIXED n617** |
 | **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
+| **P2** | #29 Zombie operations (Gracanica 8 turns, Žepa, Bihać) | MAX_CONSECUTIVE_FAILURES not aborting | **NEW n25** |
+| **P2** | #30 ARBiH Foča expansion | Goražde sector:8 spans Foča territory; enclave redistribution guard partial fix | **PARTIAL n25** |
 | **P2** | #25 Podrinje Sweep 23 weeks | Ring axis typo fixed; Follow-on planning deferred (theater-aware logic needed) | **PARTIAL n703+** |
 | **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
 | ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
