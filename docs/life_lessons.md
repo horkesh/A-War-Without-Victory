@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-12 (architecture cleanup + /simplify review)
+> Last updated: 2026-03-14 (n692–n700 review, 2 lessons promoted, 3 new lessons added)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -9,17 +9,37 @@
 
 ## Recently Violated (needs reinforcement)
 
-### [Architecture] Port systems incrementally, not all-at-once (2026-03-08) — VIOLATED 2026-03-10
-- **Violation evidence**: Phase 3 GameState domain segregation (`6cf1038`) changed 64 files in one commit. Required 6 automated fixup tools (`fix_commas.cjs`, `fix_missing_domains_2.cjs`, `fix_spreads.cjs`, `fix_test_ast.ts`, `fix_test_overrides.ts`, `fix_test_spreads.cjs`) to repair broken tests. This is a big-bang refactor, not incremental porting.
-- **Mitigation**: The refactor was type-structural (moving fields into nested domains), not behavioral. Tests still passed after fixes. But the volume of fixup tooling signals the scope was too large for one pass.
-
-### [Process] Classify tasks by actual system impact, not plan labels (2026-03-07) — VIOLATED 2026-03-10
-- **Violation evidence**: n500 commit (`ebc6248`) bundled THREE structural engine changes into one commit: (1) ops-only attack doctrine, (2) unified sector defense, (3) attack-through. Each is independently significant. Now 100% attack success rate and defense is too weak per-edge — but attribution is impossible because all three landed together. Which change caused the defense collapse? Can't tell.
-- **Mitigation**: The commit message documents all three changes. But the calibration consequence is real — tuning requires understanding which change is responsible.
+*No new violations detected in 2026-03-14 review (n692–n700 commits). Two lessons promoted to Active.*
 
 ---
 
 ## Active Lessons (no recent violations)
+
+### [Architecture] Derived state must be computed AFTER all its producers have run (2026-03-14) — NEW
+- **Context**: `defensive_power` and `threat_ratio` were computed inside `classifyBrigadesByTerritory` (Step 6 of `buildCorpsFrontSectors`). Step 7 (`ensureMinimumSectorCoverage`) and Steps 8a/8b also modify `assigned_brigade_ids`. Sectors rescued by Step 7 from scratch had `dp=0` forever — no brigades existed when dp was computed. Cascade: `dp=0` → `threat_ratio=0` → density equalization scores those sectors near-minimum → SRK siege ring brigades never get reassigned there → siege ring stays thin.
+- **Wrong approach**: Computing derived values mid-pipeline when producers haven't all finished. The value appears valid (no crash, no assertion) but is stale by end of pipeline.
+- **Right approach**: Extract to `recomputeSectorPowerAndThreat()`, call as the final step (Step 8c) AFTER all assignment steps complete. If a value depends on a mutable collection, compute it after that collection is fully settled.
+- **Do instead**: For any derived field X that depends on collection Y: find ALL pipeline steps that modify Y. If any run AFTER X is computed, move X's computation to after the last Y modifier. This applies to `assigned_brigade_ids`, `territory_osids`, brigade counts — any collection that multiple pipeline steps touch.
+
+### [Architecture] Use blacklists not whitelists for blocking logic that must cover new cases by default (2026-03-14) — NEW
+- **Context**: Graz Accords truce was written as a whitelist: block ONLY two specific corps pairs (`vrs_2nd_krajina↔hvo_tomislavgrad`, `vrs_herzegovina↔hvo_southeast_herzegovina`). Every other RS↔HRHB combination was silently exempt. When SRK pushed into HVO Sarajevo area — which should be cold-front per Graz — no block triggered because SRK wasn't in the pair list. Adding new corps or fronts to the game automatically exempts them.
+- **Wrong approach**: Whitelist the blocked pairs. New pairs require explicit developer addition; omission means attacks pass through.
+- **Right approach**: Block all RS→HRHB attacks at faction level, then explicitly exempt the Posavina corridor (`vrs_1st_krajina`, `vrs_2nd_krajina`) where the Corridor 92 conflict was active. New corps default to blocked, not exempt.
+- **Do instead**: When a constraint should apply broadly with narrow exceptions, write it as a blacklist with exemptions. When a constraint should apply narrowly with a broad default, write it as a whitelist. Getting this wrong means every new feature or faction addition bypasses the guard by default. Ask: "if I add a new entity tomorrow, do I want it blocked or allowed?"
+
+### [Architecture] Phase 1 positional capture prevents home-affinity recovery for displaced brigades (2026-03-14) — NEW
+- **Context**: In `classifyBrigadesByTerritory`, Phase 1 captures brigades physically located at a front OSID using `continue` — Phase 2a home-affinity never runs for captured brigades. A Zenica brigade that marched to the Doboj front edge gets permanently captured into the Doboj sector; its home-sector chance is gone. The 4-hop cap in Phase 2c (n696) mitigates this by preventing initial long-range displacement, but once a brigade is Phase 1 captured far from home, the phase ordering trap is permanent.
+- **Wrong approach**: Adding home-affinity logic in Phase 2a and assuming it will fix displaced brigades. If they were captured by Phase 1, Phase 2a never runs for them.
+- **Right approach**: The 4-hop cap is the correct structural prevention — stop brigades from marching far from home in the first place. Phase 1 positional capture is correct behavior (a brigade at the front should defend that front); the problem is how it got there, not Phase 1.
+- **Do instead**: When adding recovery logic in Phase N, trace whether early-capture phases (with `continue`) will prevent Phase N from seeing the problematic cases. Document Phase 1's scope limitation explicitly. If brigades shouldn't drift far from home, enforce that constraint in march orders, not in assignment recovery.
+
+### [Architecture] Port systems incrementally, not all-at-once (2026-03-08) — promoted from Recently Violated (clean 4 days)
+- **Violation evidence**: Phase 3 GameState domain segregation (`6cf1038`) changed 64 files in one commit. Required 6 automated fixup tools to repair broken tests. Volume of fixup tooling signals scope was too large for one pass.
+- **Do instead**: When porting a system to a new model, port one subsystem at a time. Each port step should leave tests green. If you need more than 2 fixup tools, the change is too large.
+
+### [Process] Classify tasks by actual system impact, not plan labels (2026-03-07) — promoted from Recently Violated (clean 4 days)
+- **Violation evidence**: n500 bundled THREE structural engine changes: ops-only attack doctrine, unified sector defense, attack-through. Attribution of calibration regressions became impossible.
+- **Do instead**: One structural behavior change per commit. "This plan section" is not a valid bundling criterion — impact is.
 
 ### [Architecture] Pipeline grouping and splitting steps must use compatible adjacency (2026-03-13)
 - **Context**: `splitNonContiguousSectors` (Step 4b) used shared-OSID connectivity — two edges are adjacent if they share any OSID endpoint. `findSubSegments` (Step 1) used triple-junction connectivity — edges must share an OSID AND their other sides must be adjacent. The splitter was LESS restrictive than the grouper, so it never split sectors that the grouper had merged. But when the splitter was made MORE restrictive (using `sharedBoundaryAdj` instead of `osidAdjacency`), it over-fragmented — 2nd Corps went from 13 sectors to 31.

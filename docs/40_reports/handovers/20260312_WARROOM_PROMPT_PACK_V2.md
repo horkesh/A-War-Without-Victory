@@ -979,3 +979,153 @@ This arc starts brightest and ends darkest of all three factions. The cliff at Y
 **Lesson: always full prompt on retry.** User feedback — never give short correction-only retry prompts. Always provide complete assembled prompt. Gemini handles one coherent block better than incremental fixes (confirmed same pattern as RBiH refinement prompt failure).
 
 **Lesson: flag reference image works.** Attaching Herceg-Bosna flag as reference image resolved the flag identity issue that text description alone could not.
+
+### HRHB Prewar — Pass 5 (2026-03-13, Gemini, pendant lamp OFF — REJECTED: pendant lamp off)
+
+Pendant ceiling lamp appeared OFF (dark). The three-light-source system requires pendant ON in prewar. Prompt did not explicitly address pendant lamp — Gemini defaulted to off.
+
+### HRHB Prewar — Pass 6 (2026-03-13, Gemini, explicit three-light-source section — ACCEPTED)
+
+**Result: PRODUCTION-READY. Accepted as HRHB Prewar plate (replaces Pass 4).**
+
+**All constraints landed:**
+- Herceg-Bosna flag with šahovnica on tricolor, floor pole, gold finial
+- Cork board large, back wall, empty, hung on wall
+- Date board on back wall, flat, blank, no grid
+- Lighter wood desk (walnut/oak), tidy
+- Desk lamp present but OFF — compact, on desk
+- **Pendant ceiling lamp ON** — clearly lit, warm glow on glass shade (fix worked)
+- Window daylight ON — bright warm Mediterranean sunshine through open shutters
+- Telephone and radio visible with good separation
+- Hrvatski Vojnik newspaper masthead visible
+- Command briefing folio with red-tagged folder
+- Journal/dossier center-right
+- Wooden wall-mounted coatrack hooks, HVO jacket, crucifix
+- Honors shelf small, neutral
+- White plastered walls, limestone arches on both sides, terracotta floor
+- Documentary realism excellent
+
+**Lesson: explicit three-light-source section.** Dedicating a LIGHTING section that names all three sources (window, pendant, desk lamp) with ON/OFF state for each prevents ambiguity. Gemini respects explicit state declarations when grouped together. Applied to all subsequent HRHB year prompts.
+
+### HRHB Year 1 (1992) — Pass 1 (2026-03-13, Gemini, follow-up from Prewar Pass 6 — REJECTED: pendant lamp off, honors shelf too full)
+
+Follow-up prompt lost the pendant lamp (OFF when should be ON). Honors shelf had multiple medals — too dense for Year 1.
+
+### HRHB Year 1 (1992) — Pass 1b (2026-03-13, Gemini, follow-up correction — MAJOR REGRESSION)
+
+Complete room redesign: camera angle shifted, flag pinned to wall, dark wood desk, standing coatrack rack, newspaper on floor, 3D render aesthetic. Follow-up approach unreliable for HRHB. Decision: fresh master prompt for each year.
+
+### HRHB Prewar — Pass 7 (2026-03-13, Gemini, fresh master prompt with explicit three-light-source section + phone/radio separation — ACCEPTED)
+
+**Result: PRODUCTION-READY. Accepted as HRHB Prewar plate (final version).**
+
+All constraints from Pass 6 landed plus:
+- Phone and radio well-separated on right side of desk (fix from Pass 6 bunching issue)
+- Limestone arches on both sides — strong Mediterranean character
+- All three light sources correctly established: window ON, pendant ON, desk lamp OFF
+
+### HRHB Year 1 (1992) — Pass 2 (2026-03-13, Gemini, follow-up from Prewar Pass 7 — REJECTED: honors shelf too full)
+
+Room geometry preserved. Lighting correct (window ON, pendant ON, desk lamp OFF). But honors shelf had too many items for Year 1 — medals, plaque, framed item. Should be single small item only.
+
+### HRHB Year 1 (1992) — Pass 3 (2026-03-13, Gemini, follow-up from Pass 2 correction — ACCEPTED)
+
+**Result: PRODUCTION-READY. Accepted as HRHB Year 1 plate.**
+
+**All constraints landed:**
+- Room geometry preserved from Prewar Pass 7
+- Window daylight ON, slightly softer — shutters still open
+- Pendant lamp ON — clearly lit
+- Desk lamp OFF — present but not lit
+- Honors shelf reduced to one small booklet — correct for Year 1
+- All 9 anchors visible with good separation
+- Cork board empty, date board blank
+- Herceg-Bosna flag on pole, light wear
+- HVO jacket on wall hooks, crucifix
+- Hrvatski Vojnik masthead visible
+- Documentary realism maintained
+
+### HRHB Year 2 (1993) — Pass 1 (2026-03-13, Gemini, follow-up from Year 1 Pass 3 — ACCEPTED)
+
+**Result: PRODUCTION-READY. Accepted as HRHB Year 2 plate.**
+
+**All constraints landed:**
+- Shutters HALF-CLOSED — noticeably less daylight. Clear dimming from Year 1
+- **Desk lamp ON for first time** — warm glow on desk surface. Key visual shift
+- Pendant lamp ON — clearly lit
+- Room darker overall — two-front war pressure reads
+- Desk clutter increased — more spread papers
+- Honors shelf more items than Year 1
+- All 9 anchors visible with good separation
+- Cork board empty, date board blank
+- Herceg-Bosna flag showing wear
+- Room geometry preserved
+- Documentary realism maintained
+
+### HRHB Year 3 (1994) — Pass 1 (2026-03-13, Gemini, follow-up from Year 2 — ACCEPTED)
+
+**Result: PRODUCTION-READY. Accepted as HRHB Year 3 plate.**
+
+**All constraints landed:**
+- Shutters THREE-QUARTERS CLOSED — minimal daylight. Clear step down from Year 2
+- Desk lamp ON — warm glow
+- Pendant lamp ON — now one of two main light sources alongside desk lamp
+- Room noticeably darker than Year 2
+- Desk clutter heavier
+- Honors shelf fuller
+- Flag showing more wear
+- All 9 anchors visible
+- Cork board empty, date board blank
+- Room geometry preserved
+- Documentary realism maintained
+
+### HRHB Year 4 (1995) — Pass 1 (2026-03-13, Gemini, follow-up from Year 3 — ACCEPTED)
+
+**Result: PRODUCTION-READY. Accepted as HRHB Year 4 plate. HRHB faction COMPLETE — 5/5 plates accepted.**
+
+**All constraints landed:**
+- Shutters NEARLY FULLY CLOSED — almost no daylight, 5/5 darkness
+- **Pendant lamp OFF** — ceiling lamp dark, unlit. Key visual shift — the institution is dying
+- Desk lamp ON — SOLE significant light source. Room falls into deep shadow
+- All 9 anchors still identifiable in low light
+- Cork board empty, date board blank
+- Herceg-Bosna flag faded, fabric limp
+- Desk clutter at heaviest
+- Honors shelf full
+- HVO jacket worn
+- Room geometry preserved throughout all 5 plates
+- Documentary realism maintained
+
+**Lesson: pendant-off in Year 4 is powerful.** The institutional overhead light failing while only the personal desk lamp remains — the institution is collapsing but the person at the desk is still working. Unique to HRHB arc; RS uses drape closure + fluorescent as primary darkening; RBiH uses window blackout/recovery.
+
+**HRHB COMPLETE.** All 5 plates (Prewar + Years 1-4) accepted. Lighting arc: bright Mediterranean sunshine → cliff-drop at Year 2 (two-front war) → pendant dies in Year 4 (institutional collapse). The three-light-source system (window/pendant/desk lamp) with independent ON/OFF control gave the most nuanced progression of all three factions.
+
+**HRHB lighting arc summary:**
+- Prewar: Window ON (dominant), pendant ON, desk lamp OFF — bright sunshine, 1/5
+- Year 1: Window ON (softer), pendant ON, desk lamp OFF — 2/5
+- Year 2: Window ON (half shutters), pendant ON, desk lamp ON — 3/5, sharp dimming
+- Year 3: Window ON (3/4 shutters), pendant ON, desk lamp ON — 4/5
+- Year 4: Window minimal, pendant OFF, desk lamp ON (sole light) — 5/5
+
+---
+
+## 10. All factions complete — summary
+
+**Total plates: 15** (5 per faction × 3 factions)
+
+| Faction | Prewar | Year 1 | Year 2 | Year 3 | Year 4 | Total passes |
+|---------|--------|--------|--------|--------|--------|-------------|
+| RBiH | Pass 9 | Pass 1 | Pass 1 | Pass 2 | Pass 1 | 14 |
+| RS | Pass 1 | Pass 1 | Pass 1 | Pass 1 | Pass 3 | 7 |
+| HRHB | Pass 7 | Pass 3 | Pass 1 | Pass 1 | Pass 1 | 13 |
+
+**Key cross-faction lessons:**
+1. **Single assembled prompts beat modular composition** — Gemini handles one coherent block better than layered assembly
+2. **Desk lamp must be seeded in prewar** — follow-up "switch on" fails without a visible lamp to reference
+3. **Explicit light-source sections** — name each source, state ON/OFF, prevents ambiguity
+4. **Follow-up prompts are unreliable for HRHB** — fresh master prompts more reliable for Gemini
+5. **Flag reference images work** — text description alone cannot reliably convey heraldry
+6. **Wear sweet spot** — flag fading is more legible than wall damage at game resolution
+7. **Always full prompt on retry** — never give short correction-only prompts
+8. **Pendant lamp OFF as narrative signal** — institutional infrastructure failing (HRHB Year 4)
+9. **Three distinct architectural identities** — Habsburg grandeur (RBiH), JNA institutional dark wood (RS), Mediterranean provincial limestone (HRHB)

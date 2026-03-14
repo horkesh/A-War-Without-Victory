@@ -106,6 +106,54 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ## Open / Under Investigation
 
+### 28. SRK abandons Sarajevo siege — opportunistic targeting has no Graz truce guard (n696)
+
+**What we found:** The Sarajevo-Romanija Corps (SRK, 5 brigades) launches "Operacija Bastion" at turn 28, committing its two strongest brigades (3rd and 4th Sarajevo) to an operation pushing northward: Kakanj → Vareš → Olovo → Visoko. At end of run, the 4th Sarajevo Light (2,788 men) is at Olovo, the 3rd Sarajevo is at Vareš. The Sarajevo siege ring — the corps's entire historical purpose — is left to 3 brigades covering 57 front edges.
+
+**Evidence:**
+- `sector:vrs_sarajevo_romanija:4`: 25 edges (Hadžići/Pale/Ilidža siege sector), 1 brigade (1st Romanija, 1,007 men), `threat_ratio: 299.97`
+- `sector:vrs_sarajevo_romanija:2`: 6 edges, **0 brigades** — the operation's source sector, emptied when 3rd/4th Sarajevo marched off
+- "Operacija Bastion" objectives: `kakanj:poljani_2`, `vares:gornja_borovica_2`, `kakanj:seoce_2`, `olovo:olovo_2`, `olovo:milankovici_2`, `visoko:podvinjci_2` — 5 captured, pushing 50+ km from Sarajevo
+
+**Historical context:** Dragomir Milošević (SRK commander 1994–1996, but Tomislav Šipčić in 1992) ran SRK as a siege and containment corps. Its entire mission was encircling Sarajevo — tightening the ring, controlling the Igman/Hadžići supply route, and mounting the sustained shelling and sniper campaign. A VRS commander sending two of his five brigades to attack Kakanj while Sarajevo's siege ring is held by 1 brigade would be relieved of command. Sarajevo was the political and propaganda centrepiece of the entire VRS campaign.
+
+**Root causes:**
+
+**1. Operation chaining through RS-held waypoints.** The operation legitimately launched against Ilijas/Olovo (RBiH objectives in sector 2's `enemy_osids`). The operation's axis then traversed RS-controlled Kakanj and Vareš OSIDs as sequential "waypoints" — march-first behavior counted these traversals as "captured" objectives, dragging brigades progressively further northeast. 5 of 6 objectives were RS-controlled territory that brigades simply marched through. Only `visoko:podvinjci_2` is an actual enemy objective.
+
+**2. No "hold Sarajevo" strategic constraint on SRK.** The bot treats SRK identically to any offensive corps. `generateCorpsDirectives` computes offensive targets from enemy OSIDs adjacent to SRK sectors — Ilijas and Olovo happen to be adjacent at operation launch. There is no mechanism recognizing that SRK's primary mission is encirclement maintenance, not territorial expansion.
+
+**3. Opportunistic targeting has NO truce guard — potential Graz violation (BUG).** Once Operacija Bastion moved SRK brigades into the Kakanj/Vareš area, SRK's sectors now border HRHB-controlled Kakanj OSIDs (`op:kakanj:bukovlje_2`, `op:kakanj:slapnica_2`). The opportunistic target code path in `bot_corps_directives.ts` (~line 537–560) adds adjacent enemy sectors with 0 brigades as targets with **no truce/Graz check**. `shouldGrazBlockAttack()` in `local_truces.ts` only protects the pairs `vrs_2nd_krajina ↔ hvo_tomislavgrad` and `vrs_herzegovina ↔ hvo_southeast_herzegovina`. **SRK is not in any Graz pair.** The current directive has HRHB Kakanj OSIDs as offensive targets — VRS SRK is being directed to attack HVO in Kakanj despite the Graz Accords. This is a confirmed code bug.
+
+**4. Siege sector `threat_ratio` = 0 on ring sectors 0–3.** Sectors 0, 1, 2, 3 all show `threat_ratio: 0.00` despite ARBiH 1st Corps brigades (101st, 105th, 112th, 115th, 141st) physically at the enemy OSIDs in central Sarajevo. The reason requires further investigation — likely the `computeLocalFrontDefensivePower` denominator or the way encirclement topology (front faces inward rather than outward) interacts with the threat calculation. Zero threat causes the bot to assign `active_defense` stance to these sectors, suppressing any urgency to reinforce or protect them.
+
+**Priority:** P0 for the Graz truce bug (SRK attacking HVO in Kakanj). P1 for the siege abandonment pattern and the threat_ratio=0 issue on ring sectors.
+
+**Files to investigate:** `bot_corps_directives.ts` ~line 537–560 (opportunistic target selection), `corps_front_sectors.ts` threat_ratio computation at end of `classifyBrigadesByTerritory`, `local_truces.ts` (`shouldGrazBlockAttack` for missing SRK corps pair).
+
+---
+
+### 27. 2nd Corps Lukavac/Doboj — 21-edge front defended by 368 men (n696)
+
+**What we found:** `sector:arbih_2nd_corps:11` covers Lukavac, Doboj, Banovici, Gračanica (21 front edges, 19 territory OSIDs) with a single assigned brigade: `arbih_222nd_liberation` at 368 personnel. Meanwhile Sector 13 (Kalesija, 10 edges) has 5 brigades including three whose home municipalities are Lukavac, Doboj, and Banovici.
+
+**Evidence:**
+| Brigade | Home municipality | Physical location | Assigned sector |
+|---|---|---|---|
+| 223rd Mountain | `op:lukavac:dobosnica_2` | `op:kalesija:kalesija_grad_2` | Sector 13 |
+| 224th Mountain | `op:doboj:brijesnica_velika` | `op:kalesija:kalesija_grad_2` | Sector 13 |
+| 225th Muslim Mountain | `op:banovici:banovici_2` | `op:kalesija:seher_2` | Sector 13 |
+
+**Root cause:** Phase 1 of `classifyBrigadesByTerritory` assigns brigades by physical location — "defend where you stand." All three brigades physically occupy front OSIDs of Sector 13 (Kalesija), so Phase 1 assigns them there immediately with `continue` — they never reach Phase 2a home-affinity. Their home municipalities (Doboj, Lukavac, Banovici) fall inside Sector 11's territory, but Phase 2a never evaluates them.
+
+**Historical context:** Partially historical. VRS captured Doboj and much of Lukavac in May–June 1992, forcing 2nd Corps brigades to displace eastward toward Tuzla/Kalesija. The presence of Doboj-home brigades in Kalesija reflects that displacement. However, the operational consequence — the largest 2nd Corps sector (by edges) defended by 368 men — is genuinely dangerous for combat resolution. A real 2nd Corps commander would rotate units back through the Tuzla area to cover the Lukavac front even after eastern redeployment.
+
+**Is this a bug?** Not a bug in the assignment logic. It is an emergent consequence of physical displacement + Phase 1's anchor-where-you-stand rule. The Phase 2a home-affinity improvement (n696) cannot help brigades already captured by Phase 1. The problem requires either (a) a sector reinforcement pull that overrides Phase 1 for dangerously thin sectors, or (b) march orders that homeward-orient displaced brigades over time.
+
+**Status:** P2 — historically grounded but operationally problematic. Document for design review: should corps commanders have authority to override Phase 1 positional assignments when sector density is critically low?
+
+---
+
 ### 23. Sector-wide casualty cascade — 0.1:1 defender-heavy battles (n647)
 
 **What we found:** Five decisive victories where the DEFENDER takes 10-15× the attacker's casualties:
@@ -161,23 +209,25 @@ A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ br
 
 ---
 
-### 14. HVO Central Bosnia — 13-edge ghost front, 7 brigades unassigned (n528)
+### 14. HVO Central Bosnia — 7 brigades sectorless, `hvo_central_bosnia` has no sectors (n696 state)
 
-**What we found:** `sector:hvo_central_bosnia:0` has 13 front edges facing RS — zero brigades, zero defensive power. But 7 HVO central_bosnia brigades (10,385 personnel) exist in Kiseljak, Vitez, Busovača, Žepče — all unassigned. The brigade classification BFS can't reach from enclave pockets to the sector's front edges through friendly territory.
+**What we found (n696):** `hvo_central_bosnia` corps produces 0 sectors. Its 7 brigades (Jure Francetić, Stjepan Tomašević, 111th, 94th, Ban Jelačić, Kiseljak, Travnik — totalling ~9,825 personnel) are classified as `corps_has_no_sectors` sectorless. They exist in Kiseljak, Vitez, Novi Travnik, Žepče — geographically isolated HVO enclaves with no continuous front-line contact with each other.
 
-**Historical context:** HVO enclaves in central Bosnia WERE isolated — this part is correct. But the HVO still defended them fiercely. 10,000 troops sitting in unassigned limbo while their front is naked is wrong.
+**Historical context:** HVO enclaves in central Bosnia were isolated — this is structurally correct for April 1992 (the RBiH-HVO conflict that would isolate them fully begins April 1993). These brigades will become active and sectorable once the HVO-RBiH war fires. Until then their sectorless status is the correct state. The 9,825 personnel aren't wasted — they're garrisoning enclaves that historically survived under siege.
 
-**Status:** P2 — partially historical. Fix planned (enclave-aware brigade assignment).
+**Status:** Deferred (expected behavior until HVO-RBiH war opens April 1993). Revisit when implementing RBiH-HRHB war arc.
 
 ---
 
-### 15. Intra-corps density imbalance — 16x ratios (n528)
+### 15. Intra-corps density imbalance — persists in n696, structural causes now clearer
 
-**What we found:** Extreme density imbalances within corps: 2nd Corps 16x (0.06–1.00), 1KK 15.3x (0.13–2.00). VRS 1KK has 6 brigades (15,565 men) on a 3-edge rear sector at Banja Luka while the 20-edge Posavina front has 3 brigades. SRK sector:0 has 25 edges defended by 519 men. `equalizeSectorDensity` and `sector_reassignment_orders` aren't working effectively.
+**What we found (n696):** Extreme density imbalances remain. 2nd Corps: sector 11 (21 edges, 1 brigade, density 0.05) vs sector 13 (10 edges, 5 brigades, density 0.50) — a 10× gap. SRK: sector 4 (25 edges, 1 brigade, threat 299) while sector 2 (6 edges, 0 brigades) was vacated by the Operacija Bastion deployment.
 
-**Historical context:** Mladić would never have 4 fresh infantry brigades idling in Banja Luka while Posavina bleeds. Every VRS unit was committed forward in 1992.
+**Root cause (better understood n696):** The density imbalance in 2nd Corps is driven by Phase 1 displacement (brigades physically at Kalesija pull away from Lukavac/Doboj front — see issue #27). The SRK imbalance is driven by operation commitment pulling brigades far from their sector. `equalizeSectorDensity` was removed (n403); the current density equalization via `ensureMinimumSectorCoverage` only handles zero-brigade sectors, not low-density ones. `sector_reassignment_orders` moves brigades toward fronts but can't override Phase 1's positional lock or operation commitment.
 
-**Status:** P1 — density equalization investigation needed.
+**Historical context:** Mladić would never tolerate 1 brigade covering 21 edges while 5 sit on a 10-edge adjacent sector. Every VRS unit was committed forward in 1992. The sim is producing the same structural imbalance — it's just the 2nd Corps doing it now, not 1KK.
+
+**Status:** P1 — density equalization below minimum threshold needed. Design question: should `ensureMinimumSectorCoverage` enforce a minimum ratio (e.g., 1 brigade per 8 edges) and pull from overstaffed adjacent sectors?
 
 ---
 
