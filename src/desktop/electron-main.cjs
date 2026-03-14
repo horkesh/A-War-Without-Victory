@@ -803,6 +803,25 @@ app.whenReady().then(() => {
     return { ok: false, error: 'AoR reshape orders are not supported (OSID mode active)' };
   });
 
+  ipcMain.handle('assign-brigade-to-sector', async (_event, payload) => {
+    const { brigadeId, sectorId } = payload || {};
+    const normalizedSectorId = sectorId == null ? null : String(sectorId);
+    if (!currentGameStateJson || typeof brigadeId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.assignBrigadeToSector(state, brigadeId, normalizedSectorId);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('assign-brigade-to-front', async (_event, payload) => {
     const { brigadeId, frontId } = payload || {};
     const normalizedFrontId = frontId == null ? null : String(frontId);
@@ -1582,6 +1601,61 @@ app.whenReady().then(() => {
     const built = mapServerPort ? getMapServerUrl('/') : null;
     if (built) console.log(`[AWWV] Map: using built server at ${built}`);
     return built;
+  });
+
+  // --- Army Reserve IPC handlers ---
+  ipcMain.handle('approve-reserve-request', async (_event, payload) => {
+    const { corpsId, brigadeId } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof brigadeId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.approveReserveRequest(state, corpsId, brigadeId);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('recall-elite-brigade', async (_event, payload) => {
+    const { brigadeId } = payload || {};
+    if (!currentGameStateJson || typeof brigadeId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.recallEliteBrigade(state, brigadeId);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('redirect-reserve-loan', async (_event, payload) => {
+    const { brigadeId, newCorpsId } = payload || {};
+    if (!currentGameStateJson || typeof brigadeId !== 'string' || typeof newCorpsId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.redirectReserveLoan(state, brigadeId, newCorpsId);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
   });
 
   // Start the tactical map HTTP server (required because MapLibre's Web Workers

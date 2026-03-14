@@ -212,9 +212,11 @@ function buildFactionSectors(
     // Phase 1: Frontline brigades assigned by position (you defend where you stand).
     // Phase 2: Corps pools remaining brigades, distributes to sectors by need
     //          (proportional to front edge count, shaped by commander personality).
+    // Player override (brigade_sector_override) pins brigades before Phase 1/2 runs.
     // General staff units are exempt.
     const commanderProfiles = buildCorpsCommanderProfiles(state, sectors);
-    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, commanderProfiles);
+    const playerOverrides = state.military.brigade_sector_override;
+    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, commanderProfiles, playerOverrides);
 
     // Step 7: Ensure every sector with front edges has at least one assigned brigade.
     // Transfer from adjacent surplus sectors only (geographic contiguity enforced).
@@ -674,6 +676,7 @@ function classifyBrigadesByTerritory(
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
     commanderProfiles: Map<string, CorpsCommanderProfile>,
+    playerOverrides?: Record<string, string>, // brigadeId → sector_id
 ): void {
     if (sectors.length === 0) return;
 
@@ -681,6 +684,29 @@ function classifyBrigadesByTerritory(
     for (const s of sectors) {
         s.assigned_brigade_ids = [];
         s.reserve_brigade_ids = [];
+    }
+
+    // ── Player override: pin brigades to player-assigned sectors ─────────
+    // Player-issued sector assignments (brigade_sector_override) take precedence
+    // over all bot logic. Brigades with a valid override are pinned directly and
+    // skipped from Phase 1/2 processing. Invalid overrides (wrong corps, sector
+    // dissolved) are silently skipped — the brigade falls through to normal assignment.
+    const playerOverridden = new Set<FormationId>();
+    if (playerOverrides) {
+        const sectorById = new Map(sectors.map(s => [s.sector_id, s]));
+        for (const bid of Object.keys(playerOverrides).sort(strictCompare)) {
+            const sectorId = playerOverrides[bid];
+            if (!sectorId) continue;
+            const f = formations[bid];
+            if (!f || f.faction !== faction || f.status !== 'active') continue;
+            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            const fCorpsId = getFormationCorpsId(f);
+            if (!fCorpsId) continue;
+            const sector = sectorById.get(sectorId);
+            if (!sector || sector.corps_id !== fCorpsId) continue; // stale/wrong corps — fall through
+            sector.assigned_brigade_ids.push(bid);
+            playerOverridden.add(bid);
+        }
     }
 
     // ── Phase 1: Assign frontline brigades by position ──────────────────
@@ -706,15 +732,30 @@ function classifyBrigadesByTerritory(
     // Per-corps unassigned brigade pool (corps decides where they go)
     const corpsPool = new Map<FormationId, FormationId[]>();
 
+    // ── Phase 0a: Elite loan routing ─────────────────────────────────────────
+    // Loaned elite brigades masquerade as members of their target corps for
+    // sector assignment. This ensures a loaned RS 1st Guards gets placed in
+    // Drina Corps sectors, not left unassigned in the Main Staff exempt pool.
+    const loanedCorpsMap = new Map<FormationId, string>();
+    for (const [fid, f] of Object.entries(formations)) {
+        const ls = f.elite_loan_state;
+        if (ls?.on_loan && ls.loaned_to_corps) loanedCorpsMap.set(fid, ls.loaned_to_corps);
+    }
+
     const sortedFormIds = Object.keys(formations).sort(strictCompare);
     for (const fid of sortedFormIds) {
+        if (playerOverridden.has(fid)) continue; // already pinned by player override
         const f = formations[fid];
         if (!f || f.faction !== faction || f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
         if (!f.location_osid) continue;
 
         const fCorpsId = getFormationCorpsId(f);
-        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue;
+        // Loaned elites bypass the exempt check — they act as members of their target corps
+        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
+
+        // Effective corps: loan target if on loan, own corps otherwise
+        const effectiveCorpsId = loanedCorpsMap.get(fid) ?? fCorpsId;
 
         const loc = f.location_osid;
 
@@ -722,7 +763,7 @@ function classifyBrigadesByTerritory(
         const frontIndices = frontOsidToSectorIndices.get(loc);
         if (frontIndices && frontIndices.length > 0) {
             // Filter to same-corps sectors only
-            const corpsIndices = frontIndices.filter(idx => sectors[idx]!.corps_id === fCorpsId);
+            const corpsIndices = frontIndices.filter(idx => sectors[idx]!.corps_id === effectiveCorpsId);
             if (corpsIndices.length === 1) {
                 sectors[corpsIndices[0]!]!.assigned_brigade_ids.push(fid);
                 continue;
@@ -744,10 +785,10 @@ function classifyBrigadesByTerritory(
         }
 
         // Not on front — goes to corps pool for corps-level assignment
-        if (fCorpsId) {
-            const pool = corpsPool.get(fCorpsId) ?? [];
+        if (effectiveCorpsId) {
+            const pool = corpsPool.get(effectiveCorpsId) ?? [];
             pool.push(fid);
-            corpsPool.set(fCorpsId, pool);
+            corpsPool.set(effectiveCorpsId, pool);
         }
     }
 

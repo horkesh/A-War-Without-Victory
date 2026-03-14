@@ -32,7 +32,7 @@ import type { OperationWeeklyEntry, PendingOperationCasualties, OperationAAR } f
 import type { CasualtyLedger } from './casualty_ledger.js';
 import type { CombatSummary } from './combat_summary.js';
 import type { BrigadeDecoration } from './decoration_types.js';
-import type { EliteLoanState } from './elite_loan_types.js';
+import type { EliteLoanState, ArmyReserveRequest, EliteBrigadeTracker } from './elite_loan_types.js';
 import type { BrigadeWarStory } from '../sim/war_stories.js';
 import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
@@ -1588,6 +1588,9 @@ sector_combat_ratings?: Record<string, SectorCombatRating>;
 sector_intel?: Record<string, SectorIntelRecord[]>;
 /** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. */
 home_distance_cache?: Record<string, number>;
+/** Player-issued permanent sector assignments. Overrides bot assignment in classifyBrigadesByTerritory.
+ *  Keyed by brigadeId → sector_id. Persists until manually cleared. */
+brigade_sector_override?: Record<string, string>;
 /** War timeline: externalized faction temporal profiles (doctrine, cohesion, reinforcement, etc). Loaded from data/scenarios/timelines/{id}.json. */
 war_timeline?: import('./war_timeline.js').WarTimeline;
 /** Named officer static data (loaded from JSON). Immutable during simulation. */
@@ -1608,6 +1611,10 @@ sarajevo_tunnel_operational?: boolean;
 opsec_sectors?: string[];
 /** Tracks which operation names have been used (name → turn used). Sequential consumption, no repeats. */
 used_operation_names?: Record<string, number>;
+/** Pending army reserve loan requests from corps, awaiting army-AI or player approval this turn. */
+pending_reserve_requests?: ArmyReserveRequest[];
+/** Per-brigade elite deployment tracker. Keyed by brigade FormationId. */
+elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
 }
 
 export interface PoliticalState {

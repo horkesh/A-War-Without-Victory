@@ -23,7 +23,7 @@ export const MAX_RESERVES_PER_SECTOR = 1;
 export const EXEMPT_CORPS_IDS = new Set<string>([
     'arbih_general_staff',
     'vrs_main_staff',
-    'hvo_general_staff',
+    'hvo_main_staff',
 ]);
 
 /** Below this competence the commander doesn't deliberately plan — falls back to BFS. */

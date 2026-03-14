@@ -226,7 +226,7 @@ function buildRecruitedFormation(
         officer_quality: brigade.initial_officer_quality ?? getFactionDefaultOfficerQuality(brigade.faction, currentTurn),
         ...(brigade.honor ? { honor: brigade.honor } : {}),
         ...convertOobDecorationsRecruitment(brigade),
-        ...(brigade.is_elite ? { elite_loan_state: { on_loan: false, loaned_to_corps: null, loan_start_turn: null, last_recall_turn: null, loan_start_personnel: null, permanently_degraded: false } } : {}),
+        ...(brigade.is_elite ? { elite_loan_state: { on_loan: false, loaned_to_corps: null, loan_start_turn: null, last_recall_turn: null, loan_start_personnel: null, permanently_degraded: false, current_episode_id: null } } : {}),
         ...(brigade.defense_terrain_bonus != null ? { defense_terrain_bonus: brigade.defense_terrain_bonus } : {}),
         ...(brigade.recruit_pool_faction ? { recruit_pool_faction: brigade.recruit_pool_faction } : {}),
         ...(brigade.fallback_osid ? { fallback_osid: brigade.fallback_osid } : {}),

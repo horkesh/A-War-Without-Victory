@@ -45,7 +45,7 @@ describe('war-phase step ordering', () => {
     });
 
     it('step count is stable', () => {
-        // Current count: 119 steps. Update this if steps are intentionally added/removed.
-        expect(stepNames.length).toBe(119);
+        // Current count: 120 steps. Update this if steps are intentionally added/removed.
+        expect(stepNames.length).toBe(120);
     });
 });

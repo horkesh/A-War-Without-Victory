@@ -13,7 +13,7 @@
 
 import type { FormationState, GameState, FactionId } from '../../state/game_state.js';
 import {
-    ELITE_LOAN_DURATION,
+    ELITE_LOAN_MIN_DURATION,
     ELITE_LOAN_COOLDOWN,
     ELITE_CASUALTY_THRESHOLD,
     ELITE_MORALE_RECALL,
@@ -82,7 +82,7 @@ export function processEliteLoanLifecycle(state: GameState): EliteLoanReport {
 
         // Check duration expiry
         const turnsSinceLoan = loan.loan_start_turn != null ? turn - loan.loan_start_turn : 0;
-        if (turnsSinceLoan >= ELITE_LOAN_DURATION) {
+        if (turnsSinceLoan >= ELITE_LOAN_MIN_DURATION) {
             recallElite(f, turn);
             report.loans_expired++;
             continue;

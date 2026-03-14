@@ -5,6 +5,7 @@ import { TopToolbar } from './components/TopToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
 import { FormationDetail } from './components/FormationDetail';
+import { ArmyReservePanel } from './components/ArmyReservePanel';
 import { CorpsDetail } from './components/CorpsDetail';
 import { ArmyDetail } from './components/ArmyDetail';
 import { Minimap } from './components/Minimap';
@@ -176,16 +177,15 @@ function App() {
     }
   }, [ipc.isAvailable, loadedGameState, sidePickerDismissed]);
 
-  // Live mode: auto-load latest run save as RBiH on startup
+  // Live mode: auto-load latest run save on startup (browser-only, not Electron)
   useEffect(() => {
     if (isDevMode()) return;
+    if (ipc.isAvailable) return; // Electron — useDesktopSession handles state
     if (loadedGameState) return; // already loaded
     (async () => {
       try {
         const text = await loadLatestRunSaveAsText();
         const json = JSON.parse(text);
-        // Force RBiH perspective for live mode
-        if (json?.meta) json.meta.player_faction = 'RBiH';
         await loadSave(json);
       } catch (err) {
         console.error('[Live] Failed to auto-load latest save:', err);
@@ -329,14 +329,22 @@ function App() {
       {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
       {railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
       {railState.primary === 'army' && <ArmyDetail railSlot="primary" />}
-      {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
+      {railState.primary === 'formation' && (
+        loadedGameState?.formations.find(f => f.id === selectedFormationId)?.kind === 'army_hq'
+          ? <ArmyReservePanel railSlot="primary" />
+          : <FormationDetail railSlot="primary" />
+      )}
       {railState.primary === 'operation' && <OperationDetail railSlot="primary" />}
       {railState.primary === 'orbat' && <OrbatPanel />}
 
       {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
       {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
       {railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
-      {railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
+      {railState.secondary === 'formation' && (
+        loadedGameState?.formations.find(f => f.id === selectedFormationId)?.kind === 'army_hq'
+          ? <ArmyReservePanel railSlot="secondary" />
+          : <FormationDetail railSlot="secondary" />
+      )}
       {railState.secondary === 'operation' && <OperationDetail railSlot="secondary" />}
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (

@@ -244,7 +244,7 @@ export function createOobFormations(
         // OOB garrison flag
         if (b.garrison) formation.garrison = true;
         // OOB elite status
-        if (b.is_elite) formation.elite_loan_state = { on_loan: false, loaned_to_corps: null, loan_start_turn: null, last_recall_turn: null, loan_start_personnel: null, permanently_degraded: false };
+        if (b.is_elite) formation.elite_loan_state = { on_loan: false, loaned_to_corps: null, loan_start_turn: null, last_recall_turn: null, loan_start_personnel: null, permanently_degraded: false, current_episode_id: null };
         // OOB composition override (e.g. enclave brigades: infantry-only)
         if (b.composition) {
             formation.composition = b.composition;

@@ -5,7 +5,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-    ELITE_LOAN_DURATION,
+    ELITE_LOAN_MIN_DURATION,
     ELITE_LOAN_COOLDOWN,
     ELITE_CASUALTY_THRESHOLD,
     ELITE_MORALE_RECALL,
@@ -46,7 +46,7 @@ function makeState(formations: Record<string, FormationState>, turn = 10): GameS
 }
 
 describe('elite loan constants', () => {
-    it('loan duration is 6 weeks', () => assert.equal(ELITE_LOAN_DURATION, 6));
+    it('loan duration is 6 weeks', () => assert.equal(ELITE_LOAN_MIN_DURATION, 6));
     it('cooldown is 4 weeks', () => assert.equal(ELITE_LOAN_COOLDOWN, 4));
     it('casualty threshold is 30%', () => assert.equal(ELITE_CASUALTY_THRESHOLD, 0.30));
     it('morale recall is 35', () => assert.equal(ELITE_MORALE_RECALL, 35));
@@ -94,15 +94,15 @@ describe('elite deployment', () => {
 });
 
 describe('elite loan lifecycle', () => {
-    it('expires loan after ELITE_LOAN_DURATION turns', () => {
+    it('expires loan after ELITE_LOAN_MIN_DURATION turns', () => {
         const f = makeEliteFormation();
         deployElite(f, 'corps_1', 5);
-        const state = makeState({ arbih_guards_brigade: f }, 5 + ELITE_LOAN_DURATION);
+        const state = makeState({ arbih_guards_brigade: f }, 5 + ELITE_LOAN_MIN_DURATION);
 
         const report = processEliteLoanLifecycle(state);
         assert.equal(report.loans_expired, 1);
         assert.equal(f.elite_loan_state!.on_loan, false);
-        assert.equal(f.elite_loan_state!.last_recall_turn, 5 + ELITE_LOAN_DURATION);
+        assert.equal(f.elite_loan_state!.last_recall_turn, 5 + ELITE_LOAN_MIN_DURATION);
     });
 
     it('force recalls on low morale', () => {

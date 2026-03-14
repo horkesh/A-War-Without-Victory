@@ -112,6 +112,28 @@ export interface FormationView {
     officer_quality?: number;
     /** True when brigade is in its home municipality (blocks attack/assault orders). */
     home_defense_active?: boolean;
+    /** BFS hops from home_osid to current location_osid (from home_distance_cache). */
+    homeHops?: number;
+    /** Home-distance effectiveness multiplier [0.70–1.0] (from home_distance_cache + equipment_class). */
+    homeDistanceMult?: number;
+    /** True if brigade is elite (mechanized/motorized): uses gentler home-distance decay. */
+    homeIsElite?: boolean;
+    /** Player-overridden sector assignment (brigade_sector_override). Null when cleared. */
+    sectorOverrideId?: string;
+    /** Actual campaign casualties from casualty_ledger.per_formation (brigades only). */
+    campaignKia?: number;
+    campaignWia?: number;
+    campaignMia?: number;
+    /** Elite loan state (elite brigades only). */
+    eliteLoanState?: {
+        on_loan: boolean;
+        loaned_to_corps: string | null;
+        loan_start_turn: number | null;
+        turns_deployed: number;
+        in_cooldown: boolean;
+        permanently_degraded: boolean;
+        current_episode_id: number | null;
+    };
     /** Turn of first battle (brigades only). Null if never fought. */
     firstBattleTurn?: number | null;
     /** OSID where first battle occurred (brigades only). */
@@ -523,6 +545,40 @@ export interface LoadedGameState {
             objectives_captured: string[]; total_attacks: number;
             casualties_suffered: { killed: number; wounded: number };
             casualties_inflicted: { killed: number; wounded: number };
+        }>;
+    }>;
+    /** Player-issued permanent sector assignments (brigade_sector_override). */
+    brigadeSectorOverride?: Record<string, string>;
+    /** Pending army reserve loan requests awaiting player decision. */
+    pendingReserveRequests?: Array<{
+        corps_id: string;
+        faction: string;
+        reason: string;
+        priority: number;
+        travel_hops: number;
+        description: string;
+        suggested_brigade_id: string | null;
+        turn_requested: number;
+    }>;
+    /** Per-elite-brigade deployment history. */
+    eliteBrigadeTracker?: Record<string, {
+        total_loans: number;
+        total_turns_deployed: number;
+        total_battles: number;
+        total_casualties_taken: number;
+        total_osids_captured: number;
+        episodes: Array<{
+            episode_id: number;
+            corps_id: string;
+            reason: string;
+            loan_start_turn: number;
+            loan_end_turn: number | null;
+            recall_reason: string | null;
+            travel_hops: number;
+            personnel_start: number;
+            casualties_taken: number;
+            battles_fought: number;
+            osids_captured: number;
         }>;
     }>;
     /** Active (in-progress) operations. */

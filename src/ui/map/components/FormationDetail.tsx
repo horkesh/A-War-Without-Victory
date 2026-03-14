@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
-import { stagePostureOrderAction } from '../desktop/orderActions';
+import { stagePostureOrderAction, assignBrigadeToSectorOverrideAction } from '../desktop/orderActions';
 import { getPanelRailStyle } from './panelRail';
 import { turnToDateString, formatCombatOutcome, formatPosture, toTitleCase } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
@@ -13,14 +13,14 @@ import { CombatSummaryPanel } from './CombatSummaryPanel';
 import type { FormationView } from '../data/types';
 
 const POSTURE_TOOLTIPS: Record<string, string> = {
-  hold: '1.00x defense. No extra cohesion cost. Baseline holding posture.',
-  defend: '1.25x defense. Moderate cohesion cost. Standard defensive stance.',
-  defend_at_all_costs: '1.60x defense. High cohesion cost. Brigade fights to destruction.',
-  elastic_defense: '1.10x defense. Preserves cohesion by yielding ground when needed.',
-  counterattack: 'Defensive stance with local offensive bias after enemy contact.',
-  dig_in: '1.35x defense when prepared. Builds fortifications over time.',
-  attack: 'Offensive stance. Lower defense, higher attack willingness.',
-  assault: 'Maximum offensive commitment. Highest casualties and cohesion burn.',
+  hold: 'Unit will maintain position but yield ground if cohesion collapses.',
+  defend: 'Unit will actively resist and hold ground at the cost of endurance.',
+  defend_at_all_costs: 'Unit fights to destruction. Will NOT yield ground until total collapse.',
+  elastic_defense: 'Unit prioritizes personnel over ground; will retreat early to save lives.',
+  counterattack: 'Unit holds until contact, then performs local offensive thrusts.',
+  dig_in: 'Brigade focused on fortification and fixed defenses. Higher survivability.',
+  attack: 'Offensive commitment. Unit will press forward despite mounting losses.',
+  assault: 'Total offensive collapse. Maximum pressure but highest cohesion burn.',
 };
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -47,6 +47,7 @@ const ZERO_BRIGADE_COMBAT_SUMMARY: NonNullable<FormationView['combatSummary']> =
   most_victories_brigade_id: null,
 };
 
+type DetailTab = 'overview' | 'record' | 'orders';
 
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
@@ -57,7 +58,7 @@ interface FormationDetailProps {
 
 export function FormationDetail({ railSlot }: FormationDetailProps) {
   const ipc = useIPC();
-  const [ordersPanelOpen, setOrdersPanelOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
@@ -65,14 +66,8 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
-  const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
-  const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
   const addStagedOrder = useGameStore((s) => s.addStagedOrder);
   const setLoadError = useGameStore((s) => s.setLoadError);
-
-  useEffect(() => {
-    setOrdersPanelOpen(false);
-  }, [selectedFormationId]);
 
   if (operationsPanelOpen || !selectedFormationId) return null;
 
@@ -97,20 +92,43 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
       </div>
     );
   }
+
   const operationOwningFormation = loadedGameState?.operations?.find(
     (operation) => operation.participating_brigade_ids?.includes(selectedFormationId)
   );
   const operationOwnershipOverridesHomeDefense = !!operationOwningFormation;
-  // Per-formation casualty data is not available in LoadedGameState (ledger is per-faction).
-  const attackOrder = loadedGameState?.attackOrders?.find(
-    (o) => o.brigadeId === selectedFormationId
-  );
+  const isBrigade = formation.kind === 'brigade';
+
+  // Home-distance helpers
+  const hops = formation.homeHops;
+  const mult = formation.homeDistanceMult;
+  const isElite = formation.homeIsElite ?? false;
+  const isHome = typeof hops === 'number' && hops <= 3;
+  const effPct = mult != null ? Math.round(mult * 100) : null;
+
+  // Sector helpers
+  const sectors = loadedGameState.corpsFrontSectors ?? [];
+  const currentSector = isBrigade && formation.corps_id
+    ? sectors.find(s => s.corps_id === formation.corps_id &&
+        (s.assigned_brigade_ids.includes(formation.id) || s.reserve_brigade_ids.includes(formation.id)))
+    : null;
+  const sameSectorList = isBrigade && formation.corps_id
+    ? sectors.filter(s => s.corps_id === formation.corps_id)
+    : [];
+  const sectorOverrideId = formation.sectorOverrideId;
+
+  const tabs: { id: DetailTab; label: string }[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'record', label: 'Record' },
+    { id: 'orders', label: 'Orders' },
+  ];
 
   return (
     <div
       className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden"
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
+      {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">
           {getArmyCrest(formation.faction) && (
@@ -120,15 +138,53 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             Formation
           </span>
         </div>
-        <button
-          onClick={() => setSelectedFormationId(null)}
-          className="text-text-secondary hover:text-interactive text-sm leading-none"
-        >
-          ✕
-        </button>
+        <div className="flex items-center gap-2">
+          {/* DIG IN quick-action (header shortcut for deployed brigades) */}
+          {isBrigade && formation.movementStatus === 'deployed' && (
+            <button
+              type="button"
+              onClick={() => void stagePostureOrderAction(
+                { ipc, addStagedOrder, setLoadError },
+                formation.id,
+                'dig_in'
+              )}
+              disabled={formation.posture === 'dig_in'}
+              title={POSTURE_TOOLTIPS.dig_in}
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded border text-[10px] font-bold transition-all ${formation.posture === 'dig_in' ? 'bg-accent-blue text-white border-accent-blue opacity-50' : 'bg-black/40 text-accent-blue border-accent-blue/40 hover:bg-accent-blue/20'}`}
+            >
+              <svg viewBox="0 0 24 24" className="w-3 h-3 fill-current"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z" /></svg>
+              DIG IN
+            </button>
+          )}
+          <button
+            onClick={() => setSelectedFormationId(null)}
+            className="text-text-secondary hover:text-interactive text-sm leading-none p-1 rounded hover:bg-white/10"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <div className="flex border-b border-panel-border bg-panel-bg/50 shrink-0">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-1 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors ${
+              activeTab === tab.id
+                ? 'text-accent-gold border-b-2 border-accent-gold bg-panel-card/40'
+                : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <div className="p-4 flex-1 space-y-3 overflow-auto min-h-0 min-w-0 relative">
+        {/* Faction crest watermark */}
         {getArmyCrest(formation.faction) && (
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none"
@@ -142,14 +198,92 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             }}
           />
         )}
-        {!formation ? (
-          <p className="text-xs text-text-secondary italic">Formation not found.</p>
-        ) : (
+
+        {/* ────────── OVERVIEW TAB ────────── */}
+        {activeTab === 'overview' && (
           <>
             <div className={`font-mono text-sm font-medium ${FACTION_COLORS_SUBTLE[formation.faction] ?? 'text-text-primary'}`}>
               {formation.name}
             </div>
 
+            {/* Corps assignment (brigades) */}
+            {isBrigade && formation.corps_id && (() => {
+              const corps = loadedGameState.formations.find(f => f.id === formation.corps_id);
+              if (!corps) return null;
+              return (
+                <button
+                  type="button"
+                  onClick={() => useGameStore.setState({
+                    selectedArmyId,
+                    selectedCorpsId: corps.id,
+                    selectedFormationId: corps.id,
+                    selectedOperationKey: null,
+                    selectedOsid: null,
+                    selectedCorpsFrontSectorId: null,
+                  })}
+                  className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-blue/10 transition-colors group"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-accent-blue/60 uppercase font-bold tracking-tighter">Corps:</span>
+                    <span className="text-accent-blue font-bold uppercase group-hover:underline">{corps.name}</span>
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent-blue/40 group-hover:bg-accent-blue transition-colors" />
+                </button>
+              );
+            })()}
+
+            {/* Sector assignment (brigades) */}
+            {(() => {
+              if (isBrigade && formation.corps_id && currentSector) {
+                return (
+                  <button
+                    type="button"
+                    onClick={() => useGameStore.setState({
+                      selectedArmyId,
+                      selectedCorpsId: selectedCorpsId ?? formation.corps_id ?? null,
+                      selectedCorpsFrontSectorId: currentSector.sector_id,
+                      selectedFormationId,
+                      selectedOperationKey: null,
+                      selectedOsid: null,
+                    })}
+                    className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-gold/10 transition-colors group"
+                    title={currentSector.sector_id}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-accent-gold/60 uppercase font-bold tracking-tighter">Sector:</span>
+                      <span className="text-accent-gold font-bold uppercase group-hover:underline">
+                        {currentSector.display_name}
+                      </span>
+                      {sectorOverrideId && (
+                        <span className="px-1 py-0 bg-accent-gold/20 text-accent-gold text-[9px] uppercase rounded border border-accent-gold/30 font-bold">
+                          Override
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-text-secondary italic">
+                        {currentSector.assigned_brigade_ids.includes(formation.id) ? 'Frontline' : 'Reserve'}
+                      </span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-accent-gold/40 group-hover:bg-accent-gold transition-colors" />
+                    </div>
+                  </button>
+                );
+              }
+              if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+                const corpsSectors = sectors.filter(s => s.corps_id === formation.id);
+                if (corpsSectors.length > 0) {
+                  return (
+                    <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center justify-between text-[10px]">
+                      <span className="text-text-secondary uppercase">Operational Sectors:</span>
+                      <span className="text-text-primary font-bold">{corpsSectors.length} ACTIVE</span>
+                    </div>
+                  );
+                }
+              }
+              return null;
+            })()}
+
+            {/* Posture & readiness */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1 bg-black/20 rounded border border-panel-border/30">
               <span className="text-text-secondary">Posture:</span>
               <span className="text-text-primary font-semibold">{formatPosture(formation.posture ?? 'hold')}</span>
@@ -169,8 +303,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   </div>
                 );
               }
-
-              if (formation.kind === 'brigade' && formation.officer_quality != null) {
+              if (isBrigade && formation.officer_quality != null) {
                 return (
                   <div className="pt-2 border-t border-panel-border flex items-center justify-between text-xs">
                     <span className="text-text-secondary">Officer Cadre Quality</span>
@@ -183,6 +316,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               return null;
             })()}
 
+            {/* Decorations */}
             {formation.decorations && formation.decorations.length > 0 && (
               <div className="pt-2 border-t border-panel-border space-y-1">
                 <div className="text-xs text-text-secondary">Unit Honors & Decorations</div>
@@ -205,7 +339,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               </div>
             )}
 
-            {/* TO&E (Table of Organization and Equipment) */}
+            {/* TO&E */}
             {formation.composition && (
               <div className="pt-2 border-t border-panel-border space-y-2">
                 <div className="text-xs text-text-secondary">TO&E (Equipment)</div>
@@ -215,9 +349,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       <span className="text-text-secondary w-16">Tanks</span>
                       <div className="flex-1 flex items-center gap-2">
                         <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
-                          <div style={{ width: `${formation.composition.tank_condition.operational * 100}%` }} className="bg-[#55d48a]" title={`${Math.round(formation.composition.tank_condition.operational * 100)}% Operational`} />
-                          <div style={{ width: `${formation.composition.tank_condition.degraded * 100}%` }} className="bg-[#d4d455]" title={`${Math.round(formation.composition.tank_condition.degraded * 100)}% Degraded`} />
-                          <div style={{ width: `${formation.composition.tank_condition.non_operational * 100}%` }} className="bg-[#d45555]" title={`${Math.round(formation.composition.tank_condition.non_operational * 100)}% Non-Operational`} />
+                          <div style={{ width: `${formation.composition.tank_condition.operational * 100}%` }} className="bg-[#55d48a]" />
+                          <div style={{ width: `${formation.composition.tank_condition.degraded * 100}%` }} className="bg-[#d4d455]" />
+                          <div style={{ width: `${formation.composition.tank_condition.non_operational * 100}%` }} className="bg-[#d45555]" />
                         </div>
                         <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.tanks}</span>
                       </div>
@@ -228,9 +362,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       <span className="text-text-secondary w-16">Artillery</span>
                       <div className="flex-1 flex items-center gap-2">
                         <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
-                          <div style={{ width: `${formation.composition.artillery_condition.operational * 100}%` }} className="bg-[#55d48a]" title={`${Math.round(formation.composition.artillery_condition.operational * 100)}% Operational`} />
-                          <div style={{ width: `${formation.composition.artillery_condition.degraded * 100}%` }} className="bg-[#d4d455]" title={`${Math.round(formation.composition.artillery_condition.degraded * 100)}% Degraded`} />
-                          <div style={{ width: `${formation.composition.artillery_condition.non_operational * 100}%` }} className="bg-[#d45555]" title={`${Math.round(formation.composition.artillery_condition.non_operational * 100)}% Non-Operational`} />
+                          <div style={{ width: `${formation.composition.artillery_condition.operational * 100}%` }} className="bg-[#55d48a]" />
+                          <div style={{ width: `${formation.composition.artillery_condition.degraded * 100}%` }} className="bg-[#d4d455]" />
+                          <div style={{ width: `${formation.composition.artillery_condition.non_operational * 100}%` }} className="bg-[#d45555]" />
                         </div>
                         <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.artillery}</span>
                       </div>
@@ -241,7 +375,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       <span className="text-text-secondary w-16">AA Sys</span>
                       <div className="flex-1 flex items-center gap-2">
                         <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
-                          <div style={{ width: '100%' }} className="bg-[#55d48a]" title="100% Operational (Abstracted)" />
+                          <div style={{ width: '100%' }} className="bg-[#55d48a]" />
                         </div>
                         <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.aa_systems}</span>
                       </div>
@@ -249,7 +383,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   )}
                   {formation.equipment_decay != null && (
                     <div className="flex justify-between items-center text-[11px] pt-1">
-                      <span className="text-text-secondary">Overall VRS Supply Effectiveness</span>
+                      <span className="text-text-secondary">Overall Supply Effectiveness</span>
                       <span className="text-text-primary font-mono">{Math.round(formation.equipment_decay * 100)}%</span>
                     </div>
                   )}
@@ -257,6 +391,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               </div>
             )}
 
+            {/* Stats grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-2 py-1 bg-black/10 rounded">
               <span className="text-text-secondary">Cohesion</span>
               <span className="text-text-primary tabular-nums flex items-center gap-1">
@@ -338,7 +473,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               )}
             </div>
 
-            {(formation.movementStatus && formation.movementStatus !== 'deployed') && (
+            {formation.movementStatus && formation.movementStatus !== 'deployed' && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 <span className="text-text-secondary">Movement:</span>
                 <span className="text-interactive px-1.5 py-0.5 bg-interactive/10 rounded border border-interactive/30">{toTitleCase(formation.movementStatus)}</span>
@@ -357,48 +492,74 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               </div>
             )}
 
-            {formation.kind === 'brigade' && (
+            {isBrigade && (
               <div className="text-xs min-w-0">
                 <span className="text-text-secondary">Home municipality: </span>
-                <span
-                  className="font-mono text-text-primary break-all"
-                  title={formation.municipalityId ?? '—'}
-                >
+                <span className="font-mono text-text-primary break-all" title={formation.municipalityId ?? '—'}>
                   {formation.municipalityId ? toTitleCase(formation.municipalityId) : '—'}
                 </span>
               </div>
             )}
 
+            {/* Narrative arc */}
+            {formation.narrativeArc && (
+              <div className="pt-2 border-t border-panel-border space-y-1 min-w-0">
+                <div className="text-xs text-text-secondary">War story</div>
+                <div className="text-xs font-semibold text-accent-gold capitalize break-words">{formation.narrativeArc}</div>
+                {formation.warNarrative && (
+                  <div className="text-[11px] text-text-primary leading-4 italic whitespace-pre-wrap break-words">{formation.warNarrative}</div>
+                )}
+                {formation.notableMoments && formation.notableMoments.length > 0 && (
+                  <div className="space-y-0.5 pt-1 min-w-0">
+                    {formation.notableMoments.map((m, i) => (
+                      <div key={i} className="text-[11px] text-text-secondary break-words">
+                        <span className="text-text-primary">{turnToDateString(m.turn)}:</span>{' '}
+                        {m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ────────── RECORD TAB ────────── */}
+        {activeTab === 'record' && (
+          <>
             {formation.last_repulsed_from && (
               <div className="text-[11px] text-text-secondary min-w-0">
                 <span>Last repulsed from: </span>
-                <span className="font-mono text-text-primary break-all" title={formation.last_repulsed_from.osid}>
-                  {getOsidDisplayName(formation.last_repulsed_from.osid, osidDisplayNames)}
-                </span>
+                <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_repulsed_from.osid, osidDisplayNames)}</span>
                 <span> (wk {formation.last_repulsed_from.turn})</span>
               </div>
             )}
             {formation.last_retreat_from && (
               <div className="text-[11px] text-text-secondary min-w-0">
                 <span>Retreated from: </span>
-                <span className="font-mono text-text-primary break-all" title={formation.last_retreat_from.osid}>
-                  {getOsidDisplayName(formation.last_retreat_from.osid, osidDisplayNames)}
-                </span>
+                <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_retreat_from.osid, osidDisplayNames)}</span>
                 <span> (wk {formation.last_retreat_from.turn})</span>
               </div>
             )}
 
-
-            {formation.kind === 'brigade' && (
-              <div className="pt-2 border-t border-panel-border space-y-2 pb-1">
+            {isBrigade && (
+              <div className="space-y-2">
                 <CombatSummaryPanel summary={formation.combatSummary ?? ZERO_BRIGADE_COMBAT_SUMMARY} compact noTopBorder />
-
-                {/* Brigade-only: KIA/WIA estimate, streak, siege */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-1">
-                  <span className="text-text-secondary text-[10px] pl-2">— KIA (est.)</span>
-                  <span className="text-[#d45555] tabular-nums text-[10px]">{Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.30).toLocaleString()}</span>
-                  <span className="text-text-secondary text-[10px] pl-2">— WIA (est.)</span>
-                  <span className="text-[#d4d455] tabular-nums text-[10px]">{Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.55).toLocaleString()}</span>
+                  <span className="text-text-secondary text-[10px] pl-2">— KIA</span>
+                  <span className="text-[#d45555] tabular-nums text-[10px]">
+                    {(formation.campaignKia ?? Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.30)).toLocaleString()}
+                  </span>
+                  <span className="text-text-secondary text-[10px] pl-2">— WIA</span>
+                  <span className="text-[#d4d455] tabular-nums text-[10px]">
+                    {(formation.campaignWia ?? Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.55)).toLocaleString()}
+                  </span>
+                  {formation.campaignMia !== undefined && formation.campaignMia > 0 && (
+                    <>
+                      <span className="text-text-secondary text-[10px] pl-2">— MIA/POW</span>
+                      <span className="text-text-secondary tabular-nums text-[10px]">{formation.campaignMia.toLocaleString()}</span>
+                    </>
+                  )}
                   {formation.brigade_history && (
                     <>
                       {formation.brigade_history.longest_victory_streak > 0 && (
@@ -417,7 +578,6 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   )}
                 </div>
 
-                {/* Equipment Brag Board */}
                 {formation.brigade_history?.total_equipment_destroyed &&
                   (formation.brigade_history.total_equipment_destroyed.tanks > 0 ||
                     formation.brigade_history.total_equipment_destroyed.artillery > 0) && (
@@ -441,7 +601,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   <div className="pt-2">
                     <div className="text-xs text-text-secondary mb-1">Recent engagements</div>
                     <div className="space-y-1">
-                      {[...formation.recent_engagements].reverse().map((engagement, idx) => (
+                      {formation.recent_engagements.map((engagement, idx) => (
                         <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
                           <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>
                           <span className="text-text-primary">{formatCombatOutcome(engagement.outcome)}</span>
@@ -456,190 +616,212 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               </div>
             )}
 
-            {formation.narrativeArc && (
-              <div className="pt-2 border-t border-panel-border space-y-1 min-w-0">
-                <div className="text-xs text-text-secondary">War story</div>
-                <div className="text-xs font-semibold text-accent-gold capitalize break-words">{formation.narrativeArc}</div>
-                {formation.warNarrative && (
-                  <div className="text-[11px] text-text-primary leading-4 italic whitespace-pre-wrap break-words">{formation.warNarrative}</div>
-                )}
-                {formation.notableMoments && formation.notableMoments.length > 0 && (
-                  <div className="space-y-0.5 pt-1 min-w-0">
-                    {formation.notableMoments.map((m, i) => (
-                      <div key={i} className="text-[11px] text-text-secondary break-words">
-                        <span className="text-text-primary">{turnToDateString(m.turn)}:</span> {m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))}
+            {!isBrigade && formation.combatSummary && (
+              <CombatSummaryPanel summary={formation.combatSummary} compact noTopBorder />
+            )}
+          </>
+        )}
+
+        {/* ────────── ORDERS TAB ────────── */}
+        {activeTab === 'orders' && (
+          <>
+            {/* Elite loan status (elite brigades only) */}
+            {formation.eliteLoanState && (
+              <div className="space-y-2 pb-3 border-b border-panel-border">
+                <span className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70">Army Reserve Status</span>
+                {formation.eliteLoanState.permanently_degraded ? (
+                  <div className="px-2 py-1.5 bg-[#d45555]/10 border border-[#d45555]/30 rounded text-[11px] text-[#d45555] font-semibold">
+                    DEGRADED — Elite status permanently lost
+                  </div>
+                ) : formation.eliteLoanState.on_loan ? (
+                  <div className="space-y-1.5">
+                    <div className="px-2 py-1.5 bg-[#d4a855]/10 border border-[#d4a855]/40 rounded text-[11px] space-y-0.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#d4a855] font-bold uppercase text-[10px]">On Loan</span>
+                        <span className="text-text-secondary text-[10px]">
+                          {formation.eliteLoanState.turns_deployed}w deployed
+                        </span>
                       </div>
-                    ))}
+                      <div className="text-text-secondary">
+                        → {loadedGameState.formations.find(f => f.id === formation.eliteLoanState!.loaned_to_corps)?.name ?? formation.eliteLoanState.loaned_to_corps}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void ipc.recallEliteBrigade(formation.id).then(r => { if (!r.ok) setLoadError(r.error ?? 'Recall failed'); })}
+                      className="w-full px-2 py-1.5 bg-[#d45555]/20 border border-[#d45555]/40 rounded text-[11px] text-[#d45555] font-bold hover:bg-[#d45555]/30 transition-colors"
+                    >
+                      RECALL TO RESERVE
+                    </button>
+                  </div>
+                ) : formation.eliteLoanState.in_cooldown ? (
+                  <div className="px-2 py-1.5 bg-black/20 border border-panel-border/40 rounded text-[11px] text-text-secondary">
+                    COOLDOWN — returning to readiness
+                  </div>
+                ) : (
+                  <div className="px-2 py-1.5 bg-[#55d48a]/10 border border-[#55d48a]/30 rounded text-[11px] text-[#55d48a] font-semibold">
+                    READY — available for deployment
                   </div>
                 )}
               </div>
             )}
 
-            {(() => {
-              if (!loadedGameState?.corpsFrontSectors) return null;
-              const sectors = loadedGameState.corpsFrontSectors;
+            {/* Home-distance effectiveness widget (brigades only) */}
+            {isBrigade && effPct != null && (
+              <div className="space-y-2">
+                {/* Layer 1: badge */}
+                <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 rounded border border-panel-border/40">
+                  <span className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">Field Effectiveness</span>
+                  {isHome ? (
+                    <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-[10px] font-bold rounded border border-[#55d48a]/30 uppercase">
+                      Home Turf
+                    </span>
+                  ) : (
+                    <span
+                      className={`px-1.5 py-0.5 text-[10px] font-bold rounded border uppercase ${
+                        effPct >= 90 ? 'bg-[#55d48a]/10 text-[#55d48a] border-[#55d48a]/30'
+                        : effPct >= 80 ? 'bg-[#d4d455]/10 text-[#d4d455] border-[#d4d455]/30'
+                        : 'bg-[#d45555]/10 text-[#d45555] border-[#d45555]/30'
+                      }`}
+                    >
+                      {effPct}% Eff{isElite ? ' (elite)' : ''}
+                    </span>
+                  )}
+                </div>
 
-              // Corps/corps_asset: show all sectors belonging to this corps
-              if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
-                const corpsSectors = sectors.filter((s) => s.corps_id === formation.id);
-                if (corpsSectors.length === 0) return null;
-                return (
-                  <div className="pt-2 border-t border-panel-border text-xs min-w-0">
-                    <div className="text-text-secondary mb-1">Sectors ({corpsSectors.length}):</div>
-                    <div className="space-y-0.5">
-                      {corpsSectors.map((s) => (
-                        <button
-                          key={s.sector_id}
-                          type="button"
-                          onClick={() => useGameStore.setState({
-                            selectedArmyId,
-                            selectedCorpsId: selectedCorpsId ?? formation.id,
-                            selectedCorpsFrontSectorId: s.sector_id,
-                            selectedFormationId,
-                            selectedOperationKey: null,
-                            selectedOsid: null,
-                          })}
-                          className="block w-full text-left text-interactive hover:underline truncate"
-                          title={s.sector_id}
-                        >
-                          {s.display_name}
-                          <span className="text-text-secondary ml-1">
-                            ({s.assigned_brigade_ids.length} Frontline / {s.reserve_brigade_ids.length} Reserve)
-                          </span>
-                        </button>
-                      ))}
+                {/* Layer 2: dual power stats */}
+                {!isHome && hops != null && (
+                  <div className="px-2 py-1.5 bg-black/10 rounded border border-panel-border/20 text-[11px] space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-text-secondary">Power at home (100%)</span>
+                      <span className="text-[#55d48a] font-mono font-semibold">
+                        {formation.personnel != null ? Math.round(formation.personnel).toLocaleString() : '—'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-text-secondary">Power here ({effPct}%)</span>
+                      <span className={`font-mono font-semibold ${effPct >= 90 ? 'text-[#d4d455]' : 'text-[#d45555]'}`}>
+                        {formation.personnel != null ? Math.round(formation.personnel * (effPct / 100)).toLocaleString() : '—'}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-text-secondary pt-0.5">
+                      {hops} hop{hops !== 1 ? 's' : ''} from home — unit cohesion and motivation degrade with distance.
                     </div>
                   </div>
-                );
-              }
-
-              // Brigade: show the single sector it belongs to
-              if (!formation.corps_id) return null;
-              const sector = sectors.find(
-                (s) => s.corps_id === formation.corps_id &&
-                  (s.assigned_brigade_ids.includes(formation.id) || s.reserve_brigade_ids.includes(formation.id))
-              );
-              if (!sector) return null;
-              return (
-                <div className="text-xs min-w-0">
-                  <span className="text-text-secondary">Sector: </span>
-                  <button
-                    type="button"
-                    onClick={() => useGameStore.setState({
-                      selectedArmyId,
-                      selectedCorpsId: selectedCorpsId ?? formation.corps_id ?? null,
-                      selectedCorpsFrontSectorId: sector.sector_id,
-                      selectedFormationId,
-                      selectedOperationKey: null,
-                      selectedOsid: null,
-                    })}
-                    className="text-interactive hover:underline"
-                    title={sector.sector_id}
-                  >
-                    {sector.display_name}
-                  </button>
-                </div>
-              );
-            })()}
-
-            {attackOrder && (
-              <div className="pt-2 border-t border-panel-border min-w-0">
-                <span className="text-xs text-text-secondary">Attack order: </span>
-                <span className="text-xs text-text-primary font-mono break-all" title={attackOrder.targetSettlementId}>
-                  {getOsidDisplayName(attackOrder.targetSettlementId, osidDisplayNames)}
-                </span>
+                )}
               </div>
             )}
 
-            {/* Phase C4: Attack/Move target selection — click map OSID */}
-            {formation.kind === 'brigade' && (
-              <div className="pt-2 border-t border-panel-border">
-                <button
-                  type="button"
-                  onClick={() => setOrdersPanelOpen((v) => !v)}
-                  className="text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover"
-                >
-                  {ordersPanelOpen ? 'Hide orders' : 'Order'}
-                </button>
+            {/* Layer 3: Sector picker (brigades only, same corps) */}
+            {isBrigade && sameSectorList.length > 0 && (
+              <div className="pt-2 border-t border-panel-border space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70">Sector Assignment</span>
+                  {sectorOverrideId && (
+                    <button
+                      type="button"
+                      onClick={() => void assignBrigadeToSectorOverrideAction(
+                        { ipc, addStagedOrder, setLoadError },
+                        formation.id,
+                        null
+                      )}
+                      className="text-[10px] text-[#d45555] hover:underline"
+                    >
+                      Clear Override
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {sameSectorList.map(sector => {
+                    const isCurrentOverride = sectorOverrideId === sector.sector_id;
+                    const isCurrentAutomatic = !sectorOverrideId && currentSector?.sector_id === sector.sector_id;
+                    return (
+                      <button
+                        key={sector.sector_id}
+                        type="button"
+                        disabled={isCurrentOverride}
+                        onClick={() => void assignBrigadeToSectorOverrideAction(
+                          { ipc, addStagedOrder, setLoadError },
+                          formation.id,
+                          sector.sector_id
+                        )}
+                        className={`w-full text-left px-2 py-1.5 rounded border text-[11px] transition-colors ${
+                          isCurrentOverride
+                            ? 'bg-accent-gold/10 border-accent-gold/50 text-accent-gold cursor-default'
+                            : isCurrentAutomatic
+                            ? 'bg-white/5 border-white/20 text-text-primary hover:bg-accent-gold/5 hover:border-accent-gold/30'
+                            : 'bg-black/20 border-panel-border/30 text-text-secondary hover:bg-white/5 hover:text-text-primary'
+                        }`}
+                        title={`${sector.assigned_brigade_ids.length} brigades assigned`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold truncate">{sector.display_name}</span>
+                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                            {isCurrentOverride && (
+                              <span className="text-[9px] bg-accent-gold/20 text-accent-gold px-1 rounded border border-accent-gold/30 font-bold uppercase">Override</span>
+                            )}
+                            {isCurrentAutomatic && (
+                              <span className="text-[9px] text-text-secondary italic">current</span>
+                            )}
+                            <span className="text-[10px] text-text-secondary">{sector.assigned_brigade_ids.length}b</span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="text-[10px] text-text-secondary px-1">
+                  Override is permanent. The sector commander will order the brigade to its new frontline position.
+                </div>
+              </div>
+            )}
+
+            {/* Combat Posture Selection */}
+            {isBrigade && (
+              <div className="pt-3 border-t border-panel-border space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70">Combat Stance</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {(['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault'] as const).map((posture) => {
+                    const isOffensive = posture === 'attack' || posture === 'assault';
+                    const blocked = isOffensive && (formation.home_defense_active ?? false) && !operationOwnershipOverridesHomeDefense;
+                    const isActive = formation.posture === posture;
+                    return (
+                      <button
+                        key={posture}
+                        type="button"
+                        disabled={blocked}
+                        onClick={() => void stagePostureOrderAction(
+                          { ipc, addStagedOrder, setLoadError },
+                          formation.id,
+                          posture
+                        )}
+                        title={blocked
+                          ? 'Blocked: home defense active'
+                          : operationOwnershipOverridesHomeDefense
+                            ? `Operation-owned: ${operationOwningFormation?.name}. ${POSTURE_TOOLTIPS[posture]}`
+                            : POSTURE_TOOLTIPS[posture]}
+                        className={`text-[10px] font-sans px-2 py-1 rounded border border-panel-border transition-colors ${isActive ? 'bg-accent-gold/10 border-accent-gold/50 text-accent-gold shadow-glow-sm' : ''} ${blocked ? 'opacity-30 cursor-not-allowed text-text-secondary' : 'text-interactive hover:bg-panel-hover'}`}
+                      >
+                        {formatPosture(posture)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Non-brigade: corps stance info placeholder */}
+            {!isBrigade && formation.corpsStance && (
+              <div className="text-xs space-y-1">
+                <span className="text-text-secondary">Corps Stance: </span>
+                <span className="text-text-primary font-semibold">{toTitleCase(formation.corpsStance)}</span>
               </div>
             )}
           </>
         )}
       </div>
-      {formation?.kind === 'brigade' && ordersPanelOpen && (
-        <div
-          className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden"
-          style={getPanelRailStyle('secondary', '22rem', 'left')}
-        >
-          <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-            <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-              Orders
-            </span>
-            <button
-              onClick={() => setOrdersPanelOpen(false)}
-              className="text-text-secondary hover:text-interactive text-sm leading-none"
-            >
-              ✕
-            </button>
-          </div>
-          <div className="p-3 space-y-3 overflow-auto">
-            <div className="text-[11px] text-text-secondary">
-              {formation.name}
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setOrderModeForFormation(orderModeForFormation === 'attack' ? null : 'attack')}
-                className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'attack' ? 'ring-1 ring-accent-gold bg-panel-active' : ''}`}
-              >
-                {orderModeForFormation === 'attack' ? 'Click target…' : 'Attack'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setOrderModeForFormation(orderModeForFormation === 'move' ? null : 'move')}
-                className={`text-xs font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover ${orderModeForFormation === 'move' ? 'ring-1 ring-green-500 bg-panel-active' : ''}`}
-              >
-                {orderModeForFormation === 'move' ? 'Click destination…' : 'Move'}
-              </button>
-            </div>
-            <div className="pt-1 border-t border-panel-border">
-              <div className="text-[11px] text-text-secondary mb-1">Posture</div>
-              <div className="flex flex-wrap gap-1">
-                {(['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault'] as const).map((posture) => {
-                  const isOffensive = posture === 'attack' || posture === 'assault';
-                  const blocked = isOffensive
-                    && (formation.home_defense_active ?? false)
-                    && !operationOwnershipOverridesHomeDefense;
-                  return (
-                    <button
-                      key={posture}
-                      type="button"
-                      disabled={blocked}
-                      onClick={() => void stagePostureOrderAction(
-                        {
-                          ipc,
-                          addStagedOrder,
-                          setLoadError,
-                        },
-                        formation.id,
-                        posture
-                      )}
-                      title={blocked
-                        ? 'Blocked: home defense active'
-                        : operationOwnershipOverridesHomeDefense
-                          ? `Operation-owned: ${operationOwningFormation?.name}. ${POSTURE_TOOLTIPS[posture]}`
-                          : POSTURE_TOOLTIPS[posture]}
-                      className={`text-[11px] font-sans px-2 py-1 rounded border border-panel-border ${blocked ? 'opacity-40 cursor-not-allowed text-text-secondary' : 'text-interactive hover:bg-panel-hover'}`}
-                    >
-                      {formatPosture(posture)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -141,6 +141,7 @@ import {
     updateSupplyReserves
 } from '../../state/supply_reserves.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
+import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
@@ -703,6 +704,17 @@ export const warPhases: NamedPhase[] = [
             if (corpsReport.length > 0) {
                 context.report.corps_ai_report = corpsReport;
             }
+        }
+    },
+    {
+        name: 'generate-army-reserve-requests',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const adjacency = buildOsidAdjacency(od.edges);
+            generateArmyReserveRequests(context.state, adjacency);
+            evaluateArmyReserveAssignments(context.state, adjacency);
         }
     },
     {
@@ -1332,11 +1344,10 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'elite-loan-lifecycle',
-        run: async (context) => {
+        name: 'tick-elite-loans',
+        run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const { processEliteLoanLifecycle } = await import('../combat/elite_loan.js');
-            processEliteLoanLifecycle(context.state);
+            tickEliteLoans(context.state, context.state.meta.turn);
         }
     },
     {

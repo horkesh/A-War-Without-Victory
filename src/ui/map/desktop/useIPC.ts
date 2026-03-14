@@ -68,6 +68,7 @@ interface WindowAwwv {
     stageMunicipalitySupportOrder: (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => Promise<{ ok: boolean; error?: string }>;
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToFront: (brigadeId: string, frontId: string) => Promise<{ ok: boolean; error?: string }>;
+    assignBrigadeToSector: (brigadeId: string, sectorId: string | null) => Promise<{ ok: boolean; error?: string }>;
     renameFrontSegment: (frontId: string, name: string) => Promise<{ ok: boolean; error?: string }>;
     renameTheatre: (theatreId: string, name: string) => Promise<{ ok: boolean; error?: string }>;
     setBrigadeDesiredAoRCap: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
@@ -82,6 +83,9 @@ interface WindowAwwv {
     loadScenarioDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     loadStateDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     openTacticalMapWindow: (payload?: { mode?: string }) => Promise<void>;
+    approveReserveRequest: (corpsId: string, brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+    recallEliteBrigade: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+    redirectReserveLoan: (brigadeId: string, newCorpsId: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -235,6 +239,10 @@ export function useIPC() {
                 ? (brigadeId: string, frontId: string) => awwv.assignBrigadeToFront(brigadeId, frontId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
+            assignBrigadeToSector: awwv
+                ? (brigadeId: string, sectorId: string | null) => awwv.assignBrigadeToSector(brigadeId, sectorId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
             renameFrontSegment: awwv
                 ? (frontId: string, name: string) => awwv.renameFrontSegment(frontId, name)
                 : makeNoop<{ ok: boolean; error?: string }>(),
@@ -294,6 +302,18 @@ export function useIPC() {
             stageCorpsOperationOrder: awwv
                 ? (payload: CorpsOperationOrderPayload) => awwv.stageCorpsOperationOrder(payload)
                 : (_payload: CorpsOperationOrderPayload) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            approveReserveRequest: awwv
+                ? (corpsId: string, brigadeId: string) => awwv.approveReserveRequest(corpsId, brigadeId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            recallEliteBrigade: awwv
+                ? (brigadeId: string) => awwv.recallEliteBrigade(brigadeId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            redirectReserveLoan: awwv
+                ? (brigadeId: string, newCorpsId: string) => awwv.redirectReserveLoan(brigadeId, newCorpsId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
         };
     }, []); // stable — never changes reference
 }

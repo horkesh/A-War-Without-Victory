@@ -45,6 +45,7 @@ import { isValidEquipmentClass } from '../state/recruitment_types.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { runPhase0TurnAndAdvance } from '../ui/warroom/run_phase0_turn.js';
+import { deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
 
 function settlementGraphOptions(baseDir: string): { settlementsPath: string; edgesPath: string } {
     return {
@@ -652,6 +653,34 @@ export function stageOgSubfrontOrder(
     return { ok: true };
 }
 
+/** Assign brigade to a corps front sector (permanent player override).
+ *  sectorId = null clears the override, returning the brigade to bot assignment. */
+export function assignBrigadeToSector(
+    state: GameState,
+    brigadeId: string,
+    sectorId: string | null,
+): { ok: true } | { ok: false; error: string } {
+    const formation = state.military.formations?.[brigadeId];
+    if (!formation || (formation.kind ?? 'brigade') !== 'brigade') {
+        return { ok: false, error: 'Invalid brigade formation' };
+    }
+    if (sectorId !== null) {
+        const sectors = state.military.corps_front_sectors ?? {};
+        const sector = sectors[sectorId];
+        if (!sector) return { ok: false, error: `Unknown sector: ${sectorId}` };
+        if (sector.corps_id !== formation.corps_id) {
+            return { ok: false, error: `Sector ${sectorId} belongs to ${sector.corps_id}, not brigade corps ${formation.corps_id}` };
+        }
+    }
+    if (!state.military.brigade_sector_override) state.military.brigade_sector_override = {};
+    if (sectorId === null) {
+        delete state.military.brigade_sector_override[brigadeId];
+    } else {
+        state.military.brigade_sector_override[brigadeId] = sectorId;
+    }
+    return { ok: true };
+}
+
 /** Assign brigade to front segment (or null to reserve). */
 export function assignBrigadeToFront(
     state: GameState,
@@ -701,6 +730,59 @@ export function renameTheatre(
     if (!theatre) return { ok: false, error: `Unknown theatre_id: ${theatreId}` };
     const normalized = typeof name === 'string' ? name.trim() : '';
     theatre.name = normalized.length > 0 ? normalized : `${theatre.faction} Theatre`;
+    return { ok: true };
+}
+
+/** Player approves a pending reserve request, deploying the suggested (or specified) brigade. */
+export function approveReserveRequest(
+    state: GameState,
+    corpsId: string,
+    brigadeId: string
+): { ok: true } | { ok: false; error: string } {
+    const f = state.military.formations?.[brigadeId];
+    if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
+    if (!f.elite_loan_state) return { ok: false, error: `${brigadeId} is not an elite brigade` };
+    if (f.elite_loan_state.on_loan) return { ok: false, error: `${brigadeId} is already on loan` };
+    if (f.elite_loan_state.permanently_degraded) return { ok: false, error: `${brigadeId} has permanently lost elite status` };
+    // Find the pending request to get the reason; fall back to 'offensive_support'
+    const req = state.military.pending_reserve_requests?.find(r => r.corps_id === corpsId);
+    const reason = req?.reason ?? 'offensive_support';
+    const hops = req?.travel_hops ?? 0;
+    deployEliteLoan(state, brigadeId, corpsId, reason, hops, state.meta.turn);
+    // Remove the fulfilled request from pending list
+    if (state.military.pending_reserve_requests) {
+        state.military.pending_reserve_requests = state.military.pending_reserve_requests.filter(r => r.corps_id !== corpsId);
+    }
+    return { ok: true };
+}
+
+/** Player manually recalls an elite brigade from its current loan. */
+export function recallEliteBrigade(
+    state: GameState,
+    brigadeId: string
+): { ok: true } | { ok: false; error: string } {
+    const f = state.military.formations?.[brigadeId];
+    if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
+    if (!f.elite_loan_state?.on_loan) return { ok: false, error: `${brigadeId} is not currently on loan` };
+    recallEliteLoan(state, brigadeId, 'player_recall', state.meta.turn);
+    return { ok: true };
+}
+
+/** Player redirects a loaned elite brigade to a different corps (recall + re-deploy). */
+export function redirectReserveLoan(
+    state: GameState,
+    brigadeId: string,
+    newCorpsId: string
+): { ok: true } | { ok: false; error: string } {
+    const f = state.military.formations?.[brigadeId];
+    if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
+    if (!f.elite_loan_state) return { ok: false, error: `${brigadeId} is not an elite brigade` };
+    if (f.elite_loan_state.on_loan) {
+        recallEliteLoan(state, brigadeId, 'player_recall', state.meta.turn);
+    }
+    const req = state.military.pending_reserve_requests?.find(r => r.corps_id === newCorpsId);
+    const reason = req?.reason ?? 'offensive_support';
+    deployEliteLoan(state, brigadeId, newCorpsId, reason, 0, state.meta.turn);
     return { ok: true };
 }
 

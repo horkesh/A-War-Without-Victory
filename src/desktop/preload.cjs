@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld('awwv', {
   stageDeployOrder: (brigadeId) => ipcRenderer.invoke('stage-deploy-order', { brigadeId }),
   stageUndeployOrder: (brigadeId) => ipcRenderer.invoke('stage-undeploy-order', { brigadeId }),
   assignBrigadeToFront: (brigadeId, frontId) => ipcRenderer.invoke('assign-brigade-to-front', { brigadeId, frontId }),
+  assignBrigadeToSector: (brigadeId, sectorId) => ipcRenderer.invoke('assign-brigade-to-sector', { brigadeId, sectorId }),
   renameFrontSegment: (frontId, name) => ipcRenderer.invoke('rename-front-segment', { frontId, name }),
   renameTheatre: (theatreId, name) => ipcRenderer.invoke('rename-theatre', { theatreId, name }),
   stageBrigadeAoROrder: (settlementId, fromBrigadeId, toBrigadeId) => ipcRenderer.invoke('stage-brigade-aor-order', { settlementId, fromBrigadeId, toBrigadeId }),
@@ -64,4 +65,7 @@ contextBridge.exposeInMainWorld('awwv', {
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
   stageAssignOperationCommander: (payload) => ipcRenderer.invoke('stage-assign-operation-commander', payload),
   assignCommander: (officerId, corpsId) => ipcRenderer.invoke('assign-commander', { officerId, corpsId }),
+  approveReserveRequest: (corpsId, brigadeId) => ipcRenderer.invoke('approve-reserve-request', { corpsId, brigadeId }),
+  recallEliteBrigade: (brigadeId) => ipcRenderer.invoke('recall-elite-brigade', { brigadeId }),
+  redirectReserveLoan: (brigadeId, newCorpsId) => ipcRenderer.invoke('redirect-reserve-loan', { brigadeId, newCorpsId }),
 });

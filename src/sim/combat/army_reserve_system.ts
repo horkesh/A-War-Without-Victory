@@ -1,0 +1,476 @@
+/**
+ * Army Reserve System — elite brigade loan management.
+ *
+ * Corps commanders request army-level elite brigades each turn.
+ * Army AI evaluates geographic feasibility + request priority, then auto-assigns.
+ * Unresolved requests surface to the player panel.
+ *
+ * Loan lifecycle: op-tied (no hard timer). Brigade stays until:
+ *   - Op concludes + need evaporates  → 'op_complete' or 'need_expired'
+ *   - Player manually recalls         → 'player_recall'
+ *   - Force-recall conditions         → 'casualty_threshold' | 'morale_collapse' | 'permanent_degradation'
+ *
+ * Per-brigade EliteLoanEpisode records accumulate in elite_brigade_tracker.
+ *
+ * Determinism: all iteration sorted via strictCompare; no Math.random(), no Date.now().
+ */
+
+import type { GameState, FormationState, FactionId, FormationId } from '../../state/game_state.js';
+import type { Osid } from './osid_adjacency.js';
+import {
+    ELITE_LOAN_MIN_DURATION,
+    ELITE_LOAN_COOLDOWN,
+    ELITE_CASUALTY_THRESHOLD,
+    ELITE_MORALE_RECALL,
+    ELITE_DEGRADATION_THRESHOLD,
+    MAX_AUTO_DEPLOY_HOPS,
+    createEliteBrigadeTracker,
+    type ArmyReserveRequest,
+    type ReserveRequestReason,
+    type EliteRecallReason,
+} from '../../state/elite_loan_types.js';
+import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
+import { computeOsidGraphDistance } from './home_distance.js';
+import { strictCompare } from '../../state/validateGameState.js';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * Returns a reference OSID for a corps — used to compute travel distance.
+ * Prefers the corps formation's location_osid, then falls back to home_osid,
+ * then falls back to the first active brigade in that corps.
+ */
+function getCorpsReferenceOsid(state: GameState, corpsId: string): string | null {
+    const formations = state.military.formations ?? {};
+    // Direct corps formation lookup
+    const corpsFormation = formations[corpsId];
+    if (corpsFormation) {
+        return (corpsFormation.location_osid ?? corpsFormation.home_osid) ?? null;
+    }
+    // Fall back to first active brigade in this corps (sorted for determinism)
+    const brigadeIds = Object.keys(formations).sort(strictCompare);
+    for (const bid of brigadeIds) {
+        const f = formations[bid];
+        if (f.corps_id === corpsId && f.status === 'active') {
+            return (f.location_osid ?? f.home_osid) ?? null;
+        }
+    }
+    return null;
+}
+
+/**
+ * Applies geographic penalty to a raw priority score.
+ * Returns -1 when hops exceed MAX_AUTO_DEPLOY_HOPS (bot AI rejects).
+ */
+export function computeDeployPriority(rawPriority: number, hops: number): number {
+    if (hops > MAX_AUTO_DEPLOY_HOPS) return -1;
+    if (hops <= 3) return rawPriority;
+    if (hops <= 6) return rawPriority * 0.6;
+    return rawPriority * 0.3; // 7–8 hops
+}
+
+/**
+ * Returns true if the formation is an elite brigade available for loan
+ * (not already on loan, not in cooldown, not permanently degraded).
+ */
+function isEliteAvailable(f: FormationState, turn: number): boolean {
+    // Elite brigades are identified by presence of elite_loan_state (set on OOB load for is_elite=true)
+    const ls = f.elite_loan_state;
+    if (!ls) return false;
+    if (ls.permanently_degraded) return false;
+    if (ls.on_loan) return false;
+    if (ls.last_recall_turn != null && turn - ls.last_recall_turn < ELITE_LOAN_COOLDOWN) return false;
+    return true;
+}
+
+/**
+ * Returns all elite brigade IDs for a faction that are currently available,
+ * sorted by formation ID for determinism.
+ */
+function getAvailableElites(state: GameState, faction: string, turn: number): FormationId[] {
+    const formations = state.military.formations ?? {};
+    return Object.keys(formations)
+        .filter(fid => {
+            const f = formations[fid];
+            return f.faction === faction && isEliteAvailable(f, turn);
+        })
+        .sort(strictCompare);
+}
+
+/**
+ * Returns true if a corps already has an elite brigade loaned to it this turn.
+ */
+function corpsHasLoanedElite(state: GameState, corpsId: string): boolean {
+    const formations = state.military.formations ?? {};
+    for (const f of Object.values(formations)) {
+        if (f.elite_loan_state?.on_loan && f.elite_loan_state.loaned_to_corps === corpsId) return true;
+    }
+    return false;
+}
+
+// ─── Request generation ───────────────────────────────────────────────────────
+
+/**
+ * Scans all non-exempt corps and generates the highest-priority reserve request
+ * per corps. Writes to state.military.pending_reserve_requests (replaces previous).
+ */
+export function generateArmyReserveRequests(
+    state: GameState,
+    adjacency: Map<Osid, Osid[]>
+): void {
+    const formations = state.military.formations ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
+    const corpsSectors = state.military.corps_front_sectors ?? {};
+    const turn = state.meta.turn;
+
+    const requests: ArmyReserveRequest[] = [];
+
+    const allCorpsIds = Object.keys(corpsCommand).sort(strictCompare);
+
+    for (const corpsId of allCorpsIds) {
+        // Only eligible (non-exempt) corps
+        if (EXEMPT_CORPS_IDS.has(corpsId)) continue;
+
+        // Determine faction from any active brigade in this corps
+        let corpsFaction: string | null = null;
+        for (const f of Object.values(formations)) {
+            if (f.corps_id === corpsId && f.status === 'active') {
+                corpsFaction = f.faction;
+                break;
+            }
+        }
+        if (!corpsFaction) continue;
+
+        // Skip if already has a loaned elite
+        if (corpsHasLoanedElite(state, corpsId)) continue;
+
+        const cmd = corpsCommand[corpsId];
+        const sector = Object.values(corpsSectors).find(s => s.corps_id === corpsId);
+        const op = cmd?.active_operation;
+
+        let bestReason: ReserveRequestReason | null = null;
+        let bestRawPriority = 0;
+        let bestDescription = '';
+
+        // 1. Offensive support — active op with momentum ≥ 1
+        if (op && op.phase === 'execution') {
+            const momentum = op.momentum ?? (op.axes ? Math.max(...op.axes.map(a => a.momentum)) : 0);
+            if (momentum >= 1) {
+                const rawPriority = Math.min(100, 60 + momentum * 8);
+                if (rawPriority > bestRawPriority) {
+                    bestReason = 'offensive_support';
+                    bestRawPriority = rawPriority;
+                    bestDescription = `Op "${op.name}" at momentum ${momentum} — elite needed to exploit breakthrough`;
+                }
+            }
+        }
+
+        // 2. Defensive gap — any sector with threat_ratio > 2.0 and ≤ 1 brigade
+        if (sector && sector.threat_ratio > 2.0 && sector.assigned_brigade_ids.length <= 1) {
+            const rawPriority = Math.min(85, 50 + (sector.threat_ratio - 2.0) * 10);
+            if (rawPriority > bestRawPriority) {
+                bestReason = 'defensive_gap';
+                bestRawPriority = rawPriority;
+                bestDescription = `Sector threat ratio ${sector.threat_ratio.toFixed(1)} with only ${sector.assigned_brigade_ids.length} brigade(s) — line is thin`;
+            }
+        }
+
+        // 3. Exploitation — op captured OSIDs last turn, no reserve yet
+        if (op && op.phase === 'execution') {
+            const capturedRecently = (op.objective_capture_count ?? (op.axes ? op.axes.reduce((s, a) => s + a.objective_capture_count, 0) : 0)) > 0;
+            if (capturedRecently && bestRawPriority < 65) {
+                const rawPriority = 65;
+                if (rawPriority > bestRawPriority) {
+                    bestReason = 'exploitation';
+                    bestRawPriority = rawPriority;
+                    bestDescription = `Op "${op.name}" captured objectives — elite needed to exploit gains`;
+                }
+            }
+        }
+
+        if (!bestReason) continue;
+
+        // Find best available elite brigade (same faction, nearest)
+        const availableElites = getAvailableElites(state, corpsFaction, turn);
+        if (availableElites.length === 0) continue;
+
+        const corpsRefOsid = getCorpsReferenceOsid(state, corpsId);
+        if (!corpsRefOsid) continue;
+
+        let bestBrigadeId: string | null = null;
+        let bestHops = Infinity;
+
+        for (const bid of availableElites) {
+            const f = formations[bid];
+            const brigadeOsid = f.location_osid ?? f.home_osid;
+            if (!brigadeOsid) continue;
+            const hops = computeOsidGraphDistance(brigadeOsid as Osid, corpsRefOsid as Osid, adjacency);
+            if (hops < bestHops) {
+                bestHops = hops;
+                bestBrigadeId = bid;
+            }
+        }
+
+        if (bestBrigadeId === null || bestHops === Infinity) continue;
+
+        const priority = computeDeployPriority(bestRawPriority, bestHops);
+        if (priority < 0) continue; // too far for bot AI
+
+        requests.push({
+            corps_id: corpsId,
+            faction: corpsFaction,
+            reason: bestReason,
+            priority,
+            raw_priority: bestRawPriority,
+            travel_hops: bestHops,
+            turn_requested: turn,
+            description: bestDescription,
+            suggested_brigade_id: bestBrigadeId,
+        });
+    }
+
+    // Sort descending by priority, tiebreak by corps_id ascending (determinism)
+    requests.sort((a, b) => {
+        if (b.priority !== a.priority) return b.priority - a.priority;
+        return strictCompare(a.corps_id, b.corps_id);
+    });
+
+    state.military.pending_reserve_requests = requests;
+}
+
+// ─── Loan lifecycle ───────────────────────────────────────────────────────────
+
+/**
+ * Deploy an elite brigade on loan to a corps.
+ * Creates an EliteLoanEpisode and updates the brigade tracker.
+ */
+export function deployEliteLoan(
+    state: GameState,
+    brigadeId: FormationId,
+    corpsId: string,
+    reason: ReserveRequestReason,
+    travelHops: number,
+    turn: number
+): void {
+    const f = state.military.formations?.[brigadeId];
+    if (!f?.elite_loan_state) return;
+
+    const ls = f.elite_loan_state;
+    ls.on_loan = true;
+    ls.loaned_to_corps = corpsId;
+    ls.loan_start_turn = turn;
+    ls.loan_start_personnel = f.personnel ?? 0;
+
+    // Ensure tracker exists
+    if (!state.military.elite_brigade_tracker) state.military.elite_brigade_tracker = {};
+    if (!state.military.elite_brigade_tracker[brigadeId]) {
+        state.military.elite_brigade_tracker[brigadeId] = createEliteBrigadeTracker(brigadeId);
+    }
+    const tracker = state.military.elite_brigade_tracker[brigadeId]!;
+    const episodeId = tracker.episodes.length;
+
+    tracker.episodes.push({
+        episode_id: episodeId,
+        corps_id: corpsId,
+        reason,
+        loan_start_turn: turn,
+        loan_end_turn: null,
+        recall_reason: null,
+        travel_hops: travelHops,
+        personnel_start: f.personnel ?? 0,
+        personnel_end: null,
+        casualties_taken: 0,
+        battles_fought: 0,
+        osids_captured: 0,
+        kia_inflicted_est: 0,
+    });
+
+    tracker.total_loans++;
+    ls.current_episode_id = episodeId;
+}
+
+/**
+ * Recall an elite brigade from loan.
+ * Closes the current episode and updates tracker totals.
+ */
+export function recallEliteLoan(
+    state: GameState,
+    brigadeId: FormationId,
+    reason: EliteRecallReason,
+    turn: number
+): void {
+    const f = state.military.formations?.[brigadeId];
+    if (!f?.elite_loan_state) return;
+
+    const ls = f.elite_loan_state;
+    if (!ls.on_loan) return;
+
+    const tracker = state.military.elite_brigade_tracker?.[brigadeId];
+    if (tracker && ls.current_episode_id != null) {
+        const episode = tracker.episodes[ls.current_episode_id];
+        if (episode) {
+            episode.loan_end_turn = turn;
+            episode.recall_reason = reason;
+            episode.personnel_end = f.personnel ?? 0;
+            episode.casualties_taken = Math.max(0, (episode.personnel_start) - (episode.personnel_end));
+            tracker.total_casualties_taken += episode.casualties_taken;
+        }
+    }
+
+    ls.on_loan = false;
+    ls.loaned_to_corps = null;
+    ls.last_recall_turn = turn;
+    ls.current_episode_id = null;
+}
+
+// ─── Bot AI assignment ────────────────────────────────────────────────────────
+
+/**
+ * Bot AI auto-assigns pending reserve requests.
+ * Processes highest-priority requests first; each assigned brigade is consumed.
+ * Requests that cannot be fulfilled remain in pending_reserve_requests for the player.
+ */
+export function evaluateArmyReserveAssignments(
+    state: GameState,
+    adjacency: Map<Osid, Osid[]>
+): void {
+    const requests = state.military.pending_reserve_requests ?? [];
+    if (requests.length === 0) return;
+
+    const turn = state.meta.turn;
+    const usedBrigades = new Set<string>();
+    const fulfilled: ArmyReserveRequest[] = [];
+    const remaining: ArmyReserveRequest[] = [];
+
+    for (const req of requests) {
+        // Only auto-assign bot factions (player faction surfaces in UI)
+        const playerFaction = state.meta.player_faction ?? null;
+        if (req.faction === playerFaction) {
+            remaining.push(req);
+            continue;
+        }
+
+        const brigadeId = req.suggested_brigade_id;
+        if (!brigadeId || usedBrigades.has(brigadeId)) {
+            // Try any available elite of same faction
+            const alternatives = getAvailableElites(state, req.faction, turn)
+                .filter(bid => !usedBrigades.has(bid));
+            if (alternatives.length === 0) {
+                remaining.push(req);
+                continue;
+            }
+            // Pick nearest
+            const corpsRef = getCorpsReferenceOsid(state, req.corps_id);
+            if (!corpsRef) {
+                remaining.push(req);
+                continue;
+            }
+            let nearestId: string | null = null;
+            let nearestHops = Infinity;
+            for (const bid of alternatives) {
+                const f = state.military.formations?.[bid];
+                const bOsid = f?.location_osid ?? f?.home_osid;
+                if (!bOsid) continue;
+                const h = computeOsidGraphDistance(bOsid as Osid, corpsRef as Osid, adjacency);
+                if (h < nearestHops) { nearestHops = h; nearestId = bid; }
+            }
+            if (!nearestId || nearestHops > MAX_AUTO_DEPLOY_HOPS) {
+                remaining.push(req);
+                continue;
+            }
+            deployEliteLoan(state, nearestId, req.corps_id, req.reason, nearestHops, turn);
+            usedBrigades.add(nearestId);
+            fulfilled.push(req);
+            continue;
+        }
+
+        // Verify the suggested brigade is still available (another request may have claimed it)
+        const f = state.military.formations?.[brigadeId];
+        if (!f || !isEliteAvailable(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS) {
+            remaining.push(req);
+            continue;
+        }
+
+        deployEliteLoan(state, brigadeId, req.corps_id, req.reason, req.travel_hops, turn);
+        usedBrigades.add(brigadeId);
+        fulfilled.push(req);
+    }
+
+    // Only unresolved requests remain in pending list (player sees these)
+    state.military.pending_reserve_requests = remaining;
+}
+
+// ─── Per-turn tick ────────────────────────────────────────────────────────────
+
+/**
+ * Runs each turn after battles.
+ *  - Force-recalls on casualty/morale thresholds
+ *  - Voluntary recall when op concluded + need expired + min duration elapsed
+ *  - Updates active episode tracker fields (turns_deployed, battles_fought)
+ */
+export function tickEliteLoans(state: GameState, turn: number): void {
+    const formations = state.military.formations ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
+    const brigadeIds = Object.keys(formations).sort(strictCompare);
+
+    for (const bid of brigadeIds) {
+        const f = formations[bid];
+        const ls = f.elite_loan_state;
+        if (!ls?.on_loan || !ls.loaned_to_corps) continue;
+
+        const tracker = state.military.elite_brigade_tracker?.[bid];
+        const episode = tracker && ls.current_episode_id != null ? tracker.episodes[ls.current_episode_id] : undefined;
+
+        // ── Update tracker totals (every turn on loan) ──
+        if (tracker) tracker.total_turns_deployed++;
+        // Update episode battles from brigade_history (if available)
+        // We use the total battle count as a proxy; episode battles_fought is best-effort
+        // (full battle attribution requires cross-referencing attack_resolution reports)
+
+        const turnsSinceLoan = ls.loan_start_turn != null ? turn - ls.loan_start_turn : 0;
+        const personnel = f.personnel ?? 0;
+        const startPersonnel = ls.loan_start_personnel ?? personnel;
+
+        // ── Force recall checks (in priority order) ──
+
+        // Permanent degradation — > 50% personnel loss
+        if (startPersonnel > 0 && personnel < startPersonnel * (1 - ELITE_DEGRADATION_THRESHOLD)) {
+            ls.permanently_degraded = true;
+            recallEliteLoan(state, bid, 'permanent_degradation', turn);
+            continue;
+        }
+
+        // Casualty threshold — > 30% personnel loss
+        if (startPersonnel > 0 && personnel < startPersonnel * (1 - ELITE_CASUALTY_THRESHOLD)) {
+            recallEliteLoan(state, bid, 'casualty_threshold', turn);
+            continue;
+        }
+
+        // Morale collapse
+        if ((f.morale ?? 60) < ELITE_MORALE_RECALL) {
+            recallEliteLoan(state, bid, 'morale_collapse', turn);
+            continue;
+        }
+
+        // ── Voluntary recall (army AI) — only after min duration ──
+        if (turnsSinceLoan < ELITE_LOAN_MIN_DURATION) continue;
+
+        const corpsId = ls.loaned_to_corps;
+        const cmd = corpsCommand[corpsId];
+        const hasActiveOp = !!(cmd?.active_operation && cmd.active_operation.phase === 'execution');
+        const sector = Object.values(state.military.corps_front_sectors ?? {}).find(s => s.corps_id === corpsId);
+        const threatHigh = sector ? sector.threat_ratio >= 1.5 : false;
+
+        // Op ended + no high threat → op_complete
+        if (!hasActiveOp && !threatHigh) {
+            const hadOp = episode?.reason === 'offensive_support' || episode?.reason === 'exploitation';
+            recallEliteLoan(state, bid, hadOp ? 'op_complete' : 'need_expired', turn);
+            continue;
+        }
+
+        // No op, no threat, not needed → need_expired
+        if (!hasActiveOp && !threatHigh) {
+            recallEliteLoan(state, bid, 'need_expired', turn);
+        }
+    }
+}

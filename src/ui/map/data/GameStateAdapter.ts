@@ -435,6 +435,35 @@ export function parseGameState(json: unknown): LoadedGameState {
     // Fallback to state.brigade_history for any legacy save that might have used that shape.
     const brigadeHistoryRecord = state.brigade_history as Record<string, Record<string, unknown>> | undefined;
 
+    // Per-formation campaign casualty totals from casualty_ledger.per_formation.
+    const rawLedgerForPerFm = state.military.casualty_ledger as
+        Record<string, { per_formation?: Record<string, { killed?: number; wounded?: number; missing_captured?: number }> }> | undefined;
+    const perFormationCasualties: Record<string, { kia: number; wia: number; mia: number }> = {};
+    if (rawLedgerForPerFm && typeof rawLedgerForPerFm === 'object') {
+        for (const factionData of Object.values(rawLedgerForPerFm)) {
+            const pf = factionData?.per_formation;
+            if (pf && typeof pf === 'object') {
+                for (const [bid, bd] of Object.entries(pf)) {
+                    const b = bd as { killed?: number; wounded?: number; missing_captured?: number };
+                    perFormationCasualties[bid] = {
+                        kia: typeof b?.killed === 'number' ? b.killed : 0,
+                        wia: typeof b?.wounded === 'number' ? b.wounded : 0,
+                        mia: typeof b?.missing_captured === 'number' ? b.missing_captured : 0,
+                    };
+                }
+            }
+        }
+    }
+
+    // Home-distance cache: pre-computed BFS hop counts from buildHomeDistanceCache() in war_phases.ts.
+    const homeDistanceCache = state.military.home_distance_cache as Record<string, number> | undefined;
+    // Player-issued permanent sector assignments.
+    const brigadeSectorOverrideRaw = state.military.brigade_sector_override as Record<string, string> | undefined;
+    const brigadeSectorOverride: Record<string, string> | undefined =
+        brigadeSectorOverrideRaw && typeof brigadeSectorOverrideRaw === 'object' && !Array.isArray(brigadeSectorOverrideRaw)
+            ? brigadeSectorOverrideRaw
+            : undefined;
+
     const formations: FormationView[] = [];
     if (Object.keys(formationsRecord).length > 0) {
         const sortedIds = Object.keys(formationsRecord).sort();
@@ -458,6 +487,32 @@ export function parseGameState(json: unknown): LoadedGameState {
             const posture = typeof f.posture === 'string' && f.posture ? f.posture : undefined;
             const home_defense_active = f.home_defense_active === true ? true : undefined;
             const corps_id = typeof f.corps_id === 'string' && f.corps_id ? f.corps_id : undefined;
+
+            // Home-distance effectiveness fields (brigades only).
+            const isBrigadeKind = (f.kind as string) === 'brigade' || (f.kind as string) === 'operational_group';
+            let homeHops: number | undefined;
+            let homeDistanceMult: number | undefined;
+            let homeIsElite: boolean | undefined;
+            let sectorOverrideId: string | undefined;
+            if (isBrigadeKind) {
+                const hops = homeDistanceCache?.[id];
+                if (typeof hops === 'number' && Number.isFinite(hops)) {
+                    homeHops = hops;
+                    const equipClass = f.equipment_class as string | undefined;
+                    const isElite = equipClass === 'mechanized' || equipClass === 'motorized'
+                        || !!(f.elite_loan_state);
+                    homeIsElite = isElite || undefined; // only include if true
+                    // Replicate getHomeDistanceMult inline (no engine import in adapter)
+                    const HOME_DISTANCE_FREE_RANGE = 3;
+                    const perHop = isElite ? 0.02 : 0.04;
+                    const floor = isElite ? 0.85 : 0.70;
+                    homeDistanceMult = hops <= HOME_DISTANCE_FREE_RANGE
+                        ? 1.0
+                        : Math.max(floor, 1.0 - (hops - HOME_DISTANCE_FREE_RANGE) * perHop);
+                }
+                const ov = brigadeSectorOverride?.[id];
+                if (typeof ov === 'string' && ov) sectorOverrideId = ov;
+            }
             const movementState = rawMovementState?.[id] as { status?: string; stance?: string } | undefined;
             const movementStatus = (movementState?.status === 'packing' || movementState?.status === 'in_transit' || movementState?.status === 'unpacking')
                 ? (movementState.status as 'packing' | 'in_transit' | 'unpacking')
@@ -505,6 +560,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 home_osid: typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined,
                 tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
                 personnel, posture, home_defense_active, corps_id, movementStatus, movementStance,
+                homeHops, homeDistanceMult, homeIsElite, sectorOverrideId,
                 narrativeArc,
                 warNarrative: typeof warStory?.narrative === 'string' ? warStory.narrative : undefined,
                 notableMoments: Array.isArray(warStory?.notable_moments) ? warStory.notable_moments : undefined,
@@ -549,6 +605,36 @@ export function parseGameState(json: unknown): LoadedGameState {
                         }));
                     }
                 }
+            }
+
+            // Campaign casualty ledger (actual KIA/WIA/MIA from casualty_ledger.per_formation).
+            if (f.kind === 'brigade' || f.kind === 'operational_group') {
+                const cfCas = perFormationCasualties[id];
+                if (cfCas) {
+                    fv.campaignKia = cfCas.kia;
+                    fv.campaignWia = cfCas.wia;
+                    fv.campaignMia = cfCas.mia;
+                }
+            }
+
+            // Elite loan state (elite brigades only — identified by presence of elite_loan_state).
+            const els = (f as any).elite_loan_state as {
+                on_loan: boolean; loaned_to_corps: string | null; loan_start_turn: number | null;
+                last_recall_turn: number | null; permanently_degraded: boolean; current_episode_id: number | null;
+            } | undefined;
+            if (els) {
+                const turn = state.meta?.turn ?? 0;
+                const turnsDeployed = els.on_loan && els.loan_start_turn != null ? turn - els.loan_start_turn : 0;
+                const inCooldown = !els.on_loan && els.last_recall_turn != null && (turn - els.last_recall_turn) < 4;
+                fv.eliteLoanState = {
+                    on_loan: els.on_loan,
+                    loaned_to_corps: els.loaned_to_corps,
+                    loan_start_turn: els.loan_start_turn,
+                    turns_deployed: turnsDeployed,
+                    in_cooldown: inCooldown,
+                    permanently_degraded: els.permanently_degraded,
+                    current_episode_id: els.current_episode_id,
+                };
             }
 
             // Brigade fallback: synthesize combatSummary from brigade_history running tallies (on formation or legacy state.brigade_history).
@@ -1473,7 +1559,50 @@ export function parseGameState(json: unknown): LoadedGameState {
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         operationHistory: deriveOperationHistory(state),
         activeOperations: deriveActiveOperations(state),
+        brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
+        pendingReserveRequests: Array.isArray(state.military?.pending_reserve_requests) && state.military.pending_reserve_requests.length > 0
+            ? (state.military.pending_reserve_requests as any[]).map(r => ({
+                corps_id: String(r.corps_id ?? ''),
+                faction: String(r.faction ?? ''),
+                reason: String(r.reason ?? ''),
+                priority: Number(r.priority ?? 0),
+                travel_hops: Number(r.travel_hops ?? 0),
+                description: String(r.description ?? ''),
+                suggested_brigade_id: r.suggested_brigade_id ? String(r.suggested_brigade_id) : null,
+                turn_requested: Number(r.turn_requested ?? 0),
+            }))
+            : undefined,
+        eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
     };
+}
+
+function deriveEliteBrigadeTracker(state: any): LoadedGameState['eliteBrigadeTracker'] {
+    const raw = state.military?.elite_brigade_tracker as Record<string, any> | undefined;
+    if (!raw || Object.keys(raw).length === 0) return undefined;
+    const result: NonNullable<LoadedGameState['eliteBrigadeTracker']> = {};
+    for (const [brigadeId, t] of Object.entries(raw)) {
+        result[brigadeId] = {
+            total_loans: Number(t.total_loans ?? 0),
+            total_turns_deployed: Number(t.total_turns_deployed ?? 0),
+            total_battles: Number(t.total_battles ?? 0),
+            total_casualties_taken: Number(t.total_casualties_taken ?? 0),
+            total_osids_captured: Number(t.total_osids_captured ?? 0),
+            episodes: Array.isArray(t.episodes) ? (t.episodes as any[]).map(ep => ({
+                episode_id: Number(ep.episode_id ?? 0),
+                corps_id: String(ep.corps_id ?? ''),
+                reason: String(ep.reason ?? ''),
+                loan_start_turn: Number(ep.loan_start_turn ?? 0),
+                loan_end_turn: ep.loan_end_turn != null ? Number(ep.loan_end_turn) : null,
+                recall_reason: ep.recall_reason ? String(ep.recall_reason) : null,
+                travel_hops: Number(ep.travel_hops ?? 0),
+                personnel_start: Number(ep.personnel_start ?? 0),
+                casualties_taken: Number(ep.casualties_taken ?? 0),
+                battles_fought: Number(ep.battles_fought ?? 0),
+                osids_captured: Number(ep.osids_captured ?? 0),
+            })) : [],
+        };
+    }
+    return result;
 }
 
 function deriveOperationHistory(state: any): LoadedGameState['operationHistory'] {
