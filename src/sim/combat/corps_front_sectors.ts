@@ -229,6 +229,11 @@ function buildFactionSectors(
     // when shared front OSIDs or coverage transfers create overlapping claims.
     deduplicateBrigadesAcrossSectors(sectors);
 
+    // Step 8c: Recompute defensive_power and threat_ratio from final brigade sets.
+    // Must run AFTER all assignment steps so sectors rescued by ensureMinimumSectorCoverage
+    // (0→1 brigade) show non-zero dp/threat_ratio instead of stale zeros.
+    recomputeSectorPowerAndThreat(sectors, formations, faction);
+
     // Final prune: remove sectors that are ghost artifacts:
     //  - 0 front edges (no enemy contact)
     //  - 0 territory AND 0 assigned/reserve brigades (isolated pocket with nobody home)
@@ -994,30 +999,12 @@ function classifyBrigadesByTerritory(
     // Reserve cap is applied later in reclassifyRearBrigades (Step 8),
     // after equalization and coverage have redistributed assigned brigades.
 
-    // Update density, defensive power, and threat ratio
-    const allFormIds = Object.keys(formations).sort(strictCompare);
-    for (const s of sectors) {
-        s.density = s.length_edges > 0
-            ? s.assigned_brigade_ids.length / s.length_edges : 0;
-        s.defensive_power = computeLocalFrontDefensivePower(
-            formations, s.assigned_brigade_ids, s.length_edges
-        );
-
-        // Recalculate threat_ratio from enemy formations at sector enemy OSIDs
-        const enemyOsids = new Set<string>();
-        for (const ss of s.sub_segments) {
-            for (const eo of ss.enemy_osids) enemyOsids.add(eo);
-        }
-        let enemyPower = 0;
-        for (const fid of allFormIds) {
-            const f = formations[fid];
-            if (!f || f.faction === faction || f.status !== 'active') continue;
-            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-            if (!f.location_osid || !enemyOsids.has(f.location_osid)) continue;
-            enemyPower += f.personnel ?? 0;
-        }
-        s.threat_ratio = s.defensive_power > 0 ? enemyPower / s.defensive_power : 0;
-    }
+    // NOTE: density, defensive_power, and threat_ratio are intentionally NOT
+    // computed here. They are computed once at the very end of buildFactionSectors
+    // by recomputeSectorPowerAndThreat(), AFTER all assignment steps (Steps 7-8b)
+    // have run. Computing them here would produce stale values for sectors that
+    // gain their first brigade via ensureMinimumSectorCoverage (Step 7), causing
+    // those sectors to show dp=0 and threat_ratio=0 despite having defenders.
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1091,6 +1078,52 @@ function reclassifyRearBrigades(
     for (const s of sectors) {
         s.density = s.length_edges > 0
             ? s.assigned_brigade_ids.length / s.length_edges : 0;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Sector Power & Threat Recomputation (runs LAST, after all assignment steps)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Recompute density, defensive_power, and threat_ratio for all sectors.
+ *
+ * This MUST run AFTER all brigade-assignment steps (classifyBrigadesByTerritory,
+ * ensureMinimumSectorCoverage, reclassifyRearBrigades, deduplicateBrigadesAcrossSectors)
+ * to ensure the values reflect the final brigade set in each sector.
+ *
+ * Sectors rescued by ensureMinimumSectorCoverage (0→1 brigade) used to show
+ * dp=0 / threat_ratio=0 because the old code computed these mid-pipeline inside
+ * classifyBrigadesByTerritory, before Steps 7-8b ran. This caused those sectors
+ * to appear unthreatened (stance = active_defense, no reinforcement priority).
+ */
+function recomputeSectorPowerAndThreat(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    faction: FactionId,
+): void {
+    const allFormIds = Object.keys(formations).sort(strictCompare);
+    for (const s of sectors) {
+        s.density = s.length_edges > 0
+            ? s.assigned_brigade_ids.length / s.length_edges : 0;
+        s.defensive_power = computeLocalFrontDefensivePower(
+            formations, s.assigned_brigade_ids, s.length_edges
+        );
+
+        // Compute enemy power from formations at sector enemy OSIDs
+        const enemyOsids = new Set<string>();
+        for (const ss of s.sub_segments) {
+            for (const eo of ss.enemy_osids) enemyOsids.add(eo);
+        }
+        let enemyPower = 0;
+        for (const fid of allFormIds) {
+            const f = formations[fid];
+            if (!f || f.faction === faction || f.status !== 'active') continue;
+            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            if (!f.location_osid || !enemyOsids.has(f.location_osid)) continue;
+            enemyPower += f.personnel ?? 0;
+        }
+        s.threat_ratio = s.defensive_power > 0 ? enemyPower / s.defensive_power : 0;
     }
 }
 
