@@ -34,11 +34,16 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findConnectedComponents } from '../../utils/graph.js';
 import {
+    COMMANDER_COMPETENCE_ASSIGNMENT_THRESHOLD,
     EXEMPT_CORPS_IDS,
     MAX_SECTOR_BRIGADES,
     MAX_SECTOR_EDGES,
     MIN_SECTOR_EDGES,
+    PHASE_2C_MAX_HOPS,
+    PRE_OP_STAGING_WEIGHT_INTEL,
+    PRE_OP_STAGING_WEIGHT_STAGING,
 } from './corps_front_sectors_constants.js';
+import { getCorpsCommander } from './officer_system.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Entry Point
@@ -206,9 +211,10 @@ function buildFactionSectors(
     // Step 6: Classify brigades — corps-driven assignment.
     // Phase 1: Frontline brigades assigned by position (you defend where you stand).
     // Phase 2: Corps pools remaining brigades, distributes to sectors by need
-    //          (proportional to front edge count). No BFS proximity — corps decides.
+    //          (proportional to front edge count, shaped by commander personality).
     // General staff units are exempt.
-    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf);
+    const commanderProfiles = buildCorpsCommanderProfiles(state, sectors);
+    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, commanderProfiles);
 
     // Step 7: Ensure every sector with front edges has at least one assigned brigade.
     // Transfer from adjacent surplus sectors only (geographic contiguity enforced).
@@ -570,6 +576,74 @@ export function filterReachableReassignmentOrders(
 
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Commander Profile — per-corps personality snapshot for brigade assignment
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface CorpsCommanderProfile {
+    competence: number;
+    aggressiveness: number;
+    /** Priority sector from the corps directive (offensive concentration point). */
+    prioritySectorId?: string;
+    /** sector_id → weight multiplier from active op preparation phases. */
+    preStagingSectorWeights: Map<string, number>;
+}
+
+/**
+ * Build a CorpsCommanderProfile for each corps that has sectors.
+ * Reads named_officers + corps_command from state. Pure — no side effects.
+ */
+function buildCorpsCommanderProfiles(
+    state: GameState,
+    sectors: CorpsFrontSector[],
+): Map<string, CorpsCommanderProfile> {
+    const profiles = new Map<string, CorpsCommanderProfile>();
+
+    const corpsIds = [...new Set(sectors.map(s => s.corps_id))].sort(strictCompare);
+
+    for (const corpsId of corpsIds) {
+        const commander = getCorpsCommander(corpsId, state);
+        let competence = 0.3; // generic placeholder when no named commander
+        let aggressiveness = 0.5;
+
+        if (commander) {
+            const penalty = commander.state.effective_competence_penalty ?? 0;
+            // officer_types.ts: competence is 1–5, normalize to 0–1
+            competence = Math.max(0, (commander.data.competence - penalty) / 5);
+            aggressiveness = commander.data.aggressiveness / 5;
+        }
+
+        const corpsCmd = state.military.corps_command?.[corpsId];
+        // priority_sector_id is on the CorpsDirective (generated prior turn)
+        const prioritySectorId = corpsCmd?.directive?.priority_sector_id;
+
+        // Build pre-op staging weights from the active operation's preparation phase.
+        // active_operation is a single CorpsOperation | null.
+        const preStagingSectorWeights = new Map<string, number>();
+        if (corpsCmd?.active_operation) {
+            const op = corpsCmd.active_operation;
+            const subPhase = op.preparation_sub_phase;
+            // sector_id = the sector this op launches from (set during planning)
+            const opSectorId = op.sector_id;
+            if (subPhase && opSectorId) {
+                const weight = subPhase === 'intel_gathering'
+                    ? PRE_OP_STAGING_WEIGHT_INTEL
+                    : PRE_OP_STAGING_WEIGHT_STAGING;
+                const existing = preStagingSectorWeights.get(opSectorId) ?? 0;
+                if (weight > existing) preStagingSectorWeights.set(opSectorId, weight);
+            }
+        }
+        // Also apply directive priority_sector_id if not already covered by op
+        if (prioritySectorId && !preStagingSectorWeights.has(prioritySectorId)) {
+            preStagingSectorWeights.set(prioritySectorId, PRE_OP_STAGING_WEIGHT_INTEL);
+        }
+
+        profiles.set(corpsId, { competence, aggressiveness, prioritySectorId, preStagingSectorWeights });
+    }
+
+    return profiles;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Step 6: Classify Brigades by Territory Membership
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -593,7 +667,8 @@ function classifyBrigadesByTerritory(
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
-    componentOf: Map<string, number>
+    componentOf: Map<string, number>,
+    commanderProfiles: Map<string, CorpsCommanderProfile>,
 ): void {
     if (sectors.length === 0) return;
 
@@ -728,9 +803,10 @@ function classifyBrigadesByTerritory(
                 continue;
             }
 
-            // Find reachable sectors with need > 0 that cover this brigade's home municipality
+            // Find reachable home-municipality sectors (no need gate — local brigades
+            // always go home regardless of whether the sector already has coverage).
             const homeSectors = sectorNeed
-                .filter(sn => sn.need > 0 && sn.comp === brigComp && sectorMunicipalities.get(sn.sector)?.has(homeMun))
+                .filter(sn => sn.comp === brigComp && sectorMunicipalities.get(sn.sector)?.has(homeMun))
                 .sort((a, b) => b.need - a.need || strictCompare(a.sector.sector_id, b.sector.sector_id));
 
             if (homeSectors.length > 0) {
@@ -742,12 +818,6 @@ function classifyBrigadesByTerritory(
             }
         }
 
-        // Phase 2b: Distribute remaining brigades to neediest NEARBY sectors.
-        // Distance-weighted scoring: score = need / (1 + distance). Hard cap at
-        // MAX_ASSIGNMENT_HOPS — brigades beyond this defend in place rather than
-        // marching across the map to a far-away sector.
-        const MAX_ASSIGNMENT_HOPS = 8;
-
         // Pre-compute each sector's front OSID set for BFS target matching.
         const sectorFrontOsidSets = new Map<CorpsFrontSector, Set<string>>();
         for (const sn of sectorNeed) {
@@ -758,8 +828,54 @@ function classifyBrigadesByTerritory(
             sectorFrontOsidSets.set(sn.sector, frontSet);
         }
 
-        for (let ri = 0; ri < unmatched.length; ri++) {
-            const bid = unmatched[ri]!;
+        // Phase 2b: Commander-directed distribution (competence-gated).
+        // High-competence commanders deliberately shape brigade placement by personality.
+        // Low-competence commanders (< threshold) skip straight to Phase 2c BFS.
+        const profile = commanderProfiles.get(corpsId);
+        const commanderUnmatched: FormationId[] = [];
+
+        if (profile && profile.competence >= COMMANDER_COMPETENCE_ASSIGNMENT_THRESHOLD) {
+            for (const bid of unmatched) {
+                const f = formations[bid];
+                const brigComp = f?.location_osid ? (componentOf.get(f.location_osid) ?? -2) : -2;
+                const reachable = sectorNeed.filter(sn => sn.comp === brigComp);
+                if (reachable.length === 0) { commanderUnmatched.push(bid); continue; }
+
+                let target: typeof sectorNeed[0] | undefined;
+
+                if (profile.aggressiveness >= 0.6) {
+                    // Aggressive: concentrate at the sector with highest threat (most pressure)
+                    target = reachable
+                        .filter(sn => sn.need > 0)
+                        .sort((a, b) => b.sector.threat_ratio - a.sector.threat_ratio
+                            || strictCompare(a.sector.sector_id, b.sector.sector_id))[0];
+                } else if (profile.aggressiveness <= 0.4) {
+                    // Defensive: fill the thinnest reachable sector (spread evenly)
+                    target = reachable
+                        .filter(sn => sn.need > 0)
+                        .sort((a, b) => (a.sector.density - b.sector.density)
+                            || strictCompare(a.sector.sector_id, b.sector.sector_id))[0];
+                }
+                // Balanced (0.4–0.6): falls through to Phase 2c BFS
+
+                if (target) {
+                    target.sector.assigned_brigade_ids.push(bid);
+                    target.need = Math.max(0, target.need - 1);
+                } else {
+                    commanderUnmatched.push(bid);
+                }
+            }
+        } else {
+            // Low competence — everything goes to Phase 2c BFS
+            commanderUnmatched.push(...unmatched);
+        }
+
+        // Phase 2c: BFS distance-weighted assignment for remaining brigades.
+        // Brigades beyond PHASE_2C_MAX_HOPS from any sector front defend in place;
+        // ensureMinimumSectorCoverage() picks them up via component-aware transfers.
+        const phase2dCandidates: FormationId[] = []; // brigades beyond BFS hop cap
+
+        for (const bid of commanderUnmatched) {
             const f = formations[bid];
             const brigLoc = f?.location_osid;
             const brigComp = brigLoc ? (componentOf.get(brigLoc) ?? -2) : -2;
@@ -767,12 +883,11 @@ function classifyBrigadesByTerritory(
             // Filter to reachable sectors only (same connected component)
             const reachable = sectorNeed.filter(sn => sn.comp === brigComp);
 
-            // If no reachable sector, skip — brigade stays unassigned and will be
-            // picked up by ensureMinimumSectorCoverage() which respects components.
-            if (reachable.length === 0) continue;
+            // If no reachable sector, skip — ensureMinimumSectorCoverage handles these.
+            if (reachable.length === 0) { phase2dCandidates.push(bid); continue; }
 
             // BFS from brigade location through friendly territory to find distance
-            // to each candidate sector's front OSIDs. Single BFS, multiple targets.
+            // to each candidate sector's front OSIDs.
             const sectorDist = new Map<CorpsFrontSector, number>();
             if (brigLoc) {
                 const visited = new Set<string>([brigLoc]);
@@ -784,7 +899,7 @@ function classifyBrigadesByTerritory(
                         sectorDist.set(sn.sector, 0);
                     }
                 }
-                while (frontier.length > 0 && dist < MAX_ASSIGNMENT_HOPS) {
+                while (frontier.length > 0 && dist < PHASE_2C_MAX_HOPS) {
                     dist++;
                     const next: string[] = [];
                     for (const osid of frontier) {
@@ -805,23 +920,68 @@ function classifyBrigadesByTerritory(
                 }
             }
 
-            // Score candidates: need / (1 + distance). Unreachable sectors get -Infinity.
+            // Score candidates: need / (1 + distance) with pre-op staging weight.
+            // Unreachable sectors (beyond hop cap) get -Infinity.
             const scored = reachable
                 .map(sn => {
                     const dist = sectorDist.get(sn.sector);
                     if (dist === undefined) return { sn, score: -Infinity };
-                    const effectiveNeed = Math.max(sn.need, 0.1); // floor so 0-need sectors still attract nearby brigades
+                    const stagingWeight = profile?.preStagingSectorWeights.get(sn.sector.sector_id) ?? 1.0;
+                    const effectiveNeed = Math.max(sn.need, 0.1) * stagingWeight;
                     return { sn, score: effectiveNeed / (1 + dist) };
                 })
                 .filter(s => s.score > -Infinity)
                 .sort((a, b) => b.score - a.score || strictCompare(a.sn.sector.sector_id, b.sn.sector.sector_id));
 
-            // If no sector within MAX_ASSIGNMENT_HOPS, brigade defends in place
-            if (scored.length === 0) continue;
+            // Beyond hop cap — collect for Phase 2d priority sweep
+            if (scored.length === 0) { phase2dCandidates.push(bid); continue; }
 
             const target = scored[0]!.sn;
             target.sector.assigned_brigade_ids.push(bid);
             target.need = Math.max(0, target.need - 1);
+        }
+
+        // Phase 2d: Priority sector concentration sweep.
+        // Brigades beyond Phase 2c's hop cap that are within 6 hops of the
+        // commander's priority sector are assigned there (decisive-point order).
+        const PHASE_2D_PRIORITY_HOPS = 6;
+        if (profile?.prioritySectorId && phase2dCandidates.length > 0) {
+            const prioritySn = sectorNeed.find(sn => sn.sector.sector_id === profile.prioritySectorId);
+            if (prioritySn) {
+                const priorityFrontSet = sectorFrontOsidSets.get(prioritySn.sector) ?? new Set<string>();
+                for (const bid of phase2dCandidates) {
+                    const f = formations[bid];
+                    const brigLoc = f?.location_osid;
+                    const brigComp = brigLoc ? (componentOf.get(brigLoc) ?? -2) : -2;
+                    if (brigComp !== prioritySn.comp) continue;
+
+                    // BFS from brigade to priority sector front
+                    let reachable = false;
+                    if (brigLoc) {
+                        const visited = new Set<string>([brigLoc]);
+                        let frontier = [brigLoc];
+                        for (let hop = 0; hop < PHASE_2D_PRIORITY_HOPS && !reachable; hop++) {
+                            const next: string[] = [];
+                            for (const osid of frontier) {
+                                for (const nb of (adjacency.get(osid as Osid) ?? [])) {
+                                    if (visited.has(nb)) continue;
+                                    visited.add(nb);
+                                    if (!friendlyOsids.has(nb)) continue;
+                                    if (priorityFrontSet.has(nb)) { reachable = true; break; }
+                                    next.push(nb);
+                                }
+                                if (reachable) break;
+                            }
+                            frontier = next;
+                        }
+                        if (!reachable && priorityFrontSet.has(brigLoc)) reachable = true;
+                    }
+                    if (reachable) {
+                        prioritySn.sector.assigned_brigade_ids.push(bid);
+                        prioritySn.need = Math.max(0, prioritySn.need - 1);
+                    }
+                }
+            }
         }
     }
 

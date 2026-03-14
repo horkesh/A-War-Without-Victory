@@ -1,6 +1,6 @@
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-03-12
+**Last Updated:** 2026-03-14
 **Purpose:** Knowledge accumulation by theme.
 
 **40_reports structure (2026-02-24):** Backlog is consolidated into themed docs (BACKLOG_*.md) in docs/40_reports/backlog/; originals archived to docs/_old/40_reports/backlog/. For historical fidelity, Phase 7, mobilization, etc., use the themed doc or the archived filename in _old. See docs/_old/README.md §40_reports/backlog and CONSOLIDATED_BACKLOG. Chronological record remains in `docs/PROJECT_LEDGER.md` (append-only).
@@ -120,6 +120,8 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
    Do instead: `PrePlannedOp` and `CorpsOperation` can specify `min_attack_outcome` to override `getSectorOffensiveProbeThreshold()`. Bot AI checks `activeOp.min_attack_outcome` first, then falls back to momentum-based thresholds. Use for operations that must attack even at unfavorable predicted outcomes (e.g., Op Teocak with `min_attack_outcome: 'repulsed'`).
 16. **[2026-03-10] Cross-corps sector assignment is forbidden**
    Do instead: In `classifyBrigadesByTerritory()`, only assign a brigade to sectors owned by its resolved corps. Do not keep "physically on another corps front" or "territory match without corps restriction" fallbacks. The last-resort nearest-front BFS must also filter to same-corps sectors.
+17. **[2026-03-14] Commander competence gates deliberate assignment; personality shapes what he optimizes for; pre-op staging connects op planning to brigade placement ahead of execution**
+   Competence (normalized from 1–5 scale) acts as a gate: below 0.35, the commander doesn't deliberately plan and falls back to BFS. Above the threshold, aggressiveness (0–1) shapes the objective: aggressive (≥ 0.6) concentrates at highest threat-ratio sector; defensive (≤ 0.4) fills thinnest gap; balanced falls through to BFS. The pre-op staging weight (1.5× intel_gathering, 3.0× force_staging+) links `CorpsOperation.preparation_sub_phase` to brigade pull — brigades begin shifting toward the operational sector during preparation, not just execution. This is also why `priority_sector_id` on `CorpsDirective` (not `CorpsCommandState`) is the correct source: it's the directive, not raw command state.
 
 | 2026-03-08 | Entrenchment reduces passive frontline attrition | Entrenched brigades suffer less sniping/shelling/bombardment — sqrt diminishing returns, floor 0.40 | Reduces total passive casualties ~25-60% for long-entrenched units; affects calibration | combat |
 | 2026-01-24 | Municipality outlines can be single polygons | Union must handle single and multi | No rejection of valid single-polygon munis | architecture |
@@ -146,6 +148,15 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 | 2026-02-24 | OSID-vs-SID key mismatch fix + force growth calibration | After OSID-as-base-layer migration, political_controllers is OSID-keyed but lookup functions still used canonical SID keys → zero formations spawned, zero ongoing mobilization | Two-pronged fix: (A) OSID→mun map rebuild in scenario_runner.ts; (B) OSID-prefix fallback in getMunicipalityController across 4 files. Calibrated through 6 runs: RBiH 144K, RS 101K, HRHB 50K (all within ±10% of historical). Key lesson: after any key-space migration, grep all `political_controllers[` lookups | implementation |
 
 | 2026-03-08 | Audit remediation 5-phase execution | Paradox State of Game + N412 Deep Dive identified frozen fronts, supply collapse, determinism risk, mega-files, stale terminology | 5 phases: (1) determinism sort hardening, (2) frozen front cascade fix (concentration bonus, entrenchment degradation, aggression floor), (3) supply/morale balance (MAINTENANCE_DRAIN 0.045→0.035, critical morale penalty), (4) code health (displacement dedup, supply assertions), (5) terminology sweep + mega-file splitting + outcomeRank unification. n403 86.9% → n415 89.4%. Key lesson: frozen front cascades are self-reinforcing — must break at multiple points simultaneously; supply drain must match OOB growth; inline constant duplication causes scale drift | implementation |
+
+17. **[2026-03-14] `isCaseBBridge()` — directional angle check for Case B pocket wrap-arounds (n694)**
+    Case B edge adjacency (same hostile OSID, different friendly OSIDs) can create wrap-around sectors when the two friendly OSIDs face *opposite* directions from the shared hostile OSID — i.e., they're on opposite sides of an enemy pocket. Distance thresholds can't catch this because the triple junction is geometrically real (0m contact). Fix: compute bearing vectors H→fi and H→fj using OSID centroids; reject Case B when the angle between them exceeds 165°. Requires centroid data (`OsidCentroidMap`) preloaded from `operational_contact_graph.json`. Wired into both `buildEdgeAdjacency` and `buildEdgeAdjacencyStrictCaseB`. *Design note:* this catch requires spatial data (centroids); purely topological rules cannot distinguish legitimate vs wrap-around Case B connections.
+
+18. **[2026-03-14] `consolidateIsolatedCorpsPockets` must check home-brigade presence before reassignment (n694)**
+    Step 3c unconditionally swaps isolated sector pockets to the majority-neighbor corps. This breaks defended pockets — a brigade physically stationed in a disconnected corps front should keep its corps assignment even though the majority of surrounding front belongs to another corps. Guard: skip reassignment if any brigade of the correct corps has `location_osid` inside the pocket's front OSIDs. A defended position is not an isolated pocket — it's an enclave or salient.
+
+19. **[2026-03-14] `reclassifyRearBrigades` reserve cap must NOT silently drop non-winning candidates (n695)**
+    The reserve competition selects the strongest 1-hop-behind-front brigade per sector (cap = 1). Non-winning candidates must be returned to `assigned_brigade_ids` — they are valid assigned brigades, just not the reserve. Before n695, non-winners were stripped from all lists, causing them to appear as "sectorless" in diagnostics despite being reachable. Pattern: whenever a competition has cap < candidates, always return losers to their source collection.
 
 *(See PROJECT_LEDGER.md §Decisions and changelog for full list.)*
 

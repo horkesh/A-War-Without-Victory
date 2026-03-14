@@ -1,11 +1,95 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-13
-**Status:** Post-MVP — War calibration, GUI rework, Phase M complete
+**Last Updated:** 2026-03-14
+**Status:** Post-MVP — War calibration, GUI rework, Phase M complete. n696 commander-driven brigade assignment.
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
+
+## [2026-03-14] n696: Commander-Driven Brigade Assignment
+
+**Problem:** `classifyBrigadesByTerritory` Phase 2 was pure BFS with no corps commander input. Surplus brigades were distributed purely by distance, ignoring the personality (aggressive/defensive) and operational focus of the corps commander. The home-affinity gate (Phase 2a) required `need > 0`, silently blocking local brigades from home sectors already at coverage capacity. Pre-planned operations had no way to pull brigades toward staging sectors during preparation.
+
+**Fix:** Four-phase enhancement to `classifyBrigadesByTerritory`:
+
+1. **Phase 2a — home affinity: removed `need > 0` gate.** Local brigades always assigned to home-municipality sector regardless of current coverage. This models garrison behavior: local troops defend their hometown unconditionally.
+
+2. **Phase 2b — competence-gated commander distribution.** Added `buildCorpsCommanderProfiles()` that reads `named_officers` and `corps_command` per corps. `CorpsCommanderProfile` captures normalized competence (0–1 from 1–5 scale, with penalty), aggressiveness (0–1), priority sector, and pre-op staging weights. Commanders with `competence ≥ 0.35` deliberately shape pool assignment:
+   - Aggressive (aggressiveness ≥ 0.6): concentrates surplus brigades at highest `threat_ratio` sector.
+   - Defensive (aggressiveness ≤ 0.4): fills the thinnest (lowest density) sector.
+   - Balanced (0.4–0.6): falls through to Phase 2c BFS.
+   - Low-competence (< 0.35): skips Phase 2b entirely → BFS.
+
+3. **Phase 2c — BFS cap 8→4 hops (`PHASE_2C_MAX_HOPS`).** Surplus brigades more than 4 hops from any sector front stay in place. `ensureMinimumSectorCoverage` picks them up if needed. Prevents brigades from marching across the map to distant fronts.
+
+4. **Phase 2d — pre-op staging weight.** Active operation in `intel_gathering` phase applies 1.5× weight to op sector's effective need; `force_staging`/`assessment`/`ready` applies 3.0×. Directive `priority_sector_id` also gets 1.5× if not already covered. This connects operation planning to brigade placement days before execution.
+
+New constants in `corps_front_sectors_constants.ts`:
+- `COMMANDER_COMPETENCE_ASSIGNMENT_THRESHOLD = 0.35`
+- `PHASE_2C_MAX_HOPS = 4`
+- `PRE_OP_STAGING_WEIGHT_INTEL = 1.5`
+- `PRE_OP_STAGING_WEIGHT_STAGING = 3.0`
+
+**Result:** **88.6% area-weighted** (same as n695, stable). **6/6 benchmarks PASS** (n695 also 6/6; n692 was 5/6). 69 sectors at w40 final, 0 disconnected. RS w40 0.515, RBiH w40 0.373. 11 new tests (596 total). Hash `5bd0de05277f63e5`.
+
+**Determinism:** Fully deterministic. All sorts use `strictCompare`. `buildCorpsCommanderProfiles` output is sorted by `strictCompare` on corpsId. No `Math.random()`.
+
+## [2026-03-14] n695: `reclassifyRearBrigades` Reserve-Cap Silent Drop Bug Fix
+
+**Problem:** The reserve-candidate competition in `reclassifyRearBrigades` had a silent data-loss bug. When multiple brigades were 1-hop behind the front, only the strongest won the single reserve slot — the losers were stripped from `assigned_brigade_ids` but never returned to any list. They vanished from all sector rosters while remaining physically present.
+
+**Diagnosis:** Traced via new `tools/check_sectorless_brigades.cjs` diagnostic (see n694 below). Four brigades reported as `reachable_but_missed (X hops) — bug?`: 803rd Light Infantry (Goražde), 282nd Mountain (Srebrenica), 443rd Mountain (Konjic), 4th Muslim Light Infantry (Konjic). All were 1-hop from their sector front — the exact symptom of reserve-cap losers being discarded.
+
+**Fix:** In `corps_front_sectors.ts`, `reclassifyRearBrigades`: non-winning reserve candidates now push into `keepAssigned` instead of being silently dropped.
+
+```typescript
+reserveCandidates.sort((a, b) => b.personnel - a.personnel || strictCompare(a.bid, b.bid));
+const reserveBrigade = reserveCandidates.length > 0 ? reserveCandidates[0]!.bid : null;
+for (const rc of reserveCandidates.slice(1)) {
+    keepAssigned.push(rc.bid);  // ← was: silently dropped
+}
+```
+
+**Result:** 0 bug-category sectorless brigades (was 4). **88.6% area-weighted** (+1.3pp from n694). 70 sectors, 191 active brigades, 10 sectorless (all structural/expected). Krajina 98.4%, Posavina 94.1%, Drina 75.1%, Central Corridor 95.1%, Central Bosnia 78.5%, Sarajevo 84.7%. 585 tests pass. Hash `679c476d945fe2bf`.
+
+**Determinism:** No impact — fix restores brigades to a deterministic set; sort uses `strictCompare` tiebreak, same as rest of pipeline.
+
+**Diagnostic tool:** `tools/check_sectorless_brigades.cjs` — classifies all sectorless brigades by root cause (no corps, corps has no sectors, disconnected pocket, too far, reachable-but-missed bug).
+
+---
+
+## [2026-03-14] n694: Case B Bridge Detection + Step 3c Home-Brigade Protection
+
+**Two topological bugs fixed in `corps_front_sectors.ts`:**
+
+### 1. Gornja Borovica wrap-around (P0) — `isCaseBBridge()`
+
+**Problem:** `buildEdgeAdjacency` Case B connected `hajderovici_2` (Zavidovići, 3rd Corps front) to `kamensko_2` (Olovo, 2nd Corps front) through a genuine 0m triple junction at `gornja_borovica_2`. Distance thresholds can't catch it — the junction is geometrically real. The result: a single sector wrapped from Zavidovići all the way around the RS Ozren salient to Olovo, pulling 3rd Corps brigades into a 2nd Corps sector and vice versa.
+
+**Fix:** `isCaseBBridge(fi, fj, h, centroids)` — computes bearing vectors H→fi and H→fj using OSID centroids, rejects Case B when the angle between them exceeds 165°. A back-to-back angle means fi and fj face opposite directions from H's perspective — the connecting sector would wrap around an enemy pocket. Wired into both `buildEdgeAdjacency` and `buildEdgeAdjacencyStrictCaseB`. Requires OSID centroid data (restored by external expert session, see report).
+
+**Infrastructure added:**
+- `OsidCentroid` interface + `OsidCentroidMap` type in `src/data/operational_data_types.ts`
+- `loadOperationalCentroids()` in `src/data/operational_data.ts` — format-agnostic (handles array or record node shapes)
+- `centroids` field on `OperationalDataCache` in `turn_pipeline_types.ts`
+- Load step in `war_phases.ts` loads centroids in parallel; passes `od.centroids` to `buildCorpsFrontSectors`
+- `FRONT_EDGE_MAX_GAP` exported from `src/map/front_edges.ts`; `computeFrontEdgesOsid` filters at the same 33m threshold
+
+### 2. Step 3c swallowing 3rd Corps Zavidovići (P1) — home-brigade guard
+
+**Problem:** `consolidateIsolatedCorpsPockets` unconditionally reassigned isolated corps sector pockets to the majority-neighbor corps. The 3rd Corps Zavidovići pocket (disconnected from main 3rd Corps territory by RS Ozren) was absorbed into a different corps even though the 319th Mountain Brigade was physically stationed there.
+
+**Fix:** Skip pocket reassignment if any brigade of the correct corps has `location_osid` inside the pocket's front OSIDs. A pocket with a home brigade is a defended position — it should keep its corps assignment.
+
+**Result:** 87.3% area-weighted. 0 disconnected sectors. 585 tests pass. Hash `dc1668eb74af26e5`.
+
+**Determinism:** Centroid-based angle check is deterministic (fixed data, no RNG). Pocket guard is deterministic (location_osid from GameState).
+
+**Related report:** `docs/40_reports/20260314_OSID_CENTROID_INVESTIGATION_AND_FIX.md` (external expert session restoring centroids to contact graph).
+**Handover doc:** `docs/40_reports/handovers/20260314_SECTOR_SYSTEM_HANDOVER.md` (P0/P1 problem catalog).
+
+---
 
 ## [2026-03-13] n692: Case B Split Threshold Tuning + Merge Safety
 

@@ -25,3 +25,15 @@ export const EXEMPT_CORPS_IDS = new Set<string>([
     'vrs_main_staff',
     'hvo_general_staff',
 ]);
+
+/** Below this competence the commander doesn't deliberately plan — falls back to BFS. */
+export const COMMANDER_COMPETENCE_ASSIGNMENT_THRESHOLD = 0.35;
+
+/** Phase 2c BFS hard hop cap. Reduced from 8 — brigades stay in their operational zone. */
+export const PHASE_2C_MAX_HOPS = 4;
+
+/** Need multiplier for a sector targeted by an op in intel_gathering phase. */
+export const PRE_OP_STAGING_WEIGHT_INTEL = 1.5;
+
+/** Need multiplier for a sector targeted by an op in force_staging/assessment/ready phase. */
+export const PRE_OP_STAGING_WEIGHT_STAGING = 3.0;
