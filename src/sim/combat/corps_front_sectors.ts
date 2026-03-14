@@ -915,8 +915,13 @@ function reclassifyRearBrigades(
         }
 
         // Cap: 1 reserve per sector. Pick the strongest brigade.
+        // Non-winners go back into assigned — they are 1 hop from the front, not
+        // deep rear, and must not be silently dropped from all sector lists.
         reserveCandidates.sort((a, b) => b.personnel - a.personnel || strictCompare(a.bid, b.bid));
         const reserveBrigade = reserveCandidates.length > 0 ? reserveCandidates[0]!.bid : null;
+        for (const rc of reserveCandidates.slice(1)) {
+            keepAssigned.push(rc.bid);
+        }
 
         sector.assigned_brigade_ids = keepAssigned.sort(strictCompare);
         sector.reserve_brigade_ids = reserveBrigade ? [reserveBrigade] : [];
