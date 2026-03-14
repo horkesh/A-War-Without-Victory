@@ -6,6 +6,16 @@
 
 **Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`; Sectors → `docs/40_reports/SECTOR_MASTER.md`. Do instead: When doing calibration, GUI, warroom, sector, or realism work, read the relevant master first and update it during the session.
 
+## Current Sprint — Calibration n701 (2026-03-14, IN PROGRESS)
+**Engine worktree:** `.claude/worktrees/engine-sprint` branch `feature/calibration-sprint-n701`
+**Baseline:** 88.6% area, 6/6 benchmarks. **Current: 89.4% area, 6/6 benchmarks, hash 413a89fafb3de897**
+**Phase 1 DONE:** Fix DEFENDER_CASUALTY_ENGAGEMENT_CAP — extend to single-brigade sectors (att:def 0.07→0.85)
+**Phase 2 DONE:** Density floor pass in ensureMinimumSectorCoverage (threat gate 300, +0.7pp)
+**Phase 2.5 REVERTED:** Op objective geographic focus hurt calibration (-0.8pp — alphabetical scatter was correct)
+**Remaining:** Phase 3 (2KK march — complex component isolation), Phase 4+5 (SRK siege + Drina), Phase 6 (ledger)
+**LESSONS:** Density floor without threat gate → rear guards move away → -1.5pp. Op focus sorting → RS spread less → -0.8pp.
+**Protocol:** One phase → `npm run test:vitest` + tsc engine-only → `npm run sim:scenario:run:40w` → compare tool → record
+
 ## Session Startup (do these EVERY session — BEFORE any work)
 1. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
    Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:

@@ -1,7 +1,29 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-14
-**Status:** Post-MVP — War calibration, GUI rework, Phase M complete. n696 commander-driven brigade assignment.
+**Status:** Post-MVP — War calibration, GUI rework, Phase M complete. n701 calibration sprint: 88.6%→89.4% area match.
+
+## [2026-03-14] n701: Calibration Sprint — Casualty Cap + Density Floor
+
+**Problems addressed:**
+1. `DEFENDER_CASUALTY_ENGAGEMENT_CAP=1.5` was gated on `sectorDefenseBrigades.length > 1`. Single-brigade sectors were uncapped, letting 109-person probes generate 900+ defender casualties (att:def 0.07:1).
+2. `ensureMinimumSectorCoverage` only rescued 0-brigade sectors. High-threat thin-front sectors (Drina 858, Ozren 471) with 1 brigade / 14-23 edges had no reinforcement mechanism.
+3. Pre-existing TS2305 in `tests/commander_driven_brigade_assignment.test.ts` (NamedOfficerState imported from wrong module).
+
+**Fixes:**
+1. **Phase 1 (attack_resolution_osid.ts):** Extended `DEFENDER_CASUALTY_ENGAGEMENT_CAP` to apply unconditionally (not just multi-brigade case). `rawPersonnelDefender` now always includes single-brigade case in the cap path.
+2. **Phase 2 (corps_front_sectors.ts):** Added density floor pass at end of `ensureMinimumSectorCoverage`. After 0-brigade rescue, transfers brigades from over-staffed sectors (surplus above 1 per 8 edges) to under-staffed sectors WITH `threat_ratio > 300` gate. Gate prevents disturbing quiet rear-guard positions (without gate: -1.5pp regression).
+3. **Typecheck fix (commander_driven_brigade_assignment.test.ts):** Moved `NamedOfficerState` import to `officer_types.js`.
+
+**Investigated and REVERTED:**
+- Phase 2.5 (op objective geographic focus): Sorting `reachableTargets` by BFS proximity from brigade assembly point hurt calibration -0.8pp. The alphabetical scatter produced better wide-front RS pressure historically.
+
+**Remaining issues (deferred):**
+- 2KK: 5 brigades stranded at Livno (morale=0) due to component isolation. Home=Bihać/Krupa/Ključ but stuck in Livno connected component. Complex phase 3 fix needed.
+- Drina 28 mismatches: Visegrad/Rogatica/Srebrenica outer ring partially RBiH in sim (should be RS).
+- Central Bosnia 26 mismatches: partly from stranded 2KK brigades at Livno.
+
+**Results:** 88.6% → 89.4% area match (+0.8pp), 6/6 benchmarks PASS, att:def ratio 0.07→0.85. Hash `413a89fafb3de897`. 606/607 tests pass (1 skip). Branch: `feature/calibration-sprint-n701`.
 
 This is the single authoritative project ledger. All context, decisions, and state should be tracked here. See `.claude/napkin.md` for corrections, preferences, and patterns (read at session start).
 
@@ -13060,3 +13082,46 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 **Finding:** Supply gate (critical_fraction=1 for besieged Orašje pocket) correctly prevents actual offensive operations — the Orašje pocket was supply-cut-off. This is historically accurate. The fundamental fix (removing forced defensive) is correct; supply system handles the rest.
 
 **Calibration:** 88.6% area-weighted (unchanged from n696), 6/6 benchmarks PASS, hash `7988bff8c990c3d8`. 606 vitest tests pass (+10 from baseline 596).
+
+---
+
+## 2026-03-14 — Sprint Plan Session + Engine Worktree Setup
+
+**Session summary:** Full standup analysis, 2KK investigation, intel/ops deep-dive, and 6-phase sprint plan assembled. No code changes to simulation engine.
+
+### Standup findings (n700 baseline: 88.6%, 6/6 benchmarks)
+
+**Calibration ceiling at 88.6% for 4 consecutive runs.** Root causes identified: (1) defender casualty cascade — 89% RS attack success, 0.07:1 att:def ratios; (2) sector density floor missing — 1-brigade sectors with threat_ratio 205+; (3) Drina tempo — 23 weeks for Podrinje Sweep (historical 8-10); (4) SRK siege ops escape ring.
+
+### 2KK investigation findings (new — not in standup)
+
+rs_15th_biha, rs_11th_krupa, rs_17th_klju, rs_1st_drvar, rs_3rd_petrovac — all at op:livno:gubin_2 with morale 0, no movement orders, no active operation. Sector 1 spans 150km arc (Ključ → Livno). Sector march sends brigades to nearest unoccupied edge within sector, not nearest to home_osid. Northern Bihać brigades marched south to Livno front, fought there, collapsed. Root cause: march destination ignores home affinity. rs_9th_grahovo: 0 personnel, `is_dissolved: undefined` — dissolution miss.
+
+### Intel/ops audit findings
+
+Intel system live and functional (passive buildup, decay, probes, recon-by-force). Critical gap: intel does not feed into combat math (no attacker penalty, no surprise/ambush). Op Prep confidence and sector_intel confidence are disconnected — two separate systems. Bot-generated op objectives have no geographic focus constraint — MAX_OBJECTIVES=6 taken by list order, no BFS proximity sort from staging OSID. `validateAxisContiguity` only applies to pre-planned multi-axis ops. Future intel features documented: `docs/40_reports/backlog/BACKLOG_INTEL_AND_OPERATIONS.md`.
+
+### Sprint plan (9 phases)
+
+| Phase | Change | Files | Type |
+|-------|--------|-------|------|
+| 1 | Casualty cascade — engagement-intensity cap | attack_resolution_osid.ts, combat_math.ts | P0 standalone |
+| 1.5 | Low-intel attacker penalty (0.70–1.0×) | combat_math.ts, attack_resolution_osid.ts | P1 standalone |
+| 2 | Sector density floor (min 1 brig/8 edges) | corps_front_sectors.ts | P0 standalone |
+| 2.5 | Op objective geographic focus (BFS sort from staging) | sector_offensive.ts, bot_corps_directives.ts | P1 standalone |
+| 3 | 2KK march destination (home-weighted) + rs_9th_grahovo dissolution fix | brigade_movement_orders.ts, brigade_dissolution.ts | P1 coupled |
+| 3.5 | Intel–op prep unification (3 sub-changes: personality gate, unified confidence, brigade fraction scaling) | operation_preparation.ts, bot_corps_directives.ts, sector_intel.ts | P1 monitor-hawk |
+| 4 | SRK siege radius (max_operation_radius_km in timeline + filter) | bot_corps_directives.ts, apr1992.json | P1 standalone |
+| 5 | Drina follow-on fast lane (1-turn planning for sequential ops) | operation_preparation.ts, apr1992.json | P1 standalone |
+| 6 | Formation casualty ledger | attack_resolution_osid.ts | P2 infra |
+
+**Protocol:** One phase → smoke test (vitest + tsc engine only) → 40w run → compare_painted_vs_sim → record in CALIBRATION_MASTER → next phase.
+
+**Expected outcome:** 90%+ area-weighted, RS attack success 60–75%, Drina region 78%+.
+
+### Infrastructure
+
+- Stale agent worktrees (agent-a8789d86, agent-a8aa0406 @ 2620a58, 17 commits behind) — pruned.
+- Engine worktree created: `.claude/worktrees/engine-sprint` on branch `feature/calibration-sprint-n701` @ d7c64ae.
+- Pre-existing typecheck error fixed: `NamedOfficerState` import in `tests/commander_driven_brigade_assignment.test.ts` moved from `game_state.js` → `officer_types.js`.
+- Engine smoke-test baseline: 606/606 vitest pass, 0 engine-side tsc errors.
