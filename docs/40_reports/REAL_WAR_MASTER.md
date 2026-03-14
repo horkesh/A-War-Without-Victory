@@ -200,12 +200,26 @@ A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ br
 
 **Root causes:**
 1. **3-turn planning phase for a follow-on operation.** Drina Corps just completed Op Drina (w1-w11). The same corps, same terrain, same enemy. Follow-on planning should be 1 turn, not 3.
-2. **Srebrenica Ring axis non-functional.** 3 brigades, 0 captures. Either the axis can't reach objectives or the brigades are too weak to attack.
+2. **Srebrenica Ring axis non-functional.** 3 brigades, 0 captures. Either the axis can't reach objectives or the brigades are too weak to attack. **Partially fixed n703+: typo `rs_1st_milici` → `rs_1st_milii` now gives Ring axis its 3rd brigade. `osmace_2` removed from Srebrenica enclave OSID list (it was painted RS in Jan 1993 calibration data — VRS had already captured it).** Ring axis still gets 0 captures but force ratio is now correct; remaining issue is approach routes.
 3. **Post-sweep: Operacija Kamen (bot-generated, w35-w40), 1 brigade, 0 captures.** A single-brigade "operation" is not an operation.
 
-**Result:** Drina region ends RS=51, RBiH=58 (total 109). RS doesn't hold a majority. Historical VRS controlled ~80-85% of the Drina valley outside enclaves by January 1993.
+**Fix B (follow-on planning duration) — DEFERRED:** Attempted in engine-sprint but caused regression. Corps-ID-only follow-on detection incorrectly marked Drina's Podrinje Sweep as follow-on to Op Drina (different theater). Needs theater-aware matching (overlapping sector coverage, not just corps_id). Documented for future sprint.
 
-**Status:** P2 — operational tempo in Drina too slow. Planning duration for follow-on operations needs reduction. Srebrenica Ring axis needs investigation.
+**Result (n703+, post-sprint):** Drina region improved. DRINA 84.1% area match. Ring axis still 0 captures — force ratio now structurally correct after typo fix.
+
+**Status:** P2 — Ring axis approaches need investigation. Follow-on planning duration deferred (needs theater-aware logic).
+
+---
+
+### 28. SRK Sarajevo Ring — 0 assigned brigades every turn (n703 state, FIXED n703+)
+
+**What we found:** `reclassifyRearBrigades` classified all SRK Sarajevo ring-sector brigades as reserve (1-hop) every turn. `ensureMinimumSectorCoverage` promoted a rescue brigade to `assigned[]` but `reclassifyRearBrigades` immediately demoted it back the next turn. Result: SRK sectors had `assigned_brigade_ids=[]` and `defensive_power=0` at w40 — the Sarajevo siege ring was computationally undefended.
+
+**Root cause:** SRK brigades garrison the suburbs of Sarajevo, sitting 1 hop behind the actual siege line. The 1-hop threshold in `reclassifyRearBrigades` is correct for offensive corps (where 1-hop means genuinely in reserve), but wrong for fortress/siege corps where 1-hop IS the front (brigades physically can't be on the siege line — they sit behind it while covering it).
+
+**Fix:** Zero-assigned guard scoped exclusively to `vrs_sarajevo_romanija`: when `keepAssigned.length === 0` and `reserveCandidates.length > 0`, promote the strongest reserve brigade to assigned. Guard is SRK-only — does not affect offensive corps or ARBiH sectors.
+
+**Status:** FIXED n703+. Verified: 3 SRK sectors with 0 empty `assigned_brigade_ids` at w40.
 
 ---
 
@@ -561,18 +575,19 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | ~~**P1**~~ | ~~#18 50:1 catastrophic casualty ratios~~ | ~~Defender near-invulnerable~~ | **FIXED n590** (overcorrection: #23) |
 | ~~**P1**~~ | ~~#21 No probe/recon operations~~ | ~~Corps attack blind~~ | **FIXED n617** |
 | **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
-| **P2** | #25 Podrinje Sweep 23 weeks | Operation tempo too slow; Srebrenica Ring axis 0/6 | **NEW n647** |
+| **P2** | #25 Podrinje Sweep 23 weeks | Ring axis typo fixed; Follow-on planning deferred (theater-aware logic needed) | **PARTIAL n703+** |
 | **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
 | ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
 | **P1** | Casualty volume — monitor | Defender casualties may be inflated by #23 | Monitoring |
 | ~~**P1**~~ | ~~#12 Suicide attacks~~ | ~~Dissolution absolute floor bypass~~ | **Partially fixed n556** |
 | ~~**P1**~~ | ~~H6 ARBiH too passive~~ | ~~24→41 attacks~~ | **Partially fixed n560/n587** |
 | ~~**P2**~~ | ~~#19 Static 2-ops pattern~~ | ~~False alarm~~ | **FALSE ALARM** |
-| **P2** | #14 HVO ghost front (13 edges, 0 brigades) | 10k HVO unassigned — enclave BFS failure | Planned |
+| ~~**P2**~~ | ~~#14 HVO ghost front (0 sectors)~~ | ~~Correct until HVO-RBiH war (April 1993). No fix needed~~ | **BY DESIGN** |
 | **P2** | #6/#8 Front coverage + stacking | Mitigated by reactive sector defense | Monitoring |
 | **P2** | H4 VRS armor not concentrated | Mech/moto staging exists; equipment IS present | Open |
-| **P2** | Brčko/Gradačac anchor persist | RS overperforms Posavina, underperforms Drina | Persistent |
+| ~~**P2**~~ | ~~Brčko/Gradačac anchor~~ | ~~brka_2 fixed: avoided_osids_by_faction RS scenario constraint~~ | **FIXED n703+** |
 | **P2** | 0 dissolved formations at w40 | Dissolution criteria may be too protective | **NEW n647** |
+| ~~**P1**~~ | ~~#28 SRK 0-assigned cycle~~ | ~~reclassifyRearBrigades zero-guard scoped to vrs_sarajevo_romanija~~ | **FIXED n703+** |
 | **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | **NEW n587** |
 | **P3** | #3 Formation casualty_ledger | Design gap, data exists in state-level ledger | Open |
 

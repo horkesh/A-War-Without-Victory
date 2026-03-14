@@ -1045,7 +1045,7 @@ function reclassifyRearBrigades(
 
         // Classify: front → assigned, 1-hop → reserve candidate, deeper → dropped.
         const keepAssigned: FormationId[] = [];
-        const reserveCandidates: Array<{ bid: FormationId; personnel: number }> = [];
+        let reserveCandidates: Array<{ bid: FormationId; personnel: number }> = [];
 
         for (const bid of [...sector.assigned_brigade_ids, ...sector.reserve_brigade_ids]) {
             const f = formations[bid];
@@ -1059,6 +1059,24 @@ function reclassifyRearBrigades(
                 // it toward the front. GOLDEN RULE: never drop a brigade from its sector.
                 keepAssigned.push(bid);
             }
+        }
+
+        // Zero-assigned guard for SRK fortress sectors: the Sarajevo ring has brigades
+        // permanently 1-hop behind a fortified front (they sit in suburbs, not on the
+        // actual siege line). ensureMinimumSectorCoverage places a rescue brigade in
+        // assigned[], but reclassifyRearBrigades demotes it back to reserve every turn
+        // because it's 1-hop. This creates a cycle: assigned=[], defensive_power=0.
+        // Fix: SRK sectors keep their sole 1-hop brigade as assigned.
+        // SCOPED TO SRK ONLY: does not affect offensive corps or ARBiH sectors
+        // (which would otherwise get artificially stronger defense).
+        if (
+            sector.corps_id === 'vrs_sarajevo_romanija' &&
+            keepAssigned.length === 0 &&
+            reserveCandidates.length > 0
+        ) {
+            reserveCandidates.sort((a, b) => b.personnel - a.personnel || strictCompare(a.bid, b.bid));
+            keepAssigned.push(reserveCandidates[0]!.bid);
+            reserveCandidates = reserveCandidates.slice(1);
         }
 
         // Cap: 1 reserve per sector. Pick the strongest brigade.

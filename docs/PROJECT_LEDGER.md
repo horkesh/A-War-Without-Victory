@@ -13060,3 +13060,61 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 **Finding:** Supply gate (critical_fraction=1 for besieged Orašje pocket) correctly prevents actual offensive operations — the Orašje pocket was supply-cut-off. This is historically accurate. The fundamental fix (removing forced defensive) is correct; supply system handles the rest.
 
 **Calibration:** 88.6% area-weighted (unchanged from n696), 6/6 benchmarks PASS, hash `7988bff8c990c3d8`. 606 vitest tests pass (+10 from baseline 596).
+
+### n703+ Engine Sprint — SRK Fix A, Ring Axis Fix C, Brčko P3 (2026-03-14)
+
+**Sprint objective:** Address remaining realism issues: #28 SRK 0-assigned cycle, #25 Srebrenica Ring axis stall (root causes), brka_2 Brčko anchor failure, HVO ghost front closure.
+
+---
+
+**Fix A — SRK 0-assigned cycle (#28, P1)**
+
+**Problem:** `reclassifyRearBrigades` demoted all SRK siege-ring sector brigades to reserve (1-hop) every turn. `ensureMinimumSectorCoverage` rescued them; `reclassifyRearBrigades` immediately demoted them back. Cycle produced `assigned=[]`, `defensive_power=0` for Sarajevo ring sectors.
+
+**Fix:** Zero-assigned guard in `reclassifyRearBrigades` (`src/sim/combat/corps_front_sectors.ts`) scoped exclusively to `vrs_sarajevo_romanija`. When `keepAssigned.length === 0` and `reserveCandidates.length > 0`, promotes strongest reserve brigade to assigned. Does not affect offensive corps or ARBiH sectors.
+
+---
+
+**Fix C — Srebrenica Ring axis typo (#25 partial)**
+
+**Problem:** `pre_planned_operations.ts` had `rs_1st_milici` (typo) in both `bratunac_vlasenica` and `srebrenica_ring` axis brigade lists. Actual OOB ID: `rs_1st_milii`. Ring axis ran with only 2 brigades instead of 3.
+
+**Fix:** `rs_1st_milici` → `rs_1st_milii` in `src/sim/combat/pre_planned_operations.ts` (both occurrences).
+
+---
+
+**Fix C — `osmace_2` Srebrenica enclave boundary correction**
+
+**Problem:** `osmace_2` was in the Srebrenica enclave OSID list (`enclave_resilience.ts`), giving it garrison defense power and making it extremely resistant to VRS capture. Calibration data (Jan 1993 painted) shows `osmace_2` as RS-controlled — VRS captured it before the calibration date.
+
+**Fix:** Removed `osmace_2` from Srebrenica enclave OSID list in `src/sim/combat/enclave_resilience.ts`.
+
+---
+
+**P3 — Brčko brka_2 anchor fix**
+
+**Problem:** Operacija Hrast (bot-generated, `vrs_east_bosnian`) explicitly targeted and captured `op:brcko:brka_2` (Brčko city center). The "Corridor 92 (EBK)" army priority in `bot_strategy.ts` lists `brcko` municipality as a full target, and the bot's operation generator picks up `brka_2` from the municipality sweep. Historically, VRS never controlled Brčko city center (it became a post-Dayton special district).
+
+**Fix:** Added `"RS": ["op:brcko:brka_2"]` to `avoided_osids_by_faction` in `data/scenarios/apr1992_definitive_40w.json`. This is a scenario-level historical constraint, not engine code.
+
+---
+
+**Fix B — Follow-on operation planning (DEFERRED)**
+
+**Problem:** Attempted to reduce planning duration for follow-on operations (same corps, recently completed op). Corps-ID-only matching incorrectly treated Podrinje Sweep (Rogatica theater) as follow-on to Op Drina (Zvornik theater). Regression: Sweep ended at w20 as failure instead of w29/w33 partial.
+
+**Status:** Reverted. Needs theater-aware matching (overlapping sector/OSID coverage). Documented in REAL_WAR_MASTER.md issue #25.
+
+---
+
+**P3 — Issue #14 HVO ghost front (CLOSED by design)**
+
+`hvo_central_bosnia` has 0 sectors — correct, because HVO-ARBiH conflict starts April 1993. In 40w window, HVO and ARBiH are nominal allies. Closed as "by design until April 1993 event system."
+
+---
+
+**Calibration result (n23, hash `8531b22a4f6e7e2b`):**
+- Area-weighted match: **90.4%** (+0.8pp from 89.6% baseline n703)
+- All regions: KRAJINA 99.6%, POSAVINA_NE 87.7%, DRINA 83.0%, CENTRAL_CORRIDOR 95.1%, CENTRAL_BOSNIA 83.4%, SARAJEVO 84.2%, HERZEGOVINA 90.4%
+- **13/13 OSID anchors PASS** (was 11/13 — brka_2 and teocak_krstac_2 now both passing)
+- 606/607 vitest tests pass
