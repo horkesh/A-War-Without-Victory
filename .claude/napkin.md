@@ -98,7 +98,9 @@
 ## Bot AI & Combat
 1. **[2026-03-13] Triple-junction adjacency: standard for grouping, strict for splitting (n664→n682)**
    Do instead: `buildEdgeAdjacency` (33m `frontEdgeAdj`) for sub-segment grouping (Steps 1-3). `buildEdgeAdjacencyStrictCaseB` for contiguity split (Step 4b): Case A always, Case B only when both fi-H and fj-H in strict adjacency (≤5.5m `SHARED_BOUNDARY_THRESHOLD`). Standard Case B bridges front edges on opposite sides of enemy pockets (e.g. dragoradi↔olovo_2 via krivajevici at 16.9m); strict Case B cuts these. Municipality guard on `mapOsidsToCorps` Phase 2 BFS prevents corps territory race.
-2. **[2026-03-11] RS three-phase doctrine — organic tempo decay (n579)**
+2. **[2026-03-14] Supply gate strips all offensive targets when critical_fraction > 0.5**
+   Do instead: `assessCorpsSupplyHealth` in `bot_corps_directives.ts` clears `offensiveTargets` when >50% brigades critical supply AND upgrades `min_attack_outcome` to `costly_victory` when adequate_fraction < 5%. Besieged pockets (Orašje) are always critical supply — stance change alone won't enable attacks. This is correct and historically accurate.
+3. **[2026-03-11] RS three-phase doctrine — organic tempo decay (n579)**
    Do instead: w0-12 blitz (0.35/0.15), w12-26 sustained (0.25/0.08), w26+ consolidation (0.20/0.05). Late-war params have ZERO calibration effect. Early-war intensity is the primary lever.
 3. **[2026-03-10] Enclave defense overhaul — Sarajevo holds (n524→n527)**
    Do instead: `ALWAYS_BESIEGED_ENCLAVES` forces Sarajevo strained supply. `initial_resilience=20`. `getEnclaveGarrisonPower()` adds civilian defense volume. Urban mult 2.0×. `URBAN_TANK_TERRAIN_FLOOR=1.7`. Key lesson: personnel ratio trumps multipliers — need raw volume.
@@ -106,8 +108,8 @@
    Do instead: ARBiH defensive through w15, then balanced with low attack share (0.12) and negative aggression (-0.05) through w40.
 5. **[2026-03-12] Operation Preparation System IMPLEMENTED**
    Do instead: `operation_preparation.ts` — 5-phase state machine (intel_gathering→force_staging→supply_check→assessment→ready). Commander personality drives tempo. Probes as sub-actions. `tickPreparation()` in pipeline. UI: `CommanderSelectionModal.tsx` + `OperationBriefingModal.tsx`. 45 tests. Player `force_launch` override. Intel-gated launch gate in `bot_corps_directives.ts`.
-6. **[2026-03-08] Graz Accords / Local Truces + cold fronts**
-   Do instead: `src/sim/local_truces.ts` — fires at week 4. Corps-pair truce (Herzegovina) + Kiseljak OSID exclusion. NOT covered: Posavina, central Bosnia outside Kiseljak, Jajce. Cold fronts: `isColdFront()` exempts from attrition/bombardment.
+6. **[2026-03-14] Graz Accords / Local Truces — faction-level block (n697)**
+   Do instead: `src/sim/local_truces.ts` — fires at week 4. Faction-level block: when Herzegovina truce active, ALL RS corps (except vrs_1st_krajina, vrs_2nd_krajina) blocked from HRHB. Corps-pair truce (Herzegovina) + Kiseljak OSID exclusion. Cold fronts: `isColdFront()` exempts from attrition/bombardment.
 7. **[2026-03-07] Pre-planned VRS operations (5 corps only) + JNA ghost Kupres**
    Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only original 5 corps. 2KK has NO pre-planned op.
 8. **[2026-03-10] Cross-corps sector assignment must stay hard-blocked**

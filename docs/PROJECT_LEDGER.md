@@ -13022,3 +13022,41 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 3. **Edge field copy** (`settlements_parse.ts`): `parseEdges` now copies `type` and `min_dist` fields from operational contact graph edges.
 
 **Calibration (n620):** 6/6 benchmarks PASS. 82.8% area-weighted (was 86.3%). RS delta -23. Hash 269533c89e00314e. Sectors ~78 (was ~77). Srebrenica and Cerska correctly split into separate sectors.
+
+---
+
+## 2026-03-14 — Realism Fixes n697–n700 (Graz Block, Sector Power Recompute, SRK Hold Ring, NWB Activation)
+
+**Session summary:** Four targeted realism fixes addressing SRK HRHB targeting, sector power/threat accuracy, SRK siege-ring holding, and HRHB NW Bosnia stance.
+
+### n697 — Graz Faction-Level RS→HRHB Block
+
+**Problem:** SRK (`vrs_sarajevo_romanija`) was generating HRHB offensive targets (Kakanj/Vareš) after Operacija Bastion. The Graz Accords corps-pair mechanism only covered Herzegovina corps pairs; other RS corps (SRK, Drina, etc.) could freely target HRHB territory.
+
+**Fix:** Added faction-level block in `shouldGrazBlockAttack` (`src/sim/local_truces.ts`): when Herzegovina truce is active and `faction === 'RS'` and corps not in `GRAZ_EXEMPT_RS_CORPS` (vrs_1st_krajina, vrs_2nd_krajina), return true. Posavina corps exempt because they were already engaged with HVO before Graz.
+
+**Tests:** Updated `tests/local_truces.test.ts` (vrs_drina now blocked). Added `tests/graz_faction_block.test.ts` (10 vitest tests).
+
+### n698 — Sector Power/Threat Recompute After All Assignment Steps
+
+**Problem:** `defensive_power` and `threat_ratio` were computed inside `classifyBrigadesByTerritory` (Step 6), before `ensureMinimumSectorCoverage` (Step 7) and `deduplicateBrigadesAcrossSectors` (Step 8b). Sectors rescued from 0→1 brigade showed dp=0, threat=0.
+
+**Fix:** Extracted computation to `recomputeSectorPowerAndThreat()` in `src/sim/combat/corps_front_sectors.ts`, called as Step 8c (last). Recomputes density, defensive_power, threat_ratio for all sectors using final brigade set.
+
+**Tests:** Added `tests/sector_power_threat_recompute.test.ts` (3 vitest tests).
+
+### n699 — SRK Hold-the-Ring Directive
+
+**Problem:** SRK had `hold_osids: []` — no OSIDs locked for defense. Brigades at the Sarajevo siege ring could be reassigned to offensive ops and abandon the encirclement.
+
+**Fix:** Added `hold_municipalities?: string[]` to `ArmyOperationPriority` interface in `src/sim/combat/bot_strategy.ts`. Sarajevo Siege priority now has `hold_municipalities: ['ilidza','hadzici','vogosca','pale','trnovo']`. In `bot_corps_directives.ts`, added processing block that iterates `hold_municipalities` and adds all friendly front OSIDs in those municipalities to `holdOsids` — unconditionally (unlike `defensive_priorities` which skips offensive corps). Result: SRK directive shows 29 hold_osids at w40.
+
+### n700 — HRHB NW Bosnia Posavina Activation
+
+**Problem:** `hvo_northwest_bosnia` was permanently forced to `defensive` stance because `orasje` was in `corridor_municipalities`. The 101st Orašje Brigade historically actively pressed RS Posavina forces.
+
+**Fix:** Removed `orasje` from `HRHB corridor_municipalities` in `bot_strategy.ts`. Added `Posavina Corridor Relief` army priority with explicit `target_osids` (Posavina municipalities not in operational reverseMap). NWB stance correctly changes to `balanced`.
+
+**Finding:** Supply gate (critical_fraction=1 for besieged Orašje pocket) correctly prevents actual offensive operations — the Orašje pocket was supply-cut-off. This is historically accurate. The fundamental fix (removing forced defensive) is correct; supply system handles the rest.
+
+**Calibration:** 88.6% area-weighted (unchanged from n696), 6/6 benchmarks PASS, hash `7988bff8c990c3d8`. 606 vitest tests pass (+10 from baseline 596).
