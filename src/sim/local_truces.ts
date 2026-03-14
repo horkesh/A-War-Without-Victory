@@ -161,9 +161,26 @@ export function isKiseljakExcluded(osid: string, faction: FactionId): boolean {
 }
 
 /**
+ * RS corps exempt from the faction-level Graz block.
+ * These corps are historically documented as fighting HRHB forces in the Posavina corridor —
+ * the Graz Accords explicitly did NOT cover that theatre.
+ * vrs_1st_krajina: fights HVO Orašje pocket throughout 1992.
+ * vrs_2nd_krajina: falls through to the corps-pair mechanism (which then blocks it).
+ */
+const GRAZ_EXEMPT_RS_CORPS = new Set([
+    'vrs_1st_krajina',
+    'vrs_2nd_krajina',
+]);
+
+/**
  * Should this corps skip offensive targeting against the given OSID's controller?
- * Combines corps-pair truce check + Kiseljak exclusion.
+ * Combines faction-level RS→HRHB block + corps-pair truce check + Kiseljak exclusion.
  * Used by bot_corps_ai directive generation.
+ *
+ * Check order:
+ * 1. Faction-level RS→HRHB block for all non-exempt RS corps (covers SRK, Drina, etc.)
+ * 2. Herzegovina corps-pair truce (covers 2KK ↔ Tomislavgrad, VRS Herz ↔ HVO SE Herz)
+ * 3. Kiseljak OSID-level exclusion (any RS corps, any HRHB corps)
  */
 export function shouldGrazBlockAttack(
     state: GameState,
@@ -177,6 +194,14 @@ export function shouldGrazBlockAttack(
     const trucePartnerFaction = getTrucePartner(faction);
     if (!trucePartnerFaction) return false;
     if (targetController !== trucePartnerFaction) return false;
+
+    // Faction-level RS→HRHB block: any RS corps not explicitly exempt is blocked.
+    // The Graz Accords covered the RS-HRHB ceasefire across all of Bosnia except
+    // the Posavina corridor where RS and HVO were already engaged in fighting.
+    // This catches SRK (vrs_sarajevo_romanija), Drina (vrs_drina), 5th Corps, etc.
+    if (isHerzegovinaTruceActive(state) && faction === 'RS' && !GRAZ_EXEMPT_RS_CORPS.has(corpsId)) {
+        return true;
+    }
 
     // Herzegovina corps-pair truce: block if corps is in a pair and truce is unbroken.
     // West pair (2KK ↔ Tomislavgrad) activates at Graz (w4).

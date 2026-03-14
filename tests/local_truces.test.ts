@@ -217,14 +217,27 @@ describe('shouldGrazBlockAttack', () => {
         assert.equal(shouldGrazBlockAttack(state, 'vrs_2nd_krajina', 'RS', 'op:duvno:duvno_2', 'HRHB'), true);
     });
 
-    it('does NOT block vrs_1st_krajina attacking HRHB (Posavina — not in pair)', () => {
+    it('does NOT block vrs_1st_krajina attacking HRHB (Posavina — exempt)', () => {
         const state = makeActiveState();
         assert.equal(shouldGrazBlockAttack(state, 'vrs_1st_krajina', 'RS', 'op:brod:brod_2', 'HRHB'), false);
     });
 
-    it('does NOT block vrs_drina attacking HRHB (not in pair)', () => {
+    it('blocks vrs_drina attacking HRHB (non-exempt RS corps — faction-level block)', () => {
         const state = makeActiveState();
-        assert.equal(shouldGrazBlockAttack(state, 'vrs_drina', 'RS', 'op:travnik:travnik_2', 'HRHB'), false);
+        assert.equal(shouldGrazBlockAttack(state, 'vrs_drina', 'RS', 'op:travnik:travnik_2', 'HRHB'), true);
+    });
+
+    it('blocks vrs_sarajevo_romanija attacking non-Kiseljak HRHB territory (faction-level block)', () => {
+        const state = makeActiveState();
+        assert.equal(shouldGrazBlockAttack(state, 'vrs_sarajevo_romanija', 'RS', 'op:kakanj:kakanj_2', 'HRHB'), true);
+    });
+
+    it('blocks vrs_sarajevo_romanija even when Herzegovina truce broken (only Herzegovina truce, not faction-level)', () => {
+        // When Herzegovina truce is broken, the faction-level check (which uses isHerzegovinaTruceActive)
+        // is also disabled. Only Kiseljak exclusion remains independent.
+        const state = makeActiveState();
+        state.political.vienna_herzegovina_broken_by = 'RS';
+        assert.equal(shouldGrazBlockAttack(state, 'vrs_sarajevo_romanija', 'RS', 'op:kakanj:kakanj_2', 'HRHB'), false);
     });
 
     it('blocks Kiseljak OSID attack by RS (any corps)', () => {
