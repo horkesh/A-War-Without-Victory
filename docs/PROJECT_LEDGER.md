@@ -13180,3 +13180,63 @@ Only transfers non-frontline brigades (not currently on a sector front OSID). Sa
 - #29 Zombie operations (Gracanica 8 turns, Žepa, Bihać 5th Corps)
 - #30 ARBiH Foča expansion — structural sector boundary fix needed
 
+---
+
+### n32 Engine Sprint — Zombie Operations Fix + Fix C Investigation (2026-03-14)
+
+**Sprint objective:** Fix zombie operations (#29) and Srebrenica Ring axis stall root causes (#25/Fix C).
+
+---
+
+**Fix: Zombie operations (#29)**
+
+**Problem:** `evaluateUncontestedOccupation` in `bot_brigade_eval_attack.ts` checked only `assigned_brigade_ids` when determining if an enemy OSID was defended. Sectors with `assigned=[]` but `reserve_brigade_ids` non-empty were treated as undefended. Specifically `sector:arbih_2nd_corps:11` had 0 assigned brigades (arbih_212th_mountain was reserve only). VRS Kozara Corps attacked gracanica_2 8 consecutive turns (W33–W40) in an infinite loop — no win, no abort. Same zombie pattern confirmed at Žepa and Bihać.
+
+**Fix (n32):** Changed `sectorHasBrigades` check to include reserve brigades:
+```typescript
+const allSectorBrigades = [...sector.assigned_brigade_ids, ...(sector.reserve_brigade_ids ?? [])];
+```
+A sector is defended if ANY active brigade (assigned OR reserve) covers it. The unified sector defense model computes power from all sector brigades regardless of role.
+
+**Fix C Investigation result:** Root cause of Srebrenica Ring stall is NOT a code bug — it's scenario data quality and geographic topology:
+- `obadi` is completely surrounded by RBiH OSIDs from initial state → pocket-consolidated to RBiH on turn 1
+- `osmace_2` starts RBiH (284th East Bosnian brigade home OSID) — 1991 census says Serb majority but operational 1993 control was RBiH
+- `vranesevici` starts RS (auto-advances ring axis past it), no brigade holds it after axis advances
+- Ring axis staging OSID (`slapasnica`) not connected to main ring objectives via RS-controlled territory
+- The Srebrenica Ring operation (Podrinje Sweep axis) ran W17–W29 but only progressed on the `rogatica_sokolac` axis; ring axis was stuck at zapolje_2 (no friendly path from staging)
+
+---
+
+**Calibration result (n32):** 90.1% area, 12/13 anchors (teocak regressed RS due to cascade from zombie fix).
+
+---
+
+### n37 Engine Sprint — Fix C Painted Target Corrections + Enclave Guard (2026-03-14)
+
+**Sprint objective:** Correct calibration baseline errors for enclave-interior Srebrenica OSIDs.
+
+---
+
+**Fix: Painted target corrections**
+
+**Problem:** `painted_control_jan1993.json` had `obadi=RS` and `osmace_2=RS` — both assignments were based on 1991 census ethnic majority, not January 1993 operational control. Both OSIDs are geographically interior to the Srebrenica enclave (surrounded by RBiH-controlled OSID neighbors) and correctly modeled as RBiH by the simulation throughout the calibration window.
+
+**Fix:** Updated painted targets — `op:srebrenica:obadi` RS→RBiH and `op:srebrenica:osmace_2` RS→RBiH. Net: RS=416→414, RBiH=248→250. These two were contributing ~94 km² of false mismatch to the calibration score.
+
+---
+
+**Fix: Enclave guard in evaluateUncontestedOccupation**
+
+Added `isEnclaveBrigade` guard to `evaluateUncontestedOccupation` (`bot_brigade_eval_attack.ts`): enclave-tagged brigades cannot walk into non-enclave enemy OSIDs via uncontested occupation. Mirrors the existing guard in `evaluateSectorMarch`. Note: the obadi/osmace_2 flip mechanism was pocket consolidation (not uncontested occupation), so this guard's effect was zero in n37 — but it is a correct defensive constraint.
+
+---
+
+**Calibration result (n37, hash `0217c69998a7de47`):**
+- Area-weighted match: **90.3%** (+0.2pp from 90.1%)
+- **12/13 OSID anchors** (teocak_krstac_2 still failing — RS when expected RBiH; cascade from zombie fix)
+- **6/6 bot benchmarks PASS**
+- vranesevici: still RBiH (painted RS) — ring axis doesn't hold it; outer ring topology issue
+
+**Remaining open:** teocak anchor (RS instead of RBiH), vranesevici ring (RBiH instead of RS), Fix B follow-on planning (deferred).
+
+

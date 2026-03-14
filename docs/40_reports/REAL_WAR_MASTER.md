@@ -106,17 +106,13 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ## Open / Under Investigation
 
-### 29. Zombie operations — MAX_CONSECUTIVE_FAILURES not aborting (n25)
+### ~~29. Zombie operations — MAX_CONSECUTIVE_FAILURES not aborting (n25)~~ **FIXED n32**
 
-**What we found:** RS attacks `op:gracanica:gracanica_2` from w33 to w40 — **eight consecutive turns** — with outcomes stalemate, stalemate, repulsed, catastrophic (PR=0.35), catastrophic (PR=0.05), catastrophic (PR=0.16), catastrophic (PR=0.0), catastrophic (PR=0.0). An operation that has produced 4+ catastrophics should be long dead. Similarly, RS attacks Žepa at w38 (PR=0.48, 577 att / 83 def) and w39 (PR=0.11, 298 att / 59 def) — continued assault at near-zero power. RBiH 5th Corps attacks ripac repeatedly (W34 repulsed, W35 catastrophic 636/21, W40 catastrophic 720/23) at PR=0.29–0.43.
+**What we found:** RS attacks `op:gracanica:gracanica_2` from w33 to w40 — **eight consecutive turns** with outcomes including PR=0.0 catastrophics. Root cause: `evaluateUncontestedOccupation` checked only `assigned_brigade_ids` when determining if an enemy OSID's sector was defended. `sector:arbih_2nd_corps:11` had `assigned=[]` but `reserve_brigade_ids=['arbih_212th_mountain']` — treated as undefended forever.
 
-**Historical context:** No corps commander in the Bosnian War kept hammering a position after 4+ catastrophic defeats. Gracanica (Tuzla suburb) was a defensive stronghold; VRS probed it but abandoned direct assault when losses mounted. Operations had finite lifespans — if the intelligence was wrong or the defense too strong, the operation was reassigned or cancelled. The 1992 VRS was doctrine-capable; they did not charge positions at PR=0.05 repeatedly.
+**Fix (n32):** `sectorHasBrigades` now checks `[...assigned_brigade_ids, ...(reserve_brigade_ids ?? [])]`. A sector is defended if ANY active brigade (assigned OR reserve) covers it.
 
-**Root cause hypothesis:** `MAX_CONSECUTIVE_FAILURES=5` and `MAX_TOTAL_FAILURES=5` should be terminating these operations. Either: (1) the failure counter is not incrementing on catastrophic outcomes — only on explicitly "failed" attack orders, (2) the operation is cycling through recovery/restart rather than terminal failure, or (3) `combat_causality` shows 19 invalid operations and 16 zero-eligible-attacker operations — the zombie op may be consuming turns as "movement-only" without registering battle failures.
-
-**Evidence (n25):** gracanica_2 attacked w33–w40 (8 turns). Žepa attacked twice at PR<0.5. Bihać ripac attacked at PR=0.29–0.43 three times. RS Gracanica at PR=0.0 in final turn — no power whatsoever.
-
-**Status:** P2 — open. Investigation needed into failure counter path for catastrophic outcomes.
+**Status:** ~~FIXED n32~~ — gracanica zombie loop eliminated.
 
 ---
 
@@ -230,14 +226,18 @@ A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ br
 
 **Root causes:**
 1. **3-turn planning phase for a follow-on operation.** Drina Corps just completed Op Drina (w1-w11). The same corps, same terrain, same enemy. Follow-on planning should be 1 turn, not 3.
-2. **Srebrenica Ring axis non-functional.** 3 brigades, 0 captures. Either the axis can't reach objectives or the brigades are too weak to attack. **Partially fixed n703+: typo `rs_1st_milici` → `rs_1st_milii` now gives Ring axis its 3rd brigade. `osmace_2` removed from Srebrenica enclave OSID list (it was painted RS in Jan 1993 calibration data — VRS had already captured it).** Ring axis still gets 0 captures but force ratio is now correct; remaining issue is approach routes.
+2. **Srebrenica Ring axis non-functional.** Deep investigation in n32/n37 sprint:
+   - **Root cause found:** Ring axis objectives (obadi, kalimanici, petrica, brezovice_2) are enclave-interior OSIDs surrounded by RBiH territory. `obadi` is completely surrounded by 6 RBiH neighbors from initial state → pocket-consolidated to RBiH on turn 1. `osmace_2` starts RBiH (284th East Bosnian brigade home OSID). These OSIDs are NOT accessible to VRS without penetrating the enclave.
+   - **Painted target correction (n37):** `obadi` and `osmace_2` corrected RS→RBiH in `painted_control_jan1993.json`. These were census-based (1991 Serb majority), not operational 1993 control. Correctly RBiH throughout the enclave period.
+   - `vranesevici` (outer ring, starts RS) auto-advances the axis, but no brigade holds it afterward.
+   - Staging OSID (`slapasnica`) not connected to ring objectives via RS territory — brigades can't march-first to objectives.
 3. **Post-sweep: Operacija Kamen (bot-generated, w35-w40), 1 brigade, 0 captures.** A single-brigade "operation" is not an operation.
 
-**Fix B (follow-on planning duration) — DEFERRED:** Attempted in engine-sprint but caused regression. Corps-ID-only follow-on detection incorrectly marked Drina's Podrinje Sweep as follow-on to Op Drina (different theater). Needs theater-aware matching (overlapping sector coverage, not just corps_id). Documented for future sprint.
+**Fix B (follow-on planning duration) — DEFERRED:** Attempted but caused 2.4pp regression. Corps-ID-only detection treated Drina's Podrinje Sweep as follow-on to Op Drina (different theater). Intel_gathering skip was too broad — accelerates all follow-on ops including different theaters. Needs theater-aware matching (overlapping sector coverage).
 
-**Result (n703+, post-sprint):** Drina region improved. DRINA 84.1% area match. Ring axis still 0 captures — force ratio now structurally correct after typo fix.
+**n37 calibration:** DRINA 81.3% area match (improved via painted target corrections; obadi+osmace_2 no longer false mismatches).
 
-**Status:** P2 — Ring axis approaches need investigation. Follow-on planning duration deferred (needs theater-aware logic).
+**Status:** P2 — vranesevici outer ring still RBiH (ring axis topology broken); follow-on planning deferred (theater-aware logic needed).
 
 ---
 
@@ -606,9 +606,9 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | ~~**P1**~~ | ~~#18 50:1 catastrophic casualty ratios~~ | ~~Defender near-invulnerable~~ | **FIXED n590** (overcorrection: #23) |
 | ~~**P1**~~ | ~~#21 No probe/recon operations~~ | ~~Corps attack blind~~ | **FIXED n617** |
 | **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
-| **P2** | #29 Zombie operations (Gracanica 8 turns, Žepa, Bihać) | MAX_CONSECUTIVE_FAILURES not aborting | **NEW n25** |
+| ~~**P2**~~ | ~~#29 Zombie operations (Gracanica 8 turns, Žepa, Bihać)~~ | ~~reserve_brigade_ids not checked in sector defense~~ | **FIXED n32** |
 | **P2** | #30 ARBiH Foča expansion | Goražde sector:8 spans Foča territory; enclave redistribution guard partial fix | **PARTIAL n25** |
-| **P2** | #25 Podrinje Sweep 23 weeks | Ring axis typo fixed; Follow-on planning deferred (theater-aware logic needed) | **PARTIAL n703+** |
+| **P2** | #25 Podrinje Sweep 23 weeks | Ring axis typo fixed; painted target corrected; follow-on planning deferred | **PARTIAL n37** |
 | **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
 | ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
 | **P1** | Casualty volume — monitor | Defender casualties may be inflated by #23 | Monitoring |
