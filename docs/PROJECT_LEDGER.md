@@ -7,6 +7,24 @@ This is the single authoritative project ledger. All context, decisions, and sta
 
 **For thematic knowledge base (decisions, patterns, rationale by topic):** see `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The changelog below remains the append-only chronological record.
 
+## [2026-03-14] n38: Teočak Pocket Anchor Fix
+
+**Problem:** After the n32 zombie operations fix, `vrs_east_bosnian` correctly identified `op:ugljevik:teocak_krstac_2` as an RBiH target. The bot launched "Operacija Plamen" — 3 brigades (1st Majevica + 1st and 2nd Semberija, 2,770 pers combined) against the lone 255th Slavna Mountain "Hajrudin Mesić" brigade (800 pers). PR=2.80, decisive_victory at week_index 30. teocak_krstac_2 ended RS at w40 — anchor 12/13.
+
+**Historical reality:** Teočak municipality was a Bosniak pocket in northeastern Bosnia that held for the ENTIRE war. The 255th Slavna held it against repeated VRS probes. VRS East Bosnian Corps never concentrated sufficient force to break it — they had bigger priorities (Posavina Corridor, Drina valley). The sim's 3-brigade concentrated assault is ahistorical.
+
+**Fix:** Added `op:ugljevik:teocak_krstac_2` to `avoided_osids_by_faction["RS"]` in `data/scenarios/apr1992_definitive_40w.json`. Same mechanism as `op:brcko:brka_2`. VRS bot will not generate operations targeting this OSID. The 255th Slavna defends its home OSID undisturbed.
+
+**Results:**
+- **13/13 anchors** (up from 12/13)
+- **6/6 bot benchmarks PASS**
+- Area-weighted match: **90.2%** (vs 90.3% n37 — within noise)
+- 606 vitest tests pass
+- Hash: `3fff90cabc0c6b92`
+- File changed: `data/scenarios/apr1992_definitive_40w.json`
+
+---
+
 ## [2026-03-14] n696: Commander-Driven Brigade Assignment
 
 **Problem:** `classifyBrigadesByTerritory` Phase 2 was pure BFS with no corps commander input. Surplus brigades were distributed purely by distance, ignoring the personality (aggressive/defensive) and operational focus of the corps commander. The home-affinity gate (Phase 2a) required `need > 0`, silently blocking local brigades from home sectors already at coverage capacity. Pre-planned operations had no way to pull brigades toward staging sectors during preparation.

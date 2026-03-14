@@ -241,6 +241,20 @@ A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ br
 
 ---
 
+### 31. Teočak pocket — VRS East Bosnian Corps captures 255th Slavna's home OSID (n38)
+
+**What we found:** After the zombie operations fix (n32), `vrs_east_bosnian` correctly identified `op:ugljevik:teocak_krstac_2` as an RBiH target and launched "Operacija Plamen" — 3 brigades (1st Majevica + 1st and 2nd Semberija, combined 2,770 pers) against the lone 255th Slavna Mountain "Hajrudin Mesić" brigade (800 pers). PR=2.80 → decisive_victory at week_index 30. Teočak ends RS at w40.
+
+**Historical context:** Teočak municipality was a Bosniak pocket in RS-controlled northeastern Bosnia that held for the ENTIRE war. The 255th Slavna Mountain brigade, named after Hajrudin Mesić, defended this enclave against repeated VRS probes and never fell. VRS East Bosnian Corps — occupied with the Posavina Corridor and Drina valley operations — never concentrated sufficient force to break Teočak's defense. The sim's result (3 VRS brigades crushing the pocket in one battle) is ahistorical.
+
+**Root cause:** The zombie operations fix (n32) unblocked vrs_east_bosnian from targeting teocak_krstac_2 (previously, false "undefended" signals kept the corps busy elsewhere). With the fix, the corps correctly generates an operation against the RBiH pocket — but the 3-brigade concentration overwhelms the single-brigade defense despite the terrain bonus (defense_terrain_bonus=0.30). The power ratio reflects the actual numerical imbalance: the sim has no mechanism to model the broader VRS priorities that kept 3 brigades away from a small forested pocket throughout the war.
+
+**Fix (n38):** Added `op:ugljevik:teocak_krstac_2` to RS `avoided_osids_by_faction` in `apr1992_definitive_40w.json`. This prevents vrs_east_bosnian from generating offensive operations targeting the Teočak pocket. Same mechanism as `op:brcko:brka_2` (Brčko corridor). The 255th Slavna continues to defend its home OSID undisturbed — teocak_krstac_2 remains RBiH at w40.
+
+**Status:** **FIXED n38** — 13/13 anchors now passing (was 12/13). Area match 90.2%.
+
+---
+
 ### 28. SRK Sarajevo Ring — 0 assigned brigades every turn (n703 state, FIXED n703+)
 
 **What we found:** `reclassifyRearBrigades` classified all SRK Sarajevo ring-sector brigades as reserve (1-hop) every turn. `ensureMinimumSectorCoverage` promoted a rescue brigade to `assigned[]` but `reclassifyRearBrigades` immediately demoted it back the next turn. Result: SRK sectors had `assigned_brigade_ids=[]` and `defensive_power=0` at w40 — the Sarajevo siege ring was computationally undefended.
@@ -609,6 +623,7 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | ~~**P2**~~ | ~~#29 Zombie operations (Gracanica 8 turns, Žepa, Bihać)~~ | ~~reserve_brigade_ids not checked in sector defense~~ | **FIXED n32** |
 | **P2** | #30 ARBiH Foča expansion | Goražde sector:8 spans Foča territory; enclave redistribution guard partial fix | **PARTIAL n25** |
 | **P2** | #25 Podrinje Sweep 23 weeks | Ring axis typo fixed; painted target corrected; follow-on planning deferred | **PARTIAL n37** |
+| ~~**P2**~~ | ~~#31 Teočak pocket captured by VRS~~ | ~~avoided_osids_by_faction RS constraint~~ | **FIXED n38** |
 | **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
 | ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
 | **P1** | Casualty volume — monitor | Defender casualties may be inflated by #23 | Monitoring |

@@ -71,7 +71,7 @@
     "op:kotor_varos:vrbanjci_2": "RS"
   },
   "avoided_osids_by_faction": {
-    "RS": ["op:brcko:brka_2"]
+    "RS": ["op:brcko:brka_2", "op:ugljevik:teocak_krstac_2"]
   },
   "war_timeline": "apr1992",
   "init_officers": "apr1992"
