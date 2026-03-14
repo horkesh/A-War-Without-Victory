@@ -20,6 +20,7 @@ import type { Osid } from './osid_adjacency.js';
 import type { BrigadePosture, FormationState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
+import { isOsidInSameEnclave } from './enclave_resilience.js';
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
 // We will import them appropriately. For now, I'll import from bot_brigade_ai_osid if needed, but they are pure.
@@ -430,6 +431,12 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // Alliance guard: HRHB/RBiH don't occupy each other's territory while allied
         if ((faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
             && areRbihHrhbAllied(state)) continue;
+
+        // Enclave guard: enclave brigades must not expand beyond their enclave perimeter.
+        // Without this, besieged ARBiH enclave brigades walk into adjacent RS positions
+        // when VRS brigades sector-march away (e.g. 280th–284th recapturing obadi/vranesevici
+        // from the Srebrenica pocket, undoing Ring operations).
+        if (brigade.tags?.includes('enclave') && !isOsidInSameEnclave(loc as string, n)) continue;
 
         // Scenario avoid-list guard: historically, some OSIDs were not captured even when
         // undefended (e.g. Brčko city center — VRS held the corridor but not the city core).

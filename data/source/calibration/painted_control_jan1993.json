@@ -1,13 +1,13 @@
 {
     "meta": {
-        "description": "Painted control state",
+        "description": "Painted control state — obadi/osmace_2 corrected to RBiH (enclave-interior OSIDs, census-RS but operationally RBiH in Jan 1993)",
         "total_osids": 753,
         "counts": {
-            "RS": 416,
-            "RBiH": 248,
+            "RS": 414,
+            "RBiH": 250,
             "HRHB": 89
         },
-        "painted_at": "2026-02-28T03:27:50.276Z"
+        "painted_at": "2026-03-14T00:00:00.000Z"
     },
     "by_settlement_id": {
         "op:bosanski_petrovac:prkosi": "RS",
@@ -545,10 +545,10 @@
         "op:srbac:sitnesi_2": "RS",
         "op:srbac:nozicko": "RS",
         "op:srbac:srbac_2": "RS",
-        "op:srebrenica:obadi": "RS",
+        "op:srebrenica:obadi": "RBiH",
         "op:srebrenica:mala_daljegosta_2": "RS",
         "op:srebrenica:brezovice_2": "RS",
-        "op:srebrenica:osmace_2": "RS",
+        "op:srebrenica:osmace_2": "RBiH",
         "op:srebrenica:radovcici": "RS",
         "op:srebrenica:sulice_2": "RS",
         "op:srebrenica:ljeskovik_2": "RBiH",
