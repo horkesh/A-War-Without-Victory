@@ -9,7 +9,7 @@
  *   update-sector-offensive-results (after attack resolution)
  *
  * **Launch and eligible-attacker gates (Phase D Trust-and-Baseline):**
- * - Launch: Corps may launch when sector has ≥ MIN_BRIGADES_FOR_OFFENSIVE (3) assigned,
+ * - Launch: Corps may launch when sector has ≥ MIN_BRIGADES_FOR_OFFENSIVE (2) assigned,
  *   no existing sector op for that corps, and sector has valid offensive targets. Planning
  *   duration is computed from objective count; force_launch can shorten.
  * - Transition to execution: when planning_elapsed >= planning_duration (or force_launch
@@ -79,7 +79,11 @@ export function resolveEquipmentClass(f: { equipment_class?: string; tags?: stri
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Minimum brigades in sector to launch an offensive. */
-const MIN_BRIGADES_FOR_OFFENSIVE = 1;
+// Minimum brigades required to launch a sector offensive.
+// Single-brigade "operations" are not operations — they hammer one objective,
+// fail 3 consecutive idle turns, and "complete" with 0 captures.
+// 2 brigades = minimum for realistic combined-arms commitment.
+const MIN_BRIGADES_FOR_OFFENSIVE = 2;
 
 /** Maximum objectives per offensive. */
 const MAX_OBJECTIVES = 6;
@@ -99,7 +103,20 @@ const EXHAUSTION_DECAY_IDLE = 3;
 /** Corps exhaustion decay per turn while running an operation. */
 const EXHAUSTION_DECAY_ACTIVE = 1;
 
-/** Maximum total failures before abort. */
+/** Maximum total failures before abort.
+ *
+ * WARNING (Issue #29 — REAL_WAR_MASTER.md): In multi-axis operations this cap
+ * is applied PER AXIS, not per operation. With 5 axes × 5 failures each, the
+ * operation can sustain 25 total failures before all axes stall and recovery
+ * begins. Operacija Izlaz (3rd Corps, n701 run) ran 12 weeks, 0/5 objectives,
+ * burning ~3,500 ARBiH personnel at 7-21:1 attacker:defender ratios because
+ * each axis failed independently. A real corps commander would abort after the
+ * 2nd catastrophic failure with 500+ casualties. Fix candidates:
+ *   (a) Add an OPERATION-LEVEL failure cap that fires independently of per-axis
+ *       counting — e.g. MAX_OPERATION_TOTAL_FAILURES = 8 across all axes.
+ *   (b) Add a power-ratio viability gate: if predicted power_ratio < 0.35 for
+ *       all remaining axes, abort regardless of failure budget.
+ *   (c) Reduce to MAX_TOTAL_FAILURES = 3 for multi-axis and keep 5 for single. */
 const MAX_TOTAL_FAILURES = 5;
 
 /** Consecutive failures on same objective before skip. */
@@ -109,6 +126,15 @@ const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 3;
  *  Prevents operations from marching brigades around indefinitely when
  *  no brigade can find an attackable target (e.g. ARBiH 1st Corps under siege). */
 const MAX_MOVEMENT_ONLY_EXECUTION_TURNS = 4;
+
+/** Zero-progress failure abort threshold for multi-axis operations (Issue #29).
+ *  When total axis failures reach this number AND zero objectives have been
+ *  captured AND at least 1 attack has been made (not just marching), the
+ *  operation is terminated early. This fires BEFORE the per-axis cap
+ *  (MAX_TOTAL_FAILURES=5) for single-axis operations, cutting suicidal
+ *  attack runs from 5 turns to 3. Multi-axis operations making any progress
+ *  (≥1 capture) are exempt and run to their full per-axis budget. */
+const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 3;
 const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
@@ -796,9 +822,11 @@ function updateMultiAxisResults(
                 return b != null && (b.posture === 'attack' || b.posture === 'assault');
             });
             const anyAttacked = anyAttackedObjective || anyAttackedAnything;
+            // Check brigade_movement_state (persists across turns) NOT brigade_movement_orders
+            // (which is cleared by apply-brigade-movement BEFORE this step runs).
             const anyMoved = axis.assigned_brigades.some(bid => {
-                const movement = state.military.brigade_movement_orders?.[bid];
-                return Array.isArray(movement?.destination_sids) && movement.destination_sids.length > 0;
+                const movState = state.military.brigade_movement_state?.[bid];
+                return movState?.status === 'in_transit' || movState?.status === 'packing';
             });
 
             if (anyAttackedObjective) {
@@ -841,7 +869,11 @@ function updateMultiAxisResults(
                     axis.consecutive_failures_on_current += 1;
                 }
 
-                if (!anyMoved && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= 2) {
+                // Idle stall: no movement and no attacks ever on this axis.
+                // Threshold = 4 to give brigades time to march from staging to objectives
+                // via regular movement (1 hop/turn). Column-marching brigades are already
+                // detected via anyMoved (in_transit) and use the movement-only stall instead.
+                if (!anyMoved && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= 4) {
                     axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
                     axis.status = 'stalled';
                     continue;
@@ -864,6 +896,9 @@ function updateMultiAxisResults(
         if (axis.current_objective_index >= axis.objectives.length) {
             axis.status = 'complete';
         }
+        // Per-axis cap. The zero-progress backstop (MAX_OPERATION_ZERO_PROGRESS_FAILURES)
+        // fires first for single-axis zero-capture operations; this per-axis cap remains
+        // the backstop for multi-axis operations making partial progress.
         if (axis.failure_count >= MAX_TOTAL_FAILURES) {
             axis.status = 'stalled';
         }
@@ -872,12 +907,28 @@ function updateMultiAxisResults(
     // Aggregate axis-level captures to operation level
     let totalCaptures = 0;
     let totalAttempts = 0;
+    let totalAxisFailures = 0;
     for (const axis of axes) {
         totalCaptures += axis.objective_capture_count ?? 0;
         totalAttempts += axis.attack_attempt_count ?? 0;
+        totalAxisFailures += axis.failure_count ?? 0;
     }
     op.objective_capture_count = totalCaptures;
     op.attack_attempt_count = totalAttempts;
+
+    // Zero-progress early abort: if ≥3 total axis failures with zero captures
+    // and at least 1 real attack attempted, force all executing axes to stalled.
+    // Fires before the per-axis cap (5) for single-axis operations, cutting
+    // suicidal attack runs from 5 turns to 3. Exempt when any objective captured.
+    if (
+        totalAxisFailures >= MAX_OPERATION_ZERO_PROGRESS_FAILURES
+        && totalCaptures === 0
+        && totalAttempts >= 1
+    ) {
+        for (const axis of axes) {
+            if (axis.status === 'executing') axis.status = 'stalled';
+        }
+    }
 
     // Check if all axes terminal → operation enters recovery
     if (allAxesTerminal(axes)) {
@@ -945,9 +996,11 @@ function updateLegacyFlatResults(
             const b = state.military.formations?.[bid];
             return b != null && (b.posture === 'attack' || b.posture === 'assault');
         });
+        // Check brigade_movement_state (persists across turns) NOT brigade_movement_orders
+        // (which is cleared by apply-brigade-movement BEFORE this step runs).
         const anyMoved = op.participating_brigades.some(bid => {
-            const movement = state.military.brigade_movement_orders?.[bid];
-            return Array.isArray(movement?.destination_sids) && movement.destination_sids.length > 0;
+            const movState = state.military.brigade_movement_state?.[bid];
+            return movState?.status === 'in_transit' || movState?.status === 'packing';
         });
 
         if (anyAttackedObjective) {
@@ -988,7 +1041,9 @@ function updateLegacyFlatResults(
                 op.consecutive_failures_on_current = (op.consecutive_failures_on_current ?? 0) + 1;
             }
 
-            if (!anyMoved && (op.idle_execution_turn_streak ?? 0) >= 2) {
+            // Idle stall: 4-turn threshold (matching multi-axis path) to give brigades
+            // time to march from staging to objectives via regular movement (1 hop/turn).
+            if (!anyMoved && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 4) {
                 op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);
                 beginRecovery(op, turn, 'no_logged_attempt');
                 return;

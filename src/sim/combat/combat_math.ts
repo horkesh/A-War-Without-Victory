@@ -224,7 +224,14 @@ export function getMoraleResistFloor(faction: string): number {
 
 /** Increased 0.04→0.06 (n482)→0.08 (n536: 24k casualties vs 40-60k historical).
  * Historical: even VRS decisive victories cost blood. ARBiH stood and died,
- * inflicting attacker losses even when overrun. BB1 p.462: 1992 was deadliest year. */
+ * inflicting attacker losses even when overrun. BB1 p.462: 1992 was deadliest year.
+ *
+ * Issue #30 (REAL_WAR_MASTER.md): Early-war VRS operations (w0-w12) show 3.8:1
+ * (Operation Corridor) and 4.3:1 (Prsten) attacker:defender exchange — too costly
+ * for operations the VRS won with massive artillery advantage. Likely this rate
+ * amplifies late-operation stalled attacks that drag the per-operation average up.
+ * Consider a faction×period attacker modifier: RS w0-12 could apply 0.75× to this
+ * base rate to reflect JNA-inheritance firepower advantage in the blitz phase. */
 export const BASE_ATTACKER_LOSS_RATE = 0.08;
 /** Increased 0.028→0.042 (n482)→0.06 (n536: defender casualties also too low).
  * ARBiH fighters in homeland didn't retreat — they fought to the last, taking

@@ -1123,7 +1123,14 @@ function recomputeSectorPowerAndThreat(
             if (!f.location_osid || !enemyOsids.has(f.location_osid)) continue;
             enemyPower += f.personnel ?? 0;
         }
-        s.threat_ratio = s.defensive_power > 0 ? enemyPower / s.defensive_power : 0;
+        // When defensive_power is 0 (sector has no assigned front-line brigades),
+        // threat_ratio must reflect real enemy presence. Setting it to 0 makes the
+        // sector look unthreatened — density floor pass skips it (THREAT_GATE=300),
+        // bot assigns active_defense stance, and reinforcement logic never fires.
+        // Reality: 0-defense vs active enemy = maximum threat. Use 9999 as a cap.
+        s.threat_ratio = s.defensive_power > 0
+            ? enemyPower / s.defensive_power
+            : (enemyPower > 0 ? 9999 : 0);
     }
 }
 

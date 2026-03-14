@@ -65,7 +65,7 @@ describe('equipment offensive priority', () => {
 });
 
 describe('sector offensive idle recovery', () => {
-    it('moves a zero-eligibility execution operation into recovery after two consecutive idle turns', () => {
+    it('moves a zero-eligibility execution operation into recovery after four consecutive idle turns', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,
   meta: { turn: 9, phase: 'war', seed: 'idle-recovery' } as any,
@@ -110,7 +110,7 @@ describe('sector offensive idle recovery', () => {
                         attack_attempt_count: 0,
                         objective_capture_count: 0,
                         movement_only_execution_turns: 0,
-                        idle_execution_turn_streak: 1,
+                        idle_execution_turn_streak: 3,
                         failure_count: 0,
                         consecutive_failures_on_current: 0,
                         sector_id: 'rs_sector',
