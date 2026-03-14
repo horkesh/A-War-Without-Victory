@@ -62,7 +62,7 @@
 
 ## Known Backlog
 1. **[2026-03-13] DONE: Sector Defense Rework — All 3 Layers Complete (n668+C)**: Layer A: Distance-weighted reactive defense. Layer B: Independent sector stances. Layer C: Defense heat map (mode 7), enhanced battle reports with DefenderContribution[], home defense indicators, defense preview tooltip. Plan: `docs/40_reports/20260313_DISTANCE_WEIGHTED_REACTIVE_DEFENSE_PLAN.md`.
-2. **[2026-03-13] Calibration: n668 = 89.0% area-weighted, 6/6 benchmarks PASS, RS w40 0.519**: Layers A+B complete. RS delta -22. Hash 78a9d9943486d996. 585 tests.
+2. **[2026-03-13] Calibration: n682 = 87.1% area-weighted, 6/6 benchmarks PASS**: Strict Case B contiguity fix. 0 disconnected sectors. Hash 80ed2277198190ec. 585 tests. 144 sectors.
 2. **[2026-03-11] Zero eligible attacker operations**: 58-106 ops per 40w run have zero eligible attackers. Root cause: brigade posture gate blocks when home_defense_active or combat_ineffective. Likely fix: better pre-screening in directive generation.
 3. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.
 4. **[2026-03-12] REAL_WAR_MASTER #14: HVO Central Bosnia ghost front — DEFERRED**: 13 front edges, 0 brigades. 7 HVO brigades in disconnected enclaves. Intentionally deferred — HVO-RBiH war breaks out April 1993; these brigades activate then. Don't fix now.
@@ -96,8 +96,8 @@
     Do instead: Test fixtures flowing through `runTurn` or scenario runners must set `meta.phase` + referendum fields.
 
 ## Bot AI & Combat
-1. **[2026-03-13] Triple-junction adjacency for BOTH grouping AND splitting (n664)**
-   Do instead: `splitNonContiguousSectors` now uses `buildEdgeAdjacency` with triple-junction (Cases A/B), same as sub-segment construction. Shared-OSID was too permissive — bridged edges facing different directions at triple junctions (Zavidovići↔Kakanj). Front-edge OSIDs can belong to multiple sectors (shared territory). Brigade at shared OSID → neediest same-corps sector. Pipeline grouping and splitting MUST use compatible adjacency — using a stricter splitter over-fragments (31 sectors gotcha).
+1. **[2026-03-13] Triple-junction adjacency: standard for grouping, strict for splitting (n664→n682)**
+   Do instead: `buildEdgeAdjacency` (33m `frontEdgeAdj`) for sub-segment grouping (Steps 1-3). `buildEdgeAdjacencyStrictCaseB` for contiguity split (Step 4b): Case A always, Case B only when both fi-H and fj-H in strict adjacency (≤5.5m `SHARED_BOUNDARY_THRESHOLD`). Standard Case B bridges front edges on opposite sides of enemy pockets (e.g. dragoradi↔olovo_2 via krivajevici at 16.9m); strict Case B cuts these. Municipality guard on `mapOsidsToCorps` Phase 2 BFS prevents corps territory race.
 2. **[2026-03-11] RS three-phase doctrine — organic tempo decay (n579)**
    Do instead: w0-12 blitz (0.35/0.15), w12-26 sustained (0.25/0.08), w26+ consolidation (0.20/0.05). Late-war params have ZERO calibration effect. Early-war intensity is the primary lever.
 3. **[2026-03-10] Enclave defense overhaul — Sarajevo holds (n524→n527)**
@@ -140,8 +140,8 @@
 ## Sectors & Operations
 1. **[2026-03-12] consolidateCrossCorpsFronts must respect osidToCorps (n624 Herzegovina/Sarajevo gotcha)**
    Do instead: Step 3b majority-count consolidation can steal territory from correct corps. The BFS home-seed mapping is authoritative — consolidation must protect edges where `osidToCorps` agrees with the minority corps. Without this, a larger connected front (Herzegovina) absorbs a smaller correct corps's edges (SRK Sarajevo).
-2. **[2026-03-12] Corps-driven brigade assignment with home-municipality affinity**
-   Do instead: `classifyBrigadesByTerritory`: Phase 1=frontline, Phase 2a=home-municipality affinity, Phase 2b=corps distributes by need. MAX_TERRITORY_OSIDS cap removed. `equalizeSectorDensity` removed.
+2. **[2026-03-14] Commander-driven brigade assignment: 4-phase 2a/2b/2c/2d (n696)**
+   Do instead: `classifyBrigadesByTerritory`: Phase 2a=home affinity (no need>0 gate), Phase 2b=competence-gated commander dist (aggressive→concentrate at threat, defensive→fill gaps), Phase 2c=BFS 4-hop cap (was 8), Phase 2d=pre-op staging weight (1.5× intel_gathering, 3.0× force_staging) + priority sector sweep. `buildCorpsCommanderProfiles()` reads named_officers + corps_command. `COMMANDER_COMPETENCE_ASSIGNMENT_THRESHOLD=0.35`, `PHASE_2C_MAX_HOPS=4`.
 3. **[2026-03-09] Every brigade stays in its sector — no reserve cap**
    Do instead: Reserve cap REMOVED. Corps needs full visibility of all manpower. `deduplicateBrigadesAcrossSectors` prevents cross-sector duplicates.
 4. **[2026-03-09] Mech/moto staging + priority for offensive ops**
