@@ -170,7 +170,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
                 })
                 : allTargets;
-            const directObjectiveAttack = targets.find((t) => t.osid === currentObjective);
+            const avoidedOsidsForFaction = state.meta?.avoided_osids_by_faction?.[faction];
+            const directObjectiveAttack = avoidedOsidsForFaction?.includes(currentObjective as string)
+                ? undefined
+                : targets.find((t) => t.osid === currentObjective);
             const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
             if (directObjectiveAttack) {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
@@ -239,10 +242,15 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             // No friendly path to objective — must fight through enemy
             // territory to open a route. Only attack intermediates held
             // by the SAME faction as the objective.
+            // Scenario avoid-list: don't attack historically excluded OSIDs even
+            // as attack-through intermediaries (e.g. Brčko city center — VRS held
+            // the corridor but not the city core; without this, operation brigades
+            // sweep through avoided OSIDs opportunistically).
+            const _avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
             const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
-            const intermediateTargets = objectiveController
+            const intermediateTargets = (objectiveController
                 ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
-                : targets;
+                : targets).filter(t => !_avoidedOsids?.includes(t.osid));
             if (intermediateTargets.length > 0) {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
                 const bestIntermediate = intermediateTargets.find((t) => {
@@ -422,6 +430,13 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // Alliance guard: HRHB/RBiH don't occupy each other's territory while allied
         if ((faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
             && areRbihHrhbAllied(state)) continue;
+
+        // Scenario avoid-list guard: historically, some OSIDs were not captured even when
+        // undefended (e.g. Brčko city center — VRS held the corridor but not the city core).
+        // Without this guard, brigades sweeping through during operation execution walk into
+        // avoided OSIDs opportunistically, bypassing the operation-level avoid check.
+        const avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
+        if (avoidedOsids?.includes(n)) continue;
 
         // Check: no enemy formations physically at this OSID
         let hasDefender = false;

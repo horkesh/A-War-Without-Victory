@@ -293,6 +293,11 @@ export const OUTCOME_ATTACKER_MOD: Record<string, number> = {
 // catastrophic raised 0.3→0.7 — even a doomed assault inflicts casualties on the defender.
 // At 0.3 combined with power-ratio floor 0.6, defenders took only 18% of base casualties,
 // producing absurd 43-50:1 ratios. Real failed attacks still cost defenders meaningfully.
+// H5 AUDIT NOTE: att:def 0.79:1 (defenders take 27% more) is historically correct for
+// 1992 VRS blitz — Op Corridor 92 data VRS 413 KIA vs HVO 918 KIA = 0.45:1 att:def.
+// H5 target range: 0.5:1 to 1:1 (defenders take equal to 2x more than attackers).
+// Previous "fix" attempts (n26-n29) that raised attacker mod to 1.5-1.6 produced
+// historically incorrect 1.17-1.31:1 ratios and -7pp DRINA regression.
 export const OUTCOME_DEFENDER_MOD: Record<string, number> = {
     decisive_victory: 2.5, victory: 1.8, costly_victory: 1.2,
     stalemate: 1.0, repulsed: 0.7, catastrophic: 0.7

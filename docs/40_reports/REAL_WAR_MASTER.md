@@ -596,7 +596,7 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | Priority | Issue | Impact | Status |
 |----------|-------|--------|--------|
 | **P1** | #24 RS 88.4% success rate | Too high for 1992 (historical 60-75%). 73.4% decisive victories | **Open n25** |
-| **P1** | Att:def ratio 0.79:1 | Defenders take 25% more casualties than attackers globally | **Open n25** |
+| ~~**P1**~~ | ~~Att:def ratio 0.79:1~~ | ~~0.79:1 IS historically correct per H5 — Op Corridor 0.45:1. n26-n29 fix attempts regressed DRINA -7pp. Range 0.5-1.0:1 is the H5 target; 0.79 is within it.~~ | **CLOSED BY AUDIT n30** |
 | **P1** | #23 Sector casualty cascade (0.1:1) | n590 overcorrection — 1,671 def casualties from 109 att attack | **Open n647** |
 | ~~**P0**~~ | ~~#16 Zero equipment~~ | ~~False alarm~~ | **FALSE ALARM** |
 | ~~**P0**~~ | ~~#2 Attack outcomes inverted~~ | ~~Root cause~~ | **FIXED n482** |
