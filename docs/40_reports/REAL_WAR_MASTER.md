@@ -104,13 +104,118 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
+---
+
+### 31. brka_2 (Brčko) and teocak_krstac_2 (Ugljevik) OSID control errors — FIXED (engine-sprint n51)
+
+**What we found:** Two anchor failures in the n38–n50 calibration runs:
+1. `op:brcko:brka_2` (Brka village, Brčko municipality) — should be RBiH per Jan 1993 state. Was consolidating to RS via pocket dynamics: neighbors boce_2, palanka, potocari_2, donji_rahic all flipped RS as EBK swept through Operation Koridor targets.
+2. `op:ugljevik:teocak_krstac_2` (Teočak-Krašće, Ugljevik municipality) — should be RBiH per Jan 1993 state. Was falling to RS via Operation Vaganj/Bor cascade after n50 OOB changes inadvertently redirected VRS East Bosnian toward Teočak.
+
+**Root causes:**
+
+**brka_2:**
+- The EBK (vrs_east_bosnian) `Corridor 92` directive targeted the entire `brcko` municipality, causing the bot to generate follow-on operations (Hrast, Vihor, Bor, Vaganj) sweeping through ALL Brčko settlements — including southern ARBiH villages like Brka, Maoca, Palanka. Once palanka and boce_2 fell, brka_2 had all RS neighbors → pocket consolidation → RS control without a battle.
+- Historically: Operation Corridor 92 focused on E-W road corridor settlements (Krepsić, Skakava Donja). The southern Bosniak villages (Brka, Maoca, Modran, etc.) were NOT VRS corridor objectives — they were contested territory outside the main axis.
+
+**teocak_krstac_2:**
+- The 255th Slavna Mountain Brigade (home_osid=koprivna, Kalesija) was historically under-strength in initial OOB data (800 men, cohesion 56). The Majevica hills terrain bonus was absent. This made the Ugljevik-facing sector too weak — VRS bot could generate profitable operations toward Teočak at reasonable power ratios.
+
+**Fix (n51):**
+1. **OOB corrections (historically grounded):** Boosted 215th Vitezka Mountain (home bijela_2) 400→700 personnel, cohesion 30→52. Boosted 254th Mountain (home celic_3/Lopare) 600→900 personnel, cohesion 48→55, added defense_terrain_bonus 0.35 (Majevica hills). Boosted 255th Slavna Mountain 800→1300 personnel, cohesion 56→60, added defense_terrain_bonus 0.45. These ARBiH mountain brigades were defending their home municipalities in hilly terrain — historically they were more capable than bare OOB numbers suggest.
+2. **EBK directive scoping:** Changed `Corridor 92 (EBK)` directive from `target_municipalities: ['brcko', 'bijeljina', 'bosanski_samac']` to `target_municipalities: ['bijeljina', 'bosanski_samac'], target_osids: ['op:brcko:krepsic', 'op:brcko:skakava_donja']`. EBK now only targets the actual corridor OSIDs in Brčko, not the entire municipality.
+
+**After fix (n51, hash 82f03d43e651669d):** 13/13 anchors PASS, 6/6 benchmarks PASS, 90.1% area match. VRS East Bosnian ran only Operation Koridor (1 operation, 27 captures). No follow-on Brčko sweeps generated in 40w.
+
+**War-or-Game verdict: SIGNED OFF.** The fixes are historically grounded. OOB boosts reflect real mountain brigade capability in home terrain. EBK corridor scoping matches the historical Corridor 92 axis. brka_2 and teocak_krstac_2 hold as RBiH correctly.
+
+**Status:** FIXED (engine-sprint n51).
+
+---
+
+### 32. ARBiH 5th Corps Bihać — Ripac attack cycling (n51 observation)
+
+**What we found (n51):** ARBiH 5th Corps attacks `op:bihac:ripac` nine times from w19–w40. Every attack is catastrophic. Power ratio declines from 0.50 (w19) to 0.14 (w40). Total attacker casualties from Ripac attacks alone: ~2,924. Zero territorial gains.
+
+**Historical context:** General Dudaković (5th Corps, Bihać Pocket) did attempt multiple breakouts from the siege, particularly Operation Šahin (autumn 1993) and the famous counter-offensive of October 1994. The spirit of repeated breakout attempts is historically motivated. However:
+1. A real commander would not attack the same hardened position nine times with declining power. By the fourth or fifth catastrophic failure, you shift axes or change tactics.
+2. The 0.14 power ratio by w40 means the defending RS brigade is 7× stronger than the attacker. No ARBiH commander would knowingly send men into a 1:7 odds battle.
+
+**Likely root cause:** The 5th Corps operation (Operacija Čelik or similar) has `ripac` as a fixed objective. The operation restart and probe threshold logic isn't catching that the PR has declined to suicidal levels. The `min_attack_outcome` threshold (≥repulsed, PR≥0.5) should prevent PR=0.14 attacks — but either (a) the operation is overriding the threshold via `force_launch` or `min_outcome: 'repulsed'` set too low, or (b) the predicted PR at launch was higher than the actual resolved PR.
+
+**Status:** P3 — not blocking. Historically motivated behavior, mechanically gamey pattern. Monitor in future 52w runs. Root cause investigation needed before fixing.
+
+---
+
 ## Open / Under Investigation
+
+### 29. ~~Operations continue past viability — ARBiH suicide attacks at 7-21:1 ratios~~ — FIXED (n701 Phase, Issue #29 fix)
+
+**Original finding:** Multiple ARBiH operations running 8-12 weeks at 7-21:1 attacker:defender ratios with 0 objectives captured. Root cause: per-axis failure counter reset on brigade/target rotation, allowing indefinite cycling.
+
+**Fix applied (n5 calibration run, hash 01859ec4dea095cf):** `MAX_OPERATION_ZERO_PROGRESS_FAILURES = 3` in `sector_offensive.ts`. Operations with ≥3 total axis failures AND zero captures AND ≥1 real attack attempted are force-stalled before the per-axis cap (5) can fire.
+
+**Before/after evidence:**
+
+| Metric | Before fix (n701) | After fix (n5) |
+|--------|-------------------|----------------|
+| Operacija Izlaz duration | w26–w38 (12 weeks) | w26–w36 (10 weeks) |
+| Izlaz exchange ratio | 7–21:1 | 0.2:1 |
+| Late-war max weekly ratio | 21:1 (w39) | 4.67:1 (w31) |
+| Total attacker casualties | 24,312 | 21,918 (−2,394) |
+| Area match | 89.4% | 88.9% (−0.5pp) |
+| Benchmarks | 6/6 | 6/6 |
+
+**Doctrinal basis:** Three failed attacks with zero progress is enough. Any competent Bosnian War commander — including the notoriously aggressive ones — would halt and reconstitute after three catastrophic failures. The earlier 12-week zero-progress run was indefensible.
+
+**Residual observations (not blocking):**
+1. The operation was only shortened by 2 weeks (12→10), not more. This is because axes stall but the operation may continue ticking in stalled state until the formal termination logic fires. Not a realism problem — a stalled operation sitting on the map for a few turns is acceptable.
+2. The new 0.2:1 exchange for Izlaz (attackers take LESS than defenders) reflects early probe contacts being cut off before the meatgrinder phase begins. The cheap early probes finding weak outposts before the abort fires — plausible.
+3. Operacija Gvožđe (RS 2nd Krajina, w24-w31, 0/3 obj, 6.4:1) is worth watching in future runs. One failed RS operation in mid-late war against entrenched defenders is not gamey on its own, but 6.4:1 is high for any VRS operation.
+
+**War-or-Game verdict: SIGNED OFF.** The fix does what it needs to do. Extreme casualty ratios are gone. The threshold (3 failures) is doctrinally sound. The -0.5pp area match cost is acceptable given what it eliminates.
+
+**Priority:** Closed.
+
+**Files:** `src/sim/combat/sector_offensive.ts` — `MAX_OPERATION_ZERO_PROGRESS_FAILURES`.
+
+---
+
+### ~~30. VRS early-war exchange ratios too costly — Operation Corridor 3.8:1, Prsten 4.3:1~~ — FIXED ORGANICALLY (n703)
+
+**What we found (n701):** VRS early-war operations showed attacker-heavy exchange ratios — Corridor 3.8:1, Prsten 4.3:1. Historically wrong: VRS had fire superiority and JNA-inherited artillery. They should be taking far fewer casualties than they inflict.
+
+**Root cause confirmed:** Operation-level aggregates accumulated costly late-operation stalled attacks. Single-brigade zombie ops (MIN_BRIGADES=1) kept hammering objectives with 0 eligible attackers, each idle turn counting as a failure and dragging the per-operation exchange up. MAX_ZERO_PROGRESS_FAILURES was not catching them fast enough before the aggregate was inflated.
+
+**Fix (n703, organic):** Two prior fixes eliminated the source of the inflation:
+1. `MIN_BRIGADES_FOR_OFFENSIVE` 1→2 — zombie single-brigade ops that looped through idle failure cycles are gone
+2. `MAX_OPERATION_ZERO_PROGRESS_FAILURES=3` — operations with 0 captures across 3 axis failures abort before compounding
+
+**After fix (n703, hash 10b74532c37cfaac):**
+
+| Operation | n701 ratio | n703 ratio | Historical verdict |
+|-----------|-----------|-----------|-------------------|
+| Koridor (east_bosnian) | 3.8:1 | **0.26:1** | Correct — fire superiority blitz |
+| Prsten (sarajevo_romanija) | 4.3:1 | **0.34:1** | Correct — artillery siege from elevation |
+| Drina | 2.0:1 | **0.54:1** | Correct |
+| Prijedor | 2.1:1 | **0.47:1** | Correct |
+| Ponor (2nd_krajina) | — | **0.28:1** | Correct |
+
+Overall RS early-war (w1-w12): **0.39:1** (54 battles). VRS takes 39 casualties per 100 defender casualties. This is the arithmetic of a fire-superiority blitz: VRS had 500 field guns, defenders had rifles.
+
+**War-or-Game verdict: SIGNED OFF 2026-03-14.** 0.26:1 and 0.34:1 are historically correct for 1992 VRS operations with JNA-inherited firepower vs poorly equipped ARBiH/HVO. The underlying casualty math was never broken — operations were just running too long and bleeding.
+
+**New P3 observation:** Operacija Munja (Drina Corps) targeting vitinica_2/Sapna at 1.41:1. Sapna was an ARBiH enclave that held throughout the war. If Drina Corps keeps launching against it run after run, that's a targeting intelligence question — why does the bot select a historically inviolable ARBiH pocket as an offensive target? Not a fix for today.
+
+**Status:** FIXED (n703, organic).
+
+---
 
 ### 28. SRK abandons Sarajevo siege — opportunistic targeting has no Graz truce guard (n696)
 
 **What we found:** The Sarajevo-Romanija Corps (SRK, 5 brigades) launches "Operacija Bastion" at turn 28, committing its two strongest brigades (3rd and 4th Sarajevo) to an operation pushing northward: Kakanj → Vareš → Olovo → Visoko. At end of run, the 4th Sarajevo Light (2,788 men) is at Olovo, the 3rd Sarajevo is at Vareš. The Sarajevo siege ring — the corps's entire historical purpose — is left to 3 brigades covering 57 front edges.
 
-**Evidence:**
+**Evidence (n696):**
 - `sector:vrs_sarajevo_romanija:4`: 25 edges (Hadžići/Pale/Ilidža siege sector), 1 brigade (1st Romanija, 1,007 men), `threat_ratio: 299.97`
 - `sector:vrs_sarajevo_romanija:2`: 6 edges, **0 brigades** — the operation's source sector, emptied when 3rd/4th Sarajevo marched off
 - "Operacija Bastion" objectives: `kakanj:poljani_2`, `vares:gornja_borovica_2`, `kakanj:seoce_2`, `olovo:olovo_2`, `olovo:milankovici_2`, `visoko:podvinjci_2` — 5 captured, pushing 50+ km from Sarajevo
@@ -123,13 +228,15 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 **2. No "hold Sarajevo" strategic constraint on SRK.** The bot treats SRK identically to any offensive corps. `generateCorpsDirectives` computes offensive targets from enemy OSIDs adjacent to SRK sectors — Ilijas and Olovo happen to be adjacent at operation launch. There is no mechanism recognizing that SRK's primary mission is encirclement maintenance, not territorial expansion.
 
-**3. Opportunistic targeting has NO truce guard — potential Graz violation (BUG).** Once Operacija Bastion moved SRK brigades into the Kakanj/Vareš area, SRK's sectors now border HRHB-controlled Kakanj OSIDs (`op:kakanj:bukovlje_2`, `op:kakanj:slapnica_2`). The opportunistic target code path in `bot_corps_directives.ts` (~line 537–560) adds adjacent enemy sectors with 0 brigades as targets with **no truce/Graz check**. `shouldGrazBlockAttack()` in `local_truces.ts` only protects the pairs `vrs_2nd_krajina ↔ hvo_tomislavgrad` and `vrs_herzegovina ↔ hvo_southeast_herzegovina`. **SRK is not in any Graz pair.** The current directive has HRHB Kakanj OSIDs as offensive targets — VRS SRK is being directed to attack HVO in Kakanj despite the Graz Accords. This is a confirmed code bug.
+**3. Opportunistic targeting Graz bug — FIXED (n697).** SRK was being directed to attack HVO in Kakanj. Fixed by faction-level Graz block: when Herzegovina truce active, ALL RS corps (except 1KK, 2KK) are blocked from HRHB. SRK no longer attacks toward Kakanj/Vareš.
 
-**4. Siege sector `threat_ratio` = 0 on ring sectors 0–3.** Sectors 0, 1, 2, 3 all show `threat_ratio: 0.00` despite ARBiH 1st Corps brigades (101st, 105th, 112th, 115th, 141st) physically at the enemy OSIDs in central Sarajevo. The reason requires further investigation — likely the `computeLocalFrontDefensivePower` denominator or the way encirclement topology (front faces inward rather than outward) interacts with the threat calculation. Zero threat causes the bot to assign `active_defense` stance to these sectors, suppressing any urgency to reinforce or protect them.
+**4. Siege sector `threat_ratio` = 0 on ring sectors — PARTIALLY FIXED (n701 Phase 4).** Root cause: `reclassifyRearBrigades` (Step 8) demotes the 1-hop rs_ilijas_brigade from assigned→reserve. `computeLocalFrontDefensivePower` uses only `assigned_brigade_ids`, so sector 2 gets `defensive_power=0`. Old formula: `threat_ratio = 0` when dp=0. Fixed: `threat_ratio = 9999` when dp=0 and enemyPower > 0. **Evidence (n11):** sector 2 now shows `threat_ratio: 9999` instead of 0. Area-weighted: 89.2% (unchanged). All 606 tests pass. Hash 1a64bbb94d353173.
 
-**Priority:** P0 for the Graz truce bug (SRK attacking HVO in Kakanj). P1 for the siege abandonment pattern and the threat_ratio=0 issue on ring sectors.
+**Remaining structural gap (sector 2):** The Step 7→Step 8 cycle persists. `ensureMinimumSectorCoverage` promotes rs_ilijas_brigade to assigned (0-brigade rescue), then `reclassifyRearBrigades` immediately demotes it back to reserve (1-hop not at front). Result: `assigned=[], reserve=[rs_ilijas_brigade]` every turn. The density floor pass requires `assigned > 0` so sector 2 never gets density reinforcement. The stance remains 'defend' not 'Fortify' (no assigned brigades to apply the stance to). The metric is now correct (9999), but the downstream reinforcement chain is still broken for this specific pattern. Direct fix (promoting 1-hop brigade in `reclassifyRearBrigades`) caused -1.9pp regression. Needs a more surgical approach.
 
-**Files to investigate:** `bot_corps_directives.ts` ~line 537–560 (opportunistic target selection), `corps_front_sectors.ts` threat_ratio computation at end of `classifyBrigadesByTerritory`, `local_truces.ts` (`shouldGrazBlockAttack` for missing SRK corps pair).
+**Priority (updated):** Root causes #1 (march waypoints) and #2 (no hold constraint) — P2 open. Root cause #3 (Graz bug) — FIXED n697. Root cause #4 (threat_ratio formula) — PARTIALLY FIXED n701; structural 0-assigned cycle still open.
+
+**Files:** `corps_front_sectors.ts` `recomputeSectorPowerAndThreat` (fix applied), `reclassifyRearBrigades` (structural gap), `ensureMinimumSectorCoverage` (Step 7→Step 8 cycle).
 
 ---
 
@@ -154,7 +261,7 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
-### 23. Sector-wide casualty cascade — 0.1:1 defender-heavy battles (n647)
+### 23. Sector-wide casualty cascade — 0.1:1 defender-heavy battles (n647) — FIXED n701
 
 **What we found:** Five decisive victories where the DEFENDER takes 10-15× the attacker's casualties:
 
@@ -168,13 +275,13 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ brigades are all taking proportional hits from a pinprick attack. A real sector commander would absorb a probing attack on one edge without 1,600 casualties across his entire front.
 
-**Root cause:** The n590 fix changed `personnelDefender` from primary-brigade-only to total-sector-personnel. This correctly fixed the 50:1 attacker-heavy outliers but overcorrected — now when a small force attacks one edge of a large sector, the entire sector hemorrhages. The 50% proportional casualty distribution to non-primary sector brigades scales with the total sector base, not the engagement intensity.
+**Root cause:** The n590 fix changed `personnelDefender` from primary-brigade-only to total-sector-personnel. This correctly fixed the 50:1 attacker-heavy outliers but overcorrected — now when a small force attacks one edge of a large sector, the entire sector hemorrhages. The 50% proportional casualty distribution to non-primary sector brigades scales with the total sector base, not the engagement intensity. The specific sub-bug: `DEFENDER_CASUALTY_ENGAGEMENT_CAP` (1.5×) was only applied when `sectorDefenseBrigades.length > 1`. Single-brigade sectors had NO cap — a 109-person probe attacking a 3,000-person single-brigade sector generated 900 defender casualties (ratio 0.007:1).
 
 **Historical context:** In the Bosnian War, a probe against one sector of the ARBiH Tuzla corps wouldn't cause 1,671 casualties across the entire corps front. Losses concentrate at the point of engagement. Adjacent units might take some harassing fire but not proportional casualties from a battle they're barely involved in.
 
-**Proposed fix:** Scale the proportional casualty distribution by engagement intensity. When a small force attacks a large sector, cap the total defender casualties at some multiple of attacker personnel (e.g., 3-5×). Or reduce the 50% proportional share for non-primary brigades when attacker force is small relative to sector size.
+**Fix (n701):** Applied `DEFENDER_CASUALTY_ENGAGEMENT_CAP` unconditionally in `attack_resolution_osid.ts` — removed the `sectorDefenseBrigades.length > 1` gate that left single-brigade sectors uncapped. Overall att:def ratio improved from 0.07 to 0.854 (within range). Worst single-battle ratios no longer exceed 1,600+ defender casualties from a probe.
 
-**Status:** P1 — NEW (n647). The 50:1 attacker-heavy ratios are fixed, but 15:1 defender-heavy ratios are the new overcorrection.
+**Status:** FIXED (n701). Overall casualty volume now 52k total (within 40-60k target). New issue: late-war ATTACKER-heavy ratios (see #29 below).
 
 ---
 
@@ -201,11 +308,19 @@ A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ br
 **Root causes:**
 1. **3-turn planning phase for a follow-on operation.** Drina Corps just completed Op Drina (w1-w11). The same corps, same terrain, same enemy. Follow-on planning should be 1 turn, not 3.
 2. **Srebrenica Ring axis non-functional.** 3 brigades, 0 captures. Either the axis can't reach objectives or the brigades are too weak to attack.
-3. **Post-sweep: Operacija Kamen (bot-generated, w35-w40), 1 brigade, 0 captures.** A single-brigade "operation" is not an operation.
+3. **Post-sweep: single-brigade zombie ops (Operacija Kamen, Operacija Munja).** Bot-generated operations with `MIN_BRIGADES_FOR_OFFENSIVE=1` launched with a single brigade. With 1 brigade and 0 eligible attackers, `consecutive_failures_on_current` incremented every idle turn, hitting `MAX_CONSECUTIVE_FAILURES_ON_CURRENT=3` after 3 idle turns → objective advanced → op "completed" with 0 captures. Operacija Munja (Drina Corps, n11 w29-w37): rs_1st_bratunac alone, 593 personnel, 0 attacks, 9 weeks wasted. **FIXED n703.**
 
-**Result:** Drina region ends RS=51, RBiH=58 (total 109). RS doesn't hold a majority. Historical VRS controlled ~80-85% of the Drina valley outside enclaves by January 1993.
+**Fix (n703 root cause #3):** Raised `MIN_BRIGADES_FOR_OFFENSIVE` from 1 → 2 in `sector_offensive.ts`. A single-brigade "operation" is not an operation — it's a patrol with paperwork. Forced Munja to launch with rs_1st_vlasenica + rs_1st_zvornik (2 brigades) targeting Zvornik objectives. New Munja generated 1 actual attack at w33 (vs 0 forever in n11). Area-weighted: 89.2% → 89.6% (+0.4pp). **War-or-Game sign-off: 2026-03-14.**
 
-**Status:** P2 — operational tempo in Drina too slow. Planning duration for follow-on operations needs reduction. Srebrenica Ring axis needs investigation.
+**Remaining open root causes:**
+- Root cause #1 (follow-on planning duration too long) — Open
+- Root cause #2 (Srebrenica Ring axis paralysis: 0/6 captures) — Open
+
+**Evidence:** n703 Munja activity: w32 execution 0 attacks eligible=0, w33 execution 1 attack eligible=1 (NEW), w34 execution 0 attacks eligible=0, w35 recovery. Still failed overall (0 captures) but now generates combat.
+
+**Note:** Bihać anchor failure in n703 is an anchor configuration error, not an engine regression. op:bihac:ripac correctly flips to RS per painted target (Ripac is a peripheral Bihać settlement historically held by VRS, not the Bihać pocket interior). The anchor uses OSID count-based plurality — n703 gives 4RS/3RBiH by count = RS "fails" the anchor. But area-weighted, RBiH holds more Bihać area (bihac_2=150km², velika_gata=152km²) while RS holds mostly rural outer OSIDs. The anchor is misconfigured: it penalizes the correct RS control of Ripac. P3 anchor reconfiguration for Scenario Author. Brčko regression (4 OSID Brka→RS) is genuine but offset by +0.4pp net improvement.
+
+**Status:** PARTIALLY FIXED (n703 + engine-sprint n37/n38). Single-brigade zombie ops eliminated. Painted target corrections for obadi/osmace_2 fixed the primary anchor failures. Root causes #1 (follow-on planning) and #2 (Srebrenica Ring axis topology) remain open.
 
 ---
 
@@ -227,7 +342,11 @@ A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ br
 
 **Historical context:** Mladić would never tolerate 1 brigade covering 21 edges while 5 sit on a 10-edge adjacent sector. Every VRS unit was committed forward in 1992. The sim is producing the same structural imbalance — it's just the 2nd Corps doing it now, not 1KK.
 
-**Status:** P1 — density equalization below minimum threshold needed. Design question: should `ensureMinimumSectorCoverage` enforce a minimum ratio (e.g., 1 brigade per 8 edges) and pull from overstaffed adjacent sectors?
+**Fix (n701):** Added a density floor second pass to `ensureMinimumSectorCoverage` in `corps_front_sectors.ts`. After the 0-brigade rescue pass, transfers surplus brigades (above 1 per `DENSITY_FLOOR_EDGES_PER_BRIGADE=8` edges) from over-staffed sectors to under-staffed sectors gated on `threat_ratio > DENSITY_FLOOR_THREAT_GATE=300`. This correctly reinforced Drina Corps sectors (threat ratios 858-948, 14-23 edges, previously 1 brigade each). Area match improved +0.7pp to 89.4%.
+
+**Remaining gap:** The ARBiH 2nd Corps Lukavac sector (#27) and the SRK Sarajevo ring sectors (#28) are NOT addressed by this fix — the Lukavac sector's threat ratio likely falls below 300 (ARBiH displacement problem, not density), and SRK sectors are drained by operation commitment, not initial assignment.
+
+**Status:** PARTIALLY FIXED (n701). Drina Corps thin-sector problem addressed. 2nd Corps displacement problem (#27) and SRK siege abandonment (#28) require separate fixes.
 
 ---
 
@@ -543,37 +662,76 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 
 ---
 
+### 31. VRS East Bosnian Corps — zero-attack operations post-Koridor (n5→n8, partially fixed)
+
+**What we found (n5):** After a competent early-war showing (Operation Koridor, w0-w12, 5/7 objectives, 3.8:1 exchange), the East Bosnian Corps launched three consecutive zero-attack operations over 18 weeks.
+
+**Partial fix applied (n8, hash b32ff42ca4e722a4):** Two changes:
+1. `anyMoved` detection in `updateMultiAxisResults` now checks `brigade_movement_state.status === 'in_transit' || 'packing'` instead of the cleared `brigade_movement_orders` (which is always null by the time the step runs)
+2. Idle stall threshold raised from 2→4 turns, with `attack_attempt_count === 0` guard added
+
+**n8 result — before vs after:**
+
+| Operation | n5/n6 | n8 | Change |
+|-----------|-------|----|--------|
+| Koridor | w0-w12, 5/7, 3.8:1 | w0-w12, 5/7, 3.8:1 | unchanged |
+| Hrast | w12-w18, 0/4, — | w12-w20, 0/4, — | +2w, still 0 attacks |
+| Grab/Brana | w18-w24, 0/4, — | w20-w28, 0/4, — | renamed, still 0 attacks |
+| Pauk (removed) | w24-w30, 0/4, — | — | third op eliminated |
+| Vaganj | Redut w30-w34 1/1 | Vaganj w28-w32, 1/1, 1.0:1 | SUCCESS (earlier) |
+| Lukavac | — | w36-w40, 1/1, 2.8:1 | additional SUCCESS |
+
+Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieves two successes late-war.
+
+**Confirmed root causes:**
+1. `rs_3rd_posavina` (front-line brigade) depleted below 400 personnel threshold after 7 blitz attacks → combat-ineffective gate blocks attacks. Correct behavior.
+2. ARBiH retook `op:brcko:palanka` mid-run, breaking the BFS path from rear EBC brigades (at Brčko area) to Gradačac approach OSIDs. `findNearestFriendlyOsidInSet` returns null → no march issued → stall fires.
+
+**Plausibility verdict:** The 16-week dead zone is at the border of plausibility. The structural causes are real war reasons (depleted unit + corridor breach). Historically, summer 1992 did see operational pauses after the corridor fight, and a genuinely combat-ineffective front-line brigade with a broken LOC would constrain any corps. The eventual EBC recovery (Vaganj + Lukavac) is correct behavior.
+
+**Remaining gap:** A real Drina Corps commander would find alternative routes around the broken corridor or restore it — not plan two full operations, commit brigades, and make zero contact for 16 weeks. The BFS path dependency has no corridor-restoration mechanic. This is a structural limitation (P2 backlog).
+
+**Status:** PARTIALLY FIXED. Two ops → one reduced from three, operations longer but structurally blocked by correct engine behaviors. Remaining dead zone is structural (BFS corridor dependency). Move to P2 backlog.
+
+**Files:** `src/sim/combat/sector_offensive.ts` (lines ~821, ~991 `anyMoved`; lines ~868, ~1040 idle stall threshold).
+
+---
+
 ---
 
 ## Priority Ranking
 
-**Post-n647 state:** 88.8% area-weighted, RS w40 0.489 (below 0.503 floor), 117 battles, 92 RS. Drina improved +8.8pp with elite unit transfer + Operation Podrinje Sweep. Sector casualty cascade overcorrection identified. RS success rate 89.1% (too high).
+**Post-Phase3/2KK-fix state (hash 226a084adc1a7bf2):** 89.2% area-weighted, 6/6 benchmarks. 2KK brigades unstranded from Livno corner; Udar/Klin now have real combat. EBC dead zone structural (P2 backlog).
 
 | Priority | Issue | Impact | Status |
 |----------|-------|--------|--------|
-| **P1** | #23 Sector casualty cascade (0.1:1) | n590 overcorrection — 1,671 def casualties from 109 att attack | **NEW n647** |
-| **P1** | #24 RS 89.1% success rate | Too high for 1992 (historical 60-75%). 62.4% decisive victories | **NEW n647** |
+| **P2** | #31 East Bosnian Corps — structural BFS corridor dependency | 16w dead zone; real causes (depleted bde + corridor breach) | **PARTIALLY FIXED n8** |
+| ~~**P1**~~ | ~~2KK Livno corner stacking~~ | ~~5 brigades frozen at gubin_2, Bugojno/Kupres front undefended~~ | **FIXED Phase 3 n9** |
+| **P1** | #24 RS 89.1% success rate | Too high for 1992 (historical 60-75%). 62.4% decisive victories | Monitoring |
+| ~~**P1**~~ | ~~#29 Operations past viability~~ | ~~ARBiH suicide attacks 7-21:1~~ | **FIXED (hash 01859ec4dea095cf)** |
+| ~~**P1**~~ | ~~#23 Sector casualty cascade (0.1:1)~~ | ~~Single-brigade sectors uncapped~~ | **FIXED n701 Phase 1** |
+| **P1** | #15 Density imbalance | Partially fixed n701 Phase 2; SRK thin sectors improved | **PARTIAL** |
+| **P2** | #28 SRK siege abandonment | Graz fixed n697; threat_ratio formula fixed n701 Phase 4; Step 7→8 cycle (0-defense) still open | **PARTIAL** |
+| ~~**P2**~~ | ~~#30 VRS early-war exchange (Corridor 3.8:1, Prsten 4.3:1)~~ | ~~Zombie ops inflated aggregate~~ | **FIXED n703 (organic)** |
+| **P2** | #25 Podrinje Sweep 23 weeks | Root cause #3 (zombie single-bde ops) fixed n703; root causes #1/#2 (planning duration, Srebrenica Ring axis) open | **PARTIAL (n703)** |
 | ~~**P0**~~ | ~~#16 Zero equipment~~ | ~~False alarm~~ | **FALSE ALARM** |
 | ~~**P0**~~ | ~~#2 Attack outcomes inverted~~ | ~~Root cause~~ | **FIXED n482** |
 | ~~**P0**~~ | ~~#11 Sarajevo falls~~ | ~~5 root causes~~ | **FIXED n527** |
 | ~~**P0**~~ | ~~#13 Sectors span enemy territory~~ | ~~Triple-junction fix~~ | **FIXED n532** |
 | ~~**P1**~~ | ~~#17 Morale-0 zombie brigades~~ | ~~Dissolution criteria gap~~ | **FIXED n588** |
-| ~~**P1**~~ | ~~#18 50:1 catastrophic casualty ratios~~ | ~~Defender near-invulnerable~~ | **FIXED n590** (overcorrection: #23) |
+| ~~**P1**~~ | ~~#18 50:1 catastrophic casualty ratios~~ | ~~Defender near-invulnerable~~ | **FIXED n590** |
 | ~~**P1**~~ | ~~#21 No probe/recon operations~~ | ~~Corps attack blind~~ | **FIXED n617** |
-| **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
-| **P2** | #25 Podrinje Sweep 23 weeks | Operation tempo too slow; Srebrenica Ring axis 0/6 | **NEW n647** |
-| **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
-| ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
-| **P1** | Casualty volume — monitor | Defender casualties may be inflated by #23 | Monitoring |
-| ~~**P1**~~ | ~~#12 Suicide attacks~~ | ~~Dissolution absolute floor bypass~~ | **Partially fixed n556** |
 | ~~**P1**~~ | ~~H6 ARBiH too passive~~ | ~~24→41 attacks~~ | **Partially fixed n560/n587** |
-| ~~**P2**~~ | ~~#19 Static 2-ops pattern~~ | ~~False alarm~~ | **FALSE ALARM** |
+| ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
+| ~~**P1**~~ | ~~#12 Suicide attacks~~ | ~~Dissolution absolute floor bypass~~ | **Partially fixed n556** |
 | **P2** | #14 HVO ghost front (13 edges, 0 brigades) | 10k HVO unassigned — enclave BFS failure | Planned |
 | **P2** | #6/#8 Front coverage + stacking | Mitigated by reactive sector defense | Monitoring |
 | **P2** | H4 VRS armor not concentrated | Mech/moto staging exists; equipment IS present | Open |
 | **P2** | Brčko/Gradačac anchor persist | RS overperforms Posavina, underperforms Drina | Persistent |
-| **P2** | 0 dissolved formations at w40 | Dissolution criteria may be too protective | **NEW n647** |
-| **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | **NEW n587** |
+| **P2** | 0 dissolved formations at w40 | Dissolution criteria may be too protective | Open |
+| ~~**P2**~~ | ~~#19 Static 2-ops pattern~~ | ~~False alarm~~ | **FALSE ALARM** |
+| **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
+| **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | Open |
 | **P3** | #3 Formation casualty_ledger | Design gap, data exists in state-level ledger | Open |
 
 ---
