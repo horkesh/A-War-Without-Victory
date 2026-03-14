@@ -449,10 +449,15 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         }
         if (hasDefender) continue;
 
-        // Check: no sector covering this OSID with active brigades
+        // Check: no sector covering this OSID with active brigades.
+        // A sector is defended if it has ANY active brigade — assigned OR reserve.
+        // Only checking assigned_brigade_ids misses sectors where all brigades are
+        // in reserve (0-assigned cycle): the sector physically defends the OSID via
+        // unified sector defense even without a front-line assignment.
         const sector = findSectorForEnemyOsid(state, n as Osid, controller);
         if (sector) {
-            const sectorHasBrigades = sector.assigned_brigade_ids.some(bid => {
+            const allSectorBrigades = [...sector.assigned_brigade_ids, ...(sector.reserve_brigade_ids ?? [])];
+            const sectorHasBrigades = allSectorBrigades.some(bid => {
                 const f = formations[bid];
                 return f != null && f.status === 'active';
             });
