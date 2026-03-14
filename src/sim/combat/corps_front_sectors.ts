@@ -2412,6 +2412,69 @@ function ensureMinimumSectorCoverage(
         }
     }
 
+    // ── Density floor pass (n701): reinforce under-pressure thin fronts ──
+    // After the 0-brigade rescue, transfer surplus brigades from over-staffed sectors
+    // to under-staffed sectors that are under active enemy pressure (threat_ratio gate).
+    // Gated on threat_ratio > THREAT_GATE to avoid pulling rear guards away from
+    // quiet sectors (which dropped calibration -1.5pp without the gate).
+    const DENSITY_FLOOR_EDGES_PER_BRIGADE = 8;
+    const DENSITY_FLOOR_THREAT_GATE = 300; // only reinforce sectors under real pressure
+    const needed = (s: CorpsFrontSector): number =>
+        Math.max(1, Math.ceil(s.length_edges / DENSITY_FLOOR_EDGES_PER_BRIGADE));
+
+    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        // Under-staffed under pressure: has brigades but fewer than needed, AND threat is high
+        const underStaffed = corpsSectors
+            .filter(s =>
+                s.assigned_brigade_ids.length > 0
+                && s.assigned_brigade_ids.length < needed(s)
+                && (s.threat_ratio ?? 0) > DENSITY_FLOOR_THREAT_GATE)
+            .sort((a, b) =>
+                (needed(b) - b.assigned_brigade_ids.length) - (needed(a) - a.assigned_brigade_ids.length)
+                || strictCompare(a.sector_id, b.sector_id));
+
+        for (const recipient of underStaffed) {
+            const recipComp = getSectorComponent(recipient, componentOf);
+            const deficit = needed(recipient) - recipient.assigned_brigade_ids.length;
+
+            // Find same-component donors with surplus above their own floor
+            const donors = corpsSectors
+                .filter(s =>
+                    s.sector_id !== recipient.sector_id
+                    && getSectorComponent(s, componentOf) === recipComp
+                    && s.assigned_brigade_ids.length > needed(s))
+                .sort((a, b) =>
+                    (b.assigned_brigade_ids.length - needed(b)) - (a.assigned_brigade_ids.length - needed(a))
+                    || strictCompare(a.sector_id, b.sector_id));
+
+            let transferred = 0;
+            for (const donor of donors) {
+                if (transferred >= deficit) break;
+                if (donor.assigned_brigade_ids.length <= needed(donor)) continue;
+
+                // Prefer a non-frontline brigade to minimize disruption
+                const donorFront = getSectorFrontOsids(donor);
+                let bid: string | undefined;
+                for (const b of [...donor.assigned_brigade_ids].sort(strictCompare)) {
+                    const f = formations[b];
+                    if (f?.location_osid && !donorFront.has(f.location_osid)) { bid = b; break; }
+                }
+                // Fallback: take the last brigade if still surplus after home-front check
+                if (!bid && donor.assigned_brigade_ids.length > needed(donor)) {
+                    bid = donor.assigned_brigade_ids[donor.assigned_brigade_ids.length - 1];
+                }
+                if (!bid) continue;
+
+                const idx = donor.assigned_brigade_ids.indexOf(bid);
+                if (idx >= 0) {
+                    donor.assigned_brigade_ids.splice(idx, 1);
+                    recipient.assigned_brigade_ids.push(bid);
+                    transferred++;
+                }
+            }
+        }
+    }
+
     // Sort for determinism
     for (const s of allSectors) s.assigned_brigade_ids.sort(strictCompare);
 }
