@@ -249,9 +249,9 @@ A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ br
 
 **Root cause:** The zombie operations fix (n32) unblocked vrs_east_bosnian from targeting teocak_krstac_2 (previously, false "undefended" signals kept the corps busy elsewhere). With the fix, the corps correctly generates an operation against the RBiH pocket — but the 3-brigade concentration overwhelms the single-brigade defense despite the terrain bonus (defense_terrain_bonus=0.30). The power ratio reflects the actual numerical imbalance: the sim has no mechanism to model the broader VRS priorities that kept 3 brigades away from a small forested pocket throughout the war.
 
-**Fix (n38):** Added `op:ugljevik:teocak_krstac_2` to RS `avoided_osids_by_faction` in `apr1992_definitive_40w.json`. This prevents vrs_east_bosnian from generating offensive operations targeting the Teočak pocket. Same mechanism as `op:brcko:brka_2` (Brčko corridor). The 255th Slavna continues to defend its home OSID undisturbed — teocak_krstac_2 remains RBiH at w40.
+**Needed fix:** `avoided_osids_by_faction` is prohibited as a calibration mechanism. The structural fix is theater-aware priority weighting in `bot_corps_directives.ts`: a corps with an active large pre-planned operation (Koridor) should not simultaneously generate secondary sector ops against minor pockets. This is the same theater-awareness needed for Fix B (follow-on planning). The two problems share the same root: the bot has no concept of strategic focus — it treats every RBiH OSID as equally valid regardless of the corps's primary mission.
 
-**Status:** **FIXED n38** — 13/13 anchors now passing (was 12/13). Area match 90.2%.
+**Status:** OPEN — engine fix needed. Bot priority logic (`bot_corps_directives.ts`) must suppress secondary ops when a pre-planned operation is active or recently completed for the same corps.
 
 ---
 
@@ -623,7 +623,7 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | ~~**P2**~~ | ~~#29 Zombie operations (Gracanica 8 turns, Žepa, Bihać)~~ | ~~reserve_brigade_ids not checked in sector defense~~ | **FIXED n32** |
 | **P2** | #30 ARBiH Foča expansion | Goražde sector:8 spans Foča territory; enclave redistribution guard partial fix | **PARTIAL n25** |
 | **P2** | #25 Podrinje Sweep 23 weeks | Ring axis typo fixed; painted target corrected; follow-on planning deferred | **PARTIAL n37** |
-| ~~**P2**~~ | ~~#31 Teočak pocket captured by VRS~~ | ~~avoided_osids_by_faction RS constraint~~ | **FIXED n38** |
+| **P2** | #31 Teočak pocket captured by VRS | Bot priority: vrs_east_bosnian secondary op overwhelms 255th Slavna | **OPEN — engine fix needed** |
 | **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
 | ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
 | **P1** | Casualty volume — monitor | Defender casualties may be inflated by #23 | Monitoring |
@@ -633,7 +633,7 @@ No commander — not Mladić, not Halilović, not Petković — would commit a m
 | ~~**P2**~~ | ~~#14 HVO ghost front (0 sectors)~~ | ~~Correct until HVO-RBiH war (April 1993). No fix needed~~ | **BY DESIGN** |
 | **P2** | #6/#8 Front coverage + stacking | Mitigated by reactive sector defense | Monitoring |
 | **P2** | H4 VRS armor not concentrated | Mech/moto staging exists; equipment IS present | Open |
-| ~~**P2**~~ | ~~Brčko/Gradačac anchor~~ | ~~brka_2 fixed: avoided_osids_by_faction RS scenario constraint~~ | **FIXED n703+** |
+| **P2** | Brčko/Gradačac anchor | brka_2 previously papered over with avoided_osids (reverted — that mechanism is banned) | **OPEN — engine fix needed** |
 | **P2** | 0 dissolved formations at w40 | Dissolution criteria may be too protective | **NEW n647** |
 | ~~**P1**~~ | ~~#28 SRK 0-assigned cycle~~ | ~~reclassifyRearBrigades zero-guard scoped to vrs_sarajevo_romanija~~ | **FIXED n703+** |
 | **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | **NEW n587** |

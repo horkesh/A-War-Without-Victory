@@ -218,8 +218,10 @@
 ## Calibration
 1. **[2026-03-08] NEVER override initial OSIDs — not an option**
    Do instead: Initial OSID control from census/referendum is NEVER manually overridden. Fix engine, OOB, operations, or scenario params instead.
-2. **[2026-03-04] Override direction law — CRITICAL**
-   Do instead: RS `avoided_osids` = fix RS OVER-captures. RS `osid_control_overrides` = fix RS UNDER-captures. Confusing them causes -0.7pp regression.
+2. **[2026-03-14] NEVER use avoided_osids_by_faction as a calibration fix — BANNED**
+   Do instead: Fix bot_corps_directives.ts target priority, OOB terrain/personnel stats, or painted targets. `avoided_osids` hides broken engine behavior. Use `osid_control_overrides` only for factual initial-control corrections.
+3. **[2026-03-04] Override direction law — CRITICAL**
+   Do instead: `osid_control_overrides` = fix initial UNDER-captures (factual data only, not bot suppression).
 3. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
    Do instead: Add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only). Adding 10+ across regions causes cascade.
 4. **[2026-03-08] Rear pocket consolidation: cluster-aware version (post-w20)**
