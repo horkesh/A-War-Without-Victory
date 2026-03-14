@@ -190,7 +190,12 @@ export const FACTION_STRATEGIES: Record<FactionId, FactionBotStrategy> = {
         min_active_brigades: 2,
     },
     HRHB: {
-        corridor_municipalities: [...HRHB_HERZEGOVINA, 'orasje'],
+        // Note: 'orasje' is intentionally excluded from HRHB corridor_municipalities.
+        // The E3 rule forces 'defensive' for corps whose home municipality is in this list.
+        // hvo_northwest_bosnia (home: orasje) should be allowed to attack in Posavina —
+        // the 101st Orašje Brigade historically fought RS forces, not just defended.
+        // Herzegovina heartland (HRHB_HERZEGOVINA) remains unconditionally defensive.
+        corridor_municipalities: [...HRHB_HERZEGOVINA],
         max_attack_posture_share: 0.35,
         preferred_posture_when_overstaffed: 'hold',
         attack_coverage_threshold: 100,
@@ -404,6 +409,13 @@ export interface ArmyOperationPriority {
     target_osids?: string[];
     /** Municipality patterns for OSIDs to avoid. */
     avoid_municipalities?: string[];
+    /**
+     * Municipalities whose friendly front OSIDs should be added to hold_osids.
+     * These are defended regardless of corps stance — hold_municipalities runs
+     * UNCONDITIONALLY (unlike defensive_priorities which only applies to non-offensive corps).
+     * Use for siege rings and critical terrain that must be held even by offensive corps.
+     */
+    hold_municipalities?: string[];
 }
 
 /**
@@ -435,7 +447,11 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 2nd Krajina: western operations + Bihac edges
     { name: 'Western Krajina', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'sipovo', 'bosanska_krupa', 'sanski_most'], start_week: 0, end_week: 30, weight: 55, min_outcome: 'repulsed' },
     // Sarajevo-Romanija: siege maintenance — persistent pressure on Sarajevo approaches
-    { name: 'Sarajevo Siege', corps_id: 'vrs_sarajevo_romanija', target_municipalities: ['ilidza', 'hadzici', 'vogosca', 'ilijas', 'pale', 'sokolac'], start_week: 0, end_week: 9999, weight: 90, min_outcome: 'repulsed' },
+    // Sarajevo siege: target approaches + hold the existing ring unconditionally.
+    // hold_municipalities ensures SRK brigades do not abandon the ring to pursue
+    // outward operations (Bastion/Lukavac sequels). The hold runs regardless of
+    // corps stance — SRK is offensive but must maintain the encirclement.
+    { name: 'Sarajevo Siege', corps_id: 'vrs_sarajevo_romanija', target_municipalities: ['ilidza', 'hadzici', 'vogosca', 'ilijas', 'pale', 'sokolac'], hold_municipalities: ['ilidza', 'hadzici', 'vogosca', 'pale', 'trnovo'], start_week: 0, end_week: 9999, weight: 90, min_outcome: 'repulsed' },
     // Herzegovina: hold territory + push north through Foča into Višegrad (Drina valley north push)
     { name: 'Herzegovina Hold', corps_id: 'vrs_herzegovina', target_municipalities: ['bileca', 'gacko', 'nevesinje', 'kalinovik', 'cajnice', 'rudo', 'foca', 'visegrad'], start_week: 0, end_week: 9999, weight: 50, min_outcome: 'repulsed' },
     // East Bosnian: post-corridor, Tuzla containment
@@ -498,7 +514,17 @@ const HRHB_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // Northwest Bosnia OZ (Posavina): initial defense, then retreat to Orašje pocket
     // Historically HVO lost Bosanski Brod, Derventa, Odžak by Oct 1992 — retreated to Orašje pocket
     { name: 'Posavina Defense (initial)', corps_id: 'hvo_northwest_bosnia', target_municipalities: ['orasje', 'odzak', 'bosanski_brod', 'derventa'], start_week: 0, end_week: 16, weight: 85, min_outcome: 'repulsed' },
+    // After initial defense, HVO NW Bosnia retreats to Orašje pocket and defends.
+    // 'orasje' is HRHB-controlled → generates no enemy targets (hold-only semantics).
+    // Posavina Corridor Relief: 101st Orašje Brigade historically pressed against RS
+    // Bosanski Šamac and Gradačac throughout 1992. Low weight to avoid overcommitting
+    // the pocket's limited forces.
     { name: 'Orasje Pocket', corps_id: 'hvo_northwest_bosnia', target_municipalities: ['orasje'], start_week: 16, end_week: 9999, weight: 90, min_outcome: 'costly_victory' },
+    // Posavina Corridor Relief: 101st Orašje Brigade presses against RS Posavina.
+    // bosanski_samac, brcko, gradacac municipalities are NOT in the operational reverseMap,
+    // so target_municipalities cannot find them — use explicit target_osids instead.
+    // These are RS-controlled OSIDs directly adjacent to HRHB Orašje territory.
+    { name: 'Posavina Corridor Relief', corps_id: 'hvo_northwest_bosnia', target_municipalities: [], target_osids: ['op:bosanski_samac:tisina', 'op:brcko:krepsic', 'op:gradacac:pelagicevo', 'op:bosanski_samac:samac_2', 'op:bosanski_samac:crkvina_2'], start_week: 16, end_week: 99, weight: 60, min_outcome: 'repulsed' },
     // Tomislavgrad OZ: western defense
     { name: 'Western Defense', corps_id: 'hvo_tomislavgrad', target_municipalities: ['duvno', 'livno', 'kupres', 'tomislavgrad'], start_week: 0, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
     // Post-Washington (week 100 ≈ late 1994): anti-RS operations — HVO cooperates with ARBiH against VRS

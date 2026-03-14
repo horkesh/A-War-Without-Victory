@@ -722,6 +722,30 @@ export function generateCorpsDirectives(
             }
         }
 
+        // hold_municipalities from army priorities: friendly front OSIDs in those municipalities
+        // are added to holdOsids UNCONDITIONALLY (regardless of corps stance).
+        // Designed for siege rings: SRK must maintain the Sarajevo encirclement even while
+        // offensive (launching Bastion/Lukavac-style operations outward).
+        {
+            const holdMunSet = new Set<string>();
+            for (const priority of armyPriorities) {
+                for (const mun of (priority.hold_municipalities ?? [])) holdMunSet.add(mun);
+            }
+            if (holdMunSet.size > 0) {
+                // Collect friendly front OSIDs from this corps's sectors
+                for (const sec of corpsSectors) {
+                    for (const ss of sec.sub_segments) {
+                        for (const osid of ss.friendly_osids) {
+                            const munMatch = osid.match(/^op:([^:]+):/);
+                            if (!munMatch) continue;
+                            if (!holdMunSet.has(munMatch[1]!)) continue;
+                            if (!holdOsids.includes(osid as Osid)) holdOsids.push(osid as Osid);
+                        }
+                    }
+                }
+            }
+        }
+
         // Reserve fraction: corps stance base + army stance modifier
         let reserveFraction: number;
         switch (cmd.stance) {
