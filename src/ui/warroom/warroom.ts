@@ -18,6 +18,16 @@ import hqRbih1992Url from './assets/hq_rbih_1992.webp?url';
 import hqRbih1993Url from './assets/hq_rbih_1993.webp?url';
 import hqRbih1994Url from './assets/hq_rbih_1994.webp?url';
 import hqRbih1995Url from './assets/hq_rbih_1995.webp?url';
+import hqRs1991Url from './assets/hq_rs_1991.webp?url';
+import hqRs1992Url from './assets/hq_rs_1992.webp?url';
+import hqRs1993Url from './assets/hq_rs_1993.webp?url';
+import hqRs1994Url from './assets/hq_rs_1994.webp?url';
+import hqRs1995Url from './assets/hq_rs_1995.webp?url';
+import hqHrhb1991Url from './assets/hq_hrhb_1991.webp?url';
+import hqHrhb1992Url from './assets/hq_hrhb_1992.webp?url';
+import hqHrhb1993Url from './assets/hq_hrhb_1993.webp?url';
+import hqHrhb1994Url from './assets/hq_hrhb_1994.webp?url';
+import hqHrhb1995Url from './assets/hq_hrhb_1995.webp?url';
 // Flag assets — drawn dynamically on the wall per player faction
 import flagHrhbUrl from './assets/flag_HRHB.png?url';
 import flagRbihUrl from './assets/flag_RBiH.png?url';
@@ -68,8 +78,8 @@ function getInitialRegionCandidates(): string[] {
 /** Year-keyed plate URLs per faction. Plates switch each April. */
 const WARROOM_YEAR_PLATE_URLS: Record<FactionId, Record<number, string>> = {
     RBiH: { 1991: hqRbih1991Url, 1992: hqRbih1992Url, 1993: hqRbih1993Url, 1994: hqRbih1994Url, 1995: hqRbih1995Url },
-    RS:   { 1991: bgUrl },
-    HRHB: { 1991: bgUrl }
+    RS:   { 1991: hqRs1991Url, 1992: hqRs1992Url, 1993: hqRs1993Url, 1994: hqRs1994Url, 1995: hqRs1995Url },
+    HRHB: { 1991: hqHrhb1991Url, 1992: hqHrhb1992Url, 1993: hqHrhb1993Url, 1994: hqHrhb1994Url, 1995: hqHrhb1995Url }
 };
 
 /** Given a calendar year from the current turn, return the plate year (latest available <= calendarYear). */

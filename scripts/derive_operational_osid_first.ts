@@ -117,7 +117,11 @@ writeFileSync(resolve(OUT_DIR, 'canonical_to_operational_map.json'), JSON.string
 const opContactGraph = {
     schema_version: 1,
     parameters: { derived_from: 'osid_first_geometry' },
-    nodes: osids.map((id) => ({ id })),
+    nodes: osids.map((id) => {
+        const feat = osidToFeature.get(id)!;
+        const ctr = turf.centroid(feat as any).geometry.coordinates;
+        return { id, lat: ctr[1], lon: ctr[0] };
+    }),
     edges
 };
 writeFileSync(resolve(OUT_DIR, 'operational_contact_graph.json'), JSON.stringify(opContactGraph));

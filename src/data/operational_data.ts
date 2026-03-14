@@ -17,10 +17,19 @@ export type {
     CanonicalToOperationalMap,
     OperationalToCanonicalReverseMap,
     OsidPopulationMap,
+    OsidCentroid,
+    OsidCentroidMap,
 } from './operational_data_types.js';
 export { resolveLocationOsid, buildReverseMap } from './operational_data_types.js';
 import { resolveLocationOsid, buildReverseMap } from './operational_data_types.js';
-import type { OperationalSettlementId, CanonicalToOperationalMap, OperationalToCanonicalReverseMap } from './operational_data_types.js';
+import type {
+    OperationalSettlementId,
+    CanonicalToOperationalMap,
+    OperationalToCanonicalReverseMap,
+    OsidCentroid,
+    OsidCentroidMap,
+} from './operational_data_types.js';
+
 
 export interface LoadedOperationalData {
     /** SID (canonical) → OSID. Keys iterated in sorted order. */
@@ -45,6 +54,37 @@ export async function loadOperationalEdges(baseDir?: string): Promise<EdgeRecord
     const raw = JSON.parse(content) as unknown;
     return parseEdges(raw);
 }
+
+/**
+ * Load OSID centroids from the nodes section of the contact graph.
+ * Returns OSID → { lat, lon } map.
+ */
+export async function loadOperationalCentroids(baseDir?: string): Promise<OsidCentroidMap> {
+    const path = resolve(
+        baseDir ?? process.cwd(),
+        'data/derived/operational/operational_contact_graph.json'
+    );
+    const content = await readFile(path, 'utf8');
+    const raw = JSON.parse(content) as {
+        nodes?: Record<string, { lat: number; lon: number }> | Array<{ id: string; lat: number; lon: number }>;
+    };
+    const centroids: OsidCentroidMap = new Map();
+    if (raw.nodes) {
+        if (Array.isArray(raw.nodes)) {
+            for (const node of raw.nodes) {
+                if (node.lat != null && node.lon != null) {
+                    centroids.set(node.id, { lat: node.lat, lon: node.lon });
+                }
+            }
+        } else {
+            for (const [osid, coord] of Object.entries(raw.nodes)) {
+                centroids.set(osid, coord);
+            }
+        }
+    }
+    return centroids;
+}
+
 
 function isRecord(x: unknown): x is Record<string, unknown> {
     return typeof x === 'object' && x !== null && !Array.isArray(x);

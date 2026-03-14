@@ -74,7 +74,7 @@ import type { Phase3AAuditSummary } from './pressure/phase3a_pressure_eligibilit
 import type { Phase3BExhaustionResult } from './pressure/phase3b_pressure_exhaustion.js';
 import type { Phase3CEligibilityResult } from './pressure/phase3c_exhaustion_collapse_gating.js';
 import type { SiegeRatioByMunFaction } from './early_war/compute_siege_state.js';
-import { loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
+import { loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -270,6 +270,7 @@ export interface NamedPhase {
 export interface OperationalDataCache {
     opData: Awaited<ReturnType<typeof loadOperationalData>>;
     edges: Awaited<ReturnType<typeof loadOperationalEdges>>;
+    centroids: Awaited<ReturnType<typeof loadOperationalCentroids>>;
 }
 
 /** Type-safe accessor for operational data attached to context by load-operational-data step. */

@@ -618,7 +618,10 @@ for (const edge of contactGraph.edges) {
 const opContactGraph = {
     schema_version: 1,
     parameters: { derived_from: 'canonical_contact_graph' },
-    nodes: Array.from(clusteredFeatures.keys()).sort().map(id => ({ id })),
+    nodes: Array.from(clusteredFeatures.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([id, feat]) => {
+        const ctr = turf.centroid(feat).geometry.coordinates;
+        return { id, lat: ctr[1], lon: ctr[0] };
+    }),
     edges: Array.from(opEdges.values()).sort((a: any, b: any) => {
         const ka = `${a.a}||${a.b}`;
         const kb = `${b.a}||${b.b}`;

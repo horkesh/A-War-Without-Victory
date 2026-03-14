@@ -22,6 +22,12 @@ export type OperationalToCanonicalReverseMap = Map<OperationalSettlementId, stri
 /** Per-OSID estimated population (1991 census, divided evenly across OSIDs within each municipality). */
 export type OsidPopulationMap = Map<string, number>;
 
+/** Per-OSID centroid coordinate from the contact graph (lat/lon). */
+export interface OsidCentroid { lat: number; lon: number; }
+/** OSID → Centroid. Used for topological Case B adjacency checks. */
+export type OsidCentroidMap = Map<string, OsidCentroid>;
+
+
 // ── Browser-safe pure functions (no Node APIs) ─────────────────────────────
 
 /**

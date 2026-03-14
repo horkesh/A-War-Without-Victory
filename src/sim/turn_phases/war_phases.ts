@@ -12,7 +12,7 @@ import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.
 import { computeFrontRegions } from '../../map/front_regions.js';
 import { loadSettlementGraph } from '../../map/settlements.js';
 import { loadTerrainScalars } from '../../map/terrain_scalars.js';
-import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
+import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
@@ -393,11 +393,12 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
             try {
-                const [opData, edges] = await Promise.all([
+                const [opData, edges, centroids] = await Promise.all([
                     loadOperationalData(baseDir || undefined),
-                    loadOperationalEdges(baseDir || undefined)
+                    loadOperationalEdges(baseDir || undefined),
+                    loadOperationalCentroids(baseDir || undefined)
                 ]);
-                setOperationalData(context, { opData, edges });
+                setOperationalData(context, { opData, edges, centroids });
             } catch (err) {
                 if (typeof console !== 'undefined' && console.warn) {
                     console.warn('load-operational-data: operational data not available, skipping OSID steps:', err instanceof Error ? err.message : String(err));
@@ -511,7 +512,7 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             context.state.military.corps_front_sectors = buildCorpsFrontSectors(
-                context.state, od.edges, od.opData.operationalToCanonical
+                context.state, od.edges, od.opData.operationalToCanonical, od.centroids
             );
         }
     },

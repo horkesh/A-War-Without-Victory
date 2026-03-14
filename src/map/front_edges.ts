@@ -85,8 +85,27 @@ export function computeFrontEdges(
 }
 
 /**
+ * Maximum gap (in decimal degrees) for an OSID edge to create a front line.
+ * Edges beyond this threshold are distance_contact pairs where polygons don't
+ * share a physical boundary — they represent cartographic adjacency for BFS
+ * routing, not actual territorial contact. Including them creates phantom front
+ * edges that bridge disconnected front segments via triple-junction adjacency.
+ *
+ * 0.0003° ≈ 33 meters. This is wider than SHARED_BOUNDARY_THRESHOLD (0.00005°
+ * ≈ 5.5m) because polygon boundaries have GIS precision gaps of 6-30m that
+ * still represent real front contacts (e.g. Sarajevo siege ring, Srebrenica
+ * enclave). The 33m threshold filters phantom bridges (>35m) while preserving
+ * legitimate front edges.
+ */
+export const FRONT_EDGE_MAX_GAP = 0.0003;
+
+/**
  * Compute front edges from OSID adjacency and OSID-level control.
  * Same contract as FrontEdge[] but a/b are OSIDs; used when operational data is present.
+ *
+ * Only includes edges where the OSID polygons share a physical boundary
+ * (min_dist ≤ FRONT_EDGE_MAX_GAP). Distance-contact edges beyond this gap
+ * are excluded to prevent phantom front edges from bridging disconnected fronts.
  */
 export function computeFrontEdgesOsid(
     state: GameState,
@@ -95,6 +114,8 @@ export function computeFrontEdgesOsid(
 ): FrontEdge[] {
     const frontEdges: FrontEdge[] = [];
     for (const edge of osidEdges) {
+        // Skip distance-contact edges where polygons don't share a physical boundary
+        if (edge.min_dist !== undefined && edge.min_dist > FRONT_EDGE_MAX_GAP) continue;
         const sideA = getPoliticalControllerOSID(state, edge.a, reverseMap);
         const sideB = getPoliticalControllerOSID(state, edge.b, reverseMap);
         if (sideA === null || sideB === null || sideA === sideB) continue;
