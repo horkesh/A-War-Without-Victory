@@ -18,6 +18,16 @@ export function useKeyboardShortcuts(): void {
     const onKeyDown = (event: KeyboardEvent) => {
       if (isFocusInInput()) return;
 
+      // Ctrl+S → quick-save
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+        const awwv = (window as unknown as { awwv?: { quickSave: () => Promise<unknown> } }).awwv;
+        if (awwv?.quickSave) {
+          awwv.quickSave().catch(() => { /* swallow */ });
+        }
+        return;
+      }
+
       if (event.key === 'Escape') {
         const { setHoveredOsids, clearTooltipTarget, setPendingAttackConfirmation, setOrderModeForFormation, setOperationTargetOsids } = useGameStore.getState();
         useGameStore.setState({

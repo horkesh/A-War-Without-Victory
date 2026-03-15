@@ -150,6 +150,7 @@ import { PARAMILITARY_FADE_WEEK } from '../../state/formation_constants.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
+import { checkWarTermination, applyWarTermination } from '../war_termination.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
@@ -1960,6 +1961,21 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const snapshot = getPoliticalControlSnapshot(context);
             if (snapshot) assertControlEventConsistency(context.state, snapshot);
+        }
+    },
+    {
+        name: 'check-victory-conditions',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const result = checkWarTermination(context.state);
+            if (result.game_over) {
+                applyWarTermination(context.state, result);
+                context.report.war_termination = {
+                    outcome: result.outcome,
+                    winner: result.winner,
+                    trigger: result.trigger
+                };
+            }
         }
     },
     {

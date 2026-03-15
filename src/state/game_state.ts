@@ -1014,6 +1014,10 @@ export interface StateMeta {
     avoided_osids_by_faction?: Record<string, string[]>;
     /** Phase A: When true, supply reserves system is active (general supply + heavy munitions). */
     supply_reserves_enabled?: boolean;
+    /** Maximum turns before game ends in stalemate. Default 208 (4 years). Set from scenario.weeks or explicit override. */
+    max_turns?: number;
+    /** Scenario victory conditions, stored at scenario load for pipeline evaluation. */
+    victory_conditions?: import('../scenario/scenario_types.js').ScenarioVictoryConditions;
 }
 
 export interface NegotiationLedgerEntry {

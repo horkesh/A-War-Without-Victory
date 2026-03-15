@@ -25,6 +25,26 @@ export const INCIDENT_PENALTY_PER_FLIP = 0.04;
 /** Positive recovery per turn when ceasefire is active. */
 export const CEASEFIRE_RECOVERY_RATE = 0.015;
 
+// ── Phase B1: Refugee pressure constants ──
+
+/** Per-municipality per-turn degradation rate from refugee pressure. */
+export const REFUGEE_PRESSURE_RATE = 0.004;
+/** Displaced-in / original_population ratio cap for scaling (diminishing returns above this). */
+export const REFUGEE_PRESSURE_RATIO_CAP = 0.30;
+/** Minimum displaced ratio before refugee pressure kicks in. */
+export const REFUGEE_PRESSURE_MIN_RATIO = 0.05;
+
+/** Municipalities with mixed RBiH/HRHB populations where refugee influx strains alliance. */
+export const REFUGEE_PRESSURE_MUNICIPALITIES: readonly string[] = [
+    'bugojno',
+    'busovaca',
+    'kiseljak',
+    'mostar',
+    'novi_travnik',
+    'travnik',
+    'vitez'
+];
+
 /** Threshold above which RBiH and HRHB are considered allied (no bilateral flips). */
 export const ALLIED_THRESHOLD = 0.20;
 /** Threshold below which open war mechanics (minority erosion) begin. */
@@ -96,6 +116,7 @@ export interface AllianceUpdateReport {
         patron_drag: number;
         incident_penalty: number;
         ceasefire_boost: number;
+        refugee_pressure: number;
     };
     phase: AlliancePhase;
     war_started_this_turn: boolean;
@@ -144,7 +165,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
             previous_value: previousValue,
             new_value: previousValue,
             delta: 0,
-            drivers: { appeasement: 0, patron_drag: 0, incident_penalty: 0, ceasefire_boost: 0 },
+            drivers: { appeasement: 0, patron_drag: 0, incident_penalty: 0, ceasefire_boost: 0, refugee_pressure: 0 },
             phase: getAlliancePhase(previousValue),
             war_started_this_turn: false,
             locked: true
@@ -165,7 +186,10 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     const incidentPenalty = INCIDENT_PENALTY_PER_FLIP * bilateralFlipsLastTurn;
     const ceasefireBoost = rhs.ceasefire_active ? CEASEFIRE_RECOVERY_RATE : 0;
 
-    const delta = appeasement - patronDrag - incidentPenalty + ceasefireBoost;
+    // Phase B1: Refugee pressure — displaced arrivals in mixed municipalities strain alliance
+    const refugeePressure = computeRefugeePressure(state);
+
+    const delta = appeasement - patronDrag - incidentPenalty + ceasefireBoost - refugeePressure;
 
     // Apply delta, clamp to [-1, 1]
     let newValue = Math.max(-1, Math.min(1, previousValue + delta));
@@ -198,12 +222,42 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
             appeasement,
             patron_drag: patronDrag,
             incident_penalty: incidentPenalty,
-            ceasefire_boost: ceasefireBoost
+            ceasefire_boost: ceasefireBoost,
+            refugee_pressure: refugeePressure
         },
         phase: getAlliancePhase(newValue),
         war_started_this_turn: warStartedThisTurn,
         locked: false
     };
+}
+
+/**
+ * Phase B1: Compute refugee pressure on alliance from displaced populations
+ * arriving in mixed municipalities. Each municipality with displaced_in/original_pop > 5%
+ * adds REFUGEE_PRESSURE_RATE * min(1.0, ratio / REFUGEE_PRESSURE_RATIO_CAP) to degradation.
+ * Deterministic: sorted iteration over REFUGEE_PRESSURE_MUNICIPALITIES.
+ */
+export function computeRefugeePressure(state: GameState): number {
+    const displacementState = state.displacement?.displacement_state;
+    if (!displacementState) return 0;
+
+    let totalPressure = 0;
+
+    // Sorted iteration (REFUGEE_PRESSURE_MUNICIPALITIES is already sorted at definition)
+    for (const munId of REFUGEE_PRESSURE_MUNICIPALITIES) {
+        const ds = displacementState[munId];
+        if (!ds) continue;
+        if (ds.original_population <= 0) continue;
+
+        const ratio = ds.displaced_in / ds.original_population;
+        if (ratio <= REFUGEE_PRESSURE_MIN_RATIO) continue;
+
+        // Scale linearly up to cap, then saturate at 1.0
+        const scaledRatio = Math.min(1.0, ratio / REFUGEE_PRESSURE_RATIO_CAP);
+        totalPressure += REFUGEE_PRESSURE_RATE * scaledRatio;
+    }
+
+    return totalPressure;
 }
 
 /**

@@ -624,6 +624,39 @@ export interface LoadedGameState {
             summary: string;
         };
     }>;
+    // ═══════════════════════════════════════════════════════════════════
+    // Peace Phase (Phase 0) — only populated when meta.phase === 'peace'
+    // ═══════════════════════════════════════════════════════════════════
+
+    /** Peace phase faction data (capital, declarations). */
+    peaceFactions?: Array<{
+        id: string;
+        capital: number;
+        declaration_pressure: number;
+        declared: boolean;
+        declaration_turn: number | null;
+    }>;
+    /** RBiH-HRHB relationship value [-1, +1]. */
+    peaceAllianceValue?: number;
+    /** Referendum state. */
+    peaceReferendum?: {
+        held: boolean;
+        turn: number | null;
+        eligible_turn: number | null;
+        deadline_turn: number | null;
+        war_start_turn: number | null;
+    };
+    /** Phase 0 events for the most recent turn. */
+    peaceEvents?: Array<{
+        type: string;
+        turn: number;
+        faction?: string;
+        details: Record<string, unknown>;
+    }>;
+    /** Game over state. */
+    gameOver?: boolean;
+    gameOutcome?: string;
+
     /** Active (in-progress) operations. */
     activeOperations?: Array<{
         corps_id: string;

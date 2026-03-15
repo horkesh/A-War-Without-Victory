@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('awwv', {
   loadScenarioDialog: () => ipcRenderer.invoke('load-scenario-dialog'),
   startNewCampaign: (payload) => ipcRenderer.invoke('start-new-campaign', payload),
   loadStateDialog: () => ipcRenderer.invoke('load-state-dialog'),
+  saveGame: (payload) => ipcRenderer.invoke('save-game', payload),
+  quickSave: () => ipcRenderer.invoke('quick-save'),
   advanceTurn: (payload) => ipcRenderer.invoke('advance-turn', payload),
   setGameStateUpdatedCallback: (cb) => { gameStateUpdatedCallback = typeof cb === 'function' ? cb : null; },
   setTurnReportUpdatedCallback: (cb) => { turnReportUpdatedCallback = typeof cb === 'function' ? cb : null; },

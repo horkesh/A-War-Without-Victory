@@ -82,6 +82,8 @@ interface WindowAwwv {
     focusWarroom: () => Promise<void>;
     loadScenarioDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     loadStateDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
+    saveGame: (payload?: { filename?: string }) => Promise<{ ok: boolean; filePath?: string; error?: string }>;
+    quickSave: () => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     openTacticalMapWindow: (payload?: { mode?: string }) => Promise<void>;
     approveReserveRequest: (corpsId: string, brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     recallEliteBrigade: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -296,6 +298,14 @@ export function useIPC() {
             loadStateDialog: awwv
                 ? () => awwv.loadStateDialog()
                 : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
+
+            saveGame: awwv
+                ? (payload?: { filename?: string }) => awwv.saveGame(payload)
+                : makeNoop<{ ok: boolean; filePath?: string; error?: string }>(),
+
+            quickSave: awwv
+                ? () => awwv.quickSave()
+                : makeNoop<{ ok: boolean; filePath?: string; error?: string }>(),
 
             openTacticalMapWindow: awwv
                 ? (payload?: { mode?: string }) => awwv.openTacticalMapWindow(payload)

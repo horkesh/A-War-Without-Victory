@@ -56,6 +56,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
   const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
   const [loading, setLoading] = useState(false);
   const [advancing, setAdvancing] = useState(false);
+  const [saveFlash, setSaveFlash] = useState(false);
   const [runIdInput, setRunIdInput] = useState('');
   const playerFaction = loadedGameState?.player_faction ?? '';
   const hasVisibleEnclaveDashboard = Boolean(
@@ -144,6 +145,17 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
     }
   }, [loadSave, setLoadError, runIdInput]);
 
+  const handleSave = useCallback(async () => {
+    if (!ipc.isAvailable || !loadedGameState) return;
+    const result = await ipc.saveGame();
+    if (result.ok) {
+      setSaveFlash(true);
+      setTimeout(() => setSaveFlash(false), 1500);
+    } else {
+      setLoadError(result.error ?? 'Save failed');
+    }
+  }, [ipc, loadedGameState, setLoadError]);
+
   const handleAdvanceTurn = useCallback(async () => {
     if (!ipc.isAvailable) {
       setLoadError('Advance turn is available in desktop mode only.');
@@ -227,6 +239,14 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
             </div>
           </div>
         )}
+        <button
+          onClick={handleSave}
+          disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}
+          className={`${TOOLBAR_BUTTON_CLASS} ${saveFlash ? 'border-green-500/50 text-green-400' : ''}`}
+          title="Save game (Ctrl+S for quick-save)"
+        >
+          {saveFlash ? 'SAVED!' : 'SAVE'}
+        </button>
         <button
           onClick={handleAdvanceTurn}
           disabled={advancing || loading || !loadedGameState || !ipc.isAvailable}

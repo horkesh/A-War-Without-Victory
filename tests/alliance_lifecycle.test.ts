@@ -9,6 +9,7 @@ import { describe, test } from 'node:test';
 import {
     areRbihHrhbAllied,
     CEASEFIRE_RECOVERY_RATE,
+    computeRefugeePressure,
     countBilateralFlips,
     DEFAULT_INIT_ALLIANCE,
     DEFAULT_MIXED_MUNICIPALITIES,
@@ -16,6 +17,8 @@ import {
     getAlliancePhase,
     HOSTILE_THRESHOLD,
     isRbihHrhbAtWar,
+    REFUGEE_PRESSURE_RATE,
+    REFUGEE_PRESSURE_RATIO_CAP,
     updateAllianceValue
 } from '../src/sim/early_war/alliance_update.js';
 import {
@@ -38,7 +41,7 @@ import {
     WASH_ALLIANCE_LOCK_VALUE,
     WASH_CEASEFIRE_DURATION
 } from '../src/sim/early_war/washington_agreement.js';
-import type { GameState } from '../src/state/game_state.js';
+import type { DisplacementState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
 /** Minimal GameState for alliance tests. */
@@ -584,5 +587,186 @@ describe('full alliance lifecycle', () => {
         const lockedReport = updateAllianceValue(state);
         assert.strictEqual(lockedReport.locked, true);
         assert.strictEqual(lockedReport.new_value, WASH_ALLIANCE_LOCK_VALUE);
+    });
+});
+
+// ── Phase B1: Refugee Pressure Tests ──
+
+/** Helper: create a DisplacementState for a municipality. */
+function makeDisplacementEntry(munId: string, originalPop: number, displacedIn: number): DisplacementState {
+    return {
+        mun_id: munId,
+        original_population: originalPop,
+        displaced_out: 0,
+        displaced_in: displacedIn,
+        lost_population: 0,
+        last_updated_turn: 10
+    };
+}
+
+describe('refugee pressure (Phase B1)', () => {
+    test('computeRefugeePressure returns 0 when no displacement state', () => {
+        const state = makeState();
+        const pressure = computeRefugeePressure(state);
+        assert.strictEqual(pressure, 0);
+    });
+
+    test('computeRefugeePressure returns 0 when displacement below 5% threshold', () => {
+        const state = makeState();
+        (state as any).displacement = {
+            displacement_state: {
+                travnik: makeDisplacementEntry('travnik', 100000, 4000) // 4% < 5%
+            }
+        };
+        const pressure = computeRefugeePressure(state);
+        assert.strictEqual(pressure, 0);
+    });
+
+    test('computeRefugeePressure calculates pressure for single municipality above threshold', () => {
+        const state = makeState();
+        // 10% ratio, well above 5% min, below 30% cap
+        (state as any).displacement = {
+            displacement_state: {
+                travnik: makeDisplacementEntry('travnik', 100000, 10000) // 10%
+            }
+        };
+        const pressure = computeRefugeePressure(state);
+        // scaledRatio = min(1.0, 0.10 / 0.30) = 0.3333...
+        // pressure = 0.004 * 0.3333... ≈ 0.001333...
+        const expected = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.10 / REFUGEE_PRESSURE_RATIO_CAP);
+        assert.ok(Math.abs(pressure - expected) < 1e-10, `Expected ~${expected}, got ${pressure}`);
+    });
+
+    test('computeRefugeePressure caps ratio at REFUGEE_PRESSURE_RATIO_CAP', () => {
+        const state = makeState();
+        // 50% ratio, well above 30% cap
+        (state as any).displacement = {
+            displacement_state: {
+                vitez: makeDisplacementEntry('vitez', 10000, 5000) // 50%
+            }
+        };
+        const pressure = computeRefugeePressure(state);
+        // scaledRatio = min(1.0, 0.50 / 0.30) = 1.0 (capped)
+        assert.ok(Math.abs(pressure - REFUGEE_PRESSURE_RATE) < 1e-10, `Expected ${REFUGEE_PRESSURE_RATE}, got ${pressure}`);
+    });
+
+    test('computeRefugeePressure sums across multiple municipalities', () => {
+        const state = makeState();
+        (state as any).displacement = {
+            displacement_state: {
+                travnik: makeDisplacementEntry('travnik', 100000, 15000), // 15%
+                vitez: makeDisplacementEntry('vitez', 20000, 4000), // 20%
+                kiseljak: makeDisplacementEntry('kiseljak', 30000, 3000) // 10%
+            }
+        };
+        const pressure = computeRefugeePressure(state);
+        const p_travnik = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.15 / REFUGEE_PRESSURE_RATIO_CAP);
+        const p_vitez = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.20 / REFUGEE_PRESSURE_RATIO_CAP);
+        const p_kiseljak = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.10 / REFUGEE_PRESSURE_RATIO_CAP);
+        const expected = p_travnik + p_vitez + p_kiseljak;
+        assert.ok(Math.abs(pressure - expected) < 1e-10, `Expected ~${expected}, got ${pressure}`);
+        assert.ok(pressure > 0);
+    });
+
+    test('computeRefugeePressure ignores non-mixed municipalities', () => {
+        const state = makeState();
+        (state as any).displacement = {
+            displacement_state: {
+                banja_luka: makeDisplacementEntry('banja_luka', 50000, 25000), // 50% but NOT a mixed mun
+                travnik: makeDisplacementEntry('travnik', 100000, 10000) // 10%
+            }
+        };
+        const pressure = computeRefugeePressure(state);
+        // Only travnik should contribute
+        const expected = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.10 / REFUGEE_PRESSURE_RATIO_CAP);
+        assert.ok(Math.abs(pressure - expected) < 1e-10, `Expected ~${expected}, got ${pressure}`);
+    });
+
+    test('refugee pressure feeds into updateAllianceValue as negative driver', () => {
+        const state = makeState({
+            political: {
+                war_alliance_rbih_hrhb: 0.35
+            } as any,
+        });
+        ensureRbihHrhbState(state);
+        // Add displacement data
+        (state as any).displacement = {
+            displacement_state: {
+                travnik: makeDisplacementEntry('travnik', 100000, 20000), // 20%
+                vitez: makeDisplacementEntry('vitez', 20000, 6000), // 30%
+                mostar: makeDisplacementEntry('mostar', 80000, 12000) // 15%
+            }
+        };
+        const report = updateAllianceValue(state);
+        assert.ok(report.drivers.refugee_pressure > 0, 'refugee_pressure driver should be positive (it is subtracted)');
+        // With refugee pressure, delta should be more negative than without
+        const baselineDelta = report.drivers.appeasement - report.drivers.patron_drag - report.drivers.incident_penalty + report.drivers.ceasefire_boost;
+        assert.ok(report.delta < baselineDelta, 'delta should be reduced by refugee pressure');
+        assert.strictEqual(report.delta, baselineDelta - report.drivers.refugee_pressure);
+    });
+
+    test('refugee pressure accelerates alliance degradation toward bilateral war', () => {
+        // Simulate turns with heavy refugee pressure to verify war triggers
+        const state = makeState({
+            political: {
+                war_alliance_rbih_hrhb: 0.25 // Just above ALLIED_THRESHOLD (0.20)
+            } as any,
+        });
+        ensureRbihHrhbState(state);
+        state.meta.turn = 30; // Past earliest turn (26)
+
+        // Heavy refugee pressure in multiple municipalities
+        (state as any).displacement = {
+            displacement_state: {
+                travnik: makeDisplacementEntry('travnik', 50000, 20000), // 40% (capped)
+                vitez: makeDisplacementEntry('vitez', 20000, 8000), // 40% (capped)
+                bugojno: makeDisplacementEntry('bugojno', 40000, 16000), // 40% (capped)
+                mostar: makeDisplacementEntry('mostar', 80000, 32000), // 40% (capped)
+                kiseljak: makeDisplacementEntry('kiseljak', 30000, 12000), // 40% (capped)
+                busovaca: makeDisplacementEntry('busovaca', 15000, 6000), // 40% (capped)
+                novi_travnik: makeDisplacementEntry('novi_travnik', 25000, 10000) // 40% (capped)
+            }
+        };
+
+        // High patron commitment too
+        const hrhb = state.factions.find((f) => f.id === 'HRHB')!;
+        hrhb.patron_state!.patron_commitment = 0.8;
+
+        // Run several turns
+        let warStarted = false;
+        for (let i = 0; i < 50; i++) {
+            state.meta.turn++;
+            const report = updateAllianceValue(state);
+            countBilateralFlips(state, []);
+            if (report.war_started_this_turn) {
+                warStarted = true;
+                break;
+            }
+        }
+        assert.strictEqual(warStarted, true, 'War should have started with heavy refugee pressure');
+        assert.ok(state.political.war_alliance_rbih_hrhb! <= HOSTILE_THRESHOLD);
+    });
+});
+
+// ── Graz Accords + Alliance Coexistence Test ──
+
+describe('graz accords with alliance dynamics enabled', () => {
+    test('cold front state is independent of RBiH-HRHB alliance value', () => {
+        // Verify that enabling alliance dynamics does not break Graz Accords state
+        const state = makeState({
+            political: {
+                war_alliance_rbih_hrhb: 0.35
+            } as any,
+        });
+        ensureRbihHrhbState(state);
+        // Graz Accords fields exist on political state
+        state.political.vienna_declaration_turn = 4;
+        state.political.vienna_herzegovina_broken_by = undefined;
+
+        // Alliance update should not touch Graz fields
+        const report = updateAllianceValue(state);
+        assert.strictEqual(state.political.vienna_declaration_turn, 4);
+        assert.strictEqual(state.political.vienna_herzegovina_broken_by, undefined);
+        assert.ok(report.new_value !== undefined);
     });
 });

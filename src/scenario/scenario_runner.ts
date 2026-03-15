@@ -1066,6 +1066,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.meta.recruitment_mode = scenario.recruitment_mode;
         }
 
+        // War termination: store max_turns and victory_conditions on state.meta for pipeline evaluation.
+        state.meta.max_turns = scenario.weeks ?? 208;
+        if (scenario.victory_conditions) {
+            state.meta.victory_conditions = scenario.victory_conditions;
+        }
+
         // Phase A: Supply reserves system flag → state.meta for pipeline gating.
         if (scenario.supply_reserves_enabled) {
             state.meta.supply_reserves_enabled = true;

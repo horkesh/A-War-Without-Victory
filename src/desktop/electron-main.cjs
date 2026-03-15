@@ -275,11 +275,34 @@ function showScenarioDialog(win) {
 }
 
 function showStateFileDialog(win) {
+  const savesDir = path.join(getBaseDir(), 'saves');
+  const defaultPath = fs.existsSync(savesDir) ? savesDir : undefined;
   return dialog.showOpenDialog(win || null, {
     title: 'Load state file (final_save.json or saved game)',
+    defaultPath,
     filters: [{ name: 'JSON', extensions: ['json'] }],
     properties: ['openFile'],
   });
+}
+
+/** Write currentGameStateJson to a file in the saves/ directory. Returns the file path. */
+function writeSaveFile(filename) {
+  if (!currentGameStateJson) throw new Error('No game loaded');
+  const savesDir = path.join(getBaseDir(), 'saves');
+  fs.mkdirSync(savesDir, { recursive: true });
+  const filePath = path.join(savesDir, filename);
+  fs.writeFileSync(filePath, currentGameStateJson, 'utf-8');
+  return filePath;
+}
+
+/** Auto-save to saves/autosave.json. Swallows errors (non-critical). */
+function autoSave() {
+  try {
+    writeSaveFile('autosave.json');
+  } catch (_e) {
+    // Auto-save failure is non-critical; log but don't propagate
+    console.error('Auto-save failed:', _e.message || String(_e));
+  }
 }
 
 function createWindow() {
@@ -671,7 +694,29 @@ app.whenReady().then(() => {
       currentGameStateJson = sim.serializeState(result.state);
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
       if (result.report) sendTurnReportToRenderer(result.report);
+      autoSave();
       return { ok: true, stateJson: currentGameStateJson, report: result.report ?? null };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('save-game', async (_event, payload) => {
+    try {
+      const filename = (payload && typeof payload.filename === 'string' && payload.filename)
+        ? payload.filename
+        : `save_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.json`;
+      const filePath = writeSaveFile(filename);
+      return { ok: true, filePath };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('quick-save', async () => {
+    try {
+      const filePath = writeSaveFile('quicksave.json');
+      return { ok: true, filePath };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

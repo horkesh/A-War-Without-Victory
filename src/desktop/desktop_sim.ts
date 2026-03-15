@@ -61,6 +61,8 @@ function terrainScalarsPath(baseDir: string): string {
 export interface DesktopSimAdvanceResult {
     state: GameState;
     error?: string;
+    game_over?: boolean;
+    outcome?: string;
     report?: {
         phase: string;
         turn: number;
@@ -158,7 +160,12 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                     next.meta.peace_war_start_control_path
                 );
             }
-            return { state: next, report: { phase, turn: next.meta.turn } };
+            return {
+                state: next,
+                game_over: next.meta.game_over === true ? true : undefined,
+                outcome: next.meta.outcome ?? undefined,
+                report: { phase, turn: next.meta.turn }
+            };
         }
         if (phase === 'war') {
             const { nextState, report } = await runTurn(state, {
@@ -166,7 +173,12 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                 settlementGraph: graphForBrowser,
                 settlementEdges: graph.edges,
             });
-            return { state: nextState, report: { phase, turn: nextState.meta.turn, details: report } };
+            return {
+                state: nextState,
+                game_over: nextState.meta.game_over === true ? true : undefined,
+                outcome: nextState.meta.outcome ?? undefined,
+                report: { phase, turn: nextState.meta.turn, details: report }
+            };
         }
         return { state, error: `Unknown phase: ${phase}` };
     } catch (err) {

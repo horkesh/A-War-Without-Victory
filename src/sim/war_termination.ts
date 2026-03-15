@@ -1,0 +1,158 @@
+/**
+ * War termination detection: victory conditions, turn limit, faction collapse.
+ * Called once per turn from the war_phases pipeline after combat/supply steps.
+ *
+ * Deterministic: sorted iteration via localeCompare, no Math.random().
+ */
+
+import type { GameState } from '../state/game_state.js';
+import { evaluateVictoryConditions } from '../scenario/victory_conditions.js';
+
+/** Default max turns (4 years at 1 turn/week). */
+const DEFAULT_MAX_TURNS = 208;
+
+/** Canonical faction IDs in deterministic order. */
+const FACTION_IDS = ['HRHB', 'RBiH', 'RS'] as const;
+
+export interface WarTerminationResult {
+    game_over: boolean;
+    outcome: string | null;
+    /** Faction that won (if any). */
+    winner: string | null;
+    /** Detail on what triggered termination. */
+    trigger: 'victory_condition' | 'turn_limit' | 'faction_collapse' | null;
+}
+
+/**
+ * Check all war termination conditions in priority order:
+ * 1. Scenario victory conditions (from evaluateVictoryConditions)
+ * 2. Faction collapse (0 active formations)
+ * 3. Turn limit stalemate
+ *
+ * Returns the first triggered condition, or a no-termination result.
+ */
+export function checkWarTermination(state: GameState): WarTerminationResult {
+    // Already game over — skip re-evaluation
+    if (state.meta.game_over) {
+        return {
+            game_over: true,
+            outcome: state.meta.outcome ?? 'unknown',
+            winner: null,
+            trigger: null
+        };
+    }
+
+    // 1. Scenario victory conditions
+    const victoryEval = evaluateVictoryConditions(state, state.meta.victory_conditions);
+    if (victoryEval && (victoryEval.result === 'winner' || victoryEval.result === 'co_winners')) {
+        const winner = victoryEval.winner ?? victoryEval.co_winners[0] ?? null;
+        const outcome = victoryEval.result === 'co_winners'
+            ? `co_victory:${victoryEval.co_winners.join(',')}`
+            : `victory:${winner}`;
+        return {
+            game_over: true,
+            outcome,
+            winner,
+            trigger: 'victory_condition'
+        };
+    }
+
+    // 2. Faction collapse — any faction with 0 active brigades is collapsed
+    const collapseResult = checkFactionCollapse(state);
+    if (collapseResult) {
+        return collapseResult;
+    }
+
+    // 3. Turn limit stalemate
+    const maxTurns = state.meta.max_turns ?? DEFAULT_MAX_TURNS;
+    if (state.meta.turn >= maxTurns) {
+        return {
+            game_over: true,
+            outcome: 'timeout_stalemate',
+            winner: null,
+            trigger: 'turn_limit'
+        };
+    }
+
+    return { game_over: false, outcome: null, winner: null, trigger: null };
+}
+
+/**
+ * Check if any faction has 0 active brigade formations.
+ * A faction is "collapsed" when it has zero brigades in the formations registry.
+ * If only one faction remains active, that faction wins.
+ */
+function checkFactionCollapse(state: GameState): WarTerminationResult | null {
+    const formations = state.military.formations ?? {};
+    const activeFactions = new Set<string>();
+
+    // Count active brigades per faction (sorted iteration for determinism)
+    for (const formationId of Object.keys(formations).sort((a, b) => a.localeCompare(b))) {
+        const f = formations[formationId];
+        if (!f) continue;
+        const kind = f.kind ?? 'brigade';
+        if (kind !== 'brigade') continue;
+        if (!f.faction) continue;
+        activeFactions.add(f.faction);
+    }
+
+    // Check which canonical factions have collapsed
+    const collapsedFactions: string[] = [];
+    for (const factionId of FACTION_IDS) {
+        // Only check factions that exist in the game
+        const factionExists = (state.factions ?? []).some(f => f.id === factionId);
+        if (factionExists && !activeFactions.has(factionId)) {
+            collapsedFactions.push(factionId);
+        }
+    }
+
+    if (collapsedFactions.length === 0) return null;
+
+    // Determine surviving factions
+    const survivingFactions = FACTION_IDS.filter(
+        fid => (state.factions ?? []).some(f => f.id === fid) && activeFactions.has(fid)
+    );
+
+    if (survivingFactions.length === 1) {
+        return {
+            game_over: true,
+            outcome: `faction_collapse:${collapsedFactions.join(',')}:winner:${survivingFactions[0]}`,
+            winner: survivingFactions[0]!,
+            trigger: 'faction_collapse'
+        };
+    }
+
+    if (survivingFactions.length === 0) {
+        // All factions collapsed — mutual destruction
+        return {
+            game_over: true,
+            outcome: 'mutual_collapse',
+            winner: null,
+            trigger: 'faction_collapse'
+        };
+    }
+
+    // Multiple factions collapsed but 2+ remain — mark collapsed factions but game continues
+    // (Only trigger game over when 0 or 1 faction remains)
+    if (collapsedFactions.length >= 2) {
+        return {
+            game_over: true,
+            outcome: `faction_collapse:${collapsedFactions.join(',')}:winner:${survivingFactions[0]}`,
+            winner: survivingFactions[0]!,
+            trigger: 'faction_collapse'
+        };
+    }
+
+    // One faction collapsed, two remain — game continues
+    return null;
+}
+
+/**
+ * Apply war termination result to game state.
+ * Sets meta.game_over and meta.outcome when triggered.
+ */
+export function applyWarTermination(state: GameState, result: WarTerminationResult): void {
+    if (!result.game_over) return;
+    state.meta.game_over = true;
+    state.meta.outcome = result.outcome ?? 'unknown';
+}

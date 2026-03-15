@@ -1604,6 +1604,11 @@ export function parseGameState(json: unknown): LoadedGameState {
             : undefined,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents: derivePendingOfficerEvents(state),
+        // Peace phase (Phase 0)
+        ...derivePeacePhaseData(state, phase),
+        // Game over
+        gameOver: Boolean(meta.game_over),
+        gameOutcome: typeof meta.outcome === 'string' ? meta.outcome : undefined,
     };
 }
 
@@ -1817,5 +1822,51 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
                 war_crimes_record: stats.war_crimes_record,
             };
         });
+}
+
+function derivePeacePhaseData(state: any, phase: string): Partial<LoadedGameState> {
+    if (phase !== 'peace') return {};
+
+    const factions = Array.isArray(state.factions) ? state.factions as any[] : [];
+    const peaceFactions = factions.map((f: any) => ({
+        id: String(f.id ?? ''),
+        capital: Number(f.prewar_capital ?? 0),
+        declaration_pressure: Number(f.declaration_pressure ?? 0),
+        declared: Boolean(f.declared),
+        declaration_turn: typeof f.declaration_turn === 'number' ? f.declaration_turn : null,
+    }));
+
+    const rel = state.political?.phase0_relationships;
+    const peaceAllianceValue = typeof rel?.rbih_hrhb === 'number' ? rel.rbih_hrhb : undefined;
+
+    const meta = state.meta ?? {};
+    const peaceReferendum = {
+        held: Boolean(meta.referendum_held),
+        turn: typeof meta.referendum_turn === 'number' ? meta.referendum_turn : null,
+        eligible_turn: typeof meta.referendum_eligible_turn === 'number' ? meta.referendum_eligible_turn : null,
+        deadline_turn: typeof meta.referendum_deadline_turn === 'number' ? meta.referendum_deadline_turn : null,
+        war_start_turn: typeof meta.war_start_turn === 'number' ? meta.war_start_turn : null,
+    };
+
+    const eventsLog = state.political?.phase0_events_log;
+    let peaceEvents: LoadedGameState['peaceEvents'];
+    if (Array.isArray(eventsLog) && eventsLog.length > 0) {
+        const latest = eventsLog[eventsLog.length - 1];
+        if (Array.isArray(latest)) {
+            peaceEvents = latest.map((e: any) => ({
+                type: String(e.type ?? ''),
+                turn: Number(e.turn ?? 0),
+                faction: typeof e.faction === 'string' ? e.faction : undefined,
+                details: (e.details && typeof e.details === 'object') ? e.details : {},
+            }));
+        }
+    }
+
+    return {
+        peaceFactions: peaceFactions.length > 0 ? peaceFactions : undefined,
+        peaceAllianceValue,
+        peaceReferendum,
+        peaceEvents,
+    };
 }
 

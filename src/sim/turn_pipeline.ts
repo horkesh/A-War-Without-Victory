@@ -47,6 +47,27 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
         throw new Error(`runTurn: unsupported lifecycle phase "${String(phase)}"`);
     }
 
+    // Game over gate: if game_over is set, short-circuit to report-only mode (no combat/movement)
+    if (working.meta.game_over) {
+        working.meta = {
+            ...working.meta,
+            seed: input.seed,
+            turn: working.meta.turn + 1
+        };
+
+        const report: TurnReport = {
+            seed: input.seed,
+            phases: [{ name: 'game_over_active' }],
+            war_termination: {
+                outcome: working.meta.outcome ?? 'unknown',
+                winner: null,
+                trigger: null
+            }
+        };
+
+        return { nextState: working, report };
+    }
+
     // Phase 12D.0: If end_state exists, short-circuit to report-only mode
     if (working.political.end_state) {
         working.meta = {

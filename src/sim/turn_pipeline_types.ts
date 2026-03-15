@@ -146,6 +146,11 @@ export interface TurnReport {
     operation_storm_check?: OperationStormCheckReport;
     bilateral_flip_count?: number;
     minority_erosion_report?: MinorityErosionReport;
+    war_termination?: {
+        outcome: string | null;
+        winner: string | null;
+        trigger: 'victory_condition' | 'turn_limit' | 'faction_collapse' | null;
+    };
     end_state_active?: boolean;
     end_state_info?: {
         kind: string;
