@@ -939,17 +939,14 @@ export function generateCorpsDirectives(
         if (supplyHealth.critical_fraction > 0.5) {
             offensiveTargets.length = 0;
         }
-        // Strained supply penalty: when most brigades are strained (not adequate),
-        // the commander becomes more cautious — only attacks when confident of success.
-        // This reflects the arms embargo effect: ARBiH counted bullets, so every
-        // attack had to be worth the ammunition cost. VRS with JNA depots could
-        // afford more aggressive thresholds.
+        // Strained supply penalty: arms embargo effect. When most brigades are
+        // strained, the commander becomes more cautious — requires higher confidence
+        // for attacks. But operations with SURPLUS brigades (beyond garrison) are
+        // still allowed at reduced scale. This lets ARBiH launch limited Brčko
+        // counterattacks while conserving ammunition.
         if (supplyHealth.adequate_fraction < 0.3) {
-            // Less than 30% of brigades have adequate supply — upgrade threshold by one rank
             const rankVal = OUTCOME_RANK[bestMinOutcome as PredictedOutcome] ?? 2;
-            if (rankVal < 3) { // below stalemate (3) → upgrade to stalemate
-                bestMinOutcome = 'stalemate';
-            }
+            if (rankVal < 3) bestMinOutcome = 'stalemate';
         }
 
         // Save the pre-supply-adjustment threshold for operation launch.
