@@ -77,12 +77,12 @@
 2. **[2026-03-12] 1 remaining disconnected brigade assignment (edge case)**: `arbih_712th_mountain` at `op:travnik:krusevo_brdo_i`. Low priority — 28→1 after n598 fix.
 3. **[2026-03-12] REAL_WAR_MASTER #14: HVO Central Bosnia ghost front — DEFERRED**: 13 front edges, 0 brigades. 7 HVO brigades in disconnected enclaves. Intentionally deferred — HVO-RBiH war breaks out April 1993; these brigades activate then. Don't fix now.
 4. **[2026-03-10] Donji Vakuf pocket remnant (5 OSIDs)**: 12/17 Krajina pocket OSIDs now RS; 5 remain RBiH. May need municipality priority tuning for 2KK.
-5. **[2026-03-15] Drina region 83.9% — OOB gap**: Missing VRS Rogatica Brigade (327 km²) and Visegrad Brigade (211 km²). Report: `docs/40_reports/20260315_DRINA_GAP_ANALYSIS.md`. P0 fix: add 2 brigades to OOB.
-6. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked. Needs fresh investigation — likely MapLibre fill-layer issue specific to modal map instance.
-7. **[2026-03-12] HVO named officer roster critically incomplete**: 20% coverage vs VRS 90%. Needed for Croat-Bosniak war phase.
-8. **[2026-03-15] REAL_WAR_MASTER #15: Density imbalance — needs ratio-based approach**: Investigated n750-n758. No idle brigades — problem is misallocation (6 brig/9 edges/threat 0 vs 2 brig/9 edges/threat 240 in same component). EPB/gate constant tuning always breaks Teočak (VRS over-concentration). Cross-component removal causes -1.2pp regression. **Needs new design: density-ratio-based equalization** that compares relative density within corps rather than absolute thresholds. See `corps_front_sectors.ts` n758 comment.
-9. **[2026-03-15] Operacija Grab: 0 attacks with 4 brigades**: Drina Corps operation ran full execution with zero attacks. Possible march-to-target or sector assignment failure. Related to Drina gap (#5).
-10. **[2026-03-15] Doboj RS pool > Banja Luka (19k vs 13k)**: Driven by displacement routing — 54k displaced Serbs into Doboj vs 32k into Banja Luka. Banja Luka loses 66k displaced OUT but only receives 32k IN. Displacement routing calibration item.
+5. **[2026-03-15] Commander Override Layer (P0)**: Design at `docs/30_planning/COMMANDER_OVERRIDE_LAYER.md`. Commander reviews mechanical assignment against strategic intent. Addresses 2KK Prozor drift, SRK sector :4, ARBiH Brčko counterattack. Includes army HQ override, supply-aware op sizing, probes/feints.
+6. **[2026-03-15] Drina region OOB gap — PARTIALLY FIXED**: Rogatica + Višegrad added. Drina at 77-81%. Enclave brigades (Goražde/Srebrenica) debuffed. 808th/843rd relocated to Prača/Trnovo corridor. Further improvement needs commander override.
+7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked.
+8. **[2026-03-12] HVO named officer roster critically incomplete**: 20% coverage vs VRS 90%.
+9. **[2026-03-15] 2KK Prozor positional lock**: 6 of 8 brigades at Prozor/GV/Livno instead of Bihać. Target + Graz fixes applied (n809) but positional lock persists. Needs commander override to recall.
+10. **[2026-03-15] Doboj RS pool > Banja Luka (19k vs 13k)**: Displacement routing calibration.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**

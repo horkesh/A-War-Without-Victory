@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** **v0.3.0** (Playable Alpha) — **n806 BASELINE**: Budget-based brigade allocation (garrison-first). **89.8% area**, 13/13 anchors, 4/6 benchmarks. SRK siege ring 1→2 brigades. Supply embargo: RBiH heavy=15. 166 total brigades. ~60 calibration runs 2026-03-15.
+**Status:** **v0.3.0** (Playable Alpha) — n809: Budget-based allocation + supply embargo + outer ring/Goražde redistribution + 2KK fixes. **88.9% area**, 13/13 anchors, 5/6 benchmarks. 166 brigades. Commander Override Layer designed (`docs/30_planning/COMMANDER_OVERRIDE_LAYER.md`). ~65 calibration runs 2026-03-15.
 
 ## [2026-03-15] n797: Full OOB Calibration Sprint — Spawn Fix + Overstacking + Troop Balance
 
