@@ -2,17 +2,49 @@
 
 **Studio:** Pyrrhic Games
 **Last Updated:** 2026-03-15
-**Current Version:** v0.3.0 (Playable Alpha)
+**Current Version:** v0.3.1 (Playable Alpha + Endgame System)
 
 ---
 
-## Completed Milestones
+## Complete Version Map
 
-### v0.1 — Proof of Concept ✓
-### v0.2 — Core Engine ✓
-### v0.3 — Playable Alpha ✓
+Every milestone is pre-numbered. Implemented milestones are marked ✓ with their completion date.
 
-See `docs/20_engineering/VERSIONING.md` for details on completed milestones.
+| Version | Milestone | Status |
+|---------|-----------|--------|
+| **v0.1.0** | Proof of Concept | ✓ 2026-02 |
+| **v0.2.0** | Core Engine | ✓ 2026-03-15 |
+| **v0.3.0** | Playable Alpha | ✓ 2026-03-15 |
+| **v0.3.1** | Endgame & Negotiation System | ✓ 2026-03-15 |
+| **v0.4.0** | Peace Phase Interactivity | PLANNED |
+| **v0.4.1** | Complete Event System | PLANNED |
+| **v0.4.2** | Additional Scenarios (1993, 1994, 1995 starts) | PLANNED |
+| **v0.4.3** | Economy & War Production | PLANNED |
+| **v0.5.0** | Full Diplomatic System (Negotiations) | PLANNED |
+| **v0.5.1** | UI Completion (all panels, modes, tooltips) | PLANNED |
+| **v0.5.2** | Tutorial & Onboarding | PLANNED |
+| **v0.5.3** | Audio (SFX + Music) | PLANNED |
+| **v0.6.0** | Full Historical Event Set (1992-1995) | PLANNED |
+| **v0.6.1** | Balance & Calibration (all factions, all scenarios) | PLANNED |
+| **v0.6.2** | Campaign Structure & Achievements | PLANNED |
+| **v0.7.0** | Performance Optimization | PLANNED |
+| **v0.7.1** | Accessibility (colorblind, keyboard, screen reader) | PLANNED |
+| **v0.7.2** | Localization (BCS first, then English polish) | PLANNED |
+| **v0.7.3** | Visual Polish (loading, transitions, art) | PLANNED |
+| **v0.8.0** | External Playtesting (closed alpha) | PLANNED |
+| **v0.8.1** | Final Balance from Playtest Feedback | PLANNED |
+| **v0.8.2** | Platform Packaging (Win/Mac/Linux/Steam) | PLANNED |
+| **v0.9.0** | Final QA Sweep | PLANNED |
+| **v0.9.1** | Store Page, Press Kit, Community | PLANNED |
+| **v1.0.0** | **GOLD — Ship it** | PLANNED |
+| *v1.1.0* | *"Operation Corridor" — Posavina expansion* | POST-LAUNCH |
+| *v1.2.0* | *"Autumn Leaves" — 1993-1994 deep content* | POST-LAUNCH |
+| *v1.3.0* | *"Deliberate Force" — NATO intervention* | POST-LAUNCH |
+| *v1.4.0* | *"Weight of Command" — enhanced officers* | POST-LAUNCH |
+
+---
+
+## Completed Milestones (Detail)
 
 ---
 

@@ -167,7 +167,7 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Sound/music | ✗ Not started |
 | Localization | ✗ Not started |
 
-**Current version: 0.3.0** — Playable Alpha milestone. All foundational simulation systems built and calibrated. Desktop app functional. Not yet a playable game for end users.
+**Current version: 0.3.1** — Playable Alpha + Endgame & Negotiation System. All foundational simulation systems built and calibrated. Desktop app functional. Not yet a playable game for end users.
 
 ---
 
