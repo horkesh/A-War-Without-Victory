@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Games — Endgame System Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700;800&display=swap');
+  :root {
+    --bg: #0a0c10; --bg-card: #111519; --bg-el: #181d24;
+    --border: #2a3040; --text: #c8cdd5; --text-dim: #6b7280; --text-bright: #e8ecf0;
+    --gold: #d4a847; --gold-dim: #8a7233; --gold-glow: rgba(212,168,71,0.15);
+    --red: #ef4444; --green: #22c55e; --blue: #3b82f6; --amber: #eab308; --purple: #a855f7; --cyan: #06b6d4;
+    --rbih: #2d7a3a; --rs: #1e40af; --hrhb: #dc2626;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; padding:2rem; }
+  .report { max-width:1200px; margin:0 auto; }
+  .header { text-align:center; padding:3rem 2rem; border:1px solid var(--border); background:linear-gradient(180deg,var(--bg-el),var(--bg)); border-radius:12px; margin-bottom:2rem; position:relative; }
+  .header::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .header .studio { font-family:'JetBrains Mono'; font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:0.5rem; }
+  .header h1 { font-family:'Playfair Display'; font-size:1.8rem; font-weight:800; color:var(--text-bright); margin-bottom:0.5rem; }
+  .header .sub { font-size:0.9rem; color:var(--text-dim); font-style:italic; }
+  .header .badge { display:inline-block; margin-top:1rem; padding:0.4rem 1.5rem; border:1px solid var(--gold); border-radius:4px; font-family:'JetBrains Mono'; font-size:1rem; font-weight:700; color:var(--gold); background:var(--gold-glow); }
+
+  .stats-bar { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1rem; margin-bottom:2rem; }
+  .stat { text-align:center; padding:1rem; background:var(--bg-el); border:1px solid var(--border); border-radius:6px; }
+  .stat-value { font-family:'JetBrains Mono'; font-size:1.8rem; font-weight:700; color:var(--gold); }
+  .stat-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dim); margin-top:0.25rem; }
+
+  .section { margin-bottom:2rem; }
+  .section-header { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1.25rem; background:var(--bg-el); border:1px solid var(--border); border-radius:8px 8px 0 0; border-bottom:1px solid var(--gold-dim); }
+  .section-num { font-family:'JetBrains Mono'; font-size:0.7rem; color:var(--gold); background:rgba(212,168,71,0.1); border:1px solid var(--gold-dim); border-radius:3px; padding:0.15rem 0.5rem; }
+  .section-title { font-size:1.1rem; font-weight:700; color:var(--text-bright); text-transform:uppercase; letter-spacing:0.03em; }
+  .section-body { padding:1.5rem; background:var(--bg-card); border:1px solid var(--border); border-top:none; border-radius:0 0 8px 8px; }
+
+  .phase-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  @media(max-width:900px) { .phase-grid { grid-template-columns:1fr; } }
+  .phase { padding:1rem; background:var(--bg-el); border:1px solid var(--border); border-radius:6px; border-left:3px solid var(--border); }
+  .phase.p1 { border-left-color:var(--cyan); }
+  .phase.p2 { border-left-color:var(--green); }
+  .phase.p3 { border-left-color:var(--amber); }
+  .phase.p4 { border-left-color:var(--red); }
+  .phase.p5 { border-left-color:var(--purple); }
+  .phase.p6 { border-left-color:var(--blue); }
+  .phase-title { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem; }
+  .p1 .phase-title { color:var(--cyan); } .p2 .phase-title { color:var(--green); }
+  .p3 .phase-title { color:var(--amber); } .p4 .phase-title { color:var(--red); }
+  .p5 .phase-title { color:var(--purple); } .p6 .phase-title { color:var(--blue); }
+  .phase ul { list-style:none; padding:0; }
+  .phase li { font-size:0.78rem; color:var(--text); padding:0.15rem 0; padding-left:1rem; position:relative; }
+  .phase li::before { content:'✓'; position:absolute; left:0; color:var(--green); font-size:0.7rem; }
+
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; margin:0.75rem 0; }
+  th { text-align:left; padding:0.5rem 0.75rem; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); border-bottom:1px solid var(--border); }
+  td { padding:0.5rem 0.75rem; border-bottom:1px solid rgba(42,48,64,0.5); }
+  .tag { display:inline-block; padding:0.1rem 0.5rem; border-radius:3px; font-size:0.7rem; font-weight:600; text-transform:uppercase; }
+  .tag-green { background:rgba(34,197,94,0.12); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
+  .tag-gold { background:var(--gold-glow); color:var(--gold); border:1px solid var(--gold-dim); }
+  code { font-family:'JetBrains Mono'; font-size:0.78rem; background:rgba(255,255,255,0.05); padding:0.1rem 0.35rem; border-radius:3px; color:var(--cyan); }
+
+  .flow { display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; margin:1.5rem 0; }
+  .flow-node { padding:0.5rem 0.75rem; background:var(--bg-el); border:1px solid var(--border); border-radius:4px; font-family:'JetBrains Mono'; font-size:0.7rem; text-align:center; white-space:nowrap; }
+  .flow-arrow { font-size:1.2rem; color:var(--text-dim); padding:0 0.3rem; }
+
+  .verdict-mock { max-width:500px; margin:1.5rem auto; padding:1.5rem; background:var(--bg-el); border:1px solid var(--border); border-radius:8px; text-align:center; }
+  .pyrrhic-score { font-family:'Playfair Display'; font-size:4rem; font-weight:800; color:var(--gold); line-height:1; }
+  .pyrrhic-label { font-size:0.7rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--text-dim); margin-top:0.25rem; }
+  .grade-badge { display:inline-block; margin-top:0.75rem; padding:0.3rem 1rem; font-family:'JetBrains Mono'; font-size:1.2rem; font-weight:700; border-radius:4px; }
+  .grade-a { color:var(--green); background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); }
+
+  .dim-bar { margin:0.4rem 0; }
+  .dim-bar-label { display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:0.15rem; }
+  .dim-bar-track { height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+  .dim-bar-fill { height:100%; border-radius:3px; transition:width 0.5s; }
+
+  .peace-plans { margin:1rem 0; }
+  .plan-row { display:flex; align-items:center; gap:0.75rem; padding:0.5rem 0; border-bottom:1px solid rgba(42,48,64,0.3); }
+  .plan-dot { width:8px; height:8px; border-radius:50%; }
+  .plan-name { font-size:0.85rem; font-weight:600; color:var(--text-bright); flex:1; }
+  .plan-week { font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--text-dim); }
+
+  .footer { text-align:center; padding:2rem; color:var(--text-dim); font-size:0.75rem; }
+  .footer .pyrrhic { color:var(--gold); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="report">
+
+<div class="header">
+  <div class="studio">Pyrrhic Games — Implementation Report</div>
+  <h1>Endgame & Negotiation System</h1>
+  <div class="sub">6 phases, 15 source files, 134 tests — built in one session</div>
+  <div class="badge">v0.3.1</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">6</div><div class="stat-label">Phases</div></div>
+  <div class="stat"><div class="stat-value">15</div><div class="stat-label">New Source Files</div></div>
+  <div class="stat"><div class="stat-value">134</div><div class="stat-label">New Tests</div></div>
+  <div class="stat"><div class="stat-value">763</div><div class="stat-label">Total Tests</div></div>
+  <div class="stat"><div class="stat-value">6.6K</div><div class="stat-label">Lines Added</div></div>
+  <div class="stat"><div class="stat-value">0</div><div class="stat-label">Regressions</div></div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">§1</span>
+    <span class="section-title">System Architecture</span>
+  </div>
+  <div class="section-body">
+    <p style="font-size:0.9rem; margin-bottom:1rem;">The endgame system adds a negotiation layer on top of the existing war simulation. Every turn, the engine tracks what each faction has earned — and what it has cost them.</p>
+    <div class="flow">
+      <div class="flow-node" style="border-color:var(--cyan);">War Simulation<br><small>125 pipeline steps</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:var(--amber);">Patron Pressure<br><small>override authority</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:var(--green);">Peace Plans<br><small>4 historical offers</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:var(--cyan);">Capital Tracking<br><small>5 dimensions/faction</small></div>
+    </div>
+    <div style="text-align:center; font-size:1.5rem; color:var(--text-dim); margin:0.5rem 0;">↓ at week 188 ↓</div>
+    <div class="flow">
+      <div class="flow-node" style="border-color:var(--red);">Dayton Negotiation<br><small>8 territorial + 6 institutional</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:var(--purple);">Pyrrhic Score<br><small>verdict + grading</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:var(--gold);">Verdict Screen<br><small>the emotional payoff</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 PHASES -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">§2</span>
+    <span class="section-title">Implementation Phases</span>
+  </div>
+  <div class="section-body">
+    <div class="phase-grid">
+      <div class="phase p1">
+        <div class="phase-title">Phase 1 — Capital Tracking</div>
+        <ul>
+          <li><code>negotiation_types.ts</code> — 5 dimensions</li>
+          <li><code>compute_capital.ts</code> — per-turn engine</li>
+          <li>Territory, humanitarian, credibility, effectiveness, cohesion</li>
+          <li>Faction-specific weighting (ARBiH→humanitarian, RS→territory)</li>
+          <li>8 tests</li>
+        </ul>
+      </div>
+      <div class="phase p2">
+        <div class="phase-title">Phase 2 — Peace Plans</div>
+        <ul>
+          <li>Cutileiro (w0): 44/44/12</li>
+          <li>Vance-Owen (w40): 53/30/17</li>
+          <li>Owen-Stoltenberg (w70): 53/30/17</li>
+          <li>Contact Group (w118): 51/49</li>
+          <li>Bot accept/reject logic + consequences</li>
+          <li>27 tests</li>
+        </ul>
+      </div>
+      <div class="phase p3">
+        <div class="phase-title">Phase 3 — Patron Pressure</div>
+        <ul>
+          <li>Override authority (0-100) per faction</li>
+          <li>Sanctions, territory loss, isolation, defeats</li>
+          <li>Belgrade sanctions RS after Contact Group</li>
+          <li>Srebrenica aftermath + NATO bombing events</li>
+          <li>RS: 10 → 90+ by Dayton (historical arc)</li>
+          <li>27 tests</li>
+        </ul>
+      </div>
+      <div class="phase p4">
+        <div class="phase-title">Phase 4 — Dayton Negotiation</div>
+        <ul>
+          <li>8 territorial packages (Goražde, Brčko, Posavina...)</li>
+          <li>6 institutional points (military, presidency...)</li>
+          <li>Bot AI: threshold + patron override scaling</li>
+          <li>Counter-proposals: drop expensive demands first</li>
+          <li>Triggers at w188 or all overrides ≥95</li>
+          <li>34 tests</li>
+        </ul>
+      </div>
+      <div class="phase p5">
+        <div class="phase-title">Phase 5 — Verdict & Score</div>
+        <ul>
+          <li>Pyrrhic Score (0-100, weighted composite)</li>
+          <li>Letter grades A+ through F</li>
+          <li>Historical anchors per faction</li>
+          <li>Full VerdictScreen component</li>
+          <li>Dayton details + statistics</li>
+          <li>24 tests</li>
+        </ul>
+      </div>
+      <div class="phase p6">
+        <div class="phase-title">Phase 6 — Washington + HV</div>
+        <ul>
+          <li>Washington Agreement trigger logic</li>
+          <li>4 Croatian Army (HV) brigades spawn</li>
+          <li>hv_4th_guards, hv_7th_guards, hv_1st_guards, hv_5th_guards</li>
+          <li>High equipment, western front assignment</li>
+          <li>6-week preparation delay</li>
+          <li>14 tests</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PEACE PLANS TIMELINE -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">§3</span>
+    <span class="section-title">Peace Plan Timeline</span>
+  </div>
+  <div class="section-body">
+    <div class="peace-plans">
+      <div class="plan-row">
+        <div class="plan-dot" style="background:var(--text-dim);"></div>
+        <span class="plan-name">Cutileiro Plan</span>
+        <span style="font-size:0.78rem; color:var(--text);">44 / 44 / 12 cantonization</span>
+        <span class="plan-week">w0</span>
+      </div>
+      <div class="plan-row">
+        <div class="plan-dot" style="background:var(--amber);"></div>
+        <span class="plan-name">Vance-Owen Peace Plan</span>
+        <span style="font-size:0.78rem; color:var(--text);">10 provinces (53/30/17)</span>
+        <span class="plan-week">w40</span>
+      </div>
+      <div class="plan-row">
+        <div class="plan-dot" style="background:var(--amber);"></div>
+        <span class="plan-name">Owen-Stoltenberg Plan</span>
+        <span style="font-size:0.78rem; color:var(--text);">Union of 3 republics (53/30/17)</span>
+        <span class="plan-week">w70</span>
+      </div>
+      <div class="plan-row">
+        <div class="plan-dot" style="background:var(--red);"></div>
+        <span class="plan-name">Contact Group Plan</span>
+        <span style="font-size:0.78rem; color:var(--text);">51% Federation / 49% RS</span>
+        <span class="plan-week">w118</span>
+      </div>
+      <div class="plan-row" style="border-bottom:none;">
+        <div class="plan-dot" style="background:var(--gold); box-shadow:0 0 8px var(--gold-glow);"></div>
+        <span class="plan-name" style="color:var(--gold);">Dayton Agreement</span>
+        <span style="font-size:0.78rem; color:var(--gold);">Forced. 51/49 + institutions.</span>
+        <span class="plan-week" style="color:var(--gold);">w188</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VERDICT MOCKUP -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">§4</span>
+    <span class="section-title">Verdict Screen — The Pyrrhic Score</span>
+  </div>
+  <div class="section-body">
+    <div class="verdict-mock">
+      <div style="font-family:'JetBrains Mono'; font-size:0.55rem; letter-spacing:0.4em; color:var(--gold); opacity:0.5; text-transform:uppercase;">A War Without Victory</div>
+      <div style="font-size:0.85rem; color:var(--text-dim); margin:0.5rem 0;">Dayton Agreement — 21 November 1995</div>
+      <div class="pyrrhic-score">67</div>
+      <div class="pyrrhic-label">Pyrrhic Score</div>
+      <div style="font-size:0.75rem; color:var(--text-dim); font-style:italic; margin-top:0.25rem;">The least bad version of a tragedy</div>
+      <div class="grade-badge grade-a">A</div>
+      <div style="font-size:0.8rem; color:var(--text); margin-top:0.5rem;">Republic of Bosnia and Herzegovina</div>
+      <div style="font-size:0.75rem; color:var(--text-dim);">Roughly historical — 32% territory, Sarajevo held, Federation intact</div>
+
+      <div style="margin-top:1.5rem; text-align:left;">
+        <div class="dim-bar">
+          <div class="dim-bar-label"><span style="color:var(--text-dim);">Military Position</span><span style="color:var(--text);">48 <span style="color:var(--amber); font-size:0.7rem;">C</span></span></div>
+          <div class="dim-bar-track"><div class="dim-bar-fill" style="width:48%; background:var(--amber);"></div></div>
+        </div>
+        <div class="dim-bar">
+          <div class="dim-bar-label"><span style="color:var(--text-dim);">Humanitarian Standing</span><span style="color:var(--text);">78 <span style="color:var(--green); font-size:0.7rem;">A</span></span></div>
+          <div class="dim-bar-track"><div class="dim-bar-fill" style="width:78%; background:var(--green);"></div></div>
+        </div>
+        <div class="dim-bar">
+          <div class="dim-bar-label"><span style="color:var(--text-dim);">International Credibility</span><span style="color:var(--text);">72 <span style="color:var(--green); font-size:0.7rem;">B</span></span></div>
+          <div class="dim-bar-track"><div class="dim-bar-fill" style="width:72%; background:var(--blue);"></div></div>
+        </div>
+        <div class="dim-bar">
+          <div class="dim-bar-label"><span style="color:var(--text-dim);">Military Effectiveness</span><span style="color:var(--text);">65 <span style="color:var(--blue); font-size:0.7rem;">B</span></span></div>
+          <div class="dim-bar-track"><div class="dim-bar-fill" style="width:65%; background:var(--blue);"></div></div>
+        </div>
+        <div class="dim-bar">
+          <div class="dim-bar-label"><span style="color:var(--text-dim);">Political Cohesion</span><span style="color:var(--text);">58 <span style="color:var(--amber); font-size:0.7rem;">B</span></span></div>
+          <div class="dim-bar-track"><div class="dim-bar-fill" style="width:58%; background:var(--amber);"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PATRON PRESSURE ARC -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">§5</span>
+    <span class="section-title">RS Patron Override Arc — Milošević's Tightening Grip</span>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>Period</th><th>Override</th><th>Key Event</th><th>Milošević Can...</th></tr></thead>
+      <tbody>
+        <tr><td>1992</td><td style="color:var(--green);">10-15</td><td>War begins, VRS at peak</td><td>Recommend only</td></tr>
+        <tr><td>Early 1993</td><td style="color:var(--green);">15-20</td><td>Vance-Owen pressure</td><td>Recommend only</td></tr>
+        <tr><td>Mid-1994</td><td style="color:var(--amber);">40-50</td><td>RS rejects Contact Group → Belgrade sanctions</td><td>Urge acceptance, impose costs</td></tr>
+        <tr><td>Early 1995</td><td style="color:var(--amber);">50-60</td><td>Sanctions biting, isolation</td><td>Demand acceptance, lock options</td></tr>
+        <tr><td>Aug-Oct 1995</td><td style="color:var(--red);">75-90</td><td>NATO bombing + Storm + collapse</td><td>Force framework acceptance</td></tr>
+        <tr><td style="color:var(--gold); font-weight:700;">Dayton</td><td style="color:var(--red); font-weight:700;">90-95</td><td style="color:var(--gold);">Milošević sits in RS chair</td><td style="color:var(--gold); font-weight:700;">Sign for them</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.82rem; color:var(--text-dim); font-style:italic; margin-top:0.5rem;">Rejecting the Contact Group plan in 1994 felt like defiance — but it's the decision that gave Milošević the authority to force Dayton in 1995. Short-term defiance, long-term catastrophe. Pyrrhic.</p>
+  </div>
+</div>
+
+<!-- FILES -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">§6</span>
+    <span class="section-title">New Files Created</span>
+  </div>
+  <div class="section-body">
+    <table>
+      <thead><tr><th>File</th><th>Phase</th><th>Lines</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>negotiation_types.ts</code></td><td>1</td><td>~240</td><td>Types: capital, patron, plans, Dayton</td></tr>
+        <tr><td><code>compute_capital.ts</code></td><td>1</td><td>~250</td><td>Per-turn capital computation</td></tr>
+        <tr><td><code>peace_plan_data.ts</code></td><td>2</td><td>~120</td><td>4 historical plan definitions</td></tr>
+        <tr><td><code>peace_plans.ts</code></td><td>2</td><td>~200</td><td>Plan evaluation + resolution</td></tr>
+        <tr><td><code>patron_pressure.ts</code></td><td>3</td><td>~180</td><td>Override authority formula</td></tr>
+        <tr><td><code>patron_events.ts</code></td><td>3</td><td>~120</td><td>Scripted patron events</td></tr>
+        <tr><td><code>territorial_packages.ts</code></td><td>4</td><td>~150</td><td>8 Dayton territorial packages</td></tr>
+        <tr><td><code>institutional_packages.ts</code></td><td>4</td><td>~100</td><td>6 institutional negotiation points</td></tr>
+        <tr><td><code>bot_negotiation.ts</code></td><td>4</td><td>~180</td><td>Bot negotiation AI</td></tr>
+        <tr><td><code>dayton_negotiation.ts</code></td><td>4</td><td>~200</td><td>Dayton trigger + resolution</td></tr>
+        <tr><td><code>scoring.ts</code></td><td>5</td><td>~250</td><td>Pyrrhic Score + grading</td></tr>
+        <tr><td><code>VerdictScreen.tsx</code></td><td>5</td><td>~400</td><td>Full verdict UI</td></tr>
+        <tr><td><code>PeacePlanModal.tsx</code></td><td>2</td><td>~80</td><td>Peace plan response UI (stub)</td></tr>
+        <tr><td><code>hv_integration.ts</code></td><td>6</td><td>~180</td><td>HV brigade spawning</td></tr>
+        <tr><td><code>washington_agreement.ts</code></td><td>6</td><td>ext</td><td>Washington trigger extension</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="pyrrhic">PYRRHIC GAMES</div>
+  <div style="margin-top:0.5rem;">A War Without Victory — v0.3.1</div>
+  <div style="margin-top:0.25rem;">Endgame & Negotiation System Report — 15 March 2026</div>
+  <div style="margin-top:0.75rem; color:var(--gold); opacity:0.5;">"Another such victory and we are undone."</div>
+</div>
+
+</div>
+</body>
+</html>
