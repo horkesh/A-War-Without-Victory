@@ -475,7 +475,6 @@
     "default_equipment_class": "light_infantry",
     "available_from": 4,
     "mandatory": true,
-    "initial_personnel": 800,
     "initial_personnel": 600,
     "initial_cohesion": 48
   },
@@ -491,9 +490,9 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1200,
-    "initial_cohesion": 55,
-    "defense_terrain_bonus": 0.25,
+    "initial_personnel": 1000,
+    "initial_cohesion": 52,
+    "defense_terrain_bonus": 0.2,
     "distinction_potential": "tier_2",
     "initial_officer_quality": 0.15
   },
@@ -509,9 +508,9 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
-    "initial_cohesion": 52,
-    "defense_terrain_bonus": 0.25,
+    "initial_personnel": 800,
+    "initial_cohesion": 50,
+    "defense_terrain_bonus": 0.2,
     "distinction_potential": "tier_2",
     "initial_officer_quality": 0.15
   },
@@ -527,9 +526,9 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
-    "initial_cohesion": 52,
-    "defense_terrain_bonus": 0.20,
+    "initial_personnel": 800,
+    "initial_cohesion": 50,
+    "defense_terrain_bonus": 0.15,
     "distinction_potential": "tier_2",
     "initial_officer_quality": 0.15
   },
@@ -685,7 +684,7 @@
     "mandatory": true,
     "initial_personnel": 2500,
     "initial_cohesion": 75,
-    "defense_terrain_bonus": 0.70,
+    "defense_terrain_bonus": 0.7,
     "distinction_potential": "tier_1",
     "initial_officer_quality": 0.25
   },
@@ -1605,7 +1604,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 40,
-    "initial_personnel": 1100,
+    "initial_personnel": 400,
     "initial_cohesion": 72,
     "initial_morale": 55,
     "initial_officer_quality": 0.08,
@@ -1642,7 +1641,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 40,
-    "initial_personnel": 1100,
+    "initial_personnel": 400,
     "initial_cohesion": 72,
     "initial_morale": 55,
     "composition": {
@@ -1678,7 +1677,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 40,
-    "initial_personnel": 1100,
+    "initial_personnel": 400,
     "initial_cohesion": 72,
     "initial_morale": 55,
     "composition": {
@@ -1714,7 +1713,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 40,
-    "initial_personnel": 1100,
+    "initial_personnel": 400,
     "initial_cohesion": 72,
     "initial_morale": 55,
     "composition": {
@@ -1750,7 +1749,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 40,
-    "initial_personnel": 1100,
+    "initial_personnel": 400,
     "initial_cohesion": 72,
     "initial_morale": 55,
     "composition": {
@@ -1786,7 +1785,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 40,
-    "initial_personnel": 1100,
+    "initial_personnel": 400,
     "initial_cohesion": 72,
     "initial_morale": 55,
     "composition": {
@@ -1822,7 +1821,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 40,
-    "initial_personnel": 1100,
+    "initial_personnel": 400,
     "initial_cohesion": 72,
     "initial_morale": 55,
     "composition": {
@@ -2959,7 +2958,7 @@
     "mandatory": true,
     "initial_personnel": 800,
     "initial_cohesion": 50,
-    "defense_terrain_bonus": 0.30
+    "defense_terrain_bonus": 0.3
   },
   {
     "id": "rs_ilijas_brigade",
@@ -3005,7 +3004,7 @@
     "mandatory": true,
     "initial_personnel": 500,
     "initial_cohesion": 45,
-    "defense_terrain_bonus": 0.40,
+    "defense_terrain_bonus": 0.4,
     "initial_officer_quality": 0.15
   },
   {
@@ -3498,7 +3497,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 2,
     "mandatory": true,
-    "initial_personnel": 800,
+    "initial_personnel": 700,
     "initial_cohesion": 55,
     "recruit_pool_faction": "HRHB"
   },
@@ -3891,7 +3890,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 60,
-    "initial_personnel": 900,
+    "initial_personnel": 400,
     "initial_cohesion": 70,
     "initial_morale": 55,
     "composition": {
@@ -3927,7 +3926,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 60,
-    "initial_personnel": 900,
+    "initial_personnel": 400,
     "initial_cohesion": 70,
     "initial_morale": 55,
     "composition": {
@@ -3963,7 +3962,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 60,
-    "initial_personnel": 900,
+    "initial_personnel": 400,
     "initial_cohesion": 70,
     "initial_morale": 55,
     "composition": {
@@ -3999,7 +3998,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 60,
-    "initial_personnel": 900,
+    "initial_personnel": 400,
     "initial_cohesion": 70,
     "initial_morale": 55,
     "composition": {
@@ -4035,7 +4034,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 60,
-    "initial_personnel": 900,
+    "initial_personnel": 400,
     "initial_cohesion": 70,
     "initial_morale": 55,
     "composition": {
@@ -4134,7 +4133,7 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 55,
-    "defense_terrain_bonus": 0.30,
+    "defense_terrain_bonus": 0.3,
     "initial_officer_quality": 0.15
   }
 ]

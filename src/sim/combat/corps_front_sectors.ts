@@ -867,10 +867,10 @@ function classifyBrigadesByTerritory(
             for (let i = 0; i < corpsSectors.length; i++) {
                 const s = corpsSectors[i]!;
                 // Weight = edges × threat multiplier from enemy personnel.
-                // log2 scaling: 0 enemy → 1.0×, 1000 → ~11×, 5000 → ~13×, 20000 → ~15×
-                // This ensures high-threat sectors get proportionally more brigades
-                // while quiet sectors still get baseline coverage.
-                const threatMult = Math.max(1.0, Math.log2(sectorEnemyPers[i]! + 1));
+                // sqrt scaling: 0 enemy → 1.0×, 500 → 1.0×, 2000 → 2.0×, 8000 → 4.0×, 20000 → 6.3×
+                // Steeper differentiation than log2 — sectors facing 20k enemy get 6× weight
+                // vs quiet sectors, ensuring high-threat fronts (Sarajevo) get adequate coverage.
+                const threatMult = Math.max(1.0, Math.sqrt(sectorEnemyPers[i]! / 500));
                 const w = s.length_edges * threatMult;
                 weights.push(w);
                 totalWeight += w;
