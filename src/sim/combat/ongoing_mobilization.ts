@@ -61,7 +61,7 @@ const BASE_MOBILIZATION_RATE = 0.003;
  *   Fix: RS w53-78 1.1→1.4, w79-104 1.0→1.5; HRHB w53-78 1.0→1.3, w79-104 0.6→0.9.
  */
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.10,
+    RBiH: 0.03,  // n793: 0.05 gave 156k (still high). 0.03 to target ~125k with 122 brigades.
     RS: 0.12,
     HRHB: 0.29
 };
