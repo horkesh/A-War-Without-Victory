@@ -174,6 +174,81 @@ The player can resist Dayton but cannot avoid it. The final screen on 21 Novembe
 
 ---
 
+## 3b. Patron Pressure in Negotiations
+
+**Patrons are not decorative. They determine whether a faction can say "no" at the table.**
+
+Each faction has a patron relationship that evolves over the war:
+
+| Faction | Patron | Relationship Arc |
+|---------|--------|-----------------|
+| RS | Serbia (Milošević) | Starts strong → fractures after Contact Group rejection (1994) → Milošević negotiates FOR RS at Dayton (1995) |
+| RBiH | International community (US, UN) | Starts with sympathy → strengthens after atrocities → US brokers Dayton directly |
+| HRHB | Croatia (Tuđman) | Starts with direct military support → HVO war crimes strain relationship → Washington Agreement realigns → Tuđman at Dayton table |
+
+### Patron Override Mechanic
+
+The key insight: **Milošević could not force the Bosnian Serbs in 1993, but he did force them in 1995.** This isn't arbitrary — it emerged from specific conditions:
+
+**1993 (Vance-Owen):** RS held 70% territory, VRS military was at peak strength, Milošević still needed Karadžić politically, Belgrade sanctions on RS hadn't started yet, there was no NATO bombing threat. The RS parliament could reject the plan and Milošević couldn't override them. The patron had **low override authority**.
+
+**1995 (Dayton):** RS territory collapsing (70%→49%), VRS losing ground to Federation + NATO bombing, Milošević had already sanctioned RS after Contact Group rejection, RSK destroyed by Operation Storm, Belgrade exhausted by international sanctions. Milošević negotiated on behalf of RS — Karadžić/Mladić weren't even at Dayton. The patron had **maximum override authority**.
+
+### Patron Override Authority (0-100 scale)
+
+Tracks how much a patron can force their client faction to accept terms:
+
+```
+patron_override_authority[faction] = f(
+    patron_sanctions_on_client,     // Belgrade sanctions on Pale (+30)
+    client_military_collapse,       // territory loss rate (+20)
+    client_international_isolation, // ICTY indictments, UN votes (+15)
+    patron_own_exhaustion,          // patron's own war weariness (+15)
+    alternative_patron_options,     // can the client find another patron? (-20 if yes)
+    client_military_strength,       // strong army resists patron (-25 if VRS at peak)
+    recent_military_defeats,        // Operation Storm, NATO bombing (+20)
+)
+```
+
+**At Dayton:** If patron override authority > 75, the patron can **force acceptance** on their client. The player (if playing the client faction) sees their negotiation options narrowed — certain demands are "blocked by [patron]." If playing RS in 1995, Milošević removes your ability to reject the deal entirely.
+
+**At earlier peace plans:** Lower override authority means the player can reject. But rejection has consequences — it may increase patron sanctions, which raises future override authority. The Bosnian Serbs rejecting the Contact Group plan in 1994 is what caused Milošević to sanction them, which is what gave him the override authority by 1995.
+
+### Patron Pressure Timeline (Historical Baseline)
+
+| Period | RS Override | RBiH Override | HRHB Override | Key Events |
+|--------|-------------|---------------|---------------|------------|
+| 1992 | 10-15 | 5-10 | 20-30 | Milošević supportive, US uninvolved, Tuđman directing HVO |
+| Early 1993 | 15-20 | 15-20 | 30-40 | Vance-Owen pressure, Tuđman pushes Croat-Bosniak war |
+| Late 1993 | 20-25 | 20-25 | 35-45 | Owen-Stoltenberg, international frustration growing |
+| Mid-1994 | 40-50 | 25-30 | 60-70 | Contact Group rejection → Belgrade sanctions RS; Washington Agreement → Croatia controls HVO |
+| Early 1995 | 50-60 | 30-40 | 70-80 | Sanctions biting, Srebrenica pressure building |
+| Aug-Oct 1995 | 75-90 | 50-60 | 80-90 | NATO bombing, Storm, rapid RS territorial collapse |
+| **Dayton** | **90-95** | **60-70** | **85-90** | Milošević negotiates for RS. Tuđman negotiates for HRHB. US brokers for RBiH. |
+
+### Mechanical Effect on Negotiations
+
+When patron override > threshold during a peace plan negotiation:
+
+| Override Level | Effect |
+|---------------|--------|
+| 0-25 | Patron "recommends" acceptance. No mechanical effect. Player fully free. |
+| 25-50 | Patron "urges" acceptance. Rejection costs international credibility capital. |
+| 50-75 | Patron "demands" acceptance. Rejection triggers patron sanctions (supply reduction, diplomatic isolation). Some negotiation options locked out. |
+| 75-100 | Patron **forces** acceptance of minimum terms. Player can negotiate details but cannot reject the framework. At Dayton with override 90+, the patron sits at the table instead of the player for rejected items — the worst-case version is imposed. |
+
+### Player Agency Within Patron Pressure
+
+Even at high override, the player retains some agency:
+- **Spend military capital** to resist patron pressure (you can say no if your army is winning)
+- **Spend humanitarian capital** to get international community to restrain the patron
+- **Negotiate within the framework** — even if you can't reject the 51/49 split, you can fight over which specific territories, and which institutions
+- **Pre-Dayton actions** matter — a player who kept patron relationship healthy has more room than one who burned bridges
+
+This creates the historical dilemma: RS rejecting the Contact Group plan felt powerful in 1994, but it's the decision that gave Milošević the authority to force Dayton in 1995. Short-term defiance, long-term catastrophe. Pyrrhic.
+
+---
+
 ## 4. Scenarios
 
 | Scenario | Start Date | Turn 0 | Dayton Turn | Duration | Focus |
