@@ -169,6 +169,11 @@ When all phases are done (or all unblocked phases completed):
 - [Patterns that should be extracted]
 - [Tests that should exist but don't]
 
+## Lessons Learned (appended to docs/life_lessons.md)
+- **[LESSON-1]**: [Night Shift] [context]. Wrong: [what went wrong]. Right: [what to do instead].
+- **[LESSON-2]**: ...
+(Only list if something went wrong or unexpectedly. "Everything worked" = no lessons.)
+
 ## Commits (chronological)
 1. [hash] — [message]
 2. [hash] — [message]
@@ -187,7 +192,21 @@ When all phases are done (or all unblocked phases completed):
 4. [Blocked items to unblock: painting, external expert]
 ```
 
-3. **Propagation checklist** (per each completed milestone):
+3. **Write Night Shift Lessons:** Append to `docs/life_lessons.md` under a new section `## Night Shift Lessons`. These capture execution-specific learnings that help future night shifts run better.
+
+   **What to capture:**
+   - **Plan-vs-reality gaps:** "Plan said to modify X.ts but Phase 2 had already refactored it into Y.ts + Z.ts. Had to adapt on the fly." → Lesson: plans should reference functions, not file paths, since refactoring between phases changes file layout.
+   - **Phase ordering issues:** "Phase 3 needed a type from Phase 4. Had to create a stub type and replace later." → Lesson: cross-phase type dependencies should be resolved in infrastructure phase.
+   - **Test strategy insights:** "The plan said ~40 tests but the real number was 65 because each effect type needs its own test." → Lesson: estimate 1.5× the planned test count for effect/event systems.
+   - **Simplify findings patterns:** "Every phase had the same issue: duplicated CANONICAL_FACTIONS array." → Lesson: extract shared constants to infrastructure before starting multi-phase plans.
+   - **Timing insights:** "Phase 3 (event content) took 2× longer than estimated because historical research for each event's mechanical effect requires careful calibration." → Lesson: content authoring phases need 2× estimates.
+   - **Integration gotchas:** "Wiring v0.4.3 economy events through v0.4.1 event bus required extending the EventEffect union — but the v0.4.1 plan hadn't anticipated the economy effect types." → Lesson: event bus plans should include a reserved 'custom' effect type for downstream extensions.
+
+   **Format:** Same as existing life lessons — context, wrong approach, right approach, "do instead" rule. Tag with `[Night Shift]` prefix so day shift can distinguish from day shift lessons.
+
+   **Rule:** Only write lessons for things that went WRONG or UNEXPECTEDLY. Don't log "everything worked as planned" — that's not a lesson, that's a report (goes in morning report). Lessons are for friction, surprises, and mistakes that future night shifts should avoid.
+
+4. **Propagation checklist** (per each completed milestone):
    - [ ] Implementation report in `docs/40_reports/implemented/`
    - [ ] Canon docs updated (if plan's checklist requires it)
    - [ ] Master files updated (if applicable)
