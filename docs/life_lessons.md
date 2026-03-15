@@ -21,6 +21,12 @@
 
 ## Active Lessons (no recent violations)
 
+### [OOB] Home brigades must be strong enough to survive the initial blitz (2026-03-15) — NEW
+- **Context**: Gradačac fell to VRS at w23 (PR 19.24 — essentially undefended). The 213th Vitežka started at 550 personnel and was swept at w5 during the VRS blitz, displaced to Doboj, and never returned. Gradačac was never captured historically — the 213th was one of ARBiH's strongest formations. Similarly, the 215th Vitežka at Bijela (700 pers) was overrun at w7.
+- **Wrong approach**: Starting brigades at 550-700 personnel and expecting the recruitment pool to reinforce them in time. The VRS blitz hits at w3-w7 with PR 5-19 — brigades need to be combat-capable from turn 0.
+- **Right approach**: Brigades defending critical positions (Gradačac, Bijela, Teočak, etc.) must start with enough personnel to absorb the initial blitz (1200-1500 pers). The pool reinforces them AFTER the front stabilizes, not before. Don't use `hold_municipalities` as a substitute for adequate initial strength — a properly manned home brigade holds its position naturally.
+- **How to apply**: When reviewing OOB for a position that should hold historically, check: (1) is the home brigade's initial_personnel enough to survive a PR 2-3:1 attack? (2) does the brigade have defense_terrain_bonus appropriate for the terrain? (3) is the brigade available from turn 0 (not gated behind available_from)?
+
 ### [Architecture] Virtual identity routing must be respected by ALL consumers (2026-03-15) — NEW
 - **Context**: The elite loan system routed brigades through `loanedCorpsMap` in `classifyBrigadesByTerritory` (sector assignment) but the bot brigade AI used `brigade.corps_id` directly. The sector system saw the elite as a Drina Corps brigade; the AI saw it as a Main Staff brigade with no operations. Result: elites assigned to correct sectors but received zero operation orders for 40 weeks.
 - **Wrong approach**: Patching the routing in one consumer (sector assignment) and assuming others will follow. Each consumer independently looks up `corps_id`.
