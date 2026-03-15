@@ -14225,3 +14225,25 @@ Fix: added `if (isActiveSectorOperationParticipant) return false;` guard at the 
 **Files:** `src/sim/combat/officer_system.ts` (parseWarCrimesRecord + field inclusion), `src/ui/map/components/OfficerProfile.tsx` (WarCrimesBadge text redesign), `src/ui/map/components/OfficerEventBadge.tsx` (WarCrimesBadge text redesign + charges type), `src/ui/map/data/types.ts` (charges field), `src/ui/map/data/GameStateAdapter.ts` (charges mapping).
 
 **Lesson:** When a validator constructs objects by explicit field listing, every new field on the type must be added to the validator. The type system doesn't catch this because the field is optional — `war_crimes_record?: ...` compiles fine when omitted. Silent data loss.
+
+---
+
+## [2026-03-15] Officer Roster Overhaul — 17 New Officers, Elite Commanders, Historical Corrections
+
+**GUI: Corps Selection Highlighting:** Selecting a corps now highlights all its sectors and turns unit icons white on the map. Map pans to fit all corps sectors (fitBounds). Fixed: 50ms animation loop only runs for transient hover, not persistent selection.
+
+**Officer System Bug Fix:** `getFormationCommander()` and `getFactionArmyCommander()` in `officerUtils.ts` searched static `namedOfficerData` without checking runtime `status === 'active'`. Result: Delić (available_from_turn 60) showed as initial ARBiH commander instead of Halilović. Fix: both functions now check `namedOfficerStateById[id].status === 'active'`.
+
+**Historical Corrections:** Čikotić spelling fixed (Cikotić). 2KK succession reversed (Tomanić initial, Borić succeeds). Živanović verdict corrected (convicted → indicted). Andrić and Arsić war_crimes_records REMOVED (fabricated — neither was tried or convicted).
+
+**Combat Death Policy:** Removed `available_until_turn` from officers who died in combat (Nanić, Hujdur, Šehović). Their elevated `casualty_vulnerability` handles KIA risk organically. `available_until_turn` reserved for organizational replacements only.
+
+**New Officers (17):** 6 ARBiH Orden heroja recipients (Hadžić, Hodžić, Mešić, Bešić, Zajko, Malkić), 2 ARBiH enclave commanders (Imamović/Goražde, Palić/Žepa), 7 HVO officers (Kordić, Oršolić, Totić, Nakić, Sopta, Bilonjić + political origin). All 9 Orden heroja recipients now in roster.
+
+**Elite Brigade Commanders:** Added `elite_commander` field to all 8 elite brigades (Rađo/Guards, Tirić/Black Swans, Samardžić/1st Guards Moto, Savčić/65th Protection, Glasnović/1st ABB, Sopta/2nd Domagoj, Nakić/3rd Jastrebovi, Bilonjić/4th Sinovi Posavine). Permanent, cannot die/promote/run ops. Fixed: 4th Guards missing `is_elite: true`.
+
+**Final roster:** 98 named officers (RS: 32, RBiH: 38, HRHB: 28).
+
+**Files:** `data/source/apr1992_officers.json`, `data/source/oob_brigades.json`, `src/ui/map/utils/officerUtils.ts`, `src/ui/map/components/MapContainer.tsx`.
+
+**Report:** `docs/40_reports/20260315_OFFICER_ROSTER_OVERHAUL.md`

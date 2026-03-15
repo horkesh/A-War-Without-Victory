@@ -961,3 +961,25 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 - **The downstream illusion:** The UI adapter, components, and types were all correctly wired. `OfficerProfile.tsx` had a `WarCrimesBadge` component, `GameStateAdapter.ts` mapped the field, `types.ts` declared it. Everything compiled. But the badge never rendered because the data was `undefined` at runtime — stripped 3 layers upstream.
 - **Rule:** When adding optional fields to a type that has an explicit-field validator, always update the validator simultaneously. Search for the type name + "push" or "result.push" to find validators that construct the type. Consider adding a test that round-trips the JSON through validation and asserts the field survives.
 - **(2026-03-15)** — See PROJECT_LEDGER.md 2026-03-15 war crimes fix entry.
+
+## 2026-03-15 - Elite commander vs named officer architecture
+
+- **Named officers** (`apr1992_officers.json`): Corps commanders and above. Participate in the officer succession system — can die (casualty_vulnerability), transfer, be replaced. Drive operation preparation tempo via competence/aggressiveness personality traits. Player-choice succession for player faction; bot factions auto-succeed. 98 total (RS 32, RBiH 38, HRHB 28).
+- **Elite commanders** (`oob_brigades.json`, `elite_commander` field): Permanent brigade-level. Cannot die, cannot promote to corps, cannot command operations. Represent iconic commander-unit bonds (e.g., Tirić and the Black Swans, Glasnović and the ABB). Purely informational for UI display. 8 total across all factions.
+- **Key distinction:** Named officers flow through `officer_system.ts` (validation, state tracking, succession events, pending_officer_events). Elite commanders are static strings on the brigade OOB entry — no state tracking, no events, no gameplay effect. They never enter `named_officer_data` or `named_officer_state_by_id`.
+- **Design rule:** Never suggest promoting an elite commander to corps or giving them operation command. The permanence is the point — these are the brigade's identity.
+
+## 2026-03-15 - Combat death policy: casualty_vulnerability vs available_until_turn
+
+- **`available_until_turn`** = organizational replacement. The officer's departure is a political or administrative decision: transfer, retirement, reassignment, loss of confidence. Creates a `replacement_suggested` event for the player faction. Deterministic timing.
+- **`casualty_vulnerability`** = combat death risk. The officer may die during the simulation based on combat exposure and this probability modifier. Higher values (0.25-0.30) for officers historically KIA early. Organic and probabilistic — the officer might survive in an alternate history.
+- **Never combine both for KIA officers.** Using `available_until_turn` to model a combat death creates a deterministic death date — the officer always dies at that exact turn. This violates the simulation's principle that combat outcomes should emerge from gameplay. Officers who historically died in combat (Nanić KIA Oct 1995, Hujdur KIA Sep 1993, Šehović KIA Aug 1992) use only `casualty_vulnerability`.
+- **When to use `available_until_turn`:** Halilović replaced by Delić (political decision, turn 60). Talić replaced by Kelečević (transfer/death outside combat zone). Blaškić replaced by Filipović (political reassignment).
+
+## 2026-03-15 - Orden heroja oslobodilačkog rata — all 9 recipients documented
+
+- Bosnia's highest military decoration, awarded to 9 individuals (all ARBiH). All are now in the officer roster.
+- **KIA recipients (3):** Safet Hadžić (KIA Apr 1992, Pretis factory), Mehdin Hodžić (KIA May 1992, Zvornik), Adil Bešić (KIA Nov 1992, Bihać). All have elevated casualty_vulnerability (0.25-0.30).
+- **Survivors (3):** Hajrudin Mešić ("Zmaj od Majevice", 2nd Corps), Safet Zajko (1st Corps, 2nd Motorized), Nesib Malkić (2nd Corps, 210th Mountain).
+- **Previously in roster (3):** Izet Nanić (5th Corps, KIA 1995), Midhad Hujdur "Hujka" (4th Corps, KIA 1993), Enver Šehović (3rd Corps, KIA 1992).
+- **Design note:** The decoration is informational only — no gameplay modifier. It serves as a historical marker in officer profiles. The `casualty_vulnerability` field independently handles the elevated combat risk these officers faced.

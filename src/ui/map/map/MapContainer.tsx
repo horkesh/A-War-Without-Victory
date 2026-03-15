@@ -1398,19 +1398,11 @@ export function MapContainer() {
       return true;
     };
 
-    // Derive sector color from corps palette
-    const getSectorFillColor = (): string => {
-      const state = loadedGameState;
-      if (!state?.corpsFrontSectors || !selectedCorpsFrontSectorId) return 'rgba(196, 163, 90, 0.15)';
-      const sector = state.corpsFrontSectors.find((s) => s.sector_id === selectedCorpsFrontSectorId);
-      if (!sector) return 'rgba(196, 163, 90, 0.15)';
-      const colorMap = buildCorpsColorMap(state.corpsFrontSectors);
-      const corpsHex = colorMap[sector.corps_id] ?? '#c4a35a';
-      // Parse hex to rgba with low opacity for fill
-      const r = parseInt(corpsHex.slice(1, 3), 16);
-      const g = parseInt(corpsHex.slice(3, 5), 16);
-      const b = parseInt(corpsHex.slice(5, 7), 16);
-      return `rgba(${r}, ${g}, ${b}, 0.18)`;
+    const hexToRgba = (hex: string, alpha: number): string => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     };
 
     const applySectorHighlight = () => {
@@ -1420,10 +1412,11 @@ export function MapContainer() {
       if (hoveredSectorId) activeSectorIds.add(hoveredSectorId);
       if (selectedCorpsFrontSectorId) activeSectorIds.add(selectedCorpsFrontSectorId);
 
-      // If a corps is hovered, highlight all its sectors
-      if (hoveredCorpsId && loadedGameState?.corpsFrontSectors) {
+      // If a corps is hovered or selected, highlight all its sectors
+      const activeCorpsId = selectedCorpsId || hoveredCorpsId;
+      if (activeCorpsId && loadedGameState?.corpsFrontSectors) {
         loadedGameState.corpsFrontSectors
-          .filter((s) => s.corps_id === hoveredCorpsId)
+          .filter((s) => s.corps_id === activeCorpsId)
           .forEach((s) => activeSectorIds.add(s.sector_id));
       }
 
@@ -1463,15 +1456,22 @@ export function MapContainer() {
 
       if (!state?.frontEdgesOsid) return true;
 
+      // Compute corps color map once for all branches
+      const corpsColorMap = state?.corpsFrontSectors ? buildCorpsColorMap(state.corpsFrontSectors) : {};
+
+      // Resolve highlight corps ID: explicit corps selection, or derived from selected sector
+      const highlightCorpsId = selectedCorpsId ?? selectedSector?.corps_id ?? null;
+      const highlightCorpsHex = highlightCorpsId ? (corpsColorMap[highlightCorpsId] ?? '#c4a35a') : '#c4a35a';
+
       try {
         map.setFilter(SECTOR_FILL_LAYER_ID,
           allOsids.length > 0
             ? ['in', ['get', 'osid'], ['literal', allOsids]] as maplibregl.FilterSpecification
             : ['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification
         );
-        // Use a generic highlight color for multi/hover, or specific if single selection
-        if (!isMulti && ids[0] === selectedCorpsFrontSectorId) {
-          map.setPaintProperty(SECTOR_FILL_LAYER_ID, 'fill-color', getSectorFillColor());
+        // Use corps color for corps/sector selection, generic gold for hover-only
+        if (selectedCorpsId || (!isMulti && selectedCorpsFrontSectorId)) {
+          map.setPaintProperty(SECTOR_FILL_LAYER_ID, 'fill-color', hexToRgba(highlightCorpsHex, 0.18));
         } else {
           map.setPaintProperty(SECTOR_FILL_LAYER_ID, 'fill-color', 'rgba(196, 163, 90, 0.20)');
         }
@@ -1503,20 +1503,15 @@ export function MapContainer() {
         console.warn('[MapContainer] sector edge glow highlight failed:', e);
       }
 
-      // C.3: Brigade rings — highlight assigned + reserve brigade markers for selected sector
+      // C.3: Brigade rings — highlight assigned + reserve brigades for selected sector or corps
       try {
         if (safeHasLayer(map, SECTOR_BRIGADE_RINGS_LAYER_ID)) {
-          if (selectedSector) {
-            const allBrigadeIds = [...selectedSector.assigned_brigade_ids, ...selectedSector.reserve_brigade_ids];
-            if (allBrigadeIds.length > 0) {
-              map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['in', ['get', 'id'], ['literal', allBrigadeIds]] as any);
-              // Use corps color for rings
-              const colorMap = buildCorpsColorMap(state!.corpsFrontSectors!);
-              const ringColor = colorMap[selectedSector.corps_id] ?? '#c4a35a';
-              map.setPaintProperty(SECTOR_BRIGADE_RINGS_LAYER_ID, 'circle-stroke-color', ringColor);
-            } else {
-              map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['==', ['get', 'id'], '__none__'] as any);
-            }
+          // Collect brigade IDs from whichever source is active
+          const ringSectors = selectedCorpsId ? allActiveSectors : selectedSector ? [selectedSector] : [];
+          const ringBrigadeIds = ringSectors.flatMap(s => [...s.assigned_brigade_ids, ...s.reserve_brigade_ids]);
+          if (ringBrigadeIds.length > 0) {
+            map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['in', ['get', 'id'], ['literal', ringBrigadeIds]] as any);
+            map.setPaintProperty(SECTOR_BRIGADE_RINGS_LAYER_ID, 'circle-stroke-color', highlightCorpsHex);
           } else {
             map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['==', ['get', 'id'], '__none__'] as any);
           }
@@ -1525,36 +1520,34 @@ export function MapContainer() {
         console.warn('[MapContainer] sector brigade rings focus failed:', e);
       }
 
-      // C.3b: Sector Unit Highlight (Static White Glow)
+      // C.3b + C.3c: Unit white glow + white icon overlay — sector or corps selection
+      const unitHighlightActive = !!(selectedCorpsId || selectedCorpsFrontSectorId);
+      // Use sector_id IN filter for corps (covers all brigades assigned to corps sectors)
+      const unitFilter: any = selectedCorpsId
+        ? ['in', ['get', 'sector_id'], ['literal', ids]]
+        : selectedCorpsFrontSectorId
+          ? ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]
+          : ['==', ['get', 'sector_id'], '__none__'];
+
       try {
         if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
-          if (selectedCorpsFrontSectorId) {
-            map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]);
+          map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, unitFilter);
+          if (unitHighlightActive) {
             map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-opacity', 0.6);
             map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-radius', [
               'interpolate', ['linear'], ['zoom'],
-              6, 12,
-              10, 16,
-              14, 22
+              6, 12, 10, 16, 14, 22
             ]);
-          } else {
-            map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, ['==', ['get', 'sector_id'], '__none__']);
           }
         }
       } catch (e) {
         console.warn('[MapContainer] sector unit highlight failed:', e);
       }
 
-      // C.3c: Unit marker color change (Static White)
       try {
         if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
-          if (selectedCorpsFrontSectorId) {
-            map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]);
-            map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0.98);
-          } else {
-            map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0);
-            map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, ['==', ['get', 'sector_id'], '__none__']);
-          }
+          map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, unitFilter);
+          map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', unitHighlightActive ? 0.98 : 0);
         }
       } catch (e) {
         console.warn('[MapContainer] unit marker white highlight failed:', e);
@@ -1564,8 +1557,9 @@ export function MapContainer() {
     };
 
     if (applySectorHighlight()) {
-      // If we have selected sector or hover, continue animation
-      if (selectedCorpsFrontSectorId || hoveredSectorId || hoveredCorpsId) {
+      // Only loop for transient hover states; static selections (corps/sector) are stable after one apply.
+      const hasTransientHover = !!(hoveredSectorId || hoveredCorpsId);
+      if (hasTransientHover) {
         const handle = setTimeout(() => applySectorHighlight(), 50);
         return () => clearTimeout(handle);
       }
@@ -1575,7 +1569,7 @@ export function MapContainer() {
       if (applySectorHighlight()) clearInterval(poll);
     }, 250);
     return () => clearInterval(poll);
-  }, [mapReady, selectedCorpsFrontSectorId, sectorsVisible, loadedGameState, hoveredSectorId, hoveredCorpsId]);
+  }, [mapReady, selectedCorpsFrontSectorId, selectedCorpsId, sectorsVisible, loadedGameState, hoveredSectorId, hoveredCorpsId]);
 
   // Movement preview: highlight same-faction-controlled OSIDs when move mode is active.
   useEffect(() => {
@@ -2026,6 +2020,31 @@ export function MapContainer() {
     const lookup = osidCentroidsRef.current;
     if (!mapReady || !map || lookup.size === 0) return;
 
+    // When corps is selected from sidebar, zoom to fit all corps sectors.
+    if (selectedCorpsId && loadedGameState?.corpsFrontSectors && loadedGameState?.frontEdgesOsid) {
+      const corpsPanKey = `corps:${selectedCorpsId}`;
+      if (lastPanTargetRef.current !== corpsPanKey) {
+        const corpsSectors = loadedGameState.corpsFrontSectors.filter(s => s.corps_id === selectedCorpsId);
+        const coords: [number, number][] = [];
+        for (const sector of corpsSectors) {
+          for (const osid of collectSectorFriendlyOsids(sector, loadedGameState.frontEdgesOsid)) {
+            const c = lookup.get(osid);
+            if (c) coords.push(c);
+          }
+        }
+        if (coords.length > 0) {
+          lastPanTargetRef.current = corpsPanKey;
+          const lngs = coords.map(c => c[0]);
+          const lats = coords.map(c => c[1]);
+          map.fitBounds(
+            [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+            { padding: 80, maxZoom: 9, duration: 450 }
+          );
+        }
+      }
+      return;
+    }
+
     const sectorJustChanged = selectedCorpsFrontSectorId !== prevSectorIdRef.current;
     prevSectorIdRef.current = selectedCorpsFrontSectorId;
 
@@ -2078,7 +2097,7 @@ export function MapContainer() {
     }
 
     lastPanTargetRef.current = null;
-  }, [loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId]);
+  }, [loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId, selectedCorpsId]);
 
   // Sync refs for animation
   useEffect(() => {

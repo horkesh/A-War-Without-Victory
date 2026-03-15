@@ -80,7 +80,7 @@
 5. **[2026-03-15] Commander Override Layer (P0)**: Design at `docs/30_planning/COMMANDER_OVERRIDE_LAYER.md`. Commander reviews mechanical assignment against strategic intent. Addresses 2KK Prozor drift, SRK sector :4, ARBiH Brčko counterattack. Includes army HQ override, supply-aware op sizing, probes/feints.
 6. **[2026-03-15] Drina region OOB gap — PARTIALLY FIXED**: Rogatica + Višegrad added. Drina at 77-81%. Enclave brigades (Goražde/Srebrenica) debuffed. 808th/843rd relocated to Prača/Trnovo corridor. Further improvement needs commander override.
 7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked.
-8. **[2026-03-12] HVO named officer roster critically incomplete**: 20% coverage vs VRS 90%.
+8. **[2026-03-15] HVO named officer roster expanded**: 28 officers (was ~20% coverage, now 28/40 brigades). 7 new HVO officers added (Kordić, Oršolić, Totić, Nakić, Sopta, Bilonjić + political). Still below VRS 90% but substantially improved.
 9. **[2026-03-15] 2KK Prozor positional lock**: 6 of 8 brigades at Prozor/GV/Livno instead of Bihać. Target + Graz fixes applied (n809) but positional lock persists. Needs commander override to recall.
 10. **[2026-03-15] Visual assets — user generating via Gemini Pro (EXTERNAL)**: P0 event illustrations (40-50 images, 800×450) + peace plan maps (5, 600×400) needed before v0.4.1 Event UI. P1 peace→war transition (1, 1920×1080) before v0.4.0. P2 commander portraits (30, 256×320) before v0.4.5. All plans should include placeholders until assets delivered. Strategy: `docs/30_planning/design/VISUAL_ASSET_STRATEGY.md`. Do NOT generate images — user handles this.
 11. **[2026-03-15] Humanitarian capital: per-faction attribution (v0.3.2)**: `computeHumanitarianData` sums ALL displacement globally instead of attributing refugees to the faction that caused displacement. Humanitarian standing = 0 for all factions. Fix: attribute refugees_created to the faction that controls the origin OSID at time of displacement. Track per-faction in displacement state or derive from control_events.
@@ -132,14 +132,14 @@
 ## Officer Architecture
 1. **[2026-03-15] Officer succession is player-choice for player faction (events, not auto-retire)**
    Do instead: `available_until_turn` creates `replacement_suggested` event (not auto-retire) for player faction. `available_from_turn` creates `officer_available` notification. Bot factions unchanged. `findHistoricalSuccessor()` finds recommended replacement. Events in `MilitaryState.pending_officer_events`. `PendingOfficerEvent` type in `officer_types.ts`. IPC: `acknowledge-officer-event`, `accept-officer-replacement`. UI: `OfficerEventBadge.tsx` in Personnel toolbar.
-2. **[2026-03-15] War crimes records on 27 officers (informational, no gameplay effect)**
+2. **[2026-03-15] Combat death policy: casualty_vulnerability vs available_until_turn**
+   Do instead: `casualty_vulnerability` = organic KIA risk (probabilistic). `available_until_turn` = organizational replacement only (political/transfer). NEVER use `available_until_turn` for combat deaths — it creates deterministic death dates. Officers historically KIA (Nanić, Hujdur, Šehović, Hadžić, Hodžić, Bešić) use only `casualty_vulnerability`.
+3. **[2026-03-15] Elite commanders: permanent brigade-level, separate from named officers**
+   Do instead: `elite_commander` field on `oob_brigades.json` — static string, not in `named_officer_data`. Cannot die, promote, or command ops. 8 elite brigades (Rađo/Guards, Tirić/Black Swans, Samardžić/1st Guards Moto, Savčić/65th Protection, Glasnović/ABB, Sopta/Domagoj, Nakić/Jastrebovi, Bilonjić/Sinovi Posavine). Never suggest promoting elite commanders.
+4. **[2026-03-15] War crimes records on 27 officers (informational, no gameplay effect)**
    Do instead: `war_crimes_record` field on `NamedOfficer` in `officer_types.ts`. 27 officers annotated (VRS 13, ARBiH 7, HVO 7) with court, sentence, summary. UI badge: red=convicted, green=acquitted, amber=indicted. Data in `apr1992_officers.json`. No combat modifier — purely informational.
-3. **[2026-03-08] Named officers = corps and above only; brigades use abstracted officer_quality**
-   Do instead: Named officers command corps and operations. Brigades have `officer_quality` [0,1] → `getBrigadeOfficerMod()`. Never suggest named officer assignment for brigades.
-4. **[2026-03-08] distinction_potential replaces pre-awarded historical_decorations**
-   Do instead: Units start with `distinction_potential: 'tier_1'|'tier_2'|'tier_3'`. Decorations EARNED during run. `historical_decorations` and `honor` fields stripped from OOB.
-5. **[2026-03-08] Army HQs seeded with initial_officer_quality + cohesion**
-   Do instead: `vrs_main_staff` oq=0.75 coh=72, `hvo_main_staff` oq=0.50 coh=65, `arbih_general_staff` oq=0.12 coh=38 morale=45.
+5. **[2026-03-15] 98 named officers (RS 32, RBiH 38, HRHB 28) — all 9 Orden heroja recipients**
+   Do instead: Named officers command corps and operations. Brigades have `officer_quality` [0,1] → `getBrigadeOfficerMod()`. Never suggest named officer assignment for brigades. All 9 Orden heroja oslobodilačkog rata recipients documented. `officerUtils.ts` must check `status === 'active'` (bug fixed: Delić showed instead of Halilović).
 
 ## OOB & Brigade Systems
 1. **[2026-03-12] Per-brigade personnel caps via `deriveMaxPersonnel()` (n626)**
