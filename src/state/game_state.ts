@@ -1641,6 +1641,8 @@ pending_reserve_requests?: ArmyReserveRequest[];
 elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
 /** Pending officer personnel events for player notification (new arrivals, suggested replacements). */
 pending_officer_events?: import('./officer_types.js').PendingOfficerEvent[];
+/** Negotiation capital, patron relationships, peace plan history. */
+negotiation?: import('./negotiation_types.js').NegotiationState;
 }
 
 export interface PoliticalState {

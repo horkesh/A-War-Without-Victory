@@ -151,6 +151,7 @@ import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitmen
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
 import { checkWarTermination, applyWarTermination } from '../war_termination.js';
+import { computeNegotiationCapital } from '../negotiation/compute_capital.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
@@ -1976,6 +1977,13 @@ export const warPhases: NamedPhase[] = [
                     trigger: result.trigger
                 };
             }
+        }
+    },
+    {
+        name: 'compute-negotiation-capital',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            computeNegotiationCapital(context.state);
         }
     },
     {
