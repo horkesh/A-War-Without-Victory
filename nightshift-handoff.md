@@ -10,17 +10,16 @@
    - Bump to v0.3.2, tag.
 
 2. **v0.3.3 — Brigade AoR sub-segment assignment**
-   - Plan: `docs/30_planning/design/BRIGADE_AOR_SUBSEGMENT_DESIGN.md`
-   - 4 phases: (A) assignment only → (B) combat integration → (C) bot AI enhancement → (D) gap mechanics
+   - Plan: `docs/plans/2026-03-15-v0.3.3-brigade-aor-subsegment.md`
+   - Design doc: `docs/30_planning/design/BRIGADE_AOR_SUBSEGMENT_DESIGN.md`
+   - 4 phases: (A) assignment only → (B) combat integration → (C) bot AI enhancement → (D) gap mechanics + UI
    - ~520 lines estimated.
    - After completion: run 40w, verify no calibration regression >2pp. Bump to v0.3.3, tag.
 
 3. **INFRASTRUCTURE — shared utilities for v0.4.x**
-   - No separate plan file. Create these three files:
-   - `src/ui/map/components/GlassPanel.tsx` — shared glassmorphism panel component. Props: position ('left'|'right'|'overlay'|'bottom-tray'), title, width, onClose, children. Style: `backdrop-blur`, dark bg, border-panel-border, accent-gold title. Match the canonical ops-planning visual language from `docs/plans/2026-03-15-ops-planning-redesign-implementation.md` (Phase 1 theming).
-   - `src/state/deterministic_random.ts` — `export function deterministicRandom(seed: string, context: string): number` returning [0,1). Use FNV-1a or djb2 hash. Must be deterministic: same inputs = same output. Include `hashString()` utility.
-   - `src/sim/scenario/scenario_preseeding.ts` — `preseedNegotiationState(state, scenarioStartWeek)` that derives initial negotiation capital, patron override, officer experience from the start date using the historical baseline tables in `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md` §3b and §7.
-   - Tests for each. No version bump — this is infrastructure.
+   - Plan: `docs/plans/2026-03-15-infrastructure-shared-utilities.md`
+   - 4 phases: (1) GlassPanel.tsx → (2) deterministic_random.ts → (3) scenario_preseeding.ts → (4) Command Briefing spec
+   - Tests for each utility. No version bump — this is infrastructure.
 
 4. **v0.4.0 — Peace Phase Interactivity**
    - Plan: `docs/plans/2026-03-15-v0.4.0-peace-phase-interactivity.md`
