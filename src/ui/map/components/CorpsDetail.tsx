@@ -1,6 +1,6 @@
 /**
- * Corps detail panel (Phase D.1). Shows when a corps is selected via header click.
- * Displays corps identity, stance, personnel, sectors, subordinate brigades.
+ * Corps detail panel. Shows when a corps is selected via header click.
+ * Tabs: Overview · ORBAT · Sectors · Ops · Orders
  */
 import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
@@ -12,15 +12,11 @@ import { getPanelRailStyle } from './panelRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { BrigadeRow } from './BrigadeRow';
+import { TabBar } from './TabBar';
+import { toTitleCase } from '../utils/formatters';
 
-function formatRawId(id: string): string {
-  if (!id) return '';
-  return id
-    .replace(/^(RS|RBiH|HRHB)_/i, '')
-    .split('_')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(' ');
-}
+type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
 interface CorpsDetailProps {
   railSlot: 'primary' | 'secondary';
@@ -28,29 +24,43 @@ interface CorpsDetailProps {
 
 export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const ipc = useIPC();
-  const [ordersPanelOpen, setOrdersPanelOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<CorpsTab>('overview');
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
+  const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setLoadError = useGameStore((s) => s.setLoadError);
+  const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
+  const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
 
-  // Derived values needed by hooks — computed unconditionally so hooks are always called in the same order
   const corpsFormation = loadedGameState?.formations.find(
     (f) => f.id === selectedCorpsId && (f.kind === 'corps' || f.kind === 'corps_asset')
   ) ?? null;
+
   const corpsSectors = useMemo(
     () => loadedGameState?.corpsFrontSectors?.filter((s) => s.corps_id === selectedCorpsId) ?? [],
     [loadedGameState?.corpsFrontSectors, selectedCorpsId]
   );
 
+  const subordinates = useMemo(
+    () => loadedGameState?.formations.filter(
+      (f) => f.corps_id === selectedCorpsId && f.kind === 'brigade'
+    ) ?? [],
+    [loadedGameState?.formations, selectedCorpsId]
+  );
+
+  const corpsOps = useMemo(
+    () => loadedGameState?.operations?.filter((op) => op.corps_id === selectedCorpsId) ?? [],
+    [loadedGameState?.operations, selectedCorpsId]
+  );
 
   useEffect(() => {
-    setOrdersPanelOpen(false);
+    setActiveTab('overview');
   }, [selectedCorpsId]);
 
   if (operationsPanelOpen || !selectedCorpsId) return null;
@@ -79,16 +89,18 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     ? buildCorpsColorMap(loadedGameState.corpsFrontSectors)
     : {};
   const corpsColor = corpsColorMap[selectedCorpsId] ?? '#888';
-
-  const subordinates = loadedGameState.formations.filter(
-    (f) => f.corps_id === selectedCorpsId && f.kind === 'brigade'
-  );
   const totalPersonnel = subordinates.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+  const corpsDisplayName = corpsFormation.name === corpsFormation.id
+    ? toTitleCase(corpsFormation.name.replace(/^(RS|RBiH|HRHB)_/i, ''))
+    : corpsFormation.name;
 
-  // Active operations for this corps
-  const corpsOps = loadedGameState.operations?.filter(
-    (op) => op.corps_id === selectedCorpsId
-  ) ?? [];
+  const tabs = [
+    { id: 'overview' as const, label: 'Overview' },
+    { id: 'orbat'    as const, label: 'ORBAT',   count: subordinates.length },
+    { id: 'sectors'  as const, label: 'Sectors', count: corpsSectors.length },
+    { id: 'ops'      as const, label: 'Ops',     count: corpsOps.length },
+    { id: 'orders'   as const, label: 'Orders' },
+  ];
 
   const handleOpenOpsPlanning = () => {
     const primarySector = corpsSectors[0];
@@ -106,113 +118,132 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
       return;
     }
     const result = await ipc.stageCorpsStanceOrder(selectedCorpsId, stance);
-    if (!result.ok) {
-      setLoadError(result.error ?? 'Failed to stage corps stance order.');
-    }
+    if (!result.ok) setLoadError(result.error ?? 'Failed to stage corps stance order.');
   };
 
   return (
     <div
-      className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
+      className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-        <div className="flex items-center gap-2">
-          <span
-            className="inline-block w-3 h-3 rounded-sm"
-            style={{ backgroundColor: corpsColor }}
-          />
-          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-            Corps
+      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="inline-block w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: corpsColor }} />
+          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold truncate">
+            {corpsDisplayName}
           </span>
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setOrdersPanelOpen((v) => !v)}
-            className="text-[11px] font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover"
-          >
-            {ordersPanelOpen ? 'Hide orders' : 'Orders'}
-          </button>
-          <button
-            onClick={() => useGameStore.setState({
-              selectedCorpsId: null,
-              selectedCorpsFrontSectorId: null,
-              selectedFormationId: null,
-              selectedOperationKey: null,
-            })}
-            className="text-text-secondary hover:text-interactive text-sm leading-none"
-          >
-            ✕
-          </button>
-        </div>
+        <button
+          onClick={() => useGameStore.setState({
+            selectedCorpsId: null,
+            selectedCorpsFrontSectorId: null,
+            selectedFormationId: null,
+            selectedOperationKey: null,
+          })}
+          className="text-text-secondary hover:text-interactive text-sm leading-none shrink-0 ml-2"
+        >
+          ✕
+        </button>
       </div>
 
-      <div className="p-4 overflow-auto text-[12px]">
-        {/* Identity */}
-        <div className="mb-3">
-          <div className="font-semibold text-text-primary text-[13px]">
-            {corpsFormation.name === corpsFormation.id ? formatRawId(corpsFormation.name) : corpsFormation.name}
-          </div>
-          <div className="text-text-secondary mt-0.5">
-            <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>
-              {corpsFormation.faction}
-            </span>
-            {' · '}
-            <span className="capitalize">{corpsFormation.corpsStance ?? 'unknown'}</span>
-            {corpsFormation.corpsExhaustion != null && (
-              <span className="text-text-secondary"> · Exhaustion: {corpsFormation.corpsExhaustion.toFixed(1)}</span>
+      <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Tab content */}
+      <div className="flex-1 overflow-auto min-h-0 text-[12px]">
+
+        {/* ── OVERVIEW ── */}
+        {activeTab === 'overview' && (
+          <div className="p-4 space-y-4">
+            <div className="text-text-secondary text-[11px]">
+              <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>
+                {corpsFormation.faction}
+              </span>
+              {' · '}
+              <span className="capitalize">{corpsFormation.corpsStance ?? 'unknown'}</span>
+              {corpsFormation.corpsExhaustion != null && (
+                <span> · Exh: {corpsFormation.corpsExhaustion.toFixed(1)}</span>
+              )}
+            </div>
+
+            {(() => {
+              const commander = getFormationCommander(corpsFormation, loadedGameState);
+              if (!commander) return null;
+              return <OfficerProfile officer={commander} label="Corps Commander" />;
+            })()}
+
+            <div className="border-t border-panel-border pt-3 space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Personnel</span>
+                <span className="text-text-primary tabular-nums">{totalPersonnel.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Brigades</span>
+                <span className="text-text-primary tabular-nums">{subordinates.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Sectors</span>
+                <span className="text-text-primary tabular-nums">{corpsSectors.length}</span>
+              </div>
+              {corpsFormation.corpsOgSlots != null && (
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">OG Slots</span>
+                  <span className="text-text-primary tabular-nums">
+                    {corpsFormation.corpsActiveOgIds?.length ?? 0}/{corpsFormation.corpsOgSlots}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {corpsFormation.combatSummary && (
+              <div className="border-t border-panel-border pt-3">
+                <CombatSummaryPanel
+                  summary={corpsFormation.combatSummary}
+                  formations={loadedGameState.formations}
+                  onSelectFormation={setSelectedFormationId}
+                />
+              </div>
             )}
           </div>
-        </div>
-
-        {/* Commander */}
-        {(() => {
-          const commander = getFormationCommander(corpsFormation, loadedGameState);
-          if (!commander) return null;
-          return <OfficerProfile officer={commander} label="Corps Commander" className="mb-4" />;
-        })()}
-
-        {/* Metrics */}
-        <div className="border-t border-panel-border pt-2 mb-3 space-y-1">
-          <div className="flex justify-between">
-            <span className="text-text-secondary">Personnel</span>
-            <span className="text-text-primary tabular-nums">{totalPersonnel.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-text-secondary">Brigades</span>
-            <span className="text-text-primary tabular-nums">{subordinates.length}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-text-secondary">Sectors</span>
-            <span className="text-text-primary tabular-nums">{corpsSectors.length}</span>
-          </div>
-          {corpsFormation.corpsOgSlots != null && (
-            <div className="flex justify-between">
-              <span className="text-text-secondary">OG Slots</span>
-              <span className="text-text-primary tabular-nums">
-                {corpsFormation.corpsActiveOgIds?.length ?? 0}/{corpsFormation.corpsOgSlots}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Combat Summary */}
-        {corpsFormation.combatSummary && (
-          <CombatSummaryPanel
-            summary={corpsFormation.combatSummary}
-            formations={loadedGameState.formations}
-            onSelectFormation={setSelectedFormationId}
-          />
         )}
 
-        {/* Sectors */}
-        {corpsSectors.length > 0 && (
-          <div className="border-t border-panel-border pt-2 mb-3">
-            <div className="text-text-secondary mb-1">Sectors ({corpsSectors.length}):</div>
-            <div className="space-y-0.5 max-h-[150px] overflow-auto">
-              {corpsSectors.map((s) => (
+        {/* ── ORBAT ── */}
+        {activeTab === 'orbat' && (
+          <div className="py-1">
+            {subordinates.length === 0 ? (
+              <div className="p-4 text-text-secondary italic text-xs">No subordinate brigades.</div>
+            ) : (
+              [...subordinates]
+                .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+                .map((f) => (
+                  <BrigadeRow
+                    key={f.id}
+                    formation={f}
+                    onClick={() => setSelectedFormationId(f.id)}
+                    onHoverChange={(hovered, e) => {
+                      setHoveredOsids(hovered ? (f.aorSettlementIds ?? (f.location_osid ? [f.location_osid] : [])) : []);
+                      if (hovered) {
+                        setTooltipTargetWithPosition(
+                          { type: 'formation', id: f.id },
+                          e ? { x: e.clientX, y: e.clientY } : undefined
+                        );
+                      } else {
+                        clearTooltipTarget();
+                      }
+                    }}
+                  />
+                ))
+            )}
+          </div>
+        )}
+
+        {/* ── SECTORS ── */}
+        {activeTab === 'sectors' && (
+          <div className="p-4 space-y-1">
+            {corpsSectors.length === 0 ? (
+              <div className="text-text-secondary italic text-xs">No sectors assigned.</div>
+            ) : (
+              corpsSectors.map((s) => (
                 <button
                   key={s.sector_id}
                   type="button"
@@ -224,31 +255,47 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     selectedOperationKey: null,
                     selectedOsid: null,
                   })}
-                  className="w-full flex justify-between text-interactive hover:underline text-left"
+                  className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
                 >
-                  <span className="truncate mr-2">{s.display_name}</span>
-                  <span className="text-text-secondary tabular-nums shrink-0">
-                    Density: {s.density.toFixed(2)}
-                  </span>
+                  <div className="min-w-0">
+                    <div className="text-text-primary text-[11px] font-medium truncate">{s.display_name}</div>
+                    <div className="text-text-secondary text-[10px] tabular-nums">
+                      {s.assigned_brigade_ids.length} front
+                      {s.reserve_brigade_ids.length > 0 && ` + ${s.reserve_brigade_ids.length} reserve`}
+                      {' · ~'}{s.length_edges} km
+                    </div>
+                  </div>
+                  <div className="shrink-0 ml-2 text-right">
+                    <div className="text-[10px] text-text-secondary tabular-nums">
+                      Density: {s.density.toFixed(2)}
+                    </div>
+                    {s.sector_stance && (
+                      <div className="text-[9px] uppercase text-text-secondary opacity-70">
+                        {s.sector_stance.replace(/_/g, ' ')}
+                        {s.stance_source === 'player' && <span className="ml-1 text-accent-gold">●</span>}
+                      </div>
+                    )}
+                  </div>
                 </button>
-              ))}
-            </div>
+              ))
+            )}
           </div>
         )}
 
-        {/* Operations Dashboard */}
-        {corpsOps.length > 0 && (
-          <div className="border-t border-panel-border pt-2 mb-3">
-            <div className="text-text-secondary mb-1 flex items-center justify-between">
-              <span>Active Operations</span>
-              <span className="tabular-nums text-[10px] bg-black/30 px-1.5 py-0.5 rounded text-text-primary">{corpsOps.length}</span>
-            </div>
-            <div className="space-y-1">
-              {corpsOps.map((op) => {
-                const phaseBg = op.phase === 'execution' ? 'bg-[#d45555]/60 text-white' : op.phase === 'planning' ? 'bg-[#d4a055]/60 text-white' : 'bg-neutral-600/60 text-white';
+        {/* ── OPS ── */}
+        {activeTab === 'ops' && (
+          <div className="p-4 space-y-3">
+            {corpsOps.length === 0 ? (
+              <div className="text-text-secondary italic text-xs">No active operations.</div>
+            ) : (
+              corpsOps.map((op) => {
+                const phaseBg = op.phase === 'execution'
+                  ? 'bg-[#d45555]/60 text-white'
+                  : op.phase === 'planning'
+                  ? 'bg-[#d4a055]/60 text-white'
+                  : 'bg-neutral-600/60 text-white';
                 const opKey = getOperationId(op);
-                const isSelected = useGameStore.getState().selectedOperationKey === opKey;
-                // Clamp momentum from -1 to 1 for the progress bar (0 is center)
+                const isSelected = selectedOperationKey === opKey;
                 const momentum = op.momentum ?? 0;
 
                 return (
@@ -263,8 +310,11 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       selectedOperationKey: opKey,
                       selectedOsid: null,
                     })}
-                    className={`w-full text-left rounded border p-2 transition-colors ${isSelected ? 'border-accent-gold bg-panel-active shadow-[inset_0_0_10px_rgba(212,160,85,0.1)]' : 'border-panel-border bg-panel-card hover:bg-panel-hover'
-                      }`}
+                    className={`w-full text-left rounded border p-2 transition-colors ${
+                      isSelected
+                        ? 'border-accent-gold bg-panel-active shadow-[inset_0_0_10px_rgba(212,160,85,0.1)]'
+                        : 'border-panel-border bg-panel-card hover:bg-panel-hover'
+                    }`}
                   >
                     <div className="flex justify-between items-start mb-1">
                       <div className="font-semibold text-text-primary text-[12px] uppercase tracking-wide">{op.name}</div>
@@ -277,17 +327,17 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       <div className="mt-2 space-y-1">
                         <div className="flex justify-between text-[10px] text-text-secondary">
                           <span>Momentum</span>
-                          <span className={momentum >= 0 ? 'text-[#55d48a]' : 'text-[#d45555]'}>{momentum > 0 ? '+' : ''}{momentum.toFixed(1)}</span>
+                          <span className={momentum >= 0 ? 'text-[#55d48a]' : 'text-[#d45555]'}>
+                            {momentum > 0 ? '+' : ''}{momentum.toFixed(1)}
+                          </span>
                         </div>
                         <div className="h-1.5 w-full bg-black/50 rounded overflow-hidden relative">
-                          {/* Center line */}
                           <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-panel-border/50 z-10" />
-                          {/* Fill */}
                           <div
                             className={`h-full transition-all duration-500 ${momentum >= 0 ? 'bg-[#55d48a]' : 'bg-[#d45555]'}`}
                             style={{
                               width: `${Math.abs(momentum) * 50}%`,
-                              marginLeft: momentum >= 0 ? '50%' : `${50 - (Math.abs(momentum) * 50)}%`
+                              marginLeft: momentum >= 0 ? '50%' : `${50 - Math.abs(momentum) * 50}%`,
                             }}
                           />
                         </div>
@@ -295,7 +345,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     )}
 
                     <div className="flex items-center justify-between text-[10px] mt-2 pt-1.5 border-t border-panel-border/30">
-                      <span className="text-text-secondary">{op.participating_brigade_count} brigades assigned</span>
+                      <span className="text-text-secondary">{op.participating_brigade_count} brigades</span>
                       {op.objectives && op.current_objective_index !== undefined && (
                         <span className="text-accent-gold">
                           Obj: <span className="text-text-primary tabular-nums">{op.current_objective_index}/{op.objectives.length}</span>
@@ -304,114 +354,65 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     </div>
                   </button>
                 );
-              })}
-            </div>
-          </div>
-        )}
+              })
+            )}
 
-        {/* Collapsible OOB Tree */}
-        {subordinates.length > 0 && (
-          <div className="border-t border-panel-border pt-2">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-text-secondary text-xs">Order of Battle</span>
-              <span className="text-[10px] bg-black/30 px-1.5 py-0.5 rounded text-text-primary flex items-center gap-1">
-                <span>{subordinates.length} Bdes</span>
-              </span>
-            </div>
-
-            <div className="space-y-[1px] max-h-[250px] overflow-auto border-l border-panel-border/50 ml-1.5 pl-2 mt-2">
-              {subordinates.map((f) => {
-                // Determine readiness "traffic light"
-                let lightColor = '#55d48a'; // Green
-                if (f.readiness === 'overextended' || (f.cohesion < 30) || (f.fatigue > 70) || (f.equipment_decay != null && f.equipment_decay < 0.4)) {
-                  lightColor = '#d45555'; // Red
-                } else if (f.readiness === 'degraded' || (f.cohesion < 70) || (f.fatigue > 30) || (f.equipment_decay != null && f.equipment_decay < 0.7)) {
-                  lightColor = '#d4d455'; // Yellow
-                }
-
-                return (
-                  <button
-                    key={f.id}
-                    type="button"
-                    className="w-full relative flex items-center justify-between py-1 px-1.5 hover:bg-panel-hover rounded group text-left transition-colors"
-                    onClick={() => setSelectedFormationId(f.id)}
-                    onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
-                    onMouseLeave={() => setHoveredOsids([])}
-                  >
-                    {/* Tree visual connector */}
-                    <div className="absolute -left-2 top-1/2 w-2 h-[1px] bg-panel-border/50 group-hover:bg-panel-border transition-colors" />
-
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <div
-                        className="w-2 h-2 rounded-full shrink-0 border border-black/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
-                        style={{ backgroundColor: lightColor }}
-                        title={`Readiness: ${f.readiness}`}
-                      />
-                      <span className="truncate text-text-primary text-[11px] font-medium group-hover:text-interactive transition-colors">{f.name}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      {f.posture && f.posture !== 'hold' && (
-                        <span className="text-[9px] uppercase text-text-secondary bg-black/20 px-1 rounded flex items-center">
-                          {f.posture.slice(0, 3)}
-                        </span>
-                      )}
-                      <span className="text-text-secondary font-mono text-[10px]">
-                        {f.personnel != null ? f.personnel.toLocaleString() : '—'}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-      {ordersPanelOpen && (
-        <div
-          className="panel-slide-in-right flex flex-col bg-panel-bg/96 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
-          style={getPanelRailStyle('secondary', 'w-64', 'left')}
-        >
-          <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-            <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-              Corps Orders
-            </span>
-            <button
-              onClick={() => setOrdersPanelOpen(false)}
-              className="text-text-secondary hover:text-interactive text-sm leading-none"
-            >
-              ✕
-            </button>
-          </div>
-          <div className="p-3 space-y-3 overflow-auto">
-            <div className="text-[11px] text-text-secondary">{corpsFormation.name}</div>
-            <div className="pt-1 border-t border-panel-border">
-              <div className="text-[11px] text-text-secondary mb-1">Stance</div>
-              <div className="flex flex-wrap gap-1">
-                {['defensive', 'balanced', 'offensive', 'reorganize'].map((stance) => (
-                  <button
-                    key={stance}
-                    type="button"
-                    onClick={() => void stageCorpsStance(stance)}
-                    className="text-[11px] font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover"
-                  >
-                    {stance}
-                  </button>
-                ))}
-              </div>
-            </div>
             <div className="pt-1 border-t border-panel-border">
               <button
                 type="button"
                 onClick={handleOpenOpsPlanning}
-                className="w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover"
+                className="w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
               >
-                Prepare operation
+                Prepare Operation
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* ── ORDERS ── */}
+        {activeTab === 'orders' && (
+          <div className="p-4 space-y-4">
+            <div>
+              <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
+                Corps Stance
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(['defensive', 'balanced', 'offensive', 'reorganize'] as const).map((stance) => {
+                  const isActive = (corpsFormation.corpsStance ?? 'balanced') === stance;
+                  return (
+                    <button
+                      key={stance}
+                      type="button"
+                      onClick={() => void stageCorpsStance(stance)}
+                      className={`px-2 py-2 rounded border text-[11px] font-semibold capitalize transition-colors ${
+                        isActive
+                          ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
+                          : 'border-panel-border text-interactive hover:bg-panel-hover'
+                      }`}
+                    >
+                      {stance}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="border-t border-panel-border pt-4">
+              <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
+                Operations
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenOpsPlanning}
+                className="w-full text-xs font-sans px-2 py-2.5 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
+              >
+                Prepare Operation
+              </button>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }

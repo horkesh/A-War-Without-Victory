@@ -388,6 +388,30 @@ export function OperationsPanel() {
                       <span className="text-text-primary tabular-nums">{avgPersonnelPct}%</span>
                     </div>
                   )}
+                  {selectedOperation.tempo && (
+                    <div>
+                      <span className="text-text-secondary">Tempo: </span>
+                      <span className={`inline-block px-1 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                        selectedOperation.tempo === 'all_out' ? 'bg-red-700/60 text-red-200' :
+                        selectedOperation.tempo === 'methodical' ? 'bg-blue-700/60 text-blue-200' :
+                        'bg-neutral-600/60 text-neutral-300'
+                      }`}>
+                        {selectedOperation.tempo === 'all_out' ? 'All Out' : toTitleCase(selectedOperation.tempo)}
+                      </span>
+                    </div>
+                  )}
+                  {selectedOperation.min_attack_outcome && (
+                    <div>
+                      <span className="text-text-secondary">Minimum: </span>
+                      <span className="text-text-primary">{selectedOperation.min_attack_outcome.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
+                    </div>
+                  )}
+                  {(selectedOperation.postponement_count ?? 0) > 0 && (
+                    <div>
+                      <span className="text-text-secondary">Postponed </span>
+                      <span className="text-amber-300 tabular-nums">&times;{selectedOperation.postponement_count}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Commander */}

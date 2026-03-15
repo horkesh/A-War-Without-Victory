@@ -245,6 +245,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
             Sector Intelligence
           </span>
+          {sector.opsec_active && (
+            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-500/50 text-amber-400">
+              OPSEC
+            </span>
+          )}
         </div>
         <button
           onClick={() => setSelectedSectorId(null)}
@@ -318,8 +323,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
               id={`sector-intel-tab-${tabId}`}
               onClick={() => setActiveTab(tabId)}
               className={`kbd-focus px-3 py-2 text-[10px] font-bold uppercase border-b-2 transition-colors ${activeTab === tabId
-                ? 'border-accent-gold text-neutral-900 bg-white'
-                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:bg-white/50'
+                ? 'border-accent-gold text-neutral-900 bg-neutral-100'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:bg-neutral-300/40'
                 }`}
             >
               {label}
@@ -459,7 +464,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                                 ? 'border-neutral-200 bg-neutral-100 text-neutral-300 cursor-not-allowed'
                                 : isActive
                                   ? 'border-accent-gold bg-amber-50 text-amber-800 ring-1 ring-accent-gold'
-                                  : 'border-neutral-400 bg-white/80 hover:bg-neutral-200 text-neutral-700'
+                                  : 'border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 text-neutral-700'
                               }`}
                           >
                             {STANCE_LABELS[stance]}
@@ -471,7 +476,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                       <button
                         type="button"
                         onClick={() => void resetToAI()}
-                        className="kbd-focus mt-1 w-full px-2 py-0.5 rounded border border-neutral-300 bg-neutral-50 hover:bg-neutral-200 text-[9px] text-neutral-600 font-semibold uppercase"
+                        className="kbd-focus mt-1 w-full px-2 py-0.5 rounded border border-neutral-300 bg-neutral-50 hover:bg-neutral-300/50 text-[9px] text-neutral-600 font-semibold uppercase"
                       >
                         Return to AI Control
                       </button>
@@ -485,7 +490,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           key={priority}
                           type="button"
                           onClick={() => void issueLogisticsPriority(priority)}
-                          className="kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 text-[10px] font-bold"
+                          className="kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 text-[10px] font-bold"
                         >
                           {priority.toFixed(1)}x
                         </button>
@@ -495,7 +500,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <button
                     type="button"
                     onClick={() => void toggleOpsec()}
-                    className="kbd-focus w-full rounded border border-neutral-400 bg-white/80 hover:bg-neutral-200 px-2 py-1 text-[10px] font-bold uppercase"
+                    className="kbd-focus w-full rounded border border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 px-2 py-1 text-[10px] font-bold uppercase"
                   >
                     {sector.opsec_active ? 'Disable OPSEC' : 'Enable OPSEC'}
                   </button>
@@ -534,7 +539,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           key={f.id}
                           type="button"
                           aria-label={`Assigned brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
-                          className="kbd-focus w-full flex justify-between items-center bg-white/50 hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
+                          className="kbd-focus w-full flex justify-between items-center bg-neutral-200/40 hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => useGameStore.setState({
                             selectedCorpsId,
                             selectedCorpsFrontSectorId: selectedSectorId,
@@ -565,7 +570,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           key={f.id}
                           type="button"
                           aria-label={`Reserve brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
-                          className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-200 transition-colors text-left px-1 py-0.5 rounded"
+                          className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => useGameStore.setState({
                             selectedCorpsId,
                             selectedCorpsFrontSectorId: selectedSectorId,
@@ -641,7 +646,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     const operationId = getOperationId(op);
                     const objective = op.objectives?.[op.current_objective_index ?? 0] ?? op.objectives?.[0];
                     return (
-                      <div key={operationId} className="bg-white border-2 border-neutral-300 p-2 relative shadow-sm">
+                      <div key={operationId} className="bg-neutral-100 border-2 border-neutral-300 p-2 relative shadow-sm">
                         {/* Stamp effect */}
                         <div className={`absolute top-1 right-2 opacity-20 font-black text-xl -rotate-12 select-none uppercase ${op.phase === 'execution' ? 'text-red-600' : 'text-amber-600'}`}>
                           {op.phase}

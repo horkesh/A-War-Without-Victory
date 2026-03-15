@@ -1,7 +1,7 @@
 import type { Feature, FeatureCollection, LineString, Polygon, Point } from 'geojson';
 import type { LoadedGameState } from '../../data/types';
 import type { OsidCentroidLookup } from './geojsonLookup';
-import { hashString, buildBezierCurve, buildArrowheadTriangle, buildTaperedArrowBody, getClosestPointOnSectorEdge } from './arrowGeometry';
+import { hashString, buildBezierCurve, buildArrowheadTriangle, buildTaperedArrowBody } from './arrowGeometry';
 
 // ── Faction colors for operation arrows ─────────────────────────────────────
 
@@ -33,10 +33,12 @@ export function buildOperationArrowsGeoJSON(
   const ops = state.operations;
   if (!ops || ops.length === 0) return { type: 'FeatureCollection', features: [] };
 
-  // Pre-index front edges for sector line snapping
-  const edgeMap = new Map<string, any>();
-  if (state.frontEdges) {
-    for (const e of state.frontEdges) edgeMap.set(e.edge_id, e);
+  // Build formation location index for computing brigade centroid origins
+  const formationLocationMap = new Map<string, string>();
+  if (state.formations) {
+    for (const f of state.formations) {
+      if (f.location_osid) formationLocationMap.set(f.id, f.location_osid);
+    }
   }
 
   for (const op of ops) {
@@ -45,29 +47,26 @@ export function buildOperationArrowsGeoJSON(
     const firstObjective = op.objectives[0];
     const firstObjPt = centroidLookup.get(firstObjective);
 
-    // Compute origin: staging_osid → snap to sector line → fallback
-    const hasStaging = !!op.staging_osid;
+    // Compute origin: position of the lead brigade (closest to first objective)
     let rawOrigin: [number, number] | null = null;
-    if (op.staging_osid) {
-      rawOrigin = centroidLookup.get(op.staging_osid) ?? null;
+    if (op.participating_brigade_ids && op.participating_brigade_ids.length > 0 && firstObjPt) {
+      let bestDist = Infinity;
+      for (const bid of op.participating_brigade_ids) {
+        const locOsid = formationLocationMap.get(bid);
+        if (!locOsid) continue;
+        const pt = centroidLookup.get(locOsid);
+        if (!pt) continue;
+        const d = (pt[0] - firstObjPt[0]) ** 2 + (pt[1] - firstObjPt[1]) ** 2;
+        if (d < bestDist) {
+          bestDist = d;
+          rawOrigin = pt;
+        }
+      }
     }
 
-    if (!rawOrigin && op.sector_id && firstObjPt) {
-      const sector = state.corpsFrontSectors?.find(s => s.sector_id === op.sector_id);
-      if (sector) {
-        // Collect edge points for snapping
-        const points: [number, number][] = [];
-        for (const eid of sector.edge_ids) {
-          const edge = edgeMap.get(eid);
-          if (edge) {
-            const p1 = centroidLookup.get(edge.a);
-            const p2 = centroidLookup.get(edge.b);
-            if (p1) points.push(p1);
-            if (p2) points.push(p2);
-          }
-        }
-        rawOrigin = getClosestPointOnSectorEdge(firstObjPt, points);
-      }
+    // Fallback: staging OSID centroid
+    if (!rawOrigin && op.staging_osid) {
+      rawOrigin = centroidLookup.get(op.staging_osid) ?? null;
     }
 
     if (!rawOrigin && firstObjPt) {
@@ -77,16 +76,7 @@ export function buildOperationArrowsGeoJSON(
 
     const colors = FACTION_ARROW_COLORS[op.faction] ?? DEFAULT_COLORS;
 
-    // Shift staging origin toward first objective to approximate OSID edge
-    // (We only do this for staging_osid origins, not sector-line snapped ones)
-    let origin: [number, number];
-    if (hasStaging && firstObjPt) {
-      const dist = Math.sqrt((rawOrigin[0] - firstObjPt[0]) ** 2 + (rawOrigin[1] - firstObjPt[1]) ** 2);
-      const shift = Math.min(0.4, 0.012 / Math.max(0.001, dist));
-      origin = [rawOrigin[0] + (firstObjPt[0] - rawOrigin[0]) * shift, rawOrigin[1] + (firstObjPt[1] - rawOrigin[1]) * shift];
-    } else {
-      origin = rawOrigin;
-    }
+    const origin: [number, number] = rawOrigin;
 
     // Draw sweeping arrow from origin to final objective
     const finalObjective = op.objectives[op.objectives.length - 1];

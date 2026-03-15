@@ -63,6 +63,10 @@ export default defineConfig({
             const contentType = mimeTypes[ext] || 'application/octet-stream';
             const rangeHeader = req.headers.range;
 
+            if (ext === '.pmtiles') {
+              console.log(`[dev-data] PMTiles ${rangeHeader ? `Range: ${rangeHeader}` : 'full'} → ${filePath.split('\\').pop()}`);
+            }
+
             if (rangeHeader) {
               const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
               if (match) {
@@ -74,6 +78,7 @@ export default defineConfig({
                   'Accept-Ranges': 'bytes',
                   'Content-Length': chunkSize,
                   'Content-Type': contentType,
+                  'Cache-Control': 'no-store',
                   'Access-Control-Allow-Origin': '*',
                   'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
                 });
@@ -87,6 +92,7 @@ export default defineConfig({
                 'Content-Length': stat.size,
                 'Content-Type': contentType,
                 'Accept-Ranges': 'bytes',
+                'Cache-Control': 'no-store',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
               });

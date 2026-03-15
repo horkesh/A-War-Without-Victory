@@ -9,8 +9,8 @@ const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
   { id: 'political', label: '1: Political', key: '1' },
   { id: 'ethnic', label: '2: Ethnic', key: '2' },
   { id: 'supply', label: '3: Supply', key: '3' },
-  { id: 'pressure', label: '4: Pressure', key: '4' },
-  { id: 'density', label: '5: Density', key: '5' },
+  { id: 'casualties', label: '4: Casualties', key: '4' },
+  { id: 'morale', label: '5: Morale', key: '5' },
   { id: 'operations', label: '6: Operations', key: '6' },
   { id: 'defense', label: '7: Defense', key: '7' },
 ];
@@ -72,7 +72,7 @@ export function MapModeToolbar() {
   };
 
   return (
-    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 p-1 bg-glass border border-white/10 rounded-lg shadow-2xl backdrop-blur-md">
+    <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 p-1 bg-glass border border-white/10 rounded-lg shadow-2xl backdrop-blur-md">
       {/* Map mode pill group */}
       <div className="flex items-center gap-0.5 px-1">
         {MAP_MODES.map(({ id, label, key }) => {

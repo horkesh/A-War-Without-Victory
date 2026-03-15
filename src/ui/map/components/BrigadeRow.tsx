@@ -1,6 +1,8 @@
+import { memo } from 'react';
 import type { FormationView } from '../data/types';
 import { FACTION_BG_SUBTLE, FACTION_COLORS } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
+import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 
 const STATUS_BADGE: Record<string, string> = {
   assigned: 'bg-panel-hover text-text-secondary',
@@ -34,7 +36,7 @@ const SUPPLY_DOT_CLASS: Record<'supplied' | 'strained' | 'cutoff', string> = {
   cutoff: 'text-faction-rs',
 };
 
-export function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
+export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
   const cohesion = Math.max(0, Math.min(100, formation.cohesion ?? 0));
   const filledSegments = Math.ceil(cohesion / 20);
   const statusClass = STATUS_BADGE[formation.status] ?? STATUS_BADGE.active;
@@ -46,8 +48,20 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
   const fatClass = fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
   const supplyColor = SUPPLY_DOT_CLASS[supplyState];
 
+  const decorations = formation.decorations ?? [];
+  const prestigeTier = getPrestigeTier(decorations);
+  const prestigeBorderClass = prestigeTier === 1
+    ? 'border-l-2 border-l-yellow-400/70'
+    : prestigeTier === 2
+    ? 'border-l-2 border-l-slate-300/55'
+    : prestigeTier === 3
+    ? 'border-l-2 border-l-amber-700/50'
+    : '';
+  const prestigePipColor = getPrestigeTierColor(prestigeTier);
+
   const containerClasses = [
     'flex items-center gap-2 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',
+    prestigeBorderClass,
     compact ? 'py-1' : 'py-1.5',
     rowClass,
     highlighted ? 'bg-panel-active/70' : 'hover:bg-panel-hover/80'
@@ -66,6 +80,16 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
       <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyState}>●</span>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${bgFaction}`} />
       <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formation.name}</span>
+      {prestigeTier > 0 && (() => {
+        const ht = getHighestTier(decorations);
+        const dn = ht ? getDecorationName(formation.faction ?? '', ht) : '';
+        return (
+          <span
+            className={`shrink-0 text-[9px] leading-none ${prestigePipColor}`}
+            title={dn}
+          >★</span>
+        );
+      })()}
       <div className="flex items-center gap-0.5 shrink-0" aria-label={`cohesion ${cohesion}`}>
         {Array.from({ length: 5 }, (_, idx) => (
           <span
@@ -82,4 +106,4 @@ export function BrigadeRow({ formation, compact, highlighted = false, onClick, o
       </span>
     </div>
   );
-}
+});

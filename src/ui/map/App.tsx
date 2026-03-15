@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { MapContainer } from './map/MapContainer';
-import { MapModeToolbar } from './components/MapModeToolbar';
 import { TopToolbar } from './components/TopToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
@@ -305,7 +304,6 @@ function App() {
   return (
     <div className="h-screen w-screen relative">
       <MapContainer />
-      <MapModeToolbar />
       <TopToolbar
         onOpenRecruitment={openRecruitmentModal}
         onOpenSidePicker={() => {

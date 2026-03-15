@@ -34,6 +34,14 @@ const OUTCOME_LABEL: Record<string, string> = {
     orphaned: 'Orphaned',
 };
 
+const RECOVERY_REASON_BADGE: Record<string, { label: string; className: string }> = {
+    completed: { label: 'COMPLETED', className: 'bg-green-700/60 text-green-200' },
+    max_failures: { label: 'FAILED \u2014 MAX FAILURES', className: 'bg-red-700/60 text-red-200' },
+    orphaned_sector: { label: 'ENDED \u2014 SECTOR LOST', className: 'bg-amber-700/60 text-amber-200' },
+    no_logged_attempt: { label: 'ENDED \u2014 NO CONTACT', className: 'bg-neutral-600/60 text-neutral-300' },
+    manual_termination: { label: 'HALTED BY COMMAND', className: 'bg-blue-700/60 text-blue-200' },
+};
+
 const PHASE_COLOR: Record<string, string> = {
     planning: 'text-blue-400',
     execution: 'text-amber-400',
@@ -135,6 +143,11 @@ function CompletedOpCard({ op }: { op: CompletedOp }) {
                         <span className={`text-[10px] font-mono ${OUTCOME_COLOR[op.outcome] ?? 'text-text-secondary'}`}>
                             {OUTCOME_LABEL[op.outcome] ?? op.outcome}
                         </span>
+                        {op.recovery_reason && RECOVERY_REASON_BADGE[op.recovery_reason] && (
+                            <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase ${RECOVERY_REASON_BADGE[op.recovery_reason].className}`}>
+                                {RECOVERY_REASON_BADGE[op.recovery_reason].label}
+                            </span>
+                        )}
                     </div>
                 </div>
             </button>

@@ -5,6 +5,7 @@ import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
 import { formatTurnLabel } from '../utils/formatters';
 import { getFactionCrest } from '../utils/factionAssets';
+import { OfficerEventBadge } from './OfficerEventBadge';
 import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 
 const LOAD_TIMEOUT_MS = 25000;
@@ -245,6 +246,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
       {/* 3. TACTICAL ASSETS MODULE */}
       <div className={MODULAR_SECTION_CLASS}>
         <div className="module-header">Personnel</div>
+        <OfficerEventBadge />
         <button
           onClick={() => onOpenRecruitment?.()}
           disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}

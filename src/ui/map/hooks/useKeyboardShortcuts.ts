@@ -6,7 +6,7 @@
 import { useEffect } from 'react';
 import { useGameStore, type MapMode } from '../store/gameStore';
 
-const MAP_MODES_BY_KEY: MapMode[] = ['political', 'ethnic', 'supply', 'pressure', 'density', 'operations', 'defense'];
+const MAP_MODES_BY_KEY: MapMode[] = ['political', 'ethnic', 'supply', 'casualties', 'morale', 'operations', 'defense'];
 
 function isFocusInInput(): boolean {
   const tag = document.activeElement?.tagName?.toUpperCase();

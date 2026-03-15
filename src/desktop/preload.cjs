@@ -68,4 +68,6 @@ contextBridge.exposeInMainWorld('awwv', {
   approveReserveRequest: (corpsId, brigadeId) => ipcRenderer.invoke('approve-reserve-request', { corpsId, brigadeId }),
   recallEliteBrigade: (brigadeId) => ipcRenderer.invoke('recall-elite-brigade', { brigadeId }),
   redirectReserveLoan: (brigadeId, newCorpsId) => ipcRenderer.invoke('redirect-reserve-loan', { brigadeId, newCorpsId }),
+  acknowledgeOfficerEvent: (eventId) => ipcRenderer.invoke('acknowledge-officer-event', { eventId }),
+  acceptOfficerReplacement: (payload) => ipcRenderer.invoke('accept-officer-replacement', payload),
 });

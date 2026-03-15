@@ -18,6 +18,30 @@ function PhaseBadge({ phase }: { phase: string }) {
   );
 }
 
+const RECOVERY_REASON_BADGE: Record<string, { label: string; className: string }> = {
+  completed: { label: 'COMPLETED', className: 'bg-green-700/60 text-green-200' },
+  max_failures: { label: 'FAILED \u2014 MAX FAILURES', className: 'bg-red-700/60 text-red-200' },
+  orphaned_sector: { label: 'ENDED \u2014 SECTOR LOST', className: 'bg-amber-700/60 text-amber-200' },
+  no_logged_attempt: { label: 'ENDED \u2014 NO CONTACT', className: 'bg-neutral-600/60 text-neutral-300' },
+  manual_termination: { label: 'HALTED BY COMMAND', className: 'bg-blue-700/60 text-blue-200' },
+};
+
+const TEMPO_BADGE: Record<string, { label: string; className: string }> = {
+  methodical: { label: 'Methodical', className: 'bg-blue-700/60 text-blue-200' },
+  standard: { label: 'Standard', className: 'bg-neutral-600/60 text-neutral-300' },
+  all_out: { label: 'All Out', className: 'bg-red-700/60 text-red-200' },
+};
+
+const AXIS_STATUS_BADGE: Record<string, { label: string; className: string }> = {
+  executing: { label: 'Executing', className: 'bg-green-700/60 text-green-200' },
+  stalled: { label: 'Stalled', className: 'bg-amber-700/60 text-amber-200' },
+  complete: { label: 'Complete', className: 'bg-blue-700/60 text-blue-200' },
+};
+
+function formatOutcomeName(outcome: string): string {
+  return outcome.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function MomentumBar({ momentum }: { momentum: number }) {
   const filled = Math.round(Math.max(0, Math.min(3, momentum)));
   return (
@@ -89,6 +113,11 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
           <div className="mt-1 flex items-center gap-2 flex-wrap">
             <PhaseBadge phase={op.phase} />
             <span className="text-text-secondary">{formatOperationType(op.type)}</span>
+            {op.phase === 'recovery' && op.recovery_reason && RECOVERY_REASON_BADGE[op.recovery_reason] && (
+              <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${RECOVERY_REASON_BADGE[op.recovery_reason].className}`}>
+                {RECOVERY_REASON_BADGE[op.recovery_reason].label}
+              </span>
+            )}
           </div>
         </div>
 
@@ -122,6 +151,20 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
               <span className={`tabular-nums ${op.supply_readiness < 0.4 ? 'text-red-400' : op.supply_readiness < 0.7 ? 'text-amber-300' : 'text-green-400'}`}>
                 {(op.supply_readiness * 100).toFixed(0)}%
               </span>
+            </div>
+          )}
+          {op.tempo && TEMPO_BADGE[op.tempo] && (
+            <div className="flex justify-between items-center">
+              <span className="text-text-secondary">Tempo</span>
+              <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${TEMPO_BADGE[op.tempo].className}`}>
+                {TEMPO_BADGE[op.tempo].label}
+              </span>
+            </div>
+          )}
+          {op.min_attack_outcome && (
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Minimum</span>
+              <span className="text-text-primary">{formatOutcomeName(op.min_attack_outcome)}</span>
             </div>
           )}
         </div>
@@ -163,6 +206,39 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
                           Schwerpunkt
                         </span>
                       )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Axes */}
+        {op.axes && op.axes.length > 0 && (
+          <div className="border-t border-panel-border pt-2">
+            <div className="text-text-secondary mb-1">Axes:</div>
+            <div className="space-y-1.5">
+              {op.axes.map((axis) => {
+                const statusBadge = AXIS_STATUS_BADGE[axis.status];
+                return (
+                  <div key={axis.axis_id} className="border-l-2 border-panel-border/50 pl-2">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-text-primary font-semibold text-[11px] truncate">{axis.name}</span>
+                      {statusBadge && (
+                        <span className={`inline-block px-1 py-0.5 rounded text-[9px] font-semibold uppercase shrink-0 ${statusBadge.className}`}>
+                          {statusBadge.label}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-text-secondary mt-0.5">
+                      <span>{axis.assigned_brigades.length} bde{axis.assigned_brigades.length !== 1 ? 's' : ''}</span>
+                      <span>·</span>
+                      <span>Obj {axis.current_objective_index + 1}/{axis.objectives.length}</span>
+                      <span>·</span>
+                      <span className={axis.momentum >= 0 ? 'text-green-400' : 'text-red-400'}>
+                        {axis.momentum >= 0 ? '+' : ''}{axis.momentum}
+                      </span>
                     </div>
                   </div>
                 );

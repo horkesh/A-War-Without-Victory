@@ -1658,6 +1658,64 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('acknowledge-officer-event', async (_event, payload) => {
+    const { eventId } = payload || {};
+    if (!currentGameStateJson || typeof eventId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const events = state.military?.pending_officer_events;
+      if (events) {
+        const evt = events.find(e => e.event_id === eventId);
+        if (evt) evt.acknowledged = true;
+      }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('accept-officer-replacement', async (_event, payload) => {
+    const { eventId, corpsId, newOfficerId, currentOfficerId } = payload || {};
+    if (!currentGameStateJson || typeof eventId !== 'string' || typeof corpsId !== 'string' || typeof newOfficerId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const officers = state.military?.named_officers;
+      if (officers) {
+        // Retire current commander
+        if (currentOfficerId && officers[currentOfficerId]) {
+          officers[currentOfficerId].status = 'retired';
+          officers[currentOfficerId].assigned_corps_id = null;
+        }
+        // Assign new officer
+        if (officers[newOfficerId]) {
+          officers[newOfficerId].status = 'active';
+          officers[newOfficerId].assigned_corps_id = corpsId;
+          officers[newOfficerId].turns_in_command = 0;
+          officers[newOfficerId].acting_commander = false;
+        }
+      }
+      // Acknowledge the event
+      const events = state.military?.pending_officer_events;
+      if (events) {
+        const evt = events.find(e => e.event_id === eventId);
+        if (evt) evt.acknowledged = true;
+      }
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // Start the tactical map HTTP server (required because MapLibre's Web Workers
   // don't function under Electron custom protocol schemes), then create the window.
   startMapServer().then(() => {

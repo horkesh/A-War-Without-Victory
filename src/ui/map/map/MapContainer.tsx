@@ -12,10 +12,10 @@ import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
 import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
-import { buildDensityGeoJSON } from './builders/buildDensityGeoJSON';
+import { buildMoraleGeoJSON } from './builders/buildMoraleGeoJSON';
+import { buildCasualtiesGeoJSON } from './builders/buildCasualtiesGeoJSON';
 import { buildDefenseStrengthGeoJSON } from './builders/buildDefenseStrengthGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
-import { buildPressureGeoJSON } from './builders/buildPressureGeoJSON';
 import { buildSupplyGeoJSON } from './builders/buildSupplyGeoJSON';
 import { buildOperationalWeightGeoJSON } from './builders/buildOperationalWeightGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
@@ -93,10 +93,10 @@ function safeHasLayer(
   }
 }
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
-const OSID_DENSITY_FILL_LAYER_ID = 'osid-density-fill';
-const OSID_DENSITY_SOURCE_ID = 'osid-density';
-const OSID_PRESSURE_FILL_LAYER_ID = 'osid-pressure-fill';
-const OSID_PRESSURE_SOURCE_ID = 'osid-pressure';
+const OSID_MORALE_FILL_LAYER_ID = 'osid-morale-fill';
+const OSID_MORALE_SOURCE_ID = 'osid-morale';
+const OSID_CASUALTIES_FILL_LAYER_ID = 'osid-casualties-fill';
+const OSID_CASUALTIES_SOURCE_ID = 'osid-casualties';
 const OSID_SUPPLY_FILL_LAYER_ID = 'osid-supply-fill';
 const OSID_SUPPLY_SOURCE_ID = 'osid-supply';
 const OSID_OPERATIONS_FILL_LAYER_ID = 'osid-operations-fill';
@@ -239,10 +239,22 @@ export function MapContainer() {
 
     const pmtilesProtocol = new Protocol();
     const origin = window.location.origin;
-    maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
+    console.log('[PMTiles] registering protocol, origin:', origin);
+    // Use tilev4 (native MapLibre v4 async handler) and surface errors
+    const tileHandler = async (params: { url: string; type?: string }, abortController: AbortController) => {
+      if (params.type === 'json') console.log('[PMTiles] source metadata request:', params.url);
+      try {
+        return await (pmtilesProtocol as any).tilev4(params, abortController);
+      } catch (e) {
+        console.error('[PMTiles] tile error', params.url, e);
+        throw e;
+      }
+    };
+    maplibregl.addProtocol('pmtiles', tileHandler as any);
 
     const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
 
+    let initCancelled = false;
     const init = async () => {
       try {
         const [geojson, byOsid, adjacency] = await Promise.all([
@@ -284,19 +296,21 @@ export function MapContainer() {
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)['fog-overlay'] = { type: 'geojson', data: EMPTY_GEOJSON };
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[BATTLE_MARKERS_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[STRATEGIC_POINTS_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
+        (sources as Record<string, { type?: string; data?: FeatureCollection }>)[GHOST_PATH_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
         // NOTE: front-edges-hover source is NOT pre-registered here — it's created via addSource
         // in runUpdate so that addLayer calls in the same block also execute.
       } catch (e) {
         console.warn('Failed to pre-load OSID data:', e);
       }
 
-      if (!containerRef.current) return;
+      if (initCancelled || !containerRef.current) return;
       const map = new maplibregl.Map({
         container: containerRef.current,
         style,
         center: BOSNIA_CENTER,
         zoom: DEFAULT_ZOOM,
       });
+      map.on('error', (e) => console.error('[MapLibre] map error:', e.error));
       mapRef.current = map;
       ensureTacticalIcons(map);
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -330,6 +344,7 @@ export function MapContainer() {
     init();
 
     return () => {
+      initCancelled = true;
       mapRef.current?.remove();
       mapRef.current = null;
       useGameStore.getState().setPanToCenter(null);
@@ -1659,11 +1674,11 @@ export function MapContainer() {
       if (safeHasLayer(m, OSID_ETHNIC_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic');
       }
-      if (safeHasLayer(m, OSID_DENSITY_FILL_LAYER_ID)) {
-        safeSetLayoutVisibility(m, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density');
+      if (safeHasLayer(m, OSID_MORALE_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, OSID_MORALE_FILL_LAYER_ID, mapMode === 'morale');
       }
-      if (safeHasLayer(m, OSID_PRESSURE_FILL_LAYER_ID)) {
-        safeSetLayoutVisibility(m, OSID_PRESSURE_FILL_LAYER_ID, mapMode === 'pressure');
+      if (safeHasLayer(m, OSID_CASUALTIES_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, OSID_CASUALTIES_FILL_LAYER_ID, mapMode === 'casualties');
       }
       if (safeHasLayer(m, OSID_SUPPLY_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply');
@@ -1681,7 +1696,7 @@ export function MapContainer() {
     };
   }, [mapReady, osidPropertiesMap, mapMode, loadedGameState]);
 
-  // Phase E.1: Density map mode — color front-adjacent OSIDs by sector density.
+  // Morale map mode — color front-adjacent OSIDs by sector average morale (continuous gradient).
   useEffect(() => {
     const map = mapRef.current;
     const baseGeoJson = osidBaseRef.current;
@@ -1691,33 +1706,33 @@ export function MapContainer() {
     const rafId = requestAnimationFrame(() => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
-      const densityGeoJson = buildDensityGeoJSON(controlGeoJson, loadedGameState.corpsFrontSectors!, loadedGameState.frontEdgesOsid!);
+      const moraleGeoJson = buildMoraleGeoJSON(controlGeoJson, loadedGameState.corpsFrontSectors!, loadedGameState.frontEdgesOsid!);
       if (cancelled || !mapRef.current) return;
       const m = mapRef.current;
-      if (!m.getSource(OSID_DENSITY_SOURCE_ID)) {
-        m.addSource(OSID_DENSITY_SOURCE_ID, { type: 'geojson', data: densityGeoJson });
+      if (!m.getSource(OSID_MORALE_SOURCE_ID)) {
+        m.addSource(OSID_MORALE_SOURCE_ID, { type: 'geojson', data: moraleGeoJson });
         m.addLayer(
           {
-            id: OSID_DENSITY_FILL_LAYER_ID,
+            id: OSID_MORALE_FILL_LAYER_ID,
             type: 'fill',
-            source: OSID_DENSITY_SOURCE_ID,
+            source: OSID_MORALE_SOURCE_ID,
             paint: {
               'fill-color': [
-                'match',
-                ['get', 'density_class'],
-                'thin', 'rgba(220, 50, 50, 0.35)',
-                'normal', 'rgba(210, 160, 40, 0.30)',
-                'dense', 'rgba(50, 180, 70, 0.35)',
-                'rgba(60, 60, 70, 0.12)',
+                'interpolate', ['linear'], ['get', 'morale'],
+                0,   'rgba(204, 34, 34, 0.45)',
+                25,  'rgba(204, 102, 34, 0.40)',
+                45,  'rgba(204, 170, 34, 0.35)',
+                65,  'rgba(136, 170, 34, 0.35)',
+                85,  'rgba(34, 136, 68, 0.35)',
               ],
             },
           },
           'faction-border-glow-pos'
         );
       } else {
-        (m.getSource(OSID_DENSITY_SOURCE_ID) as GeoJSONSource).setData(densityGeoJson);
+        (m.getSource(OSID_MORALE_SOURCE_ID) as GeoJSONSource).setData(moraleGeoJson);
       }
-      safeSetLayoutVisibility(m, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density');
+      safeSetLayoutVisibility(m, OSID_MORALE_FILL_LAYER_ID, mapMode === 'morale');
     });
     return () => {
       cancelled = true;
@@ -1833,49 +1848,43 @@ export function MapContainer() {
     };
   }, [mapReady, mapMode, loadedGameState]);
 
-  // Pressure map mode — color front-adjacent OSIDs by combat pressure intensity.
+  // Casualties map mode — color OSIDs by cumulative recent battle casualties (continuous gradient).
   useEffect(() => {
     const map = mapRef.current;
     const baseGeoJson = osidBaseRef.current;
-    if (!mapReady || !map || !baseGeoJson || !loadedGameState?.frontEdgesOsid) return;
+    if (!mapReady || !map || !baseGeoJson || !loadedGameState?.formations) return;
 
     let cancelled = false;
     const rafId = requestAnimationFrame(() => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
-      const pressureGeoJson = buildPressureGeoJSON(
-        controlGeoJson,
-        loadedGameState.frontEdgesOsid!,
-        loadedGameState.frontPressureByEdge,
-        loadedGameState.controlBySettlement
-      );
+      const casualtiesGeoJson = buildCasualtiesGeoJSON(controlGeoJson, loadedGameState.formations);
       if (cancelled || !mapRef.current) return;
       const m = mapRef.current;
-      if (!m.getSource(OSID_PRESSURE_SOURCE_ID)) {
-        m.addSource(OSID_PRESSURE_SOURCE_ID, { type: 'geojson', data: pressureGeoJson });
+      if (!m.getSource(OSID_CASUALTIES_SOURCE_ID)) {
+        m.addSource(OSID_CASUALTIES_SOURCE_ID, { type: 'geojson', data: casualtiesGeoJson });
         m.addLayer(
           {
-            id: OSID_PRESSURE_FILL_LAYER_ID,
+            id: OSID_CASUALTIES_FILL_LAYER_ID,
             type: 'fill',
-            source: OSID_PRESSURE_SOURCE_ID,
+            source: OSID_CASUALTIES_SOURCE_ID,
             paint: {
               'fill-color': [
-                'match',
-                ['get', 'pressure_class'],
-                'low', 'rgba(100, 180, 100, 0.30)',
-                'medium', 'rgba(220, 180, 40, 0.40)',
-                'high', 'rgba(220, 60, 60, 0.50)',
-                'rgba(80, 80, 80, 0.15)',
+                'interpolate', ['linear'], ['get', 'casualties_normalized'],
+                0,   'rgba(60, 60, 70, 0.05)',
+                0.15, 'rgba(204, 170, 34, 0.25)',
+                0.4,  'rgba(220, 130, 40, 0.35)',
+                0.7,  'rgba(220, 60, 60, 0.45)',
+                1.0,  'rgba(140, 20, 20, 0.55)',
               ],
-              'fill-opacity': 1,
             },
           },
           'faction-border-glow-pos'
         );
       } else {
-        (m.getSource(OSID_PRESSURE_SOURCE_ID) as GeoJSONSource).setData(pressureGeoJson);
+        (m.getSource(OSID_CASUALTIES_SOURCE_ID) as GeoJSONSource).setData(casualtiesGeoJson);
       }
-      safeSetLayoutVisibility(m, OSID_PRESSURE_FILL_LAYER_ID, mapMode === 'pressure');
+      safeSetLayoutVisibility(m, OSID_CASUALTIES_FILL_LAYER_ID, mapMode === 'casualties');
     });
     return () => {
       cancelled = true;
@@ -1959,8 +1968,8 @@ export function MapContainer() {
       const showPolitical = mapMode === 'political';
       if (!safeSetLayoutVisibility(map, 'osid-control-fill', showPolitical)) allExist = false;
       if (safeHasLayer(map, OSID_ETHNIC_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic')) allExist = false;
-      if (safeHasLayer(map, OSID_DENSITY_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_DENSITY_FILL_LAYER_ID, mapMode === 'density')) allExist = false;
-      if (safeHasLayer(map, OSID_PRESSURE_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_PRESSURE_FILL_LAYER_ID, mapMode === 'pressure')) allExist = false;
+      if (safeHasLayer(map, OSID_MORALE_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_MORALE_FILL_LAYER_ID, mapMode === 'morale')) allExist = false;
+      if (safeHasLayer(map, OSID_CASUALTIES_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_CASUALTIES_FILL_LAYER_ID, mapMode === 'casualties')) allExist = false;
       if (safeHasLayer(map, OSID_SUPPLY_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply')) allExist = false;
       if (safeHasLayer(map, OSID_OPERATIONS_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations')) allExist = false;
       return allExist;

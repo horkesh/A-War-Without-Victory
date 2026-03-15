@@ -38,7 +38,7 @@ export function OrderQueue() {
         style={{
           position: 'absolute',
           left: 0,
-          bottom: '2rem',
+          bottom: '2.25rem',
           width: '18rem',
           zIndex: 15,
           direction: 'ltr',
@@ -60,7 +60,7 @@ export function OrderQueue() {
         style={{
           position: 'absolute',
           left: 0,
-          bottom: '2rem',
+          bottom: '2.25rem',
           width: '18rem',
           zIndex: 15,
           direction: 'ltr',

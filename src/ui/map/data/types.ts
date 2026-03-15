@@ -75,6 +75,13 @@ export interface NamedOfficerView {
     compatible_corps_ids?: string[];
     /** Casualty vulnerability (0-1). High = shown as warning. */
     casualty_vulnerability?: number;
+    /** War crimes record from historical data (ICTY etc). */
+    war_crimes_record?: {
+        court: string;
+        verdict: string;
+        sentence?: string;
+        summary: string;
+    };
 }
 
 export interface FormationView {
@@ -546,6 +553,7 @@ export interface LoadedGameState {
             casualties_suffered: { killed: number; wounded: number };
             casualties_inflicted: { killed: number; wounded: number };
         }>;
+        recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
     }>;
     /** Player-issued permanent sector assignments (brigade_sector_override). */
     brigadeSectorOverride?: Record<string, string>;
@@ -580,6 +588,29 @@ export interface LoadedGameState {
             battles_fought: number;
             osids_captured: number;
         }>;
+    }>;
+    /** Pending officer personnel events (new arrivals, suggested replacements). */
+    pendingOfficerEvents?: Array<{
+        event_id: string;
+        type: 'officer_available' | 'replacement_suggested';
+        faction: string;
+        turn: number;
+        officer_id: string;
+        officer_name: string;
+        officer_competence: number;
+        officer_aggressiveness: number;
+        officer_defensive_skill: number;
+        current_commander_id?: string;
+        current_commander_name?: string;
+        corps_id?: string;
+        corps_name?: string;
+        acknowledged: boolean;
+        war_crimes_record?: {
+            court: string;
+            verdict: string;
+            sentence?: string;
+            summary: string;
+        };
     }>;
     /** Active (in-progress) operations. */
     activeOperations?: Array<{

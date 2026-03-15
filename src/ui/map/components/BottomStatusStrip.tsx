@@ -1,119 +1,161 @@
-import { useGameStore } from '../store/gameStore';
-import { getByOsid } from '../utils/osidLookup';
-import { getOsidDisplayName } from '../utils/osidDisplayName';
-import { getFormationsAtOsid } from '../utils/formationAtOsid';
+import { useGameStore, type MapMode } from '../store/gameStore';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
+import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
+
+const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
+
+const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
+  { id: 'political', label: 'Political', key: '1' },
+  { id: 'ethnic', label: 'Ethnic', key: '2' },
+  { id: 'supply', label: 'Supply', key: '3' },
+  { id: 'casualties', label: 'Casualties', key: '4' },
+  { id: 'morale', label: 'Morale', key: '5' },
+  { id: 'operations', label: 'Operations', key: '6' },
+  { id: 'defense', label: 'Defense', key: '7' },
+];
+
+const DEV_LAYER_TOGGLES = [
+  { key: 'frontsVisible', setKey: 'setFrontsVisible', label: 'Fronts' },
+  { key: 'formationsVisible', setKey: 'setFormationsVisible', label: 'Units' },
+  { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
+  { key: 'sectorsVisible', setKey: 'setSectorsVisible', label: 'Sectors' },
+  { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
+  { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
+  { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
+  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
+] as const;
+
+const LIVE_LAYER_TOGGLES = [
+  { key: 'sectorsVisible', setKey: 'setSectorsVisible', label: 'Front' },
+  { key: 'formationsVisible', setKey: 'setFormationsVisible', label: 'Units' },
+  { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
+  { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
+  { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
+  { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
+  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
+] as const;
 
 /**
- * One-line status bar at the bottom: selected OSID summary or empty state.
+ * Unified bottom bar: map mode pills | territory control | layer toggles.
  */
 export function BottomStatusStrip() {
-  const selectedOsid = useGameStore((s) => s.selectedOsid);
-  const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
 
-  const controller = selectedOsid
-    ? getByOsid(loadedGameState?.controlBySettlement, selectedOsid)
-    : null;
-  const formationsAtOsid = getFormationsAtOsid(loadedGameState?.formations, selectedOsid ?? '');
-  const formationCount = formationsAtOsid.length;
+  // Territory control — area-weighted (km²)
   const controlBySettlement = loadedGameState?.controlBySettlement ?? {};
-  const territoryTotals = { RS: 0, RBiH: 0, HRHB: 0 };
-  const controlCount = Object.keys(controlBySettlement).length;
-  if (controlCount > 0) {
-    for (const faction of Object.values(controlBySettlement)) {
-      if (faction === 'RS' || faction === 'RBiH' || faction === 'HRHB') territoryTotals[faction] += 1;
+  const areaTotals = { RS: 0, RBiH: 0, HRHB: 0 };
+  const totalArea = osidAreas.total_area_km2;
+  for (const [osid, faction] of Object.entries(controlBySettlement)) {
+    if (faction === 'RS' || faction === 'RBiH' || faction === 'HRHB') {
+      areaTotals[faction] += osidAreas.areas[osid] ?? 0;
     }
   }
   const territoryPct = {
-    RS: controlCount > 0 ? (territoryTotals.RS / controlCount) * 100 : 0,
-    RBiH: controlCount > 0 ? (territoryTotals.RBiH / controlCount) * 100 : 0,
-    HRHB: controlCount > 0 ? (territoryTotals.HRHB / controlCount) * 100 : 0,
+    RS: totalArea > 0 ? (areaTotals.RS / totalArea) * 100 : 0,
+    RBiH: totalArea > 0 ? (areaTotals.RBiH / totalArea) * 100 : 0,
+    HRHB: totalArea > 0 ? (areaTotals.HRHB / totalArea) * 100 : 0,
   };
-  const activeOps = loadedGameState?.operations?.length ?? 0;
-  const cumulativeCasualties = Object.values(loadedGameState?.casualtyLedger ?? {}).reduce((sum, row) => {
-    const killed = Number.isFinite(row?.killed) ? row.killed : 0;
-    const wounded = Number.isFinite(row?.wounded) ? row.wounded : 0;
-    const missing = Number.isFinite(row?.missing_captured) ? row.missing_captured : 0;
-    return sum + killed + wounded + missing;
-  }, 0);
 
+  // Map mode
+  const devMode = useGameStore((s) => s.devMode);
+  const LAYER_TOGGLES = devMode ? DEV_LAYER_TOGGLES : LIVE_LAYER_TOGGLES;
+  const mapMode = useGameStore((s) => s.mapMode);
+  const setMapMode = useGameStore((s) => s.setMapMode);
+  const frontsVisible = useGameStore((s) => s.frontsVisible);
+  const setFrontsVisible = useGameStore((s) => s.setFrontsVisible);
+  const formationsVisible = useGameStore((s) => s.formationsVisible);
+  const setFormationsVisible = useGameStore((s) => s.setFormationsVisible);
+  const labelsVisible = useGameStore((s) => s.labelsVisible);
+  const setLabelsVisible = useGameStore((s) => s.setLabelsVisible);
+  const sectorsVisible = useGameStore((s) => s.sectorsVisible);
+  const setSectorsVisible = useGameStore((s) => s.setSectorsVisible);
+  const minimapVisible = useGameStore((s) => s.minimapVisible);
+  const setMinimapVisible = useGameStore((s) => s.setMinimapVisible);
+  const fogVisible = useGameStore((s) => s.fogVisible);
+  const setFogVisible = useGameStore((s) => s.setFogVisible);
+  const battlesVisible = useGameStore((s) => s.battlesVisible);
+  const setBattlesVisible = useGameStore((s) => s.setBattlesVisible);
+  const strategicVisible = useGameStore((s) => s.strategicVisible);
+  const setStrategicVisible = useGameStore((s) => s.setStrategicVisible);
+
+  const toggles: Record<string, { value: boolean; set: (v: boolean) => void }> = {
+    frontsVisible: { value: frontsVisible, set: setFrontsVisible },
+    formationsVisible: { value: formationsVisible, set: setFormationsVisible },
+    labelsVisible: { value: labelsVisible, set: setLabelsVisible },
+    sectorsVisible: { value: sectorsVisible, set: setSectorsVisible },
+    minimapVisible: { value: minimapVisible, set: setMinimapVisible },
+    fogVisible: { value: fogVisible, set: setFogVisible },
+    battlesVisible: { value: battlesVisible, set: setBattlesVisible },
+    strategicVisible: { value: strategicVisible, set: setStrategicVisible },
+  };
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between gap-6 px-4 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] overflow-hidden"
+      className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-1 px-2 py-1 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]"
     >
-      <div className="absolute inset-0 scanline-texture opacity-[0.02] pointer-events-none" />
+      {/* 1. Map mode pills */}
+      <div className="flex items-center gap-0.5 px-1 shrink-0">
+        {MAP_MODES.map(({ id, label, key }) => {
+          const active = mapMode === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setMapMode(id)}
+              title={`${label} (${key})`}
+              className={`px-2 py-1 rounded text-[9px] font-mono tracking-widest transition-all duration-200 uppercase ${active
+                ? 'bg-accent-gold/20 text-accent-gold shadow-glow-sm font-bold'
+                : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
 
-      {/* 1. SELECTION TELEMETRY */}
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-1 h-3 bg-interactive/60 rounded-full" />
-        <div className="flex flex-col min-w-0">
-          <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-interactive/70 leading-none mb-1">TARGET TELEMETRY</span>
-          <div className="flex items-center gap-2 text-xs font-mono truncate">
-            {selectedOsid ? (
-              <>
-                <span className="text-text-primary glow-text uppercase font-bold" title={selectedOsid}>
-                  {getOsidDisplayName(selectedOsid, osidDisplayNames)}
-                </span>
-                {controller && (
-                  <>
-                    <span className="text-white/20">/</span>
-                    <span className={`${FACTION_COLORS_SUBTLE[controller] ?? 'text-text-primary'} uppercase font-bold`}>
-                      {controller}
-                    </span>
-                  </>
-                )}
-                {formationCount > 0 && (
-                  <>
-                    <span className="text-white/10">|</span>
-                    <span className="text-text-secondary">
-                      {formationCount} DETACHMENTS
-                    </span>
-                  </>
-                )}
-              </>
-            ) : (
-              <span className="text-text-muted italic opacity-50 uppercase tracking-widest text-[10px]">AWAIT SELECTION</span>
-            )}
-          </div>
+      {/* Divider */}
+      <div className="w-[1px] h-4 bg-white/10 shrink-0" />
+
+      {/* 2. Territory control (center) */}
+      <div className="hidden md:flex items-center gap-3 px-3 shrink-0">
+        <div className="flex items-center gap-3 text-[10px] font-mono tracking-widest">
+          <span className={`${FACTION_COLORS_SUBTLE['RS'] ?? 'text-text-primary'} tabular-nums`}>
+            RS {territoryPct.RS.toFixed(1)}%
+          </span>
+          <div className="h-3 w-px bg-white/10" />
+          <span className={`${FACTION_COLORS_SUBTLE['RBiH'] ?? 'text-text-primary'} tabular-nums`}>
+            RBiH {territoryPct.RBiH.toFixed(1)}%
+          </span>
+          <div className="h-3 w-px bg-white/10" />
+          <span className={`${FACTION_COLORS_SUBTLE['HRHB'] ?? 'text-text-primary'} tabular-nums`}>
+            HRHB {territoryPct.HRHB.toFixed(1)}%
+          </span>
         </div>
       </div>
 
-      {/* 2. FRONTLINE CONTROL (Center) */}
-      <div className="hidden md:flex flex-1 items-center justify-center gap-4 px-6 border-l border-r border-white/5">
-        <div className="flex flex-col items-center mr-4">
-          <span className="text-[8px] font-mono uppercase tracking-[0.3em] text-text-secondary mb-1">FRONTLINE CONTROL</span>
-          <div className="flex items-center gap-4 text-[10px] font-mono tracking-widest">
-            <div className="flex flex-col items-center">
-              <span className="text-[8px] text-faction-rs/60">RS</span>
-              <span className="text-text-primary">{territoryPct.RS.toFixed(1)}%</span>
-            </div>
-            <div className="h-4 w-px bg-white/10" />
-            <div className="flex flex-col items-center">
-              <span className="text-[8px] text-faction-rbih/60">RBiH</span>
-              <span className="text-text-primary">{territoryPct.RBiH.toFixed(1)}%</span>
-            </div>
-            <div className="h-4 w-px bg-white/10" />
-            <div className="flex flex-col items-center">
-              <span className="text-[8px] text-faction-hrhb/60">HRHB</span>
-              <span className="text-text-primary">{territoryPct.HRHB.toFixed(1)}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Divider */}
+      <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 
-      {/* 3. THEATER STATS */}
-      <div className="flex items-center gap-4 shrink-0">
-        <div className="flex flex-col items-end">
-          <span className="text-[8px] font-mono uppercase tracking-widest text-text-secondary">THEATER OPERATIONS</span>
-          <span className="text-[11px] font-mono text-text-primary tabular-nums">{activeOps} ACTIVE</span>
-        </div>
-        <div className="h-6 w-px bg-white/10" />
-        <div className="flex flex-col items-end">
-          <span className="text-[8px] font-mono uppercase tracking-widest text-text-secondary">AGGREGATE LOSSES</span>
-          <span className="text-[11px] font-mono text-red-500/80 tabular-nums glow-text">{cumulativeCasualties.toLocaleString()}</span>
-        </div>
+      {/* 3. Layer toggles */}
+      <div className="flex items-center gap-0.5 px-1">
+        {LAYER_TOGGLES.map(({ key, label }) => {
+          const t = toggles[key];
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => t.set(!t.value)}
+              title={`Toggle ${label}`}
+              className={`px-2 py-1 rounded text-[9px] font-mono tracking-[0.1em] transition-all duration-200 uppercase ${t.value
+                ? 'bg-interactive/10 text-text-primary border border-interactive/30'
+                : 'text-text-secondary/50 hover:text-text-secondary'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -31,6 +31,27 @@ function groupFormationsByCorps(formations: FormationView[]): Map<string, Format
 
 
 
+const STRENGTH_BADGE_STYLES: Record<string, string> = {
+  fortress: 'text-green-400 font-bold',
+  strong: 'text-green-400',
+  adequate: 'text-amber-400',
+  thin: 'text-orange-400',
+  critical: 'text-red-400 font-bold',
+};
+
+function SectorStrengthBadge({ strengthClass }: { strengthClass: string }) {
+  const style = STRENGTH_BADGE_STYLES[strengthClass] ?? 'text-text-secondary';
+  return (
+    <span className={`text-[9px] uppercase tracking-tight shrink-0 ${style}`}>
+      {strengthClass}
+    </span>
+  );
+}
+
+// TODO: Fog coverage indicator — compute visibleEnemyOsids.length / totalEnemyOsids * 100
+// from loadedGameState.fogOfWar and display as "Intel: XX%" in the sidebar footer.
+// Deferred: requires determining totalEnemyOsids which needs cross-referencing controlBySettlement.
+
 /**
  * Left sidebar: Collapsible accordion sections — Situation, Army, Sectors.
  */
@@ -196,7 +217,7 @@ export function OOBSidebar() {
   if (!loadedGameState) {
     return (
       <div
-        className="absolute left-0 top-14 bottom-8 z-10 w-72 flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+        className="absolute left-0 top-14 bottom-9 z-10 w-72 flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
         style={{ direction: 'ltr' }}
       >
         <div className="px-3 py-3 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border glow-text">
@@ -209,7 +230,7 @@ export function OOBSidebar() {
 
   return (
     <div
-      className="absolute left-0 top-14 bottom-8 z-10 w-72 flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+      className="absolute left-0 top-14 bottom-9 z-10 w-72 flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
       style={{ direction: 'ltr' }}
     >
       {/* Overlay — explicitly absolute to avoid flex-item space consumption */}
@@ -506,8 +527,11 @@ export function OOBSidebar() {
                               style={{ backgroundColor: color }}
                             />
                             <div className="min-w-0 flex-1">
-                              <div className="text-text-primary truncate text-[11px]">
-                                {sector.display_name}
+                              <div className="text-text-primary truncate text-[11px] flex items-center gap-1.5">
+                                <span className="truncate">{sector.display_name}</span>
+                                {sector.combat_strength_class && (
+                                  <SectorStrengthBadge strengthClass={sector.combat_strength_class} />
+                                )}
                               </div>
                               <div className="text-text-secondary text-[10px] tabular-nums">
                                 {sector.assigned_brigade_ids.length} assigned

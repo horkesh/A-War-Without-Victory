@@ -58,7 +58,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
 
     if (!isOpen || !loadedGameState) return null;
 
-    const { label, formations, controlBySettlement, casualtyLedger, displacementByMun, departedByOsid } = loadedGameState;
+    const { label, formations, controlBySettlement, casualtyLedger, civilianCasualties, displacementByMun, departedByOsid } = loadedGameState;
 
     // Territory: area-weighted percentage per faction
     const areaByFaction: Record<string, number> = {};
@@ -263,6 +263,29 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                                 })}
                             </div>
                         </Section>
+
+                        {civilianCasualties && Object.keys(civilianCasualties).length > 0 && (() => {
+                            let totalKilled = 0;
+                            let totalFled = 0;
+                            for (const entry of Object.values(civilianCasualties)) {
+                                totalKilled += entry.killed ?? 0;
+                                totalFled += entry.fled_abroad ?? 0;
+                            }
+                            return (
+                                <Section title="Civilian Impact">
+                                    <div style={{ display: 'flex', gap: 24, fontSize: 12 }}>
+                                        <div>
+                                            <span style={{ color: '#8a7d70' }}>Killed: </span>
+                                            <span style={{ color: '#e06060', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{fmtK(totalKilled)}</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: '#8a7d70' }}>Fled abroad: </span>
+                                            <span style={{ color: '#d5c9bc', fontVariantNumeric: 'tabular-nums' }}>{fmtK(totalFled)}</span>
+                                        </div>
+                                    </div>
+                                </Section>
+                            );
+                        })()}
                     </>
                 ) : (
                     <div style={{ maxHeight: '24rem', overflow: 'auto', marginBottom: 16, paddingRight: 4 }}>

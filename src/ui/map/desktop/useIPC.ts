@@ -86,6 +86,8 @@ interface WindowAwwv {
     approveReserveRequest: (corpsId: string, brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     recallEliteBrigade: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     redirectReserveLoan: (brigadeId: string, newCorpsId: string) => Promise<{ ok: boolean; error?: string }>;
+    acknowledgeOfficerEvent: (eventId: string) => Promise<{ ok: boolean; error?: string }>;
+    acceptOfficerReplacement: (payload: { eventId: string; corpsId: string; newOfficerId: string; currentOfficerId?: string }) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -313,6 +315,14 @@ export function useIPC() {
 
             redirectReserveLoan: awwv
                 ? (brigadeId: string, newCorpsId: string) => awwv.redirectReserveLoan(brigadeId, newCorpsId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            acknowledgeOfficerEvent: awwv
+                ? (eventId: string) => awwv.acknowledgeOfficerEvent(eventId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            acceptOfficerReplacement: awwv
+                ? (payload: { eventId: string; corpsId: string; newOfficerId: string; currentOfficerId?: string }) => awwv.acceptOfficerReplacement(payload)
                 : makeNoop<{ ok: boolean; error?: string }>(),
         };
     }, []); // stable — never changes reference

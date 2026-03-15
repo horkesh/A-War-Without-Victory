@@ -1151,6 +1151,14 @@ export function parseGameState(json: unknown): LoadedGameState {
                 assigned_operation: typeof os?.assigned_operation === 'string' ? os.assigned_operation : undefined,
                 compatible_corps_ids: Array.isArray(data.compatible_corps_ids) ? (data.compatible_corps_ids as string[]).filter(s => typeof s === 'string') : undefined,
                 casualty_vulnerability: finiteNumber(os?.casualty_vulnerability, undefined) as number | undefined,
+                war_crimes_record: data.war_crimes_record != null && typeof data.war_crimes_record === 'object'
+                    ? {
+                        court: String((data.war_crimes_record as Record<string, unknown>).court ?? ''),
+                        verdict: String((data.war_crimes_record as Record<string, unknown>).verdict ?? ''),
+                        sentence: typeof (data.war_crimes_record as Record<string, unknown>).sentence === 'string' ? (data.war_crimes_record as Record<string, unknown>).sentence as string : undefined,
+                        summary: String((data.war_crimes_record as Record<string, unknown>).summary ?? ''),
+                    }
+                    : undefined,
             });
         }
         if (officerList.length > 0) namedOfficerData = officerList;
@@ -1573,6 +1581,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             }))
             : undefined,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
+        pendingOfficerEvents: derivePendingOfficerEvents(state),
     };
 }
 
@@ -1725,5 +1734,57 @@ function deriveActiveOperations(state: any): LoadedGameState['activeOperations']
     }
 
     return activeOps.length > 0 ? activeOps : undefined;
+}
+
+function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficerEvents'] {
+    const events = state.military?.pending_officer_events as any[] | undefined;
+    if (!events || events.length === 0) return undefined;
+
+    const officerData = state.military?.named_officer_data as any[] | undefined;
+    const formations = state.military?.formations as Record<string, any> | undefined;
+
+    const getOfficerName = (id: string): string => {
+        const o = officerData?.find((d: any) => d.id === id);
+        return o?.name ?? id;
+    };
+
+    const getOfficerStats = (id: string) => {
+        const o = officerData?.find((d: any) => d.id === id);
+        return {
+            competence: Number(o?.competence ?? 3),
+            aggressiveness: Number(o?.aggressiveness ?? 3),
+            defensive_skill: Number(o?.defensive_skill ?? 3),
+            war_crimes_record: o?.war_crimes_record ?? undefined,
+        };
+    };
+
+    const getCorpsName = (corpsId: string): string => {
+        if (!formations) return corpsId;
+        const f = formations[corpsId];
+        return f?.name ?? corpsId;
+    };
+
+    return events
+        .filter((e: any) => !e.acknowledged)
+        .map((e: any) => {
+            const stats = getOfficerStats(e.officer_id);
+            return {
+                event_id: String(e.event_id),
+                type: e.type as 'officer_available' | 'replacement_suggested',
+                faction: String(e.faction),
+                turn: Number(e.turn),
+                officer_id: String(e.officer_id),
+                officer_name: getOfficerName(e.officer_id),
+                officer_competence: stats.competence,
+                officer_aggressiveness: stats.aggressiveness,
+                officer_defensive_skill: stats.defensive_skill,
+                current_commander_id: e.current_commander_id ? String(e.current_commander_id) : undefined,
+                current_commander_name: e.current_commander_id ? getOfficerName(e.current_commander_id) : undefined,
+                corps_id: e.corps_id ? String(e.corps_id) : undefined,
+                corps_name: e.corps_id ? getCorpsName(e.corps_id) : undefined,
+                acknowledged: Boolean(e.acknowledged),
+                war_crimes_record: stats.war_crimes_record,
+            };
+        });
 }
 
