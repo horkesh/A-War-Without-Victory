@@ -82,7 +82,8 @@
 7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked.
 8. **[2026-03-12] HVO named officer roster critically incomplete**: 20% coverage vs VRS 90%.
 9. **[2026-03-15] 2KK Prozor positional lock**: 6 of 8 brigades at Prozor/GV/Livno instead of Bihać. Target + Graz fixes applied (n809) but positional lock persists. Needs commander override to recall.
-10. **[2026-03-15] Humanitarian capital: per-faction attribution (v0.3.2)**: `computeHumanitarianData` sums ALL displacement globally instead of attributing refugees to the faction that caused displacement. Humanitarian standing = 0 for all factions. Fix: attribute refugees_created to the faction that controls the origin OSID at time of displacement. Track per-faction in displacement state or derive from control_events.
+10. **[2026-03-15] Visual assets — user generating via Gemini Pro (EXTERNAL)**: P0 event illustrations (40-50 images, 800×450) + peace plan maps (5, 600×400) needed before v0.4.1 Event UI. P1 peace→war transition (1, 1920×1080) before v0.4.0. P2 commander portraits (30, 256×320) before v0.4.5. All plans should include placeholders until assets delivered. Strategy: `docs/30_planning/design/VISUAL_ASSET_STRATEGY.md`. Do NOT generate images — user handles this.
+11. **[2026-03-15] Humanitarian capital: per-faction attribution (v0.3.2)**: `computeHumanitarianData` sums ALL displacement globally instead of attributing refugees to the faction that caused displacement. Humanitarian standing = 0 for all factions. Fix: attribute refugees_created to the faction that controls the origin OSID at time of displacement. Track per-faction in displacement state or derive from control_events.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
