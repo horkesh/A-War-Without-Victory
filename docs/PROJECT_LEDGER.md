@@ -1,7 +1,43 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** Post-MVP — n776: Intelligent Corps Commander (Phases A-D) + cross-corps enclave guard. **91.7% area**, 13/13 anchors, 6/6 benchmarks. Žepče holds. 9 SRK brigades on siege ring. Salient aversion. Drina OOB.
+**Status:** Post-MVP — n786: **MANDATORY SPAWN FIX** — 64 brigades now spawn that were silently blocked. 122 ARBiH brigades (was 38). Gradačac holds, Bijela holds. Full recalibration needed. Intelligent Corps Commander Phases A-E active.
+
+## [2026-03-15] n786: Force-Spawn Mandatory Brigades — 64 Formations Restored
+
+**ROOT CAUSE FOUND:** 64 of 182 mandatory brigades (43 RBiH, 21 RS, 4 HRHB) silently failed to spawn at game start. The militia pool system (`runPoolPopulation`) only creates pool entries where `war_militia_strength` has non-zero values. Many ARBiH-majority municipalities (Gradačac, Centar Sarajevo, Goražde, Travnik, Hadžići, Mostar, etc.) had NO RBiH militia pool at init despite large Bosniak populations. The recruitment engine's mandatory path checked `pool.available < MIN_MANDATORY_SPAWN(100)` and skipped brigades when the pool didn't exist.
+
+**Impact of the bug:** The entire sim was calibrated with ~38 ARBiH brigades when the OOB specifies 81 mandatory. Every calibration constant — mobilization scales, pool scales, JNA bonus, doctrine phases, attack/defense thresholds — was tuned for a war with half the intended formations. Gradačac fell because the 217th Vitežka never spawned. Goražde had 2 of 7 brigades. Sarajevo had half its garrison. VRS was historically outnumbered but the sim gave them near-parity through a spawn bug.
+
+**Fix:** In `recruitment_engine.ts`, mandatory brigade spawn path: when the pool is empty or missing, force-create the pool and seed it with enough manpower for the brigade's `initial_personnel`. These formations historically existed from day one — they don't wait for the pool system to catch up. Normal pool drain applies after spawn.
+
+**Result (n786):** 122 ARBiH brigades, 159k pers (was 38 brig/~100k). RS 78 brig/108k. HRHB 26 brig/44k. Gradačac holds (RBiH). Bijela holds (RBiH). Žepče holds (HRHB). Posavina 96.1% (+3.2pp). BUT: Teočak anchor fails, 2 benchmarks fail. **Full recalibration required** — the sim was calibrated on broken foundations.
+
+**Files:** `src/sim/recruitment_engine.ts` (mandatory spawn force-create pool).
+
+**Life lesson added:** "Home brigades must be strong enough to survive the initial blitz" — investigation of Gradačac led to discovery of the spawn bug.
+
+---
+
+## [2026-03-15] n785: ARBiH Gradačac/Brčko Brigade Buffs
+
+**Problem:** Gradačac fell to VRS at w3 (PR 8.04 — essentially undefended) despite the 213th Vitežka being homed there. The 213th started at only 550 personnel and was swept during the VRS early blitz. The 217th Vitežka (homed at gradacac_2) never spawned (see n786 for root cause). Brčko:bijela_2 fell at w7 (PR 7.03) — the 215th Vitežka at 700 pers was overrun. Historically, Gradačac was never captured by VRS. The 213th was one of the most decorated ARBiH formations.
+
+**Fix:** Buffed 5 brigades: 213th 550→1200, 217th 550→1000, 215th 700→1000, 212th 600→800, 107th HVO 700→800. Added `defense_terrain_bonus` to key defenders. Added `brcko` to ARBiH 2nd Corps `target_municipalities` (Brčko corridor was the most contested area of the war).
+
+**Files:** `data/source/oob_brigades.json`, `src/sim/combat/bot_strategy.ts`.
+
+---
+
+## [2026-03-15] n782: Phase E — Return-to-Corps March for Orphaned Brigades
+
+**Problem:** The Čajniče brigade (vrs_herzegovina) ended up at Banja Luka (200km from home) after being captured by a 1KK sector via cross-corps enclave defense, then marching north via sector orders. After the cross-corps guard fix (n776), the brigade was orphaned — no sector wanted it, no mechanism to march home.
+
+**Fix:** `evaluateReturnToCorps()` in `bot_brigade_eval_front.ts`. BFS from current location through friendly territory toward nearest own-corps sector territory. Issues column march one hop per turn. Placed early in brigade AI pipeline (after sector march, before home defense).
+
+**Files:** `src/sim/combat/bot_brigade_eval_front.ts` (new function), `src/sim/combat/bot_brigade_ai_osid.ts` (call site).
+
+---
 
 ## [2026-03-15] n776: Cross-Corps Enclave Guard — Prevent Brigade Corps Theft
 

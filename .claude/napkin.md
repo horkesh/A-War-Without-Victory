@@ -8,13 +8,13 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current Sprint — Intelligent Corps Commander (2026-03-15, IN PROGRESS)
-**Plan:** `C:\Users\User\.claude\plans\intelligent-corps-commander.md`
-**Current (n776): 91.7% area, 13/13 anchors, 6/6 benchmarks. Žepče HRHB.**
-**Phase A DONE: Defensive health gate. Phase B DONE: Threat-weighted density.**
-**Phase C DONE: Salient aversion. Phase D DONE: SRK 9 brigades mandatory.**
-**Phase E NEXT: Corps area constraint — orphaned brigades return to corps, uncontested occupation scoped to target municipalities.**
-**Cross-corps guard: own-corps-has-sectors check prevents brigade theft (n776). Čajniče at Banja Luka needs return-to-corps march.**
+## Current: MANDATORY SPAWN FIX — Recalibration Needed (2026-03-15)
+**n786: 64/182 mandatory brigades now spawn (were silently blocked by empty militia pools).**
+**ARBiH: 38→122 brigades, RS: 56→78, HRHB: 20→26. All historically intended formations now exist.**
+**Gradačac holds, Bijela holds, Žepče holds. 90.5% area, 12/13 anchors, 4/6 benchmarks.**
+**The sim was calibrated on broken foundations — every constant tuned for half the OOB. Recalibration sprint needed.**
+**Intelligent Corps Commander Phases A-E DONE: defensive health, salient aversion, threat-weighted density, SRK OOB, return-to-corps.**
+**Root cause: `runPoolPopulation` only creates militia pools where `war_militia_strength` has values. Many municipalities had no pool at init.**
 **Protocol:** One phase → tests + tsc → 40w run → compare tool → /war-or-game sign-off → record.
 **LESSONS (from engine-sprint-2):** `target_osids` does NOT override `target_municipalities` (code comment lies — both additive). Initial OSID override cascade: changing 5 Foča OSIDs caused -1.0pp total area regression. `avoid_municipalities` existed in type but was removed from implementation. `priorityMunicipalities` in generateCorpsDirectives is built but never used (dead variable).
 

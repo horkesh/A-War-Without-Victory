@@ -1,29 +1,41 @@
 # Working On — Task Continuity
 
-## Current Task: Gradačac/Brčko ARBiH OOB + Spawn Investigation
+## Current Task: Recalibration After Mandatory Spawn Fix
 
-### What we're doing
-Buffing ARBiH Gradačac/Brčko brigades to survive VRS early blitz. Found that 43/81 mandatory ARBiH brigades don't spawn — likely batchSize/pool capacity issue in formation_spawn.ts.
+### What happened
+Found and fixed a fundamental OOB loading bug: 64/182 mandatory brigades silently failed to spawn because militia pools didn't exist at game start. The recruitment engine's mandatory path checked pool.available and skipped brigades when the pool was empty/missing. Fix: force-create pool and seed with enough manpower for mandatory brigades.
 
-### Key finding
-The 217th Vitežka (homed at gradacac_2) doesn't spawn despite mandatory=true, available_from=0. The spawn mechanism requires pool.available >= batchSize. Buffing the 213th from 550→1200 may consume the Gradačac pool, preventing the 217th from spawning.
+### Impact
+- ARBiH: 38 → 122 brigades (43 restored)
+- RS: 56 → 78 brigades (21 restored, including SRK expansion)
+- HRHB: 20 → 26 brigades (4 restored)
+- The entire sim was calibrated for ~38 ARBiH brigades. All constants need review.
 
-### Files being modified
-- `data/source/oob_brigades.json` — Gradačac/Brčko brigade buffs (213th 1200, 217th 1000, 215th 1000, 212th 800, 107th 800)
-- `src/sim/combat/bot_strategy.ts` — added brcko to 2nd Corps targets
-- `docs/life_lessons.md` — new lesson on home brigade initial strength
+### Current state (n786)
+- 90.5% area, 12/13 anchors (Teočak fails), 4/6 benchmarks
+- Gradačac holds (RBiH), Bijela holds (RBiH), Žepče holds (HRHB)
+- RS delta -34 (too weak now — RBiH too strong with 122 brigades)
 
-### Current run state
-- n785: 90.6% area, 13/13 anchors, 4/6 benchmarks (two marginal fails)
-- Bijela_2 RBiH (good!), Gradačac_2 RS (bad — 217th doesn't spawn)
-- 43 mandatory ARBiH brigades don't spawn — fundamental OOB loading issue
+### What needs recalibration
+1. **FACTION_POOL_SCALE** — RBiH 0.25 was set when only 38 brigades existed. With 122, manpower may be over-allocated.
+2. **Mobilization rates** — RS=0.12, RBiH=0.10, HRHB=0.29. May need adjustment.
+3. **Benchmarks** — `preserve_survival_corridors` (RBiH w40) and `consolidate_gains` (RS w40) thresholds set for old OOB.
+4. **RS_JNA_INHERITANCE_BONUS** — 10k may need increase to compensate for RS also gaining 21 brigades.
+5. **Doctrine phases** — RS blitz intensity may need adjustment since defenders are now stronger.
 
-### Next 3 steps
-1. Investigate formation_spawn.ts spawn mechanism — understand batchSize vs initial_personnel for mandatory brigades
-2. Fix: mandatory brigades should spawn regardless of pool capacity (they represent existing forces, not new recruitment)
-3. Re-run with fixed spawn + moderate buffs, verify Gradačac holds and benchmarks pass
+### Key files
+- `src/sim/recruitment_engine.ts` — the spawn fix (force-create pool)
+- `src/sim/early_war/pool_population.ts` — FACTION_POOL_SCALE, RS_JNA_INHERITANCE_BONUS
+- `src/sim/combat/ongoing_mobilization.ts` — mobilization rates
+- `data/source/oob_brigades.json` — OOB entries (Gradačac buffs, SRK, Drina)
 
-### Related issues
-- REAL_WAR_MASTER #42 (bot strategic targeting), #44 (ARBiH probing), #46 (SRK OOB)
-- Life lesson: "Home brigades must be strong enough to survive the initial blitz"
-- 712th at Travnik orphaned — sector territory gap at krusevo_brdo_i
+### Session achievements (2026-03-15)
+- Intelligent Corps Commander Phases A-E
+- Drina OOB: +Rogatica, +Višegrad, Čajniče fix
+- SRK: 9 brigades on siege ring
+- Cross-corps enclave defense + guard
+- Elite cohesion recall + tracker + catastrophic stall
+- Salient aversion, return-to-corps march
+- Brčko in 2nd Corps targets
+- **Mandatory spawn fix (biggest single fix)**
+- ~30 calibration runs (n748-n786)
