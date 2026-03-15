@@ -25,6 +25,7 @@
  */
 
 import type {
+    CorpsCommandState,
     CorpsOperation,
     FactionId,
     FormationId,
@@ -42,6 +43,7 @@ import { releaseOperationCommander } from './officer_system.js';
 import { finalizeOperationAAR } from './operation_aar.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
+import { isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
 import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
@@ -96,6 +98,21 @@ const MAX_PARTICIPATING_BRIGADES = 20;
 
 /** Momentum cap. */
 const MOMENTUM_CAP = 3;
+
+/**
+ * Number of failed operation attempts on the same objective before triggering a cooldown.
+ * After this many failures, the objective is suppressed for OBJECTIVE_FAILURE_COOLDOWN_TURNS.
+ * Set to 2: one probe-style failure is tolerable, but a second consecutive failure
+ * signals the position is hardened and the corps should redirect effort.
+ */
+const OBJECTIVE_FAILURE_THRESHOLD = 2;
+
+/**
+ * How many turns a repeatedly-failed objective is suppressed from directive targeting.
+ * 8 turns (~2 months) gives time for reinforcements, resupply, or re-assessment —
+ * consistent with historical pauses after failed assaults in the Bosnian War.
+ */
+const OBJECTIVE_FAILURE_COOLDOWN_TURNS = 8;
 
 /** Corps exhaustion decay per turn when idle (no active operation). */
 const EXHAUSTION_DECAY_IDLE = 3;
@@ -336,6 +353,38 @@ function areParticipantsReadyForExecution(
         return false;
     }
     return activeParticipantCount > 0;
+}
+
+/**
+ * Record failed objectives for a corps when an operation ends without success.
+ * After OBJECTIVE_FAILURE_THRESHOLD failures, the objective enters a cooldown period.
+ * This prevents suicidal repeated assaults on hardened positions (Ripac pattern).
+ */
+function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn: number): void {
+    if (op.recovery_reason === 'completed') return; // Success — no failure to record
+
+    const failedOsids: string[] = [];
+    if (isMultiAxis(op) && op.axes) {
+        for (const axis of op.axes) {
+            if (axis.status !== 'complete') {
+                for (const obj of axis.objectives) failedOsids.push(obj);
+            }
+        }
+    } else {
+        for (const obj of op.objectives ?? []) failedOsids.push(obj);
+    }
+
+    if (failedOsids.length === 0) return;
+
+    if (!cmd.failed_offensive_objectives) cmd.failed_offensive_objectives = {};
+    for (const osid of failedOsids) {
+        const entry = cmd.failed_offensive_objectives[osid] ?? { failure_count: 0, cooldown_until_turn: 0 };
+        entry.failure_count += 1;
+        if (entry.failure_count >= OBJECTIVE_FAILURE_THRESHOLD) {
+            entry.cooldown_until_turn = turn + OBJECTIVE_FAILURE_COOLDOWN_TURNS;
+        }
+        cmd.failed_offensive_objectives[osid] = entry;
+    }
 }
 
 function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation['recovery_reason']): void {
@@ -700,6 +749,7 @@ export function advanceSectorOffensives(
                 cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + exhaustionCost);
                 if (op.type === 'sector_attack') {
                     finalizeOperationAAR(state, corpsId, op);
+                    recordFailedObjectives(cmd, op, turn);
                 }
                 releaseOperationCommander(state, op);
 
@@ -1127,12 +1177,36 @@ export function evaluateSectorOffensiveLaunch(
     minAttackOutcome?: CorpsOperation['min_attack_outcome']
 ): CorpsOperation | null {
     const turn = state.meta?.turn ?? 0;
+    const formations = state.military.formations ?? {};
+
+    // Exclude brigades at critical supply from offensive operations.
+    // Siege-isolated units lack ammunition, fuel, and rations to sustain attacks.
+    // They can defend in place but cannot be committed to offensive operations.
+    // Historical: Goražde/Srebrenica/Bihać enclave brigades were chronically supply-starved;
+    // launching multi-week offensives from a besieged enclave is not historically plausible.
+    if (supplyByOsid) {
+        const fac = supplyByOsid.factions?.find(f => f.faction_id === faction);
+        if (fac?.by_osid) {
+            const osidState = new Map(fac.by_osid.map(e => [e.osid, e.state] as const));
+            const reserveLevel = state.meta?.supply_reserves_enabled
+                ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
+                : 100;
+            sectorBrigadeIds = sectorBrigadeIds.filter(bid => {
+                const b = formations[bid];
+                if (!b) return true;
+                const rawSt = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
+                const st = state.meta?.supply_reserves_enabled
+                    ? getEffectiveSupplyState(rawSt, reserveLevel)
+                    : rawSt;
+                return st !== 'critical';
+            });
+        }
+    }
 
     // Must have enough brigades
     if (sectorBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
 
     // Must have at least one brigade that can actually attack (active, not disrupted, personnel >= 400)
-    const formations = state.military.formations ?? {};
     if (!hasEligibleAttackersForLaunch(formations, sectorBrigadeIds)) return null;
 
     // Must have at least one enemy target adjacent to sector
@@ -1152,6 +1226,21 @@ export function evaluateSectorOffensiveLaunch(
 
     // Need at least 1 objective for a sector offensive
     if (objectives.length < 1) return null;
+
+    // Enclave brigade filter: enclave-tagged brigades cannot participate in operations
+    // targeting OSIDs outside their enclave. Organically implements the "corridor-widening only"
+    // constraint — besieged units can raid adjacent VRS positions or expand their perimeter,
+    // but cannot march through a supply corridor to attack towns 20km away.
+    // This prevents Goražde brigades marching through northern Foča to attack Foča objectives.
+    sectorBrigadeIds = sectorBrigadeIds.filter(bid => {
+        const b = formations[bid];
+        if (!b?.tags?.includes('enclave')) return true; // Non-enclave brigades: always eligible
+        const loc = b.location_osid;
+        if (!loc) return true;
+        // Enclave brigade: include only if at least one objective is in the same enclave.
+        return objectives.some(obj => isOsidInSameEnclave(loc, obj));
+    });
+    if (sectorBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
 
     const planningDuration = computePlanningDuration(objectives.length);
     const name = pickOperationName(corpsId, turn, faction, state);

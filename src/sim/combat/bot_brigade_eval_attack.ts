@@ -2,7 +2,7 @@ import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { getAdjacentEnemyOsids } from './bot_brigade_context.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { findNearestFriendlyOsidInSet } from './bot_brigade_context.js';
+import { findNearestFriendlyOsidInSet, findNearestFriendlyOsidDestination } from './bot_brigade_context.js';
 import { predictAllAdjacentTargets } from './combat_predictor.js';
 import {
     scoreTargetFromDirective,
@@ -211,9 +211,12 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             }
 
             // ── March toward objective first ─────────────────────────
-            // Brigades follow orders: move toward the objective through
-            // friendly territory. Only attack-through as a last resort
-            // when no friendly march path exists.
+            // Brigades follow orders: column-march toward a friendly OSID adjacent
+            // to the objective. Use column_march_orders (sets brigade_movement_state
+            // in_transit) so the stall detector (anyMoved) can see the movement.
+            // movement_orders (1-hop regular move) is invisible to anyMoved and causes
+            // the idle_execution_turn_streak to accumulate incorrectly — leading to
+            // premature axis stall before brigades reach attack position (#34 root cause).
             const objectiveApproachOsids = getSectorOffensiveApproachOsids(
                 state,
                 activeOp15,
@@ -224,7 +227,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             );
             objectiveApproachOsids.delete(loc);
             if (objectiveApproachOsids.size > 0) {
-                const approachStep = findNearestFriendlyOsidInSet(
+                // Use Destination (actual target OSID) so the Dijkstra path covers all hops.
+                // findNearestFriendlyOsidInSet returns only the first step — passing a 1-hop
+                // destination to column_march_orders would stop the column after 1 hop.
+                const approachDest = findNearestFriendlyOsidDestination(
                     state,
                     faction,
                     loc,
@@ -232,8 +238,8 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     reverseMap,
                     objectiveApproachOsids
                 );
-                if (approachStep) {
-                    result.movement_orders[brigade.id] = approachStep;
+                if (approachDest) {
+                    result.column_march_orders[brigade.id] = approachDest;
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                     return true;
                 }
@@ -253,11 +259,11 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
                 : targets).filter(t => !_avoidedOsids?.includes(t.osid));
             if (intermediateTargets.length > 0) {
-                const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
+                const intermediateThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
                 const bestIntermediate = intermediateTargets.find((t) => {
                     const alreadyAt = chosenTargets.get(t.osid) ?? 0;
                     if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;
-                    return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, probeThreshold);
+                    return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, intermediateThreshold);
                 });
                 if (bestIntermediate) {
                     const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';

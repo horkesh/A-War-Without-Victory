@@ -389,6 +389,14 @@ export interface CorpsCommandState {
     last_completed_operation?: CorpsOperation | null;
     /** Turn on which the last operation completed — used for post-op cooldown. */
     last_completed_operation_turn?: number;
+    /**
+     * Per-OSID failure tracking for offensive targets.
+     * Maps OSID → { failure_count, cooldown_until_turn }.
+     * When an objective is attempted N times without capture, it enters a cooldown
+     * period and is excluded from future targeting until the cooldown expires.
+     * Prevents suicidal repeated assaults on hardened positions.
+     */
+    failed_offensive_objectives?: Record<string, { failure_count: number; cooldown_until_turn: number }>;
 }
 
 /** Operational group activation order. */

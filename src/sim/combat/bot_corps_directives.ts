@@ -523,8 +523,9 @@ export function generateCorpsDirectives(
             if ((OUTCOME_RANK[priority.min_outcome as PredictedOutcome] ?? 2) < (OUTCOME_RANK[bestMinOutcome as PredictedOutcome] ?? 2)) {
                 bestMinOutcome = priority.min_outcome;
             }
-            // avoid_municipalities removed — bipolar co-ethnic scoring handles deterrence emergently
+            // avoid_municipalities removed — supply constraints handle deterrence emergently.
         }
+
         // P3: Collect priority municipality slugs for opportunistic target filtering.
         // Opportunistic targets outside these municipalities are filtered to prevent
         // corps spreading into non-priority areas (e.g. 1KK sprawling into Central Corridor).
@@ -871,8 +872,16 @@ export function generateCorpsDirectives(
         if (supplyHealth.critical_fraction > 0.5) {
             offensiveTargets.length = 0;
         }
+        // Save the pre-supply-adjustment threshold for operation launch.
+        // Operations bake in their min_attack_outcome at creation — if we pass the
+        // supply-inflated 'costly_victory' here, operations launched during an early
+        // supply crisis carry that restriction even after supply recovers. The supply
+        // penalty in combat power already handles the realism; double-penalizing via
+        // the probe threshold causes persistent zero-attack stalls. (#35)
+        const minAttackOutcomeForOpLaunch = bestMinOutcome;
         // Near-complete supply isolation → upgrade minimum outcome by one rank (max costly_victory).
         // Only applies when almost no brigades have adequate supply (< 5%).
+        // Note: only affects the corps DIRECTIVE (not the operation probe threshold — see above).
         if (supplyHealth.adequate_fraction < 0.05) {
             const rankVal = OUTCOME_RANK[bestMinOutcome as PredictedOutcome] ?? 2;
             if (rankVal < 4) { // below costly_victory (4 in 6-scale) → upgrade to costly_victory
@@ -915,6 +924,20 @@ export function generateCorpsDirectives(
             const avoidSet = new Set(avoidOsids);
             for (let i = offensiveTargets.length - 1; i >= 0; i--) {
                 if (avoidSet.has(offensiveTargets[i]!)) offensiveTargets.splice(i, 1);
+            }
+        }
+
+        // Failed-objective cooldown: suppress targets that have been attempted and failed
+        // repeatedly. After OBJECTIVE_FAILURE_THRESHOLD failures the objective is on cooldown
+        // for OBJECTIVE_FAILURE_COOLDOWN_TURNS. Prevents corps from hammering the same
+        // hardened position every operation (Ripac/5th Corps pattern).
+        const failedObjs = cmd?.failed_offensive_objectives;
+        if (failedObjs) {
+            for (let i = offensiveTargets.length - 1; i >= 0; i--) {
+                const entry = failedObjs[offensiveTargets[i]!];
+                if (entry && entry.cooldown_until_turn > turn) {
+                    offensiveTargets.splice(i, 1);
+                }
             }
         }
 
@@ -1457,7 +1480,7 @@ export function generateCorpsDirectives(
                 const op = evaluateSectorOffensiveLaunch(
                     state, corps.id, sec.sector_id, faction,
                     finalBrigadeIds, secEnemyOsids, reachableTargets, supplyByOsid,
-                    bestMinOutcome
+                    minAttackOutcomeForOpLaunch
                 );
                 if (op) {
                     // Same-theater follow-on: corps already has recon from previous op —

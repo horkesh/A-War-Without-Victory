@@ -30,7 +30,12 @@ export function evaluateGarrisonAndDetachments(ctx: BrigadeEvaluationContext): b
 }
 
 export function evaluateReserve(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsId, directive, adjEnemy, corpsReserve, graphAnalysis, loc, adjacency, result } = ctx;
+    const { brigade, corpsId, directive, adjEnemy, corpsReserve, graphAnalysis, loc, adjacency, result, isActiveSectorOperationParticipant } = ctx;
+
+    // --- Operation participants bypass reserve ---
+    // Brigades committed to a sector offensive have explicit march orders toward an objective.
+    // Holding them as corps reserve prevents them from reaching the front — entirely wrong.
+    if (isActiveSectorOperationParticipant) return false;
 
     // --- Reserve check: should this brigade be in reserve? ---
     if (directive && corpsId) {
