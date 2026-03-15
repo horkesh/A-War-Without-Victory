@@ -1,7 +1,19 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** Post-MVP — UI Data Surface Sprint: 17 items surfaced (morale/entrenchment/disruption, op recovery reasons, war crimes records, sector strength, equipment condition, narrative arcs, axes breakdown, civilian casualties, OPSEC). Officer succession player-choice system. Bottom strip unified. Map modes: casualties + morale replace pressure + density. Op arrows from lead brigade. 90.4% area, 13/13 anchors, 6/6 benchmarks.
+**Status:** Post-MVP — n776: Intelligent Corps Commander (Phases A-D) + cross-corps enclave guard. **91.7% area**, 13/13 anchors, 6/6 benchmarks. Žepče holds. 9 SRK brigades on siege ring. Salient aversion. Drina OOB.
+
+## [2026-03-15] n776: Cross-Corps Enclave Guard — Prevent Brigade Corps Theft
+
+**Problem:** The cross-corps enclave defense (Step 6b, n763) assigned orphaned brigades to any same-faction sector regardless of corps. This caused Herzegovina brigades to be captured by 1KK sectors when they drifted near corps boundaries. The Čajniče brigade (vrs_herzegovina) ended up at Banja Luka — 200km from home — via 1KK sector march orders.
+
+**Fix:** Step 6b guard: only cross-corps assign brigades whose own corps has ZERO sectors (true enclaves like `hvo_central_bosnia` which has no sectors but `hvo_northwest_bosnia` does). Brigades whose corps has sectors stay in the normal corps-strict pipeline. This preserves the Žepče fix (111th HVO defends via cross-corps) while preventing Herzegovina/Drina brigade theft.
+
+**Result (n776):** 91.7% area (+0.2pp from n774). Žepče holds as HRHB. Čajniče brigade orphaned at Banja Luka (no longer assigned to 1KK sector, but needs "return to corps" march — Phase E). 13/13 anchors, 6/6 benchmarks.
+
+**Files:** `src/sim/combat/corps_front_sectors.ts` (`assignCrossCorpsEnclaveDefenders` guard).
+
+---
 
 ## [2026-03-15] n774: Intelligent Corps Commander — Phases A+B+C
 
