@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** **v0.3.0** (Playable Alpha) — n804: Supply embargo + threat-weighted assignment + enclave calibration. **89.7% area**, 13/13 anchors, 5/6 benchmarks. Supply: RS heavy=100, RBiH heavy=15 (embargo), HRHB heavy=50. Gradačac/Teočak/Žepče hold. Bijela RS (needs ARBiH counterattack). Drina 80.9%.
+**Status:** **v0.3.0** (Playable Alpha) — **n806 BASELINE**: Budget-based brigade allocation (garrison-first). **89.8% area**, 13/13 anchors, 4/6 benchmarks. SRK siege ring 1→2 brigades. Supply embargo: RBiH heavy=15. 166 total brigades. ~60 calibration runs 2026-03-15.
 
 ## [2026-03-15] n797: Full OOB Calibration Sprint — Spawn Fix + Overstacking + Troop Balance
 

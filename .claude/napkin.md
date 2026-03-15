@@ -8,12 +8,12 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-15, end of session)
-**n797: 90.4% area, 13/13 anchors, 5/6 benchmarks (preserve_survival_corridors). 166 total brigades.**
-**Full OOB operational: 122 ARBiH mandatory + 44 emergent, 78 RS, 26 HRHB. Mandatory spawn fix + overstacking fix.**
-**w40: RS 99k (✓), ARBiH 153k (slightly over 130k target, acceptable), HRHB 42k (✓).**
-**w206 tested: RS 119k (✓), ARBiH 231k (over 200k, growth continues), HRHB 66k (over 55k).**
-**Teočak, Gradačac, Bijela, Žepče all hold. Intelligent Corps Commander Phases A-E active.**
+## BASELINE: n806 — Budget-Based Brigade Allocation (2026-03-15)
+**89.8% area, 13/13 anchors, 4/6 benchmarks. War-or-Game APPROVED.**
+**Budget-based allocation: garrison-first, threat-proportional, home affinity as distance modifier.**
+**SRK siege ring: 2 brigades (1st Mech + Ilijaš). Supply embargo: RBiH heavy=15.**
+**166 total brigades (122 ARBiH mandatory + 44 emergent). Mandatory spawn fix active.**
+**Teočak, Gradačac, Žepče hold. Bijela RS (supply-constrained ARBiH can't counterattack yet).**
 **Calibration targets from docs/knowledge/*_ORDER_OF_BATTLE_MASTER.md — use these, not memory estimates.**
 **Protocol:** One phase → tests + tsc → 40w run → compare tool → /war-or-game sign-off → record.
 **LESSONS (from engine-sprint-2):** `target_osids` does NOT override `target_municipalities` (code comment lies — both additive). Initial OSID override cascade: changing 5 Foča OSIDs caused -1.0pp total area regression. `avoid_municipalities` existed in type but was removed from implementation. `priorityMunicipalities` in generateCorpsDirectives is built but never used (dead variable).
