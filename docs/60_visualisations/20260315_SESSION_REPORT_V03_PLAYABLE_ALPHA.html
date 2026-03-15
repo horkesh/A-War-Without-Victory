@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Games — Session Report 2026-03-15</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --bg-card: #111519;
+    --bg-elevated: #181d24;
+    --border: #2a3040;
+    --border-accent: #3d4a5c;
+    --text: #c8cdd5;
+    --text-dim: #6b7280;
+    --text-bright: #e8ecf0;
+    --gold: #d4a847;
+    --gold-dim: #b8932e;
+    --gold-glow: rgba(212, 168, 71, 0.15);
+    --red: #ef4444;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --amber: #eab308;
+    --purple: #a855f7;
+    --cyan: #06b6d4;
+    --rbih: #2d7a3a;
+    --rs: #1e40af;
+    --hrhb: #dc2626;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .report {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 3rem 2rem;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--bg-elevated), var(--bg));
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .header .studio {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .header .subtitle {
+    font-size: 1rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .header .version-badge {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.4rem 1.5rem;
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold);
+    background: var(--gold-glow);
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 2rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold);
+    background: rgba(212, 168, 71, 0.1);
+    border: 1px solid var(--gold-dim);
+    border-radius: 3px;
+    padding: 0.15rem 0.5rem;
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .section-body {
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+  }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .card {
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .card p, .card li {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* Data flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+  .flow-node {
+    padding: 0.5rem 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .flow-node.error {
+    border-color: var(--red);
+    color: var(--red);
+    background: rgba(239, 68, 68, 0.08);
+  }
+  .flow-node.success {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(34, 197, 94, 0.08);
+  }
+  .flow-arrow {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    padding: 0 0.4rem;
+  }
+
+  /* Timeline / Roadmap */
+  .roadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 2rem;
+  }
+  .roadmap::before {
+    content: '';
+    position: absolute;
+    left: 0.55rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .roadmap-item {
+    position: relative;
+    padding: 0.5rem 0 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .roadmap-item::before {
+    content: '';
+    position: absolute;
+    left: -1.65rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg);
+  }
+  .roadmap-item.done::before {
+    border-color: var(--green);
+    background: var(--green);
+  }
+  .roadmap-item.current::before {
+    border-color: var(--gold);
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold-glow);
+  }
+  .roadmap-item.future::before {
+    border-color: var(--text-dim);
+  }
+  .roadmap-version {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    min-width: 3.5rem;
+  }
+  .roadmap-label {
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+  .done .roadmap-version { color: var(--green); }
+  .current .roadmap-version { color: var(--gold); }
+  .future .roadmap-version { color: var(--text-dim); }
+
+  /* Parallel streams */
+  .streams {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  @media (max-width: 900px) { .streams { grid-template-columns: repeat(2, 1fr); } }
+  .stream {
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    border-top: 3px solid var(--border);
+  }
+  .stream.s1 { border-top-color: var(--red); }
+  .stream.s2 { border-top-color: var(--blue); }
+  .stream.s3 { border-top-color: var(--purple); }
+  .stream.s4 { border-top-color: var(--amber); }
+  .stream-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+  }
+  .s1 .stream-title { color: var(--red); }
+  .s2 .stream-title { color: var(--blue); }
+  .s3 .stream-title { color: var(--purple); }
+  .s4 .stream-title { color: var(--amber); }
+  .stream ul { list-style: none; padding: 0; }
+  .stream li {
+    font-size: 0.78rem;
+    color: var(--text);
+    padding: 0.2rem 0;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .stream li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--green);
+    font-size: 0.7rem;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .stat {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
+  }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid rgba(42, 48, 64, 0.5);
+    color: var(--text);
+  }
+  tr:hover td { background: rgba(212, 168, 71, 0.03); }
+  .tag {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .tag-green { background: rgba(34, 197, 94, 0.12); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.3); }
+  .tag-red { background: rgba(239, 68, 68, 0.12); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
+  .tag-blue { background: rgba(59, 130, 246, 0.12); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.3); }
+  .tag-amber { background: rgba(234, 179, 8, 0.12); color: var(--amber); border: 1px solid rgba(234, 179, 8, 0.3); }
+  .tag-purple { background: rgba(168, 85, 247, 0.12); color: var(--purple); border: 1px solid rgba(168, 85, 247, 0.3); }
+  .tag-gold { background: var(--gold-glow); color: var(--gold); border: 1px solid var(--gold-dim); }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    background: rgba(255,255,255,0.05);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    color: var(--cyan);
+  }
+
+  .note {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 0.5rem;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 1.5rem 0;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+  .footer .pyrrhic {
+    color: var(--gold);
+    font-weight: 600;
+    font-style: normal;
+  }
+</style>
+</head>
+<body>
+<div class="report">
+
+<!-- ═══════════════════════════════════════ HEADER ═══════════════════════════════════════ -->
+<div class="header">
+  <div class="studio">Pyrrhic Games — Development Report</div>
+  <h1>Session Report — 15 March 2026</h1>
+  <div class="subtitle">From v0.2.0 Core Engine to v0.3.0 Playable Alpha in one session</div>
+  <div class="version-badge">v0.3.0 PLAYABLE ALPHA</div>
+</div>
+
+<!-- ═══════════════════════════════════════ STATS ═══════════════════════════════════════ -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">12</div><div class="stat-label">Commits</div></div>
+  <div class="stat"><div class="stat-value">643</div><div class="stat-label">Tests Passing</div></div>
+  <div class="stat"><div class="stat-value">50+</div><div class="stat-label">Files Changed</div></div>
+  <div class="stat"><div class="stat-value">2</div><div class="stat-label">Version Tags</div></div>
+  <div class="stat"><div class="stat-value">4</div><div class="stat-label">Parallel Streams</div></div>
+  <div class="stat"><div class="stat-value">0</div><div class="stat-label">Failures</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ §1 WAR CRIMES FIX ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">§1</span>
+    <span class="section-title">War Crimes Badge Fix — Data Flow Repair</span>
+  </div>
+  <div class="section-body">
+    <p style="margin-bottom: 1rem; font-size: 0.9rem;">29 officers had <code>war_crimes_record</code> in the JSON data but it never appeared in the UI. Root cause: <code>validateOfficerData()</code> constructs objects by explicit field listing — the new field was silently stripped.</p>
+
+    <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.5rem;">Data Flow (Before Fix)</div>
+    <div class="flow">
+      <div class="flow-node">apr1992_officers.json<br><small style="color:var(--green)">29 records ✓</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node error">validateOfficerData()<br><small>field STRIPPED here</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node error">GameState<br><small>0 records</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node error">Adapter<br><small>undefined</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node error">UI Badge<br><small>never renders</small></div>
+    </div>
+
+    <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.5rem; margin-top: 1.25rem;">Data Flow (After Fix)</div>
+    <div class="flow">
+      <div class="flow-node">apr1992_officers.json<br><small style="color:var(--green)">29 records ✓</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node success">validateOfficerData()<br><small>+ parseWarCrimesRecord()</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node success">GameState<br><small>29 records ✓</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node success">Adapter<br><small>+ charges field</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node success">WarCrimesBadge<br><small>text labels ✓</small></div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+      <div class="card">
+        <div class="card-title">Officers Annotated</div>
+        <table>
+          <tr><td>VRS (convicted)</td><td style="text-align:right; color:var(--red)">13</td></tr>
+          <tr><td>ARBiH (mixed)</td><td style="text-align:right; color:var(--amber)">6</td></tr>
+          <tr><td>HVO (convicted)</td><td style="text-align:right; color:var(--red)">10</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Verdict Types</div>
+        <table>
+          <tr><td><span class="tag tag-red">Convicted</span></td><td style="text-align:right">23</td></tr>
+          <tr><td><span class="tag tag-green">Acquitted</span></td><td style="text-align:right">2</td></tr>
+          <tr><td><span class="tag tag-amber">Indicted</span></td><td style="text-align:right">1</td></tr>
+          <tr><td><span class="tag" style="background:rgba(128,128,128,0.12);color:#888;border:1px solid rgba(128,128,128,0.3)">Died Before Trial</span></td><td style="text-align:right">2</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="note">Lesson: When a validator constructs objects by explicit field listing, every new optional field must be added. TypeScript doesn't catch omissions on optional fields.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ §2 SIMPLIFY ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">§2</span>
+    <span class="section-title">UI Simplify Pass — Code Quality Sweep</span>
+  </div>
+  <div class="section-body">
+    <p style="margin-bottom: 1rem; font-size: 0.9rem;">Two rounds of /simplify across all today's code. Three parallel review agents (reuse, quality, efficiency) identified issues; actionable ones fixed immediately.</p>
+    <table>
+      <thead>
+        <tr><th>Fix</th><th>Before</th><th>After</th><th>Impact</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Shared <code>WarCrimesBadge.tsx</code></td>
+          <td>2 duplicate implementations</td>
+          <td>1 shared component + type export</td>
+          <td><span class="tag tag-green">Reuse</span></td>
+        </tr>
+        <tr>
+          <td>Current commander stats</td>
+          <td><code>competence={3}</code> hardcoded</td>
+          <td>Real values from adapter</td>
+          <td><span class="tag tag-red">Bug fix</span></td>
+        </tr>
+        <tr>
+          <td>Shared <code>mapModes.ts</code></td>
+          <td>MAP_MODES + toggles duplicated in 2 files</td>
+          <td>Single source of truth</td>
+          <td><span class="tag tag-green">Reuse</span></td>
+        </tr>
+        <tr>
+          <td><code>useMemo</code> event filter</td>
+          <td>Filtered events 2× per render</td>
+          <td>Memoized, filtered once</td>
+          <td><span class="tag tag-blue">Performance</span></td>
+        </tr>
+        <tr>
+          <td>Adapter cast caching</td>
+          <td>5× repeated cast per officer</td>
+          <td>Cached to local variable</td>
+          <td><span class="tag tag-blue">Performance</span></td>
+        </tr>
+        <tr>
+          <td>Determinism fix</td>
+          <td>4× <code>Object.values()</code> unsorted</td>
+          <td>Sorted <code>Object.keys()</code></td>
+          <td><span class="tag tag-red">Correctness</span></td>
+        </tr>
+        <tr>
+          <td>Dead code removal</td>
+          <td>Unreachable duplicate <code>if</code> block</td>
+          <td>Removed</td>
+          <td><span class="tag tag-green">Cleanup</span></td>
+        </tr>
+        <tr>
+          <td>Resource cleanup</td>
+          <td>No <code>destroy()</code> on renderer</td>
+          <td><code>OsidThumbnailRenderer.destroy()</code></td>
+          <td><span class="tag tag-blue">Memory</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ §3 DOCS ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">§3</span>
+    <span class="section-title">Documentation Consolidation + Canon v0.7</span>
+  </div>
+  <div class="section-body">
+    <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Before</div>
+        <div style="font-family:'JetBrains Mono'; font-size:2.5rem; font-weight:700; color:var(--red);">759</div>
+        <div style="font-size:0.75rem; color:var(--text-dim);">files in docs/</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Removed</div>
+        <div style="font-family:'JetBrains Mono'; font-size:2.5rem; font-weight:700; color:var(--amber);">139</div>
+        <div style="font-size:0.75rem; color:var(--text-dim);">_old + archived + merged</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="card-title">After</div>
+        <div style="font-family:'JetBrains Mono'; font-size:2.5rem; font-weight:700; color:var(--green);">620</div>
+        <div style="font-size:0.75rem; color:var(--text-dim);">files in docs/</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.75rem;">Canon v0.7 Upgrade — New Sections Added</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title" style="color:var(--red);">Rulebook v0.7 (+20KB)</div>
+        <ul style="list-style:none; padding:0;">
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Graz Accords / Local Truces</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Operation Preparation (5-phase)</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Named Officers & Succession</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Reactive Sector Defense</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Army HQ Reserve Pool</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Brigade Survivability</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Ops-Only Attack Doctrine</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--blue);">Systems Manual v0.7 (+12KB)</div>
+        <ul style="list-style:none; padding:0;">
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Graz Accords Mechanics</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Reactive Defense (A+B layers)</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Army HQ Reserve Pool</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Brigade No-Destruction</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Enclave Resilience Expansion</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Sector Intel System</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Supply Phases B-D</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--green);">Engine Invariants v0.7 (+2KB)</div>
+        <ul style="list-style:none; padding:0;">
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Brigade No-Destruction</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Ops-Only Attack</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Cold Front Invariant</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Unified Sector Defense</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Officer System</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Elite Loan Invariant</li>
+          <li style="font-size:0.8rem; padding:0.15rem 0;">+ Appendix: Removed Systems</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ §4 VERSIONING ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">§4</span>
+    <span class="section-title">Versioning System — Roadmap to Gold</span>
+  </div>
+  <div class="section-body">
+    <div class="roadmap">
+      <div class="roadmap-item done">
+        <span class="roadmap-version">0.1.x</span>
+        <span class="roadmap-label">Proof of Concept — core loop runs</span>
+      </div>
+      <div class="roadmap-item done">
+        <span class="roadmap-version">0.2.0</span>
+        <span class="roadmap-label">Core Engine — all sim systems, 247 brigades, 627 tests</span>
+      </div>
+      <div class="roadmap-item done">
+        <span class="roadmap-version">0.3.0</span>
+        <span class="roadmap-label" style="color:var(--green);font-weight:600;">Playable Alpha — war termination, save/load, peace UI, alliance ← TODAY</span>
+      </div>
+      <div class="roadmap-item future">
+        <span class="roadmap-version">0.4.x</span>
+        <span class="roadmap-label">Content Alpha — scenarios, events, diplomacy, economy</span>
+      </div>
+      <div class="roadmap-item future">
+        <span class="roadmap-version">0.5.x</span>
+        <span class="roadmap-label">Feature Complete Beta — all systems, full UI, sound, tutorial</span>
+      </div>
+      <div class="roadmap-item future">
+        <span class="roadmap-version">0.6–0.7</span>
+        <span class="roadmap-label">Polish Beta — performance, accessibility, localization</span>
+      </div>
+      <div class="roadmap-item future">
+        <span class="roadmap-version">0.8–0.9</span>
+        <span class="roadmap-label">Release Candidate → Gold Candidate</span>
+      </div>
+      <div class="roadmap-item future">
+        <span class="roadmap-version" style="font-size:1rem;">1.0.0</span>
+        <span class="roadmap-label" style="font-weight:600;">GOLD — Ship it.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ §5 STUDIO RENAME ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">§5</span>
+    <span class="section-title">Studio Identity — Pyrrhic Games</span>
+  </div>
+  <div class="section-body">
+    <div style="text-align:center; padding: 1.5rem 0;">
+      <div style="font-size:2rem; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:0.08em;">Pyrrhic Games</div>
+      <div style="font-size:0.85rem; color:var(--text-dim); font-style:italic; margin-top:0.5rem;">"Another such victory and we are undone." — Pyrrhus of Epirus</div>
+      <div style="font-size:0.8rem; color:var(--text); margin-top:1rem; max-width:600px; margin-left:auto; margin-right:auto; line-height:1.6;">
+        Every game we make is about winning at a cost. No clean victories. Constrained agency. History as mechanism. Exhaustion over conquest. The name applies to every title in the catalog — past and future.
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="text-align:center; font-size:0.8rem; color:var(--text-dim);">
+      Renamed across <strong style="color:var(--gold);">50+ files</strong> — team rosters, skill definitions, canon docs, engineering references, reports, memory files, convene archives, and visualizations. Formerly "Paradox" — now permanently Pyrrhic.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ §6 V0.3 IMPLEMENTATION ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">§6</span>
+    <span class="section-title">v0.3 Playable Alpha — Four Parallel Streams</span>
+  </div>
+  <div class="section-body">
+    <p style="margin-bottom:1rem; font-size:0.9rem;">All four streams launched simultaneously as background agents. Stream 3 (Peace UI) executed in the foreground while the others worked in parallel. Zero merge conflicts.</p>
+
+    <div style="text-align:center; margin:1.5rem 0;">
+      <div class="flow">
+        <div class="flow-node" style="border-color:var(--gold);">ORCHESTRATOR<br><small style="color:var(--gold)">Plan + Dispatch</small></div>
+      </div>
+      <div style="font-size:1.5rem; color:var(--text-dim); margin:0.5rem 0;">↓ ↓ ↓ ↓</div>
+      <div style="display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap;">
+        <div class="flow-node" style="border-color:var(--red);"><small style="color:var(--red)">Stream 1</small><br>War Termination</div>
+        <div class="flow-node" style="border-color:var(--blue);"><small style="color:var(--blue)">Stream 2</small><br>Save System</div>
+        <div class="flow-node" style="border-color:var(--purple);"><small style="color:var(--purple)">Stream 3</small><br>Peace UI</div>
+        <div class="flow-node" style="border-color:var(--amber);"><small style="color:var(--amber)">Stream 4</small><br>Alliance</div>
+      </div>
+      <div style="font-size:1.5rem; color:var(--text-dim); margin:0.5rem 0;">↓ ↓ ↓ ↓</div>
+      <div class="flow">
+        <div class="flow-node success">MERGE → v0.3.0<br><small>643 tests, tsc clean</small></div>
+      </div>
+    </div>
+
+    <div class="streams">
+      <div class="stream s1">
+        <div class="stream-title">Stream 1 — War Termination</div>
+        <ul>
+          <li><code>war_termination.ts</code> — check each turn</li>
+          <li>Victory conditions from scenario</li>
+          <li>Turn-limit stalemate (208w default)</li>
+          <li>Faction collapse detection</li>
+          <li>Pipeline step #121</li>
+          <li>Desktop IPC game_over flag</li>
+          <li>16 new tests</li>
+        </ul>
+      </div>
+      <div class="stream s2">
+        <div class="stream-title">Stream 2 — Desktop Save</div>
+        <ul>
+          <li><code>save-game</code> IPC handler</li>
+          <li><code>quick-save</code> IPC handler</li>
+          <li>Auto-save on every turn advance</li>
+          <li>SAVE button in toolbar</li>
+          <li>Ctrl+S keyboard shortcut</li>
+          <li>Load dialog defaults to saves/</li>
+          <li>Round-trip test</li>
+        </ul>
+      </div>
+      <div class="stream s3">
+        <div class="stream-title">Stream 3 — Peace Phase UI</div>
+        <ul>
+          <li><code>PeaceStatusPanel.tsx</code></li>
+          <li>Capital bars per faction</li>
+          <li>Declaration pressure meters</li>
+          <li>Referendum countdown</li>
+          <li>Alliance value bar</li>
+          <li>Turn events display</li>
+          <li><code>GameOverModal.tsx</code></li>
+        </ul>
+      </div>
+      <div class="stream s4">
+        <div class="stream-title">Stream 4 — Alliance Dynamics</div>
+        <ul>
+          <li>Dynamics enabled in scenarios</li>
+          <li>Phase B1: refugee pressure</li>
+          <li>7 mixed municipalities tracked</li>
+          <li>Endogenous degradation formula</li>
+          <li>Init alliance 0.35 (fragile)</li>
+          <li>War earliest w26 (52w scenario)</li>
+          <li>9 new alliance tests</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.75rem;">Game Over Modal — Faction Standings</div>
+    <div class="card" style="max-width:500px; margin:0 auto;">
+      <div style="text-align:center; padding:0.75rem 0;">
+        <div style="font-family:'JetBrains Mono'; font-size:0.6rem; letter-spacing:0.3em; color:var(--gold); opacity:0.6;">A WAR WITHOUT VICTORY</div>
+        <div style="font-size:1.2rem; font-weight:700; color:var(--text-bright); margin:0.25rem 0;">Stalemate</div>
+        <div style="font-size:0.8rem; color:var(--text-dim); font-style:italic;">The war grinds to exhaustion. No side achieves its aims.</div>
+      </div>
+      <div style="margin-top:0.75rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+          <div style="width:8px; height:8px; border-radius:2px; background:var(--rbih);"></div>
+          <span style="font-size:0.8rem; flex:1;">RBiH</span>
+          <span style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--text-bright);">34.2%</span>
+        </div>
+        <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; margin-bottom:0.6rem;">
+          <div style="height:100%; width:34.2%; background:var(--rbih); border-radius:3px;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+          <div style="width:8px; height:8px; border-radius:2px; background:var(--rs);"></div>
+          <span style="font-size:0.8rem; flex:1;">RS</span>
+          <span style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--text-bright);">51.7%</span>
+        </div>
+        <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; margin-bottom:0.6rem;">
+          <div style="height:100%; width:51.7%; background:var(--rs); border-radius:3px;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+          <div style="width:8px; height:8px; border-radius:2px; background:var(--hrhb);"></div>
+          <span style="font-size:0.8rem; flex:1;">HRHB</span>
+          <span style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--text-bright);">14.1%</span>
+        </div>
+        <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+          <div style="height:100%; width:14.1%; background:var(--hrhb); border-radius:3px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ §7 COST ESTIMATE ═══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">§7</span>
+    <span class="section-title">Studio Cost Estimate — What This Would Cost</span>
+  </div>
+  <div class="section-body">
+    <div class="card-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div class="card" style="text-align:center;">
+        <div class="card-title">European Studio</div>
+        <div style="font-family:'JetBrains Mono'; font-size:1.8rem; font-weight:700; color:var(--gold);">€675K</div>
+        <div style="font-size:0.75rem; color:var(--text-dim);">8 FTEs × 15 months</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="card-title">US Studio</div>
+        <div style="font-family:'JetBrains Mono'; font-size:1.8rem; font-weight:700; color:var(--gold);">$1.1M</div>
+        <div style="font-size:0.75rem; color:var(--text-dim);">8 FTEs × 15 months</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="card-title">AAA Studio</div>
+        <div style="font-family:'JetBrains Mono'; font-size:1.8rem; font-weight:700; color:var(--gold);">€2.5M</div>
+        <div style="font-size:0.75rem; color:var(--text-dim);">12-15 people, slower</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="text-align:center; max-width:700px; margin:0 auto;">
+      <div style="font-size:0.9rem; color:var(--text); line-height:1.7;">
+        Built by <strong style="color:var(--gold);">1 person + AI tooling</strong> over <strong style="color:var(--gold);">8 weeks</strong>.
+        AI-contributed engineering equivalent: <strong style="color:var(--gold);">€400K–500K</strong>.
+      </div>
+      <div style="font-size:0.85rem; color:var(--text-dim); margin-top:0.75rem; font-style:italic;">
+        The thing no studio could replicate is the design coherence. One person's vision + an AI that remembers 620 docs of context = zero design-by-committee drift.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ FOOTER ═══════════════════════════════════════ -->
+<div class="footer">
+  <div class="pyrrhic">PYRRHIC GAMES</div>
+  <div style="margin-top:0.5rem;">A War Without Victory — v0.3.0 Playable Alpha</div>
+  <div style="margin-top:0.25rem;">Session Report generated 2026-03-15 by Claude Opus 4.6</div>
+  <div style="margin-top:0.75rem; font-style:normal; color:var(--gold); opacity:0.5;">
+    "Another such victory and we are undone."
+  </div>
+</div>
+
+</div>
+</body>
+</html>

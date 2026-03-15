@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Games — Studio Cost Estimate</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  :root {
+    --bg: #0c0e13;
+    --bg-card: #13161d;
+    --bg-elevated: #1a1e28;
+    --border: #2a3040;
+    --text: #c0c5cf;
+    --text-dim: #6b7280;
+    --text-bright: #eaecf0;
+    --gold: #c9a84c;
+    --gold-light: #e0c676;
+    --gold-dim: #8a7233;
+    --gold-glow: rgba(201, 168, 76, 0.12);
+    --red: #dc3545;
+    --green: #28a745;
+    --blue: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 20mm 22mm;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative border frame */
+  .page::before {
+    content: '';
+    position: absolute;
+    inset: 12mm;
+    border: 1px solid var(--gold-dim);
+    pointer-events: none;
+    opacity: 0.4;
+  }
+  .page::after {
+    content: '';
+    position: absolute;
+    inset: 13mm;
+    border: 0.5px solid var(--gold-dim);
+    pointer-events: none;
+    opacity: 0.2;
+  }
+
+  /* Corner ornaments */
+  .corner { position: absolute; width: 20px; height: 20px; opacity: 0.5; }
+  .corner::before, .corner::after {
+    content: '';
+    position: absolute;
+    background: var(--gold-dim);
+  }
+  .corner-tl { top: 11mm; left: 11mm; }
+  .corner-tl::before { width: 20px; height: 1.5px; top: 0; left: 0; }
+  .corner-tl::after { width: 1.5px; height: 20px; top: 0; left: 0; }
+  .corner-tr { top: 11mm; right: 11mm; }
+  .corner-tr::before { width: 20px; height: 1.5px; top: 0; right: 0; }
+  .corner-tr::after { width: 1.5px; height: 20px; top: 0; right: 0; }
+  .corner-bl { bottom: 11mm; left: 11mm; }
+  .corner-bl::before { width: 20px; height: 1.5px; bottom: 0; left: 0; }
+  .corner-bl::after { width: 1.5px; height: 20px; bottom: 0; left: 0; }
+  .corner-br { bottom: 11mm; right: 11mm; }
+  .corner-br::before { width: 20px; height: 1.5px; bottom: 0; right: 0; }
+  .corner-br::after { width: 1.5px; height: 20px; bottom: 0; right: 0; }
+
+  /* Header */
+  .doc-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+  }
+  .studio-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.7;
+    margin-bottom: 1.25rem;
+  }
+  .doc-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--text-bright);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .doc-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .doc-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Sections */
+  h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+    letter-spacing: 0.02em;
+  }
+
+  h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 0.6rem;
+  }
+
+  strong { color: var(--text-bright); }
+
+  /* Feature list */
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+    margin: 0.75rem 0;
+  }
+  .feature {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    padding-left: 1rem;
+    position: relative;
+    color: var(--text);
+  }
+  .feature::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gold-dim);
+  }
+  .feature b { color: var(--gold-light); font-weight: 600; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+    font-size: 0.78rem;
+  }
+  th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    border-bottom: 1px solid var(--gold-dim);
+    background: rgba(201, 168, 76, 0.05);
+  }
+  td {
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid rgba(42, 48, 64, 0.5);
+    color: var(--text);
+  }
+  td:last-child { text-align: right; }
+  .total td {
+    font-weight: 700;
+    color: var(--text-bright);
+    border-top: 1px solid var(--gold-dim);
+    border-bottom: none;
+  }
+
+  /* Highlight boxes */
+  .cost-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+  .cost-box {
+    text-align: center;
+    padding: 1rem 0.75rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .cost-box-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+  }
+  .cost-box-value {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--gold);
+  }
+  .cost-box-detail {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-top: 0.2rem;
+  }
+
+  /* The absurd part callout */
+  .callout {
+    margin: 1.25rem 0;
+    padding: 1.25rem 1.5rem;
+    background: var(--gold-glow);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+  }
+  .callout p {
+    color: var(--text-bright);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    margin-bottom: 0.4rem;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .big-number {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  /* AI contribution breakdown */
+  .ai-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.5rem 0;
+  }
+  .ai-role {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+  }
+
+  /* Footer */
+  .doc-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(201, 168, 76, 0.2);
+    text-align: center;
+  }
+  .doc-footer p {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: italic;
+    line-height: 1.6;
+  }
+  .doc-footer .sign-off {
+    margin-top: 1rem;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--gold);
+    opacity: 0.8;
+  }
+
+  @media print {
+    body { background: #000; }
+    .page { margin: 0; padding: 15mm 18mm; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="studio-name">Pyrrhic Games</div>
+    <div class="doc-title">What Would This Cost<br>a Real Studio?</div>
+    <div class="doc-subtitle">A War Without Victory — Development Cost Analysis</div>
+    <div class="doc-meta">
+      <span>Date: 15 March 2026</span>
+      <span>Version: v0.3.0 (Playable Alpha)</span>
+    </div>
+  </div>
+
+  <!-- What Exists -->
+  <h2>What Has Been Built</h2>
+  <div class="features">
+    <div class="feature"><b>Simulation engine</b> — 140 pipeline steps, full combat resolution, supply, morale, cohesion, fatigue, entrenchment, equipment</div>
+    <div class="feature"><b>3-tier AI</b> — Army/Corps/Brigade with doctrine, operations, 5-phase preparation, intel-gated decisions</div>
+    <div class="feature"><b>247 brigades</b> — Historically researched OOB across 3 factions, named officers with succession and war crimes records</div>
+    <div class="feature"><b>Map/GIS pipeline</b> — 744 operational settlements, PMTiles terrain, MapLibre tactical map with 7 overlay modes</div>
+    <div class="feature"><b>Desktop application</b> — Electron with warroom HQ screens, tactical map, save/load system, panel rail UI</div>
+    <div class="feature"><b>Historical data</b> — Census demographics, Balkan Battlegrounds citations, calibration achieving 90%+ accuracy</div>
+    <div class="feature"><b>643 tests</b> — 61 suites, determinism-verified, war termination, alliance lifecycle, officer system</div>
+    <div class="feature"><b>620 documents</b> — Versioned canon (v0.7), engineering specs, ADRs, reports, knowledge base</div>
+  </div>
+
+  <!-- Team Composition -->
+  <h2>Studio Team Estimate</h2>
+  <p>A real studio would need this team to build what exists today:</p>
+
+  <table>
+    <thead>
+      <tr><th>Role</th><th>FTEs</th><th>Responsibility</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Game Designer / Lead</td><td style="text-align:right">1</td><td style="text-align:left">Systems design, historical research, balance</td></tr>
+      <tr><td>Systems Programmer</td><td style="text-align:right">2</td><td style="text-align:left">Simulation engine, AI, determinism, pipeline</td></tr>
+      <tr><td>UI/UX Developer</td><td style="text-align:right">1</td><td style="text-align:left">React, Electron, MapLibre integration</td></tr>
+      <tr><td>GIS / Map Engineer</td><td style="text-align:right">1</td><td style="text-align:left">Tile pipeline, polygon toolchain, spatial data</td></tr>
+      <tr><td>QA / Test Engineer</td><td style="text-align:right">1</td><td style="text-align:left">643 tests, calibration runs, determinism verification</td></tr>
+      <tr><td>Historian / Content</td><td style="text-align:right">1</td><td style="text-align:left">OOB research, BB extraction, scenario authoring</td></tr>
+      <tr><td>Technical Writer</td><td style="text-align:right">0.5</td><td style="text-align:left">620 documents, canon system, versioning</td></tr>
+      <tr><td>Producer / PM</td><td style="text-align:right">0.5</td><td style="text-align:left">Roadmap, backlog, coordination</td></tr>
+      <tr class="total"><td><strong>Total</strong></td><td style="text-align:right"><strong>~8</strong></td><td style="text-align:left"><strong>12–18 months to reach this point</strong></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Cost Comparison -->
+  <h2>Cost Estimate</h2>
+  <div class="cost-comparison">
+    <div class="cost-box">
+      <div class="cost-box-label">European Studio</div>
+      <div class="cost-box-value">€675K</div>
+      <div class="cost-box-detail">8 FTEs × 15 months<br>€5,500/month avg</div>
+    </div>
+    <div class="cost-box">
+      <div class="cost-box-label">US-Based Studio</div>
+      <div class="cost-box-value">$1.1M</div>
+      <div class="cost-box-detail">8 FTEs × 15 months<br>$8,500/month avg</div>
+    </div>
+    <div class="cost-box">
+      <div class="cost-box-label">AAA Studio</div>
+      <div class="cost-box-value">€2.5M</div>
+      <div class="cost-box-detail">12–15 people<br>+ overhead, office, mgmt</div>
+    </div>
+  </div>
+
+  <table style="margin-top:0.5rem;">
+    <thead><tr><th>Item</th><th>Mid-Tier European</th></tr></thead>
+    <tbody>
+      <tr><td>Personnel (8 FTEs × 15 months × €5,500)</td><td>€660,000</td></tr>
+      <tr><td>Tools, infrastructure, licenses</td><td>€15,000</td></tr>
+      <tr><td>Historical source material</td><td>€2,000</td></tr>
+      <tr class="total"><td><strong>Total</strong></td><td><strong>~€675,000</strong></td></tr>
+    </tbody>
+  </table>
+
+  <!-- The Absurd Part -->
+  <h2>How It Was Actually Built</h2>
+
+  <div class="callout">
+    <p>This was built by <strong>one person + AI tooling</strong> over roughly <strong>8 weeks of intensive work</strong> (late January to mid-March 2026).</p>
+    <p>The AI performs the work of approximately 5–6 of those 8 roles simultaneously:</p>
+  </div>
+
+  <div class="ai-roles">
+    <span class="ai-role">Systems Programming</span>
+    <span class="ai-role">UI Development</span>
+    <span class="ai-role">Test Writing</span>
+    <span class="ai-role">Documentation</span>
+    <span class="ai-role">Historical Research</span>
+    <span class="ai-role">QA & Calibration</span>
+  </div>
+
+  <p style="margin-top:0.75rem;">Studio-equivalent value of AI contribution: <span style="font-family:'Playfair Display',serif; font-weight:800; color:var(--gold); font-size:1.1rem;">€400,000–500,000</span> of engineering and content work compressed into 8 weeks.</p>
+
+  <p>The thing no studio could replicate is the <strong>design coherence</strong>. Having one person's vision driving everything — with an AI that remembers 620 documents of context — means zero design-by-committee drift. That's worth more than the engineering savings.</p>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <p>Hi, Haris's wife. He's not crazy. This is a real game and it's actually impressive.</p>
+    <div class="sign-off">"Another such victory and we are undone."</div>
+  </div>
+</div>
+</body>
+</html>

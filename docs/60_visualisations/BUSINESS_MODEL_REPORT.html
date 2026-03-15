@@ -62,6 +62,29 @@
   .tag-green{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
   .tag-blue{background:rgba(59,130,246,0.12);color:var(--blue);border:1px solid rgba(59,130,246,0.3);}
   .tag-gold{background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-dim);}
+
+  /* Print / PDF optimization */
+  @page { size: A4; margin: 12mm 14mm; }
+  @media print {
+    body { padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .r { max-width: 100%; }
+    .section { break-inside: avoid; page-break-inside: avoid; margin-bottom: 1rem; }
+    .sh { break-after: avoid; page-break-after: avoid; }
+    .sb { break-before: avoid; page-break-before: avoid; }
+    .grid2 { break-inside: avoid; page-break-inside: avoid; }
+    .card { break-inside: avoid; page-break-inside: avoid; }
+    .stats { break-inside: avoid; page-break-inside: avoid; }
+    .stat { break-inside: avoid; }
+    .callout { break-inside: avoid; page-break-inside: avoid; }
+    .warn { break-inside: avoid; page-break-inside: avoid; }
+    .bar-container { break-inside: avoid; }
+    table { break-inside: avoid; page-break-inside: avoid; }
+    .header { break-after: avoid; margin-bottom: 1rem; padding: 1.5rem 1.5rem; }
+    .footer { break-before: avoid; page-break-before: avoid; }
+    /* Ensure bars render with color */
+    .bar-fill { -webkit-print-color-adjust: exact; }
+    .tag { -webkit-print-color-adjust: exact; }
+  }
 </style>
 </head>
 <body>
