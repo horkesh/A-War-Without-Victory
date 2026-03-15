@@ -3,40 +3,8 @@
  * Horizontal bar centered at bottom, above BottomStatusStrip.
  * Styled per HOI §9.2 warm palette.
  */
-import { useGameStore, type MapMode } from '../store/gameStore';
-
-const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
-  { id: 'political', label: '1: Political', key: '1' },
-  { id: 'ethnic', label: '2: Ethnic', key: '2' },
-  { id: 'supply', label: '3: Supply', key: '3' },
-  { id: 'casualties', label: '4: Casualties', key: '4' },
-  { id: 'morale', label: '5: Morale', key: '5' },
-  { id: 'operations', label: '6: Operations', key: '6' },
-  { id: 'defense', label: '7: Defense', key: '7' },
-];
-
-const DEV_LAYER_TOGGLES = [
-  { key: 'frontsVisible', setKey: 'setFrontsVisible', label: 'Fronts' },
-  { key: 'formationsVisible', setKey: 'setFormationsVisible', label: 'Units' },
-  { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
-  { key: 'sectorsVisible', setKey: 'setSectorsVisible', label: 'Sectors' },
-  { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
-  { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
-  { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
-  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
-] as const;
-
-// Live mode: no separate "Fronts" toggle — front lines ARE sectors.
-// "Front" toggle controls sectorsVisible (which drives front line visibility).
-const LIVE_LAYER_TOGGLES = [
-  { key: 'sectorsVisible', setKey: 'setSectorsVisible', label: 'Front' },
-  { key: 'formationsVisible', setKey: 'setFormationsVisible', label: 'Units' },
-  { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
-  { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
-  { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
-  { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
-  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
-] as const;
+import { useGameStore } from '../store/gameStore';
+import { MAP_MODES, DEV_LAYER_TOGGLES, LIVE_LAYER_TOGGLES } from '../utils/mapModes';
 
 export function MapModeToolbar() {
   const devMode = useGameStore((s) => s.devMode);
@@ -82,13 +50,13 @@ export function MapModeToolbar() {
               key={id}
               type="button"
               onClick={() => setMapMode(id)}
-              title={`${label} (${key})`}
+              title={`${key}: ${label}`}
               className={`px-3 py-1.5 rounded text-[10px] font-mono tracking-widest transition-all duration-200 uppercase ${active
                 ? 'bg-accent-gold/20 text-accent-gold shadow-glow-sm font-bold'
                 : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
                 }`}
             >
-              {label.split(': ')[1]}
+              {label}
             </button>
           );
         })}

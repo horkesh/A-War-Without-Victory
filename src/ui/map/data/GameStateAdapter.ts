@@ -1169,14 +1169,18 @@ export function parseGameState(json: unknown): LoadedGameState {
                 assigned_operation: typeof os?.assigned_operation === 'string' ? os.assigned_operation : undefined,
                 compatible_corps_ids: Array.isArray(data.compatible_corps_ids) ? (data.compatible_corps_ids as string[]).filter(s => typeof s === 'string') : undefined,
                 casualty_vulnerability: finiteNumber(os?.casualty_vulnerability, undefined) as number | undefined,
-                war_crimes_record: data.war_crimes_record != null && typeof data.war_crimes_record === 'object'
-                    ? {
-                        court: String((data.war_crimes_record as Record<string, unknown>).court ?? ''),
-                        verdict: String((data.war_crimes_record as Record<string, unknown>).verdict ?? ''),
-                        sentence: typeof (data.war_crimes_record as Record<string, unknown>).sentence === 'string' ? (data.war_crimes_record as Record<string, unknown>).sentence as string : undefined,
-                        summary: String((data.war_crimes_record as Record<string, unknown>).summary ?? ''),
-                    }
-                    : undefined,
+                war_crimes_record: (() => {
+                    const wcr = data.war_crimes_record;
+                    if (wcr == null || typeof wcr !== 'object') return undefined;
+                    const r = wcr as Record<string, unknown>;
+                    return {
+                        court: String(r.court ?? ''),
+                        verdict: String(r.verdict ?? ''),
+                        sentence: typeof r.sentence === 'string' ? r.sentence : undefined,
+                        charges: typeof r.charges === 'string' ? r.charges : undefined,
+                        summary: String(r.summary ?? ''),
+                    };
+                })(),
             });
         }
         if (officerList.length > 0) namedOfficerData = officerList;
@@ -1798,6 +1802,15 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
                 officer_defensive_skill: stats.defensive_skill,
                 current_commander_id: e.current_commander_id ? String(e.current_commander_id) : undefined,
                 current_commander_name: e.current_commander_id ? getOfficerName(e.current_commander_id) : undefined,
+                ...(e.current_commander_id ? (() => {
+                    const cs = getOfficerStats(e.current_commander_id);
+                    return {
+                        current_commander_competence: cs.competence,
+                        current_commander_aggressiveness: cs.aggressiveness,
+                        current_commander_defensive_skill: cs.defensive_skill,
+                        current_commander_war_crimes_record: cs.war_crimes_record,
+                    };
+                })() : {}),
                 corps_id: e.corps_id ? String(e.corps_id) : undefined,
                 corps_name: e.corps_id ? getCorpsName(e.corps_id) : undefined,
                 acknowledged: Boolean(e.acknowledged),

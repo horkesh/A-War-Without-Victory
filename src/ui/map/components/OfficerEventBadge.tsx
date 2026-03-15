@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
+import { WarCrimesBadge } from './WarCrimesBadge';
 
 function StatBar({ label, value }: { label: string; value: number }) {
   const pct = (value / 5) * 100;
@@ -15,30 +16,12 @@ function StatBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-function WarCrimesBadge({ record }: { record: { court: string; verdict: string; sentence?: string; summary: string } }) {
-  const verdictColor = record.verdict === 'convicted' ? 'text-red-400 border-red-500/30 bg-red-900/20'
-    : record.verdict === 'acquitted' ? 'text-green-400 border-green-500/30 bg-green-900/20'
-    : record.verdict === 'indicted' ? 'text-amber-400 border-amber-500/30 bg-amber-900/20'
-    : 'text-text-secondary border-panel-border bg-black/20';
-  return (
-    <div className={`mt-2 px-2 py-1.5 rounded border text-[9px] ${verdictColor}`}>
-      <div className="flex items-center gap-1.5 mb-1">
-        <span className="font-bold uppercase tracking-wider">
-          {record.court} — {record.verdict.replace(/_/g, ' ')}
-        </span>
-        {record.sentence && <span className="text-text-secondary">({record.sentence})</span>}
-      </div>
-      <div className="text-text-secondary leading-tight">{record.summary}</div>
-    </div>
-  );
-}
-
 function OfficerCard({ name, competence, aggressiveness, defensiveSkill, warCrimesRecord, highlight }: {
   name: string;
   competence: number;
   aggressiveness: number;
   defensiveSkill: number;
-  warCrimesRecord?: { court: string; verdict: string; sentence?: string; summary: string };
+  warCrimesRecord?: import('./WarCrimesBadge').WarCrimesRecord;
   highlight?: boolean;
 }) {
   return (
@@ -56,7 +39,7 @@ function OfficerCard({ name, competence, aggressiveness, defensiveSkill, warCrim
         <StatBar label="Aggression" value={aggressiveness} />
         <StatBar label="Defense" value={defensiveSkill} />
       </div>
-      {warCrimesRecord && <WarCrimesBadge record={warCrimesRecord} />}
+      {warCrimesRecord && <WarCrimesBadge record={warCrimesRecord} className="mt-2" />}
     </div>
   );
 }
@@ -68,8 +51,11 @@ export function OfficerEventBadge() {
   const events = loadedGameState?.pendingOfficerEvents;
   const [modalOpen, setModalOpen] = useState(false);
 
-  const unacknowledgedCount = events?.filter(e => !e.acknowledged).length ?? 0;
-  if (unacknowledgedCount === 0) return null;
+  const unacknowledged = useMemo(
+    () => events?.filter(e => !e.acknowledged) ?? [],
+    [events],
+  );
+  if (unacknowledged.length === 0) return null;
 
   return (
     <>
@@ -80,12 +66,12 @@ export function OfficerEventBadge() {
       >
         OFFICERS
         <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center px-1 rounded-full bg-red-600 text-white text-[9px] font-bold border border-red-400 shadow-lg">
-          {unacknowledgedCount}
+          {unacknowledged.length}
         </span>
       </button>
       {modalOpen && (
         <OfficerEventModal
-          events={events!.filter(e => !e.acknowledged)}
+          events={unacknowledged}
           onClose={() => setModalOpen(false)}
         />
       )}
@@ -168,9 +154,10 @@ function OfficerEventModal({ events, onClose }: {
                   <div className="text-[9px] uppercase tracking-wider text-text-secondary mb-1.5">Current Commander</div>
                   <OfficerCard
                     name={event.current_commander_name}
-                    competence={3}
-                    aggressiveness={3}
-                    defensiveSkill={3}
+                    competence={event.current_commander_competence ?? 3}
+                    aggressiveness={event.current_commander_aggressiveness ?? 3}
+                    defensiveSkill={event.current_commander_defensive_skill ?? 3}
+                    warCrimesRecord={event.current_commander_war_crimes_record}
                   />
                 </div>
               )}

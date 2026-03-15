@@ -11,6 +11,7 @@ import {
     formatCombatRecord,
     formatTenure,
 } from '../utils/officerCharacter';
+import { WarCrimesBadge } from './WarCrimesBadge';
 
 interface OfficerProfileProps {
     officer: NamedOfficerView;
@@ -81,27 +82,6 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
             {officer.war_crimes_record && (
                 <WarCrimesBadge record={officer.war_crimes_record} />
             )}
-        </div>
-    );
-}
-
-const VERDICT_STYLE: Record<string, { border: string; text: string; bg: string }> = {
-    convicted: { border: 'border-red-500/50', text: 'text-red-400', bg: 'bg-red-900/20' },
-    acquitted: { border: 'border-green-500/50', text: 'text-green-400', bg: 'bg-green-900/20' },
-    indicted: { border: 'border-amber-500/50', text: 'text-amber-400', bg: 'bg-amber-900/20' },
-    died_before_trial: { border: 'border-neutral-500/50', text: 'text-neutral-400', bg: 'bg-neutral-800/30' },
-};
-
-function WarCrimesBadge({ record }: { record: NonNullable<import('../data/types').NamedOfficerView['war_crimes_record']> }) {
-    const style = VERDICT_STYLE[record.verdict] ?? VERDICT_STYLE.indicted;
-    return (
-        <div className={`text-[9px] px-1.5 py-1 rounded border ${style.border} ${style.bg} space-y-0.5`}>
-            <div className="flex items-center justify-between gap-2">
-                <span className={`font-bold uppercase ${style.text}`}>{record.verdict.replace(/_/g, ' ')}</span>
-                <span className="text-text-secondary">{record.court}</span>
-            </div>
-            {record.sentence && <div className="text-text-secondary">{record.sentence}</div>}
-            <div className="text-text-secondary truncate" title={record.summary}>{record.summary}</div>
         </div>
     );
 }

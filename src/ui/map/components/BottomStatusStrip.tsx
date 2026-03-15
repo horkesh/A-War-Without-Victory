@@ -1,39 +1,9 @@
-import { useGameStore, type MapMode } from '../store/gameStore';
+import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
+import { MAP_MODES, DEV_LAYER_TOGGLES, LIVE_LAYER_TOGGLES } from '../utils/mapModes';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
-
-const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
-  { id: 'political', label: 'Political', key: '1' },
-  { id: 'ethnic', label: 'Ethnic', key: '2' },
-  { id: 'supply', label: 'Supply', key: '3' },
-  { id: 'casualties', label: 'Casualties', key: '4' },
-  { id: 'morale', label: 'Morale', key: '5' },
-  { id: 'operations', label: 'Operations', key: '6' },
-  { id: 'defense', label: 'Defense', key: '7' },
-];
-
-const DEV_LAYER_TOGGLES = [
-  { key: 'frontsVisible', setKey: 'setFrontsVisible', label: 'Fronts' },
-  { key: 'formationsVisible', setKey: 'setFormationsVisible', label: 'Units' },
-  { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
-  { key: 'sectorsVisible', setKey: 'setSectorsVisible', label: 'Sectors' },
-  { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
-  { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
-  { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
-  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
-] as const;
-
-const LIVE_LAYER_TOGGLES = [
-  { key: 'sectorsVisible', setKey: 'setSectorsVisible', label: 'Front' },
-  { key: 'formationsVisible', setKey: 'setFormationsVisible', label: 'Units' },
-  { key: 'labelsVisible', setKey: 'setLabelsVisible', label: 'Labels' },
-  { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
-  { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
-  { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
-  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
-] as const;
 
 /**
  * Unified bottom bar: map mode pills | territory control | layer toggles.

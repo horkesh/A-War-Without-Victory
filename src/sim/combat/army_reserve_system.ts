@@ -103,7 +103,8 @@ function getAvailableElites(state: GameState, faction: string, turn: number): Fo
  */
 function corpsHasLoanedElite(state: GameState, corpsId: string): boolean {
     const formations = state.military.formations ?? {};
-    for (const f of Object.values(formations)) {
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
         if (f.elite_loan_state?.on_loan && f.elite_loan_state.loaned_to_corps === corpsId) return true;
     }
     return false;
@@ -134,7 +135,8 @@ export function generateArmyReserveRequests(
 
         // Determine faction from any active brigade in this corps
         let corpsFaction: string | null = null;
-        for (const f of Object.values(formations)) {
+        for (const fid of Object.keys(formations).sort(strictCompare)) {
+            const f = formations[fid];
             if (f.corps_id === corpsId && f.status === 'active') {
                 corpsFaction = f.faction;
                 break;
@@ -146,7 +148,7 @@ export function generateArmyReserveRequests(
         if (corpsHasLoanedElite(state, corpsId)) continue;
 
         const cmd = corpsCommand[corpsId];
-        const sector = Object.values(corpsSectors).find(s => s.corps_id === corpsId);
+        const sector = Object.keys(corpsSectors).sort(strictCompare).map(k => corpsSectors[k]).find(s => s.corps_id === corpsId);
         const op = cmd?.active_operation;
 
         let bestReason: ReserveRequestReason | null = null;
@@ -509,19 +511,15 @@ export function tickEliteLoans(state: GameState, turn: number): void {
         const corpsId = ls.loaned_to_corps;
         const cmd = corpsCommand[corpsId];
         const hasActiveOp = !!(cmd?.active_operation && cmd.active_operation.phase === 'execution');
-        const sector = Object.values(state.military.corps_front_sectors ?? {}).find(s => s.corps_id === corpsId);
+        const cfs = state.military.corps_front_sectors ?? {};
+        const sector = Object.keys(cfs).sort(strictCompare).map(k => cfs[k]).find(s => s.corps_id === corpsId);
         const threatHigh = sector ? sector.threat_ratio >= 1.5 : false;
 
-        // Op ended + no high threat → op_complete
+        // Op ended + no high threat → recall
         if (!hasActiveOp && !threatHigh) {
             const hadOp = episode?.reason === 'offensive_support' || episode?.reason === 'exploitation';
             recallEliteLoan(state, bid, hadOp ? 'op_complete' : 'need_expired', turn);
             continue;
-        }
-
-        // No op, no threat, not needed → need_expired
-        if (!hasActiveOp && !threatHigh) {
-            recallEliteLoan(state, bid, 'need_expired', turn);
         }
     }
 }

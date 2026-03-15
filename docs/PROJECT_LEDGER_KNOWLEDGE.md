@@ -953,3 +953,11 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 - **This is not a calibration bug** — the equipment attrition mechanic correctly removes tanks. But equipment totals at end-of-run are not directly comparable to historical figures because recruitment inflates the supply side.
 - **Design rule:** If recruits shouldn't spawn with armor, `ensureBrigadeComposition` needs an `equipment_class`-aware path — mountain/light brigades get zero tanks; mechanized/motorized get full complement. Low priority until equipment calibration becomes a target.
 - **(2026-03-15)** — See PROJECT_LEDGER.md 2026-03-15 n718 entry.
+
+## 2026-03-15 - Explicit-field validators silently strip new optional fields
+
+- **Pattern:** `validateOfficerData()` constructs validated `NamedOfficer` objects by explicitly listing every field in an object literal. When `war_crimes_record` was added to the `NamedOfficer` type and the JSON data, it was never added to the validator's field list. The field was silently dropped during scenario loading.
+- **Why TypeScript didn't catch it:** The field is optional (`war_crimes_record?: {...}`). Omitting an optional field from an object literal is perfectly valid — no compile error. The validator produced a type-correct object that was missing data.
+- **The downstream illusion:** The UI adapter, components, and types were all correctly wired. `OfficerProfile.tsx` had a `WarCrimesBadge` component, `GameStateAdapter.ts` mapped the field, `types.ts` declared it. Everything compiled. But the badge never rendered because the data was `undefined` at runtime — stripped 3 layers upstream.
+- **Rule:** When adding optional fields to a type that has an explicit-field validator, always update the validator simultaneously. Search for the type name + "push" or "result.push" to find validators that construct the type. Consider adding a test that round-trips the JSON through validation and asserts the field survives.
+- **(2026-03-15)** — See PROJECT_LEDGER.md 2026-03-15 war crimes fix entry.

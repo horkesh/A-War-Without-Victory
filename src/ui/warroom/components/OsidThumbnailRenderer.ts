@@ -296,4 +296,13 @@ export class OsidThumbnailRenderer {
         ctx.drawImage(img, sx, sy, stampSize, stampSize);
         ctx.restore();
     }
+
+    /** Release all cached resources. Call when warroom is torn down. */
+    destroy(): void {
+        this.crestImages.clear();
+        this.features = [];
+        this.borderEdges.clear();
+        this.liveControl = null;
+        this.loaded = false;
+    }
 }

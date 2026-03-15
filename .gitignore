@@ -29,8 +29,11 @@ data/derived/municipalities_viewer_v1.geojson
 data/derived/municipalities_viewer_v1.geojson.gz
 data/derived/municipalities_mun1990_viewer_v1.geojson
 data/derived/municipalities_mun1990_viewer_v1.geojson.gz
-docs/cleanup/cleanup_audit.json
-docs/cleanup/cleanup_audit.md
+# Archived/deprecated docs (kept locally, not committed)
+docs/_old/
+docs/cleanup/
+docs/40_reports/convenes/_archived_feb2026/
+docs/40_reports/implemented/_archived_feb2026/
 
 # Phase H6.2 terrain snapshot temp files
 data/derived/terrain/_tmp/

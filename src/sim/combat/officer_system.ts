@@ -797,6 +797,7 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
             improvement_rate: typeof o.improvement_rate === 'number' ? o.improvement_rate : 0,
             pool_tier: (o.pool_tier as OfficerPoolTier) ?? 'tier_c',
             enclave_lock: parseEnclaveLock(o.enclave_lock, id),
+            war_crimes_record: parseWarCrimesRecord(o.war_crimes_record),
         });
     }
 
@@ -816,5 +817,19 @@ function parseEnclaveLock(raw: unknown, officerId: string): NamedOfficer['enclav
     return {
         enclave_id: lock.enclave_id,
         locked_until_turn: lock.locked_until_turn as number | undefined,
+    };
+}
+
+function parseWarCrimesRecord(raw: unknown): NamedOfficer['war_crimes_record'] {
+    if (raw === undefined || raw === null) return undefined;
+    if (typeof raw !== 'object') return undefined;
+    const r = raw as Record<string, unknown>;
+    if (typeof r.court !== 'string' || typeof r.verdict !== 'string') return undefined;
+    return {
+        court: r.court as 'ICTY' | 'BiH State Court',
+        verdict: r.verdict as 'convicted' | 'acquitted' | 'died_before_trial' | 'indicted',
+        sentence: typeof r.sentence === 'string' ? r.sentence : undefined,
+        charges: typeof r.charges === 'string' ? r.charges : '',
+        summary: typeof r.summary === 'string' ? r.summary : '',
     };
 }

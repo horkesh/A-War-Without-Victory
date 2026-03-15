@@ -80,6 +80,7 @@ export interface NamedOfficerView {
         court: string;
         verdict: string;
         sentence?: string;
+        charges?: string;
         summary: string;
     };
 }
@@ -602,6 +603,16 @@ export interface LoadedGameState {
         officer_defensive_skill: number;
         current_commander_id?: string;
         current_commander_name?: string;
+        current_commander_competence?: number;
+        current_commander_aggressiveness?: number;
+        current_commander_defensive_skill?: number;
+        current_commander_war_crimes_record?: {
+            court: string;
+            verdict: string;
+            sentence?: string;
+            charges?: string;
+            summary: string;
+        };
         corps_id?: string;
         corps_name?: string;
         acknowledged: boolean;
@@ -609,6 +620,7 @@ export interface LoadedGameState {
             court: string;
             verdict: string;
             sentence?: string;
+            charges?: string;
             summary: string;
         };
     }>;

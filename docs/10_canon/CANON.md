@@ -4,12 +4,12 @@
 
 The following documents are **CANON** (authoritative). Canon docs live in `docs/10_canon/`. At docs root: `docs/PROJECT_LEDGER.md` (append-only changelog) and `docs/PROJECT_LEDGER_KNOWLEDGE.md` (thematic knowledge base � decisions, patterns, rationale by topic).
 
-- `docs/10_canon/Engine_Invariants_v0_6_0.md`
+- `docs/10_canon/Engine_Invariants_v0_7_0.md`
 - `docs/10_canon/Phase_Specifications_v0_6_0.md`
 - `docs/10_canon/Peace_Specification_v0_6_0.md`
 - `docs/10_canon/War_Specification_v0_6_0.md`
-- `docs/10_canon/Systems_Manual_v0_6_0.md`
-- `docs/10_canon/Rulebook_v0_6_0.md`
+- `docs/10_canon/Systems_Manual_v0_7_0.md`
+- `docs/10_canon/Rulebook_v0_7_0.md`
 - `docs/10_canon/Game_Bible_v0_6_0.md`
 - `docs/10_canon/context.md` (process canon)
 
@@ -17,10 +17,10 @@ The following documents are **CANON** (authoritative). Canon docs live in `docs/
 
 When conflicts arise, resolve in this order:
 
-1. **Engine Invariants v0.6.0** - Defines what MUST be true (correctness constraints)
+1. **Engine Invariants v0.7.0** - Defines what MUST be true (correctness constraints)
 2. **Phase Specifications v0.6.0** - Defines lifecycle contracts (Peace/War)
-3. **Systems & Mechanics Manual v0.6.0** - Defines complete system behavior (implementation spec)
-4. **Rulebook v0.6.0** - Defines player-facing experience
+3. **Systems & Mechanics Manual v0.7.0** - Defines complete system behavior (implementation spec)
+4. **Rulebook v0.7.0** - Defines player-facing experience
 5. **Game Bible v0.6.0** - Defines design philosophy and constraints
 6. **context.md** - Defines process canon (workflow, ledger, session runbook)
 
@@ -61,6 +61,6 @@ Do NOT edit FORAWWV automatically.
 
 ## Canon Versioning
 
-Canon v0.6 is the active canon. Deprecated v0.5 and older canon files are archived under `docs/_old/10_canon/` and must not be used for normative behavior.
+Canon v0.7 is the active canon (Engine Invariants, Systems Manual, Rulebook). Phase Specifications, Peace/War Specifications, and Game Bible remain at v0.6 (no changes needed). Deprecated v0.5 and older canon files have been removed.
 
 One game turn equals one week.
