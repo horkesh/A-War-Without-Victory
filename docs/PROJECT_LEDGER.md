@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** Post-MVP — n797: Full OOB + overstacking fix + troop calibration. **90.4% area**, 13/13 anchors, 5/6 benchmarks. 166 brigades total (122 ARBiH mandatory + 44 emergent). RS 99k, ARBiH 153k, HRHB 42k at w40. 206w tested: RS 119k, ARBiH 231k, HRHB 66k.
+**Status:** Post-MVP — n804: Supply embargo + threat-weighted assignment + enclave calibration. **89.7% area**, 13/13 anchors, 5/6 benchmarks. Supply: RS heavy=100, RBiH heavy=15 (embargo), HRHB heavy=50. Gradačac/Teočak/Žepče hold. Bijela RS (needs ARBiH counterattack). Drina 80.9%.
 
 ## [2026-03-15] n797: Full OOB Calibration Sprint — Spawn Fix + Overstacking + Troop Balance
 
