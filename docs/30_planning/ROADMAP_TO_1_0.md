@@ -21,13 +21,16 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.4.1** | Complete Event System | PLANNED |
 | **v0.4.2** | Additional Scenarios (1993, 1994, 1995 starts) | PLANNED |
 | **v0.4.3** | Economy & War Production | PLANNED |
+| **v0.4.4** | AI Commander Prototype (Phase A: Mladić) | PLANNED |
 | **v0.5.0** | Full Diplomatic System (Negotiations) | PLANNED |
 | **v0.5.1** | UI Completion (all panels, modes, tooltips) | PLANNED |
 | **v0.5.2** | Tutorial & Onboarding | PLANNED |
 | **v0.5.3** | Audio (SFX + Music) | PLANNED |
+| **v0.5.4** | AI Commander Full (all 3 armies + corps + advisor) | PLANNED |
 | **v0.6.0** | Full Historical Event Set (1992-1995) | PLANNED |
 | **v0.6.1** | Balance & Calibration (all factions, all scenarios) | PLANNED |
 | **v0.6.2** | Campaign Structure & Achievements | PLANNED |
+| **v0.6.3** | AI Commander Auto-Play & Spectator Mode | PLANNED |
 | **v0.7.0** | Performance Optimization | PLANNED |
 | **v0.7.1** | Accessibility (colorblind, keyboard, screen reader) | PLANNED |
 | **v0.7.2** | Localization (BCS first, then English polish) | PLANNED |
