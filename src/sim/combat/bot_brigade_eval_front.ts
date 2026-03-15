@@ -98,6 +98,79 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     return false;
 }
 
+/**
+ * Return-to-corps: orphaned brigades outside their corps territory march home.
+ *
+ * A brigade not assigned to any sector AND not in any of its corps's sector
+ * territories is lost — it's in the wrong part of the map (e.g. Čajniče brigade
+ * at Banja Luka). The commander recalls it by issuing a column march toward
+ * home_osid. The brigade will eventually reach its corps's territory and get
+ * assigned to a sector through the normal pipeline.
+ */
+export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
+    const { brigade, state, loc, adjacency, result } = ctx;
+
+    // Only fires for brigades NOT in any sector
+    if (!state.military.corps_front_sectors) return false;
+    const sectors = state.military.corps_front_sectors;
+    for (const s of Object.values(sectors)) {
+        if (s.assigned_brigade_ids.includes(brigade.id)) return false;
+        if ((s.reserve_brigade_ids ?? []).includes(brigade.id)) return false;
+    }
+
+    // Check: is the brigade in ANY of its own corps's sector territories?
+    const corpsId = brigade.corps_id;
+    if (!corpsId) return false;
+    for (const s of Object.values(sectors)) {
+        if (s.corps_id === corpsId && s.territory_osids.includes(loc)) return false;
+    }
+
+    // Brigade is orphaned and outside corps territory — march toward nearest
+    // own-corps sector territory. BFS from current location through friendly
+    // territory, looking for any OSID in a corps sector's territory.
+    const pc = state.political.political_controllers ?? {};
+
+    // Collect all own-corps territory OSIDs as BFS targets
+    const corpsTerritory = new Set<string>();
+    for (const s of Object.values(sectors)) {
+        if (s.corps_id === corpsId) {
+            for (const o of s.territory_osids) corpsTerritory.add(o);
+        }
+    }
+    if (corpsTerritory.size === 0) return false;
+
+    // BFS from current location toward nearest corps territory OSID
+    const visited = new Set<string>([loc]);
+    const parent = new Map<string, string>();
+    const queue: string[] = [loc];
+    let targetFound: string | null = null;
+    while (queue.length > 0 && !targetFound) {
+        const curr = queue.shift()!;
+        const neighbors = adjacency.get(curr as Osid) ?? [];
+        for (const n of neighbors) {
+            if (visited.has(n)) continue;
+            if (pc[n] !== brigade.faction) continue;
+            visited.add(n);
+            parent.set(n, curr);
+            if (corpsTerritory.has(n)) { targetFound = n; break; }
+            queue.push(n);
+        }
+    }
+    if (!targetFound) return false;
+
+    // Walk back from target to loc to find the first step
+    let step = targetFound;
+    while (parent.has(step) && parent.get(step) !== loc) {
+        step = parent.get(step)!;
+    }
+    if (step && step !== loc) {
+        result.movement_orders[brigade.id] = step as Osid;
+        result.posture_orders.push({ brigade_id: brigade.id, posture: 'hold' });
+        return true;
+    }
+    return false;
+}
+
 export function evaluateFrontCoverage(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, state, faction, loc, adjacency, reverseMap, graphAnalysis, directive, corpsStance, adjEnemy, result, columnAssignments } = ctx;
 

@@ -58,7 +58,7 @@ import { isMultiAxis, getAllAxisBrigades } from './sector_offensive.js';
 import { getCorpsStance } from './combat_math.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
-import { evaluateSectorMarch, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
+import { evaluateSectorMarch, evaluateReturnToCorps, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
 import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, evaluateUncontestedOccupation } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
@@ -412,6 +412,7 @@ function executeFactionDirectives(
         }
         if (evaluateGarrisonAndDetachments(ctx)) continue;
         if (evaluateSectorMarch(ctx)) continue;
+        if (evaluateReturnToCorps(ctx)) continue; // Before hold/defense — orphans march home first
         if (evaluateHomeDefense(ctx)) continue;
         if (evaluateReserve(ctx)) continue;
         if (evaluateSupplyGate(ctx)) continue;

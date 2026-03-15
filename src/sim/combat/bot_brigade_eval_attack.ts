@@ -459,6 +459,11 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
             if (totalN > 0 && enemyN / totalN >= 0.75) continue;
         }
 
+        // NOTE: Corps operational area guard was tested (n778) but too restrictive —
+        // blocked legitimate VRS advances, -0.9pp regression. The salient aversion
+        // filter (Phase C) handles geometric overextension. Demographic filter (#42)
+        // is the right approach for strategic scope, not municipality whitelisting.
+
         // Scenario avoid-list guard: historically, some OSIDs were not captured even when
         // undefended (e.g. Brčko city center — VRS held the corridor but not the city core).
         // Without this guard, brigades sweeping through during operation execution walk into

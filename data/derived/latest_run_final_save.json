@@ -333912,6 +333912,11 @@
         ],
         "stance": "column"
       },
+      "rs_ajnie_brigade": {
+        "destination_sids": [
+          "op:celinac:josavka_donja_2"
+        ]
+      },
       "rs_ilidza_brigade": {
         "destination_sids": [
           "op:novi_grad_sarajevo:recica"
@@ -334260,23 +334265,6 @@
         "status": "in_transit",
         "turns_remaining": 2
       },
-      "rs_ajnie_brigade": {
-        "destination_sids": [
-          "op:donji_vakuf:prusac_2"
-        ],
-        "path": [
-          "op:banja_luka:banja_luka_2",
-          "op:skender_vakuf:javorani_2",
-          "op:jajce:barevo_2",
-          "op:jajce:bravnice",
-          "op:sipovo:pribeljci_2",
-          "op:donji_vakuf:pribraca_2",
-          "op:donji_vakuf:prusac_2"
-        ],
-        "stance": "column",
-        "status": "in_transit",
-        "turns_remaining": 5
-      },
       "rs_trebinje_brigade": {
         "destination_sids": [
           "op:foca:prevrac"
@@ -334304,10 +334292,10 @@
         "equipment_lost": {
           "aa_systems": 0,
           "artillery": 13,
-          "tanks": 2
+          "tanks": 1
         },
-        "killed": 1722,
-        "missing_captured": 1325,
+        "killed": 1703,
+        "missing_captured": 1318,
         "per_formation": {
           "hrhb_101st_oraje_brigade": {
             "killed": 247,
@@ -334340,14 +334328,14 @@
             "wounded": 11
           },
           "hrhb_1st_herzegovina_brigade_knez_domagoj": {
-            "killed": 194,
-            "missing_captured": 105,
-            "wounded": 356
+            "killed": 181,
+            "missing_captured": 98,
+            "wounded": 331
           },
           "hrhb_2nd_brigade_mostar": {
-            "killed": 30,
-            "missing_captured": 18,
-            "wounded": 56
+            "killed": 3,
+            "missing_captured": 4,
+            "wounded": 7
           },
           "hrhb_6th_brigade_ranko_boban": {
             "killed": 9,
@@ -334360,9 +334348,9 @@
             "wounded": 25
           },
           "hrhb_apljina_brigade": {
-            "killed": 135,
-            "missing_captured": 79,
-            "wounded": 248
+            "killed": 126,
+            "missing_captured": 75,
+            "wounded": 230
           },
           "hrhb_ban_jelai_brigade": {
             "killed": 9,
@@ -334420,9 +334408,9 @@
             "wounded": 98
           },
           "hrhb_stolac_units": {
-            "killed": 88,
-            "missing_captured": 53,
-            "wounded": 163
+            "killed": 118,
+            "missing_captured": 71,
+            "wounded": 218
           },
           "hrhb_travnik_brigade": {
             "killed": 51,
@@ -334445,7 +334433,7 @@
             "wounded": 27
           }
         },
-        "wounded": 3312
+        "wounded": 3275
       },
       "RBiH": {
         "equipment_lost": {
@@ -334917,11 +334905,11 @@
       "RS": {
         "equipment_lost": {
           "aa_systems": 0,
-          "artillery": 119,
-          "tanks": 78
+          "artillery": 118,
+          "tanks": 77
         },
-        "killed": 7811,
-        "missing_captured": 7011,
+        "killed": 7819,
+        "missing_captured": 7014,
         "per_formation": {
           "jna_17th_corps_tg": {
             "killed": 0,
@@ -335354,9 +335342,9 @@
             "wounded": 282
           },
           "rs_bilea_brigade": {
-            "killed": 165,
-            "missing_captured": 94,
-            "wounded": 307
+            "killed": 173,
+            "missing_captured": 97,
+            "wounded": 319
           },
           "rs_foa_brigade": {
             "killed": 112,
@@ -335419,7 +335407,7 @@
             "wounded": 111
           }
         },
-        "wounded": 15110
+        "wounded": 15122
       }
     },
     "corps_command": {
@@ -338290,7 +338278,7 @@
           "current_objective_index": 0,
           "failure_count": 0,
           "force_launch": false,
-          "force_ratio_estimate": 0.11555280810206497,
+          "force_ratio_estimate": 0.11590343007915568,
           "idle_execution_turn_streak": 0,
           "initial_strength": 950,
           "intel_confidence_at_assessment": 0.9,
@@ -339412,6 +339400,10 @@
             },
             {
               "brigade_id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
+              "to_sector_id": "sector:hvo_southeast_herzegovina:1"
+            },
+            {
+              "brigade_id": "hrhb_apljina_brigade",
               "to_sector_id": "sector:hvo_southeast_herzegovina:2"
             }
           ]
@@ -339451,7 +339443,7 @@
             "op:stolac:rotimlja_2": "RS",
             "op:stolac:stolac_2": "RS"
           },
-          "attack_attempt_count": 6,
+          "attack_attempt_count": 5,
           "axes": [
             {
               "assigned_brigades": [
@@ -339486,7 +339478,7 @@
                 "hrhb_2nd_brigade_mostar",
                 "hrhb_mostar_brigade"
               ],
-              "attack_attempt_count": 3,
+              "attack_attempt_count": 2,
               "axis_id": "mostar_hills",
               "consecutive_failures_on_current": 0,
               "current_objective_index": 0,
@@ -339787,42 +339779,17 @@
               "turn": 13
             },
             {
-              "attacks_this_turn": 2,
+              "attacks_this_turn": 1,
               "axis_entries": {
-                "mostar_hills": {
-                  "attacks_this_turn": 1,
-                  "casualties_inflicted": {
-                    "killed": 10,
-                    "wounded": 18
-                  },
-                  "casualties_suffered": {
-                    "killed": 27,
-                    "wounded": 50
-                  },
-                  "equipment_captured": {
-                    "artillery": 0,
-                    "tanks": 0
-                  },
-                  "equipment_destroyed": {
-                    "artillery": 0,
-                    "tanks": 0
-                  },
-                  "equipment_lost": {
-                    "artillery": 0,
-                    "tanks": 0
-                  },
-                  "objectives_captured_this_turn": [],
-                  "objectives_lost_this_turn": []
-                },
                 "stolac_sweep": {
                   "attacks_this_turn": 1,
                   "casualties_inflicted": {
-                    "killed": 16,
-                    "wounded": 29
+                    "killed": 26,
+                    "wounded": 48
                   },
                   "casualties_suffered": {
-                    "killed": 70,
-                    "wounded": 129
+                    "killed": 75,
+                    "wounded": 137
                   },
                   "equipment_captured": {
                     "artillery": 0,
@@ -339843,11 +339810,11 @@
               "brigade_count": 6,
               "casualties_inflicted": {
                 "killed": 26,
-                "wounded": 47
+                "wounded": 48
               },
               "casualties_suffered": {
-                "killed": 97,
-                "wounded": 179
+                "killed": 75,
+                "wounded": 137
               },
               "equipment_captured": {
                 "artillery": 0,
@@ -344183,7 +344150,7 @@
             "op:visegrad:okrugla"
           ],
           "max_attackers_per_target": 3,
-          "min_attack_outcome": "repulsed",
+          "min_attack_outcome": "costly_victory",
           "offensive_targets": [],
           "reinforce_sector_ids": [
             "sector:vrs_herzegovina:2",
@@ -347655,7 +347622,7 @@
           "hrhb_stolac_units"
         ],
         "corps_id": "hvo_southeast_herzegovina",
-        "defensive_power": 176.659317,
+        "defensive_power": 137.48786156874996,
         "density": 1,
         "edge_ids": [
           "op:stolac:pjesivac_kula_2__op:stolac:prenj"
@@ -347687,7 +347654,7 @@
         "territory_osids": [
           "op:stolac:prenj"
         ],
-        "threat_ratio": 6.3002621027907635
+        "threat_ratio": 7.651584568969049
       },
       "sector:hvo_southeast_herzegovina:2": {
         "assigned_brigade_ids": [
@@ -347790,7 +347757,7 @@
           "hrhb_mostar_brigade"
         ],
         "corps_id": "hvo_southeast_herzegovina",
-        "defensive_power": 139.20000000000002,
+        "defensive_power": 150,
         "density": 0.5,
         "edge_ids": [
           "op:capljina:tasovcici_2__op:stolac:prenj",
@@ -347840,7 +347807,7 @@
           "hrhb_ljubuki_brigade"
         ],
         "corps_id": "hvo_southeast_herzegovina",
-        "defensive_power": 1251.385940625,
+        "defensive_power": 1258.6507809003906,
         "density": 2.25,
         "edge_ids": [
           "op:capljina:capljina_2__op:capljina:tasovcici_2",
@@ -350396,7 +350363,7 @@
           "rs_kalinovik_brigade"
         ],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 13.987809168153385,
+        "defensive_power": 13.297309674958985,
         "density": 0.13333333333333333,
         "edge_ids": [
           "op:capljina:capljina_2__op:capljina:tasovcici_2",
@@ -350485,7 +350452,7 @@
           "op:trebinje:velicani",
           "op:trebinje:zakovo_2"
         ],
-        "threat_ratio": 1492.585418418046
+        "threat_ratio": 1574.8298348977567
       },
       "sector:vrs_herzegovina:4": {
         "assigned_brigade_ids": [
@@ -365558,7 +365525,7 @@
         "max_personnel": 3000,
         "morale": 80,
         "name": "1st Brigade (Mostar)",
-        "officer_quality": 0.225,
+        "officer_quality": 0.22504437500000002,
         "origin_mun": "mostar",
         "personnel": 3000,
         "posture": "defend",
@@ -365626,11 +365593,11 @@
               "was_concentrated": true
             },
             {
-              "casualties_inflicted": 26,
-              "casualties_taken": 117,
+              "casualties_inflicted": 29,
+              "casualties_taken": 83,
               "enemy_faction": "RS",
               "osid": "op:capljina:tasovcici_2",
-              "outcome": "costly_victory",
+              "outcome": "victory",
               "role": "attacker",
               "territory_flipped": false,
               "turn": 14,
@@ -365641,11 +365608,11 @@
           "first_battle_turn": 12,
           "longest_defense_streak": 0,
           "longest_victory_streak": 3,
-          "nadir_personnel": 766,
+          "nadir_personnel": 811,
           "peak_personnel": 1064,
           "stalemates": 0,
-          "total_casualties_inflicted": 115,
-          "total_casualties_taken": 329,
+          "total_casualties_inflicted": 118,
+          "total_casualties_taken": 295,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -365660,10 +365627,10 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 3,
-          "worst_single_battle_casualties": 117,
-          "worst_single_battle_turn": 14
+          "worst_single_battle_casualties": 115,
+          "worst_single_battle_turn": 12
         },
-        "cohesion": 40,
+        "cohesion": 40.349999999999994,
         "composition": {
           "aa_systems": 0,
           "artillery": 2,
@@ -365683,7 +365650,6 @@
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
         "decorations": [],
-        "disrupted_turns": 0,
         "doctrine_state": {
           "active": null,
           "active_turns": 0,
@@ -365715,7 +365681,7 @@
         "kind": "brigade",
         "location_osid": "op:citluk:krehin_gradac_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "1st Herzegovina Brigade \"Knez Domagoj\"",
         "officer_quality": 0.0500975,
         "ops": {
@@ -365723,7 +365689,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "capljina",
-        "personnel": 1980,
+        "personnel": 2025,
         "posture": "defend",
         "readiness": "active",
         "status": "active",
@@ -365739,25 +365705,25 @@
           "faction": "HRHB",
           "formation_id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
           "formation_name": "1st Herzegovina Brigade \"Knez Domagoj\"",
-          "narrative": "The 1st Herzegovina Brigade \"Knez Domagoj\" has fought 3 battles, winning 3. It has inflicted 115 casualties while losing 329 of its own. A reliable formation, it stands at 1980 personnel — the backbone of its corps.",
+          "narrative": "The 1st Herzegovina Brigade \"Knez Domagoj\" has fought 3 battles, winning 3. It has inflicted 118 casualties while losing 295 of its own. A reliable formation, it stands at 2025 personnel — the backbone of its corps.",
           "notable_moments": [
             {
               "description": "First battle at op:capljina:tasovcici_2",
               "turn": 12
             },
             {
-              "description": "Lost 117 in a single battle",
-              "turn": 14
+              "description": "Lost 115 in a single battle",
+              "turn": 12
             }
           ],
           "stats": {
             "battles_fought": 3,
             "defeats": 0,
-            "final_personnel": 1980,
-            "nadir_personnel": 766,
+            "final_personnel": 2025,
+            "nadir_personnel": 811,
             "peak_personnel": 1064,
-            "total_casualties_inflicted": 115,
-            "total_casualties_taken": 329,
+            "total_casualties_inflicted": 118,
+            "total_casualties_taken": 295,
             "victories": 3
           }
         }
@@ -365766,36 +365732,23 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "battle_outcome_count": 1,
         "brigade_history": {
-          "battles_as_attacker": 1,
+          "battles_as_attacker": 0,
           "battles_as_defender": 0,
-          "battles_fought": 1,
+          "battles_fought": 0,
           "current_defense_streak": 0,
           "current_victory_streak": 0,
           "defeats": 0,
-          "engagements": [
-            {
-              "casualties_inflicted": 33,
-              "casualties_taken": 90,
-              "enemy_faction": "RS",
-              "osid": "op:mostar:vranjevici_2",
-              "outcome": "stalemate",
-              "role": "attacker",
-              "territory_flipped": false,
-              "turn": 14,
-              "was_concentrated": false
-            }
-          ],
-          "first_battle_osid": "op:mostar:vranjevici_2",
-          "first_battle_turn": 14,
+          "engagements": [],
+          "first_battle_osid": null,
+          "first_battle_turn": null,
           "longest_defense_streak": 0,
           "longest_victory_streak": 0,
-          "nadir_personnel": 846,
+          "nadir_personnel": 950,
           "peak_personnel": 950,
-          "stalemates": 1,
-          "total_casualties_inflicted": 33,
-          "total_casualties_taken": 90,
+          "stalemates": 0,
+          "total_casualties_inflicted": 0,
+          "total_casualties_taken": 0,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -365810,25 +365763,25 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 0,
-          "worst_single_battle_casualties": 90,
-          "worst_single_battle_turn": 14
+          "worst_single_battle_casualties": 0,
+          "worst_single_battle_turn": null
         },
         "cohesion": 40,
         "composition": {
           "aa_systems": 1,
-          "artillery": 6,
+          "artillery": 7,
           "artillery_condition": {
-            "degraded": 0.008749999999999997,
+            "degraded": 0,
             "non_operational": 0,
-            "operational": 0.99125
+            "operational": 1
           },
           "infantry": 850,
           "tank_condition": {
-            "degraded": 0.38875,
-            "non_operational": 0.06375,
-            "operational": 0.5474999999999997
+            "degraded": 0.37999999999999995,
+            "non_operational": 0.05999999999999999,
+            "operational": 0.5599999999999996
           },
-          "tanks": 4
+          "tanks": 5
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
@@ -365856,7 +365809,6 @@
           "operational_heavy": 29,
           "total_heavy": 29
         },
-        "experience": 0.03,
         "faction": "HRHB",
         "home_defense_active": false,
         "home_osid": "op:mostar:mostar_zapad_2",
@@ -365865,13 +365817,9 @@
         "kind": "brigade",
         "location_osid": "op:capljina:visici_2",
         "max_personnel": 3000,
-        "morale": 78,
+        "morale": 80,
         "name": "2nd Brigade (Mostar)",
-        "officer_quality": 0.09117257380319148,
-        "ops": {
-          "fatigue": 4,
-          "last_supplied_turn": null
-        },
+        "officer_quality": 0.22504437500000002,
         "origin_mun": "mostar",
         "personnel": 3000,
         "posture": "defend",
@@ -365889,25 +365837,16 @@
           "faction": "HRHB",
           "formation_id": "hrhb_2nd_brigade_mostar",
           "formation_name": "2nd Brigade (Mostar)",
-          "narrative": "The 2nd Brigade (Mostar) has held its ground. With only 1 engagements, its war has been one of patience, not blood. It currently fields 3000 personnel.",
-          "notable_moments": [
-            {
-              "description": "First battle at op:mostar:vranjevici_2",
-              "turn": 14
-            },
-            {
-              "description": "Lost 90 in a single battle",
-              "turn": 14
-            }
-          ],
+          "narrative": "The 2nd Brigade (Mostar) has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 3000 personnel.",
+          "notable_moments": [],
           "stats": {
-            "battles_fought": 1,
+            "battles_fought": 0,
             "defeats": 0,
             "final_personnel": 3000,
-            "nadir_personnel": 846,
+            "nadir_personnel": 950,
             "peak_personnel": 950,
-            "total_casualties_inflicted": 33,
-            "total_casualties_taken": 90,
+            "total_casualties_inflicted": 0,
+            "total_casualties_taken": 0,
             "victories": 0
           }
         }
@@ -366192,11 +366131,11 @@
               "was_concentrated": true
             },
             {
-              "casualties_inflicted": 26,
-              "casualties_taken": 117,
+              "casualties_inflicted": 29,
+              "casualties_taken": 83,
               "enemy_faction": "RS",
               "osid": "op:capljina:tasovcici_2",
-              "outcome": "costly_victory",
+              "outcome": "victory",
               "role": "attacker",
               "territory_flipped": false,
               "turn": 14,
@@ -366207,11 +366146,11 @@
           "first_battle_turn": 12,
           "longest_defense_streak": 0,
           "longest_victory_streak": 3,
-          "nadir_personnel": 504,
+          "nadir_personnel": 535,
           "peak_personnel": 900,
           "stalemates": 0,
-          "total_casualties_inflicted": 115,
-          "total_casualties_taken": 329,
+          "total_casualties_inflicted": 118,
+          "total_casualties_taken": 295,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -366226,8 +366165,8 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 3,
-          "worst_single_battle_casualties": 117,
-          "worst_single_battle_turn": 14
+          "worst_single_battle_casualties": 115,
+          "worst_single_battle_turn": 12
         },
         "cohesion": 40,
         "composition": {
@@ -366249,7 +366188,6 @@
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
         "decorations": [],
-        "disrupted_turns": 0,
         "doctrine_state": {
           "active": null,
           "active_turns": 0,
@@ -366281,7 +366219,7 @@
         "kind": "brigade",
         "location_osid": "op:citluk:krehin_gradac_2",
         "max_personnel": 3000,
-        "morale": 75,
+        "morale": 78,
         "name": "Čapljina Brigade",
         "officer_quality": 0.0500975,
         "ops": {
@@ -366289,7 +366227,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "capljina",
-        "personnel": 504,
+        "personnel": 535,
         "posture": "defend",
         "readiness": "active",
         "status": "active",
@@ -366305,25 +366243,25 @@
           "faction": "HRHB",
           "formation_id": "hrhb_apljina_brigade",
           "formation_name": "Čapljina Brigade",
-          "narrative": "The Čapljina Brigade has held its ground. With only 3 engagements, its war has been one of patience, not blood. It currently fields 504 personnel.",
+          "narrative": "The Čapljina Brigade has held its ground. With only 3 engagements, its war has been one of patience, not blood. It currently fields 535 personnel.",
           "notable_moments": [
             {
               "description": "First battle at op:capljina:tasovcici_2",
               "turn": 12
             },
             {
-              "description": "Lost 117 in a single battle",
-              "turn": 14
+              "description": "Lost 115 in a single battle",
+              "turn": 12
             }
           ],
           "stats": {
             "battles_fought": 3,
             "defeats": 0,
-            "final_personnel": 504,
-            "nadir_personnel": 504,
+            "final_personnel": 535,
+            "nadir_personnel": 535,
             "peak_personnel": 900,
-            "total_casualties_inflicted": 115,
-            "total_casualties_taken": 329,
+            "total_casualties_inflicted": 118,
+            "total_casualties_taken": 295,
             "victories": 3
           }
         }
@@ -367764,7 +367702,7 @@
         "name": "Mostar Brigade",
         "officer_quality": 0.22504437500000002,
         "origin_mun": "mostar",
-        "personnel": 1359,
+        "personnel": 1449,
         "posture": "defend",
         "readiness": "active",
         "status": "active",
@@ -367780,12 +367718,12 @@
           "faction": "HRHB",
           "formation_id": "hrhb_mostar_brigade",
           "formation_name": "Mostar Brigade",
-          "narrative": "The Mostar Brigade has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 1359 personnel.",
+          "narrative": "The Mostar Brigade has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 1449 personnel.",
           "notable_moments": [],
           "stats": {
             "battles_fought": 0,
             "defeats": 0,
-            "final_personnel": 1359,
+            "final_personnel": 1449,
             "nadir_personnel": 950,
             "peak_personnel": 950,
             "total_casualties_inflicted": 0,
@@ -367923,11 +367861,11 @@
         "assignment": null,
         "battle_outcome_count": 1,
         "brigade_history": {
-          "battles_as_attacker": 2,
+          "battles_as_attacker": 3,
           "battles_as_defender": 0,
-          "battles_fought": 2,
+          "battles_fought": 3,
           "current_defense_streak": 0,
-          "current_victory_streak": 2,
+          "current_victory_streak": 3,
           "defeats": 0,
           "engagements": [
             {
@@ -367951,17 +367889,28 @@
               "territory_flipped": false,
               "turn": 13,
               "was_concentrated": true
+            },
+            {
+              "casualties_inflicted": 29,
+              "casualties_taken": 83,
+              "enemy_faction": "RS",
+              "osid": "op:capljina:tasovcici_2",
+              "outcome": "victory",
+              "role": "attacker",
+              "territory_flipped": false,
+              "turn": 14,
+              "was_concentrated": true
             }
           ],
           "first_battle_osid": "op:capljina:tasovcici_2",
           "first_battle_turn": 12,
           "longest_defense_streak": 0,
-          "longest_victory_streak": 2,
-          "nadir_personnel": 596,
+          "longest_victory_streak": 3,
+          "nadir_personnel": 493,
           "peak_personnel": 900,
           "stalemates": 0,
-          "total_casualties_inflicted": 89,
-          "total_casualties_taken": 212,
+          "total_casualties_inflicted": 118,
+          "total_casualties_taken": 295,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -367975,24 +367924,24 @@
           "total_osids_captured": 0,
           "total_osids_lost": 0,
           "turns_under_siege": 0,
-          "victories": 2,
+          "victories": 3,
           "worst_single_battle_casualties": 115,
           "worst_single_battle_turn": 12
         },
-        "cohesion": 45.849999999999994,
+        "cohesion": 41.849999999999994,
         "composition": {
           "aa_systems": 0,
-          "artillery": 3,
+          "artillery": 2,
           "artillery_condition": {
-            "degraded": 0.008749999999999997,
+            "degraded": 0.01749999999999999,
             "non_operational": 0,
-            "operational": 0.99125
+            "operational": 0.9824999999999999
           },
           "infantry": 800,
           "tank_condition": {
-            "degraded": 0.38874999999999993,
-            "non_operational": 0.06375,
-            "operational": 0.5474999999999997
+            "degraded": 0.39749999999999996,
+            "non_operational": 0.0675,
+            "operational": 0.5349999999999997
           },
           "tanks": 1
         },
@@ -368021,7 +367970,7 @@
           "operational_heavy": 29,
           "total_heavy": 29
         },
-        "experience": 0.09875,
+        "experience": 0.14628125,
         "faction": "HRHB",
         "home_defense_active": true,
         "home_osid": "op:stolac:prenj",
@@ -368030,15 +367979,15 @@
         "kind": "brigade",
         "location_osid": "op:stolac:prenj",
         "max_personnel": 3000,
-        "morale": 65,
+        "morale": 66,
         "name": "Stolac Units",
-        "officer_quality": 0.0501462475625,
+        "officer_quality": 0.0500975,
         "ops": {
-          "fatigue": 8,
+          "fatigue": 12,
           "last_supplied_turn": null
         },
         "origin_mun": "stolac",
-        "personnel": 596,
+        "personnel": 493,
         "posture": "defend",
         "readiness": "active",
         "status": "active",
@@ -368054,7 +368003,7 @@
           "faction": "HRHB",
           "formation_id": "hrhb_stolac_units",
           "formation_name": "Stolac Units",
-          "narrative": "The Stolac Units has held its ground. With only 2 engagements, its war has been one of patience, not blood. It currently fields 596 personnel.",
+          "narrative": "The Stolac Units has held its ground. With only 3 engagements, its war has been one of patience, not blood. It currently fields 493 personnel.",
           "notable_moments": [
             {
               "description": "First battle at op:capljina:tasovcici_2",
@@ -368066,14 +368015,14 @@
             }
           ],
           "stats": {
-            "battles_fought": 2,
+            "battles_fought": 3,
             "defeats": 0,
-            "final_personnel": 596,
-            "nadir_personnel": 596,
+            "final_personnel": 493,
+            "nadir_personnel": 493,
             "peak_personnel": 900,
-            "total_casualties_inflicted": 89,
-            "total_casualties_taken": 212,
-            "victories": 2
+            "total_casualties_inflicted": 118,
+            "total_casualties_taken": 295,
+            "victories": 3
           }
         }
       },
@@ -368371,20 +368320,20 @@
           "battles_as_defender": 4,
           "battles_fought": 13,
           "brigade_count": 29,
-          "casualty_exchange_ratio": 0.48637961335676627,
-          "current_personnel": 44732,
+          "casualty_exchange_ratio": 0.5038618809631985,
+          "current_personnel": 44795,
           "defeats": 4,
           "most_casualties_brigade_id": "hvo_hrvoje_vukcic_brigade",
           "most_victories_brigade_id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
-          "nadir_aggregate_personnel": 22767,
+          "nadir_aggregate_personnel": 22844,
           "peak_aggregate_personnel": 24764,
-          "stalemates": 1,
-          "total_casualties_inflicted": 1107,
-          "total_casualties_taken": 2276,
+          "stalemates": 0,
+          "total_casualties_inflicted": 1109,
+          "total_casualties_taken": 2201,
           "total_osids_captured": 0,
           "total_osids_lost": 4,
-          "victories": 8,
-          "win_rate": 0.6153846153846154
+          "victories": 9,
+          "win_rate": 0.6923076923076923
         },
         "composition": {
           "aa_systems": 2,
@@ -368773,20 +368722,20 @@
           "battles_as_defender": 0,
           "battles_fought": 9,
           "brigade_count": 14,
-          "casualty_exchange_ratio": 0.36666666666666664,
-          "current_personnel": 22036,
+          "casualty_exchange_ratio": 0.4,
+          "current_personnel": 22099,
           "defeats": 0,
           "most_casualties_brigade_id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
           "most_victories_brigade_id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
-          "nadir_aggregate_personnel": 11912,
+          "nadir_aggregate_personnel": 11989,
           "peak_aggregate_personnel": 13014,
-          "stalemates": 1,
-          "total_casualties_inflicted": 352,
-          "total_casualties_taken": 960,
+          "stalemates": 0,
+          "total_casualties_inflicted": 354,
+          "total_casualties_taken": 885,
           "total_osids_captured": 0,
           "total_osids_lost": 0,
-          "victories": 8,
-          "win_rate": 0.8888888888888888
+          "victories": 9,
+          "win_rate": 1
         },
         "composition": {
           "aa_systems": 2,
@@ -380431,7 +380380,7 @@
           "worst_single_battle_casualties": 101,
           "worst_single_battle_turn": 6
         },
-        "cohesion": 35,
+        "cohesion": 36,
         "composition": {
           "aa_systems": 2,
           "artillery": 10,
@@ -380465,7 +380414,7 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 2.4,
+        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_decay": 0.95,
         "equipment_state": {
@@ -380487,9 +380436,9 @@
           "osid": "op:cajnice:miljeno_2",
           "turn": 6
         },
-        "location_osid": "op:banja_luka:banja_luka_2",
+        "location_osid": "op:celinac:celinac_2",
         "max_personnel": 3000,
-        "morale": 60,
+        "morale": 62,
         "name": "Čajniče Brigade",
         "officer_quality": 0.05,
         "ops": {
@@ -380498,7 +380447,7 @@
         },
         "origin_mun": "cajnice",
         "personnel": 1200,
-        "posture": "defend",
+        "posture": "hold",
         "readiness": "forming",
         "status": "active",
         "tags": [
@@ -380543,9 +380492,9 @@
         "battle_outcome_count": 1,
         "brigade_history": {
           "battles_as_attacker": 0,
-          "battles_as_defender": 4,
-          "battles_fought": 4,
-          "current_defense_streak": 1,
+          "battles_as_defender": 3,
+          "battles_fought": 3,
+          "current_defense_streak": 0,
           "current_victory_streak": 0,
           "defeats": 3,
           "engagements": [
@@ -380572,37 +380521,26 @@
               "was_concentrated": true
             },
             {
-              "casualties_inflicted": 234,
-              "casualties_taken": 52,
+              "casualties_inflicted": 249,
+              "casualties_taken": 87,
               "enemy_faction": "HRHB",
               "osid": "op:capljina:tasovcici_2",
-              "outcome": "costly_victory",
+              "outcome": "victory",
               "role": "defender",
               "territory_flipped": false,
               "turn": 14,
               "was_concentrated": true
-            },
-            {
-              "casualties_inflicted": 90,
-              "casualties_taken": 33,
-              "enemy_faction": "HRHB",
-              "osid": "op:mostar:vranjevici_2",
-              "outcome": "stalemate",
-              "role": "defender",
-              "territory_flipped": false,
-              "turn": 14,
-              "was_concentrated": false
             }
           ],
           "first_battle_osid": "op:capljina:tasovcici_2",
           "first_battle_turn": 12,
-          "longest_defense_streak": 1,
+          "longest_defense_streak": 0,
           "longest_victory_streak": 0,
-          "nadir_personnel": 511,
+          "nadir_personnel": 488,
           "peak_personnel": 1000,
-          "stalemates": 1,
-          "total_casualties_inflicted": 964,
-          "total_casualties_taken": 352,
+          "stalemates": 0,
+          "total_casualties_inflicted": 889,
+          "total_casualties_taken": 354,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -380623,7 +380561,7 @@
         "cohesion": 33,
         "composition": {
           "aa_systems": 2,
-          "artillery": 18,
+          "artillery": 19,
           "artillery_condition": {
             "degraded": 0.07507499999999992,
             "non_operational": 0,
@@ -380635,12 +380573,12 @@
             "non_operational": 0.08995,
             "operational": 0.4859199999999997
           },
-          "tanks": 8
+          "tanks": 9
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
         "decorations": [],
-        "defense_streak": 1,
+        "defense_streak": 0,
         "dig_in_progress": 0,
         "doctrine_state": {
           "active": null,
@@ -380665,7 +380603,7 @@
           "operational_heavy": 17,
           "total_heavy": 57
         },
-        "experience": 0.096249850983125,
+        "experience": 0.062340815249999994,
         "faction": "RS",
         "home_defense_active": false,
         "home_osid": "op:bileca:bileca_2",
@@ -380674,15 +380612,15 @@
         "kind": "brigade",
         "location_osid": "op:stolac:pjesivac_kula_2",
         "max_personnel": 3000,
-        "morale": 3,
+        "morale": 0,
         "name": "Bileća Brigade",
         "officer_quality": 0.05,
         "ops": {
-          "fatigue": 8,
+          "fatigue": 6,
           "last_supplied_turn": null
         },
         "origin_mun": "bileca",
-        "personnel": 454,
+        "personnel": 382,
         "posture": "defend",
         "readiness": "forming",
         "status": "active",
@@ -380698,7 +380636,7 @@
           "faction": "RS",
           "formation_id": "rs_bilea_brigade",
           "formation_name": "Bileća Brigade",
-          "narrative": "The Bileća Brigade is a shadow of what it was. After 4 battles and 352 casualties, it stands at 454 personnel — 45% of its peak strength. Still in the line, but barely.",
+          "narrative": "The Bileća Brigade is a shadow of what it was. After 3 battles and 354 casualties, it stands at 382 personnel — 38% of its peak strength. Still in the line, but barely.",
           "notable_moments": [
             {
               "description": "First battle at op:capljina:tasovcici_2",
@@ -380710,13 +380648,13 @@
             }
           ],
           "stats": {
-            "battles_fought": 4,
+            "battles_fought": 3,
             "defeats": 3,
-            "final_personnel": 454,
-            "nadir_personnel": 511,
+            "final_personnel": 382,
+            "nadir_personnel": 488,
             "peak_personnel": 1000,
-            "total_casualties_inflicted": 964,
-            "total_casualties_taken": 352,
+            "total_casualties_inflicted": 889,
+            "total_casualties_taken": 354,
             "victories": 0
           }
         }
@@ -382789,23 +382727,23 @@
             "veteran": 2
           },
           "battles_as_attacker": 12,
-          "battles_as_defender": 7,
-          "battles_fought": 19,
+          "battles_as_defender": 6,
+          "battles_fought": 18,
           "brigade_count": 8,
-          "casualty_exchange_ratio": 2.5316308763784097,
-          "current_personnel": 10934,
+          "casualty_exchange_ratio": 2.485217391304348,
+          "current_personnel": 10862,
           "defeats": 4,
           "most_casualties_brigade_id": "rs_gacko_brigade",
           "most_victories_brigade_id": "rs_gacko_brigade",
-          "nadir_aggregate_personnel": 6410,
+          "nadir_aggregate_personnel": 6387,
           "peak_aggregate_personnel": 10447,
-          "stalemates": 2,
-          "total_casualties_inflicted": 4362,
-          "total_casualties_taken": 1723,
+          "stalemates": 1,
+          "total_casualties_inflicted": 4287,
+          "total_casualties_taken": 1725,
           "total_osids_captured": 7,
           "total_osids_lost": 0,
           "victories": 13,
-          "win_rate": 0.6842105263157895
+          "win_rate": 0.7222222222222222
         },
         "composition": {
           "aa_systems": 5,
@@ -382955,10 +382893,10 @@
     "general_supply_reserve": {
       "HRHB": 70,
       "RBiH": 47.4928740506298,
-      "RS": 52.7653957824403
+      "RS": 52.76620701887094
     },
     "heavy_munitions_reserve": {
-      "HRHB": 68.88958281730356,
+      "HRHB": 68.83961416738087,
       "RBiH": 99.98289772151152,
       "RS": 99.99144886075575
     },
@@ -383149,7 +383087,7 @@
       "rs_6th_sanske_infantry": 7,
       "rs_7th_krajina_motorized": 2,
       "rs_9th_grahovo_light_infantry": 7,
-      "rs_ajnie_brigade": 19,
+      "rs_ajnie_brigade": 20,
       "rs_bilea_brigade": 4,
       "rs_foa_brigade": 2,
       "rs_gacko_brigade": 3,
@@ -383233,7 +383171,7 @@
         ],
         "coverage_length": 15,
         "created_turn": 40,
-        "defensive_power": 345.6541084666666,
+        "defensive_power": 345.18724237333333,
         "edge_ids": [
           "op:capljina:capljina_2__op:capljina:tasovcici_2",
           "op:capljina:tasovcici_2__op:capljina:visici_2",
@@ -383494,7 +383432,7 @@
         ],
         "coverage_length": 308,
         "created_turn": 40,
-        "defensive_power": 295.22756267073686,
+        "defensive_power": 295.19835760576046,
         "edge_ids": [
           "op:banovici:seona__op:lukavac:brijesnica_donja_2",
           "op:banovici:seona__op:zavidovici:vozuca_2",
@@ -383948,7 +383886,7 @@
       "bileca:RS": {
         "available": 116,
         "committed": 338,
-        "exhausted": 13,
+        "exhausted": 12,
         "faction": "RS",
         "fatigue": 40,
         "mun_id": "bileca",
@@ -384353,7 +384291,7 @@
       "capljina:HRHB": {
         "available": 0,
         "committed": 2871,
-        "exhausted": 26,
+        "exhausted": 24,
         "faction": "HRHB",
         "fatigue": 40,
         "mun_id": "capljina",
@@ -385478,7 +385416,7 @@
       "mostar:HRHB": {
         "available": 0,
         "committed": 7093,
-        "exhausted": 13,
+        "exhausted": 8,
         "faction": "HRHB",
         "fatigue": 40,
         "mun_id": "mostar",
@@ -389757,15 +389695,15 @@
       },
       "sector:hvo_southeast_herzegovina:1": {
         "brigade_count": 1,
-        "cohesion_avg": 46,
-        "defense_per_edge": 113,
-        "defensive_power": 113,
+        "cohesion_avg": 42,
+        "defense_per_edge": 84,
+        "defensive_power": 84,
         "edge_count": 1,
         "faction": "HRHB",
-        "fatigue_avg": 8,
-        "morale_avg": 65,
-        "offensive_power": 31,
-        "personnel": 596,
+        "fatigue_avg": 12,
+        "morale_avg": 66,
+        "offensive_power": 22,
+        "personnel": 493,
         "sector_id": "sector:hvo_southeast_herzegovina:1",
         "strength_class": "critical"
       },
@@ -389800,28 +389738,28 @@
       "sector:hvo_southeast_herzegovina:4": {
         "brigade_count": 1,
         "cohesion_avg": 40,
-        "defense_per_edge": 104,
-        "defensive_power": 208,
+        "defense_per_edge": 112,
+        "defensive_power": 224,
         "edge_count": 2,
         "faction": "HRHB",
         "fatigue_avg": 0,
         "morale_avg": 70,
-        "offensive_power": 75,
-        "personnel": 1160,
+        "offensive_power": 81,
+        "personnel": 1250,
         "sector_id": "sector:hvo_southeast_herzegovina:4",
         "strength_class": "critical"
       },
       "sector:hvo_southeast_herzegovina:5": {
         "brigade_count": 9,
         "cohesion_avg": 40,
-        "defense_per_edge": 533,
-        "defensive_power": 2133,
+        "defense_per_edge": 545,
+        "defensive_power": 2179,
         "edge_count": 4,
         "faction": "HRHB",
-        "fatigue_avg": 3.1,
-        "morale_avg": 81,
-        "offensive_power": 1164,
-        "personnel": 16387,
+        "fatigue_avg": 2.7,
+        "morale_avg": 82,
+        "offensive_power": 1207,
+        "personnel": 16463,
         "sector_id": "sector:hvo_southeast_herzegovina:5",
         "strength_class": "thin"
       },
@@ -390305,13 +390243,13 @@
         "brigade_count": 2,
         "cohesion_avg": 40,
         "defense_per_edge": 6,
-        "defensive_power": 95,
+        "defensive_power": 92,
         "edge_count": 15,
         "faction": "RS",
-        "fatigue_avg": 10,
-        "morale_avg": 38,
-        "offensive_power": 113,
-        "personnel": 1113,
+        "fatigue_avg": 9,
+        "morale_avg": 36,
+        "offensive_power": 109,
+        "personnel": 1052,
         "sector_id": "sector:vrs_herzegovina:4",
         "strength_class": "critical"
       },
@@ -400856,12 +400794,12 @@
             "hrhb_stolac_units"
           ],
           "casualties_inflicted": {
-            "killed": 96,
-            "wounded": 176
+            "killed": 106,
+            "wounded": 195
           },
           "casualties_suffered": {
-            "killed": 262,
-            "wounded": 481
+            "killed": 267,
+            "wounded": 489
           },
           "equipment_captured": {
             "artillery": 0,
@@ -400893,12 +400831,12 @@
             "hrhb_mostar_brigade"
           ],
           "casualties_inflicted": {
-            "killed": 10,
-            "wounded": 18
+            "killed": 0,
+            "wounded": 0
           },
           "casualties_suffered": {
-            "killed": 27,
-            "wounded": 50
+            "killed": 0,
+            "wounded": 0
           },
           "equipment_captured": {
             "artillery": 0,
@@ -400917,16 +400855,16 @@
             "op:mostar:vranjevici_2",
             "op:mostar:kruzanj_2"
           ],
-          "total_attacks": 1
+          "total_attacks": 0
         }
       ],
       "casualties_inflicted": {
         "killed": 106,
-        "wounded": 194
+        "wounded": 195
       },
       "casualties_suffered": {
-        "killed": 289,
-        "wounded": 531
+        "killed": 267,
+        "wounded": 489
       },
       "commander_name": "Mario Čerkez",
       "commander_officer_id": "hvo_cerkez",
@@ -400947,12 +400885,12 @@
         "tanks": 0
       },
       "faction": "HRHB",
-      "final_strength": 5271,
+      "final_strength": 5334,
       "grade": {
         "factors": {
-          "exchange_ratio": 12.073170731707316,
+          "exchange_ratio": 13.13888888888889,
           "objective_completion": 0,
-          "preservation": 55.44918998527246,
+          "preservation": 56.111929307805596,
           "tempo": 0
         },
         "stars": 1,
@@ -400980,7 +400918,7 @@
         "hrhb_stolac_units"
       ],
       "started_turn": 8,
-      "total_attacks": 4,
+      "total_attacks": 3,
       "type": "sector_attack",
       "weekly_log": [
         {
@@ -401220,42 +401158,17 @@
           "turn": 13
         },
         {
-          "attacks_this_turn": 2,
+          "attacks_this_turn": 1,
           "axis_entries": {
-            "mostar_hills": {
-              "attacks_this_turn": 1,
-              "casualties_inflicted": {
-                "killed": 10,
-                "wounded": 18
-              },
-              "casualties_suffered": {
-                "killed": 27,
-                "wounded": 50
-              },
-              "equipment_captured": {
-                "artillery": 0,
-                "tanks": 0
-              },
-              "equipment_destroyed": {
-                "artillery": 0,
-                "tanks": 0
-              },
-              "equipment_lost": {
-                "artillery": 0,
-                "tanks": 0
-              },
-              "objectives_captured_this_turn": [],
-              "objectives_lost_this_turn": []
-            },
             "stolac_sweep": {
               "attacks_this_turn": 1,
               "casualties_inflicted": {
-                "killed": 16,
-                "wounded": 29
+                "killed": 26,
+                "wounded": 48
               },
               "casualties_suffered": {
-                "killed": 70,
-                "wounded": 129
+                "killed": 75,
+                "wounded": 137
               },
               "equipment_captured": {
                 "artillery": 0,
@@ -401276,11 +401189,11 @@
           "brigade_count": 6,
           "casualties_inflicted": {
             "killed": 26,
-            "wounded": 47
+            "wounded": 48
           },
           "casualties_suffered": {
-            "killed": 97,
-            "wounded": 179
+            "killed": 75,
+            "wounded": 137
           },
           "equipment_captured": {
             "artillery": 0,
@@ -422489,7 +422402,7 @@
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
-        "HRHB": 1.1115410703999942,
+        "HRHB": 1.1105410704000036,
         "RBiH": -0.008069495401429094,
         "RS": 0.0010377620960611011
       },
@@ -422650,7 +422563,7 @@
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
-        "HRHB": 1.1112185607999976,
+        "HRHB": 1.110218560800007,
         "RBiH": 0.002809386140526726,
         "RS": 0.0015329209941228328
       },
@@ -422813,7 +422726,7 @@
       ],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
-        "HRHB": 1.1115102256,
+        "HRHB": 1.1105102256000094,
         "RBiH": 0.0007708779694439727,
         "RS": 0.004370349188874911
       },
