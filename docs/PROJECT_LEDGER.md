@@ -1,7 +1,40 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-15
-**Status:** **v0.3.1** (Playable Alpha + Endgame System) — Endgame & Negotiation system COMPLETE (6 phases). Negotiation capital tracking, 4 peace plan events, patron pressure + override authority, Dayton negotiation engine (territorial + institutional packages, bot AI), Washington Agreement + HV brigade integration, Pyrrhic Score verdict screen. **763 tests**, 66 suites. Design: `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md`.
+**Last Updated:** 2026-03-16
+**Status:** **v0.3.1** (Playable Alpha + Endgame System). **763 tests**, 66 suites. Full v0.4.x roadmap scoped (8 milestones, all Pyrrhic compliant). Night shift system live. Night shift handoff written for v0.3.2→v0.4.4.
+
+## [2026-03-15/16] Mega Session — v0.3.0→v0.3.1, Canon v0.7, Studio Identity, Roadmap to 1.0
+
+**Shipped:**
+- v0.3.0 Playable Alpha (war termination, save system, peace UI, alliance dynamics)
+- v0.3.1 Endgame & Negotiation System (6 phases: capital tracking, peace plans, patron pressure, Dayton, Washington/HV, Pyrrhic Score)
+- Canon v0.7 (Rulebook, Systems Manual, Engine Invariants — 20+ new sections)
+- Studio rename: Paradox → Pyrrhic Games (50+ files)
+- Versioning system established (v0.1→v1.0 roadmap with 31 milestones)
+- War crimes badge fix + UI simplify pass (shared WarCrimesBadge, mapModes, commander stats)
+- Docs consolidation (759→620 files)
+
+**Designed & Planned (not yet implemented):**
+- v0.3.2 humanitarian fix, v0.3.3 brigade AoR, Infrastructure phase
+- v0.4.0 peace interactivity, v0.4.1 event system, v0.4.2 scenarios, v0.4.3 economy, v0.4.4 officer experience, v0.4.5 AI Commander prototype
+- Cross-plan review (8 findings: universal event bus, capital integration, v0.4.4/v0.4.5 swap, shared infrastructure)
+- Endgame & Negotiation design (Dayton, patron pressure, 5 peace plans, Pyrrhic Score)
+- Claude AI Commander design (multi-model: Opus army, Flash corps, Haiku ops)
+- Visual asset strategy (Gemini Pro, 100+ planned images)
+- Pricing & business model (€19.99, honest projections, probability-weighted €50K expected Year 1)
+- Brigade AoR sub-segment design (soft AoR, 4 phases)
+- Officer Experience & Weight of Command design (experience gain, ARBiH learning curve, warlord friction)
+- Pyrrhic Planning Rules (mandatory for all plans)
+- Night shift autonomous implementation system
+
+**Infrastructure established:**
+- Day/Night shift development cycle
+- Pyrrhic Planning Rules (enforced religiously)
+- Night shift handoff template + skill protocol + learning system
+- All v0.4.x plans Pyrrhic-compliant with /simplify gates
+- Cross-plan integration review with revised execution order
+
+---
 
 ## [2026-03-15] n797: Full OOB Calibration Sprint — Spawn Fix + Overstacking + Troop Balance
 
