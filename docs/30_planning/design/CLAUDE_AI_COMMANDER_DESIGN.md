@@ -221,19 +221,124 @@ src/sim/ai_commander/
 | Command briefing UI | Displays Claude's `briefing_text` and `reasoning` |
 | Save/load | `CommandDecisionLog` persisted in save |
 
+### Multi-Model Architecture
+
+**Don't pick one API. Pick three and use each where it's strongest.** Claude for character and persona. Gemini for cheap volume. GPT for reasoning value. The architecture routes each decision to the right model.
+
+#### Model Selection Per Command Level (March 2026 Pricing)
+
+| Level | What Matters | Best Model | Why |
+|-------|-------------|-----------|-----|
+| Army Commander | Character + strategy | Claude Opus 4.6 | Best persona consistency, nuanced reasoning, moral complexity |
+| Corps routine | Speed + cost | Gemini 2.5 Flash / Flash-Lite | 20-50× cheaper, fast enough for "maintain stance" |
+| Corps operations | Reasoning | Claude Haiku 4.5 or GPT-5.2 | Good tactical thinking at low cost |
+| Player advisor | Player-facing quality | Claude Opus 4.6 / Sonnet 4.6 | Player reads this directly — quality matters |
+
+#### Player-Selectable Configurations
+
+| Config | Army | Corps Routine | Corps Ops | Advisor | **Cost/Game** | **Experience** |
+|--------|------|--------------|-----------|---------|--------------|----------------|
+| **Commander Mode** | Opus 4.6 ($5/$25) | Haiku 4.5 ($1/$5) | Opus 4.6 ($5/$25) | Opus 4.6 | **~$13.50** | "Your enemy is a mind" |
+| **Officer Mode** | Sonnet 4.6 ($3/$15) | GPT-5 Mini ($0.25/$2) | Haiku 4.5 ($1/$5) | Sonnet 4.6 | **~$3.60** | "Your enemy adapts" |
+| **Recruit Mode** | Haiku 4.5 ($1/$5) | Gemini Flash-Lite ($0.10/$0.40) | Haiku 4.5 | Haiku 4.5 | **~$1.10** | "Your enemy thinks — sometimes" |
+| **Cadet Mode** | Formula bot | Formula bot | Formula bot | None | **Free** | "Your enemy follows rules" |
+
+#### Full Model Reference (March 2026)
+
+**Anthropic Claude:**
+| Model | Input $/1M | Output $/1M | Context | Speed | Persona |
+|-------|-----------|-------------|---------|-------|---------|
+| Opus 4.6 | $5.00 | $25.00 | 1M | Medium | Excellent |
+| Sonnet 4.6 | $3.00 | $15.00 | 1M | Fast | Very Good |
+| Haiku 4.5 | $1.00 | $5.00 | 200K | Very Fast | Good |
+
+**OpenAI GPT:**
+| Model | Input $/1M | Output $/1M | Context | Speed | Persona |
+|-------|-----------|-------------|---------|-------|---------|
+| GPT-5.4 | $2.50 | $15.00 | 1.05M | Medium | Very Good |
+| GPT-5.2 | $1.75 | $14.00 | 400K | Medium-Fast | Very Good |
+| GPT-5 Mini | $0.25 | $2.00 | 128K | Fast | Fair |
+| GPT-5 Nano | $0.05 | $0.40 | 128K | Very Fast | Poor |
+
+**Google Gemini:**
+| Model | Input $/1M | Output $/1M | Context | Speed | Persona |
+|-------|-----------|-------------|---------|-------|---------|
+| Gemini 3.1 Pro | $2.00 | $12.00 | 1M | Medium | Fair |
+| Gemini 3 Flash | $0.50 | $3.00 | 1M | Very Fast | Fair |
+| Gemini 2.5 Flash | $0.30 | $2.50 | 1M | Very Fast | Fair |
+| Gemini 2.5 Flash-Lite | $0.10 | $0.40 | 1M | Very Fast | Poor |
+
 ### API Configuration
 
 ```typescript
-// .env or settings
-ANTHROPIC_API_KEY=sk-ant-...
-AI_COMMANDER_ENABLED=true
-AI_COMMANDER_ARMY_MODEL=claude-sonnet-4-6      // strategic decisions
-AI_COMMANDER_CORPS_MODEL=claude-haiku-4-5       // routine operational
-AI_COMMANDER_CORPS_OP_MODEL=claude-sonnet-4-6   // operation planning
-AI_COMMANDER_ADVISOR_MODEL=claude-sonnet-4-6    // player advice
-AI_COMMANDER_TEMPERATURE=0                       // minimize variance
-AI_COMMANDER_FALLBACK=formula                    // fallback when offline
+// Game settings (player-facing)
+ai_commander_mode: 'commander' | 'officer' | 'recruit' | 'cadet';
+
+// API keys (player provides, or Pyrrhic Games proxy)
+ai_keys: {
+    anthropic?: string;    // Claude — army commander + advisor
+    openai?: string;       // GPT — corps operations (officer mode)
+    google?: string;       // Gemini — corps routine (all modes)
+}
+
+// Internal routing (determined by mode + keys available)
+AI_COMMANDER_TEMPERATURE=0;
+AI_COMMANDER_FALLBACK='formula';  // when API unavailable
 ```
+
+### Business Model — How Players Pay
+
+**Three access paths:**
+
+#### Path 1: Bring Your Own Keys (BYOK)
+- Player enters their own API keys in game settings
+- Game routes calls directly to providers
+- Player pays their own API bills
+- No Pyrrhic Games involvement in billing
+- **Best for:** developers, power users, people with existing API accounts
+
+#### Path 2: Pyrrhic Credits (Pre-Paid)
+- Player buys credit packs from Pyrrhic Games:
+  - 5 Commander games — $75 (~$15/game)
+  - 10 Officer games — $40 (~$4/game)
+  - 25 Recruit games — $30 (~$1.20/game)
+- Credits stored server-side, deducted per API call
+- Game communicates with Pyrrhic Games proxy server that holds the real API keys
+- **Overage handling:** when credits run low (20% remaining), player warned. When credits exhausted, game falls back to Cadet Mode (formula bot) mid-game. No surprise billing.
+- Player can buy more credits from in-game store or website
+- **Best for:** most players, simple UX, predictable cost
+
+#### Path 3: Subscription (Post-Paid with Cap)
+- Monthly subscription: $15/month for unlimited Officer Mode, $30/month for Commander Mode
+- Hard monthly cap prevents runaway costs (e.g., 50 games/month at Officer = $200 API cost, absorbed by Pyrrhic)
+- Pyrrhic Games absorbs the margin risk
+- **Best for:** heavy players, competitive/streaming use
+- **Note:** Only viable if player base is large enough to amortize — defer to post-launch
+
+#### Overage Protection (All Paths)
+- **BYOK:** player manages their own budget — game shows estimated cost per turn and running total
+- **Credits:** hard cap — when credits gone, Cadet Mode activates. No debt.
+- **Subscription:** monthly cap — when reached, downgraded to Recruit Mode for rest of month
+
+#### Cost Visibility in UI
+- Settings panel: "AI Commander: Commander Mode — estimated $13.50/game"
+- During gameplay: running cost counter in toolbar (subtle, not intrusive): "$4.23 spent this game"
+- Pre-game: "This game will cost approximately $X at your current tier"
+- On credit purchase: clear breakdown of what you get
+
+#### Pyrrhic Games Proxy Architecture
+For Path 2 and 3, Pyrrhic Games runs a lightweight proxy:
+```
+Player Game → HTTPS → Pyrrhic Proxy → Anthropic/OpenAI/Google APIs
+                        ↓
+                  Deduct credits
+                  Log usage
+                  Rate limit
+                  Cache system prompts
+```
+The proxy adds: credit management, usage logging, rate limiting, and prompt caching (system prompts cached server-side, reducing per-call cost by ~50% for input tokens).
+
+**Important: The game MUST work fully without any API.** Cadet Mode (formula bot) is always available. AI Commander is a premium feature, not a requirement.
 
 ---
 
@@ -299,13 +404,15 @@ This is the game that Pyrrhic Games was named for. Every decision has cost. Even
 
 ## Open Questions
 
-1. **Context window management** — A full game is 188 turns of state summaries. Does Claude need the full history or just the last N turns + a running summary?
-2. **Prompt caching** — Can we cache the system prompt (personality + game rules) to reduce per-call cost?
-3. **Structured output** — Use Claude's tool_use / JSON mode for reliable directive parsing?
-4. **Streaming** — Should corps assessments stream to the UI in real-time during the "thinking" phase?
-5. **Multiplayer** — In multiplayer, does each player's faction get its own Claude advisor? Who pays?
-6. **Modding** — Can players write custom personality profiles for commanders? Historical what-ifs?
-7. **Content rating** — Mladić's personality involves war crimes decisions. How explicit should the AI reasoning be?
+1. **Context window management** — A full game is 188 turns of state summaries. Does Claude need the full history or just the last N turns + a running summary? Opus 4.6 has 1M context — could fit entire game history, but cost scales with input tokens. Likely best: rolling 20-turn window + cumulative summary.
+2. **Prompt caching** — Yes. System prompt (personality + rules, ~2KB) cached server-side via Pyrrhic proxy. Reduces input costs ~50% for repeated calls. All three providers support caching.
+3. **Structured output** — Claude tool_use for army decisions, JSON mode for corps routine. GPT function calling where GPT models used. Gemini function calling for Flash calls.
+4. **Streaming** — Deferred. Add in v0.5.4 when full corps AI is live. Corps assessments could stream "thinking..." to a briefing panel.
+5. **Multiplayer** — Each player could have their own advisor. Costs additive. Deferred to post-1.0.
+6. **Modding** — Yes. Personality profiles are JSON/text. Player-editable. "What if Mladić was cautious?" Historical what-ifs as a feature.
+7. **Content rating** — AI reasoning should be military-strategic, not graphic. "Securing Srebrenica eliminates the enclave threat" not graphic descriptions. Content filter in the system prompt.
+8. **Billing disputes** — What happens if the proxy fails mid-game? Fallback to Cadet Mode. Credits not deducted for failed calls. Retry logic with exponential backoff.
+9. **Model updates** — When providers release new models, how do we update? Model IDs stored in config, not hardcoded. Pyrrhic proxy can route to latest models without game update.
 
 ---
 
