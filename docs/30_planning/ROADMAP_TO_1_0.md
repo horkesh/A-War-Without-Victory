@@ -16,6 +16,7 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.2.0** | Core Engine | ✓ 2026-03-15 |
 | **v0.3.0** | Playable Alpha | ✓ 2026-03-15 |
 | **v0.3.1** | Endgame & Negotiation System | ✓ 2026-03-15 |
+| **v0.3.2** | Humanitarian capital per-faction attribution fix | PLANNED |
 | **v0.4.0** | Peace Phase Interactivity | PLANNED |
 | **v0.4.1** | Complete Event System | PLANNED |
 | **v0.4.2** | Additional Scenarios (1993, 1994, 1995 starts) | PLANNED |

@@ -82,7 +82,7 @@
 7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked.
 8. **[2026-03-12] HVO named officer roster critically incomplete**: 20% coverage vs VRS 90%.
 9. **[2026-03-15] 2KK Prozor positional lock**: 6 of 8 brigades at Prozor/GV/Livno instead of Bihać. Target + Graz fixes applied (n809) but positional lock persists. Needs commander override to recall.
-10. **[2026-03-15] Doboj RS pool > Banja Luka (19k vs 13k)**: Displacement routing calibration.
+10. **[2026-03-15] Humanitarian capital: per-faction attribution (v0.3.2)**: `computeHumanitarianData` sums ALL displacement globally instead of attributing refugees to the faction that caused displacement. Humanitarian standing = 0 for all factions. Fix: attribute refugees_created to the faction that controls the origin OSID at time of displacement. Track per-faction in displacement state or derive from control_events.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
