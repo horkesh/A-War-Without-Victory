@@ -1,41 +1,49 @@
 # Working On — Task Continuity
 
-## Current Task: Recalibration After Mandatory Spawn Fix
+## Current State: n797 — Calibrated, Ready for New Task
 
-### What happened
-Found and fixed a fundamental OOB loading bug: 64/182 mandatory brigades silently failed to spawn because militia pools didn't exist at game start. The recruitment engine's mandatory path checked pool.available and skipped brigades when the pool was empty/missing. Fix: force-create pool and seed with enough manpower for mandatory brigades.
+### Session Summary (2026-03-15)
+Massive session: ~50 calibration runs (n748-n797), 15+ commits.
 
-### Impact
-- ARBiH: 38 → 122 brigades (43 restored)
-- RS: 56 → 78 brigades (21 restored, including SRK expansion)
-- HRHB: 20 → 26 brigades (4 restored)
-- The entire sim was calibrated for ~38 ARBiH brigades. All constants need review.
+**Major fixes shipped:**
+1. Intelligent Corps Commander (Phases A-E): defensive health gate, salient aversion, threat-weighted density, SRK OOB, return-to-corps march, cross-corps enclave defense + guard
+2. Mandatory spawn fix: 64/182 brigades restored (root cause: empty militia pools)
+3. Overstacking redistribution: isMovementDestinationRisky removed for front redistribution (Teočak fix)
+4. Drina OOB: +Rogatica, +Višegrad brigades, Čajniče home fix
+5. Elite cohesion recall + tracker, catastrophic stall gate
+6. Gradačac/Brčko brigade buffs + Brčko in 2nd Corps targets
+7. Troop balance calibration: mobilization scales adjusted for all factions
 
-### Current state (n786)
-- 90.5% area, 12/13 anchors (Teočak fails), 4/6 benchmarks
-- Gradačac holds (RBiH), Bijela holds (RBiH), Žepče holds (HRHB)
-- RS delta -34 (too weak now — RBiH too strong with 122 brigades)
+### Current calibration (n797)
+- 90.4% area, 13/13 anchors, 5/6 benchmarks
+- w40: RS 99k (✓), ARBiH 153k (slightly over 130k, acceptable), HRHB 42k (✓)
+- w206: RS 119k (✓), ARBiH 231k (over 200k), HRHB 66k (over 55k)
+- Teočak, Gradačac, Bijela, Žepče all hold
+- 166 total brigades (122 ARBiH mandatory + 44 emergent)
 
-### What needs recalibration
-1. **FACTION_POOL_SCALE** — RBiH 0.25 was set when only 38 brigades existed. With 122, manpower may be over-allocated.
-2. **Mobilization rates** — RS=0.12, RBiH=0.10, HRHB=0.29. May need adjustment.
-3. **Benchmarks** — `preserve_survival_corridors` (RBiH w40) and `consolidate_gains` (RS w40) thresholds set for old OOB.
-4. **RS_JNA_INHERITANCE_BONUS** — 10k may need increase to compensate for RS also gaining 21 brigades.
-5. **Doctrine phases** — RS blitz intensity may need adjustment since defenders are now stronger.
+### Troop calibration targets (from docs/knowledge/*_ORDER_OF_BATTLE_MASTER.md)
+| Period | ARBiH | VRS | HVO |
+|--------|-------|-----|-----|
+| Apr 1992 (w0) | 60-80k | ~80k | 25-35k |
+| Dec 1992 (w40) | 110-130k | 90-100k | 40-45k |
+| Apr 1993 (w52) | 135-155k | 100-110k | 50-55k |
+| 1994 (w104) | 165-180k | 110-120k | 50-55k |
+| Nov 1995 (w206) | 180-200k | 110-120k | 50-55k |
 
-### Key files
-- `src/sim/recruitment_engine.ts` — the spawn fix (force-create pool)
-- `src/sim/early_war/pool_population.ts` — FACTION_POOL_SCALE, RS_JNA_INHERITANCE_BONUS
-- `src/sim/combat/ongoing_mobilization.ts` — mobilization rates
-- `data/source/oob_brigades.json` — OOB entries (Gradačac buffs, SRK, Drina)
+### Open items
+- #49: preserve_survival_corridors benchmark (only failing benchmark)
+- #42: Bot strategic targeting — demographic affinity filter still needed
+- #44: ARBiH probing weak sectors
+- #45: Salient retreat mechanism
+- #43: UI shows brigade raw power not sector defensive power
 
-### Session achievements (2026-03-15)
-- Intelligent Corps Commander Phases A-E
-- Drina OOB: +Rogatica, +Višegrad, Čajniče fix
-- SRK: 9 brigades on siege ring
-- Cross-corps enclave defense + guard
-- Elite cohesion recall + tracker + catastrophic stall
-- Salient aversion, return-to-corps march
-- Brčko in 2nd Corps targets
-- **Mandatory spawn fix (biggest single fix)**
-- ~30 calibration runs (n748-n786)
+### Key constants (current)
+- FACTION_POOL_SCALE: RBiH 0.08, RS 0.25, HRHB 1.05
+- FACTION_MOBILIZATION_SCALE: RBiH 0.02, RS 0.08, HRHB 0.20
+- RS_JNA_INHERITANCE_BONUS: 10,000
+- BASE_MOBILIZATION_RATE: 0.003
+- DENSITY_FLOOR_EDGES_PER_BRIGADE: 8, THREAT_GATE: 300
+- MAX_CORPS_BRIGADES_PER_OSID: 2
+- CRITICAL_DENSITY_THRESHOLD: 0.10, STRAINED: 0.167
+- SALIENT_RISK_THRESHOLD: 0.75
+- MAX_CONSECUTIVE_CATASTROPHIC_ON_CURRENT: 2

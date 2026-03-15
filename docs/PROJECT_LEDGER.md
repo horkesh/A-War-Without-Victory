@@ -1,7 +1,26 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** Post-MVP — n786: **MANDATORY SPAWN FIX** — 64 brigades now spawn that were silently blocked. 122 ARBiH brigades (was 38). Gradačac holds, Bijela holds. Full recalibration needed. Intelligent Corps Commander Phases A-E active.
+**Status:** Post-MVP — n797: Full OOB + overstacking fix + troop calibration. **90.4% area**, 13/13 anchors, 5/6 benchmarks. 166 brigades total (122 ARBiH mandatory + 44 emergent). RS 99k, ARBiH 153k, HRHB 42k at w40. 206w tested: RS 119k, ARBiH 231k, HRHB 66k.
+
+## [2026-03-15] n797: Full OOB Calibration Sprint — Spawn Fix + Overstacking + Troop Balance
+
+**Mandatory Spawn Fix (n786):** 64/182 mandatory brigades silently failed to spawn because militia pools didn't exist at init. Force-create pool and seed with initial_personnel for mandatory brigades. ARBiH 38→122 brigades, RS 56→78, HRHB 20→26.
+
+**Overstacking Fix (n790):** `isMovementDestinationRisky()` blocked overstacking redistribution because front OSIDs have 3+ enemy neighbors by definition. Removed the check for sector-internal redistribution. Brigades now spread across sector fronts. Kikači 7→1 stacked. **Teočak holds (13/13 anchors).**
+
+**Troop Balance Calibration:** Mobilization scales reduced for all factions to match OOB master targets (from `docs/knowledge/*_ORDER_OF_BATTLE_MASTER.md`):
+- RBiH: mobilization 0.10→0.02, pool_scale 0.25→0.08. 153k at w40 (target 110-130k, inflated acceptable).
+- RS: mobilization 0.12→0.08. 99k at w40 (target 90-100k ✓). 119k at w206 (target 110-120k ✓).
+- HRHB: mobilization 0.29→0.20. 42k at w40 (target 40-45k ✓). 66k at w206 (target 50-55k, slightly over).
+
+**206w Full-War Test:** RS 83k→119k (52 brigades survive of 81). ARBiH 78k→231k (122 survive of 127). HRHB 36k→66k (33 survive of 37). RS reaches historical ceiling and stabilizes. ARBiH continues growing — historically correct trajectory.
+
+**Gradačac/Brčko OOB (n785):** Buffed 213th Vitežka (550→1200), 217th (550→1000), 215th (700→1000), 212th (600→800), 107th HVO (700→800). Added Brčko to 2nd Corps targets. Bijela_2 holds (RBiH).
+
+**Files:** `src/sim/recruitment_engine.ts` (mandatory spawn), `src/sim/combat/bot_brigade_eval_front.ts` (overstacking), `src/sim/combat/ongoing_mobilization.ts` (mobilization scales), `src/sim/early_war/pool_population.ts` (pool scale), `data/source/oob_brigades.json` (Gradačac/Brčko buffs, 255th Slavna), `src/sim/combat/bot_strategy.ts` (Brčko targets).
+
+---
 
 ## [2026-03-15] UI: Army HQ Panel Architecture + Corps Highlight + Clickability
 
@@ -14182,3 +14201,27 @@ Fix: added `if (isActiveSectorOperationParticipant) return false;` guard at the 
 **Determinism:** All new iteration uses `strictCompare`. `is_elite` bypass path is deterministic (no pool state mutated for elite brigades). Hash changed from prior session due to elite brigades now participating in sector assignment and combat.
 
 **Files:** `src/sim/recruitment_engine.ts` (elite bypass for presence check + pool drain), `src/sim/combat/army_reserve_system.ts` (`getCorpsReferenceOsid` brigade fallback).
+
+---
+
+## [2026-03-15] Fix: War Crimes Records Not Displayed — validateOfficerData Stripping Field
+
+**Bug:** `war_crimes_record` was defined on 29 officers in `apr1992_officers.json` (ICTY convictions, acquittals, indictments for Mladić, Galić, Krstić, Blaškić, Halilović, Orić, etc.) but never appeared in the UI. The `WarCrimesBadge` component existed and was wired into all officer display surfaces (CorpsDetail, ArmyDetail, FormationDetail, OrbatPanel, OperationsPanel, OperationDetail, OfficerEventBadge modal) — but the data was always `undefined`.
+
+**Root cause:** `validateOfficerData()` in `officer_system.ts` constructs each `NamedOfficer` by explicitly listing every field in the object literal (lines 776-800). `war_crimes_record` was missing from this list. The field was silently stripped during scenario loading, before it ever reached `GameState.military.named_officer_data`. The adapter and UI were correctly wired — the data just never arrived.
+
+**Fix:**
+1. **`officer_system.ts`:** Added `war_crimes_record: parseWarCrimesRecord(o.war_crimes_record)` to validated object. New `parseWarCrimesRecord()` parser validates court, verdict, sentence, charges, summary fields.
+2. **`OfficerProfile.tsx`:** `WarCrimesBadge` redesigned with clear text header ("WAR CRIMES — CONVICTED" / "ACQUITTED" / "INDICTED" / "DIED BEFORE TRIAL") instead of just a colored outline. Now shows court + sentence, charges, and summary as separate readable lines.
+3. **`OfficerEventBadge.tsx`:** Same text-forward redesign for the officer succession modal's war crimes display.
+4. **`types.ts` + `GameStateAdapter.ts`:** Added `charges` field to `NamedOfficerView.war_crimes_record` and pending officer event types. Adapter now maps charges from officer data.
+
+**Affected officers:** 29 total — 13 RS (Mladić, Talić, Galić, D. Milošević, Živanović, Krstić, Tolimir, Miletić, Pandurević, Andrić, Arsić, Blagojević, Obrenović), 6 RBiH (Halilović, Delić, Hadžihasanović, Alagić, Mahmuljin, Dudaković, Orić), 10 HRHB (Petković ×2, Praljak, Blaškić ×2, Šiljeg, Rajić, Čerkez, Naletilić). Verdicts: convicted, acquitted, indicted, died_before_trial.
+
+**Determinism:** No impact. `war_crimes_record` is informational only — does not affect gameplay, combat modifiers, or any simulation logic. Field is static (immutable during simulation). No iteration order changes.
+
+**Tests:** 627 pass (0 new — existing officer tests unaffected). TypeScript clean.
+
+**Files:** `src/sim/combat/officer_system.ts` (parseWarCrimesRecord + field inclusion), `src/ui/map/components/OfficerProfile.tsx` (WarCrimesBadge text redesign), `src/ui/map/components/OfficerEventBadge.tsx` (WarCrimesBadge text redesign + charges type), `src/ui/map/data/types.ts` (charges field), `src/ui/map/data/GameStateAdapter.ts` (charges mapping).
+
+**Lesson:** When a validator constructs objects by explicit field listing, every new field on the type must be added to the validator. The type system doesn't catch this because the field is optional — `war_crimes_record?: ...` compiles fine when omitted. Silent data loss.

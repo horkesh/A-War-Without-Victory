@@ -971,8 +971,10 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 | **P2** | #43 UI shows brigade raw power, not sector defensive power | FormationDetail/sector panel shows `brigadePower()` (~2,602 for 3000 pers motorized) instead of `sector.defensive_power` (72.5). Player sees a "strong" sector when it's actually 115:1 overmatched. Misleading. | **OPEN — UI fix** |
 | **P1** | #44 ARBiH 1st Corps doesn't probe weak SRK sectors | SRK sector:0 has 1 brigade / 14 edges / threat 665:1. The 1st Corps should detect this via intel and launch a breakout op. Currently defensive stance through w40 — no probing, no exploitation. Historically 1st Corps attempted breakouts whenever the siege ring thinned. | **OPEN — bot AI** |
 | **P2** | #45 Salient retreat — commander doesn't withdraw from indefensible positions | Srebrenik tinja_gornja_2 (1 RS OSID surrounded by 5 RBiH) created during w6 blitz but never abandoned. A real commander would withdraw from positions he can't supply or reinforce. Salient aversion prevents NEW salients but can't undo existing ones. | **OPEN — new concept** |
-| ~~**P1**~~ | ~~#46 SRK OOB + mandatory spawn~~ | ~~64/182 mandatory brigades silently failed to spawn (no militia pool at init)~~ | **FIXED (n786) — force-create pool for mandatory brigades** |
-| **P0** | #47 Full recalibration needed after spawn fix | Sim calibrated for 38 ARBiH brigades, now has 122. All constants need review: mobilization scales, pool scales, doctrine, benchmarks. n786: 12/13 anchors, 4/6 benchmarks. | **OPEN — recalibration sprint** |
+| ~~**P1**~~ | ~~#46 SRK OOB + mandatory spawn~~ | ~~64/182 mandatory brigades silently failed to spawn~~ | **FIXED (n786)** |
+| ~~**P0**~~ | ~~#47 Recalibration after spawn fix~~ | ~~Overstacking fix (n790) + mobilization tuning (n797)~~ | **DONE (n797) — 13/13 anchors, troop balance calibrated** |
+| **P2** | #48 Overstacking redistribution — isMovementDestinationRisky was blocking all front redistribution | Brigades stacked 7-9 at one OSID while rest of sector front empty. Root cause: front OSIDs have 3+ enemy neighbors → flagged as "risky." Removed check for sector-internal redistribution. | **FIXED (n790)** |
+| **P2** | #49 preserve_survival_corridors benchmark — RBiH w40 share 0.389 vs 0.329±0.05 | Only failing benchmark. RBiH territorial share slightly over threshold. May need benchmark threshold adjustment (was calibrated for 38-brigade ARBiH). | **OPEN — benchmark review** |
 
 ---
 

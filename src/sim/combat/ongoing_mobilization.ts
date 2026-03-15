@@ -60,10 +60,16 @@ const BASE_MOBILIZATION_RATE = 0.003;
  *   RS still declining due to high attacker casualties (229 RS attacks in 80w) vs half-rate mobilization.
  *   Fix: RS w53-78 1.1→1.4, w79-104 1.0→1.5; HRHB w53-78 1.0→1.3, w79-104 0.6→0.9.
  */
+// Calibration targets (from OOB masters):
+//   w40 (Dec 92): ARBiH 110-130k, VRS 90-100k, HVO 40-45k
+//   w52 (Apr 93): ARBiH 135-155k, VRS 100-110k, HVO 50-55k
+// n794: ARBiH 154k, RS 104k, HRHB 43k at w40 — ARBiH 20-40% over.
+// n794 52w: ARBiH 177k, RS 137k, HRHB 68k — all over by w52.
+// Post-spawn-fix: 122 ARBiH + 44 emergent = 166 brigades draw heavily from pools.
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.03,  // n793: 0.05 gave 156k (still high). 0.03 to target ~125k with 122 brigades.
-    RS: 0.12,
-    HRHB: 0.29
+    RBiH: 0.02,  // n794: 0.03→154k still high. 0.02 to target 120-130k at w40.
+    RS: 0.08,    // n794: 0.12→137k at w52 (+37% over). 0.08 to slow late-war RS growth.
+    HRHB: 0.20   // n794: 0.29→68k at w52 (+24% over). 0.20 to target 50-55k.
 };
 const DEFAULT_MOBILIZATION_SCALE = 1.0;
 
