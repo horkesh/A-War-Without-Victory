@@ -85,7 +85,12 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         const dest = findNearestFriendlyOsidDestination(
                             state, faction, loc, adjacency, reverseMap, new Set([candidate])
                         );
-                        if (dest && !isMovementDestinationRisky(candidate as Osid, graphAnalysis)) {
+                        // No isMovementDestinationRisky check here — the brigade is being
+                        // ordered to a FRONT OSID in its own sector. Front OSIDs are inherently
+                        // "risky" (adjacent to enemy) but that's where defenders must be.
+                        // The risky check was preventing all overstacking redistribution because
+                        // front OSIDs have 3+ enemy neighbors by definition.
+                        if (dest) {
                             result.column_march_orders[brigade.id] = dest;
                             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                             return true;
