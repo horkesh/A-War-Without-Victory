@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Games — Business Model & Pricing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700;800&display=swap');
+  :root {
+    --bg:#0a0c10;--bg-card:#111519;--bg-el:#181d24;--border:#2a3040;
+    --text:#c8cdd5;--text-dim:#6b7280;--text-bright:#e8ecf0;
+    --gold:#d4a847;--gold-dim:#8a7233;--gold-glow:rgba(212,168,71,0.15);
+    --red:#ef4444;--green:#22c55e;--blue:#3b82f6;--amber:#eab308;--purple:#a855f7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;padding:2rem;}
+  .r{max-width:1100px;margin:0 auto;}
+  .header{text-align:center;padding:2.5rem 2rem;border:1px solid var(--border);background:linear-gradient(180deg,var(--bg-el),var(--bg));border-radius:12px;margin-bottom:2rem;position:relative;}
+  .header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+  .header .st{font-family:'JetBrains Mono';font-size:0.6rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.5rem;}
+  .header h1{font-family:'Playfair Display';font-size:1.6rem;font-weight:800;color:var(--text-bright);margin-bottom:0.3rem;}
+  .header .sub{font-size:0.85rem;color:var(--text-dim);font-style:italic;}
+
+  .warn{margin:1.5rem 0;padding:1rem 1.5rem;background:rgba(239,68,68,0.08);border-left:3px solid var(--red);border-radius:0 6px 6px 0;}
+  .warn p{font-size:0.85rem;color:var(--red);line-height:1.6;}
+  .warn strong{color:#ff6b6b;}
+
+  .section{margin-bottom:1.5rem;}
+  .sh{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;background:var(--bg-el);border:1px solid var(--border);border-radius:8px 8px 0 0;border-bottom:1px solid var(--gold-dim);}
+  .sn{font-family:'JetBrains Mono';font-size:0.65rem;color:var(--gold);background:rgba(212,168,71,0.1);border:1px solid var(--gold-dim);border-radius:3px;padding:0.1rem 0.4rem;}
+  .st2{font-size:1rem;font-weight:700;color:var(--text-bright);text-transform:uppercase;letter-spacing:0.03em;}
+  .sb{padding:1.2rem;background:var(--bg-card);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;}
+
+  table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.5rem 0;}
+  th{text-align:left;padding:0.4rem 0.6rem;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);border-bottom:1px solid var(--border);}
+  td{padding:0.4rem 0.6rem;border-bottom:1px solid rgba(42,48,64,0.4);}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin:1rem 0;}
+  .stat{text-align:center;padding:0.8rem;background:var(--bg-el);border:1px solid var(--border);border-radius:6px;}
+  .sv{font-family:'JetBrains Mono';font-size:1.5rem;font-weight:700;color:var(--gold);}
+  .sl{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-top:0.2rem;}
+
+  .bar-container{margin:0.5rem 0;}
+  .bar-label{display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.2rem;}
+  .bar-track{height:20px;background:rgba(255,255,255,0.03);border-radius:4px;overflow:hidden;position:relative;}
+  .bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:var(--bg);transition:width 0.5s;}
+
+  .callout{margin:1rem 0;padding:1rem 1.5rem;background:var(--gold-glow);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;}
+  .callout p{color:var(--text-bright);font-size:0.85rem;line-height:1.6;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  .card{padding:1rem;background:var(--bg-el);border:1px solid var(--border);border-radius:6px;}
+  .card-title{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.5rem;}
+
+  .footer{text-align:center;padding:2rem;color:var(--text-dim);font-size:0.7rem;}
+  .footer .p{color:var(--gold);font-weight:600;}
+
+  .tag{display:inline-block;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.65rem;font-weight:600;}
+  .tag-red{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.3);}
+  .tag-amber{background:rgba(234,179,8,0.12);color:var(--amber);border:1px solid rgba(234,179,8,0.3);}
+  .tag-green{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
+  .tag-blue{background:rgba(59,130,246,0.12);color:var(--blue);border:1px solid rgba(59,130,246,0.3);}
+  .tag-gold{background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-dim);}
+</style>
+</head>
+<body>
+<div class="r">
+
+<div class="header">
+  <div class="st">Pyrrhic Games — Business Analysis</div>
+  <h1>Can We Ship This?</h1>
+  <div class="sub">An honest assessment for the people who matter most</div>
+</div>
+
+<!-- WARNING -->
+<div class="warn">
+  <p><strong>Reality check:</strong> The median indie game on Steam earns ~€4,000-€10,000 lifetime. 40-66% of Steam games fail to earn back the €100 submission fee. ~50% sell fewer than 100 copies. This document is deliberately conservative.</p>
+</div>
+
+<!-- WHAT IT COST -->
+<div class="section">
+  <div class="sh"><span class="sn">§1</span><span class="st2">What It Cost to Build</span></div>
+  <div class="sb">
+    <div class="stats">
+      <div class="stat"><div class="sv">€1,500</div><div class="sl">Total Cash Spent</div></div>
+      <div class="stat"><div class="sv">8 weeks</div><div class="sl">Development Time</div></div>
+      <div class="stat"><div class="sv">763</div><div class="sl">Automated Tests</div></div>
+      <div class="stat"><div class="sv">150</div><div class="sl">Copies to Break Even</div></div>
+    </div>
+    <table>
+      <tr><td>Claude API (development sessions)</td><td style="text-align:right">~€500</td></tr>
+      <tr><td>Gemini Pro (asset generation)</td><td style="text-align:right">~€50</td></tr>
+      <tr><td>Historical sources (Balkan Battlegrounds)</td><td style="text-align:right">~€100</td></tr>
+      <tr><td>Steam submission fee</td><td style="text-align:right">€100</td></tr>
+      <tr><td>Capsule art + marketing</td><td style="text-align:right">€500-1,000</td></tr>
+      <tr><td style="font-weight:700;color:var(--text-bright);">Total</td><td style="text-align:right;font-weight:700;color:var(--gold);">~€1,250-1,750</td></tr>
+    </table>
+    <p style="font-size:0.8rem;color:var(--text-dim);margin-top:0.5rem;">No loans. No investors. No money we can't afford to lose.</p>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="section">
+  <div class="sh"><span class="sn">§2</span><span class="st2">Pricing: €19.99</span></div>
+  <div class="sb">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Why €19.99</div>
+        <p style="font-size:0.8rem;line-height:1.6;">Wargamers see exceptional value (most niche wargames cost €30-50). Signals quality without pricing out the Balkan market. Room for sales: 30% off = €13.99, 50% off = €9.99. Break-even at just 150 copies.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Per Sale Economics</div>
+        <table>
+          <tr><td>List price</td><td style="text-align:right">€19.99</td></tr>
+          <tr><td>Steam cut (30%)</td><td style="text-align:right;color:var(--red);">-€6.00</td></tr>
+          <tr><td>Regional pricing avg</td><td style="text-align:right;color:var(--amber);">-€2.00</td></tr>
+          <tr><td style="font-weight:700;">Net to Pyrrhic (avg)</td><td style="text-align:right;font-weight:700;color:var(--gold);">~€8-10</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENARIOS -->
+<div class="section">
+  <div class="sh"><span class="sn">§3</span><span class="st2">Revenue Scenarios — The Honest Numbers</span></div>
+  <div class="sb">
+    <div style="margin-bottom:1rem;">
+      <div class="bar-container">
+        <div class="bar-label"><span style="color:var(--red);">Failure (40% chance)</span><span>&lt;€4,000</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--red);"></div></div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label"><span style="color:var(--amber);">Below median (20%)</span><span>€4,500-€18,000</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--amber);"></div></div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label"><span style="color:var(--green);">Modest niche hit (20%)</span><span>€20,000-€50,000</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--green);"></div></div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label"><span style="color:var(--blue);">Solid success (12%)</span><span>€50,000-€150,000</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:12%;background:var(--blue);"></div></div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label"><span style="color:var(--purple);">Breakout (6%)</span><span>€165,000-€440,000</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:6%;background:var(--purple);"></div></div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label"><span style="color:var(--gold);">Lightning (2%)</span><span>€440,000+</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:2%;background:var(--gold);"></div></div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p><strong>Expected value (probability-weighted): ~€50,000 Year 1.</strong> This is not a promise — it's the mathematical average across all scenarios. The most likely single outcome is the failure bucket. But the upside scenarios pull the average up.</p>
+    </div>
+
+    <table>
+      <thead><tr><th>Scenario</th><th>Units</th><th>Net Revenue</th><th>What It Means</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-red">Failure</span></td><td>&lt;500</td><td>&lt;€4,000</td><td>Portfolio piece. Learning experience. Beer money.</td></tr>
+        <tr><td><span class="tag tag-amber">Below median</span></td><td>500-2,000</td><td>€4,500-€18,000</td><td>Covers development costs. Validates the concept.</td></tr>
+        <tr><td><span class="tag tag-green">Modest hit</span></td><td>2,000-5,000</td><td>€20,000-€50,000</td><td>Real supplementary income. DLC worth making.</td></tr>
+        <tr><td><span class="tag tag-blue">Solid success</span></td><td>5,000-15,000</td><td>€50,000-€150,000</td><td>Meaningful income. Consider part-time transition.</td></tr>
+        <tr><td><span class="tag tag-gold">Breakout+</span></td><td>15,000+</td><td>€165,000+</td><td>Life-changing. Full-time indie viable.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADVANTAGES -->
+<div class="section">
+  <div class="sh"><span class="sn">§4</span><span class="st2">Why We Might Beat the Median</span></div>
+  <div class="sb">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title" style="color:var(--green);">Real Advantages</div>
+        <ul style="list-style:none;padding:0;font-size:0.8rem;line-height:1.8;">
+          <li>✓ Category monopoly — zero competition on the topic</li>
+          <li>✓ 20M ex-Yugoslavs with emotional connection</li>
+          <li>✓ AI Commander — genuine press-worthy innovation</li>
+          <li>✓ Deep simulation (763 tests, 90%+ historical accuracy)</li>
+          <li>✓ €1,500 cost basis — break-even at 150 copies</li>
+          <li>✓ Four separate press angles (game + AI + history + cultural)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--red);">Real Risks</div>
+        <ul style="list-style:none;padding:0;font-size:0.8rem;line-height:1.8;">
+          <li>✗ Solo dev, first game, no track record</li>
+          <li>✗ Niche of a niche (Bosnian War wargame)</li>
+          <li>✗ Discovery is brutal — algorithms bury unknowns</li>
+          <li>✗ Subject matter sensitivity — controversy likely</li>
+          <li>✗ Balkan market has low purchasing power</li>
+          <li>✗ 40% of ALL indie games fail completely</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARABLES -->
+<div class="section">
+  <div class="sh"><span class="sn">§5</span><span class="st2">Comparable Games — Where We Fit</span></div>
+  <div class="sb">
+    <table>
+      <thead><tr><th>Game</th><th>Dev Size</th><th>Price</th><th>Est Sales</th><th>Relevance</th></tr></thead>
+      <tbody>
+        <tr><td>Radio Commander</td><td>Small team</td><td>€15</td><td>~10,000</td><td style="color:var(--green);">Most realistic comp — niche war, unique mechanic</td></tr>
+        <tr><td>Decisive Campaigns: Ardennes</td><td>Small team</td><td>€30</td><td>~12,000</td><td>Niche WWII wargame, published</td></tr>
+        <tr><td>Shadow Empire</td><td>1 person</td><td>€35</td><td>~30,000</td><td>Solo dev cult hit — aspirational</td></tr>
+        <tr><td>Unity of Command II</td><td>Small team</td><td>€30</td><td>~50,000</td><td>Ex-Yu developer! WWII strategy</td></tr>
+        <tr><td>This War of Mine</td><td>11 bit studios</td><td>€20</td><td>500,000+</td><td>Category creation precedent (civilian war)</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;">Radio Commander is the realistic benchmark. Unity of Command II is the dream. This War of Mine is the lightning strike.</p>
+  </div>
+</div>
+
+<!-- WHAT TO TELL YOUR WIFE -->
+<div class="section">
+  <div class="sh"><span class="sn">§6</span><span class="st2">The Honest Version</span></div>
+  <div class="sb">
+    <div style="padding:1rem;background:var(--bg-el);border-radius:6px;border:1px solid var(--border);">
+      <p style="font-size:0.9rem;color:var(--text-bright);line-height:1.8;font-style:italic;">
+        "I'm building a strategy game about the Bosnian War. It cost us €1,500 in cash and my evenings for 8 weeks. Here's what could happen:
+      </p>
+      <div style="margin:1rem 0;padding-left:1rem;border-left:2px solid var(--gold-dim);">
+        <p style="font-size:0.85rem;color:var(--text);line-height:1.8;">
+          <strong style="color:var(--red);">40% chance:</strong> It makes less than €4,000. We lose nothing but my time.<br>
+          <strong style="color:var(--amber);">20% chance:</strong> It makes €4,500-€18,000. Covers costs, validates the idea.<br>
+          <strong style="color:var(--green);">20% chance:</strong> It makes €20,000-€50,000. Real supplementary income.<br>
+          <strong style="color:var(--blue);">12% chance:</strong> It makes €50,000-€150,000. Serious money.<br>
+          <strong style="color:var(--gold);">8% chance:</strong> It breaks out bigger. But I'm not counting on it.
+        </p>
+      </div>
+      <p style="font-size:0.9rem;color:var(--text-bright);line-height:1.8;font-style:italic;">
+        The break-even is 150 copies. I'll almost certainly clear that. The expected average is ~€50,000, but the most likely single outcome is much less. What I'm NOT doing: quitting my job, taking loans, or investing money we can't afford to lose. The total risk is €1,500 and my time."
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- MARKETING -->
+<div class="section">
+  <div class="sh"><span class="sn">§7</span><span class="st2">What Moves the Needle</span></div>
+  <div class="sb">
+    <p style="font-size:0.82rem;margin-bottom:0.75rem;">The difference between the 40% failure bucket and the 20% modest-hit bucket is <strong>almost entirely marketing</strong>, not game quality.</p>
+    <table>
+      <thead><tr><th>Action</th><th>Cost</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr><td>Steam Next Fest demo</td><td style="color:var(--green);">Free</td><td>Biggest single free visibility event. 1,000-10,000 wishlists.</td></tr>
+        <tr><td>Dev blog (Steam News, weekly)</td><td style="color:var(--green);">Free</td><td>Algorithm rewards regular updates.</td></tr>
+        <tr><td>Wargame YouTubers (review keys)</td><td style="color:var(--green);">Free</td><td>1 well-matched creator = 500-5,000 wishlists.</td></tr>
+        <tr><td>3MA podcast appearance</td><td style="color:var(--green);">Free</td><td>THE wargame podcast. Massive niche credibility.</td></tr>
+        <tr><td>Reddit/forum community</td><td style="color:var(--green);">Free</td><td>r/wargames, Slitherine forums, Wargamer.com.</td></tr>
+        <tr><td>Balkan media outreach</td><td style="color:var(--green);">Free</td><td>Cultural story: "Bosnian dev builds first BiH war game."</td></tr>
+        <tr><td>Professional capsule art</td><td>€200-500</td><td>Click-through rate = algorithmic promotion. #1 marketing asset.</td></tr>
+        <tr><td>Gameplay trailer (AI Commander)</td><td>€0-500</td><td>"Watch Mladić think." The press hook.</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.78rem;color:var(--text-dim);margin-top:0.5rem;">Total marketing budget: €200-1,500. Most high-impact activities are free.</p>
+  </div>
+</div>
+
+<!-- AI COMMANDER -->
+<div class="section">
+  <div class="sh"><span class="sn">§8</span><span class="st2">The AI Commander — Our Secret Weapon</span></div>
+  <div class="sb">
+    <p style="font-size:0.85rem;line-height:1.6;margin-bottom:1rem;">No other strategy game has an AI opponent that actually thinks. This is the headline that gets us discovered beyond the wargame niche.</p>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Four Press Angles</div>
+        <p style="font-size:0.78rem;line-height:1.7;">
+          <strong>Gaming:</strong> "This wargame's opposing general actually thinks"<br>
+          <strong>Tech:</strong> "Claude AI powers opposing commanders"<br>
+          <strong>Cultural:</strong> "First Bosnian War strategy game"<br>
+          <strong>AI industry:</strong> "Multi-model AI creates thinking opponents"
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title">Player Tiers</div>
+        <table>
+          <tr><td>Commander (Opus)</td><td style="text-align:right">~€13.50/game</td></tr>
+          <tr><td>Officer (Sonnet)</td><td style="text-align:right">~€3.60/game</td></tr>
+          <tr><td>Recruit (Haiku)</td><td style="text-align:right">~€1.10/game</td></tr>
+          <tr><td>Cadet (no AI)</td><td style="text-align:right;color:var(--green);">Free</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="p">PYRRHIC GAMES</div>
+  <div style="margin-top:0.5rem;">A War Without Victory — Business Model & Pricing Report</div>
+  <div style="margin-top:0.25rem;">16 March 2026 — Deliberately conservative. Better surprised than disappointed.</div>
+  <div style="margin-top:0.75rem;color:var(--gold);opacity:0.5;">"Another such victory and we are undone."<br>But at €1,500 invested, even undoing is affordable.</div>
+</div>
+
+</div>
+</body>
+</html>
