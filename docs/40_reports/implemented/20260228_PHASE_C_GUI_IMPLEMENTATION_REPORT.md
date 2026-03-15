@@ -106,7 +106,7 @@ Phase C (Rich interactions) from HOI_VISUAL_GUI_OVERHAUL_SPEC.md §10 was implem
 
 - **Napkin** (`.claude/napkin.md`): Add entry that Phase C tooltips use store tooltipTarget + 300ms delay; MapModeToolbar bottom-right per C2.1; shortcuts 1–4 = map modes, Enter = confirm.
 - **Ledger:** Append entry for Phase C implementation (this report, file list, pre-existing test note).
-- **Canon/technical:** context.md already references Paradox rules and napkin; AWWV_GUI_ARCHITECTURE_REWORK_v2.md §0 to be updated to mark Phase C complete and Phase D next.
+- **Canon/technical:** context.md already references Pyrrhic rules and napkin; AWWV_GUI_ARCHITECTURE_REWORK_v2.md §0 to be updated to mark Phase C complete and Phase D next.
 
 ---
 

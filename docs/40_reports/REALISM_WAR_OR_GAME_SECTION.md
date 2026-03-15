@@ -1,6 +1,6 @@
 # Realism (War-or-Game) — Paradox Report Section
 
-**Use:** Merge the block below into the Paradox team report as section **8. Realism (War-or-Game)**. No softening language; War-or-Game's job is to keep the sim honest.
+**Use:** Merge the block below into the Pyrrhic team report as section **8. Realism (War-or-Game)**. No softening language; War-or-Game's job is to keep the sim honest.
 
 ---
 

@@ -5,7 +5,7 @@
 **Reference:** [docs/plans/2026-03-09-evaluation-remediation-plan.md](../../plans/2026-03-09-evaluation-remediation-plan.md)
 
 ## Executive Summary
-The Paradox Team conducted a comprehensive codebase evaluation on 2026-03-09, identifying key technical debt in QA processes, UI placeholder gaps, monolithic state structures, and complex AI modules. A 4-phase remediation plan was executed to address these gaps. All four phases are now complete, resulting in a cleaner architecture, robust testing coverage, finalized Warroom narrative UI, and fully segregated functional bot AI logic. 
+The Pyrrhic Team conducted a comprehensive codebase evaluation on 2026-03-09, identifying key technical debt in QA processes, UI placeholder gaps, monolithic state structures, and complex AI modules. A 4-phase remediation plan was executed to address these gaps. All four phases are now complete, resulting in a cleaner architecture, robust testing coverage, finalized Warroom narrative UI, and fully segregated functional bot AI logic. 
 
 **Zero behavioral changes** were introduced to the simulation engine, as verified by strict scenario deterministic probes.
 

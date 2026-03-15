@@ -128,7 +128,7 @@ Treat these as backlog items for bot/brigade AI when prioritizing. **Next single
 
 **War termination (1.1) work directive (2026-02-24):** [ORCHESTRATOR_WAR_TERMINATION_MINIMAL_SPEC_DIRECTIVE_2026_02_24.md](convenes/ORCHESTRATOR_WAR_TERMINATION_MINIMAL_SPEC_DIRECTIVE_2026_02_24.md) — Game Designer lead, Technical Architect oversee, Historian advise on historicity. Deliverable: minimal spec (Dayton-style end, faction goals, recurring initiatives, preconditions).
 
-**Supply full-team convene (2026-02-24):** [ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md](convenes/ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md) — Full Paradox team input; innovative proposals (enclave resilience, corridor UI, supply_mult in bot scoring, optional hardening). **Single priority:** Supply design doc (OSID trace, supply_mult wiring, cascade, enclave/resilience rules, minimum supply UX). Owner: Technical Architect (lead author), Game Designer, Architect; PM to sequence implementation after sign-off. **Supply design doc:** [docs/30_planning/SUPPLY_DESIGN.md](../30_planning/SUPPLY_DESIGN.md).
+**Supply full-team convene (2026-02-24):** [ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md](convenes/ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md) — Full Pyrrhic team input; innovative proposals (enclave resilience, corridor UI, supply_mult in bot scoring, optional hardening). **Single priority:** Supply design doc (OSID trace, supply_mult wiring, cascade, enclave/resilience rules, minimum supply UX). Owner: Technical Architect (lead author), Game Designer, Architect; PM to sequence implementation after sign-off. **Supply design doc:** [docs/30_planning/SUPPLY_DESIGN.md](../30_planning/SUPPLY_DESIGN.md).
 
 ---
 

@@ -6,7 +6,7 @@
 **Result:** n415 (89.4% area-weighted, +2.5pp)
 
 ## Summary
-- Systematic remediation of issues identified in two audit reports: Paradox Team State of the Game Evaluation and N412 Deep Dive Sector/Ops/Combat
+- Systematic remediation of issues identified in two audit reports: Pyrrhic Team State of the Game Evaluation and N412 Deep Dive Sector/Ops/Combat
 - 5 phases executed across 11 commits: determinism hardening, frozen front cascade fix, supply/morale balance, code health cleanup, terminology sweep + mega-file splitting, and simplify pass
 - Calibration improved from 86.9% to 89.4% area-weighted; DRINA region improved +8.4pp
 - 154 files touched for terminology, 11 new submodules from mega-file splitting, 3 inline ranking dicts unified

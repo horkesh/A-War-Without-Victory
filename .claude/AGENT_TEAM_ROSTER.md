@@ -1,14 +1,14 @@
-# Paradox — Agent Team Roster (AWWV)
+# Pyrrhic — Agent Team Roster (AWWV)
 
-**Collective identity:** Paradox. The specialists listed below are the Paradox team for this repo. Individual role names are unchanged.
+**Collective identity:** Pyrrhic. The specialists listed below are the Pyrrhic team for this repo. Individual role names are unchanged.
 
-**Purpose:** Single source of truth for when and whom the main agent invokes. Paradox specialists focus on different aspects; tension between roles produces better results. Do not collapse roles (e.g. use both Code Review and QA Engineer before merge).
+**Purpose:** Single source of truth for when and whom the main agent invokes. Pyrrhic specialists focus on different aspects; tension between roles produces better results. Do not collapse roles (e.g. use both Code Review and QA Engineer before merge).
 
-**Process QA:** All Paradox roles are **subject to Process QA** (quality-assurance-process). Process QA validates that others followed established process (context, ledger, napkin at session start, commit discipline). Invoking Process QA after handoffs or execution eliminates the need for micromanagement—others follow process, Process QA verifies.
+**Process QA:** All Pyrrhic roles are **subject to Process QA** (quality-assurance-process). Process QA validates that others followed established process (context, ledger, napkin at session start, commit discipline). Invoking Process QA after handoffs or execution eliminates the need for micromanagement—others follow process, Process QA verifies.
 
 ## Main agent instruction
 
-**For every non-trivial task:** Consult this Paradox roster; invoke the listed skill(s) for the relevant role(s) by reading and following the corresponding `.cursor/skills/<name>/SKILL.md`. Use clarification-first for high-risk items; document handoffs when passing between roles.
+**For every non-trivial task:** Consult this Pyrrhic roster; invoke the listed skill(s) for the relevant role(s) by reading and following the corresponding `.cursor/skills/<name>/SKILL.md`. Use clarification-first for high-risk items; document handoffs when passing between roles.
 
 ---
 
@@ -18,7 +18,7 @@
 
 | Role | Skill path | When to invoke |
 |------|------------|----------------|
-| Orchestrator | orchestrator | Big-picture direction, team coordination, strategic priority, convening Paradox, aligning roadmap and ledger; resolves cross-role conflicts. **Deputy:** Product Manager. |
+| Orchestrator | orchestrator | Big-picture direction, team coordination, strategic priority, convening Pyrrhic, aligning roadmap and ledger; resolves cross-role conflicts. **Deputy:** Product Manager. |
 | Product Manager | product-manager | Roadmap, MVP, sequencing work, handoff to dev; reports to Orchestrator for big-picture alignment. References awwv-plan-change, awwv-make-cursor-prompt. |
 
 ### Planning
@@ -72,14 +72,14 @@
 
 | Role | Skill path | When to invoke |
 |------|------------|----------------|
-| **Process QA** | quality-assurance-process | **Validates that other Paradox roles followed process** (context, ledger, napkin at session start, commit discipline). Single checkpoint—invoke after handoffs, after Orchestrator/PM execution, or before merge. *Process QA changes everything: eliminates micromanagement.* |
+| **Process QA** | quality-assurance-process | **Validates that other Pyrrhic roles followed process** (context, ledger, napkin at session start, commit discipline). Single checkpoint—invoke after handoffs, after Orchestrator/PM execution, or before merge. *Process QA changes everything: eliminates micromanagement.* |
 | Retrospective Analyst | retrospective-analyst | After major milestone or comprehensive review; gaps, spec/code discrepancies, performance. |
 
 ---
 
 ## Handoff workflow
 
-- **Big-picture / team** → Orchestrator (strategic priority, convening Paradox, aligning roadmap and ledger). Orchestrator delegates scope and sequencing to Product Manager (deputy).
+- **Big-picture / team** → Orchestrator (strategic priority, convening Pyrrhic, aligning roadmap and ledger). Orchestrator delegates scope and sequencing to Product Manager (deputy).
 - **Design/scope** → Game Designer, Technical Architect, or Product Manager (by question type).
 - **Historical events / scenario plausibility / "what does the record say?"** → **Historian** (historian). Historian holds all Balkan Battlegrounds–derived knowledge; invoke for citation-backed BiH war facts, control/holdouts/enclaves/JNA, scenario design.
 - **Product architecture / cross-system** → Architect (UI/UX architecture, cross-system integration, feasibility assessment, vision documents). Architect delegates implementation to relevant Dev roles.
@@ -95,7 +95,7 @@ Document handoffs when passing between roles (e.g. "Handoff: Orchestrator → Pr
 
 ## Clarification-first (high-risk)
 
-For the following, require **questions with examples**, **documented assumptions with risk levels**, and **STOP AND ASK** before proceeding. This Paradox roster is the checkpoint list for when to escalate.
+For the following, require **questions with examples**, **documented assumptions with risk levels**, and **STOP AND ASK** before proceeding. This Pyrrhic roster is the checkpoint list for when to escalate.
 
 **High-risk triggers:**
 
@@ -110,7 +110,7 @@ For the following, require **questions with examples**, **documented assumptions
 
 ---
 
-## Periodic Paradox team review
+## Periodic Pyrrhic team review
 
 For a **comprehensive review**, invoke in sequence or combined: **Game Designer**, **Technical Architect**, **Code Review** (canon-compliance-reviewer), **QA Engineer** (qa-engineer). Produce a consolidated list of:
 

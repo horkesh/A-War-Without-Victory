@@ -8,7 +8,7 @@
 
 ## Orchestrator Setup
 
-Invoked the Orchestrator Protocol per user request. Full Paradox team assigned:
+Invoked the Orchestrator Protocol per user request. Full Pyrrhic team assigned:
 
 | Role | Responsibility |
 |------|---------------|

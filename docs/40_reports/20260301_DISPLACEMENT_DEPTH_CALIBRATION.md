@@ -98,7 +98,7 @@ All 6/6 pass in n319. Determinism verified (identical hash on second run: `42ad7
 
 Also implemented in this session: OSID-level ethnic composition for the map's ethnic layer. Previously used uniform municipality-level ratio; now uses per-OSID departure events (from `displacement_event_log`) and per-municipality arrivals. Files: `buildEthnicGeoJSON.ts`, `GameStateAdapter.ts`, `types.ts`, `MapContainer.tsx`.
 
-## Historian Findings (Paradox Team)
+## Historian Findings (Pyrrhic Team)
 
 | Municipality | Historical displacement % | Category |
 |---|---|---|

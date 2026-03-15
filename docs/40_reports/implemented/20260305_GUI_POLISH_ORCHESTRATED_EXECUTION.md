@@ -81,7 +81,7 @@ Plan: `gui-polish-paradox-plan`
 
 ## Process QA Checkpoint
 
-- context/napkin/Paradox rules read before implementation: PASS
+- context/napkin/Pyrrhic rules read before implementation: PASS
 - ledger updated with implementation evidence: PASS
 - napkin updated with reusable GUI runbook guidance: PASS
 - FORAWWV untouched: PASS

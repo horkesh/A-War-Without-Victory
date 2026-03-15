@@ -765,7 +765,7 @@ Stage 1 morale-victory feedback: anti-steamroller + anti-death-spiral. Drift pat
 
 ---
 
-## [2026-03-12] Paradox Team State of the Game Convene
+## [2026-03-12] Pyrrhic Team State of the Game Convene
 
 **Report:** `docs/40_reports/convenes/20260312_PARADOX_TEAM_STATE_OF_THE_GAME_CONVENE.md`
 
@@ -823,7 +823,7 @@ Stage 1 morale-victory feedback: anti-steamroller + anti-death-spiral. Drift pat
 
 ## [2026-03-11] Operation Preparation System — Design Complete, Execution Plan Assigned
 
-**Design doc:** `docs/plans/2026-03-11-operation-preparation-system.md` (10 sections, Paradox team reviewed).
+**Design doc:** `docs/plans/2026-03-11-operation-preparation-system.md` (10 sections, Pyrrhic team reviewed).
 
 **What it does:** Adds a preparation phase between "corps launches operation" and "brigades attack." Commander assesses intel, orders probes, stages forces, checks supply, makes go/no-go recommendation. Player selects commander (new), receives briefings (new), makes go/no-go decisions. Commander personality (comp×agg) drives preparation tempo — aggressive commanders attack fast, cautious ones demand intel.
 
@@ -1025,7 +1025,7 @@ Three sector system fixes. Calibration: **87.6% area-weighted** (+0.4pp from n43
 **Files**: `corps_front_sectors.ts`, `corps_front_sectors_constants.ts`, `sector_offensive.ts`, `bot_corps_directives.ts`, `corps_front_sectors_multi.test.ts`, `sector_offensive_idle_recovery.test.ts`
 **Verification**: tsc clean (implicit via vitest), 395/395 vitest passing. 40w run n440: 87.6% area-weighted, RS delta -47 (improved from -50).
 
-## [2026-03-09] Paradox Team State of the Game Evaluation & Remediation Plan
+## [2026-03-09] Pyrrhic Team State of the Game Evaluation & Remediation Plan
 
 Conducted comprehensive state of the game evaluation across all domains.
 
@@ -8366,7 +8366,7 @@ Determinism checks **MUST** be run:
 - **Artifacts:** scripts/map/derive_settlements_wgs84_voronoi_1990.ts, data/derived/settlements_wgs84_1990.geojson, census_rolled_up_wgs84.json, A1_BASE_MAP.geojson, settlements_a1_viewer.geojson, map_viewer, docs/PROJECT_LEDGER.md.
 
 **2026-02-07** - Orchestrator: War Planning Map full-screen scene (not overlay)
-- **Summary:** Paradox team convened to discuss implementation of GUI_WAR_PLANNING_MAP_EXPERT_HANDOVER.md. User constraint: wall map click must open a whole new full-screen scene, not an overlay. Team agreed on scene-swap approach: hide warroom, show map scene; close returns to warroom.
+- **Summary:** Pyrrhic team convened to discuss implementation of GUI_WAR_PLANNING_MAP_EXPERT_HANDOVER.md. User constraint: wall map click must open a whole new full-screen scene, not an overlay. Team agreed on scene-swap approach: hide warroom, show map scene; close returns to warroom.
 - **Decision:** Option A (scene swap). Add #warroom-scene and #map-scene; wall map click triggers transition; WarPlanningMap becomes sole content of map scene. PM to produce phased plan; UI/UX Developer to implement.
 - **Scope:** Strategic direction; no code changes yet.
 - **Artifacts:** docs/40_reports/PARADOX_WAR_PLANNING_MAP_FULL_SCENE_TEAM_CONVENE.md, docs/PROJECT_LEDGER.md.
@@ -8592,7 +8592,7 @@ Determinism checks **MUST** be run:
 
 **2026-02-09** - Project ledger reorganization: knowledge-focused structure (plan and implementation guide)
 - **Summary:** Organized project ledger reorganization around knowledge accumulation. Created a thematic plan, migration examples, and a step-by-step implementation guide so the ledger can evolve from a pure chronological log into a knowledge base while keeping PROJECT_LEDGER.md append-only.
-- **Change:** (1) `docs/PROJECT_LEDGER_REORGANIZATION_PLAN.md`: thematic structure (Identity & Governance, Architecture & Systems, Implementation Knowledge, Canon Evolution, Process & Team, Technical Decision Chains), migration strategy in four phases, maintenance model, success metrics. (2) `docs/PROJECT_LEDGER_EXAMPLE_MIGRATION.md`: worked examples showing how chronological entries map to thematic sections (architecture decisions, implementation patterns, failed approaches, domain knowledge, decision chains, process knowledge). (3) `docs/PROJECT_LEDGER_IMPLEMENTATION_GUIDE.md`: execution steps for Paradox team (tagging, thematic skeleton, content migration, validation, ongoing maintenance), role summary (Orchestrator, Documentation-specialist, Ledger-process-scribe, QA).
+- **Change:** (1) `docs/PROJECT_LEDGER_REORGANIZATION_PLAN.md`: thematic structure (Identity & Governance, Architecture & Systems, Implementation Knowledge, Canon Evolution, Process & Team, Technical Decision Chains), migration strategy in four phases, maintenance model, success metrics. (2) `docs/PROJECT_LEDGER_EXAMPLE_MIGRATION.md`: worked examples showing how chronological entries map to thematic sections (architecture decisions, implementation patterns, failed approaches, domain knowledge, decision chains, process knowledge). (3) `docs/PROJECT_LEDGER_IMPLEMENTATION_GUIDE.md`: execution steps for Pyrrhic team (tagging, thematic skeleton, content migration, validation, ongoing maintenance), role summary (Orchestrator, Documentation-specialist, Ledger-process-scribe, QA).
 - **Scope:** Documentation and process only. No change to PROJECT_LEDGER.md content or append-only discipline; thematic knowledge base is additive and to be created separately (e.g. PROJECT_LEDGER_KNOWLEDGE.md) when Phase 2–3 are executed.
 - **Determinism:** N/A.
 - **Artifacts:** docs/PROJECT_LEDGER_REORGANIZATION_PLAN.md, docs/PROJECT_LEDGER_EXAMPLE_MIGRATION.md, docs/PROJECT_LEDGER_IMPLEMENTATION_GUIDE.md, docs/PROJECT_LEDGER.md.
@@ -8634,7 +8634,7 @@ Determinism checks **MUST** be run:
 - **Artifacts:** docs/40_reports/HISTORICAL_TRAJECTORY_VRS_ARBIH_ANALYSIS.md, .agent/napkin.md, docs/PROJECT_LEDGER.md.
 
 **2026-02-10** - Paradox execution board Phase 1: decisions, authority derivation, browser Phase II advance
-- **Summary:** Executed Phase 1 of the Paradox execution plan: documented A1.7 calibration stance and PM sequence (B1 → partial systems 2→3→4→7→9→10 → B2–B4), replaced formation-lifecycle authority stub with derivation from political control, and added browser-safe Phase II advance (turn + AoR init when empty). Baselines updated after authority change.
+- **Summary:** Executed Phase 1 of the Pyrrhic execution plan: documented A1.7 calibration stance and PM sequence (B1 → partial systems 2→3→4→7→9→10 → B2–B4), replaced formation-lifecycle authority stub with derivation from political control, and added browser-safe Phase II advance (turn + AoR init when empty). Baselines updated after authority change.
 - **Change:** (1) `docs/40_reports/IMPLEMENTATION_PLAN_MASTER_EARLY_DOCS.md` §6.1: A1.7 = ship as-is; PM sequence B1 → partials → B2–B4 → GUI. (2) `src/state/formation_lifecycle.ts`: added `deriveMunicipalityAuthorityMap(state)` (consolidated=1, contested=0.5, fragmented=0.2; deterministic sorted mun ids). (3) `src/sim/turn_pipeline.ts`: update-formation-lifecycle step now uses `deriveMunicipalityAuthorityMap(context.state)` instead of stub 0.5. (4) `src/scenario/aor_init.ts`: new browser-safe module with `populateFactionAoRFromControl` and `ensureFormationHomeMunsInFactionAoR` (strict compare, no Node). (5) `src/scenario/scenario_runner.ts`: imports and re-exports from aor_init. (6) `src/sim/run_phase_ii_browser.ts`: new browser-safe Phase II advance (turn increment + AoR init when all faction AoRs empty; no supply/exhaustion in browser). (7) `src/ui/warroom/ClickableRegionManager.ts`: Phase II advance now calls `runPhaseIITurn(state, { seed, settlementGraph })` after loading graph. (8) Baseline manifest updated: `UPDATE_BASELINES=1 npm run test:baselines`; activity_summary.json hash updated for baseline_ops_4w.
 - **Determinism:** Authority map and AoR init use sorted iteration and strict string compare; no timestamps or randomness. Same scenario + seed → same formation activation and baseline artifacts.
 - **Artifacts:** docs/40_reports/IMPLEMENTATION_PLAN_MASTER_EARLY_DOCS.md, src/state/formation_lifecycle.ts, src/sim/turn_pipeline.ts, src/scenario/aor_init.ts, src/scenario/scenario_runner.ts, src/sim/run_phase_ii_browser.ts, src/ui/warroom/ClickableRegionManager.ts, data/derived/scenario/baselines/manifest.json, docs/PROJECT_LEDGER.md.
@@ -8652,7 +8652,7 @@ Determinism checks **MUST** be run:
 - **Artifacts:** src/state/game_state.ts, src/state/serializeGameState.ts, src/sim/phase_i/control_flip.ts, docs/PROJECT_LEDGER.md.
 
 **2026-02-10** - Paradox execution board run summary
-- **Summary:** Executed Phases 1–3 of the Paradox execution plan. Delivered: Phase 1 (A1.7/PM decisions, authority derivation, browser Phase II advance, baselines + ledger); Phase 2 (B1 event framework, partial systems 2–4 confirmed wired); Phase 3 (B4 coercion; B2 campaign branching and B3 negotiation counter-offers deferred; partial systems 7, 9, 10 deferred).
+- **Summary:** Executed Phases 1–3 of the Pyrrhic execution plan. Delivered: Phase 1 (A1.7/PM decisions, authority derivation, browser Phase II advance, baselines + ledger); Phase 2 (B1 event framework, partial systems 2–4 confirmed wired); Phase 3 (B4 coercion; B2 campaign branching and B3 negotiation counter-offers deferred; partial systems 7, 9, 10 deferred).
 - **Remaining (post-session):** B2 campaign branching (scenario dependency graph, unlock logic); B3 negotiation counter-offers (accept/reject/counter flow); full wiring of systems 7 (Negotiation), 9 (Doctrine), 10 (Capability) per IMPLEMENTATION_PLAN_MASTER_EARLY_DOCS and PHASE7_BACKLOG_QUEUE.
 - **Artifacts:** docs/40_reports/IMPLEMENTATION_PLAN_MASTER_EARLY_DOCS.md, docs/PROJECT_LEDGER.md, .agent/napkin.md.
 
@@ -8824,7 +8824,7 @@ Determinism checks **MUST** be run:
 - **Artifacts:** data/scenarios/_tmp_attack_scale_sweep/, runs/phase_i_attack_scale_sweep_summary.json, runs/_tmp_attack_scale_ethnic_a1p4__38adb15d6466b778__w30, runs/_tmp_attack_scale_ethnic_a0p6__5dd76257cf093da6__w30, runs/_tmp_attack_scale_hybrid_a1p0__0f425b79846253a9__w30, runs/_tmp_attack_scale_hybrid_a0p9__35444013937edf1f__w30, docs/40_reports/PARADOX_PHASEI_SCENARIO_LEVEL_TUNING_PASS_2026_02_11.md, docs/PROJECT_LEDGER.md, .agent/napkin.md.
 
 **2026-02-11** - Orchestrator: Phase I no-flip calibration final proposal (Paradox convene)
-- **Summary:** Convened Paradox roles (Game Designer, Gameplay Programmer, Canon Compliance Reviewer, Determinism Auditor, QA Engineer, Scenario Harness Engineer) and produced a single final proposal from Phase I no-flip calibration evidence. Recommended: no-flip GO only for player_choice recruitment-focused scenarios; ethnic/hybrid NO-GO (remain default militia-pressure).
+- **Summary:** Convened Pyrrhic roles (Game Designer, Gameplay Programmer, Canon Compliance Reviewer, Determinism Auditor, QA Engineer, Scenario Harness Engineer) and produced a single final proposal from Phase I no-flip calibration evidence. Recommended: no-flip GO only for player_choice recruitment-focused scenarios; ethnic/hybrid NO-GO (remain default militia-pressure).
 - **Change:** (1) Created comprehensive proposal document `docs/40_reports/PARADOX_PHASEI_NOFLIP_FINAL_PROPOSAL_2026_02_11.md` with product decision, canon position, determinism guarantees, implementation plan, validation plan, risk register, go/no-go table, and executive recommendation. (2) Updated napkin Domain Notes with final no-flip policy. (3) No code changes; policy and documentation only.
 - **Determinism:** N/A (documentation and policy; no sim/pipeline changes).
 - **Artifacts:** docs/40_reports/PARADOX_PHASEI_NOFLIP_FINAL_PROPOSAL_2026_02_11.md, .agent/napkin.md, docs/PROJECT_LEDGER.md, docs/PROJECT_LEDGER_KNOWLEDGE.md.
@@ -9326,7 +9326,7 @@ Determinism checks **MUST** be run:
 - **Artifacts:** docs/40_reports/CONSOLIDATED_IMPLEMENTED.md, docs/20_engineering/TACTICAL_MAP_SYSTEM.md, docs/10_canon/context.md, docs/00_start_here/docs_index.md, docs/PROJECT_LEDGER_KNOWLEDGE.md, docs/PROJECT_LEDGER.md.
 
 **2026-02-15** - Orchestrator: Paradox state of the game meeting (Formation-expert, Wargame-specialist, recommendations)
-- **Summary:** Convened Paradox team for state-of-the-game meeting. Gathered Orchestrator big-picture, Formation-expert (militia/brigade/pool/spawn setup, constants, scenario contract), and Wargame-specialist (playable loop, scenario naming, bot backlog ordering) input; synthesized agreed recommendations on what must change before continuing.
+- **Summary:** Convened Pyrrhic team for state-of-the-game meeting. Gathered Orchestrator big-picture, Formation-expert (militia/brigade/pool/spawn setup, constants, scenario contract), and Wargame-specialist (playable loop, scenario naming, bot backlog ordering) input; synthesized agreed recommendations on what must change before continuing.
 - **Change:** (1) Created `docs/40_reports/convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md`: meeting record with role inputs (Orchestrator §1, Formation-expert §2, Wargame-specialist §3), synthesis table (§5), single agreed priority (§6). Recommendations: document scenario contract (historical 52w vs player recruitment), default run to apr1992_historical_52w, order bot backlog (AoR imbalance / RS early-war first), no formation constant changes without design, optional pool diagnostics. Single priority: close scenario-contract docs and default documentation; then select one bot backlog item with owner and acceptance criteria. Handoffs: Orchestrator → PM for sequencing; PM → Documentation and Game Designer + Gameplay Programmer.
 - **Determinism:** N/A. Convene and documentation only; no simulation, pipeline, or code behavior changed.
 - **Artifacts:** docs/40_reports/convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_15.md, docs/PROJECT_LEDGER.md.
@@ -9580,7 +9580,7 @@ Determinism checks **MUST** be run:
 - **Run status:** 104w run started (`npm run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_52w.json --weeks 104 --unique --out runs`); output folder `runs/apr1992_definitive_52w__3daa0c50f29af5d0__w104_n117`. At last check 48/104 weeks completed; run_summary.json and end_report.md will appear when complete. User can re-run with `--scenario data/scenarios/apr1992_definitive_104w.json` (no --weeks needed) for future 104w runs.
 - **Artifacts:** data/scenarios/apr1992_definitive_104w.json, docs/40_reports/convenes/ORCHESTRATOR_104W_APR1992_RUN_AND_CALIBRATION_2026_02_17.md, docs/40_reports/README.md, docs/PROJECT_LEDGER.md.
 
-**2026-02-17** - Orchestrator: Paradox team convene on 104w results — analysis and calibration/system-change proposals
+**2026-02-17** - Orchestrator: Pyrrhic team convene on 104w results — analysis and calibration/system-change proposals
 - **Summary:** Convened team (Scenario Creator/Tester, Formation Expert, Game Designer, Gameplay Programmer, Systems/Tech Architect, PM) to analyze the completed 104w April 1992 run and propose calibration-only vs game-system change options.
 - **Change:** (1) Created `docs/40_reports/convenes/PARADOX_104W_RESULTS_TEAM_ANALYSIS_2026_02_17.md` with evidence summary, per-role questions and synthesized input, root-cause synthesis, calibration proposals (C1–C4: 104w historical scenario path, RS long-run growth, RBiH benchmark update, 104w-only trickle) and system-change options (S1–S3: time-dependent resources, reinforcement cap, benchmark bands). (2) Single priority: implement C1 + C3 (104w historical scenario or trickle bump, RBiH benchmark update); C2 (RS growth) if needed. (3) Updated docs/40_reports/README.md convenes row to link the team analysis report.
 - **Determinism:** N/A. Convene and documentation only; no simulation or code behavior changed.
@@ -9746,7 +9746,7 @@ Determinism checks **MUST** be run:
 - **FORAWWV note:** N/A.
 
 **2026-02-17** - Orchestrator: Paradox state of the game meeting (full team)
-- **Summary:** Convened full Paradox team for state-of-the-game meeting. Goal: entire team to give analysis and suggestions on next steps.
+- **Summary:** Convened full Pyrrhic team for state-of-the-game meeting. Goal: entire team to give analysis and suggestions on next steps.
 - **Change:** (1) Created docs/40_reports/convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md: meeting record with role-by-role input (Orchestrator §1, Product Manager §2, Technical Architect §3, Game Designer §4, Gameplay Programmer §5, Formation-expert §6, Scenario-creator-runner-tester §7, Systems Programmer §8, QA Engineer §9, Modern-wargame-expert §10, Documentation/Reports §11), synthesis table (§12), single agreed priority and next steps (§13). Recommendations: set one next single priority (A: 104w calibration sign-off, B: one bot-fix, C: Phase 0 referendum fix, D: Integration-handover spike); fill 104w calibration report; keep scenario/formation constants stable; bot backlog ordering when (B) chosen; add meeting to CONSOLIDATED_BACKLOG and 40_reports. (2) Updated CONSOLIDATED_BACKLOG.md §6: added PARADOX_STATE_OF_GAME_MEETING_2026_02_17 to state-of-game meetings list. (3) This ledger entry.
 - **Determinism:** N/A. Convene and documentation only; no simulation, pipeline, or code behavior changed.
 - **Artifacts:** docs/40_reports/convenes/PARADOX_STATE_OF_GAME_MEETING_2026_02_17.md, docs/40_reports/CONSOLIDATED_BACKLOG.md, docs/PROJECT_LEDGER.md.
@@ -9788,7 +9788,7 @@ Determinism checks **MUST** be run:
 - **Artifacts:** docs/40_reports/convenes/INITIAL_BRIGADE_PLACEMENTS_STRENGTHS_JNA_REEVALUATION_2026_02_18.md, docs/40_reports/README.md, docs/PROJECT_LEDGER.md.
 
 **2026-02-18** - Paradox convene: RS JNA exception, paramilitary, per-army flavor
-- **Summary:** Convened Paradox team per user request. (1) RS JNA exception approved; handoff to implement composition override. (2) Paramilitary/rear-cleanup and per-army flavor discussed with BB historical grounding; added to backlog as design item (Game Designer → Formation-expert).
+- **Summary:** Convened Pyrrhic team per user request. (1) RS JNA exception approved; handoff to implement composition override. (2) Paramilitary/rear-cleanup and per-army flavor discussed with BB historical grounding; added to backlog as design item (Game Designer → Formation-expert).
 - **Change:** (1) Created docs/40_reports/convenes/PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md: RS JNA handoff, role-by-role input on paramilitary and per-army flavor, BB citations (cleanup, rear areas, elite recon-sabotage), recommendations and single priority. (2) CONSOLIDATED_BACKLOG §3: added Paramilitary/rear-cleanup design item with convene link. (3) 40_reports README: convenes list updated.
 - **Determinism:** N/A. Convene and backlog only.
 - **Artifacts:** docs/40_reports/convenes/PARADOX_RS_JNA_PARAMILITARY_PER_ARMY_FLAVOR_2026_02_18.md, docs/40_reports/CONSOLIDATED_BACKLOG.md, docs/40_reports/README.md, docs/PROJECT_LEDGER.md.
@@ -9866,7 +9866,7 @@ Determinism checks **MUST** be run:
 - **Artifacts:** scripts/map/export_municipalities_2_5d.ts, data/derived/municipalities_2_5d_viewer.geojson, src/ui/map/map_2_5d.html, src/ui/map/map_2_5d.ts, src/ui/map/vite.config.ts, package.json, docs/PROJECT_LEDGER.md.
 
 **2026-02-18** - Brigade AoR Redesign implementation plan published (Paradox delegation, Phases A–L)
-- **Summary:** Orchestrator-led implementation plan for the Brigade AoR Comprehensive Redesign Study (docs/plans/2026-02-18-brigade-aor-redesign-study.md) published as convene document. Plan assigns Paradox roles to phases A–L, defines between-phase checkpoint (refactor-pass → git commit → next phase), and delegates Phase A (Core AoR Rework) and Phase B (Militia Garrisons) as first execution priority.
+- **Summary:** Orchestrator-led implementation plan for the Brigade AoR Comprehensive Redesign Study (docs/plans/2026-02-18-brigade-aor-redesign-study.md) published as convene document. Plan assigns Pyrrhic roles to phases A–L, defines between-phase checkpoint (refactor-pass → git commit → next phase), and delegates Phase A (Core AoR Rework) and Phase B (Militia Garrisons) as first execution priority.
 - **Change:** (1) Convene document created: docs/40_reports/convenes/BRIGADE_AOR_REDESIGN_IMPLEMENTATION_PLAN_2026_02_18.md with scope, role assignment, sequencing, phase-by-phase delegation, handoffs, and risks. (2) Ledger entry appended (this entry).
 - **Next:** Phase A implementation (Gameplay Programmer; Technical Architect, Formation Expert, Systems Programmer support). After each phase: /refactor-pass → git commit → next phase.
 - **Artifacts:** docs/40_reports/convenes/BRIGADE_AOR_REDESIGN_IMPLEMENTATION_PLAN_2026_02_18.md, docs/PROJECT_LEDGER.md.
@@ -10044,7 +10044,7 @@ Determinism checks **MUST** be run:
 - **Artifacts:** src/ui/map/map_operational_3d.ts, docs/PROJECT_LEDGER.md, docs/PROJECT_LEDGER_KNOWLEDGE.md, .agent/napkin.md.
 
 **2026-02-20** - Orchestrator convene: three workstreams (3D icons, AoR display, brigade AoR 1–4)
-- **Summary:** Convened Paradox roles and produced handoffs for (1) corps/brigade icon size and LOD in 3D map, (2) AoR display in 3D to match TACTICAL_SANDBOX_3D_MAP_IMPLEMENTATION §2.5/§4.5 and TACTICAL_MAP_SYSTEM Pass 6, (3) brigade AoR 1–4 settlements (canon, engine, GUI). No code or canon edits by Orchestrator; implementation delegated.
+- **Summary:** Convened Pyrrhic roles and produced handoffs for (1) corps/brigade icon size and LOD in 3D map, (2) AoR display in 3D to match TACTICAL_SANDBOX_3D_MAP_IMPLEMENTATION §2.5/§4.5 and TACTICAL_MAP_SYSTEM Pass 6, (3) brigade AoR 1–4 settlements (canon, engine, GUI). No code or canon edits by Orchestrator; implementation delegated.
 - **Change:** Added `docs/40_reports/convenes/ORCHESTRATOR_THREE_WORKSTREAMS_3D_ICONS_AOR_BRIGADE_CAP_2026_02_20.md` (state of game, authoritative docs, priority order, owners, handoffs). Linked from PROJECT_LEDGER_KNOWLEDGE. Napkin updated with convene reference.
 - **Artifacts:** docs/40_reports/convenes/ORCHESTRATOR_THREE_WORKSTREAMS_3D_ICONS_AOR_BRIGADE_CAP_2026_02_20.md, docs/PROJECT_LEDGER_KNOWLEDGE.md, docs/PROJECT_LEDGER.md, .agent/napkin.md.
 
@@ -10379,7 +10379,7 @@ Determinism checks **MUST** be run:
 - **Files modified:** src/phase0/referendum.ts, src/state/game_state.ts, src/state/validateGameState.ts, docs/10_canon/Phase_0_Specification_v0_5_0.md, docs/10_canon/Phase_I_Specification_v0_5_0.md, docs/10_canon/context.md, docs/40_reports/CONSOLIDATED_IMPLEMENTED.md, docs/40_reports/backlog/PHASE0_JNA_STATUS_HANDOFF_HOWTO.md, docs/PROJECT_LEDGER_KNOWLEDGE.md, docs/PROJECT_LEDGER.md.
 
 **2026-02-24** - Orchestrator work directive: War termination minimal spec (1.1) — Game Designer lead, Architect oversee, Historian advise
-- **Summary:** Created work directive to put Paradox team to work on item 1.1 (War termination / end-game minimal spec). Game Designer leads; Technical Architect oversees (canon consistency, implementability); Historian advises on historicity (Dayton-style outcome, faction objectives, peace initiative timing, preconditions). Vision captured: Dayton-style negotiated end; trade territories and points; faction goal hierarchy (RS independence→autonomy, HRHB third entity→cantons, RBiH state institutions); recurring peace initiatives with low success until preconditions (IVP, patron, exhaustion, army strength) met.
+- **Summary:** Created work directive to put Pyrrhic team to work on item 1.1 (War termination / end-game minimal spec). Game Designer leads; Technical Architect oversees (canon consistency, implementability); Historian advises on historicity (Dayton-style outcome, faction objectives, peace initiative timing, preconditions). Vision captured: Dayton-style negotiated end; trade territories and points; faction goal hierarchy (RS independence→autonomy, HRHB third entity→cantons, RBiH state institutions); recurring peace initiatives with low success until preconditions (IVP, patron, exhaustion, army strength) met.
 - **Change:** Added docs/40_reports/convenes/ORCHESTRATOR_WAR_TERMINATION_MINIMAL_SPEC_DIRECTIVE_2026_02_24.md (assignment table, design vision §2, existing canon §3, deliverables and acceptance criteria). Updated CONSOLIDATED_BACKLOG §9 with directive link and README convenes list.
 - **Scope:** Process/work assignment only; no code or canon change. Spec deliverable will extend Phase II §11.2 and align with Systems Manual §20, System 1, System 7.
 - **Files modified:** docs/40_reports/convenes/ORCHESTRATOR_WAR_TERMINATION_MINIMAL_SPEC_DIRECTIVE_2026_02_24.md (new), docs/40_reports/CONSOLIDATED_BACKLOG.md, docs/40_reports/README.md, docs/PROJECT_LEDGER.md.
@@ -10402,7 +10402,7 @@ Determinism checks **MUST** be run:
 - **Files modified:** docs/40_reports/backlog/20260223_PIPELINE_NEXT_WHILE_BOT_REWRITE.md (1.1 done note, 1.2 confirmed note), .agent/napkin.md, docs/PROJECT_LEDGER.md.
 
 **2026-02-24** - Orchestrator supply full-team convene — single priority: Supply design doc
-- **Summary:** Executed full Paradox team convene for supply system design (docs/40_reports/convenes/ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md). Gathered per-role input (Game Designer, Architect, Historian, Technical Architect, Gameplay Programmer, Systems Programmer, Formation-expert, Scenario-creator-runner-tester, QA, PM); synthesized canon vs implemented vs gap; produced innovative proposals (enclave resilience curve, corridor state UI without micromanagement, supply_mult in bot target scoring, optional hardening mechanic).
+- **Summary:** Executed full Pyrrhic team convene for supply system design (docs/40_reports/convenes/ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md). Gathered per-role input (Game Designer, Architect, Historian, Technical Architect, Gameplay Programmer, Systems Programmer, Formation-expert, Scenario-creator-runner-tester, QA, PM); synthesized canon vs implemented vs gap; produced innovative proposals (enclave resilience curve, corridor state UI without micromanagement, supply_mult in bot target scoring, optional hardening mechanic).
 - **Deliverables:** Report §7 Team input and synthesis (per-role summary, innovative proposals, single priority, open questions). **Single priority:** Supply design doc — (1) OSID-level supply trace and per-OSID supply state, (2) wiring supply state to supply_mult in attack resolution and combat predictor, (3) corridor collapse and cascade semantics, (4) enclave supply and optional enclave resilience/hardening, (5) minimum viable supply UX (corridor state + isolation summary). Owner: Technical Architect (lead author), Game Designer, Architect; PM to sequence implementation after sign-off.
 - **Determinism:** All supply design must remain deterministic (stable ordering, no timestamps/RNG). No canon or code changes in this convene.
 - **Files modified:** docs/40_reports/convenes/ORCHESTRATOR_SUPPLY_FULL_TEAM_CONVENE_2026_02_24.md (§6 status, §7 Team input and synthesis), docs/40_reports/CONSOLIDATED_BACKLOG.md (supply convene entry + single priority), docs/40_reports/README.md (convenes list), docs/PROJECT_LEDGER.md.
@@ -10582,7 +10582,7 @@ Determinism checks **MUST** be run:
 
 **2026-02-28** - GUI Rework v2 Phase 3 status and next priority (Orchestrator + Architect)
 - **Phase:** GUI Architecture Rework v2 — Phase 3 (UI Panels)
-- **Summary:** Phase 3 in progress. Done: TopToolbar, SelectionPanel (right), BottomStatusStrip, Storybook for these; shared utils (osidLookup, formationAtOsid). **Single priority:** Implement OOB sidebar per §6.2 and §8 of AWWV_GUI_ARCHITECTURE_REWORK_v2.md: build CorpsCard and BrigadeRow in Storybook with mock OOB data, then OOBSidebar that builds tree from LoadedGameState (formations, corps_id, theatres, armyTheatreAssignment), then mount OOBSidebar on the left in the map app. No other Paradox roles required for this slice; data flow is store → panels only.
+- **Summary:** Phase 3 in progress. Done: TopToolbar, SelectionPanel (right), BottomStatusStrip, Storybook for these; shared utils (osidLookup, formationAtOsid). **Single priority:** Implement OOB sidebar per §6.2 and §8 of AWWV_GUI_ARCHITECTURE_REWORK_v2.md: build CorpsCard and BrigadeRow in Storybook with mock OOB data, then OOBSidebar that builds tree from LoadedGameState (formations, corps_id, theatres, armyTheatreAssignment), then mount OOBSidebar on the left in the map app. No other Pyrrhic roles required for this slice; data flow is store → panels only.
 - **Phase 3 remaining (backlog):** FormationDetail panel, Map mode toolbar (SELECT/ATTACK/MOVE), OrderQueue, AttackConfirmation modal, WarSummaryModal, RecruitmentModal, ReplayScrubber, keyboard shortcuts. PM may formalize order when re-sequencing.
 - **Determinism:** No simulation or persisted output changes; UI only.
 - **Files modified:** `docs/PROJECT_LEDGER.md`.
@@ -10623,11 +10623,11 @@ Determinism checks **MUST** be run:
 - **Files modified:** src/ui/map/tailwind.config.ts, src/ui/map/styles/globals.css, src/ui/map/utils/theme.ts, src/ui/map/components/{TopToolbar,BottomStatusStrip,SelectionPanel,FormationDetail,BrigadeRow,CorpsCard,OOBSidebar,SituationTab}.tsx, src/ui/map/store/gameStore.ts, src/ui/map/map/MapContainer.tsx, src/ui/map/App.tsx, src/ui/map/data/{types,GameStateAdapter}.ts, docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md, docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md, docs/10_canon/{context.md,CANON.md}, docs/PROJECT_LEDGER.md, .claude/napkin.md.
 - **Verification:** `npx tsc --noEmit` (repo root) pass x2, `npx vitest run` pass x2 (18 files, 193 passed, 13 skipped), `src/ui/map`: `npm run build` pass, `npx tsc --noEmit` pass.
 
-**[2026-02-28] Paradox rules and Phase C GUI execution plan**
+**[2026-02-28] Pyrrhic rules and Phase C GUI execution plan**
 - **Phase:** Orchestrator-led multi-phase execution (Phase C GUI)
-- **Summary:** User established "Paradox rules" for Orchestrator-led implementation: concrete phases with concrete todos; refactor-pass between each phase; use full Paradox team and delegate tasks; spin up concurrent processes/subagents when possible; when done run all tests, create full report in docs, update napkin/ledger/canon and technical docs, then commit and push. Architect oversees process and flags decisions for user review. Documented in docs/20_engineering/PARADOX_RULES.md and referenced from context.md §2. Phase C (Rich tooltips, MapModeToolbar, MapLayerToggles, keyboard shortcuts, Attack confirmation modal, Order queue panel) execution plan created at docs/40_reports/phase_c/PHASE_C_EXECUTION_PLAN.md with phases C1–C5, todos, owners, refactor-pass gates, and concurrency notes. Napkin location confirmed as .claude/napkin.md in context.md.
-- **Change:** (1) Created docs/20_engineering/PARADOX_RULES.md (eight rules: phases+todos, refactor between phases, delegate to team, concurrent execution, tests+report, napkin/ledger/docs, commit+push, Architect oversight). (2) Created docs/40_reports/phase_c/PHASE_C_EXECUTION_PLAN.md (C1 tooltips, C2 toolbar+toggles, C3 shortcuts, C4 attack modal, C5 order queue; refactor after each; concurrency; decisions-for-review section). (3) context.md §2: napkin location set to .claude/napkin.md (canonical); added Paradox rules pointer and Napkin SKILL link; project metadata list updated to .claude/napkin.md.
-- **Failure mode prevented:** Multi-phase work could proceed without refactor gates or clear delegation; Paradox rules and Phase C plan give a single playbook for Orchestrator and Architect.
+- **Summary:** User established "Pyrrhic rules" for Orchestrator-led implementation: concrete phases with concrete todos; refactor-pass between each phase; use full Pyrrhic team and delegate tasks; spin up concurrent processes/subagents when possible; when done run all tests, create full report in docs, update napkin/ledger/canon and technical docs, then commit and push. Architect oversees process and flags decisions for user review. Documented in docs/20_engineering/PARADOX_RULES.md and referenced from context.md §2. Phase C (Rich tooltips, MapModeToolbar, MapLayerToggles, keyboard shortcuts, Attack confirmation modal, Order queue panel) execution plan created at docs/40_reports/phase_c/PHASE_C_EXECUTION_PLAN.md with phases C1–C5, todos, owners, refactor-pass gates, and concurrency notes. Napkin location confirmed as .claude/napkin.md in context.md.
+- **Change:** (1) Created docs/20_engineering/PARADOX_RULES.md (eight rules: phases+todos, refactor between phases, delegate to team, concurrent execution, tests+report, napkin/ledger/docs, commit+push, Architect oversight). (2) Created docs/40_reports/phase_c/PHASE_C_EXECUTION_PLAN.md (C1 tooltips, C2 toolbar+toggles, C3 shortcuts, C4 attack modal, C5 order queue; refactor after each; concurrency; decisions-for-review section). (3) context.md §2: napkin location set to .claude/napkin.md (canonical); added Pyrrhic rules pointer and Napkin SKILL link; project metadata list updated to .claude/napkin.md.
+- **Failure mode prevented:** Multi-phase work could proceed without refactor gates or clear delegation; Pyrrhic rules and Phase C plan give a single playbook for Orchestrator and Architect.
 - **Files created:** docs/20_engineering/PARADOX_RULES.md, docs/40_reports/phase_c/PHASE_C_EXECUTION_PLAN.md. **Files modified:** docs/10_canon/context.md, docs/PROJECT_LEDGER.md.
 
 **2026-02-28** - Phase C GUI implementation complete (React+MapLibre map app)
@@ -11276,7 +11276,7 @@ Determinism checks **MUST** be run:
 - **Summary:** Execution plan to resolve map investigation issues: desktop map build output path vs Electron route, density-mode interactions, layer-binding race, protocol routes for `/data/runs` and `/data/source`, glyph documentation, Tailwind build warning.
 - **Blast-radius:** Build output path (`dist/tactical-map`), map interaction bindings (`useMapInteractions.ts`, `MapContainer.tsx`), desktop protocol handlers (`electron-main.cjs`, `protocol_data_route.cjs`), map style/docs (glyphs, optional style contract).
 - **Plan:** `docs/plans/2026-03-03-map-runtime-contract-fixes.md`
-- **Phases:** A (build + Tailwind), B (density + layer-aware binding), C (protocol routes), D (glyphs doc), E (tests + report). Paradox roles: Build Engineer, UI/UX Developer, Platform Specialist, Documentation Specialist, QA Engineer; Process QA after Phase E.
+- **Phases:** A (build + Tailwind), B (density + layer-aware binding), C (protocol routes), D (glyphs doc), E (tests + report). Pyrrhic roles: Build Engineer, UI/UX Developer, Platform Specialist, Documentation Specialist, QA Engineer; Process QA after Phase E.
 - **Determinism:** No simulation or ordering impact; build path, UI events, and I/O routes only.
 - **Status:** Plan approved; implementation not started.
 
@@ -13151,7 +13151,7 @@ Pre-awarding decorations at war start collapses the doctrinal arc (ARBiH starts 
 ## [2026-03-08] Orchestrator-led state-of-game evaluation started
 
 ### What changed
-- Began a fresh Paradox team "state of the game" evaluation to replace the stale same-day draft in `docs/40_reports/convenes/20260308_PARADOX_TEAM_STATE_OF_THE_GAME_EVALUATION.md`
+- Began a fresh Pyrrhic team "state of the game" evaluation to replace the stale same-day draft in `docs/40_reports/convenes/20260308_PARADOX_TEAM_STATE_OF_THE_GAME_EVALUATION.md`
 - Scoped the review as a docs/reporting pass covering engine, combat, calibration, GUI, code health, canon, and system interoperability
 - Loaded orchestration, reporting, GUI, and process guidance before dispatching specialist reviews
 

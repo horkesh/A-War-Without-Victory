@@ -26,7 +26,7 @@
 
 ---
 
-## 3. Use entire Paradox team — delegate tasks
+## 3. Use entire Pyrrhic team — delegate tasks
 
 - **Orchestrator** owns priority, sequencing, and handoffs.
 - **Architect** oversees process; makes implementation/design decisions when needed but **flags them for later user review**.
@@ -76,4 +76,4 @@
 
 ---
 
-*These are the Paradox rules. Reference this document from `docs/10_canon/context.md` or workflow docs when Orchestrator-led multi-phase execution is in effect.*
+*These are the Pyrrhic rules. Reference this document from `docs/10_canon/context.md` or workflow docs when Orchestrator-led multi-phase execution is in effect.*

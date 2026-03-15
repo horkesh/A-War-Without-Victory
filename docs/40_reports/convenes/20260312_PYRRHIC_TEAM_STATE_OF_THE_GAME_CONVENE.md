@@ -1,4 +1,4 @@
-# Paradox Team — State of the Game Convene
+# Pyrrhic Team — State of the Game Convene
 **Date:** 2026-03-12
 **Convened by:** Orchestrator
 **Participants:** All Paradox roles

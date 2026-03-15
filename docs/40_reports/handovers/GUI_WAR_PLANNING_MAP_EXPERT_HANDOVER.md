@@ -1,7 +1,7 @@
 # War Planning Map — GUI Expert Advisor Handover
 
 **Date:** 2026-02-07  
-**Prepared by:** Orchestrator (Paradox team convened)  
+**Prepared by:** Orchestrator (Pyrrhic team convened)  
 **Audience:** External expert advisor (GUI/UX, interaction design)  
 **Main priority:** The map that opens when the player clicks the wall map in the warroom — this is **the meat of the game**.
 
@@ -154,4 +154,4 @@ Then open the warroom; click the wall map to open the War Planning Map. Do not u
 
 ---
 
-**Orchestrator:** This handover synthesizes Paradox team input. The map that opens on wall-map click is the primary game surface. The expert should focus on: what it shows, how it shows it, how the user sees brigade/corps/settlement/municipality info, and how (if at all) to prepare for future order-giving. War system (orders) remains a separate track.
+**Orchestrator:** This handover synthesizes Pyrrhic team input. The map that opens on wall-map click is the primary game surface. The expert should focus on: what it shows, how it shows it, how the user sees brigade/corps/settlement/municipality info, and how (if at all) to prepare for future order-giving. War system (orders) remains a separate track.

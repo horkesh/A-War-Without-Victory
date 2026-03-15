@@ -455,7 +455,7 @@ Identified via Orchestrator comprehensive review convene ([ORCHESTRATOR_COMPREHE
 
 *(See PROJECT_LEDGER.md 2026-02-13 docs/40_reports cleanup and consolidation; 2026-02-13 physical reorg and reports-custodian.)*
 
-### Paradox team & meetings
+### Pyrrhic team & meetings
 
 - **Subagents:** formation-expert (militia/brigade, pools, constants); scenario-creator-runner-tester (BiH history, scenarios, run analysis, conceptual proposals).
 - **State-of-game meetings:** e.g. PARADOX_STATE_OF_GAME_MEETING_2026_02_08_THIRD.md — knowledge base, PDF limitation, canon audit; 11 systems designed, 5 fully wired, 6 partial.

@@ -1,6 +1,6 @@
 ---
 name: wake-up
-description: Spin up napkin and orchestrator protocols. Start using superpowers and engage the Paradox team. Get up to date with the most recent work on the repo. Identify 3 areas that show gaps or deficiencies and propose to work on them.
+description: Spin up napkin and orchestrator protocols. Start using superpowers and engage the Pyrrhic team. Get up to date with the most recent work on the repo. Identify 3 areas that show gaps or deficiencies and propose to work on them.
 user_invocable: true
 ---
 
@@ -16,7 +16,7 @@ Invoke these skills in order — each one shapes how the rest of the session run
 
 1. **napkin** — Read and curate `.claude/napkin.md`. Internalize silently.
 2. **using-superpowers** — Establish skill discipline for the session.
-3. **orchestrator** — Engage Paradox team perspective for big-picture awareness.
+3. **orchestrator** — Engage Pyrrhic team perspective for big-picture awareness.
 
 ### 2. Survey Recent Work
 
@@ -38,7 +38,7 @@ Using Orchestrator perspective and the surveyed state, identify **exactly 3** ar
 - **Area**: one-line label
 - **Evidence**: what you found (failing tests, stale code, missing coverage, known regression, napkin warning, ledger TODO)
 - **Proposed action**: concrete next step, scoped to a single session
-- **Paradox roles involved**: which skills/roles would be engaged
+- **Pyrrhic roles involved**: which skills/roles would be engaged
 
 Present these as a numbered list and ask the user which (if any) they want to pursue.
 

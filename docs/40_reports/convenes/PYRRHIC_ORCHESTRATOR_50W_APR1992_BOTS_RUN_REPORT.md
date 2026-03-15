@@ -8,7 +8,7 @@
 
 ## 1. Goal (user request)
 
-- Organize Paradox team and run a **50-week scenario** with **April 1992** as starting point.
+- Organize Pyrrhic team and run a **50-week scenario** with **April 1992** as starting point.
 - **3 bots** (one per side) as active decision makers.
 - Track **population, troop strengths, displacement, control** changes.
 - Flag **ahistorical or canon-violating** results (e.g. suspiciously high troop strength).

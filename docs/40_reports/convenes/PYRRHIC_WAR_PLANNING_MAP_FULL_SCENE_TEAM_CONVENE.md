@@ -1,4 +1,4 @@
-# Paradox Team Convene: War Planning Map — Full-Screen Scene Implementation
+# Pyrrhic Team Convene: War Planning Map — Full-Screen Scene Implementation
 
 **Date:** 2026-02-07  
 **Convened by:** Orchestrator  

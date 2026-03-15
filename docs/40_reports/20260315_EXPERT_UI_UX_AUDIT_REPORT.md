@@ -1,6 +1,6 @@
 # Expert UI/UX Audit Report: A War Without Victory
 **Date:** 2026-03-15
-**Auditor:** Paradox Team (Front-end & Wargame Specialists)
+**Auditor:** Pyrrhic Team (Front-end & Wargame Specialists)
 
 ## Executive Summary
 The current UI successfully captures a "high-tech military command" aesthetic, utilizing glassmorphism, scanline textures, and mono-spaced dossier layouts. However, the transition from "thematic flavor" to "tactical utility" is uneven. While the map is highly interactive, the data presented in the detail panels often relies on abstract simulation metrics that may confuse the user without further contextual anchoring.

@@ -1,11 +1,11 @@
-# Paradox Team State of the Game Evaluation
+# Pyrrhic Team State of the Game Evaluation
 
 **Date:** 2026-03-09
 **Convener:** Orchestrator
 **Participants:** Technical Architect, Gameplay Programmer, UI/UX Developer, QA Engineer
 
 ## Executive Summary
-The Paradox team conducted a comprehensive, multi-agent evaluation of the AWWV codebase, grading each system independently and analyzing their interoperability. 
+The Pyrrhic team conducted a comprehensive, multi-agent evaluation of the AWWV codebase, grading each system independently and analyzing their interoperability. 
 
 The engine exhibits world-class determinism and strict architectural discipline. The React-based Tactical Map is a gold standard for strategy game interfaces. However, technical debt is accumulating in the form of a monolithic `GameState`, highly complex combat/front algorithms, and a fragmented QA pipeline lacking coverage metrics. The Warroom UI also suffers from incomplete placeholder flows that break immersion.
 

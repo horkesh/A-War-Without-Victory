@@ -1168,7 +1168,7 @@ If metrics miss targets:
 - Comparison vs n254 baseline
 - Identified regressions and proposed fixes
 
-→ **Full Paradox team report** under `docs/40_reports/phase_m/`
+→ **Full Pyrrhic team report** under `docs/40_reports/phase_m/`
 
 ---
 

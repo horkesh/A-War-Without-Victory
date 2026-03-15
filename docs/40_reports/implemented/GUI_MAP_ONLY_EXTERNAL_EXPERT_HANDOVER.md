@@ -1,7 +1,7 @@
 # GUI Creation — External Expert Advisor Handover (Map-Only Phase)
 
 **Date:** 2026-02-08  
-**Prepared by:** Orchestrator (Paradox team)  
+**Prepared by:** Orchestrator (Pyrrhic team)  
 **Audience:** External expert advisor (GUI/UX, interaction design) — **GUI creation**  
 **Scope:** **Map-only.** Warroom (HQ, desk, wall map, crests) is **out of scope** for this phase. Deliverable: a **standalone map application** — one base geographical map with information layers, settlement interaction, and zoom — per earlier report recommendation.
 

@@ -1,4 +1,4 @@
-# Paradox Team Full State-of-the-Game Evaluation
+# Pyrrhic Team Full State-of-the-Game Evaluation
 
 **Date:** 2026-03-10  
 **Convener:** Orchestrator  
@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-The Paradox team conducted a **full multi-agent evaluation** of AWWV: each system was graded individually and assessed for interoperability. **War-or-Game** joined as the new realism auditor and was tasked with questioning everything—outcomes, territorial dynamics, force structure, and commander behavior—against the standard: *What would a real Bosnian War commander find absurd?*
+The Pyrrhic team conducted a **full multi-agent evaluation** of AWWV: each system was graded individually and assessed for interoperability. **War-or-Game** joined as the new realism auditor and was tasked with questioning everything—outcomes, territorial dynamics, force structure, and commander behavior—against the standard: *What would a real Bosnian War commander find absurd?*
 
 **Overall picture:** The engine is **architecturally sound** (partitioned state, deterministic pipeline, strong canon alignment) and **combat is now plausible** after the n482 posture fix. The main gaps are **calibration** (RS over-capture, casualty volume), **realism** (HVO passivity, zero-morale consequence, casualty ratio), **canon hygiene** (Phase I/II remnants, morale doc drift), and **operational maturity** (QA coverage thresholds, warroom placeholders, CI). No single system fails; interoperability is clear (state → adapter → UI, pipeline → runner → baselines). The report below is synthesized from eight parallel subagent evaluations.
 
@@ -334,4 +334,4 @@ Prioritized across all eight roles:
 
 ## Document History
 
-- **2026-03-10:** Full Paradox team evaluation with eight subagents; War-or-Game included as realism auditor. Report placed in `docs/40_reports/convenes/`.
+- **2026-03-10:** Full Pyrrhic team evaluation with eight subagents; War-or-Game included as realism auditor. Report placed in `docs/40_reports/convenes/`.

@@ -1,4 +1,4 @@
-# Paradox Team Convene: 1991 Census Master & Sarajevo Split Settlements
+# Pyrrhic Team Convene: 1991 Census Master & Sarajevo Split Settlements
 
 **Date:** 2026-02-07  
 **Convened by:** Orchestrator  

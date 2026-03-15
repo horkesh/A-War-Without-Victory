@@ -31,7 +31,7 @@
 
 ---
 
-## Paradox Roles & Domain Experts
+## Pyrrhic Roles & Domain Experts
 
 | Skill | When to use |
 |-------|-------------|
@@ -113,7 +113,7 @@
 | **finishing-a-development-branch** | Implementation complete, tests pass; decide merge/PR/cleanup |
 | **using-git-worktrees** | Feature work needing isolation; before executing implementation plans |
 | **scenario-harness-engineer** | Scenario runner, preflight, diagnostics, artifacts, run pipeline |
-| **scenario-report** | Run a scenario and produce a full Paradox team report with tracked metrics and per-role assessments; "everyone weighing in" |
+| **scenario-report** | Run a scenario and produce a full Pyrrhic team report with tracked metrics and per-role assessments; "everyone weighing in" |
 | **qa-engineer** | Test strategy, coverage, regression; determinism-auditor for determinism |
 | **writing-skills** | Creating, editing, verifying skills |
 | **retrospective-analyst** | Post-milestone review; what went well, gaps, spec/code discrepancies |

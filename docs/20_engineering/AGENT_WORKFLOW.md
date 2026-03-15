@@ -20,15 +20,15 @@ Do not restate procedures already defined in `docs/10_canon/context.md`. This fi
 
 ## Paradox (agent team)
 
-The collective identity for subagents in this repo is **Paradox**. For **big-picture or team coordination** (strategic priority, convening roles, aligning roadmap and ledger), invoke **orchestrator**; Product Manager is the Orchestrator's deputy for scope and sequencing. For other non-trivial tasks, read `.cursor/AGENT_TEAM_ROSTER.md` (Paradox roster). Invoke the listed specialist(s) by reading and following the corresponding `.cursor/skills/<name>/SKILL.md`. Use clarification-first for high-risk items (cross-phase, canon, architecture, determinism); document handoffs when passing between roles.
+The collective identity for subagents in this repo is **Pyrrhic**. For **big-picture or team coordination** (strategic priority, convening roles, aligning roadmap and ledger), invoke **orchestrator**; Product Manager is the Orchestrator's deputy for scope and sequencing. For other non-trivial tasks, read `.cursor/AGENT_TEAM_ROSTER.md` (Pyrrhic roster). Invoke the listed specialist(s) by reading and following the corresponding `.cursor/skills/<name>/SKILL.md`. Use clarification-first for high-risk items (cross-phase, canon, architecture, determinism); document handoffs when passing between roles.
 
 ## Process QA (validates others — eliminates micromanagement)
 
-**Process QA changes everything.** Invoke **Process QA** (quality-assurance-process) to validate that *other* Paradox roles followed established process (context.md, ledger, preferences check, commit discipline). Process QA is the single process checkpoint: it does not do the work for others; it verifies they followed the rules. Invoke Process QA **after significant handoffs**, **after Orchestrator or Product Manager execution**, or **before merge**. This virtually eliminates micromanagement—others follow process, Process QA verifies.
+**Process QA changes everything.** Invoke **Process QA** (quality-assurance-process) to validate that *other* Pyrrhic roles followed established process (context.md, ledger, preferences check, commit discipline). Process QA is the single process checkpoint: it does not do the work for others; it verifies they followed the rules. Invoke Process QA **after significant handoffs**, **after Orchestrator or Product Manager execution**, or **before merge**. This virtually eliminates micromanagement—others follow process, Process QA verifies.
 
 ## See Also
 
-- `.cursor/AGENT_TEAM_ROSTER.md` - Paradox roster and handoffs
+- `.cursor/AGENT_TEAM_ROSTER.md` - Pyrrhic roster and handoffs
 - `docs/00_start_here/docs_index.md` - Docs entrypoint
 - `docs/10_canon/context.md` - Complete workflow and process rules
 - `docs/10_canon/CANON.md` - Canon document index

@@ -1,5 +1,5 @@
 ---
-description: Establishes the hierarchy and priority for Paradox team roles during task execution.
+description: Establishes the hierarchy and priority for Pyrrhic team roles during task execution.
 ---
 
 # Orchestrator Priority Protocol
@@ -21,7 +21,7 @@ This workflow defines the primary communication channel when starting new work o
 
 2. **State Analysis**:
    - The Orchestrator assesses the "State of the Game" against the roadmap and ledger.
-   - Delegation: Orchestrator assigns specific domains to Paradox roles (Technical Architect, Game Designer, etc.).
+   - Delegation: Orchestrator assigns specific domains to Pyrrhic roles (Technical Architect, Game Designer, etc.).
 
 3. **Product Manager Supervision**:
    - The Product Manager (deputy) takes the Orchestrator's direction and oversees the detailed team execution.

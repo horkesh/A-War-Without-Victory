@@ -1,4 +1,4 @@
-# Paradox Team Meeting — State of the Game
+# Pyrrhic Team Meeting — State of the Game
 
 **Convened by:** Product Manager (Gary Grigsby)  
 **Date:** 2026-02-06  
@@ -113,11 +113,11 @@ Each Paradox specialist is asked one question to surface their view of the state
 - **Build/QA:** Confirm gate commands and report status.
 - **Documentation:** Update ledger “Current Phase” and “Focus” per Executive Roadmap.
 - **Game Designer + Canon Compliance:** Short canon alignment check on militia/brigade and Phase I.
-- **Product Manager:** Track “next single priority” and re-convene Paradox if scope or phase becomes unclear.
+- **Product Manager:** Track “next single priority” and re-convene Pyrrhic if scope or phase becomes unclear.
 
 ---
 
-*End of meeting. This document is the single record of the Paradox state-of-the-game meeting and recommended next steps.*
+*End of meeting. This document is the single record of the Pyrrhic state-of-the-game meeting and recommended next steps.*
 
 ---
 
