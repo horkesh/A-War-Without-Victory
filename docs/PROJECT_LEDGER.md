@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** **v0.3.0** (Playable Alpha) — Endgame & Negotiation system COMPLETE (6 phases). Negotiation capital tracking, 4 peace plan events, patron pressure + override authority, Dayton negotiation engine (territorial + institutional packages, bot AI), Washington Agreement + HV brigade integration, Pyrrhic Score verdict screen. **763 tests**, 66 suites. Design: `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md`.
+**Status:** **v0.3.1** (Playable Alpha + Endgame System) — Endgame & Negotiation system COMPLETE (6 phases). Negotiation capital tracking, 4 peace plan events, patron pressure + override authority, Dayton negotiation engine (territorial + institutional packages, bot AI), Washington Agreement + HV brigade integration, Pyrrhic Score verdict screen. **763 tests**, 66 suites. Design: `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md`.
 
 ## [2026-03-15] n797: Full OOB Calibration Sprint — Spawn Fix + Overstacking + Troop Balance
 
