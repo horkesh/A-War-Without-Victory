@@ -1145,8 +1145,17 @@ function assignCrossCorpsEnclaveDefenders(
         const fCorpsId = getFormationCorpsId(f);
         if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue;
 
-        // Check if this brigade is on a front OSID of ANY same-faction sector
+        // Guard: if the brigade's own corps has ANY sector at all, skip — the brigade
+        // should be assigned to its own corps through the normal pipeline. Cross-corps
+        // assignment is ONLY for brigades whose corps has zero sectors (true disconnected
+        // enclaves, e.g. HVO central Bosnia brigades where hvo_central_bosnia has no
+        // sectors but hvo_northwest_bosnia does). This prevents Herzegovina brigades from
+        // being captured by 1KK sectors (Čajniče → Banja Luka wandering bug).
         const loc = f.location_osid;
+        const ownCorpsHasSectors = sectors.some(s => s.corps_id === fCorpsId);
+        if (ownCorpsHasSectors) continue;
+
+        // Check if this brigade is on a front OSID of ANY same-faction sector
         let sectorIndices = frontOsidToSectors.get(loc);
         if (!sectorIndices || sectorIndices.length === 0) {
             // Not on front — check territory (1-hop behind)
