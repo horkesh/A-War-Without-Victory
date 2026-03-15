@@ -918,6 +918,76 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 
 ---
 
+### #37 — Elite loan: no cohesion-based recall (P2, n747)
+
+**What we found:** The 1st Guards Motorized was loaned to vrs_sarajevo_romanija at t1 and fought three battles at milankovici_2 (Olovo) over weeks 35-39. By w40: personnel 1864/3000, morale 60, **cohesion 9.0**. The recall system checks casualties (30% threshold — not triggered because the unit grew through reinforcement before losing personnel) and morale (threshold 35 — 60 is above). It does NOT check cohesion.
+
+**Historical context:** Cohesion 9 means a unit where the command structure has collapsed, sub-units don't coordinate, soldiers don't trust each other. In the Bosnian War, Mladić would never leave the 1st Guards — his premiere mobile strike force — at cohesion 9. He'd pull them back to Pale, reconstitute them, and redeploy. The VRS Main Staff treated elite units as investments to preserve, not expendable assault troops.
+
+**Root cause:** `tickEliteLoans` in `army_reserve_system.ts` checks `ELITE_CASUALTY_THRESHOLD` (30% personnel loss) and `ELITE_MORALE_RECALL` (morale < 35). No cohesion check exists.
+
+**Proposed fix:** Add `ELITE_COHESION_RECALL` threshold (suggest 25). In `tickEliteLoans`, force-recall when `f.cohesion < ELITE_COHESION_RECALL`. A cohesion-9 elite is not an elite — it's a liability.
+
+**Evidence (n747):** `rs_1st_guards_motorized` — cohesion 9.0, 3 battles at Olovo, 40 turns deployed without recall.
+
+**Priority:** P2 — the system works but permits absurd states.
+
+---
+
+### #38 — Elite loan tracker not updated during battle resolution (P3, n747)
+
+**What we found:** All four elite brigades show `battles_fought: 0` and `casualties_taken: 0` in `EliteLoanEpisode` despite the weekly report recording them in combat. The 65th fought 5 battles, the 1st Guards 3, the Black Swans 2, the Guards 1. None are reflected in the tracker.
+
+**Root cause:** `EliteLoanEpisode.battles_fought` and `casualties_taken` are set to 0 at episode creation (`deployEliteLoan`) and never incremented. No code in `attack_resolution_osid.ts` or `tickEliteLoans` updates these fields from battle results.
+
+**Proposed fix:** In `attack_resolution_osid.ts`, after battle resolution, check if any participating formation has `elite_loan_state.on_loan` and increment the tracker episode's `battles_fought` and `casualties_taken` fields.
+
+**Impact:** Player-facing Campaign History panel in ArmyReservePanel will show zeroes for all metrics until this is fixed. Decorative, not functional.
+
+**Priority:** P3 — instrumentation gap, no gameplay impact.
+
+---
+
+### #39 — ARBiH suicide attacks at 0.1-0.2 power ratio (P2, n747)
+
+**What we found:** In late war (w36-40), multiple ARBiH brigades launched deliberate attacks at catastrophic odds:
+- w36: 105th Motorized → Radava, power_ratio 0.1, 601 attacker casualties
+- w37: 101st Mountain → Radava (again), power_ratio 0.2, 496 attacker casualties
+- w40: 252nd Slavna → Ripac, power_ratio 0.2, 720 attacker casualties
+
+Power ratio 0.1 means the attacker has 10% of defender strength. No commander in any army launches a deliberate assault with 10:1 odds against. The operation system forces participating brigades to attack objectives regardless of how suicidal the prediction is — the `min_attack_outcome` threshold inherited from the operation permits it.
+
+**Historical context:** ARBiH operations in 1992-93 were often launched with poor odds, but not at 10:1 against. Even the most desperate 1st Corps breakout attempts from Sarajevo had at least a plausible force ratio at the point of attack. The 5th Corps operations around Bihać were similarly constrained by reality — you probe, find the weak point, concentrate there. You don't throw a brigade at a fortified position at 10% strength.
+
+**Related:** CONSOLIDATED_BACKLOG §8 "ARBiH zero-capture operations" documents the same class of problem. Also related to closed #29 (zombie operations) and #36 (Operacija Zora stall).
+
+**Root cause candidates:** (a) `min_attack_outcome` allows 'repulsed' or 'catastrophic' during execution — no floor on predicted outcome for launching attacks; (b) no per-turn abort check during execution that says "we're being massacred, stop"; (c) approach-OSID selection forces brigades toward unreachable objectives.
+
+**Proposed fix:** Per-execution-turn sanity check: if the predicted outcome for the current objective is 'catastrophic' for N consecutive turns (suggest N=2), the axis stalls. Different from the existing idle/movement stall counters — this is an outcome-quality gate.
+
+**Priority:** P2 — produces visibly absurd casualties and wastes ARBiH manpower.
+
+---
+
+### #40 — Operational tempo too low: 3.5 battles/week across 198 brigades (P3, n747)
+
+**What we found:** 141 total battles over 40 weeks = 3.5/week. With 198 active brigades across three factions, that's one engagement per 56 brigade-weeks. The ops-only attack doctrine means only operation participants fight; the other ~180 brigades each turn sit in their sectors defending.
+
+**Historical context:** The first year of the Bosnian War was constant, everywhere, all the time. Every front had daily skirmishes. The Sarajevo siege alone generated dozens of engagements per week. 3.5/week is a cold war, not the Bosnian War.
+
+**Root cause:** By design — `evaluateOffensive` was stripped of independent attacks in n500 (ops-only doctrine). All attacks flow through CorpsOperation. With typical operation cadence (3+ turns planning, 3-5 turns execution, recovery), each corps runs 4-6 operations in 40 weeks. Most brigades never attack.
+
+**Note:** This is a known design trade-off. Ops-only prevents gamey penny-packet probes. But the cure is arguably worse than the disease — 3.5 battles/week is too quiet. This will likely be addressed by the follow-on operation planning system (deferred Fix B) or by adding limited independent tactical actions (counterattacks already exist as a brigade-level exception).
+
+**Priority:** P3 — known design trade-off, not a bug. Monitor.
+
+| **P2** | #37 Elite loan: no cohesion recall | 1st Guards at cohesion 9.0 after 40 turns, no recall triggered | **OPEN — easy fix** |
+| **P3** | #38 Elite tracker not updated | battles_fought/casualties_taken always 0 despite combat | **OPEN — instrumentation** |
+| **P2** | #39 ARBiH suicide attacks (0.1 PR) | Ops force attacks at 10:1 against; 600-720 cas per battle | **OPEN — needs execution gate** |
+| **P3** | #40 Operational tempo 3.5/week | Ops-only doctrine → 180 brigades idle every turn | **KNOWN — design trade-off** |
+
+---
+
 ## Methodology
 
 **How to audit for realism:**
