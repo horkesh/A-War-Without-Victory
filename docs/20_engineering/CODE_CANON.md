@@ -59,6 +59,10 @@ Ledger entries are required for any change to:
 - Canonical entrypoints
 See `docs/20_engineering/DETERMINISM_TEST_MATRIX.md` for the current enforcement coverage.
 
+## Development Cycle
+
+Code changes are implemented either during day shift (user + Claude interactive) or night shift (autonomous Claude executing prepared plans). The night shift enforces all Code Canon rules — determinism contract, canon precedence, entrypoint discipline — without human oversight. See `.claude/skills/nightshift/SKILL.md`.
+
 ## Assumptions
 - Assumption: There is a single canonical scenario runner.
   - How to verify: Use the discovery checklist in `docs/20_engineering/REPO_MAP.md`.

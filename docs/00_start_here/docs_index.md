@@ -42,6 +42,9 @@
 - [ADR/](../20_engineering/ADR/) — architecture decision records
 - [repo/](../20_engineering/repo/) — repo policies (tracked artifacts, node_modules)
 - [specs/](../20_engineering/specs/) — phase/sim and map specs
+- [NIGHTSHIFT_HANDOFF_TEMPLATE.md](../20_engineering/NIGHTSHIFT_HANDOFF_TEMPLATE.md) — template for autonomous night shift handoffs
+- [Night Shift Skill](../../.claude/skills/nightshift/SKILL.md) — autonomous implementation manager protocol
+- [PYRRHIC_PLANNING_RULES.md](../20_engineering/PYRRHIC_PLANNING_RULES.md) — mandatory plan compliance rules (includes night shift handoff requirements)
 
 ## Planning (docs/30_planning/)
 

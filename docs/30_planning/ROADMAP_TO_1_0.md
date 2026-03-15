@@ -64,6 +64,8 @@ v0.3.2 → v0.3.3 → INFRASTRUCTURE → v0.4.0 → v0.4.1 → v0.4.2 → v0.4.3
 ```
 Note: v0.4.4 (Officer Experience) and v0.4.5 (AI Commander) SWAPPED from original numbering. Officer experience implemented before AI Commander so Claude has the full officer picture. See `CROSS_PLAN_REVIEW_V04.md` for rationale.
 
+Milestones are implemented via the night shift system when plans are ready and approved by day shift. Plans must comply with Pyrrhic Planning Rules (`docs/20_engineering/PYRRHIC_PLANNING_RULES.md`) and use the handoff template (`docs/20_engineering/NIGHTSHIFT_HANDOFF_TEMPLATE.md`). See `.claude/skills/nightshift/SKILL.md` for the autonomous execution protocol.
+
 ### Infrastructure (pre-v0.4.0)
 - [ ] **`GlassPanel.tsx`** — shared glassmorphism panel component (position, title, width, onClose). Used by ALL subsequent panels (EconomyPanel, EventLogPanel, PeaceStatusPanel enhancement, friction log). Matches canonical ops-planning visual style.
 - [ ] **`deterministic_random.ts`** — canonical utility for controlled pseudo-random: `deterministicRandom(seed, context) → number [0,1)`. Used by event system (random events), smuggling disruption, warlord friction. Same input = same output. Replay-safe.

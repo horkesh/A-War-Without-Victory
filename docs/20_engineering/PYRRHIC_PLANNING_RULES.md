@@ -146,3 +146,16 @@ After the report, propagate changes to ALL relevant documents:
 - **Non-compliance:** Plan is rejected or execution paused until compliance restored
 
 These rules are non-negotiable. They exist because every shortcut we've ever taken has cost us more time than following the process.
+
+---
+
+## 5. Night Shift Handoff
+
+Plans are often executed autonomously by the night shift (`.claude/skills/nightshift/SKILL.md`). This means:
+
+- **Plans must be self-contained.** The night shift cannot ask clarifying questions — the user is sleeping.
+- **Every ambiguity must be resolved in the plan.** Pre-make architectural decisions, specify constants, list files to skip.
+- **Use the handoff template** (`docs/20_engineering/NIGHTSHIFT_HANDOFF_TEMPLATE.md`) to prepare `nightshift-handoff.md` in the project root before activation.
+- **The night shift enforces these Pyrrhic Rules** during execution: `/simplify` gates, `tsc + vitest` after every phase, commit discipline, ledger updates, and version bumps.
+
+If a plan is too vague for autonomous execution, it is not ready for night shift.

@@ -405,6 +405,10 @@ npm run typecheck                 # Type check all TypeScript
 npm test                          # Run test suite
 ```
 
+## Development Cycle: Day/Night Shift
+
+Development follows a day/night shift cycle. Day shift (user + Claude) plans, reviews, and makes design decisions. Night shift (autonomous Claude) implements prepared plans without stopping for confirmation. Plans must comply with Pyrrhic Planning Rules and use the handoff template. See `.claude/skills/nightshift/SKILL.md` for the full protocol and `docs/20_engineering/NIGHTSHIFT_HANDOFF_TEMPLATE.md` for the handoff format.
+
 ## Common Workflows
 
 ### 1. Starting a New Task

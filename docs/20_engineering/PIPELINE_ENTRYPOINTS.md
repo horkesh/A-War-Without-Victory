@@ -141,3 +141,11 @@ When adding or changing the following, update docs as below so REPO_MAP and PIPE
 - **New GameState field or serialized state:** Add to `src/state/serializeGameState.ts` allowlist (`GAMESTATE_TOP_LEVEL_KEYS`) and key order; if it crosses canon boundary (e.g. B4 coercion), add an implementation-note in the relevant canon spec. Example: `control_events` added to GAMESTATE_TOP_LEVEL_KEYS in 2026-03-04 (commit 6400a9b). `sector_intel` added 2026-03-05 (replaces `recon_intelligence`). `pending_officer_events` added 2026-03-15 to `MilitaryState` (officer succession events for player faction; `PendingOfficerEvent` type in `officer_types.ts`).
 - **Scenario summary schema changes:** If `run_summary.json` or `weekly_report.jsonl` contracts change, update this file, `REPO_MAP.md`, `CALIBRATION_MASTER.md`, and any map/UI docs that consume the changed fields. Preserve fractional reporting fields (`share`, `ratio`, `rate`, `tolerance`, `deviation`) during normalization.
 - **New pipeline step or reorder:** Update the canon-hook table and step list in this doc; update REPO_MAP §Key Pipelines / Change X → Go Here if the “go here” file changes.
+
+## Night Shift Launch
+
+For autonomous overnight execution of implementation plans, use the night shift system. Prepare a `nightshift-handoff.md` in the project root (template: `docs/20_engineering/NIGHTSHIFT_HANDOFF_TEMPLATE.md`), then launch:
+
+```bash
+claude --dangerously-skip-permissions -p “Read nightshift-handoff.md and execute the night shift. Follow .claude/skills/nightshift/SKILL.md protocol exactly. Do not stop until all plans are complete or blocked.”
+```
