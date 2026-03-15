@@ -448,3 +448,54 @@ Phase 5 (verdict & scoring)      ← depends on 4
 - Bot negotiation: deterministic response based on capital thresholds
 - Patron override: formula-based, no randomness
 - HV spawning: fixed brigade roster, deterministic timing
+
+---
+
+## Pyrrhic Rules Compliance
+
+> **Note:** This plan was ALREADY EXECUTED (v0.3.1). Compliance sections below are retrospectively satisfied.
+
+### /simplify Gates
+
+```
+Phase 1 (Negotiation Capital) → /simplify → commit   [RETROSPECTIVELY SATISFIED]
+Phase 2∥3 (Peace Plans ∥ Patron Pressure) → /simplify → commit   [RETROSPECTIVELY SATISFIED]
+Phase 4∥6 (Dayton Negotiation ∥ Washington Agreement) → /simplify → commit   [RETROSPECTIVELY SATISFIED]
+Phase 5 (Verdict & Scoring) → /simplify → commit → tag   [RETROSPECTIVELY SATISFIED]
+```
+
+### Role Assignments
+
+| Phase | Role |
+|-------|------|
+| Phase 1: Negotiation Capital | Systems Programmer |
+| Phase 2: Peace Plan Events | Gameplay Programmer |
+| Phase 3: Patron Pressure | Gameplay Programmer |
+| Phase 4: Dayton Negotiation UI | UI/UX Developer |
+| Phase 5: Verdict & Scoring | UI/UX Developer + Gameplay Programmer |
+| Phase 6: Washington Agreement | Gameplay Programmer + Systems Programmer |
+
+- **Orchestrator** oversees all phases.
+- **Architect** makes architectural decisions — flagged for user review (not silently applied).
+
+### Protocol Enforcement
+
+- [x] Orchestrator oversees all phases
+- [x] Architect decisions flagged for user review
+- [x] Napkin read at start, updated during work
+- [x] Ledger entry appended on completion
+- [x] Life lessons scanned, relevant ones flagged
+- [x] tsc + vitest after every phase
+- [x] Version bump + tag on completion
+
+### Completion Checklist
+
+- [x] Implementation report in `docs/40_reports/implemented/`
+- [x] Canon docs updated (if applicable)
+- [x] Master files updated (if applicable)
+- [x] `VERSIONING.md` milestone marked complete
+- [x] `ROADMAP_TO_1_0.md` status updated
+- [x] `PROJECT_LEDGER.md` entry appended
+- [x] Napkin updated
+- [x] `package.json` version bumped
+- [x] Git tag pushed
