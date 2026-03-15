@@ -1067,7 +1067,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         // War termination: store max_turns and victory_conditions on state.meta for pipeline evaluation.
-        state.meta.max_turns = scenario.weeks ?? 208;
+        // max_turns is a gameplay mechanic (when does stalemate trigger), NOT the harness run length.
+        // Only set from explicit scenario.max_turns field; default 208 (4 years) handled by war_termination.ts.
+        if (typeof (scenario as any).max_turns === 'number') {
+            state.meta.max_turns = (scenario as any).max_turns;
+        }
         if (scenario.victory_conditions) {
             state.meta.victory_conditions = scenario.victory_conditions;
         }
