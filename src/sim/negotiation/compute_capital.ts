@@ -18,16 +18,19 @@ const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 // OSID area data (loaded lazily)
 // ═══════════════════════════════════════════════════════════════════════════
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
 let osidAreaCache: { total: number; areas: Record<string, number> } | null = null;
 
 function getOsidAreas(): { total: number; areas: Record<string, number> } {
     if (osidAreaCache) return osidAreaCache;
     try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const data = require('../../../data/derived/operational/osid_areas.json') as { total_area_km2: number; areas: Record<string, number> };
-        osidAreaCache = { total: data.total_area_km2, areas: data.areas };
+        const filePath = resolve(process.cwd(), 'data/derived/operational/osid_areas.json');
+        const raw = JSON.parse(readFileSync(filePath, 'utf8')) as { total_area_km2: number; areas: Record<string, number> };
+        osidAreaCache = { total: raw.total_area_km2, areas: raw.areas };
     } catch {
-        osidAreaCache = { total: 51129, areas: {} }; // fallback: BiH total area
+        osidAreaCache = { total: 51337, areas: {} }; // fallback: BiH total area
     }
     return osidAreaCache;
 }

@@ -394880,6 +394880,114 @@
         "victories": 0
       }
     },
+    "negotiation": {
+      "capital": {
+        "HRHB": {
+          "civilian_casualties_caused": 0,
+          "civilians_under_protection": 980191,
+          "enclaves_held": [],
+          "enclaves_lost": [],
+          "humanitarian_standing": 0,
+          "international_credibility": 50,
+          "military_casualties_inflicted": 715,
+          "military_casualties_taken": 2195,
+          "military_effectiveness": 10.749430523917995,
+          "military_position": 16.631440789788936,
+          "operations_launched": 7,
+          "operations_successful": 0,
+          "peace_plans_accepted": [],
+          "peace_plans_rejected": [],
+          "political_cohesion": 46.16379310344828,
+          "refugees_created": 769126,
+          "refugees_received": 768594,
+          "territory_controlled_km2": 5692.084,
+          "territory_controlled_pct": 11.087627193192624,
+          "war_crimes_events": 0
+        },
+        "RBiH": {
+          "civilian_casualties_caused": 0,
+          "civilians_under_protection": 3002873,
+          "enclaves_held": [
+            "sarajevo",
+            "srebrenica",
+            "zepa",
+            "gorazde",
+            "bihac"
+          ],
+          "enclaves_lost": [],
+          "humanitarian_standing": 0,
+          "international_credibility": 50,
+          "military_casualties_inflicted": 10914,
+          "military_casualties_taken": 28882,
+          "military_effectiveness": 12.470119797797937,
+          "military_position": 41.17157888831621,
+          "operations_launched": 35,
+          "operations_successful": 17,
+          "peace_plans_accepted": [],
+          "peace_plans_rejected": [],
+          "political_cohesion": 56.31998788612956,
+          "refugees_created": 769126,
+          "refugees_received": 768594,
+          "territory_controlled_km2": 14090.907000000003,
+          "territory_controlled_pct": 27.447719258877473,
+          "war_crimes_events": 0
+        },
+        "RS": {
+          "civilian_casualties_caused": 0,
+          "civilians_under_protection": 3324953,
+          "enclaves_held": [],
+          "enclaves_lost": [],
+          "humanitarian_standing": 0,
+          "international_credibility": 50,
+          "military_casualties_inflicted": 30944,
+          "military_casualties_taken": 11648,
+          "military_effectiveness": 87.66758241758241,
+          "military_position": 92.19697155633162,
+          "operations_launched": 93,
+          "operations_successful": 100,
+          "peace_plans_accepted": [],
+          "peace_plans_rejected": [],
+          "political_cohesion": 47.81263057929725,
+          "refugees_created": 769126,
+          "refugees_received": 768594,
+          "territory_controlled_km2": 31554.266000000003,
+          "territory_controlled_pct": 61.46464770422108,
+          "war_crimes_events": 0
+        }
+      },
+      "patron_relationships": {
+        "HRHB": {
+          "override_authority": 0,
+          "patron_id": "croatia",
+          "relationship_events": [],
+          "sanctions_active": false,
+          "support_level": 70
+        },
+        "RBiH": {
+          "override_authority": 0,
+          "patron_id": "international_community",
+          "relationship_events": [],
+          "sanctions_active": false,
+          "support_level": 40
+        },
+        "RS": {
+          "override_authority": 0,
+          "patron_id": "serbia",
+          "relationship_events": [],
+          "sanctions_active": false,
+          "support_level": 80
+        }
+      },
+      "peace_plan_history": [],
+      "pending_peace_plan": {
+        "bot_responses": {
+          "HRHB": "accepted",
+          "RS": "rejected"
+        },
+        "plan_id": "vance_owen",
+        "turn_offered": 40
+      }
+    },
     "og_orders": [],
     "pending_convoy_decisions": [],
     "pending_officer_events": [],
