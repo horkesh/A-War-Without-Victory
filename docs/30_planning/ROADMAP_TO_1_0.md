@@ -23,6 +23,7 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.4.2** | Additional Scenarios (1993, 1994, 1995 starts) | PLANNED |
 | **v0.4.3** | Economy & War Production | PLANNED |
 | **v0.4.4** | AI Commander Prototype (Phase A: Mladić) | PLANNED |
+| **v0.4.5** | Officer Experience & Weight of Command | PLANNED |
 | **v0.5.0** | Full Diplomatic System (Negotiations) | PLANNED |
 | **v0.5.1** | UI Completion (all panels, modes, tooltips) | PLANNED |
 | **v0.5.2** | Tutorial & Onboarding | PLANNED |
@@ -45,7 +46,7 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | *v1.1.0* | *"Operation Corridor" — Posavina expansion* | POST-LAUNCH |
 | *v1.2.0* | *"Autumn Leaves" — 1993-1994 deep content* | POST-LAUNCH |
 | *v1.3.0* | *"Deliberate Force" — NATO intervention* | POST-LAUNCH |
-| *v1.4.0* | *"Weight of Command" — enhanced officers* | POST-LAUNCH |
+| *v1.4.0* | *"The Hague" — war crimes consequences & moral choices* | POST-LAUNCH |
 
 ---
 
@@ -85,6 +86,14 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 - [ ] **Structured directive output** — corps stances, operation approvals, strategic reasoning.
 - [ ] **Decision logging** — all Claude decisions saved for deterministic replay.
 - [ ] **Formula bot fallback** — works offline without API key.
+
+### 0.4.5 — Officer Experience & Weight of Command
+- [ ] **Post-operation experience gain** — after each operation, commanding officer gains experience. Competence improves based on outcome (success = faster). Aggressiveness/defensive_skill shift toward what the officer actually did (defensive ops → better defense skill).
+- [ ] **ARBiH learning curve** — officers with `can_improve: true` gain competence faster. The militia-to-professional transformation arc emerges organically: ARBiH officers start weak (competence 1-2) but improve through combat. By 1995, corps commanders are competent professionals.
+- [ ] **RS brain drain** — VRS officers depart via `available_until_turn` (already implemented). Experience loss is visible: replacing a competence-5 officer with a competence-3 replacement is painful. The player feels the institutional decay.
+- [ ] **Warlord friction** — independent-minded commanders (Dudaković, Orić, early ARBiH warlords) occasionally ignore army directives. Probability based on `political_reliability` rating. Player must manage these personalities — replace them (losing combat competence) or tolerate the friction (losing political cohesion).
+- [ ] **Commander relationship events** — personality-driven events: officer refuses to cooperate with another corps, officer launches unauthorized operation, officer protests orders. Feed into negotiation capital (political cohesion dimension).
+- [ ] **Experience UI** — OfficerProfile shows experience progression (battles commanded, operations completed, competence growth). Combat record already displayed — extend with trend indicator.
 
 ---
 
