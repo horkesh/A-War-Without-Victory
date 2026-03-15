@@ -328,16 +328,49 @@ A single "Pyrrhic Score" (0-100) combining all dimensions with faction-specific 
 
 ---
 
-## 6. Open Design Questions (For Future Sessions)
+## 6. Design Decisions (Resolved 2026-03-15)
 
-1. **Negotiation UI** — is this a map-drawing interface (player proposes boundary lines) or a card-trading system (pre-defined territorial packages)?
-2. **Bot negotiation depth** — how sophisticated is the AI at evaluating proposals? Simple threshold or multi-factor?
-3. **Peace plan player agency** — can the player propose their OWN peace plans, or only respond to scripted ones?
-4. **Srebrenica** — if the player (as RS) could prevent Srebrenica, what happens? Does avoiding the genocide give RS dramatically more negotiation capital? Is this the key "what-if" of the game?
-5. **Operation Storm** — is this a scripted event or can the player (as HRHB/ARBiH) influence its timing and scope?
-6. **Patron switching** — can the player lose patron support entirely? What happens to RS if Milosevic cuts them off completely?
-7. **Early game ending** — if a player accepts Cutileiro in March 1992, does the game end immediately with a short verdict? How do we handle 3+ years of "missing" war?
-8. **Multiplayer Dayton** — if multiplayer is implemented, how do three human players negotiate Dayton? Real-time negotiation session?
+1. **Negotiation UI** — **Card-trading with map preview.** Pre-defined territorial packages ("Goražde corridor", "Brčko district", "Posavina pocket") that the player trades. Each has a capital cost. Map updates in real-time. This mirrors how real negotiations worked — named regions, not arbitrary lines.
+
+2. **Bot negotiation depth** — **Multi-factor but transparent.** Bot evaluates using same 5 capital dimensions the player sees. Shows reaction: "RS rejects — insufficient territorial compensation." No black box.
+
+3. **Peace plan player agency** — **Respond only until Dayton, then propose at Dayton.** Historical plans are scripted events (accept/reject/counter within bounds). At final Dayton, the player assembles their own proposal from territorial + institutional packages.
+
+4. **Srebrenica** — **The central moral question.** RS player faces a decision event at the Srebrenica operation. Historical path: gain territory, lose catastrophic humanitarian capital, trigger NATO bombing. Restraint path: occupy without massacre, less humanitarian cost, NATO may still come from other triggers. The game never rewards the genocide, but shows it wasn't militarily necessary — RS could have taken Srebrenica without it. That's the lesson.
+
+5. **Operation Storm** — **Scripted trigger, player-influenced scope.** Storm happens when Croatia is ready (Aug 1995). Player (as HRHB/ARBiH) influences the follow-up Federation offensive. As RS, player manages the retreat — pull back to defensible lines vs fight for every OSID.
+
+6. **Patron switching** — **Yes, losing your patron is catastrophic.** RS alienating Milošević completely = supply drops to zero, diplomatic cover gone, game-over-in-slow-motion. HRHB alienating Tuđman = HV support withdrawn. RBiH can squander international sympathy via atrocities or unreasonable peace plan rejections.
+
+7. **Early peace plan acceptance** — **Game ends immediately with abbreviated verdict.** "The war never happened. X lives saved." Short campaign = limited data = limited verdict. Rewards peace but gives less "game."
+
+8. **Multiplayer Dayton** — **Deferred to post-1.0.** Hot-seat sealed proposals + patron arbitration is the concept, but this is a v2.0 problem.
+
+## 6b. Washington Agreement & Croatian Military Integration
+
+The Washington Agreement (March 1994) is a separate framework that must be implemented:
+
+**Washington Agreement mechanics:**
+- Ends the HRHB-ARBiH war (alliance locked at 0.80)
+- HRHB entity dissolved — HVO absorbed into Federation structure
+- Joint ARBiH-HVO command structure for anti-RS operations
+- Constitutional protections for Croats (1/3 presidency, House of Peoples parity)
+
+**Croatian Army (HV) integration — post-Washington:**
+- After Washington, **Croatian regular army brigades appear on the western front** to fight alongside HVO against RS
+- This is historically accurate: HV directly participated in Operations Mistral, Sana, Southern Move (Sep-Oct 1995)
+- Implementation: HV brigades spawn as HRHB-faction formations with special `origin: 'hv'` tag, high equipment quality, and assignment to western front sectors
+- HV brigades are NOT player-controlled if playing HRHB — they follow Croatian strategic objectives (primarily territorial, directed by Zagreb)
+- If playing RS: the sudden appearance of professional HV brigades on the western front is the strategic crisis that mirrors Operation Storm's impact
+
+**Washington as a negotiation event:**
+- Triggered by: mutual HRHB-ARBiH exhaustion + US patron pressure on both sides
+- Player (as RBiH or HRHB) can accept or delay
+- Accepting: immediate ceasefire on bilateral front, corps redeploy to RS front, HV integration begins
+- Delaying: continued two-front war, patron pressure increases, both factions weaken against RS
+- Bot auto-accepts when alliance < -0.3 AND patron override > 50 AND bilateral war duration > 40 weeks
+
+**Design note:** Washington is the mid-game Dayton — a forced peace within the larger war. It must feel like a genuine turning point, not just a flag flip. The mechanical impact (HV brigades + joint command + freed-up corps) should be dramatic and visible on the map within 2-3 turns.
 
 ---
 
