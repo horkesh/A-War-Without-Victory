@@ -37,6 +37,7 @@ import {
     PATRON_AID_SCALE,
     PATRON_AID_FACTION_EFFICIENCY,
     EMBARGO_SUPPLY_CAP,
+    EMBARGO_HEAVY_CAP,
     PATRON_AID_GENERAL_FRACTION,
     PATRON_AID_HEAVY_FRACTION,
     AIRDROP_ISOLATION_THRESHOLD,
@@ -365,7 +366,8 @@ export function updateSupplyReserves(
         state.military.general_supply_reserve![factionKey] = Math.max(0, Math.min(embargoCap,
             prevGeneral - maintenanceDrain - siegeDrain.general + totalIncomeGeneral
         ));
-        state.military.heavy_munitions_reserve![factionKey] = Math.max(0, Math.min(100,
+        const heavyCap = EMBARGO_HEAVY_CAP[fid] ?? 100;
+        state.military.heavy_munitions_reserve![factionKey] = Math.max(0, Math.min(heavyCap,
             prevHeavy - heavyMaintenanceDrain - siegeDrain.heavy + totalIncomeHeavy
         ));
 

@@ -107,6 +107,20 @@ export const EMBARGO_SUPPLY_CAP: Record<string, number> = {
     HRHB: 70
 };
 
+/**
+ * Heavy munitions cap by faction (embargo effect on heavy weapons).
+ * RBiH: arms embargo blocked heavy weapon supply. Factories produced small arms
+ * and mortar rounds, not tank shells or heavy artillery ammunition. 30-50 captured
+ * T-55s and improvised weapons were all they had.
+ * RS: full JNA inheritance — 300-400 tanks, 800+ artillery pieces, ammunition depots.
+ * HRHB: Croatian pipeline provided some heavy weapons but limited by corridor access.
+ */
+export const EMBARGO_HEAVY_CAP: Record<string, number> = {
+    RBiH: 15,
+    RS: 100,
+    HRHB: 50
+};
+
 // ── Reserve → Effective Supply State Thresholds ──────────────────────────────
 /** Reserve level at or above which faction supply is considered adequate (if OSID reachable). */
 export const RESERVE_ADEQUATE_THRESHOLD = 50;

@@ -939,6 +939,19 @@ export function generateCorpsDirectives(
         if (supplyHealth.critical_fraction > 0.5) {
             offensiveTargets.length = 0;
         }
+        // Strained supply penalty: when most brigades are strained (not adequate),
+        // the commander becomes more cautious — only attacks when confident of success.
+        // This reflects the arms embargo effect: ARBiH counted bullets, so every
+        // attack had to be worth the ammunition cost. VRS with JNA depots could
+        // afford more aggressive thresholds.
+        if (supplyHealth.adequate_fraction < 0.3) {
+            // Less than 30% of brigades have adequate supply — upgrade threshold by one rank
+            const rankVal = OUTCOME_RANK[bestMinOutcome as PredictedOutcome] ?? 2;
+            if (rankVal < 3) { // below stalemate (3) → upgrade to stalemate
+                bestMinOutcome = 'stalemate';
+            }
+        }
+
         // Save the pre-supply-adjustment threshold for operation launch.
         // Operations bake in their min_attack_outcome at creation — if we pass the
         // supply-inflated 'costly_victory' here, operations launched during an early
