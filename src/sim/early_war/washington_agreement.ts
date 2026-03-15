@@ -1,7 +1,9 @@
 /**
  * Peace-phase §4.8: Washington Agreement evaluator (precondition-driven).
  *
- * Six preconditions (ALL must be true):
+ * TWO trigger pathways (either fires the agreement):
+ *
+ * Path A — Diplomatic preconditions (ALL must be true):
  *   W1: ceasefire active
  *   W2: ceasefire duration >= WASH_CEASEFIRE_DURATION turns
  *   W3: IVP negotiation_momentum > WASH_IVP_THRESHOLD
@@ -9,8 +11,14 @@
  *   W5: RS territorial control share > WASH_RS_THREAT_SHARE
  *   W6: combined RBiH + HRHB exhaustion > WASH_COMBINED_EXHAUSTION
  *
- * Effects (when fired):
+ * Path B — Patron override (ALL must be true):
+ *   P1: alliance < WASH_ALLIANCE_WAR_THRESHOLD (-0.30) — bilateral war ongoing
+ *   P2: bilateral war duration > WASH_MIN_WAR_DURATION (40 weeks)
+ *   P3: HRHB patron override_authority > WASH_PATRON_OVERRIDE_THRESHOLD (50)
+ *
+ * Effects (when fired by either path):
  *   - Alliance set to WASH_ALLIANCE_LOCK_VALUE (0.80) and locked
+ *   - Bilateral ceasefire activated
  *   - HRHB capability profiles shift (equipment_access 0.65, croatian_support 0.90)
  *   - HRHB embargo enhanced (external_pipeline_status 0.85, heavy_equipment_access 0.65)
  *   - COORDINATED_STRIKE "HV coordination enabled" flag set
@@ -50,6 +58,22 @@ export const POST_WASH_HEAVY_EQUIPMENT = 0.65;
 /** Post-Washington joint pressure bonus vs RS on shared fronts. */
 export const POST_WASH_JOINT_PRESSURE_BONUS = 1.15;
 
+// ── Path B: Patron override trigger thresholds ──
+
+/** P1: Alliance must be below this value (bilateral war active). */
+export const WASH_ALLIANCE_WAR_THRESHOLD = -0.30;
+/** P2: Minimum bilateral war duration in turns (weeks). */
+export const WASH_MIN_WAR_DURATION = 40;
+/** P3: HRHB patron override_authority threshold (from negotiation system). */
+export const WASH_PATRON_OVERRIDE_THRESHOLD = 50;
+
+export interface WashingtonPatronOverrideResult {
+    p1_alliance_below_threshold: boolean;
+    p2_war_duration_met: boolean;
+    p3_patron_override_met: boolean;
+    all_met: boolean;
+}
+
 export interface WashingtonPreconditionResult {
     w1_ceasefire_active: boolean;
     w2_ceasefire_duration: boolean;
@@ -62,6 +86,9 @@ export interface WashingtonPreconditionResult {
 
 export interface WashingtonCheckReport {
     preconditions: WashingtonPreconditionResult;
+    patron_override?: WashingtonPatronOverrideResult;
+    /** Which trigger path fired: 'diplomatic' (Path A), 'patron_override' (Path B), or null. */
+    trigger_path?: 'diplomatic' | 'patron_override' | null;
     fired: boolean;
     already_signed: boolean;
 }
@@ -129,6 +156,37 @@ export function evaluateWashingtonPreconditions(state: GameState): WashingtonPre
 }
 
 /**
+ * Evaluate Path B: Patron override trigger.
+ * When bilateral war has lasted long enough and Zagreb's override authority is high,
+ * Washington fires regardless of ceasefire/IVP preconditions.
+ */
+export function evaluateWashingtonPatronOverride(state: GameState): WashingtonPatronOverrideResult {
+    const rhs = state.political.rbih_hrhb_state;
+    const allianceValue = state.political.war_alliance_rbih_hrhb ?? 0;
+
+    // P1: Alliance below war threshold
+    const p1 = allianceValue < WASH_ALLIANCE_WAR_THRESHOLD;
+
+    // P2: Bilateral war duration > threshold
+    const warStartedTurn = rhs?.war_started_turn ?? null;
+    const warDuration = warStartedTurn !== null ? state.meta.turn - warStartedTurn : 0;
+    const p2 = warDuration > WASH_MIN_WAR_DURATION;
+
+    // P3: HRHB patron override_authority from negotiation system
+    const neg = state.military?.negotiation;
+    const hrhbPatron = neg?.patron_relationships?.['HRHB'];
+    const overrideAuthority = hrhbPatron?.override_authority ?? 0;
+    const p3 = overrideAuthority > WASH_PATRON_OVERRIDE_THRESHOLD;
+
+    return {
+        p1_alliance_below_threshold: p1,
+        p2_war_duration_met: p2,
+        p3_patron_override_met: p3,
+        all_met: p1 && p2 && p3,
+    };
+}
+
+/**
  * Apply post-Washington effects to HRHB capabilities, embargo, and alliance.
  */
 function applyWashingtonEffects(state: GameState): void {
@@ -138,6 +196,12 @@ function applyWashingtonEffects(state: GameState): void {
     state.political.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
     rhs.washington_signed = true;
     rhs.washington_turn = state.meta.turn;
+
+    // Activate bilateral ceasefire (if not already active)
+    if (!rhs.ceasefire_active) {
+        rhs.ceasefire_active = true;
+        rhs.ceasefire_since_turn = state.meta.turn;
+    }
 
     // HRHB capability shift
     const hrhbFaction = (state.factions ?? []).find((f) => f.id === 'HRHB');
@@ -195,19 +259,28 @@ export function checkAndApplyWashington(state: GameState): WashingtonCheckReport
     if (rhs.washington_signed) {
         return {
             preconditions: evaluateWashingtonPreconditions(state),
+            patron_override: evaluateWashingtonPatronOverride(state),
+            trigger_path: null,
             fired: false,
             already_signed: true
         };
     }
 
     const preconditions = evaluateWashingtonPreconditions(state);
-    if (!preconditions.all_met) {
-        return { preconditions, fired: false, already_signed: false };
+    const patronOverride = evaluateWashingtonPatronOverride(state);
+
+    // Path A: Diplomatic preconditions
+    if (preconditions.all_met) {
+        applyWashingtonEffects(state);
+        return { preconditions, patron_override: patronOverride, trigger_path: 'diplomatic', fired: true, already_signed: false };
     }
 
-    // Fire Washington Agreement
-    applyWashingtonEffects(state);
+    // Path B: Patron override
+    if (patronOverride.all_met) {
+        applyWashingtonEffects(state);
+        return { preconditions, patron_override: patronOverride, trigger_path: 'patron_override', fired: true, already_signed: false };
+    }
 
-    return { preconditions, fired: true, already_signed: false };
+    return { preconditions, patron_override: patronOverride, trigger_path: null, fired: false, already_signed: false };
 }
 

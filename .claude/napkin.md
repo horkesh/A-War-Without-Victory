@@ -8,14 +8,14 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## BASELINE: n806 — Budget-Based Brigade Allocation (2026-03-15)
-**89.8% area, 13/13 anchors, 4/6 benchmarks. War-or-Game APPROVED.**
-**Budget-based allocation: garrison-first, threat-proportional, home affinity as distance modifier.**
-**SRK siege ring: 2 brigades (1st Mech + Ilijaš). Supply embargo: RBiH heavy=15.**
-**166 total brigades (122 ARBiH mandatory + 44 emergent). Mandatory spawn fix active.**
-**Teočak, Gradačac, Žepče hold. Bijela RS (supply-constrained ARBiH can't counterattack yet).**
-**Calibration targets from docs/knowledge/*_ORDER_OF_BATTLE_MASTER.md — use these, not memory estimates.**
-**Protocol:** One phase → tests + tsc → 40w run → compare tool → /war-or-game sign-off → record.
+## Current State (2026-03-15, late session)
+**v0.3.0 Playable Alpha SHIPPED.** War termination, save system, peace UI, alliance dynamics.
+**Negotiation system in progress (v0.4 target):** Phase 1-3 done (capital tracking, peace plans, patron pressure). Phases 4+6 running (Dayton + Washington/HV). Phase 5 (verdict) next.
+**n810 baseline:** 89.8% area, 13/13 anchors, 4/6 benchmarks. 705 tests passing.
+**Studio renamed to Pyrrhic Games.** Canon v0.7. Versioning system established.
+**Design doc:** `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md` — Dayton as only ending, 5 peace plans, patron pressure, negotiation capital, Pyrrhic Score.
+**Implementation plan:** `docs/plans/2026-03-15-endgame-negotiation-implementation.md`
+**Protocol:** One phase → tests + tsc → /simplify → commit → next phase.
 **LESSONS (from engine-sprint-2):** `target_osids` does NOT override `target_municipalities` (code comment lies — both additive). Initial OSID override cascade: changing 5 Foča OSIDs caused -1.0pp total area regression. `avoid_municipalities` existed in type but was removed from implementation. `priorityMunicipalities` in generateCorpsDirectives is built but never used (dead variable).
 
 ## Session Startup (do these EVERY session — BEFORE any work)

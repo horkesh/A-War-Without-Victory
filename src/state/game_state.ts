@@ -998,6 +998,8 @@ export interface StateMeta {
     war_force_transition_after_turns?: number;
     /** War phase §11.3: Operation Storm (Oluja) has triggered (precondition step set). */
     operation_storm_triggered?: boolean;
+    /** War phase §6.3: HV brigades have been spawned (one-shot flag, set after Washington + delay). */
+    hv_brigades_spawned?: boolean;
     /** Peace-phase §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
     rbih_hrhb_war_earliest_turn?: number | null;
     /** Peace-phase §4.8: When false, alliance value is not updated (RBiH–HRHB remain at init_alliance_rbih_hrhb). Set from scenario.enable_rbih_hrhb_dynamics. */

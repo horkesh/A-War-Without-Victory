@@ -78,6 +78,7 @@ import { applyCasualtyPoolExhaustion } from '../early_war/pool_population.js';
 import { checkAndApplyWashington } from '../early_war/washington_agreement.js';
 import { updateMixedMunicipalitiesList } from '../early_war/mixed_municipality.js';
 import { checkAndApplyOperationStorm } from '../combat/operation_storm.js';
+import { tickHvIntegration } from '../combat/hv_integration.js';
 import {
     applyCorpsAttackAxisOrders,
     applyCorpsFrontAutoDistribution,
@@ -1208,6 +1209,13 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             context.report.operation_storm_check = checkAndApplyOperationStorm(context.state);
+        }
+    },
+    {
+        name: 'hv-integration',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            context.report.hv_integration = tickHvIntegration(context.state);
         }
     },
     {

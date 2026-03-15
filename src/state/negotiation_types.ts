@@ -139,6 +139,75 @@ export interface NegotiationState {
     };
     /** Composite Pyrrhic Score per faction (computed at game end). */
     pyrrhic_scores?: Record<string, number>;
+    /** Result of the Dayton negotiation (set when Dayton resolves). */
+    dayton_result?: DaytonResult;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Dayton Negotiation
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** A territorial package that can be demanded or conceded at Dayton. */
+export interface TerritorialPackage {
+    id: string;
+    name: string;
+    description: string;
+    /** Faction that holds this area by default (based on front lines). */
+    default_holder: string;
+    /** Capital cost for the non-holder to demand this package. */
+    capital_cost_to_demand: number;
+    /** Capital cost for the holder to concede this package. */
+    capital_cost_to_concede: number;
+    /** OSID keyword fragments for map matching. */
+    osid_keywords: string[];
+}
+
+/** An institutional negotiation point at Dayton. */
+export interface InstitutionalPackage {
+    id: string;
+    name: string;
+    description: string;
+    /** Capital cost to RS if centralized outcome is chosen. */
+    centralized_cost: number;
+    /** Capital cost to RBiH if decentralized outcome is chosen. */
+    decentralized_cost: number;
+}
+
+/** A proposal containing territorial demands and institutional choices. */
+export interface DaytonProposal {
+    /** Territorial package IDs the proposing faction demands. */
+    territorial_demands: string[];
+    /** Territorial package IDs the proposing faction concedes. */
+    territorial_concessions: string[];
+    /** Institutional choices: package id -> 'centralized' | 'decentralized'. */
+    institutional_choices: Record<string, 'centralized' | 'decentralized'>;
+}
+
+/** Bot response to a Dayton proposal. */
+export interface DaytonBotResponse {
+    decision: 'accept' | 'reject' | 'counter';
+    /** If counter, the bot's counter-proposal. */
+    counter_proposal?: DaytonProposal;
+    /** Reason for the decision (for UI display). */
+    reason: string;
+    /** Total capital cost of the proposal to this bot faction. */
+    proposal_cost: number;
+    /** Bot's available capital. */
+    available_capital: number;
+}
+
+/** Final result of the Dayton negotiation. */
+export interface DaytonResult {
+    /** Territorial packages that were accepted in the final agreement. */
+    territorial_packages_accepted: string[];
+    /** Territorial packages that were rejected (remain with default holder). */
+    territorial_packages_rejected: string[];
+    /** Institutional outcome for each negotiation point. */
+    institutional_choices: Record<string, 'centralized' | 'decentralized'>;
+    /** Final territory percentage per faction (approximate, from packages). */
+    final_territory_split: Record<string, number>;
+    /** Items where patron override forced acceptance. */
+    patron_overrides_applied: string[];
 }
 
 /** Create empty negotiation capital for a faction. */
