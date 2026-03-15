@@ -1031,6 +1031,39 @@ function classifyBrigadesByTerritory(
         }
     }
 
+    // ── Force-assign loaned elites that BFS couldn't place ──
+    // A loaned elite may be physically in another corps's territory (e.g. Black Swans
+    // at brnjic_2 in 3rd Corps territory, loaned to 2nd Corps). BFS from 2nd Corps
+    // sectors can't reach it. Force-assign to the target corps's largest sector
+    // so the sector-march rule moves the brigade there.
+    for (const [fid, targetCorpsId] of loanedCorpsMap) {
+        // Check if this elite was assigned to any sector
+        let alreadyAssigned = false;
+        for (const sec of sectors) {
+            if (sec.assigned_brigade_ids.includes(fid) || sec.reserve_brigade_ids?.includes(fid)) {
+                alreadyAssigned = true;
+                break;
+            }
+        }
+        if (alreadyAssigned) continue;
+
+        // Find the target corps's sector with the most assigned brigades (the "main effort")
+        let bestSector: CorpsFrontSector | null = null;
+        let bestCount = -1;
+        for (const sec of sectors) {
+            if (sec.corps_id !== targetCorpsId) continue;
+            const count = sec.assigned_brigade_ids.length;
+            if (count > bestCount || (count === bestCount && bestSector && strictCompare(sec.sector_id, bestSector.sector_id) < 0)) {
+                bestCount = count;
+                bestSector = sec;
+            }
+        }
+
+        if (bestSector) {
+            bestSector.assigned_brigade_ids.push(fid);
+        }
+    }
+
     // Sort for determinism
     for (const s of sectors) {
         s.assigned_brigade_ids.sort(strictCompare);

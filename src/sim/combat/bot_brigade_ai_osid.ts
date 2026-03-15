@@ -347,7 +347,10 @@ function executeFactionDirectives(
 
     for (const brigade of brigades) {
         const loc = brigade.location_osid!;
-        const corpsId = brigade.corps_id;
+        // Loaned elites use their target corps for command lookups —
+        // their corps_id is still the main staff (which has no operations).
+        const loanedTo = brigade.elite_loan_state?.on_loan ? brigade.elite_loan_state.loaned_to_corps : null;
+        const corpsId = loanedTo ?? brigade.corps_id;
         const cmd = corpsId ? state.military.corps_command?.[corpsId] : null;
         const activeOp = cmd?.active_operation ?? null;
         const isActiveSectorOperationParticipant =

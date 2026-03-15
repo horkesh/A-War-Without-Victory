@@ -152,16 +152,24 @@ export function generateArmyReserveRequests(
         let bestRawPriority = 0;
         let bestDescription = '';
 
-        // 1. Offensive support — active op with momentum ≥ 1
-        if (op && op.phase === 'execution') {
-            const momentum = op.momentum ?? (op.axes ? Math.max(...op.axes.map(a => a.momentum)) : 0);
-            if (momentum >= 1) {
-                const rawPriority = Math.min(100, 60 + momentum * 8);
-                if (rawPriority > bestRawPriority) {
-                    bestReason = 'offensive_support';
-                    bestRawPriority = rawPriority;
-                    bestDescription = `Op "${op.name}" at momentum ${momentum} — elite needed to exploit breakthrough`;
-                }
+        // 1. Offensive support — active op in any committed phase (force_staging through execution)
+        // Elites create momentum — they don't wait for it. Deploy during preparation so they arrive by execution.
+        if (op && (op.phase === 'execution' || (op.phase === 'planning' && op.preparation_sub_phase && op.preparation_sub_phase !== 'intel_gathering'))) {
+            const momentum = op.momentum ?? (op.axes ? Math.max(...op.axes.map(a => a.momentum ?? 0)) : 0);
+            // Scale priority by phase: execution > ready/assessment > force_staging/supply_check
+            let phaseBase: number;
+            if (op.phase === 'execution') {
+                phaseBase = 80 + Math.min(20, momentum * 8); // 80-100
+            } else if (op.preparation_sub_phase === 'ready' || op.preparation_sub_phase === 'assessment') {
+                phaseBase = 70;
+            } else {
+                phaseBase = 55; // force_staging, supply_check
+            }
+            const rawPriority = Math.min(100, phaseBase);
+            if (rawPriority > bestRawPriority) {
+                bestReason = 'offensive_support';
+                bestRawPriority = rawPriority;
+                bestDescription = `Op "${op.name}" (${op.phase === 'execution' ? 'execution' : op.preparation_sub_phase}) — elite deployment for offensive`;
             }
         }
 
@@ -287,6 +295,18 @@ export function deployEliteLoan(
 
     tracker.total_loans++;
     ls.current_episode_id = episodeId;
+
+    // ── Auto-join target corps's active operation ──
+    // If deployed for offensive reasons and the corps has an active operation,
+    // add the elite to participating_brigades so march-first logic moves it to the front.
+    if (reason === 'offensive_support' || reason === 'exploitation') {
+        const cmd = state.military.corps_command?.[corpsId];
+        const activeOp = cmd?.active_operation;
+        if (activeOp && !activeOp.participating_brigades.includes(brigadeId)) {
+            activeOp.participating_brigades.push(brigadeId);
+            activeOp.participating_brigades.sort(strictCompare);
+        }
+    }
 }
 
 /**
@@ -426,6 +446,25 @@ export function tickEliteLoans(state: GameState, turn: number): void {
         // Update episode battles from brigade_history (if available)
         // We use the total battle count as a proxy; episode battles_fought is best-effort
         // (full battle attribution requires cross-referencing attack_resolution reports)
+
+        // ── Auto-join target corps operation (standing rule) ──
+        // If the target corps launched a NEW operation since deployment, join it.
+        // This handles operation transitions: old op ends, new op launches, elite joins.
+        const targetCmd = corpsCommand[ls.loaned_to_corps];
+        const activeOp = targetCmd?.active_operation;
+        if (activeOp && !activeOp.participating_brigades.includes(bid)) {
+            if (activeOp.axes) {
+                // Multi-axis: check axes too
+                const inAxis = activeOp.axes.some(a => a.assigned_brigades.includes(bid));
+                if (!inAxis) {
+                    activeOp.participating_brigades.push(bid);
+                    activeOp.participating_brigades.sort(strictCompare);
+                }
+            } else {
+                activeOp.participating_brigades.push(bid);
+                activeOp.participating_brigades.sort(strictCompare);
+            }
+        }
 
         const turnsSinceLoan = ls.loan_start_turn != null ? turn - ls.loan_start_turn : 0;
         const personnel = f.personnel ?? 0;
