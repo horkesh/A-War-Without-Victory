@@ -183,6 +183,7 @@ export function MapContainer() {
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const hoveredOsids = useGameStore((s) => s.hoveredOsids);
+  const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const operationTargetOsids = useGameStore((s) => s.operationTargetOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const stagedOrders = useGameStore((s) => s.stagedOrders);
@@ -1077,10 +1078,21 @@ export function MapContainer() {
           'formation-markers'
         );
       }
+      // Merge hovered OSIDs with selected corps brigade locations for persistent highlight
+      let effectiveOsids = hoveredOsids;
+      if (selectedCorpsId && loadedGameState?.formations) {
+        const corpsOsids = loadedGameState.formations
+          .filter(f => f.corps_id === selectedCorpsId && f.location_osid)
+          .map(f => f.location_osid!);
+        if (corpsOsids.length > 0) {
+          const merged = new Set([...hoveredOsids, ...corpsOsids]);
+          effectiveOsids = [...merged];
+        }
+      }
       const filter =
-        hoveredOsids.length === 0
+        effectiveOsids.length === 0
           ? (['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification)
-          : (['in', ['get', 'osid'], ['literal', hoveredOsids]] as maplibregl.FilterSpecification);
+          : (['in', ['get', 'osid'], ['literal', effectiveOsids]] as maplibregl.FilterSpecification);
       try {
         map.setFilter(SIDEBAR_HOVER_LAYER_ID, filter);
       } catch (e) {
@@ -1095,7 +1107,7 @@ export function MapContainer() {
       if (applyHoverFilter()) clearInterval(poll);
     }, 250);
     return () => clearInterval(poll);
-  }, [hoveredOsids, mapReady]);
+  }, [hoveredOsids, selectedCorpsId, loadedGameState, mapReady]);
 
   // Operation target visualization: crosshair + ring + dot + fill on objective OSIDs
   useEffect(() => {

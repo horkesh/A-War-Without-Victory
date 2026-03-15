@@ -3,6 +3,18 @@
 **Last Updated:** 2026-03-15
 **Status:** Post-MVP — n786: **MANDATORY SPAWN FIX** — 64 brigades now spawn that were silently blocked. 122 ARBiH brigades (was 38). Gradačac holds, Bijela holds. Full recalibration needed. Intelligent Corps Commander Phases A-E active.
 
+## [2026-03-15] UI: Army HQ Panel Architecture + Corps Highlight + Clickability
+
+**Army HQ as distinct panel type:** Added `selectedArmyHqId` to panel rail system and `army_reserve` panel type. Army HQ (Main Staff) now renders as distinct gold-accented card in OOB sidebar above corps list. Clicking opens ArmyReservePanel as primary panel. Brigade drill-down opens FormationDetail as secondary panel alongside (not replacing) the reserve panel. Fixed: VRS Main Staff missing from saves — adapter now synthesizes `army_hq` formations for factions that have corps but no HQ. Initial formations JSON updated: all three HQs `corps_asset` → `army_hq`.
+
+**Corps sector highlighting:** Selecting a corps in OOB sidebar now persistently highlights all brigade locations on the map (not just on hover). MapContainer merges `selectedCorpsId` brigade locations into the hover filter.
+
+**Clickability:** ArmyReservePanel elite brigade cards — entire card clickable (was name-only). BrigadeRow changed from `<div>` to `<button>` for accessibility. Full audit of all 13 components confirmed no other violations.
+
+**Files:** `panelRail.ts` (army_reserve type + selectedArmyHqId), `gameStore.ts` (selectedArmyHqId state), `App.tsx` (army_reserve rail rendering), `OOBSidebar.tsx` (HQ card + army_hq detection), `ArmyReservePanel.tsx` (selectedArmyHqId + full-card click + 24rem width), `MapContainer.tsx` (corps highlight), `GameStateAdapter.ts` (army_hq synthesis), `BrigadeRow.tsx` (div→button), `useKeyboardShortcuts.ts` (escape clears armyHqId), `initial_formations_apr1992.json` (kind→army_hq).
+
+---
+
 ## [2026-03-15] n786: Force-Spawn Mandatory Brigades — 64 Formations Restored
 
 **ROOT CAUSE FOUND:** 64 of 182 mandatory brigades (43 RBiH, 21 RS, 4 HRHB) silently failed to spawn at game start. The militia pool system (`runPoolPopulation`) only creates pool entries where `war_militia_strength` has non-zero values. Many ARBiH-majority municipalities (Gradačac, Centar Sarajevo, Goražde, Travnik, Hadžići, Mostar, etc.) had NO RBiH militia pool at init despite large Bosniak populations. The recruitment engine's mandatory path checked `pool.available < MIN_MANDATORY_SPAWN(100)` and skipped brigades when the pool didn't exist.

@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-03-14
+**Updated:** 2026-03-15
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 

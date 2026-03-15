@@ -1,6 +1,6 @@
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-03-14
+**Last Updated:** 2026-03-15
 **Purpose:** Knowledge accumulation by theme.
 
 **40_reports structure (2026-02-24):** Backlog is consolidated into themed docs (BACKLOG_*.md) in docs/40_reports/backlog/; originals archived to docs/_old/40_reports/backlog/. For historical fidelity, Phase 7, mobilization, etc., use the themed doc or the archived filename in _old. See docs/_old/README.md §40_reports/backlog and CONSOLIDATED_BACKLOG. Chronological record remains in `docs/PROJECT_LEDGER.md` (append-only).
@@ -79,6 +79,10 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 | 2026-01-24 | Always emit GeoJSON with zero features | Downstream tools expect consistent structure | Empty GeoJSON valid; pipeline consistency | implementation |
 | 2026-01-24 | Filter aggregate rows (∑) from settlement data | Aggregate rows are validation-only | Prevents totals becoming entities | implementation |
 | 2026-01-24 | Render-valid primary gate, GIS-valid diagnostic | GIS too strict, drops usable geometry | More geometry preserved | architecture |
+| 2026-03-15 | Officer succession is player-choice for player faction | Player agency over commander assignments; bot factions auto-succeed | `available_until_turn` creates `replacement_suggested` event instead of auto-retiring; `findHistoricalSuccessor()` recommends replacement; `pending_officer_events` on MilitaryState; IPC pipeline for accept/acknowledge | design |
+| 2026-03-15 | War crimes records are informational-only | Ethical transparency without gamification; no combat modifier from atrocity data | 27 officers annotated (VRS 13, ARBiH 7, HVO 7); `war_crimes_record` on NamedOfficer; UI badge (red=convicted, green=acquitted, amber=indicted) | design |
+| 2026-03-15 | Map modes use continuous gradients (interpolate expressions) | Continuous gradients convey magnitude better than 3-tier match bucketing | Casualties + morale modes use MapLibre `interpolate` expressions; removed broken `pressure` and redundant `density` modes | GUI |
+| 2026-03-15 | Bottom strip is single unified bar (merged MapModeToolbar + BottomStatusStrip) | Reduces visual clutter; territory % now area-weighted km² | Layout: [Map Mode Pills] \| [Territory %] \| [Layer Toggles]; z-20; MapModeToolbar not rendered separately | GUI |
 
 ## 10. Sectors & Operations
 

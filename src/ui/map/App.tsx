@@ -109,6 +109,7 @@ function App() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
+  const selectedArmyHqId = useGameStore((s) => s.selectedArmyHqId);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
@@ -124,6 +125,7 @@ function App() {
   const railState = derivePanelRailState({
     selectedOsid,
     selectedArmyId,
+    selectedArmyHqId,
     selectedCorpsId,
     selectedCorpsFrontSectorId,
     selectedFormationId,
@@ -327,22 +329,15 @@ function App() {
       {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
       {railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
       {railState.primary === 'army' && <ArmyDetail railSlot="primary" />}
-      {railState.primary === 'formation' && (
-        loadedGameState?.formations.find(f => f.id === selectedFormationId)?.kind === 'army_hq'
-          ? <ArmyReservePanel railSlot="primary" />
-          : <FormationDetail railSlot="primary" />
-      )}
+      {railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
+      {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
       {railState.primary === 'operation' && <OperationDetail railSlot="primary" />}
       {railState.primary === 'orbat' && <OrbatPanel />}
 
       {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
       {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
       {railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
-      {railState.secondary === 'formation' && (
-        loadedGameState?.formations.find(f => f.id === selectedFormationId)?.kind === 'army_hq'
-          ? <ArmyReservePanel railSlot="secondary" />
-          : <FormationDetail railSlot="secondary" />
-      )}
+      {railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
       {railState.secondary === 'operation' && <OperationDetail railSlot="secondary" />}
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (

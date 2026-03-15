@@ -34,15 +34,16 @@ interface ArmyReservePanelProps {
 
 export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     const ipc = useIPC();
+    const selectedArmyHqId = useGameStore((s) => s.selectedArmyHqId);
     const selectedFormationId = useGameStore((s) => s.selectedFormationId);
-    const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const setLoadError = useGameStore((s) => s.setLoadError);
     const [historyOpen, setHistoryOpen] = useState(false);
 
-    if (!selectedFormationId || !loadedGameState) return null;
+    const hqId = selectedArmyHqId ?? selectedFormationId;
+    if (!hqId || !loadedGameState) return null;
 
-    const armyHq = loadedGameState.formations.find(f => f.id === selectedFormationId);
+    const armyHq = loadedGameState.formations.find(f => f.id === hqId);
     if (!armyHq || armyHq.kind !== 'army_hq') return null;
 
     const faction = armyHq.faction;
@@ -81,7 +82,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     return (
         <div
             className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
-            style={getPanelRailStyle(railSlot, '26rem', 'left')}
+            style={getPanelRailStyle(railSlot, '24rem', 'left')}
         >
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-panel-border/60 bg-black/30 shrink-0">
@@ -91,7 +92,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                 </div>
                 <button
                     type="button"
-                    onClick={() => setSelectedFormationId(null)}
+                    onClick={() => useGameStore.setState({ selectedArmyHqId: null, selectedFormationId: null })}
                     className="text-text-secondary hover:text-text-primary text-lg leading-none px-1"
                     aria-label="Close"
                 >×</button>
@@ -112,15 +113,16 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                 const ls = brigade.eliteLoanState!;
                                 const pct = brigade.personnel != null ? Math.min(100, Math.round((brigade.personnel / 2200) * 100)) : 0;
                                 return (
-                                    <div key={brigade.id} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-1.5">
+                                    <button
+                                        key={brigade.id}
+                                        type="button"
+                                        className="w-full text-left bg-black/20 border border-panel-border/40 rounded p-2 space-y-1.5 hover:bg-panel-hover transition-colors cursor-pointer"
+                                        onClick={() => useGameStore.setState({ selectedFormationId: brigade.id })}
+                                    >
                                         <div className="flex items-center justify-between">
-                                            <button
-                                                type="button"
-                                                className="text-text-primary font-semibold hover:text-accent-gold text-left truncate"
-                                                onClick={() => setSelectedFormationId(brigade.id)}
-                                            >
+                                            <span className="text-text-primary font-semibold truncate">
                                                 {brigade.name}
-                                            </button>
+                                            </span>
                                             {ls.permanently_degraded ? (
                                                 <span className="px-1.5 py-0.5 bg-[#d45555]/20 text-[#d45555] text-[9px] font-bold rounded border border-[#d45555]/30 uppercase shrink-0">Degraded</span>
                                             ) : ls.on_loan ? (
@@ -153,14 +155,14 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 </span>
                                                 <button
                                                     type="button"
-                                                    onClick={() => void handleRecall(brigade.id)}
+                                                    onClick={(e) => { e.stopPropagation(); void handleRecall(brigade.id); }}
                                                     className="px-2 py-0.5 bg-[#d45555]/20 border border-[#d45555]/40 rounded text-[10px] text-[#d45555] font-bold hover:bg-[#d45555]/30 transition-colors"
                                                 >
                                                     Recall
                                                 </button>
                                             </div>
                                         )}
-                                    </div>
+                                    </button>
                                 );
                             })}
                         </div>

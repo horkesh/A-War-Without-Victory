@@ -26,6 +26,7 @@ export function useKeyboardShortcuts(): void {
           selectedCorpsFrontSectorId: null,
           selectedCorpsId: null,
           selectedArmyId: null,
+          selectedArmyHqId: null,
           selectedOperationKey: null,
         });
         setHoveredOsids([]);

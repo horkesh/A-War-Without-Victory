@@ -68,7 +68,8 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   ].join(' ');
 
   return (
-    <div
+    <button
+      type="button"
       className={containerClasses}
       onClick={onClick}
       onMouseEnter={(e) => onHoverChange?.(true, e)}
@@ -104,6 +105,6 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       <span className={`shrink-0 text-[10px] uppercase px-1 rounded ${statusClass}`}>
         {toTitleCase(formation.status)}
       </span>
-    </div>
+    </button>
   );
 });

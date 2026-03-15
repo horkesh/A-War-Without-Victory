@@ -4,7 +4,7 @@
       "id": "arbih_general_staff",
       "faction": "RBiH",
       "name": "General Staff ARBiH",
-      "kind": "corps_asset",
+      "kind": "army_hq",
       "hq_sid": "S122742",
       "personnel": 0,
       "tags": []
@@ -58,7 +58,7 @@
       "id": "vrs_main_staff",
       "faction": "RS",
       "name": "Main Staff VRS",
-      "kind": "corps_asset",
+      "kind": "army_hq",
       "hq_sid": "S228095",
       "personnel": 0,
       "tags": []
@@ -121,7 +121,7 @@
       "id": "hvo_main_staff",
       "faction": "HRHB",
       "name": "Main Staff HVO",
-      "kind": "corps_asset",
+      "kind": "army_hq",
       "hq_sid": "S166090",
       "personnel": 0,
       "tags": []

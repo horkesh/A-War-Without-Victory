@@ -132,6 +132,10 @@ export interface GameStore {
   selectedArmyId: string | null;
   setSelectedArmyId: (id: string | null) => void;
 
+  /** Selected army HQ formation (opens ArmyReservePanel as primary). */
+  selectedArmyHqId: string | null;
+  setSelectedArmyHqId: (id: string | null) => void;
+
   /** Selected operation (click on operation card in sidebar). Key: `${corps_id}|${name}`. */
   selectedOperationKey: string | null;
   setSelectedOperationKey: (key: string | null) => void;
@@ -205,7 +209,7 @@ export const useGameStore = create<GameStore>((set) => ({
   devMode: isDevMode(),
 
   selectedOsid: null,
-  setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null, selectedOrbatCorpsId: null }),
+  setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null, selectedArmyHqId: null, selectedOrbatCorpsId: null }),
 
   selectedFormationId: null,
   setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedOperationKey: null, selectedOrbatCorpsId: null }),
@@ -265,10 +269,13 @@ export const useGameStore = create<GameStore>((set) => ({
   setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedFormationId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   selectedCorpsId: null,
-  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+  setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedArmyHqId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   selectedArmyId: null,
-  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedCorpsId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedArmyHqId: null, selectedCorpsId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+
+  selectedArmyHqId: null,
+  setSelectedArmyHqId: (id: string | null) => set({ selectedArmyHqId: id, selectedArmyId: null, selectedCorpsId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   selectedOperationKey: null,
   setSelectedOperationKey: (key) => set((state) => (

@@ -5,6 +5,7 @@ export type PanelRailPanel =
   | 'formation'
   | 'corps'
   | 'army'
+  | 'army_reserve'
   | 'sector'
   | 'operation'
   | 'orbat';
@@ -12,6 +13,7 @@ export type PanelRailPanel =
 export interface PanelRailSelectionState {
   selectedOsid: string | null;
   selectedArmyId: string | null;
+  selectedArmyHqId: string | null;
   selectedCorpsId: string | null;
   selectedCorpsFrontSectorId: string | null;
   selectedFormationId: string | null;
@@ -89,6 +91,12 @@ export const RIGHT_PANEL_STYLE: CSSProperties = {
 
 export function derivePanelRailState(state: PanelRailSelectionState): PanelRailState {
   if (state.selectedOrbatCorpsId) return { primary: 'orbat', secondary: null };
+
+  // Army HQ reserve panel (elite brigades) — drill-down to brigade as secondary
+  if (state.selectedArmyHqId) {
+    if (state.selectedFormationId) return { primary: 'army_reserve', secondary: 'formation' };
+    return { primary: 'army_reserve', secondary: null };
+  }
 
   // Priority 1: Selection with Parent context (Drill-down)
   if (state.selectedFormationId) {

@@ -554,7 +554,8 @@ export function parseGameState(json: unknown): LoadedGameState {
 
             const fv: FormationView = {
                 id, faction: (f.faction as string) ?? '', name: (f.name as string) ?? id,
-                kind: (f.kind as string) ?? 'brigade', readiness: (f.readiness as string) ?? 'active',
+                kind: ((f.kind as string) === 'corps_asset' && (id.endsWith('_staff') || id.endsWith('_general_staff'))) ? 'army_hq' : ((f.kind as string) ?? 'brigade'),
+                readiness: (f.readiness as string) ?? 'active',
                 cohesion: (f.cohesion as number) ?? 100, fatigue: (ops?.fatigue as number) ?? 0,
                 status: (f.status as string) ?? 'active', createdTurn: (f.created_turn as number) ?? 0,
                 home_osid: typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined,
@@ -696,6 +697,23 @@ export function parseGameState(json: unknown): LoadedGameState {
             }
             fv.combatSummary = combatSummary; // Assign the potentially synthesized combatSummary
             formations.push(fv);
+        }
+    }
+
+    // Synthesize army_hq for factions that have corps but no army_hq in the save
+    const ARMY_HQ_SYNTH: Record<string, { id: string; name: string }> = {
+        RS: { id: 'vrs_main_staff', name: 'Main Staff VRS' },
+        RBiH: { id: 'arbih_general_staff', name: 'General Staff ARBiH' },
+        HRHB: { id: 'hvo_main_staff', name: 'Main Staff HVO' },
+    };
+    for (const [faction, hqDef] of Object.entries(ARMY_HQ_SYNTH)) {
+        const hasHq = formations.some(f => f.kind === 'army_hq' && f.faction === faction);
+        const hasCorps = formations.some(f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === faction);
+        if (!hasHq && hasCorps) {
+            formations.push({
+                id: hqDef.id, faction, name: hqDef.name, kind: 'army_hq',
+                readiness: 'active', cohesion: 100, fatigue: 0, status: 'active', createdTurn: 0,
+            } as FormationView);
         }
     }
 

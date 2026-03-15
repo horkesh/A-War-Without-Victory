@@ -278,7 +278,16 @@ export function OOBSidebar() {
                   const reserves = reserveByFaction.get(faction) ?? [];
                   const isCollapsed = collapsed[faction];
                   const byCorps = groupFormationsByCorps(formations);
-                  const corpsEntries = Array.from(byCorps.entries()).sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+                  // Separate army HQ groups from real corps — HQ units render first with distinct styling
+                  const armyHqIds = new Set(
+                    loadedGameState.formations
+                      .filter(f => f.faction === faction && f.kind === 'army_hq')
+                      .map(f => f.id)
+                  );
+                  const hqEntries = Array.from(byCorps.entries()).filter(([id]) => armyHqIds.has(id));
+                  const corpsEntries = Array.from(byCorps.entries())
+                    .filter(([id]) => !armyHqIds.has(id))
+                    .sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
                   return (
                     <div key={faction} className="space-y-2">
@@ -326,6 +335,33 @@ export function OOBSidebar() {
                       </div>
                       {!isCollapsed && (
                         <>
+                          {/* HQ Reserve Units — rendered above corps with distinct styling */}
+                          {hqEntries.map(([hqId, hqBrigades]) => {
+                            const hqFormation = corpsFormationById.get(hqId);
+                            const hqName = hqFormation?.name ?? 'Main Staff';
+                            return (
+                              <button
+                                key={hqId}
+                                type="button"
+                                className="w-full text-left ml-2 px-2 py-1.5 rounded border border-accent-gold/20 bg-accent-gold/5 hover:bg-accent-gold/10 transition-colors"
+                                onClick={() => {
+                                  useGameStore.setState({ selectedArmyHqId: hqId, selectedArmyId: null, selectedCorpsId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOsid: null });
+                                }}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="text-[9px] text-accent-gold font-bold uppercase tracking-wider">★ {hqName}</span>
+                                  </div>
+                                  <span className="text-[10px] text-text-secondary tabular-nums shrink-0">{hqBrigades.length} units</span>
+                                </div>
+                                <div className="mt-0.5 flex flex-wrap gap-1">
+                                  {hqBrigades.map(b => (
+                                    <span key={b.id} className="text-[9px] text-accent-gold/70 truncate">{b.name}</span>
+                                  ))}
+                                </div>
+                              </button>
+                            );
+                          })}
                           {corpsEntries.map(([corpsId, brigades]) => (
                             <CorpsCard
                               key={corpsId}
