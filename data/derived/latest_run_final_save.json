@@ -341635,8 +341635,18 @@
           ],
           "max_attackers_per_target": 3,
           "min_attack_outcome": "costly_victory",
-          "offensive_targets": [],
-          "reserve_fraction": 0.1
+          "offensive_targets": [
+            "op:bosanska_krupa:veliki_badic",
+            "op:bihac:bihac_2"
+          ],
+          "priority_sector_id": "sector:vrs_2nd_krajina:0",
+          "reserve_fraction": 0.1,
+          "sector_targets": {
+            "sector:vrs_2nd_krajina:0": [
+              "op:bihac:bihac_2",
+              "op:bosanska_krupa:veliki_badic"
+            ]
+          }
         },
         "failed_offensive_objectives": {
           "op:donji_vakuf:donji_vakuf_2": {

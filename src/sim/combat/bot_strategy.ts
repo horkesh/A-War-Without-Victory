@@ -432,8 +432,10 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // Historically VRS/paramilitaries secured Prijedor, Banja Luka outskirts within first weeks.
     // Low weight: cleanup priority, must not pull brigades from main fronts.
     { name: '1KK Rear Security', corps_id: 'vrs_1st_krajina', target_municipalities: ['prijedor', 'banja_luka', 'bosanska_dubica', 'bosanska_gradiska', 'mrkonjic_grad', 'skender_vakuf', 'kotor_varos', 'prnjavor', 'laktasi', 'celinac'], start_week: 0, end_week: 30, weight: 20, min_outcome: 'repulsed' },
-    // 2nd Krajina: secure western rear — Drvar, Petrovac, Sipovo rear areas
-    { name: '2KK Rear Security', corps_id: 'vrs_2nd_krajina', target_municipalities: ['sipovo', 'mrkonjic_grad', 'skender_vakuf', 'glamoc', 'titov_drvar'], start_week: 0, end_week: 30, weight: 20, min_outcome: 'repulsed' },
+    // 2nd Krajina: secure western rear + contain Bihać pocket
+    // Historically 2KK's primary mission was containing the 5th Corps at Bihać.
+    // Bihać was never in the target list — the corps drifted south to Prozor instead.
+    { name: '2KK Rear Security', corps_id: 'vrs_2nd_krajina', target_municipalities: ['sipovo', 'mrkonjic_grad', 'skender_vakuf', 'glamoc', 'titov_drvar', 'bihac'], start_week: 0, end_week: 30, weight: 20, min_outcome: 'repulsed' },
     // Drina Corps: clear Drina valley (DAY ONE — highest priority first 12 weeks)
     { name: 'Drina Sweep', corps_id: 'vrs_drina', target_municipalities: ['zvornik', 'bratunac', 'visegrad', 'foca', 'vlasenica', 'rogatica', 'sekovici', 'han_pijesak', 'milici', 'kalinovik', 'cajnice', 'rudo'], start_week: 0, end_week: 30, weight: 130, min_outcome: 'stalemate' },
     // Drina Corps: maintain after initial sweep
@@ -448,7 +450,7 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 1st Krajina: Krajina operations (mid-1992) — aggressive: push through entrenchment
     { name: 'Krajina Sweep', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'bosanski_petrovac', 'jajce', 'donji_vakuf', 'sipovo', 'sanski_most'], start_week: 12, end_week: 30, weight: 45, min_outcome: 'repulsed' },
     // 2nd Krajina: western operations + Bihac edges
-    { name: 'Western Krajina', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'sipovo', 'bosanska_krupa', 'sanski_most'], start_week: 0, end_week: 30, weight: 55, min_outcome: 'repulsed' },
+    { name: 'Western Krajina', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'sipovo', 'bosanska_krupa', 'sanski_most', 'bihac'], start_week: 0, end_week: 30, weight: 55, min_outcome: 'repulsed' },
     // Sarajevo-Romanija: siege maintenance — persistent pressure on Sarajevo approaches
     // Sarajevo siege: target approaches + hold the existing ring unconditionally.
     // hold_municipalities ensures SRK brigades do not abandon the ring to pursue
@@ -464,7 +466,7 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 1st Krajina: consolidation after Corridor/Krajina Sweep expire (week 40+) — includes Posavina corridor municipalities for continued pressure
     { name: '1KK Consolidation', corps_id: 'vrs_1st_krajina', target_municipalities: ['kljuc', 'sanski_most', 'jajce', 'donji_vakuf', 'bosanski_petrovac', 'kotor_varos', 'teslic', 'brcko', 'odzak', 'derventa', 'bosanski_brod', 'bosanski_samac', 'modrica', 'doboj'], start_week: 40, end_week: 9999, weight: 35, min_outcome: 'repulsed' },
     // 2nd Krajina: western front maintenance after operations expire (week 40+)
-    { name: '2KK Consolidation', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'sipovo', 'mrkonjic_grad'], start_week: 40, end_week: 9999, weight: 30, min_outcome: 'repulsed' },
+    { name: '2KK Consolidation', corps_id: 'vrs_2nd_krajina', target_municipalities: ['bosanski_petrovac', 'titov_drvar', 'glamoc', 'sipovo', 'mrkonjic_grad', 'bihac', 'bosanska_krupa'], start_week: 40, end_week: 9999, weight: 30, min_outcome: 'repulsed' },
     // East Bosnian: Ozren salient operations — pressure toward Tuzla, secure flanks
     // Ozren Operations removed — RS was overrunning central corridor via this route
 ];
