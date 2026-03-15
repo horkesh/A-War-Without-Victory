@@ -834,12 +834,56 @@ function classifyBrigadesByTerritory(
         }
 
         // Compute each sector's need and connected component.
-        // Pooled brigades can only reach sectors in the same component of friendly territory.
+        // Need is THREAT-WEIGHTED: sectors facing more enemy troops need more brigades.
+        // Since threat_ratio is computed AFTER classification (Step 8c), we compute
+        // a PRELIMINARY enemy personnel count from formations at enemy OSIDs.
         const sectorNeed: Array<{ sector: CorpsFrontSector; need: number; comp: number }> = [];
-        for (const s of corpsSectors) {
-            const comp = getSectorComponent(s, componentOf);
-            const need = Math.max(0, s.length_edges - s.assigned_brigade_ids.length);
-            sectorNeed.push({ sector: s, need, comp });
+        {
+            // Pre-compute enemy personnel per sector (raw count, not power ratio)
+            const allFormIds = Object.keys(formations).sort(strictCompare);
+            const sectorEnemyPers: number[] = [];
+            for (const s of corpsSectors) {
+                const enemyOsids = new Set<string>();
+                for (const ss of s.sub_segments) {
+                    for (const eo of ss.enemy_osids) enemyOsids.add(eo);
+                }
+                let enemyPers = 0;
+                for (const fid of allFormIds) {
+                    const f = formations[fid];
+                    if (!f || f.faction === faction || f.status !== 'active') continue;
+                    if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+                    if (!f.location_osid || !enemyOsids.has(f.location_osid)) continue;
+                    enemyPers += f.personnel ?? 0;
+                }
+                sectorEnemyPers.push(enemyPers);
+            }
+
+            // Threat-weighted target per sector: total brigades × (sector weight / total weight)
+            let totalWeight = 0;
+            const weights: number[] = [];
+            const totalPooled = corpsPool.get(corpsId)?.length ?? 0;
+            const totalAlreadyAssigned = corpsSectors.reduce((sum, s) => sum + s.assigned_brigade_ids.length, 0);
+            const totalBrigades = totalPooled + totalAlreadyAssigned;
+            for (let i = 0; i < corpsSectors.length; i++) {
+                const s = corpsSectors[i]!;
+                // Weight = edges × threat multiplier from enemy personnel.
+                // log2 scaling: 0 enemy → 1.0×, 1000 → ~11×, 5000 → ~13×, 20000 → ~15×
+                // This ensures high-threat sectors get proportionally more brigades
+                // while quiet sectors still get baseline coverage.
+                const threatMult = Math.max(1.0, Math.log2(sectorEnemyPers[i]! + 1));
+                const w = s.length_edges * threatMult;
+                weights.push(w);
+                totalWeight += w;
+            }
+            for (let i = 0; i < corpsSectors.length; i++) {
+                const s = corpsSectors[i]!;
+                const comp = getSectorComponent(s, componentOf);
+                const targetBrigades = totalWeight > 0
+                    ? totalBrigades * (weights[i]! / totalWeight)
+                    : s.length_edges;
+                const need = Math.max(0, Math.ceil(targetBrigades) - s.assigned_brigade_ids.length);
+                sectorNeed.push({ sector: s, need, comp });
+            }
         }
 
         // Phase 2a: Home-affinity assignment — brigades prefer sectors covering
