@@ -585,14 +585,31 @@ export function runBotRecruitment(
                     pool = state.military.militia_pools?.[poolKey];
                 }
                 const manpowerAvailable = pool ? pool.available : 0;
-                // Mandatory drain = initial_personnel: the pool represents actual military-age
-                // males, so we drain exactly how many people the brigade takes.
-                // Spawn if pool has at least MIN_MANDATORY_SPAWN; skip only when truly empty.
                 const mandatoryDrain = brigade.initial_personnel ?? brigade.manpower_cost;
                 effectiveManpower = Math.min(mandatoryDrain, manpowerAvailable);
-                if (effectiveManpower < MIN_MANDATORY_SPAWN && manpowerAvailable < mandatoryDrain) {
-                    report.brigades_skipped_no_manpower++;
-                    continue;
+
+                // Mandatory brigades represent historically existing formations.
+                // If the pool doesn't exist or is empty, force-create it and seed
+                // with enough manpower. These men existed — they were mobilized from
+                // day one. The pool system catches up later via ongoing_mobilization.
+                if (manpowerAvailable < MIN_MANDATORY_SPAWN) {
+                    // Force-create pool if missing
+                    if (!state.military.militia_pools) state.military.militia_pools = {};
+                    const pools = state.military.militia_pools as Record<string, any>;
+                    if (!pools[poolKey]) {
+                        pools[poolKey] = {
+                            mun_id: brigade.home_mun,
+                            faction: poolFaction,
+                            available: 0,
+                            committed: 0,
+                            exhausted: 0,
+                            updated_turn: state.meta.turn,
+                        };
+                    }
+                    pool = pools[poolKey]!;
+                    // Seed with enough for this brigade
+                    pool!.available += mandatoryDrain;
+                    effectiveManpower = mandatoryDrain;
                 }
             }
 
