@@ -555,33 +555,45 @@ export function runBotRecruitment(
                 break;
             }
             if (resources.recruited_brigade_ids.includes(brigade.id)) continue;
-            if (!factionHasPresenceInMun(state, faction, brigade.home_mun, sidToMun)) {
+            // Elite brigades are national-level professional units — bypass municipality presence check.
+            // Their home_mun may use different slug formatting than the operational layer
+            // (e.g. "han_pijesak" vs "hanpijesak"), and they spawn unconditionally from a national pool.
+            if (!brigade.is_elite && !factionHasPresenceInMun(state, faction, brigade.home_mun, sidToMun)) {
                 report.brigades_skipped_no_control++;
                 continue;
             }
 
             // Mandatory formations: zero capital cost, zero equipment cost (equipment was already there)
-            // Cross-faction recruitment: try recruit_pool_faction first, fall back to own faction pool
-            const preferredPoolFaction = brigade.recruit_pool_faction ?? faction;
-            let poolFaction = preferredPoolFaction;
-            let poolKey = militiaPoolKey(brigade.home_mun, poolFaction);
-            let pool = state.military.militia_pools?.[poolKey];
-            if ((!pool || pool.available <= 0) && preferredPoolFaction !== faction) {
-                poolFaction = faction;
-                poolKey = militiaPoolKey(brigade.home_mun, poolFaction);
+            // Elite (is_elite) brigades are national-level professional units — they draw from
+            // a professional volunteer pool, not the municipality militia pool. Spawn unconditionally
+            // with full initial_personnel and skip pool drain (avoids depleting local pools).
+            const isElite = brigade.is_elite === true;
+            let effectiveManpower: number;
+            let pool: { available: number; committed: number; updated_turn: number } | undefined;
+            if (isElite) {
+                effectiveManpower = brigade.initial_personnel ?? brigade.manpower_cost ?? MIN_MANDATORY_SPAWN;
+                pool = undefined;
+            } else {
+                // Cross-faction recruitment: try recruit_pool_faction first, fall back to own faction pool
+                const preferredPoolFaction = brigade.recruit_pool_faction ?? faction;
+                let poolFaction = preferredPoolFaction;
+                let poolKey = militiaPoolKey(brigade.home_mun, poolFaction);
                 pool = state.military.militia_pools?.[poolKey];
-            }
-            const manpowerAvailable = pool ? pool.available : 0;
-
-            // Mandatory drain = initial_personnel: the pool represents actual military-age
-            // males, so we drain exactly how many people the brigade takes. manpower_cost
-            // is only relevant for elective recruitment (organizational overhead).
-            // Spawn if pool has at least MIN_MANDATORY_SPAWN; skip only when truly empty.
-            const mandatoryDrain = brigade.initial_personnel ?? brigade.manpower_cost;
-            const effectiveManpower = Math.min(mandatoryDrain, manpowerAvailable);
-            if (effectiveManpower < MIN_MANDATORY_SPAWN && manpowerAvailable < mandatoryDrain) {
-                report.brigades_skipped_no_manpower++;
-                continue;
+                if ((!pool || pool.available <= 0) && preferredPoolFaction !== faction) {
+                    poolFaction = faction;
+                    poolKey = militiaPoolKey(brigade.home_mun, poolFaction);
+                    pool = state.military.militia_pools?.[poolKey];
+                }
+                const manpowerAvailable = pool ? pool.available : 0;
+                // Mandatory drain = initial_personnel: the pool represents actual military-age
+                // males, so we drain exactly how many people the brigade takes.
+                // Spawn if pool has at least MIN_MANDATORY_SPAWN; skip only when truly empty.
+                const mandatoryDrain = brigade.initial_personnel ?? brigade.manpower_cost;
+                effectiveManpower = Math.min(mandatoryDrain, manpowerAvailable);
+                if (effectiveManpower < MIN_MANDATORY_SPAWN && manpowerAvailable < mandatoryDrain) {
+                    report.brigades_skipped_no_manpower++;
+                    continue;
+                }
             }
 
             // Build formation directly for mandatory (bypass normal cost checks)
@@ -603,7 +615,6 @@ export function runBotRecruitment(
             report.actions.push({
                 brigade_id: brigade.id,
                 faction,
-                ...(poolFaction !== faction ? { pool_faction: poolFaction } : {}),
                 home_mun: brigade.home_mun,
                 equipment_class: brigade.default_equipment_class,
                 manpower_spent: effectiveManpower,

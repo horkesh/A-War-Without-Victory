@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** Post-MVP — Per-formation casualty ledger surfaced in UI (n718). n292 backlog audit: equipment attrition, siege/bombardment KIA ratio, enclave resilience dynamism all confirmed resolved. 88.6% area, 6/6 benchmarks.
+**Status:** Post-MVP — Army HQ Reserve Pool elite brigade loan system implemented (2026-03-15): `army_reserve_system.ts`, `ArmyReservePanel`, 3 IPC channels, 12 tests (618 total), EliteBrigadeTracker. UI/UX overhaul Phases 1-2 complete: NATO symbology quantized, ghost lines purged, FRONTLINE CONTROL branding. Per-formation casualty ledger (n718) live. 89.6% area (n703), 6/6 benchmarks.
 
 ## [2026-03-15] UI/UX Overhaul: Tactical Agency & Information Density (Phases 1-2)
 
@@ -13874,3 +13874,41 @@ Fix: added `if (isActiveSectorOperationParticipant) return false;` guard at the 
 - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — army_hq panel description updated
 - `.claude/napkin.md` — elite loan lifecycle entry updated
 - `memory/backlog_army_hq_reserve.md` — marked IMPLEMENTED
+
+---
+
+## [2026-03-15] n745: Elite Brigade Spawning + Loan System Activation Fixes
+
+**Summary:** Two silent bugs prevented all elite brigades from spawning and the loan system from firing. Both fixed; all four elites now spawn and loan correctly.
+
+### Bug 1 — Elite brigades never spawning (`recruitment_engine.ts`)
+
+**Root cause (two independent failures):**
+
+1. `factionHasPresenceInMun` check: OOB uses `home_mun: "han_pijesak"` (with underscore), but `operational_settlements.geojson` stores `mun1990_id: "hanpijesak"` (no underscore). `factionHasPresenceInMun` compares `m === munId` where `munId` is the GeoJSON slug → always false → `rs_65th_protection_motorized_regiment` skipped every turn.
+
+2. Militia pool too small: `han_pijesak` RS militia pool ≈ 257 people (1991 census × 0.28 × 0.25). `rs_65th_protection_motorized_regiment` needs `initial_personnel=1200`. The pool-drain path spawned it at 257 personnel — below `MIN_MANDATORY_SPAWN` — and the brigade dissolved. `arbih_guards_brigade` failed similarly: `centar_sarajevo:RBiH` pool fully committed by other Sarajevo brigades before `available_from=12`.
+
+**Fix:** Elite brigades (`is_elite: true`) now bypass both the municipality presence check and the militia pool drain. They draw `initial_personnel` directly from a notional national pool (no pool key deducted). Comment in code explains the slug mismatch and national-unit rationale.
+
+### Bug 2 — Loan system never firing (`army_reserve_system.ts`)
+
+**Root cause:** `getCorpsReferenceOsid` looked up `formations[corpsId]` — the corps HQ formation itself. Corps HQ formations have `location_osid=undefined` and `home_osid=undefined`. The original code did: `if (corpsFormation) { return (corpsFormation.location_osid ?? corpsFormation.home_osid) ?? null; }` — which returned `null` immediately for every corps, never falling through to the brigade scan. Result: every `computeDeployPriority` call got `corpsRef=null` → hop distance infinite → request rejected.
+
+**Fix:** Only return corps formation OSID if non-null; otherwise scan brigades (`f.corps_id === corpsId && f.status === 'active'`, sorted by `strictCompare`) and return the first brigade's `location_osid ?? home_osid`.
+
+### Calibration result (n745)
+
+| Metric | n76 (pre-fix) | n745 (post-fix) |
+|--------|--------------|-----------------|
+| Area-weighted | 90.3% | 90.1% (−0.2pp) |
+| Anchors | 13/13 | 13/13 |
+| Benchmarks | 6/6 | 6/6 |
+| Hash | 94af31cf9c86ad2b | fbb58f69f335d68c |
+| Tests | 585 | 618 (+33 elite loan tests) |
+
+−0.2pp is within expected noise from elite brigade deployment displacing other sector assignments. All four elites active: `rs_65th_protection` → `vrs_drina` (t1), `rs_1st_guards` → `vrs_sarajevo_romanija` (t1), `arbih_120th_black_swans` → `arbih_2nd_corps` (t16), `arbih_guards_brigade` → `arbih_2nd_corps`.
+
+**Determinism:** All new iteration uses `strictCompare`. `is_elite` bypass path is deterministic (no pool state mutated for elite brigades). Hash changed from prior session due to elite brigades now participating in sector assignment and combat.
+
+**Files:** `src/sim/recruitment_engine.ts` (elite bypass for presence check + pool drain), `src/sim/combat/army_reserve_system.ts` (`getCorpsReferenceOsid` brigade fallback).

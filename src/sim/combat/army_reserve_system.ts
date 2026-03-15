@@ -42,17 +42,17 @@ import { strictCompare } from '../../state/validateGameState.js';
  */
 function getCorpsReferenceOsid(state: GameState, corpsId: string): string | null {
     const formations = state.military.formations ?? {};
-    // Direct corps formation lookup
+    // Direct corps formation lookup — only use if it has a real location
     const corpsFormation = formations[corpsId];
-    if (corpsFormation) {
-        return (corpsFormation.location_osid ?? corpsFormation.home_osid) ?? null;
-    }
+    const corpsOsid = corpsFormation ? (corpsFormation.location_osid ?? corpsFormation.home_osid) ?? null : null;
+    if (corpsOsid) return corpsOsid;
     // Fall back to first active brigade in this corps (sorted for determinism)
     const brigadeIds = Object.keys(formations).sort(strictCompare);
     for (const bid of brigadeIds) {
         const f = formations[bid];
         if (f.corps_id === corpsId && f.status === 'active') {
-            return (f.location_osid ?? f.home_osid) ?? null;
+            const brigOsid = (f.location_osid ?? f.home_osid) ?? null;
+            if (brigOsid) return brigOsid;
         }
     }
     return null;

@@ -41,30 +41,27 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 
 ### Current Phase
 
-- **Phase:** Phase 6 (MVP declaration and freeze) — complete
-- **Status:** MVP declared
-- **Focus:** Scope frozen. **A1 tactical base map is STABLE** and is the basis for the game.
-- **Key Work:** Phase 5 COMPLETE; Phase 6 COMPLETE (MVP declared 2026-02-08). Track A (A1 base map) COMPLETE. See `docs/20_engineering/specs/map/A1_BASE_MAP_REFERENCE.md`.
+- **Phase:** Post-MVP — War engine (Peace/War two-phase lifecycle), full combat system active
+- **Status:** MVP declared 2026-02-08. Scope open for calibration, realism, and UI work.
+- **Focus:** Historical calibration (89.6% area w40), reactive defense system (Layers A+B+C), operation preparation system, warroom UI, elite brigade loan system.
+- **Key Systems Live (2026-03-15):** 120-step war pipeline, OSID combat, sector stances (5 types), distance-weighted reactive defense, operation preparation (5-phase), sector intel, strategic reserve, fog-of-war, displacement, supply reserves, officer system, army HQ reserve pool (elite loan), warroom cork board + OsidThumbnailRenderer, ArmyReservePanel. 618 vitest tests.
+- **Calibration baseline:** n703 — 89.6% area-weighted, 11/13 anchors, 6/6 benchmarks, hash `10b74532c37cfaac`.
 
 ### Phase tracking & milestones
 
 | Milestone | Date |
 |-----------|------|
 | Path A adopted | 2026-01-24 |
-| Municipality borders from drzava.js | 2026-01-24 |
-| Phase 0/1 settlement substrate, adjacency | 2026-01-26–27 |
-| Executive roadmap Phases 1–6 | 2026-02-06 |
 | Phase A1 Base Map STABLE | 2026-02-07 |
 | MVP declared | 2026-02-08 |
-| Phase A (bots, victory, production) | 2026-02-09 |
-| RBiH–HRHB alliance lifecycle implemented | 2026-02-09 |
-| Phase 1 execution (authority derivation, browser Phase II advance, B1 events, B4 coercion) | 2026-02-10 |
-| RBiH–HRHB Phase II gate (resolve_attack_orders blocks bilateral flips before rbih_hrhb_war_earliest_turn) | 2026-02-11 |
-| Phase I no-flip policy final (player_choice GO; ethnic/hybrid NO-GO) | 2026-02-11 |
-| Phase II battle resolution engine (terrain, casualty_ledger, snap events) | 2026-02-12 |
-| RBiH-aligned municipalities (control/spawn always RBiH in nine muns; Velika Kladuša added 2026-02-15) | 2026-02-12 |
-| Scenario harness Phase II attack-resolution rollup in run_summary / end_report | 2026-02-13 |
-| Orchestrator scenario-run handoffs (2026-02-12, 2026-02-13) for historical verification | 2026-02-12–13 |
+| Phase II battle resolution engine | 2026-02-12 |
+| AoR/ZoC removed | 2026-03-02/04 |
+| Phase I/II terminology purged → Peace/War | 2026-03-07 |
+| Reactive defense Layers A+B+C complete | 2026-03-13 |
+| Operation Preparation System | 2026-03-12 |
+| Commander-driven brigade assignment (n696) | 2026-03-14 |
+| Army HQ Reserve Pool / Elite Loan System | 2026-03-15 |
+| UI/UX Overhaul Phases 1–2 (NATO quantization, ghost line purge) | 2026-03-15 |
 
 ### Allowed / Disallowed Work
 
@@ -297,6 +294,9 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 - **Headless corps fronts and run_summary (2026-02-21):** Phase II pipeline step `ensure-derived-corps-front-edges` populates corps_front_edges in headless runs; run_summary includes `front_corps_tracking: { corps_front_edges_present, corps_count }` when Phase II ran. IMPLEMENTED_WORK_CONSOLIDATED §29; PROJECT_LEDGER 2026-02-21.
 - **Clone centralization (2026-02-11):** Single `cloneGameState` in `src/state/clone.ts` used by all turn pipelines and browser runners; avoids six duplicate polyfills (napkin).
 - **Displacement system complete (2026-03-01):** Per-OSID census displacement depth. Key mechanics: (1) `getOsidCensusPopulation()` and `getOsidCensusHostileShare()` read `population_total`, `population_bosniaks/serbs/croats/others` from operational settlement records; faction→ethnic: RBiH=bosniak+other, RS=serb, HRHB=croat. (2) Hostile share cap 0.95 per-OSID, 0.80 municipality fallback. (3) Operational settlements loaded separately in turn_pipeline via `loadSettlementGraph()` (OSID-keyed, `op:` prefix validated); passed as `osidSettlements` param. (4) Sustained pool: `cumulative_displaced = displacementAmount` after initial fire (prevents double-counting). (5) Ethnic map layer: `buildEthnicGeoJSON.ts` uses departure events + per-mun arrivals for OSID-level ethnic composition. Results: n319 668k displaced (RBiH 458k, HRHB 150k, RS 60k); Ljubija 5,331→13,399 (+151%). Report: `20260301_DISPLACEMENT_DEPTH_CALIBRATION.md`. **Key lesson:** The SID-keyed raw graph (5822 entries) and OSID-keyed operational graph (753 entries) serve different purposes; displacement requires OSID-keyed graph for per-OSID census lookups.
+- **Elite brigade spawning bypass (2026-03-15, n745):** Elite brigades (`is_elite: true`) must bypass both `factionHasPresenceInMun` and militia pool drain in `runBotRecruitment`. Rationale: (1) OOB mun slugs use underscores (`han_pijesak`) while `operational_settlements.geojson` uses no-underscore (`hanpijesak`) → presence check always fails; (2) municipality militia pools are sized from census × 0.28 × 0.25 — far smaller than elite initial_personnel (1200+). Fix: early-continue only when `!brigade.is_elite` for presence check; pool drain block skipped for `isElite === true`; `effectiveManpower = brigade.initial_personnel`. No pool key is deducted for elites (they represent national professional units, not local conscripts). See PROJECT_LEDGER.md 2026-03-15.
+- **`getCorpsReferenceOsid` corps-formation early-return trap (2026-03-15, n745):** In `army_reserve_system.ts`, `formations[corpsId]` returns the corps HQ formation, which always has `location_osid=undefined` and `home_osid=undefined`. Any `if (corpsFormation) { return ...; }` pattern that wraps both `location_osid` and `home_osid` will return `null` immediately, preventing the brigade fallback scan from ever running. Pattern to follow: check if the formation's OSID is non-null before returning; fall through to brigade scan if null. This trap applies to any corps-level formation lookup that expects a geographic anchor. See PROJECT_LEDGER.md 2026-03-15.
+- **Army HQ Reserve Pool — Elite Brigade Loan System (2026-03-15):** Elites permanently assigned to faction Main Staff HQ corps (`vrs_main_staff`, `arbih_general_staff`, `hvo_main_staff`). Per-turn lifecycle: (1) `generateArmyReserveRequests` — each non-main-staff corps generates up to one request per type (`offensive_support`/`defensive_gap`/`exploitation`); priority scored by `computeDeployPriority` (geographic feasibility: MAX_AUTO_DEPLOY_HOPS=8, 0–3 hops=1.0×, 4–6=0.6×, 7–8=0.3×, >8 rejected); (2) `evaluateArmyReserveAssignments` — bot factions auto-assign best-match elites, player faction's requests surface in `pending_reserve_requests` for ArmyReservePanel; (3) `tickEliteLoans` — forced recall on ≥30% casualties OR morale<35 OR ≥50% personnel degradation; voluntary recall after ELITE_LOAN_MIN_DURATION=6 turns when op ended and sector threat<1.5; 4-turn cooldown (`last_recall_turn`) between deployments. **Elite identification:** Runtime check for presence of `elite_loan_state` on `FormationState` (not the `is_elite` OOB flag — which is for initial placement only). **Loan routing:** Phase 0a `loanedCorpsMap` in `classifyBrigadesByTerritory` routes loaned brigades through the target corps for sector assignment — they fight as if belonging to that corps while on loan. **Episode tracker:** `EliteBrigadeTracker` on `MilitaryState.elite_brigade_tracker` records per-brigade episodes with deployment dates, casualties taken, reason for recall — enables Campaign History in the UI. **Player/bot split:** Bot factions use `auto_assign: true`; player faction always `auto_assign: false` regardless of bot status. **OOB corrections:** rs_1st_guards + rs_65th_protection → vrs_main_staff; hvo_1st/2nd/3rd_guard → hvo_main_staff (2nd+3rd `is_elite: true`); arbih_guards + arbih_120th_black_swans already in arbih_general_staff. Report: `docs/40_reports/implemented/20260315_ARMY_HQ_RESERVE_POOL_LOAN_SYSTEM.md`. See PROJECT_LEDGER.md 2026-03-15.
 
 **Data & tooling**
 
