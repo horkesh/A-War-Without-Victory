@@ -375,7 +375,8 @@ function pushDisplacementEventLogFromMun(
     settlements: Map<string, SettlementRecord>,
     byFaction: Record<FactionId, number>,
     turn: number,
-    lostAmount: number = 0
+    lostAmount: number = 0,
+    causedBy?: FactionId
 ): void {
     const entries = Array.from(settlements.entries())
         .filter(([, rec]) => (rec.mun1990_id ?? rec.mun_code) === munId)
@@ -426,6 +427,7 @@ function pushDisplacementEventLogFromMun(
                 origin_osid: osid,
                 dest_mun: munId,
                 ethnicity: fid,
+                caused_by: causedBy,
                 displaced: routedHere,
                 killed: lostHere,
                 fled_abroad: 0,
@@ -518,11 +520,11 @@ export function applyDisplacementFromFlips(
             routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
             routedAmount = rRBiH + rRS + rHRHB;
             lostAmount = displacementAmount - routedAmount;
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount);
+            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, toFaction);
         } else {
             lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
             routedAmount = displacementAmount - lostAmount;
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount);
+            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, flip.to_faction);
         }
 
         const beforeOut = dispState.displaced_out;
@@ -788,11 +790,11 @@ export function updateDisplacement(
                 routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
                 routedAmount = rRBiH + rRS + rHRHB;
                 lostAmount = displacementAmount - routedAmount;
-                pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, lostAmount);
+                pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, lostAmount, factionId as FactionId);
             } else {
                 lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
                 routedAmount = displacementAmount - lostAmount;
-                pushDisplacementEventLogFromMun(state, munId, settlements, { RBiH: displacementAmount, RS: 0, HRHB: 0 }, currentTurn, lostAmount);
+                pushDisplacementEventLogFromMun(state, munId, settlements, { RBiH: displacementAmount, RS: 0, HRHB: 0 }, currentTurn, lostAmount, factionId as FactionId);
             }
 
             // Update displacement state

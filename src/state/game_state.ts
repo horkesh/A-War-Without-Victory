@@ -847,6 +847,8 @@ export interface DisplacementEvent {
     dest_mun: MunicipalityId;
     dest_osid?: string;
     ethnicity: FactionId;
+    /** Faction controlling the origin OSID at time of displacement (the causer). */
+    caused_by?: FactionId;
     displaced: number;
     killed: number;
     fled_abroad: number;

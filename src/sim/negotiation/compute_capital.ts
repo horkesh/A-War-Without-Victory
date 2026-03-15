@@ -201,14 +201,31 @@ function computeHumanitarianData(state: GameState, faction: FactionId): {
     let refugees_received = 0;
     let civilians_under_protection = 0;
 
+    // Attribution: count refugees from events where THIS faction was the causer.
+    // Fallback: if caused_by is absent (legacy events), attribute to current OSID controller.
+    const eventLog = displacement?.displacement_event_log;
+    if (eventLog) {
+        const controllers = state.political?.political_controllers;
+        for (const evt of eventLog) {
+            const causer = evt.caused_by
+                ?? (evt.origin_osid && controllers ? controllers[evt.origin_osid] : undefined);
+            if (causer === faction) {
+                refugees_created += (evt.displaced ?? 0) + (evt.killed ?? 0) + (evt.fled_abroad ?? 0);
+            }
+            // refugees_received: events where displaced people settled in faction-controlled territory
+            if (evt.dest_osid && controllers && controllers[evt.dest_osid] === faction) {
+                refugees_received += evt.settled ?? 0;
+            }
+        }
+    }
+
+    // Civilians under protection: sum population of faction-controlled municipalities
     if (displacement?.displacement_state) {
         const ds = displacement.displacement_state as Record<string, { original_population?: number; displaced_out?: number; displaced_in?: number; lost_population?: number }>;
         const controllers = state.political?.political_controllers;
         for (const munId of Object.keys(ds).sort(strictCompare)) {
             const mun = ds[munId];
             if (!mun) continue;
-
-            // Population under control: original - displaced_out - lost + displaced_in
             if (controllers) {
                 const munOsids = Object.keys(controllers).filter(o => o.includes(munId));
                 const factionControls = munOsids.some(o => controllers[o] === faction);
@@ -217,8 +234,6 @@ function computeHumanitarianData(state: GameState, faction: FactionId): {
                     civilians_under_protection += Math.max(0, pop);
                 }
             }
-            refugees_created += mun.displaced_out ?? 0;
-            refugees_received += mun.displaced_in ?? 0;
         }
     }
 

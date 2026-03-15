@@ -364,7 +364,7 @@ export function processMinorityFlight(
             if (displaced <= 0) continue;
             state.displacement.displacement_event_log.push({
                 turn: currentTurn, origin_mun: munId, origin_osid: sid, dest_mun: munId,
-                ethnicity, displaced, killed, fled_abroad, settled,
+                ethnicity, caused_by: controller, displaced, killed, fled_abroad, settled,
             });
         }
     }

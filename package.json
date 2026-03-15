@@ -1,6 +1,6 @@
 {
   "name": "awwv",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A War Without Victory (AWWV) simulation prototype",
   "main": "src/desktop/electron-main.cjs",
   "private": true,
@@ -293,8 +293,10 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@napi-rs/canvas": "^0.1.90",
+    "@turf/bezier-spline": "^7.3.4",
     "@turf/boolean-intersects": "^7.3.2",
     "@turf/boolean-valid": "^7.3.2",
+    "@turf/helpers": "^7.3.4",
     "@turf/turf": "^7.3.2",
     "@types/topojson-client": "^3.1.5",
     "@types/topojson-server": "^3.0.4",
