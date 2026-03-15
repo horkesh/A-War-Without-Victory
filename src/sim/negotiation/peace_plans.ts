@@ -1,0 +1,286 @@
+/**
+ * Peace plan evaluation engine.
+ *
+ * Checks whether a historical peace plan should fire on the current turn,
+ * computes bot responses, and resolves accept/reject consequences.
+ *
+ * Deterministic: sorted iteration via strictCompare, no Math.random().
+ */
+
+import type { GameState, FactionId } from '../../state/game_state.js';
+import type { PeacePlanDefinition, PeacePlanResponse, NegotiationState } from '../../state/negotiation_types.js';
+import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
+import { PEACE_PLANS, getPeacePlanById } from './peace_plan_data.js';
+import { strictCompare } from '../../state/validateGameState.js';
+
+const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// War week helper
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Compute the current war week (turns since war start). */
+function getWarWeek(state: GameState): number {
+    const warStart = state.meta.war_start_turn ?? 0;
+    return state.meta.turn - warStart;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Initialization
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Ensure negotiation state exists on the GameState. */
+function ensureNegotiationState(state: GameState): NegotiationState {
+    if (!state.military.negotiation) {
+        const capital: Record<string, import('../../state/negotiation_types.js').NegotiationCapital> = {};
+        const patron_relationships: Record<string, import('../../state/negotiation_types.js').PatronRelationship> = {};
+        for (const faction of CANONICAL_FACTIONS) {
+            capital[faction] = createEmptyCapital();
+            patron_relationships[faction] = createDefaultPatronRelationship(faction);
+        }
+        state.military.negotiation = {
+            capital,
+            patron_relationships,
+            peace_plan_history: [],
+        };
+    }
+    return state.military.negotiation;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Territory computation (for bot decisions)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Get faction's current territory percentage from political_controllers. */
+function getFactionTerritoryPct(state: GameState, faction: FactionId): number {
+    const controllers = state.political?.political_controllers;
+    if (!controllers) return 0;
+
+    const osids = Object.keys(controllers).sort(strictCompare);
+    if (osids.length === 0) return 0;
+
+    let factionCount = 0;
+    for (const osid of osids) {
+        if (controllers[osid] === faction) factionCount++;
+    }
+
+    // Simple OSID-count ratio (not area-weighted, but sufficient for bot decisions)
+    return (factionCount / osids.length) * 100;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Bot response logic
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Determine whether a bot faction accepts or rejects a peace plan.
+ *
+ * Bot accepts if:
+ *   (a) patron override_authority > 50 (patron forces acceptance), OR
+ *   (b) the plan's proposed split gives them >= their current territory percentage.
+ *
+ * Otherwise the bot rejects.
+ */
+function computeBotResponse(
+    state: GameState,
+    plan: PeacePlanDefinition,
+    faction: FactionId
+): 'accepted' | 'rejected' {
+    const neg = state.military.negotiation;
+
+    // Check patron override authority
+    if (neg) {
+        const patronRel = neg.patron_relationships[faction];
+        if (patronRel && patronRel.override_authority > 50) {
+            return 'accepted';
+        }
+    }
+
+    // Check territory: accept if plan gives >= current holdings
+    const currentTerritory = getFactionTerritoryPct(state, faction);
+    const proposedTerritory = plan.proposed_split[faction] ?? 0;
+
+    if (proposedTerritory >= currentTerritory) {
+        return 'accepted';
+    }
+
+    return 'rejected';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Main evaluation (called from pipeline)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Evaluate whether a peace plan should trigger this turn.
+ *
+ * Called once per turn from the war_phases pipeline. If a plan's trigger_week
+ * matches the current war week AND the plan hasn't been offered before,
+ * creates a pending peace plan with bot responses pre-computed.
+ *
+ * The player faction's response remains 'pending' until resolved via
+ * resolvePeacePlan().
+ */
+export function evaluatePeacePlans(state: GameState): void {
+    if (state.meta.phase !== 'war') return;
+    if (state.meta.game_over) return;
+
+    const neg = ensureNegotiationState(state);
+
+    // Don't trigger a new plan if one is already pending
+    if (neg.pending_peace_plan) return;
+
+    const warWeek = getWarWeek(state);
+
+    // Check each plan in chronological order
+    for (const plan of PEACE_PLANS) {
+        if (plan.trigger_week !== warWeek) continue;
+
+        // Skip if this plan was already offered
+        const alreadyOffered = neg.peace_plan_history.some(h => h.plan_id === plan.id);
+        if (alreadyOffered) continue;
+
+        // Determine player faction (defaults to RBiH if not set)
+        const playerFaction = state.meta.player_faction ?? 'RBiH';
+
+        // Compute bot responses for non-player factions
+        const botResponses: Record<string, 'accepted' | 'rejected'> = {};
+        for (const faction of CANONICAL_FACTIONS) {
+            if (faction === playerFaction) continue;
+            botResponses[faction] = computeBotResponse(state, plan, faction);
+        }
+
+        // Create pending peace plan
+        neg.pending_peace_plan = {
+            plan_id: plan.id,
+            turn_offered: state.meta.turn,
+            bot_responses: botResponses,
+        };
+
+        // Only one plan per turn
+        break;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Resolution (called when player responds)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Resolve a pending peace plan after the player responds.
+ *
+ * @param state - The current game state
+ * @param planId - The peace plan ID being resolved
+ * @param playerResponse - The player's decision ('accepted' or 'rejected')
+ * @returns Summary of what happened
+ */
+export function resolvePeacePlan(
+    state: GameState,
+    planId: string,
+    playerResponse: 'accepted' | 'rejected'
+): { all_accepted: boolean; rejection_factions: FactionId[] } {
+    const neg = ensureNegotiationState(state);
+    const plan = getPeacePlanById(planId);
+
+    if (!plan) {
+        throw new Error(`Unknown peace plan ID: ${planId}`);
+    }
+
+    if (!neg.pending_peace_plan || neg.pending_peace_plan.plan_id !== planId) {
+        throw new Error(`No pending peace plan with ID: ${planId}`);
+    }
+
+    const playerFaction = state.meta.player_faction ?? 'RBiH';
+
+    // Build complete response map: bot responses + player response
+    const allResponses: Record<string, 'accepted' | 'rejected' | 'pending'> = {};
+    for (const faction of CANONICAL_FACTIONS) {
+        if (faction === playerFaction) {
+            allResponses[faction] = playerResponse;
+        } else {
+            allResponses[faction] = neg.pending_peace_plan.bot_responses[faction] ?? 'rejected';
+        }
+    }
+
+    // Record in history
+    const historyEntry: PeacePlanResponse = {
+        plan_id: planId,
+        turn_offered: neg.pending_peace_plan.turn_offered,
+        responses: allResponses,
+        resolved: true,
+    };
+    neg.peace_plan_history.push(historyEntry);
+
+    // Clear pending plan
+    neg.pending_peace_plan = undefined;
+
+    // Check if all factions accepted
+    const rejectionFactions: FactionId[] = [];
+    let allAccepted = true;
+    for (const faction of CANONICAL_FACTIONS) {
+        if (allResponses[faction] !== 'accepted') {
+            allAccepted = false;
+            rejectionFactions.push(faction);
+        }
+    }
+
+    if (allAccepted) {
+        // All factions accepted — game ends with peace plan outcome
+        state.meta.game_over = true;
+        state.meta.outcome = `peace_plan:${planId}`;
+    } else {
+        // Apply rejection consequences
+        applyRejectionConsequences(state, plan, rejectionFactions);
+    }
+
+    return {
+        all_accepted: allAccepted,
+        rejection_factions: rejectionFactions,
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Rejection consequences
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Apply credibility and override authority changes to factions that rejected.
+ */
+function applyRejectionConsequences(
+    state: GameState,
+    plan: PeacePlanDefinition,
+    rejectionFactions: FactionId[]
+): void {
+    const neg = state.military.negotiation;
+    if (!neg) return;
+
+    for (const faction of rejectionFactions) {
+        // Apply override authority increase
+        const overrideChange = plan.override_change_on_reject[faction] ?? 0;
+        if (overrideChange !== 0 && neg.patron_relationships[faction]) {
+            const pr = neg.patron_relationships[faction];
+            pr.override_authority = clamp(pr.override_authority + overrideChange, 0, 100);
+            pr.relationship_events.push(`rejected_${plan.id}`);
+        }
+
+        // Apply international credibility change
+        const credChange = plan.credibility_change_on_reject[faction] ?? 0;
+        if (credChange !== 0 && neg.capital[faction]) {
+            const cap = neg.capital[faction];
+            cap.international_credibility = clamp(cap.international_credibility + credChange, 0, 100);
+            cap.peace_plans_rejected.push(plan.id);
+        }
+    }
+
+    // Factions that accepted get credit
+    for (const faction of CANONICAL_FACTIONS) {
+        if (rejectionFactions.includes(faction)) continue;
+        if (neg.capital[faction]) {
+            neg.capital[faction].peace_plans_accepted.push(plan.id);
+        }
+    }
+}
+
+function clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, value));
+}

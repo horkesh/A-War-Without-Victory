@@ -1,27 +1,28 @@
-# Working On — Task Continuity
+# Working On: Endgame & Negotiation System (v0.4 target)
 
-## BASELINE: n809 — Ready for Commander Override Layer
+## Implementation Plan
+`docs/plans/2026-03-15-endgame-negotiation-implementation.md`
 
-### Current state
-- 88.9% area, 13/13 anchors, 5/6 benchmarks
-- Budget-based brigade allocation (garrison-first) active
-- Supply embargo: RBiH heavy=15, strained supply penalty active
-- 2KK: Bihać added to targets, Graz exemption removed, but brigades still at Prozor (positional lock)
-- SRK: 2 brigades on siege ring (improved from 1), sector :4 still has 3 at threat 13
-- Goražde: 808th at Prača, 843rd at Trnovo (corridor defended)
-- All key positions hold: Teočak, Gradačac, Žepče, Prača, Trnovo RBiH/HRHB
+## Phase Status
+- **Phase 1 (Negotiation Capital)**: DONE — committed 674d63e, 8 tests, step #122
+- **Phase 2 (Peace Plans)**: Background agent running
+- **Phase 3 (Patron Pressure)**: Background agent running
+- **Phase 4 (Dayton Negotiation)**: NOT STARTED — depends on 2+3
+- **Phase 5 (Verdict & Scoring)**: NOT STARTED — depends on 4
+- **Phase 6 (Washington + HV)**: NOT STARTED — can parallel with 4
 
-### Next task: Commander Override Layer
-**Design:** `docs/30_planning/COMMANDER_OVERRIDE_LAYER.md`
-- Commander reviews mechanical assignment against strategic intent
-- Issues overrides: mission compliance, non-priority excess, offensive staging, defensive coherence
-- Commander personality shapes trade-offs (aggressive vs defensive)
-- Supply-aware operation sizing (surplus count, not binary block)
-- Army HQ override for rare critical operations
-- Probes/feints as army HQ-directed low-cost intel ops
+## /simplify Gates
+- Phase 1: PASSED (clean)
+- Phase 2+3: pending
 
-### Session achievements (2026-03-15) — ~65 runs, 35+ commits
-See previous working-on.md entries for full list. Key: budget-based allocation, mandatory spawn fix, overstacking fix, supply embargo, Drina/SRK/Gradačac/Goražde OOB, intelligent corps commander Phases A-E, cross-corps enclave defense.
+## Build State
+- tsc: clean
+- vitest: 62 suites, 651 passed, 1 skipped
 
-### Key constants (n809)
-Same as n806 baseline — see BUDGET_BASED_BRIGADE_ALLOCATION.md
+## Next Steps
+1. Wait for Phase 2+3 agents
+2. Integrate, /simplify
+3. Commit Phase 2+3
+4. Execute Phase 4 + 6 (parallel)
+5. /simplify → Phase 5 (Verdict)
+6. Final integration

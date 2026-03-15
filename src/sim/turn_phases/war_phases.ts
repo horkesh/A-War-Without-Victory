@@ -152,6 +152,9 @@ import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
 import { checkWarTermination, applyWarTermination } from '../war_termination.js';
 import { computeNegotiationCapital } from '../negotiation/compute_capital.js';
+import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
+import { updatePatronPressure } from '../negotiation/patron_pressure.js';
+import { evaluatePatronEvents } from '../negotiation/patron_events.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
@@ -1965,6 +1968,13 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'evaluate-peace-plans',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            evaluatePeacePlans(context.state);
+        }
+    },
+    {
         name: 'check-victory-conditions',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -1977,6 +1987,14 @@ export const warPhases: NamedPhase[] = [
                     trigger: result.trigger
                 };
             }
+        }
+    },
+    {
+        name: 'update-patron-pressure',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            updatePatronPressure(context.state);
+            evaluatePatronEvents(context.state);
         }
     },
     {

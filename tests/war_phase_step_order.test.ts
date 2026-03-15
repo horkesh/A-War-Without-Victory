@@ -45,9 +45,11 @@ describe('war-phase step ordering', () => {
     });
 
     it('step count is stable', () => {
-        // Current count: 122 steps. Update this if steps are intentionally added/removed.
+        // Current count: 124 steps. Update this if steps are intentionally added/removed.
         // +1 from check-victory-conditions (war termination, 2026-03-15).
         // +1 from compute-negotiation-capital (negotiation system, 2026-03-15).
-        expect(stepNames.length).toBe(122);
+        // +1 from evaluate-peace-plans (peace plan events, 2026-03-15).
+        // +1 from update-patron-pressure (patron pressure system, 2026-03-15).
+        expect(stepNames.length).toBe(124);
     });
 });
