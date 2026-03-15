@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paradox Daily Standup — 2026-03-15</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+    --bg: #0c1018;
+    --surface: #141a24;
+    --surface2: #1a2230;
+    --surface-elevated: #1e2838;
+    --border: rgba(255,255,255,0.06);
+    --border-bright: rgba(255,255,255,0.12);
+    --text: #d4dce8;
+    --text-dim: #6b7a8e;
+    --accent: #d4a73a;
+    --accent-dim: rgba(212,167,58,0.1);
+    --green: #3fb950;
+    --green-dim: rgba(63,185,80,0.08);
+    --red: #f85149;
+    --red-dim: rgba(248,81,73,0.08);
+    --amber: #d29922;
+    --amber-dim: rgba(210,153,34,0.08);
+    --blue: #58a6ff;
+    --blue-dim: rgba(88,166,255,0.08);
+    --sage: #56d364;
+    --teal: #39d2c0;
+    --teal-dim: rgba(57,210,192,0.06);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f1ec;
+      --surface: #ffffff;
+      --surface2: #f0ebe3;
+      --surface-elevated: #faf7f3;
+      --border: rgba(0,0,0,0.07);
+      --border-bright: rgba(0,0,0,0.14);
+      --text: #1e2a3a;
+      --text-dim: #6b7a8e;
+      --accent: #b8860b;
+      --accent-dim: rgba(184,134,11,0.07);
+      --green: #1a7f37;
+      --green-dim: rgba(26,127,55,0.06);
+      --red: #cf222e;
+      --red-dim: rgba(207,34,46,0.06);
+      --amber: #9a6700;
+      --amber-dim: rgba(154,103,0,0.06);
+      --blue: #0969da;
+      --blue-dim: rgba(9,105,218,0.06);
+      --sage: #1a7f37;
+      --teal: #1b7c83;
+      --teal-dim: rgba(27,124,131,0.06);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, var(--accent-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 90%, var(--blue-dim) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    padding: 1.5rem 1.5rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  /* HEADER */
+  header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--accent); }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; color: var(--accent); }
+  header .sub { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); margin-top: 0.2rem; }
+  /* SECTION */
+  section { margin-bottom: 2rem; }
+  .slabel { display:inline-flex; align-items:center; gap:0.5rem; font-family:var(--font-mono); font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:0.8rem; }
+  .slabel .dot { width:8px; height:8px; border-radius:50%; }
+  h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.8rem; }
+  /* KPIs */
+  .kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0.8rem; margin-bottom:2rem; }
+  .kpi { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:0.9rem 1rem; animation:fadeUp 0.35s ease both; }
+  .kpi .n { font-size:1.8rem; font-weight:700; line-height:1.1; }
+  .kpi .l { font-family:var(--font-mono); font-size:0.65rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; margin-top:0.15rem; }
+  .kpi.gold { border-left:3px solid var(--accent); }
+  .kpi.gold .n { color:var(--accent); }
+  .kpi.grn { border-left:3px solid var(--green); }
+  .kpi.grn .n { color:var(--green); }
+  .kpi.red { border-left:3px solid var(--red); }
+  .kpi.red .n { color:var(--red); }
+  .kpi.blue { border-left:3px solid var(--blue); }
+  .kpi.blue .n { color:var(--blue); }
+  .kpi.amb { border-left:3px solid var(--amber); }
+  .kpi.amb .n { color:var(--amber); }
+  /* CARDS */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1rem 1.2rem; margin-bottom:0.7rem; animation:fadeUp 0.35s ease both; }
+  .card h3 { font-size:0.92rem; font-weight:600; margin-bottom:0.3rem; }
+  .card p { font-size:0.82rem; color:var(--text-dim); line-height:1.55; }
+  .card code { font-family:var(--font-mono); font-size:0.76rem; background:var(--surface2); padding:0.1em 0.35em; border-radius:3px; }
+  .card-good { border-left:3px solid var(--green); }
+  .card-bad { border-left:3px solid var(--red); }
+  .card-ugly { border-left:3px solid var(--amber); }
+  /* CALIBRATION CHART */
+  .chart-area { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:1.2rem; margin-bottom:1rem; }
+  .chart-area h3 { font-size:0.9rem; font-weight:600; margin-bottom:0.8rem; }
+  .bar-row { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; font-size:0.78rem; }
+  .bar-label { width:90px; text-align:right; font-family:var(--font-mono); font-size:0.72rem; color:var(--text-dim); flex-shrink:0; }
+  .bar-track { flex:1; height:18px; background:var(--surface2); border-radius:3px; overflow:hidden; position:relative; }
+  .bar-fill { height:100%; border-radius:3px; transition:width 0.8s ease; }
+  .bar-val { width:50px; font-family:var(--font-mono); font-size:0.72rem; font-weight:600; }
+  /* TABLE */
+  .tw { overflow-x:auto; border-radius:6px; border:1px solid var(--border); margin-bottom:1rem; }
+  table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+  th { background:var(--surface2); font-family:var(--font-mono); font-size:0.68rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); padding:0.6rem 0.8rem; text-align:left; border-bottom:1px solid var(--border-bright); }
+  td { padding:0.55rem 0.8rem; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:nth-child(even) td { background:var(--surface2); }
+  .badge { display:inline-block; font-family:var(--font-mono); font-size:0.65rem; font-weight:600; padding:0.12em 0.45em; border-radius:3px; text-transform:uppercase; letter-spacing:0.04em; }
+  .b-esc { background:var(--red-dim); color:var(--red); }
+  .b-park { background:var(--blue-dim); color:var(--blue); }
+  .b-kill { background:var(--amber-dim); color:var(--amber); }
+  .b-fixed { background:var(--green-dim); color:var(--green); }
+  .b-new { background:var(--accent-dim); color:var(--accent); }
+  /* GRID */
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.8rem; }
+  /* PRIORITY BOARD */
+  .pri { background:var(--surface-elevated); border:1px solid var(--accent); border-radius:8px; padding:1.2rem 1.4rem; margin-bottom:1rem; animation:fadeUp 0.4s ease both; }
+  .pri h3 { font-size:1rem; font-weight:700; color:var(--accent); margin-bottom:0.3rem; }
+  .pri .meta { font-family:var(--font-mono); font-size:0.72rem; color:var(--text-dim); margin-bottom:0.5rem; }
+  .pri p { font-size:0.82rem; color:var(--text-dim); line-height:1.55; }
+  .pri .done { font-family:var(--font-mono); font-size:0.78rem; color:var(--green); margin-top:0.4rem; }
+  footer { margin-top:3rem; padding-top:0.8rem; border-top:1px solid var(--border); font-family:var(--font-mono); font-size:0.68rem; color:var(--text-dim); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+  @media(max-width:700px){ .kpi-grid{grid-template-columns:repeat(2,1fr)} .g2,.g3{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PARADOX DAILY STANDUP</h1>
+  <div class="sub">2026-03-15 Saturday &middot; Orchestrator convenes full team &middot; n747 (90.6% area, 13/13 anchors)</div>
+</header>
+
+<!-- ═══ HERO KPIs ═══ -->
+<div class="kpi-grid">
+  <div class="kpi gold" style="animation-delay:0.05s">
+    <div class="n">90.6%</div>
+    <div class="l">Area Match</div>
+  </div>
+  <div class="kpi grn" style="animation-delay:0.1s">
+    <div class="n">13/13</div>
+    <div class="l">Anchors</div>
+  </div>
+  <div class="kpi grn" style="animation-delay:0.15s">
+    <div class="n">6/6</div>
+    <div class="l">Benchmarks</div>
+  </div>
+  <div class="kpi blue" style="animation-delay:0.2s">
+    <div class="n">618</div>
+    <div class="l">Tests Pass</div>
+  </div>
+  <div class="kpi amb" style="animation-delay:0.25s">
+    <div class="n">141</div>
+    <div class="l">Battles (40w)</div>
+  </div>
+</div>
+
+<!-- ═══ PHASE 1: RETROSPECTIVE ═══ -->
+<section>
+  <div class="slabel"><span class="dot" style="background:var(--accent)"></span> Phase 1 — Yesterday's Retrospective</div>
+  <div class="g3">
+    <div class="card card-good" style="animation-delay:0.1s">
+      <h3 style="color:var(--green)">The Good</h3>
+      <p><strong>Elite loan system fully operational.</strong> Four fixes across army_reserve_system, corps_front_sectors, bot_brigade_ai_osid, recruitment_engine. All four elite brigades spawn, deploy to ops, march to fronts, and fight. +0.5pp calibration gain (90.1→90.6%).</p>
+      <p style="margin-top:0.4rem"><strong>65th Protection fought 5 battles</strong> in Drina. 1st Guards ground down at Olovo (3 battles, 1864/3000, coh 9.0). Black Swans at Žepče (2 battles). Guards Brigade deployed to 1st Corps. Historically plausible theaters.</p>
+    </div>
+    <div class="card card-bad" style="animation-delay:0.15s">
+      <h3 style="color:var(--red)">The Bad</h3>
+      <p><strong>n746 wasted.</strong> Bundled 4 fixes into one run — first three produced 0 battles, root cause was the fourth (corps lookup). One-change-per-run lesson violated again.</p>
+      <p style="margin-top:0.4rem"><strong>5 bugs across 4 files.</strong> First session found 3, assumed system worked. Second session discovered 2 more in completely different layers. Multi-layer failure pattern — should have traced end-to-end from the start.</p>
+    </div>
+    <div class="card card-ugly" style="animation-delay:0.2s">
+      <h3 style="color:var(--amber)">The Ugly</h3>
+      <p><strong>1st Guards at cohesion 9.0</strong> — 40 turns on loan, never recalled. The recall system checks casualties and morale but not cohesion. A cohesion-9 elite is a mob.</p>
+      <p style="margin-top:0.4rem"><strong>Elite tracker always shows 0 battles.</strong> <code>battles_fought</code> and <code>casualties_taken</code> in EliteLoanEpisode never incremented. Player-facing Campaign History is decorative.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PHASE 2: CALIBRATION TRAJECTORY ═══ -->
+<section>
+  <div class="slabel"><span class="dot" style="background:var(--blue)"></span> Phase 2 — Calibration Trajectory</div>
+  <div class="chart-area">
+    <h3>Area-Weighted Match (last 10 significant runs)</h3>
+    <div class="bar-row"><div class="bar-label">n304 ATH</div><div class="bar-track"><div class="bar-fill" style="width:93.8%;background:var(--green)"></div></div><div class="bar-val" style="color:var(--green)">93.8%</div></div>
+    <div class="bar-row"><div class="bar-label">n620</div><div class="bar-track"><div class="bar-fill" style="width:82.8%;background:var(--red)"></div></div><div class="bar-val" style="color:var(--red)">82.8%</div></div>
+    <div class="bar-row"><div class="bar-label">n636</div><div class="bar-track"><div class="bar-fill" style="width:86.3%;background:var(--amber)"></div></div><div class="bar-val">86.3%</div></div>
+    <div class="bar-row"><div class="bar-label">n666</div><div class="bar-track"><div class="bar-fill" style="width:89.1%;background:var(--blue)"></div></div><div class="bar-val">89.1%</div></div>
+    <div class="bar-row"><div class="bar-label">n668</div><div class="bar-track"><div class="bar-fill" style="width:89.0%;background:var(--blue)"></div></div><div class="bar-val">89.0%</div></div>
+    <div class="bar-row"><div class="bar-label">n692</div><div class="bar-track"><div class="bar-fill" style="width:88.2%;background:var(--blue)"></div></div><div class="bar-val">88.2%</div></div>
+    <div class="bar-row"><div class="bar-label">n703</div><div class="bar-track"><div class="bar-fill" style="width:89.6%;background:var(--blue)"></div></div><div class="bar-val">89.6%</div></div>
+    <div class="bar-row"><div class="bar-label">n76</div><div class="bar-track"><div class="bar-fill" style="width:90.3%;background:var(--accent)"></div></div><div class="bar-val" style="color:var(--accent)">90.3%</div></div>
+    <div class="bar-row"><div class="bar-label">n745</div><div class="bar-track"><div class="bar-fill" style="width:90.1%;background:var(--accent)"></div></div><div class="bar-val" style="color:var(--accent)">90.1%</div></div>
+    <div class="bar-row"><div class="bar-label">n747 ★</div><div class="bar-track"><div class="bar-fill" style="width:90.6%;background:var(--accent)"></div></div><div class="bar-val" style="color:var(--accent);font-weight:700">90.6%</div></div>
+    <p style="font-size:0.75rem;color:var(--text-dim);margin-top:0.6rem">Trend: steady recovery from n620 trough (sector system overhaul). Three consecutive runs at 90%+. New session high at 90.6%. Gap to ATH (93.8%): 3.2pp — primarily Drina region (81.9%) and Central Bosnia (80.2%).</p>
+  </div>
+</section>
+
+<!-- ═══ PHASE 3: GAME STATE ═══ -->
+<section>
+  <div class="slabel"><span class="dot" style="background:var(--teal)"></span> Phase 3 — Current Game State (n747, w40)</div>
+  <div class="g2">
+    <div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Faction</th><th>Personnel</th><th>Brigades</th><th>OSIDs</th><th>Share</th></tr></thead>
+          <tbody>
+            <tr><td><strong>RS (VRS)</strong></td><td>103,172</td><td>76</td><td>394</td><td>52.3%</td></tr>
+            <tr><td><strong>RBiH (ARBiH)</strong></td><td>127,651</td><td>94</td><td>273</td><td>36.3%</td></tr>
+            <tr><td><strong>HRHB (HVO)</strong></td><td>46,501</td><td>28</td><td>86</td><td>11.4%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Metric</th><th>Value</th><th>Historical</th></tr></thead>
+          <tbody>
+            <tr><td>Total casualties</td><td>63,306</td><td>~40-60k (40w)</td></tr>
+            <tr><td>Att:Def ratio</td><td>0.97:1</td><td>~1.5:1</td></tr>
+            <tr><td>RS early success</td><td>100% (51/51)</td><td>60-75%</td></tr>
+            <tr><td>RS late success</td><td>83% (38/46)</td><td>40-50%</td></tr>
+            <tr><td>Battles/week</td><td>3.5 avg</td><td>Higher</td></tr>
+            <tr><td>Dissolved brigades</td><td>0</td><td>Some expected</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="border-left:3px solid var(--teal)">
+        <h3>War-or-Game Assessment</h3>
+        <p><strong>Biggest realism gap:</strong> ARBiH suicide attacks at 0.1-0.2 power ratio (#39). The operation system forces attacks at 10:1 against. 600-720 casualties per battle in a pointless assault. No commander in any army does this.</p>
+        <p style="margin-top:0.3rem"><strong>Second gap:</strong> Operational tempo at 3.5/week across 198 brigades. The first year was constant everywhere. This is a cold war, not the Bosnian War.</p>
+        <p style="margin-top:0.3rem"><strong>Elite system verdict: PASS.</strong> All four elites fighting in historically plausible theaters. +0.5pp is real. Two follow-ups needed (cohesion recall, tracker fix).</p>
+      </div>
+      <div class="card" style="border-left:3px solid var(--amber)">
+        <h3>Equipment State</h3>
+        <p>RS: <strong>533 tanks, 1195 arty</strong> — JNA inheritance intact<br>
+        RBiH: 144 tanks, 436 arty — underequipped as expected<br>
+        HRHB: 37 tanks, 119 arty — light but capable<br>
+        RS:RBiH tank ratio 3.7:1 — historically plausible</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PHASE 4: CANON DRIFT ═══ -->
+<section>
+  <div class="slabel"><span class="dot" style="background:var(--amber)"></span> Phase 4 — Canon &amp; Doc Drift</div>
+  <div class="card" style="border-left:3px solid var(--amber)">
+    <h3>15 sim files changed in last 5 commits</h3>
+    <p><strong>Needs doc update:</strong> <code>army_reserve_system.ts</code> — added auto-join operation logic and offensive_support trigger changes. <code>corps_front_sectors.ts</code> — added force-assign sweep for loaned elites. <code>bot_brigade_ai_osid.ts</code> — loaned corps lookup override. <code>recruitment_engine.ts</code> — elite bypass for presence check + pool drain.</p>
+    <p style="margin-top:0.3rem"><strong>Already documented (n745 ledger):</strong> recruitment_engine and getCorpsReferenceOsid changes. <strong>Not yet in canon:</strong> The n747 four fixes (offensive_support trigger, auto-join, force-assign, corps lookup) need a ledger entry + Systems Manual update for the elite loan lifecycle changes.</p>
+    <p style="margin-top:0.3rem"><strong>Risk:</strong> PIPELINE_ENTRYPOINTS.md was updated for the initial loan system but not for the n747 changes to <code>tickEliteLoans</code> (auto-join standing rule). Low risk — implementation detail.</p>
+  </div>
+</section>
+
+<!-- ═══ PHASE 5: STALE BACKLOG ═══ -->
+<section>
+  <div class="slabel"><span class="dot" style="background:var(--red)"></span> Phase 5 — Stale Backlog Triage</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Item</th><th>Age</th><th>Decision</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>#15 Density imbalance (16x ratios)</td><td>P1, 5+ sessions</td><td><span class="badge b-esc">Escalate</span></td><td>1KK 4 brigades idle in Banja Luka. Real impact on Posavina corridor.</td></tr>
+        <tr><td>#31 Teočak pocket</td><td>P2, 3 sessions</td><td><span class="badge b-park">Park</span></td><td>East Bosnian minor theater. Won't move the needle vs Drina/Central Bosnia.</td></tr>
+        <tr><td>#25 Podrinje Sweep 23 weeks</td><td>P2, partial fix</td><td><span class="badge b-park">Park</span></td><td>Ring axis topology broken. Fix caused -0.9pp regression. Needs topology redesign.</td></tr>
+        <tr><td>#6/#8 Front coverage + stacking</td><td>P2, monitoring</td><td><span class="badge b-park">Park</span></td><td>Mitigated by reactive defense. No active regression.</td></tr>
+        <tr><td>H4 VRS armor concentration</td><td>P2, open</td><td><span class="badge b-park">Park</span></td><td>Equipment IS present. Concentration is a bot AI design question, not a bug.</td></tr>
+        <tr><td>Brčko/Gradačac anchor</td><td>P2, open</td><td><span class="badge b-esc">Escalate</span></td><td>brka_2 failed after avoided_osids banned. Needs engine fix for RS Posavina targeting.</td></tr>
+        <tr><td>0 dissolved formations</td><td>P2, n647</td><td><span class="badge b-park">Park</span></td><td>Dissolution criteria may be too protective but zero dissolutions is stable.</td></tr>
+        <tr><td>#37 Elite cohesion recall</td><td><span class="badge b-new">New</span></td><td><span class="badge b-esc">Escalate</span></td><td>Easy fix (~5 lines). 1st Guards at coh 9 is absurd.</td></tr>
+        <tr><td>#39 ARBiH suicide attacks</td><td><span class="badge b-new">New</span></td><td><span class="badge b-esc">Escalate</span></td><td>P2 realism issue. 600-720 cas at PR 0.1. Needs execution-time outcome gate.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ PHASE 6: DEEP DIVE ═══ -->
+<section>
+  <div class="slabel"><span class="dot" style="background:var(--sage)"></span> Phase 6 — Saturday Deep Dive: Force Structure</div>
+  <div class="g2">
+    <div class="chart-area">
+      <h3>Personnel Distribution (n747 w40)</h3>
+      <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:0.6rem">Active brigades by personnel band</p>
+      <div style="font-family:var(--font-mono);font-size:0.75rem;line-height:1.8">
+        <div><strong style="color:var(--blue)">RS (76 brig)</strong> avg=1358 med=1132 min=400 max=3000</div>
+        <div style="margin-left:1rem;color:var(--text-dim)">0-499: 10 &middot; 500-999: 24 &middot; 1000-1499: 18 &middot; 1500+: 24</div>
+        <div style="margin-top:0.4rem"><strong style="color:var(--green)">RBiH (94 brig)</strong> avg=1358 med=902 min=106 max=3000</div>
+        <div style="margin-left:1rem;color:var(--text-dim)">0-499: 23 &middot; 500-999: 27 &middot; 1000-1499: 15 &middot; 1500+: 29</div>
+        <div style="margin-top:0.4rem"><strong style="color:var(--amber)">HRHB (28 brig)</strong> avg=1661 med=1592 min=566 max=3000</div>
+        <div style="margin-left:1rem;color:var(--text-dim)">500-999: 11 &middot; 1000-1499: 3 &middot; 1500+: 14</div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--text-dim);margin-top:0.8rem"><strong>14 brigades below combat ineffective (400).</strong> All RBiH. These are walking dead — can't attack, barely defend. Historical: some TDF units were this small, but 14/94 ARBiH brigades (15%) being sub-400 at w40 is high.</p>
+    </div>
+    <div class="chart-area">
+      <h3>Lowest Cohesion Brigades</h3>
+      <div style="font-family:var(--font-mono);font-size:0.78rem;line-height:2">
+        <div><span style="color:var(--red)">&#9632;</span> rs_1st_guards_motorized: <strong style="color:var(--red)">coh 9.0</strong> pers=1864 mor=65</div>
+        <div><span style="color:var(--red)">&#9632;</span> rs_4th_sarajevo_light: <strong style="color:var(--red)">coh 9.0</strong> pers=1634 mor=64</div>
+        <div><span style="color:var(--amber)">&#9632;</span> rs_1st_semberija: coh 33 pers=427 <strong style="color:var(--red)">mor=0</strong></div>
+        <div><span style="color:var(--amber)">&#9632;</span> rs_3rd_posavina: coh 33 pers=400 mor=12</div>
+        <div><span style="color:var(--amber)">&#9632;</span> arbih_217th_vitezka: coh 33 pers=1258 mor=32</div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--text-dim);margin-top:0.8rem"><strong>Two RS brigades at cohesion 9.0</strong> — both on the Sarajevo siege ring. The 1st Guards is an elite on loan (should be recalled). The 4th Sarajevo has been fighting continuously. <strong>rs_1st_semberija has morale 0</strong> — this should have triggered dissolution (morale criterion ≤15 is met, but needs 2-of-3 criteria for non-enclave).</p>
+      <p style="font-size:0.75rem;color:var(--text-dim);margin-top:0.3rem"><strong>Historical comparison:</strong> VRS ~80-100k personnel (we have 103k — correct). ARBiH heading toward 180k by late 1992 (we have 127k — growing, correct trajectory). HVO ~25-50k (we have 46.5k — top of range, HRHB Lasva window keeping them healthy).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PHASE 7: TODAY'S PRIORITIES ═══ -->
+<section>
+  <div class="slabel"><span class="dot" style="background:var(--accent)"></span> Phase 7 — Today's Priorities</div>
+
+  <div class="pri" style="animation-delay:0.3s">
+    <h3>1. Elite Cohesion Recall + Tracker Instrumentation</h3>
+    <div class="meta">Gameplay Programmer &middot; ~30min &middot; REAL_WAR_MASTER #37 + #38</div>
+    <p>Add <code>ELITE_COHESION_RECALL=25</code> to <code>elite_loan_types.ts</code>, check in <code>tickEliteLoans</code>. Then wire <code>battles_fought</code>/<code>casualties_taken</code> increment in <code>attack_resolution_osid.ts</code>. Easy wins that close two audit items.</p>
+    <div class="done">Done = 1st Guards recalled before coh 9. Tracker shows non-zero battles. Run n748 confirms.</div>
+  </div>
+
+  <div class="pri" style="animation-delay:0.35s">
+    <h3>2. ARBiH Suicide Attack Gate</h3>
+    <div class="meta">Gameplay Programmer + War-or-Game &middot; ~2h &middot; REAL_WAR_MASTER #39</div>
+    <p>Add per-execution-turn outcome quality gate: if predicted outcome is 'catastrophic' for 2 consecutive turns on the same objective, axis stalls. Different from existing idle/movement stall. Prevents 600-720 casualty attacks at PR 0.1. The single biggest realism gap in the current sim.</p>
+    <div class="done">Done = No battles at PR &lt; 0.3 in late war. ARBiH total casualties drop. /war-or-game signs off.</div>
+  </div>
+
+  <div class="pri" style="animation-delay:0.4s">
+    <h3>3. Ledger Entry + Canon Propagation for n747</h3>
+    <div class="meta">Documentation Specialist &middot; ~30min</div>
+    <p>Write n747 ledger entry (four elite loan fixes, +0.5pp). Update Systems Manual elite loan lifecycle description. Update PIPELINE_ENTRYPOINTS for auto-join standing rule in tickEliteLoans.</p>
+    <div class="done">Done = Ledger, Systems Manual, and PIPELINE_ENTRYPOINTS all reflect the n747 changes.</div>
+  </div>
+
+  <div class="pri" style="animation-delay:0.45s">
+    <h3>4. Density Imbalance Investigation (#15)</h3>
+    <div class="meta">War-or-Game + Gameplay Programmer &middot; ~3h &middot; REAL_WAR_MASTER #15</div>
+    <p>Stale P1 — 1KK has 4 brigades idle in Banja Luka while front sectors are thin. Investigate density equalization gaps. This affects Posavina Corridor performance and the Brčko anchor (#P2). Could unlock 1-2pp if fixed.</p>
+    <div class="done">Done = Diagnostic showing brigade distribution by corps. Proposal for density fix. Run showing Posavina improvement.</div>
+  </div>
+
+  <div class="pri" style="animation-delay:0.5s">
+    <h3>5. Drina Region Gap Analysis</h3>
+    <div class="meta">Scenario Author + Historian &middot; ~2h</div>
+    <p>Drina is the weakest region at 81.9% (vs 99.6% Krajina). 12 OSID mismatches. Identify which are fixable through OOB/painted targets vs which need engine changes (vranesevici ring axis, Srebrenica approach). The 3.2pp gap to ATH is primarily here.</p>
+    <div class="done">Done = Drina OSID mismatch list with root cause per OSID. Sorted by fixability (data fix vs engine fix).</div>
+  </div>
+</section>
+
+<footer>
+  Paradox Daily Standup &middot; Orchestrator &middot; 2026-03-15 &middot; n747 baseline &middot; Hash: 6f956382172fb520
+</footer>
+
+</body>
+</html>

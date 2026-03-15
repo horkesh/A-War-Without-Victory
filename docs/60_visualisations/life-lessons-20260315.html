@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life-Lessons Review — 2026-03-15</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Bricolage Grotesque', system-ui, sans-serif;
+    --font-mono: 'Fragment Mono', 'SF Mono', Consolas, monospace;
+
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --surface2: #f5f0eb;
+    --surface-elevated: #fffdfb;
+    --surface-recessed: #f0ebe5;
+    --border: rgba(0, 0, 0, 0.07);
+    --border-bright: rgba(0, 0, 0, 0.14);
+    --text: #2c1810;
+    --text-dim: #8a7262;
+    --accent: #c2410c;
+    --accent-dim: rgba(194, 65, 12, 0.07);
+    --green: #3d7a3d;
+    --green-dim: rgba(61, 122, 61, 0.08);
+    --red: #b91c1c;
+    --red-dim: rgba(185, 28, 28, 0.08);
+    --amber: #92400e;
+    --amber-dim: rgba(146, 64, 14, 0.08);
+    --sage: #4d7c5e;
+    --sage-dim: rgba(77, 124, 94, 0.08);
+    --blue: #1e5f8a;
+    --blue-dim: rgba(30, 95, 138, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1410;
+      --surface: #241c16;
+      --surface2: #2e241c;
+      --surface-elevated: #352a20;
+      --surface-recessed: #1e1812;
+      --border: rgba(255, 255, 255, 0.06);
+      --border-bright: rgba(255, 255, 255, 0.12);
+      --text: #f0e6dc;
+      --text-dim: #a89280;
+      --accent: #f97316;
+      --accent-dim: rgba(249, 115, 22, 0.1);
+      --green: #6ee7a0;
+      --green-dim: rgba(110, 231, 160, 0.08);
+      --red: #f87171;
+      --red-dim: rgba(248, 113, 113, 0.08);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251, 191, 36, 0.08);
+      --sage: #86efac;
+      --sage-dim: rgba(134, 239, 172, 0.06);
+      --blue: #7dd3fc;
+      --blue-dim: rgba(125, 211, 252, 0.08);
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, var(--accent-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, var(--sage-dim) 0%, transparent 40%);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.55;
+    padding: 2rem 1.5rem 4rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-bright);
+  }
+  header h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+  }
+  header .subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  /* ===== KPI STRIP ===== */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    animation: fadeUp 0.4s ease both;
+  }
+  .kpi:nth-child(1) { animation-delay: 0.05s; }
+  .kpi:nth-child(2) { animation-delay: 0.1s; }
+  .kpi:nth-child(3) { animation-delay: 0.15s; }
+  .kpi:nth-child(4) { animation-delay: 0.2s; }
+  .kpi .num {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .kpi .label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 0.2rem;
+  }
+  .kpi.violated { border-left: 3px solid var(--red); }
+  .kpi.violated .num { color: var(--red); }
+  .kpi.exemplified { border-left: 3px solid var(--green); }
+  .kpi.exemplified .num { color: var(--green); }
+  .kpi.new-lesson { border-left: 3px solid var(--accent); }
+  .kpi.new-lesson .num { color: var(--accent); }
+  .kpi.stable { border-left: 3px solid var(--sage); }
+  .kpi.stable .num { color: var(--sage); }
+
+  /* ===== SECTION ===== */
+  section { margin-bottom: 2.5rem; }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+  .section-label .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot-red { background: var(--red); }
+  .dot-green { background: var(--green); }
+  .dot-amber { background: var(--amber); }
+  .dot-accent { background: var(--accent); }
+  .dot-sage { background: var(--sage); }
+  .dot-blue { background: var(--blue); }
+
+  /* ===== VIOLATION CARDS ===== */
+  .violation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    border-radius: 6px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.4s ease both;
+  }
+  .violation-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .violation-card p, .exemplar-card p { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 0.5rem; }
+  .violation-card code, .exemplar-card code, .new-card code {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    background: var(--surface-recessed);
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+  }
+  .severity {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.15em 0.5em;
+    border-radius: 3px;
+  }
+  .severity-moderate { background: var(--amber-dim); color: var(--amber); }
+
+  /* ===== EXEMPLAR CARDS ===== */
+  .exemplar-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 6px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.4s ease both;
+  }
+  .exemplar-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--green);
+  }
+
+  /* ===== NEW LESSON CARDS ===== */
+  .new-card {
+    background: var(--surface-elevated);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.4rem 1.5rem;
+    margin-bottom: 1.2rem;
+    animation: fadeUp 0.45s ease both;
+  }
+  .new-card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+  }
+  .new-card .wrong, .new-card .right {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding: 0.6rem 0.8rem;
+    border-radius: 5px;
+    margin-bottom: 0.6rem;
+  }
+  .new-card .wrong {
+    background: var(--red-dim);
+    border-left: 2px solid var(--red);
+  }
+  .new-card .right {
+    background: var(--green-dim);
+    border-left: 2px solid var(--green);
+  }
+  .new-card .wrong strong { color: var(--red); }
+  .new-card .right strong { color: var(--green); }
+  .new-card .context { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.6rem; line-height: 1.6; }
+
+  /* ===== PRIORITY TABLE ===== */
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  th {
+    background: var(--surface2);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-bright);
+  }
+  td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: var(--surface2); }
+  tr:hover td { background: var(--accent-dim); }
+  .badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15em 0.55em;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-reinforced { background: var(--amber-dim); color: var(--amber); }
+  .badge-stable { background: var(--sage-dim); color: var(--sage); }
+  .badge-violated { background: var(--red-dim); color: var(--red); }
+
+  /* ===== COMMIT STRIP ===== */
+  .commit-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 2rem;
+  }
+  .commit {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    animation: fadeUp 0.3s ease both;
+  }
+  .commit .hash {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    min-width: 5.5em;
+  }
+  .commit .msg { color: var(--text-dim); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+  @media (max-width: 640px) {
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    body { padding: 1.2rem 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Life-Lessons Review</h1>
+  <div class="subtitle">2026-03-15 &middot; 7 commits &middot; n745 &rarr; n747 elite loan system sprint</div>
+</header>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi violated">
+    <div class="num">2</div>
+    <div class="label">Violations</div>
+  </div>
+  <div class="kpi exemplified">
+    <div class="num">2</div>
+    <div class="label">Exemplified</div>
+  </div>
+  <div class="kpi new-lesson">
+    <div class="num">2</div>
+    <div class="label">New Lessons</div>
+  </div>
+  <div class="kpi stable">
+    <div class="num">0</div>
+    <div class="label">Demoted</div>
+  </div>
+</div>
+
+<!-- COMMITS UNDER REVIEW -->
+<section>
+  <div class="section-label"><span class="dot dot-blue"></span> Commits Under Review</div>
+  <div class="commit-strip">
+    <div class="commit" style="animation-delay:0.05s"><span class="hash">927f746</span><span class="msg">fix(sim): n745 — elite brigade spawning + loan system activation</span></div>
+    <div class="commit" style="animation-delay:0.1s"><span class="hash">56f2ae0</span><span class="msg">fix(sim): n747 — elite loan system produces combat (+0.5pp)</span></div>
+    <div class="commit" style="animation-delay:0.12s"><span class="hash">21498a2</span><span class="msg">docs: War-or-Game n747 audit — 4 issues to REAL_WAR_MASTER + backlog</span></div>
+    <div class="commit" style="animation-delay:0.15s"><span class="hash">a26087a</span><span class="msg">feat(ui): UI premium polish — warroom HQ screens, map overhaul</span></div>
+    <div class="commit" style="animation-delay:0.18s"><span class="hash">23004f8</span><span class="msg">merge(engine-sprint): calibration sprint n701–n76</span></div>
+    <div class="commit" style="animation-delay:0.2s"><span class="hash">5dd3f32</span><span class="msg">feat(calibration): n76 engine sprint — 90.3% area, 13/13 anchors</span></div>
+    <div class="commit" style="animation-delay:0.22s"><span class="hash">f8e2e3b</span><span class="msg">feat(sim+ui): Army HQ Reserve Pool — elite brigade loan system</span></div>
+  </div>
+</section>
+
+<!-- VIOLATIONS -->
+<section>
+  <div class="section-label"><span class="dot dot-red"></span> Violations Detected</div>
+
+  <div class="violation-card" style="animation-delay:0.25s">
+    <h3>
+      "One change per run + mandatory insanity check"
+      <span class="severity severity-moderate">moderate</span>
+    </h3>
+    <p>The n747 commit (<code>56f2ae0</code>) bundled <strong>four independent fixes</strong> into a single calibration run: (1) offensive_support trigger, (2) auto-join operation, (3) force-assign to sector, (4) bot AI corps lookup. When the first three produced zero elite battles (n746), attribution was ambiguous. Only debug logging after n746 identified Change 4 as the sole blocker.</p>
+    <p>If each fix had been a separate run, the first three would have shown zero change instantly — Change 4 would have been identified in one cycle instead of two.</p>
+  </div>
+
+  <div class="violation-card" style="animation-delay:0.3s">
+    <h3>
+      "Persistent symptoms = multi-layer failure"
+      <span class="severity severity-moderate">moderate</span>
+    </h3>
+    <p>The elite loan system had <strong>five bugs across four files</strong>: (1) <code>factionHasPresenceInMun</code> slug mismatch, (2) pool too small for elites, (3) <code>getCorpsReferenceOsid</code> early-return, (4) <code>offensive_support</code> trigger too restrictive, (5) bot AI corps lookup using wrong <code>corps_id</code>.</p>
+    <p>The first session found bugs 1–3 and assumed the system would work. It didn't — bugs 4–5 were in different layers (request generation, brigade AI evaluation) that weren't investigated until the zero-combat report. Classic multi-layer: fixing spawning and deployment left the order-generation layer broken.</p>
+  </div>
+</section>
+
+<!-- EXEMPLIFIED -->
+<section>
+  <div class="section-label"><span class="dot dot-green"></span> Lessons Exemplified</div>
+
+  <div class="exemplar-card" style="animation-delay:0.35s">
+    <h3>"The bug is never where you think it is"</h3>
+    <p>The elite loan system appeared to be a "deployment doesn't move brigades" problem. The real critical bug was a <strong>one-line corps lookup</strong> at <code>bot_brigade_ai_osid.ts:350</code>. All the architectural work (wider triggers, auto-join, force-assign) was correct but cosmetic without <code>const corpsId = loanedTo ?? brigade.corps_id</code>. The system passed the entire evaluation chain — it just evaluated under the wrong corps.</p>
+  </div>
+
+  <div class="exemplar-card" style="animation-delay:0.4s">
+    <h3>"Fixing one faction cascades to all others"</h3>
+    <p>The elite fix (n747) improved area match from 90.1% to <strong>90.6% (+0.5pp)</strong>. VRS elites participating in Drina and SRK operations changed the territorial balance. All benchmarks passed, but the cascade was real and measured — RS captured slightly more territory in those theaters.</p>
+  </div>
+</section>
+
+<!-- NEW LESSONS -->
+<section>
+  <div class="section-label"><span class="dot dot-accent"></span> New Lessons Proposed</div>
+
+  <div class="new-card" style="animation-delay:0.45s">
+    <h3>[Architecture] Virtual identity routing must be respected by ALL consumers</h3>
+    <div class="context">The elite loan system routed brigades through <code>loanedCorpsMap</code> in sector assignment, but the bot brigade AI used <code>brigade.corps_id</code> directly. The sector system saw a Drina Corps brigade; the AI saw a Main Staff brigade with no operations.</div>
+    <div class="wrong"><strong>Wrong:</strong> Patching the routing in one consumer (sector assignment) and assuming others will follow. Each consumer independently looks up <code>corps_id</code>.</div>
+    <div class="right"><strong>Right:</strong> After adding any identity-routing mechanism, <code>grep ALL</code> references to the original identity field. Each reference is a potential bypass. A routing system that only works in one consumer is worse than none — it creates the illusion of correctness.</div>
+  </div>
+
+  <div class="new-card" style="animation-delay:0.5s">
+    <h3>[Debugging] Paper-transfer systems need end-to-end smoke tests</h3>
+    <div class="context">The elite loan system set <code>on_loan=true</code>, updated tracker episodes, generated requests — all correctly. But elites never fought. Five bugs across four files prevented combat. Correct state masked total behavioral failure.</div>
+    <div class="wrong"><strong>Wrong:</strong> Trusting that correct state means correct behavior. The loan state was perfect; the behavior was zero.</div>
+    <div class="right"><strong>Right:</strong> Define a smoke test: "at least one elite must appear in <code>weekly_report</code> battles." If it fails, trace the entity step-by-step: spawn → deploy → sector assign → corps command lookup → operation participation → brigade AI → attack order → battle.</div>
+  </div>
+</section>
+
+<!-- PRIORITY TABLE -->
+<section>
+  <div class="section-label"><span class="dot dot-sage"></span> Priority Updates</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Lesson</th>
+          <th>Status</th>
+          <th>Evidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>"One change per run"</td>
+          <td><span class="badge badge-reinforced">Reinforced</span></td>
+          <td>n747 bundled 4 fixes → n746 wasted cycle</td>
+        </tr>
+        <tr>
+          <td>"Persistent symptoms = multi-layer failure"</td>
+          <td><span class="badge badge-reinforced">Reinforced</span></td>
+          <td>5 bugs across 4 files, classic multi-layer</td>
+        </tr>
+        <tr>
+          <td>"The bug is never where you think it is"</td>
+          <td><span class="badge badge-reinforced">Reinforced</span></td>
+          <td>Critical bug was 1-line corps lookup, not architectural</td>
+        </tr>
+        <tr>
+          <td>"Fixing one faction cascades"</td>
+          <td><span class="badge badge-reinforced">Reinforced</span></td>
+          <td>+0.5pp from elite system, benchmarks re-verified</td>
+        </tr>
+        <tr>
+          <td>"Port systems incrementally"</td>
+          <td><span class="badge badge-stable">Stable</span></td>
+          <td>No change — not triggered today</td>
+        </tr>
+        <tr>
+          <td>"Classify tasks by actual system impact"</td>
+          <td><span class="badge badge-stable">Stable</span></td>
+          <td>No change — not triggered today</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  Generated 2026-03-15 &middot; AWWV Life-Lessons Cron &middot; Reviewing 927f746..21498a2 (7 commits)
+</footer>
+
+</body>
+</html>
