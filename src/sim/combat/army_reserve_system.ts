@@ -22,6 +22,7 @@ import {
     ELITE_LOAN_COOLDOWN,
     ELITE_CASUALTY_THRESHOLD,
     ELITE_MORALE_RECALL,
+    ELITE_COHESION_RECALL,
     ELITE_DEGRADATION_THRESHOLD,
     MAX_AUTO_DEPLOY_HOPS,
     createEliteBrigadeTracker,
@@ -332,8 +333,14 @@ export function recallEliteLoan(
             episode.loan_end_turn = turn;
             episode.recall_reason = reason;
             episode.personnel_end = f.personnel ?? 0;
-            episode.casualties_taken = Math.max(0, (episode.personnel_start) - (episode.personnel_end));
+            // casualties_taken is updated in real-time by recordBrigadeEngagement.
+            // On close, use the larger of real-time tally and personnel delta
+            // (personnel delta captures non-combat losses too).
+            const personnelDelta = Math.max(0, episode.personnel_start - (episode.personnel_end));
+            episode.casualties_taken = Math.max(episode.casualties_taken, personnelDelta);
             tracker.total_casualties_taken += episode.casualties_taken;
+            tracker.total_battles += episode.battles_fought;
+            tracker.total_osids_captured += episode.osids_captured;
         }
     }
 
@@ -443,9 +450,8 @@ export function tickEliteLoans(state: GameState, turn: number): void {
 
         // ── Update tracker totals (every turn on loan) ──
         if (tracker) tracker.total_turns_deployed++;
-        // Update episode battles from brigade_history (if available)
-        // We use the total battle count as a proxy; episode battles_fought is best-effort
-        // (full battle attribution requires cross-referencing attack_resolution reports)
+        // Episode battles_fought, casualties_taken, osids_captured, kia_inflicted_est
+        // are updated in real-time by recordBrigadeEngagement() in brigade_history_recorder.ts.
 
         // ── Auto-join target corps operation (standing rule) ──
         // If the target corps launched a NEW operation since deployment, join it.
@@ -488,6 +494,12 @@ export function tickEliteLoans(state: GameState, turn: number): void {
         // Morale collapse
         if ((f.morale ?? 60) < ELITE_MORALE_RECALL) {
             recallEliteLoan(state, bid, 'morale_collapse', turn);
+            continue;
+        }
+
+        // Cohesion collapse
+        if ((f.cohesion ?? 50) < ELITE_COHESION_RECALL) {
+            recallEliteLoan(state, bid, 'cohesion_collapse', turn);
             continue;
         }
 

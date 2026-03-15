@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-14 (n692–n700 review, 2 lessons promoted, 3 new lessons added)
+> Last updated: 2026-03-15 (n745–n747 review, 2 violations, 2 new lessons, 4 reinforced)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -9,11 +9,29 @@
 
 ## Recently Violated (needs reinforcement)
 
-*No new violations detected in 2026-03-14 review (n692–n700 commits). Two lessons promoted to Active.*
+### [Calibration] One change per run + mandatory insanity check — VIOLATED 2026-03-15
+- **Violation evidence**: n747 (`56f2ae0`) bundled FOUR independent fixes (offensive_support trigger, auto-join op, force-assign sector, bot AI corps lookup) into a single calibration run. When the first three produced 0 elite battles (n746), attribution was ambiguous. Debug logging after n746 identified Change 4 as the sole blocker — if each fix had been a separate run, identification would have been immediate.
+- **Cost**: One wasted calibration cycle (n746). No regression, but delayed root-cause identification.
+
+### [Debugging] Persistent symptoms = multi-layer failure — VIOLATED 2026-03-15
+- **Violation evidence**: Elite loan system had 5 bugs across 4 files. First session found bugs 1-3 (spawning/deployment layer) and assumed the system would work. Bugs 4-5 (request generation + brigade AI evaluation layers) weren't discovered until the zero-combat report forced a second investigation. Classic multi-layer: fixing one layer doesn't fix the system when other layers are independently broken.
+- **Cost**: Extra investigation cycle. The systematic trace approach in the second pass was correct — should have been applied from the start.
 
 ---
 
 ## Active Lessons (no recent violations)
+
+### [Architecture] Virtual identity routing must be respected by ALL consumers (2026-03-15) — NEW
+- **Context**: The elite loan system routed brigades through `loanedCorpsMap` in `classifyBrigadesByTerritory` (sector assignment) but the bot brigade AI used `brigade.corps_id` directly. The sector system saw the elite as a Drina Corps brigade; the AI saw it as a Main Staff brigade with no operations. Result: elites assigned to correct sectors but received zero operation orders for 40 weeks.
+- **Wrong approach**: Patching the routing in one consumer (sector assignment) and assuming others will follow. Each consumer independently looks up `corps_id`.
+- **Right approach**: After adding any identity-routing mechanism (loan, detachment, operational control), grep ALL references to the original identity field (`corps_id`, `faction`, etc.). Each reference is a potential bypass. A routing system that only works in one consumer is worse than none — it creates the illusion of correctness.
+- **Do instead**: When adding virtual identity (loaned corps, temporary faction, etc.), search for ALL references to the real identity field. Test by tracing: "if I follow this entity through every pipeline step, does it use the virtual identity consistently?" The `bot_brigade_ai_osid.ts` corps lookup was the fifth bug found — invisible from the other four layers.
+
+### [Debugging] Paper-transfer systems need end-to-end smoke tests (2026-03-15) — NEW
+- **Context**: The elite loan system set `on_loan=true`, updated tracker episodes, generated requests, deployed brigades — all correctly. But elites never fought. Five bugs across four files prevented combat. The "system works" appearance (correct flags, tracker entries, UI) masked total behavioral failure for 40 weeks.
+- **Wrong approach**: Trusting that correct state means correct behavior. The loan state was perfect; the behavior was zero.
+- **Right approach**: Define a smoke test before claiming any new system works: "what observable behavior MUST occur?" For elite loans: "at least one elite must appear in `weekly_report` battles." If the smoke test fails, trace the entity through every pipeline step: spawn → deploy → sector assign → corps command lookup → operation participation → brigade AI → attack order → battle resolution.
+- **Do instead**: For every new system that should produce observable behavior (combat, movement, territorial change), define the smoke test up front. Run it before claiming the system works. If the smoke test fails, do NOT debug the most complex layer — trace from input to output and check each handoff.
 
 ### [Architecture] Derived state must be computed AFTER all its producers have run (2026-03-14) — NEW
 - **Context**: `defensive_power` and `threat_ratio` were computed inside `classifyBrigadesByTerritory` (Step 6 of `buildCorpsFrontSectors`). Step 7 (`ensureMinimumSectorCoverage`) and Steps 8a/8b also modify `assigned_brigade_ids`. Sectors rescued by Step 7 from scratch had `dp=0` forever — no brigades existed when dp was computed. Cascade: `dp=0` → `threat_ratio=0` → density equalization scores those sectors near-minimum → SRK siege ring brigades never get reassigned there → siege ring stays thin.

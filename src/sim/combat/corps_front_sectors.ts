@@ -218,6 +218,13 @@ function buildFactionSectors(
     const playerOverrides = state.military.brigade_sector_override;
     classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, commanderProfiles, playerOverrides);
 
+    // Step 6b: Cross-corps enclave defense — brigades defend where they stand.
+    // After corps-strict assignment, some brigades remain unassigned because their
+    // location's front edges belong to a different corps's sector (e.g. HVO 111th at
+    // Žepče — hvo_central_bosnia corps, but Žepče sector is hvo_northwest_bosnia).
+    // A brigade physically present at a front defends it regardless of corps org chart.
+    assignCrossCorpsEnclaveDefenders(sectors, formations, faction);
+
     // Step 7: Ensure every sector with front edges has at least one assigned brigade.
     // Transfer from adjacent surplus sectors only (geographic contiguity enforced).
     ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf);
@@ -1079,6 +1086,92 @@ function classifyBrigadesByTerritory(
     // have run. Computing them here would produce stale values for sectors that
     // gain their first brigade via ensureMinimumSectorCoverage (Step 7), causing
     // those sectors to show dp=0 and threat_ratio=0 despite having defenders.
+}
+
+/**
+ * Step 6b: Cross-corps enclave defense.
+ *
+ * After corps-strict assignment, some brigades are unassigned because they're
+ * physically present in territory where the front edges belong to a different
+ * corps's sector. This happens in disconnected enclaves where the "correct" corps
+ * has no sectors nearby (e.g. HVO central Bosnia brigades in Žepče — the Žepče
+ * front edges are in an hvo_northwest_bosnia sector).
+ *
+ * A brigade physically at a front OSID defends it regardless of corps org charts.
+ * This pass assigns orphaned brigades to the nearest same-faction sector at their
+ * location, even if it belongs to a different corps.
+ */
+function assignCrossCorpsEnclaveDefenders(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    faction: FactionId,
+): void {
+    // Build set of all already-assigned brigade IDs
+    const assigned = new Set<string>();
+    for (const s of sectors) {
+        for (const bid of s.assigned_brigade_ids) assigned.add(bid);
+        for (const bid of s.reserve_brigade_ids ?? []) assigned.add(bid);
+    }
+
+    // Build front OSID → sector index map (all sectors, not corps-filtered)
+    const frontOsidToSectors = new Map<string, number[]>();
+    for (let i = 0; i < sectors.length; i++) {
+        for (const ss of sectors[i]!.sub_segments) {
+            for (const o of ss.friendly_osids) {
+                const existing = frontOsidToSectors.get(o);
+                if (existing) { if (!existing.includes(i)) existing.push(i); }
+                else frontOsidToSectors.set(o, [i]);
+            }
+        }
+    }
+
+    // Also build territory OSID → sector index (for brigades 1-hop behind front)
+    const territoryOsidToSectors = new Map<string, number[]>();
+    for (let i = 0; i < sectors.length; i++) {
+        for (const o of sectors[i]!.territory_osids) {
+            const existing = territoryOsidToSectors.get(o);
+            if (existing) { if (!existing.includes(i)) existing.push(i); }
+            else territoryOsidToSectors.set(o, [i]);
+        }
+    }
+
+    const sortedFormIds = Object.keys(formations).sort(strictCompare);
+    for (const fid of sortedFormIds) {
+        if (assigned.has(fid)) continue;
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid) continue;
+        const fCorpsId = getFormationCorpsId(f);
+        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue;
+
+        // Check if this brigade is on a front OSID of ANY same-faction sector
+        const loc = f.location_osid;
+        let sectorIndices = frontOsidToSectors.get(loc);
+        if (!sectorIndices || sectorIndices.length === 0) {
+            // Not on front — check territory (1-hop behind)
+            sectorIndices = territoryOsidToSectors.get(loc);
+        }
+        if (!sectorIndices || sectorIndices.length === 0) continue;
+
+        // Filter to same-faction sectors (should always be, but guard)
+        const factionIndices = sectorIndices.filter(idx => sectors[idx]!.faction === faction);
+        if (factionIndices.length === 0) continue;
+
+        // Assign to neediest sector
+        let bestIdx = factionIndices[0]!;
+        let bestNeed = -Infinity;
+        for (const idx of factionIndices) {
+            const s = sectors[idx]!;
+            const need = s.length_edges - s.assigned_brigade_ids.length;
+            if (need > bestNeed || (need === bestNeed && strictCompare(s.sector_id, sectors[bestIdx]!.sector_id) < 0)) {
+                bestNeed = need;
+                bestIdx = idx;
+            }
+        }
+        sectors[bestIdx]!.assigned_brigade_ids.push(fid);
+        assigned.add(fid);
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2511,11 +2604,17 @@ function ensureMinimumSectorCoverage(
         }
     }
 
-    // ── Density floor pass (n701): reinforce under-pressure thin fronts ──
+    // ── Density floor pass (n701→n750): reinforce under-pressure thin fronts ──
     // After the 0-brigade rescue, transfer surplus brigades from over-staffed sectors
     // to under-staffed sectors that are under active enemy pressure (threat_ratio gate).
-    // Gated on threat_ratio > THREAT_GATE to avoid pulling rear guards away from
-    // quiet sectors (which dropped calibration -1.5pp without the gate).
+    // n750: EPB 8→4 (tighter floor), gate 300→200 (catches moderate-high threat),
+    // component restriction removed (corps commander orders march regardless of
+    // territory connectivity — the march system handles cross-component movement).
+    // n758: Constants unchanged from n701. The 1KK density problem (sector:9
+    // threat=240, 2 brigades on 9 edges while sector:5 has 6 on 9) cannot be fixed
+    // by EPB/gate alone — EPB=4 causes VRS over-concentration (Teočak falls),
+    // cross-component removal causes -1.2pp regression. Needs density-ratio-based
+    // approach (relative density within corps) rather than absolute threshold.
     const DENSITY_FLOOR_EDGES_PER_BRIGADE = 8;
     const DENSITY_FLOOR_THREAT_GATE = 300; // only reinforce sectors under real pressure
     const needed = (s: CorpsFrontSector): number =>
@@ -2533,9 +2632,10 @@ function ensureMinimumSectorCoverage(
                 || strictCompare(a.sector_id, b.sector_id));
 
         for (const recipient of underStaffed) {
-            const recipComp = getSectorComponent(recipient, componentOf);
             const deficit = needed(recipient) - recipient.assigned_brigade_ids.length;
 
+            // Find donors with surplus above their own floor.
+            const recipComp = getSectorComponent(recipient, componentOf);
             // Find same-component donors with surplus above their own floor
             const donors = corpsSectors
                 .filter(s =>

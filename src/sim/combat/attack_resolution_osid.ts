@@ -1233,12 +1233,12 @@ export function resolveAttackOrdersOsid(
         const isConcentrated = attackerFormations.length > 1;
         recordAttackerEngagements(
             attackerFormations, currentTurn, targetOsid, outcome,
-            defFaction, flip, finalAttackerCas, finalDefenderCas, isConcentrated,
+            defFaction, flip, finalAttackerCas, finalDefenderCas, isConcentrated, state,
         );
         if (defenderFormation) {
             recordDefenderEngagement(
                 defenderFormation, currentTurn, targetOsid, outcome,
-                attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated,
+                attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated, state,
             );
         }
 

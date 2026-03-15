@@ -166,6 +166,11 @@ export function isKiseljakExcluded(osid: string, faction: FactionId): boolean {
  * the Graz Accords explicitly did NOT cover that theatre.
  * vrs_1st_krajina: fights HVO Orašje pocket throughout 1992.
  * vrs_2nd_krajina: falls through to the corps-pair mechanism (which then blocks it).
+ *
+ * NOTE: This blanket exemption lets 1KK take HRHB territory in central Bosnia (e.g. Žepče)
+ * which is historically wrong — VRS never captured Žepče (7.3% Serb, no strategic value).
+ * The real fix is strategic targeting in bot AI (demographic affinity + line-flattening
+ * assessment), not Graz scoping. See backlog: bot_strategic_targeting_design.
  */
 const GRAZ_EXEMPT_RS_CORPS = new Set([
     'vrs_1st_krajina',

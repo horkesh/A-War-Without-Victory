@@ -56,6 +56,20 @@ export interface NamedOfficer {
     /** Pool priority tier for succession ordering. */
     pool_tier: OfficerPoolTier;
 
+    /** War crimes record from ICTY or BiH State Court. Informational — does not affect gameplay. */
+    war_crimes_record?: {
+        /** Court that handled the case. */
+        court: 'ICTY' | 'BiH State Court';
+        /** Outcome of proceedings. */
+        verdict: 'convicted' | 'acquitted' | 'died_before_trial' | 'indicted';
+        /** Sentence if convicted (e.g. "Life imprisonment", "20 years"). */
+        sentence?: string;
+        /** Primary charges. */
+        charges: string;
+        /** One-line summary. */
+        summary: string;
+    };
+
     /** If set, officer is physically trapped in an enclave and can only command ops within it. */
     enclave_lock?: {
         /** Enclave identifier (e.g. 'srebrenica', 'bihac', 'sarajevo', 'sarajevo_ring', 'orasje'). */
@@ -91,6 +105,28 @@ export interface NamedOfficerState {
 // ═══════════════════════════════════════════════════════════════════════════
 // Faction officer config (from war timeline)
 // ═══════════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Pending officer events (player notification system)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export type OfficerEventType = 'officer_available' | 'replacement_suggested';
+
+export interface PendingOfficerEvent {
+    /** Unique event key for deduplication. */
+    event_id: string;
+    type: OfficerEventType;
+    faction: FactionId;
+    turn: number;
+    /** The newly available officer ID. */
+    officer_id: string;
+    /** For replacement_suggested: the current commander being suggested for replacement. */
+    current_commander_id?: string;
+    /** Corps ID where the replacement is suggested. */
+    corps_id?: string;
+    /** Whether the player has acknowledged this event. */
+    acknowledged: boolean;
+}
 
 export interface FactionOfficerConfig {
     faction: FactionId;

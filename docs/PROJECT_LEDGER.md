@@ -1,7 +1,217 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-15
-**Status:** Post-MVP — Army HQ Reserve Pool elite brigade loan system implemented (2026-03-15): `army_reserve_system.ts`, `ArmyReservePanel`, 3 IPC channels, 12 tests (618 total), EliteBrigadeTracker. UI/UX overhaul Phases 1-2 complete: NATO symbology quantized, ghost lines purged, FRONTLINE CONTROL branding. Per-formation casualty ledger (n718) live. 89.6% area (n703), 6/6 benchmarks.
+**Status:** Post-MVP — UI Data Surface Sprint: 17 items surfaced (morale/entrenchment/disruption, op recovery reasons, war crimes records, sector strength, equipment condition, narrative arcs, axes breakdown, civilian casualties, OPSEC). Officer succession player-choice system. Bottom strip unified. Map modes: casualties + morale replace pressure + density. Op arrows from lead brigade. 90.4% area, 13/13 anchors, 6/6 benchmarks.
+
+## [2026-03-15] n774: Intelligent Corps Commander — Phases A+B+C
+
+**Three-phase commander intelligence system in `bot_corps_directives.ts`:**
+
+**Phase A — Defensive Health Gate (n772):** Corps commander evaluates `density = brigades / front_edges` before generating offensive targets. `< 0.10` = critical (strip all offense, every brigade defends). `< 0.167` = strained (no new operations). This stopped SRK brigades from wandering to Kakanj/Vareš — the commander kept everyone on the siege ring.
+
+**Phase B — Threat-Weighted Sector Density (n774):** Tightened surplus/deficit thresholds from 1.3×/0.7× to 1.2×/0.6×. Relaxed entrenchment guard for critical deficits (≤3 → ≤8 when sector at <0.3× desired). A commander facing 710:1 threat ratio WILL pull entrenched troops from quiet rear sectors. SRK density ratio improved to 2.4×.
+
+**Phase C — Salient Aversion (n773):** `computeSalientRisk()` checks each potential target's neighbor composition. If >75% neighbors are enemy after capture, the target is skipped — creates an indefensible salient. Applied to both `offensiveTargetSet` generation (army priority + opportunistic) and `evaluateUncontestedOccupation` (brigade-level walk-in). Drina region improved +3.9pp (84.1→88.0%) — VRS stopped overextending into surrounded positions.
+
+**Combined result (n774 vs n763 baseline):** Area 91.8→91.5% (-0.3pp, within variance). Battles 128→110 (-14%). Catastrophic outcomes 21→15. RS attacker casualties 12,746→9,561 (-25%). Drina 86.5→88.0% (+1.5pp). SRK all 9 brigades in Sarajevo area.
+
+**Files:** `src/sim/combat/bot_corps_directives.ts` (defensive health, salient risk, density thresholds), `src/sim/combat/bot_brigade_eval_attack.ts` (salient aversion in uncontested occupation).
+
+---
+
+## [2026-03-15] UI Data Surface Sprint — 17 Items Across 10 Files
+
+Systematic audit of engine data available but not displayed in the UI. 17 items implemented across P0/P1/P2 tiers. 1 deferred (fog coverage %).
+
+### P0 — Critical (data existed, zero display)
+1. **Morale on brigade overview** — `FormationDetail` shows morale bar with green/amber/red thresholds (60/30)
+2. **Entrenchment display** — "Entrenched: X turns" shown when > 0
+3. **Disrupted display** — Bold red "DISRUPTED: X turns remaining" when > 0
+4. **Recovery reason on operations** — Color-coded badge on `OperationHistoryPanel` + `OperationDetail`: completed(green), max_failures(red), orphaned_sector(amber), no_logged_attempt(gray), manual_termination(blue)
+5. **War crimes on OfficerProfile** — Badge below stats: convicted=red, acquitted=green, indicted=amber, died_before_trial=gray. Court, verdict, sentence, summary.
+6. **Sector strength badge** — `OOBSidebar` sector cards show combat_strength_class: fortress/strong(green), adequate(amber), thin(orange), critical(red)
+
+### P1 — High value
+7. **Equipment condition bars** — `FormationDetail` TO&E shows operational/degraded/destroyed stacked bars for tanks and artillery
+8. **Campaign casualties** — Record tab top: KIA(red)/WIA(amber)/MIA grid with formatted numbers
+9. **Narrative arc + war stories** — Record tab: color-coded arc badge (veteran/bloodied/risen/shattered/garrison), italic war narrative, notable moments timeline. Overview tab shows compact arc badge.
+10. **Operation axes breakdown** — `OperationDetail`: axis name, status badge (executing/stalled/complete), brigade count, objective progress, momentum per axis
+11. **Civilian casualties** — `WarSummaryModal` overview tab: "Civilian Impact" section with total killed and fled abroad
+
+### P2 — Polish
+12. **Movement status badge** — `FormationDetail`: colored badge (in_transit=blue, packing/unpacking=amber) with march stance
+13. **Tempo on operations** — `OperationDetail` metrics: methodical(blue)/standard(gray)/all_out(red) badge
+14. **Min attack outcome** — `OperationDetail`: "Minimum: Costly Victory" etc.
+15. **Postponement count** — `OperationsPanel`: "Postponed x2" when > 0
+16. **Officer casualty vulnerability** — `OfficerProfile`: HIGH RISK(red >=0.15)/MODERATE RISK(amber 0.10-0.15) indicator
+17. **OPSEC badge** — `CorpsFrontPanel` header: amber "OPSEC" badge when sector has opsec_active
+
+### Files changed (10):
+`FormationDetail.tsx` (morale, entrenchment, disruption, equipment bars, campaign losses, narrative arc, movement badge), `OperationDetail.tsx` (recovery reason, axes, tempo, min_attack_outcome), `OperationsPanel.tsx` (tempo, min_attack_outcome, postponement), `OperationHistoryPanel.tsx` (recovery reason badge), `OfficerProfile.tsx` (war crimes, casualty vulnerability), `OOBSidebar.tsx` (sector strength badge), `WarSummaryModal.tsx` (civilian casualties), `CorpsFrontPanel.tsx` (OPSEC badge), `types.ts` (war_crimes_record, recovery_reason types), `GameStateAdapter.ts` (war_crimes_record extraction).
+
+### Deferred:
+Fog coverage % indicator — requires computing totalEnemyOsids from controlBySettlement, deferred with TODO in `OOBSidebar`.
+
+---
+
+## [2026-03-15] UI: Army HQ Brigade Navigation + Decoration Display Names
+
+**Army HQ brigade navigation fix:** `FormationDetail.tsx` brigade parent link now detects `army_hq` vs `corps` kind. Army HQ brigades (elites like 1st Guards) show "Subordinated to: VRS Main Staff" instead of "Corps: General Staff". Clicking navigates to the Army panel (`selectedArmyId`) instead of trying to open a non-existent corps panel — fixes spinning panel bug. `ArmyDetail.tsx` Forces tab gains "HQ Reserve Units" section at the top listing all brigades subordinated to the army HQ with loan status ("-> Drina Corps" if on loan, "Available" if in reserve) and personnel count; clicking opens FormationDetail, hover highlights location.
+
+**Decoration display fix:** `FormationDetail.tsx` "Unit Honors & Decorations" section now shows only the highest decoration with its proper faction-specific name (e.g. "Viteska" instead of "tier_2 / valor") — color-coded gold/silver/bronze for tier_3/tier_2/tier_1. `BrigadeRow.tsx` shows a single star with decoration name as tooltip (e.g. "Orden Zlatni Ljiljan") instead of multiple stars with "3 decorations". New `decorationUtils.ts` provides `getDecorationName(faction, tier)` and `getHighestTier(decorations)` with faction-specific display names (ARBiH: Slavna/Viteska/Zlatni Ljiljan, VRS: Mrkonjic/Nemanjic/Obilic, HVO: Zrinski/Domagoj/Trolist).
+
+**Files:** `src/ui/map/components/FormationDetail.tsx`, `src/ui/map/components/ArmyDetail.tsx`, `src/ui/map/components/BrigadeRow.tsx`, `src/ui/map/utils/decorationUtils.ts` (NEW).
+
+---
+
+## [2026-03-15] Officer Succession — Player Choice System + War Crimes Records + UI Fixes
+
+### Officer Succession (Player Choice)
+
+**Problem:** `available_until_turn` auto-retired officers for all factions, including the player faction. Players had no say in corps commander changes — succession happened silently between turns.
+
+**Fix:** For the player faction, `available_until_turn` no longer auto-retires. Instead, it creates a `replacement_suggested` event in `MilitaryState.pending_officer_events`. `available_from_turn` creates an `officer_available` notification. Bot factions retain unchanged auto-succession behavior. `findHistoricalSuccessor()` finds the recommended replacement by corps + tier priority.
+
+**UI:** `OfficerEventBadge.tsx` — gold "OFFICERS" badge with red count pill in the Personnel toolbar section. Modal titled "Personnel Directive" shows current commander + recommended replacement with stat bars and "Recommended" tag. Buttons: "Keep Current" / "Accept Replacement" / "Acknowledged" (for arrivals). Pagination through multiple pending events. Full IPC pipeline: `preload.cjs` → `electron-main.cjs` → state mutation → `sendGameStateToRenderer`. IPC channels: `acknowledge-officer-event`, `accept-officer-replacement`.
+
+### War Crimes Records
+
+27 officers (29 entries with 2nd-tenure duplicates) annotated with ICTY/BiH State Court records. New `war_crimes_record` field on `NamedOfficer` type. VRS: 13 (Mladić life, Galić life, Tolimir life, Krstić 35yr, etc.). ARBiH: 7 (Delić 3yr, Hadžihasanović 3.5yr, Mahmuljin 8yr; Halilović+Orić acquitted; Dudaković indicted). HVO: 7 (Petković 20yr, Praljak 20yr suicide in court, Naletilić 20yr, etc.). UI badge on officer cards: red=convicted, green=acquitted, amber=indicted — with court, sentence, summary. Informational only, no gameplay effect.
+
+### Data Adjustments
+
+3rd Corps `available_from_turn`: 28 → 22 (September 1992). 4th Corps `available_from_turn`: 28 → 24 (October 1992). Both historically accurate.
+
+### Operation Arrows Fix
+
+Arrow origin changed from staging_osid/sector edge to lead brigade position (closest participating brigade to first objective). Removed sector edge snapping code and staging origin shift logic.
+
+### Army Combat Summary + Sector Panel Hover Fixes
+
+`ArmyDetail.tsx`: aggregated combat summary from corps data. `CorpsFrontPanel.tsx`: white hover artifact fixes. `FormationDetail.tsx`: removed white tooltip on sector assignment.
+
+**Files:** `src/state/officer_types.ts` (PendingOfficerEvent type, war_crimes_record field), `src/state/game_state.ts` (pending_officer_events on MilitaryState), `src/sim/combat/officer_system.ts` (findHistoricalSuccessor, player-faction events), `data/scenarios/officers/apr1992_officers.json` (war crimes records, formation turn adjustments), `src/ui/map/components/OfficerEventBadge.tsx` (NEW), `src/ui/map/components/TopToolbar.tsx`, `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/desktop/useIPC.ts`, `src/desktop/preload.cjs`, `src/desktop/electron-main.cjs`, `src/ui/map/map/builders/buildOperationArrowsGeoJSON.ts`, `src/ui/map/components/ArmyDetail.tsx`, `src/ui/map/components/CorpsFrontPanel.tsx`, `src/ui/map/components/FormationDetail.tsx`.
+
+---
+
+## [2026-03-15] n763: Cross-Corps Enclave Defense — Brigades Defend Where They Stand (+0.2pp)
+
+**Problem:** HVO brigades physically present in disconnected enclaves (Žepče, Vitez, Busovača) were invisible to the defense system. The sector assignment pipeline enforced strict corps boundaries — a `hvo_central_bosnia` brigade couldn't be assigned to a `hvo_northwest_bosnia` sector even when it was the only defender. Result: VRS captured Žepče (HRHB, 54.5% Croat, 7.3% Serb) at w11 because the 111th HVO brigade was never assigned to defend it. Historically, VRS never took Žepče.
+
+**Root cause:** `classifyBrigadesByTerritory` Phase 1 (line 766) filtered front-OSID sector indices to `corps_id === effectiveCorpsId`. Brigades at front OSIDs belonging to a different corps's sector got no assignment and fell through to the corps pool — which also couldn't place them (no same-corps sectors nearby).
+
+**Fix:** Added `assignCrossCorpsEnclaveDefenders()` as Step 6b after corps-strict assignment. Finds unassigned brigades at front OSIDs (or territory OSIDs) of any same-faction sector. Assigns them to the neediest sector regardless of corps. This is the "bullets don't check org charts" principle — a brigade physically at a front defends it.
+
+**Result (n763):** Area 91.6% → **91.8%** (+0.2pp). Central Bosnia 84.1% → **87.2%** (+3.1pp). HRHB delta: -4 → +0 (all HVO enclaves now defended). Žepče holds — 111th at zepce_2, 587 pers, coh 40. 13/13 anchors, 6/6 benchmarks.
+
+**Files:** `src/sim/combat/corps_front_sectors.ts` (`assignCrossCorpsEnclaveDefenders` function + Step 6b call).
+
+---
+
+## [2026-03-15] n759: Drina OOB Additions — Rogatica + Višegrad Brigades (+1.2pp)
+
+**Problem:** Drina region at 83.9% area match — worst of all regions. Gap analysis (`docs/40_reports/20260315_DRINA_GAP_ANALYSIS.md`) identified root cause: zero VRS brigades homed in Rogatica, Višegrad, or Čajniče. 21/23 mismatches were empty territory with no VRS unit available. Historical VRS had dedicated brigades in these municipalities.
+
+**Fix:** (1) `rs_rogatica_brigade` added to `vrs_drina` — home `op:rogatica:rogatica_2`, mountain, 1000 pers. (2) `rs_visegrad_brigade` added to `vrs_herzegovina` — home `op:visegrad:visegrad_2`, mountain, 800 pers. (3) `rs_ajnie_brigade` home_osid fixed from `op:foca:prevrac` to `op:cajnice:cajnice_2`. Pool sustainability verified — brigades sized to local pool capacity (+1.8% total VRS manpower).
+
+**Result (n759):** Area 90.4% → **91.6%** (+1.2pp). Drina 83.9% → 86.5% (+2.6pp). Cascade: Central Bosnia +4.2pp, Sarajevo +5.6pp. 13/13 anchors, 6/6 benchmarks. VRS 80→83 brigades.
+
+**Files:** `data/source/oob_brigades.json` (2 new entries + 1 home_osid fix).
+
+---
+
+## [2026-03-15] n756: 255th Slavna Teočak Buff + Density Investigation (n750-n758)
+
+**Density investigation:** 8 calibration runs tested density floor constant tuning. Every EPB/gate combination that fixes 1KK imbalance also breaks Teočak (VRS over-concentration). Cross-component removal causes -1.2pp regression. **Backlogged:** needs density-ratio-based approach, not absolute thresholds. See `memory/backlog_density_ratio_design.md`.
+
+**255th Slavna buff:** Personnel 1300→2000, cohesion 60→70, defense_terrain_bonus 0.45→0.55, officer_quality 0.10→0.25. Teočak pocket held entire war — buff reflects historical reality. Calibration-neutral (90.4%).
+
+**Files:** `data/source/oob_brigades.json`, `src/sim/combat/corps_front_sectors.ts` (comment only).
+
+---
+
+## [2026-03-15] UI: Bottom Strip Unification + Map Mode Overhaul
+
+**Bottom strip unification:** Merged `MapModeToolbar` (standalone floating bar) and `BottomStatusStrip` into a single unified bottom bar in `BottomStatusStrip.tsx`. Layout: `[Map Mode Pills] | [Territory Control %] | [Layer Toggles]` — centered, z-20 (above map, below all panels/sidebars). `MapModeToolbar` removed from `App.tsx` render (component file kept). Territory percentages now use **area-weighted km²** from `osid_areas.json` instead of OSID count.
+
+**Stacking/overlap fixes:** OOBSidebar `bottom-8` → `bottom-9`; detail panels (`panelRail.ts`) `bottom: '2rem'` → `bottom: '2.5rem'`; OrderQueue `bottom: '2rem'` → `bottom: '2.25rem'`. Eliminates overlap between bottom strip and all floating panels.
+
+**Map mode replacements:**
+- **Removed `pressure` mode** (key 4): Uniformly green/broken — `front_pressure` data didn't vary enough for meaningful visualization.
+- **Removed `density` mode** (key 5): Redundant with Defense mode (which shows the same info plus reactive reserves, stance, distance weighting in continuous gradient).
+- **Added `casualties` mode** (key 4): Per-OSID battle casualties from brigade `recent_engagements`. Continuous gradient: transparent → yellow → orange → deep red. Reference: 200 casualties = full intensity. Builder: `buildCasualtiesGeoJSON.ts`.
+- **Added `morale` mode** (key 5): Per-sector `combat_morale_avg` on front-adjacent OSIDs. Continuous gradient: red (0-25, critical) → orange → yellow → green (85+). Builder: `buildMoraleGeoJSON.ts`.
+
+**Current map mode lineup (7 modes, keys 1-7):** Political, Ethnic, Supply, Casualties, Morale, Operations, Defense. Layer toggles (7): Front, Units, Labels, Minimap, Fog, Battles, Points (dev mode adds Sectors separately from Front).
+
+**Files:** `BottomStatusStrip.tsx` (rewritten), `MapModeToolbar.tsx` (updated, not rendered), `OOBSidebar.tsx`, `panelRail.ts`, `OrderQueue.tsx`, `App.tsx`, `gameStore.ts` (`MapMode` type updated), `useKeyboardShortcuts.ts`, `MapContainer.tsx`, `buildCasualtiesGeoJSON.ts` (NEW), `buildMoraleGeoJSON.ts` (NEW).
+
+---
+
+## [2026-03-15] n749: Catastrophic Outcome Stall Gate (REAL_WAR_MASTER #39)
+
+**Problem:** ARBiH brigades attacked the same fortified position at catastrophic odds (PR 0.1-0.2) for 3 consecutive turns. Radava (Sarajevo) was hit w33/w36/w37 at PR 0.14-0.21, producing 1,725 total casualties. Single desperate attacks are historically correct — commanders gamble. But repeating the same assault three turns running is a bot pathology.
+
+**Fix:** Added `consecutive_catastrophic_on_current` counter on `OperationAxis` in `game_state.ts`. In `updateMultiAxisResults()` (`sector_offensive.ts`), when an attack on the current objective produces a catastrophic outcome (checked via last `BrigadeEngagement` in `brigade_history`), the counter increments. After `MAX_CONSECUTIVE_CATASTROPHIC_ON_CURRENT=2`, the axis stalls. Counter resets on capture, objective change, or non-catastrophic outcome. Single-attempt gambles preserved.
+
+**Result (n749):** Radava repeat attacks: 3→1. Total PR<0.3 attacks: 12→10. RBiH attacker casualties: -886. Area: 90.4% (within variance of n748 90.6%). 13/13 anchors, 6/6 benchmarks. Hash `ec6edead05fbcf1c`.
+
+**Files:** `src/state/game_state.ts` (`consecutive_catastrophic_on_current` on OperationAxis), `src/sim/combat/sector_offensive.ts` (stall gate + constant).
+
+---
+
+## [2026-03-15] n748: Elite Cohesion Recall + Tracker Instrumentation (REAL_WAR_MASTER #37, #38)
+
+**Problem 1 (#37):** 1st Guards Motorized at cohesion 9.0 after 40 turns on loan. `tickEliteLoans` checked casualty threshold (30%) and morale floor (35) but not cohesion. A cohesion-9 elite is a mob.
+
+**Problem 2 (#38):** `EliteLoanEpisode.battles_fought`, `casualties_taken`, `osids_captured`, `kia_inflicted_est` initialized to 0 and never updated during combat. Player-facing Campaign History showed zeroes.
+
+**Fix 1:** Added `ELITE_COHESION_RECALL=25` and `cohesion_collapse` recall reason in `elite_loan_types.ts`. Cohesion check added to `tickEliteLoans` force-recall section in `army_reserve_system.ts`.
+
+**Fix 2:** `recordBrigadeEngagement()` in `brigade_history_recorder.ts` now syncs elite episode fields in real-time when the formation is on loan (`elite_loan_state.on_loan` + `current_episode_id`). `GameState` threaded through `recordAttackerEngagements` and `recordDefenderEngagement` wrappers. Call site in `attack_resolution_osid.ts` passes `state`. On recall, `recallEliteLoan` syncs tracker totals from episode.
+
+**Result (n748):** 1st Guards recalled via `cohesion_collapse` at w40. All four elites show real battle counts (10/7/3/2). Area: 90.6% (unchanged from n747). 13/13 anchors, 6/6 benchmarks. Hash `1fc2752ddc815c5d`.
+
+**Files:** `src/state/elite_loan_types.ts`, `src/sim/combat/army_reserve_system.ts`, `src/sim/combat/brigade_history_recorder.ts`, `src/sim/combat/attack_resolution_osid.ts`. Tests: `tests/elite_loan_recall.test.ts` (5 tests), `tests/catastrophic_stall.test.ts` (4 tests).
+
+---
+
+## [2026-03-15] n747: Elite Loan System Combat Activation (4 bug fixes, +0.5pp)
+
+**Problem:** Elite loan system (n745) deployed but produced 0 battles. Four independent bugs across 4 files prevented elites from fighting:
+
+1. **Offensive support trigger** (`army_reserve_system.ts`): Request generation required `op.phase === 'execution'` — but elites should deploy during preparation (force_staging+) so they arrive by execution. Fixed: trigger on any committed preparation sub-phase.
+2. **Auto-join operation** (`army_reserve_system.ts`): Loaned elite wasn't added to `participating_brigades` of new corps operations launched after deployment. Fixed: standing rule in `tickEliteLoans` auto-joins each turn.
+3. **Force-assign sector** (`corps_front_sectors.ts`): Loaned elite arriving at a corps had no sector assignment — `classifyBrigadesByTerritory` skipped it because it wasn't in any corps sector. Fixed: force-assign sweep for loaned elites to nearest sector.
+4. **Corps lookup** (`bot_brigade_ai_osid.ts`): `getCorpsReferenceOsid()` used `f.corps_id` (army HQ) instead of `f.elite_loan_state.loaned_to_corps`. Brigade evaluated against wrong corps's sectors. Fixed: override lookup when on loan.
+
+**Result (n747):** All four elites spawn, deploy, march, and fight. 65th Protection: 5 battles (Drina). 1st Guards: 3 battles (Olovo). Black Swans: 2 battles (Žepče). Guards Brigade: 1 battle (1st Corps). Area: 90.6% (+0.5pp from n745). 13/13 anchors, 6/6 benchmarks. Hash `6f956382172fb520`.
+
+**Files:** `src/sim/combat/army_reserve_system.ts`, `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/combat/recruitment_engine.ts`.
+
+---
+
+## [2026-03-15] Fix: Political Control "Initial State" Visual Bug (serialize + ghost-paths deadlock)
+
+Two independent bugs caused the tactical map to show the April 1992 initial state instead of the loaded save's territorial control.
+
+### Bug 1 — `migrateState` writes to wrong location → `serializeState` throws (Electron path)
+
+**Root cause:** `migrateState` in `src/state/serialize.ts` checked `'field' in candidate` (top-level) instead of the correct nested parent. For any war-phase save with `displacement.displacement_camp_state` present, `hasAnyPhaseII = true`. The defaulting code then wrote `war_supply_pressure`, `war_exhaustion`, `war_exhaustion_local`, `hostile_takeover_timers` as spurious **top-level** keys on the GameState candidate. `serializeGameState` then threw `unexpected top-level key "war_supply_pressure"` at `assertNoWrapper`. The `loadStateFromPath` catch block swallowed the error silently; `currentGameStateJson` was never updated; `sendGameStateToRenderer` was never called; Electron tactical map stayed on initial state.
+
+**Fix:** Changed `hasAnyPhaseII` to check and default into the correct parent objects (`political.*` for supply/exhaustion fields, `displacement.*` for timer/camp fields). Also added the affected fields to the existing political/displacement sweep sections as a defence-in-depth safety net for any legacy saves that may have had them at the top level.
+
+**Determinism:** No simulation logic touched. `deserializeState`/`serializeState` round-trip now preserves `political.war_supply_pressure` (and all related fields) correctly.
+
+### Bug 2 — `ghost-paths` source deadlock → `runUpdate` never executes (web map path)
+
+**Root cause:** `runUpdate` in `MapContainer.tsx` checked for `m.getSource(GHOST_PATH_SOURCE_ID)` before proceeding (line 475). If the source was absent, it started a 500ms polling interval and returned early. However, the `ghost-paths` source was only created **inside** `runUpdate`'s nested `requestAnimationFrame` block (line 977) — which never ran because `runUpdate` always returned early. Classic deadlock: source check blocked execution; execution never reached source creation.
+
+**Fix:** Pre-registered the `ghost-paths` source in the map style init block alongside `fog-overlay`, `battle-markers`, and `strategic-points`, so the source check at line 475 passes on the first call.
+
+**Files:** `src/state/serialize.ts` (`hasAnyPhaseII` nested-path fix + sweep additions), `src/ui/map/map/MapContainer.tsx` (pre-register `GHOST_PATH_SOURCE_ID`), `dist/desktop/desktop_sim.cjs` (rebuilt).
+
+---
 
 ## [2026-03-15] UI/UX Overhaul: Tactical Agency & Information Density (Phases 1-2)
 

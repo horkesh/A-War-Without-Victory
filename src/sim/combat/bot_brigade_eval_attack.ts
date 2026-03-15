@@ -444,6 +444,21 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // from the Srebrenica pocket, undoing Ring operations).
         if (brigade.tags?.includes('enclave') && !isOsidInSameEnclave(loc as string, n)) continue;
 
+        // Salient aversion: don't walk into undefended territory if it creates
+        // an indefensible salient (>75% of neighbors are enemy after capture).
+        // No commander holds one OSID deep inside enemy territory with no supply line.
+        {
+            const nNeighbors = adjacency.get(n as import('./osid_adjacency.js').Osid) ?? [];
+            let friendlyN = 0, enemyN = 0;
+            for (const nn of nNeighbors) {
+                const nnCtrl = pc[nn] as string | undefined;
+                if (nnCtrl === faction || nn === loc) friendlyN++; // current position counts as friendly
+                else if (nnCtrl && nnCtrl !== faction) enemyN++;
+            }
+            const totalN = friendlyN + enemyN;
+            if (totalN > 0 && enemyN / totalN >= 0.75) continue;
+        }
+
         // Scenario avoid-list guard: historically, some OSIDs were not captured even when
         // undefended (e.g. Brčko city center — VRS held the corridor but not the city core).
         // Without this guard, brigades sweeping through during operation execution walk into

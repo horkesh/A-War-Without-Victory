@@ -43,7 +43,7 @@ describe('Graz faction-level RS→HRHB block (n697)', () => {
 
     it('does NOT block vrs_1st_krajina attacking HRHB (Posavina — exempt)', () => {
         const state = makeActiveState();
-        expect(shouldGrazBlockAttack(state, 'vrs_1st_krajina', 'RS', 'op:brod:brod_2', 'HRHB')).toBe(false);
+        expect(shouldGrazBlockAttack(state, 'vrs_1st_krajina', 'RS', 'op:orasje:ostra_luka', 'HRHB')).toBe(false);
     });
 
     it('does NOT block vrs_2nd_krajina from faction-level (falls through to corps-pair which blocks it)', () => {

@@ -226,6 +226,10 @@ export interface OperationAxis {
     objective_capture_count: number;
     movement_only_execution_turns: number;
     idle_execution_turn_streak: number;
+    /** Consecutive turns where attack on current objective resulted in catastrophic outcome.
+     *  After 2 consecutive catastrophics on the same target, axis stalls — no commander
+     *  sends men to die at the same fortified position three turns running. */
+    consecutive_catastrophic_on_current?: number;
     /** Friendly OSID where this axis's brigades stage during planning. */
     staging_osid?: string;
 }
@@ -1631,6 +1635,8 @@ used_operation_names?: Record<string, number>;
 pending_reserve_requests?: ArmyReserveRequest[];
 /** Per-brigade elite deployment tracker. Keyed by brigade FormationId. */
 elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
+/** Pending officer personnel events for player notification (new arrivals, suggested replacements). */
+pending_officer_events?: import('./officer_types.js').PendingOfficerEvent[];
 }
 
 export interface PoliticalState {

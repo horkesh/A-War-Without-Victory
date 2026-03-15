@@ -152,6 +152,12 @@ const MAX_MOVEMENT_ONLY_EXECUTION_TURNS = 4;
  *  attack runs from 5 turns to 3. Multi-axis operations making any progress
  *  (≥1 capture) are exempt and run to their full per-axis budget. */
 const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 3;
+
+/** Consecutive catastrophic outcomes on the same objective before axis stalls.
+ *  A desperate attack at bad odds can happen once — commanders sometimes gamble.
+ *  But no one sends men to die at the same fortified position three turns running.
+ *  After 2 consecutive catastrophics, the axis stalls. */
+const MAX_CONSECUTIVE_CATASTROPHIC_ON_CURRENT = 2;
 const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
@@ -860,6 +866,7 @@ function updateMultiAxisResults(
             axis.momentum = Math.min(MOMENTUM_CAP, axis.momentum + 1);
             axis.current_objective_index = currentIdx + 1;
             axis.consecutive_failures_on_current = 0;
+            axis.consecutive_catastrophic_on_current = 0;
             fullyRevealProbeSectorIntel(state, op);
         } else {
             // Check if any of THIS AXIS's brigades attacked (objective or intermediate)
@@ -893,9 +900,30 @@ function updateMultiAxisResults(
                 axis.consecutive_failures_on_current += 1;
                 fullyRevealProbeSectorIntel(state, op);
 
+                // ── Catastrophic outcome stall ──
+                // Check if any attacking brigade's last engagement was catastrophic.
+                // A desperate attack at bad odds can happen once — commanders sometimes gamble.
+                // But no one sends men to die at the same fortified position three turns running.
+                const wasCatastrophic = axis.assigned_brigades.some(bid => {
+                    const b = state.military.formations?.[bid];
+                    if (!b?.brigade_history?.engagements?.length) return false;
+                    const lastEng = b.brigade_history.engagements[b.brigade_history.engagements.length - 1];
+                    return lastEng.role === 'attacker' && lastEng.outcome === 'catastrophic';
+                });
+                if (wasCatastrophic) {
+                    axis.consecutive_catastrophic_on_current = (axis.consecutive_catastrophic_on_current ?? 0) + 1;
+                } else {
+                    axis.consecutive_catastrophic_on_current = 0;
+                }
+                if ((axis.consecutive_catastrophic_on_current ?? 0) >= MAX_CONSECUTIVE_CATASTROPHIC_ON_CURRENT) {
+                    axis.status = 'stalled';
+                    continue;
+                }
+
                 if (axis.consecutive_failures_on_current >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
                     axis.current_objective_index = currentIdx + 1;
                     axis.consecutive_failures_on_current = 0;
+                    axis.consecutive_catastrophic_on_current = 0; // reset on objective change
                 }
             } else if (anyAttackedAnything) {
                 // Intermediate attack (fighting through toward objective)

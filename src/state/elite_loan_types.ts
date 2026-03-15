@@ -41,6 +41,8 @@ export const ELITE_LOAN_COOLDOWN = 4;
 export const ELITE_CASUALTY_THRESHOLD = 0.30;
 /** Morale floor that triggers forced recall. */
 export const ELITE_MORALE_RECALL = 35;
+/** Cohesion floor that triggers forced recall. */
+export const ELITE_COHESION_RECALL = 25;
 /** Fraction of loan-start personnel lost that triggers permanent degradation. */
 export const ELITE_DEGRADATION_THRESHOLD = 0.50;
 /** Reinforcement rate when returned to army HQ pool. */
@@ -62,6 +64,7 @@ export type EliteRecallReason =
     | 'player_recall'
     | 'casualty_threshold'
     | 'morale_collapse'
+    | 'cohesion_collapse'
     | 'permanent_degradation';
 
 export interface ArmyReserveRequest {

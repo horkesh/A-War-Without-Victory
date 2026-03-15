@@ -509,27 +509,24 @@ function migrateState(raw: unknown): GameState {
             }
 
             // War phase: Default War phase optional state for determinism when present (do not inject for old saves).
+            // Fields are nested under `political` or `displacement` — check and write to the correct parent.
+            const polWar = (candidate as any).political;
+            const dispWar = (candidate as any).displacement;
             const hasAnyPhaseII =
-                (candidate as any).war_supply_pressure !== undefined ||
-                (candidate as any).war_exhaustion !== undefined ||
-                (candidate as any).war_exhaustion_local !== undefined ||
-                (candidate as any).hostile_takeover_timers !== undefined ||
-                (candidate as any).displacement.displacement_camp_state !== undefined;
+                (polWar && polWar.war_supply_pressure !== undefined) ||
+                (polWar && polWar.war_exhaustion !== undefined) ||
+                (polWar && polWar.war_exhaustion_local !== undefined) ||
+                (dispWar && dispWar.hostile_takeover_timers !== undefined) ||
+                (dispWar && dispWar.displacement_camp_state !== undefined);
             if (hasAnyPhaseII) {
-                if (!('war_supply_pressure' in candidate) || (candidate as any).war_supply_pressure === undefined) {
-                    (candidate as any).war_supply_pressure = {};
+                if (polWar) {
+                    if (!('war_supply_pressure' in polWar) || polWar.war_supply_pressure === undefined) polWar.war_supply_pressure = {};
+                    if (!('war_exhaustion' in polWar) || polWar.war_exhaustion === undefined) polWar.war_exhaustion = {};
+                    if (!('war_exhaustion_local' in polWar) || polWar.war_exhaustion_local === undefined) polWar.war_exhaustion_local = {};
                 }
-                if (!('war_exhaustion' in candidate) || (candidate as any).war_exhaustion === undefined) {
-                    (candidate as any).war_exhaustion = {};
-                }
-                if (!('war_exhaustion_local' in candidate) || (candidate as any).war_exhaustion_local === undefined) {
-                    (candidate as any).war_exhaustion_local = {};
-                }
-                if (!('hostile_takeover_timers' in candidate) || (candidate as any).hostile_takeover_timers === undefined) {
-                    (candidate as any).hostile_takeover_timers = {};
-                }
-                if (!('displacement_camp_state' in candidate) || (candidate as any).displacement.displacement_camp_state === undefined) {
-                    (candidate as any).displacement.displacement_camp_state = {};
+                if (dispWar) {
+                    if (!('hostile_takeover_timers' in dispWar) || dispWar.hostile_takeover_timers === undefined) dispWar.hostile_takeover_timers = {};
+                    if (!('displacement_camp_state' in dispWar) || dispWar.displacement_camp_state === undefined) dispWar.displacement_camp_state = {};
                 }
             }
 
@@ -579,7 +576,7 @@ function migrateState(raw: unknown): GameState {
             if (polSweep) {
                 for (const k of ['negotiation_status', 'ceasefire', 'negotiation_ledger', 'supply_rights',
                     'war_consolidation_until', 'war_control_strain', 'war_alliance_rbih_hrhb',
-                    'municipalities'] as const) {
+                    'municipalities', 'war_supply_pressure', 'war_exhaustion', 'war_exhaustion_local'] as const) {
                     if (k in candidate && !(k in polSweep)) {
                         polSweep[k] = (candidate as any)[k];
                     }
@@ -590,7 +587,8 @@ function migrateState(raw: unknown): GameState {
             const dispSweep = (candidate as any).displacement;
             if (dispSweep) {
                 for (const k of ['war_displacement_initiated', 'settlement_displacement_started_turn',
-                    'municipality_displacement'] as const) {
+                    'municipality_displacement', 'hostile_takeover_timers', 'displacement_camp_state',
+                    'settlement_displacement'] as const) {
                     if (k in candidate && !(k in dispSweep)) {
                         dispSweep[k] = (candidate as any)[k];
                     }

@@ -57,6 +57,37 @@ import {
     getCorpsSubordinates,
 } from './bot_corps_helpers.js';
 
+/**
+ * Salient risk: fraction of a target OSID's neighbors that are enemy-controlled.
+ * High risk (>0.75) means capturing this OSID creates an indefensible salient —
+ * one friendly position surrounded by enemy on 3+ sides. No real commander would
+ * hold a single OSID inside enemy territory with no supply line.
+ *
+ * Returns 0.0 (surrounded by friends — pocket cleanup, always good)
+ *    to   1.0 (surrounded by enemies — deep salient, avoid).
+ */
+function computeSalientRisk(
+    targetOsid: string,
+    adjacency: Map<Osid, Osid[]>,
+    pc: Record<string, string>,
+    faction: string,
+): number {
+    const neighbors = adjacency.get(targetOsid as Osid) ?? [];
+    let friendlyCount = 0;
+    let enemyCount = 0;
+    for (const n of neighbors) {
+        const ctrl = pc[n];
+        if (ctrl === faction) friendlyCount++;
+        else if (ctrl && ctrl !== faction) enemyCount++;
+    }
+    const total = friendlyCount + enemyCount;
+    if (total === 0) return 0;
+    return enemyCount / total;
+}
+
+/** Salient risk threshold: skip targets where >75% of neighbors are enemy. */
+const SALIENT_RISK_THRESHOLD = 0.75;
+
 export const AGGRESSION_FLOOR: Record<string, number> = {
     'offensive': 0.0,
     'balanced': -0.10,
@@ -494,6 +525,24 @@ export function generateCorpsDirectives(
         );
         const assignedFrontIds = corpsFrontMapping.get(corps.id) ?? [];
 
+        // ── Commander's defensive health assessment ──────────────────────
+        // The corps commander evaluates his defensive coverage BEFORE considering
+        // offensive operations. If his sectors are critically thin, he suppresses
+        // offensive targeting and focuses on defense. A real commander's first
+        // priority is to hold what he has — you don't attack Kakanj when your
+        // siege ring is at 115:1 disadvantage.
+        const totalCorpsEdges = corpsSectors.reduce((sum, s) => sum + s.length_edges, 0);
+        const totalCorpsBrigades = subordinates.length;
+        const corpsDensity = totalCorpsEdges > 0 ? totalCorpsBrigades / totalCorpsEdges : 0;
+        // Critical threshold: fewer than 1 brigade per 10 edges means the front
+        // is so thin that any attack could break through. Commander goes defensive.
+        const CRITICAL_DENSITY_THRESHOLD = 0.10;
+        // Strained threshold: fewer than 1 brigade per 6 edges. Commander stays
+        // balanced but won't launch new operations — hold what you have.
+        const STRAINED_DENSITY_THRESHOLD = 0.167;
+        const isDefenseCritical = corpsDensity > 0 && corpsDensity < CRITICAL_DENSITY_THRESHOLD;
+        const isDefenseStrained = corpsDensity > 0 && corpsDensity < STRAINED_DENSITY_THRESHOLD;
+
         // Army-level priorities for this corps
         const armyPriorities = getCorpsArmyPriorities(faction, corps.id, turn);
 
@@ -517,7 +566,12 @@ export function generateCorpsDirectives(
                 state, faction, priority.target_municipalities, reverseMap
             );
             for (const t of targets) {
-                if (!offensiveTargetSet.has(t)) offensiveTargetSet.add(t);
+                if (offensiveTargetSet.has(t)) continue;
+                // Salient aversion: don't target OSIDs where capturing would
+                // leave us surrounded (>75% enemy neighbors). Even priority
+                // municipalities have bad individual OSIDs at the edges.
+                if (computeSalientRisk(t, adjacency, pc as Record<string, string>, faction) >= SALIENT_RISK_THRESHOLD) continue;
+                offensiveTargetSet.add(t);
             }
             // Use the most permissive min_outcome from active priorities
             if ((OUTCOME_RANK[priority.min_outcome as PredictedOutcome] ?? 2) < (OUTCOME_RANK[bestMinOutcome as PredictedOutcome] ?? 2)) {
@@ -608,9 +662,11 @@ export function generateCorpsDirectives(
                 if (!isAdjacent) continue;
                 for (const ss of enemySector.sub_segments) {
                     for (const osid of ss.friendly_osids) {
-                        if (!offensiveTargetSet.has(osid)) {
-                            offensiveTargetSet.add(osid);
-                        }
+                        if (offensiveTargetSet.has(osid)) continue;
+                        // Salient aversion: don't target OSIDs that would create
+                        // indefensible salients (>75% enemy neighbors after capture).
+                        if (computeSalientRisk(osid, adjacency, pc as Record<string, string>, faction) >= SALIENT_RISK_THRESHOLD) continue;
+                        offensiveTargetSet.add(osid);
                     }
                 }
             }
@@ -866,6 +922,17 @@ export function generateCorpsDirectives(
 
         // Opportunistic targets are always retained — factions limit their own
         // offensive ambition organically through combat readiness and supply.
+
+        // Commander's defensive health gate: if the front is critically thin,
+        // the commander suppresses offensive operations. He won't send brigades
+        // to attack Kakanj when his siege ring is at 115:1 disadvantage.
+        if (isDefenseCritical) {
+            // Critical: strip ALL offensive targets. Every brigade defends.
+            offensiveTargets.length = 0;
+        } else if (isDefenseStrained) {
+            // Strained: keep targets (for counterattacks) but don't launch new ops.
+            // This is handled below at the operation launch gate.
+        }
 
         // Supply health gating: critical majority → strip offensive targets
         const supplyHealth = assessCorpsSupplyHealth(subordinates, faction, supplyByOsid);
@@ -1160,9 +1227,12 @@ export function generateCorpsDirectives(
                 const desired = totalThreatWeightForRebalance > 0
                     ? totalAssignedForRebalance * (w / totalThreatWeightForRebalance) : 0;
                 sectorDesired.set(sec.sector_id, desired);
-                if (sec.assigned_brigade_ids.length > desired * 1.3 && sec.assigned_brigade_ids.length >= 2) {
+                // Tighter thresholds: a sector at 2× desired is clearly surplus,
+                // a sector at 0.5× is clearly deficit. The old 1.3×/0.7× was too loose
+                // for extreme imbalances (22× surplus vs 0.04× deficit in same corps).
+                if (sec.assigned_brigade_ids.length > desired * 1.2 && sec.assigned_brigade_ids.length >= 2) {
                     surplusSectors.push(sec);
-                } else if (desired > 0 && sec.assigned_brigade_ids.length < desired * 0.7) {
+                } else if (desired > 0 && sec.assigned_brigade_ids.length < desired * 0.6) {
                     deficitSectors.push(sec);
                 }
             }
@@ -1194,7 +1264,15 @@ export function generateCorpsDirectives(
                             const homeDist = homeCache[bid] ?? 0;
                             return { bid, entrench, homeDist };
                         })
-                        .filter(c => c.entrench <= 3) // Don't move heavily entrenched brigades
+                        // Don't move heavily entrenched brigades — unless the deficit is
+                        // critical (0.3× or less of desired). A commander facing 710:1 threat
+                        // on one sector WILL pull entrenched troops from a quiet rear sector.
+                        .filter(c => {
+                            const deficitDesired = sectorDesired.get(deficit.sector_id) ?? 1;
+                            const deficitRatio = deficit.assigned_brigade_ids.length / Math.max(0.1, deficitDesired);
+                            const isCriticalDeficit = deficitRatio < 0.3;
+                            return isCriticalDeficit ? c.entrench <= 8 : c.entrench <= 3;
+                        })
                         .sort((a, b) => {
                             // Prefer less entrenched, then lower home distance (already far from home = more "loose")
                             if (a.entrench !== b.entrench) return a.entrench - b.entrench;
@@ -1341,7 +1419,7 @@ export function generateCorpsDirectives(
         // If corps has queued operations, don't launch auto-ops — let queued injection handle it.
         // Don't replace recovery-phase ops — they must complete to accumulate exhaustion.
         const hasQueuedOps = cmd.queued_operations && cmd.queued_operations.length > 0;
-        const canLaunchSectorOp = !hasQueuedOps && !existingOp;
+        const canLaunchSectorOp = !hasQueuedOps && !existingOp && !isDefenseStrained;
         if (canLaunchSectorOp &&
             (cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {

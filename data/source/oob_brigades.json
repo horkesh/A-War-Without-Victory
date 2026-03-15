@@ -679,11 +679,11 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1300,
-    "initial_cohesion": 60,
-    "defense_terrain_bonus": 0.45,
+    "initial_personnel": 2000,
+    "initial_cohesion": 70,
+    "defense_terrain_bonus": 0.55,
     "distinction_potential": "tier_1",
-    "initial_officer_quality": 0.1
+    "initial_officer_quality": 0.25
   },
   {
     "id": "arbih_7th_vitezka_muslim_liberation",
@@ -2720,9 +2720,9 @@
     "faction": "RS",
     "name": "1st Romanija Infantry",
     "corps": "vrs_sarajevo_romanija",
-    "home_mun": "han_pijesak",
-    "home_settlement": "Han Pijesak",
-    "home_osid": "op:hanpijesak:han_pijesak_2",
+    "home_mun": "pale",
+    "home_settlement": "Pale",
+    "home_osid": "op:pale:pale",
     "kind": "brigade",
     "default_equipment_class": "motorized",
     "available_from": 0,
@@ -2884,7 +2884,7 @@
     "corps": "vrs_herzegovina",
     "home_mun": "cajnice",
     "home_settlement": "Čajniče",
-    "home_osid": "op:foca:prevrac",
+    "home_osid": "op:cajnice:cajnice_2",
     "kind": "brigade",
     "default_equipment_class": "mountain",
     "available_from": 0,
@@ -2906,6 +2906,23 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 67
+  },
+  {
+    "id": "rs_visegrad_brigade",
+    "faction": "RS",
+    "name": "Višegrad Brigade",
+    "corps": "vrs_herzegovina",
+    "home_mun": "visegrad",
+    "home_settlement": "Višegrad",
+    "home_osid": "op:visegrad:visegrad_2",
+    "kind": "brigade",
+    "default_equipment_class": "mountain",
+    "available_from": 0,
+    "mandatory": true,
+    "initial_personnel": 800,
+    "initial_cohesion": 55,
+    "defense_terrain_bonus": 0.25,
+    "initial_officer_quality": 0.15
   },
   {
     "id": "rs_65th_protection_motorized_regiment",
@@ -2931,12 +2948,14 @@
     "name": "2nd Sarajevo Light Infantry Brigade (Ilidža)",
     "corps": "vrs_sarajevo_romanija",
     "home_mun": "ilidza",
-    "home_osid": "op:ilidza:kasindo",
+    "home_osid": "op:ilidza:rudnik_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 0,
-    "initial_personnel": 1800,
-    "initial_cohesion": 55
+    "available_from": 4,
+    "mandatory": true,
+    "initial_personnel": 800,
+    "initial_cohesion": 50,
+    "defense_terrain_bonus": 0.30
   },
   {
     "id": "rs_ilijas_brigade",
@@ -2947,9 +2966,11 @@
     "home_osid": "op:ilijas:podlugovi",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 0,
-    "initial_personnel": 1500,
-    "initial_cohesion": 50
+    "available_from": 3,
+    "mandatory": true,
+    "initial_personnel": 800,
+    "initial_cohesion": 50,
+    "defense_terrain_bonus": 0.25
   },
   {
     "id": "rs_igman_brigade",
@@ -2960,9 +2981,28 @@
     "home_osid": "op:hadzici:misevici_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 0,
-    "initial_personnel": 1400,
-    "initial_cohesion": 50
+    "available_from": 5,
+    "mandatory": true,
+    "initial_personnel": 600,
+    "initial_cohesion": 45,
+    "defense_terrain_bonus": 0.35
+  },
+  {
+    "id": "rs_trnovo_brigade",
+    "faction": "RS",
+    "name": "Trnovo Brigade",
+    "corps": "vrs_sarajevo_romanija",
+    "home_mun": "trnovo",
+    "home_settlement": "Trnovo",
+    "home_osid": "op:trnovo:gornja_presjenica",
+    "kind": "brigade",
+    "default_equipment_class": "mountain",
+    "available_from": 6,
+    "mandatory": true,
+    "initial_personnel": 500,
+    "initial_cohesion": 45,
+    "defense_terrain_bonus": 0.40,
+    "initial_officer_quality": 0.15
   },
   {
     "id": "rs_2nd_romanija_brigade",
@@ -4075,5 +4115,22 @@
     "mandatory": true,
     "initial_personnel": 1000,
     "initial_cohesion": 67
+  },
+  {
+    "id": "rs_rogatica_brigade",
+    "faction": "RS",
+    "name": "Rogatica Brigade",
+    "corps": "vrs_drina",
+    "home_mun": "rogatica",
+    "home_settlement": "Rogatica",
+    "home_osid": "op:rogatica:rogatica_2",
+    "kind": "brigade",
+    "default_equipment_class": "mountain",
+    "available_from": 0,
+    "mandatory": true,
+    "initial_personnel": 1000,
+    "initial_cohesion": 55,
+    "defense_terrain_bonus": 0.30,
+    "initial_officer_quality": 0.15
   }
 ]

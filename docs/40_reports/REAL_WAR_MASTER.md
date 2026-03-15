@@ -918,54 +918,35 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 
 ---
 
-### #37 — Elite loan: no cohesion-based recall (P2, n747)
+### #37 — ~~Elite loan: no cohesion-based recall~~ — FIXED (n748)
 
-**What we found:** The 1st Guards Motorized was loaned to vrs_sarajevo_romanija at t1 and fought three battles at milankovici_2 (Olovo) over weeks 35-39. By w40: personnel 1864/3000, morale 60, **cohesion 9.0**. The recall system checks casualties (30% threshold — not triggered because the unit grew through reinforcement before losing personnel) and morale (threshold 35 — 60 is above). It does NOT check cohesion.
+**What we found:** 1st Guards Motorized at cohesion 9.0 after 40 turns on loan. Recall system checked casualties and morale but not cohesion. Mladić would never leave his elite strike force as a mob.
 
-**Historical context:** Cohesion 9 means a unit where the command structure has collapsed, sub-units don't coordinate, soldiers don't trust each other. In the Bosnian War, Mladić would never leave the 1st Guards — his premiere mobile strike force — at cohesion 9. He'd pull them back to Pale, reconstitute them, and redeploy. The VRS Main Staff treated elite units as investments to preserve, not expendable assault troops.
+**Fix (n748):** Added `ELITE_COHESION_RECALL=25` in `elite_loan_types.ts`. `tickEliteLoans` force-recalls with reason `cohesion_collapse` when cohesion drops below threshold. New `EliteRecallReason` variant added.
 
-**Root cause:** `tickEliteLoans` in `army_reserve_system.ts` checks `ELITE_CASUALTY_THRESHOLD` (30% personnel loss) and `ELITE_MORALE_RECALL` (morale < 35). No cohesion check exists.
-
-**Proposed fix:** Add `ELITE_COHESION_RECALL` threshold (suggest 25). In `tickEliteLoans`, force-recall when `f.cohesion < ELITE_COHESION_RECALL`. A cohesion-9 elite is not an elite — it's a liability.
-
-**Evidence (n747):** `rs_1st_guards_motorized` — cohesion 9.0, 3 battles at Olovo, 40 turns deployed without recall.
-
-**Priority:** P2 — the system works but permits absurd states.
+**Result:** 1st Guards recalled at w40 via `cohesion_collapse`. 10 battles tracked, 2307 casualties, 4 OSIDs captured in episode. No calibration regression (90.6% maintained).
 
 ---
 
-### #38 — Elite loan tracker not updated during battle resolution (P3, n747)
+### #38 — ~~Elite loan tracker not updated during battle resolution~~ — FIXED (n748)
 
-**What we found:** All four elite brigades show `battles_fought: 0` and `casualties_taken: 0` in `EliteLoanEpisode` despite the weekly report recording them in combat. The 65th fought 5 battles, the 1st Guards 3, the Black Swans 2, the Guards 1. None are reflected in the tracker.
+**What we found:** `EliteLoanEpisode.battles_fought` and `casualties_taken` always 0 despite combat.
 
-**Root cause:** `EliteLoanEpisode.battles_fought` and `casualties_taken` are set to 0 at episode creation (`deployEliteLoan`) and never incremented. No code in `attack_resolution_osid.ts` or `tickEliteLoans` updates these fields from battle results.
+**Fix (n748):** `recordBrigadeEngagement()` in `brigade_history_recorder.ts` now syncs elite episode fields in real-time when the formation is on loan. `GameState` threaded through recorder → `recordAttackerEngagements` → `recordDefenderEngagement`. On recall, `recallEliteLoan` syncs tracker totals (`total_battles`, `total_osids_captured`, `total_casualties_taken`) from the closed episode.
 
-**Proposed fix:** In `attack_resolution_osid.ts`, after battle resolution, check if any participating formation has `elite_loan_state.on_loan` and increment the tracker episode's `battles_fought` and `casualties_taken` fields.
-
-**Impact:** Player-facing Campaign History panel in ArmyReservePanel will show zeroes for all metrics until this is fixed. Decorative, not functional.
-
-**Priority:** P3 — instrumentation gap, no gameplay impact.
+**Result:** All four elites show real battle counts (10, 7, 3, 2 battles respectively). Campaign History panel no longer decorative.
 
 ---
 
-### #39 — ARBiH suicide attacks at 0.1-0.2 power ratio (P2, n747)
+### #39 — ~~ARBiH suicide attacks at 0.1-0.2 power ratio~~ — FIXED (n749)
 
-**What we found:** In late war (w36-40), multiple ARBiH brigades launched deliberate attacks at catastrophic odds:
-- w36: 105th Motorized → Radava, power_ratio 0.1, 601 attacker casualties
-- w37: 101st Mountain → Radava (again), power_ratio 0.2, 496 attacker casualties
-- w40: 252nd Slavna → Ripac, power_ratio 0.2, 720 attacker casualties
+**What we found:** Repeat attacks at the same fortified position at catastrophic odds. Radava (Sarajevo) was attacked 3 consecutive turns (w33, w36, w37) at PR 0.14-0.21, producing 1,725 total casualties. No commander sends men to die at the same wall three turns running.
 
-Power ratio 0.1 means the attacker has 10% of defender strength. No commander in any army launches a deliberate assault with 10:1 odds against. The operation system forces participating brigades to attack objectives regardless of how suicidal the prediction is — the `min_attack_outcome` threshold inherited from the operation permits it.
+**Historical context:** Single desperate attacks at bad odds DID happen in the Bosnian War — Dudaković tried breakouts from Bihać, 1st Corps attempted Sarajevo perimeter assaults. Commanders gamble. But they don't repeat the same failed assault at the same position turn after turn. One gamble is war. Three consecutive is a broken bot.
 
-**Historical context:** ARBiH operations in 1992-93 were often launched with poor odds, but not at 10:1 against. Even the most desperate 1st Corps breakout attempts from Sarajevo had at least a plausible force ratio at the point of attack. The 5th Corps operations around Bihać were similarly constrained by reality — you probe, find the weak point, concentrate there. You don't throw a brigade at a fortified position at 10% strength.
+**Fix (n749):** Added `consecutive_catastrophic_on_current` counter on `OperationAxis`. After 2 consecutive catastrophic outcomes on the same objective, the axis stalls (`MAX_CONSECUTIVE_CATASTROPHIC_ON_CURRENT=2`). Counter resets on objective change, capture, or non-catastrophic outcome. Single-attempt gambles at bad odds are preserved — historically correct.
 
-**Related:** CONSOLIDATED_BACKLOG §8 "ARBiH zero-capture operations" documents the same class of problem. Also related to closed #29 (zombie operations) and #36 (Operacija Zora stall).
-
-**Root cause candidates:** (a) `min_attack_outcome` allows 'repulsed' or 'catastrophic' during execution — no floor on predicted outcome for launching attacks; (b) no per-turn abort check during execution that says "we're being massacred, stop"; (c) approach-OSID selection forces brigades toward unreachable objectives.
-
-**Proposed fix:** Per-execution-turn sanity check: if the predicted outcome for the current objective is 'catastrophic' for N consecutive turns (suggest N=2), the axis stalls. Different from the existing idle/movement stall counters — this is an outcome-quality gate.
-
-**Priority:** P2 — produces visibly absurd casualties and wastes ARBiH manpower.
+**Result:** Radava repeat attacks eliminated (3→1). Total suicide attacks (PR<0.3) dropped 12→10. RBiH attacker casualties down 886. Remaining PR<0.3 attacks are all single-attempt gambles at different operations — historically defensible. Area match 90.4% (within variance of n748 90.6%). 13/13 anchors, 6/6 benchmarks.
 
 ---
 
@@ -981,10 +962,16 @@ Power ratio 0.1 means the attacker has 10% of defender strength. No commander in
 
 **Priority:** P3 — known design trade-off, not a bug. Monitor.
 
-| **P2** | #37 Elite loan: no cohesion recall | 1st Guards at cohesion 9.0 after 40 turns, no recall triggered | **OPEN — easy fix** |
-| **P3** | #38 Elite tracker not updated | battles_fought/casualties_taken always 0 despite combat | **OPEN — instrumentation** |
-| **P2** | #39 ARBiH suicide attacks (0.1 PR) | Ops force attacks at 10:1 against; 600-720 cas per battle | **OPEN — needs execution gate** |
+| ~~**P2**~~ | ~~#37 Elite loan: no cohesion recall~~ | ~~1st Guards at cohesion 9.0 after 40 turns~~ | **FIXED (n748)** |
+| ~~**P3**~~ | ~~#38 Elite tracker not updated~~ | ~~battles_fought/casualties_taken always 0~~ | **FIXED (n748)** |
+| ~~**P2**~~ | ~~#39 ARBiH suicide attacks (0.1 PR)~~ | ~~Repeat attacks at same fortified position~~ | **FIXED (n749)** |
 | **P3** | #40 Operational tempo 3.5/week | Ops-only doctrine → 180 brigades idle every turn | **KNOWN — design trade-off** |
+| **P2** | #41 ARBiH attacks HVO territory while allied (Mostar w38-39) | RBiH brigades attack op:mostar:kruzanj_2 (HRHB) at PR 0.24-0.25 before HVO-RBiH war starts (w52+). Alliance guard may not cover all attack paths. | **OPEN — investigate** |
+| **P1** | #42 Bot strategic targeting — no demographic/geometric filter | Bot targets any adjacent enemy OSID without assessing strategic value. VRS takes Žepče (7.3% Serb, creates pocket). Salient aversion (Phase C) partially addresses geometry but demographic filter still needed. | **PARTIALLY ADDRESSED (n773 salient aversion)** |
+| **P2** | #43 UI shows brigade raw power, not sector defensive power | FormationDetail/sector panel shows `brigadePower()` (~2,602 for 3000 pers motorized) instead of `sector.defensive_power` (72.5). Player sees a "strong" sector when it's actually 115:1 overmatched. Misleading. | **OPEN — UI fix** |
+| **P1** | #44 ARBiH 1st Corps doesn't probe weak SRK sectors | SRK sector:0 has 1 brigade / 14 edges / threat 665:1. The 1st Corps should detect this via intel and launch a breakout op. Currently defensive stance through w40 — no probing, no exploitation. Historically 1st Corps attempted breakouts whenever the siege ring thinned. | **OPEN — bot AI** |
+| **P2** | #45 Salient retreat — commander doesn't withdraw from indefensible positions | Srebrenik tinja_gornja_2 (1 RS OSID surrounded by 5 RBiH) created during w6 blitz but never abandoned. A real commander would withdraw from positions he can't supply or reinforce. Salient aversion prevents NEW salients but can't undo existing ones. | **OPEN — new concept** |
+| **P1** | #46 SRK OOB — 4 brigades non-mandatory, sector:0 still 1 brig/14 edges | Ilidža, Ilijaš, Igman, Trnovo in OOB but non-mandatory. Marking mandatory causes -1.9pp regression without JNA compensation. Defensive health gate keeps them on ring but sector:0 still critically thin. Blocked by duplicate home_osids (Ilidža shares with 2nd Sarajevo, 1st Romanija shares with 65th Protection). | **OPEN — needs Phase D** |
 
 ---
 

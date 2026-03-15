@@ -48,6 +48,42 @@ const TIER_PRIORITY: Record<OfficerPoolTier, number> = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Historical successor lookup
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Find the historical successor for a departing officer.
+ * Looks for the next officer with the same home_corps_id, available this turn,
+ * not yet in state, prioritized by pool_tier.
+ */
+function findHistoricalSuccessor(
+    departing: NamedOfficer,
+    allOfficers: NamedOfficer[],
+    currentState: Record<string, NamedOfficerState>,
+    turn: number,
+): NamedOfficer | null {
+    const corpsId = departing.home_corps_id;
+    if (!corpsId) return null;
+
+    const candidates = allOfficers
+        .filter(o =>
+            o.id !== departing.id &&
+            o.faction === departing.faction &&
+            o.home_corps_id === corpsId &&
+            o.available_from_turn <= turn &&
+            (o.available_until_turn === undefined || o.available_until_turn > turn) &&
+            (!currentState[o.id] || currentState[o.id].status === 'reserve')
+        )
+        .sort((a, b) => {
+            const tierDiff = (TIER_PRIORITY[a.pool_tier] ?? 99) - (TIER_PRIORITY[b.pool_tier] ?? 99);
+            if (tierDiff !== 0) return tierDiff;
+            return a.id.localeCompare(b.id);
+        });
+
+    return candidates[0] ?? null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Deterministic hash for casualty checks
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -386,7 +422,9 @@ export interface OfficerSuccessionReport {
  * Process officer succession for one turn.
  *
  * 1. Process historical departures (available_until_turn).
+ *    - Bot factions: auto-retire. Player faction: create replacement_suggested event.
  * 2. Check for newly available officers (available_from_turn).
+ *    - Player faction: create officer_available notification event.
  * 3. Casualty checks for active officers in corps that fought.
  * 4. Fill vacant corps commands from pool.
  */
@@ -407,12 +445,43 @@ export function processOfficerSuccession(
     if (!officers || !officerData) return report;
 
     const turn = state.meta?.turn ?? 0;
+    const playerFaction = state.meta?.player_faction ?? null;
+
+    // Ensure pending_officer_events array exists
+    if (!state.military.pending_officer_events) {
+        state.military.pending_officer_events = [];
+    }
+    const pendingEvents = state.military.pending_officer_events;
 
     // 1. Historical departures
     for (const data of officerData) {
         const os = officers[data.id];
         if (!os || os.status !== 'active' && os.status !== 'reserve') continue;
         if (data.available_until_turn !== undefined && turn >= data.available_until_turn) {
+            // Player faction: don't auto-retire, create a replacement_suggested event instead
+            if (data.faction === playerFaction && os.status === 'active' && os.assigned_corps_id) {
+                // Find the suggested replacement (next officer for this corps by tier)
+                const suggestedReplacement = findHistoricalSuccessor(data, officerData, officers, turn);
+                if (suggestedReplacement) {
+                    const eventId = `replacement_${data.id}_t${turn}`;
+                    const alreadyPending = pendingEvents.some(e => e.event_id === eventId);
+                    if (!alreadyPending) {
+                        pendingEvents.push({
+                            event_id: eventId,
+                            type: 'replacement_suggested',
+                            faction: data.faction,
+                            turn,
+                            officer_id: suggestedReplacement.id,
+                            current_commander_id: data.id,
+                            corps_id: os.assigned_corps_id,
+                            acknowledged: false,
+                        });
+                    }
+                }
+                // Don't retire — player decides
+                continue;
+            }
+
             os.status = 'retired';
             if (os.assigned_corps_id) {
                 os.assigned_corps_id = null;
@@ -440,6 +509,22 @@ export function processOfficerSuccession(
                 acting_commander: false,
             };
             report.new_arrivals.push(data.id);
+
+            // Player faction: notify about new officer availability
+            if (data.faction === playerFaction) {
+                const eventId = `arrival_${data.id}_t${turn}`;
+                const alreadyPending = pendingEvents.some(e => e.event_id === eventId);
+                if (!alreadyPending) {
+                    pendingEvents.push({
+                        event_id: eventId,
+                        type: 'officer_available',
+                        faction: data.faction,
+                        turn,
+                        officer_id: data.id,
+                        acknowledged: false,
+                    });
+                }
+            }
         }
     }
 

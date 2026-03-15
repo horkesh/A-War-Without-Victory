@@ -9,7 +9,7 @@
  * - Running tallies (battles, victories, casualties, streaks, milestones)
  */
 
-import type { FormationState, FactionId } from '../../state/game_state.js';
+import type { FormationState, FactionId, GameState } from '../../state/game_state.js';
 import {
     type BrigadeEngagement,
     type BrigadeHistory,
@@ -35,10 +35,12 @@ export function ensureBrigadeHistory(formation: FormationState): BrigadeHistory 
  *
  * @param formation - The brigade's FormationState (mutated)
  * @param engagement - The engagement data to record
+ * @param state - Optional GameState for elite loan episode tracking
  */
 export function recordBrigadeEngagement(
     formation: FormationState,
     engagement: BrigadeEngagement,
+    state?: GameState,
 ): void {
     const h = ensureBrigadeHistory(formation);
 
@@ -55,6 +57,21 @@ export function recordBrigadeEngagement(
 
     h.total_casualties_taken += engagement.casualties_taken;
     h.total_casualties_inflicted += engagement.casualties_inflicted;
+
+    // ── Sync elite loan episode if brigade is on loan ──
+    const eliteLoanState = formation.elite_loan_state;
+    if (state && eliteLoanState?.on_loan && eliteLoanState.current_episode_id != null) {
+        const tracker = state.military.elite_brigade_tracker?.[formation.id ?? ''];
+        if (tracker) {
+            const episode = tracker.episodes[eliteLoanState.current_episode_id];
+            if (episode && episode.loan_end_turn == null) {
+                episode.battles_fought++;
+                episode.casualties_taken += engagement.casualties_taken;
+                if (engagement.territory_flipped) episode.osids_captured++;
+                episode.kia_inflicted_est += engagement.casualties_inflicted;
+            }
+        }
+    }
 
     const isWin = isAttackerWin(engagement);
     const isLoss = isAttackerLoss(engagement);
@@ -135,6 +152,7 @@ export function recordAttackerEngagements(
     totalAttackerCasualties: number,
     totalDefenderCasualties: number,
     isConcentrated: boolean,
+    state?: GameState,
 ): void {
     const perAttackerCas = attackerFormations.length > 0
         ? Math.floor(totalAttackerCasualties / attackerFormations.length)
@@ -151,7 +169,7 @@ export function recordAttackerEngagements(
             enemy_faction: defenderFaction,
             territory_flipped: territoryFlipped,
             was_concentrated: isConcentrated,
-        });
+        }, state);
     }
 }
 
@@ -168,6 +186,7 @@ export function recordDefenderEngagement(
     defenderCasualties: number,
     attackerCasualties: number,
     wasConcentrated: boolean,
+    state?: GameState,
 ): void {
     recordBrigadeEngagement(defenderFormation, {
         turn,
@@ -179,7 +198,7 @@ export function recordDefenderEngagement(
         enemy_faction: attackerFaction,
         territory_flipped: territoryFlipped,
         was_concentrated: wasConcentrated,
-    });
+    }, state);
 }
 
 function isAttackerWin(e: BrigadeEngagement): boolean {
