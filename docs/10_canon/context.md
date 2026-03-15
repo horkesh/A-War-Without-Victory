@@ -10,10 +10,10 @@
 
 When conflicts arise between documents, this is the resolution order. See **`docs/10_canon/CANON.md`** for the canonical list and paths.
 
-1. **Engine Invariants v0.6.0** - Defines what MUST be true (correctness constraints)
+1. **Engine Invariants v0.7.0** - Defines what MUST be true (correctness constraints)
 2. **Phase Specifications v0.6.0** - Defines lifecycle contracts (Peace/War)
-3. **Systems Manual v0.6.0** - Defines complete system behavior (implementation spec)
-4. **Rulebook v0.6.0** - Defines player-facing experience
+3. **Systems Manual v0.7.0** - Defines complete system behavior (implementation spec)
+4. **Rulebook v0.7.0** - Defines player-facing experience
 5. **Game Bible v0.6.0** - Defines design philosophy and constraints
 6. **context.md** - Defines process canon (workflow, ledger, session runbook)
 
@@ -21,10 +21,10 @@ When conflicts arise between documents, this is the resolution order. See **`doc
 
 | Document | Audience | Purpose | Status |
 |----------|----------|---------|--------|
-| **Rulebook** | Players, new designers | Teach how to play | v0.6.0 |
-| **Engine Invariants** | Developers, QA | Assert correctness constraints | v0.6.0 |
+| **Rulebook** | Players, new designers | Teach how to play | v0.7.0 |
+| **Engine Invariants** | Developers, QA | Assert correctness constraints | v0.7.0 |
 | **Game Bible** | Designers | Establish design principles | v0.6.0 |
-| **Systems Manual** | Developers | Complete mechanical specification | v0.6.0 |
+| **Systems Manual** | Developers | Complete mechanical specification | v0.7.0 |
 | **Phase Specifications** | Developers | Two-phase lifecycle contracts | v0.6.0 |
 | **War Specification** | Developers | War-phase behavior (fronts, supply, exhaustion, operations) | v0.6.0 |
 

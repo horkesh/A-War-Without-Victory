@@ -31,7 +31,7 @@ Everything before 1.0.0 is development. Everything after is live product.
 ### 0.1.x — Proof of Concept ✓ (COMPLETED)
 Core simulation loop exists. Turn pipeline runs. Factions exist. Map renders.
 
-### 0.2.x — Core Engine (CURRENT TARGET)
+### 0.2.x — Core Engine ✓ (COMPLETED 2026-03-15)
 - War phase combat resolution
 - Bot AI (3-tier: army/corps/brigade)
 - Corps sector system

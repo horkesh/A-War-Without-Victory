@@ -5,7 +5,7 @@
 ## Where to start
 
 - **Process and workflow:** [docs/10_canon/context.md](../10_canon/context.md) — mandatory first read for agents and contributors (ledger, mistake guard, determinism).
-- **Political control:** Control is **settlement-level** (each settlement has a controller); municipality-level control is a derived view (e.g. majority of settlements) for display only. See [Systems_Manual_v0_6_0.md § System 11](../10_canon/Systems_Manual_v0_6_0.md).
+- **Political control:** Control is **settlement-level** (each settlement has a controller); municipality-level control is a derived view (e.g. majority of settlements) for display only. See [Systems_Manual_v0_7_0.md § System 11](../10_canon/Systems_Manual_v0_7_0.md).
 - **Paradox roster and handoffs:** [.cursor/AGENT_TEAM_ROSTER.md](../../.cursor/AGENT_TEAM_ROSTER.md) — Paradox (subagent collective); when to invoke which specialist; clarification-first and handoff rules.
 - **Canon (game truth):** [docs/10_canon/CANON.md](../10_canon/CANON.md) — canonical doc index and precedence order; includes industry mapping (GDD / TDD / process) for readers used to standard game-dev docs.
 - **Project state:** [docs/PROJECT_LEDGER.md](../PROJECT_LEDGER.md) — changelog and current state (at docs root).
@@ -17,9 +17,9 @@
 | [CANON.md](../10_canon/CANON.md) | Index and precedence |
 | [context.md](../10_canon/context.md) | Process canon |
 | [FORAWWV.md](../10_canon/FORAWWV.md) | Validated design insights (addenda) |
-| [Engine_Invariants_v0_6_0.md](../10_canon/Engine_Invariants_v0_6_0.md) | Correctness constraints |
-| [Systems_Manual_v0_6_0.md](../10_canon/Systems_Manual_v0_6_0.md) | System behavior spec |
-| [Rulebook_v0_6_0.md](../10_canon/Rulebook_v0_6_0.md) | Player-facing rules |
+| [Engine_Invariants_v0_7_0.md](../10_canon/Engine_Invariants_v0_7_0.md) | Correctness constraints |
+| [Systems_Manual_v0_7_0.md](../10_canon/Systems_Manual_v0_7_0.md) | System behavior spec |
+| [Rulebook_v0_7_0.md](../10_canon/Rulebook_v0_7_0.md) | Player-facing rules |
 | [Game_Bible_v0_6_0.md](../10_canon/Game_Bible_v0_6_0.md) | Design philosophy |
 | [Phase_Specifications_v0_6_0.md](../10_canon/Phase_Specifications_v0_6_0.md) | Frozen phase specs |
 | [Peace_Specification_v0_6_0.md](../10_canon/Peace_Specification_v0_6_0.md) | Peace spec |
@@ -49,7 +49,7 @@
 - [EXECUTIVE_ROADMAP.md](../30_planning/EXECUTIVE_ROADMAP.md) — executive phases (1–7)
 - [MVP_CHECKLIST.md](../30_planning/MVP_CHECKLIST.md) — MVP scope and gates
 - [V1_0_PACKAGING.md](../30_planning/V1_0_PACKAGING.md) — v1.0 packaging notes
-- [V0_4_CANON_ALIGNMENT.md](../30_planning/V0_4_CANON_ALIGNMENT.md) — v0.4→v0.5 canon alignment (current canon: v0.5.0)
+- [V0_4_CANON_ALIGNMENT.md](../30_planning/V0_4_CANON_ALIGNMENT.md) — v0.4→v0.5 canon alignment (historical)
 - [missing_systems_roadmap.md](../30_planning/missing_systems_roadmap.md) — missing systems roadmap
 - Gap/addendum: [gap_analysis.md](../30_planning/gap_analysis.md), [AWWV_Gap_Systems_*](../30_planning/)
 - Implementation plans: [BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md](../30_planning/BATCH_ADVANCE_TWO_WEEKS_UI_PLAN.md) (warroom batch advance), [RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md](../30_planning/RBIH_HRHB_ALLIANCE_BREAKDOWN_AND_WAR_PLAN.md) (RBiH–HRHB alliance breakdown and war; Phase A done, B/C backlog)
@@ -61,7 +61,7 @@
 - **Entrypoint:** [40_reports/README.md](../40_reports/README.md) — master index and structure (2026-02-13).
 - **Consolidated views:** [CONSOLIDATED_IMPLEMENTED.md](../40_reports/CONSOLIDATED_IMPLEMENTED.md) (what’s done; single doc [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md), reports archived 2026-02-15), [CONSOLIDATED_BACKLOG.md](../40_reports/CONSOLIDATED_BACKLOG.md) (what’s not yet done), [CONSOLIDATED_LESSONS_LEARNED.md](../40_reports/CONSOLIDATED_LESSONS_LEARNED.md) (patterns and corrections).
 - **Cleanup plan:** [ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md](../40_reports/ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md).
-- Subfolders: [audit/](../40_reports/audit/), [implemented/](../40_reports/implemented/) (new reports added 2026-02-16), [backlog/](../40_reports/backlog/), [convenes/](../40_reports/convenes/), [handovers/](../40_reports/handovers/). Custodian: `.cursor/skills/reports-custodian/SKILL.md`.
+- Subfolders: [audits/](../40_reports/audits/), [implemented/](../40_reports/implemented/), [backlog/](../40_reports/backlog/), [convenes/](../40_reports/convenes/), [handovers/](../40_reports/handovers/). Custodian: `.cursor/skills/reports-custodian/SKILL.md`.
 - **GUI design advisor handover:** [handovers/GUI_DESIGN_ADVISOR_HANDOVER_2026_02_14.md](../40_reports/handovers/GUI_DESIGN_ADVISOR_HANDOVER_2026_02_14.md) — report for expert GUI/UX advisor (what exists, what’s planned, what we need: layout, readability, panels, controls) before Phase 3/4.
 - **Latest GUI research review:** [convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md](../40_reports/convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md) — orchestrator-led player-perspective review of warroom + tactical map; flags hidden systems, hierarchy issues, faction-pride opportunities, and calls for right-drill sliding panels instead of stacked detail panels.
 - **Latest GUI implementation report:** [implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md](../40_reports/implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md) — delivered map panel rail, warroom scene-plate contract, hotspot-anchor routing, and faction-identity presentation updates.
@@ -75,9 +75,9 @@
 - [awwv_gap_analysis_vs_best_practices.md](../50_research/awwv_gap_analysis_vs_best_practices.md), [war_sims_best_practices.md](../50_research/war_sims_best_practices.md), [gui_improvements_backlog.md](../50_research/gui_improvements_backlog.md)
 - [knowledge/](../knowledge/) — knowledge base and AWWV project notes (at docs root for tooling)
 
-## Archive (docs/_old/)
+## Versioning
 
-Superseded docs only; never delete. See [docs/_old/README.md](../_old/README.md) for policy and index.
+See [docs/20_engineering/VERSIONING.md](../20_engineering/VERSIONING.md) for the game versioning system (MAJOR.MINOR.PATCH). Current: **v0.2.0** (Core Engine). Canon document versions (v0.6, v0.7) are independent of the game version.
 
 ---
 

@@ -63,4 +63,10 @@ Do NOT edit FORAWWV automatically.
 
 Canon v0.7 is the active canon (Engine Invariants, Systems Manual, Rulebook). Phase Specifications, Peace/War Specifications, and Game Bible remain at v0.6 (no changes needed). Deprecated v0.5 and older canon files have been removed.
 
+**Canon doc versions are independent of game version.** Canon tracks documentation state; game version tracks software milestones. See `docs/20_engineering/VERSIONING.md`.
+
+## Game Versioning
+
+**Current: v0.2.0** (Core Engine). Format: `MAJOR.MINOR.PATCH`. 1.0.0 = gold/shipping product. See `docs/20_engineering/VERSIONING.md` for full milestone map and bump protocol.
+
 One game turn equals one week.

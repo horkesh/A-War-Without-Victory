@@ -2,9 +2,9 @@
 
 ## Canon Precedence for Code
 The codebase follows the same precedence rules as canonical docs:
-- Engine invariants: `docs/10_canon/Engine_Invariants_v0_6_0.md`
-- Rulebook: `docs/10_canon/Rulebook_v0_6_0.md`
-- Systems Manual: `docs/10_canon/Systems_Manual_v0_6_0.md`
+- Engine invariants: `docs/10_canon/Engine_Invariants_v0_7_0.md`
+- Rulebook: `docs/10_canon/Rulebook_v0_7_0.md`
+- Systems Manual: `docs/10_canon/Systems_Manual_v0_7_0.md`
 - FORAWWV addenda: `docs/FORAWWV.md`
 - Code: this repository
 
