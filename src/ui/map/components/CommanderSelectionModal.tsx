@@ -4,7 +4,7 @@
  * and greyed-out unavailable officers with reasons.
  */
 import { useMemo } from 'react';
-import type { NamedOfficerView, OperationView } from '../data/types';
+import type { NamedOfficerView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import {
     getArchetype,
@@ -27,7 +27,6 @@ interface CommanderSelectionModalProps {
 /** Availability status for an officer. */
 function getAvailabilityStatus(
     officer: NamedOfficerView,
-    operations: OperationView[],
     targetCorpsId: string,
 ): { available: boolean; reason?: string } {
     if (officer.status === 'kia') return { available: false, reason: `KIA` };
@@ -81,7 +80,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
         const unavail: Array<{ officer: NamedOfficerView; reason: string }> = [];
 
         for (const officer of factionOfficers) {
-            const status = getAvailabilityStatus(officer, operations ?? [], context.corpsId);
+            const status = getAvailabilityStatus(officer, context.corpsId);
             if (status.available) {
                 avail.push({ officer, fit: getRegionalFit(officer, context.corpsId) });
             } else {

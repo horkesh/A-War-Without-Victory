@@ -131,6 +131,30 @@ body {
   box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0, 0, 0, 0.8);
 }
 
+.bg-glass {
+  background: rgba(26, 24, 21, 0.7);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+.border-glow {
+  border: 1px solid rgba(180, 160, 130, 0.25);
+  box-shadow: 0 0 8px rgba(180, 160, 130, 0.15), inset 0 0 4px rgba(180, 160, 130, 0.05);
+}
+
+.scanline-texture {
+  background: linear-gradient(
+    to bottom,
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.08) 50%
+  );
+  background-size: 100% 4px;
+}
+
+.module-header {
+  @apply font-mono text-[9px] uppercase tracking-[0.2em] text-accent-gold/60 mb-1 pl-1 border-l-2 border-accent-gold/30;
+}
+
 /* CRT Screen Flickers */
 @keyframes crtFlicker {
   0% {

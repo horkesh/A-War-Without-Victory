@@ -30,13 +30,15 @@ export const WithBrigades: Story = {
   },
 };
 
-export const WithFrontAssignment: Story = {
+export const WithStanceAndCommander: Story = {
   args: {
     corpsId: 'rbih_corps_sarajevo',
     corpsName: mockCorpsNames['rbih_corps_sarajevo'],
     brigades: rbihSarajevo,
-    frontAssignment: 'Sarajevo sector',
+    stance: 'defensive',
+    commanderName: 'Gen. Jovan Divjak',
     faction: 'RBiH',
+    onStanceChange: (s) => console.log('Stance changed to:', s),
   },
 };
 

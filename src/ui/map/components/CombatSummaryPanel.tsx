@@ -101,7 +101,7 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                 {summary.peak_aggregate_personnel > 0 && (
                     <div className="flex justify-between">
                         <span className="text-text-secondary">Peak Personnel</span>
-                        <span className="text-text-primary tabular-nums">{summary.peak_aggregate_personnel.toLocaleString()}</span>
+                        <span className="text-text-primary tabular-nums">{Math.max(summary.peak_aggregate_personnel, summary.current_personnel).toLocaleString()}</span>
                     </div>
                 )}
             </div>

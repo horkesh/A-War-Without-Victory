@@ -27,6 +27,28 @@ export function hashString(str: string): number {
   return h;
 }
 
+/** Square of the distance between two points. */
+export function getDistSq(a: [number, number], b: [number, number]): number {
+  return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
+}
+
+/**
+ * Find the closest point on a line segment (a-b) to a test point p.
+ * Returns the coordinates of the closest point.
+ */
+export function getClosestPointOnSegment(
+  p: [number, number],
+  a: [number, number],
+  b: [number, number],
+): [number, number] {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const d2 = dx * dx + dy * dy;
+  if (d2 === 0) return a;
+  const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / d2));
+  return [a[0] + t * dx, a[1] + t * dy];
+}
+
 /**
  * Build a quadratic Bezier curve from p0→p2 with a lateral offset for visual separation
  * when multiple arrows share endpoints.
@@ -133,4 +155,29 @@ export function buildTaperedArrowBody(
   // Close: left edge forward, right edge reversed — then ensure CCW for MapLibre fill
   const ring = [...leftEdge, ...rightEdge.reverse(), leftEdge[0]];
   return ensureCCW(ring);
+}
+
+/**
+ * Find the closest point on a polyline (edgeList) to a target objective.
+ * This is used to snap arrow origins from a unit's centroid to its sector's front line.
+ */
+export function getClosestPointOnSectorEdge(
+  objective: [number, number],
+  edgeList: [number, number][],
+): [number, number] | null {
+  if (edgeList.length < 2) return edgeList[0] || null;
+
+  let minPoint = edgeList[0];
+  let minDistSq = Infinity;
+
+  for (let i = 0; i < edgeList.length - 1; i++) {
+    const p = getClosestPointOnSegment(objective, edgeList[i], edgeList[i + 1]);
+    const d2 = getDistSq(p, objective);
+    if (d2 < minDistSq) {
+      minDistSq = d2;
+      minPoint = p;
+    }
+  }
+
+  return minPoint;
 }

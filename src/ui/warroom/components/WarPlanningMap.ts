@@ -6,7 +6,7 @@
 
 import type { InvestmentType } from '../../../phase0/investment.js';
 import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
-import wallMapFrameUrl from '../assets/wall_map_frame_v1.png?url';
+import wallMapFrameUrl from '../assets/wall_map_frame_v1.webp?url';
 import type { InvestmentPanelMunInfo } from './InvestmentPanel.js';
 import { InvestmentPanel } from './InvestmentPanel.js';
 import { Phase0DirectiveState } from './Phase0DirectiveState.js';
@@ -71,6 +71,10 @@ export class WarPlanningMap {
     private zoomLevel: 0 | 1 | 2 = 0;
     private zoomCenter = { x: 0.5, y: 0.5 };
     private controlData: PoliticalControlData = {};
+    /** SID-keyed control for thumbnail (initialized from static data, updated via OSID→SID mapping from live state). */
+    private staticControlBySid: Record<string, string | null> = {};
+    /** Reverse map: OSID → SID[] for translating live political_controllers to SID keys. */
+    private osidToSids: Map<string, string[]> = new Map();
     private settlementMeta: Array<{ sid: string; mid: string }> | null = null;
     private municipalitiesMeta: Array<{ mid: string; name: string }> | null = null;
     private municipalitiesMap: Map<string, string> = new Map(); // MID -> Name
@@ -397,7 +401,7 @@ export class WarPlanningMap {
 
     async loadData(): Promise<void> {
         try {
-            const [geoRes, controlRes, edgesRes, namesRes, munRes, ethnicityRes, settMetaRes, munMetaRes] = await Promise.all([
+            const [geoRes, controlRes, edgesRes, namesRes, munRes, ethnicityRes, settMetaRes, munMetaRes, osidMapRes] = await Promise.all([
                 fetch('/data/derived/settlements_a1_viewer.geojson'),
                 fetch('/data/derived/political_control_data.json'),
                 fetch('/data/derived/settlement_edges.json').catch(() => null),
@@ -405,7 +409,8 @@ export class WarPlanningMap {
                 fetch('/data/derived/mun1990_names.json').catch(() => null),
                 fetch('/data/derived/settlement_ethnicity_data.json').catch(() => null),
                 fetch('/data/derived/settlements_meta.json').catch(() => null),
-                fetch('/data/derived/municipalities_meta.json').catch(() => null)
+                fetch('/data/derived/municipalities_meta.json').catch(() => null),
+                fetch('/data/derived/operational/canonical_to_operational_map.json').catch(() => null)
             ]);
             if (!geoRes.ok) throw new Error(`Failed to load GeoJSON: ${geoRes.status} ${geoRes.url}`);
             if (!controlRes.ok) throw new Error(`Failed to load political control data: ${controlRes.status} ${controlRes.url}`);
@@ -417,6 +422,18 @@ export class WarPlanningMap {
             const geojson = JSON.parse(geoText);
             const controlData = JSON.parse(controlText);
             this.controlData = controlData as PoliticalControlData;
+            // Preserve SID-keyed static control for thumbnail (setControlFromState overwrites with OSID keys)
+            this.staticControlBySid = { ...(controlData.by_settlement_id ?? {}) };
+
+            // Build OSID→SID[] reverse map for live state updates
+            if (osidMapRes?.ok) {
+                const sidToOsid: Record<string, string> = await osidMapRes.json();
+                for (const [sid, osid] of Object.entries(sidToOsid)) {
+                    const arr = this.osidToSids.get(osid);
+                    if (arr) arr.push(sid);
+                    else this.osidToSids.set(osid, [sid]);
+                }
+            }
 
             if (settMetaRes?.ok) {
                 this.settlementMeta = await settMetaRes.json();
@@ -560,8 +577,18 @@ export class WarPlanningMap {
     setControlFromState(state: GameState): void {
         const pc = state.political.political_controllers ?? {};
         const bySid: Record<string, string | null> = {};
-        for (const [sid, controller] of Object.entries(pc)) {
-            bySid[sid] = controller ?? null;
+        for (const [osid, controller] of Object.entries(pc)) {
+            // political_controllers is OSID-keyed — translate to SID for polygon rendering
+            const sids = this.osidToSids.get(osid);
+            if (sids) {
+                for (const sid of sids) {
+                    bySid[sid] = controller ?? null;
+                    this.staticControlBySid[sid] = controller ?? null;
+                }
+            } else {
+                // Fallback: might already be SID-keyed (static data)
+                bySid[osid] = controller ?? null;
+            }
         }
         this.controlData.by_settlement_id = bySid;
         const contested = state.political.contested_control ?? {};
@@ -847,6 +874,82 @@ export class WarPlanningMap {
             ctx.lineWidth = 2;
             ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
         }
+    }
+
+    /**
+     * Render a territorial control thumbnail onto an arbitrary canvas context.
+     * Used by the warroom to project a staff map onto the cork board surface.
+     * Returns false if polygon data is not yet loaded.
+     */
+    renderThumbnail(ctx: CanvasRenderingContext2D, w: number, h: number): boolean {
+        if (!this.bounds || this.polygons.size === 0) return false;
+        const { minX, minY, maxX, maxY } = this.bounds;
+        const scale = Math.min(w / (maxX - minX), h / (maxY - minY));
+        const offsetX = (w - (maxX - minX) * scale) / 2;
+        const offsetY = (h - (maxY - minY) * scale) / 2;
+        const project = (x: number, y: number): [number, number] => [
+            (x - minX) * scale + offsetX,
+            (y - minY) * scale + offsetY
+        ];
+        const controllers = this.staticControlBySid;
+        for (const [, feature] of this.polygons.entries()) {
+            const masterSid = this.getMasterSid(feature);
+            const c = masterSid ? (controllers[masterSid] ?? 'null') : 'null';
+            const color = c === 'RBiH' ? 'rgb(27,94,32)' : c === 'RS' ? 'rgb(226,74,74)' : c === 'HRHB' ? 'rgb(74,144,226)' : 'rgb(100,100,100)';
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            const polys: PolygonCoords[] = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry.coordinates;
+            for (const poly of polys) {
+                for (const ring of poly) {
+                    for (let i = 0; i < ring.length; i++) {
+                        const [sx, sy] = project(ring[i][0], ring[i][1]);
+                        if (i === 0) ctx.moveTo(sx, sy);
+                        else ctx.lineTo(sx, sy);
+                    }
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Country outline
+        ctx.strokeStyle = 'rgba(40,30,20,0.6)';
+        ctx.lineWidth = Math.max(1, scale * 0.001);
+        ctx.beginPath();
+        for (const [, feature] of this.polygons.entries()) {
+            const polys: PolygonCoords[] = feature.geometry.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry.coordinates;
+            for (const poly of polys) {
+                const ring = poly[0]; // exterior ring only
+                for (let i = 0; i < ring.length; i++) {
+                    const [sx, sy] = project(ring[i][0], ring[i][1]);
+                    if (i === 0) ctx.moveTo(sx, sy);
+                    else ctx.lineTo(sx, sy);
+                }
+            }
+        }
+        ctx.stroke();
+
+        // Staff map legend (bottom-right)
+        const legendSize = Math.max(6, Math.min(w, h) * 0.04);
+        const legendX = w - legendSize * 8;
+        const legendY = h - legendSize * 4.5;
+        const legendItems: Array<[string, string]> = [['ARBiH', 'rgb(27,94,32)'], ['VRS', 'rgb(226,74,74)'], ['HVO', 'rgb(74,144,226)']];
+        ctx.font = `bold ${Math.round(legendSize * 0.7)}px sans-serif`;
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        for (let i = 0; i < legendItems.length; i++) {
+            const [label, color] = legendItems[i];
+            const ly = legendY + i * legendSize * 1.3;
+            ctx.fillStyle = color;
+            ctx.fillRect(legendX, ly, legendSize, legendSize * 0.8);
+            ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+            ctx.lineWidth = 0.5;
+            ctx.strokeRect(legendX, ly, legendSize, legendSize * 0.8);
+            ctx.fillStyle = 'rgba(30,20,10,0.8)';
+            ctx.fillText(label, legendX + legendSize * 1.3, ly + legendSize * 0.4);
+        }
+
+        return true;
     }
 
     private onMinimapClick(e: MouseEvent, minimap: HTMLCanvasElement): void {

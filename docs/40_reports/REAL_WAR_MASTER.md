@@ -133,17 +133,36 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
-### 32. ARBiH 5th Corps Bihać — Ripac attack cycling (n51 observation)
+### ~~32. ARBiH 5th Corps Bihać — Ripac attack cycling~~ — FIXED (engine-sprint n58)
 
-**What we found (n51):** ARBiH 5th Corps attacks `op:bihac:ripac` nine times from w19–w40. Every attack is catastrophic. Power ratio declines from 0.50 (w19) to 0.14 (w40). Total attacker casualties from Ripac attacks alone: ~2,924. Zero territorial gains.
+**What we found (n51):** ARBiH 5th Corps attacks `op:bihac:ripac` nine times from w19–w40. Every attack is catastrophic. Power ratio declines from 0.50 (w19) to 0.14 (w40). Total attacker casualties: ~2,924. Zero captures.
 
-**Historical context:** General Dudaković (5th Corps, Bihać Pocket) did attempt multiple breakouts from the siege, particularly Operation Šahin (autumn 1993) and the famous counter-offensive of October 1994. The spirit of repeated breakout attempts is historically motivated. However:
-1. A real commander would not attack the same hardened position nine times with declining power. By the fourth or fifth catastrophic failure, you shift axes or change tactics.
-2. The 0.14 power ratio by w40 means the defending RS brigade is 7× stronger than the attacker. No ARBiH commander would knowingly send men into a 1:7 odds battle.
+**Fix (n58):** `failed_offensive_objectives` cooldown system. After `OBJECTIVE_FAILURE_THRESHOLD=2` failed operations on the same objective, `cooldown_until_turn = current + 8` is set in `CorpsCommandState.failed_offensive_objectives`. The objective is suppressed from `offensiveTargets` in `bot_corps_directives.ts` until the cooldown expires.
 
-**Likely root cause:** The 5th Corps operation (Operacija Čelik or similar) has `ripac` as a fixed objective. The operation restart and probe threshold logic isn't catching that the PR has declined to suicidal levels. The `min_attack_outcome` threshold (≥repulsed, PR≥0.5) should prevent PR=0.14 attacks — but either (a) the operation is overriding the threshold via `force_launch` or `min_outcome: 'repulsed'` set too low, or (b) the predicted PR at launch was higher than the actual resolved PR.
+**Evidence (n58):** Operacija Čelik (t15–t23) fails on ripac → failure_count=1. Operacija Gazija (t23–t28) fails on ripac → failure_count=2, cooldown_until_turn=36. No third Ripac operation in 40-week run. Total Ripac attacks 9→7; suppressed after second failed op. Final save confirms `op:bihac:ripac: { failure_count: 2, cooldown_until_turn: 36 }`.
 
-**Status:** P3 — not blocking. Historically motivated behavior, mechanically gamey pattern. Monitor in future 52w runs. Root cause investigation needed before fixing.
+**War-or-Game verdict: SIGNED OFF 2026-03-14.** Dudaković tries twice, takes serious casualties (444+298 KIA across both ops), and pivots. That's a real commander. The cooldown is organic — not a geographic hard-block, just institutional learning.
+
+**Status:** FIXED (engine-sprint n58).
+
+---
+
+### 33. ARBiH 1st Corps — Foča as offensive target (n54 observation)
+
+**What we found (n54):** ARBiH 1st Corps (Sarajevo garrison) lists `foca` as an offensive target municipality. After the Foča initial-control fix (n54), 1st Corps operations successfully reconquer `op:foca:ustikolina`, `op:foca:prevrac`, and `op:foca:donje_zesce` from RS control, returning them to RBiH by w40.
+
+**Historical context:** ARBiH 1st Corps (Generals Divjak/Karavelić) was the Sarajevo garrison — responsible for defending the city, the enclaves, and the tunnel. The corps was militarily pinned by the SRK siege. It had no capacity or mandate to conduct offensive operations 60+ km south through Trnovo, Kalinovik, and into Foča municipality. The ARBiH forces near southern Foča were the isolated Foča garrison remnants who evacuated to Goražde — they formed part of the 81st Division in the Goražde enclave, not a strike force attacking from Sarajevo.
+
+**Root cause hypothesis:** The Foča municipality is listed in 1st Corps' `target_municipalities` directive because the corps sector boundary includes the area south of Sarajevo (Trnovo, Kalinovik, Pale, Foča). By starting more OSIDs as RS in Foča (n54 override), the 1st Corps sees these as enemy territory within its operational area and assigns attack postures. The sector bot evaluates power ratios and finds openings.
+
+**Impact:** Three northern Foča OSIDs (ustikolina, prevrac, donje_zesce) incorrectly end up as RBiH at w40. Painted target: RS for all three. Cascade from correct initial-control fix creating an operational anomaly.
+
+**Fix options:**
+1. Add `op:foca:ustikolina`, `op:foca:prevrac`, `op:foca:donje_zesce` to `hold_osids` for `arbih_1st_corps` directive — prevent 1st Corps from attacking there.
+2. Remove `foca` from `arbih_1st_corps` target_municipalities — scopes corps to Sarajevo ring only.
+3. Phase B (failed-objective memory) will help if the attacks keep failing before capturing.
+
+**Status:** FIXED n57 (enclave brigade filter in `evaluateSectorOffensiveLaunch`). In n58: 1st Corps correctly targets Sarajevo siege ring only (Operacija Džihad + Biser targeting lukavica/radava/recica/faletici). Zero Foča mismatches confirmed. The n55 `avoid_municipalities` approach was reverted (artificial rule); the organic fix is the enclave brigade filter. **War-or-Game sign-off: CONFIRMED FIXED n58.**
 
 ---
 
@@ -529,6 +548,77 @@ The original diagnosis ("Graz too broad") was **wrong**. The Graz Accords correc
 
 ---
 
+### 34. VRS 1st Krajina Corps — Operation Corridor 92 doesn't happen (n58)
+
+**What we found (n58):** The 1st Krajina Corps (1KK) launches two consecutive operations to open the Posavina Corridor — "Operation Corridor" (t9–t17) and "Operation Posavina Corridor" (t18–t26) — and generates **zero attacks in both**. Targets: Modriča, Garevac, Donja Dubica, Potočani, Novo Selo (Posavina axis), plus Ostra Luka and Makljenovac. All 7 objectives fail silently: 6 planning turns + 4 execution turns + 0 attacks = no-logged-attempt abort. At w40, the 1KK has instead swept central Bosnia: 16th Krajina Motorized, 1st Armored, 2nd/3rd/4th Banja Luka brigades are all at Donji Vakuf. Op Sadejstvo (t29–t38) captures 4 Donji Vakuf OSIDs instead.
+
+**Historical context:** Operation Corridor 92 (June 24 – July 11, 1992) was the single most important VRS strategic operation of the entire first year of the war. The 1st and 2nd Krajina Corps, with elements of the East Bosnian Corps, massed ~40,000 troops and hundreds of artillery pieces to drive east along the Sava River through Modriča toward Brčko and link up with eastern Bosnia. The corridor was essential — without it, the Krajina (western Bosnia + Banja Luka) was strategically isolated from eastern Bosnia, Serbia, and VRS Main Staff. Mladić personally oversaw the operation. It succeeded within two weeks.
+
+In the sim: not a single shot fired on the Corridor axis. 1KK instead attacks central Bosnia (Donji Vakuf), which was historically a peripheral theater. This is like saying the D-Day landings never happened and the Allied armies invaded Turkey instead.
+
+**Evidence (n58 final save):**
+- `vrs_1st_krajina` operation AARs: Corridor (t9–t17) 0 attacks, Posavina Corridor (t18–t26) 0 attacks
+- `rs_1st_vujak_light_infantry` @ `op:modrica:vranjak_2` (actually IN Modriča municipality but never attacked the corridor objectives)
+- 1KK failed_offensive_objectives: modrica_2, garevac_2, donja_dubica, potocani_2, novo_selo_2, ostra_luka, makljenovac — all `failure_count: 1` (single failed op each), `cooldown_until_turn: 0` (threshold=2 not reached, so no actual cooldown)
+- 1KK w40 brigade locations: 16th Krajina Motorized @ donji_vakuf, 1st Armored @ donji_vakuf, 1st/2nd/3rd/4th Banja Luka @ donji_vakuf. Zero brigades on the Sava River.
+
+**Root cause hypothesis:** March-first logic fails for the Corridor objectives. After Op Prijedor (w0–w9) captures Prijedor/Sanski Most/Ključ, most 1KK brigades are deployed in the northwest Krajina. The Corridor targets (Modriča, Odzak, Bosanski Šamac) are ~70km northeast along the Sava. Between the Krajina and Modriča, the territory is either hostile-controlled or the friendly RS path doesn't exist yet. Without a connected friendly-OSID path, march-first returns no route, attack-through finds no adjacency either, and the brigades stand still for 4 execution turns before the no-logged-attempt abort fires.
+
+Meanwhile, Donji Vakuf (central Bosnia) has enemy OSIDs adjacent to 1KK sectors via the corps' southern front edge — so Sadejstvo can actually reach its objectives. The bot pivots to where it can fight, abandoning where it can't.
+
+**Priority: P1.** This isn't a minor calibration miss. The Posavina Corridor was the foundational VRS strategic achievement of 1992. The sim producing a 1KK that ignores it entirely and instead drives into Donji Vakuf is historically indefensible. Every consequence of the Corridor not opening — eastern Bosnia isolated, 1KK deep in central Bosnia, RS territory in the wrong shape — cascades.
+
+**Status:** Open. Root cause is march-first staging: 1KK needs either a pre-positioned staging brigade in the Derventa/Modriča area, or the army directive needs to ensure the Corridor op is pre-planned (as a `pre_planned_operations` entry like Operation Prijedor) rather than bot-generated.
+
+---
+
+### 35. ARBiH corps operations — systematic stall with zero attacks (n58)
+
+**What we found (n58):** Three of five ARBiH corps launch their first operation, enter execution phase, and generate zero attacks across 3–4 execution turns, then abort:
+
+| Corps | Op | Execution turns | Attacks | Targets | Brigade locations |
+|-------|-----|-----------------|---------|---------|-------------------|
+| 3rd Corps | Operacija Strijela (t15–t27) | 5 | 0 | Donji Vakuf, Jajce, Bugojno | 705th (194 pers), 707th (126 pers), 717th (316 pers) — ALL below 400 combat gate |
+| 4th Corps | Operacija Rijeka (t15–t26) | 5 | 0 | Konjic (bijela_2, sitnik) | 441st @ Kalinovik, 442nd/445th @ Mostar — none adjacent to Konjic objectives |
+| 2nd Corps | Operation Teočak (t25–t34) | 4 | 0 | Zvornik (rastosnica_2) | 241st/242nd @ Brčko (boce_2), 245th @ Brčko — ~60km from Zvornik target |
+
+**The 3rd Corps case is especially egregious:** Operacija Strijela launches with arbih_705th (194 personnel), arbih_707th (126), and arbih_717th (316) as the assigned brigades — all three below the `COMBAT_INEFFECTIVE_PERSONNEL=400` gate. `hasEligibleAttackersForLaunch()` in `sector_offensive.ts` is supposed to prevent this, but the operation launched anyway. Either the guard fired on a different brigade set at launch time, or there's a gap in the check. The result: a 12-turn operation that generates zero attacks and wastes all 5 planning + 5 execution turns.
+
+**Historical context:** ARBiH corps were operationally active from mid-1992 onward. 4th Corps (Arif Pašalić) held the Neretva valley and was actively engaging VRS in Konjic, Mostar, and Jablanica throughout the summer. 2nd Corps (Sead Delić) was defending Tuzla, Zvornik, and the Birač corridor — not sitting in Brčko while Zvornik objectives sit untouched. 3rd Corps (Enver Hadžihasanović) was fighting in the Lašva Valley/Donji Vakuf/Jajce region. Zero attacks from three corps in their first operation cycle is not "ARBiH was weak in 1992" — it's a staging and eligibility problem.
+
+**Root causes:**
+1. **4th Corps and 2nd Corps:** March-first staging fails. The assigned brigades are physically far from the objectives. No friendly RS path to march through; attack-through finds no adjacency. 4 execution turn no-logged-attempt abort fires.
+2. **3rd Corps:** The `hasEligibleAttackersForLaunch()` guard may have passed at operation creation time (when eligible brigades were present in the sector), but by execution those brigades moved or were re-assigned. Or the check itself has a gap — needs investigation.
+
+**Priority: P2.** ARBiH passivity is a long-standing issue but three simultaneous zero-attack corps operations is worse than expected. The 3rd Corps case specifically (launching with combat-ineffective brigades) may be a `hasEligibleAttackersForLaunch` gap worth fixing.
+
+**Status:** MOSTLY FIXED (n76). Fix: `minAttackOutcomeForOpLaunch` captured before supply gate in `bot_corps_directives.ts` (see Knowledge entry). 3rd/4th/2nd corps now generate attacks in execution. RBiH total attacks 27→35. Remaining: see Issue #36 below.
+
+---
+
+### 36. 1st Corps Operacija Zora — 10-turn zero-attack execution (n76 observation)
+
+**What we found (n77 diagnostic run):** Operacija Zora (1st Corps, w31–w40) targets `op:foca:donje_zesce` and `op:kalinovik:varos_2` (both RS-controlled). Assigned brigades: `arbih_104th_vitezka_motorized` (138 pers — combat-ineffective), `arbih_111th_vitezka_motorized` (1063 pers, Trnovo), `arbih_124th_light_king_tvrtko` (1528 pers, Pale). `elig=0` throughout execution (w35–w40). The operation stalls at w41 (1 turn past the 40-week window) via the `movement_only_execution_turns` stall.
+
+**Root cause:** `kalinovik:varos_2` has no adjacent friendly OSID accessible via the current sector structure (Kalinovik is entirely RS-surrounded). `getSectorOffensiveApproachOsids` for Kalinovik returns the sector's approach OSIDs, but those require a multi-hop march from Trnovo (111th/124th). The planning march (w31–34) doesn't complete the full path, so brigades are still mid-transit at execution start. During execution, movement orders alternate with idle turns (march 1 turn → arrive at intermediate → no approach OSID found → idle → new march → repeat). This alternating pattern evades both stall counters (movement_only and idle_streak increment alternately, each staying below the threshold of 4). The 104th at 138 personnel is combat-ineffective and contributes nothing.
+
+**Evidence:**
+- w35–w40: `elig=0`, `movement_only=1→3`, `idle_streak` resets each march turn
+- `objective_capture_count=0`, `battle_count=0` — zero progress in 10 weeks
+- Operation stalls at w41 (outside 40-week window); zero calibration impact
+
+**Attempted fix:** Combined `movement_only + idle_streak ≥ MAX` stall check. Caused -1.0pp area regression (90.3→89.3%) and +9 RS attacks due to operation cascade changes. **REVERTED.**
+
+**Why it matters:** 10 execution turns of ghost activity is not a calibration issue (0 attacks) but represents wasted command cycle for 1st Corps. Historically, the 1st Corps under Rasim Delić was actively defending Sarajevo and raiding toward Trnovo — not locked in a frozen planning cycle.
+
+**Proposed fix (not implemented):** Launch-gate check in `evaluateSectorOffensiveLaunch` — if the first objective has no adjacent friendly OSID within the current sector sub_segments AND no assigned brigade is within 1 hop of any adjacent friendly OSID, reject the launch. This prevents Kalinovik-style operations that are topologically unreachable via march-first without changing the stall mechanism.
+
+**Priority: P3.** Zero calibration impact. Stall mechanism works correctly (fires at w41). Low urgency.
+
+**Status:** Open. P3. Fix should be at launch-gate, not stall-detector.
+
+---
+
 ## Historical "Not Real War" Patterns (from previous sessions)
 
 ### H1. Rear pocket cleanup was instant (fixed n384)
@@ -622,6 +712,10 @@ The sim previously set all 5 ARBiH corps to `general_defensive` / `defensive` do
 **What actually happened:** Equipment is stored in `composition` field (not `equipment`). RS has **535 tanks**, **1,158 artillery**. RBiH has 106 tanks, 329 artillery. HRHB has 33 tanks, 115 artillery. The insanity check script was reading the wrong field. Equipment is fully populated with condition tracking (operational/degraded/non_operational).
 
 **Lesson:** FormationState uses `composition` for equipment counts, `equipment_state` for aggregated heavy equipment tracking. There is no `equipment` field.
+
+**Update (2026-03-14):** The n292 audit item "0 equipment lost in 168 battles" is also closed. Per-battle equipment attrition was added to `attack_resolution_osid.ts` after n292. Current w40 losses: RS 132 tanks / 152 arty (22% / 12%), RBiH 45 / 77 (23% / 15%), HRHB 6 / 14 (15% / 11%). Mechanism confirmed working.
+
+**Open follow-up:** Recruited brigades initialize with full `DEFAULT_COMPOSITION` (RS: 40 tanks). This means wartime recruitment inflates the heavy-weapon pool — recruits shouldn't spawn with factory-fresh tanks. Low priority but worth flagging for OOB/recruitment design review.
 
 ---
 
@@ -819,6 +913,8 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 | ~~**P1**~~ | ~~#28 SRK 0-assigned cycle~~ | ~~reclassifyRearBrigades zero-guard scoped to vrs_sarajevo_romanija~~ | **FIXED n703+** |
 | **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | **NEW n587** |
 | **P3** | #3 Formation casualty_ledger | Design gap, data exists in state-level ledger | Open |
+| **P3** | #32 ARBiH 5th Corps Bihać — Ripac cycling | 9× attacks at PR=0.14; historically motivated but mechanically gamey | Open |
+| ~~**P3**~~ | ~~#33 ARBiH 1st Corps — Foča offensive target~~ | ~~Sarajevo garrison reconquers northern Foča OSIDs~~ | **FIXED n57** |
 
 ---
 

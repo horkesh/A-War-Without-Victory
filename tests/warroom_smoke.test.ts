@@ -1,6 +1,6 @@
 /**
- * Warroom smoke: desk_map click path invokes tactical-map handler without crash.
- * Phase E Trust-and-Baseline — automated “load warroom → select map” path.
+ * Warroom smoke: desk_map click path invokes map scene handler without crash.
+ * Phase E Trust-and-Baseline — automated "load warroom → select map" path.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ClickableRegionManager } from '../src/ui/warroom/ClickableRegionManager.js';
@@ -51,20 +51,13 @@ describe('Warroom smoke — select map', () => {
     globalThis.fetch = originalFetch;
   });
 
-  it('desk_map click invokes tactical map open handler via Operational Situation modal (peace phase)', async () => {
+  it('desk_map click opens tactical map directly (war phase)', async () => {
     const manager = new ClickableRegionManager();
-    const openHandler = vi.fn();
-    manager.setTacticalMapOpenHandler(openHandler);
-    
-    // Mock ModalManager
+    const tacticalMapHandler = vi.fn();
+    manager.setTacticalMapOpenHandler(tacticalMapHandler);
+
     const modalManager = {
-        showModal: vi.fn((element: HTMLElement) => {
-            // Simulate clicking the button in the modal
-            setTimeout(() => {
-                const btn = element.querySelector('#wr-btn-open-map-situ') as HTMLButtonElement;
-                if (btn) btn.click();
-            }, 10);
-        }),
+        showModal: vi.fn(),
         hideModal: vi.fn()
     } as unknown as ModalManager;
     manager.setModalManager(modalManager);
@@ -74,18 +67,16 @@ describe('Warroom smoke — select map', () => {
     const gameState = { meta: { phase: 'war', turn: 1 }, factions: [{ id: 'RBiH' }] };
     manager.onClick(200, 200, gameState);
 
-    expect(modalManager.showModal).toHaveBeenCalledTimes(1);
-    
-    // Wait for the simulated click to fire
-    await new Promise(r => setTimeout(r, 50));
-    expect(openHandler).toHaveBeenCalledTimes(1);
+    // Should open tactical map directly, not via modal
+    expect(tacticalMapHandler).toHaveBeenCalledTimes(1);
+    expect(modalManager.showModal).not.toHaveBeenCalled();
   });
 
-  it('click outside desk_map does not invoke modal or tactical map handler', async () => {
+  it('click outside desk_map does not invoke modal or map handler', async () => {
     const manager = new ClickableRegionManager();
-    const openHandler = vi.fn();
-    manager.setTacticalMapOpenHandler(openHandler);
-    
+    const mapSceneHandler = vi.fn();
+    manager.setMapSceneOpenHandler(mapSceneHandler);
+
     const modalManager = { showModal: vi.fn() } as unknown as ModalManager;
     manager.setModalManager(modalManager);
 
@@ -94,7 +85,6 @@ describe('Warroom smoke — select map', () => {
     manager.onClick(10, 10, { meta: { phase: 'peace', turn: 1 } });
 
     expect(modalManager.showModal).not.toHaveBeenCalled();
-    expect(openHandler).not.toHaveBeenCalled();
+    expect(mapSceneHandler).not.toHaveBeenCalled();
   });
 });
-

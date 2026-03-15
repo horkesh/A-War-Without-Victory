@@ -353,8 +353,9 @@ The player commands through posture and targeting, not direct unit movement. Com
 
 Each turn the player:
 1. **Reviews** reports: front status, exhaustion, supply pressure, corps operations, recent battles
-2. **Sets brigade postures**, **sector defensive intent**, and **issues attack orders**
+2. **Sets brigade postures** and **sector defensive intent**. Note: brigades do not attack independently — all attacks flow through corps operations. The player sets posture as a readiness directive; the sector and operation machinery decides when and where to attack.
 3. **Manages corps operations**: front assignments, operational groups, attack axes, tempo, launch timing, and deception tools such as feints or probes. Operations now include a **preparation phase** before execution — the player reviews readiness briefings, selects commanders, may order probes, and makes go/no-go decisions. Commander personality (competence × aggressiveness) shapes preparation tempo and launch recommendations
+3a. **Brigade sector override** (n717): player may permanently assign a brigade to a specific same-corps sector via the brigade's Orders tab. The sector commander then orders the brigade to march to its frontline position. Useful for concentrating a veteran unit on a key sector or pulling a brigade back from a threatened flank. Override persists until cleared. Effectiveness cost shown in the panel: brigades operating far from their home municipality perform at reduced effectiveness (up to 30% penalty; elite mechanized/motorized brigades have a gentler decay curve).
 4. **Allocates constrained supply agency**: enclave airdrops, convoy decisions, smuggling focus, municipality support, and related relief choices where available
 5. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics, and international visibility pressure consequences
 6. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity (implementation-note: enclave protection for Srebrenica/Goražde/Cazin is not yet implemented; see CALIBRATION_REPORT_BOT_AI_FEB_2026.md §7)

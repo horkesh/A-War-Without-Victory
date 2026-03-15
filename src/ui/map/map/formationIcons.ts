@@ -3,8 +3,8 @@ import { normalizeFactionId } from '../../../state/identity.js';
 
 // Spec §2.4: rectangular HoI-style counters — faction-colored fill, white abbreviation.
 // Canvas is 160×80 at pixelRatio 2 → displayed as 80×40 CSS px per icon-size unit.
-const W = 160;
-const H = 80;
+export const ICON_WIDTH = 160;
+export const ICON_HEIGHT = 80;
 const PIXEL_RATIO = 2;
 const CORNER_RADIUS = 8; // 4 CSS px at pixelRatio 2
 
@@ -20,10 +20,9 @@ const FACTION_BORDER: Record<string, string> = {
   HRHB: 'rgba(25, 65, 115, 0.95)',
 };
 
-function drawTacticalSymbol(ctx: CanvasRenderingContext2D, kind: string, w: number, h: number): void {
+export function drawTacticalSymbol(ctx: CanvasRenderingContext2D, kind: string, w: number, h: number): void {
   const normalized = kind.toLowerCase();
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.97)';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.97)';
+  // Colors are now handled by drawFormationIcon via context settings or manual overrides
   ctx.lineWidth = 2.0 * PIXEL_RATIO;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -84,9 +83,11 @@ export const POSTURE_STRIPE: Record<string, string> = {
   assault: 'rgba(130, 0, 0, 0.95)',
 };
 
-function parseIconId(iconId: string): { kind: string; faction: string; posture?: string } {
-  const [kind = 'unit', faction = 'UNKNOWN', posture] = iconId.split('__');
-  return { kind, faction, posture };
+function parseIconId(iconId: string): { kind: string; faction: string; posture?: string; health?: number; morale?: number } {
+  const [kind = 'unit', faction = 'UNKNOWN', posture, hStr, mStr] = iconId.split('__');
+  const health = hStr ? parseInt(hStr.slice(1)) : undefined;
+  const morale = mStr ? parseInt(mStr.slice(1)) : undefined;
+  return { kind, faction, posture, health, morale };
 }
 
 function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
@@ -103,22 +104,19 @@ function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
   ctx.closePath();
 }
 
-function createFormationIcon(iconId: string): ImageData {
-  const { kind, faction, posture } = parseIconId(iconId);
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Failed to create 2D canvas context');
-
+export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string): void {
+  const isWhiteVariant = iconId.startsWith('white__');
+  const actualIconId = isWhiteVariant ? iconId.slice(7) : iconId;
+  const { kind, faction, posture } = parseIconId(actualIconId);
   const canonicalFaction = normalizeFactionId(faction);
-  const fill = FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 0.92)';
-  const border = FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 0.95)';
+  const fill = isWhiteVariant ? 'rgba(255, 255, 255, 0.98)' : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 0.92)');
+  const border = isWhiteVariant ? 'rgba(20, 20, 20, 0.95)' : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 0.95)');
+  const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 0.95)' : 'rgba(255, 255, 255, 0.97)';
 
-  ctx.clearRect(0, 0, W, H);
+  ctx.clearRect(0, 0, ICON_WIDTH, ICON_HEIGHT);
 
   // Background fill
-  roundedRect(ctx, 2, 2, W - 4, H - 4, CORNER_RADIUS);
+  roundedRect(ctx, 2, 2, ICON_WIDTH - 4, ICON_HEIGHT - 4, CORNER_RADIUS);
   ctx.fillStyle = fill;
   ctx.fill();
 
@@ -126,23 +124,66 @@ function createFormationIcon(iconId: string): ImageData {
   const stripeColor = posture ? (POSTURE_STRIPE[posture] ?? null) : null;
   if (stripeColor) {
     ctx.save();
-    roundedRect(ctx, 2, 2, W - 4, H - 4, CORNER_RADIUS);
+    roundedRect(ctx, 2, 2, ICON_WIDTH - 4, ICON_HEIGHT - 4, CORNER_RADIUS);
     ctx.clip();
     ctx.fillStyle = stripeColor;
-    ctx.fillRect(2, 2, 12, H - 4);
+    ctx.fillRect(2, 2, 12, ICON_HEIGHT - 4);
     ctx.restore();
   }
 
   // Border
-  roundedRect(ctx, 2, 2, W - 4, H - 4, CORNER_RADIUS);
+  roundedRect(ctx, 2, 2, ICON_WIDTH - 4, ICON_HEIGHT - 4, CORNER_RADIUS);
   ctx.strokeStyle = border;
   ctx.lineWidth = 4;
   ctx.stroke();
 
-  // Draw Tactical Symbol
-  drawTacticalSymbol(ctx, kind, W, H);
+  // Status Bars: bottom 16px (15-20% of counter)
+  const { health, morale } = parseIconId(actualIconId);
+  if (health !== undefined || morale !== undefined) {
+    const barY = ICON_HEIGHT - 12;
+    const barH = 6;
+    const totalW = ICON_WIDTH - 24; // Account for posture stripe and padding
 
-  return ctx.getImageData(0, 0, W, H);
+    // Health (Green/Red)
+    if (health !== undefined) {
+      const hW = (totalW / 2) - 4;
+      const hPct = health / 100;
+      ctx.fillStyle = 'rgba(20, 20, 20, 0.6)';
+      ctx.fillRect(18, barY, hW, barH);
+      ctx.fillStyle = hPct > 0.4 ? 'rgba(50, 200, 50, 0.9)' : 'rgba(200, 50, 50, 0.9)';
+      ctx.fillRect(18, barY, hW * hPct, barH);
+    }
+
+    // Morale (Cyan)
+    if (morale !== undefined) {
+      const mW = (totalW / 2) - 4;
+      const mPct = morale / 100;
+      const mX = 18 + (totalW / 2) + 4;
+      ctx.fillStyle = 'rgba(20, 20, 20, 0.6)';
+      ctx.fillRect(mX, barY, mW, barH);
+      ctx.fillStyle = 'rgba(50, 200, 255, 0.9)';
+      ctx.fillRect(mX, barY, mW * mPct, barH);
+    }
+  }
+
+  // Draw Tactical Symbol
+  ctx.save();
+  ctx.strokeStyle = symbolColor;
+  ctx.fillStyle = symbolColor;
+  drawTacticalSymbol(ctx, kind, ICON_WIDTH, ICON_HEIGHT - 8); // Offset up to make room for bars
+  ctx.restore();
+}
+
+function createFormationIcon(iconId: string): ImageData {
+  const canvas = document.createElement('canvas');
+  canvas.width = ICON_WIDTH;
+  canvas.height = ICON_HEIGHT;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) throw new Error('Failed to create 2D canvas context');
+
+  drawFormationIcon(ctx, iconId);
+
+  return ctx.getImageData(0, 0, ICON_WIDTH, ICON_HEIGHT);
 }
 
 export function ensureFormationIcons(map: MapLibreMap, iconIds: string[]): void {
@@ -151,4 +192,34 @@ export function ensureFormationIcons(map: MapLibreMap, iconIds: string[]): void 
     if (map.hasImage(iconId)) continue;
     map.addImage(iconId, createFormationIcon(iconId), { pixelRatio: PIXEL_RATIO });
   }
+}
+
+/**
+ * Ensures tactical helper icons (like front line teeth) are registered on the map.
+ */
+export function ensureTacticalIcons(map: MapLibreMap): void {
+  if (map.hasImage('front-line-tooth')) return;
+
+  const size = 32; // 16 CSSpx
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const mid = size / 2;
+  const h = size * 0.4;
+  const w = size * 0.35;
+
+  // Simple solid triangle pointing UP (rotation handled by MapLibre icon-rotate)
+  ctx.fillStyle = 'rgba(20, 20, 25, 0.95)';
+  ctx.beginPath();
+  ctx.moveTo(mid, mid - h);
+  ctx.lineTo(mid - w, mid + h);
+  ctx.lineTo(mid + w, mid + h);
+  ctx.closePath();
+  ctx.fill();
+
+  const imageData = ctx.getImageData(0, 0, size, size);
+  map.addImage('front-line-tooth', imageData, { pixelRatio: PIXEL_RATIO });
 }

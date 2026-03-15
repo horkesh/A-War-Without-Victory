@@ -6,15 +6,19 @@
 
 **Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`; Sectors → `docs/40_reports/SECTOR_MASTER.md`. Do instead: When doing calibration, GUI, warroom, sector, or realism work, read the relevant master first and update it during the session.
 
-## Current Sprint — Calibration n701 (2026-03-14, IN PROGRESS)
+## GUI Sprint — brigade-panel-rework (2026-03-14, COMPLETE)
+**n717:** 3-tab FormationDetail (Overview/Record/Orders). ATK/MOV buttons REMOVED (bypass CorpsOperation). Brigade sector override (`brigade_sector_override` in MilitaryState). Home-distance effectiveness widget (badge + dual power + marker desaturation). Sector picker in Orders tab (same-corps only, permanent override). 606/607 tests pass. 88.6% area match (no regression). Player command model canonized in `context.md`. GUI_MASTER + ledger updated.
+**Player command model CANON:** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
+
+## Current Sprint — engine-sprint-2 (2026-03-14, IN PROGRESS)
 **Engine worktree:** `.claude/worktrees/engine-sprint` branch `feature/calibration-sprint-n701`
-**Baseline:** 88.6% area, 6/6 benchmarks. **Current: 89.4% area, 6/6 benchmarks, hash 413a89fafb3de897**
-**Phase 1 DONE:** Fix DEFENDER_CASUALTY_ENGAGEMENT_CAP — extend to single-brigade sectors (att:def 0.07→0.85)
-**Phase 2 DONE:** Density floor pass in ensureMinimumSectorCoverage (threat gate 300, +0.7pp)
-**Phase 2.5 REVERTED:** Op objective geographic focus hurt calibration (-0.8pp — alphabetical scatter was correct)
-**Remaining:** Phase 3 (2KK march — complex component isolation), Phase 4+5 (SRK siege + Drina), Phase 6 (ledger)
-**LESSONS:** Density floor without threat gate → rear guards move away → -1.5pp. Op focus sorting → RS spread less → -0.8pp.
-**Protocol:** One phase → `npm run test:vitest` + tsc engine-only → `npm run sim:scenario:run:40w` → compare tool → record
+**Baseline (n53): 90.1% area, 13/13 anchors, 6/6 benchmarks, hash 9fbaee69d0ed9829**
+**Current best (n55): 89.1% area, 13/13 anchors, 6/6 benchmarks, hash 215b935fae29219e**
+**Phase A DONE (n54+n55):** Foča initialization fix — 5 `osid_control_overrides` in scenario JSON + `avoid_municipalities: ['foca']` for arbih_1st_corps. Foča 7/14 → 13/14 RS at w40. Cost: −1.0pp area cascade (cascade effects in kalinovik/sokolac/central-bosnia persist).
+**Plan:** `C:\Users\User\.claude\plans\engine-realism-sprint-2.md` — Phases B (ARBiH Ripac cycling), C (2nd Corps Lukavac diagnostic), D (SRK OOB), E (deferred).
+**Protocol:** One phase → `npm run test:vitest` + tsc engine-only → `npm run sim:scenario:run:40w` → compare tool → **/war-or-game sign-off (MANDATORY)** → if new issues raised, slot into plan before advancing → record
+**War-or-Game gate:** No phase is DONE until /war-or-game signs off on the run results. New issues he raises go into REAL_WAR_MASTER.md and are evaluated for priority — P1 = add to current sprint plan, P2 = backlog.
+**LESSONS:** `target_osids` does NOT override `target_municipalities` in ArmyOperationPriority (code comment lies — both are additive). Initial OSID override cascade: changing 5 Foča OSIDs caused -1.0pp total area regression through butterfly effects across 40w simulation. `avoid_municipalities` existed in type but was removed from implementation — need to re-implement before use. `priorityMunicipalities` set in generateCorpsDirectives is built but never used (dead variable).
 
 ## Session Startup (do these EVERY session — BEFORE any work)
 1. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
@@ -25,8 +29,10 @@
 ## Execution & Validation
 1. **[2026-03-11] NEVER claim a fix works without running the scenario and verifying the output**
    Do instead: After any bug fix, run a fresh scenario (`npm run sim:scenario:run:40w`), then write a diagnostic script to verify the specific bug is gone. Check for related issues (e.g. other code paths that do the same wrong thing). Always verify with data, never with assumptions.
-2. **[2026-03-11] One-change-then-verify calibration protocol (MANDATORY)**
-   Do instead: (1) Change ONE parameter or fix ONE bug. Never bundle. (2) Run fresh 40w scenario. (3) Run comparison tool. (4) Run /war-or-game insanity check — brigade states, casualty ratios, tempo, troop strength, equipment (`composition` field). (5) Record result in CALIBRATION_MASTER.md.
+2. **[2026-03-14] /war-or-game sign-off required after every phase — standing directive**
+   Do instead: After each implementation phase runs the scenario and comparison tool, invoke /war-or-game to sign off. If he raises P1 issues, slot them into the sprint plan before moving to the next phase. If P2, add to backlog. No phase is complete without the sign-off.
+3. **[2026-03-11] One-change-then-verify calibration protocol (MANDATORY)**
+   Do instead: (1) Change ONE parameter or fix ONE bug. Never bundle. (2) Run fresh 40w scenario. (3) Run comparison tool. (4) Run /war-or-game sign-off. (5) Record result in CALIBRATION_MASTER.md.
 3. **[2026-03-07] Classify phases by real code impact, not plan labels**
    Do instead: Before parallelizing or skipping regression, audit the task list. If a phase touches schema, IPC, bot logic, pipeline, or serialization, treat it as engine-touching even if the plan calls it UI-only.
 4. **[2026-02-25] Determinism is sacred**
@@ -81,7 +87,7 @@
 7. **[2026-03-11] Ops planning modal arrows invisible/broken**: Parked. Needs fresh investigation — likely MapLibre fill-layer issue specific to modal map instance.
 8. **[2026-03-12] HVO named officer roster critically incomplete**: 20% coverage vs VRS 90%. Needed for Croat-Bosniak war phase.
 9. **[2026-03-12] REAL_WAR_MASTER #15: Intra-corps density imbalance**: 16× ratios within corps. 1KK has 6 idle brigades in Banja Luka while Posavina under-manned.
-10. **[2026-03-12] REAL_WAR_MASTER #3: Per-formation casualty ledger**: State-level ledger works. Formation-level `casualty_ledger` field absent — data exists but not surfaced per-brigade.
+10. **[2026-03-15] ~~REAL_WAR_MASTER #3: Per-formation casualty ledger~~**: DONE (n718) — plumbed `casualty_ledger.per_formation` → adapter → FormationView → Record tab. KIA/WIA/MIA now show actual numbers.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
@@ -144,8 +150,8 @@
    Do instead: Patch both `oob_early_war_entry.ts` and `recruitment_engine.ts`. Choose starting OSIDs that are already friendly-controlled.
 3. **[2026-03-02] VRS equipment decay**
    Do instead: `equipment_decay` field on FormationState. Applied as multiplier in `getEquipmentRatio()`. Starts w26, 0.5%/week, floor 0.60.
-4. **[2026-03-02] Elite loan lifecycle**
-   Do instead: `elite_loan.ts` — 6w loan, 4w cooldown, forced recall 30% casualties or morale <35.
+4. **[2026-03-15] Army HQ Reserve Pool — elite brigade loan system (IMPLEMENTED)**
+   Do instead: `army_reserve_system.ts` + `elite_loan.ts`. Elites permanently under `vrs_main_staff`/`arbih_general_staff`/`hvo_main_staff`. Per-turn: `generate-army-reserve-requests` (corps request offensive_support/defensive_gap/exploitation) → `evaluateArmyReserveAssignments` (bot auto-assigns; player requests stay in `pending_reserve_requests`) → `tick-elite-loans` (force-recall ≥30% cas/morale<35/50% degradation; voluntary after ELITE_LOAN_MIN_DURATION=6 + op ended + threat<1.5). UI: `ArmyReservePanel.tsx` rendered when army_hq selected (replaces FormationDetail). IPC: `approve-reserve-request`, `recall-elite-brigade`, `redirect-reserve-loan`. State: `elite_brigade_tracker` on MilitaryState tracks episodes. Elite identified at runtime by presence of `elite_loan_state` (not `is_elite` flag).
 5. **[2026-03-07] Phase E municipality support stays asymmetric and pool-constrained**
    Do instead: Faction-distinct effects: RBiH=weapons_shipment, RS=staff_priority, HRHB=croatian_support_package. One target, one turn.
 
@@ -182,12 +188,20 @@
    Do instead: Assign `window.awwv` / `this.desktopBridge` before asset or map-loading awaits.
 6. **[2026-03-08] Warroom image target: archival photograph, not AI concept art**
    Do instead: "Real photographed room, not AI art." Keep visible year out of baked art.
+7. **[2026-03-14] Cork board staff map uses OSID polygons, not old settlement viewer**
+   Do instead: `OsidThumbnailRenderer.ts` — uses `operational_settlements.geojson`. Player faction only colored (muted pencil tones). Front lines + BiH outline + paper grain + faded crest stamp. No generic `hq_clickable_regions.json` — per-faction only.
+8. **[2026-03-14] Tactical map player_faction: NEVER hardcode**
+   Do instead: `App.tsx` must NOT override `player_faction`. Electron uses `useDesktopSession` which preserves chosen faction. Live autoload skips when IPC available.
+9. **[2026-03-15] HQ Abstraction vs Physical Units**
+   Do instead: `corps_asset` and `army_hq` are organizacional abstractions. They do **not** have map lines or "ghost lines". Only brigades and front sectors are map-physical. Command lines are in the OOB/Warroom, not the tactical map.
 7. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
    Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions.
 8. **[2026-03-07] Officer display: use OfficerProfile component, never raw stat numbers**
    Do instead: All officer displays use `OfficerProfile` (archetype, pips, origin badge, combat record).
 9. **[2026-03-01] Map load: validate + defer parse + timeout**
    Do instead: Validate save schema. `parseGameState` unwraps `{ state }`/`{ gameState }`. Parse in requestIdleCallback. 25s timeout.
+10. **[2026-03-15] NATO Symbology (Status): Quantized 10% steps**
+    Do instead: Health/Morale banners on map symbols must use 10% quantized steps (`h0-h100`). These are baked into the `icon_id` (e.g., `...__h90__m70`) and rendered by `formationIcons.ts`. Do not pass raw float percentages to map layers.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**

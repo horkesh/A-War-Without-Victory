@@ -55,5 +55,6 @@ export function makeMockLoadedGameState(): LoadedGameState {
     ],
     aorOrders: [],
     recentControlEvents: [],
+    latestTurnSummary: null,
   };
 }

@@ -25,6 +25,13 @@ function formatOutcome(outcome: string): string {
     .join(' ');
 }
 
+const IMPACT_DESCRIPTORS: Record<string, string> = {
+  defensive: 'Hold until total collapse. Focus on terrain retention.',
+  balanced: 'Maintain flexible engagement. standard operational rules.',
+  offensive: 'Aggressive stance. Prioritize momentum and terrain gains.',
+  reorganize: 'Operational pause. Focus on recovery and cohesion.',
+};
+
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
@@ -61,10 +68,43 @@ export function FormationDetail() {
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
       style={DETAIL_PANEL_STYLE}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-          Formation
-        </span>
+      <div className="flex items-center justify-between px-4 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
+            {formation?.kind === 'brigade' ? 'Unit' : 'Formation'}
+          </span>
+          {formation?.kind === 'brigade' && (
+            <div className="flex items-center gap-1.5 ml-2">
+              <button
+                type="button"
+                onClick={() => setOrderModeForFormation(orderModeForFormation === 'attack' ? null : 'attack')}
+                className={`w-6 h-6 flex items-center justify-center rounded border transition-colors ${orderModeForFormation === 'attack' ? 'bg-accent-red/20 border-accent-red text-accent-red' : 'bg-panel-bg border-panel-border text-text-secondary hover:text-text-primary hover:bg-panel-hover'
+                  }`}
+                title="Attack Order (⚔️)"
+              >
+                <span className="text-[10px]">⚔️</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrderModeForFormation(orderModeForFormation === 'move' ? null : 'move')}
+                className={`w-6 h-6 flex items-center justify-center rounded border transition-colors ${orderModeForFormation === 'move' ? 'bg-accent-blue/20 border-accent-blue text-accent-blue' : 'bg-panel-bg border-panel-border text-text-secondary hover:text-text-primary hover:bg-panel-hover'
+                  }`}
+                title="Move Order (➡️)"
+              >
+                <span className="text-[10px]">➡️</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrderModeForFormation(orderModeForFormation === 'sector' ? null : 'sector')}
+                className={`w-6 h-6 flex items-center justify-center rounded border transition-colors ${orderModeForFormation === 'sector' ? 'bg-accent-gold/20 border-accent-gold text-accent-gold' : 'bg-panel-bg border-panel-border text-text-secondary hover:text-text-primary hover:bg-panel-hover'
+                  }`}
+                title="Sector Assignment (🛡️)"
+              >
+                <span className="text-[10px]">🛡️</span>
+              </button>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => setSelectedFormationId(null)}
           className="text-text-secondary hover:text-interactive text-sm leading-none"
@@ -296,26 +336,29 @@ export function FormationDetail() {
                 {orderModeForFormation === 'move' ? 'Click destination…' : 'Move'}
               </button>
             </div>
-            <div className="pt-1 border-t border-panel-border">
-              <div className="text-[11px] text-text-secondary mb-1">Posture</div>
-              <div className="flex flex-wrap gap-1">
+            <div className="pt-1 border-t border-panel-border space-y-2">
+              <div className="text-[11px] text-text-secondary">Posture Management</div>
+              <div className="space-y-2">
                 {['defensive', 'balanced', 'offensive', 'reorganize'].map((posture) => (
-                  <button
-                    key={posture}
-                    type="button"
-                    onClick={() => void stagePostureOrderAction(
-                      {
-                        ipc,
-                        addStagedOrder,
-                        setLoadError,
-                      },
-                      formation.id,
-                      posture
-                    )}
-                    className="text-[11px] font-sans px-2 py-1 rounded border border-panel-border text-interactive hover:bg-panel-hover"
-                  >
-                    {posture}
-                  </button>
+                  <div key={posture} className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => void stagePostureOrderAction(
+                        { ipc, addStagedOrder, setLoadError },
+                        formation.id,
+                        posture
+                      )}
+                      className={`w-full text-left px-2 py-1.5 rounded border text-[10px] uppercase font-mono transition-colors ${formation.posture === posture
+                        ? 'bg-panel-active border-accent-gold text-text-primary'
+                        : 'bg-panel-bg border-panel-border text-text-secondary hover:bg-panel-hover'
+                        }`}
+                    >
+                      {posture}
+                    </button>
+                    <div className="px-1 text-[9px] text-text-secondary leading-tight italic">
+                      {IMPACT_DESCRIPTORS[posture]}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

@@ -178,32 +178,17 @@ function migrateState(raw: unknown): GameState {
             if (!('front_segments' in candidate) || (candidate as any).military.front_segments === undefined) {
                 (candidate as any).military.front_segments = {};
             }
-            if (!('theatres' in candidate) || candidate.theatres === undefined) {
-                candidate.theatres = {};
-            }
-            if (!('army_theatre_assignment' in candidate) || candidate.army_theatre_assignment === undefined) {
-                candidate.army_theatre_assignment = {};
-            }
-            if (!('formations' in candidate) || candidate.formations === undefined) {
-                candidate.formations = {};
-            }
-            if (!('front_posture' in candidate) || candidate.front_posture === undefined) {
-                candidate.front_posture = {};
-            }
-            if (!('front_posture_regions' in candidate) || candidate.front_posture_regions === undefined) {
-                candidate.front_posture_regions = {};
-            }
-            if (!('front_pressure' in candidate) || candidate.front_pressure === undefined) {
-                candidate.front_pressure = {};
-            }
-            if (!('assignable_front_segments' in candidate) || candidate.assignable_front_segments === undefined) {
-                candidate.assignable_front_segments = [];
-            }
-            if (!('brigade_front_assignment' in candidate) || candidate.brigade_front_assignment === undefined) {
-                candidate.brigade_front_assignment = {};
-            }
-            if (!('militia_pools' in candidate) || candidate.militia_pools === undefined) {
-                candidate.militia_pools = {};
+            const mil = (candidate as any).military;
+            if (mil) {
+                if (mil.theatres === undefined) mil.theatres = {};
+                if (mil.army_theatre_assignment === undefined) mil.army_theatre_assignment = {};
+                if (mil.formations === undefined) mil.formations = {};
+                if (mil.front_posture === undefined) mil.front_posture = {};
+                if (mil.front_posture_regions === undefined) mil.front_posture_regions = {};
+                if (mil.front_pressure === undefined) mil.front_pressure = {};
+                if (mil.assignable_front_segments === undefined) mil.assignable_front_segments = [];
+                if (mil.brigade_front_assignment === undefined) mil.brigade_front_assignment = {};
+                if (mil.militia_pools === undefined) mil.militia_pools = {};
             }
             // Phase 0: Default meta referendum/war-start fields for older saves
             const meta = candidate.meta as any | undefined;
@@ -220,14 +205,13 @@ function migrateState(raw: unknown): GameState {
                 if (!('outcome' in meta)) meta.outcome = undefined;
                 // war_opposing_edges_streak: do not default on load (preserve round-trip; readers use ?? 0)
             }
-            // Phase 11B: Default negotiation_status and ceasefire
-            if (!('negotiation_status' in candidate) || candidate.negotiation_status === undefined) {
-                candidate.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
-            } else {
-                const ns = candidate.negotiation_status as any;
-                if (typeof ns !== 'object') {
-                    candidate.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
+            // Phase 11B: Default negotiation_status and ceasefire on political
+            const pol = (candidate as any).political;
+            if (pol) {
+                if (!pol.negotiation_status || typeof pol.negotiation_status !== 'object') {
+                    pol.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
                 } else {
+                    const ns = pol.negotiation_status;
                     if (typeof ns.ceasefire_active !== 'boolean') ns.ceasefire_active = false;
                     const currentTurn = (candidate.meta as any)?.turn ?? 0;
                     if (ns.ceasefire_since_turn !== null && (!Number.isInteger(ns.ceasefire_since_turn) || ns.ceasefire_since_turn > currentTurn)) {
@@ -237,13 +221,11 @@ function migrateState(raw: unknown): GameState {
                         ns.last_offer_turn = null;
                     }
                 }
-            }
-            if (!('ceasefire' in candidate) || candidate.ceasefire === undefined) {
-                candidate.ceasefire = {};
-            } else {
-                // Validate and clean ceasefire entries
-                const ceasefire = candidate.ceasefire as any;
-                if (ceasefire && typeof ceasefire === 'object') {
+                if (!pol.ceasefire || typeof pol.ceasefire !== 'object') {
+                    pol.ceasefire = {};
+                } else {
+                    // Validate and clean ceasefire entries
+                    const ceasefire = pol.ceasefire;
                     const currentTurn = (candidate.meta as any)?.turn ?? 0;
                     const keysSorted = Object.keys(ceasefire).sort();
                     for (const edgeId of keysSorted) {
@@ -332,7 +314,7 @@ function migrateState(raw: unknown): GameState {
 
             // Phase 10: Ensure deterministic defaulting for FormationState ops fields.
             // Also canonicalize formation faction IDs and preserve army labels as force_label.
-            const formations = candidate.formations as unknown;
+            const formations = (candidate as any).military?.formations as unknown;
             if (formations && typeof formations === 'object') {
                 const formRec = formations as Record<string, any>;
                 const keysSorted = Object.keys(formRec).sort();
@@ -578,6 +560,43 @@ function migrateState(raw: unknown): GameState {
             delete candidate.brigade_aor_orders;
             delete candidate.brigade_mun_orders;
             delete candidate.brigade_municipality_assignment;
+
+            // Sweep: move any stray fields that migration wrote to top-level back to their correct parents.
+            // Military fields:
+            const milSweep = (candidate as any).military;
+            if (milSweep) {
+                for (const k of ['theatres', 'army_theatre_assignment', 'formations', 'front_posture',
+                    'front_posture_regions', 'front_pressure', 'assignable_front_segments',
+                    'brigade_front_assignment', 'militia_pools', 'war_militia_strength', 'war_jna'] as const) {
+                    if (k in candidate && !(k in milSweep)) {
+                        milSweep[k] = (candidate as any)[k];
+                    }
+                    delete (candidate as any)[k];
+                }
+            }
+            // Political fields:
+            const polSweep = (candidate as any).political;
+            if (polSweep) {
+                for (const k of ['negotiation_status', 'ceasefire', 'negotiation_ledger', 'supply_rights',
+                    'war_consolidation_until', 'war_control_strain', 'war_alliance_rbih_hrhb',
+                    'municipalities'] as const) {
+                    if (k in candidate && !(k in polSweep)) {
+                        polSweep[k] = (candidate as any)[k];
+                    }
+                    delete (candidate as any)[k];
+                }
+            }
+            // Displacement fields:
+            const dispSweep = (candidate as any).displacement;
+            if (dispSweep) {
+                for (const k of ['war_displacement_initiated', 'settlement_displacement_started_turn',
+                    'municipality_displacement'] as const) {
+                    if (k in candidate && !(k in dispSweep)) {
+                        dispSweep[k] = (candidate as any)[k];
+                    }
+                    delete (candidate as any)[k];
+                }
+            }
 
             return candidate as unknown as GameState;
         }

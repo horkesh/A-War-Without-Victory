@@ -82,7 +82,15 @@
 
 ---
 
-## 7. Bot AI remaining work (from BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13 and CALIBRATION_REPORT_BOT_AI_FEB_2026)
+## 7. Intelligence system & operations — future features
+
+| Report | Summary | Priority / owner |
+|--------|---------|------------------|
+| [BACKLOG_INTEL_AND_OPERATIONS.md](backlog/BACKLOG_INTEL_AND_OPERATIONS.md) | Four deferred enhancements to the intel system, captured after deep investigation of `sector_intel.ts` / `operation_preparation.ts` / `bot_corps_directives.ts` during the 2026-03-14 sprint plan session. Current intel system (passive buildup, decay, probes, recon-by-force, intel-gated launch) is live and functional; these extend it once the Phase 1–5 calibration sprint stabilises at 90%+. Items: **(1)** per-OSID confidence (currently per-sector-pair) — finer targeting granularity; **(2)** surprise/ambush mechanic — defender power bonus when attacker has low intel (complement to Phase 1.5 attacker penalty); **(3)** patrol/scout intel sources — passive civilian networks + player-ordered recon, differentiating faction intelligence capabilities beyond passive buildup rate; **(4)** stale-intel penalty during operation execution — re-assessment if enemy repositions during preparation turns. Also notes OPSEC player UI gap (engine field exists, no UI). | Deferred post-90% calibration. Gameplay Programmer + Game Designer + War-or-Game audit. |
+
+---
+
+## 8. Bot AI remaining work (from BOT_AI_INVESTIGATION_AND_OVERHAUL_2026_02_13 and CALIBRATION_REPORT_BOT_AI_FEB_2026)
 
 **Open issues from Feb 2026 calibration report** ([CALIBRATION_REPORT_BOT_AI_FEB_2026.md](CALIBRATION_REPORT_BOT_AI_FEB_2026.md) §7): **Front-assignment bug (critical)** — all RS brigades assigned to HRHB-RS front, zero see RBiH-RS front; RS cannot attack Brčko/Posavina corridor regardless of scoring. **Corps personnel imbalance (high)** — VRS 1st Krajina 56K vs Sarajevo-Romanija 2.6K; ARBiH 2nd Corps 75K vs 4th Corps 0 brigades at week 0. **Enclave protection (high)** — Srebrenica, Goražde, Cazin fall to RS; no mechanism to model besieged enclaves that held historically. **ARBiH 4th Corps / 2nd Corps balance (medium)** — OOB available_from gating and turn-0 brigade distribution; RS at 59% not 60–65% (combination of above).
 
@@ -143,19 +151,32 @@ Orchestrator convened Technical Architect and Product Manager to synthesize find
 
 ---
 
+## 15. March-first staging failures — n58 War-or-Game audit (2026-03-14)
+
+Two new realism issues surfaced in the n58 audit. Both share the same root cause: operations generated for objectives the assigned brigades cannot physically reach via march-first (no friendly OSID path), producing zero-attack stalls.
+
+| Issue | Priority | Description | Fix direction |
+|-------|----------|-------------|---------------|
+| **#34 — VRS 1KK Corridor 92 never happens** | **P1** | Op Corridor (Modriča/Odzak targets) + Op Posavina Corridor both fire but produce 0 attacks across 6 execution turns each. Post-Prijedor 1KK brigades in Krajina have no friendly path to the Sava. 1KK instead captures Donji Vakuf. | Pre-plan as `pre_planned_operations` entry with staging OSID on the Posavina axis (like Op Prijedor). Alternatively, ensure the Derventa area has 1KK sector coverage before Corridor launches. |
+| **#35 — ARBiH 2nd/3rd/4th Corps zero-attack stalls** | **P2** | Three corps, three 0-attack operations. 3rd Corps launches with 705th/707th/717th all below 400-pers combat gate — `hasEligibleAttackersForLaunch()` gap. 4th Corps targets Konjic from Mostar (no path). 2nd Corps targets Rastošnica/Zvornik from Brčko (60km gap, no path). | Investigate `hasEligibleAttackersForLaunch` gap for 3rd Corps. For 4th/2nd: same march-first staging fix as #34. |
+
+**Source:** `docs/40_reports/REAL_WAR_MASTER.md` issues #34 and #35 (added 2026-03-14 n58 audit).
+
+---
+
 ## 13. Combat mechanics failures (n292 audit, 2026-03-07)
 
 **Source report:** [20260307_N292_COMBAT_MECHANICS_REPORT.md](convenes/20260307_N292_COMBAT_MECHANICS_REPORT.md)
 
 | Issue | Priority | Complexity | Owner |
 |-------|----------|------------|-------|
-| Equipment attrition mechanic (0 lost in 168 battles) | **P0** | Medium | Gameplay Programmer |
+| ~~Equipment attrition mechanic (0 lost in 168 battles)~~ | ~~**P0**~~ | — | **FIXED** — `attack_resolution_osid.ts` added per-battle loss after n292. At w40: RS 132 tanks/152 arty, RBiH 45/77, HRHB 6/14. |
 | Brigade dissolution at combat-ineffective threshold | **P0** | Low | Gameplay Programmer |
 | RBiH supply constraint (100% under arms embargo) | **P0** | Medium | Gameplay Programmer / Game Designer |
 | Fatigue accumulation/recovery rebalance (98% at zero) | **P1** | Low | Gameplay Programmer |
-| Siege/bombardment casualty mechanic (inverted KIA ratio) | **P1** | Medium | Game Designer / Gameplay Programmer |
+| ~~Siege/bombardment casualty mechanic (inverted KIA ratio)~~ | ~~**P1**~~ | — | **RESOLVED** — `frontline_attrition.ts` bombardment exposure added after n292 (BOMBARDMENT_EXPOSURE_RATE=0.008). Current w40: RBiH 17,235 KIA vs RS 7,775 KIA (2.2:1 defender:attacker — correct direction). REAL_WAR_MASTER H5 still open as fine-tuning. |
 | HRHB cohesion floor reduction (50 → 25-30) | **P2** | Trivial | Gameplay Programmer |
-| Enclave resilience dynamism (static after init) | **P2** | Medium | Game Designer / Gameplay Programmer |
+| ~~Enclave resilience dynamism (static after init)~~ | ~~**P2**~~ | — | **RESOLVED** — `enclave_resilience.ts` per-enclave growth_mult + supply-driven growth/decay implemented after n292. At w40: Sarajevo 44/45, Gorazde 33/35, Srebrenica 17.5/25, Zepa 15/20, Bihac 11.5/40 (partially isolated). |
 | 65th Protection Regt garrison flag | **P3** | Trivial | OOB data |
 
 ---

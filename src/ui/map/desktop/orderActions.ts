@@ -70,3 +70,42 @@ export async function stagePostureOrderAction(
     }
     addStagedOrder({ type: 'posture', formationId, postureName: posture });
 }
+/**
+ * Stages an AoR order via IPC when the player clicks a settlement in AoR mode.
+ * Shifts the settlement from its current owner to the selected brigade.
+ */
+/**
+ * Stages a Brigade-to-Sector assignment via IPC (legacy map-click path).
+ */
+export async function stageAssignBrigadeToSectorAction(
+    { ipc, addStagedOrder, setLoadError }: PostureOrderDeps,
+    brigadeId: string,
+    sectorId: string,
+): Promise<void> {
+    const result = await ipc.assignBrigadeToFront(brigadeId, sectorId);
+    if (!result.ok) {
+        setLoadError(result.error ?? 'Sector assignment failed.');
+        return;
+    }
+    addStagedOrder({ type: 'sector', formationId: brigadeId, targetOsid: sectorId });
+}
+
+/**
+ * Permanently assigns a brigade to a sector (player sector override).
+ * Persists in brigade_sector_override until manually cleared.
+ * Pass sectorId=null to clear an existing override.
+ */
+export async function assignBrigadeToSectorOverrideAction(
+    { ipc, addStagedOrder, setLoadError }: PostureOrderDeps,
+    brigadeId: string,
+    sectorId: string | null,
+): Promise<void> {
+    const result = await ipc.assignBrigadeToSector(brigadeId, sectorId);
+    if (!result.ok) {
+        setLoadError(result.error ?? 'Sector assignment failed.');
+        return;
+    }
+    if (sectorId) {
+        addStagedOrder({ type: 'sector', formationId: brigadeId, targetOsid: sectorId });
+    }
+}

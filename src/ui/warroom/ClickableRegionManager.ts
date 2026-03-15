@@ -60,13 +60,15 @@ type DesktopBridge = {
 
 type WarroomAnchorId =
     | 'desk_map'
+    | 'wall_cork_board'
     | 'command_briefing_folio'
     | 'newspaper_stack'
     | 'intelligence_journal'
     | 'diplomatic_telephone'
     | 'desk_radio'
     | 'wall_flag_area'
-    | 'wall_calendar_area';
+    | 'wall_calendar_area'
+    | 'commander_coatrack';
 
 export class ClickableRegionManager {
     private regionsMap: RegionsMap | null = null;
@@ -248,7 +250,8 @@ export class ClickableRegionManager {
                 this.advanceTurn(gameState);
                 return;
             case 'desk_map':
-                this.openOperationalSituationModal(gameState);
+            case 'wall_cork_board':
+                this.openPrimaryMap(gameState);
                 return;
             case 'command_briefing_folio':
                 this.openCommandBriefingModal(gameState);
@@ -264,6 +267,9 @@ export class ClickableRegionManager {
                 return;
             case 'desk_radio':
                 this.toggleNewsTicker(gameState);
+                return;
+            case 'commander_coatrack':
+                this.openFactionOverview(gameState);
                 return;
             default:
                 this.executeLegacyAction(action, gameState);

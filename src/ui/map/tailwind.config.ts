@@ -41,6 +41,15 @@ export default {
         mono: ['IBM Plex Mono', 'monospace'],
         sans: ['IBM Plex Sans Condensed', 'sans-serif'],
       },
+      dropShadow: {
+        'glow-sm': '0 0 4px rgba(180, 160, 130, 0.25)',
+        'glow-md': '0 0 8px rgba(180, 160, 130, 0.35)',
+        'glow-gold': '0 0 8px rgba(196, 163, 90, 0.4)',
+      },
+      boxShadow: {
+        'glow-inner': 'inset 0 0 8px rgba(180, 160, 130, 0.1)',
+        'glow-sm': '0 0 4px rgba(180, 160, 130, 0.15)',
+      },
     },
   },
   plugins: [],

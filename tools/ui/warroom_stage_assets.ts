@@ -17,8 +17,9 @@ const COPY_FILES: Array<{ src: string; dest: string }> = [
   { src: 'data/derived/settlement_names.json', dest: 'data/derived/settlement_names.json' },
   { src: 'data/derived/settlements_a1_viewer.geojson', dest: 'data/derived/settlements_a1_viewer.geojson' },
   { src: 'data/derived/settlements_meta.json', dest: 'data/derived/settlements_meta.json' },
+  { src: 'data/derived/operational/operational_settlements.geojson', dest: 'data/derived/operational/operational_settlements.geojson' },
+  { src: 'data/derived/operational/operational_political_control.json', dest: 'data/derived/operational/operational_political_control.json' },
   { src: 'data/source/settlements_initial_master.json', dest: 'data/source/settlements_initial_master.json' },
-  { src: 'data/ui/hq_clickable_regions.json', dest: 'data/ui/hq_clickable_regions.json' },
   { src: 'data/ui/hq_rbih_clickable_regions.json', dest: 'data/ui/hq_rbih_clickable_regions.json' },
   { src: 'data/ui/hq_rs_clickable_regions.json', dest: 'data/ui/hq_rs_clickable_regions.json' },
   { src: 'data/ui/hq_hrhb_clickable_regions.json', dest: 'data/ui/hq_hrhb_clickable_regions.json' }

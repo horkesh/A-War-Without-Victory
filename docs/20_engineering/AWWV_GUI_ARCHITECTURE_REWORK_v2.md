@@ -869,7 +869,7 @@ npx storybook@latest init --type react
 | 1 | CorpsCard | Corps object with brigades array | Compact card showing corps name, strength, front assignment. Appears in OOB sidebar. |
 | 2 | BrigadeRow | Brigade object | Single row in a corps card. Name, strength bar, fatigue, status badge (assigned/reserve/in-combat). |
 | 3 | SelectionPanel | Selected OSID feature properties | Right panel showing OSID detail. Population bars, controller, supply status. |
-| 4 | FormationDetail | Formation object | Right panel showing formation detail when a marker is clicked. Phase E: Command block (officer quality, corps/army commander, Acting) and Recent command changes when turn report has officer_succession. |
+| 4 | FormationDetail | Formation object | Right panel showing formation detail when a marker is clicked. **n717 (2026-03-14):** 3-tab layout — Overview (corps/sector assignment, stats, narrative), Record (combat history), Orders (home-distance widget + sector picker + posture). ATK/MOV buttons removed. DIG IN in header. Sector picker calls `assign-brigade-to-sector` IPC for permanent `brigade_sector_override`. Phase E: Command block (officer quality, corps/army commander, Acting) and Recent command changes when turn report has officer_succession. |
 | 5 | TopToolbar | Turn number, date, faction, phase | Thin bar across top. Turn counter, date, action buttons. |
 | 6 | BottomStatusStrip | Hovered/selected entity summary | Thin bar across bottom. One-line summary of whatever is under the cursor. |
 | 7 | OOBSidebar | Full OOB tree for one faction | Left sidebar. Collapsible tree: Theatre → Army → Corps (CorpsCard) → Brigade (BrigadeRow). |

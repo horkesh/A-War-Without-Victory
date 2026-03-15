@@ -3,7 +3,7 @@
  * Horizontal bar centered at bottom, above BottomStatusStrip.
  * Styled per HOI §9.2 warm palette.
  */
-import { useGameStore, type MapMode, isDevMode } from '../store/gameStore';
+import { useGameStore, type MapMode } from '../store/gameStore';
 
 const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
   { id: 'political', label: '1: Political', key: '1' },
@@ -72,30 +72,9 @@ export function MapModeToolbar() {
   };
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: 32,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 10,
-        direction: 'ltr',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          backgroundColor: 'rgba(28, 26, 23, 0.92)',
-          border: '1px solid rgba(180, 160, 130, 0.18)',
-          borderRadius: 6,
-          padding: '4px 6px',
-          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        {/* Map mode pill group */}
+    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 p-1 bg-glass border border-white/10 rounded-lg shadow-2xl backdrop-blur-md">
+      {/* Map mode pill group */}
+      <div className="flex items-center gap-0.5 px-1">
         {MAP_MODES.map(({ id, label, key }) => {
           const active = mapMode === id;
           return (
@@ -104,28 +83,22 @@ export function MapModeToolbar() {
               type="button"
               onClick={() => setMapMode(id)}
               title={`${label} (${key})`}
-              style={{
-                padding: '4px 10px',
-                borderRadius: 4,
-                border: 'none',
-                fontSize: 11,
-                fontWeight: active ? 600 : 400,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-                backgroundColor: active ? 'rgba(196, 163, 90, 0.18)' : 'transparent',
-                color: active ? '#c4a35a' : '#a09080',
-              }}
+              className={`px-3 py-1.5 rounded text-[10px] font-mono tracking-widest transition-all duration-200 uppercase ${active
+                ? 'bg-accent-gold/20 text-accent-gold shadow-glow-sm font-bold'
+                : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+                }`}
             >
-              {label}
+              {label.split(': ')[1]}
             </button>
           );
         })}
+      </div>
 
-        {/* Divider */}
-        <div style={{ width: 1, height: 20, backgroundColor: 'rgba(180, 160, 130, 0.18)', margin: '0 4px' }} />
+      {/* Divider */}
+      <div className="w-[1px] h-4 bg-white/10 mx-1" />
 
-        {/* Layer toggles */}
+      {/* Layer toggles */}
+      <div className="flex items-center gap-0.5 px-1">
         {LAYER_TOGGLES.map(({ key, label }) => {
           const t = toggles[key];
           return (
@@ -134,17 +107,10 @@ export function MapModeToolbar() {
               type="button"
               onClick={() => t.set(!t.value)}
               title={`Toggle ${label}`}
-              style={{
-                padding: '4px 8px',
-                borderRadius: 4,
-                border: 'none',
-                fontSize: 11,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-                backgroundColor: t.value ? 'rgba(196, 163, 90, 0.12)' : 'transparent',
-                color: t.value ? '#ddd5c8' : '#605848',
-              }}
+              className={`px-2 py-1 rounded text-[9px] font-mono tracking-[0.1em] transition-all duration-200 uppercase ${t.value
+                ? 'bg-interactive/10 text-text-primary border border-interactive/30'
+                : 'text-text-secondary/50 hover:text-text-secondary'
+                }`}
             >
               {label}
             </button>

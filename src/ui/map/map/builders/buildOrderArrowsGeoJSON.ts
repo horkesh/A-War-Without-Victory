@@ -1,10 +1,10 @@
 import type { Feature, FeatureCollection, LineString, Polygon, Point } from 'geojson';
-import type { LoadedGameState } from '../../data/types';
+import type { LoadedGameState, CorpsFrontSectorView } from '../../data/types';
 import type { StagedOrder } from '../../store/gameStore';
 import { buildOsidCentroidLookup, resolveOsidKey } from './geojsonLookup';
 import type { OsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
-import { hashString, buildBezierCurve, buildArrowheadTriangle } from './arrowGeometry';
+import { hashString, buildBezierCurve, buildArrowheadTriangle, getClosestPointOnSectorEdge } from './arrowGeometry';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,14 +49,24 @@ function pushArrow(
   sourceOsid: string | null,
   targetOsidRaw: string | undefined,
   centroidLookup: OsidCentroidLookup,
-  faction?: string
+  faction?: string,
+  sector?: CorpsFrontSectorView,
+  edgePoints?: [number, number][]
 ): void {
   if (!sourceOsid) return;
   const targetOsid = resolveOsidKey(targetOsidRaw, centroidLookup);
   if (!targetOsid || targetOsid === sourceOsid) return;
-  const fromPoint = centroidLookup.get(sourceOsid);
+
+  const rawFromPoint = centroidLookup.get(sourceOsid);
   const toPoint = centroidLookup.get(targetOsid);
-  if (!fromPoint || !toPoint) return;
+  if (!rawFromPoint || !toPoint) return;
+
+  // Snapping logic: if the brigade is in a front sector, snap origin to the front line closest to target
+  let fromPoint = rawFromPoint;
+  if (sector && edgePoints && edgePoints.length > 0) {
+    const snapped = getClosestPointOnSectorEdge(toPoint, edgePoints);
+    if (snapped) fromPoint = snapped;
+  }
 
   const dx = toPoint[0] - fromPoint[0];
   const dy = toPoint[1] - fromPoint[1];
@@ -126,6 +136,35 @@ export function buildOrderArrowsGeoJSON(
   const formationById = new Map(state.formations.map((f) => [f.id, f] as const));
   const sourceByBrigadeId = new Map<string, string | null>();
 
+  // Pre-index front edges and sectors for snapping
+  const sectorByBrigade = new Map<string, CorpsFrontSectorView>();
+  const edgePointsBySector = new Map<string, [number, number][]>();
+
+  if (state.corpsFrontSectors) {
+    const edgeMap = new Map<string, any>();
+    if (state.frontEdges) {
+      for (const e of state.frontEdges) edgeMap.set(e.edge_id, e);
+    }
+
+    for (const sector of state.corpsFrontSectors) {
+      for (const bid of sector.assigned_brigade_ids) sectorByBrigade.set(bid, sector);
+      for (const bid of sector.reserve_brigade_ids) sectorByBrigade.set(bid, sector);
+
+      // Extract coordinates for the sector's edge list
+      const points: [number, number][] = [];
+      for (const eid of sector.edge_ids) {
+        const edge = edgeMap.get(eid);
+        if (edge) {
+          const p1 = centroidLookup.get(edge.a);
+          const p2 = centroidLookup.get(edge.b);
+          if (p1) points.push(p1);
+          if (p2) points.push(p2);
+        }
+      }
+      if (points.length > 0) edgePointsBySector.set(sector.sector_id, points);
+    }
+  }
+
   for (const formation of [...state.formations].sort((a, b) => a.id.localeCompare(b.id))) {
     sourceByBrigadeId.set(formation.id, resolveFormationLocationOsid(formation, centroidLookup));
   }
@@ -139,7 +178,9 @@ export function buildOrderArrowsGeoJSON(
   for (const order of attackOrders) {
     const formation = formationById.get(order.brigadeId);
     const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formation, centroidLookup);
-    pushArrow(features, 'attack', order.brigadeId, sourceOsid, order.targetSettlementId, centroidLookup, formation?.faction);
+    const sector = sectorByBrigade.get(order.brigadeId);
+    const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
+    pushArrow(features, 'attack', order.brigadeId, sourceOsid, order.targetSettlementId, centroidLookup, formation?.faction, sector, edgePoints);
   }
 
   if (state.movementOrdersSettlement && state.movementOrdersSettlement.length > 0) {
@@ -147,9 +188,11 @@ export function buildOrderArrowsGeoJSON(
     for (const order of settlementOrders) {
       const formation = formationById.get(order.brigadeId);
       const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formation, centroidLookup);
+      const sector = sectorByBrigade.get(order.brigadeId);
+      const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
       const targets = [...order.targetSettlementIds].sort((a, b) => a.localeCompare(b));
       for (const target of targets) {
-        pushArrow(features, 'movement', order.brigadeId, sourceOsid, target, centroidLookup, formation?.faction);
+        pushArrow(features, 'movement', order.brigadeId, sourceOsid, target, centroidLookup, formation?.faction, sector, edgePoints);
       }
     }
   }
@@ -161,8 +204,10 @@ export function buildOrderArrowsGeoJSON(
       const outputType = order.type === 'attack' ? 'attack-staged' : 'movement-staged';
       const formation = formationById.get(order.formationId);
       const sourceOsid = sourceByBrigadeId.get(order.formationId) ?? resolveFormationLocationOsid(formation, centroidLookup);
+      const sector = sectorByBrigade.get(order.formationId);
+      const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
       if (order.targetOsid) {
-        pushArrow(features, outputType, order.formationId, sourceOsid, order.targetOsid, centroidLookup, formation?.faction);
+        pushArrow(features, outputType, order.formationId, sourceOsid, order.targetOsid, centroidLookup, formation?.faction, sector, edgePoints);
       }
     }
   }

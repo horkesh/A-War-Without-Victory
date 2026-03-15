@@ -20,11 +20,59 @@ function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong
   }
 }
 
-/** Threat ratio badge with color coding. */
+/** Threat ratio badge with descriptive balance labels. */
 function ThreatBadge({ ratio }: { ratio: number }) {
-  if (ratio > 1.5) return <span className="text-red-400 font-semibold">{ratio.toFixed(2)}</span>;
-  if (ratio > 0.8) return <span className="text-amber-300">{ratio.toFixed(2)}</span>;
-  return <span className="text-green-400">{ratio.toFixed(2)}</span>;
+  let label = 'BALANCED';
+  let color = 'text-green-400';
+
+  if (ratio > 2.0) { label = 'OVERMATCHED'; color = 'text-red-500 font-black'; }
+  else if (ratio > 1.5) { label = 'VULNERABLE'; color = 'text-red-400 font-bold'; }
+  else if (ratio > 1.2) { label = 'PRESSURE'; color = 'text-amber-500'; }
+  else if (ratio < 0.5) { label = 'SUPERIOR'; color = 'text-emerald-500 font-bold'; }
+  else if (ratio < 0.8) { label = 'FAVORABLE'; color = 'text-green-500'; }
+
+  return (
+    <div className="flex flex-col">
+      <span className={`${color} text-[10px] tracking-tighter leading-none mb-0.5`}>{label}</span>
+      <span className={`${color} font-mono`}>{ratio.toFixed(2)}:1</span>
+    </div>
+  );
+}
+
+/** Helper to render fuzzy intelligence ranges for low-confidence data. */
+function FuzzyIntel({
+  value,
+  confidence,
+  format = 'number',
+  redactThreshold = 0.2,
+  fuzzyThreshold = 0.5
+}: {
+  value?: number | string;
+  confidence: number;
+  format?: 'number' | 'percent' | 'string';
+  redactThreshold?: number;
+  fuzzyThreshold?: number;
+}) {
+  if (confidence < redactThreshold) {
+    return <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">REDACTED</span>;
+  }
+
+  if (value == null) return <span className="text-neutral-400">—</span>;
+
+  if (confidence < fuzzyThreshold && typeof value === 'number') {
+    const variance = (1 - confidence) * 0.4; // up to 40% variance at low confidence
+    const min = Math.round(value * (1 - variance));
+    const max = Math.round(value * (1 + variance));
+    if (format === 'percent') return <span className="italic text-neutral-500">~{min}-{max}%?</span>;
+    return <span className="italic text-neutral-500">{min.toLocaleString()}-{max.toLocaleString()}?</span>;
+  }
+
+  if (typeof value === 'number') {
+    if (format === 'percent') return <span className="tabular-nums">{Math.round(value)}%</span>;
+    return <span className="tabular-nums">{Math.round(value).toLocaleString()}</span>;
+  }
+
+  return <span className="truncate">{value}</span>;
 }
 
 
@@ -286,43 +334,54 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
               <div className="space-y-3">
                 {/* Combat Power Summary */}
                 <div className="mb-2 p-2 bg-neutral-100 border border-neutral-300 rounded">
-                  <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1.5 border-b border-neutral-300 pb-1">Combat Power Assessment</div>
+                  <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1.5 border-b border-neutral-300 pb-1 flex justify-between">
+                    <span>Combat Power Assessment</span>
+                    <span className="text-[8px] font-normal text-neutral-400 normal-case">Baseline: 1.0 = Standard Brigade</span>
+                  </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">Strength</span>
-                      <span className="font-medium">
-                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : <StrengthBadge strengthClass={sector.combat_strength_class} />}
-                      </span>
+                      <div className="font-medium">
+                        {sector.intel_confidence < 0.3 ? (
+                          <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">REDACTED</span>
+                        ) : (
+                          <StrengthBadge strengthClass={sector.combat_strength_class} />
+                        )}
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">Personnel</span>
-                      <span className="font-medium tabular-nums">
-                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : (sector.combat_personnel?.toLocaleString() ?? '—')}
-                      </span>
+                      <div className="font-medium tabular-nums">
+                        <FuzzyIntel value={sector.combat_personnel} confidence={sector.intel_confidence} />
+                      </div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col" title={`Equivalency: ~${((sector.combat_offensive_power ?? 0) / 1000).toFixed(1)} Standard Brigades`}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">Offensive Power</span>
-                      <span className="font-medium tabular-nums">
-                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : (sector.combat_offensive_power != null ? Math.round(sector.combat_offensive_power).toLocaleString() : '—')}
-                      </span>
+                      <div className="font-medium tabular-nums">
+                        <FuzzyIntel value={sector.combat_offensive_power} confidence={sector.intel_confidence} />
+                      </div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col" title={`Equivalency: ~${((sector.combat_defensive_power ?? sector.defensive_power ?? 0) / 1000).toFixed(1)} Standard Brigades`}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">Defensive Power</span>
-                      <span className="font-medium tabular-nums">
-                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : (sector.combat_defensive_power != null ? Math.round(sector.combat_defensive_power).toLocaleString() : Math.round(sector.defensive_power).toLocaleString())}
-                      </span>
+                      <div className="font-medium tabular-nums">
+                        <FuzzyIntel value={sector.combat_defensive_power ?? sector.defensive_power} confidence={sector.intel_confidence} />
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">Def/Edge</span>
-                      <span className="font-medium tabular-nums">
-                        {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACTED</span> : (sector.combat_defense_per_edge != null ? Math.round(sector.combat_defense_per_edge).toLocaleString() : '—')}
-                      </span>
+                      <div className="font-medium tabular-nums">
+                        <FuzzyIntel value={sector.combat_defense_per_edge} confidence={sector.intel_confidence} />
+                      </div>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Risk Ratio</span>
-                      <span className="font-medium">
-                        {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : <ThreatBadge ratio={sector.threat_ratio} />}
-                      </span>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">Force Balance</span>
+                      <div className="pt-0.5">
+                        {sector.intel_confidence < 0.4 ? (
+                          <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">REDACTED</span>
+                        ) : (
+                          <ThreatBadge ratio={sector.threat_ratio} />
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -333,21 +392,21 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <div className="grid grid-cols-3 gap-x-3 gap-y-1.5">
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">Morale</span>
-                      <span className={`font-medium tabular-nums ${(sector.combat_morale_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_morale_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
-                        {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">RED</span> : (sector.combat_morale_avg != null ? Math.round(sector.combat_morale_avg) : '—')}
-                      </span>
+                      <div className={`font-medium tabular-nums ${(sector.combat_morale_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_morale_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
+                        <FuzzyIntel value={sector.combat_morale_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">Cohesion</span>
-                      <span className={`font-medium tabular-nums ${(sector.combat_cohesion_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_cohesion_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
-                        {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">RED</span> : (sector.combat_cohesion_avg != null ? Math.round(sector.combat_cohesion_avg) : '—')}
-                      </span>
+                      <div className={`font-medium tabular-nums ${(sector.combat_cohesion_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_cohesion_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
+                        <FuzzyIntel value={sector.combat_cohesion_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">Fatigue</span>
-                      <span className={`font-medium tabular-nums ${(sector.combat_fatigue_avg ?? 0) > 20 ? 'text-red-600' : (sector.combat_fatigue_avg ?? 0) > 10 ? 'text-amber-600' : ''}`}>
-                        {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">RED</span> : (sector.combat_fatigue_avg != null ? sector.combat_fatigue_avg.toFixed(1) : '—')}
-                      </span>
+                      <div className={`font-medium tabular-nums ${(sector.combat_fatigue_avg ?? 0) > 20 ? 'text-red-600' : (sector.combat_fatigue_avg ?? 0) > 10 ? 'text-amber-600' : ''}`}>
+                        <FuzzyIntel value={sector.combat_fatigue_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -396,13 +455,12 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             disabled={!isAllowed}
                             onClick={() => void issueSectorStance(stance)}
                             title={isAllowed ? STANCE_DESCRIPTIONS[stance] : `Not allowed under ${corpsStance} corps stance`}
-                            className={`kbd-focus px-1.5 py-1 rounded border text-[9px] font-bold uppercase transition-colors ${
-                              !isAllowed
+                            className={`kbd-focus px-1.5 py-1 rounded border text-[9px] font-bold uppercase transition-colors ${!isAllowed
                                 ? 'border-neutral-200 bg-neutral-100 text-neutral-300 cursor-not-allowed'
                                 : isActive
                                   ? 'border-accent-gold bg-amber-50 text-amber-800 ring-1 ring-accent-gold'
                                   : 'border-neutral-400 bg-white/80 hover:bg-neutral-200 text-neutral-700'
-                            }`}
+                              }`}
                           >
                             {STANCE_LABELS[stance]}
                           </button>
@@ -623,11 +681,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                               <button
                                 type="button"
                                 onClick={() => setOperationBriefingContext({ corpsId: op.corps_id, operationName: op.name })}
-                                className={`kbd-focus mt-2 w-full text-[10px] uppercase font-bold py-1.5 border transition-colors ${
-                                  op.preparation_sub_phase === 'assessment'
+                                className={`kbd-focus mt-2 w-full text-[10px] uppercase font-bold py-1.5 border transition-colors ${op.preparation_sub_phase === 'assessment'
                                     ? 'bg-amber-400 hover:bg-amber-500 text-amber-900 border-amber-500'
                                     : 'bg-neutral-200 hover:bg-neutral-300 text-neutral-800 border-neutral-400'
-                                }`}
+                                  }`}
                               >
                                 {op.preparation_sub_phase === 'assessment' ? 'Assessment Ready \u2014 Review' : 'Review Briefing'}
                               </button>

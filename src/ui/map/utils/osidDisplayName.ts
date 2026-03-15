@@ -6,8 +6,13 @@ import type { FeatureCollection } from 'geojson';
  */
 export function humanizeOsid(osid: string): string {
   if (!osid || typeof osid !== 'string') return osid;
+  // Handle internal operational prefixes: strip everything before the final ":"
   const segment = osid.includes(':') ? osid.split(':').pop() ?? osid : osid;
-  return segment
+
+  // Strip common technical suffixes or prefixes that shouldn't be humanized
+  const clean = segment.replace(/^(op|sector)_/i, '');
+
+  return clean
     .split('_')
     .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''))
     .join(' ')

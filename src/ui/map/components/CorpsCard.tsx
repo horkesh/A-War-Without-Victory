@@ -11,6 +11,8 @@ export interface CorpsCardProps {
   onHeaderClick?: () => void;
   onHoverOsidsChange?: (osids: string[]) => void;
   onOrbatClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   commanderName?: string;
   commanderActing?: boolean;
 }
@@ -28,6 +30,8 @@ export function CorpsCard({
   onHeaderClick,
   onHoverOsidsChange,
   onOrbatClick,
+  onMouseEnter,
+  onMouseLeave,
   commanderName,
   commanderActing,
 }: CorpsCardProps) {
@@ -46,8 +50,14 @@ export function CorpsCard({
   return (
     <div
       className="rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden"
-      onMouseEnter={() => onHoverOsidsChange?.(corpsOsids)}
-      onMouseLeave={() => onHoverOsidsChange?.([])}
+      onMouseEnter={() => {
+        onHoverOsidsChange?.(corpsOsids);
+        onMouseEnter?.();
+      }}
+      onMouseLeave={() => {
+        onHoverOsidsChange?.([]);
+        onMouseLeave?.();
+      }}
     >
       <button
         type="button"

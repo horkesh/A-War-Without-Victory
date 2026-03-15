@@ -38,50 +38,82 @@ export function BottomStatusStrip() {
     return sum + killed + wounded + missing;
   }, 0);
 
-  const line = !selectedOsid
-    ? 'No selection — click a settlement on the map'
-    : loadedGameState
-      ? `${getOsidDisplayName(selectedOsid, osidDisplayNames)} · ${controller ?? '—'}${formationCount > 0 ? ` · ${formationCount} formation${formationCount !== 1 ? 's' : ''}` : ''}`
-      : `${getOsidDisplayName(selectedOsid, osidDisplayNames)} — load a save for control and formation data`;
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between gap-3 px-4 py-1.5 font-mono text-xs text-text-secondary bg-panel-card/90 backdrop-blur-sm border-t border-panel-border"
-      style={{ direction: 'ltr' }}
+      className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between gap-6 px-4 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] overflow-hidden"
     >
-      <div className="min-w-0 truncate">
-        {controller && selectedOsid ? (
-          <>
-            <span className="text-text-primary" title={selectedOsid}>
-              {getOsidDisplayName(selectedOsid, osidDisplayNames)}
-            </span>
-            <span className="mx-2 text-panel-border">·</span>
-            <span className={FACTION_COLORS_SUBTLE[controller] ?? 'text-text-primary'}>
-              {controller}
-            </span>
-            {formationCount > 0 && (
+      <div className="absolute inset-0 scanline-texture opacity-[0.02] pointer-events-none" />
+
+      {/* 1. SELECTION TELEMETRY */}
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-1 h-3 bg-interactive/60 rounded-full" />
+        <div className="flex flex-col min-w-0">
+          <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-interactive/70 leading-none mb-1">TARGET TELEMETRY</span>
+          <div className="flex items-center gap-2 text-xs font-mono truncate">
+            {selectedOsid ? (
               <>
-                <span className="mx-2 text-panel-border">·</span>
-                <span className="text-text-secondary">
-                  {formationCount} formation{formationCount !== 1 ? 's' : ''}
+                <span className="text-text-primary glow-text uppercase font-bold" title={selectedOsid}>
+                  {getOsidDisplayName(selectedOsid, osidDisplayNames)}
                 </span>
+                {controller && (
+                  <>
+                    <span className="text-white/20">/</span>
+                    <span className={`${FACTION_COLORS_SUBTLE[controller] ?? 'text-text-primary'} uppercase font-bold`}>
+                      {controller}
+                    </span>
+                  </>
+                )}
+                {formationCount > 0 && (
+                  <>
+                    <span className="text-white/10">|</span>
+                    <span className="text-text-secondary">
+                      {formationCount} DETACHMENTS
+                    </span>
+                  </>
+                )}
               </>
+            ) : (
+              <span className="text-text-muted italic opacity-50 uppercase tracking-widest text-[10px]">AWAIT SELECTION</span>
             )}
-          </>
-        ) : (
-          <span>{line}</span>
-        )}
+          </div>
+        </div>
       </div>
-      <div className="shrink-0 whitespace-nowrap">
-        <span className={`${FACTION_COLORS_SUBTLE.RS ?? ''}`}>RS {territoryPct.RS.toFixed(1)}%</span>
-        <span className="mx-2 text-panel-border">|</span>
-        <span className={`${FACTION_COLORS_SUBTLE.RBiH ?? ''}`}>RBiH {territoryPct.RBiH.toFixed(1)}%</span>
-        <span className="mx-2 text-panel-border">|</span>
-        <span className={`${FACTION_COLORS_SUBTLE.HRHB ?? ''}`}>HRHB {territoryPct.HRHB.toFixed(1)}%</span>
-        <span className="mx-2 text-panel-border">·</span>
-        <span>{activeOps} active ops</span>
-        <span className="mx-2 text-panel-border">·</span>
-        <span>{cumulativeCasualties.toLocaleString()} casualties</span>
+
+      {/* 2. FRONTLINE CONTROL (Center) */}
+      <div className="hidden md:flex flex-1 items-center justify-center gap-4 px-6 border-l border-r border-white/5">
+        <div className="flex flex-col items-center mr-4">
+          <span className="text-[8px] font-mono uppercase tracking-[0.3em] text-text-secondary mb-1">FRONTLINE CONTROL</span>
+          <div className="flex items-center gap-4 text-[10px] font-mono tracking-widest">
+            <div className="flex flex-col items-center">
+              <span className="text-[8px] text-faction-rs/60">RS</span>
+              <span className="text-text-primary">{territoryPct.RS.toFixed(1)}%</span>
+            </div>
+            <div className="h-4 w-px bg-white/10" />
+            <div className="flex flex-col items-center">
+              <span className="text-[8px] text-faction-rbih/60">RBiH</span>
+              <span className="text-text-primary">{territoryPct.RBiH.toFixed(1)}%</span>
+            </div>
+            <div className="h-4 w-px bg-white/10" />
+            <div className="flex flex-col items-center">
+              <span className="text-[8px] text-faction-hrhb/60">HRHB</span>
+              <span className="text-text-primary">{territoryPct.HRHB.toFixed(1)}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. THEATER STATS */}
+      <div className="flex items-center gap-4 shrink-0">
+        <div className="flex flex-col items-end">
+          <span className="text-[8px] font-mono uppercase tracking-widest text-text-secondary">THEATER OPERATIONS</span>
+          <span className="text-[11px] font-mono text-text-primary tabular-nums">{activeOps} ACTIVE</span>
+        </div>
+        <div className="h-6 w-px bg-white/10" />
+        <div className="flex flex-col items-end">
+          <span className="text-[8px] font-mono uppercase tracking-widest text-text-secondary">AGGREGATE LOSSES</span>
+          <span className="text-[11px] font-mono text-red-500/80 tabular-nums glow-text">{cumulativeCasualties.toLocaleString()}</span>
+        </div>
       </div>
     </div>
   );

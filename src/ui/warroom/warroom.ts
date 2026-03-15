@@ -9,10 +9,10 @@ import { NewspaperModal } from './components/NewspaperModal.js';
 import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
 import { TacticalMap } from './components/TacticalMap.js';
 import { WallCalendar } from './components/WallCalendar.js';
+import { OsidThumbnailRenderer } from './components/OsidThumbnailRenderer.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
-import { setScenarioStartDate, turnToCalendarMonthYear, turnToShortLabel } from './components/warroom_utils.js';
+import { setScenarioStartDate, turnToCalendarMonthYear, turnToDateString, turnToShortLabel } from './components/warroom_utils.js';
 // Asset URLs via Vite so dev server serves them from the module graph
-import bgUrl from './assets/hq_background_v3.png?url';
 import hqRbih1991Url from './assets/hq_rbih_1991.webp?url';
 import hqRbih1992Url from './assets/hq_rbih_1992.webp?url';
 import hqRbih1993Url from './assets/hq_rbih_1993.webp?url';
@@ -29,14 +29,14 @@ import hqHrhb1993Url from './assets/hq_hrhb_1993.webp?url';
 import hqHrhb1994Url from './assets/hq_hrhb_1994.webp?url';
 import hqHrhb1995Url from './assets/hq_hrhb_1995.webp?url';
 // Flag assets — drawn dynamically on the wall per player faction
-import flagHrhbUrl from './assets/flag_HRHB.png?url';
-import flagRbihUrl from './assets/flag_RBiH.png?url';
-import flagRsUrl from './assets/flag_RS.png?url';
+import flagHrhbUrl from './assets/flag_HRHB.webp?url';
+import flagRbihUrl from './assets/flag_RBiH.webp?url';
+import flagRsUrl from './assets/flag_RS.webp?url';
 // Scenario briefing images
 import scnApr1992Url from './assets/scenarios/apr1992_briefing.png?url';
 import scnSep1991Url from './assets/scenarios/sep1991_briefing.png?url';
 // Main menu background (game start screen)
-import gameStartBgUrl from './assets/game start.png?url';
+import gameStartBgUrl from './assets/game start.webp?url';
 
 type CampaignScenarioKey = 'sep_1991' | 'apr_1992';
 
@@ -45,7 +45,6 @@ const WARROOM_SCENE_WIDTH = 1376;
 const WARROOM_SCENE_HEIGHT = 768;
 const WARROOM_CALENDAR_REGION_IDS = ['wall_calendar_area', 'wall_calendar'] as const;
 
-const DEFAULT_REGIONS_URL = '/data/ui/hq_clickable_regions.json';
 /** If this file exists, it is used when no faction-specific file is available. */
 const OVERRIDE_REGIONS_URL = '/data/ui/hq_clickable_regions_override.json';
 
@@ -54,22 +53,10 @@ function getFactionRegionsUrl(faction: FactionId): string {
     return `/data/ui/hq_${faction.toLowerCase()}_clickable_regions.json`;
 }
 
-async function resolveRegionsUrl(): Promise<string> {
-    const w = typeof window !== 'undefined' ? (window as unknown as { __awwvWarroomRegionsUrl?: string }) : undefined;
-    if (w?.__awwvWarroomRegionsUrl) return w.__awwvWarroomRegionsUrl;
-    try {
-        const r = await fetch(OVERRIDE_REGIONS_URL);
-        if (r.ok) return OVERRIDE_REGIONS_URL;
-    } catch {
-        // ignore
-    }
-    return DEFAULT_REGIONS_URL;
-}
-
+/** Try override file first, then per-faction candidates. No generic default. */
 function getInitialRegionCandidates(): string[] {
     return [
         OVERRIDE_REGIONS_URL,
-        DEFAULT_REGIONS_URL,
         getFactionRegionsUrl('RBiH'),
         getFactionRegionsUrl('RS'),
         getFactionRegionsUrl('HRHB')
@@ -132,6 +119,12 @@ class WarroomApp {
     private userNavigatedFromMenu = false;
     /** Faction for which we last loaded region data (so we only reload when faction changes). */
     private lastLoadedRegionsFaction: FactionId | null = null;
+    /** Offscreen canvas for the cork board staff map thumbnail. */
+    private thumbnailCanvas: HTMLCanvasElement = document.createElement('canvas');
+    /** True when game state changed and thumbnail needs re-rendering. */
+    private thumbnailDirty = true;
+    /** OSID-based thumbnail renderer for the cork board staff map. */
+    private osidThumbnail = new OsidThumbnailRenderer();
 
     constructor() {
         this.canvas = document.getElementById('warroom-canvas') as HTMLCanvasElement;
@@ -166,7 +159,8 @@ class WarroomApp {
             this.loadScenePlateAssets(),
             this.calendar.loadAssets(),
             this.map.loadAssets(),
-            this.loadFlagAssets()
+            this.loadFlagAssets(),
+            this.osidThumbnail.load()
         ]);
 
         await this.loadInitialRegions();
@@ -247,11 +241,16 @@ class WarroomApp {
         this.renderLoop();
     }
 
-    private async loadScenePlateAssets() {
+    /** Load scene plates for a single faction (or all if none specified). */
+    private async loadScenePlateAssets(faction?: FactionId) {
         const tasks: Array<Promise<[string, HTMLImageElement]>> = [];
-        for (const [faction, yearMap] of Object.entries(WARROOM_YEAR_PLATE_URLS)) {
+        const entries = faction
+            ? [[faction, WARROOM_YEAR_PLATE_URLS[faction]] as const]
+            : (Object.entries(WARROOM_YEAR_PLATE_URLS) as Array<[string, Record<number, string>]>);
+        for (const [f, yearMap] of entries) {
             for (const [year, url] of Object.entries(yearMap)) {
-                const key = `${faction}:${year}`;
+                const key = `${f}:${year}`;
+                if (this.scenePlateImages.has(key)) continue; // already loaded
                 tasks.push(this.loadImage(url).then(img => [key, img]));
             }
         }
@@ -341,6 +340,9 @@ class WarroomApp {
         this.warPlanningMap.setControlFromState(this.gameState);
         this.warPlanningMap.setGameState(this.gameState);
         this.warPlanningMap.setPlayerFaction(playerFaction);
+        this.osidThumbnail.setControlFromState(this.gameState);
+        this.osidThumbnail.setPlayerFaction(playerFaction);
+        this.thumbnailDirty = true;
         this.phase0PreparationMap.setGameState(this.gameState);
         this.phase0PreparationMap.setPlayerFaction(playerFaction);
         this.regionManager.phase0Directives = this.phase0PreparationMap.getDirectiveState();
@@ -677,11 +679,158 @@ class WarroomApp {
             );
         }
 
+        // 2b. Cork board staff map
+        const corkRegion = this.regionManager.getScaledRegionById('wall_cork_board');
+        if (corkRegion) {
+            this.renderCorkBoardMap(corkRegion.bounds);
+        }
+
+        // 2c. Whiteboard date
+        const dateRegion = this.regionManager.getScaledRegionById('wall_calendar_area');
+        if (dateRegion) {
+            this.renderWhiteboardDate(dateRegion.bounds);
+        }
+
         // 3. Hover highlight
         const hoveredRegion = this.regionManager.getHoveredRegion();
         if (hoveredRegion) {
             this.hoverRenderer.renderHighlight(this.ctx, hoveredRegion);
         }
+    }
+
+    private renderCorkBoardMap(bounds: { x: number; y: number; width: number; height: number }): void {
+        const PAD = 8;
+        const mapW = bounds.width - PAD * 2;
+        const mapH = bounds.height - PAD * 2;
+        if (mapW <= 0 || mapH <= 0) return;
+
+        // Resize offscreen canvas if needed
+        if (this.thumbnailCanvas.width !== Math.ceil(mapW) || this.thumbnailCanvas.height !== Math.ceil(mapH)) {
+            this.thumbnailCanvas.width = Math.ceil(mapW);
+            this.thumbnailCanvas.height = Math.ceil(mapH);
+            this.thumbnailDirty = true;
+        }
+
+        // Re-render thumbnail only when game state changes
+        if (this.thumbnailDirty) {
+            const tCtx = this.thumbnailCanvas.getContext('2d');
+            if (!tCtx) return;
+            tCtx.clearRect(0, 0, mapW, mapH);
+            // White paper background
+            tCtx.fillStyle = '#f5f2ea';
+            tCtx.fillRect(0, 0, mapW, mapH);
+            // Draw OSID territorial control + front lines
+            this.osidThumbnail.render(tCtx, mapW, mapH);
+            this.thumbnailDirty = false;
+        }
+
+        this.ctx.save();
+
+        const paperX = bounds.x + PAD;
+        const paperY = bounds.y + PAD;
+
+        // Slight rotation for pinned-paper effect (~0.5 degrees)
+        const cx = bounds.x + bounds.width / 2;
+        const cy = bounds.y + bounds.height / 2;
+        this.ctx.translate(cx, cy);
+        this.ctx.rotate(0.008);
+        this.ctx.translate(-cx, -cy);
+
+        // Paper shadow (depth against cork board)
+        this.ctx.shadowColor = 'rgba(0,0,0,0.35)';
+        this.ctx.shadowBlur = 4;
+        this.ctx.shadowOffsetX = 2;
+        this.ctx.shadowOffsetY = 2;
+        this.ctx.fillStyle = '#f5f2ea';
+        this.ctx.fillRect(paperX, paperY, mapW, mapH);
+        this.ctx.shadowColor = 'transparent';
+
+        // Draw map on paper (normal blend — opaque, sits on top of cork)
+        this.ctx.drawImage(this.thumbnailCanvas, paperX, paperY, mapW, mapH);
+
+        // Thin paper edge
+        this.ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+        this.ctx.lineWidth = 0.5;
+        this.ctx.strokeRect(paperX, paperY, mapW, mapH);
+
+        // Pushpins at top corners
+        this.drawPushPin(paperX + 6, paperY + 6);
+        this.drawPushPin(paperX + mapW - 6, paperY + 6);
+
+        this.ctx.restore();
+    }
+
+    private drawPushPin(x: number, y: number): void {
+        this.ctx.save();
+        this.ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        this.ctx.shadowBlur = 3;
+        this.ctx.shadowOffsetX = 1;
+        this.ctx.shadowOffsetY = 2;
+        // Pin body
+        this.ctx.fillStyle = '#c0392b';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+        this.ctx.fill();
+        // Pin highlight
+        this.ctx.shadowColor = 'transparent';
+        this.ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        this.ctx.beginPath();
+        this.ctx.arc(x - 0.8, y - 0.8, 1.5, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
+    }
+
+    private renderWhiteboardDate(bounds: { x: number; y: number; width: number; height: number }): void {
+        if (!this.gameState) return;
+        const dateStr = turnToDateString(this.gameState.meta.turn);
+
+        this.ctx.save();
+        // Smaller font — fits comfortably without filling the whole board
+        const fontSize = Math.min(bounds.height * 0.20, bounds.width / dateStr.length * 1.2);
+
+        // Greasy blue dry-erase marker — semi-transparent, smudged look
+        this.ctx.font = `bold ${Math.round(fontSize)}px "Segoe Script", "Comic Sans MS", cursive`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+
+        const cx = bounds.x + bounds.width / 2;
+        const cy = bounds.y + bounds.height * 0.42;
+
+        // Ghost smudge layer (previous writing not fully erased)
+        this.ctx.globalAlpha = 0.06;
+        this.ctx.fillStyle = '#1a3faa';
+        this.ctx.fillText(dateStr, cx + 1.5, cy + 1);
+        this.ctx.globalAlpha = 1.0;
+
+        // Main text — slightly transparent for greasy marker look
+        this.ctx.globalAlpha = 0.70;
+        this.ctx.fillStyle = '#152d7a';
+        this.ctx.shadowColor = 'rgba(0,0,60,0.12)';
+        this.ctx.shadowBlur = 2;
+        this.ctx.shadowOffsetX = 0.3;
+        this.ctx.shadowOffsetY = 0.3;
+        this.ctx.fillText(dateStr, cx, cy);
+
+        // Second pass — ink buildup on edges (thicker strokes)
+        this.ctx.globalAlpha = 0.20;
+        this.ctx.fillText(dateStr, cx + 0.3, cy + 0.2);
+        this.ctx.globalAlpha = 1.0;
+        this.ctx.shadowColor = 'transparent';
+
+        // Underline — greasy and wobbly
+        const textWidth = this.ctx.measureText(dateStr).width;
+        this.ctx.globalAlpha = 0.55;
+        this.ctx.strokeStyle = '#152d7a';
+        this.ctx.lineWidth = Math.max(1.2, fontSize * 0.06);
+        this.ctx.lineCap = 'round';
+        const underY = cy + fontSize * 0.55;
+        this.ctx.beginPath();
+        this.ctx.moveTo(cx - textWidth / 2, underY);
+        this.ctx.quadraticCurveTo(cx, underY + 1.5, cx + textWidth / 2, underY - 0.5);
+        this.ctx.stroke();
+        this.ctx.globalAlpha = 1.0;
+
+        this.ctx.restore();
     }
 
     private async loadFlagAssets() {
@@ -702,12 +851,7 @@ class WarroomApp {
      * shared regions file is intentionally removed in favor of per-faction files.
      */
     private async loadInitialRegions(): Promise<void> {
-        const explicitUrl = await resolveRegionsUrl();
-        const candidates = explicitUrl === DEFAULT_REGIONS_URL
-            ? getInitialRegionCandidates()
-            : [explicitUrl];
-
-        for (const url of candidates) {
+        for (const url of getInitialRegionCandidates()) {
             try {
                 const response = await fetch(url);
                 if (!response.ok) continue;
@@ -717,13 +861,14 @@ class WarroomApp {
                 // Try the next candidate.
             }
         }
-
-        console.warn('[warroom] No initial region file found; continuing without regions until faction-specific data loads.');
+        // No regions yet — ensureRegionsLoadedForFaction will load once faction is known.
     }
 
-    /** Load faction-specific region file when player faction is known; fall back to default if missing. */
+    /** Load faction-specific region file when player faction is known. */
     private async ensureRegionsLoadedForFaction(faction: FactionId): Promise<void> {
         if (this.lastLoadedRegionsFaction === faction) return;
+        // Lazy-load this faction's scene plates (skips if already loaded)
+        void this.loadScenePlateAssets(faction);
         const url = getFactionRegionsUrl(faction);
         try {
             const r = await fetch(url);
@@ -733,13 +878,7 @@ class WarroomApp {
                 return;
             }
         } catch {
-            // ignore
-        }
-        try {
-            await this.regionManager.loadRegions(DEFAULT_REGIONS_URL);
-            this.lastLoadedRegionsFaction = faction;
-        } catch {
-            // keep previous regions if default also fails
+            // ignore — keep previous regions
         }
     }
 

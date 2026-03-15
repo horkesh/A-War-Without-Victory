@@ -215,11 +215,25 @@ export function MapContainer() {
           setOrderModeForFormation(null);
         } else if (orderModeForFormation === 'move' && selectedFormationId) {
           void stageMoveOrderFromOsid(
-            {
-              ipc,
-              addStagedOrder: useGameStore.getState().addStagedOrder,
-              setLoadError,
-            },
+            { ipc, addStagedOrder: useGameStore.getState().addStagedOrder, setLoadError },
+            selectedFormationId,
+            osid
+          );
+          setOrderModeForFormation(null);
+        } else if (orderModeForFormation === 'aor' && selectedFormationId) {
+          let fromBrigadeId = 'none';
+          const aorMap = loadedGameState?.brigadeAorByFormationId;
+          if (aorMap) {
+            for (const [bid, osids] of Object.entries(aorMap)) {
+              if (osids.includes(osid)) {
+                fromBrigadeId = bid;
+                break;
+              }
+            }
+          }
+          void stageAoROrderFromOsid(
+            { ipc, addStagedOrder: useGameStore.getState().addStagedOrder, setLoadError },
+            fromBrigadeId,
             selectedFormationId,
             osid
           );
@@ -573,12 +587,12 @@ export function MapContainer() {
     const targetSet = new Set(operationTargetOsids.filter((osid) => osid.length > 0));
     const targetPolygons: FeatureCollection = targetSet.size
       ? {
-          type: 'FeatureCollection',
-          features: baseGeoJson.features.filter((feature) => {
-            const osid = typeof feature.properties?.osid === 'string' ? feature.properties.osid : '';
-            return osid.length > 0 && targetSet.has(osid);
-          }),
-        }
+        type: 'FeatureCollection',
+        features: baseGeoJson.features.filter((feature) => {
+          const osid = typeof feature.properties?.osid === 'string' ? feature.properties.osid : '';
+          return osid.length > 0 && targetSet.has(osid);
+        }),
+      }
       : emptyGeoJson;
     const targetPoints = targetSet.size
       ? buildOperationTargetPointsGeoJSON(centroidLookup, operationTargetOsids)

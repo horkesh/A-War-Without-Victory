@@ -61,6 +61,11 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: validates brigade and front segment ID (`assignable_front_segments`), writes `state.brigade_front_assignment[brigadeId] = frontId` (`null` = reserve), reserializes, sends state via `game-state-updated`.
 
+- `assign-brigade-to-sector` (invoke)
+  - Payload: `{ brigadeId: string, sectorId: string | null }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: permanent player sector override. Validates same-corps constraint: sector `corps_id` must match brigade `corps_id`. Writes `state.military.brigade_sector_override[brigadeId] = sectorId`; `null` clears the override. Persists until explicitly cleared. `classifyBrigadesByTerritory` respects this override before its Phase 1 (frontline-by-position) logic. Invalid/stale overrides (wrong corps, brigade dissolved) fall through silently to normal assignment. Reserializes and broadcasts update. Source: `desktop_sim.ts::assignBrigadeToSector`.
+
 - `rename-front-segment` (invoke)
   - Payload: `{ frontId: string, name: string | null }`
   - Returns: `{ ok: boolean, error?: string }`
@@ -160,6 +165,21 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
     - Payload: `{ corpsId: string, operationName: string, decision: 'launch' | 'postpone' | 'abort' | 'probe' }`
     - Returns: `{ ok: boolean, error?: string }`
     - Behavior: player decision during Operation Briefing. `launch` sets `force_launch=true` on the operation; `postpone` increments `postponement_count`; `abort` sets `recovery_reason='commander_abort'`; `probe` creates `active_probe` on the operation. Triggered from OperationBriefingModal. Reserializes, sends state via `game-state-updated`.
+
+- `approve-reserve-request` (invoke)
+    - Payload: `{ corpsId: string, brigadeId: string }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: deploys `brigadeId` on loan to `corpsId`. Validates brigade has `elite_loan_state`, is not already on loan, and is in cooldown. Calls `deployEliteLoan` and removes the fulfilled request from `state.military.pending_reserve_requests`. Reserializes, sends state via `game-state-updated`. Triggered from ArmyReservePanel APPROVE button.
+
+- `recall-elite-brigade` (invoke)
+    - Payload: `{ brigadeId: string }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: recalls `brigadeId` from its current loan using reason `'player_recall'`. Validates brigade is currently on loan. Calls `recallEliteLoan`. Reserializes, sends state via `game-state-updated`. Triggered from ArmyReservePanel Recall button and FormationDetail Orders tab Recall button.
+
+- `redirect-reserve-loan` (invoke)
+    - Payload: `{ brigadeId: string, newCorpsId: string }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: recalls brigade from current corps and immediately re-deploys to `newCorpsId`. Validates both corps exist and brigade is currently on loan. Reserializes, sends state via `game-state-updated`. (IPC wired; UI redirect button not yet implemented.)
 
 ### Read-only query channels (no state mutation)
 

@@ -34,9 +34,9 @@ export default meta;
 type Story = StoryObj<typeof FormationDetail>;
 
 export const WithData: Story = {
-  render: () => <FormationDetail />,
+  render: () => <FormationDetail railSlot="primary" />,
 };
 
 export const Hidden: Story = {
-  render: () => <FormationDetail />,
+  render: () => <FormationDetail railSlot="primary" />,
 };

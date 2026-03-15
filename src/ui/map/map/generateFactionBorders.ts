@@ -16,6 +16,8 @@ interface FrontLineProperties {
   lineType: 'front';
   factionA: string;
   factionB: string;
+  tooth_rotation?: number;
+  brigade_count?: number;
 }
 
 interface GlowLineProperties {
@@ -96,7 +98,8 @@ function mergeLineSegments(
  */
 export function generateFactionBorders(
   osidGeoJson: FeatureCollection,
-  rbihHrhbAllied?: boolean
+  rbihHrhbAllied?: boolean,
+  osidCentroids?: Map<string, [number, number]>
 ): FeatureCollection<LineString> {
   const features = osidGeoJson.features as Feature<
     Polygon | MultiPolygon,
@@ -147,13 +150,10 @@ export function generateFactionBorders(
     if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
     if (rbihHrhbAllied && ((ctrlA === 'RBiH' && ctrlB === 'HRHB') || (ctrlA === 'HRHB' && ctrlB === 'RBiH'))) continue;
 
-    const [partA, partB] = edgeKey.split('|');
-    const [ax, ay] = partA.split(',').map(Number);
-    const [bx, by] = partB.split(',').map(Number);
-    const coords: [number, number][] = [
-      [ax, ay],
-      [bx, by],
-    ];
+    const [pA, pB] = edgeKey.split('|');
+    const [ax, ay] = pA.split(',').map(Number);
+    const [bx, by] = pB.split(',').map(Number);
+    const coords: [number, number][] = [[ax, ay], [bx, by]];
 
     glowFeatures.push({
       type: 'Feature',
@@ -167,12 +167,31 @@ export function generateFactionBorders(
     });
 
     const pairKey = [ctrlA, ctrlB].sort().join('-');
+    let toothRotation: number | undefined;
+    if (osidCentroids) {
+      const centA = osidCentroids.get(osidA);
+      const centB = osidCentroids.get(osidB);
+      if (centA && centB) {
+        const dx = bx - ax;
+        const dy = by - ay;
+        // Cross product to determine side
+        const crossA = dx * (centA[1] - ay) - dy * (centA[0] - ax);
+        toothRotation = crossA > 0 ? 180 : 0;
+      }
+    }
+
     if (!frontSegmentsByPair.has(pairKey)) {
       frontSegmentsByPair.set(pairKey, []);
     }
     frontSegmentsByPair.get(pairKey)!.push({
       type: 'Feature',
-      properties: { lineType: 'front', factionA: ctrlA, factionB: ctrlB },
+      properties: {
+        lineType: 'front',
+        factionA: ctrlA,
+        factionB: ctrlB,
+        tooth_rotation: toothRotation,
+        brigade_count: 0 // In base mode, we don't have sector density info
+      },
       geometry: { type: 'LineString', coordinates: coords },
     });
   }

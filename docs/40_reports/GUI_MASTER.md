@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-03-10
+**Updated:** 2026-03-14
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -72,6 +72,7 @@
 | 2026-03-07 | Settlement panel ethnic structure charts: Pre-war and Current use **ethnic bar colors** — green (Bosniaks), red (Serbs), blue (Croats), neutral (Other). `ethnicBarColor()` + `bg-faction-rbih` / `bg-faction-rs` / `bg-faction-hrhb`. | (this session) |
 | 2026-03-07 | Command experience: panel rail, right-drill flow, warroom scene-plate, hotspot anchors, faction identity, briefing routing | [20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md](implemented/20260307_GUI_COMMAND_EXPERIENCE_EXECUTION.md) |
 | 2026-03-07 | Comprehensive GUI review (player perspective) — convene, not implementation | [convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md](convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md) |
+| 2026-03-14 | **Brigade panel rework (n717)** — Engine: `brigade_sector_override` field in `MilitaryState`; `classifyBrigadesByTerritory` respects player overrides (same-corps only); `assignBrigadeToSector()` in `desktop_sim.ts`; `assign-brigade-to-sector` IPC handler; `preload.cjs` exposed. Adapter: `homeHops`, `homeDistanceMult`, `homeIsElite`, `sectorOverrideId` from `home_distance_cache` + formation data; `brigadeSectorOverride` in `LoadedGameState`. UI: `FormationDetail.tsx` restructured into 3 tabs (Overview / Record / Orders); ATK/MOV buttons removed (architecturally wrong — bypassed CorpsOperation); DIG IN stays in header; Orders tab has home-distance effectiveness widget (Layer 1 badge + Layer 2 dual power stats) and permanent sector reassignment picker (Layer 3, same-corps only); marker desaturation Layer 4 via data-driven `icon-opacity` = `home_distance_mult × 0.96` in map style. `useMapInteractions.ts`: click handler for `osid-density-fill`. `orderActions.ts`: `assignBrigadeToSectorOverrideAction`. | Phase A–F brigade-panel-rework plan |
 | 2026-03-06 | Panel rework: CorpsFrontPanel accordions, numeric shortcuts 1–5, loading shimmer, TopToolbar glow | [20260306_GUI_PANEL_REWORK_AND_GENERAL_POLISH.md](implemented/20260306_GUI_PANEL_REWORK_AND_GENERAL_POLISH.md) |
 
 ---

@@ -4,6 +4,9 @@
     "width": 2752,
     "height": 1536
   },
+  "options": {
+    "calendar_baked_in_art": true
+  },
   "regions": [
     {
       "id": "wall_flag_area",

@@ -315,7 +315,7 @@
                 "coalesce",
                 [
                   "get",
-                  "pressure_intensity"
+                  "threat_intensity"
                 ],
                 0
               ]
@@ -327,12 +327,12 @@
             4,
             [
               "*",
-              6,
+              8,
               [
                 "coalesce",
                 [
                   "get",
-                  "pressure_intensity"
+                  "threat_intensity"
                 ],
                 0
               ]
@@ -344,12 +344,12 @@
             6,
             [
               "*",
-              10,
+              12,
               [
                 "coalesce",
                 [
                   "get",
-                  "pressure_intensity"
+                  "threat_intensity"
                 ],
                 0
               ]
@@ -365,11 +365,11 @@
             "zoom"
           ],
           6,
-          1,
+          1.5,
           10,
-          2,
+          3,
           14,
-          3
+          5
         ],
         "line-offset": [
           "interpolate",
@@ -459,15 +459,15 @@
           6,
           [
             "+",
-            3,
+            2,
             [
               "*",
-              5,
+              4,
               [
                 "coalesce",
                 [
                   "get",
-                  "pressure_intensity"
+                  "threat_intensity"
                 ],
                 0
               ]
@@ -476,7 +476,7 @@
           10,
           [
             "+",
-            6,
+            4,
             [
               "*",
               8,
@@ -484,7 +484,7 @@
                 "coalesce",
                 [
                   "get",
-                  "pressure_intensity"
+                  "threat_intensity"
                 ],
                 0
               ]
@@ -493,7 +493,7 @@
           14,
           [
             "+",
-            9,
+            6,
             [
               "*",
               12,
@@ -501,7 +501,7 @@
                 "coalesce",
                 [
                   "get",
-                  "pressure_intensity"
+                  "threat_intensity"
                 ],
                 0
               ]
@@ -517,11 +517,11 @@
             "zoom"
           ],
           6,
-          1,
+          1.5,
           10,
-          2,
+          3,
           14,
-          3
+          5
         ],
         "line-offset": [
           "interpolate",
@@ -586,96 +586,159 @@
           ],
           6,
           [
-            "case",
+            "*",
             [
-              ">=",
+              "case",
+              [
+                ">=",
+                [
+                  "coalesce",
+                  [
+                    "get",
+                    "avg_entrenchment"
+                  ],
+                  0
+                ],
+                4
+              ],
+              3.2,
+              [
+                ">=",
+                [
+                  "coalesce",
+                  [
+                    "get",
+                    "avg_entrenchment"
+                  ],
+                  0
+                ],
+                2
+              ],
+              2.5,
+              1.7
+            ],
+            [
+              "interpolate",
+              [
+                "linear"
+              ],
               [
                 "coalesce",
                 [
                   "get",
-                  "avg_entrenchment"
+                  "brigade_count"
                 ],
-                0
+                1
               ],
-              4
-            ],
-            3.2,
-            [
-              ">=",
-              [
-                "coalesce",
-                [
-                  "get",
-                  "avg_entrenchment"
-                ],
-                0
-              ],
-              2
-            ],
-            2.5,
-            1.7
+              1,
+              1,
+              4,
+              1.8
+            ]
           ],
           10,
           [
-            "case",
+            "*",
             [
-              ">=",
+              "case",
+              [
+                ">=",
+                [
+                  "coalesce",
+                  [
+                    "get",
+                    "avg_entrenchment"
+                  ],
+                  0
+                ],
+                4
+              ],
+              5.2,
+              [
+                ">=",
+                [
+                  "coalesce",
+                  [
+                    "get",
+                    "avg_entrenchment"
+                  ],
+                  0
+                ],
+                2
+              ],
+              4,
+              2.6
+            ],
+            [
+              "interpolate",
+              [
+                "linear"
+              ],
               [
                 "coalesce",
                 [
                   "get",
-                  "avg_entrenchment"
+                  "brigade_count"
                 ],
-                0
+                1
               ],
-              4
-            ],
-            5.2,
-            [
-              ">=",
-              [
-                "coalesce",
-                [
-                  "get",
-                  "avg_entrenchment"
-                ],
-                0
-              ],
-              2
-            ],
-            4,
-            2.6
+              1,
+              1,
+              4,
+              1.8
+            ]
           ],
           14,
           [
-            "case",
+            "*",
             [
-              ">=",
+              "case",
+              [
+                ">=",
+                [
+                  "coalesce",
+                  [
+                    "get",
+                    "avg_entrenchment"
+                  ],
+                  0
+                ],
+                4
+              ],
+              7,
+              [
+                ">=",
+                [
+                  "coalesce",
+                  [
+                    "get",
+                    "avg_entrenchment"
+                  ],
+                  0
+                ],
+                2
+              ],
+              5.5,
+              3.6
+            ],
+            [
+              "interpolate",
+              [
+                "linear"
+              ],
               [
                 "coalesce",
                 [
                   "get",
-                  "avg_entrenchment"
+                  "brigade_count"
                 ],
-                0
+                1
               ],
-              4
-            ],
-            7,
-            [
-              ">=",
-              [
-                "coalesce",
-                [
-                  "get",
-                  "avg_entrenchment"
-                ],
-                0
-              ],
-              2
-            ],
-            5.5,
-            3.6
+              1,
+              1,
+              4,
+              1.8
+            ]
           ]
         ],
         "line-opacity": 0.95
@@ -1358,7 +1421,7 @@
         "icon-ignore-placement": true
       },
       "paint": {
-        "icon-opacity": 0.96
+        "icon-opacity": ["*", ["coalesce", ["get", "home_distance_mult"], 1.0], 0.96]
       }
     },
     {

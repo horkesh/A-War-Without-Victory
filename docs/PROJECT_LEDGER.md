@@ -1,7 +1,45 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-14
-**Status:** Post-MVP — War calibration, GUI rework, Phase M complete. Engine-sprint n703: 89.6% area match (+1.0pp from n701 baseline). All P1 realism issues closed; P2 issues partially addressed.
+**Last Updated:** 2026-03-15
+**Status:** Post-MVP — Per-formation casualty ledger surfaced in UI (n718). n292 backlog audit: equipment attrition, siege/bombardment KIA ratio, enclave resilience dynamism all confirmed resolved. 88.6% area, 6/6 benchmarks.
+
+## [2026-03-15] UI/UX Overhaul: Tactical Agency & Information Density (Phases 1-2)
+
+**Phase 1: Geometric Integrity & Tactical Agency**
+- **Frontline Snapping:** Operation arrow origins now snap to the nearest sector frontline point, ensuring map-wide cartographic alignment.
+- **Tactical Order Promotion:** Promoted Attack (⚔️), Move (➡️), and Sector (🛡️) orders to the `FormationDetail` header as icon-only actions for high-frequency interaction.
+- **Sector Re-assignment Interaction:** Replaced "AoR" logic with direct map-based Sector Assignment via the HUD panel.
+- **Nomenclature Standardization:** Implemented `DisplayNameProvider` to purge internal IDs (`op:*`) from user-facing screens in favor of human-readable sector and settlement names.
+
+**Phase 2: Information Density & Hierarchy**
+- **Unit Status Banners:** Performance-baked Health (⚔️) and Morale (🛡️) bars integrated directly into NATO counters.
+- **Quantization (10% Steps):** Status values are quantized (e.g., `h80`, `m60`) and baked into icon IDs for zero-overhead rendering on dense maps.
+- **HUD Rebranding:** Rebranded "TERRITORIAL EQUILIBRIUM" to **"FRONTLINE CONTROL"**; applied premium wide-kerning monospace typography (`tracking-[0.3em]`) to telemetry strips.
+- **Legacy HQ Purge:** Completely removed "Ghost Lines" and "Chain of Command" map visualizations. Multi-echelon HQ entities (Corps/Army) are now officially organizational abstractions, not map-bound targets.
+
+**Files:** `src/ui/map/map/MapContainer.tsx` (purge), `src/ui/map/map/builders/buildFormationsGeoJSON.ts` (quantization), `src/ui/map/components/BottomStatusStrip.tsx` (rebranding), `src/ui/map/map/formationIcons.ts`.
+
+---
+
+## [2026-03-14] Warroom: Cork Board Staff Map, Faction Wiring, Tactical Map Integration
+
+**Cork board staff map (new):** OSID-based territorial control thumbnail rendered onto the cork board surface as a hand-colored paper map. Uses `operational_settlements.geojson` (744 OSID polygons) + `operational_political_control.json` for initial state, updated live from `GameState.political.political_controllers`. Only the player's faction territory is colored (muted colored-pencil tones at 40% opacity); enemy territory stays neutral. Front lines drawn as dark pencil strokes between different-controller OSIDs. BiH country outline from exterior edges. Paper grain noise overlay (deterministic LCG), fold crease, edge vignette, and faded army crest stamp (12% opacity, multiply blend). Clicking the cork board opens the tactical map directly.
+
+**Whiteboard date:** Renders current turn date in greasy blue dry-erase marker style — ghost smudge layer, semi-transparent ink, wobbly underline.
+
+**Faction wiring fixes:**
+- Removed hardcoded `player_faction = 'RBiH'` in `src/ui/map/App.tsx` that forced ARBiH perspective regardless of chosen faction. Live autoload now skips when Electron IPC is available (desktop session handles state correctly).
+- Removed non-existent `data/ui/hq_clickable_regions.json` from staging (`tools/ui/warroom_stage_assets.ts`) and startup fallback chain. Region loading now uses per-faction files only (`hq_{faction}_clickable_regions.json`).
+
+**Tactical map "Back to HQ" button:** Added `◀ HQ` button to `TopToolbar.tsx` (React tactical map) — only visible in embedded mode (`?embedded=1`), posts `awwv-back-to-hq` to parent frame for warroom scene swap.
+
+**Serialization fixes:** `src/state/serialize.ts` migration code was writing `theatres`, `formations`, `negotiation_status`, `ceasefire` etc. to top-level `candidate` instead of `candidate.military`/`candidate.political`. Added comprehensive sweep to relocate stray fields.
+
+**Asset pipeline:** All remaining PNGs converted to WebP (crests, flags, game start, wall map frame). Lazy plate loading — only selected faction's 5 scene plates loaded on demand. OSID data files added to warroom staging.
+
+**Files:** `src/ui/warroom/components/OsidThumbnailRenderer.ts` (new), `src/ui/warroom/warroom.ts`, `src/ui/warroom/ClickableRegionManager.ts`, `src/ui/map/App.tsx`, `src/ui/map/components/TopToolbar.tsx`, `src/state/serialize.ts`, `tools/ui/warroom_stage_assets.ts`, `src/ui/warroom/components/WarPlanningMap.ts`, region JSONs (all 3 factions).
+
+---
 
 ## [2026-03-14] Anchor Recalibration: OSID-Only (no gameplay change)
 
@@ -13461,3 +13499,378 @@ Added `isEnclaveBrigade` guard to `evaluateUncontestedOccupation` (`bot_brigade_
 **Remaining open:** teocak anchor (RS instead of RBiH), vranesevici ring (RBiH instead of RS), Fix B follow-on planning (deferred).
 
 
+---
+
+## 2026-03-14 — Engine Sprint n54: Foča Initial Control Fix (engine-sprint worktree)
+
+**Problem:** `settlements_initial_master.json` marks all 121 Foča SIDs as RBiH (data sourcing error). Majority-vote derivation propagates this to `operational_initial_master.json`, marking all 14 Foča OSIDs as RBiH. The `hybrid_1992` initializer overwrites the correct RS municipal baseline with this wrong data. VRS captured Foča in April 1992 — nearly the entire municipality was RS-controlled by January 1993.
+
+**Result:** sim had 7/14 Foča OSIDs correctly RS at w40 (n53 baseline). After fix: 11/14 RS at w0, 10/14 RS at w40.
+
+### Change: `osid_control_overrides` in `data/scenarios/apr1992_definitive_40w.json`
+
+Added 5 Foča OSID overrides → RS: `op:foca:kosman`, `op:foca:tjentiste_2`, `op:foca:miljevina_2`, `op:foca:izbisno`, `op:foca:ustikolina`.
+
+**Intentionally left as RBiH:** `op:foca:brusna_2`, `op:foca:patkovina` (engine correctly captures via Operation Foca). `op:foca:mazlina` (painted RBiH target — correct).
+
+**Side effect:** Overriding 5 OSIDs also initialized `donje_zesce` and `prevrac` as RS (cascade from pocket-consolidation logic — neighbors now all RS). Both subsequently reconquered by RBiH by w40 via ARBiH 1st Corps operations, an ahistorical outcome (Sarajevo garrison does not march to Foča — flagged as P3 in REAL_WAR_MASTER.md).
+
+### Calibration impact
+
+- **13/13 anchors PASS**, **6/6 benchmarks PASS**
+- Area-weighted match: **89.4%** (−0.7pp vs n53 90.1%)
+- Foča end state: 10/14 RS (vs 7/14 in n53, vs painted 13/14 RS)
+- Hash: `1cab83a00f06d87c`
+
+**Cascade regression:** DRINA area dropped from 80.4% → 77.5% (−2.9pp). CENTRAL_CORRIDOR 96.5% → 94.1% (−2.4pp). New failures in sokolac (3 OSIDs), kalinovik:sela_2, cajnice:batotici, foca:prevrac. These are butterfly-effect cascades from changed initial conditions altering operation sequencing across the 40-week run. Accepted: historical accuracy gain in Foča outweighs regression in cascade areas.
+
+**Operation Foca (w15-w26, Gen. Slavko Lisica):** Achieves 1/3 objectives even from improved starting position. VRS Foča Brigade still depletes to ~489 personnel during execution — root cause of the stall is force size, not initial control.
+
+**Determinism:** `osid_control_overrides` is a deterministic scenario JSON field. Engine processes overrides before first turn. All downstream effects deterministic.
+
+**Tests:** 606/606 vitest pass (no new tests — scenario JSON change, no code paths modified).
+
+**War-or-Game sign-off:** SIGNED OFF 2026-03-14. Foča accuracy improvement (10/14 vs 7/14) is historically meaningful. VRS captured Foča in April 1992. Cascade regressions documented. P3 flag added: ARBiH 1st Corps listing Foča as offensive target is ahistorical (besieged Sarajevo garrison would not attack south into Foča).
+
+---
+
+## 2026-03-14 — Engine Sprint n55: Phase A.5 — ARBiH 1st Corps Foča Scope Fix (engine-sprint worktree)
+
+**Problem:** After Phase A (n54), ARBiH 1st Corps (Sarajevo garrison) reconquered `ustikolina`, `prevrac`, `donje_zesce` from RS control. Root cause: these newly-RS Foča OSIDs became adjacent to 1st Corps Trnovo/Kalinovik sectors, and the sector geometry/salient detection added them to `offensiveTargets` even though `foca` was not in `arbih_1st_corps` `target_municipalities`. Historically absurd — the besieged Sarajevo garrison does not march 60+ km south through Kalinovik to attack Foča.
+
+**Result:** Foča reaches **13/14 RS** at w40 (only `mazlina` correctly stays RBiH). ARBiH 1st Corps no longer attacks Foča.
+
+### Changes
+
+**1. Implemented `avoid_municipalities` in `generateCorpsDirectives` (`src/sim/combat/bot_corps_directives.ts`):**
+
+The field already existed in the `ArmyOperationPriority` type but its implementation had been removed. Re-implemented as:
+- Collect `avoidMunicipalitySet` from all active priorities for the corps
+- After all offensive target generation (including salient and pocket detection), strip any target whose municipality matches the avoid set
+- Applied just before the sector adjacency filter so no generation path bypasses it
+
+**2. Added `Sarajevo Garrison Boundary` priority (`src/sim/combat/bot_strategy.ts`):**
+
+```typescript
+{ name: 'Sarajevo Garrison Boundary', corps_id: 'arbih_1st_corps',
+  target_municipalities: [], avoid_municipalities: ['foca'],
+  start_week: 0, end_week: 9999, weight: 0, min_outcome: 'repulsed' }
+```
+
+A zero-weight, zero-target entry that injects `foca` into the avoid set for all turns. The Sarajevo garrison's mandate does not extend to Foča municipality.
+
+### Calibration impact
+
+- **13/13 anchors PASS**, **6/6 benchmarks PASS**
+- Area-weighted match: **89.1%** (−0.3pp vs n54, −1.0pp vs n53 baseline)
+- Foča end state: **13/14 RS** (vs 10/14 in n54, 7/14 in n53, vs painted 13/14 RS) ✓
+- Hash: `215b935fae29219e`
+
+**Cascade summary:** DRINA area improved marginally (80.4→80.5%). CENTRAL_BOSTON regressed (83.9→80.2%) — ARBiH 1st Corps freed resources now redirect to different operations. Kalinovik/Sokolac cascade failures (4 OSIDs) persist from n54. All are butterfly-effect cascades from changed initial conditions; none are P1 issues.
+
+**Battle stats:** 146 battles (−4 vs n54 — Foča attacks removed), 50,706 casualties (−5k vs n54), ARBiH 23 orders (−4 — Foča attack orders eliminated).
+
+**Determinism:** `avoid_municipalities` filtering uses municipality slug matching on OSID format. Deterministic. No Math.random(). No timestamp.
+
+**Tests:** 606/606 vitest pass.
+
+**War-or-Game sign-off:** SIGNED OFF 2026-03-14. Foča 13/14 RS is historically excellent — VRS controlled nearly all of Foča by April 1992. ARBiH 1st Corps correctly scoped to Sarajevo. −1.0pp area vs n53 baseline is accepted as the price of accurate Foča initialization. No new P1 realism issues.
+
+**NOTE: n55 superseded.** The `avoid_municipalities` artificial rule was reverted per project design principle (no geographic lockouts — supply constraints must organically handle deterrence). See n56 and n57.
+
+---
+
+## 2026-03-14 — Engine Sprint n56: Supply Filter — Organic Approach (engine-sprint worktree)
+
+**Problem:** n55's artificial `avoid_municipalities` rule was rejected. Investigation of the root mechanism: the attackers in n54 were Goražde enclave brigades (801st Light, 803rd Light, 807th Muslim Liberation, 808th Liberation) all under `arbih_1st_corps`. They marched via `mazlina` (RBiH Foča OSID adjacent to Goražde) to attack Foča objectives.
+
+**Organic fix attempted:** Added critical-supply brigade filter at the top of `evaluateSectorOffensiveLaunch()` in `sector_offensive.ts`. Brigades at `critical` supply state are excluded from offensive operations — sieged enclave units lack ammunition and fuel to sustain attacks.
+
+**Why it didn't work:** Goražde is not `critical` in the supply system. A paper corridor of RBiH-controlled OSIDs (brusna_2, mazlina, patkovina → Kalinovik → Trnovo → Sarajevo) connects Goražde to the heartland in the BFS. Supply state = `strained` (not `critical`). Filter only blocks `critical`. The filter stays in the codebase as a valid constraint for truly isolated pockets, but doesn't solve the Goražde case.
+
+### Calibration impact
+
+- **13/13 anchors PASS**, **6/6 benchmarks PASS**
+- Area-weighted match: **89.4%** (identical to n54 — filter has no effect on this run)
+- Hash: `d269e969dde43f06` (same as n54/n55 — supply filter changes no outcomes in this configuration)
+
+**Determinism:** New filter code is deterministic. Brigade ID → OSID → supply state lookup, no RNG.
+
+**Tests:** 606/606 vitest pass.
+
+---
+
+## 2026-03-14 — Engine Sprint n57: Enclave Operation Filter — Organic Fix (engine-sprint worktree)
+
+**Problem:** Root cause of Goražde brigades marching to Foča confirmed. `evaluateSectorAttack()` in `bot_brigade_eval_attack.ts` has no enclave guard for operation participants — it only checks the `enclave` tag for `evaluateUncontestedOccupation`. Enclave-tagged brigades (801st/803rd/807th/808th, all `home_mun: gorazde`) can freely march through the northern Foča paper corridor to reach `izbisno`/`prevrac` approach OSIDs.
+
+The existing enclave march guard in `bot_brigade_eval_front.ts` only applies to non-operation column marching. Operation execution bypasses it entirely.
+
+**Fix:** Added enclave brigade filter in `evaluateSectorOffensiveLaunch()` — after objectives are determined, filter out any brigade tagged `enclave` whose `location_osid` is not in the same enclave as any objective (per `isOsidInSameEnclave()`). If fewer than `MIN_BRIGADES_FOR_OFFENSIVE` remain, the operation is not created.
+
+This organically implements the design principle: **besieged units can raid adjacent positions or widen their perimeter (objectives within their enclave), but cannot march through supply corridors to attack distant objectives.** Strained-supply corridor brigades stay local; only objectives inside the enclave are eligible.
+
+### Changes
+
+**`src/sim/combat/sector_offensive.ts`:**
+- Added `import { isOsidInSameEnclave } from './enclave_resilience.js'`
+- Added enclave brigade filter block after objective selection (after line checking `objectives.length < 1`):
+  - Filters `sectorBrigadeIds` to exclude brigades tagged `enclave` whose location is not in the same enclave as any objective
+  - Re-checks `MIN_BRIGADES_FOR_OFFENSIVE` threshold after filtering
+
+### Result
+
+**Operacija Džihad** in n57: launches at turn 15 with `arbih_101st_mountain`, `arbih_105th_motorized`, `arbih_10th_mountain` (non-enclave Sarajevo brigades), targeting `op:novo_sarajevo:lukavica`, `op:centar_sarajevo:radava`, `op:novi_grad_sarajevo:recica`, `op:stari_grad_sarajevo:faletici` — the Sarajevo siege ring. Historically correct.
+
+**Goražde brigade behavior:** 801st/803rd/807th/808th no longer participate in Foča sector operations. Zero Foča mismatches in n57 compare output.
+
+### Calibration impact
+
+- **13/13 anchors PASS**, **6/6 benchmarks PASS**
+- Area-weighted match: **89.1%** (−0.3pp vs n54 — minor cascade effect from different 1st Corps sector composition)
+- Foča: **zero mismatches** — all Foča OSIDs match painted targets
+- Hash: `9cd776872612b907`
+
+**Regression note:** DRINA 82.1% (vs 80.5% in n54) — improvement. CENTRAL_BOSTON 82.8% (vs 80.2% in n54) — improvement. Overall area comparable to n54.
+
+**Determinism:** `isOsidInSameEnclave` uses static `ENCLAVE_DEFINITIONS` constant — purely deterministic. No RNG. No timestamps.
+
+**Tests:** 606/606 vitest pass.
+
+**War-or-Game sign-off:** SIGNED OFF 2026-03-14. This is the correct organic fix. Goražde brigades defending their enclave and potentially raiding adjacent RS positions (within the enclave perimeter) — not marching 30 km south through a paper corridor to attack Foča town. ARBiH 1st Corps Džihad now correctly targets the Sarajevo siege ring (lukavica, radava). No P1 realism issues identified in n57.
+
+---
+
+## [2026-03-14] n58: Phase B — Failed Objective Cooldown (Ripac Cycling Fix)
+
+**Problem (#32):** ARBiH 5th Corps repeatedly assaulted `op:bihac:ripac` every operation cycle. In n57: 9 attacks across w19–w40, all failed (7 repulsed, 2 stalemate), PRs 0.51–0.92. Same brigade (501st Slavna Mountain) led every attempt. No captures. Real commander behavior: after two consecutive failed assaults on a hardened position, redirect effort to a different axis — not keep hammering.
+
+**Root cause:** No memory of past failures in `CorpsCommandState`. Each operation cycle, `bot_corps_directives.ts` re-selected `op:bihac:ripac` as an offensive target from army priorities without any suppression of previously-failed objectives.
+
+### Fix
+
+**`src/state/game_state.ts`:**
+- Added `failed_offensive_objectives?: Record<string, { failure_count: number; cooldown_until_turn: number }>` to `CorpsCommandState`
+
+**`src/sim/combat/sector_offensive.ts`:**
+- Added `CorpsCommandState` to import block
+- Added constants: `OBJECTIVE_FAILURE_THRESHOLD = 2`, `OBJECTIVE_FAILURE_COOLDOWN_TURNS = 8`
+- Added `recordFailedObjectives(cmd, op, turn)` helper: runs at recovery completion for failed sector_attack ops; for each uncaptured objective, increments `failure_count`; when count reaches threshold, sets `cooldown_until_turn = turn + 8`
+- Called `recordFailedObjectives(cmd, op, turn)` immediately after `finalizeOperationAAR()` in the recovery-end block
+
+**`src/sim/combat/bot_corps_directives.ts`:**
+- Added cooldown filter after hard-enforce `avoidOsids` block: removes from `offensiveTargets` any OSID whose `failed_offensive_objectives` entry has `cooldown_until_turn > turn`
+
+### Result
+
+**5th Corps Ripac pattern:**
+- Op 1 "Operacija Čelik" (t15–t23): 3 attacks, 0 captures, failure → ripac `failure_count=1`
+- Op 2 "Operacija Gazija" (t23–t28): 4 attacks, 0 captures, failure → ripac `failure_count=2`, `cooldown_until_turn=36`
+- No third Ripac operation. Ripac suppressed until t36 (past meaningful w40 horizon)
+
+Attacks on Ripac: **9 → 7** (two-op learning window), then suppressed.
+
+### Calibration impact
+
+- **89.6% area match** (+0.5pp from n57, matches pre-fix n54 baseline)
+- **13/13 anchors PASS**, **6/6 benchmarks PASS**
+- Hash: `0aebd2a29fa8653d`
+
+**Determinism:** `failed_offensive_objectives` is written deterministically (turn-based threshold, no RNG). Filter reads same map in same order across runs.
+
+**Tests:** 606/606 vitest pass (no new tests — behavior change validated via calibration run).
+
+**War-or-Game sign-off:** SIGNED OFF 2026-03-14. A real 5th Corps commander (Dudaković) would try Ripac twice, take heavy casualties (444 KIA + 814 WIA in Op Čelik alone), and pivot to other axes. The cooldown correctly models institutional learning without hard-coding geographic restrictions. Threshold=2 / cooldown=8 turns (~2 months) is historically appropriate for operational reassessment in the Bosnian War context.
+
+
+---
+
+## [2026-03-15] Engine-sprint n59+n70: Fix #34 — VRS 1KK Operation Corridor 92 zero attacks
+
+**Issue:** Operation Corridor 92 fired correctly (launched t9, transitioned to execution t11) but produced **0 attacks** and terminated after 3 execution turns — 3 brigades marched into position then stalled.
+
+**Root cause (two bugs, both required fixing):**
+
+### Bug 1 — Execution march-first used 1-hop move invisible to stall detector (n59 fix)
+
+`evaluateSectorAttack` execution-phase march-first path used `movement_orders` + `findNearestFriendlyOsidInSet` (returns the **first step** of BFS). Regular movement orders write only `location_osid` change — the `updateMultiAxisResults` stall detector checks `brigade_movement_state[bid].status === 'in_transit' || 'packing'` for `anyMoved`. A 1-hop movement order never sets `in_transit` status, so `anyMoved` was always false → `idle_execution_turn_streak` accumulated → axis stalled prematurely.
+
+Fix: changed to `column_march_orders` + `findNearestFriendlyOsidDestination` (returns the **actual destination OSID**), which sets `brigade_movement_state` to `in_transit`, making the stall detector correctly see the movement.
+
+### Bug 2 — `evaluateReserve` intercepted operation participants before they reached `evaluateSectorAttack` (n70 fix)
+
+After marching to `misinci_2` (staging position), both `rs_1st_doboj_light_infantry` and `rs_27th_derventa_motorized` were caught by `evaluateReserve` every execution turn instead of falling through to `evaluateSectorAttack`.
+
+Root cause: `misinci_2` is adjacent to HRHB territory (`zivinice`, `kotorsko_2`), but RS and HRHB are under Graz Accords — HRHB neighbors do not appear in `graphAnalysis.osid_analysis.enemy_neighbors` for RS. So from the brigade perspective: `adjEnemy.length === 0`, `osidAnalysis.enemy_neighbors.length === 0`, and one neighbor IS near-front (has enemy neighbors in graphAnalysis). This triggered the reserve condition: `reserveInfo.reserved < maxReserve && adjEnemy.length === 0 && nearFront`. Both brigades were slotted as corps reserve with `posture='defend'` and returned `true` — `evaluateSectorAttack` was never reached.
+
+Fix: added `if (isActiveSectorOperationParticipant) return false;` guard at the top of `evaluateReserve`. Operation participants have explicit march orders toward an objective — holding them as corps reserve is structurally wrong.
+
+### Fix
+
+**`src/sim/combat/bot_brigade_eval_attack.ts`** (n59):
+- Execution-phase march-first: `movement_orders[brigade.id] = nearestApproach` → `column_march_orders[brigade.id] = approachDest`
+- Path query: `findNearestFriendlyOsidInSet(...)` → `findNearestFriendlyOsidDestination(...)` (returns actual destination, not first step)
+
+**`src/sim/combat/bot_brigade_eval_hold.ts`** (n70):
+- Added `isActiveSectorOperationParticipant` to `evaluateReserve` destructure
+- Added early return: `if (isActiveSectorOperationParticipant) return false;`
+
+### Result
+
+**Operation Corridor ★★★★☆ (w9–w19):** 4 attacks total, 5/5 objectives captured — `modrica`, `garevac_2` (corridor_east); `donja_dubica`, `potocani_2`, `novo_selo_2` (corridor_south). Outcome: success. 1.5:1 exchange.
+
+**Corridor East axis:** rs_43rd_prijedor_motorized + rs_27th_derventa_motorized, 2 attacks, modrica+garevac_2 captured, 110 enemy KIA / 50 own KIA.
+
+**Corridor South axis:** rs_1st_doboj_light_infantry, 2 attacks, donja_dubica+potocani_2+novo_selo_2 captured, 249 enemy KIA / 183 own KIA.
+
+### Calibration impact
+
+- **90.1% area match** (+0.5pp from 89.6% in n58)
+- **13/13 anchors PASS**, **6/6 benchmarks PASS**
+- Hash: `8c7654dd7e97515b`
+
+**Determinism:** Pure bot AI logic changes — no new state fields, no RNG. Fully deterministic.
+
+**Tests:** 606/607 vitest pass (1 skipped pre-existing). No new tests — behavior validated via calibration run and operation_aars.json.
+
+**War-or-Game note:** VRS 1KK Op Corridor was the defining VRS success of summer 1992 — linking Krajina to Serbia proper. An operation that fires correctly with 5/5 objectives is historically appropriate. The 1.5:1 exchange ratio is on the low end (historical VRS ratio was 2-3:1) but acceptable for a surprise mechanized push through lightly-defended Posavina villages.
+
+**Knowledge base:** See 2026-03-15 entry in `docs/PROJECT_LEDGER_KNOWLEDGE.md` — "Operation participant reserve bypass pattern."
+
+---
+
+## [2026-03-15] Fix #35 — ARBiH Corps Zero-Attack Operations (n76)
+
+**Summary:** ARBiH 3rd and 4th corps consistently produced zero attack orders throughout operation execution phases (w20–w26), stalling with `elig=0` and entering recovery via `max_failures`. All other ARBiH corps (1st, 2nd, 5th) also had this issue but were partially masked by better-positioned brigades.
+
+**Root cause:** `bot_corps_directives.ts` supply health gate (lines 876–882) upgrades `bestMinOutcome` to `'costly_victory'` when `supplyHealth.adequate_fraction < 0.05`. RBiH starts with `general_supply_reserve = 10` (below `RESERVE_STRAINED_THRESHOLD = 20`) → `getEffectiveSupplyState` degrades all RBiH OSID supply states to `'critical'` → `adequate_fraction ≈ 0.0` → `bestMinOutcome = 'costly_victory'` is baked into every ARBiH operation at launch time via `evaluateSectorOffensiveLaunch`. Operations persist their `min_attack_outcome` field for their entire lifetime. `getSectorOffensiveProbeThreshold` returns this stored value on every probe check. Even after supply recovered by w20 (supply_pressure=100), operations continued using the launch-time `'costly_victory'` threshold. With `predictedOutcome ≤ 'stalemate'` for most ARBiH brigades vs fortified VRS positions, `isOutcomeSufficientForAttack('stalemate', 'costly_victory')` = false → all attacks blocked.
+
+**Investigation path:** Two incorrect hypotheses preceded the correct fix: (1) supply penalty at brigade level (`brigadeSupplyState === 'critical'`) was initially suspected — incorrect because supply recovered by execution phase; (2) `evaluateSupplyGate` blocking — already bypassed for operation participants. The correct root cause was found by adding `getSectorOffensiveProbeThreshold` debug which revealed `min_attack_outcome = 'costly_victory'` baked into operations at launch, tracing back to the supply health gate in directive generation.
+
+**Fix:**
+- `bot_corps_directives.ts`: capture `minAttackOutcomeForOpLaunch = bestMinOutcome` BEFORE the supply health upgrade (lines 876–882). Pass `minAttackOutcomeForOpLaunch` to `evaluateSectorOffensiveLaunch` instead of supply-inflated `bestMinOutcome`. The directive itself still receives the upgraded 'costly_victory' threshold (for planning purposes); only the baked-into-operation value is de-inflated.
+- `bot_brigade_eval_attack.ts`: secondary defense-in-depth — if `brigadeSupplyState === 'critical'` for an operation participant in execution, lower the probe threshold to `'catastrophic'` (allow any attack). Combat predictor already penalizes critical supply via power multiplier; double-penalizing at the threshold level prevents historically-plausible desperate attacks.
+
+**Results:**
+- ARBiH 3rd corps: `Operacija Strijela` → atk=1 at w23; follow-on ops (`Odbrana`, `Kiša`) attacking w28–w40
+- ARBiH 4th corps: `Operacija Rijeka` → atk=1 at w21–22; follow-on ops (`Grad`, `Sjena`) active through w40
+- RBiH total attack orders: 27 → 35 (+30%)
+- Area: 90.1% → **90.3%** (+0.2pp)
+- Anchors: **13/13** ✓
+- Benchmarks: **6/6** ✓
+- Hash: `94af31cf9c86ad2b`
+
+**Determinism:** Fix is deterministic. `minAttackOutcomeForOpLaunch` is computed from sorted priority iteration (unchanged). No randomness introduced. New hash (`94af31cf9c86ad2b`) confirms changed simulation behavior.
+
+**Files:** `src/sim/combat/bot_corps_directives.ts` (`minAttackOutcomeForOpLaunch` capture), `src/sim/combat/bot_brigade_eval_attack.ts` (critical supply threshold override in `evaluateSectorAttack`)
+
+**Tests:** 606/607 vitest pass (1 skipped pre-existing).
+
+**Knowledge base:** See 2026-03-15 entry in `docs/PROJECT_LEDGER_KNOWLEDGE.md` — "Supply-gate directive baking vs operation probe threshold (n76 Fix #35)."
+
+---
+
+## [2026-03-14] Brigade Panel Rework — Player Command Model, Home-Distance Viz, Sector Override (n717)
+
+**Motivation:** External expert added ATK⚔️ and MOV➡️ buttons to FormationDetail which bypass CorpsOperation machinery — architecturally wrong. Simultaneously, the player had no way to (a) reassign a brigade to a different sector, (b) see the effectiveness cost of moving a brigade far from home, or (c) understand the brigade/sector division of labour.
+
+### Engine changes
+
+- **`brigade_sector_override`** added to `MilitaryState` (`game_state.ts`). Persists until manually cleared. Same-corps validation only.
+- **`classifyBrigadesByTerritory`** (`corps_front_sectors.ts`): respects player overrides before Phase 1. Invalid/stale overrides silently fall through to normal assignment.
+- **`assignBrigadeToSector()`** added to `desktop_sim.ts`: validates same-corps constraint, mutates override map.
+- **IPC**: `assign-brigade-to-sector` handler in `electron-main.cjs`; `assignBrigadeToSector` exposed in `preload.cjs` and `useIPC.ts`.
+
+### Adapter / data layer
+
+- `GameStateAdapter.ts`: reads `home_distance_cache` (pre-computed BFS hops from `buildHomeDistanceCache()`); derives `homeHops`, `homeDistanceMult`, `homeIsElite`, `sectorOverrideId` for each brigade. Inlines `getHomeDistanceMult` constants (adapter cannot import engine).
+- `types.ts`: new `FormationView` fields (`homeHops`, `homeDistanceMult`, `homeIsElite`, `sectorOverrideId`) + `LoadedGameState.brigadeSectorOverride`.
+
+### UI changes
+
+- **`FormationDetail.tsx`** restructured into **3 tabs** (Overview / Record / Orders):
+  - **ATK/MOV buttons removed** (bypass CorpsOperation — wrong). DIG IN stays in header.
+  - **Overview tab**: name, corps/sector assignment boxes, posture/readiness, officer, decorations, TO&E, stats, movement, location, narrative arc.
+  - **Record tab**: combat summary, KIA/WIA estimate, streaks, equipment brag, recent engagements.
+  - **Orders tab**: Layer 1 home-distance badge (Home Turf vs X% Eff), Layer 2 dual power stats (home vs current), Layer 3 sector picker (same-corps sectors with override/current badges + clear override), combat posture buttons.
+- **`buildFormationsGeoJSON.ts`**: emits `home_distance_mult` property on each formation feature.
+- **`awwv_map_style.json`**: `icon-opacity` now data-driven = `home_distance_mult × 0.96` (Layer 4 marker desaturation — brigades away from home visibly dim on map).
+- **`useMapInteractions.ts`**: click handler for `osid-density-fill` layer (fixes pre-existing failing test).
+- **`orderActions.ts`**: `assignBrigadeToSectorOverrideAction()` wraps the permanent override IPC.
+
+### Tests
+
+- 606/607 vitest pass (1 pre-existing skip). Failing `ui_map_interactions.test.ts` test fixed.
+- No calibration regression: 88.6% area match (same as n696). Hash: `5e0751bafd3343d5`.
+
+### Canon update
+
+- `docs/10_canon/context.md`: **Player command model** section added — documents the canonical Army→Corps→Sector command hierarchy, valid player levers, why direct brigade attack/move orders are architecturally wrong, and home-distance effectiveness mechanics.
+- `docs/40_reports/GUI_MASTER.md`: updated with n717 entry.
+
+**Determinism:** `brigade_sector_override` is a player-set state field (deterministic mutations via IPC only). `home_distance_cache` is pre-computed deterministically by `buildHomeDistanceCache()` each turn. UI changes and GeoJSON property additions are display-only — no simulation behavior change. Zero calibration regression confirmed.
+
+**Knowledge base:** Player command model now canonical in `context.md` §Player command model.
+
+
+---
+
+## [2026-03-15] Per-formation casualty ledger UI + n292 backlog audit (n718)
+
+**Motivation:** Backlog §13 (n292 audit) listed several P0/P1 combat mechanics failures. Two were already stale (fixes added after n292 without closing the backlog). One required new UI plumbing. Systematic investigation closed all three.
+
+### 1. Per-formation casualty ledger (new UI feature)
+
+- **`types.ts`**: Added `campaignKia?`, `campaignWia?`, `campaignMia?` to `FormationView`.
+- **`GameStateAdapter.ts`**: Before the formations loop, extracts `casualty_ledger[faction].per_formation` into a flat `perFormationCasualties` lookup. Populates `fv.campaignKia/Wia/Mia` for brigades and OGs.
+- **`FormationDetail.tsx`** (Record tab): Replaces estimated KIA/WIA (`total_casualties_taken × 0.30/0.55`) with actual ledger values when available. Adds MIA/POW row (shown only when > 0). Strips `(est.)` label from KIA/WIA.
+- Data was already present in `state.military.casualty_ledger.per_formation` — pure adapter + UI plumbing, no engine change.
+
+### 2. n292 backlog audit — stale items confirmed resolved
+
+| Issue | Status | Evidence |
+|-------|--------|---------|
+| Equipment attrition (0 lost in 168 battles) | **CONFIRMED FIXED** | w40 run: RS 132 tanks/152 arty lost, RBiH 45/77, HRHB 6/14. Code in `attack_resolution_osid.ts` lines 867–875 (attacker) + 927–935 (defender). |
+| Siege/bombardment KIA ratio inverted | **CONFIRMED RESOLVED** | `frontline_attrition.ts` has `BOMBARDMENT_EXPOSURE_RATE=0.008` applied to outgunned defenders. Current w40: RBiH 17,235 KIA vs RS 7,775 KIA (2.2:1 defender:attacker — correct direction). |
+| Enclave resilience static after init | **CONFIRMED FIXED** | `enclave_resilience.ts` per-enclave `growth_mult` + supply-driven growth/decay. w40 values: Sarajevo 44/45, Gorazde 33/35, Srebrenica 17.5/25, Zepa 15/20, Bihac 11.5/40. |
+
+**Side-finding:** Recruited brigades initialize with full `DEFAULT_COMPOSITION` (RS: 40 tanks each). Wartime recruits should not spawn fresh armor. Low-priority design issue filed in REAL_WAR_MASTER §16 update note.
+
+**Determinism:** UI/adapter changes only. No engine or pipeline code modified. Zero calibration impact.
+
+**Files:** `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/components/FormationDetail.tsx`, `docs/40_reports/CONSOLIDATED_BACKLOG.md` (3 items closed), `docs/40_reports/REAL_WAR_MASTER.md` (§16 update).
+
+**Tests:** 606/607 vitest pass (unchanged).
+
+## [2026-03-15] Army HQ Reserve Pool — Elite Brigade Loan System
+
+**Summary:** Full implementation of the elite brigade loan system. Elite brigades moved to faction Main Staff HQ corps; per-turn bot AI request/assignment/recall lifecycle; player UI panel; IPC bridge; per-brigade episode tracker.
+
+**Engine changes:**
+- `src/sim/combat/army_reserve_system.ts` — new 476-LOC module: `generateArmyReserveRequests`, `deployEliteLoan`, `recallEliteLoan`, `evaluateArmyReserveAssignments`, `tickEliteLoans`
+- `src/state/elite_loan_types.ts` — added `ArmyReserveRequest`, `EliteLoanEpisode`, `EliteBrigadeTracker`; renamed `ELITE_LOAN_DURATION → ELITE_LOAN_MIN_DURATION`; added `current_episode_id`, `MAX_AUTO_DEPLOY_HOPS`
+- `src/state/game_state.ts` — `pending_reserve_requests?: ArmyReserveRequest[]`, `elite_brigade_tracker?: Record<string, EliteBrigadeTracker>` on MilitaryState
+- `src/sim/turn_phases/war_phases.ts` — +`generate-army-reserve-requests` step; `elite-loan-lifecycle` → `tick-elite-loans` (120 total steps)
+- `src/sim/combat/corps_front_sectors.ts` — Phase 0a `loanedCorpsMap` routes loaned brigades through target corps for sector assignment
+- `src/sim/combat/corps_front_sectors_constants.ts` — bug fix: `hvo_general_staff` → `hvo_main_staff` in EXEMPT_CORPS_IDS
+- `data/source/oob_brigades.json` — RS 1st Guards + 65th Protection → `vrs_main_staff`; HRHB 1st/2nd/3rd Guard → `hvo_main_staff` (2nd+3rd marked `is_elite: true`); ARBiH unchanged
+
+**IPC/Desktop:** `approve-reserve-request`, `recall-elite-brigade`, `redirect-reserve-loan` — full stack through `desktop_sim.ts` → `electron-main.cjs` → `preload.cjs` → `useIPC.ts`
+
+**UI:** `ArmyReservePanel.tsx` (new) — rendered for army_hq selections via App.tsx conditional; sections: Reserve Pool, Pending Requests, Campaign History. `FormationDetail.tsx` — elite loan status badge in Orders tab.
+
+**Tests:** 12 new vitest tests in `tests/army_reserve_system.test.ts` (618 total passing).
+
+**Determinism:** All iteration via `strictCompare`; no timestamps or Math.random(). No calibration regression expected (new system, elites thin per faction).
+
+**Report:** `docs/40_reports/implemented/20260315_ARMY_HQ_RESERVE_POOL_LOAN_SYSTEM.md`
+
+**Doc propagation:**
+- `docs/10_canon/context.md` — elite loan system entry rewritten
+- `docs/10_canon/Systems_Manual_v0_6_0.md` — `officer-succession` pipeline step name updated
+- `docs/20_engineering/PIPELINE_ENTRYPOINTS.md` — `elite-loan-lifecycle` replaced; new steps documented
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md` — 3 new IPC channels added
+- `docs/20_engineering/MAP_UI_MASTER.md` — ArmyReservePanel in component tree; ArmyDetail / ArmyReservePanel sections updated
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` — army_hq panel description updated
+- `.claude/napkin.md` — elite loan lifecycle entry updated
+- `memory/backlog_army_hq_reserve.md` — marked IMPLEMENTED

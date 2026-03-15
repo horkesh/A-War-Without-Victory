@@ -30,7 +30,7 @@ export type MapMode = 'political' | 'ethnic' | 'supply' | 'pressure' | 'density'
 /** Single staged order for the current turn (Phase C5). */
 export interface StagedOrder {
   id: string;
-  type: 'attack' | 'move' | 'posture';
+  type: 'attack' | 'move' | 'posture' | 'sector';
   formationId: string;
   targetOsid?: string;
   postureName?: string;
@@ -61,6 +61,9 @@ export interface GameStore {
 
   hoveredOsids: string[];
   setHoveredOsids: (osids: string[]) => void;
+
+  hoveredCorpsId: string | null;
+  setHoveredCorpsId: (id: string | null) => void;
 
   /** Tooltip hover target: type + id (osid string, formation id, or front edge_id). */
   tooltipTarget: { type: 'osid' | 'formation' | 'front'; id: string } | null;
@@ -102,9 +105,9 @@ export interface GameStore {
   setBattlesVisible: (v: boolean) => void;
   setStrategicVisible: (v: boolean) => void;
 
-  /** Phase C4: When 'attack'/'move', next OSID click opens AttackConfirmation or stages move order. */
-  orderModeForFormation: 'attack' | 'move' | null;
-  setOrderModeForFormation: (mode: 'attack' | 'move' | null) => void;
+  /** Phase C4: When 'attack'/'move'/'sector', next OSID click opens AttackConfirmation or stages move/sector assignment. */
+  orderModeForFormation: 'attack' | 'move' | 'sector' | null;
+  setOrderModeForFormation: (mode: 'attack' | 'move' | 'sector' | null) => void;
 
   /** Phase C4: When set, show AttackConfirmation modal; cleared on Confirm or Cancel. */
   pendingAttackConfirmation: { attackerFormationId: string; targetOsid: string } | null;
@@ -117,6 +120,9 @@ export interface GameStore {
   /** Hovered corps front sector (mouse over territory). */
   hoveredSectorId: string | null;
   setHoveredSectorId: (id: string | null) => void;
+
+  expandedStackOsid: string | null;
+  setExpandedStackOsid: (osid: string | null) => void;
 
   /** Selected corps (click on corps header in sidebar). */
   selectedCorpsId: string | null;
@@ -189,6 +195,10 @@ export interface GameStore {
   addStagedOrder: (order: Omit<StagedOrder, 'id'>) => void;
   removeStagedOrder: (id: string) => void;
   clearStagedOrders: () => void;
+
+  /** Position [lng, lat] for the "Ghost Line" interaction preview (move/attack). */
+  ghostLinePoint: [number, number] | null;
+  setGhostLinePoint: (pt: [number, number] | null) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -202,6 +212,15 @@ export const useGameStore = create<GameStore>((set) => ({
 
   hoveredOsids: [],
   setHoveredOsids: (osids) => set({ hoveredOsids: [...new Set(osids)].sort((a, b) => a.localeCompare(b)) }),
+
+  hoveredCorpsId: null,
+  setHoveredCorpsId: (id) => set({ hoveredCorpsId: id }),
+
+  hoveredSectorId: null,
+  setHoveredSectorId: (id) => set({ hoveredSectorId: id }),
+
+  expandedStackOsid: null,
+  setExpandedStackOsid: (osid) => set({ expandedStackOsid: osid }),
 
   tooltipTarget: null,
   tooltipPosition: null,
@@ -237,16 +256,13 @@ export const useGameStore = create<GameStore>((set) => ({
   setStrategicVisible: (v) => set({ strategicVisible: v }),
 
   orderModeForFormation: null,
-  setOrderModeForFormation: (mode) => set({ orderModeForFormation: mode }),
+  setOrderModeForFormation: (mode: 'attack' | 'move' | 'sector' | null) => set({ orderModeForFormation: mode }),
 
   pendingAttackConfirmation: null,
   setPendingAttackConfirmation: (v) => set({ pendingAttackConfirmation: v }),
 
   selectedCorpsFrontSectorId: null,
   setSelectedCorpsFrontSectorId: (id) => set({ selectedCorpsFrontSectorId: id, selectedFormationId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
-
-  hoveredSectorId: null,
-  setHoveredSectorId: (id) => set({ hoveredSectorId: id }),
 
   selectedCorpsId: null,
   setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
@@ -379,4 +395,7 @@ export const useGameStore = create<GameStore>((set) => ({
       stagedOrders: state.stagedOrders.filter((o) => o.id !== id),
     })),
   clearStagedOrders: () => set({ stagedOrders: [] }),
+
+  ghostLinePoint: null,
+  setGhostLinePoint: (pt) => set({ ghostLinePoint: pt }),
 }));

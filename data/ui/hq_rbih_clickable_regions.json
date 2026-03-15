@@ -9,452 +9,504 @@
   },
   "regions": [
     {
-      "id": "diplomatic_telephone",
-      "type": "baked_prop",
+      "id": "wall_flag_area",
+      "type": "sprite_overlay",
       "bounds": {
-        "x": 263,
-        "y": 1197,
-        "width": 275,
-        "height": 197
+        "x": 1538,
+        "y": 465,
+        "width": 172,
+        "height": 632
       },
       "polygon": [
         [
-          366,
-          1394
+          1612,
+          1097
         ],
         [
-          519,
-          1375
+          1636,
+          1084
         ],
         [
-          526,
-          1341
+          1681,
+          1057
         ],
         [
-          510,
-          1309
+          1710,
+          1036
         ],
         [
-          490,
-          1268
+          1700,
+          999
         ],
         [
-          533,
-          1272
+          1686,
+          862
         ],
         [
-          538,
-          1245
+          1681,
+          812
         ],
         [
-          533,
-          1217
+          1631,
+          534
         ],
         [
-          490,
-          1201
+          1628,
+          492
         ],
         [
-          437,
-          1197
+          1612,
+          465
         ],
         [
-          384,
-          1201
+          1607,
+          494
         ],
         [
-          331,
-          1219
+          1560,
+          793
         ],
         [
-          279,
-          1231
+          1538,
+          968
         ],
         [
-          263,
-          1254
+          1562,
+          1012
         ],
         [
-          265,
-          1286
+          1578,
+          1034
         ],
         [
-          279,
-          1309
-        ],
-        [
-          308,
-          1293
-        ],
-        [
-          301,
-          1327
-        ],
-        [
-          301,
-          1355
-        ],
-        [
-          327,
-          1378
+          1594,
+          1089
         ]
       ],
-      "action": "open_diplomatic_telephone",
+      "action": "open_faction_overview",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Diplomatic Telephone",
-      "layer": "desk"
+      "tooltip": "Faction Overview",
+      "layer": "wall"
     },
     {
-      "id": "wall_flag_area",
-      "type": "runtime_overlay",
+      "id": "wall_cork_board",
+      "type": "dynamic_render",
       "bounds": {
-        "x": 2274,
-        "y": 181,
-        "width": 358,
-        "height": 1213
+        "x": 854,
+        "y": 576,
+        "width": 602,
+        "height": 325
       },
       "polygon": [
         [
-          2455,
-          1394
+          854,
+          584
         ],
         [
-          2629,
-          1295
+          1456,
+          576
         ],
         [
-          2632,
-          1245
+          1454,
+          896
         ],
         [
-          2583,
-          860
-        ],
-        [
-          2528,
-          580
-        ],
-        [
-          2446,
-          181
-        ],
-        [
-          2421,
-          200
-        ],
-        [
-          2418,
-          261
-        ],
-        [
-          2333,
-          663
-        ],
-        [
-          2292,
-          914
-        ],
-        [
-          2274,
-          1098
-        ],
-        [
-          2347,
-          1208
-        ],
-        [
-          2391,
-          1316
+          854,
+          901
         ]
       ],
-      "action": "open_faction_archive",
+      "action": "open_strategic_map",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Faction Flag",
+      "tooltip": "Strategic Map",
       "layer": "wall"
     },
     {
       "id": "wall_calendar_area",
-      "type": "runtime_overlay",
+      "type": "dynamic_render",
       "bounds": {
-        "x": 1421,
-        "y": 433,
-        "width": 793,
-        "height": 541
+        "x": 1774,
+        "y": 640,
+        "width": 304,
+        "height": 190
       },
       "polygon": [
         [
-          1421,
-          433
+          1774,
+          642
         ],
         [
-          1425,
-          974
+          1776,
+          830
         ],
         [
-          2214,
-          965
+          2078,
+          825
         ],
         [
-          2212,
-          433
+          2075,
+          640
         ]
       ],
-      "action": "advance_turn",
+      "action": "open_calendar",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Wall Calendar",
+      "tooltip": "Calendar",
       "layer": "wall"
     },
     {
-      "id": "intelligence_journal",
+      "id": "diplomatic_telephone",
       "type": "baked_prop",
       "bounds": {
-        "x": 1620,
-        "y": 1348,
-        "width": 319,
-        "height": 117
+        "x": 1800,
+        "y": 1158,
+        "width": 185,
+        "height": 77
       },
       "polygon": [
         [
-          1661,
-          1458
+          1890,
+          1235
         ],
         [
-          1721,
-          1465
+          1964,
+          1224
         ],
         [
-          1939,
-          1460
+          1967,
+          1208
         ],
         [
-          1932,
-          1433
+          1985,
+          1208
         ],
         [
-          1868,
-          1348
+          1983,
+          1192
         ],
         [
-          1620,
-          1348
+          1977,
+          1190
+        ],
+        [
+          1972,
+          1176
+        ],
+        [
+          1948,
+          1163
+        ],
+        [
+          1919,
+          1158
+        ],
+        [
+          1898,
+          1158
+        ],
+        [
+          1869,
+          1163
+        ],
+        [
+          1864,
+          1171
+        ],
+        [
+          1858,
+          1182
+        ],
+        [
+          1824,
+          1184
+        ],
+        [
+          1803,
+          1187
+        ],
+        [
+          1800,
+          1198
+        ],
+        [
+          1805,
+          1205
+        ],
+        [
+          1813,
+          1213
         ]
       ],
-      "action": "open_intelligence_journal",
+      "action": "open_diplomacy",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Intelligence Journal",
-      "layer": "wall"
-    },
-    {
-      "id": "desk_map",
-      "type": "baked_prop",
-      "bounds": {
-        "x": 496,
-        "y": 426,
-        "width": 844,
-        "height": 548
-      },
-      "polygon": [
-        [
-          496,
-          426
-        ],
-        [
-          501,
-          972
-        ],
-        [
-          1340,
-          974
-        ],
-        [
-          1336,
-          426
-        ]
-      ],
-      "action": "open_operational_map",
-      "hover_style": "glow",
-      "cursor": "pointer",
-      "tooltip": "Operational Map",
-      "layer": "desk"
-    },
-    {
-      "id": "newspaper_stack",
-      "type": "baked_prop",
-      "bounds": {
-        "x": 540,
-        "y": 1307,
-        "width": 498,
-        "height": 156
-      },
-      "polygon": [
-        [
-          542,
-          1460
-        ],
-        [
-          985,
-          1463
-        ],
-        [
-          1038,
-          1373
-        ],
-        [
-          1028,
-          1323
-        ],
-        [
-          671,
-          1307
-        ],
-        [
-          540,
-          1410
-        ]
-      ],
-      "action": "open_press_briefing",
-      "hover_style": "glow",
-      "cursor": "pointer",
-      "tooltip": "Press Briefing",
-      "layer": "desk"
-    },
-    {
-      "id": "command_briefing_folio",
-      "type": "baked_prop",
-      "bounds": {
-        "x": 1180,
-        "y": 1323,
-        "width": 325,
-        "height": 140
-      },
-      "polygon": [
-        [
-          1180,
-          1463
-        ],
-        [
-          1501,
-          1463
-        ],
-        [
-          1505,
-          1421
-        ],
-        [
-          1487,
-          1330
-        ],
-        [
-          1386,
-          1336
-        ],
-        [
-          1315,
-          1336
-        ],
-        [
-          1207,
-          1323
-        ]
-      ],
-      "action": "open_command_briefing",
-      "hover_style": "glow",
-      "cursor": "pointer",
-      "tooltip": "Command Briefing",
+      "tooltip": "Diplomacy",
       "layer": "desk"
     },
     {
       "id": "desk_radio",
       "type": "baked_prop",
       "bounds": {
-        "x": 581,
-        "y": 1043,
-        "width": 367,
-        "height": 293
+        "x": 1975,
+        "y": 1205,
+        "width": 116,
+        "height": 156
       },
       "polygon": [
         [
-          629,
-          1336
+          1975,
+          1301
         ],
         [
-          586,
-          1334
+          2051,
+          1359
         ],
         [
-          581,
-          1222
+          2091,
+          1361
         ],
         [
-          586,
-          1082
+          2091,
+          1322
         ],
         [
-          655,
-          1077
+          2091,
+          1266
         ],
         [
-          758,
-          1073
+          2001,
+          1205
         ],
         [
-          866,
-          1068
+          1977,
+          1216
+        ]
+      ],
+      "action": "open_radio_intel",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Radio Intelligence",
+      "layer": "desk"
+    },
+    {
+      "id": "newspaper_stack",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 885,
+        "y": 1240,
+        "width": 302,
+        "height": 140
+      },
+      "polygon": [
+        [
+          904,
+          1375
         ],
         [
-          879,
-          1043
+          1137,
+          1380
         ],
         [
-          909,
-          1043
+          1168,
+          1322
         ],
         [
-          937,
-          1070
-        ],
-        [
-          944,
-          1123
-        ],
-        [
-          948,
-          1192
-        ],
-        [
-          946,
-          1242
-        ],
-        [
-          930,
+          1187,
           1272
         ],
         [
-          889,
-          1274
+          1174,
+          1248
         ],
         [
-          886,
-          1318
+          1166,
+          1242
         ],
         [
-          769,
-          1320
+          1142,
+          1245
         ],
         [
-          673,
-          1304
+          1105,
+          1256
+        ],
+        [
+          1044,
+          1253
+        ],
+        [
+          1002,
+          1242
+        ],
+        [
+          978,
+          1240
+        ],
+        [
+          967,
+          1253
+        ],
+        [
+          959,
+          1253
+        ],
+        [
+          885,
+          1340
+        ],
+        [
+          885,
+          1348
+        ],
+        [
+          891,
+          1356
+        ],
+        [
+          893,
+          1364
         ]
       ],
-      "action": "open_radio_net",
+      "action": "open_news",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Radio Net",
+      "tooltip": "News & Press",
       "layer": "desk"
+    },
+    {
+      "id": "command_briefing_folio",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 621,
+        "y": 1227,
+        "width": 291,
+        "height": 142
+      },
+      "polygon": [
+        [
+          626,
+          1364
+        ],
+        [
+          830,
+          1369
+        ],
+        [
+          912,
+          1285
+        ],
+        [
+          912,
+          1240
+        ],
+        [
+          729,
+          1227
+        ],
+        [
+          621,
+          1306
+        ]
+      ],
+      "action": "open_briefing",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Command Briefing",
+      "layer": "desk"
+    },
+    {
+      "id": "commander_coatrack",
+      "type": "baked_prop",
+      "bounds": {
+        "x": 579,
+        "y": 769,
+        "width": 206,
+        "height": 254
+      },
+      "polygon": [
+        [
+          692,
+          769
+        ],
+        [
+          708,
+          782
+        ],
+        [
+          756,
+          804
+        ],
+        [
+          774,
+          875
+        ],
+        [
+          780,
+          931
+        ],
+        [
+          785,
+          994
+        ],
+        [
+          751,
+          994
+        ],
+        [
+          751,
+          1012
+        ],
+        [
+          716,
+          1020
+        ],
+        [
+          671,
+          1023
+        ],
+        [
+          637,
+          1020
+        ],
+        [
+          605,
+          1018
+        ],
+        [
+          608,
+          1002
+        ],
+        [
+          587,
+          1002
+        ],
+        [
+          579,
+          938
+        ],
+        [
+          581,
+          896
+        ],
+        [
+          589,
+          841
+        ],
+        [
+          608,
+          804
+        ],
+        [
+          661,
+          782
+        ]
+      ],
+      "action": "open_commander",
+      "hover_style": "glow",
+      "cursor": "pointer",
+      "tooltip": "Commander",
+      "layer": "wall"
     }
   ]
 }

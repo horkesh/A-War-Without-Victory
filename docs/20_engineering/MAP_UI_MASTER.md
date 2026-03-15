@@ -30,7 +30,7 @@ src/ui/map/
 ├── map/
 │   ├── MapContainer.tsx           Master map: MapLibre init, all sources/layers, GeoJSON updates
 │   ├── useMapInteractions.ts      Click/hover event wiring → store callbacks (300ms hover delay)
-│   ├── formationIcons.ts          HoI-style rectangular brigade counters (160×80 canvas, pixelRatio 2 → 80×40 CSS px/unit; faction-colored fill; white kind abbreviation)
+│   ├── formationIcons.ts          HoI-style rectangular brigade counters (160×80 canvas; quantized 10% Health/Morale status banners; faction-colored fill; white kind abbreviation)
 │   ├── frontLineIcons.ts          Front-line SVG icon helpers (stub)
 │   ├── pmtilesRoute.ts            PMTiles URL routing helper (stub)
 │   ├── rewritePmtilesUrls.ts      Shared PMTiles style URL rewriter (pmtiles:/// → pmtiles://origin/); used by MapContainer and OpsPlanningModal
@@ -57,7 +57,8 @@ src/ui/map/
 │
 ├── components/
 │   ├── Entity slide-out panels (left: 19rem — see §2 for layout)
-│   │   ├── FormationDetail.tsx    Brigade/corps/army detail (highest priority)
+│   │   ├── FormationDetail.tsx    Brigade/corps/army detail (highest priority; army_hq → ArmyReservePanel)
+│   │   ├── ArmyReservePanel.tsx   Army HQ panel: Reserve Pool + Pending Requests + Campaign History (rendered instead of FormationDetail when kind === 'army_hq')
 │   │   ├── CorpsFrontPanel.tsx    Sector detail (sector selected, no formation)
 │   │   ├── CorpsDetail.tsx        Corps detail (corps selected)
 │   │   ├── ArmyDetail.tsx         Faction summary (faction header clicked)
@@ -67,7 +68,7 @@ src/ui/map/
 │   ├── OOBSidebar.tsx             Left accordion sidebar (Situation/Army/Ops/Sectors)
 │   ├── TopToolbar.tsx             Top bar: file/run load UI, faction gradient banner
 │   ├── MapModeToolbar.tsx         Bottom-center: map mode buttons + layer toggles
-│   ├── BottomStatusStrip.tsx      Bottom-left 1-line strip: OSID name, controller, formation count
+│   ├── BottomStatusStrip.tsx      Bottom-left 1-line strip: 'FRONTLINE CONTROL' telemetry + OSID/formation details (spaced wide-kerning typography)
 │   ├── Minimap.tsx                Bottom-left 250×180px secondary map
 │   ├── Tooltip.tsx                Mouse-follow tooltip (300ms delay): OSID/formation/front
 │   ├── SupplyPanel.tsx            Reserve bars when supply map mode active
@@ -217,12 +218,23 @@ Usage: `style={getPanelRailStyle(railSlot, '24rem')}`.
   hover brigade → setHoveredOsids; close → setSelectedCorpsId(null)
 
 #### ArmyDetail
-- **Shows:** `selectedArmyId` set, no formation/sector/corps selected
+- **Shows:** `selectedArmyId` set, no formation/sector/corps selected (faction header clicked in OOBSidebar)
 - **Data:** faction name + full display name, stance, exhaustion, total personnel, brigade/corps/sector counts,
   militia pools (available/committed/exhausted), casualties (KIA/WIA), army HQ combat summary,
   corps list (clickable with subordinate count + personnel + combat summary line)
 - **Interactions:** Corps click → setSelectedCorpsId; hover corps → setHoveredOsids (brigade locations);
   close → setSelectedArmyId(null)
+- **Note:** Distinct from ArmyReservePanel — ArmyDetail is the faction overview opened from the sidebar; ArmyReservePanel is the Army HQ formation panel opened when clicking the army_hq formation directly (shows Reserve Pool, Pending Requests, Campaign History)
+
+#### ArmyReservePanel
+- **Shows:** when `selectedFormationId` resolves to `kind === 'army_hq'` (rendered in App.tsx instead of FormationDetail)
+- **Width:** 26rem, left-positioned on primary/secondary rail
+- **Sections:**
+  - **Reserve Pool** — all faction elite brigades (status badge: READY/ON LOAN/COOLDOWN/DEGRADED; personnel bar; Recall button when on loan)
+  - **Pending Requests** — unresolved player-faction reserve requests (reason chip, priority bar, APPROVE / Dismiss)
+  - **Campaign History** (collapsible) — per-brigade totals (loans, weeks deployed, KIA) + episode log
+- **IPC:** APPROVE → `approve-reserve-request`; Recall → `recall-elite-brigade`
+- **Data:** `loadedGameState.pendingReserveRequests`, `loadedGameState.eliteBrigadeTracker`, formation `eliteLoanState`
 
 #### OperationsPanel
 - **Shows:** `isOperationsPanelOpen` true (opened by clicking op card in OOBSidebar, or via `setSelectedOperationKey`)
@@ -504,9 +516,10 @@ interface OperationView {
 
 The map UI now carries the live player-agency A-H surface through these components:
 
-- `CorpsFrontPanel.tsx` - sector defensive intent, logistics priority, and OPSEC toggles
-- `OpsPlanningModal.tsx` - operation shaping fields including tempo, artillery preparation, launch gating, casualty tolerance, schwerpunkt, feint, and probe
+- `CorpsFrontPanel.tsx` - sector defensive intent, logistics priority, and **Sector Assignment bridge**
+- `OpsPlanningModal.tsx` - operation shaping fields including tempo, artillery preparation, launch gating...
 - `OperationsPanel.tsx` - operation list/detail, readiness surfacing, and objective focus
+- **NOTE (2026-03-15):** `CorpsDetail.tsx` and `ArmyDetail.tsx` now represent organizational abstractions. Functional tactical map interaction is primarily via `FormationDetail` and `CorpsFrontPanel`.
 - `SelectionPanel.tsx` - municipality support staging for the current player faction on selected municipalities
 - `EnclaveDashboard.tsx` - enclave status plus player airdrop allocation
 - `SituationTab.tsx` and `TopToolbar.tsx` - convoy decisions, IVP/consequence surfacing, and tunnel status

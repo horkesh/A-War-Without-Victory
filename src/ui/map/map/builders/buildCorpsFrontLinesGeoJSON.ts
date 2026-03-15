@@ -24,6 +24,8 @@ interface CorpsFrontProperties {
     sector_id?: string;
     avg_entrenchment?: number;
     tooth_rotation?: number;
+    brigade_count?: number;
+    threat_intensity?: number;
 }
 
 type CorpsLineProperties = CorpsGlowProperties | CorpsFrontProperties;
@@ -96,8 +98,41 @@ export function buildCorpsColorExpression(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GeoJSON builder
 // ═══════════════════════════════════════════════════════════════════════════
+// Helpers for property calculation
+// ═══════════════════════════════════════════════════════════════════════════
+
+function calculateAvgEntrenchment(
+    sector: CorpsFrontSectorView | undefined,
+    formationsById: Record<string, { entrenchment_turns?: number }> | undefined
+): number {
+    if (!sector || !formationsById) return 0;
+    const ids = sector.assigned_brigade_ids;
+    if (ids.length === 0) return 0;
+    const total = ids.reduce((sum, brigadeId) => {
+        const formation = formationsById[brigadeId];
+        return sum + (typeof formation?.entrenchment_turns === 'number' ? formation.entrenchment_turns : 0);
+    }, 0);
+    return total / ids.length;
+}
+
+function createGlowProperties(
+    faction: string,
+    corpsId: string,
+    sectorId: string | undefined,
+    offset: 1 | -1 | undefined,
+    pressureIntensity: number
+): CorpsGlowProperties {
+    const props: CorpsGlowProperties = {
+        lineType: 'glow',
+        faction,
+        corps_id: corpsId,
+        pressure_intensity: pressureIntensity
+    };
+    if (offset != null) props.offset_side = offset;
+    if (sectorId) props.sector_id = sectorId;
+    return props;
+}
 
 /** Merge consecutive segments that share endpoints into longer LineStrings. */
 function mergeLineSegments<P extends CorpsLineProperties>(
@@ -179,13 +214,7 @@ function buildEdgeFactionToCorps(
 }
 
 /**
- * Generate corps-colored front lines GeoJSON.
- *
- * Uses the authoritative front edge set (from the operational contact graph)
- * to determine which OSID pairs form fronts. Polygon geometry is used only
- * to obtain the visual coordinates for those edges — NOT for adjacency
- * detection. This ensures every rendered front line belongs to a corps sector,
- * matching the HoI theatre model (no orphaned/grey front edges).
+ * Build a plain Record<corpsId, hexColor> for use in UI panels/badges.
  */
 export function buildCorpsFrontLinesGeoJSON(
     osidGeoJson: FeatureCollection,
@@ -203,7 +232,6 @@ export function buildCorpsFrontLinesGeoJSON(
         controllerMap.set(f.properties.osid, f.properties.controller);
     }
 
-    // Build (edgeId + faction) → corps_id lookup
     const edgeFactionToCorps = buildEdgeFactionToCorps(corpsFrontSectors);
     const sectorByEdgeAndFaction = new Map<string, CorpsFrontSectorView>();
     for (const sector of corpsFrontSectors) {
@@ -212,8 +240,6 @@ export function buildCorpsFrontLinesGeoJSON(
         }
     }
 
-    // Build authoritative OSID-pair set from the operational contact graph front edges.
-    // Only these pairs will be rendered; geometric-only adjacencies are suppressed.
     const authoritativePairs = new Set<string>();
     if (frontEdgesOsid) {
         for (const edge of frontEdgesOsid) {
@@ -221,16 +247,14 @@ export function buildCorpsFrontLinesGeoJSON(
         }
     }
 
-    // Build edgeMap: geometric edge key → set of OSIDs sharing that edge
     const coordKey = (c: number[]) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
     const edgeMap = new Map<string, Set<string>>();
 
     for (const feature of features) {
         const osid = feature.properties.osid;
-        const rings =
-            feature.geometry.type === 'Polygon'
-                ? feature.geometry.coordinates
-                : feature.geometry.coordinates.flat();
+        const rings = feature.geometry.type === 'Polygon'
+            ? feature.geometry.coordinates
+            : feature.geometry.coordinates.flat();
 
         for (const ring of rings) {
             for (let i = 0; i < ring.length - 1; i++) {
@@ -246,7 +270,6 @@ export function buildCorpsFrontLinesGeoJSON(
         }
     }
 
-    // Generate features for shared boundary edges between different controllers
     const glowFeatures: Feature<LineString, CorpsGlowProperties>[] = [];
     const frontSegmentsByGroup = new Map<string, Feature<LineString, CorpsFrontProperties>[]>();
 
@@ -258,9 +281,6 @@ export function buildCorpsFrontLinesGeoJSON(
         if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
         if (rbihHrhbAllied && ((ctrlA === 'RBiH' && ctrlB === 'HRHB') || (ctrlA === 'HRHB' && ctrlB === 'RBiH'))) continue;
 
-        // Only render edges that exist in the authoritative contact graph.
-        // Geometric-only adjacencies (polygon boundary sharing without contact
-        // graph entry) are phantom edges — not in any sector, render as grey.
         const pairKey = osidA < osidB ? `${osidA}__${osidB}` : `${osidB}__${osidA}`;
         if (authoritativePairs.size > 0 && !authoritativePairs.has(pairKey)) continue;
 
@@ -269,23 +289,13 @@ export function buildCorpsFrontLinesGeoJSON(
         const [bx, by] = partB.split(',').map(Number);
         const coords: [number, number][] = [[ax, ay], [bx, by]];
 
-        // Look up which corps owns each side of this edge
         const corpsA = edgeFactionToCorps.get(`${pairKey}\0${ctrlA}`) ?? 'unknown';
         const corpsB = edgeFactionToCorps.get(`${pairKey}\0${ctrlB}`) ?? 'unknown';
         const sectorA = sectorByEdgeAndFaction.get(`${pairKey}\0${ctrlA}`);
-        const avgEntrenchment = sectorA && formationsById
-            ? (() => {
-                const ids = sectorA.assigned_brigade_ids;
-                if (ids.length === 0) return 0;
-                const total = ids.reduce((sum, brigadeId) => {
-                    const formation = formationsById[brigadeId];
-                    return sum + (typeof formation?.entrenchment_turns === 'number' ? formation.entrenchment_turns : 0);
-                }, 0);
-                return total / ids.length;
-            })()
-            : 0;
+        const sectorB = sectorByEdgeAndFaction.get(`${pairKey}\0${ctrlB}`);
 
-        // Compute offset_side + tooth_rotation from OSID centroids
+        const avgEntrenchment = calculateAvgEntrenchment(sectorA, formationsById);
+
         let offsetA: 1 | -1 | undefined;
         let offsetB: 1 | -1 | undefined;
         let toothRotation: number | undefined;
@@ -293,17 +303,11 @@ export function buildCorpsFrontLinesGeoJSON(
             const centA = osidCentroids.get(osidA);
             const centB = osidCentroids.get(osidB);
             if (centA && centB) {
-                // Edge direction vector: (bx-ax, by-ay)
                 const dx = bx - ax;
                 const dy = by - ay;
-                // Cross product: which side of the edge segment does each OSID centroid fall on?
                 const crossA = dx * (centA[1] - ay) - dy * (centA[0] - ax);
-                // crossA > 0 → centA is LEFT of directed edge; MapLibre positive line-offset = RIGHT,
-                // so assign -1 (negative offset) to push glow LEFT into faction A's territory.
                 offsetA = crossA > 0 ? -1 : 1;
                 offsetB = crossA > 0 ? 1 : -1;
-                // Tooth rotation: 0 means triangle points "left" of line direction (toward positive cross side)
-                // If ctrlA (factionA) is on the positive side, teeth should point toward ctrlB (negative side) → 180
                 toothRotation = crossA > 0 ? 180 : 0;
             }
         }
@@ -311,35 +315,33 @@ export function buildCorpsFrontLinesGeoJSON(
         const pressureData = frontPressureByEdge?.[pairKey];
         const pressureIntensity = pressureData && pressureData.max_abs > 0 ? Math.abs(pressureData.value) / pressureData.max_abs : 0;
 
-        const sectorIdA = sectorA?.sector_id;
-        const sectorIdB = sectorByEdgeAndFaction.get(`${pairKey}\0${ctrlB}`)?.sector_id;
-
-        const glowPropsA: CorpsGlowProperties = { lineType: 'glow', faction: ctrlA, corps_id: corpsA, pressure_intensity: pressureIntensity };
-        if (offsetA != null) glowPropsA.offset_side = offsetA;
-        if (sectorIdA) glowPropsA.sector_id = sectorIdA;
-        const glowPropsB: CorpsGlowProperties = { lineType: 'glow', faction: ctrlB, corps_id: corpsB, pressure_intensity: pressureIntensity };
-        if (offsetB != null) glowPropsB.offset_side = offsetB;
-        if (sectorIdB) glowPropsB.sector_id = sectorIdB;
-
         glowFeatures.push({
             type: 'Feature',
-            properties: glowPropsA,
+            properties: createGlowProperties(ctrlA, corpsA, sectorA?.sector_id, offsetA, pressureIntensity),
             geometry: { type: 'LineString', coordinates: coords },
         });
         glowFeatures.push({
             type: 'Feature',
-            properties: glowPropsB,
+            properties: createGlowProperties(ctrlB, corpsB, sectorB?.sector_id, offsetB, pressureIntensity),
             geometry: { type: 'LineString', coordinates: coords },
         });
 
-        // Front line feature — group by sector_id for merging so that lines
-        // naturally break at sector boundaries (creating visual demarcation).
         const pairFactionKey = [ctrlA, ctrlB].sort().join('-');
-        const groupKey = sectorIdA ? `${sectorIdA}:${pairFactionKey}` : `${corpsA}:${pairFactionKey}`;
+        const groupKey = sectorA?.sector_id ? `${sectorA.sector_id}:${pairFactionKey}` : `${corpsA}:${pairFactionKey}`;
         if (!frontSegmentsByGroup.has(groupKey)) frontSegmentsByGroup.set(groupKey, []);
-        const frontProps: CorpsFrontProperties = { lineType: 'front', factionA: ctrlA, factionB: ctrlB, corps_id: corpsA, avg_entrenchment: avgEntrenchment };
-        if (sectorIdA) frontProps.sector_id = sectorIdA;
+
+        const frontProps: CorpsFrontProperties = {
+            lineType: 'front',
+            factionA: ctrlA,
+            factionB: ctrlB,
+            corps_id: corpsA,
+            avg_entrenchment: avgEntrenchment,
+            brigade_count: sectorA ? sectorA.assigned_brigade_ids.length : 0,
+            threat_intensity: pressureIntensity
+        };
+        if (sectorA?.sector_id) frontProps.sector_id = sectorA.sector_id;
         if (toothRotation != null) frontProps.tooth_rotation = toothRotation;
+
         frontSegmentsByGroup.get(groupKey)!.push({
             type: 'Feature',
             properties: frontProps,
@@ -347,18 +349,11 @@ export function buildCorpsFrontLinesGeoJSON(
         });
     }
 
-    // NOTE: Contact-graph edges without shared polygon boundaries (93 edges) are
-    // intentionally NOT rendered as centroid-to-centroid lines — those create ugly
-    // straight-line artifacts across the map. These edges still exist in sectors
-    // and are tracked by the engine; they just don't produce visible front lines.
-    // The hover/click layer and sector territory fill handle them correctly.
-
-    // Merge front segments per corps group for smoother lines
     const mergedFront: Feature<LineString, CorpsFrontProperties>[] = [];
     for (const segments of frontSegmentsByGroup.values()) {
         mergedFront.push(...mergeLineSegments(segments));
     }
 
     const allFeatures: Feature<LineString>[] = [...glowFeatures, ...mergedFront];
-    return { type: 'FeatureCollection', features: allFeatures };
+    return { type: 'FeatureCollection', features: allFeatures as any };
 }

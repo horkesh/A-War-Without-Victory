@@ -47,6 +47,8 @@ export function OOBSidebar() {
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const setSelectedOrbatCorpsId = useGameStore((s) => s.setSelectedOrbatCorpsId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
+  const setHoveredCorpsId = useGameStore((s) => s.setHoveredCorpsId);
+  const setHoveredSectorId = useGameStore((s) => s.setHoveredSectorId);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     situation: false,
@@ -324,6 +326,8 @@ export function OOBSidebar() {
                                 }
                               }}
                               onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
+                              onMouseEnter={() => setHoveredCorpsId(corpsId)}
+                              onMouseLeave={() => setHoveredCorpsId(null)}
                               onOrbatClick={() => setSelectedOrbatCorpsId(corpsId)}
                               commanderName={(() => {
                                 if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
@@ -494,6 +498,8 @@ export function OOBSidebar() {
                               ? 'border-accent-gold bg-panel-active'
                               : 'border-panel-border bg-panel-card hover:bg-panel-hover'
                               }`}
+                            onMouseEnter={() => setHoveredSectorId(sector.sector_id)}
+                            onMouseLeave={() => setHoveredSectorId(null)}
                           >
                             <span
                               className="inline-block w-2.5 h-2.5 rounded-sm shrink-0"
