@@ -124,7 +124,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'rs_1st_bratunac',
                     'rs_1st_vlasenica',
-                    'rs_1st_milici',
+                    'rs_1st_milii',
                 ],
                 objectives: [
                     'op:bratunac:bratunac_2',
@@ -170,7 +170,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 name: 'Srebrenica Ring',
                 brigades: [
                     'rs_1st_bratunac',
-                    'rs_1st_milici',
+                    'rs_1st_milii',
                     'rs_1st_birac',
                 ],
                 objectives: [
@@ -589,6 +589,7 @@ function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participa
         failure_count: 0,
         consecutive_failures_on_current: 0,
         staging_osid: def.staging_osid,
+        is_pre_planned: true,
         ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
     };
 }

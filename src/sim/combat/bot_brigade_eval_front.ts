@@ -61,6 +61,37 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         return true;
                     }
                 }
+            } else {
+                // Brigade IS on a sector front OSID. Check if this position is overstacked
+                // while other front OSIDs in the same sector are under-covered.
+                // This prevents brigades from piling into a corner front OSID (e.g. a single RS
+                // pocket embedded in enemy territory) while the main sector front goes undefended.
+                const corpsCountHere = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc);
+                if (corpsCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
+                    // Find least-covered other sector front OSID (prefer undefended, then lightly defended)
+                    // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
+                    // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
+                    // front OSIDs in the same sector when those OSIDs have fewer brigades.
+                    const isEnclaveBrigade = brigade.tags?.includes('enclave') === true;
+                    const otherFronts = [...frontSet]
+                        .filter(o => o !== loc)
+                        .filter(o => !isEnclaveBrigade || isOsidInSameEnclave(loc as string, o))
+                        .sort((a, b) => {
+                            const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a);
+                            const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b);
+                            return ca - cb || strictCompare(a, b);
+                        });
+                    for (const candidate of otherFronts) {
+                        const dest = findNearestFriendlyOsidDestination(
+                            state, faction, loc, adjacency, reverseMap, new Set([candidate])
+                        );
+                        if (dest && !isMovementDestinationRisky(candidate as Osid, graphAnalysis)) {
+                            result.column_march_orders[brigade.id] = dest;
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                            return true;
+                        }
+                    }
+                }
             }
         }
     }

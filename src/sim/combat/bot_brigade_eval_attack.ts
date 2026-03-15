@@ -2,7 +2,7 @@ import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { getAdjacentEnemyOsids } from './bot_brigade_context.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { findNearestFriendlyOsidInSet } from './bot_brigade_context.js';
+import { findNearestFriendlyOsidInSet, findNearestFriendlyOsidDestination } from './bot_brigade_context.js';
 import { predictAllAdjacentTargets } from './combat_predictor.js';
 import {
     scoreTargetFromDirective,
@@ -20,6 +20,7 @@ import type { Osid } from './osid_adjacency.js';
 import type { BrigadePosture, FormationState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
+import { isOsidInSameEnclave } from './enclave_resilience.js';
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
 // We will import them appropriately. For now, I'll import from bot_brigade_ai_osid if needed, but they are pure.
@@ -170,7 +171,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
                 })
                 : allTargets;
-            const directObjectiveAttack = targets.find((t) => t.osid === currentObjective);
+            const avoidedOsidsForFaction = state.meta?.avoided_osids_by_faction?.[faction];
+            const directObjectiveAttack = avoidedOsidsForFaction?.includes(currentObjective as string)
+                ? undefined
+                : targets.find((t) => t.osid === currentObjective);
             const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
             if (directObjectiveAttack) {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
@@ -207,9 +211,12 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             }
 
             // ── March toward objective first ─────────────────────────
-            // Brigades follow orders: move toward the objective through
-            // friendly territory. Only attack-through as a last resort
-            // when no friendly march path exists.
+            // Brigades follow orders: column-march toward a friendly OSID adjacent
+            // to the objective. Use column_march_orders (sets brigade_movement_state
+            // in_transit) so the stall detector (anyMoved) can see the movement.
+            // movement_orders (1-hop regular move) is invisible to anyMoved and causes
+            // the idle_execution_turn_streak to accumulate incorrectly — leading to
+            // premature axis stall before brigades reach attack position (#34 root cause).
             const objectiveApproachOsids = getSectorOffensiveApproachOsids(
                 state,
                 activeOp15,
@@ -220,7 +227,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             );
             objectiveApproachOsids.delete(loc);
             if (objectiveApproachOsids.size > 0) {
-                const approachStep = findNearestFriendlyOsidInSet(
+                // Use Destination (actual target OSID) so the Dijkstra path covers all hops.
+                // findNearestFriendlyOsidInSet returns only the first step — passing a 1-hop
+                // destination to column_march_orders would stop the column after 1 hop.
+                const approachDest = findNearestFriendlyOsidDestination(
                     state,
                     faction,
                     loc,
@@ -228,8 +238,8 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     reverseMap,
                     objectiveApproachOsids
                 );
-                if (approachStep) {
-                    result.movement_orders[brigade.id] = approachStep;
+                if (approachDest) {
+                    result.column_march_orders[brigade.id] = approachDest;
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                     return true;
                 }
@@ -239,16 +249,21 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             // No friendly path to objective — must fight through enemy
             // territory to open a route. Only attack intermediates held
             // by the SAME faction as the objective.
+            // Scenario avoid-list: don't attack historically excluded OSIDs even
+            // as attack-through intermediaries (e.g. Brčko city center — VRS held
+            // the corridor but not the city core; without this, operation brigades
+            // sweep through avoided OSIDs opportunistically).
+            const _avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
             const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
-            const intermediateTargets = objectiveController
+            const intermediateTargets = (objectiveController
                 ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
-                : targets;
+                : targets).filter(t => !_avoidedOsids?.includes(t.osid));
             if (intermediateTargets.length > 0) {
-                const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
+                const intermediateThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
                 const bestIntermediate = intermediateTargets.find((t) => {
                     const alreadyAt = chosenTargets.get(t.osid) ?? 0;
                     if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;
-                    return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, probeThreshold);
+                    return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, intermediateThreshold);
                 });
                 if (bestIntermediate) {
                     const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
@@ -423,6 +438,19 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         if ((faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
             && areRbihHrhbAllied(state)) continue;
 
+        // Enclave guard: enclave brigades must not expand beyond their enclave perimeter.
+        // Without this, besieged ARBiH enclave brigades walk into adjacent RS positions
+        // when VRS brigades sector-march away (e.g. 280th–284th recapturing obadi/vranesevici
+        // from the Srebrenica pocket, undoing Ring operations).
+        if (brigade.tags?.includes('enclave') && !isOsidInSameEnclave(loc as string, n)) continue;
+
+        // Scenario avoid-list guard: historically, some OSIDs were not captured even when
+        // undefended (e.g. Brčko city center — VRS held the corridor but not the city core).
+        // Without this guard, brigades sweeping through during operation execution walk into
+        // avoided OSIDs opportunistically, bypassing the operation-level avoid check.
+        const avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
+        if (avoidedOsids?.includes(n)) continue;
+
         // Check: no enemy formations physically at this OSID
         let hasDefender = false;
         for (const fid of Object.keys(formations)) {
@@ -434,10 +462,15 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         }
         if (hasDefender) continue;
 
-        // Check: no sector covering this OSID with active brigades
+        // Check: no sector covering this OSID with active brigades.
+        // A sector is defended if it has ANY active brigade — assigned OR reserve.
+        // Only checking assigned_brigade_ids misses sectors where all brigades are
+        // in reserve (0-assigned cycle): the sector physically defends the OSID via
+        // unified sector defense even without a front-line assignment.
         const sector = findSectorForEnemyOsid(state, n as Osid, controller);
         if (sector) {
-            const sectorHasBrigades = sector.assigned_brigade_ids.some(bid => {
+            const allSectorBrigades = [...sector.assigned_brigade_ids, ...(sector.reserve_brigade_ids ?? [])];
+            const sectorHasBrigades = allSectorBrigades.some(bid => {
                 const f = formations[bid];
                 return f != null && f.status === 'active';
             });

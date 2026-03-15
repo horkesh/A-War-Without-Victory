@@ -422,7 +422,7 @@ interface HistoricalControlAlignmentDiagnostics {
 }
 
 interface HistoricalAnchorCheck {
-    anchor_type: 'municipality' | 'settlement' | 'osid';
+    anchor_type: 'settlement' | 'osid';
     anchor_id: string;
     expected_controller: string;
     actual_controller: string | null;
@@ -436,25 +436,27 @@ interface OverrideInventoryEntry {
     rationale: string;
 }
 
-const HISTORICAL_ANCHORS_APR1992_TO_DEC1992: Array<{ municipality_id: string; expected_controller: string }> = [
-    { municipality_id: 'bijeljina', expected_controller: 'RS' },
-    { municipality_id: 'srebrenica', expected_controller: 'RBiH' },
-    { municipality_id: 'bihac', expected_controller: 'RBiH' },
-    { municipality_id: 'banja_luka', expected_controller: 'RS' },
-    { municipality_id: 'tuzla', expected_controller: 'RBiH' },
-    { municipality_id: 'centar_sarajevo', expected_controller: 'RBiH' }
-];
 const HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992: Array<{ settlement_id: string; expected_controller: string }> = [
 ];
+// OSID-level anchors: each entry checks a specific painted OSID against simulated control.
+// No municipality plurality — pluralities are unstable (OSID count can flip on a single settlement).
+// Use the city-core or enclave-core OSID for each historically unambiguous location.
 const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected_controller: string }> = [
-    { osid: 'op:zvornik:zvornik', expected_controller: 'RS' },             // Zvornik city — VRS captured by May 1992
-    { osid: 'op:zvornik:vitinica_2', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold (Sapna brigade)
+    // City cores — unambiguous historical control
+    { osid: 'op:bijeljina:bijeljina_2', expected_controller: 'RS' },                         // Bijeljina city — VRS from April 1992
+    { osid: 'op:banja_luka:banja_luka_2', expected_controller: 'RS' },                       // Banja Luka city — VRS throughout
+    { osid: 'op:tuzla:tuzla_2', expected_controller: 'RBiH' },                               // Tuzla city — ARBiH throughout
+    { osid: 'op:bihac:bihac_2', expected_controller: 'RBiH' },                               // Bihac town — ARBiH 5th Corps pocket
+    { osid: 'op:centar_sarajevo:sarajevo_dio_centar_sajarevo', expected_controller: 'RBiH' }, // Sarajevo centre — ARBiH throughout
+    // Specific contested/enclave OSIDs
+    { osid: 'op:zvornik:zvornik', expected_controller: 'RS' },             // Zvornik city — VRS captured May 1992
+    { osid: 'op:zvornik:vitinica_2', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold
     { osid: 'op:ugljevik:teocak_krstac_2', expected_controller: 'RBiH' },  // Teocak — ARBiH stronghold
     { osid: 'op:orasje:orasje', expected_controller: 'HRHB' },              // Orasje pocket — HVO held throughout
-    { osid: 'op:brcko:brka_2', expected_controller: 'RBiH' },              // South Brcko (Brka) — ARBiH held
+    { osid: 'op:brcko:brka_2', expected_controller: 'RBiH' },              // Brka (south Brcko) — ARBiH held
     { osid: 'op:gorazde:gorazde_2', expected_controller: 'RBiH' },         // Gorazde enclave — ARBiH defended
     { osid: 'op:srebrenica:srebrenica_2', expected_controller: 'RBiH' },   // Srebrenica enclave — ARBiH defended
-    { osid: 'op:zavidovici:vozuca_2', expected_controller: 'RS' },          // Vozuca — VRS held Ozren salient
+    { osid: 'op:zavidovici:vozuca_2', expected_controller: 'RS' },          // Vozuca — VRS Ozren salient
 ];
 
 function countControllers(snapshot: ControlKey[]): Map<string, number> {
@@ -487,44 +489,8 @@ function computeHistoricalControlAlignmentDiagnostics(
     };
 }
 
-function deriveMunicipalityControllers(snapshot: ControlKey[]): Map<string, string | null> {
-    const byMun = new Map<string, Map<string, number>>();
-    for (const row of snapshot) {
-        if (!row.municipality_id || !row.controller) continue;
-        const entry = byMun.get(row.municipality_id) ?? new Map<string, number>();
-        entry.set(row.controller, (entry.get(row.controller) ?? 0) + 1);
-        byMun.set(row.municipality_id, entry);
-    }
-    const out = new Map<string, string | null>();
-    for (const munId of Array.from(byMun.keys()).sort(strictCompare)) {
-        const counts = byMun.get(munId)!;
-        let bestController: string | null = null;
-        let bestCount = -1;
-        for (const controller of Array.from(counts.keys()).sort(strictCompare)) {
-            const count = counts.get(controller)!;
-            if (count > bestCount) {
-                bestCount = count;
-                bestController = controller;
-            }
-        }
-        out.set(munId, bestController);
-    }
-    return out;
-}
-
 function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorCheck[] {
-    const byMun = deriveMunicipalityControllers(final);
     const bySid = new Map(final.map((row) => [row.settlement_id, row.controller ?? null]));
-    const municipalityChecks = HISTORICAL_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
-        const actual = byMun.get(anchor.municipality_id) ?? null;
-        return {
-            anchor_type: 'municipality' as const,
-            anchor_id: anchor.municipality_id,
-            expected_controller: anchor.expected_controller,
-            actual_controller: actual,
-            passed: actual === anchor.expected_controller
-        };
-    });
     const settlementChecks = HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
         const actual = bySid.get(anchor.settlement_id) ?? null;
         return {
@@ -535,7 +501,6 @@ function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorChe
             passed: actual === anchor.expected_controller
         };
     });
-    // OSID anchors: look up directly via settlement_id (which holds the OSID in OSID-keyed mode)
     const osidChecks = HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
         const actual = bySid.get(anchor.osid) ?? null;
         return {
@@ -546,7 +511,7 @@ function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorChe
             passed: actual === anchor.expected_controller
         };
     });
-    return [...municipalityChecks, ...settlementChecks, ...osidChecks];
+    return [...settlementChecks, ...osidChecks];
 }
 
 function buildOverrideInventory(scenario: Scenario): OverrideInventoryEntry[] {

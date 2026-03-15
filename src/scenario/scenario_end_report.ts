@@ -1020,8 +1020,14 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         lines.push('');
         for (const aar of params.operationHistory) {
             const stars = '\u2605'.repeat(aar.grade.stars) + '\u2606'.repeat(5 - aar.grade.stars);
+            const rankDisplay: Record<string, string> = {
+                army_commander: 'General',
+                corps_commander: 'Gen.',
+                deputy: 'Brig. Gen.',
+            };
+            const rankLabel = aar.commander_rank ? (rankDisplay[aar.commander_rank] ?? aar.commander_rank) : '';
             const oic = aar.commander_name
-                ? `OiC: ${aar.commander_rank ?? ''} ${aar.commander_name}`.trim()
+                ? `OiC: ${rankLabel} ${aar.commander_name}`.trim()
                 : 'OiC: —';
             const suffered = aar.casualties_suffered.killed + aar.casualties_suffered.wounded;
             const inflicted = aar.casualties_inflicted.killed + aar.casualties_inflicted.wounded;

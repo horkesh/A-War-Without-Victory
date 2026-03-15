@@ -208,6 +208,29 @@ Overall RS early-war (w1-w12): **0.39:1** (54 battles). VRS takes 39 casualties 
 **New P3 observation:** Operacija Munja (Drina Corps) targeting vitinica_2/Sapna at 1.41:1. Sapna was an ARBiH enclave that held throughout the war. If Drina Corps keeps launching against it run after run, that's a targeting intelligence question — why does the bot select a historically inviolable ARBiH pocket as an offensive target? Not a fix for today.
 
 **Status:** FIXED (n703, organic).
+### ~~29. Zombie operations — MAX_CONSECUTIVE_FAILURES not aborting (n25)~~ **FIXED n32**
+
+**What we found:** RS attacks `op:gracanica:gracanica_2` from w33 to w40 — **eight consecutive turns** with outcomes including PR=0.0 catastrophics. Root cause: `evaluateUncontestedOccupation` checked only `assigned_brigade_ids` when determining if an enemy OSID's sector was defended. `sector:arbih_2nd_corps:11` had `assigned=[]` but `reserve_brigade_ids=['arbih_212th_mountain']` — treated as undefended forever.
+
+**Fix (n32):** `sectorHasBrigades` now checks `[...assigned_brigade_ids, ...(reserve_brigade_ids ?? [])]`. A sector is defended if ANY active brigade (assigned OR reserve) covers it.
+
+**Status:** ~~FIXED n32~~ — gracanica zombie loop eliminated.
+
+---
+
+### 30. ARBiH Foča expansion — Goražde enclave brigades marching to Foča front OSIDs (n25 state, ENCLAVE GUARD PARTIAL FIX n25)
+
+**What we found:** 3 Foča OSIDs (donje_zesce, izbisno, ustikolina) show RBiH control at w40 but are painted RS (expected RS in Jan 1993). Root cause: `sector:arbih_1st_corps:8` spans both Goražde enclave territory AND Foča territory. The overstacking redistribution branch in `bot_brigade_eval_front.ts` was redistributing Goražde enclave brigades to Foča front OSIDs in the same mixed sector (0 brigades there → picked as redistribution candidate).
+
+**Historical context:** ARBiH never held Foča town surroundings at any point in 1992 — Foča fell to VRS in April 1992 and remained RS throughout. ARBiH brigades in Goražde enclave were defending their pocket, not expanding into the Foča plateau. These are distinct theaters separated by hostile territory.
+
+**Root cause:** `sector:8` is a mixed sector spanning two geographically disconnected theaters: Goražde enclave (16 OSIDs) and the Foča area front. The march guard's `hasEnclaveTarget` check passes because Goražde OSIDs ARE in `frontSet`, allowing the march guard to proceed even when the actual destination is a Foča OSID.
+
+**Partial fix (n25):** Added enclave guard to the overstacking redistribution branch — enclave brigades now filtered from redistribution to non-enclave front OSIDs in the same sector. This closes the redistribution path. Remaining: initial sector march path (`findNearestFriendlyOsidDestination`) may still send Goražde brigades toward Foča front OSIDs if `dest` resolves through sector frontSet containing Foča OSIDs.
+
+**Structural fix needed:** Sector:8 should be split at the Goražde/Foča boundary so that Goražde brigades belong to a Goražde-only sector. This is a sector construction issue, not a brigade AI issue.
+
+**Status:** P2 — partial fix shipped (n25). Full fix requires sector split at enclave boundary.
 
 ---
 
@@ -321,6 +344,44 @@ A 1-brigade RS attack causing 1,671 defender casualties means the SECTOR's 5+ br
 **Note:** Bihać anchor failure in n703 is an anchor configuration error, not an engine regression. op:bihac:ripac correctly flips to RS per painted target (Ripac is a peripheral Bihać settlement historically held by VRS, not the Bihać pocket interior). The anchor uses OSID count-based plurality — n703 gives 4RS/3RBiH by count = RS "fails" the anchor. But area-weighted, RBiH holds more Bihać area (bihac_2=150km², velika_gata=152km²) while RS holds mostly rural outer OSIDs. The anchor is misconfigured: it penalizes the correct RS control of Ripac. P3 anchor reconfiguration for Scenario Author. Brčko regression (4 OSID Brka→RS) is genuine but offset by +0.4pp net improvement.
 
 **Status:** PARTIALLY FIXED (n703 + engine-sprint n37/n38). Single-brigade zombie ops eliminated. Painted target corrections for obadi/osmace_2 fixed the primary anchor failures. Root causes #1 (follow-on planning) and #2 (Srebrenica Ring axis topology) remain open.
+2. **Srebrenica Ring axis non-functional.** Deep investigation in n32/n37 sprint:
+   - **Root cause found:** Ring axis objectives (obadi, kalimanici, petrica, brezovice_2) are enclave-interior OSIDs surrounded by RBiH territory. `obadi` is completely surrounded by 6 RBiH neighbors from initial state → pocket-consolidated to RBiH on turn 1. `osmace_2` starts RBiH (284th East Bosnian brigade home OSID). These OSIDs are NOT accessible to VRS without penetrating the enclave.
+   - **Painted target correction (n37):** `obadi` and `osmace_2` corrected RS→RBiH in `painted_control_jan1993.json`. These were census-based (1991 Serb majority), not operational 1993 control. Correctly RBiH throughout the enclave period.
+   - `vranesevici` (outer ring, starts RS) auto-advances the axis, but no brigade holds it afterward.
+   - Staging OSID (`slapasnica`) not connected to ring objectives via RS territory — brigades can't march-first to objectives.
+3. **Post-sweep: Operacija Kamen (bot-generated, w35-w40), 1 brigade, 0 captures.** A single-brigade "operation" is not an operation.
+
+**Fix B (follow-on planning duration) — DEFERRED:** Attempted but caused 2.4pp regression. Corps-ID-only detection treated Drina's Podrinje Sweep as follow-on to Op Drina (different theater). Intel_gathering skip was too broad — accelerates all follow-on ops including different theaters. Needs theater-aware matching (overlapping sector coverage).
+
+**n37 calibration:** DRINA 81.3% area match (improved via painted target corrections; obadi+osmace_2 no longer false mismatches).
+
+**Status:** P2 — vranesevici outer ring still RBiH (ring axis topology broken); follow-on planning deferred (theater-aware logic needed).
+
+---
+
+### 31. Teočak pocket — VRS East Bosnian Corps captures 255th Slavna's home OSID (n38)
+
+**What we found:** After the zombie operations fix (n32), `vrs_east_bosnian` correctly identified `op:ugljevik:teocak_krstac_2` as an RBiH target and launched "Operacija Plamen" — 3 brigades (1st Majevica + 1st and 2nd Semberija, combined 2,770 pers) against the lone 255th Slavna Mountain "Hajrudin Mesić" brigade (800 pers). PR=2.80 → decisive_victory at week_index 30. Teočak ends RS at w40.
+
+**Historical context:** Teočak municipality was a Bosniak pocket in RS-controlled northeastern Bosnia that held for the ENTIRE war. The 255th Slavna Mountain brigade, named after Hajrudin Mesić, defended this enclave against repeated VRS probes and never fell. VRS East Bosnian Corps — occupied with the Posavina Corridor and Drina valley operations — never concentrated sufficient force to break Teočak's defense. The sim's result (3 VRS brigades crushing the pocket in one battle) is ahistorical.
+
+**Root cause:** The zombie operations fix (n32) unblocked vrs_east_bosnian from targeting teocak_krstac_2 (previously, false "undefended" signals kept the corps busy elsewhere). With the fix, the corps correctly generates an operation against the RBiH pocket — but the 3-brigade concentration overwhelms the single-brigade defense despite the terrain bonus (defense_terrain_bonus=0.30). The power ratio reflects the actual numerical imbalance: the sim has no mechanism to model the broader VRS priorities that kept 3 brigades away from a small forested pocket throughout the war.
+
+**Needed fix:** `avoided_osids_by_faction` is prohibited as a calibration mechanism. The structural fix is theater-aware priority weighting in `bot_corps_directives.ts`: a corps with an active large pre-planned operation (Koridor) should not simultaneously generate secondary sector ops against minor pockets. This is the same theater-awareness needed for Fix B (follow-on planning). The two problems share the same root: the bot has no concept of strategic focus — it treats every RBiH OSID as equally valid regardless of the corps's primary mission.
+
+**Status:** OPEN — engine fix needed. Bot priority logic (`bot_corps_directives.ts`) must suppress secondary ops when a pre-planned operation is active or recently completed for the same corps.
+
+---
+
+### 28. SRK Sarajevo Ring — 0 assigned brigades every turn (n703 state, FIXED n703+)
+
+**What we found:** `reclassifyRearBrigades` classified all SRK Sarajevo ring-sector brigades as reserve (1-hop) every turn. `ensureMinimumSectorCoverage` promoted a rescue brigade to `assigned[]` but `reclassifyRearBrigades` immediately demoted it back the next turn. Result: SRK sectors had `assigned_brigade_ids=[]` and `defensive_power=0` at w40 — the Sarajevo siege ring was computationally undefended.
+
+**Root cause:** SRK brigades garrison the suburbs of Sarajevo, sitting 1 hop behind the actual siege line. The 1-hop threshold in `reclassifyRearBrigades` is correct for offensive corps (where 1-hop means genuinely in reserve), but wrong for fortress/siege corps where 1-hop IS the front (brigades physically can't be on the siege line — they sit behind it while covering it).
+
+**Fix:** Zero-assigned guard scoped exclusively to `vrs_sarajevo_romanija`: when `keepAssigned.length === 0` and `reserveCandidates.length > 0`, promote the strongest reserve brigade to assigned. Guard is SRK-only — does not affect offensive corps or ARBiH sectors.
+
+**Status:** FIXED n703+. Verified: 3 SRK sectors with 0 empty `assigned_brigade_ids` at w40.
 
 ---
 
@@ -714,6 +775,13 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 | **P2** | #28 SRK siege abandonment | Graz fixed n697; threat_ratio formula fixed n701 Phase 4; Step 7→8 cycle (0-defense) still open | **PARTIAL** |
 | ~~**P2**~~ | ~~#30 VRS early-war exchange (Corridor 3.8:1, Prsten 4.3:1)~~ | ~~Zombie ops inflated aggregate~~ | **FIXED n703 (organic)** |
 | **P2** | #25 Podrinje Sweep 23 weeks | Root cause #3 (zombie single-bde ops) fixed n703; root causes #1/#2 (planning duration, Srebrenica Ring axis) open | **PARTIAL (n703)** |
+**Post-n25 state:** 90.5% area-weighted, 13/13 anchors. Hash `6fd84077b3a383e2`. 139 battles (RS 112, RBiH 21, HRHB 6). RS win rate 88.4% (target 60-75%). Att:def ratio 0.79:1 (defenders take 25% more casualties than attackers). 73.4% decisive victories. brka_2 FIXED. Goražde enclave redistribution guard FIXED. SRK 0-assigned FIXED. Idle equalization Step 7c added.
+
+| Priority | Issue | Impact | Status |
+|----------|-------|--------|--------|
+| **P1** | #24 RS 88.4% success rate | Too high for 1992 (historical 60-75%). 73.4% decisive victories | **Open n25** |
+| ~~**P1**~~ | ~~Att:def ratio 0.79:1~~ | ~~0.79:1 IS historically correct per H5 — Op Corridor 0.45:1. n26-n29 fix attempts regressed DRINA -7pp. Range 0.5-1.0:1 is the H5 target; 0.79 is within it.~~ | **CLOSED BY AUDIT n30** |
+| **P1** | #23 Sector casualty cascade (0.1:1) | n590 overcorrection — 1,671 def casualties from 109 att attack | **Open n647** |
 | ~~**P0**~~ | ~~#16 Zero equipment~~ | ~~False alarm~~ | **FALSE ALARM** |
 | ~~**P0**~~ | ~~#2 Attack outcomes inverted~~ | ~~Root cause~~ | **FIXED n482** |
 | ~~**P0**~~ | ~~#11 Sarajevo falls~~ | ~~5 root causes~~ | **FIXED n527** |
@@ -732,6 +800,24 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 | ~~**P2**~~ | ~~#19 Static 2-ops pattern~~ | ~~False alarm~~ | **FALSE ALARM** |
 | **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
 | **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | Open |
+| **P1** | #15 Density imbalance (16x ratios) | 1KK 4 brigades idle in Banja Luka, SRK sector with 519 men | Investigation needed |
+| ~~**P2**~~ | ~~#29 Zombie operations (Gracanica 8 turns, Žepa, Bihać)~~ | ~~reserve_brigade_ids not checked in sector defense~~ | **FIXED n32** |
+| **P2** | #30 ARBiH Foča expansion | Goražde sector:8 spans Foča territory; enclave redistribution guard partial fix | **PARTIAL n25** |
+| **P2** | #25 Podrinje Sweep 23 weeks | Ring axis typo fixed; painted target corrected; follow-on planning deferred | **PARTIAL n37** |
+| **P2** | #31 Teočak pocket captured by VRS | Bot priority: vrs_east_bosnian secondary op overwhelms 255th Slavna | **OPEN — engine fix needed** |
+| **P3** | #7 HVO passivity (30 orders n618) | Mostly structural | **MOSTLY STRUCTURAL** |
+| ~~**P1**~~ | ~~#5/#10 Morale system~~ | ~~No victory boost + no zero-morale consequence~~ | **ADDRESSED n588/n618** |
+| **P1** | Casualty volume — monitor | Defender casualties may be inflated by #23 | Monitoring |
+| ~~**P1**~~ | ~~#12 Suicide attacks~~ | ~~Dissolution absolute floor bypass~~ | **Partially fixed n556** |
+| ~~**P1**~~ | ~~H6 ARBiH too passive~~ | ~~24→41 attacks~~ | **Partially fixed n560/n587** |
+| ~~**P2**~~ | ~~#19 Static 2-ops pattern~~ | ~~False alarm~~ | **FALSE ALARM** |
+| ~~**P2**~~ | ~~#14 HVO ghost front (0 sectors)~~ | ~~Correct until HVO-RBiH war (April 1993). No fix needed~~ | **BY DESIGN** |
+| **P2** | #6/#8 Front coverage + stacking | Mitigated by reactive sector defense | Monitoring |
+| **P2** | H4 VRS armor not concentrated | Mech/moto staging exists; equipment IS present | Open |
+| **P2** | Brčko/Gradačac anchor | brka_2 previously papered over with avoided_osids (reverted — that mechanism is banned) | **OPEN — engine fix needed** |
+| **P2** | 0 dissolved formations at w40 | Dissolution criteria may be too protective | **NEW n647** |
+| ~~**P1**~~ | ~~#28 SRK 0-assigned cycle~~ | ~~reclassifyRearBrigades zero-guard scoped to vrs_sarajevo_romanija~~ | **FIXED n703+** |
+| **P3** | #20 30 RBiH at 3,000 cap | Cookie-cutter uniformity | **NEW n587** |
 | **P3** | #3 Formation casualty_ledger | Design gap, data exists in state-level ledger | Open |
 
 ---

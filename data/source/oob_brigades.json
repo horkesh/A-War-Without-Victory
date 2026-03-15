@@ -507,8 +507,8 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 400,
-    "initial_cohesion": 30,
+    "initial_personnel": 700,
+    "initial_cohesion": 52,
     "distinction_potential": "tier_2",
     "initial_officer_quality": 0.15
   },
@@ -663,8 +663,9 @@
     "default_equipment_class": "light_infantry",
     "available_from": 4,
     "mandatory": true,
-    "initial_personnel": 600,
-    "initial_cohesion": 48
+    "initial_personnel": 900,
+    "initial_cohesion": 55,
+    "defense_terrain_bonus": 0.35
   },
   {
     "id": "arbih_255th_slavna_mountain_hajrudin_mesi",

@@ -224,7 +224,14 @@ export function getMoraleResistFloor(faction: string): number {
 
 /** Increased 0.04→0.06 (n482)→0.08 (n536: 24k casualties vs 40-60k historical).
  * Historical: even VRS decisive victories cost blood. ARBiH stood and died,
- * inflicting attacker losses even when overrun. BB1 p.462: 1992 was deadliest year. */
+ * inflicting attacker losses even when overrun. BB1 p.462: 1992 was deadliest year.
+ *
+ * Issue #30 (REAL_WAR_MASTER.md): Early-war VRS operations (w0-w12) show 3.8:1
+ * (Operation Corridor) and 4.3:1 (Prsten) attacker:defender exchange — too costly
+ * for operations the VRS won with massive artillery advantage. Likely this rate
+ * amplifies late-operation stalled attacks that drag the per-operation average up.
+ * Consider a faction×period attacker modifier: RS w0-12 could apply 0.75× to this
+ * base rate to reflect JNA-inheritance firepower advantage in the blitz phase. */
 export const BASE_ATTACKER_LOSS_RATE = 0.08;
 /** Increased 0.028→0.042 (n482)→0.06 (n536: defender casualties also too low).
  * ARBiH fighters in homeland didn't retreat — they fought to the last, taking
@@ -286,6 +293,11 @@ export const OUTCOME_ATTACKER_MOD: Record<string, number> = {
 // catastrophic raised 0.3→0.7 — even a doomed assault inflicts casualties on the defender.
 // At 0.3 combined with power-ratio floor 0.6, defenders took only 18% of base casualties,
 // producing absurd 43-50:1 ratios. Real failed attacks still cost defenders meaningfully.
+// H5 AUDIT NOTE: att:def 0.79:1 (defenders take 27% more) is historically correct for
+// 1992 VRS blitz — Op Corridor 92 data VRS 413 KIA vs HVO 918 KIA = 0.45:1 att:def.
+// H5 target range: 0.5:1 to 1:1 (defenders take equal to 2x more than attackers).
+// Previous "fix" attempts (n26-n29) that raised attacker mod to 1.5-1.6 produced
+// historically incorrect 1.17-1.31:1 ratios and -7pp DRINA regression.
 export const OUTCOME_DEFENDER_MOD: Record<string, number> = {
     decisive_victory: 2.5, victory: 1.8, costly_victory: 1.2,
     stalemate: 1.0, repulsed: 0.7, catastrophic: 0.7

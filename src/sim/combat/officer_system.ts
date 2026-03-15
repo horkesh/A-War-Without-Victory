@@ -245,7 +245,17 @@ export function selectOperationCommander(
 
     for (const data of officerData) {
         if (data.faction !== faction) continue;
-        // Only corps_commander rank can command ops (not army/deputy)
+        // Only corps_commander rank can command ops (not army/deputy).
+        //
+        // DESIGN NOTE: In real Bosnian War doctrine, the corps commander (Merdan,
+        // Bahto, Mutevelija) does NOT personally lead the assault — he directs the
+        // operation from HQ while delegating tactical command to a brigade CO or
+        // a designated operational-group commander. The current model uses the
+        // `corps_commander` pool as a proxy for "senior officer capable of
+        // commanding an operation", which works for the 1992-1993 chaotic period
+        // but becomes inaccurate as the war professionalises. Future work: add a
+        // `tactical_commander` rank tier (brigade COs who actually lead assaults)
+        // and reserve `corps_commander` pool for the planning/modifier role only.
         if (data.rank !== 'corps_commander') continue;
 
         const os = officers[data.id];

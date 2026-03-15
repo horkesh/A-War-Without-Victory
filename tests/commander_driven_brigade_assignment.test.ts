@@ -26,9 +26,8 @@ import {
     type FactionId,
     type FormationState,
     type GameState,
-    type NamedOfficerState,
 } from '../src/state/game_state.js';
-import type { NamedOfficer } from '../src/state/officer_types.js';
+import type { NamedOfficer, NamedOfficerState } from '../src/state/officer_types.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────

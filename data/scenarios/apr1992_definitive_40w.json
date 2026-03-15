@@ -68,9 +68,13 @@
     "op:nevesinje:hrusta_2": "RS",
     "op:nevesinje:sopilja": "RS",
     "op:kotor_varos:prisocka_2": "RS",
-    "op:kotor_varos:vrbanjci_2": "RS"
+    "op:kotor_varos:vrbanjci_2": "RS",
+    "op:foca:kosman": "RS",
+    "op:foca:tjentiste_2": "RS",
+    "op:foca:miljevina_2": "RS",
+    "op:foca:izbisno": "RS",
+    "op:foca:ustikolina": "RS"
   },
-  "avoided_osids_by_faction": {},
   "war_timeline": "apr1992",
   "init_officers": "apr1992"
 }

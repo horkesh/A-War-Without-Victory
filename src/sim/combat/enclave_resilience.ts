@@ -73,12 +73,14 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
         id: 'srebrenica',
         faction: 'RBiH',
         // Painted January 1993 RBiH OSIDs only — not entire municipality
+        // Painted January 1993 RBiH OSIDs only — not entire municipality.
+        // osmace_2 omitted: VRS captured it before Jan 1993 (painted RS in calibration data).
         osid_list: [
             'op:srebrenica:bostahovine_2', 'op:srebrenica:brezovice_2',
             'op:srebrenica:donji_potocari_2', 'op:srebrenica:kalimanici',
             'op:srebrenica:lijesce', 'op:srebrenica:ljeskovik_2',
             'op:srebrenica:luka_2', 'op:srebrenica:milacevici',
-            'op:srebrenica:osmace_2', 'op:srebrenica:radovcici',
+            'op:srebrenica:radovcici',
             'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
             'op:srebrenica:sulice_2',
         ],
