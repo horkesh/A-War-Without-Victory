@@ -530,6 +530,8 @@ export interface FormationState {
     fallback_osid?: string;
     /** Origin OSID — where this brigade was raised / permanently based. Used for home distance effectiveness. Set at creation, never changes. */
     home_osid?: string;
+    /** Sub-segment this brigade is assigned to defend (AoR). Derived each turn. */
+    assigned_sub_segment_id?: string;
     /** Garrison unit — only defends, never attacks. Set from OOB (e.g. VRS 65th Protection Regiment). */
     garrison?: boolean;
     /** Target OSID for paramilitary sweep. When set, this paramilitary unit marches to and captures this OSID, then dissolves. */
@@ -1507,6 +1509,10 @@ export interface CorpsFrontSubSegment {
     enemy_osids: string[];
     /** Edge count. */
     length_edges: number;
+    /** Brigade IDs assigned as primary defenders of this sub-segment. */
+    primary_brigade_ids: string[];
+    /** True if this sub-segment has no primary brigade (gap in the line). */
+    gap?: boolean;
 }
 
 /** Civilian casualties from displacement (killed, fled abroad) per faction (ethnicity-aligned). */

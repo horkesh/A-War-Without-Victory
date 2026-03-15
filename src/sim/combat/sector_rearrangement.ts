@@ -272,6 +272,7 @@ function createPocketContainmentSectors(
             friendly_osids: [...containmentFriendly].sort(strictCompare),
             enemy_osids: [...pocket].sort(strictCompare),
             length_edges: 0,
+            primary_brigade_ids: [],
         };
 
         result.push({

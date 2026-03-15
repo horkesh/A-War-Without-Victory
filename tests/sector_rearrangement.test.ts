@@ -13,6 +13,7 @@ function makeSector(
         edge_ids: edges,
         friendly_osids: friendly,
         enemy_osids: enemy,
+        primary_brigade_ids: [],
         length_edges: edges.length,
     };
     return {

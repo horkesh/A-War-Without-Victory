@@ -70,6 +70,7 @@ export function makeSubSegment(
     return {
         friendly_osids: [],
         enemy_osids: [],
+        primary_brigade_ids: [],
         length_edges: overrides.edge_ids.length,
         ...overrides,
     };
@@ -116,6 +117,7 @@ export function makeSector(opts: {
             edge_ids: edgeIds,
             friendly_osids: friendlyOsids,
             enemy_osids: enemyOsids,
+            primary_brigade_ids: [],
             length_edges: edgeIds.length,
         },
     ];

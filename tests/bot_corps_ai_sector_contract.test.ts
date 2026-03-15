@@ -61,6 +61,7 @@ function makeSector(
                 edge_ids: edgeIds,
                 friendly_osids: friendlyOsids,
                 enemy_osids: enemyOsids,
+                primary_brigade_ids: [],
                 length_edges: lengthEdges,
             }
         ],

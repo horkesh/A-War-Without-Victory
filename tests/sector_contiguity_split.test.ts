@@ -38,6 +38,7 @@ function makeSubSeg(id: string, edgeIds: string[], friendly: string[], enemy: st
         edge_ids: edgeIds,
         friendly_osids: friendly,
         enemy_osids: enemy,
+        primary_brigade_ids: [],
         length_edges: edgeIds.length,
     };
 }

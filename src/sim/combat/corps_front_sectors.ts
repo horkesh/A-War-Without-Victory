@@ -2062,6 +2062,7 @@ function findSubSegments(
             friendly_osids: [...friendlyOsids].sort(strictCompare),
             enemy_osids: [...enemyOsids].sort(strictCompare),
             length_edges: component.length,
+            primary_brigade_ids: [],
         });
         segIndex++;
     }
@@ -2397,6 +2398,7 @@ function buildSubSegmentFromEdges(
         friendly_osids: [...friendlyOsids].sort(strictCompare),
         enemy_osids: [...enemyOsids].sort(strictCompare),
         length_edges: edgeIds.length,
+        primary_brigade_ids: [],
     };
 }
 
@@ -2957,6 +2959,7 @@ export function splitNonContiguousSectors(
                         friendly_osids: [...comp].sort(strictCompare),
                         enemy_osids: [...sector.sub_segments.flatMap(ss => ss.enemy_osids)].sort(strictCompare),
                         length_edges: isLargest ? compEdgeIds.length : 0,
+                        primary_brigade_ids: [],
                     };
                     result.push({
                         sector_id: `sector:${sector.corps_id}:${result.length}`,
@@ -3050,6 +3053,7 @@ export function splitNonContiguousSectors(
                     friendly_osids: [...compFriendly].sort(strictCompare),
                     enemy_osids: [...compEnemy].sort(strictCompare),
                     length_edges: compEdgeIds.length,
+                    primary_brigade_ids: [],
                 };
                 result.push({
                     sector_id: `sector:${sector.corps_id}:${result.length}`,
@@ -3118,6 +3122,7 @@ export function splitNonContiguousSectors(
                 friendly_osids: [...compFriendly].sort(strictCompare),
                 enemy_osids: [...compEnemy].sort(strictCompare),
                 length_edges: compEdgeIds.length,
+                primary_brigade_ids: [],
             };
 
             // Brigades: all go to the largest component; others get empty lists
@@ -3226,6 +3231,7 @@ function mergeSubSegmentsInto(
         friendly_osids: friendlyOsids,
         enemy_osids: enemyOsids,
         length_edges: edgeIds.length,
+        primary_brigade_ids: [],
     };
 }
 
@@ -3513,6 +3519,7 @@ function mergeSectors(
             ...other.sub_segments.flatMap(ss => ss.enemy_osids),
         ])].sort(strictCompare),
         length_edges: edgeIds.length,
+        primary_brigade_ids: [],
     };
 
     const brigadeIds = [...new Set([...base.assigned_brigade_ids, ...other.assigned_brigade_ids])].sort(strictCompare);
@@ -3876,4 +3883,206 @@ export function getCorpsHqOsid(
     const corpsFormation = state.military.formations?.[corpsId];
     if (!corpsFormation) return null;
     return (corpsFormation as FormationState & { location_osid?: string }).location_osid ?? null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Brigade Sub-Segment Assignment (AoR)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Sub-segments wider than this get 2+ brigades. */
+const WIDE_SEGMENT_THRESHOLD = 5;
+
+/** Home OSID affinity bonus when brigade's home_osid is in the sub-segment's friendly OSIDs. */
+const HOME_AFFINITY_BONUS = 1.3;
+
+/** Mechanized/motorized brigade terrain affinity bonus for non-mountain sub-segments. */
+const MECH_TERRAIN_BONUS = 1.2;
+
+/**
+ * Assign front-line brigades to sub-segments within each sector.
+ * Each brigade gets exactly one sub-segment (their AoR). Each sub-segment
+ * should have at least one brigade if possible. Widest segments get priority.
+ *
+ * Deterministic: sorted iteration, greedy best-fit.
+ */
+export function assignBrigadesToSubSegments(
+    state: GameState,
+    sectors: CorpsFrontSector[],
+    adjacency: Map<string, string[]>
+): void {
+    const formations = state.military.formations ?? {};
+
+    for (const sector of sectors) {
+        if (sector.sub_segments.length === 0) continue;
+
+        // Reset previous assignments
+        for (const ss of sector.sub_segments) {
+            ss.primary_brigade_ids = [];
+            ss.gap = false;
+        }
+
+        // Separate front-line brigades from reserves
+        const frontBrigadeIds: string[] = [];
+        for (const bid of sector.assigned_brigade_ids) {
+            if (sector.reserve_brigade_ids.includes(bid)) continue;
+            const f = formations[bid];
+            if (!f || f.status === 'inactive') continue;
+            frontBrigadeIds.push(bid);
+        }
+
+        if (frontBrigadeIds.length === 0) {
+            // All sub-segments are gaps
+            for (const ss of sector.sub_segments) {
+                ss.gap = true;
+            }
+            continue;
+        }
+
+        // If only 1 sub-segment, assign all front brigades to it
+        if (sector.sub_segments.length === 1) {
+            sector.sub_segments[0]!.primary_brigade_ids = [...frontBrigadeIds].sort(strictCompare);
+            for (const bid of frontBrigadeIds) {
+                const f = formations[bid];
+                if (f) f.assigned_sub_segment_id = sector.sub_segments[0]!.sub_segment_id;
+            }
+            continue;
+        }
+
+        // Compute affinity for each brigade × sub-segment pair
+        const affinities: Array<{ bid: string; ssIdx: number; score: number }> = [];
+        for (const bid of frontBrigadeIds) {
+            const f = formations[bid];
+            if (!f) continue;
+            const brigLoc = (f as FormationState & { location_osid?: string }).location_osid ?? '';
+            const brigHome = f.home_osid ?? '';
+            const isMech = f.equipment_class === 'mechanized' || f.equipment_class === 'motorized';
+
+            for (let si = 0; si < sector.sub_segments.length; si++) {
+                const ss = sector.sub_segments[si]!;
+                // Distance from brigade location to nearest friendly OSID in this sub-segment
+                let minDist = Infinity;
+                for (const fOsid of ss.friendly_osids) {
+                    if (fOsid === brigLoc) { minDist = 0; break; }
+                    const d = bfsDistance(brigLoc, fOsid, adjacency);
+                    if (d < minDist) minDist = d;
+                }
+                let score = 1.0 / (1 + (minDist === Infinity ? 20 : minDist));
+
+                // Home affinity bonus
+                if (brigHome && ss.friendly_osids.includes(brigHome)) {
+                    score *= HOME_AFFINITY_BONUS;
+                }
+
+                // Mech terrain bonus (non-mountain terrain = favorable for mechanized)
+                if (isMech) {
+                    score *= MECH_TERRAIN_BONUS;
+                }
+
+                affinities.push({ bid, ssIdx: si, score });
+            }
+        }
+
+        // Sort sub-segments by width descending (widest first gets first pick)
+        const ssOrder = sector.sub_segments
+            .map((ss, i) => ({ idx: i, width: ss.length_edges }))
+            .sort((a, b) => b.width - a.width || a.idx - b.idx);
+
+        const assignedBrigades = new Set<string>();
+        const brigadesPerSubSeg: Map<number, string[]> = new Map();
+
+        // First pass: assign one brigade to each sub-segment (widest first)
+        for (const { idx } of ssOrder) {
+            // Find best unassigned brigade for this sub-segment
+            const candidates = affinities
+                .filter(a => a.ssIdx === idx && !assignedBrigades.has(a.bid))
+                .sort((a, b) => b.score - a.score || a.bid.localeCompare(b.bid));
+
+            if (candidates.length > 0) {
+                const best = candidates[0]!;
+                assignedBrigades.add(best.bid);
+                brigadesPerSubSeg.set(idx, [best.bid]);
+            }
+        }
+
+        // Second pass: assign remaining brigades to sub-segments that need more
+        const unassigned = frontBrigadeIds
+            .filter(b => !assignedBrigades.has(b))
+            .sort(strictCompare);
+
+        for (const bid of unassigned) {
+            // Find best sub-segment for this brigade
+            const candidates = affinities
+                .filter(a => a.bid === bid)
+                .sort((a, b) => {
+                    // Prefer wide under-staffed sub-segments
+                    const ssA = sector.sub_segments[a.ssIdx]!;
+                    const ssB = sector.sub_segments[b.ssIdx]!;
+                    const countA = brigadesPerSubSeg.get(a.ssIdx)?.length ?? 0;
+                    const countB = brigadesPerSubSeg.get(b.ssIdx)?.length ?? 0;
+                    const needsA = ssA.length_edges >= WIDE_SEGMENT_THRESHOLD && countA < 2 ? 1 : 0;
+                    const needsB = ssB.length_edges >= WIDE_SEGMENT_THRESHOLD && countB < 2 ? 1 : 0;
+                    if (needsA !== needsB) return needsB - needsA;
+                    return b.score - a.score || a.ssIdx - b.ssIdx;
+                });
+
+            if (candidates.length > 0) {
+                const best = candidates[0]!;
+                const list = brigadesPerSubSeg.get(best.ssIdx) ?? [];
+                list.push(bid);
+                brigadesPerSubSeg.set(best.ssIdx, list);
+            }
+        }
+
+        // Write assignments to sub-segments and formations
+        for (let si = 0; si < sector.sub_segments.length; si++) {
+            const ss = sector.sub_segments[si]!;
+            const assigned = brigadesPerSubSeg.get(si) ?? [];
+            ss.primary_brigade_ids = assigned.sort(strictCompare);
+            ss.gap = assigned.length === 0;
+
+            for (const bid of assigned) {
+                const f = formations[bid];
+                if (f) f.assigned_sub_segment_id = ss.sub_segment_id;
+            }
+        }
+    }
+}
+
+/** Simple BFS distance between two OSIDs through adjacency graph. */
+function bfsDistance(from: string, to: string, adjacency: Map<string, string[]>): number {
+    if (from === to) return 0;
+    if (!from || !to) return Infinity;
+    const visited = new Set<string>([from]);
+    const queue: Array<{ osid: string; depth: number }> = [{ osid: from, depth: 0 }];
+    let head = 0;
+    const maxDepth = 10; // cap search depth
+
+    while (head < queue.length) {
+        const { osid, depth } = queue[head++]!;
+        if (depth >= maxDepth) break;
+        const neighbors = adjacency.get(osid) ?? [];
+        for (const n of neighbors) {
+            if (n === to) return depth + 1;
+            if (visited.has(n)) continue;
+            visited.add(n);
+            queue.push({ osid: n, depth: depth + 1 });
+        }
+    }
+    return Infinity;
+}
+
+/**
+ * Find which sub-segment contains a given OSID (either as friendly or enemy).
+ * Returns the sub-segment, or undefined if not found.
+ */
+export function findSubSegmentForOsid(
+    sector: CorpsFrontSector,
+    targetOsid: string
+): CorpsFrontSubSegment | undefined {
+    for (const ss of sector.sub_segments) {
+        if (ss.friendly_osids.includes(targetOsid) || ss.enemy_osids.includes(targetOsid)) {
+            return ss;
+        }
+    }
+    return undefined;
 }

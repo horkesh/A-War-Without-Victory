@@ -80,6 +80,7 @@ function makeSubSegment(
         edge_ids: edgeIds,
         enemy_osids: enemyOsids,
         friendly_osids: friendlyOsids,
+        primary_brigade_ids: [],
         length_edges: edgeIds.length,
     };
 }

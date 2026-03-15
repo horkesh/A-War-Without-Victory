@@ -117,7 +117,7 @@ import { updateEnclaveResilience } from '../combat/enclave_resilience.js';
 import { updateExhaustion } from '../combat/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
 import { buildLocalFronts } from '../combat/local_front_defense.js';
-import { buildCorpsFrontSectors } from '../combat/corps_front_sectors.js';
+import { buildCorpsFrontSectors, assignBrigadesToSubSegments } from '../combat/corps_front_sectors.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults } from '../combat/sector_offensive.js';
 import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
@@ -527,6 +527,21 @@ export const warPhases: NamedPhase[] = [
     // Sectors are an organizational layer for corps targeting and directives.
     // The density modifier continues to use the existing local_fronts (faction-level aggregation)
     // because per-sector density would over-penalize overextended factions (VRS historically thin).
+
+    {
+        name: 'assign-brigades-to-subsegments',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const sectorMap = context.state.military.corps_front_sectors;
+            if (!sectorMap) return;
+            const sectorList = Object.values(sectorMap);
+            if (sectorList.length === 0) return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const adjacency = buildOsidAdjacency(od.edges);
+            assignBrigadesToSubSegments(context.state, sectorList, adjacency);
+        }
+    },
 
     {
         name: 'compute-sector-combat-ratings',

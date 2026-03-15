@@ -51,6 +51,7 @@ describe('war-phase step ordering', () => {
         // +1 from evaluate-peace-plans (peace plan events, 2026-03-15).
         // +1 from update-patron-pressure (patron pressure system, 2026-03-15).
         // +1 from hv-integration (Washington Agreement + HV brigades, 2026-03-15).
-        expect(stepNames.length).toBe(125);
+        // +1 from assign-brigades-to-subsegments (v0.3.3 AoR sub-segment assignment, 2026-03-16).
+        expect(stepNames.length).toBe(126);
     });
 });
