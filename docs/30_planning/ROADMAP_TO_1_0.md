@@ -63,22 +63,28 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 - [ ] **Peace map overlays** — political control colors + org-pen heat map during peace phase. Municipality click shows stability score, org-pen breakdown.
 - [ ] **Peace→War transition screen** — dramatic "War Begins" modal: date, OOB summary, faction briefing, initial front overview. Smooth UI transition from peace panels to war panels.
 
-### 0.4.1 — Victory Conditions Design
-- [ ] **Scenario victory conditions** — per-faction goals defined in scenario JSON (territory thresholds, exhaustion limits, required settlements). Checked every turn by `war_termination.ts`.
-- [ ] **Endgame scoring** — faction standings at game over: territory %, population under control, military losses, exhaustion, political stability. Displayed in GameOverModal.
-- [ ] **Treaty termination** — Dayton-track: when mutual exhaustion + international pressure cross thresholds, game proposes ceasefire. Player accepts or refuses (with consequences). Washington Agreement for RBiH-HRHB already exists — wire it to game-over path.
-- [ ] **War termination tuning** — run full 208w scenarios for each faction, verify games end at reasonable historical points. Calibrate thresholds.
-
-### 0.4.2 — Event System Foundation
+### 0.4.1 — Complete Event System
 - [ ] **Event engine** — `src/sim/events/`: event types (historical, random, decision), trigger conditions (turn, territory, exhaustion, alliance), effects (morale, supply, political, alliance). Deterministic evaluation.
 - [ ] **Historical events** — 15-20 key events for 1992 (JNA withdrawal May 12, Sarajevo siege, Operation Corridor June, London Conference August, Vance-Owen January 1993). Each has narrative text, mechanical effect, and player response options where applicable.
 - [ ] **Event UI** — newspaper-style modal or command briefing. Events queue when multiple fire same turn. Player acknowledges or chooses response.
 - [ ] **Decision events** — player-initiated choices at key moments (accept/reject ceasefire proposals, commit reserves, break alliances). Consequences affect alliance, international pressure, morale.
 
-### 0.4.3 — Diplomatic Layer (Foundation)
-- [ ] **International visibility pressure (IVP)** — composite score from atrocities, media coverage, UN resolutions. Affects patron support, arms embargo enforcement, intervention risk. Build on existing `patron_pressure.ts`.
-- [ ] **Patron commitment curves** — historical patron support profiles (Serbia→RS, Croatia→HRHB, international community→RBiH). Already partially in supply reserves — formalize and expose to UI.
-- [ ] **Sanctions/embargo mechanics** — RS under sanctions (historical), RBiH under arms embargo (historical). Mechanical effects on supply, equipment replacement, morale.
+### 0.4.2 — Additional Scenarios (1993, 1994, 1995 starts)
+- [ ] **January 1993 start** — post-Corridor, Drina valley situation, Croat-Bosniak tensions rising.
+- [ ] **March 1994 start** — post-Washington, joint RBiH-HVO operations, NATO involvement beginning.
+- [ ] **January 1995 start** — endgame: Srebrenica → Storm → Dayton.
+- [ ] **Scenario selection screen** — map-based scenario picker showing starting date, situation summary, difficulty rating per faction.
+
+### 0.4.3 — Economy & War Production
+- [ ] **War economy** — simple production system: each faction has industrial capacity (factories, workshops). Produces equipment replacement, ammunition. Capacity degrades from bombing/territory loss.
+- [ ] **Smuggling & black market** — RBiH tunnel system (Sarajevo), smuggling routes. Player can invest in these. Affects enclave supply.
+- [ ] **Equipment lifecycle** — weapons degrade over time, captured equipment has lower effectiveness, JNA inheritance pools deplete.
+
+### 0.4.4 — AI Commander Prototype (Phase A: Mladić)
+- [ ] **Claude API integration** — single Army Commander (RS/Mladić) with personality prompt.
+- [ ] **Structured directive output** — corps stances, operation approvals, strategic reasoning.
+- [ ] **Decision logging** — all Claude decisions saved for deterministic replay.
+- [ ] **Formula bot fallback** — works offline without API key.
 
 ---
 
@@ -86,39 +92,35 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 
 **Goal:** All game systems exist and are integrated. A player can have a complete, meaningful experience from start to finish. No placeholder mechanics.
 
-### 0.5.0 — Full Diplomatic System
-- [ ] **Negotiation framework** — periodic negotiation rounds (Lisbon, Vance-Owen, Owen-Stoltenberg, Contact Group, Dayton-track). Each has territorial proposals, political conditions, and patron pressure modifiers.
-- [ ] **Counter-offer system** — player responds to proposals (accept, reject, counter). AI evaluates based on military position + exhaustion + patron pressure.
-- [ ] **International intervention thresholds** — NATO air strikes, safe areas, UNPROFOR mandate changes. Triggered by IVP milestones + player/AI decisions. Mechanical effects on VRS capabilities.
-- [ ] **Endgame Dayton logic** — when all factions exhausted + patron pressure peaked, negotiation converges. Territory lines at ceasefire become the Dayton map. Scoring evaluates how close to historical Dayton.
+### 0.5.0 — Full Diplomatic System (Negotiations)
+- [ ] **IVP (International Visibility Pressure)** — composite score from atrocities, media coverage, UN resolutions. Build on existing `patron_pressure.ts`.
+- [ ] **International intervention thresholds** — NATO air strikes, safe areas, UNPROFOR mandate changes. Triggered by IVP milestones.
+- [ ] **Sanctions/embargo formalization** — RS sanctions, RBiH arms embargo. Mechanical effects on supply and equipment.
+- [ ] **Patron commitment curves** — historical support profiles exposed to UI.
 
-### 0.5.1 — Economy & Production
-- [ ] **War economy** — simple production system: each faction has industrial capacity (factories, workshops). Produces equipment replacement, ammunition. Capacity degrades from bombing/territory loss.
-- [ ] **Smuggling & black market** — RBiH tunnel system (Sarajevo), smuggling routes. Player can invest in these. Affects enclave supply.
-- [ ] **Equipment lifecycle** — weapons degrade over time, captured equipment has lower effectiveness, JNA inheritance pools deplete. Already partially in VRS equipment decay — extend to all factions.
-
-### 0.5.2 — Additional Scenarios
-- [ ] **January 1993 start** — post-Corridor, Drina valley situation, Croat-Bosniak tensions rising.
-- [ ] **March 1994 start** — post-Washington, joint RBiH-HVO operations, NATO involvement beginning.
-- [ ] **September 1991 start** — full peace phase, JNA mobilization, barricades crisis, complete pre-war experience.
-- [ ] **Scenario selection screen** — map-based scenario picker showing starting date, situation summary, difficulty rating per faction.
-
-### 0.5.3 — UI Completion
-- [ ] **All panels finalized** — settlement detail, corps detail, army detail, operation planning, sector management. No missing data fields, no placeholder text.
+### 0.5.1 — UI Completion
+- [ ] **All panels finalized** — settlement detail, corps detail, army detail, sector management. No missing data, no placeholder text.
+- [ ] **Operations Planning Modal Redesign** — Command Dashboard, Tactical Cards, Bezier Arrows, G-2 Forecast, Commander Integration.
 - [ ] **All map modes polished** — 7 modes with proper legends, gradient scales, tooltips.
 - [ ] **Warroom completion** — all faction HQ screens with clickable regions, situation overlays, briefing modals.
 - [ ] **Menu system** — main menu, settings (graphics, audio, gameplay), credits, quit confirmation.
 - [ ] **Settings persistence** — game settings saved to disk, restored on launch.
 
-### 0.5.4 — Tutorial & Onboarding
-- [ ] **Interactive tutorial scenario** — guided 10-turn scenario teaching core mechanics: reading the map, issuing orders, understanding supply, managing operations.
+### 0.5.2 — Tutorial & Onboarding
+- [ ] **Interactive tutorial scenario** — guided 10-turn scenario teaching core mechanics.
 - [ ] **Tooltips & help system** — contextual help on every UI element. "What's this?" mode.
-- [ ] **Encyclopedia/Codex** — in-game reference for: factions, corps, historical context, game mechanics, key figures. Populated from canon docs + historical data.
+- [ ] **Encyclopedia/Codex** — in-game reference for factions, corps, history, mechanics, key figures.
 
-### 0.5.5 — Audio
+### 0.5.3 — Audio (SFX + Music)
 - [ ] **Sound effects** — UI clicks, turn advance, battle notifications, map interactions, events.
-- [ ] **Music system** — ambient war-era music, faction-specific themes, tension escalation based on game state. Licensed or commissioned.
+- [ ] **Music system** — ambient war-era music, faction-specific themes, tension escalation.
 - [ ] **Audio settings** — master/music/SFX volume controls.
+
+### 0.5.4 — AI Commander Full (all 3 armies + corps + advisor)
+- [ ] **All 3 Army Commanders** — Mladić, Halilović/Delić, Petković with personality profiles.
+- [ ] **Corps Commander AI** — operational decisions from named officer personalities. Haiku for routine, Sonnet for operations.
+- [ ] **Player Advisor** — "Ask Commander" on-demand situation analysis.
+- [ ] **AI-vs-AI runs** — spectator mode for calibration and testing.
 
 ---
 
