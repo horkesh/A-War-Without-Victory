@@ -481,8 +481,10 @@ const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 2nd Corps: Tuzla area defense + Brčko south (ARBiH held OSID just south of Brčko throughout war)
     // Zvornik included: Sapna Finger/Teočak corridor was a 2nd Corps priority. Enables ARBiH
     // to connect Teočak pocket via rastosnica_2.
-    { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'zvornik'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },
-    { name: 'Tuzla Expansion', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'lopare', 'ugljevik', 'zvornik'], start_week: 56, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
+    // 2nd Corps historically fought for Brčko corridor throughout 1992-93. The corridor
+    // was the most contested area of the war — ARBiH constantly probed and counterattacked.
+    { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'zvornik', 'brcko'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },
+    { name: 'Tuzla Expansion', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'lopare', 'ugljevik', 'zvornik', 'brcko'], start_week: 56, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
     // 3rd Corps: Central Bosnia — defensive only until week 56
     { name: 'Central Corridor Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko', 'tesanj', 'maglaj', 'zavidovici', 'zepce'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },
     // 3rd Corps: Central corridor counter — reclaim municipalities RS overruns (calibration: Phase M, Jan 1993 painted targets)
