@@ -210,6 +210,44 @@ export interface DaytonResult {
     patron_overrides_applied: string[];
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Verdict & Scoring Types (Phase 5)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Per-dimension grade (one of the 5 capital dimensions). */
+export interface DimensionGrade {
+    dimension: string;
+    label: string;
+    score: number;
+    grade: string;
+}
+
+/** Complete verdict for a single faction. */
+export interface FactionVerdict {
+    faction: string;
+    /** Composite score 0-100, weighted by faction-specific CAPITAL_WEIGHTS. */
+    pyrrhic_score: number;
+    /** Letter grade: 'A+', 'A', 'B', 'C', 'D', 'F'. */
+    grade: string;
+    /** Human-readable description of the grade anchor matched. */
+    grade_description: string;
+    /** Full negotiation capital breakdown. */
+    capital_breakdown: NegotiationCapital;
+    /** Per-dimension letter grades (5 dimensions). */
+    dimension_grades: DimensionGrade[];
+}
+
+/** Complete game verdict covering all factions and the overall outcome. */
+export interface GameVerdict {
+    outcome_type: 'dayton' | 'peace_plan' | 'termination';
+    outcome_label: string;
+    turn: number;
+    date: string;
+    duration_weeks: number;
+    faction_verdicts: Record<string, FactionVerdict>;
+    dayton_result?: DaytonResult;
+}
+
 /** Create empty negotiation capital for a faction. */
 export function createEmptyCapital(): NegotiationCapital {
     return {

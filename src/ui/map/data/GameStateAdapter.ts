@@ -15,6 +15,8 @@ import type {
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
+import type { GameVerdict } from '../../../state/negotiation_types.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -1609,6 +1611,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         // Game over
         gameOver: Boolean(meta.game_over),
         gameOutcome: typeof meta.outcome === 'string' ? meta.outcome : undefined,
+        gameVerdict: Boolean(meta.game_over) ? deriveGameVerdict(state) : undefined,
     };
 }
 
@@ -1868,5 +1871,13 @@ function derivePeacePhaseData(state: any, phase: string): Partial<LoadedGameStat
         peaceReferendum,
         peaceEvents,
     };
+}
+
+function deriveGameVerdict(state: any): GameVerdict | undefined {
+    try {
+        return computeFullVerdict(state);
+    } catch {
+        return undefined;
+    }
 }
 

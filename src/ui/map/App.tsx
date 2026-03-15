@@ -28,7 +28,7 @@ import { AARPanel } from './components/AARPanel';
 import { OperationHistoryPanel } from './components/OperationHistoryPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
-import { GameOverModal } from './components/GameOverModal';
+import { VerdictScreen } from './components/VerdictScreen';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText } from './data/DataLoader';
@@ -394,7 +394,7 @@ function App() {
         <SupplyPanel state={loadedGameState} />
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
-      <GameOverModal />
+      <VerdictScreen />
       <Minimap />
       <BottomStatusStrip />
     </div>

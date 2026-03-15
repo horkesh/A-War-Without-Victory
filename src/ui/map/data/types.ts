@@ -656,6 +656,8 @@ export interface LoadedGameState {
     /** Game over state. */
     gameOver?: boolean;
     gameOutcome?: string;
+    /** Game verdict (computed at game end from negotiation capital). */
+    gameVerdict?: import('../../../state/negotiation_types.js').GameVerdict;
 
     /** Active (in-progress) operations. */
     activeOperations?: Array<{
