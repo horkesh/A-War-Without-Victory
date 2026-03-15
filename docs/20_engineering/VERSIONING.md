@@ -43,7 +43,7 @@ Core simulation loop exists. Turn pipeline runs. Factions exist. Map renders.
 - Calibration pipeline (40w/52w runs, area-weighted comparison)
 - 627 tests passing
 
-### 0.3.x — Playable Alpha
+### 0.3.x — Playable Alpha ✓ (COMPLETED 2026-03-15)
 - Peace phase fully playable (pre-war diplomacy, referendum)
 - War phase fully playable (player orders, operations, officer management)
 - Complete turn cycle: peace → war → endgame
@@ -167,7 +167,7 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Sound/music | ✗ Not started |
 | Localization | ✗ Not started |
 
-**Current version: 0.2.0** — Core engine milestone. All foundational simulation systems built and calibrated. Desktop app functional. Not yet a playable game for end users.
+**Current version: 0.3.0** — Playable Alpha milestone. All foundational simulation systems built and calibrated. Desktop app functional. Not yet a playable game for end users.
 
 ---
 

@@ -67,6 +67,6 @@ Canon v0.7 is the active canon (Engine Invariants, Systems Manual, Rulebook). Ph
 
 ## Game Versioning
 
-**Current: v0.2.0** (Core Engine). Format: `MAJOR.MINOR.PATCH`. 1.0.0 = gold/shipping product. See `docs/20_engineering/VERSIONING.md` for full milestone map and bump protocol.
+**Current: v0.3.0** (Playable Alpha). Format: `MAJOR.MINOR.PATCH`. 1.0.0 = gold/shipping product. See `docs/20_engineering/VERSIONING.md` for full milestone map and bump protocol.
 
 One game turn equals one week.
