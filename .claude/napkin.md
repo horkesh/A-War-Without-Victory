@@ -8,14 +8,13 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-15, late session)
-**v0.3.0 Playable Alpha SHIPPED.** War termination, save system, peace UI, alliance dynamics.
-**Negotiation system in progress (v0.4 target):** Phase 1-3 done (capital tracking, peace plans, patron pressure). Phases 4+6 running (Dayton + Washington/HV). Phase 5 (verdict) next.
-**n810 baseline:** 89.8% area, 13/13 anchors, 4/6 benchmarks. 705 tests passing.
-**Studio renamed to Pyrrhic Games.** Canon v0.7. Versioning system established.
-**Design doc:** `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md` — Dayton as only ending, 5 peace plans, patron pressure, negotiation capital, Pyrrhic Score.
-**Implementation plan:** `docs/plans/2026-03-15-endgame-negotiation-implementation.md`
-**Protocol:** One phase → tests + tsc → /simplify → commit → next phase.
+## Current State (2026-03-15, end of session)
+**v0.3.1 (Playable Alpha + Endgame System).** 763 tests, 66 suites. tsc clean.
+**Endgame COMPLETE:** Negotiation capital, peace plans, patron pressure, Dayton, Washington/HV, Pyrrhic Score.
+**Studio: Pyrrhic Games.** Canon v0.7. Versioning v0.1→v1.0 roadmap established.
+**Night shift system LIVE.** Handoff for v0.3.2 → v0.4.4 (8 milestones). All plans Pyrrhic compliant.
+**External:** Ops planning modal (outside expert). Visual assets (user, Gemini Pro).
+**Protocol:** Day shift plans → nightshift-handoff.md → night shift executes → morning-report.md → review.
 **LESSONS (from engine-sprint-2):** `target_osids` does NOT override `target_municipalities` (code comment lies — both additive). Initial OSID override cascade: changing 5 Foča OSIDs caused -1.0pp total area regression. `avoid_municipalities` existed in type but was removed from implementation. `priorityMunicipalities` in generateCorpsDirectives is built but never used (dead variable).
 
 ## Session Startup (do these EVERY session — BEFORE any work)
