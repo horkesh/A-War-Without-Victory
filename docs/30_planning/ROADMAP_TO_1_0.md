@@ -22,8 +22,8 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.4.1** | Complete Event System | PLANNED |
 | **v0.4.2** | Additional Scenarios (1993, 1994, 1995 starts) | PLANNED |
 | **v0.4.3** | Economy & War Production | PLANNED |
-| **v0.4.4** | AI Commander Prototype (Phase A: Mladić) | PLANNED |
-| **v0.4.5** | Officer Experience & Weight of Command | PLANNED |
+| **v0.4.4** | Officer Experience & Weight of Command | PLANNED |
+| **v0.4.5** | AI Commander Prototype (Phase A: Mladić) | PLANNED |
 | **v0.5.0** | Full Diplomatic System (Negotiations) | PLANNED |
 | **v0.5.1** | UI Completion (all panels, modes, tooltips) | PLANNED |
 | **v0.5.2** | Tutorial & Onboarding | PLANNED |
@@ -58,6 +58,18 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 
 **Goal:** The game is genuinely interactive. Player makes meaningful decisions in both phases. The war ends for real reasons, not just a timer.
 
+**Execution order (revised per cross-plan review):**
+```
+v0.3.2 → v0.3.3 → INFRASTRUCTURE → v0.4.0 → v0.4.1 → v0.4.2 → v0.4.3 → v0.4.4 → v0.4.5
+```
+Note: v0.4.4 (Officer Experience) and v0.4.5 (AI Commander) SWAPPED from original numbering. Officer experience implemented before AI Commander so Claude has the full officer picture. See `CROSS_PLAN_REVIEW_V04.md` for rationale.
+
+### Infrastructure (pre-v0.4.0)
+- [ ] **`GlassPanel.tsx`** — shared glassmorphism panel component (position, title, width, onClose). Used by ALL subsequent panels (EconomyPanel, EventLogPanel, PeaceStatusPanel enhancement, friction log). Matches canonical ops-planning visual style.
+- [ ] **`deterministic_random.ts`** — canonical utility for controlled pseudo-random: `deterministicRandom(seed, context) → number [0,1)`. Used by event system (random events), smuggling disruption, warlord friction. Same input = same output. Replay-safe.
+- [ ] **`scenario_preseeding.ts`** — derives initial state from scenario start date: negotiation capital, patron override, officer experience, economy state. Shared by all scenario manifests. Avoids duplicating pre-seeding logic per scenario.
+- [ ] **Command Briefing enhancement spec** — define the unified post-turn brief that aggregates military + economy + diplomacy + officer events. Cross-cutting deliverable, implemented incrementally with each v0.4.x milestone.
+
 ### 0.4.0 — Peace Phase Interactivity
 - [ ] **Investment queue UI** — player allocates pre-war capital (Police/TO/Party/Paramilitary) to municipalities via modal. Cost preview, coordination toggle (RBiH+HRHB), undo/edit staged investments before turn commit.
 - [ ] **Peace turn flow** — "End Turn" commits investments, runs 22-step peace pipeline, displays events. Turn report: capital spent, declarations, militia changes.
@@ -81,19 +93,21 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 - [ ] **Smuggling & black market** — RBiH tunnel system (Sarajevo), smuggling routes. Player can invest in these. Affects enclave supply.
 - [ ] **Equipment lifecycle** — weapons degrade over time, captured equipment has lower effectiveness, JNA inheritance pools deplete.
 
-### 0.4.4 — AI Commander Prototype (Phase A: Mladić)
-- [ ] **Claude API integration** — single Army Commander (RS/Mladić) with personality prompt.
-- [ ] **Structured directive output** — corps stances, operation approvals, strategic reasoning.
+### 0.4.4 — Officer Experience & Weight of Command
+- [ ] **Post-operation experience gain** — commanding officer gains competence from operations. Outcome scales gain (decisive > costly > stalemate). Skill shift toward combat type (offensive → aggressive, defensive → defensive specialist).
+- [ ] **ARBiH learning curve** — militia/TO-origin officers gain 1.5× experience. Faction maturity thresholds (avg competence ≥ 2.0 → officer_quality base rises, ≥ 3.0 → cohesion recovery bonus). The transformation arc emerges organically.
+- [ ] **RS brain drain** — departures via `available_until_turn`. Competence loss displayed prominently. Player feels institutional decay.
+- [ ] **Warlord friction** — low `political_reliability` commanders occasionally ignore directives. Uses `deterministicRandom()`. Player tolerates (loses cohesion capital) or relieves (loses competence).
+- [ ] **Commander relationship events** — posted through v0.4.1 event bus. Rivalry, mentorship, insubordination, heroic stand, defeatism. Feed into negotiation capital (political cohesion).
+- [ ] **Capital integration** — officer maturity → military_effectiveness capital, friction count → political_cohesion capital.
+- [ ] **Experience UI** — OfficerProfile progression bar, trend indicators, maturity in ArmyDetail.
+
+### 0.4.5 — AI Commander Prototype (Phase A: Mladić)
+- [ ] **Claude API integration** — single Army Commander (RS/Mladić) with personality prompt. Requires officer experience (v0.4.4) so Claude can reason about officer growth.
+- [ ] **Structured directive output** — corps stances, operation approvals, strategic reasoning, briefing text.
 - [ ] **Decision logging** — all Claude decisions saved for deterministic replay.
 - [ ] **Formula bot fallback** — works offline without API key.
-
-### 0.4.5 — Officer Experience & Weight of Command
-- [ ] **Post-operation experience gain** — after each operation, commanding officer gains experience. Competence improves based on outcome (success = faster). Aggressiveness/defensive_skill shift toward what the officer actually did (defensive ops → better defense skill).
-- [ ] **ARBiH learning curve** — officers with `can_improve: true` gain competence faster. The militia-to-professional transformation arc emerges organically: ARBiH officers start weak (competence 1-2) but improve through combat. By 1995, corps commanders are competent professionals.
-- [ ] **RS brain drain** — VRS officers depart via `available_until_turn` (already implemented). Experience loss is visible: replacing a competence-5 officer with a competence-3 replacement is painful. The player feels the institutional decay.
-- [ ] **Warlord friction** — independent-minded commanders (Dudaković, Orić, early ARBiH warlords) occasionally ignore army directives. Probability based on `political_reliability` rating. Player must manage these personalities — replace them (losing combat competence) or tolerate the friction (losing political cohesion).
-- [ ] **Commander relationship events** — personality-driven events: officer refuses to cooperate with another corps, officer launches unauthorized operation, officer protests orders. Feed into negotiation capital (political cohesion dimension).
-- [ ] **Experience UI** — OfficerProfile shows experience progression (battles commanded, operations completed, competence growth). Combat record already displayed — extend with trend indicator.
+- [ ] **Reads ALL accumulated state** — territory, capital, events, economy, officers, friction. Richest possible decision surface.
 
 ---
 

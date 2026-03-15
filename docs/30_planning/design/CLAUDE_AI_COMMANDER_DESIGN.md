@@ -309,14 +309,14 @@ This is the game that Pyrrhic Games was named for. Every decision has cost. Even
 
 ---
 
-## Version Assignment
+## Version Assignment (Revised per CROSS_PLAN_REVIEW_V04.md)
 
 | Version | Milestone |
 |---------|-----------|
-| v0.5.0 or feature branch | Phase A: Single Army Commander prototype (RS/Mladić) |
-| v0.5.1 | Phase B: All three Army Commanders + spectator |
-| v0.5.2 | Phase C: Corps Commander AI |
-| v0.5.3 | Phase D: Player Advisor |
-| v0.6.0 | Phase E: Auto-Play + full integration |
+| **v0.4.5** | Phase A: Single Army Commander prototype (RS/Mladić) — after v0.4.4 Officer Experience |
+| v0.5.4 | Phase B-D: All three armies + corps + advisor |
+| v0.6.3 | Phase E: Auto-Play + spectator mode |
+
+Note: Originally v0.4.4, renumbered to v0.4.5 so officer experience (v0.4.4) comes first. Claude needs the full officer picture (experience, friction, relationships) to make rich decisions.
 
 *"Your enemy thinks. Your commanders judge. Your advisor reasons. And all of them remember what you did last turn."*
