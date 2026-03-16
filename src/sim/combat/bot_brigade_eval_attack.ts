@@ -567,10 +567,14 @@ export function findWeakestSubSegment(
     return weakest;
 }
 
+/** Edges per brigade above which a sub-segment is considered overstretched. */
+const OVERSTRETCHED_EDGES_PER_BRIGADE = 6;
+
 /**
  * Score bonus for attack targets in the weakest sub-segment of the defending sector.
  * Returns WEAK_SUBSEGMENT_SCORE_BONUS if the target OSID is in the weakest sub-segment,
- * 0 otherwise. This is a soft preference (additive bonus), not a hard filter.
+ * doubled if that sub-segment is overstretched (too many edges per brigade).
+ * This is a soft preference (additive bonus), not a hard filter.
  */
 export function getWeakSubSegmentBonus(
     targetOsid: string,
@@ -581,8 +585,13 @@ export function getWeakSubSegmentBonus(
     const weakest = findWeakestSubSegment(defendingSector, formations);
     if (!weakest) return 0;
     if (weakest.enemy_osids.includes(targetOsid)) {
-        // Gap sub-segments (no assigned brigades) are extra vulnerable — double the bonus
-        return weakest.gap ? WEAK_SUBSEGMENT_SCORE_BONUS * 2 : WEAK_SUBSEGMENT_SCORE_BONUS;
+        // Overstretched sub-segments (too many edges per brigade) are extra vulnerable
+        const edgesPerBrigade = weakest.primary_brigade_ids.length > 0
+            ? weakest.length_edges / weakest.primary_brigade_ids.length
+            : Infinity;
+        return edgesPerBrigade > OVERSTRETCHED_EDGES_PER_BRIGADE
+            ? WEAK_SUBSEGMENT_SCORE_BONUS * 2
+            : WEAK_SUBSEGMENT_SCORE_BONUS;
     }
     return 0;
 }

@@ -165,7 +165,7 @@ describe('brigade AoR sub-segment assignment', () => {
         expect(ss2.primary_brigade_ids.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('marks sub-segments as gap when no brigades available', () => {
+    it('merges gap sub-segments into nearest neighbor — no unowned edges', () => {
         const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
         const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
         const sector = makeSector('sec1', [ss1, ss2], ['brig_1']);
@@ -180,14 +180,13 @@ describe('brigade AoR sub-segment assignment', () => {
         const adj = makeAdjacency([['osid_a', 'osid_b']]);
         assignBrigadesToSubSegments(state, [sector], adj);
 
-        // One sub-segment has the brigade, the other is a gap
-        const gapSS = sector.sub_segments.find(ss => ss.gap);
-        expect(gapSS).toBeDefined();
-        expect(gapSS!.primary_brigade_ids).toHaveLength(0);
-
-        const coveredSS = sector.sub_segments.find(ss => !ss.gap);
-        expect(coveredSS).toBeDefined();
-        expect(coveredSS!.primary_brigade_ids).toContain('brig_1');
+        // Gap sub-segment is merged — only 1 sub-segment remains
+        expect(sector.sub_segments).toHaveLength(1);
+        // The surviving sub-segment has brig_1 and covers all edges
+        expect(sector.sub_segments[0]!.primary_brigade_ids).toContain('brig_1');
+        expect(sector.sub_segments[0]!.length_edges).toBe(6); // 3 + 3 merged
+        // No gaps remain
+        expect(sector.sub_segments.every(ss => !ss.gap)).toBe(true);
     });
 
     it('reserves are excluded from sub-segment assignment', () => {
@@ -303,7 +302,7 @@ describe('Phase B: sub-segment combat defense integration', () => {
         expect(defendingSS?.primary_brigade_ids).toContain('brig_1');
     });
 
-    it('gap sub-segment (no assigned brigade) still found for defense lookup', () => {
+    it('gap sub-segment merged — fewer brigades than sub-segments still has full coverage', () => {
         const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
         const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
         const sector = makeSector('sec1', [ss1, ss2], ['brig_1']);
@@ -318,11 +317,12 @@ describe('Phase B: sub-segment combat defense integration', () => {
         const adj = makeAdjacency([['osid_a', 'osid_b']]);
         assignBrigadesToSubSegments(state, [sector], adj);
 
-        // ss2 is a gap — no primary brigade
-        const gapSS = findSubSegmentForOsid(sector, 'enemy_ss2');
-        expect(gapSS?.sub_segment_id).toBe('ss2');
-        expect(gapSS?.primary_brigade_ids).toHaveLength(0);
-        expect(gapSS?.gap).toBe(true);
+        // Gap merged — only 1 sub-segment remains, covering all edges
+        expect(sector.sub_segments).toHaveLength(1);
+        expect(sector.sub_segments[0]!.primary_brigade_ids).toContain('brig_1');
+        // enemy_ss2 OSIDs now belong to the merged sub-segment
+        const merged = sector.sub_segments[0]!;
+        expect(merged.enemy_osids).toContain('enemy_ss2');
     });
 
     it('brigade at target OSID has 0 hops (physical defender) in its sub-segment', () => {
@@ -394,22 +394,21 @@ describe('Phase C: findWeakestSubSegment', () => {
         expect(weakest!.sub_segment_id).toBe('ss2');
     });
 
-    it('gap sub-segment is always weakest', () => {
+    it('sub-segment with fewer personnel is weakest', () => {
         const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
         ss1.primary_brigade_ids = ['brig_1'];
         const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
-        ss2.primary_brigade_ids = [];
-        ss2.gap = true;
-        const sector = makeSector('sec1', [ss1, ss2], ['brig_1']);
+        ss2.primary_brigade_ids = ['brig_2'];
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1', 'brig_2']);
 
         const formations: Record<string, FormationState | undefined> = {
-            brig_1: makeFormation({ id: 'brig_1', personnel: 500 }),
+            brig_1: makeFormation({ id: 'brig_1', personnel: 1500 }),
+            brig_2: makeFormation({ id: 'brig_2', personnel: 300 }),
         };
 
         const weakest = findWeakestSubSegment(sector, formations);
         expect(weakest).not.toBeNull();
         expect(weakest!.sub_segment_id).toBe('ss2');
-        expect(weakest!.gap).toBe(true);
     });
 
     it('returns null for sector with no sub-segments', () => {
@@ -488,24 +487,26 @@ describe('Phase D: entrenchment reset on sub-segment reassignment', () => {
     });
 });
 
-describe('Phase D: gap sub-segment gets double attack bonus', () => {
-    it('doubles WEAK_SUBSEGMENT_SCORE_BONUS for gap sub-segments', () => {
+describe('Phase D: overstretched sub-segment gets double attack bonus', () => {
+    it('doubles WEAK_SUBSEGMENT_SCORE_BONUS for overstretched sub-segments', () => {
+        // ss1: 3 edges, 1 brigade = 3 edges/brigade (normal)
         const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
         ss1.primary_brigade_ids = ['brig_1'];
-        const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
-        ss2.primary_brigade_ids = [];
-        ss2.gap = true;
-        const sector = makeSector('sec1', [ss1, ss2], ['brig_1']);
+        // ss2: 8 edges, 1 brigade = 8 edges/brigade (overstretched, > 6 threshold)
+        const ss2 = makeSubSeg('ss2', ['osid_b'], 8);
+        ss2.primary_brigade_ids = ['brig_2'];
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1', 'brig_2']);
 
         const formations: Record<string, FormationState | undefined> = {
             brig_1: makeFormation({ id: 'brig_1', personnel: 1500 }),
+            brig_2: makeFormation({ id: 'brig_2', personnel: 500 }),
         };
 
-        // Target in the gap sub-segment (enemy_ss2) → double bonus
-        const gapBonus = getWeakSubSegmentBonus('enemy_ss2', sector, formations);
-        expect(gapBonus).toBe(WEAK_SUBSEGMENT_SCORE_BONUS * 2);
+        // Target in overstretched ss2 (weakest) → double bonus
+        const bonus = getWeakSubSegmentBonus('enemy_ss2', sector, formations);
+        expect(bonus).toBe(WEAK_SUBSEGMENT_SCORE_BONUS * 2);
 
-        // Target in the non-gap sub-segment (enemy_ss1) → no bonus (it's not weakest)
+        // Target in normal ss1 → no bonus (it's not weakest)
         const noBonus = getWeakSubSegmentBonus('enemy_ss1', sector, formations);
         expect(noBonus).toBe(0);
     });

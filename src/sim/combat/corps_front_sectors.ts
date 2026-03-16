@@ -708,8 +708,8 @@ export function commanderReviewAssignment(
     const overrides: CommanderOverride[] = [];
 
     // Apply four criteria in priority order
-    applyMissionCompliance(corpsSectors, formations, armyPriorities, overrides, componentOf);
-    applyNonPriorityExcess(corpsSectors, formations, commanderProfile, overrides, componentOf);
+    applyMissionCompliance(corpsSectors, formations, armyPriorities, commanderProfile, overrides, componentOf);
+    applyNonPriorityExcess(corpsSectors, formations, armyPriorities, commanderProfile, overrides, componentOf);
     applyOffensiveStaging(corpsSectors, formations, commanderProfile, overrides, componentOf);
     applyDefensiveCoherence(corpsSectors, formations, commanderProfile, overrides, componentOf);
 
@@ -4320,7 +4320,7 @@ function mergeGapSubSegments(
         const gapFriendly = new Set(gapSS.friendly_osids);
 
         let bestNeighborIdx = -1;
-        let bestOverlap = -1;
+        let bestOverlap = -Infinity;
 
         for (let si = 0; si < sector.sub_segments.length; si++) {
             if (si === gapIdx) continue;
