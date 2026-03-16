@@ -401,6 +401,10 @@ export interface CorpsCommandState {
      * Prevents suicidal repeated assaults on hardened positions.
      */
     failed_offensive_objectives?: Record<string, { failure_count: number; cooldown_until_turn: number }>;
+    /** True if this corps was decided by AI commander this turn. Formula bot skips AI-decided corps. */
+    ai_decided?: boolean;
+    /** AI commander's assessment text for this corps (displayed in UI). */
+    ai_assessment?: string;
 }
 
 /** Operational group activation order. */

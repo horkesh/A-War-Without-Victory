@@ -13,10 +13,9 @@ import type { AiCommanderMode } from './ai_config.js';
 import { getArmyCommander, getCorpsCommander } from '../combat/officer_system.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-let currentMode: AiCommanderMode = 'officer';
-
-export function setAiMode(mode: AiCommanderMode): void {
-    currentMode = mode;
+/** Read AI mode from GameState config. Defaults to 'officer' if not set. */
+function getMode(state: GameState): AiCommanderMode {
+    return (state.meta as any).ai_commander_config?.mode ?? 'officer';
 }
 
 export function buildArmyPrompt(state: GameState, faction: FactionId): AiPrompt {
@@ -24,7 +23,7 @@ export function buildArmyPrompt(state: GameState, faction: FactionId): AiPrompt 
     const commanderName = commander?.data.name ?? `${faction} Army Commander`;
     const system = getArmyCommanderProfile(faction, commanderName);
     const user = buildArmyUserPrompt(state, faction);
-    const model = MODEL_ROUTING[currentMode].army;
+    const model = MODEL_ROUTING[getMode(state)].army;
 
     return {
         system,
@@ -47,9 +46,9 @@ export function buildCorpsPrompt(
     const aggressiveness = commander?.data.aggressiveness ?? 3;
     const defensiveSkill = commander?.data.defensive_skill ?? 3;
 
-    const hasActiveOp = !!(state.military.corps_command as any)?.[corpsId]?.active_operation;
+    const hasActiveOp = !!state.military.corps_command?.[corpsId]?.active_operation;
     const modelKey = hasActiveOp ? 'corps_ops' : 'corps_routine';
-    const model = MODEL_ROUTING[currentMode][modelKey];
+    const model = MODEL_ROUTING[getMode(state)][modelKey];
 
     const system = getCorpsCommanderProfile(name, faction, competence, aggressiveness, defensiveSkill);
     const user = buildCorpsUserPrompt(state, faction, corpsId, armyDirective);
@@ -77,7 +76,7 @@ export function buildAdvisorPrompt(
     return {
         system,
         user,
-        model: MODEL_ROUTING[currentMode].advisor,
+        model: MODEL_ROUTING[getMode(state)].advisor,
         max_tokens: MAX_TOKENS.advisor,
         temperature: AI_TEMPERATURE,
     };
@@ -119,13 +118,13 @@ function buildArmyUserPrompt(state: GameState, faction: FactionId): string {
     }
 
     // Supply summary
-    const generalSupply = (state.military as any).general_supply_reserve?.[faction] ?? 'unknown';
-    const heavySupply = (state.military as any).heavy_munitions_reserve?.[faction] ?? 'unknown';
+    const generalSupply = state.military.general_supply_reserve?.[faction] ?? 'unknown';
+    const heavySupply = state.military.heavy_munitions_reserve?.[faction] ?? 'unknown';
     lines.push('');
     lines.push(`Supply: general=${generalSupply}, heavy=${heavySupply}`);
 
     // Negotiation capital
-    const capital = (state.military as any).negotiation?.capital?.[faction];
+    const capital = state.military.negotiation?.capital?.[faction];
     if (capital) {
         lines.push('');
         lines.push(`Negotiation Capital: military_position=${capital.military_position?.toFixed(1)}, humanitarian=${capital.humanitarian_standing?.toFixed(1)}, credibility=${capital.international_credibility?.toFixed(1)}, effectiveness=${capital.military_effectiveness?.toFixed(1)}, cohesion=${capital.political_cohesion?.toFixed(1)}`);
@@ -180,7 +179,7 @@ function buildCorpsUserPrompt(
     // Brigade summary
     const formations = state.military.formations ?? {};
     const brigades = Object.entries(formations)
-        .filter(([, f]) => f.faction === faction && (f as any).corps_id === corpsId && f.kind === 'brigade' && f.status === 'active')
+        .filter(([, f]) => f.faction === faction && f.corps_id === corpsId && f.kind === 'brigade' && f.status === 'active')
         .sort(([a], [b]) => strictCompare(a, b));
 
     lines.push('');

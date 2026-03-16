@@ -138,6 +138,6 @@ function applyCorpsDecisionToState(state: GameState, corpsId: string, decision: 
     }
 
     // Store AI assessment as briefing text
-    (cc as any).ai_assessment = decision.assessment;
-    (cc as any).ai_decided = true;
+    cc.ai_assessment = decision.assessment;
+    cc.ai_decided = true;
 }

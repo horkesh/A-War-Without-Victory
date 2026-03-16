@@ -737,10 +737,8 @@ export const warPhases: NamedPhase[] = [
             const { createAiClient } = await import('../ai_commander/ai_client.js');
             const { generateArmyDecision } = await import('../ai_commander/army_commander_ai.js');
             const { clearTurnDecisions } = await import('../ai_commander/decision_log.js');
-            const { setAiMode } = await import('../ai_commander/prompt_builder.js');
 
             clearTurnDecisions(context.state);
-            setAiMode(config.mode);
             const client = await createAiClient(config.anthropic_api_key);
             if (!client) return;
 
