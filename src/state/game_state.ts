@@ -130,7 +130,7 @@ export type CorpsStance = 'defensive' | 'balanced' | 'offensive' | 'reorganize';
 export type ArmyStance = 'general_defensive' | 'balanced' | 'general_offensive' | 'total_mobilization';
 
 /** Operation preparation sub-phase (within planning phase). */
-export type PreparationSubPhase = 'intel_gathering' | 'force_staging' | 'supply_check' | 'assessment' | 'ready';
+export type PreparationSubPhase = 'intel_gathering' | 'force_staging' | 'supply_check' | 'assessment' | 'ready' | 'waiting_for_sync';
 
 /** Commander's go/no-go recommendation at end of preparation. */
 export type CommanderAssessment = 'launch' | 'postpone' | 'abort';
@@ -327,6 +327,12 @@ export interface CorpsOperation {
     pending_casualties?: PendingOperationCasualties;
     /** Previous turn's objective control snapshot for diff (OSID→faction). */
     _prev_objective_state?: Record<string, string | null>;
+
+    // --- Synchronized operation fields (Army HQ Gathering v0.4.7) ---
+    /** If part of a synchronized operation, the sync op name */
+    sync_operation_name?: string;
+    /** Earliest turn to launch (from sync window) */
+    sync_launch_after?: number;
 }
 
 /** Independent sector stances — each sector can differ from its corps stance. */
@@ -1670,6 +1676,10 @@ used_operation_names?: Record<string, number>;
 pending_reserve_requests?: ArmyReserveRequest[];
 /** Army HQ overrides forcing corps to launch operations. Consumed and cleared each turn. */
 army_hq_overrides?: ArmyHQOverride[];
+/** Active campaign plan per faction (null = no plan, use defaults). */
+campaign_plans?: Record<string, import('../sim/combat/army_hq_gathering_types.js').CampaignPlan | null>;
+/** Turn of last gathering per faction. */
+last_gathering_turn?: Record<string, number>;
 /** Per-brigade elite deployment tracker. Keyed by brigade FormationId. */
 elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
 /** Pending officer personnel events for player notification (new arrivals, suggested replacements). */
