@@ -98,10 +98,10 @@ export function buildFrontEdgesHoverGeoJSON(
   const edgeToSubSegment = new Map<string, string>();
   if (corpsFrontSectors) {
     for (const sector of corpsFrontSectors) {
-      for (const ss of (sector as any).sub_segments ?? []) {
-        const ssId = ss.sub_segment_id as string | undefined;
+      for (const ss of sector.sub_segments ?? []) {
+        const ssId = ss.sub_segment_id;
         if (!ssId) continue;
-        for (const edgeId of (ss.edge_ids as string[]) ?? []) {
+        for (const edgeId of ss.edge_ids ?? []) {
           edgeToSubSegment.set(`${edgeId}\0${sector.faction}`, ssId);
         }
       }

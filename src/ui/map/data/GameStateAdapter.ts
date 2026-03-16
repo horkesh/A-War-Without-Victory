@@ -1536,6 +1536,15 @@ export function parseGameState(json: unknown): LoadedGameState {
                 opsec_active: opsecSectorSet.has(sectorId),
                 sector_stance: typeof s.sector_stance === 'string' ? s.sector_stance as CorpsFrontSectorView['sector_stance'] : 'defend',
                 stance_source: typeof s.stance_source === 'string' ? s.stance_source as CorpsFrontSectorView['stance_source'] : 'bot',
+                sub_segments: subSegments.map((ss: any) => ({
+                    sub_segment_id: ss.sub_segment_id ?? '',
+                    edge_ids: Array.isArray(ss.edge_ids) ? ss.edge_ids : [],
+                    friendly_osids: Array.isArray(ss.friendly_osids) ? ss.friendly_osids : [],
+                    enemy_osids: Array.isArray(ss.enemy_osids) ? ss.enemy_osids : [],
+                    length_edges: typeof ss.length_edges === 'number' ? ss.length_edges : 0,
+                    primary_brigade_ids: Array.isArray(ss.primary_brigade_ids) ? ss.primary_brigade_ids : [],
+                    gap: Boolean(ss.gap),
+                })),
             });
         }
         // Merge sector combat ratings if available

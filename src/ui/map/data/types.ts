@@ -393,6 +393,16 @@ export interface CorpsFrontSectorView {
     sector_stance?: 'fortify' | 'defend' | 'elastic' | 'active_defense' | 'screening';
     /** Who set this stance: 'bot' | 'player'. */
     stance_source?: 'bot' | 'player';
+    /** Sub-segments with edge and brigade assignment data. */
+    sub_segments?: Array<{
+        sub_segment_id: string;
+        edge_ids: string[];
+        friendly_osids: string[];
+        enemy_osids: string[];
+        length_edges: number;
+        primary_brigade_ids: string[];
+        gap?: boolean;
+    }>;
 }
 
 export interface OperationView {
