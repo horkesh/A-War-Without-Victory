@@ -418,6 +418,12 @@
 - **Right approach**: For each milestone, define ONE observable behavior check that can only pass if the full pipeline is connected: "Run a 10-week scenario. Does X appear in the output?" For events: do `events_fired` entries appear in weekly reports? For economy: do production facility outputs change supply reserves? For officer experience: do officer stats change after operations?
 - **Do instead**: Before bumping the version for a milestone, run the scenario and verify the feature's output in the run artifacts. Not tests. Not type checks. Actual scenario output.
 
+### [Night Shift] Per-entity loops must not multiply global effects (2026-03-16) — NEW
+- **Context**: Decision events (London Conference, Vance-Owen) iterated all 3 factions. For each bot faction, the chosen response effects were applied independently. With 2 bot factions, effects applied twice; with 3 bots (headless), 3x. The London Conference "accept" gave RBiH +30 credibility instead of +10.
+- **Wrong approach**: Iterating factions and applying the same global effect inside the loop. The response effects target a specific faction (hardcoded `"faction": "RBiH"`), not the iterating faction. The loop multiplies instead of distributing.
+- **Right approach**: Diplomatic events fire once globally. Bot auto-responds once (pick one response, apply once). Player gets one decision. The faction loop was conceptually wrong — a peace conference produces one outcome, not three independent outcomes.
+- **Do instead**: When writing a per-entity loop that applies effects, ask: "Do these effects target the iterating entity, or a fixed target?" If fixed target, the loop is multiplying. Apply once outside the loop.
+
 ### [Bot AI] Stale-count reads cause oscillation — always track planned movements (2026-03-16) — NEW
 - **Evidence**: `evaluateSectorMarch` in `bot_brigade_eval_front.ts` used `countCorpsBrigadesAtOsid()` to check overstacking. Since all brigades evaluate against the same static state in one pass, 7 brigades at OSID X all see count=7 and all march to OSID Y. Next turn: all 7 at Y, march back to X. Perpetual oscillation.
 - **Root cause**: Per-entity evaluation loop reads shared static state without tracking the effects of earlier entities' decisions in the same loop.

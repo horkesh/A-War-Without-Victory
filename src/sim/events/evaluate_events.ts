@@ -94,25 +94,24 @@ export function evaluateEvents(
         fired.push({ id: def.id, text });
 
         // Handle decision events (response_options present)
+        // Diplomatic events fire once globally. Player gets a decision; bots auto-respond once.
         if (def.response_options && def.response_options.length > 0) {
-            for (const faction of allFactions) {
-                if (playerFaction && faction === playerFaction) {
-                    // Player faction: queue as pending decision
-                    if (!state.military.pending_event_decisions) {
-                        state.military.pending_event_decisions = [];
-                    }
-                    state.military.pending_event_decisions.push({
-                        event_id: def.id,
-                        event_title: text,
-                        turn_fired: currentTurn,
-                        response_options: def.response_options,
-                        faction,
-                    });
-                } else {
-                    // Bot faction: auto-respond
-                    const chosen = pickBotResponse(def.response_options, def.bot_response_logic);
-                    applyEventEffects(state, chosen.effects);
+            if (playerFaction) {
+                // Player faction: queue as pending decision
+                if (!state.military.pending_event_decisions) {
+                    state.military.pending_event_decisions = [];
                 }
+                state.military.pending_event_decisions.push({
+                    event_id: def.id,
+                    event_title: text,
+                    turn_fired: currentTurn,
+                    response_options: def.response_options,
+                    faction: playerFaction,
+                });
+            } else {
+                // No player faction (headless/spectator): bot auto-responds once
+                const chosen = pickBotResponse(def.response_options, def.bot_response_logic);
+                applyEventEffects(state, chosen.effects);
             }
         }
 

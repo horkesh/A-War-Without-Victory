@@ -91,29 +91,29 @@ describe('Event Decisions', () => {
         expect(pending.turn_fired).toBe(5);
     });
 
-    it('bot factions auto-respond with accept_first', () => {
-        // No player faction — all factions are bots
+    it('bot auto-responds once with accept_first (no player faction)', () => {
+        // No player faction — bot auto-responds once (not per-faction)
         const state = makeMinimalState(undefined);
         const initialSupply = state.military.general_supply_reserve!['RBiH'];
         const rng = () => 0.5;
 
         evaluateEvents(state, rng, 5, [DECISION_EVENT]);
 
-        // All 3 factions are bots, each picks 'accept' → +10 supply to RBiH × 3
-        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 30);
+        // Bot responds once → +10 supply to RBiH (not ×3)
+        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 10);
         // No pending decisions (no player faction)
         expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
     });
 
-    it('bot factions auto-respond with reject_all (picks last option)', () => {
+    it('bot auto-responds once with reject_all (picks last option)', () => {
         const state = makeMinimalState(undefined);
         const initialSupply = state.military.general_supply_reserve!['RS'];
         const rng = () => 0.5;
 
         evaluateEvents(state, rng, 5, [REJECT_ALL_EVENT]);
 
-        // 3 bots × reject → -5 supply to RS each = -15
-        expect(state.military.general_supply_reserve!['RS']).toBe(initialSupply - 15);
+        // Bot responds once → -5 supply to RS (not ×3)
+        expect(state.military.general_supply_reserve!['RS']).toBe(initialSupply - 5);
     });
 
     it('resolveEventDecision applies effects and removes pending', () => {
