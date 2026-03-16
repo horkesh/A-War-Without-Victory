@@ -500,7 +500,7 @@ const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     { name: 'Neretva Defense', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic'], start_week: 0, end_week: 56, weight: 50, min_outcome: 'repulsed' },
     { name: 'Neretva Offensive', corps_id: 'arbih_4th_corps', target_municipalities: ['jablanica', 'konjic', 'mostar'], start_week: 56, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
     // 2nd Corps: Brcko south hold — prevent RS from taking south Brcko (calibration: Jan 1993 painted targets)
-    { name: 'Brcko South Hold', corps_id: 'arbih_2nd_corps', target_municipalities: ['gradacac', 'lopare', 'srebrenik'], target_osids: ['op:brcko:brka_2'], start_week: 0, end_week: 56, weight: 90, min_outcome: 'stalemate' },
+    { name: 'Brcko South Hold', corps_id: 'arbih_2nd_corps', target_municipalities: ['gradacac', 'lopare', 'srebrenik', 'ugljevik', 'brcko'], target_osids: ['op:brcko:brka_2'], start_week: 0, end_week: 56, weight: 90, min_outcome: 'stalemate' },
     // 5th Corps: Bihac pocket defense (crucial — hold throughout)
     { name: 'Bihac Pocket Defense', corps_id: 'arbih_5th_corps', target_municipalities: ['bihac', 'cazin', 'velika_kladusa', 'bosanska_krupa'], start_week: 0, end_week: 9999, weight: 90, min_outcome: 'costly_victory' },
     // Late-war counteroffensives (mid-1994+)
