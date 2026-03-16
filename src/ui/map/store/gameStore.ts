@@ -203,6 +203,10 @@ export interface GameStore {
   /** Position [lng, lat] for the "Ghost Line" interaction preview (move/attack). */
   ghostLinePoint: [number, number] | null;
   setGhostLinePoint: (pt: [number, number] | null) => void;
+
+  /** Whether the peace-to-war transition overlay has been dismissed. */
+  peaceWarTransitionSeen: boolean;
+  setPeaceWarTransitionSeen: (v: boolean) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -405,4 +409,7 @@ export const useGameStore = create<GameStore>((set) => ({
 
   ghostLinePoint: null,
   setGhostLinePoint: (pt) => set({ ghostLinePoint: pt }),
+
+  peaceWarTransitionSeen: false,
+  setPeaceWarTransitionSeen: (v) => set({ peaceWarTransitionSeen: v }),
 }));

@@ -2,8 +2,11 @@
  * Peace Phase Status Panel — displayed during peace/Phase 0.
  * Shows: capital balances, declaration pressure, referendum countdown, alliance value, events.
  */
+import { useState, useCallback } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
+import { useIPC } from '../desktop/useIPC';
+import { advanceTurnAndSync } from '../desktop/orderActions';
 
 const FACTION_LABELS: Record<string, string> = {
     RBiH: 'Republic of Bosnia and Herzegovina',
@@ -54,6 +57,19 @@ function AllianceBar({ value }: { value: number }) {
 
 export function PeaceStatusPanel() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const loadSave = useGameStore((s) => s.loadSave);
+    const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
+    const setLoadError = useGameStore((s) => s.setLoadError);
+    const ipc = useIPC();
+    const [advancing, setAdvancing] = useState(false);
+
+    const handleEndTurn = useCallback(async () => {
+        if (!ipc.isAvailable || advancing) return;
+        setAdvancing(true);
+        await advanceTurnAndSync({ ipc, loadSave, clearStagedOrders, setLoadError });
+        setAdvancing(false);
+    }, [ipc, loadSave, clearStagedOrders, setLoadError, advancing]);
+
     if (!loadedGameState) return null;
 
     const { peaceFactions, peaceAllianceValue, peaceReferendum, peaceEvents, turn } = loadedGameState;
@@ -61,6 +77,9 @@ export function PeaceStatusPanel() {
     if (!peaceFactions) return null;
 
     const playerFaction = loadedGameState.player_faction;
+    const hasInvestments = (loadedGameState.peaceEvents ?? []).some(
+        (e) => e.type === 'investment' || e.type === 'staged_investment'
+    );
 
     return (
         <div className="absolute top-2 left-2 z-50 w-[320px] max-h-[90vh] overflow-auto">
@@ -147,6 +166,23 @@ export function PeaceStatusPanel() {
                             ))}
                         </div>
                     )}
+
+                    {/* End Turn */}
+                    <div className="pt-3 border-t border-panel-border">
+                        {hasInvestments && (
+                            <div className="text-[9px] text-amber-400 mb-2 flex items-center gap-1">
+                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                Staged investments pending
+                            </div>
+                        )}
+                        <button
+                            onClick={handleEndTurn}
+                            disabled={!ipc.isAvailable || advancing}
+                            className="w-full py-2 rounded text-[11px] font-bold uppercase tracking-[0.2em] transition-all duration-200 border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            {advancing ? 'Advancing...' : 'End Turn'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

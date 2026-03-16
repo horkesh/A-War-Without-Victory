@@ -28,6 +28,7 @@ import { AARPanel } from './components/AARPanel';
 import { OperationHistoryPanel } from './components/OperationHistoryPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
+import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { VerdictScreen } from './components/VerdictScreen';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
@@ -98,6 +99,20 @@ function OperationBriefingModalWrapper() {
       onOrderProbe={() => handleDecision('probe')}
     />
   );
+}
+
+function PeaceWarTransitionOverlay() {
+  const state = useGameStore((s) => s.loadedGameState);
+  const seen = useGameStore((s) => s.peaceWarTransitionSeen);
+  const setSeen = useGameStore((s) => s.setPeaceWarTransitionSeen);
+
+  // Show when phase is 'war' and turn is early (first war turn) and not yet dismissed
+  if (!state || seen || state.phase !== 'war') return null;
+  // Only show on the first war turn (turn <= 1 from war start, approximated by low turn number or first load)
+  // Since we can't easily detect "just transitioned", show if turn <= 5 and not yet seen
+  if ((state.turn ?? 0) > 5) return null;
+
+  return <PeaceWarTransition state={state} onDismiss={() => setSeen(true)} />;
 }
 
 function App() {
@@ -394,6 +409,7 @@ function App() {
         <SupplyPanel state={loadedGameState} />
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
+      <PeaceWarTransitionOverlay />
       <VerdictScreen />
       <Minimap />
       <BottomStatusStrip />
