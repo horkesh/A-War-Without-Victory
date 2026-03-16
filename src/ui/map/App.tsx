@@ -23,6 +23,7 @@ import { OpsPlanningModal } from './components/OpsPlanningModal';
 import { CommanderSelectionModal } from './components/CommanderSelectionModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
+import { EconomyPanel } from './components/EconomyPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { AARPanel } from './components/AARPanel';
 import { OperationHistoryPanel } from './components/OperationHistoryPanel';
@@ -164,6 +165,7 @@ function App() {
   const [aarOpen, setAarOpen] = useState(false);
   const [opsHistoryOpen, setOpsHistoryOpen] = useState(false);
   const [eventLogOpen, setEventLogOpen] = useState(false);
+  const [economyOpen, setEconomyOpen] = useState(false);
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
   const [eventQueueIndex, setEventQueueIndex] = useState(0);
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
@@ -432,6 +434,7 @@ function App() {
         onOpenAAR={() => setAarOpen((current) => !current)}
         onOpenOpsHistory={() => setOpsHistoryOpen((current) => !current)}
         onOpenEventLog={() => setEventLogOpen((current) => !current)}
+        onOpenEconomy={() => setEconomyOpen((current) => !current)}
       />
       <CommandBriefingLayer
         onOpenSummary={openSummary}
@@ -506,6 +509,9 @@ function App() {
       )}
       {mapMode === 'supply' && loadedGameState && (
         <SupplyPanel state={loadedGameState} />
+      )}
+      {economyOpen && loadedGameState && (
+        <EconomyPanel state={loadedGameState} onClose={() => setEconomyOpen(false)} />
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
       {/* v0.4.1 Phase 5: Event modal (queue-based) */}

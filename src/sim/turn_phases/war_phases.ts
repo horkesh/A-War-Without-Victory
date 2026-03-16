@@ -453,6 +453,27 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'update-smuggling-routes',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.meta.supply_reserves_enabled) return;
+            const { updateSmugglingRoutes, getSmugglingIncome } = await import('../economy/smuggling_routes.js');
+            const turn = context.state.meta.turn;
+            updateSmugglingRoutes(context.state, turn);
+            // Apply smuggling income to supply reserves
+            const income = getSmugglingIncome(context.state);
+            if (context.state.military.general_supply_reserve && context.state.military.heavy_munitions_reserve) {
+                for (const fid of Object.keys(income.general).sort()) {
+                    const fkey = fid as import('../../state/game_state.js').FactionId;
+                    context.state.military.general_supply_reserve![fkey] = Math.min(100,
+                        (context.state.military.general_supply_reserve![fkey] ?? 0) + (income.general[fid] ?? 0));
+                    context.state.military.heavy_munitions_reserve![fkey] = Math.min(100,
+                        (context.state.military.heavy_munitions_reserve![fkey] ?? 0) + (income.heavy[fid] ?? 0));
+                }
+            }
+        }
+    },
+    {
         name: 'enclave-resilience',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;

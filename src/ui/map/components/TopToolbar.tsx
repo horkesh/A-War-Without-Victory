@@ -41,12 +41,13 @@ interface TopToolbarProps {
   onOpenAAR?: () => void;
   onOpenOpsHistory?: () => void;
   onOpenEventLog?: () => void;
+  onOpenEconomy?: () => void;
 }
 
 /** True when loaded inside the warroom iframe (?embedded=1). */
 const isEmbedded = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embedded') === '1';
 
-export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory, onOpenEventLog }: TopToolbarProps) {
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory, onOpenEventLog, onOpenEconomy }: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const devMode = useGameStore((s) => s.devMode);
@@ -261,6 +262,13 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
           className={TOOLBAR_BUTTON_CLASS}
         >
           CAMPAIGN
+        </button>
+        <button
+          onClick={() => onOpenEconomy?.()}
+          disabled={!loadedGameState}
+          className={TOOLBAR_BUTTON_CLASS}
+        >
+          ECONOMY
         </button>
       </div>
 

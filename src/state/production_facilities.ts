@@ -58,6 +58,20 @@ const FACILITY_SEEDS: ProductionFacilitySeed[] = [
         municipality_id: 'zenica',
         type: 'heavy_equipment' as const,
         base_capacity: 8
+    },
+    {
+        facility_id: 'prod_hadzici_ammo',
+        name: 'Hadžići Ammunition Plant',
+        municipality_id: 'hadzici',
+        type: 'ammunition' as const,
+        base_capacity: 5
+    },
+    {
+        facility_id: 'prod_lukavica_depot',
+        name: 'Lukavica Repair Depot',
+        municipality_id: 'lukavica',
+        type: 'heavy_equipment' as const,
+        base_capacity: 4
     }
 ].sort((a, b) => a.facility_id.localeCompare(b.facility_id));
 

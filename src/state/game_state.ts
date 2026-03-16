@@ -1641,6 +1641,8 @@ smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>
 municipality_support_orders?: Partial<Record<FactionId, MunicipalitySupportOrder>>;
 /** One-time Sarajevo tunnel unlock. */
 sarajevo_tunnel_operational?: boolean;
+/** Smuggling route capacity and disruption state per route id. */
+smuggling_routes?: import('../sim/economy/smuggling_routes.js').SmugglingRouteState[];
 /** Sector ids with OPSEC active. */
 opsec_sectors?: string[];
 /** Tracks which operation names have been used (name → turn used). Sequential consumption, no repeats. */

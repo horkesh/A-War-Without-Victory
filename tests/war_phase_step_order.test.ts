@@ -52,6 +52,7 @@ describe('war-phase step ordering', () => {
         // +1 from update-patron-pressure (patron pressure system, 2026-03-15).
         // +1 from hv-integration (Washington Agreement + HV brigades, 2026-03-15).
         // +1 from assign-brigades-to-subsegments (v0.3.3 AoR sub-segment assignment, 2026-03-16).
-        expect(stepNames.length).toBe(126);
+        // +1 from update-smuggling-routes (v0.4.3 economy & war production, 2026-03-16).
+        expect(stepNames.length).toBe(127);
     });
 });

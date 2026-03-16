@@ -1078,6 +1078,80 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) factionReserves = out;
     }
 
+    // Economy: Production facilities
+    let productionFacilities: LoadedGameState['productionFacilities'] | undefined;
+    const rawFacilities = state.military.production_facilities as Record<string, any> | undefined;
+    if (rawFacilities && typeof rawFacilities === 'object') {
+        const pc = state.political.political_controllers ?? {};
+        // Simple municipality controller lookup from OSID keys
+        const munControllers = new Map<string, string>();
+        for (const key of Object.keys(pc).sort()) {
+            const ctrl = pc[key];
+            if (!ctrl) continue;
+            const parts = key.split(':');
+            const mun = parts.length >= 2 ? parts[1] : key;
+            if (!munControllers.has(mun)) munControllers.set(mun, ctrl);
+        }
+        productionFacilities = Object.keys(rawFacilities).sort().map(fid => {
+            const f = rawFacilities[fid];
+            return {
+                id: f.facility_id ?? fid,
+                name: f.name ?? fid,
+                type: f.type ?? 'unknown',
+                municipality: f.municipality_id ?? '',
+                condition: typeof f.current_condition === 'number' ? f.current_condition : 1,
+                controller: munControllers.get(f.municipality_id ?? '') ?? null,
+            };
+        });
+    }
+
+    // Economy: Smuggling routes
+    let smugglingRoutes: LoadedGameState['smugglingRoutes'] | undefined;
+    const rawRoutes = state.military.smuggling_routes as any[] | undefined;
+    if (Array.isArray(rawRoutes) && rawRoutes.length > 0) {
+        // Build name lookup from route defs
+        const ROUTE_NAMES: Record<string, { name: string; faction: string }> = {
+            rbih_sarajevo_tunnel: { name: 'Sarajevo Tunnel', faction: 'RBiH' },
+            rbih_adriatic_coast: { name: 'Adriatic Coast', faction: 'RBiH' },
+            rbih_dinaric_spine: { name: 'Dinaric Spine', faction: 'RBiH' },
+            rs_belgrade_pipeline: { name: 'Belgrade Pipeline', faction: 'RS' },
+            rs_corridor: { name: 'Posavina Corridor', faction: 'RS' },
+            rs_montenegro: { name: 'Montenegro Route', faction: 'RS' },
+            hrhb_croatian_supply: { name: 'Croatian Supply Line', faction: 'HRHB' },
+            hrhb_adriatic: { name: 'Adriatic Port', faction: 'HRHB' },
+            hrhb_herzegovina: { name: 'Herzegovina Network', faction: 'HRHB' },
+        };
+        smugglingRoutes = rawRoutes
+            .sort((a: any, b: any) => String(a.id ?? '').localeCompare(String(b.id ?? '')))
+            .map((r: any) => {
+                const meta = ROUTE_NAMES[r.id] ?? { name: r.id, faction: '' };
+                return {
+                    id: String(r.id ?? ''),
+                    name: meta.name,
+                    faction: meta.faction,
+                    capacity: typeof r.capacity === 'number' ? r.capacity : 0,
+                    disrupted: Boolean(r.disrupted),
+                    active_turns: typeof r.active_turns === 'number' ? r.active_turns : 0,
+                };
+            });
+    }
+
+    // Economy: Embargo status
+    let embargoStatus: LoadedGameState['embargoStatus'] | undefined;
+    const factionsList = state.factions ?? [];
+    const embargoEntries: Array<[string, { pipeline: number; smuggling: number }]> = [];
+    for (const fac of factionsList) {
+        const ep = fac.embargo_profile;
+        if (!ep) continue;
+        embargoEntries.push([fac.id, {
+            pipeline: typeof ep.external_pipeline_status === 'number' ? ep.external_pipeline_status : 0,
+            smuggling: typeof ep.smuggling_efficiency === 'number' ? ep.smuggling_efficiency : 0,
+        }]);
+    }
+    if (embargoEntries.length > 0) {
+        embargoStatus = Object.fromEntries(embargoEntries.sort(([a], [b]) => a.localeCompare(b)));
+    }
+
     let mobilizationSummary: LoadedGameState['mobilizationSummary'] | undefined;
     const rawMilitiaPoolsForSummary = state.military.militia_pools as Record<string, Record<string, unknown>> | undefined;
     const rawStrategicReserves = state.military.strategic_reserves as any | undefined;
@@ -1584,6 +1658,9 @@ export function parseGameState(json: unknown): LoadedGameState {
         namedOfficerData,
         namedOfficerStateById,
         factionReserves,
+        productionFacilities,
+        smugglingRoutes,
+        embargoStatus,
         enclaveResilience,
         sectorEntrenchmentSummary,
         mobilizationSummary,
