@@ -8,14 +8,13 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-15, end of session)
-**v0.3.1 (Playable Alpha + Endgame System).** 763 tests, 66 suites. tsc clean.
-**Endgame COMPLETE:** Negotiation capital, peace plans, patron pressure, Dayton, Washington/HV, Pyrrhic Score.
-**Studio: Pyrrhic Games.** Canon v0.7. Versioning v0.1→v1.0 roadmap established.
-**Night shift system LIVE.** Handoff for v0.3.2 → v0.4.4 (8 milestones). All plans Pyrrhic compliant.
-**External:** Ops planning modal (outside expert). Visual assets (user, Gemini Pro).
-**Protocol:** Day shift plans → nightshift-handoff.md → night shift executes → morning-report.md → review.
-**LESSONS (from engine-sprint-2):** `target_osids` does NOT override `target_municipalities` (code comment lies — both additive). Initial OSID override cascade: changing 5 Foča OSIDs caused -1.0pp total area regression. `avoid_municipalities` existed in type but was removed from implementation. `priorityMunicipalities` in generateCorpsDirectives is built but never used (dead variable).
+## Current State (2026-03-16, end of planning session)
+**v0.4.6 (Commander Override Layer).** 927 tests, 80 suites. tsc clean.
+**v0.5.x + v0.6.x FULLY PLANNED:** 10 milestones scoped, 3 cross-plan reviews, all Pyrrhic compliant.
+**Night shift handoff ready:** v0.5.0→v0.5.4 (5 milestones). v0.6.x handoff separate (v0.6.1 Phase 2 day-shift only).
+**External:** Ops planning modal (outside expert). Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
+**10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots. See `CROSS_PLAN_REVIEW_V05_V06_INTEGRATED.md`.
+**Calibration freeze rule:** After v0.6.1, any sim-affecting change needs `npm run calibrate:52w` regression check vs freeze baseline.
 
 ## Session Startup (do these EVERY session — BEFORE any work)
 1. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**

@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-15 (n745–n747 review, 2 violations, 2 new lessons, 4 reinforced)
+> Last updated: 2026-03-16 (planning session: 4 new lessons from full-roadmap cross-plan reviews)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -20,6 +20,30 @@
 ---
 
 ## Active Lessons (no recent violations)
+
+### [Planning] Multi-milestone roadmaps need freeze points, not just feature lists (2026-03-16) — NEW
+- **Context**: Full roadmap review of 20 milestones (v0.5.0→v1.0.0) revealed a 7-step content dependency chain: events → essays → codex → help → tutorial → localization → store page. A change to event titles at v0.6.0 would cascade stale content through 6 downstream milestones. Without explicit freeze points, late changes destabilize everything.
+- **Wrong approach**: Treating each milestone as independent. "We can always fix the text later." Late text changes require re-translation (v0.7.2), re-reviewed essays (v0.6.4), updated help tooltips (v0.5.2), and new store screenshots (v0.9.1). The cost of a "simple" late change multiplies through the dependency chain.
+- **Right approach**: Define explicit freeze points in the roadmap where specific categories of change become prohibited: event freeze, content freeze, feature freeze, text freeze, code freeze. Each freeze narrows what CAN change, preventing cascading rework.
+- **How to apply**: When planning any multi-milestone roadmap (>5 milestones), identify the content/feature/text dependency chains and place freeze points after the last milestone that produces each category. After a freeze, changes to that category require explicit Orchestrator approval with impact assessment on all downstream milestones.
+
+### [Planning] Cross-plan reviews catch rework before it happens (2026-03-16) — NEW
+- **Context**: v0.5.0 Phase 4 added diplomatic briefing items to the UI-side `buildCommandBriefing()` in GameStateAdapter. v0.5.1 Phase 2 rebuilt the entire briefing system sim-side in `collect_briefing.ts`. Without cross-plan review, the v0.5.0 work would have been thrown away and rewritten in v0.5.1. Also caught: capital bars built twice (v0.5.0 + VerdictScreen), SaveBrowser ordering dependency, help content duplicating codex content.
+- **Wrong approach**: Writing plans in isolation and assuming they won't conflict. Each plan looks correct independently; integration failures only appear when comparing them.
+- **Right approach**: After writing a batch of plans, do a dedicated cross-plan review pass looking for: shared systems modified by multiple plans, components built twice, execution ordering assumptions, content overlap. Produce a separate review document with numbered findings and apply changes to all affected plans.
+- **How to apply**: Every batch of 3+ plans gets a cross-plan review before handoff. For plans spanning multiple version series (v0.5.x + v0.6.x), also do a cross-series review focusing on systems that evolve across the boundary.
+
+### [Architecture] Build extension points early — registry patterns prevent god components (2026-03-16) — NEW
+- **Context**: Cross-series review found that 7 shared systems (briefing, settings, SFX, verdict, menu, codex, App.tsx) were each modified by 3-6 milestones across v0.5.x and v0.6.x. Without extension points, each milestone would edit the same files, creating merge conflicts and bloated components. App.tsx alone was touched by 6 milestones.
+- **Wrong approach**: Building a component in one milestone and having subsequent milestones modify its internals. Each edit increases coupling and merge conflict risk. By v0.6.4, the original component is unrecognizable.
+- **Right approach**: When building a component that WILL be extended by later milestones, use a simple **open registry pattern**: an array of items + a `register()` function. Later milestones push onto the array without modifying the original file. Cost: ~10 lines of code. Savings: prevents 6+ milestones of invasive edits.
+- **How to apply**: For any component in a multi-milestone roadmap: count how many future milestones will touch it. If ≥3, add a registry pattern. Applies to: panel sections, menu items, briefing collectors, SFX manifests, settings sections, post-game tabs.
+
+### [Planning] Calibration sandwiches need a freeze protocol (2026-03-16) — NEW
+- **Context**: v0.6.0 adds 60+ events with mechanical effects. v0.6.1 calibrates the game. v0.6.3 adds AI-generated procedural events with MORE mechanical effects. The calibration sits in the middle — stable before, destabilized after. Without a freeze protocol, the calibration work becomes invalid.
+- **Wrong approach**: Calibrate once and assume all subsequent milestones are calibration-neutral. Any milestone that adds mechanical effects (events, AI content, economy changes) invalidates the calibration.
+- **Right approach**: After the calibration milestone, establish a **calibration freeze baseline** (`data/calibration/v0.6.1_freeze.json`). Any subsequent milestone with sim-affecting changes MUST regression-test against this baseline. Pass criterion: all benchmarks within 2%.
+- **How to apply**: After any calibration sprint, store the baseline. Tag it. Every future PR that touches `src/sim/` must include a calibration regression check in its checklist.
 
 ### [OOB] Home brigades must be strong enough to survive the initial blitz (2026-03-15) — NEW
 - **Context**: Gradačac fell to VRS at w23 (PR 19.24 — essentially undefended). The 213th Vitežka started at 550 personnel and was swept at w5 during the VRS blitz, displaced to Doboj, and never returned. Gradačac was never captured historically — the 213th was one of ARBiH's strongest formations. Similarly, the 215th Vitežka at Bijela (700 pers) was overrun at w7.

@@ -1,7 +1,69 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-16
-**Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **927 tests**, 67 suites. Full v0.4.x roadmap scoped (8 milestones, all Pyrrhic compliant). Night shift system live. Night shift handoff written for v0.3.2→v0.4.4.
+**Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **927 tests**, 80 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
+
+## [2026-03-16] Orchestrator Planning Session — v0.5.x + v0.6.x Scoped (10 Milestones)
+
+**Produced:**
+- 10 Pyrrhic-compliant implementation plans covering v0.5.0 through v0.6.4
+- 3 cross-plan reviews (intra-v0.5.x, intra-v0.6.x, cross-series integrated)
+- Night shift handoff for v0.5.0→v0.5.4 execution
+
+**v0.5.x — Feature Complete Beta (5 milestones):**
+- v0.5.0: Full Diplomatic System — wire PeacePlanModal + DaytonNegotiationModal + patron gauge + capital display
+- v0.5.1: UI Completion — map legends, sim-side command briefing, main menu/settings/credits, save browser
+- v0.5.2: Tutorial & Onboarding — 11-objective tutorial, help tooltips, codex (~60 entries)
+- v0.5.3: Audio — Howler.js engine, 17 SFX, 6 music tracks, music state machine
+- v0.5.4: AI Narrative Layer — AARs, post-game analysis, auto-play spectator, enhanced advisor
+
+**v0.6.x — Content Complete Beta (5 milestones):**
+- v0.6.0: Full Historical Event Set — expand 39→100+ events, chains, conditions, probability, 20+ decisions
+- v0.6.1: Balance & Calibration Framework — automated benchmarks, acceptance criteria, calibration freeze (Phase 2 day-shift only)
+- v0.6.2: Campaign Structure & Achievements — statistics, territory timeline, 28+ achievements, save metadata
+- v0.6.3: AI Dynamic Content — procedural events (Haiku ~$2/game), multi-round Dayton dialogue (Sonnet)
+- v0.6.4: Historical Essays — 60-80 BB-cited essays generated at dev time, unlock through gameplay
+
+**Cross-series architectural patterns established (10 mandatory for night shift):**
+1. Briefing collector open registry
+2. Settings section registry
+3. SFX open manifest (not sealed enum)
+4. VerdictScreen tab registry for post-game content
+5. useGameFlow.ts hook (prevents App.tsx god component)
+6. Codex as JSON data files (not TypeScript)
+7. MainMenu primary/secondary tiers with Collection slot
+8. Dayton modal round-based state (extensible to v0.6.3 multi-round)
+9. Tutorial event objectives flexible (not hardcoded to event IDs)
+10. All new GameState fields with defaults for save compatibility
+
+**Key lessons from cross-plan analysis:**
+- Build extension points in v0.5.x that v0.6.x can push onto (registry pattern)
+- Calibration freeze after v0.6.1 — post-freeze sim changes need regression check
+- v0.6.1 calibration Phase 2 is inherently interactive (day-shift only)
+- App.tsx touched by 6 milestones — extract orchestration to dedicated hook
+
+**v0.7.x — Polish Beta (4 milestones):**
+- v0.7.0: Performance — profiling, simulation caching, map rendering, memory audit. Targets: <100ms turn, 60fps map, <3s startup.
+- v0.7.1: Accessibility — 3 colorblind modes, full keyboard navigation, screen reader support, rebindable keys, text scaling.
+- v0.7.2: Localization — react-i18next, 500-800 string extraction, BCS (Latin) localization, AI-drafted + human-reviewed.
+- v0.7.3: Visual Polish — loading screen, panel transitions, turn animations, NATO symbology audit, WCAG contrast.
+
+**v0.8.x — Release Candidate (3 milestones):**
+- v0.8.0: External Playtesting — 10-20 closed alpha testers, structured questionnaire, P0 fixes.
+- v0.8.1: Final Balance — P1 playtest fixes, edge case hardening (300-turn stress test), determinism verification.
+- v0.8.2: Platform Packaging — Windows NSIS, Mac universal DMG (notarized), Linux AppImage, optional Steam.
+
+**v0.9.x — Gold Candidate (2 milestones):**
+- v0.9.0: Final QA — full regression, feature exercise checklist, production build performance.
+- v0.9.1: Store & Marketing — Steam store page, trailer, press kit, Discord, developer website.
+
+**v1.0.0 — GOLD:** Ship it. "Another such victory and we are undone."
+
+**Cross-plan review v0.7-v1.0:** Feature freeze discipline (no features after v0.6.4), perf regression checks through polish, production build QA, night shift eligibility mapped.
+
+**Files:** 20 plans in `docs/plans/2026-03-16-*`, 4 reviews in `docs/30_planning/CROSS_PLAN_REVIEW_*.md`, `nightshift-handoff.md`.
+
+---
 
 ## [2026-03-16] v0.4.6: Commander Override Layer Phase B — Army HQ Overrides + Probes
 
