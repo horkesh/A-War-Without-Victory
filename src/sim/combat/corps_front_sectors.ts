@@ -729,37 +729,299 @@ export function commanderReviewAssignment(
     return overrides;
 }
 
-/** Stub: enforce army-level mission priorities. */
+/**
+ * Enforce army-level mission priorities: concentrate brigades at sectors
+ * facing target municipalities specified by army operation priorities.
+ */
 function applyMissionCompliance(
-    _corpsSectors: CorpsFrontSector[],
-    _formations: Record<string, FormationState>,
-    _armyPriorities: ArmyOperationPriority[],
-    _overrides: CommanderOverride[],
+    corpsSectors: CorpsFrontSector[],
+    formations: Record<string, FormationState>,
+    armyPriorities: ArmyOperationPriority[],
+    commanderProfile: CorpsCommanderProfile,
+    overrides: CommanderOverride[],
     _componentOf: Map<string, number>,
 ): void {
-    // Phase 2 — not yet implemented
+    if (armyPriorities.length === 0) return;
+
+    // 1. Build target municipalities set and weight map (max weight per municipality)
+    const targetMunicipalities = new Set<string>();
+    const municipalityWeight = new Map<string, number>();
+    for (const p of armyPriorities) {
+        for (const m of p.target_municipalities) {
+            targetMunicipalities.add(m);
+            const existing = municipalityWeight.get(m) ?? 0;
+            if (p.weight > existing) municipalityWeight.set(m, p.weight);
+        }
+    }
+    if (targetMunicipalities.size === 0) return;
+
+    // 2. Classify sectors as mission or non-mission
+    const getMissionWeight = (sector: CorpsFrontSector): number => {
+        let maxW = 0;
+        for (const seg of sector.sub_segments) {
+            for (const hosid of (seg.enemy_osids ?? [])) {
+                const muni = hosid.split(':')[1];
+                if (muni && targetMunicipalities.has(muni)) {
+                    const w = municipalityWeight.get(muni) ?? 0;
+                    if (w > maxW) maxW = w;
+                }
+            }
+        }
+        return maxW;
+    };
+
+    const aggressiveBonus = commanderProfile.aggressiveness >= 0.6 ? 1 : 0;
+
+    // 3. Find mission-sector deficits and non-mission surplus
+    const missionDeficits: { sector: CorpsFrontSector; need: number; weight: number }[] = [];
+    const nonMissionSurplus: CorpsFrontSector[] = [];
+
+    for (const s of corpsSectors) {
+        const mw = getMissionWeight(s);
+        const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE) + (mw > 0 ? aggressiveBonus : 0);
+        if (mw > 0 && s.assigned_brigade_ids.length < budget) {
+            missionDeficits.push({ sector: s, need: budget - s.assigned_brigade_ids.length, weight: mw });
+        } else if (mw === 0) {
+            const sBudget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            if (s.assigned_brigade_ids.length > sBudget && s.assigned_brigade_ids.length > MIN_DONOR_BRIGADES) {
+                nonMissionSurplus.push(s);
+            }
+        }
+    }
+
+    if (missionDeficits.length === 0 || nonMissionSurplus.length === 0) return;
+
+    // 4. Sort deficit by weight descending, surplus by threat ascending
+    missionDeficits.sort((a, b) => b.weight - a.weight || strictCompare(a.sector.sector_id, b.sector.sector_id));
+    nonMissionSurplus.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
+
+    // 5. Transfer
+    const takenFromSector = new Map<string, number>();
+    for (const { sector: deficit, need: initialNeed } of missionDeficits) {
+        let need = initialNeed;
+        if (need <= 0) continue;
+
+        for (const surplus of nonMissionSurplus) {
+            if (need <= 0) break;
+            const taken = takenFromSector.get(surplus.sector_id) ?? 0;
+            const currentCount = surplus.assigned_brigade_ids.length - taken;
+            const surplusBudget = Math.ceil(surplus.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            const floor = Math.max(surplusBudget, MIN_DONOR_BRIGADES);
+            const available = currentCount - floor;
+            if (available <= 0) continue;
+
+            const candidates = surplus.assigned_brigade_ids
+                .filter(bid => !overrides.some(o => o.brigade_id === bid))
+                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
+                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
+
+            const toTransfer = Math.min(need, available, candidates.length);
+            for (let i = 0; i < toTransfer; i++) {
+                overrides.push({
+                    brigade_id: candidates[i].bid,
+                    from_sector_id: surplus.sector_id,
+                    to_sector_id: deficit.sector_id,
+                    reason: 'mission_priority',
+                });
+                takenFromSector.set(surplus.sector_id, (takenFromSector.get(surplus.sector_id) ?? 0) + 1);
+                need--;
+            }
+        }
+    }
 }
 
-/** Stub: redistribute excess brigades from non-priority sectors. */
+/**
+ * Redistribute excess brigades from non-priority sectors (those not facing
+ * any target or hold municipalities) to under-garrisoned sectors.
+ */
 function applyNonPriorityExcess(
-    _corpsSectors: CorpsFrontSector[],
-    _formations: Record<string, FormationState>,
-    _commanderProfile: CorpsCommanderProfile,
-    _overrides: CommanderOverride[],
+    corpsSectors: CorpsFrontSector[],
+    formations: Record<string, FormationState>,
+    armyPriorities: ArmyOperationPriority[],
+    commanderProfile: CorpsCommanderProfile,
+    overrides: CommanderOverride[],
     _componentOf: Map<string, number>,
 ): void {
-    // Phase 2 — not yet implemented
+    // Without priorities, there's no concept of "non-priority" — skip
+    if (armyPriorities.length === 0) return;
+
+    // 1. Build combined priority municipalities
+    const priorityMunicipalities = new Set<string>();
+    for (const p of armyPriorities) {
+        for (const m of p.target_municipalities) priorityMunicipalities.add(m);
+        if (p.hold_municipalities) {
+            for (const m of p.hold_municipalities) priorityMunicipalities.add(m);
+        }
+    }
+    if (priorityMunicipalities.size === 0) return;
+
+    // 2. Classify sectors
+    const isSectorPriority = (s: CorpsFrontSector): boolean => {
+        for (const seg of s.sub_segments) {
+            for (const hosid of (seg.enemy_osids ?? [])) {
+                const muni = hosid.split(':')[1];
+                if (muni && priorityMunicipalities.has(muni)) return true;
+            }
+        }
+        return false;
+    };
+
+    const defensiveKeep = commanderProfile.aggressiveness <= 0.4 ? 1 : 0;
+
+    // 3. Find non-priority donors and deficit recipients
+    const donors: CorpsFrontSector[] = [];
+    const recipients: { sector: CorpsFrontSector; need: number }[] = [];
+
+    for (const s of corpsSectors) {
+        const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+        const isPriority = isSectorPriority(s);
+
+        if (!isPriority) {
+            const effectiveMin = Math.max(budget, MIN_DONOR_BRIGADES) + defensiveKeep;
+            if (s.assigned_brigade_ids.length > effectiveMin) {
+                donors.push(s);
+            }
+        }
+
+        // Any under-budget sector can receive
+        if (s.assigned_brigade_ids.length < budget) {
+            recipients.push({ sector: s, need: budget - s.assigned_brigade_ids.length });
+        }
+    }
+
+    if (donors.length === 0 || recipients.length === 0) return;
+
+    // 4. Sort: recipients by threat descending, donors by threat ascending
+    recipients.sort((a, b) => b.sector.threat_ratio - a.sector.threat_ratio || strictCompare(a.sector.sector_id, b.sector.sector_id));
+    donors.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
+
+    // 5. Transfer
+    const takenFromSector = new Map<string, number>();
+    for (const { sector: recipient, need: initialNeed } of recipients) {
+        let need = initialNeed;
+        if (need <= 0) continue;
+
+        for (const donor of donors) {
+            if (need <= 0) break;
+            const taken = takenFromSector.get(donor.sector_id) ?? 0;
+            const currentCount = donor.assigned_brigade_ids.length - taken;
+            const donorBudget = Math.ceil(donor.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            const floor = Math.max(donorBudget, MIN_DONOR_BRIGADES) + defensiveKeep;
+            const available = currentCount - floor;
+            if (available <= 0) continue;
+
+            const candidates = donor.assigned_brigade_ids
+                .filter(bid => !overrides.some(o => o.brigade_id === bid))
+                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
+                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
+
+            const toTransfer = Math.min(need, available, candidates.length);
+            for (let i = 0; i < toTransfer; i++) {
+                overrides.push({
+                    brigade_id: candidates[i].bid,
+                    from_sector_id: donor.sector_id,
+                    to_sector_id: recipient.sector_id,
+                    reason: 'non_priority_excess',
+                });
+                takenFromSector.set(donor.sector_id, (takenFromSector.get(donor.sector_id) ?? 0) + 1);
+                need--;
+            }
+        }
+    }
 }
 
-/** Stub: stage brigades for planned offensive operations. */
+/**
+ * Stage brigades for planned offensive operations by concentrating
+ * at sectors with pre-staging weights from operation preparation.
+ */
 function applyOffensiveStaging(
-    _corpsSectors: CorpsFrontSector[],
-    _formations: Record<string, FormationState>,
-    _commanderProfile: CorpsCommanderProfile,
-    _overrides: CommanderOverride[],
+    corpsSectors: CorpsFrontSector[],
+    formations: Record<string, FormationState>,
+    commanderProfile: CorpsCommanderProfile,
+    overrides: CommanderOverride[],
     _componentOf: Map<string, number>,
 ): void {
-    // Phase 2 — not yet implemented
+    const weights = commanderProfile.preStagingSectorWeights;
+    if (weights.size === 0) return;
+
+    // 1. Determine staging bonus based on aggressiveness
+    let stagingBonus: number;
+    if (commanderProfile.aggressiveness >= 0.6) {
+        stagingBonus = 2;
+    } else if (commanderProfile.aggressiveness <= 0.4) {
+        stagingBonus = 0;
+    } else {
+        stagingBonus = 1;
+    }
+
+    // 2. Find staging sector deficits
+    const stagingDeficits: { sector: CorpsFrontSector; need: number }[] = [];
+    const stagingSectorIds = new Set<string>();
+
+    for (const s of corpsSectors) {
+        const w = weights.get(s.sector_id);
+        if (w !== undefined && w >= 1.5) {
+            stagingSectorIds.add(s.sector_id);
+            const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            const desired = budget + stagingBonus;
+            if (s.assigned_brigade_ids.length < desired) {
+                stagingDeficits.push({ sector: s, need: desired - s.assigned_brigade_ids.length });
+            }
+        }
+    }
+
+    if (stagingDeficits.length === 0) return;
+
+    // 3. Find non-staging surplus (guard: don't thin high-threat sectors)
+    const donors: CorpsFrontSector[] = [];
+    for (const s of corpsSectors) {
+        if (stagingSectorIds.has(s.sector_id)) continue;
+        if (s.threat_ratio >= DEFENSIVE_CRITICAL_THREAT) continue; // don't thin the front
+        const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+        if (s.assigned_brigade_ids.length > budget && s.assigned_brigade_ids.length > MIN_DONOR_BRIGADES) {
+            donors.push(s);
+        }
+    }
+
+    if (donors.length === 0) return;
+
+    // 4. Sort deterministically
+    stagingDeficits.sort((a, b) => strictCompare(a.sector.sector_id, b.sector.sector_id));
+    donors.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
+
+    // 5. Transfer
+    const takenFromSector = new Map<string, number>();
+    for (const { sector: staging, need: initialNeed } of stagingDeficits) {
+        let need = initialNeed;
+        if (need <= 0) continue;
+
+        for (const donor of donors) {
+            if (need <= 0) break;
+            const taken = takenFromSector.get(donor.sector_id) ?? 0;
+            const currentCount = donor.assigned_brigade_ids.length - taken;
+            const donorBudget = Math.ceil(donor.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            const floor = Math.max(donorBudget, MIN_DONOR_BRIGADES);
+            const available = currentCount - floor;
+            if (available <= 0) continue;
+
+            const candidates = donor.assigned_brigade_ids
+                .filter(bid => !overrides.some(o => o.brigade_id === bid))
+                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
+                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
+
+            const toTransfer = Math.min(need, available, candidates.length);
+            for (let i = 0; i < toTransfer; i++) {
+                overrides.push({
+                    brigade_id: candidates[i].bid,
+                    from_sector_id: donor.sector_id,
+                    to_sector_id: staging.sector_id,
+                    reason: 'offensive_staging',
+                });
+                takenFromSector.set(donor.sector_id, (takenFromSector.get(donor.sector_id) ?? 0) + 1);
+                need--;
+            }
+        }
+    }
 }
 
 /** Reinforce critically threatened defensive sectors by pulling from safe surplus sectors. */

@@ -198,4 +198,122 @@ describe('commanderReviewAssignment', () => {
             expect(result.length).toBe(0);
         });
     });
+
+    describe('mission compliance', () => {
+        it('concentrates brigades at mission-relevant sector', () => {
+            const sectors: any[] = [
+                { ...makeSector('s1', 'vrs_2kk', ['b1'], 8, 1.0),
+                  sub_segments: [{ friendly_osids: ['op:bihac:f1'], enemy_osids: ['op:bihac:h1'] }] },
+                { ...makeSector('s2', 'vrs_2kk', ['b2', 'b3', 'b4'], 4, 0.3),
+                  sub_segments: [{ friendly_osids: ['op:livno:f1'], enemy_osids: ['op:livno:h1'] }] },
+            ];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'op:bihac:f1', 'vrs_2kk', 800),
+                b2: makeFormation('b2', 'op:livno:f1', 'vrs_2kk', 700),
+                b3: makeFormation('b3', 'op:livno:f1', 'vrs_2kk', 600),
+                b4: makeFormation('b4', 'op:livno:f1', 'vrs_2kk', 500),
+            };
+            const priorities = [{
+                name: 'Bihac Pocket', corps_id: 'vrs_2kk',
+                target_municipalities: ['bihac'],
+                start_week: 0, end_week: 52, weight: 10,
+                min_outcome: 'stalemate' as const,
+            }];
+            const profile = { competence: 0.6, aggressiveness: 0.6, preStagingSectorWeights: new Map() };
+            const result = commanderReviewAssignment(
+                'vrs_2kk', sectors, formations, priorities, profile, new Map(), new Map(),
+            );
+            expect(result.some(o => o.to_sector_id === 's1' && o.reason === 'mission_priority')).toBe(true);
+            expect(sectors[0].assigned_brigade_ids.length).toBeGreaterThan(1);
+        });
+
+        it('does not move when no army priorities exist', () => {
+            const sectors = [
+                makeSector('s1', 'vrs_2kk', ['b1'], 8, 1.0),
+                makeSector('s2', 'vrs_2kk', ['b2', 'b3'], 4, 0.3),
+            ];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'osid_s1_f1', 'vrs_2kk'),
+                b2: makeFormation('b2', 'osid_s2_f1', 'vrs_2kk'),
+                b3: makeFormation('b3', 'osid_s2_f1', 'vrs_2kk'),
+            };
+            const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
+            const result = commanderReviewAssignment(
+                'vrs_2kk', sectors, formations, [], profile, new Map(), new Map(),
+            );
+            expect(result.filter(o => o.reason === 'mission_priority').length).toBe(0);
+        });
+    });
+
+    describe('non-priority excess', () => {
+        it('releases excess from non-priority sector', () => {
+            const sectors: any[] = [
+                { ...makeSector('s1', 'vrs_2kk', ['b1'], 8, 1.5),
+                  sub_segments: [{ friendly_osids: ['op:bihac:f1'], enemy_osids: ['op:bihac:h1'] }] },
+                { ...makeSector('s2', 'vrs_2kk', ['b2', 'b3', 'b4'], 4, 0.3),
+                  sub_segments: [{ friendly_osids: ['op:prozor:f1'], enemy_osids: ['op:prozor:h1'] }] },
+            ];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'op:bihac:f1', 'vrs_2kk', 800),
+                b2: makeFormation('b2', 'op:prozor:f1', 'vrs_2kk', 700),
+                b3: makeFormation('b3', 'op:prozor:f1', 'vrs_2kk', 600),
+                b4: makeFormation('b4', 'op:prozor:f1', 'vrs_2kk', 500),
+            };
+            const priorities = [{
+                name: 'Bihac', corps_id: 'vrs_2kk',
+                target_municipalities: ['bihac'],
+                start_week: 0, end_week: 52, weight: 10,
+                min_outcome: 'stalemate' as const,
+            }];
+            const profile = { competence: 0.5, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
+            const result = commanderReviewAssignment(
+                'vrs_2kk', sectors, formations, priorities, profile, new Map(), new Map(),
+            );
+            expect(result.some(o => o.from_sector_id === 's2' && o.reason === 'non_priority_excess')).toBe(true);
+        });
+    });
+
+    describe('offensive staging', () => {
+        it('concentrates at staging sector', () => {
+            const sectors = [
+                makeSector('s1', 'vrs_drina', ['b1'], 6, 1.0),
+                makeSector('s2', 'vrs_drina', ['b2', 'b3', 'b4'], 4, 0.4),
+            ];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'osid_s1_f1', 'vrs_drina', 800),
+                b2: makeFormation('b2', 'osid_s2_f1', 'vrs_drina', 700),
+                b3: makeFormation('b3', 'osid_s2_f1', 'vrs_drina', 600),
+                b4: makeFormation('b4', 'osid_s2_f1', 'vrs_drina', 500),
+            };
+            const profile = {
+                competence: 0.6, aggressiveness: 0.7,
+                preStagingSectorWeights: new Map([['s1', 3.0]]),
+            };
+            const result = commanderReviewAssignment(
+                'vrs_drina', sectors, formations, [], profile, new Map(), new Map(),
+            );
+            expect(result.some(o => o.to_sector_id === 's1' && o.reason === 'offensive_staging')).toBe(true);
+        });
+
+        it('does not pull from high-threat sector for staging', () => {
+            const sectors = [
+                makeSector('s1', 'vrs_drina', ['b1'], 6, 0.5),
+                makeSector('s2', 'vrs_drina', ['b2', 'b3'], 4, 3.0), // high threat
+            ];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'osid_s1_f1', 'vrs_drina'),
+                b2: makeFormation('b2', 'osid_s2_f1', 'vrs_drina'),
+                b3: makeFormation('b3', 'osid_s2_f1', 'vrs_drina'),
+            };
+            const profile = {
+                competence: 0.6, aggressiveness: 0.8,
+                preStagingSectorWeights: new Map([['s1', 3.0]]),
+            };
+            const result = commanderReviewAssignment(
+                'vrs_drina', sectors, formations, [], profile, new Map(), new Map(),
+            );
+            // Should NOT pull from s2 (threat 3.0 >= DEFENSIVE_CRITICAL_THREAT)
+            expect(result.filter(o => o.from_sector_id === 's2').length).toBe(0);
+        });
+    });
 });
