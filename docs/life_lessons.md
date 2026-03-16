@@ -376,6 +376,12 @@
 - **Right approach**: Single post-pipeline assertion (`assertBrigadeReachability`) runs AFTER all code paths have executed. Catches violations regardless of which path introduced them. Added as the last step in `buildCorpsFrontSectors()`. Pattern proven and then applied to 4 more systems: dissolved brigades in sectors, control event consistency, operation lifecycle, formation territory.
 - **Do instead**: For invariants with 3+ code paths that can violate them, add a single end-of-pipeline assertion rather than guarding each path. The assertion is the safety net; per-path guards are optimization. Five assertions now live in `war_phases.ts` (118 steps). Plan: `docs/40_reports/INVARIANT_FOOLPROOFING_PLAN.md`.
 
+### [UI] Never share MapLibre layers between independent selection highlights (2026-03-16) — NEW
+- **Context**: Brigade AoR highlighting needed to show the selected brigade's sub-segment front line. Five attempts tried to reuse the existing sector edge glow layers (shared between sector/corps highlight and brigade highlight). Each attempt caused one system to break the other — race conditions between useEffects, hover overwriting click, clear paths erasing each other's state.
+- **Wrong approach**: Sharing MapLibre layers between two independent selection features (sector highlight and brigade highlight). Setting filters on shared layers from two different useEffects creates a last-writer-wins race. Suppressing hover when a brigade is selected broke sector navigation.
+- **Right approach**: Create DEDICATED MapLibre layers for each selection feature. Brigade AoR uses `brigade-aor-pos` and `brigade-aor-neg` layers on the same source but with independent filters and opacity. Sector highlight is completely untouched.
+- **Do instead**: When adding a new map highlight feature, ALWAYS create new layers. Never reuse layers owned by another useEffect. Shared source is fine; shared layers are not.
+
 ---
 
 ## Internalized (Consistently Applied)

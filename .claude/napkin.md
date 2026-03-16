@@ -189,8 +189,8 @@
    Do instead: `corps_asset` and `army_hq` are organizational abstractions. They do **not** have map lines or "ghost lines". Only brigades and front sectors are map-physical. Command lines are in the OOB/Warroom, not the tactical map. Army HQ brigades (elites) navigate to the Army panel (`selectedArmyId`), not a corps panel — `FormationDetail.tsx` detects `army_hq` kind for the parent link.
 9. **[2026-03-06] Tactical fog contract is `fogOfWar`, not raw sector intel**
    Do instead: Derive player-visible fog in `GameStateAdapter.ts` from `sector_intel` + sectors + friendly brigade positions.
-10. **[2026-03-15] NATO Symbology (Status): Quantized 10% steps**
-    Do instead: Health/Morale banners on map symbols must use 10% quantized steps (`h0-h100`). These are baked into the `icon_id` (e.g., `...__h90__m70`) and rendered by `formationIcons.ts`. Do not pass raw float percentages to map layers.
+10. **[2026-03-16] Brigade AoR highlight: dedicated layers, never shared**
+    Do instead: Brigade AoR highlight uses 2 dedicated layers (`brigade-aor-pos`/`brigade-aor-neg`) on `front-edges-hover` source. Completely independent of sector/corps highlight. White icon via `FORMATION_WHITE_OVERLAY` + `SECTOR_UNIT_PULSE`. Filter by `sub_segment_id`. NEVER share layers between sector highlight and brigade highlight — use dedicated layers. Shared layers cause last-writer-wins race between useEffects.
 
 ## Desktop & Electron
 1. **[2026-03-02] One map app: desktop uses dev when running**
