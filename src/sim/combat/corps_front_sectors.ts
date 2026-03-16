@@ -762,15 +762,69 @@ function applyOffensiveStaging(
     // Phase 2 — not yet implemented
 }
 
-/** Stub: reinforce critically threatened defensive sectors. */
+/** Reinforce critically threatened defensive sectors by pulling from safe surplus sectors. */
 function applyDefensiveCoherence(
-    _corpsSectors: CorpsFrontSector[],
-    _formations: Record<string, FormationState>,
+    corpsSectors: CorpsFrontSector[],
+    formations: Record<string, FormationState>,
     _commanderProfile: CorpsCommanderProfile,
-    _overrides: CommanderOverride[],
+    overrides: CommanderOverride[],
     _componentOf: Map<string, number>,
 ): void {
-    // Phase 2 — not yet implemented
+    // Find deficit sectors: high threat AND under-garrisoned
+    const deficitSectors = corpsSectors
+        .filter(s => {
+            const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            return s.threat_ratio >= DEFENSIVE_CRITICAL_THREAT && s.assigned_brigade_ids.length < budget;
+        })
+        .sort((a, b) => b.threat_ratio - a.threat_ratio || strictCompare(a.sector_id, b.sector_id));
+
+    // Find surplus sectors: over-garrisoned AND above minimum
+    const surplusSectors = corpsSectors
+        .filter(s => {
+            const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            return s.assigned_brigade_ids.length > budget && s.assigned_brigade_ids.length > MIN_DONOR_BRIGADES;
+        })
+        .sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
+
+    if (deficitSectors.length === 0 || surplusSectors.length === 0) return;
+
+    // Track how many have been taken from each surplus sector (overrides not yet applied)
+    const takenFromSector = new Map<string, number>();
+
+    for (const deficit of deficitSectors) {
+        const budget = Math.ceil(deficit.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+        let need = budget - deficit.assigned_brigade_ids.length;
+        if (need <= 0) continue;
+
+        for (const surplus of surplusSectors) {
+            if (need <= 0) break;
+
+            const taken = takenFromSector.get(surplus.sector_id) ?? 0;
+            const currentCount = surplus.assigned_brigade_ids.length - taken;
+            const surplusBudget = Math.ceil(surplus.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            const floor = Math.max(surplusBudget, MIN_DONOR_BRIGADES);
+            const available = currentCount - floor;
+            if (available <= 0) continue;
+
+            // Candidate brigades: those still in this sector and not already overridden
+            const candidates = surplus.assigned_brigade_ids
+                .filter(bid => !overrides.some(o => o.brigade_id === bid))
+                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
+                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
+
+            const toTransfer = Math.min(need, available, candidates.length);
+            for (let i = 0; i < toTransfer; i++) {
+                overrides.push({
+                    brigade_id: candidates[i].bid,
+                    from_sector_id: surplus.sector_id,
+                    to_sector_id: deficit.sector_id,
+                    reason: 'defensive_critical',
+                });
+                takenFromSector.set(surplus.sector_id, (takenFromSector.get(surplus.sector_id) ?? 0) + 1);
+                need--;
+            }
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4228,7 +4282,98 @@ export function assignBrigadesToSubSegments(
                 if (f) f.assigned_sub_segment_id = ss.sub_segment_id;
             }
         }
+
+        // Merge gap sub-segments into nearest neighbor — no unowned front edges.
+        // Adjacent brigades stretch to cover. Their AoR widens, defense thins, but
+        // every edge has a responsible brigade.
+        mergeGapSubSegments(sector, brigadesPerSubSeg, formations);
     }
+}
+
+/**
+ * Merge gap sub-segments into their nearest non-gap neighbor.
+ * The neighbor's brigade stretches to cover the gap — AoR widens, defense thins,
+ * but every front edge has a responsible brigade. No unowned holes in the line.
+ *
+ * After merge, gap sub-segments have their edges/OSIDs absorbed into the neighbor
+ * and are removed from the sector's sub_segments array.
+ */
+function mergeGapSubSegments(
+    sector: CorpsFrontSector,
+    brigadesPerSubSeg: Map<number, string[]>,
+    formations: Record<string, FormationState>
+): void {
+    if (sector.sub_segments.length <= 1) return;
+
+    // Find gap indices
+    const gapIndices: number[] = [];
+    for (let si = 0; si < sector.sub_segments.length; si++) {
+        if (sector.sub_segments[si]!.gap) gapIndices.push(si);
+    }
+    if (gapIndices.length === 0) return;
+    // If ALL sub-segments are gaps (no brigades at all), nothing to merge into
+    if (gapIndices.length === sector.sub_segments.length) return;
+
+    // For each gap, find the nearest non-gap sub-segment by shared friendly OSIDs
+    for (const gapIdx of gapIndices) {
+        const gapSS = sector.sub_segments[gapIdx]!;
+        const gapFriendly = new Set(gapSS.friendly_osids);
+
+        let bestNeighborIdx = -1;
+        let bestOverlap = -1;
+
+        for (let si = 0; si < sector.sub_segments.length; si++) {
+            if (si === gapIdx) continue;
+            const candidate = sector.sub_segments[si]!;
+            if (candidate.gap) continue; // don't merge gap into gap
+
+            // Count shared friendly OSIDs (adjacent sub-segments share border OSIDs)
+            let overlap = 0;
+            for (const osid of candidate.friendly_osids) {
+                if (gapFriendly.has(osid)) overlap++;
+            }
+            // Fallback: if no OSID overlap, use index proximity (adjacent in list)
+            if (overlap === 0) overlap = -Math.abs(si - gapIdx);
+
+            if (overlap > bestOverlap || (overlap === bestOverlap && si < bestNeighborIdx)) {
+                bestOverlap = overlap;
+                bestNeighborIdx = si;
+            }
+        }
+
+        if (bestNeighborIdx < 0) continue; // no non-gap neighbor found
+
+        // Merge: absorb gap's edges and OSIDs into neighbor
+        const neighbor = sector.sub_segments[bestNeighborIdx]!;
+        for (const eid of gapSS.edge_ids) {
+            if (!neighbor.edge_ids.includes(eid)) neighbor.edge_ids.push(eid);
+        }
+        for (const osid of gapSS.friendly_osids) {
+            if (!neighbor.friendly_osids.includes(osid)) neighbor.friendly_osids.push(osid);
+        }
+        for (const osid of gapSS.enemy_osids) {
+            if (!neighbor.enemy_osids.includes(osid)) neighbor.enemy_osids.push(osid);
+        }
+        neighbor.edge_ids.sort(strictCompare);
+        neighbor.friendly_osids.sort(strictCompare);
+        neighbor.enemy_osids.sort(strictCompare);
+        neighbor.length_edges = neighbor.edge_ids.length;
+
+        // Update brigade assignments: gap's edges are now the neighbor brigade's AoR
+        for (const bid of neighbor.primary_brigade_ids) {
+            const f = formations[bid];
+            if (f) f.assigned_sub_segment_id = neighbor.sub_segment_id;
+        }
+
+        // Mark gap for removal
+        gapSS.edge_ids = [];
+        gapSS.friendly_osids = [];
+        gapSS.enemy_osids = [];
+        gapSS.length_edges = 0;
+    }
+
+    // Remove empty (merged) sub-segments
+    sector.sub_segments = sector.sub_segments.filter(ss => ss.length_edges > 0);
 }
 
 /** Fraction of entrenchment_turns retained when a brigade is reassigned to a different sub-segment. */
