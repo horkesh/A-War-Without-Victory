@@ -40,12 +40,13 @@ interface TopToolbarProps {
   onOpenEnclaves?: () => void;
   onOpenAAR?: () => void;
   onOpenOpsHistory?: () => void;
+  onOpenEventLog?: () => void;
 }
 
 /** True when loaded inside the warroom iframe (?embedded=1). */
 const isEmbedded = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embedded') === '1';
 
-export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory }: TopToolbarProps) {
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory, onOpenEventLog }: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const devMode = useGameStore((s) => s.devMode);
@@ -310,6 +311,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
             <button onClick={() => onOpenSummary?.('overview')} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>SUMMARY</button>
             <button onClick={() => onOpenAAR?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>AAR</button>
             <button onClick={() => onOpenOpsHistory?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>OPS</button>
+            <button onClick={() => onOpenEventLog?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>EVENTS</button>
           </div>
         </div>
 

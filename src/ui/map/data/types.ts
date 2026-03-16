@@ -674,5 +674,31 @@ export interface LoadedGameState {
         attacks: number;
         weekly_log_length: number;
     }>;
+
+    /** Fired event IDs with their turn and metadata, for the event log. */
+    firedEvents?: Array<{
+        id: string;
+        turn: number;
+        title: string;
+        narrative: string;
+        category: string;
+        effects: Array<{ kind: string; description: string }>;
+        isDecision: boolean;
+        responseOptions?: Array<{ id: string; label: string; description?: string }>;
+    }>;
+
+    /** Pending event decisions awaiting player response. */
+    pendingEventDecisions?: Array<{
+        event_id: string;
+        event_title: string;
+        turn_fired: number;
+        faction: string;
+        response_options: Array<{
+            id: string;
+            label: string;
+            description?: string;
+            effects: import('../../../sim/events/event_types.js').EventEffect[];
+        }>;
+    }>;
 }
 

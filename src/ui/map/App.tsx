@@ -26,6 +26,10 @@ import { SupplyPanel } from './components/SupplyPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { AARPanel } from './components/AARPanel';
 import { OperationHistoryPanel } from './components/OperationHistoryPanel';
+import { EventModal } from './components/EventModal';
+import { EventLogPanel } from './components/EventLogPanel';
+import type { EventDisplayData } from './components/EventModal';
+import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransition } from './components/PeaceWarTransition';
@@ -159,6 +163,10 @@ function App() {
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
   const [aarOpen, setAarOpen] = useState(false);
   const [opsHistoryOpen, setOpsHistoryOpen] = useState(false);
+  const [eventLogOpen, setEventLogOpen] = useState(false);
+  const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
+  const [eventQueueIndex, setEventQueueIndex] = useState(0);
+  const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -218,6 +226,96 @@ function App() {
       useGameStore.getState().setSelectedOsid('S1');
     }
   }, []);
+
+  // v0.4.1 Phase 5: detect new events from game state and queue for display
+  useEffect(() => {
+    if (!loadedGameState) return;
+    const fired = loadedGameState.firedEvents;
+    if (!fired || fired.length === 0) return;
+
+    // Find events not yet acknowledged
+    const newEvents = fired.filter(e => !acknowledgedEventIds.has(e.id));
+    if (newEvents.length === 0) return;
+
+    const displayData: EventDisplayData[] = newEvents.map(e => ({
+      id: e.id,
+      title: e.title,
+      narrative: e.narrative || '',
+      category: e.category || 'military',
+      effects: e.effects,
+      isDecision: e.isDecision,
+      responseOptions: e.responseOptions,
+    }));
+
+    // Only show if we have new events that aren't already in queue
+    if (displayData.length > 0 && eventQueue.length === 0) {
+      setEventQueue(displayData);
+      setEventQueueIndex(0);
+    }
+  }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length]);
+
+  // v0.4.1 Phase 5: also check pending event decisions
+  useEffect(() => {
+    if (!loadedGameState) return;
+    const pending = loadedGameState.pendingEventDecisions;
+    if (!pending || pending.length === 0) return;
+
+    // Convert pending decisions to EventDisplayData for modal display
+    const decisionEvents: EventDisplayData[] = pending.map(d => ({
+      id: d.event_id,
+      title: d.event_title,
+      narrative: '',
+      category: 'political',
+      effects: [],
+      isDecision: true,
+      responseOptions: d.response_options.map(opt => ({
+        id: opt.id,
+        label: opt.label,
+        description: opt.description,
+      })),
+    }));
+
+    if (decisionEvents.length > 0 && eventQueue.length === 0) {
+      setEventQueue(decisionEvents);
+      setEventQueueIndex(0);
+    }
+  }, [loadedGameState?.pendingEventDecisions?.length]);
+
+  const handleEventAcknowledge = () => {
+    const current = eventQueue[eventQueueIndex];
+    if (current) {
+      setAcknowledgedEventIds(prev => new Set(prev).add(current.id));
+    }
+    if (eventQueueIndex < eventQueue.length - 1) {
+      setEventQueueIndex(eventQueueIndex + 1);
+    } else {
+      setEventQueue([]);
+      setEventQueueIndex(0);
+    }
+  };
+
+  const handleEventDecisionResponse = (responseId: string) => {
+    const current = eventQueue[eventQueueIndex];
+    if (current) {
+      // TODO: Send decision response via IPC when backend support is added
+      console.log('[EventModal] Decision response:', current.id, responseId);
+      setAcknowledgedEventIds(prev => new Set(prev).add(current.id));
+    }
+    if (eventQueueIndex < eventQueue.length - 1) {
+      setEventQueueIndex(eventQueueIndex + 1);
+    } else {
+      setEventQueue([]);
+      setEventQueueIndex(0);
+    }
+  };
+
+  // Build event log entries from fired events
+  const eventLogEntries: EventLogEntry[] = (loadedGameState?.firedEvents ?? []).map(e => ({
+    turn: e.turn,
+    title: e.title,
+    category: e.category || 'military',
+    effectsSummary: e.effects.map(ef => ef.description).filter(Boolean).join('; '),
+  }));
 
   // Phase C4: Attack confirmation modal payload and render
   const attackerFormation = pendingAttackConfirmation && loadedGameState
@@ -333,6 +431,7 @@ function App() {
         onOpenEnclaves={() => setEnclaveDashboardOpen((current) => !current)}
         onOpenAAR={() => setAarOpen((current) => !current)}
         onOpenOpsHistory={() => setOpsHistoryOpen((current) => !current)}
+        onOpenEventLog={() => setEventLogOpen((current) => !current)}
       />
       <CommandBriefingLayer
         onOpenSummary={openSummary}
@@ -409,6 +508,20 @@ function App() {
         <SupplyPanel state={loadedGameState} />
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
+      {/* v0.4.1 Phase 5: Event modal (queue-based) */}
+      {eventQueue.length > 0 && eventQueue[eventQueueIndex] && (
+        <EventModal
+          event={eventQueue[eventQueueIndex]}
+          queuePosition={eventQueueIndex + 1}
+          queueTotal={eventQueue.length}
+          onAcknowledge={handleEventAcknowledge}
+          onDecisionResponse={handleEventDecisionResponse}
+        />
+      )}
+      {/* v0.4.1 Phase 5: Event log panel */}
+      {eventLogOpen && (
+        <EventLogPanel events={eventLogEntries} onClose={() => setEventLogOpen(false)} />
+      )}
       <PeaceWarTransitionOverlay />
       <VerdictScreen />
       <Minimap />

@@ -1606,6 +1606,9 @@ export function parseGameState(json: unknown): LoadedGameState {
             : undefined,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents: derivePendingOfficerEvents(state),
+        // Event system (v0.4.1 Phase 5)
+        firedEvents: deriveFiredEvents(state),
+        pendingEventDecisions: derivePendingEventDecisions(state),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
         // Game over
@@ -1871,6 +1874,69 @@ function derivePeacePhaseData(state: any, phase: string): Partial<LoadedGameStat
         peaceReferendum,
         peaceEvents,
     };
+}
+
+function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
+    const firedIds = state.military?.fired_event_ids as string[] | undefined;
+    if (!firedIds || firedIds.length === 0) return undefined;
+
+    // We have the list of fired event IDs but not the full definitions at runtime in the UI.
+    // Build minimal entries from the IDs. The turn_summaries may contain events_fired with text.
+    const turnSummaries = state.turn_summaries as Array<{ turn?: number; events_fired?: Array<{ id: string; text: string }> }> | undefined;
+
+    // Build a lookup: id -> { turn, text } from turn summaries
+    const eventInfo = new Map<string, { turn: number; text: string }>();
+    if (Array.isArray(turnSummaries)) {
+        for (const summary of turnSummaries) {
+            const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+            if (Array.isArray(summary.events_fired)) {
+                for (const ev of summary.events_fired) {
+                    if (ev.id && !eventInfo.has(ev.id)) {
+                        eventInfo.set(ev.id, { turn, text: ev.text ?? ev.id });
+                    }
+                }
+            }
+        }
+    }
+
+    // Build fired event entries (most recent first, cap at 20)
+    const entries: NonNullable<LoadedGameState['firedEvents']> = [];
+    for (const id of firedIds) {
+        const info = eventInfo.get(id);
+        entries.push({
+            id,
+            turn: info?.turn ?? 0,
+            title: info?.text ?? id,
+            narrative: '',
+            category: 'military',
+            effects: [],
+            isDecision: false,
+        });
+    }
+
+    // Sort by turn descending, cap at 20
+    entries.sort((a, b) => b.turn - a.turn);
+    return entries.length > 0 ? entries.slice(0, 20) : undefined;
+}
+
+function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventDecisions'] {
+    const pending = state.military?.pending_event_decisions as any[] | undefined;
+    if (!pending || pending.length === 0) return undefined;
+
+    return pending.map((d: any) => ({
+        event_id: String(d.event_id ?? ''),
+        event_title: String(d.event_title ?? ''),
+        turn_fired: Number(d.turn_fired ?? 0),
+        faction: String(d.faction ?? ''),
+        response_options: Array.isArray(d.response_options)
+            ? d.response_options.map((opt: any) => ({
+                id: String(opt.id ?? ''),
+                label: String(opt.label ?? ''),
+                description: opt.description ? String(opt.description) : undefined,
+                effects: Array.isArray(opt.effects) ? opt.effects : [],
+            }))
+            : [],
+    }));
 }
 
 function deriveGameVerdict(state: any): GameVerdict | undefined {
