@@ -369,6 +369,7 @@ function areParticipantsReadyForExecution(
  */
 function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn: number): void {
     if (op.recovery_reason === 'completed') return; // Success — no failure to record
+    if (op.recovery_reason === 'probe_complete') return; // Probes gather intel — not a failure
 
     const failedOsids: string[] = [];
     if (isMultiAxis(op) && op.axes) {
@@ -406,6 +407,7 @@ function getRecoveryDuration(op: CorpsOperation): number {
     switch (op.recovery_reason) {
         case 'no_logged_attempt':
         case 'manual_termination':
+        case 'probe_complete':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(objectiveCount / 2));
@@ -431,6 +433,7 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
     switch (op.recovery_reason) {
         case 'no_logged_attempt':
         case 'manual_termination':
+        case 'probe_complete':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(maxLen / 2));
@@ -743,7 +746,7 @@ export function advanceSectorOffensives(
             }
 
             if (op.type === 'probe' && !multiAxis && (op.attack_attempt_count ?? 0) > 0) {
-                beginRecovery(op, turn, op.last_result === 'captured' ? 'completed' : 'manual_termination');
+                beginRecovery(op, turn, op.last_result === 'captured' ? 'completed' : 'probe_complete');
                 continue;
             }
         } else if (op.phase === 'recovery') {

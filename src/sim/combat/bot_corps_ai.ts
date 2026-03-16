@@ -33,6 +33,7 @@ import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanc
 import { evaluateOperationProgress, generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
 import { attemptCorridorBreach } from './bot_corps_corridor.js';
 import { generateCorpsDirectives, evaluateSectorStances } from './bot_corps_directives.js';
+import { generateArmyHQOverrides } from './army_hq_overrides.js';
 import { getFactionCorps, getCorpsSubordinates } from './bot_corps_helpers.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -181,7 +182,11 @@ export function generateAllCorpsOrders(
     supplyByOsid?: SupplyStateByOsidReport | null,
     ethnicMap?: OsidEthnicComposition | null
 ): void {
-    // 0. Set army stance from standing orders
+    // 0. Generate army HQ overrides for this turn
+    const armyOverrides = generateArmyHQOverrides(state, faction);
+    state.military.army_hq_overrides = armyOverrides.length > 0 ? armyOverrides : undefined;
+
+    // 0a. Set army stance from standing orders
     setArmyStandingOrder(state, faction);
 
     // 0b. Multi-corps coordination: concentrate offensive force
@@ -225,4 +230,7 @@ export function generateAllCorpsOrders(
             if (sec.length_edges === 0) delete state.military.corps_front_sectors[sid];
         }
     }
+
+    // Clear consumed army HQ overrides — they are per-turn directives
+    state.military.army_hq_overrides = undefined;
 }

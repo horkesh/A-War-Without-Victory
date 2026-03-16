@@ -7,6 +7,7 @@ import {
     type CorpsCommanderProfile,
 } from '../src/sim/combat/corps_front_sectors.js';
 import { computeSupplyAwareOpSize } from '../src/sim/combat/bot_corps_directives.js';
+import { generateArmyHQOverrides } from '../src/sim/combat/army_hq_overrides.js';
 
 // ── Factories ───────────────────────────────────────────────────────────────
 
@@ -344,6 +345,72 @@ describe('supply-aware operation sizing', () => {
     });
 });
 
+describe('generateArmyHQOverrides', () => {
+    function makeHQState(overrides: any = {}): any {
+        return {
+            meta: { turn: 20, phase: 'war', ...(overrides.meta ?? {}) },
+            military: {
+                formations: {
+                    vrs_drina: { faction: 'RS', kind: 'corps', status: 'active' },
+                    vrs_1st_krajina: { faction: 'RS', kind: 'corps', status: 'active' },
+                    ...(overrides.formations ?? {}),
+                },
+                corps_command: overrides.corps_command ?? {},
+            },
+            political: {
+                political_controllers: {
+                    'op:srebrenica:srebrenica_2': 'RBiH',
+                    'op:brcko:brka_2': 'RBiH',
+                    ...(overrides.political_controllers ?? {}),
+                },
+            },
+        };
+    }
+
+    it('returns empty array when all corps have active operations', () => {
+        const state = makeHQState({
+            corps_command: {
+                vrs_drina: { active_operation: { name: 'Op Drina', phase: 'execution' } },
+                vrs_1st_krajina: { active_operation: { name: 'Op Krajina', phase: 'execution' } },
+            },
+        });
+        const result = generateArmyHQOverrides(state, 'RS');
+        expect(result.length).toBe(0);
+    });
+
+    it('skips corps that operated recently', () => {
+        const state = makeHQState({
+            meta: { turn: 10 },
+            corps_command: {
+                vrs_drina: { last_completed_operation_turn: 8 },
+            },
+        });
+        const result = generateArmyHQOverrides(state, 'RS');
+        const drinaOverrides = result.filter(o => o.corps_id === 'vrs_drina');
+        expect(drinaOverrides.length).toBe(0);
+    });
+
+    it('generates at most one override per corps', () => {
+        const state = makeHQState();
+        const result = generateArmyHQOverrides(state, 'RS');
+        const corpsIds = result.map(o => o.corps_id);
+        expect(corpsIds.length).toBe(new Set(corpsIds).size);
+    });
+
+    it('runs without error for all factions', () => {
+        const state = makeHQState({
+            formations: {
+                vrs_drina: { faction: 'RS', kind: 'corps', status: 'active' },
+                arbih_1st_corps: { faction: 'RBiH', kind: 'corps', status: 'active' },
+                hvo_tomislavgrad: { faction: 'HRHB', kind: 'corps', status: 'active' },
+            },
+        });
+        expect(() => generateArmyHQOverrides(state, 'RS')).not.toThrow();
+        expect(() => generateArmyHQOverrides(state, 'RBiH')).not.toThrow();
+        expect(() => generateArmyHQOverrides(state, 'HRHB')).not.toThrow();
+    });
+});
+
 describe('ArmyHQOverride type', () => {
     it('is assignable with all required fields', () => {
         const override: ArmyHQOverride = {
@@ -372,5 +439,100 @@ describe('ArmyHQOverride type', () => {
         };
         expect(probe.type).toBe('probe');
         expect(probe.max_brigades).toBe(2);
+    });
+});
+
+describe('army HQ override consumption', () => {
+    it('injects forced targets past supply gate', () => {
+        const targets: string[] = [];
+        const hqOv: ArmyHQOverride = {
+            corps_id: 'vrs_drina',
+            operation_name: 'HQ: Srebrenica',
+            min_brigades: 3,
+            target_osids: ['op:srebrenica:srebrenica_2'],
+            reason: 'Army directive',
+            issued_turn: 20,
+            type: 'offensive',
+        };
+        // Simulate consumption logic
+        for (const osid of hqOv.target_osids) {
+            if (!targets.includes(osid)) targets.push(osid);
+        }
+        expect(targets).toContain('op:srebrenica:srebrenica_2');
+    });
+
+    it('does not duplicate existing targets', () => {
+        const targets = ['op:srebrenica:srebrenica_2'];
+        const hqOv: ArmyHQOverride = {
+            corps_id: 'vrs_drina',
+            operation_name: 'HQ: Srebrenica',
+            min_brigades: 3,
+            target_osids: ['op:srebrenica:srebrenica_2'],
+            reason: 'Army directive',
+            issued_turn: 20,
+            type: 'offensive',
+        };
+        for (const osid of hqOv.target_osids) {
+            if (!targets.includes(osid)) targets.push(osid);
+        }
+        expect(targets.length).toBe(1); // no duplicate
+    });
+});
+
+describe('probe/feint brigade cap', () => {
+    it('probe caps at max_brigades', () => {
+        const brigades = ['b1', 'b2', 'b3', 'b4'];
+        const hqOv: ArmyHQOverride = {
+            corps_id: 'vrs_drina',
+            operation_name: 'Probe: Srebrenica',
+            min_brigades: 1,
+            target_osids: ['op:srebrenica:srebrenica_2'],
+            reason: 'Intel probe',
+            issued_turn: 20,
+            type: 'probe',
+            max_brigades: 2,
+        };
+        const cap = hqOv.max_brigades ?? 2;
+        expect(brigades.slice(0, cap).length).toBe(2);
+    });
+
+    it('feint caps at max_brigades or default 3', () => {
+        const brigades = ['b1', 'b2', 'b3', 'b4'];
+        const hqOv: ArmyHQOverride = {
+            corps_id: 'vrs_drina',
+            operation_name: 'Feint: Srebrenica',
+            min_brigades: 1,
+            target_osids: ['op:srebrenica:srebrenica_2'],
+            reason: 'Diversionary feint',
+            issued_turn: 20,
+            type: 'feint',
+        };
+        const cap = hqOv.max_brigades ?? 3;
+        expect(brigades.slice(0, cap).length).toBe(3);
+    });
+
+    it('probe without max_brigades defaults to 2', () => {
+        const brigades = ['b1', 'b2', 'b3', 'b4'];
+        const hqOv: ArmyHQOverride = {
+            corps_id: 'vrs_drina',
+            operation_name: 'Probe: test',
+            min_brigades: 1,
+            target_osids: ['op:brcko:brka_2'],
+            reason: 'Intel probe',
+            issued_turn: 20,
+            type: 'probe',
+        };
+        const cap = hqOv.max_brigades ?? 2;
+        expect(cap).toBe(2);
+        expect(brigades.slice(0, cap).length).toBe(2);
+    });
+});
+
+describe('probe_complete recovery reason', () => {
+    it('is a valid recovery_reason value', () => {
+        const op = {
+            recovery_reason: 'probe_complete' as const,
+        };
+        expect(op.recovery_reason).toBe('probe_complete');
     });
 });

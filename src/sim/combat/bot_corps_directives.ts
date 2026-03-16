@@ -974,6 +974,22 @@ export function generateCorpsDirectives(
         if (maxOpSize === 0) {
             offensiveTargets.length = 0;  // critical: no operations
         }
+
+        // Army HQ override: inject forced targets (overrides supply gate).
+        // When army HQ has issued a direct override for this corps, the targets
+        // bypass the supply gate — army-level strategic necessity trumps corps
+        // supply caution. This models historical cases where army command forced
+        // operations despite local commanders' reluctance (e.g. Srebrenica 1995).
+        const armyHqOverrides = (state.military.army_hq_overrides ?? [])
+            .filter(o => o.corps_id === corps.id);
+        for (const hqOv of armyHqOverrides) {
+            for (const osid of hqOv.target_osids) {
+                if (!offensiveTargets.includes(osid)) {
+                    offensiveTargets.push(osid);
+                }
+            }
+        }
+
         // Strained supply penalty: arms embargo effect. When most brigades are
         // strained, the commander becomes more cautious — requires higher confidence
         // for attacks. But operations with SURPLUS brigades (beyond garrison) are
@@ -1569,6 +1585,23 @@ export function generateCorpsDirectives(
                     finalBrigadeIds = finalBrigadeIds.slice(0, maxOpSize);
                 }
 
+                // Army HQ override: cap brigade count for probe/feint operations.
+                // Probes are small recon-by-force; feints are limited diversions.
+                const matchingHqOv = armyHqOverrides.find(o =>
+                    o.target_osids.some(t => offensiveTargets.includes(t) || secEnemyOsids.includes(t))
+                );
+                if (matchingHqOv?.type === 'probe') {
+                    const cap = matchingHqOv.max_brigades ?? 2;
+                    if (finalBrigadeIds.length > cap) {
+                        finalBrigadeIds = finalBrigadeIds.slice(0, cap);
+                    }
+                } else if (matchingHqOv?.type === 'feint') {
+                    const cap = matchingHqOv.max_brigades ?? 3;
+                    if (finalBrigadeIds.length > cap) {
+                        finalBrigadeIds = finalBrigadeIds.slice(0, cap);
+                    }
+                }
+
                 // Filter targets to only those adjacent to at least one friendly-held OSID.
                 // Removes unreachable deep-enemy targets from operation objectives, preventing
                 // operations from launching into cells that have no adjacent RS position to attack from.
@@ -1611,6 +1644,16 @@ export function generateCorpsDirectives(
                     minAttackOutcomeForOpLaunch
                 );
                 if (op) {
+                    // Army HQ override: set operation type from override directive.
+                    if (matchingHqOv) {
+                        if (matchingHqOv.type === 'probe') {
+                            op.type = 'probe';
+                            op.planning_duration = 1;
+                        } else if (matchingHqOv.type === 'feint') {
+                            op.type = 'feint';
+                            op.planning_duration = 1;
+                        }
+                    }
                     // Same-theater follow-on: corps already has recon from previous op —
                     // skip the full intel_gathering phase (cap preparation to 1 turn).
                     if (lastCompletedOp != null) {
