@@ -313,4 +313,55 @@ The AI feature is genuinely novel — no other game does this. It could get pres
 
 ---
 
+## Anthropic Partnership Strategy
+
+### Why Not a Patent
+The AI Commander technique (LLM with historical personality as opposing commander, multi-model routing by command level) is not worth patenting:
+- **Prior art everywhere** — AI opponents in games, LLM-powered NPCs (Inworld AI, Nvidia ACE), model-tier routing all exist
+- **Software patents weak in EU** — European Patent Convention doesn't cover software "as such"; US patents cost $15-30K, take 2-3 years, hard to enforce for solo indie
+- **The moat is execution, not technique** — anyone can call Claude with a personality prompt; nobody else has 879 tests of calibrated Bosnian War simulation with 247 brigades and historical officer data
+- **Patents attract unwanted attention** — at this scale, obscurity is better protection than a patent you can't afford to litigate
+
+**Real IP protection:** Ship fast (first-mover advantage), trademark the brand ("Pyrrhic Games — your enemy thinks"), keep calibration data/OOB/personality profiles proprietary (copyright covers automatically).
+
+### Anthropic Developer Relations — When and How
+
+**When to reach out:** After v0.4.5 prototype is working. Need:
+1. A working prototype of Claude-as-Mladić making actual strategic decisions in a real game
+2. A 2-minute demo video — "watch Claude decide to abandon Srebrenica"
+3. Ideally a few hundred Steam wishlists showing there's an audience
+
+**Who to contact:**
+- **Developer Relations team**, not partnerships — they actively seek interesting use cases, run case studies, give credits, feature projects
+- **Twitter/X is the best door** — post the demo video, tag @AnthropicAI and @alexalbert (head of developer relations). A compelling public demo gets more attention than a cold email to partnerships@anthropic.com
+- Anthropic Discord developer channel for additional visibility
+
+**What to ask for (not money):**
+- **API credits** for development and early access players (~$500-1,000 covers months)
+- **A case study** — they write it, we get exposure, they get a novel showcase
+- **Technical guidance** on prompt caching and structured output for the use case
+- **Early access** to new models before public release (they do this for interesting projects)
+
+**The pitch in one sentence:**
+> "We built a historically calibrated Bosnian War simulation where Claude commands opposing armies with historically accurate personalities — the first strategy game where your enemy genuinely thinks."
+
+**Why Anthropic might care:**
+- Novel showcase: Claude reasoning as Mladić about Brčko corridor vs Sarajevo reinforcement — compelling demo of persona consistency, structured reasoning, moral complexity
+- Validates their model tiering strategy (Opus for army, Haiku for corps)
+- Wargames are a respectable AI benchmark domain (military strategy as AI testing ground since the 1950s)
+
+**Why they might hesitate:**
+- Content sensitivity: "AI roleplays as a war criminal" is a headline their policy team would think carefully about
+- API revenue is negligible: 10,000 players × $5/game = $50K/year — noise for Anthropic
+- Framing matters: position as historical simulation and educational tool, not glorification
+
+**Action items:**
+1. Build v0.4.5 (working AI Commander prototype)
+2. Record demo video (2 min, compelling gameplay moment)
+3. Post publicly on Twitter/X with tags
+4. Follow up with dev rel email if public post gets traction
+5. Apply for Anthropic Accelerate program if available
+
+---
+
 *"Another such victory and we are undone." — But at €1,500 invested, even undoing is affordable.*
