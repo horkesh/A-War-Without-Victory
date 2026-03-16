@@ -68,15 +68,29 @@ All bot decisions must be deterministic. Same GameState + same turn → same ord
 
 ## 2. Architecture
 
-### 2.1 Three-layer decision model (retained)
+### 2.1 Layered decision model
 
 ```
-Layer 0: Army Standing Orders     (time-phased, per faction)
+Layer G: Army HQ Gathering        (deliberative, multi-turn scope — v0.4.7)
+Layer 0: Army Standing Orders     (time-phased, per faction — fallback/initial defaults)
 Layer 1: Corps AI                 (stance, named operations, OGs)
 Layer 2: Brigade AI               (OSID-native posture, attack, movement)
 ```
 
 Each layer runs in pipeline order. Higher layers constrain lower layers. Corps stance flows down to modulate brigade behavior. Army stance flows down to constrain corps stance.
+
+#### Layer G: Army HQ Gathering (v0.4.7)
+
+Periodic deliberative meetings producing a `CampaignPlan` with multi-turn scope. Runs every 8–14 turns (faction-specific) plus emergency sessions. Outputs:
+- **Front priorities** (primary/secondary/economy/contain) — drives corps stance baselines and target selection
+- **Doctrine override** — adaptive army stance + aggression, replaces calendar-driven `FACTION_DOCTRINE_PHASES` after first gathering
+- **Synchronized operations** — multi-corps launch windows with `waiting_for_sync` preparation state
+
+Layer G sets the strategic context that constrains all lower layers. When no gathering has fired (turn 0 to first gathering), Layer 0 defaults apply.
+
+#### Layer 0: Army Standing Orders
+
+Serves as **fallback/initial defaults** before the first Layer G gathering fires, and as the sole strategic layer for player-controlled factions (which do not use the gathering system). Provides time-phased army stance and doctrine baselines per faction.
 
 ### 2.2 OSID-native operation
 
@@ -110,10 +124,11 @@ Turn Pipeline:
   3. zoc-computation                    → context.operationalData
   4. zoc-constrained-movement
   5. derive-osid-front-segments
-  6. generate-bot-corps-orders          → Layer 1 (unchanged)
-  7. generate-bot-brigade-orders-osid   → Layer 2 (NEW: this spec)
-  8. apply-brigade-posture              → applies posture from Layer 2
-  9. phase-ii-resolve-attack-orders     → resolves attacks from Layer 2
+  6. evaluate-army-hq-gathering          → Layer G (v0.4.7: campaign plan)
+  7. generate-bot-corps-orders          → Layer 1 (unchanged)
+  8. generate-bot-brigade-orders-osid   → Layer 2 (NEW: this spec)
+  9. apply-brigade-posture              → applies posture from Layer 2
+ 10. phase-ii-resolve-attack-orders     → resolves attacks from Layer 2
 ```
 
 **Key change:** Step 7 now runs the OSID-native brigade AI directly. The legacy `generateBotBrigadeOrders` is no longer called when OSID context is active. Posture, attack, and movement orders are all produced by the new OSID-native code.
@@ -214,6 +229,8 @@ The VRS (Vojska Republike Srpske) inherited the bulk of the JNA's heavy equipmen
 | **Consolidation** | 26–52 | `balanced` | Fortify gains. Dig in on all fronts. Only attack to improve tactical positions or close gaps. Begin manpower conservation. |
 | **Strategic Hold** | 52–104 | `general_defensive` | Manpower crisis biting. Pure defense except for local counterattacks. Trade exhaustion for territory only when forced. |
 | **Endgame** | 104+ | `general_defensive` | Hold for political settlement. Accept stalemate. Fight only to prevent catastrophic loss. |
+
+> **v0.4.7 note:** After the first Army HQ Gathering fires, the `DoctrineOverride` from Layer G replaces these calendar-driven phase values. The table above serves as initial defaults only. The gathering's adaptive doctrine adjusts army stance and aggression based on current battlefield conditions rather than a fixed weekly schedule.
 
 ### 4.3 Corps-level behavior
 
