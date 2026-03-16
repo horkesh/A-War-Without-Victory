@@ -3,6 +3,24 @@
 **Last Updated:** 2026-03-16
 **Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **927 tests**, 80 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
 
+## [2026-03-16] n824: Army HQ Override Activation — corps_asset Fix + Organic Sarajevo Stance
+
+**Three fixes activating the dormant army HQ override system:**
+
+1. **`corps_asset` kind bug**: `generateArmyHQOverrides` filtered for `f.kind === 'corps'` but corps formations use `kind: 'corps_asset'`. Zero overrides ever generated — entire Phase B was dead code. One-character fix.
+
+2. **Organic Sarajevo stance**: E2 personality override unconditionally forced ARBiH 1st Corps to `defensive` — replaced with bias that respects army HQ directives. When army HQ issues a probe override, 1st Corps goes `balanced` for probing. Otherwise stays defensive (besieged garrison). Emergence over hardcoding.
+
+3. **Sarajevo Probing priority**: New `Sarajevo Probing` priority (weight 60, w15-56) targeting RS-held suburbs (Ilidža, Hadžići, Vogošća, Ilijaš). Enables army HQ probe generation for idle 1st Corps.
+
+**Results (n824):** 89.4% area-weighted (+0.4pp from n819). **Drina 80.4%** (+2.7pp — biggest single-change Drina improvement). **6/6 benchmarks**, 13/13 anchors. 135 orders (RS 97 +5). Hash `0ecdd419df84b491`.
+
+**Life lesson**: When filtering formations by kind, always check actual values in save files. `'corps'` vs `'corps_asset'` is a silent failure — zero results, no error.
+
+**Files:** `src/sim/combat/army_hq_overrides.ts` (kind fix), `src/sim/combat/bot_corps_stance.ts` (E2 organic), `src/sim/combat/bot_strategy.ts` (Sarajevo Probing priority).
+
+---
+
 ## [2026-03-16] Orchestrator Planning Session — v0.5.x + v0.6.x Scoped (10 Milestones)
 
 **Produced:**

@@ -57,6 +57,12 @@
 - **Right approach**: After adding any identity-routing mechanism (loan, detachment, operational control), grep ALL references to the original identity field (`corps_id`, `faction`, etc.). Each reference is a potential bypass. A routing system that only works in one consumer is worse than none — it creates the illusion of correctness.
 - **Do instead**: When adding virtual identity (loaned corps, temporary faction, etc.), search for ALL references to the real identity field. Test by tracing: "if I follow this entity through every pipeline step, does it use the virtual identity consistently?" The `bot_brigade_ai_osid.ts` corps lookup was the fifth bug found — invisible from the other four layers.
 
+### [Debugging] Formation kind values: always verify against save files (2026-03-16) — NEW
+- **Evidence**: `generateArmyHQOverrides` filtered for `f.kind === 'corps'` but corps formations use `kind: 'corps_asset'`. The function returned empty arrays for every faction on every turn — the entire Phase B army HQ override system was dead code. No error, no warning, just silent zero results.
+- **Root cause**: The kind value was assumed from the type name, not verified against actual data. Other files in the codebase already used `f.kind === 'corps' || f.kind === 'corps_asset'`.
+- **Rule**: When writing code that filters formations by `kind`, check the save file for actual values. Never assume `'corps'` — check for `'corps_asset'`, `'army_hq'`, `'brigade'`, `'paramilitary'` etc. The type system doesn't catch string literal mismatches against runtime data.
+- **Related**: Save field name lesson (2026-03-12) — `corps_id` not `corps`, `location_osid` not `current_osid`.
+
 ### [Debugging] Paper-transfer systems need end-to-end smoke tests (2026-03-15) — NEW
 - **Context**: The elite loan system set `on_loan=true`, updated tracker episodes, generated requests, deployed brigades — all correctly. But elites never fought. Five bugs across four files prevented combat. The "system works" appearance (correct flags, tracker entries, UI) masked total behavioral failure for 40 weeks.
 - **Wrong approach**: Trusting that correct state means correct behavior. The loan state was perfect; the behavior was zero.

@@ -1,7 +1,7 @@
 # Commander Override Layer — Design Plan
 
 **Date:** 2026-03-15
-**Status:** IMPLEMENTED (v0.4.6, 2026-03-16) — Phase A (4 criteria + supply-aware sizing) and Phase B (army HQ overrides + probes/feints) both complete. Army HQ overrides dormant pending priority weight tuning.
+**Status:** IMPLEMENTED AND ACTIVE (v0.4.6, n824). Phase A (4 criteria + supply-aware sizing) and Phase B (army HQ overrides + probes/feints) both complete and verified active. n824 fixed corps_asset kind bug that kept Phase B dormant.
 **Depends on:** Budget-based brigade allocation (n806, implemented)
 **Addresses:** REAL_WAR_MASTER #42 (strategic targeting), #44 (ARBiH probing), 2KK Prozor drift, SRK sector :4 over-allocation
 

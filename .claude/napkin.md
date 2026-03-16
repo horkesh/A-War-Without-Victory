@@ -8,8 +8,8 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-16, end of planning session)
-**v0.4.6 (Commander Override Layer).** 927 tests, 80 suites. tsc clean.
+## Current State (2026-03-16, n824 calibration)
+**v0.4.6 (Commander Override Layer).** 927 tests, 80 suites. tsc clean. **Latest calibration: n824 = 89.4% area-weighted, 6/6 benchmarks, 13/13 anchors. Drina 80.4%.**
 **v0.5.x + v0.6.x FULLY PLANNED:** 10 milestones scoped, 3 cross-plan reviews, all Pyrrhic compliant.
 **Night shift handoff ready:** v0.5.0→v0.5.4 (5 milestones). v0.6.x handoff separate (v0.6.1 Phase 2 day-shift only).
 **External:** Ops planning modal (outside expert). Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
@@ -72,15 +72,15 @@
 
 ## Known Backlog
 1. **[2026-03-16] Salient retreat — no proactive withdrawal (P2)**: Prevention works (`computeSalientRisk` blocks new captures at 0.75). But NO proactive evacuation from existing salients. Brigades surrounded on 3+ sides defend until destroyed. Need: periodic position-viability audit in brigade AI pipeline → column march to nearest safe OSID when salient-risk > 0.75 AND supply critical.
-2. **[2026-03-16] ARBiH 1st Corps probing — Sarajevo passive (P2)**: Offensive priorities all start w56+. No early-war probing. 1st Corps sits defensive while SRK has exploitable thin sectors. Need: threat-aware stance switching or probe priorities for w15+.
+2. **[2026-03-16] ARBiH 1st Corps probing — RESOLVED (n824)**: Sarajevo Probing priority (weight 60, w15-56) + organic E2 stance (army-HQ-aware bias) + `corps_asset` kind fix activated army HQ overrides. 1st Corps now probes RS suburbs when army HQ directs.
 3. **[2026-03-16] 2KK Prozor positional lock — PARTIALLY ADDRESSED (P2)**: Commander override mission compliance pulls toward Bihac. 3 Prozor OSIDs still mismatched at n820. Residual positional inertia needs weight tuning or explicit recall.
 4. **[2026-03-10] Donji Vakuf pocket remnant (P3)**: 2 OSIDs still RBiH (was 5). Improved but not fully resolved. Municipality priority tuning for 2KK.
-5. **[2026-03-16] Army HQ override weight tuning (P1)**: Phase B infrastructure wired but dormant — actual priority weights (50-100 range) need checking against thresholds (50/80). Tune to activate probes and forced operations.
+5. **[2026-03-16] Army HQ override weight tuning — RESOLVED (n824)**: `corps_asset` kind fix activated Phase B. Weights already correct (50/80 thresholds vs 20-150 actual). 135 orders generated (RS 97, RBiH 27, HRHB 11).
 6. **[2026-03-16] Density ratio design (P3)**: `ensureMinimumSectorCoverage` still uses absolute density, not ratio-based. Low priority — commander override defensive coherence partially compensates.
 7. **[2026-03-12] HVO Central Bosnia ghost front — DEFERRED**: 13 front edges, 0 brigades. Intentionally deferred — HVO-RBiH war activates April 1993.
 8. **[2026-03-11] Ops planning modal arrows — PARKED (EXTERNAL)**: Outside expert redesigning.
 9. **[2026-03-15] Visual assets — EXTERNAL**: User generating via Gemini Pro. Strategy: `docs/30_planning/design/VISUAL_ASSET_STRATEGY.md`.
-10. **[2026-03-15] Drina region 77.7% (P2)**: Partially fixed (Rogatica/Višegrad added, n819 commander override helps). Remaining gap is structural — RBiH holds too many Drina OSIDs. May need OOB or painted target adjustments.
+10. **[2026-03-16] Drina region 80.4% (P2)**: Improved +2.7pp from n819 (was 77.7%). Army HQ override activation was biggest single Drina improvement. Remaining gap may need OOB or painted target adjustments.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
