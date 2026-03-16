@@ -9,7 +9,7 @@ import { isOsidInSameEnclave } from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis } = ctx;
+    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments } = ctx;
 
     // --- Sector march: brigade assigned/reserve in a sector but not on its front → column march ---
     // This overrides home defense: the corps needs this brigade at the front.
@@ -66,8 +66,15 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 // while other front OSIDs in the same sector are under-covered.
                 // This prevents brigades from piling into a corner front OSID (e.g. a single RS
                 // pocket embedded in enemy territory) while the main sector front goes undefended.
-                const corpsCountHere = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc);
-                if (corpsCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
+                //
+                // CRITICAL: Use columnAssignments to track planned departures/arrivals THIS turn.
+                // Without this, all stacked brigades see the same static count and all pick the
+                // same destination — causing perpetual ping-pong oscillation.
+                const plannedDepartures = columnAssignments.get(loc as Osid) ?? 0;
+                // Negative values in columnAssignments = planned departures from this OSID
+                const effectiveCountHere = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc)
+                    + Math.min(0, plannedDepartures); // departures reduce count
+                if (effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
                     // Find least-covered other sector front OSID (prefer undefended, then lightly defended)
                     // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
                     // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
@@ -77,22 +84,31 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         .filter(o => o !== loc)
                         .filter(o => !isEnclaveBrigade || isOsidInSameEnclave(loc as string, o))
                         .sort((a, b) => {
-                            const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a);
-                            const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b);
+                            const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a)
+                                + (columnAssignments.get(a as Osid) ?? 0);
+                            const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b)
+                                + (columnAssignments.get(b as Osid) ?? 0);
                             return ca - cb || strictCompare(a, b);
                         });
                     for (const candidate of otherFronts) {
+                        // Check: would this destination be overstacked after planned arrivals?
+                        const plannedAtDest = columnAssignments.get(candidate as Osid) ?? 0;
+                        const destCount = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, candidate)
+                            + Math.max(0, plannedAtDest); // arrivals increase count
+                        if (destCount >= MAX_CORPS_BRIGADES_PER_OSID) continue; // already full
+
                         const dest = findNearestFriendlyOsidDestination(
                             state, faction, loc, adjacency, reverseMap, new Set([candidate])
                         );
                         // No isMovementDestinationRisky check here — the brigade is being
                         // ordered to a FRONT OSID in its own sector. Front OSIDs are inherently
                         // "risky" (adjacent to enemy) but that's where defenders must be.
-                        // The risky check was preventing all overstacking redistribution because
-                        // front OSIDs have 3+ enemy neighbors by definition.
                         if (dest) {
                             result.column_march_orders[brigade.id] = dest;
                             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                            // Track this movement so next brigade sees updated counts
+                            columnAssignments.set(loc as Osid, (columnAssignments.get(loc as Osid) ?? 0) - 1);
+                            columnAssignments.set(dest, (columnAssignments.get(dest) ?? 0) + 1);
                             return true;
                         }
                     }
@@ -267,8 +283,10 @@ export function evaluateFrontCoverage(ctx: BrigadeEvaluationContext): boolean {
                 return true;
             }
         }
-        // Corps-level rebalancing
-        const corpsCount = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc);
+        // Corps-level rebalancing (use columnAssignments to avoid oscillation)
+        const plannedHere = columnAssignments.get(loc as Osid) ?? 0;
+        const corpsCount = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc)
+            + Math.min(0, plannedHere);
         if (corpsCount > MAX_CORPS_BRIGADES_PER_OSID) {
             issueInteriorMovement(brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, result,
                 ['undefended', 'critical', 'threatened'], columnAssignments);
