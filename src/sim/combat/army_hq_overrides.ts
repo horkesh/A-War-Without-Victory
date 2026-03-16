@@ -72,7 +72,7 @@ export function generateArmyHQOverrides(
             // Derive from municipalities if no direct targets
             if (targetOsids.length === 0 && p.target_municipalities.length > 0) {
                 const targetMuns = new Set(p.target_municipalities);
-                for (const [osid, controller] of Object.entries(pc)) {
+                for (const [osid, controller] of Object.entries(pc).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)) {
                     if (controller === faction) continue;
                     const mun = munFromOsid(osid);
                     if (mun && targetMuns.has(mun)) {

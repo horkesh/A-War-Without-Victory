@@ -90,6 +90,12 @@ export function classifyBrigadesByTerritory(
         }
     }
 
+    // Pre-compute sector components (avoids repeated getSectorComponent calls in Phase 1 filter)
+    const sectorComponentCache = new Map<string, number>();
+    for (const s of sectors) {
+        sectorComponentCache.set(s.sector_id, getSectorComponent(s, componentOf));
+    }
+
     // ── Phase 1: Assign frontline brigades by position ──────────────────
     const frontOsidToSectorIndices = new Map<string, number[]>();
     for (let i = 0; i < sectors.length; i++) {
@@ -136,7 +142,7 @@ export function classifyBrigadesByTerritory(
             const corpsIndices = frontIndices.filter(idx => {
                 const s = sectors[idx]!;
                 return s.corps_id === effectiveCorpsId
-                    && getSectorComponent(s, componentOf) === brigComp;
+                    && (sectorComponentCache.get(s.sector_id) ?? -1) === brigComp;
             });
             if (corpsIndices.length === 1) {
                 sectors[corpsIndices[0]!]!.assigned_brigade_ids.push(fid);
