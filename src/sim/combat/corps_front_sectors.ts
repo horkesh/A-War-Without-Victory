@@ -45,6 +45,7 @@ import {
 } from './corps_front_sectors_constants.js';
 import { getCorpsCommander } from './officer_system.js';
 import type { ArmyOperationPriority } from './bot_strategy.js';
+import { getCorpsArmyPriorities } from './bot_strategy.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Entry Point
@@ -234,6 +235,22 @@ function buildFactionSectors(
     // Front → assigned, 1-hop → reserve (cap 1), deeper → stays assigned (marches forward).
     // GOLDEN RULE: no brigade is ever dropped from its sector.
     reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
+
+    // Step 8a: Commander reviews mechanical assignment and issues overrides.
+    // Competent corps commanders redistribute brigades to match strategic intent:
+    // mission compliance, defensive coherence, non-priority excess, offensive staging.
+    {
+        const uniqueCorps = [...new Set(sectors.map(s => s.corps_id))].sort();
+        for (const cid of uniqueCorps) {
+            const profile = commanderProfiles.get(cid);
+            if (!profile) continue;
+            const priorities = getCorpsArmyPriorities(faction, cid, state.meta.turn);
+            commanderReviewAssignment(
+                cid, sectors, formations, priorities, profile,
+                adjacency, componentOf,
+            );
+        }
+    }
 
     // Step 8b: Deduplicate — steps 6b/7/8 can produce cross-sector duplicates
     // when shared front OSIDs or coverage transfers create overlapping claims.
