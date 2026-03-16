@@ -36,7 +36,7 @@ export function generateArmyHQOverrides(
     // Find all corps for this faction
     const factionCorps: string[] = [];
     for (const [id, f] of Object.entries(formations)) {
-        if (f.faction === faction && f.kind === 'corps' && f.status === 'active') {
+        if (f.faction === faction && (f.kind === 'corps' || f.kind === 'corps_asset') && f.status === 'active') {
             factionCorps.push(id);
         }
     }

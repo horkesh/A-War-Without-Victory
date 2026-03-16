@@ -111,10 +111,20 @@ export function generateCorpsStanceOrders(
                 if (stance === 'reorganize') stance = 'balanced'; // Maintain siege pressure
             }
         } else if (faction === 'RBiH') {
-            // E2: RBiH Sarajevo corps: always defensive
+            // E2: RBiH Sarajevo corps: strong defensive bias, but can go balanced
+            // when army HQ issues probe override (historically ARBiH probed SRK lines).
+            // Organic: stance emerges from threat ratio + army directive, not hardcoded.
             const SARAJEVO_MUNS = new Set(['centar_sarajevo', 'novi_grad_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo']);
             if (corpsHomeMun && SARAJEVO_MUNS.has(corpsHomeMun)) {
-                stance = 'defensive';
+                const hasHqOverride = (state.military.army_hq_overrides ?? [])
+                    .some(o => o.corps_id === corps.id);
+                if (hasHqOverride) {
+                    // Army HQ directive exists: allow balanced for probing
+                    if (stance === 'offensive') stance = 'balanced';
+                } else {
+                    // No army directive: default defensive (besieged garrison)
+                    if (stance !== 'reorganize') stance = 'defensive';
+                }
             }
             // E2: RBiH survival mode weeks 0-12: no offensive
             if (turn < 12 && stance === 'offensive') {
