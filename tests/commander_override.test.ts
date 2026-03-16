@@ -86,7 +86,7 @@ describe('commanderReviewAssignment', () => {
 
         const overrides = commanderReviewAssignment(
             'vrs_1k', sectors, formations, emptyPriorities,
-            profile, emptyComp,
+            profile, emptyComp, new Map(), new Set(),
         );
 
         expect(overrides).toEqual([]);
@@ -104,7 +104,7 @@ describe('commanderReviewAssignment', () => {
 
         const overrides = commanderReviewAssignment(
             'vrs_1k', sectors, formations, emptyPriorities,
-            profile, emptyComp,
+            profile, emptyComp, new Map(), new Set(),
         );
 
         expect(overrides).toEqual([]);
@@ -123,7 +123,7 @@ describe('commanderReviewAssignment', () => {
 
         const overrides = commanderReviewAssignment(
             'vrs_1k', sectors, formations, emptyPriorities,
-            profile, emptyComp,
+            profile, emptyComp, new Map(), new Set(),
         );
 
         // Stubs produce no overrides, but function should execute without error
@@ -148,7 +148,7 @@ describe('commanderReviewAssignment', () => {
             const componentOf = new Map<string, number>();
             const result = commanderReviewAssignment(
                 'vrs_srk', sectors, formations, [], profile,
-                componentOf,
+                componentOf, new Map(), new Set(),
             );
             expect(result.length).toBeGreaterThanOrEqual(1);
             expect(result[0].reason).toBe('defensive_critical');
@@ -172,7 +172,7 @@ describe('commanderReviewAssignment', () => {
             const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
                 'vrs_srk', sectors, formations, [], profile,
-                new Map(),
+                new Map(), new Map(), new Set(),
             );
             // No transfer — s2 can't go below 1
             expect(result.length).toBe(0);
@@ -194,7 +194,7 @@ describe('commanderReviewAssignment', () => {
             const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
                 'vrs_srk', sectors, formations, [], profile,
-                new Map(),
+                new Map(), new Map(), new Set(),
             );
             expect(result.length).toBe(0);
         });
@@ -222,7 +222,7 @@ describe('commanderReviewAssignment', () => {
             }];
             const profile = { competence: 0.6, aggressiveness: 0.6, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
-                'vrs_2kk', sectors, formations, priorities, profile, new Map(),
+                'vrs_2kk', sectors, formations, priorities, profile, new Map(), new Map(), new Set(),
             );
             expect(result.some(o => o.to_sector_id === 's1' && o.reason === 'mission_priority')).toBe(true);
             expect(sectors[0].assigned_brigade_ids.length).toBeGreaterThan(1);
@@ -240,7 +240,7 @@ describe('commanderReviewAssignment', () => {
             };
             const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
-                'vrs_2kk', sectors, formations, [], profile, new Map(),
+                'vrs_2kk', sectors, formations, [], profile, new Map(), new Map(), new Set(),
             );
             expect(result.filter(o => o.reason === 'mission_priority').length).toBe(0);
         });
@@ -268,7 +268,7 @@ describe('commanderReviewAssignment', () => {
             }];
             const profile = { competence: 0.5, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
-                'vrs_2kk', sectors, formations, priorities, profile, new Map(),
+                'vrs_2kk', sectors, formations, priorities, profile, new Map(), new Map(), new Set(),
             );
             expect(result.some(o => o.from_sector_id === 's2' && o.reason === 'non_priority_excess')).toBe(true);
         });
@@ -291,7 +291,7 @@ describe('commanderReviewAssignment', () => {
                 preStagingSectorWeights: new Map([['s1', 3.0]]),
             };
             const result = commanderReviewAssignment(
-                'vrs_drina', sectors, formations, [], profile, new Map(),
+                'vrs_drina', sectors, formations, [], profile, new Map(), new Map(), new Set(),
             );
             expect(result.some(o => o.to_sector_id === 's1' && o.reason === 'offensive_staging')).toBe(true);
         });
@@ -311,10 +311,171 @@ describe('commanderReviewAssignment', () => {
                 preStagingSectorWeights: new Map([['s1', 3.0]]),
             };
             const result = commanderReviewAssignment(
-                'vrs_drina', sectors, formations, [], profile, new Map(),
+                'vrs_drina', sectors, formations, [], profile, new Map(), new Map(), new Set(),
             );
             // Should NOT pull from s2 (threat 3.0 >= DEFENSIVE_CRITICAL_THREAT)
             expect(result.filter(o => o.from_sector_id === 's2').length).toBe(0);
+        });
+    });
+
+    describe('position viability', () => {
+        function makeViabilityContext(
+            friendlyList: string[],
+            adjacencyPairs: [string, string][],
+        ): { adjacency: Map<string, string[]>; friendlyOsids: Set<string> } {
+            const friendlyOsids = new Set(friendlyList);
+            const adjacency = new Map<string, string[]>();
+            for (const [a, b] of adjacencyPairs) {
+                if (!adjacency.has(a)) adjacency.set(a, []);
+                if (!adjacency.has(b)) adjacency.set(b, []);
+                adjacency.get(a)!.push(b);
+                adjacency.get(b)!.push(a);
+            }
+            return { adjacency, friendlyOsids };
+        }
+
+        it('withdraws encircled brigade (0 friendly neighbors)', () => {
+            const sectors = [
+                makeSector('s1', 'vrs_drina', ['b1'], 4, 1.0),
+                makeSector('s2', 'vrs_drina', ['b2'], 4, 0.5),
+            ];
+            sectors[1].territory_osids = ['op:bijeljina:safe'];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'op:srebrenik:tinja', 'vrs_drina', 800),
+                b2: makeFormation('b2', 'op:bijeljina:safe', 'vrs_drina', 800),
+            };
+            const { adjacency, friendlyOsids } = makeViabilityContext(
+                ['op:bijeljina:safe', 'op:bijeljina:n1', 'op:bijeljina:n2'],
+                [
+                    ['op:srebrenik:tinja', 'op:enemy:e1'],
+                    ['op:srebrenik:tinja', 'op:enemy:e2'],
+                    ['op:srebrenik:tinja', 'op:enemy:e3'],
+                    ['op:bijeljina:safe', 'op:bijeljina:n1'],
+                    ['op:bijeljina:safe', 'op:bijeljina:n2'],
+                ],
+            );
+            const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
+            const result = commanderReviewAssignment(
+                'vrs_drina', sectors, formations, [], profile,
+                new Map(), adjacency, friendlyOsids,
+            );
+            expect(result.some(o => o.brigade_id === 'b1' && o.reason === 'position_viability')).toBe(true);
+        });
+
+        it('withdraws brigade with 1 friendly neighbor (balanced commander)', () => {
+            const sectors = [
+                makeSector('s1', 'vrs_drina', ['b1'], 4, 1.0),
+                makeSector('s2', 'vrs_drina', ['b2'], 4, 0.5),
+            ];
+            sectors[1].territory_osids = ['op:test:safe'];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'op:test:exposed', 'vrs_drina', 800),
+                b2: makeFormation('b2', 'op:test:safe', 'vrs_drina', 800),
+            };
+            const { adjacency, friendlyOsids } = makeViabilityContext(
+                ['op:test:exposed', 'op:test:safe', 'op:test:n1', 'op:test:n2'],
+                [
+                    ['op:test:exposed', 'op:test:safe'],
+                    ['op:test:exposed', 'op:enemy:e1'],
+                    ['op:test:exposed', 'op:enemy:e2'],
+                    ['op:test:safe', 'op:test:n1'],
+                    ['op:test:safe', 'op:test:n2'],
+                ],
+            );
+            const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
+            const result = commanderReviewAssignment(
+                'vrs_drina', sectors, formations, [], profile,
+                new Map(), adjacency, friendlyOsids,
+            );
+            expect(result.some(o => o.brigade_id === 'b1' && o.reason === 'position_viability')).toBe(true);
+        });
+
+        it('aggressive commander only withdraws at 0 neighbors', () => {
+            const sectors = [
+                makeSector('s1', 'vrs_drina', ['b1'], 4, 1.0),
+                makeSector('s2', 'vrs_drina', ['b2'], 4, 0.5),
+            ];
+            sectors[1].territory_osids = ['op:test:safe'];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'op:test:exposed', 'vrs_drina', 800),
+                b2: makeFormation('b2', 'op:test:safe', 'vrs_drina', 800),
+            };
+            const { adjacency, friendlyOsids } = makeViabilityContext(
+                ['op:test:exposed', 'op:test:safe', 'op:test:n1'],
+                [
+                    ['op:test:exposed', 'op:test:safe'],
+                    ['op:test:exposed', 'op:enemy:e1'],
+                    ['op:test:safe', 'op:test:n1'],
+                ],
+            );
+            const profile = { competence: 0.6, aggressiveness: 0.8, preStagingSectorWeights: new Map() };
+            const result = commanderReviewAssignment(
+                'vrs_drina', sectors, formations, [], profile,
+                new Map(), adjacency, friendlyOsids,
+            );
+            expect(result.filter(o => o.reason === 'position_viability').length).toBe(0);
+        });
+
+        it('does not withdraw from mission-critical position', () => {
+            const sectors = [
+                makeSector('s1', 'vrs_drina', ['b1'], 4, 1.0),
+                makeSector('s2', 'vrs_drina', ['b2'], 4, 0.5),
+            ];
+            sectors[1].territory_osids = ['op:test:safe'];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'op:srebrenica:srebrenica_2', 'vrs_drina', 800),
+                b2: makeFormation('b2', 'op:test:safe', 'vrs_drina', 800),
+            };
+            const { adjacency, friendlyOsids } = makeViabilityContext(
+                ['op:srebrenica:srebrenica_2', 'op:test:safe'],
+                [
+                    ['op:srebrenica:srebrenica_2', 'op:enemy:e1'],
+                    ['op:srebrenica:srebrenica_2', 'op:enemy:e2'],
+                    ['op:test:safe', 'op:test:n1'],
+                ],
+            );
+            const priorities = [{
+                name: 'Hold Srebrenica', corps_id: 'vrs_drina',
+                target_municipalities: [], hold_municipalities: ['srebrenica'],
+                start_week: 0, end_week: 52, weight: 100,
+                min_outcome: 'stalemate' as const,
+            }];
+            const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
+            const result = commanderReviewAssignment(
+                'vrs_drina', sectors, formations, priorities, profile,
+                new Map(), adjacency, friendlyOsids,
+            );
+            expect(result.filter(o => o.reason === 'position_viability').length).toBe(0);
+        });
+
+        it('caps withdrawals at 2 per corps', () => {
+            const sectors = [
+                makeSector('s1', 'vrs_drina', ['b1', 'b2', 'b3'], 6, 1.0),
+                makeSector('s2', 'vrs_drina', ['b4'], 4, 0.5),
+            ];
+            sectors[1].territory_osids = ['op:test:safe'];
+            const formations: Record<string, any> = {
+                b1: makeFormation('b1', 'op:test:exp1', 'vrs_drina', 800),
+                b2: makeFormation('b2', 'op:test:exp2', 'vrs_drina', 700),
+                b3: makeFormation('b3', 'op:test:exp3', 'vrs_drina', 600),
+                b4: makeFormation('b4', 'op:test:safe', 'vrs_drina', 800),
+            };
+            const { adjacency, friendlyOsids } = makeViabilityContext(
+                ['op:test:exp1', 'op:test:exp2', 'op:test:exp3', 'op:test:safe', 'op:test:n1', 'op:test:n2'],
+                [
+                    ['op:test:exp1', 'op:enemy:e1'],
+                    ['op:test:exp2', 'op:enemy:e2'],
+                    ['op:test:exp3', 'op:enemy:e3'],
+                    ['op:test:safe', 'op:test:n1'],
+                    ['op:test:safe', 'op:test:n2'],
+                ],
+            );
+            const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
+            const result = commanderReviewAssignment(
+                'vrs_drina', sectors, formations, [], profile,
+                new Map(), adjacency, friendlyOsids,
+            );
+            expect(result.filter(o => o.reason === 'position_viability').length).toBeLessThanOrEqual(2);
         });
     });
 });

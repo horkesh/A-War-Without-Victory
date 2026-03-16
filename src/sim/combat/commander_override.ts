@@ -32,11 +32,12 @@ export interface CommanderOverride {
     brigade_id: string;
     from_sector_id: string;
     to_sector_id: string;
-    reason: 'mission_priority' | 'non_priority_excess' | 'offensive_staging' | 'defensive_critical';
+    reason: 'mission_priority' | 'non_priority_excess' | 'offensive_staging' | 'defensive_critical' | 'position_viability';
 }
 
 const DEFENSIVE_CRITICAL_THREAT = 2.0;
 const MIN_DONOR_BRIGADES = 1;
+const MAX_VIABILITY_WITHDRAWALS_PER_CORPS = 2;
 
 /**
  * Build a CorpsCommanderProfile for each corps that has sectors.
@@ -164,6 +165,8 @@ export function commanderReviewAssignment(
     armyPriorities: ArmyOperationPriority[],
     commanderProfile: CorpsCommanderProfile,
     componentOf: Map<string, number>,
+    adjacency: Map<string, string[]>,
+    friendlyOsids: Set<string>,
 ): CommanderOverride[] {
     if (commanderProfile.competence < COMMANDER_COMPETENCE_OVERRIDE_THRESHOLD) {
         return [];
@@ -184,6 +187,7 @@ export function commanderReviewAssignment(
     applyNonPriorityExcess(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
     applyOffensiveStaging(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
     applyDefensiveCoherence(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
+    applyPositionViability(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
 
     // Execute overrides: splice from source sector, push to target sector
     for (const ov of overrides) {
@@ -417,4 +421,103 @@ function applyDefensiveCoherence(
     if (deficitSectors.length === 0 || surplusSectors.length === 0) return;
 
     transferBrigadesBetweenSectors(deficitSectors, surplusSectors, formations, overrides, overriddenBrigadeIds, 'defensive_critical', componentOf);
+}
+
+/**
+ * Pull exposed brigades from untenable positions to safer sectors.
+ * Exposed = friendly neighbors <= threshold (personality-dependent).
+ * Mission-critical positions (hold/target municipalities) are exempt.
+ * Cap: MAX_VIABILITY_WITHDRAWALS_PER_CORPS per turn to prevent cascade.
+ */
+function applyPositionViability(
+    corpsSectors: CorpsFrontSector[],
+    formations: Record<string, FormationState>,
+    armyPriorities: ArmyOperationPriority[],
+    commanderProfile: CorpsCommanderProfile,
+    overrides: CommanderOverride[],
+    overriddenBrigadeIds: Set<string>,
+    _componentOf: Map<string, number>,
+    adjacency: Map<string, string[]>,
+    friendlyOsids: Set<string>,
+): void {
+    // Aggressive commanders (>=0.6) only withdraw when fully encircled (0 friendly neighbors)
+    // Balanced/defensive withdraw when nearly encircled (<=1 friendly neighbor)
+    const withdrawThreshold = commanderProfile.aggressiveness >= 0.6 ? 0 : 1;
+
+    // Build mission-critical municipality set from army priorities
+    const missionMunicipalities = new Set<string>();
+    for (const p of armyPriorities) {
+        for (const m of p.target_municipalities) missionMunicipalities.add(m);
+        if (p.hold_municipalities) {
+            for (const m of p.hold_municipalities) missionMunicipalities.add(m);
+        }
+    }
+
+    // Find exposed brigades across all corps sectors
+    const exposedBrigades: Array<{
+        brigadeId: string;
+        sectorId: string;
+        friendlyNeighborCount: number;
+        personnel: number;
+    }> = [];
+
+    for (const sector of corpsSectors) {
+        for (const bid of sector.assigned_brigade_ids) {
+            if (overriddenBrigadeIds.has(bid)) continue;
+            const f = formations[bid];
+            if (!f?.location_osid) continue;
+
+            // Count friendly neighbors
+            const neighbors = adjacency.get(f.location_osid) ?? [];
+            let friendlyCount = 0;
+            for (const n of neighbors) {
+                if (friendlyOsids.has(n)) friendlyCount++;
+            }
+
+            if (friendlyCount > withdrawThreshold) continue;
+
+            // Check if position is mission-critical
+            const mun = munFromOsid(f.location_osid);
+            if (mun && missionMunicipalities.has(mun)) continue;
+
+            exposedBrigades.push({
+                brigadeId: bid,
+                sectorId: sector.sector_id,
+                friendlyNeighborCount: friendlyCount,
+                personnel: f.personnel ?? 0,
+            });
+        }
+    }
+
+    if (exposedBrigades.length === 0) return;
+
+    // Sort: most exposed first (0 before 1), then weakest first
+    exposedBrigades.sort((a, b) =>
+        a.friendlyNeighborCount - b.friendlyNeighborCount
+        || a.personnel - b.personnel
+        || strictCompare(a.brigadeId, b.brigadeId)
+    );
+
+    // Find safest sector (lowest threat, has territory)
+    const safestSector = [...corpsSectors]
+        .filter(s => s.territory_osids.length > 0)
+        .sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id))[0];
+
+    if (!safestSector) return;
+
+    // Issue withdrawal overrides (capped)
+    let withdrawCount = 0;
+    for (const exposed of exposedBrigades) {
+        if (withdrawCount >= MAX_VIABILITY_WITHDRAWALS_PER_CORPS) break;
+        if (exposed.sectorId === safestSector.sector_id) continue;
+
+        overrides.push({
+            brigade_id: exposed.brigadeId,
+            from_sector_id: exposed.sectorId,
+            to_sector_id: safestSector.sector_id,
+            reason: 'position_viability',
+        });
+        overriddenBrigadeIds.add(exposed.brigadeId);
+        withdrawCount++;
+    }
 }

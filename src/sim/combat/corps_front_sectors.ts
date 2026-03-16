@@ -220,7 +220,7 @@ function buildFactionSectors(
             const priorities = getCorpsArmyPriorities(faction, cid, state.meta.turn);
             commanderReviewAssignment(
                 cid, sectors, formations, priorities, profile,
-                componentOf,
+                componentOf, adjacency, friendlyOsids,
             );
         }
     }
