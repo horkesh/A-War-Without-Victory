@@ -269,3 +269,104 @@ describe('findSubSegmentForOsid', () => {
         expect(findSubSegmentForOsid(sector, 'unknown')).toBeUndefined();
     });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase B: combat integration — sub-segment defense flows through combat
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Phase B: sub-segment combat defense integration', () => {
+    it('sub-segment with assigned brigade defends via distance-weighted model', () => {
+        // Setup: sector with 2 sub-segments, brigade assigned to ss1
+        const ss1 = makeSubSeg('ss1', ['osid_a', 'osid_b'], 3);
+        const ss2 = makeSubSeg('ss2', ['osid_c', 'osid_d'], 3);
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1', 'brig_2']);
+        const state = {
+            military: {
+                formations: {
+                    brig_1: makeFormation({ id: 'brig_1', location_osid: 'osid_a' }),
+                    brig_2: makeFormation({ id: 'brig_2', location_osid: 'osid_c' }),
+                },
+            },
+        } as unknown as GameState;
+
+        const adj = makeAdjacency([['osid_a', 'osid_b'], ['osid_b', 'osid_c'], ['osid_c', 'osid_d']]);
+        assignBrigadesToSubSegments(state, [sector], adj);
+
+        // brig_1 should be in ss1, brig_2 in ss2
+        expect(ss1.primary_brigade_ids).toContain('brig_1');
+        expect(ss2.primary_brigade_ids).toContain('brig_2');
+
+        // Attacking enemy_ss1 → sub-segment ss1 is the defending sub-segment
+        const defendingSS = findSubSegmentForOsid(sector, 'enemy_ss1');
+        expect(defendingSS?.sub_segment_id).toBe('ss1');
+        expect(defendingSS?.primary_brigade_ids).toContain('brig_1');
+    });
+
+    it('gap sub-segment (no assigned brigade) still found for defense lookup', () => {
+        const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
+        const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1']);
+        const state = {
+            military: {
+                formations: {
+                    brig_1: makeFormation({ id: 'brig_1', location_osid: 'osid_a' }),
+                },
+            },
+        } as unknown as GameState;
+
+        const adj = makeAdjacency([['osid_a', 'osid_b']]);
+        assignBrigadesToSubSegments(state, [sector], adj);
+
+        // ss2 is a gap — no primary brigade
+        const gapSS = findSubSegmentForOsid(sector, 'enemy_ss2');
+        expect(gapSS?.sub_segment_id).toBe('ss2');
+        expect(gapSS?.primary_brigade_ids).toHaveLength(0);
+        expect(gapSS?.gap).toBe(true);
+    });
+
+    it('brigade at target OSID has 0 hops (physical defender) in its sub-segment', () => {
+        // This validates the distance-weighted model: brigade physically at the OSID
+        // gets full power (0 hops), while brigades in other sub-segments would have >0 hops
+        const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
+        const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1', 'brig_2']);
+        const state = {
+            military: {
+                formations: {
+                    brig_1: makeFormation({ id: 'brig_1', location_osid: 'osid_a' }),
+                    brig_2: makeFormation({ id: 'brig_2', location_osid: 'osid_b' }),
+                },
+            },
+        } as unknown as GameState;
+
+        const adj = makeAdjacency([['osid_a', 'osid_b']]);
+        assignBrigadesToSubSegments(state, [sector], adj);
+
+        // Attack on enemy_ss1 → ss1 defends, brig_1 is primary and at the OSID
+        const defendingSS = findSubSegmentForOsid(sector, 'enemy_ss1');
+        expect(defendingSS?.sub_segment_id).toBe('ss1');
+        expect(defendingSS?.primary_brigade_ids).toContain('brig_1');
+        // brig_1 is AT osid_a which is in ss1's friendly_osids → 0 hops
+        expect(ss1.friendly_osids).toContain('osid_a');
+    });
+
+    it('sub-segment lookup works for both friendly and enemy OSIDs', () => {
+        const ss1 = makeSubSeg('ss1', ['osid_a', 'osid_b'], 4);
+        const sector = makeSector('sec1', [ss1], ['brig_1']);
+        const state = {
+            military: {
+                formations: {
+                    brig_1: makeFormation({ id: 'brig_1', location_osid: 'osid_a' }),
+                },
+            },
+        } as unknown as GameState;
+
+        const adj = makeAdjacency([['osid_a', 'osid_b']]);
+        assignBrigadesToSubSegments(state, [sector], adj);
+
+        // Friendly OSID lookup
+        expect(findSubSegmentForOsid(sector, 'osid_a')?.sub_segment_id).toBe('ss1');
+        // Enemy OSID lookup (used by combat resolver)
+        expect(findSubSegmentForOsid(sector, 'enemy_ss1')?.sub_segment_id).toBe('ss1');
+    });
+});

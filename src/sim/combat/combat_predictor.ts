@@ -71,7 +71,7 @@ import {
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
 } from './combat_math.js';
-import { findSectorForEnemyOsid } from './corps_front_sectors.js';
+import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 
 // Backward-compat re-export
@@ -121,6 +121,8 @@ export interface CombatPrediction {
     defender_has_brigade: boolean;
     defender_disrupted: boolean;
     defender_cohesion: number;
+    /** Phase B: sub-segment responsible for defending this OSID (undefined if no sub-segment found). */
+    defending_sub_segment_id?: string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -195,6 +197,8 @@ export function predictCombatOutcome(
     let defenderDisrupted = false;
     let defenderCohesion = 60;
     let sectorDefBrigades: FormationState[] | null = null;
+    // Phase B: sub-segment responsible for defending this OSID
+    let defendingSubSegmentId: string | undefined;
     const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
 
     // Fog of war: did this brigade previously fail at this target?
@@ -213,6 +217,9 @@ export function predictCombatOutcome(
     // proportional to BFS distance + home-municipality bonus.
     if (isEnemyControlled) {
         const sector = findSectorForEnemyOsid(state, targetOsid, controller);
+        // Phase B: identify which sub-segment is responsible for this OSID
+        const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
+        defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
         const sectorBrigades = sector
             ? sector.assigned_brigade_ids
                 .map(id => state.military.formations?.[id])
@@ -358,7 +365,8 @@ export function predictCombatOutcome(
         friendly_neighbors_after_capture: friendlyNeighborsAfterCapture,
         defender_has_brigade: defenderHasBrigade,
         defender_disrupted: defenderDisrupted,
-        defender_cohesion: defenderCohesion
+        defender_cohesion: defenderCohesion,
+        defending_sub_segment_id: defendingSubSegmentId,
     };
 }
 

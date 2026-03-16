@@ -90,7 +90,7 @@ import {
     SECTOR_STANCE_REACTIVE_BONUS,
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
-import { findSectorForEnemyOsid, getCorpsHqOsid } from './corps_front_sectors.js';
+import { findSectorForEnemyOsid, findSubSegmentForOsid, getCorpsHqOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital, isOsidInSameEnclave } from './enclave_resilience.js';
 // frontDensityModifier import removed — no longer used in sector defense
 
@@ -478,6 +478,8 @@ export interface AttackResolutionOsidReport {
         defender_casualties: number;
         /** Per-brigade defender contributions (Layer A distance-weighted). */
         defender_contributions?: DefenderContribution[];
+        /** Sub-segment that defended this OSID (Phase B). */
+        defending_sub_segment_id?: string;
     }>;
 }
 
@@ -614,6 +616,8 @@ export function resolveAttackOrdersOsid(
         let sectorBrigadeWeights: Map<FormationId, number> | null = null;
         // Per-brigade metadata for defender contribution records (Layer C)
         let sectorBrigadeMeta: Map<FormationId, { hops: number; isHome: boolean }> | null = null;
+        // Phase B: sub-segment responsible for defending this OSID
+        let defendingSubSegmentId: string | undefined;
         const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
         const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
         const pc = state.political?.political_controllers ?? {};
@@ -625,6 +629,9 @@ export function resolveAttackOrdersOsid(
         // Casualties distributed by the same weights.
         if (isEnemyControlled) {
             const sector = findSectorForEnemyOsid(state, targetOsid, controller);
+            // Phase B: identify which sub-segment is responsible for this OSID
+            const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
+            defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
             const sectorBrigades = sector
                 ? sector.assigned_brigade_ids
                     .map(id => state.military.formations?.[id])
@@ -827,6 +834,7 @@ export function resolveAttackOrdersOsid(
             attacker_casualties: finalAttackerCas,
             defender_casualties: finalDefenderCas,
             defender_contributions: defenderContributions,
+            defending_sub_segment_id: defendingSubSegmentId,
         });
 
         const aKia = Math.floor(finalAttackerCas * KIA_FRACTION);
