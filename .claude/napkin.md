@@ -71,7 +71,7 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-16] Brigade-to-sector reachability gap (P2)**: Brigades assigned to sectors in disconnected friendly components (Gorazde brigades at Pale). Needs sector assignment to respect connected components during base classification, not just during commander overrides.
+1. **[2026-03-16] Brigade-to-sector reachability (P3, mostly fixed)**: Phase 1 component guard added in `brigade_assignment.ts`. Violations 18→2 (arbih_1st_cerska at Vlasenica is edge case — enclave brigade displaced mid-turn). Phase 2 already had component checks. Structural gap largely closed.
 2. **[2026-03-16] ARBiH 1st Corps probing — RESOLVED (n824)**: Sarajevo Probing priority (weight 60, w15-56) + organic E2 stance (army-HQ-aware bias) + `corps_asset` kind fix activated army HQ overrides. 1st Corps now probes RS suburbs when army HQ directs.
 3. **[2026-03-16] 2KK Prozor positional lock — PARTIALLY ADDRESSED (P2)**: Commander override mission compliance pulls toward Bihac. 3 Prozor OSIDs still mismatched at n820. Residual positional inertia needs weight tuning or explicit recall.
 4. **[2026-03-10] Donji Vakuf pocket remnant (P3)**: 2 OSIDs still RBiH (was 5). Improved but not fully resolved. Municipality priority tuning for 2KK.
