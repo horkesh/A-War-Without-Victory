@@ -81,8 +81,31 @@ export type EventEffect =
     | EventEffectAllianceChange
     | EventEffectNegotiationCapital;
 
+/** A player/bot response option for decision events. */
+export interface EventResponseOption {
+    /** Response identifier, e.g. 'accept', 'reject', 'negotiate'. */
+    id: string;
+    /** Human-readable button label. */
+    label: string;
+    /** Optional longer description of consequences. */
+    description?: string;
+    /** Effects applied when this response is chosen. */
+    effects: EventEffect[];
+}
+
+/** Event category for UI display and filtering. */
+export type EventCategory = 'military' | 'political' | 'humanitarian' | 'diplomatic' | 'economic' | 'command' | 'territorial';
+
 export interface EventDefinition {
     id: string;
+    /** Display title for event UI headline. */
+    title?: string;
+    /** Narrative text (2-3 sentences, historically accurate, present tense). */
+    narrative?: string;
+    /** Event category for UI grouping and badge display. */
+    category?: EventCategory;
+    /** Optional illustration asset path (relative to assets dir). */
+    image?: string;
     trigger: EventTrigger;
     /** Primary effect (required). */
     effect: EventEffect;
@@ -95,6 +118,22 @@ export interface EventDefinition {
     probability?: number;
     /** If true, event can fire only once (tracked via fired_event_ids on state). Default: false. */
     once?: boolean;
+    /** Player choice options. When present, each affected faction must respond. */
+    response_options?: EventResponseOption[];
+    /** When true, blocks turn advance until the player responds. */
+    requires_player_response?: boolean;
+    /** How bot factions auto-respond: accept_first picks first option, reject_all picks last, capital_based/capital_weighted uses negotiation capital position. */
+    bot_response_logic?: 'accept_first' | 'reject_all' | 'capital_based' | 'capital_weighted';
+}
+
+/** A pending decision awaiting player response. Stored on MilitaryState. */
+export interface PendingEventDecision {
+    event_id: string;
+    event_title: string;
+    turn_fired: number;
+    response_options: EventResponseOption[];
+    /** Which faction must respond. */
+    faction: FactionId;
 }
 
 export interface FiredEvent {

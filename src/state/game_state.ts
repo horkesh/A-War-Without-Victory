@@ -1655,6 +1655,8 @@ pending_officer_events?: import('./officer_types.js').PendingOfficerEvent[];
 negotiation?: import('./negotiation_types.js').NegotiationState;
 /** Event IDs that have already fired (prevents re-fire for once-only events). */
 fired_event_ids?: string[];
+/** Pending event decisions awaiting player response. */
+pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
 }
 
 export interface PoliticalState {
