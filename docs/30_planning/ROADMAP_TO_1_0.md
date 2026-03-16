@@ -25,6 +25,7 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.4.4** | Officer Experience & Weight of Command | ✓ 2026-03-16 |
 | **v0.4.5** | AI Command Layer (Army + Corps + Ops Planning AI) | ✓ 2026-03-16 |
 | **v0.4.6** | Commander Override Layer (Strategic Intent) | ✓ 2026-03-16 |
+| **v0.4.7** | Army HQ Gathering (Strategic Deliberation) | PLANNED |
 | **v0.5.0** | Full Diplomatic System (Negotiations) | PLANNED |
 | **v0.5.1** | UI Completion (all panels, modes, tooltips) | PLANNED |
 | **v0.5.2** | Tutorial & Onboarding | PLANNED |
@@ -118,6 +119,17 @@ Bundled: Army Commander + Corps Commander + Ops Planning AI share prompt builder
 - [ ] **Formula bot fallback** — works offline without API key. Cadet Mode always available.
 - [ ] **Multi-model routing** — Commander/Officer/Recruit/Cadet tiers. Player-selectable. BYOK or Pyrrhic Credits.
 - [ ] **Reads ALL accumulated state** — territory, capital, events, economy, officers, friction, smuggling, production. Richest possible decision surface.
+
+### 0.4.7 — Army HQ Gathering (Strategic Deliberation)
+- [ ] **Periodic command meetings** — army HQ convenes corps commanders to produce multi-turn campaign plans.
+- [ ] **Front priorities** — primary/secondary/economy/contain designations drive corps stances and target selection.
+- [ ] **Synchronized multi-corps operations** — coordinated offensives with launch windows across multiple corps.
+- [ ] **Adaptive doctrine** — replaces calendar-driven doctrine phases with situational assessment.
+- [ ] **Faction-specific cadence** — VRS 8w, ARBiH 14→8w (improving with officer maturity), HVO 10w.
+- [ ] **Emergency triggers** — unscheduled gatherings on territory loss, corps collapse, corridor severance, enclave fall.
+- [ ] **Communication constraints** — besieged corps excluded from deliberation, radio-only corps delayed.
+- [ ] **Formula bot only** — deterministic implementation, no API cost.
+- [ ] **~42 tests**
 
 ---
 
