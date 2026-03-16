@@ -515,6 +515,8 @@ export function parseGameState(json: unknown): LoadedGameState {
                 const ov = brigadeSectorOverride?.[id];
                 if (typeof ov === 'string' && ov) sectorOverrideId = ov;
             }
+            const assigned_sub_segment_id = typeof f.assigned_sub_segment_id === 'string' && f.assigned_sub_segment_id
+                ? f.assigned_sub_segment_id : undefined;
             const movementState = rawMovementState?.[id] as { status?: string; stance?: string } | undefined;
             const movementStatus = (movementState?.status === 'packing' || movementState?.status === 'in_transit' || movementState?.status === 'unpacking')
                 ? (movementState.status as 'packing' | 'in_transit' | 'unpacking')
@@ -563,7 +565,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 home_osid: typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined,
                 tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
                 personnel, posture, home_defense_active, corps_id, movementStatus, movementStance,
-                homeHops, homeDistanceMult, homeIsElite, sectorOverrideId,
+                homeHops, homeDistanceMult, homeIsElite, sectorOverrideId, assigned_sub_segment_id,
                 narrativeArc,
                 warNarrative: typeof warStory?.narrative === 'string' ? warStory.narrative : undefined,
                 notableMoments: Array.isArray(warStory?.notable_moments) ? warStory.notable_moments : undefined,

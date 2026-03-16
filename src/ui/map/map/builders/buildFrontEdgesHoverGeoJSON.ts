@@ -14,6 +14,7 @@ interface FrontEdgeHoverProperties {
   offset_side: 1 | -1;
   sector_id?: string;
   corps_id?: string;
+  sub_segment_id?: string;
 }
 
 /**
@@ -93,6 +94,20 @@ export function buildFrontEdgesHoverGeoJSON(
     }
   }
 
+  // Build edge_id → sub_segment_id lookup from sector sub_segments data
+  const edgeToSubSegment = new Map<string, string>();
+  if (corpsFrontSectors) {
+    for (const sector of corpsFrontSectors) {
+      for (const ss of (sector as any).sub_segments ?? []) {
+        const ssId = ss.sub_segment_id as string | undefined;
+        if (!ssId) continue;
+        for (const edgeId of (ss.edge_ids as string[]) ?? []) {
+          edgeToSubSegment.set(`${edgeId}\0${sector.faction}`, ssId);
+        }
+      }
+    }
+  }
+
   // Emit one feature per polygon boundary segment per faction — same approach as
   // buildCorpsFrontLinesGeoJSON. Each segment gets its own offset computed from
   // the segment's direction + the friendly OSID centroid. This avoids offset
@@ -128,28 +143,37 @@ export function buildFrontEdgesHoverGeoJSON(
         offsetForB = cross > 0 ? 1 : -1;
       }
 
+      const subSegA = edgeToSubSegment.get(`${edge.edge_id}\0${factionA}`);
+      const subSegB = edgeToSubSegment.get(`${edge.edge_id}\0${factionB}`);
+
+      const propsA: FrontEdgeHoverProperties = {
+        edge_id: `${edge.edge_id}:${factionA}`,
+        faction: factionA,
+        opposing_faction: factionB,
+        offset_side: offsetForA,
+        sector_id: sectorA?.sector_id,
+        corps_id: sectorA?.corps_id,
+      };
+      if (subSegA) propsA.sub_segment_id = subSegA;
+
+      const propsB: FrontEdgeHoverProperties = {
+        edge_id: `${edge.edge_id}:${factionB}`,
+        faction: factionB,
+        opposing_faction: factionA,
+        offset_side: offsetForB,
+        sector_id: sectorB?.sector_id,
+        corps_id: sectorB?.corps_id,
+      };
+      if (subSegB) propsB.sub_segment_id = subSegB;
+
       outFeatures.push({
         type: 'Feature',
-        properties: {
-          edge_id: `${edge.edge_id}:${factionA}`,
-          faction: factionA,
-          opposing_faction: factionB,
-          offset_side: offsetForA,
-          sector_id: sectorA?.sector_id,
-          corps_id: sectorA?.corps_id,
-        },
+        properties: propsA,
         geometry: { type: 'LineString', coordinates: seg },
       });
       outFeatures.push({
         type: 'Feature',
-        properties: {
-          edge_id: `${edge.edge_id}:${factionB}`,
-          faction: factionB,
-          opposing_faction: factionA,
-          offset_side: offsetForB,
-          sector_id: sectorB?.sector_id,
-          corps_id: sectorB?.corps_id,
-        },
+        properties: propsB,
         geometry: { type: 'LineString', coordinates: seg },
       });
     }

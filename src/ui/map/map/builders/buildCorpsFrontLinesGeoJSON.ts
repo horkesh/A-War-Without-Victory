@@ -12,6 +12,7 @@ interface CorpsGlowProperties {
     faction: string;
     corps_id: string;
     sector_id?: string;
+    sub_segment_id?: string;
     offset_side?: 1 | -1;
     pressure_intensity?: number;
 }
@@ -22,6 +23,7 @@ interface CorpsFrontProperties {
     factionB: string;
     corps_id: string;
     sector_id?: string;
+    sub_segment_id?: string;
     avg_entrenchment?: number;
     tooth_rotation?: number;
     brigade_count?: number;
@@ -240,6 +242,18 @@ export function buildCorpsFrontLinesGeoJSON(
         }
     }
 
+    // Build edge → sub_segment_id lookup from sector sub_segments data
+    const edgeToSubSegment = new Map<string, string>();
+    for (const sector of corpsFrontSectors) {
+        for (const ss of (sector as any).sub_segments ?? []) {
+            const ssId = ss.sub_segment_id as string | undefined;
+            if (!ssId) continue;
+            for (const edgeId of (ss.edge_ids as string[]) ?? []) {
+                edgeToSubSegment.set(`${edgeId}\0${sector.faction}`, ssId);
+            }
+        }
+    }
+
     const authoritativePairs = new Set<string>();
     if (frontEdgesOsid) {
         for (const edge of frontEdgesOsid) {
@@ -315,14 +329,22 @@ export function buildCorpsFrontLinesGeoJSON(
         const pressureData = frontPressureByEdge?.[pairKey];
         const pressureIntensity = pressureData && pressureData.max_abs > 0 ? Math.abs(pressureData.value) / pressureData.max_abs : 0;
 
+        const subSegA = edgeToSubSegment.get(`${pairKey}\0${ctrlA}`);
+        const subSegB = edgeToSubSegment.get(`${pairKey}\0${ctrlB}`);
+
+        const glowPropsA = createGlowProperties(ctrlA, corpsA, sectorA?.sector_id, offsetA, pressureIntensity);
+        if (subSegA) glowPropsA.sub_segment_id = subSegA;
+        const glowPropsB = createGlowProperties(ctrlB, corpsB, sectorB?.sector_id, offsetB, pressureIntensity);
+        if (subSegB) glowPropsB.sub_segment_id = subSegB;
+
         glowFeatures.push({
             type: 'Feature',
-            properties: createGlowProperties(ctrlA, corpsA, sectorA?.sector_id, offsetA, pressureIntensity),
+            properties: glowPropsA,
             geometry: { type: 'LineString', coordinates: coords },
         });
         glowFeatures.push({
             type: 'Feature',
-            properties: createGlowProperties(ctrlB, corpsB, sectorB?.sector_id, offsetB, pressureIntensity),
+            properties: glowPropsB,
             geometry: { type: 'LineString', coordinates: coords },
         });
 
@@ -340,6 +362,7 @@ export function buildCorpsFrontLinesGeoJSON(
             threat_intensity: pressureIntensity
         };
         if (sectorA?.sector_id) frontProps.sector_id = sectorA.sector_id;
+        if (subSegA) frontProps.sub_segment_id = subSegA;
         if (toothRotation != null) frontProps.tooth_rotation = toothRotation;
 
         frontSegmentsByGroup.get(groupKey)!.push({

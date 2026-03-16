@@ -134,6 +134,8 @@ export interface FormationView {
     homeIsElite?: boolean;
     /** Player-overridden sector assignment (brigade_sector_override). Null when cleared. */
     sectorOverrideId?: string;
+    /** Sub-segment this brigade is assigned to (from corps_front_sectors). */
+    assigned_sub_segment_id?: string;
     /** Actual campaign casualties from casualty_ledger.per_formation (brigades only). */
     campaignKia?: number;
     campaignWia?: number;

@@ -21,6 +21,7 @@ interface FormationMarkerProperties {
   location_osid: string;
   posture: string | null;
   sector_id: string | null;
+  assigned_sub_segment_id: string | null;
   /** True when brigade is in its home municipality. */
   is_home: boolean;
   /** Home-distance effectiveness multiplier [0.70–1.0]. 1.0 means full effectiveness / home turf. */
@@ -118,6 +119,7 @@ export function buildFormationsGeoJSON(
         location_osid: osid,
         posture: formation.posture ?? null,
         sector_id: getSectorIdForFormation(formation.id, state.corpsFrontSectors),
+        assigned_sub_segment_id: formation.assigned_sub_segment_id ?? null,
         is_home: !!(munFromOsid(formation.home_osid) && munFromOsid(formation.home_osid) === munFromOsid(osid)),
         home_distance_mult: typeof formation.homeDistanceMult === 'number' ? formation.homeDistanceMult : 1.0,
       },
