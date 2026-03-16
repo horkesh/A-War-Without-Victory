@@ -4,6 +4,7 @@ import {
     getGatheringCadence,
     shouldGather,
     canCorpsAttendGathering,
+    assessTheater,
 } from '../src/sim/combat/army_hq_gathering.js';
 
 // ── Factory ──────────────────────────────────────────────────────────────────
@@ -154,5 +155,140 @@ describe('canCorpsAttendGathering', () => {
         expect(canCorpsAttendGathering('vrs_1st_krajina', 'RS', state)).toBe('full');
         expect(canCorpsAttendGathering('vrs_drina', 'RS', state)).toBe('full');
         expect(canCorpsAttendGathering('vrs_sarajevo_romanija', 'RS', state)).toBe('full');
+    });
+});
+
+// ── Theater Assessment ──────────────────────────────────────────────────────
+
+/** Extended factory for assessTheater tests. */
+function makeTheaterState(overrides: {
+    turn?: number;
+    formations?: Record<string, Partial<FormationState>>;
+    corpsCommand?: Record<string, { corps_exhaustion?: number; active_operation?: unknown }>;
+    generalSupplyReserve?: Record<string, number>;
+} = {}): GameState {
+    const formations: Record<string, FormationState> = {};
+    if (overrides.formations) {
+        for (const [id, partial] of Object.entries(overrides.formations)) {
+            formations[id] = {
+                id,
+                faction: 'RS',
+                name: id,
+                created_turn: 0,
+                status: 'active',
+                assignment: null,
+                personnel: 2000,
+                corps_id: 'vrs_1st_krajina',
+                ...partial,
+            } as unknown as FormationState;
+        }
+    }
+
+    return {
+        meta: { turn: overrides.turn ?? 10 } as GameState['meta'],
+        military: {
+            formations,
+            front_segments: {},
+            front_posture: {},
+            corps_command: overrides.corpsCommand ?? {},
+            general_supply_reserve: overrides.generalSupplyReserve ?? {},
+        } as unknown as GameState['military'],
+        political: {
+            fired_event_ids: [],
+        } as unknown as GameState['political'],
+        factions: {} as GameState['factions'],
+        map: {} as GameState['map'],
+        displacement: {} as GameState['displacement'],
+        economy: {} as GameState['economy'],
+    } as unknown as GameState;
+}
+
+describe('assessTheater', () => {
+    it('correctly classifies corps strength', () => {
+        const state = makeTheaterState({
+            formations: {
+                bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1800, status: 'active' },
+                bde_2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1600, status: 'active' },
+                bde_3: { faction: 'RS', corps_id: 'vrs_drina', personnel: 400, status: 'active' },
+                bde_4: { faction: 'RS', corps_id: 'vrs_drina', personnel: 350, status: 'active' },
+            },
+        });
+        const assessment = assessTheater(state, 'RS');
+        expect(assessment.corps_assessments).toHaveLength(2);
+
+        const krajina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_1st_krajina')!;
+        const drina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_drina')!;
+
+        // Average 1700 → fortress
+        expect(krajina.strength_class).toBe('fortress');
+        expect(krajina.available_brigades).toBe(2);
+
+        // Average 375 → thin
+        expect(drina.strength_class).toBe('thin');
+        expect(drina.available_brigades).toBe(2);
+    });
+
+    it('flags corps with high exhaustion', () => {
+        const state = makeTheaterState({
+            formations: {
+                bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1000, status: 'active' },
+            },
+            corpsCommand: {
+                vrs_1st_krajina: { corps_exhaustion: 65 },
+            },
+        });
+        const assessment = assessTheater(state, 'RS');
+        const krajina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_1st_krajina')!;
+        expect(krajina.exhaustion).toBe(65);
+    });
+
+    it('territory trend: gaining when mostly strong, losing when mostly thin', () => {
+        // All strong → gaining
+        const strongState = makeTheaterState({
+            formations: {
+                bde_a1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1600, status: 'active' },
+                bde_b1: { faction: 'RS', corps_id: 'vrs_drina', personnel: 1500, status: 'active' },
+                bde_c1: { faction: 'RS', corps_id: 'vrs_sarajevo_romanija', personnel: 1800, status: 'active' },
+            },
+        });
+        expect(assessTheater(strongState, 'RS').territory_trend).toBe('gaining');
+
+        // All thin → losing
+        const weakState = makeTheaterState({
+            formations: {
+                bde_a2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 250, status: 'active' },
+                bde_b2: { faction: 'RS', corps_id: 'vrs_drina', personnel: 280, status: 'active' },
+                bde_c2: { faction: 'RS', corps_id: 'vrs_sarajevo_romanija', personnel: 200, status: 'active' },
+            },
+        });
+        expect(assessTheater(weakState, 'RS').territory_trend).toBe('losing');
+    });
+
+    it('supply status derived from general_supply_reserve', () => {
+        const makeWithSupply = (reserve: number) => makeTheaterState({
+            formations: { bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1000, status: 'active' } },
+            generalSupplyReserve: { RS: reserve },
+        });
+
+        expect(assessTheater(makeWithSupply(80), 'RS').supply_status).toBe('abundant');
+        expect(assessTheater(makeWithSupply(50), 'RS').supply_status).toBe('adequate');
+        expect(assessTheater(makeWithSupply(30), 'RS').supply_status).toBe('strained');
+        expect(assessTheater(makeWithSupply(10), 'RS').supply_status).toBe('critical');
+    });
+
+    it('excluded corps still assessed with strength data', () => {
+        // arbih_general_staff is excluded for RBiH
+        const state = makeTheaterState({
+            formations: {
+                bde_1: { faction: 'RBiH', corps_id: 'arbih_general_staff', personnel: 1200, status: 'active' },
+                bde_2: { faction: 'RBiH', corps_id: 'arbih_2nd_corps', personnel: 1000, status: 'active' },
+            },
+        });
+        const assessment = assessTheater(state, 'RBiH');
+        const staff = assessment.corps_assessments.find(c => c.corps_id === 'arbih_general_staff')!;
+        expect(staff).toBeDefined();
+        expect(staff.attendance).toBe('excluded');
+        expect(staff.strength_class).toBe('strong');
+        expect(staff.available_brigades).toBe(1);
     });
 });

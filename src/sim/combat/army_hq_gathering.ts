@@ -5,6 +5,7 @@
  */
 
 import type { GameState, FactionId, FormationState } from '../../state/game_state.js';
+import type { TheaterAssessment, CorpsAssessment } from './army_hq_gathering_types.js';
 import {
     GATHERING_CADENCE_RS, GATHERING_CADENCE_HRHB, getGatheringCadenceRBiH,
     EMERGENCY_COOLDOWN,
@@ -176,4 +177,239 @@ function hasEmergencyEventSinceLastGathering(
         if (EMERGENCY_EVENT_IDS.has(id)) return true;
     }
     return false;
+}
+
+// ── Theater Assessment ──────────────────────────────────────────────────────
+
+/** Default officer competence when no corps commander is found. */
+const DEFAULT_OFFICER_COMPETENCE = 2.0;
+
+/**
+ * Produces a theater-wide assessment for a faction — corps-by-corps evaluation,
+ * territory trend, supply/manpower status, and threat identification.
+ * Used as input for campaign plan generation.
+ */
+export function assessTheater(state: GameState, faction: FactionId): TheaterAssessment {
+    // 1. Collect unique corps IDs for this faction from active formations
+    const corpsIds = collectFactionCorps(state, faction);
+
+    // 2. Per-corps assessment
+    const corpsAssessments: CorpsAssessment[] = [];
+    for (const corpsId of corpsIds) {
+        corpsAssessments.push(assessCorps(state, faction, corpsId));
+    }
+    // Deterministic sort by corps_id
+    corpsAssessments.sort((a, b) => a.corps_id < b.corps_id ? -1 : a.corps_id > b.corps_id ? 1 : 0);
+
+    // 3. Territory trend (derived from strength_class distribution)
+    const territoryTrend = computeTerritoryTrend(corpsAssessments);
+
+    // 4. Supply status
+    const supplyStatus = computeSupplyStatus(state, faction);
+
+    // 5. Manpower status
+    const manpowerStatus = computeManpowerStatus(state, faction);
+
+    // 6. Weakest enemy front + strongest threat (from sector intel)
+    const { weakestEnemyFront, strongestThreat } = identifyEnemyFronts(state, faction);
+
+    return {
+        corps_assessments: corpsAssessments,
+        territory_trend: territoryTrend,
+        supply_status: supplyStatus,
+        manpower_status: manpowerStatus,
+        weakest_enemy_front: weakestEnemyFront,
+        strongest_threat: strongestThreat,
+    };
+}
+
+/** Collect unique corps IDs for a faction from formations. */
+function collectFactionCorps(state: GameState, faction: FactionId): string[] {
+    const corpsSet = new Set<string>();
+    for (const fmn of Object.values(state.military.formations)) {
+        if (fmn.faction !== faction) continue;
+        if (!fmn.corps_id) continue;
+        corpsSet.add(fmn.corps_id);
+    }
+    return Array.from(corpsSet).sort();
+}
+
+/** Assess a single corps for the gathering. */
+function assessCorps(state: GameState, faction: FactionId, corpsId: string): CorpsAssessment {
+    const attendance = canCorpsAttendGathering(corpsId, faction, state);
+    const cc = state.military.corps_command?.[corpsId];
+    const exhaustion = cc?.corps_exhaustion ?? 0;
+    const hasActiveOp = cc?.active_operation != null;
+
+    // Count active brigades and sum personnel
+    let availableBrigades = 0;
+    let totalPersonnel = 0;
+    for (const fmn of Object.values(state.military.formations)) {
+        if (fmn.faction !== faction) continue;
+        if (fmn.corps_id !== corpsId) continue;
+        if (fmn.status !== 'active') continue;
+        const kind = fmn.kind ?? 'brigade';
+        if (kind !== 'brigade') continue;
+        availableBrigades++;
+        totalPersonnel += fmn.personnel ?? 1000;
+    }
+
+    // Officer competence: find corps commander in named_officers
+    const officerCompetence = getCorpsCommanderCompetence(state, corpsId);
+
+    // Strength class from average personnel
+    const avgPersonnel = availableBrigades > 0 ? totalPersonnel / availableBrigades : 0;
+    const strengthClass = classifyStrength(avgPersonnel);
+
+    // Sector threat average from sector_combat_ratings
+    const sectorThreatAvg = computeSectorThreatAvg(state, faction, corpsId);
+
+    return {
+        corps_id: corpsId,
+        attendance,
+        strength_class: strengthClass,
+        exhaustion,
+        has_active_op: hasActiveOp,
+        recent_territory_change: 0, // Placeholder for v0.4.7
+        sector_threat_avg: sectorThreatAvg,
+        available_brigades: availableBrigades,
+        officer_competence: officerCompetence,
+    };
+}
+
+/** Look up the corps commander competence from named officer data. */
+function getCorpsCommanderCompetence(state: GameState, corpsId: string): number {
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
+    if (!officers || !officerData) return DEFAULT_OFFICER_COMPETENCE;
+
+    // Find the officer state assigned to this corps
+    for (const [officerId, officerState] of Object.entries(officers)) {
+        if (officerState.assigned_corps_id !== corpsId) continue;
+        if (officerState.status !== 'active') continue;
+        // Find the static data for competence
+        const data = officerData.find(o => o.id === officerId);
+        if (data) return data.competence;
+    }
+    return DEFAULT_OFFICER_COMPETENCE;
+}
+
+/** Classify corps strength from average brigade personnel. */
+function classifyStrength(avgPersonnel: number): string {
+    if (avgPersonnel >= 1500) return 'fortress';
+    if (avgPersonnel >= 1000) return 'strong';
+    if (avgPersonnel >= 600)  return 'adequate';
+    if (avgPersonnel >= 300)  return 'thin';
+    return 'critical';
+}
+
+/** Compute average sector threat for a corps from sector_combat_ratings. */
+function computeSectorThreatAvg(state: GameState, faction: FactionId, corpsId: string): number {
+    const ratings = state.military.sector_combat_ratings;
+    if (!ratings) return 0.5;
+
+    // Find sectors belonging to this corps, compute average of a normalized threat proxy
+    // Use inverse of defense_per_edge as threat indicator (lower defense = higher threat)
+    let totalThreat = 0;
+    let count = 0;
+    for (const rating of Object.values(ratings)) {
+        if (rating.faction !== faction) continue;
+        // Sector IDs embed the corps_id — check via corps_front_sectors
+        const sector = state.military.corps_front_sectors?.[rating.sector_id];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        // Normalize threat: defense_per_edge inversely proportional to threat
+        // A rough heuristic: threat = 1 / (1 + defense_per_edge / 1000)
+        const threat = 1 / (1 + rating.defense_per_edge / 1000);
+        totalThreat += threat;
+        count++;
+    }
+    return count > 0 ? totalThreat / count : 0.5;
+}
+
+/** Derive territory trend from corps strength distribution. */
+function computeTerritoryTrend(assessments: CorpsAssessment[]): 'gaining' | 'stable' | 'losing' {
+    if (assessments.length === 0) return 'stable';
+
+    let weak = 0;
+    let strong = 0;
+    for (const a of assessments) {
+        if (a.strength_class === 'thin' || a.strength_class === 'critical') weak++;
+        if (a.strength_class === 'fortress' || a.strength_class === 'strong') strong++;
+    }
+
+    const majority = assessments.length / 2;
+    if (weak > majority) return 'losing';
+    if (strong > majority) return 'gaining';
+    return 'stable';
+}
+
+/** Derive supply status from general_supply_reserve. */
+function computeSupplyStatus(state: GameState, faction: FactionId): 'abundant' | 'adequate' | 'strained' | 'critical' {
+    const reserve = state.military.general_supply_reserve?.[faction] ?? 0;
+    if (reserve >= 75) return 'abundant';
+    if (reserve >= 50) return 'adequate';
+    if (reserve >= 25) return 'strained';
+    return 'critical';
+}
+
+/** Derive manpower status from average brigade personnel. */
+function computeManpowerStatus(state: GameState, faction: FactionId): 'healthy' | 'adequate' | 'strained' | 'critical' {
+    let totalPersonnel = 0;
+    let count = 0;
+    for (const fmn of Object.values(state.military.formations)) {
+        if (fmn.faction !== faction) continue;
+        if (fmn.status !== 'active') continue;
+        const kind = fmn.kind ?? 'brigade';
+        if (kind !== 'brigade') continue;
+        totalPersonnel += fmn.personnel ?? 1000;
+        count++;
+    }
+
+    const avg = count > 0 ? totalPersonnel / count : 0;
+    if (avg >= 1500) return 'healthy';
+    if (avg >= 1000) return 'adequate';
+    if (avg >= 600)  return 'strained';
+    return 'critical';
+}
+
+/** Identify weakest enemy front (best opportunity) and strongest threat from sector intel. */
+function identifyEnemyFronts(
+    state: GameState,
+    faction: FactionId,
+): { weakestEnemyFront: string | null; strongestThreat: string | null } {
+    const sectorIntel = state.military.sector_intel;
+    if (!sectorIntel) return { weakestEnemyFront: null, strongestThreat: null };
+
+    // Tally weak/strong sectors per enemy corps
+    const enemyCorpsWeak = new Map<string, number>();
+    const enemyCorpsStrong = new Map<string, number>();
+
+    for (const records of Object.values(sectorIntel)) {
+        for (const rec of records) {
+            if (rec.confidence < 0.3) continue;
+            const eid = rec.enemy_corps_id;
+            if (rec.strength_category === 'thin') {
+                enemyCorpsWeak.set(eid, (enemyCorpsWeak.get(eid) ?? 0) + 1);
+            }
+            if (rec.strength_category === 'fortress' || rec.strength_category === 'dense') {
+                enemyCorpsStrong.set(eid, (enemyCorpsStrong.get(eid) ?? 0) + 1);
+            }
+        }
+    }
+
+    // Weakest enemy: most 'thin'/'critical' sectors
+    let weakestEnemyFront: string | null = null;
+    let maxWeak = 0;
+    for (const [eid, count] of enemyCorpsWeak) {
+        if (count > maxWeak) { maxWeak = count; weakestEnemyFront = eid; }
+    }
+
+    // Strongest threat: most 'fortress'/'dense' sectors
+    let strongestThreat: string | null = null;
+    let maxStrong = 0;
+    for (const [eid, count] of enemyCorpsStrong) {
+        if (count > maxStrong) { maxStrong = count; strongestThreat = eid; }
+    }
+
+    return { weakestEnemyFront, strongestThreat };
 }
