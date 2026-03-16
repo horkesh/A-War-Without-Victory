@@ -49,7 +49,7 @@ import {
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
-import { splitNonContiguousSectors } from './corps_front_sectors.js';
+import { splitNonContiguousSectors, GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors.js';
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
 import {
     assessCorpsSupplyHealth,
@@ -111,7 +111,7 @@ function computeCorpsSurplus(
 ): number {
     let surplus = 0;
     for (const sector of corpsSectors) {
-        const budget = Math.ceil(sector.length_edges / 6);
+        const budget = Math.ceil(sector.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
         const excess = sector.assigned_brigade_ids.length - budget;
         if (excess > 0) surplus += excess;
     }

@@ -70,7 +70,6 @@ function makeProfile(competence: number): CorpsCommanderProfile {
 
 describe('commanderReviewAssignment', () => {
     const emptyPriorities: ArmyOperationPriority[] = [];
-    const emptyAdj = new Map<string, string[]>();
     const emptyComp = new Map<string, number>();
 
     it('skips review for low-competence commanders', () => {
@@ -86,7 +85,7 @@ describe('commanderReviewAssignment', () => {
 
         const overrides = commanderReviewAssignment(
             'vrs_1k', sectors, formations, emptyPriorities,
-            profile, emptyAdj, emptyComp,
+            profile, emptyComp,
         );
 
         expect(overrides).toEqual([]);
@@ -104,7 +103,7 @@ describe('commanderReviewAssignment', () => {
 
         const overrides = commanderReviewAssignment(
             'vrs_1k', sectors, formations, emptyPriorities,
-            profile, emptyAdj, emptyComp,
+            profile, emptyComp,
         );
 
         expect(overrides).toEqual([]);
@@ -123,7 +122,7 @@ describe('commanderReviewAssignment', () => {
 
         const overrides = commanderReviewAssignment(
             'vrs_1k', sectors, formations, emptyPriorities,
-            profile, emptyAdj, emptyComp,
+            profile, emptyComp,
         );
 
         // Stubs produce no overrides, but function should execute without error
@@ -148,7 +147,7 @@ describe('commanderReviewAssignment', () => {
             const componentOf = new Map<string, number>();
             const result = commanderReviewAssignment(
                 'vrs_srk', sectors, formations, [], profile,
-                new Map(), componentOf,
+                componentOf,
             );
             expect(result.length).toBeGreaterThanOrEqual(1);
             expect(result[0].reason).toBe('defensive_critical');
@@ -172,7 +171,7 @@ describe('commanderReviewAssignment', () => {
             const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
                 'vrs_srk', sectors, formations, [], profile,
-                new Map(), new Map(),
+                new Map(),
             );
             // No transfer — s2 can't go below 1
             expect(result.length).toBe(0);
@@ -194,7 +193,7 @@ describe('commanderReviewAssignment', () => {
             const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
                 'vrs_srk', sectors, formations, [], profile,
-                new Map(), new Map(),
+                new Map(),
             );
             expect(result.length).toBe(0);
         });
@@ -222,7 +221,7 @@ describe('commanderReviewAssignment', () => {
             }];
             const profile = { competence: 0.6, aggressiveness: 0.6, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
-                'vrs_2kk', sectors, formations, priorities, profile, new Map(), new Map(),
+                'vrs_2kk', sectors, formations, priorities, profile, new Map(),
             );
             expect(result.some(o => o.to_sector_id === 's1' && o.reason === 'mission_priority')).toBe(true);
             expect(sectors[0].assigned_brigade_ids.length).toBeGreaterThan(1);
@@ -240,7 +239,7 @@ describe('commanderReviewAssignment', () => {
             };
             const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
-                'vrs_2kk', sectors, formations, [], profile, new Map(), new Map(),
+                'vrs_2kk', sectors, formations, [], profile, new Map(),
             );
             expect(result.filter(o => o.reason === 'mission_priority').length).toBe(0);
         });
@@ -268,7 +267,7 @@ describe('commanderReviewAssignment', () => {
             }];
             const profile = { competence: 0.5, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
-                'vrs_2kk', sectors, formations, priorities, profile, new Map(), new Map(),
+                'vrs_2kk', sectors, formations, priorities, profile, new Map(),
             );
             expect(result.some(o => o.from_sector_id === 's2' && o.reason === 'non_priority_excess')).toBe(true);
         });
@@ -291,7 +290,7 @@ describe('commanderReviewAssignment', () => {
                 preStagingSectorWeights: new Map([['s1', 3.0]]),
             };
             const result = commanderReviewAssignment(
-                'vrs_drina', sectors, formations, [], profile, new Map(), new Map(),
+                'vrs_drina', sectors, formations, [], profile, new Map(),
             );
             expect(result.some(o => o.to_sector_id === 's1' && o.reason === 'offensive_staging')).toBe(true);
         });
@@ -311,7 +310,7 @@ describe('commanderReviewAssignment', () => {
                 preStagingSectorWeights: new Map([['s1', 3.0]]),
             };
             const result = commanderReviewAssignment(
-                'vrs_drina', sectors, formations, [], profile, new Map(), new Map(),
+                'vrs_drina', sectors, formations, [], profile, new Map(),
             );
             // Should NOT pull from s2 (threat 3.0 >= DEFENSIVE_CRITICAL_THREAT)
             expect(result.filter(o => o.from_sector_id === 's2').length).toBe(0);

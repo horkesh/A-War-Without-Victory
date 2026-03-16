@@ -247,7 +247,7 @@ function buildFactionSectors(
             const priorities = getCorpsArmyPriorities(faction, cid, state.meta.turn);
             commanderReviewAssignment(
                 cid, sectors, formations, priorities, profile,
-                adjacency, componentOf,
+                componentOf,
             );
         }
     }
@@ -688,8 +688,56 @@ export interface CommanderOverride {
 
 const COMMANDER_COMPETENCE_OVERRIDE_THRESHOLD = 0.35;
 const DEFENSIVE_CRITICAL_THREAT = 2.0;
-const GARRISON_BUDGET_EDGES_PER_BRIGADE = 6;
+export const GARRISON_BUDGET_EDGES_PER_BRIGADE = 6;
 const MIN_DONOR_BRIGADES = 1;
+
+/**
+ * Transfer brigades from surplus sectors to deficit sectors.
+ * Shared implementation for all 4 commander override criteria.
+ */
+function transferBrigadesBetweenSectors(
+    deficits: Array<{ sector: CorpsFrontSector; need: number }>,
+    donors: CorpsFrontSector[],
+    formations: Record<string, FormationState>,
+    overrides: CommanderOverride[],
+    overriddenBrigadeIds: Set<string>,
+    reason: CommanderOverride['reason'],
+    floorModifier?: number,
+): void {
+    const takenFromSector = new Map<string, number>();
+    for (const { sector: deficit, need: initialNeed } of deficits) {
+        let need = initialNeed;
+        if (need <= 0) continue;
+
+        for (const donor of donors) {
+            if (need <= 0) break;
+            const taken = takenFromSector.get(donor.sector_id) ?? 0;
+            const currentCount = donor.assigned_brigade_ids.length - taken;
+            const donorBudget = Math.ceil(donor.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            const floor = Math.max(donorBudget, MIN_DONOR_BRIGADES) + (floorModifier ?? 0);
+            const available = currentCount - floor;
+            if (available <= 0) continue;
+
+            const candidates = donor.assigned_brigade_ids
+                .filter(bid => !overriddenBrigadeIds.has(bid))
+                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
+                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
+
+            const toTransfer = Math.min(need, available, candidates.length);
+            for (let i = 0; i < toTransfer; i++) {
+                overrides.push({
+                    brigade_id: candidates[i].bid,
+                    from_sector_id: donor.sector_id,
+                    to_sector_id: deficit.sector_id,
+                    reason,
+                });
+                overriddenBrigadeIds.add(candidates[i].bid);
+                takenFromSector.set(donor.sector_id, (takenFromSector.get(donor.sector_id) ?? 0) + 1);
+                need--;
+            }
+        }
+    }
+}
 
 /**
  * Commander review of mechanical brigade-to-sector assignments.
@@ -704,7 +752,6 @@ export function commanderReviewAssignment(
     formations: Record<string, FormationState>,
     armyPriorities: ArmyOperationPriority[],
     commanderProfile: CorpsCommanderProfile,
-    adjacency: Map<string, string[]>,
     componentOf: Map<string, number>,
 ): CommanderOverride[] {
     // Gate: incompetent commanders don't override mechanical assignment
@@ -723,12 +770,13 @@ export function commanderReviewAssignment(
     }
 
     const overrides: CommanderOverride[] = [];
+    const overriddenBrigadeIds = new Set<string>();
 
     // Apply four criteria in priority order
-    applyMissionCompliance(corpsSectors, formations, armyPriorities, commanderProfile, overrides, componentOf);
-    applyNonPriorityExcess(corpsSectors, formations, armyPriorities, commanderProfile, overrides, componentOf);
-    applyOffensiveStaging(corpsSectors, formations, commanderProfile, overrides, componentOf);
-    applyDefensiveCoherence(corpsSectors, formations, commanderProfile, overrides, componentOf);
+    applyMissionCompliance(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds);
+    applyNonPriorityExcess(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds);
+    applyOffensiveStaging(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds);
+    applyDefensiveCoherence(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds);
 
     // Execute overrides: splice from source sector, push to target sector
     for (const ov of overrides) {
@@ -756,7 +804,7 @@ function applyMissionCompliance(
     armyPriorities: ArmyOperationPriority[],
     commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
-    _componentOf: Map<string, number>,
+    overriddenBrigadeIds: Set<string>,
 ): void {
     if (armyPriorities.length === 0) return;
 
@@ -777,7 +825,7 @@ function applyMissionCompliance(
         let maxW = 0;
         for (const seg of sector.sub_segments) {
             for (const hosid of (seg.enemy_osids ?? [])) {
-                const muni = hosid.split(':')[1];
+                const muni = munFromOsid(hosid);
                 if (muni && targetMunicipalities.has(muni)) {
                     const w = municipalityWeight.get(muni) ?? 0;
                     if (w > maxW) maxW = w;
@@ -813,38 +861,7 @@ function applyMissionCompliance(
     nonMissionSurplus.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
 
     // 5. Transfer
-    const takenFromSector = new Map<string, number>();
-    for (const { sector: deficit, need: initialNeed } of missionDeficits) {
-        let need = initialNeed;
-        if (need <= 0) continue;
-
-        for (const surplus of nonMissionSurplus) {
-            if (need <= 0) break;
-            const taken = takenFromSector.get(surplus.sector_id) ?? 0;
-            const currentCount = surplus.assigned_brigade_ids.length - taken;
-            const surplusBudget = Math.ceil(surplus.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
-            const floor = Math.max(surplusBudget, MIN_DONOR_BRIGADES);
-            const available = currentCount - floor;
-            if (available <= 0) continue;
-
-            const candidates = surplus.assigned_brigade_ids
-                .filter(bid => !overrides.some(o => o.brigade_id === bid))
-                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
-                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
-
-            const toTransfer = Math.min(need, available, candidates.length);
-            for (let i = 0; i < toTransfer; i++) {
-                overrides.push({
-                    brigade_id: candidates[i].bid,
-                    from_sector_id: surplus.sector_id,
-                    to_sector_id: deficit.sector_id,
-                    reason: 'mission_priority',
-                });
-                takenFromSector.set(surplus.sector_id, (takenFromSector.get(surplus.sector_id) ?? 0) + 1);
-                need--;
-            }
-        }
-    }
+    transferBrigadesBetweenSectors(missionDeficits, nonMissionSurplus, formations, overrides, overriddenBrigadeIds, 'mission_priority');
 }
 
 /**
@@ -857,7 +874,7 @@ function applyNonPriorityExcess(
     armyPriorities: ArmyOperationPriority[],
     commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
-    _componentOf: Map<string, number>,
+    overriddenBrigadeIds: Set<string>,
 ): void {
     // Without priorities, there's no concept of "non-priority" — skip
     if (armyPriorities.length === 0) return;
@@ -876,7 +893,7 @@ function applyNonPriorityExcess(
     const isSectorPriority = (s: CorpsFrontSector): boolean => {
         for (const seg of s.sub_segments) {
             for (const hosid of (seg.enemy_osids ?? [])) {
-                const muni = hosid.split(':')[1];
+                const muni = munFromOsid(hosid);
                 if (muni && priorityMunicipalities.has(muni)) return true;
             }
         }
@@ -913,38 +930,7 @@ function applyNonPriorityExcess(
     donors.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
 
     // 5. Transfer
-    const takenFromSector = new Map<string, number>();
-    for (const { sector: recipient, need: initialNeed } of recipients) {
-        let need = initialNeed;
-        if (need <= 0) continue;
-
-        for (const donor of donors) {
-            if (need <= 0) break;
-            const taken = takenFromSector.get(donor.sector_id) ?? 0;
-            const currentCount = donor.assigned_brigade_ids.length - taken;
-            const donorBudget = Math.ceil(donor.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
-            const floor = Math.max(donorBudget, MIN_DONOR_BRIGADES) + defensiveKeep;
-            const available = currentCount - floor;
-            if (available <= 0) continue;
-
-            const candidates = donor.assigned_brigade_ids
-                .filter(bid => !overrides.some(o => o.brigade_id === bid))
-                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
-                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
-
-            const toTransfer = Math.min(need, available, candidates.length);
-            for (let i = 0; i < toTransfer; i++) {
-                overrides.push({
-                    brigade_id: candidates[i].bid,
-                    from_sector_id: donor.sector_id,
-                    to_sector_id: recipient.sector_id,
-                    reason: 'non_priority_excess',
-                });
-                takenFromSector.set(donor.sector_id, (takenFromSector.get(donor.sector_id) ?? 0) + 1);
-                need--;
-            }
-        }
-    }
+    transferBrigadesBetweenSectors(recipients, donors, formations, overrides, overriddenBrigadeIds, 'non_priority_excess', defensiveKeep);
 }
 
 /**
@@ -956,7 +942,7 @@ function applyOffensiveStaging(
     formations: Record<string, FormationState>,
     commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
-    _componentOf: Map<string, number>,
+    overriddenBrigadeIds: Set<string>,
 ): void {
     const weights = commanderProfile.preStagingSectorWeights;
     if (weights.size === 0) return;
@@ -1007,38 +993,7 @@ function applyOffensiveStaging(
     donors.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
 
     // 5. Transfer
-    const takenFromSector = new Map<string, number>();
-    for (const { sector: staging, need: initialNeed } of stagingDeficits) {
-        let need = initialNeed;
-        if (need <= 0) continue;
-
-        for (const donor of donors) {
-            if (need <= 0) break;
-            const taken = takenFromSector.get(donor.sector_id) ?? 0;
-            const currentCount = donor.assigned_brigade_ids.length - taken;
-            const donorBudget = Math.ceil(donor.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
-            const floor = Math.max(donorBudget, MIN_DONOR_BRIGADES);
-            const available = currentCount - floor;
-            if (available <= 0) continue;
-
-            const candidates = donor.assigned_brigade_ids
-                .filter(bid => !overrides.some(o => o.brigade_id === bid))
-                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
-                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
-
-            const toTransfer = Math.min(need, available, candidates.length);
-            for (let i = 0; i < toTransfer; i++) {
-                overrides.push({
-                    brigade_id: candidates[i].bid,
-                    from_sector_id: donor.sector_id,
-                    to_sector_id: staging.sector_id,
-                    reason: 'offensive_staging',
-                });
-                takenFromSector.set(donor.sector_id, (takenFromSector.get(donor.sector_id) ?? 0) + 1);
-                need--;
-            }
-        }
-    }
+    transferBrigadesBetweenSectors(stagingDeficits, donors, formations, overrides, overriddenBrigadeIds, 'offensive_staging');
 }
 
 /** Reinforce critically threatened defensive sectors by pulling from safe surplus sectors. */
@@ -1047,7 +1002,7 @@ function applyDefensiveCoherence(
     formations: Record<string, FormationState>,
     _commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
-    _componentOf: Map<string, number>,
+    overriddenBrigadeIds: Set<string>,
 ): void {
     // Find deficit sectors: high threat AND under-garrisoned
     const deficitSectors = corpsSectors
@@ -1055,7 +1010,11 @@ function applyDefensiveCoherence(
             const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
             return s.threat_ratio >= DEFENSIVE_CRITICAL_THREAT && s.assigned_brigade_ids.length < budget;
         })
-        .sort((a, b) => b.threat_ratio - a.threat_ratio || strictCompare(a.sector_id, b.sector_id));
+        .map(s => {
+            const budget = Math.ceil(s.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
+            return { sector: s, need: budget - s.assigned_brigade_ids.length };
+        })
+        .sort((a, b) => b.sector.threat_ratio - a.sector.threat_ratio || strictCompare(a.sector.sector_id, b.sector.sector_id));
 
     // Find surplus sectors: over-garrisoned AND above minimum
     const surplusSectors = corpsSectors
@@ -1067,43 +1026,7 @@ function applyDefensiveCoherence(
 
     if (deficitSectors.length === 0 || surplusSectors.length === 0) return;
 
-    // Track how many have been taken from each surplus sector (overrides not yet applied)
-    const takenFromSector = new Map<string, number>();
-
-    for (const deficit of deficitSectors) {
-        const budget = Math.ceil(deficit.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
-        let need = budget - deficit.assigned_brigade_ids.length;
-        if (need <= 0) continue;
-
-        for (const surplus of surplusSectors) {
-            if (need <= 0) break;
-
-            const taken = takenFromSector.get(surplus.sector_id) ?? 0;
-            const currentCount = surplus.assigned_brigade_ids.length - taken;
-            const surplusBudget = Math.ceil(surplus.length_edges / GARRISON_BUDGET_EDGES_PER_BRIGADE);
-            const floor = Math.max(surplusBudget, MIN_DONOR_BRIGADES);
-            const available = currentCount - floor;
-            if (available <= 0) continue;
-
-            // Candidate brigades: those still in this sector and not already overridden
-            const candidates = surplus.assigned_brigade_ids
-                .filter(bid => !overrides.some(o => o.brigade_id === bid))
-                .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
-                .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
-
-            const toTransfer = Math.min(need, available, candidates.length);
-            for (let i = 0; i < toTransfer; i++) {
-                overrides.push({
-                    brigade_id: candidates[i].bid,
-                    from_sector_id: surplus.sector_id,
-                    to_sector_id: deficit.sector_id,
-                    reason: 'defensive_critical',
-                });
-                takenFromSector.set(surplus.sector_id, (takenFromSector.get(surplus.sector_id) ?? 0) + 1);
-                need--;
-            }
-        }
-    }
+    transferBrigadesBetweenSectors(deficitSectors, surplusSectors, formations, overrides, overriddenBrigadeIds, 'defensive_critical');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
