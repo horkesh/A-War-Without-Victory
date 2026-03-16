@@ -400,9 +400,6 @@ export function MapContainer() {
         },
         onFormationClick: (id, props, point) => {
           setSelectedFormationId(id);
-          // Also select the brigade's sector so its front line highlights
-          const sectorId = getSectorIdForFormation(id, loadedGameState?.corpsFrontSectors);
-          if (sectorId) setSelectedCorpsFrontSectorId(sectorId);
           // If clicking a formation, also expand its stack if it's not already expanded
           const osid = props.location_osid as string | undefined;
           if (osid && loadedGameState) {
@@ -1424,27 +1421,65 @@ export function MapContainer() {
       }
 
       if (activeSectorIds.size === 0 || !sectorsVisible) {
-        // Clear all highlight layers
+        // Clear sector-specific layers
         try {
           map.setFilter(SECTOR_FILL_LAYER_ID, ['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification);
-          for (const layerId of [SECTOR_EDGE_GLOW_POS_LAYER_ID, SECTOR_EDGE_GLOW_NEG_LAYER_ID, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID]) {
-            if (safeHasLayer(map, layerId)) {
-              const side = layerId.includes('-pos') ? 1 : -1;
-              map.setFilter(layerId, ['all', ['==', ['get', 'offset_side'], side], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
-            }
-          }
           if (safeHasLayer(map, SECTOR_BRIGADE_RINGS_LAYER_ID)) {
             map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['==', ['get', 'id'], '__none__'] as maplibregl.FilterSpecification);
           }
-          if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
-            map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, ['==', ['get', 'id'], '__none__'] as maplibregl.FilterSpecification);
-            map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0);
-          }
-          if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
-            map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, ['==', ['get', 'id'], '__none__'] as maplibregl.FilterSpecification);
-          }
         } catch (e) {
-          console.warn('[MapContainer] highlight clear failed:', e);
+          console.warn('[MapContainer] sector clear failed:', e);
+        }
+
+        // Brigade-level highlight: white icon + AoR sub-segment line
+        if (selectedFormationId && loadedGameState) {
+          const fm = loadedGameState.formations.find((f) => f.id === selectedFormationId);
+          const subSegId = fm?.assigned_sub_segment_id;
+          try {
+            if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
+              map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, ['==', ['get', 'id'], selectedFormationId] as maplibregl.FilterSpecification);
+              map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0.98);
+            }
+            if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
+              map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, ['==', ['get', 'id'], selectedFormationId] as maplibregl.FilterSpecification);
+              map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-opacity', 0.6);
+              map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-radius', ['interpolate', ['linear'], ['zoom'], 6, 12, 10, 16, 14, 22]);
+            }
+            // AoR line: filter front edge layers by sub_segment_id
+            const edgeFilter = subSegId
+              ? ['==', ['get', 'sub_segment_id'], subSegId]
+              : ['==', ['get', 'sector_id'], '__none__'];
+            for (const layerId of [SECTOR_EDGE_GLOW_POS_LAYER_ID, SECTOR_EDGE_GLOW_NEG_LAYER_ID, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID]) {
+              if (safeHasLayer(map, layerId)) {
+                const side = layerId.includes('-pos') ? 1 : -1;
+                map.setFilter(layerId, ['all', ['==', ['get', 'offset_side'], side], edgeFilter] as any);
+                if (subSegId && layerId.includes('glow')) {
+                  map.setPaintProperty(layerId, 'line-opacity', 0.95);
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('[MapContainer] brigade highlight failed:', e);
+          }
+        } else {
+          // Nothing selected — clear everything
+          try {
+            for (const layerId of [SECTOR_EDGE_GLOW_POS_LAYER_ID, SECTOR_EDGE_GLOW_NEG_LAYER_ID, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID]) {
+              if (safeHasLayer(map, layerId)) {
+                const side = layerId.includes('-pos') ? 1 : -1;
+                map.setFilter(layerId, ['all', ['==', ['get', 'offset_side'], side], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+              }
+            }
+            if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
+              map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, ['==', ['get', 'id'], '__none__'] as maplibregl.FilterSpecification);
+              map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0);
+            }
+            if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
+              map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, ['==', ['get', 'id'], '__none__'] as maplibregl.FilterSpecification);
+            }
+          } catch (e) {
+            console.warn('[MapContainer] full clear failed:', e);
+          }
         }
         return true;
       }
@@ -1483,15 +1518,8 @@ export function MapContainer() {
         console.warn('[MapContainer] sector fill filter failed:', e);
       }
 
-      // 2. Highlight front edges — narrow to sub-segment when a brigade is selected
-      let filterExpr: any = ['in', ['get', 'sector_id'], ['literal', ids]];
-      if (selectedFormationId && loadedGameState) {
-        const formation = loadedGameState.formations.find((f) => f.id === selectedFormationId);
-        const subSegId = formation?.assigned_sub_segment_id;
-        if (subSegId) {
-          filterExpr = ['==', ['get', 'sub_segment_id'], subSegId];
-        }
-      }
+      // 2. Highlight front edges in the sector
+      const filterExpr = ['in', ['get', 'sector_id'], ['literal', ids]] as any;
       try {
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
           map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as any);
@@ -1531,16 +1559,13 @@ export function MapContainer() {
         console.warn('[MapContainer] sector brigade rings focus failed:', e);
       }
 
-      // C.3b + C.3c: Unit white glow + white icon overlay — sector, corps, or brigade selection
-      const unitHighlightActive = !!(selectedCorpsId || selectedCorpsFrontSectorId || selectedFormationId);
-      // When a brigade is selected, narrow to just that brigade (not whole sector)
-      const unitFilter: any = selectedFormationId
-        ? ['==', ['get', 'id'], selectedFormationId]
-        : selectedCorpsId
-          ? ['in', ['get', 'sector_id'], ['literal', ids]]
-          : selectedCorpsFrontSectorId
-            ? ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]
-            : ['==', ['get', 'sector_id'], '__none__'];
+      // C.3b + C.3c: Unit white glow + white icon overlay — sector or corps selection
+      const unitHighlightActive = !!(selectedCorpsId || selectedCorpsFrontSectorId);
+      const unitFilter: any = selectedCorpsId
+        ? ['in', ['get', 'sector_id'], ['literal', ids]]
+        : selectedCorpsFrontSectorId
+          ? ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]
+          : ['==', ['get', 'sector_id'], '__none__'];
 
       try {
         if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {

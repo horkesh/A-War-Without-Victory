@@ -216,7 +216,7 @@ export const useGameStore = create<GameStore>((set) => ({
   setSelectedOsid: (osid) => set({ selectedOsid: osid, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedCorpsId: null, selectedArmyId: null, selectedArmyHqId: null, selectedOrbatCorpsId: null }),
 
   selectedFormationId: null,
-  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedCorpsId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+  setSelectedFormationId: (id) => set({ selectedFormationId: id, selectedCorpsId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   hoveredOsids: [],
   setHoveredOsids: (osids) => set({ hoveredOsids: [...new Set(osids)].sort((a, b) => a.localeCompare(b)) }),
