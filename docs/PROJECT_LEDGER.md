@@ -3,6 +3,24 @@
 **Last Updated:** 2026-03-16
 **Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **927 tests**, 80 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
 
+## [2026-03-16] n835: Stale-Count Oscillation Fix + Sector Contiguity + Position Viability
+
+**Three structural fixes to brigade positioning:**
+
+1. **Stale-count oscillation (BUG):** `evaluateSectorMarch` in `bot_brigade_eval_front.ts` used `countCorpsBrigadesAtOsid()` which reads static state. When 7 brigades evaluate at the same OSID, ALL see count=7 and ALL march to the same empty destination. Next turn they all march back — perpetual ping-pong. Fix: `columnAssignments` Map tracks planned departures (-1) and arrivals (+1) during the per-brigade evaluation loop. Each brigade sees adjusted counts from prior brigades' decisions this turn. Destination check prevents marching to already-full OSIDs. Also applied to `evaluateFrontCoverage` corps-level rebalancing.
+
+2. **Centroids passthrough (BUG):** `splitNonContiguousSectors` in `sector_splitting.ts` called `buildEdgeAdjacency` without passing `centroids`. Without centroids, `isCaseBBridge()` returns false (skips the angle check), allowing Case B to wrongly bridge disconnected pockets (Gorazde-Rudo). Fix: pass centroids through the call chain from `buildMultiSectorsForCorps`.
+
+3. **Position viability (FEATURE):** 5th commander override criterion in `commander_override.ts`. Exposed brigades (<=1 friendly neighbor, not in mission-critical municipalities from army priorities) get withdrawal orders to safest sector. Aggressive commanders only withdraw at 0 (encircled). Max 2 per corps per turn. Brcko South Hold priority expanded with `ugljevik` and `brcko` municipalities to protect Teocak anchor.
+
+**Results (n835):** 89.4% area-weighted. 13/13 anchors. 5/6 benchmarks (RBiH w40 marginal at +0.054). Bihac 7-stack **GONE**. Trebinje 6->4. Orders 136->151 (+15). Battles 111->121 (+10). Hash `e6eac4450e598a41`.
+
+**Known remaining:** Brigades assigned to sectors they can't physically reach through friendly territory (Gorazde brigades at Pale). Structural — needs sector assignment reachability enforcement.
+
+**Files:** `src/sim/combat/bot_brigade_eval_front.ts` (oscillation), `src/sim/combat/sector_splitting.ts` + `src/sim/combat/sector_building.ts` (centroids), `src/sim/combat/commander_override.ts` (viability), `src/sim/combat/bot_strategy.ts` (Brcko priorities).
+
+---
+
 ## [2026-03-16] Refactor: Extract corps_front_sectors.ts (4,639→349 lines)
 
 Extracted into 9 focused modules with zero behavior change. 927 tests pass, tsc clean. `/simplify` pass unified duplicate constants and consolidated imports. REPO_MAP and PIPELINE_ENTRYPOINTS updated. Modules: `sector_utils`, `sector_edge_adjacency`, `sector_assertions`, `sector_territory`, `sector_building`, `sector_splitting`, `brigade_assignment`, `commander_override`, `subsegment_assignment`. Orchestrator re-exports everything for backward compatibility.

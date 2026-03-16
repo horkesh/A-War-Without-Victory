@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-16 (planning session: 4 new lessons from full-roadmap cross-plan reviews)
+> Last updated: 2026-03-16 (night shift audit: 5 new lessons from event system v0.4.1 testing)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -381,6 +381,48 @@
 - **Wrong approach**: Sharing MapLibre layers between two independent selection features (sector highlight and brigade highlight). Setting filters on shared layers from two different useEffects creates a last-writer-wins race. Suppressing hover when a brigade is selected broke sector navigation.
 - **Right approach**: Create DEDICATED MapLibre layers for each selection feature. Brigade AoR uses `brigade-aor-pos` and `brigade-aor-neg` layers on the same source but with independent filters and opacity. Sector highlight is completely untouched.
 - **Do instead**: When adding a new map highlight feature, ALWAYS create new layers. Never reuse layers owned by another useEffect. Shared source is fine; shared layers are not.
+
+### [Night Shift] Distinguish "deferred integration" from "forgotten wiring" — flag both explicitly (2026-03-16) — NEW
+- **Context**: Night shift v0.4.4 implemented `checkHeroicStand()` and `checkDefeatism()` in `officer_experience.ts` — well-written functions with clear APIs. But neither is imported or called anywhere. Unlike the event loader (which was accidental dead code), these appear to be intentionally deferred: integrating them requires battle resolution to link power ratios back to corps commanders, which is non-trivial. Similarly, `ScenarioSelectionScreen.tsx` (v0.4.2) was created but not imported in `App.tsx` — correctly deferred because App.tsx was on the "DO NOT Touch" list.
+- **Wrong approach**: Leaving deferred functions without any marker. The morning report lists "heroic stand (+aggressiveness, +morale)" as implemented, but there's no note saying "integration deferred — needs battle resolution linkage." A future developer (or nightshift) sees the export, assumes it's active, and builds on a foundation that doesn't exist.
+- **Right approach**: When creating a function that can't be wired yet, add a `// TODO(nightshift): not yet called — needs X to integrate` comment at the export AND note it in the morning report as "API ready, integration deferred: [reason]." When a component can't be imported due to DO NOT Touch constraints, note that too.
+- **Do instead**: Every exported function must be either (a) imported and called, or (b) explicitly marked as deferred with the reason. The morning report must distinguish "implemented and active" from "API created, integration pending."
+
+### [Night Shift] Every new function must be imported and called — dead code is invisible failure (2026-03-16) — NEW
+- **Context**: Night shift (v0.4.1) created `event_loader.ts` with `loadEventDefinitions()` to load 41 historical events from JSON files. The function is well-written, well-documented, properly handles errors, sorts deterministically. But it is **never imported or called anywhere**. `evaluateEvents()` iterates `EVENT_REGISTRY` from `event_registry.ts` — a hardcoded array of 15 narrative-only placeholder events. All 41 rich events with mechanical effects (morale, supply, alliance, war crimes, decisions) are dead code.
+- **Wrong approach**: Creating a loader function and data files, then moving on to the next milestone without wiring the loader to the consumer. The nightshift morning report declared "41 historical events" implemented — because the files exist. Nobody checked whether the events actually fire.
+- **Right approach**: After creating any function, immediately verify it is (1) imported by its consumer, (2) called at runtime, and (3) produces observable output. For events: run the scenario, grep the weekly report for `events_fired`, confirm the right events appear at the right turns.
+- **Do instead**: Before marking any feature complete, answer: "How do I know this code actually runs?" If the answer requires tracing imports, do the trace. A function that exists but is never called is worse than no function — it creates false confidence. **Minimum bar: the function must appear in at least one import statement outside its own file.**
+
+### [Night Shift] Output serialization must include new report fields (2026-03-16) — NEW
+- **Context**: The `evaluate-events` pipeline step correctly sets `context.report.events_fired` with fired event data. But `buildWeeklyReport()` in `scenario_reporting.ts` never includes `events_fired` in its output row. The scenario runner manually attaches `column_movement` and `movement_report` from the turn report (lines 1919-1923) but doesn't do the same for `events_fired`. Result: events fire at runtime but are invisible in all scenario output files.
+- **Wrong approach**: Adding a report field to the pipeline context type (`turn_pipeline_types.ts`) and setting it in the pipeline step, then assuming it will appear in the output. The weekly report builder has its own explicit field list.
+- **Right approach**: When adding a new field to `TurnReport`, also add it to `buildWeeklyReport()` or the manual attachment block in `scenario_runner.ts`. Verify by running a scenario and checking the JSONL output for the new field.
+- **Do instead**: Treat "field appears in output" as part of the definition of done. If you add `context.report.X`, grep `scenario_reporting.ts` and `scenario_runner.ts` for where report fields are serialized. Add your field there. Verify with: `node -e "..."` checking the weekly_report.jsonl.
+
+### [Night Shift] Placeholder registries must be replaced, not left alongside real data (2026-03-16) — NEW
+- **Context**: `event_registry.ts` contains 15 hardcoded placeholder events (narrative-only, no `once` flag, fire every turn in their range). The night shift created 41 rich events in JSON files plus a loader — but left the placeholder registry intact and active. Even if the loader were connected, the placeholders would still fire alongside the real events, producing duplicates (e.g. both `srebrenica_enclave` placeholder AND `srebrenica_enclave_forms_1992` real event).
+- **Wrong approach**: Creating the replacement system (JSON loader) without removing or replacing the thing it replaces (hardcoded registry). Both systems coexist in silent conflict.
+- **Right approach**: When building a replacement for a hardcoded registry, the old registry must be emptied or removed in the same commit that connects the new one. If the new system isn't ready to connect, leave the old one and don't create the replacement yet.
+- **Do instead**: Search for the constant that the consumer reads (`EVENT_REGISTRY`). If you're replacing its source, replace it completely. Never leave two competing sources of truth.
+
+### [Night Shift] Effect handlers must guard against missing state fields (2026-03-16) — NEW
+- **Context**: `applySupplyDelta()` correctly guards `if (!state.military.general_supply_reserve) return;` — it silently no-ops when the field doesn't exist. Similarly `applyHumanitarianImpact` and `applyPatronPressure` guard against missing `negotiation` state. This is defensive but makes failures invisible: supply_delta events fire, appear in the fired list, but have zero effect because the state field doesn't exist yet at that point in the game.
+- **Wrong approach**: Silent no-ops that mask broken preconditions. The effect "succeeds" (no error) but does nothing.
+- **Right approach**: Two options: (1) Initialize the state field with defaults before events evaluate (so effects always apply), or (2) Log a warning when an effect is skipped due to missing state, so the developer knows the effect didn't apply. Option 1 is preferred — effects should be mechanical, not conditional on state initialization order.
+- **Do instead**: When writing an effect handler that guards against missing state, ask: "Should this state always exist by the time this effect runs?" If yes, the guard is hiding a bug. If no (e.g. peace phase doesn't have military formations), the guard is correct but should be documented.
+
+### [Night Shift] Smoke-test each milestone's observable behavior before moving to the next (2026-03-16) — NEW
+- **Context**: Night shift implemented 8 milestones in sequence. The morning report lists all commits, test counts, version tags. But no milestone was smoke-tested for observable behavior. The event system (v0.4.1) was declared complete with "41 historical events" — but zero events produce observable output in a scenario run. A single `grep events_fired weekly_report.jsonl` would have revealed the disconnection immediately.
+- **Wrong approach**: Using "tests pass + tsc clean" as the completeness criterion. Unit tests verify individual functions in isolation; they don't verify that the functions are wired into the pipeline. 13 event tests pass — but events don't fire in an actual game.
+- **Right approach**: For each milestone, define ONE observable behavior check that can only pass if the full pipeline is connected: "Run a 10-week scenario. Does X appear in the output?" For events: do `events_fired` entries appear in weekly reports? For economy: do production facility outputs change supply reserves? For officer experience: do officer stats change after operations?
+- **Do instead**: Before bumping the version for a milestone, run the scenario and verify the feature's output in the run artifacts. Not tests. Not type checks. Actual scenario output.
+
+### [Bot AI] Stale-count reads cause oscillation — always track planned movements (2026-03-16) — NEW
+- **Evidence**: `evaluateSectorMarch` in `bot_brigade_eval_front.ts` used `countCorpsBrigadesAtOsid()` to check overstacking. Since all brigades evaluate against the same static state in one pass, 7 brigades at OSID X all see count=7 and all march to OSID Y. Next turn: all 7 at Y, march back to X. Perpetual oscillation.
+- **Root cause**: Per-entity evaluation loop reads shared static state without tracking the effects of earlier entities' decisions in the same loop.
+- **Rule**: Any per-entity evaluation loop that reads entity counts at locations MUST maintain a running adjustment map (departures/arrivals) so entity N sees the effects of entities 1..N-1's decisions. This applies to: overstacking redistribution, front gap filling, sector march, and any future per-brigade movement evaluation.
+- **Fix**: `columnAssignments: Map<Osid, number>` passed through `BrigadeEvaluationContext`, decremented on departure, incremented on arrival, checked before issuing movement orders.
 
 ---
 

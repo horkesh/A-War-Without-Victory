@@ -8,8 +8,8 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-16, n824 calibration)
-**v0.4.6 (Commander Override Layer).** 927 tests, 80 suites. tsc clean. **Latest calibration: n824 = 89.4% area-weighted, 6/6 benchmarks, 13/13 anchors. Drina 80.4%.**
+## Current State (2026-03-16, n835 calibration)
+**v0.4.6 (Commander Override Layer).** 927 tests, 80 suites. tsc clean. **Latest calibration: n835 = 89.4% area-weighted, 5/6 benchmarks, 13/13 anchors. 151 orders, 121 battles.** Stale-count oscillation FIXED (columnAssignments tracking). Position viability (5th commander override criterion) ACTIVE.
 **v0.5.x + v0.6.x FULLY PLANNED:** 10 milestones scoped, 3 cross-plan reviews, all Pyrrhic compliant.
 **Night shift handoff ready:** v0.5.0→v0.5.4 (5 milestones). v0.6.x handoff separate (v0.6.1 Phase 2 day-shift only).
 **External:** Ops planning modal (outside expert). Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
@@ -71,7 +71,7 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-16] Salient retreat — no proactive withdrawal (P2)**: Prevention works (`computeSalientRisk` blocks new captures at 0.75). But NO proactive evacuation from existing salients. Brigades surrounded on 3+ sides defend until destroyed. Need: periodic position-viability audit in brigade AI pipeline → column march to nearest safe OSID when salient-risk > 0.75 AND supply critical.
+1. **[2026-03-16] Brigade-to-sector reachability gap (P2)**: Brigades assigned to sectors in disconnected friendly components (Gorazde brigades at Pale). Needs sector assignment to respect connected components during base classification, not just during commander overrides.
 2. **[2026-03-16] ARBiH 1st Corps probing — RESOLVED (n824)**: Sarajevo Probing priority (weight 60, w15-56) + organic E2 stance (army-HQ-aware bias) + `corps_asset` kind fix activated army HQ overrides. 1st Corps now probes RS suburbs when army HQ directs.
 3. **[2026-03-16] 2KK Prozor positional lock — PARTIALLY ADDRESSED (P2)**: Commander override mission compliance pulls toward Bihac. 3 Prozor OSIDs still mismatched at n820. Residual positional inertia needs weight tuning or explicit recall.
 4. **[2026-03-10] Donji Vakuf pocket remnant (P3)**: 2 OSIDs still RBiH (was 5). Improved but not fully resolved. Municipality priority tuning for 2KK.
