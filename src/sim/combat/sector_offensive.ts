@@ -41,7 +41,7 @@ import type { ControlSide } from '../../state/political_control_types.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { releaseOperationCommander } from './officer_system.js';
 import { finalizeOperationAAR } from './operation_aar.js';
-import { applyOperationExperience, gradeStarsToOutcome } from './officer_experience.js';
+import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import { isOsidInSameEnclave } from './enclave_resilience.js';
@@ -766,6 +766,18 @@ export function advanceSectorOffensives(
                         if (latestAAR && latestAAR.commander_officer_id === op.commander_officer_id) {
                             const outcome = gradeStarsToOutcome(latestAAR.grade.stars);
                             applyOperationExperience(state, op.commander_officer_id, outcome);
+                        }
+                    }
+                    // Track consecutive operation failures for defeatism
+                    if (op.commander_officer_id && state.military.named_officers) {
+                        const os = state.military.named_officers[op.commander_officer_id];
+                        if (os) {
+                            if (op.recovery_reason === 'completed') {
+                                os.consecutive_op_failures = 0; // Reset on success
+                            } else if (op.recovery_reason !== 'probe_complete') {
+                                os.consecutive_op_failures = (os.consecutive_op_failures ?? 0) + 1;
+                                checkDefeatism(state, op.commander_officer_id, os.consecutive_op_failures);
+                            }
                         }
                     }
                 }

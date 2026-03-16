@@ -1,13 +1,13 @@
 /**
- * B1.4: Event evaluator tests — trigger matching, registry order, determinism.
- * Same state + turn + seed → same events_fired; RNG only for random events; stable EVENT_REGISTRY order.
+ * Event evaluator tests — trigger matching, registry order, determinism.
+ * Same state + turn + seed → same events_fired; RNG only for random events; stable registry order.
+ * Tests use inline event definitions passed via the registry parameter.
  */
 
 import assert from 'node:assert';
 import { test } from 'node:test';
 import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
-import { EVENT_REGISTRY, HISTORICAL_EVENTS } from '../src/sim/events/event_registry.js';
-import type { Rng } from '../src/sim/events/event_types.js';
+import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import { triggerMatches } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -36,73 +36,124 @@ function hashSeed(seed: string): number {
 function minimalState(phase: 'peace' | 'war', turn: number): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn, seed: 'events-test-seed', phase }
-    } as GameState;
+        meta: { turn, seed: 'events-test-seed', phase },
+        military: { formations: {}, fired_event_ids: [] },
+        political: {},
+        factions: [],
+        displacement: {},
+    } as unknown as GameState;
 }
 
+/** Test event definitions (inline, not from JSON files). */
+const TEST_HISTORICAL: EventDefinition[] = [
+    {
+        id: 'test_early_war',
+        trigger: { turn_min: 0, turn_max: 80, phase: 'war' },
+        effect: { kind: 'narrative', text: 'Early war event.' },
+        once: true,
+    },
+    {
+        id: 'test_mid_war',
+        trigger: { turn_min: 40, turn_max: 150, phase: 'war' },
+        effect: { kind: 'narrative', text: 'Mid war event.' },
+        once: true,
+    },
+    {
+        id: 'test_late_war',
+        trigger: { turn_min: 80, turn_max: 120, phase: 'war' },
+        effect: { kind: 'narrative', text: 'Late war event.' },
+        once: true,
+    },
+    {
+        id: 'test_full_war',
+        trigger: { turn_min: 0, turn_max: 200, phase: 'war' },
+        effect: { kind: 'narrative', text: 'Full war event.' },
+        once: true,
+    },
+];
+
+const TEST_RANDOM: EventDefinition[] = [
+    {
+        id: 'test_random_a',
+        trigger: { phase: 'war' },
+        effect: { kind: 'narrative', text: 'Random event A.' },
+        probability: 0.08,
+    },
+    {
+        id: 'test_random_b',
+        trigger: { phase: 'war' },
+        effect: { kind: 'narrative', text: 'Random event B.' },
+        probability: 0.50,
+    },
+];
+
+const TEST_REGISTRY: EventDefinition[] = [...TEST_HISTORICAL, ...TEST_RANDOM];
+
 test('triggerMatches: phase filter — war event does not match peace state', () => {
-    const markale = EVENT_REGISTRY.find((e) => e.id === 'markale_market')!;
+    const ev = TEST_HISTORICAL.find((e) => e.id === 'test_late_war')!;
     const state = minimalState('peace', 90);
-    assert.strictEqual(triggerMatches(markale, state, 90), false);
+    assert.strictEqual(triggerMatches(ev, state, 90), false);
 });
 
 test('triggerMatches: phase filter — war event matches war state', () => {
-    const srebrenica = EVENT_REGISTRY.find((e) => e.id === 'srebrenica_enclave')!;
+    const ev = TEST_HISTORICAL.find((e) => e.id === 'test_full_war')!;
     const state = minimalState('war', 10);
-    assert.strictEqual(triggerMatches(srebrenica, state, 10), true);
+    assert.strictEqual(triggerMatches(ev, state, 10), true);
 });
 
 test('triggerMatches: turn_min — event with turn_min 40 does not match turn 39', () => {
-    const arabh = EVENT_REGISTRY.find((e) => e.id === 'arabh_organization')!;
+    const ev = TEST_HISTORICAL.find((e) => e.id === 'test_mid_war')!;
     const state = minimalState('war', 39);
-    assert.strictEqual(triggerMatches(arabh, state, 39), false);
+    assert.strictEqual(triggerMatches(ev, state, 39), false);
 });
 
 test('triggerMatches: turn_min — event with turn_min 40 matches turn 40', () => {
-    const arabh = EVENT_REGISTRY.find((e) => e.id === 'arabh_organization')!;
+    const ev = TEST_HISTORICAL.find((e) => e.id === 'test_mid_war')!;
     const state = minimalState('war', 40);
-    assert.strictEqual(triggerMatches(arabh, state, 40), true);
+    assert.strictEqual(triggerMatches(ev, state, 40), true);
 });
 
 test('triggerMatches: turn_max — event with turn_max 80 does not match turn 81', () => {
-    const vrs = EVENT_REGISTRY.find((e) => e.id === 'vrs_offensive')!;
+    const ev = TEST_HISTORICAL.find((e) => e.id === 'test_early_war')!;
     const state = minimalState('war', 81);
-    assert.strictEqual(triggerMatches(vrs, state, 81), false);
+    assert.strictEqual(triggerMatches(ev, state, 81), false);
 });
 
 test('triggerMatches: turn_max — event with turn_max 80 matches turn 80', () => {
-    const vrs = EVENT_REGISTRY.find((e) => e.id === 'vrs_offensive')!;
+    const ev = TEST_HISTORICAL.find((e) => e.id === 'test_early_war')!;
     const state = minimalState('war', 80);
-    assert.strictEqual(triggerMatches(vrs, state, 80), true);
+    assert.strictEqual(triggerMatches(ev, state, 80), true);
 });
 
-test('evaluateEvents: war turn 10 fires historical events only (no probability)', () => {
+test('evaluateEvents: war turn 10 fires matching historical events (via registry param)', () => {
     const state = minimalState('war', 10);
     const rng = createRng('seed-a');
-    const result = evaluateEvents(state, rng, 10);
+    const result = evaluateEvents(state, rng, 10, TEST_REGISTRY);
     const ids = result.fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    assert.ok(ids.includes('srebrenica_enclave'));
-    assert.ok(ids.includes('sarajevo_siege'));
-    assert.ok(ids.includes('vrs_offensive'));
-    assert.ok(ids.includes('hrhb_croat_rep'));
+    assert.ok(ids.includes('test_early_war'));
+    assert.ok(ids.includes('test_full_war'));
+    assert.ok(!ids.includes('test_mid_war')); // turn_min 40
+    assert.ok(!ids.includes('test_late_war')); // turn_min 80
     assert.strictEqual(result.fired.every((f) => typeof f.text === 'string'), true);
 });
 
-test('evaluateEvents: war turn 100 fires war historical events', () => {
+test('evaluateEvents: war turn 100 fires late and mid war events', () => {
     const state = minimalState('war', 100);
     const rng = createRng('seed-b');
-    const result = evaluateEvents(state, rng, 100);
+    const result = evaluateEvents(state, rng, 100, TEST_REGISTRY);
     const ids = result.fired.map((f) => f.id);
-    assert.ok(ids.includes('markale_market'));
-    assert.ok(ids.includes('washington_agreement'));
+    assert.ok(ids.includes('test_late_war'));
+    assert.ok(ids.includes('test_mid_war'));
+    assert.ok(ids.includes('test_full_war'));
 });
 
 test('evaluateEvents: same state + turn + seed → same events_fired (determinism)', () => {
-    const state = minimalState('war', 50);
+    const state1 = minimalState('war', 50);
+    const state2 = minimalState('war', 50);
     const rng1 = createRng('determinism-seed');
     const rng2 = createRng('determinism-seed');
-    const result1 = evaluateEvents(state, rng1, 50);
-    const result2 = evaluateEvents(state, rng2, 50);
+    const result1 = evaluateEvents(state1, rng1, 50, TEST_REGISTRY);
+    const result2 = evaluateEvents(state2, rng2, 50, TEST_REGISTRY);
     assert.deepStrictEqual(
         result1.fired.map((f) => ({ id: f.id, text: f.text })),
         result2.fired.map((f) => ({ id: f.id, text: f.text }))
@@ -110,11 +161,12 @@ test('evaluateEvents: same state + turn + seed → same events_fired (determinis
 });
 
 test('evaluateEvents: registry order stable — two calls produce identical fired order', () => {
-    const state = minimalState('war', 100);
+    const state1 = minimalState('war', 100);
+    const state2 = minimalState('war', 100);
     const rng1 = createRng('order-seed');
     const rng2 = createRng('order-seed');
-    const a = evaluateEvents(state, rng1, 100).fired;
-    const b = evaluateEvents(state, rng2, 100).fired;
+    const a = evaluateEvents(state1, rng1, 100, TEST_REGISTRY).fired;
+    const b = evaluateEvents(state2, rng2, 100, TEST_REGISTRY).fired;
     assert.strictEqual(a.length, b.length);
     for (let i = 0; i < a.length; i += 1) {
         assert.strictEqual(a[i]!.id, b[i]!.id);
@@ -122,36 +174,44 @@ test('evaluateEvents: registry order stable — two calls produce identical fire
     }
 });
 
-test('evaluateEvents: phase_0 or other phase returns empty fired', () => {
-    const statePhase0 = { ...minimalState('war', 10), meta: { ...minimalState('war', 10).meta, phase: 'peace' } } as GameState;
+test('evaluateEvents: peace phase returns empty fired', () => {
+    const state = minimalState('peace', 10);
     const rng = createRng('x');
-    const result = evaluateEvents(statePhase0, rng, 10);
+    const result = evaluateEvents(state, rng, 10, TEST_REGISTRY);
     assert.strictEqual(result.fired.length, 0);
 });
 
-test('EVENT_REGISTRY: historical events first then random; stable array', () => {
-    const historicalIds = HISTORICAL_EVENTS.map((e) => e.id);
-    const registryHistorical = EVENT_REGISTRY.slice(0, HISTORICAL_EVENTS.length).map((e) => e.id);
-    assert.deepStrictEqual(registryHistorical, historicalIds);
-    assert.ok(EVENT_REGISTRY.length > HISTORICAL_EVENTS.length);
+test('evaluateEvents: once-only events tracked and not re-fired', () => {
+    const state = minimalState('war', 10);
+    const rng1 = createRng('once-a');
+    const rng2 = createRng('once-b');
+    const r1 = evaluateEvents(state, rng1, 10, TEST_REGISTRY);
+    assert.ok(r1.fired.some(f => f.id === 'test_early_war'));
+    // Second call with same state (fired_event_ids now populated)
+    const r2 = evaluateEvents(state, rng2, 10, TEST_REGISTRY);
+    assert.ok(!r2.fired.some(f => f.id === 'test_early_war'), 'once-only event should not re-fire');
 });
 
 test('evaluateEvents: random events use RNG — same seed same fired set', () => {
-    const state = minimalState('war', 95);
+    const state1 = minimalState('war', 95);
+    const state2 = minimalState('war', 95);
     const seed = 'random-same';
-    const r1 = evaluateEvents(state, createRng(seed), 95);
-    const r2 = evaluateEvents(state, createRng(seed), 95);
+    const r1 = evaluateEvents(state1, createRng(seed), 95, TEST_RANDOM);
+    const r2 = evaluateEvents(state2, createRng(seed), 95, TEST_RANDOM);
     const ids1 = r1.fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
     const ids2 = r2.fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
     assert.deepStrictEqual(ids1, ids2);
 });
 
-test('evaluateEvents: each RNG seed yields deterministic fired set (war with random events)', () => {
-    const state = minimalState('war', 95);
-    const seedA1 = evaluateEvents(state, createRng('seed-alpha'), 95).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    const seedA2 = evaluateEvents(state, createRng('seed-alpha'), 95).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    const seedB1 = evaluateEvents(state, createRng('seed-beta'), 95).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    const seedB2 = evaluateEvents(state, createRng('seed-beta'), 95).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
+test('evaluateEvents: each RNG seed yields deterministic fired set', () => {
+    const stateA1 = minimalState('war', 95);
+    const stateA2 = minimalState('war', 95);
+    const stateB1 = minimalState('war', 95);
+    const stateB2 = minimalState('war', 95);
+    const seedA1 = evaluateEvents(stateA1, createRng('seed-alpha'), 95, TEST_RANDOM).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const seedA2 = evaluateEvents(stateA2, createRng('seed-alpha'), 95, TEST_RANDOM).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const seedB1 = evaluateEvents(stateB1, createRng('seed-beta'), 95, TEST_RANDOM).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const seedB2 = evaluateEvents(stateB2, createRng('seed-beta'), 95, TEST_RANDOM).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
     assert.deepStrictEqual(seedA1, seedA2);
     assert.deepStrictEqual(seedB1, seedB2);
 });

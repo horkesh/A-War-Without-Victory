@@ -214,7 +214,7 @@ export const warPhases: NamedPhase[] = [
         name: 'evaluate-events',
         run: (context) => {
             const turn = context.state.meta.turn;
-            const result = evaluateEvents(context.state, context.rng, turn);
+            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions);
             context.report.events_fired = result.fired;
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
             const grazText = checkAndFireGrazAccords(context.state);
@@ -1503,6 +1503,33 @@ export const warPhases: NamedPhase[] = [
             }
             const report = processOfficerSuccession(context.state, engagedCorpsIds);
             context.report.officer_succession = report;
+        }
+    },
+    {
+        name: 'check-heroic-stand',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.military.named_officers || !context.state.military.named_officer_data) return;
+            const osidReport = context.report.attack_resolution_osid;
+            if (!osidReport?.battles) return;
+            const { checkHeroicStand } = await import('../combat/officer_experience.js');
+            const formations = context.state.military.formations ?? {};
+            const corpsCmds = context.state.military.corps_command ?? {};
+            // Find defensive victories at 3:1+ power ratio — award heroic stand to defender's corps commander
+            for (const battle of osidReport.battles) {
+                if (battle.attacker_won) continue; // Defender must hold
+                if (battle.power_ratio < 3.0) continue; // Must be 3:1+ odds against
+                if (!battle.defender_brigade) continue;
+                const defenderF = formations[battle.defender_brigade];
+                if (!defenderF?.corps_id) continue;
+                const cmd = corpsCmds[defenderF.corps_id];
+                if (!cmd) continue;
+                // Find the corps commander officer ID
+                const officerState = Object.entries(context.state.military.named_officers ?? {})
+                    .find(([, os]) => os.assigned_corps_id === defenderF.corps_id && os.status === 'active');
+                if (!officerState) continue;
+                checkHeroicStand(context.state, officerState[0], battle.power_ratio);
+            }
         }
     },
     {

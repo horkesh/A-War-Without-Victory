@@ -1,7 +1,45 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-16
-**Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **927 tests**, 80 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
+**Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **932 tests**, 80 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
+
+## [2026-03-16] Nightshift Audit: Event System Fix + Officer Experience Integration
+
+**Systematic audit of all 8 nightshift-implemented systems (v0.3.2–v0.4.4). Found and fixed 2 broken systems; 5 working correctly; 1 correctly deferred.**
+
+### Event System (v0.4.1) — 3 bugs fixed
+
+1. **Event loader disconnected (CRITICAL):** `loadEventDefinitions()` in `event_loader.ts` was never imported or called. `evaluateEvents()` iterated `EVENT_REGISTRY` from `event_registry.ts` — 15 hardcoded narrative-only placeholder events. All 41 rich historical events with mechanical effects (morale, supply, alliance, war crimes, decisions) were dead code. Fix: replaced static registry with `initEventRegistry()` + `getEventRegistry()`, added `eventDefinitions` to `TurnInput`, loaded in scenario runner, passed through pipeline context.
+
+2. **Events not serialized to weekly report:** Pipeline step set `context.report.events_fired` but `buildWeeklyReport()` never included it. Fix: added `events_fired` to `WeeklyReportRow` and attached from turn report in scenario runner.
+
+3. **Placeholder registry left alongside real data:** 15 hardcoded narrative-only events would fire alongside real JSON events. Fix: removed all placeholder events, registry now loads exclusively from JSON files.
+
+**Result:** 17 events fire correctly across 40 weeks at historically accurate turns. Mechanical effects active: supply deltas, morale changes, alliance erosion (-0.15 from HVO-ARBiH tensions + Jajce), war crimes tracking, decision events. Calibration: 88.9% area-weighted (events inject real friction).
+
+### Officer Experience (v0.4.4) — 2 dead code paths wired
+
+1. **Defeatism (DEAD CODE):** `checkDefeatism()` exported but never called. Fix: added `consecutive_op_failures` to `NamedOfficerState`, tracked in `sector_offensive.ts` at operation completion (success resets to 0, failure increments, 3+ triggers -0.3 competence). 3 officers triggered defeatism in 40w run.
+
+2. **Heroic stand (DEAD CODE):** `checkHeroicStand()` exported but never called. Fix: added `check-heroic-stand` pipeline step in `war_phases.ts` after `process-officer-succession`. Scans battle results for defensive victories at 3:1+ power ratio, awards defender's corps commander. Correctly wired but hasn't fired yet (no 3:1+ defensive holds in 40w — realistic, will trigger in longer runs with enclave sieges).
+
+### Remaining systems — verified working
+
+- **v0.3.2 Humanitarian Attribution:** `caused_by` field on DisplacementEvent set correctly. ✓
+- **v0.3.3 Sub-Segment Assignment:** Pipeline step active, sub-segment targeting in bot AI. ✓
+- **v0.4.0 Peace Phase Interactivity:** Both PeaceWarTransition + PeaceStatusPanel imported in App.tsx. ✓
+- **v0.4.2 Additional Scenarios:** ScenarioSelectionScreen.tsx created but App.tsx was on DO NOT Touch list — correct deferral. ✓
+- **v0.4.3 Economy & War Production:** Pipeline steps active, supply effects flowing. ✓
+
+### Determinism impact
+All changes are deterministic. Event effects sorted by kind before application. Defeatism uses `consecutive_op_failures` counter (no randomness). Heroic stand triggers from battle results (already deterministic). New hash: `e6eac4450e598a41` (changed due to mechanical event effects + defeatism).
+
+### Life lessons added (7 total)
+6 nightshift lessons + 1 stale-count oscillation lesson. Key: "Every new function must be imported and called — dead code is invisible failure." See `docs/life_lessons.md`.
+
+**Files changed:** `src/sim/events/event_registry.ts`, `src/sim/events/evaluate_events.ts`, `src/sim/turn_pipeline_types.ts`, `src/sim/turn_phases/war_phases.ts`, `src/sim/turn_phases/peace_phases.ts`, `src/scenario/scenario_runner.ts`, `src/scenario/scenario_reporting.ts`, `src/sim/combat/sector_offensive.ts`, `src/state/officer_types.ts`, `tests/events_evaluate.test.ts`, `tests/event_decisions.test.ts`, `tests/event_effects.test.ts`, `tests/war_phase_step_order.test.ts`.
+
+---
 
 ## [2026-03-16] n835: Stale-Count Oscillation Fix + Sector Contiguity + Position Viability
 

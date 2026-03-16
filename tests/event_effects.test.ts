@@ -117,19 +117,22 @@ describe('applyEventEffects', () => {
 
 describe('evaluateEvents fired_event_ids', () => {
     it('once-only events tracked and prevented from re-firing', () => {
-        // Use evaluateEvents with a custom registry isn't possible directly,
-        // so test via the fired_event_ids mechanism in applyEventEffects + evaluateEvents
+        const testEvents = [
+            { id: 'test_once', trigger: { turn_min: 5, turn_max: 15, phase: 'war' as const }, effect: { kind: 'narrative' as const, text: 'Once-only event.' }, once: true },
+            { id: 'test_repeatable', trigger: { turn_min: 5, turn_max: 15, phase: 'war' as const }, effect: { kind: 'narrative' as const, text: 'Repeatable event.' } },
+        ];
+
         const state = makeState();
-        state.military.fired_event_ids = ['srebrenica_enclave'];
+        const rng = () => 0.99;
 
-        // Run evaluation — srebrenica_enclave is in the registry but already in fired_event_ids
-        // However, it's not marked once:true in the default registry, so it will still fire.
-        // This test validates the mechanism by checking the tracking array.
-        const rng = () => 0.99; // high value skips probabilistic events
-        const result = evaluateEvents(state, rng, 10);
+        // First evaluation: both events fire
+        const result1 = evaluateEvents(state, rng, 10, testEvents);
+        expect(result1.fired.length).toBe(2);
+        expect(state.military.fired_event_ids).toContain('test_once');
 
-        // Default registry events fire (they aren't once:true), so some should fire
-        expect(result.fired.length).toBeGreaterThan(0);
-        expect(Array.isArray(state.military.fired_event_ids)).toBe(true);
+        // Second evaluation: once-only is skipped, repeatable fires again
+        const result2 = evaluateEvents(state, rng, 10, testEvents);
+        expect(result2.fired.length).toBe(1);
+        expect(result2.fired[0].id).toBe('test_repeatable');
     });
 });

@@ -8,8 +8,8 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-16, n835 calibration)
-**v0.4.6 (Commander Override Layer).** 927 tests, 80 suites. tsc clean. **Latest calibration: n835 = 89.4% area-weighted, 5/6 benchmarks, 13/13 anchors. 151 orders, 121 battles.** Stale-count oscillation FIXED (columnAssignments tracking). Position viability (5th commander override criterion) ACTIVE.
+## Current State (2026-03-16, nightshift audit complete)
+**v0.4.6 (Commander Override Layer).** 932 tests, 80 suites. tsc clean. **Latest calibration: 89.4% area-weighted.** Nightshift audit: event system FIXED (41 historical events now fire), officer defeatism/heroic stand WIRED. 7 life lessons added.
 **v0.5.x + v0.6.x FULLY PLANNED:** 10 milestones scoped, 3 cross-plan reviews, all Pyrrhic compliant.
 **Night shift handoff ready:** v0.5.0→v0.5.4 (5 milestones). v0.6.x handoff separate (v0.6.1 Phase 2 day-shift only).
 **External:** Ops planning modal (outside expert). Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
@@ -101,8 +101,8 @@
    Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
 9. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
    Do instead: Autonomous paramilitary units for rear enemy pocket clusters (1-3 OSIDs, ALL external neighbors faction-controlled). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30.
-10. **[2026-02-24] Test fixtures: phase + referendum required**
-    Do instead: Test fixtures flowing through `runTurn` or scenario runners must set `meta.phase` + referendum fields.
+10. **[2026-03-16] Historical event system LIVE — 41 events from JSON, loaded via `event_loader.ts`**
+    Do instead: Events loaded from `data/scenarios/events/war_*.json` via `loadEventDefinitions(startWeek)` in scenario runner. Passed as `eventDefinitions` on `TurnInput`. `evaluateEvents()` accepts optional `registry` param. Events fire mechanical effects (morale, supply, alliance, war crimes, decisions). `events_fired` serialized to `weekly_report.jsonl`. Decision events queue for player, auto-respond for bots.
 
 ## Bot AI & Combat
 1. **[2026-03-13] Triple-junction adjacency: standard for grouping, strict for splitting (n664→n682)**
@@ -137,6 +137,8 @@
    Do instead: `war_crimes_record` field on `NamedOfficer` in `officer_types.ts`. 27 officers annotated (VRS 13, ARBiH 7, HVO 7) with court, sentence, summary. UI badge: red=convicted, green=acquitted, amber=indicted. Data in `apr1992_officers.json`. No combat modifier — purely informational.
 5. **[2026-03-15] 98 named officers (RS 32, RBiH 38, HRHB 28) — all 9 Orden heroja recipients**
    Do instead: Named officers command corps and operations. Brigades have `officer_quality` [0,1] → `getBrigadeOfficerMod()`. Never suggest named officer assignment for brigades. All 9 Orden heroja oslobodilačkog rata recipients documented. `officerUtils.ts` must check `status === 'active'` (bug fixed: Delić showed instead of Halilović).
+6. **[2026-03-16] Officer experience + defeatism + heroic stand ALL WIRED**
+   Do instead: `applyOperationExperience()` called from `sector_offensive.ts` on op completion (ARBiH 1.5× learning). `checkDefeatism()` fires at 3+ consecutive op failures → -0.3 competence. `checkHeroicStand()` fires from `check-heroic-stand` pipeline step when defender holds at 3:1+ ratio → +1 aggressiveness + morale boost. `consecutive_op_failures` tracked on `NamedOfficerState`, reset on success.
 
 ## OOB & Brigade Systems
 1. **[2026-03-12] Per-brigade personnel caps via `deriveMaxPersonnel()` (n626)**

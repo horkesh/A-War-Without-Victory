@@ -6,7 +6,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import { EVENT_REGISTRY } from './event_registry.js';
+import { getEventRegistry } from './event_registry.js';
 import { applyEventEffects } from './apply_effects.js';
 import type { EventDefinition, EventResponseOption, FiredEvent, PendingEventDecision, Rng } from './event_types.js';
 import { triggerMatches } from './event_types.js';
@@ -59,7 +59,8 @@ function getNarrativeText(def: EventDefinition): string {
 export function evaluateEvents(
     state: GameState,
     rng: Rng,
-    currentTurn: number
+    currentTurn: number,
+    registry?: EventDefinition[]
 ): EventsEvaluationReport {
     const fired: FiredEvent[] = [];
     const phase = state.meta.phase;
@@ -75,7 +76,8 @@ export function evaluateEvents(
     const playerFaction = state.meta.player_faction as FactionId | undefined;
     const allFactions: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
-    for (const def of EVENT_REGISTRY) {
+    const events = registry ?? getEventRegistry();
+    for (const def of events) {
         // Skip once-only events that have already fired
         if (def.once && firedIds.includes(def.id)) continue;
 

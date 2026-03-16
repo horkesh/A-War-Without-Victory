@@ -105,6 +105,8 @@ export interface TurnInput {
     historicalNameLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
     /** When provided, Peace phase wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
+    /** When provided, historical event definitions loaded from scenario JSON files. */
+    eventDefinitions?: import('./events/event_types.js').EventDefinition[];
 }
 
 export interface TurnReport {

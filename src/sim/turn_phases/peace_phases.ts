@@ -66,7 +66,7 @@ export const peacePhases: NamedPhase[] = [
         name: 'evaluate-events',
         run: (context) => {
             const turn = context.state.meta.turn;
-            const result = evaluateEvents(context.state, context.rng, turn);
+            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions);
             context.report.events_fired = result.fired;
         }
     },

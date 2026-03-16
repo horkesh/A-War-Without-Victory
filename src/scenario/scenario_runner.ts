@@ -31,6 +31,7 @@ import {
 } from '../sim/recruitment_engine.js';
 import type { MunicipalityPopulation1991 } from '../sim/turn_pipeline.js';
 import { runTurn } from '../sim/turn_pipeline.js';
+import { loadEventDefinitions } from '../sim/events/event_loader.js';
 import {
     applyControlFlipProposals,
     buildAdjacencyMap,
@@ -1411,6 +1412,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             })
             : null;
 
+        // Load historical event definitions from scenario JSON files
+        const eventDefinitions = loadEventDefinitions(scenario.scenario_start_week ?? 0);
+
         for (let week_index = 0; week_index < weeks; week_index++) {
             const turnActions = scenario.turns?.find((t) => t.week_index === week_index)?.actions ?? [];
             const actions = normalizeActions(turnActions);
@@ -1541,7 +1545,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     settlementPopulationBySid,
                     settlementDataRaw,
                     municipalityHqSettlement: Object.keys(municipalityHqSettlement).length > 0 ? municipalityHqSettlement : undefined,
-                    historicalNameLookup
+                    historicalNameLookup,
+                    eventDefinitions
                 });
                 state = runResult.nextState;
                 turnReport = runResult.report;
@@ -1921,6 +1926,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
             if (trAny.movement_report) {
                 rowAny.movement_report = trAny.movement_report;
+            }
+            // Attach fired events from turn report
+            if (turnReport.events_fired && turnReport.events_fired.length > 0) {
+                reportRow.events_fired = turnReport.events_fired;
             }
             if (week_index === 0) firstReportRow = reportRow;
             lastReportRow = reportRow;

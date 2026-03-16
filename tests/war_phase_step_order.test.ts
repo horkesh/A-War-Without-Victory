@@ -60,6 +60,7 @@ describe('war-phase step ordering', () => {
         // +1 from check-warlord-friction (v0.4.4 officer experience & weight of command, 2026-03-16).
         // +1 from update-faction-officer-maturity (v0.4.4 officer experience & weight of command, 2026-03-16).
         // +2 from ai-army-decisions + ai-corps-decisions (v0.4.5 AI command layer, 2026-03-16).
-        expect(stepNames.length).toBe(131);
+        // +1 from check-heroic-stand (v0.4.4 officer experience integration, 2026-03-16).
+        expect(stepNames.length).toBe(132);
     });
 });

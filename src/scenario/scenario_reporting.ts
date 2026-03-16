@@ -82,6 +82,8 @@ export interface WeeklyReportRow {
     brigade_dissolution?: WeeklyDissolutionEntry[];
     /** Brigade reconstitution report — which brigades reformed from municipality manpower. */
     brigade_reconstitution?: WeeklyReconstitutionEntry[];
+    /** Historical events that fired this turn (id + narrative text). */
+    events_fired?: Array<{ id: string; text: string }>;
 }
 
 /** Compact per-dissolution entry persisted in weekly report. */

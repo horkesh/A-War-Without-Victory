@@ -3,16 +3,14 @@
  * - Decision event adds to pending list for player faction
  * - Bot auto-responds with accept_first / reject_all
  * - resolveEventDecision applies effects and removes pending
+ * Tests pass event definitions via the registry parameter (no global mutation).
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { GameState } from '../src/state/game_state';
 import type { EventDefinition } from '../src/sim/events/event_types';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision';
 import { evaluateEvents } from '../src/sim/events/evaluate_events';
-
-// Inject a test event into the registry temporarily
-import * as registry from '../src/sim/events/event_registry';
 
 function makeMinimalState(playerFaction?: string): GameState {
     return {
@@ -78,26 +76,11 @@ const REJECT_ALL_EVENT: EventDefinition = {
 };
 
 describe('Event Decisions', () => {
-    let savedRegistry: EventDefinition[];
-
-    beforeEach(() => {
-        // Save and replace registry
-        savedRegistry = [...registry.EVENT_REGISTRY];
-        registry.EVENT_REGISTRY.length = 0;
-    });
-
-    // Restore after each test by re-populating
-    function restoreRegistry() {
-        registry.EVENT_REGISTRY.length = 0;
-        registry.EVENT_REGISTRY.push(...savedRegistry);
-    }
-
     it('decision event adds to pending list for player faction', () => {
-        registry.EVENT_REGISTRY.push(DECISION_EVENT);
         const state = makeMinimalState('RBiH');
         const rng = () => 0.5;
 
-        evaluateEvents(state, rng, 5);
+        evaluateEvents(state, rng, 5, [DECISION_EVENT]);
 
         expect(state.military.pending_event_decisions).toBeDefined();
         expect(state.military.pending_event_decisions!.length).toBe(1);
@@ -106,39 +89,31 @@ describe('Event Decisions', () => {
         expect(pending.faction).toBe('RBiH');
         expect(pending.response_options.length).toBe(2);
         expect(pending.turn_fired).toBe(5);
-
-        restoreRegistry();
     });
 
     it('bot factions auto-respond with accept_first', () => {
-        registry.EVENT_REGISTRY.push(DECISION_EVENT);
         // No player faction — all factions are bots
         const state = makeMinimalState(undefined);
         const initialSupply = state.military.general_supply_reserve!['RBiH'];
         const rng = () => 0.5;
 
-        evaluateEvents(state, rng, 5);
+        evaluateEvents(state, rng, 5, [DECISION_EVENT]);
 
         // All 3 factions are bots, each picks 'accept' → +10 supply to RBiH × 3
         expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 30);
         // No pending decisions (no player faction)
         expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
-
-        restoreRegistry();
     });
 
     it('bot factions auto-respond with reject_all (picks last option)', () => {
-        registry.EVENT_REGISTRY.push(REJECT_ALL_EVENT);
         const state = makeMinimalState(undefined);
         const initialSupply = state.military.general_supply_reserve!['RS'];
         const rng = () => 0.5;
 
-        evaluateEvents(state, rng, 5);
+        evaluateEvents(state, rng, 5, [REJECT_ALL_EVENT]);
 
         // 3 bots × reject → -5 supply to RS each = -15
         expect(state.military.general_supply_reserve!['RS']).toBe(initialSupply - 15);
-
-        restoreRegistry();
     });
 
     it('resolveEventDecision applies effects and removes pending', () => {
@@ -158,8 +133,6 @@ describe('Event Decisions', () => {
 
         expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 10);
         expect(state.military.pending_event_decisions!.length).toBe(0);
-
-        restoreRegistry();
     });
 
     it('resolveEventDecision throws on unknown event_id', () => {
@@ -167,8 +140,6 @@ describe('Event Decisions', () => {
         state.military.pending_event_decisions = [];
 
         expect(() => resolveEventDecision(state, 'nonexistent', 'accept')).toThrow('No pending decision');
-
-        restoreRegistry();
     });
 
     it('resolveEventDecision throws on unknown response_id', () => {
@@ -184,7 +155,5 @@ describe('Event Decisions', () => {
         ];
 
         expect(() => resolveEventDecision(state, 'test_decision_event', 'nonexistent')).toThrow('No response option');
-
-        restoreRegistry();
     });
 });

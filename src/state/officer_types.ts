@@ -108,6 +108,8 @@ export interface NamedOfficerState {
     initial_competence?: number;
     /** Aggressiveness at first experience gain (baseline for skill shift cap). */
     initial_aggressiveness?: number;
+    /** Consecutive operation failures (reset on success). Drives defeatism check. */
+    consecutive_op_failures?: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
