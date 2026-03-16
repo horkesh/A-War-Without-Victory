@@ -18,7 +18,8 @@ import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
 import type { BrigadePosture, FormationState } from '../../state/game_state.js';
-import { findSectorForEnemyOsid } from './corps_front_sectors.js';
+import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
+import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
 import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
 import { isOsidInSameEnclave } from './enclave_resilience.js';
 
@@ -505,4 +506,82 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
     }
 
     return false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase C: Sub-segment targeting — find weakest sub-segment for bot AI
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Bonus applied to attack target scores when the target OSID is in the weakest sub-segment. */
+export const WEAK_SUBSEGMENT_SCORE_BONUS = 50;
+
+/**
+ * Find the weakest sub-segment in a sector by estimated defense strength.
+ *
+ * Gap sub-segments (no assigned brigades) are automatically weakest.
+ * Otherwise, defense strength = sum of primary_brigade_ids' personnel.
+ * Returns null if the sector has no sub-segments.
+ *
+ * Deterministic: on tie, returns the sub-segment with the lowest sub_segment_id.
+ */
+export function findWeakestSubSegment(
+    sector: CorpsFrontSector,
+    formations: Record<string, FormationState | undefined>
+): CorpsFrontSubSegment | null {
+    if (sector.sub_segments.length === 0) return null;
+
+    let weakest: CorpsFrontSubSegment | null = null;
+    let weakestStrength = Infinity;
+
+    for (const ss of sector.sub_segments) {
+        // Gap sub-segments are automatically weakest
+        if (ss.gap) {
+            if (weakest === null || !weakest.gap ||
+                ss.sub_segment_id < weakest.sub_segment_id) {
+                weakest = ss;
+                weakestStrength = 0;
+            }
+            continue;
+        }
+
+        // Already found a gap — skip non-gap sub-segments
+        if (weakest?.gap) continue;
+
+        // Estimate defense strength as sum of primary brigade personnel
+        let strength = 0;
+        for (const bid of ss.primary_brigade_ids) {
+            const f = formations[bid];
+            if (f && f.status === 'active') {
+                strength += f.personnel ?? 0;
+            }
+        }
+
+        if (strength < weakestStrength ||
+            (strength === weakestStrength && weakest !== null &&
+             ss.sub_segment_id < weakest.sub_segment_id)) {
+            weakest = ss;
+            weakestStrength = strength;
+        }
+    }
+
+    return weakest;
+}
+
+/**
+ * Score bonus for attack targets in the weakest sub-segment of the defending sector.
+ * Returns WEAK_SUBSEGMENT_SCORE_BONUS if the target OSID is in the weakest sub-segment,
+ * 0 otherwise. This is a soft preference (additive bonus), not a hard filter.
+ */
+export function getWeakSubSegmentBonus(
+    targetOsid: string,
+    defendingSector: CorpsFrontSector | undefined,
+    formations: Record<string, FormationState | undefined>
+): number {
+    if (!defendingSector) return 0;
+    const weakest = findWeakestSubSegment(defendingSector, formations);
+    if (!weakest) return 0;
+    if (weakest.enemy_osids.includes(targetOsid)) {
+        return WEAK_SUBSEGMENT_SCORE_BONUS;
+    }
+    return 0;
 }

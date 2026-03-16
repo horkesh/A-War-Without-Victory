@@ -7,6 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { assignBrigadesToSubSegments, findSubSegmentForOsid } from '../src/sim/combat/corps_front_sectors.js';
+import { findWeakestSubSegment } from '../src/sim/combat/bot_brigade_eval_attack.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment, GameState, FormationState } from '../src/state/game_state.js';
 
 function makeFormation(overrides: Partial<FormationState> & { location_osid?: string }): FormationState {
@@ -368,5 +369,68 @@ describe('Phase B: sub-segment combat defense integration', () => {
         expect(findSubSegmentForOsid(sector, 'osid_a')?.sub_segment_id).toBe('ss1');
         // Enemy OSID lookup (used by combat resolver)
         expect(findSubSegmentForOsid(sector, 'enemy_ss1')?.sub_segment_id).toBe('ss1');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase C: Bot AI per-sub-segment targeting — weakest sub-segment detection
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Phase C: findWeakestSubSegment', () => {
+    it('returns sub-segment with lowest total personnel', () => {
+        const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
+        ss1.primary_brigade_ids = ['brig_1'];
+        const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
+        ss2.primary_brigade_ids = ['brig_2'];
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1', 'brig_2']);
+
+        const formations: Record<string, FormationState | undefined> = {
+            brig_1: makeFormation({ id: 'brig_1', personnel: 1500 }),
+            brig_2: makeFormation({ id: 'brig_2', personnel: 800 }),
+        };
+
+        const weakest = findWeakestSubSegment(sector, formations);
+        expect(weakest).not.toBeNull();
+        expect(weakest!.sub_segment_id).toBe('ss2');
+    });
+
+    it('gap sub-segment is always weakest', () => {
+        const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
+        ss1.primary_brigade_ids = ['brig_1'];
+        const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
+        ss2.primary_brigade_ids = [];
+        ss2.gap = true;
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1']);
+
+        const formations: Record<string, FormationState | undefined> = {
+            brig_1: makeFormation({ id: 'brig_1', personnel: 500 }),
+        };
+
+        const weakest = findWeakestSubSegment(sector, formations);
+        expect(weakest).not.toBeNull();
+        expect(weakest!.sub_segment_id).toBe('ss2');
+        expect(weakest!.gap).toBe(true);
+    });
+
+    it('returns null for sector with no sub-segments', () => {
+        const sector = makeSector('sec1', [], []);
+        const result = findWeakestSubSegment(sector, {});
+        expect(result).toBeNull();
+    });
+
+    it('breaks ties by sub_segment_id (deterministic)', () => {
+        const ss1 = makeSubSeg('ss_a', ['osid_a'], 3);
+        ss1.primary_brigade_ids = ['brig_1'];
+        const ss2 = makeSubSeg('ss_b', ['osid_b'], 3);
+        ss2.primary_brigade_ids = ['brig_2'];
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1', 'brig_2']);
+
+        const formations: Record<string, FormationState | undefined> = {
+            brig_1: makeFormation({ id: 'brig_1', personnel: 1000 }),
+            brig_2: makeFormation({ id: 'brig_2', personnel: 1000 }),
+        };
+
+        const weakest = findWeakestSubSegment(sector, formations);
+        expect(weakest!.sub_segment_id).toBe('ss_a');
     });
 });

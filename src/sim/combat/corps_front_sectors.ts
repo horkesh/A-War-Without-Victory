@@ -3898,6 +3898,12 @@ const HOME_AFFINITY_BONUS = 1.3;
 /** Mechanized/motorized brigade terrain affinity bonus for non-mountain sub-segments. */
 const MECH_TERRAIN_BONUS = 1.2;
 
+/** Aggressive commander bonus: best personnel brigades get extra affinity for the widest sub-segment (most enemy OSIDs). */
+const AGGRESSIVE_COMMANDER_CONCENTRATION_BONUS = 1.4;
+
+/** Cautious commander spread bonus: brigades get extra affinity for under-covered sub-segments. */
+const CAUTIOUS_COMMANDER_SPREAD_BONUS = 1.25;
+
 /**
  * Assign front-line brigades to sub-segments within each sector.
  * Each brigade gets exactly one sub-segment (their AoR). Each sub-segment
@@ -3949,6 +3955,54 @@ export function assignBrigadesToSubSegments(
         }
 
         // Compute affinity for each brigade × sub-segment pair
+        // Commander personality influences assignment:
+        //   Aggressive (>=4): concentrate best personnel on sub-segment with most enemy OSIDs
+        //   Cautious (<=1): spread evenly, boost affinity for smaller sub-segments
+        const commander = getCorpsCommander(sector.corps_id, state);
+        const commanderAggr = commander?.data.aggressiveness ?? 3;
+
+        // Find sub-segment with most enemy OSIDs (offensive concentration target)
+        let maxEnemyOsids = 0;
+        let maxEnemySsIdx = 0;
+        if (commanderAggr >= 4) {
+            for (let si = 0; si < sector.sub_segments.length; si++) {
+                const enemyCount = sector.sub_segments[si]!.enemy_osids.length;
+                if (enemyCount > maxEnemyOsids ||
+                    (enemyCount === maxEnemyOsids && si < maxEnemySsIdx)) {
+                    maxEnemyOsids = enemyCount;
+                    maxEnemySsIdx = si;
+                }
+            }
+        }
+
+        // Find smallest sub-segment (cautious spread target)
+        let minEdges = Infinity;
+        let minEdgesSsIdx = 0;
+        if (commanderAggr <= 1) {
+            for (let si = 0; si < sector.sub_segments.length; si++) {
+                const edges = sector.sub_segments[si]!.length_edges;
+                if (edges < minEdges) {
+                    minEdges = edges;
+                    minEdgesSsIdx = si;
+                }
+            }
+        }
+
+        // Sort brigades by personnel descending for aggressive commanders
+        const brigadePersonnel = new Map<string, number>();
+        for (const bid of frontBrigadeIds) {
+            const f = formations[bid];
+            brigadePersonnel.set(bid, f?.personnel ?? 0);
+        }
+        const topHalfPersonnel = new Set<string>();
+        if (commanderAggr >= 4) {
+            const sorted = [...frontBrigadeIds].sort((a, b) =>
+                (brigadePersonnel.get(b) ?? 0) - (brigadePersonnel.get(a) ?? 0) ||
+                a.localeCompare(b));
+            const halfCount = Math.ceil(sorted.length / 2);
+            for (let i = 0; i < halfCount; i++) topHalfPersonnel.add(sorted[i]!);
+        }
+
         const affinities: Array<{ bid: string; ssIdx: number; score: number }> = [];
         for (const bid of frontBrigadeIds) {
             const f = formations[bid];
@@ -3976,6 +4030,19 @@ export function assignBrigadesToSubSegments(
                 // Mech terrain bonus (non-mountain terrain = favorable for mechanized)
                 if (isMech) {
                     score *= MECH_TERRAIN_BONUS;
+                }
+
+                // Commander personality: aggressive concentration
+                // Best brigades (top half by personnel) get bonus toward the sub-segment
+                // with the most enemy OSIDs — concentrate force at the schwerpunkt.
+                if (commanderAggr >= 4 && si === maxEnemySsIdx && topHalfPersonnel.has(bid)) {
+                    score *= AGGRESSIVE_COMMANDER_CONCENTRATION_BONUS;
+                }
+
+                // Commander personality: cautious spread
+                // Boost affinity for the smallest sub-segment to ensure adequate coverage.
+                if (commanderAggr <= 1 && si === minEdgesSsIdx) {
+                    score *= CAUTIOUS_COMMANDER_SPREAD_BONUS;
                 }
 
                 affinities.push({ bid, ssIdx: si, score });
