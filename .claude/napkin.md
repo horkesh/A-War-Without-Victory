@@ -71,16 +71,14 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-16] Brigade-to-sector reachability (P3, mostly fixed)**: Phase 1 component guard added in `brigade_assignment.ts`. Violations 18→2 (arbih_1st_cerska at Vlasenica is edge case — enclave brigade displaced mid-turn). Phase 2 already had component checks. Structural gap largely closed.
-2. **[2026-03-16] ARBiH 1st Corps probing — RESOLVED (n824)**: Sarajevo Probing priority (weight 60, w15-56) + organic E2 stance (army-HQ-aware bias) + `corps_asset` kind fix activated army HQ overrides. 1st Corps now probes RS suburbs when army HQ directs.
-3. **[2026-03-16] 2KK Prozor positional lock — PARTIALLY ADDRESSED (P2)**: Commander override mission compliance pulls toward Bihac. 3 Prozor OSIDs still mismatched at n820. Residual positional inertia needs weight tuning or explicit recall.
-4. **[2026-03-10] Donji Vakuf pocket remnant (P3)**: 2 OSIDs still RBiH (was 5). Improved but not fully resolved. Municipality priority tuning for 2KK.
-5. **[2026-03-16] Army HQ override weight tuning — RESOLVED (n824)**: `corps_asset` kind fix activated Phase B. Weights already correct (50/80 thresholds vs 20-150 actual). 135 orders generated (RS 97, RBiH 27, HRHB 11).
-6. **[2026-03-16] Density ratio design (P3)**: `ensureMinimumSectorCoverage` still uses absolute density, not ratio-based. Low priority — commander override defensive coherence partially compensates.
-7. **[2026-03-12] HVO Central Bosnia ghost front — DEFERRED**: 13 front edges, 0 brigades. Intentionally deferred — HVO-RBiH war activates April 1993.
-8. **[2026-03-11] Ops planning modal arrows — PARKED (EXTERNAL)**: Outside expert redesigning.
-9. **[2026-03-15] Visual assets — EXTERNAL**: User generating via Gemini Pro. Strategy: `docs/30_planning/design/VISUAL_ASSET_STRATEGY.md`.
-10. **[2026-03-16] Drina region 80.4% (P2)**: Improved +2.7pp from n819 (was 77.7%). Army HQ override activation was biggest single Drina improvement. Remaining gap may need OOB or painted target adjustments.
+1. **[2026-03-16] 2KK Prozor positional lock (P2)**: Commander override mission compliance pulls toward Bihac. 3 Prozor OSIDs still mismatched. Residual positional inertia.
+2. **[2026-03-16] Drina region 80.4% (P2)**: Improved +2.7pp from n819. Remaining gap structural — may need OOB or painted target adjustments.
+3. **[2026-03-10] Donji Vakuf pocket remnant (P3)**: 2 OSIDs still RBiH (was 5). Municipality priority tuning.
+4. **[2026-03-16] RBiH w40 benchmark marginal (P3)**: 0.054 deviation vs 0.05 tolerance. Within noise.
+5. **[2026-03-12] HVO Central Bosnia ghost front — DEFERRED**: Activates April 1993.
+6. **[2026-03-11] Ops planning modal arrows — PARKED (EXTERNAL)**: Outside expert.
+7. **[2026-03-15] Visual assets — EXTERNAL**: User generating via Gemini Pro.
+8. **RESOLVED this session**: Commander Override Layer (v0.4.6), army HQ overrides (n824), ARBiH 1st Corps probing, salient retreat (#45 → position viability), stale-count oscillation, centroids passthrough, brigade-to-sector reachability (18→2 transient), density ratio (superseded by defensive coherence).
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
