@@ -42,12 +42,13 @@ interface TopToolbarProps {
   onOpenOpsHistory?: () => void;
   onOpenEventLog?: () => void;
   onOpenEconomy?: () => void;
+  onOpenAiSettings?: () => void;
 }
 
 /** True when loaded inside the warroom iframe (?embedded=1). */
 const isEmbedded = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embedded') === '1';
 
-export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory, onOpenEventLog, onOpenEconomy }: TopToolbarProps) {
+export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory, onOpenEventLog, onOpenEconomy, onOpenAiSettings }: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const devMode = useGameStore((s) => s.devMode);
@@ -320,6 +321,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
             <button onClick={() => onOpenAAR?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>AAR</button>
             <button onClick={() => onOpenOpsHistory?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>OPS</button>
             <button onClick={() => onOpenEventLog?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>EVENTS</button>
+            <button onClick={() => onOpenAiSettings?.()} className={`${TOOLBAR_BUTTON_CLASS} text-[#c4a04a] border-[#c4a04a]/20 hover:bg-[#c4a04a]/10`}>AI</button>
           </div>
         </div>
 

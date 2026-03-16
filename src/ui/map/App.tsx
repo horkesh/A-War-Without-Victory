@@ -29,6 +29,8 @@ import { AARPanel } from './components/AARPanel';
 import { OperationHistoryPanel } from './components/OperationHistoryPanel';
 import { EventModal } from './components/EventModal';
 import { EventLogPanel } from './components/EventLogPanel';
+import { AiAdvisorPanel } from './components/AiAdvisorPanel';
+import { AiSettingsPanel } from './components/AiSettingsPanel';
 import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
@@ -166,6 +168,9 @@ function App() {
   const [opsHistoryOpen, setOpsHistoryOpen] = useState(false);
   const [eventLogOpen, setEventLogOpen] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+  const [aiAdvisorOpen, setAiAdvisorOpen] = useState(false);
+  const [aiAdvisorResponse, setAiAdvisorResponse] = useState<any>(null);
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
   const [eventQueueIndex, setEventQueueIndex] = useState(0);
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
@@ -200,7 +205,8 @@ function App() {
       setSidePickerDismissed(false);
       return;
     }
-    if (ipc.isAvailable && !sidePickerDismissed) {
+    // Show side picker automatically if no state is loaded and not already dismissed
+    if (!sidePickerDismissed) {
       setSidePickerOpen(true);
     }
   }, [ipc.isAvailable, loadedGameState, sidePickerDismissed]);
@@ -228,6 +234,36 @@ function App() {
       useGameStore.getState().setSelectedOsid('S1');
     }
   }, []);
+
+  // Global handler for manual save load (called by SidePickerOverlay)
+  useEffect(() => {
+    (window as any).handleManualSaveLoad = async (json: any) => {
+      try {
+        await loadSave(json);
+        setSidePickerOpen(false);
+        setSidePickerDismissed(false);
+      } catch (err) {
+        console.error('Failed to load manual save:', err);
+        setLoadError(err instanceof Error ? err.message : String(err));
+      }
+    };
+    (window as any).handleContinueLastRun = async () => {
+      try {
+        const text = await loadLatestRunSaveAsText();
+        const json = JSON.parse(text);
+        await loadSave(json);
+        setSidePickerOpen(false);
+        setSidePickerDismissed(false);
+      } catch (err) {
+        console.error('Failed to continue last run:', err);
+        setLoadError(err instanceof Error ? err.message : String(err));
+      }
+    };
+    return () => {
+      delete (window as any).handleManualSaveLoad;
+      delete (window as any).handleContinueLastRun;
+    };
+  }, [loadSave, setLoadError]);
 
   // v0.4.1 Phase 5: detect new events from game state and queue for display
   useEffect(() => {
@@ -390,6 +426,7 @@ function App() {
 
   const handleSelectFaction = async (faction: StartNewCampaignPayload['playerFaction']) => {
     setCampaignStarting(true);
+    // Use scenarioKey 'apr_1992' as default for dev map, mirroring Warroom fix
     const ok = await startCampaignFromSidePicker({ ipc, loadSave, setLoadError }, faction, 'apr_1992');
     setCampaignStarting(false);
     if (ok) {
@@ -435,6 +472,7 @@ function App() {
         onOpenOpsHistory={() => setOpsHistoryOpen((current) => !current)}
         onOpenEventLog={() => setEventLogOpen((current) => !current)}
         onOpenEconomy={() => setEconomyOpen((current) => !current)}
+        onOpenAiSettings={() => setAiSettingsOpen((current) => !current)}
       />
       <CommandBriefingLayer
         onOpenSummary={openSummary}
@@ -512,6 +550,16 @@ function App() {
       )}
       {economyOpen && loadedGameState && (
         <EconomyPanel state={loadedGameState} onClose={() => setEconomyOpen(false)} />
+      )}
+      {aiSettingsOpen && (
+        <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />
+      )}
+      {aiAdvisorOpen && (
+        <AiAdvisorPanel
+          response={aiAdvisorResponse}
+          loading={!aiAdvisorResponse}
+          onClose={() => { setAiAdvisorOpen(false); setAiAdvisorResponse(null); }}
+        />
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
       {/* v0.4.1 Phase 5: Event modal (queue-based) */}

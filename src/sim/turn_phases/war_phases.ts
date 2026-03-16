@@ -728,6 +728,65 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'ai-army-decisions',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const config = (context.state.meta as any).ai_commander_config;
+            if (!config || config.mode === 'cadet') return;
+
+            const { createAiClient } = await import('../ai_commander/ai_client.js');
+            const { generateArmyDecision } = await import('../ai_commander/army_commander_ai.js');
+            const { clearTurnDecisions } = await import('../ai_commander/decision_log.js');
+            const { setAiMode } = await import('../ai_commander/prompt_builder.js');
+
+            clearTurnDecisions(context.state);
+            setAiMode(config.mode);
+            const client = await createAiClient(config.anthropic_api_key);
+            if (!client) return;
+
+            const playerFaction = context.state.meta.player_faction ?? null;
+            const botFactions = (context.state.factions ?? [])
+                .map((f: any) => f.id)
+                .filter((fid: string) => playerFaction == null || fid !== playerFaction);
+
+            const results = await Promise.allSettled(
+                botFactions.map(async (faction: string) => {
+                    const decision = await generateArmyDecision(context.state, faction as any, client);
+                    if (decision) {
+                        if (!context.state.military.ai_army_decisions) {
+                            context.state.military.ai_army_decisions = {} as any;
+                        }
+                        (context.state.military.ai_army_decisions as any)[faction] = decision;
+                    }
+                })
+            );
+        }
+    },
+    {
+        name: 'ai-corps-decisions',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const config = (context.state.meta as any).ai_commander_config;
+            if (!config || config.mode === 'cadet') return;
+
+            const { createAiClient } = await import('../ai_commander/ai_client.js');
+            const { generateCorpsDecisions } = await import('../ai_commander/corps_commander_ai.js');
+
+            const client = await createAiClient(config.anthropic_api_key);
+            if (!client) return;
+
+            const playerFaction = context.state.meta.player_faction ?? null;
+            const botFactions = (context.state.factions ?? [])
+                .map((f: any) => f.id)
+                .filter((fid: string) => playerFaction == null || fid !== playerFaction);
+
+            for (const faction of botFactions) {
+                const armyDecision = (context.state.military.ai_army_decisions as any)?.[faction] ?? null;
+                await generateCorpsDecisions(context.state, faction as any, armyDecision, client);
+            }
+        }
+    },
+    {
         name: 'generate-bot-corps-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;

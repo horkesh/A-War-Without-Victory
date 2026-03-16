@@ -501,6 +501,8 @@ export function generateCorpsDirectives(
     for (const corps of corpsList) {
         const cmd = corpsCommand[corps.id];
         if (!cmd) continue;
+        // Skip corps whose directives were already set by the AI command layer
+        if ((cmd as any).ai_decided) continue;
 
         const subordinates = getCorpsSubordinates(state, corps.id);
         if (subordinates.length === 0) {
