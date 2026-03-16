@@ -1,8 +1,8 @@
 # Roadmap to v1.0 — A War Without Victory
 
 **Studio:** Pyrrhic Games
-**Last Updated:** 2026-03-15
-**Current Version:** v0.3.1 (Playable Alpha + Endgame System)
+**Last Updated:** 2026-03-16
+**Current Version:** v0.4.4 (Officer Experience & Weight of Command)
 
 ---
 
@@ -16,14 +16,14 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.2.0** | Core Engine | ✓ 2026-03-15 |
 | **v0.3.0** | Playable Alpha | ✓ 2026-03-15 |
 | **v0.3.1** | Endgame & Negotiation System | ✓ 2026-03-15 |
-| **v0.3.2** | Humanitarian capital per-faction attribution fix | PLANNED |
-| **v0.3.3** | Brigade AoR sub-segment assignment | PLANNED |
-| **v0.4.0** | Peace Phase Interactivity | PLANNED |
-| **v0.4.1** | Complete Event System | PLANNED |
-| **v0.4.2** | Additional Scenarios (1993, 1994, 1995 starts) | PLANNED |
-| **v0.4.3** | Economy & War Production | PLANNED |
-| **v0.4.4** | Officer Experience & Weight of Command | PLANNED |
-| **v0.4.5** | AI Commander Prototype (Phase A: Mladić) | PLANNED |
+| **v0.3.2** | Humanitarian capital per-faction attribution fix | ✓ 2026-03-16 |
+| **v0.3.3** | Brigade AoR sub-segment assignment | ✓ 2026-03-16 |
+| **v0.4.0** | Peace Phase Interactivity | ✓ 2026-03-16 |
+| **v0.4.1** | Complete Event System (41 events, decision events, UI) | ✓ 2026-03-16 |
+| **v0.4.2** | Additional Scenarios (Sep 1991, Jan 1993 + selection screen) | ✓ 2026-03-16 (Phase 3 blocked) |
+| **v0.4.3** | Economy & War Production | ✓ 2026-03-16 |
+| **v0.4.4** | Officer Experience & Weight of Command | ✓ 2026-03-16 |
+| **v0.4.5** | AI Command Layer (Army + Corps + Ops Planning AI) | PLANNED |
 | **v0.5.0** | Full Diplomatic System (Negotiations) | PLANNED |
 | **v0.5.1** | UI Completion (all panels, modes, tooltips) | PLANNED |
 | **v0.5.2** | Tutorial & Onboarding | PLANNED |
@@ -32,7 +32,8 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.6.0** | Full Historical Event Set (1992-1995) | PLANNED |
 | **v0.6.1** | Balance & Calibration (all factions, all scenarios) | PLANNED |
 | **v0.6.2** | Campaign Structure & Achievements | PLANNED |
-| **v0.6.3** | AI Commander Auto-Play & Spectator Mode | PLANNED |
+| **v0.6.3** | AI Dynamic Content (procedural events, peace negotiation dialogue) | PLANNED |
+| **v0.6.4** | Historical Essays (AI-generated at dev time, shipped with game) | PLANNED |
 | **v0.7.0** | Performance Optimization | PLANNED |
 | **v0.7.1** | Accessibility (colorblind, keyboard, screen reader) | PLANNED |
 | **v0.7.2** | Localization (BCS first, then English polish) | PLANNED |
@@ -47,6 +48,7 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | *v1.2.0* | *"Autumn Leaves" — 1993-1994 deep content* | POST-LAUNCH |
 | *v1.3.0* | *"Deliberate Force" — NATO intervention* | POST-LAUNCH |
 | *v1.4.0* | *"The Hague" — war crimes consequences & moral choices* | POST-LAUNCH |
+| *v1.5.0* | *AI Scenario Editor Assistant + Streaming Narrator* | POST-LAUNCH |
 
 ---
 
@@ -104,12 +106,17 @@ Milestones are implemented via the night shift system when plans are ready and a
 - [ ] **Capital integration** — officer maturity → military_effectiveness capital, friction count → political_cohesion capital.
 - [ ] **Experience UI** — OfficerProfile progression bar, trend indicators, maturity in ArmyDetail.
 
-### 0.4.5 — AI Commander Prototype (Phase A: Mladić)
-- [ ] **Claude API integration** — single Army Commander (RS/Mladić) with personality prompt. Requires officer experience (v0.4.4) so Claude can reason about officer growth.
-- [ ] **Structured directive output** — corps stances, operation approvals, strategic reasoning, briefing text.
-- [ ] **Decision logging** — all Claude decisions saved for deterministic replay.
-- [ ] **Formula bot fallback** — works offline without API key.
-- [ ] **Reads ALL accumulated state** — territory, capital, events, economy, officers, friction. Richest possible decision surface.
+### 0.4.5 — AI Command Layer (Army + Corps + Ops Planning AI)
+Bundled: Army Commander + Corps Commander + Ops Planning AI share prompt builder, response parser, fallback system.
+- [ ] **Army Commander AI** — all 3 factions (Mladić, Halilović/Delić, Petković) with historical personality prompts. Structured JSON output: corps directives, operation approvals, peace plan responses, strategic reasoning, briefing text. Multi-model: Opus for army decisions.
+- [ ] **Corps Commander AI** — operational decisions from named officer personalities. Interprets army orders with judgment (cautious delays, aggressive rushes). Haiku for routine turns, Sonnet for operation planning.
+- [ ] **Ops Planning AI** — when player opens ops planning modal, AI analyzes target/terrain/force/supply/intel. Generates commander's assessment, recommends force composition, axis, timing, warns about risks. ~$0.01-0.05 per plan (Haiku).
+- [ ] **Player Advisor** — "Ask Commander" on-demand situation analysis. Top 3 recommendations displayed in briefing panel.
+- [ ] **Shared infrastructure** — `src/sim/ai_commander/`: claude_client.ts, prompt_builder.ts, response_parser.ts, personality_profiles.ts, decision_log.ts, fallback.ts.
+- [ ] **Decision logging** — all AI decisions saved for deterministic replay.
+- [ ] **Formula bot fallback** — works offline without API key. Cadet Mode always available.
+- [ ] **Multi-model routing** — Commander/Officer/Recruit/Cadet tiers. Player-selectable. BYOK or Pyrrhic Credits.
+- [ ] **Reads ALL accumulated state** — territory, capital, events, economy, officers, friction, smuggling, production. Richest possible decision surface.
 
 ---
 
@@ -141,11 +148,11 @@ Milestones are implemented via the night shift system when plans are ready and a
 - [ ] **Music system** — ambient war-era music, faction-specific themes, tension escalation.
 - [ ] **Audio settings** — master/music/SFX volume controls.
 
-### 0.5.4 — AI Commander Full (all 3 armies + corps + advisor)
-- [ ] **All 3 Army Commanders** — Mladić, Halilović/Delić, Petković with personality profiles.
-- [ ] **Corps Commander AI** — operational decisions from named officer personalities. Haiku for routine, Sonnet for operations.
-- [ ] **Player Advisor** — "Ask Commander" on-demand situation analysis.
-- [ ] **AI-vs-AI runs** — spectator mode for calibration and testing.
+### 0.5.4 — AI Narrative Layer + Auto-Play
+- [ ] **After-Action Reports in character** — corps commander writes field reports after each battle in their voice. Haiku, ~$0.005/battle.
+- [ ] **Post-game analysis** — AI writes full war analysis at Dayton: strategy assessment, turning points, Pyrrhic Score commentary. Sonnet, ~$0.10/game.
+- [ ] **AI-vs-AI Auto-Play** — spectator mode: Claude commands all 3 factions. Game runs automatically. Full AAR at end. Calibration tool + entertainment.
+- [ ] **Contextual tutorial/advisor** — player clicks "Why am I losing?" and gets situation-specific explanation with actionable recommendations. Haiku, ~$0.01/query.
 
 ---
 
@@ -165,6 +172,13 @@ Milestones are implemented via the night shift system when plans are ready and a
 - [ ] **Faction balance** — each faction has a viable path to "best achievable outcome" (not victory — this is negative-sum).
 - [ ] **Difficulty differentiation** — RBiH hardest (historical underdog), RS most straightforward (military advantage + declining), HRHB most complex (two-front alliance management).
 - [ ] **Play-length targets** — April 1992 scenario: 3-5 hours. September 1991: 5-8 hours. Each tested with real players.
+
+### 0.6.3 — AI Dynamic Content
+- [ ] **Procedural events** — AI generates events reacting to what actually happened (early Srebrenica fall → different international response). Haiku evaluates, guardrails keep it historical. ~$0.01/turn.
+- [ ] **Peace negotiation dialogue** — negotiate with AI-Milošević/Izetbegović/Tuđman. Multi-turn conversation. AI pushes back based on capital position. Must reach game-mechanical outcomes. Sonnet, ~$0.05-0.20/negotiation.
+
+### 0.6.4 — Historical Essays
+- [ ] **AI-generated at dev time** — 500-word historical essays tied to in-game events. Generated once with Sonnet (~$5 total), shipped with game. Unlocked after player experiences the event. Educational value differentiator.
 
 ### 0.6.2 — Campaign Structure
 - [ ] **Campaign flow** — structured progression: early war → mid-war turning points → late war → endgame. Pacing mechanics (event frequency, crisis escalation).
@@ -258,6 +272,7 @@ Ship it. "Another such victory and we are undone."
 | 1.2.0 | "Autumn Leaves" | 1993-1994 deep content: Croat-Bosniak war, Mostar siege, Vitez |
 | 1.3.0 | "Deliberate Force" | NATO intervention mechanics, 1995 endgame, Operation Storm |
 | 1.4.0 | "The Weight of Command" | Enhanced officer system: personality events, war crimes consequences, moral choices |
+| 1.5.0 | "The War Room" | AI Scenario Editor Assistant (help build what-if scenarios) + Streaming Narrator (AI commentary for streamers) |
 | 2.0.0 | TBD | Major engine overhaul or new conflict scenario |
 
 ---

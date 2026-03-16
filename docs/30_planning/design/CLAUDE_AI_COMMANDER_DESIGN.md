@@ -416,14 +416,16 @@ This is the game that Pyrrhic Games was named for. Every decision has cost. Even
 
 ---
 
-## Version Assignment (Revised per CROSS_PLAN_REVIEW_V04.md)
+## Version Assignment (Revised 2026-03-16)
 
-| Version | Milestone |
-|---------|-----------|
-| **v0.4.5** | Phase A: Single Army Commander prototype (RS/Mladić) — after v0.4.4 Officer Experience |
-| v0.5.4 | Phase B-D: All three armies + corps + advisor |
-| v0.6.3 | Phase E: Auto-Play + spectator mode |
+| Version | Milestone | AI Features |
+|---------|-----------|-------------|
+| **v0.4.5** | AI Command Layer (bundled) | All 3 Army Commanders + Corps Commander AI + Ops Planning AI + Player Advisor. Shared infra: prompt builder, response parser, decision log, fallback, multi-model routing. |
+| **v0.5.4** | AI Narrative Layer + Auto-Play | After-Action Reports in character, post-game analysis, AI-vs-AI auto-play/spectator, contextual tutorial/advisor |
+| **v0.6.3** | AI Dynamic Content | Procedural events (react to actual gameplay), peace negotiation dialogue (multi-turn with AI-Milošević/Izetbegović/Tuđman) |
+| **v0.6.4** | Historical Essays | AI-generated at dev time (~$5 total), shipped with game, unlocked per event |
+| *v1.5.0* | AI Scenario Editor + Streaming | Scenario editor assistant ("make Srebrenica hold"), streaming narrator for live commentary |
 
-Note: Originally v0.4.4, renumbered to v0.4.5 so officer experience (v0.4.4) comes first. Claude needs the full officer picture (experience, friction, relationships) to make rich decisions.
+Note: v0.4.5 bundles Army + Corps + Ops Planning because they share architecture (prompt builder, response parser, fallback). Building one means building all three. Officer experience (v0.4.4) comes first so Claude has the full officer picture.
 
 *"Your enemy thinks. Your commanders judge. Your advisor reasons. And all of them remember what you did last turn."*
