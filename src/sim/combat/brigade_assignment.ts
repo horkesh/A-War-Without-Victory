@@ -131,7 +131,13 @@ export function classifyBrigadesByTerritory(
 
         const frontIndices = frontOsidToSectorIndices.get(loc);
         if (frontIndices && frontIndices.length > 0) {
-            const corpsIndices = frontIndices.filter(idx => sectors[idx]!.corps_id === effectiveCorpsId);
+            // Reachability guard: only consider sectors in the same connected component
+            const brigComp = componentOf.get(loc) ?? -2;
+            const corpsIndices = frontIndices.filter(idx => {
+                const s = sectors[idx]!;
+                return s.corps_id === effectiveCorpsId
+                    && getSectorComponent(s, componentOf) === brigComp;
+            });
             if (corpsIndices.length === 1) {
                 sectors[corpsIndices[0]!]!.assigned_brigade_ids.push(fid);
                 continue;
