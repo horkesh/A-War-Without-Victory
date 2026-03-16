@@ -1,0 +1,207 @@
+/**
+ * Utility functions for corps front sectors.
+ * Extracted from corps_front_sectors.ts — pure refactoring, zero behavior change.
+ */
+
+import type {
+    CorpsFrontSector,
+    CorpsFrontSubSegment,
+    FactionId,
+    FormationId,
+    FormationState,
+    GameState,
+} from '../../state/game_state.js';
+import type { Osid } from './osid_adjacency.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
+import { strictCompare } from '../../state/validateGameState.js';
+import { findConnectedComponents } from '../../utils/graph.js';
+
+/** Fraction of entrenchment_turns retained when a brigade is reassigned to a different sub-segment. */
+export const REASSIGNMENT_ENTRENCHMENT_RETAIN = 0.3;
+
+/**
+ * Partition friendly OSIDs into connected components via BFS.
+ * Returns a map from OSID → component index (0-based).
+ * Delegates to the generic findConnectedComponents() utility.
+ */
+export function buildFriendlyComponents(
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+): Map<string, number> {
+    const components = findConnectedComponents(
+        friendlyOsids,
+        osid => (adjacency.get(osid as Osid) ?? []).filter(n => friendlyOsids.has(n)),
+    );
+    const componentOf = new Map<string, number>();
+    for (let i = 0; i < components.length; i++) {
+        for (const osid of components[i]!) componentOf.set(osid, i);
+    }
+    return componentOf;
+}
+
+/**
+ * Get the component ID for a sector (from its first territory OSID or friendly front OSID).
+ * Returns -1 if sector has no OSIDs in the component map.
+ */
+export function getSectorComponent(sector: CorpsFrontSector, componentOf: Map<string, number>): number {
+    for (const osid of sector.territory_osids) {
+        const c = componentOf.get(osid);
+        if (c !== undefined) return c;
+    }
+    for (const ss of sector.sub_segments) {
+        for (const o of ss.friendly_osids) {
+            const c = componentOf.get(o);
+            if (c !== undefined) return c;
+        }
+    }
+    return -1;
+}
+
+/** Collect the set of friendly-side front OSIDs for a sector. */
+export function getSectorFrontOsids(sector: CorpsFrontSector): Set<string> {
+    const frontSet = new Set<string>();
+    for (const ss of sector.sub_segments) {
+        for (const o of ss.friendly_osids) frontSet.add(o);
+    }
+    return frontSet;
+}
+
+/**
+ * Find the sector that DEFENDS targetOsid via sector-coverage when no brigade
+ * is physically there.  That is the defender-faction sector whose sub-segment
+ * lists targetOsid as a **friendly** OSID (= the sector that owns the territory).
+ *
+ * Previous implementation searched enemy_osids, which returned the attacker's
+ * sector instead of the defender's — making the predictor treat the attacker's
+ * own brigades as defenders (blocking attacks against truly undefended OSIDs).
+ *
+ * Returns the first matching sector in deterministic sector_id order, or null.
+ */
+export function findSectorForEnemyOsid(
+    state: GameState,
+    targetOsid: string,
+    defenderFaction?: string | null,
+): CorpsFrontSector | null {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return null;
+    // First pass: check front-edge friendly_osids (primary — direct front defense)
+    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sid]!;
+        if (defenderFaction && sector.faction !== defenderFaction) continue;
+        for (const sub of sector.sub_segments) {
+            if (sub.friendly_osids.includes(targetOsid)) return sector;
+        }
+    }
+    // Second pass: check territory_osids (fallback — depth territory claimed by post-Voronoi sweep)
+    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sid]!;
+        if (defenderFaction && sector.faction !== defenderFaction) continue;
+        if (sector.territory_osids?.includes(targetOsid)) return sector;
+    }
+    return null;
+}
+
+/**
+ * Get the corps HQ OSID for the brigade's corps — used as rout destination when
+ * a sector-coverage defender has no valid retreat path after a flip.
+ * Returns null if no corps formation is found or it has no location_osid.
+ */
+export function getCorpsHqOsid(
+    state: GameState,
+    formation: FormationState
+): string | null {
+    const corpsId = getFormationCorpsId(formation);
+    if (!corpsId) return null;
+    const corpsFormation = state.military.formations?.[corpsId];
+    if (!corpsFormation) return null;
+    return (corpsFormation as FormationState & { location_osid?: string }).location_osid ?? null;
+}
+
+/**
+ * BFS from startOsid through friendly territory to find the nearest OSID
+ * belonging to a sector. If allowedSectorIdxs is provided, only sectors
+ * in that set are considered (used for corps-strict assignment).
+ * Returns the sector index, or null if unreachable.
+ */
+export function bfsToNearestSector(
+    startOsid: string,
+    osidToSectorIdx: Map<string, number>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+    allowedSectorIdxs?: number[]
+): number | null {
+    const allowed = allowedSectorIdxs ? new Set(allowedSectorIdxs) : null;
+
+    // Quick check: already at a sector OSID?
+    const direct = osidToSectorIdx.get(startOsid);
+    if (direct !== undefined && (!allowed || allowed.has(direct))) return direct;
+
+    // BFS through friendly territory (adjacency lists are pre-sorted by buildOsidAdjacency)
+    const visited = new Set<string>();
+    visited.add(startOsid);
+    const queue: string[] = [startOsid];
+    let head = 0;
+
+    while (head < queue.length) {
+        const osid = queue[head++]!;
+        const neighbors = adjacency.get(osid) ?? [];
+        for (const n of neighbors) {
+            if (visited.has(n)) continue;
+            if (!friendlyOsids.has(n)) continue;
+            visited.add(n);
+
+            const sIdx = osidToSectorIdx.get(n);
+            if (sIdx !== undefined && (!allowed || allowed.has(sIdx))) return sIdx;
+
+            queue.push(n);
+        }
+    }
+
+    return null; // Unreachable (enclave with no front edges)
+}
+
+/** Simple BFS distance between two OSIDs through adjacency graph. */
+export function bfsDistance(from: string, to: string, adjacency: Map<string, string[]>): number {
+    if (from === to) return 0;
+    if (!from || !to) return Infinity;
+    const visited = new Set<string>([from]);
+    const queue: Array<{ osid: string; depth: number }> = [{ osid: from, depth: 0 }];
+    let head = 0;
+    const maxDepth = 10; // cap search depth
+
+    while (head < queue.length) {
+        const { osid, depth } = queue[head++]!;
+        if (depth >= maxDepth) break;
+        const neighbors = adjacency.get(osid) ?? [];
+        for (const n of neighbors) {
+            if (n === to) return depth + 1;
+            if (visited.has(n)) continue;
+            visited.add(n);
+            queue.push({ osid: n, depth: depth + 1 });
+        }
+    }
+    return Infinity;
+}
+
+/**
+ * Get sorted list of active corps formation IDs for a faction.
+ */
+export function getCorpsForFaction(
+    formations: Record<FormationId, FormationState>,
+    faction: FactionId
+): FormationId[] {
+    return Object.keys(formations)
+        .sort(strictCompare)
+        .filter(fid => {
+            const f = formations[fid];
+            return f && f.faction === faction && f.status === 'active'
+                && (f.kind === 'corps' || f.kind === 'corps_asset');
+        });
+}
+
+/**
+ * Get sorted list of faction IDs in the game.
+ */
+export function getFactions(state: GameState): FactionId[] {
+    return (state.factions ?? []).map(f => f.id).sort(strictCompare);
+}

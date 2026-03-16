@@ -29,6 +29,12 @@ export const EXEMPT_CORPS_IDS = new Set<string>([
 /** Below this competence the commander doesn't deliberately plan — falls back to BFS. */
 export const COMMANDER_COMPETENCE_ASSIGNMENT_THRESHOLD = 0.35;
 
+/** Below this competence the commander doesn't override mechanical assignments. */
+export const COMMANDER_COMPETENCE_OVERRIDE_THRESHOLD = 0.35;
+
+/** Front edges per garrison brigade in budget-based allocation. */
+export const GARRISON_BUDGET_EDGES_PER_BRIGADE = 6;
+
 /** Phase 2c BFS hard hop cap. Reduced from 8 — brigades stay in their operational zone. */
 export const PHASE_2C_MAX_HOPS = 4;
 
