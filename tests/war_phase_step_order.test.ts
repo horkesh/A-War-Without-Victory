@@ -34,6 +34,10 @@ describe('war-phase step ordering', () => {
 
         // Operation casualties must be attributed after attacks resolve
         assertBefore('resolve-attack-orders', 'attribute-operation-casualties');
+
+        // Warlord friction and officer maturity run after officer succession
+        assertBefore('officer-succession', 'check-warlord-friction');
+        assertBefore('officer-succession', 'update-faction-officer-maturity');
     });
 
     it('has no duplicate step names', () => {
@@ -53,6 +57,8 @@ describe('war-phase step ordering', () => {
         // +1 from hv-integration (Washington Agreement + HV brigades, 2026-03-15).
         // +1 from assign-brigades-to-subsegments (v0.3.3 AoR sub-segment assignment, 2026-03-16).
         // +1 from update-smuggling-routes (v0.4.3 economy & war production, 2026-03-16).
-        expect(stepNames.length).toBe(127);
+        // +1 from check-warlord-friction (v0.4.4 officer experience & weight of command, 2026-03-16).
+        // +1 from update-faction-officer-maturity (v0.4.4 officer experience & weight of command, 2026-03-16).
+        expect(stepNames.length).toBe(129);
     });
 });

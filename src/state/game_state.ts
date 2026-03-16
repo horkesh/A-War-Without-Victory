@@ -1653,6 +1653,10 @@ pending_reserve_requests?: ArmyReserveRequest[];
 elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
 /** Pending officer personnel events for player notification (new arrivals, suggested replacements). */
 pending_officer_events?: import('./officer_types.js').PendingOfficerEvent[];
+/** Average competence of active officers per faction (updated each turn). */
+faction_officer_maturity?: Record<string, number>;
+/** Warlord friction events (low-reliability commanders ignoring orders). */
+friction_events?: import('../sim/combat/warlord_friction.js').FrictionEvent[];
 /** Negotiation capital, patron relationships, peace plan history. */
 negotiation?: import('./negotiation_types.js').NegotiationState;
 /** Event IDs that have already fired (prevents re-fire for once-only events). */

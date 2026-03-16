@@ -239,6 +239,10 @@ export interface TurnReport {
     sector_combat_ratings?: import('./combat/sector_combat_rating.js').SectorCombatRatingReport;
     /** Operation preparation phase events (intel, staging, probes, assessments). */
     preparation_events?: PreparationEvent[];
+    /** Warlord friction events this turn. */
+    warlord_friction?: import('../sim/combat/warlord_friction.js').WarlordFrictionReport;
+    /** HV (Croatian Army) integration report — post-Washington brigade spawning. */
+    hv_integration?: import('./combat/hv_integration.js').HvIntegrationReport;
 }
 
 /** Single preparation event emitted during advanceSectorOffensives. */

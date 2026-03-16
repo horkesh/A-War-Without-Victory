@@ -83,6 +83,12 @@ export interface NamedOfficerView {
         charges?: string;
         summary: string;
     };
+    /** Accumulated experience points from commanding operations. */
+    experience_points?: number;
+    /** Total operations commanded. */
+    operations_commanded?: number;
+    /** Competence at first experience event (baseline). */
+    initial_competence?: number;
 }
 
 export interface FormationView {

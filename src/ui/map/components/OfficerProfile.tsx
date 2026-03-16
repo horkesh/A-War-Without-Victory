@@ -67,6 +67,33 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
                 </div>
             )}
 
+            {/* Experience & competence growth */}
+            {(officer.operations_commanded != null && officer.operations_commanded > 0) && (
+                <div className="space-y-0.5 pt-0.5 border-t border-panel-border/20">
+                    <div className="flex items-center gap-2 text-[9px]">
+                        <span className="text-text-secondary w-[62px] shrink-0">Ops Led</span>
+                        <span className="font-mono text-accent-gold">{officer.operations_commanded}</span>
+                        {officer.initial_competence != null && officer.competence > officer.initial_competence && (
+                            <span className="text-green-400 text-[8px]">
+                                +{(officer.competence - officer.initial_competence).toFixed(1)} comp
+                            </span>
+                        )}
+                    </div>
+                    {officer.experience_points != null && officer.experience_points > 0 && (
+                        <div className="flex items-center gap-1 text-[9px]">
+                            <span className="text-text-secondary w-[62px] shrink-0">XP</span>
+                            <div className="flex-1 h-1 bg-black/40 rounded overflow-hidden">
+                                <div
+                                    className="h-full bg-accent-gold/70 rounded"
+                                    style={{ width: `${Math.min(100, (officer.experience_points / 2) * 100)}%` }}
+                                />
+                            </div>
+                            <span className="font-mono text-text-secondary">{officer.experience_points.toFixed(2)}</span>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Casualty vulnerability indicator */}
             {officer.casualty_vulnerability != null && officer.casualty_vulnerability >= 0.10 && (
                 <div className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${

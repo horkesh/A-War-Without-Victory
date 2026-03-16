@@ -1449,6 +1449,27 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'check-warlord-friction',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.military.named_officers || !context.state.military.named_officer_data) return;
+            const { checkWarlordFriction } = await import('../combat/warlord_friction.js');
+            const frictionReport = checkWarlordFriction(context.state);
+            if (frictionReport.events.length > 0) {
+                context.report.warlord_friction = frictionReport;
+            }
+        }
+    },
+    {
+        name: 'update-faction-officer-maturity',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.military.named_officers || !context.state.military.named_officer_data) return;
+            const { updateFactionOfficerMaturity } = await import('../combat/officer_experience.js');
+            updateFactionOfficerMaturity(context.state);
+        }
+    },
+    {
         name: 'generate-war-stories',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;

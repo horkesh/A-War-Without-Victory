@@ -100,6 +100,14 @@ export interface NamedOfficerState {
     acting_commander: boolean;
     /** Operation name if currently commanding a named operation. */
     assigned_operation?: string;
+    /** Accumulated experience points from commanding operations. */
+    experience_points?: number;
+    /** Total number of operations commanded. */
+    operations_commanded?: number;
+    /** Competence at first experience gain (baseline for drift tracking). */
+    initial_competence?: number;
+    /** Aggressiveness at first experience gain (baseline for skill shift cap). */
+    initial_aggressiveness?: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

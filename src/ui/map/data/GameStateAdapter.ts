@@ -1257,6 +1257,9 @@ export function parseGameState(json: unknown): LoadedGameState {
                         summary: String(r.summary ?? ''),
                     };
                 })(),
+                experience_points: finiteNumber(os?.experience_points, undefined) as number | undefined,
+                operations_commanded: finiteNumber(os?.operations_commanded, undefined) as number | undefined,
+                initial_competence: finiteNumber(os?.initial_competence, undefined) as number | undefined,
             });
         }
         if (officerList.length > 0) namedOfficerData = officerList;
