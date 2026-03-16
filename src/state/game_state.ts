@@ -1653,6 +1653,8 @@ elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
 pending_officer_events?: import('./officer_types.js').PendingOfficerEvent[];
 /** Negotiation capital, patron relationships, peace plan history. */
 negotiation?: import('./negotiation_types.js').NegotiationState;
+/** Event IDs that have already fired (prevents re-fire for once-only events). */
+fired_event_ids?: string[];
 }
 
 export interface PoliticalState {
