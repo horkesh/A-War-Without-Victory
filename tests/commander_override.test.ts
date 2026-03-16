@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { CorpsFrontSector, FormationState } from '../src/state/game_state.js';
+import type { ArmyHQOverride, CorpsFrontSector, FormationState } from '../src/state/game_state.js';
 import type { ArmyOperationPriority } from '../src/sim/combat/bot_strategy.js';
 import {
     commanderReviewAssignment,
@@ -341,5 +341,36 @@ describe('supply-aware operation sizing', () => {
         expect(computeSupplyAwareOpSize(
             { critical_fraction: 0.3, adequate_fraction: 0.4 }, 20, 12
         )).toBe(12);
+    });
+});
+
+describe('ArmyHQOverride type', () => {
+    it('is assignable with all required fields', () => {
+        const override: ArmyHQOverride = {
+            corps_id: 'vrs_drina',
+            operation_name: 'Srebrenica Push',
+            min_brigades: 4,
+            target_osids: ['op:srebrenica:srebrenica_2'],
+            reason: 'Take Srebrenica at all costs',
+            issued_turn: 20,
+            type: 'offensive',
+        };
+        expect(override.corps_id).toBe('vrs_drina');
+        expect(override.type).toBe('offensive');
+    });
+
+    it('supports probe type with max_brigades', () => {
+        const probe: ArmyHQOverride = {
+            corps_id: 'arbih_2nd_corps',
+            operation_name: 'Brčko Probe',
+            min_brigades: 1,
+            target_osids: ['op:brcko:brka_2'],
+            reason: 'Test VRS defenses',
+            issued_turn: 15,
+            type: 'probe',
+            max_brigades: 2,
+        };
+        expect(probe.type).toBe('probe');
+        expect(probe.max_brigades).toBe(2);
     });
 });

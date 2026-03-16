@@ -373,6 +373,21 @@ export interface CorpsDirective {
     sector_reassignment_orders?: Array<{ brigade_id: string; to_sector_id: string }>;
 }
 
+/**
+ * Army HQ directive forcing a corps to launch an operation.
+ * Rare — army commander overriding corps-level caution for strategic necessity.
+ */
+export interface ArmyHQOverride {
+    corps_id: string;
+    operation_name: string;
+    min_brigades: number;
+    target_osids: string[];
+    reason: string;
+    issued_turn: number;
+    type: 'offensive' | 'probe' | 'feint';
+    max_brigades?: number;
+}
+
 /** Per-corps command state. */
 export interface CorpsCommandState {
     command_span: number;
@@ -1653,6 +1668,8 @@ opsec_sectors?: string[];
 used_operation_names?: Record<string, number>;
 /** Pending army reserve loan requests from corps, awaiting army-AI or player approval this turn. */
 pending_reserve_requests?: ArmyReserveRequest[];
+/** Army HQ overrides forcing corps to launch operations. Consumed and cleared each turn. */
+army_hq_overrides?: ArmyHQOverride[];
 /** Per-brigade elite deployment tracker. Keyed by brigade FormationId. */
 elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
 /** Pending officer personnel events for player notification (new arrivals, suggested replacements). */
