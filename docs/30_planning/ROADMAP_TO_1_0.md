@@ -2,7 +2,7 @@
 
 **Studio:** Pyrrhic Games
 **Last Updated:** 2026-03-16
-**Current Version:** v0.4.4 (Officer Experience & Weight of Command)
+**Current Version:** v0.4.5 (AI Command Layer)
 
 ---
 
@@ -23,7 +23,7 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.4.2** | Additional Scenarios (Sep 1991, Jan 1993 + selection screen) | ✓ 2026-03-16 (Phase 3 blocked) |
 | **v0.4.3** | Economy & War Production | ✓ 2026-03-16 |
 | **v0.4.4** | Officer Experience & Weight of Command | ✓ 2026-03-16 |
-| **v0.4.5** | AI Command Layer (Army + Corps + Ops Planning AI) | PLANNED |
+| **v0.4.5** | AI Command Layer (Army + Corps + Ops Planning AI) | ✓ 2026-03-16 |
 | **v0.5.0** | Full Diplomatic System (Negotiations) | PLANNED |
 | **v0.5.1** | UI Completion (all panels, modes, tooltips) | PLANNED |
 | **v0.5.2** | Tutorial & Onboarding | PLANNED |
