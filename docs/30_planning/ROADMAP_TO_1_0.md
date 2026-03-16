@@ -24,7 +24,7 @@ Every milestone is pre-numbered. Implemented milestones are marked ✓ with thei
 | **v0.4.3** | Economy & War Production | ✓ 2026-03-16 |
 | **v0.4.4** | Officer Experience & Weight of Command | ✓ 2026-03-16 |
 | **v0.4.5** | AI Command Layer (Army + Corps + Ops Planning AI) | ✓ 2026-03-16 |
-| **v0.4.6** | Commander Override Layer (Strategic Intent) | PARTIAL (Phase A complete) |
+| **v0.4.6** | Commander Override Layer (Strategic Intent) | ✓ 2026-03-16 |
 | **v0.5.0** | Full Diplomatic System (Negotiations) | PLANNED |
 | **v0.5.1** | UI Completion (all panels, modes, tooltips) | PLANNED |
 | **v0.5.2** | Tutorial & Onboarding | PLANNED |

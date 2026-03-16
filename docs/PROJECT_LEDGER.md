@@ -1,7 +1,27 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-16
-**Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **778 tests**, 67 suites. Full v0.4.x roadmap scoped (8 milestones, all Pyrrhic compliant). Night shift system live. Night shift handoff written for v0.3.2→v0.4.4.
+**Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **927 tests**, 67 suites. Full v0.4.x roadmap scoped (8 milestones, all Pyrrhic compliant). Night shift system live. Night shift handoff written for v0.3.2→v0.4.4.
+
+## [2026-03-16] v0.4.6: Commander Override Layer Phase B — Army HQ Overrides + Probes
+
+**Phase B additions to the Commander Override Layer:**
+
+1. **`ArmyHQOverride` type** on `MilitaryState` — army-level directive forcing corps to launch operations. Fields: corps_id, operation_name, min_brigades, target_osids, reason, type (offensive/probe/feint), max_brigades.
+
+2. **`generateArmyHQOverrides()`** in `army_hq_overrides.ts` — per-turn generation based on army priority weight thresholds. Weight ≥ 80 triggers full offensive, 50-79 triggers probe. Idle check (6 turns), one override per corps per turn. Target OSIDs derived from priorities.
+
+3. **Override consumption** in `bot_corps_directives.ts` — army HQ targets injected past supply gate. Probe/feint operations capped at 2/3 brigades. Operation type set from HQ override.
+
+4. **Pipeline integration** in `bot_corps_ai.ts` — overrides generated before corps processing, cleared after. Single-turn consumption model.
+
+5. **Probe auto-abort** in `sector_offensive.ts` — probes auto-recover on first repulse with `probe_complete` recovery reason (1-turn recovery, no failed-objective penalty).
+
+**Status:** Infrastructure wired but dormant — actual priority weights in `bot_strategy.ts` need tuning to exceed 50/80 thresholds. Same hash as n819 (`829e9f2b691e42f6`). No regression. Version bumped to v0.4.6.
+
+**Files:** `src/state/game_state.ts` (+19), `src/sim/combat/army_hq_overrides.ts` (NEW, 115 lines), `src/sim/combat/bot_corps_directives.ts` (+43), `src/sim/combat/bot_corps_ai.ts` (+10), `src/sim/combat/sector_offensive.ts` (+5). 27 tests total.
+
+---
 
 ## [2026-03-16] n819: Commander Override Layer Phase A — Strategic Intent
 
