@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { assignBrigadesToSubSegments, findSubSegmentForOsid } from '../src/sim/combat/corps_front_sectors.js';
-import { findWeakestSubSegment } from '../src/sim/combat/bot_brigade_eval_attack.js';
+import { assignBrigadesToSubSegments, findSubSegmentForOsid, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../src/sim/combat/corps_front_sectors.js';
+import { findWeakestSubSegment, getWeakSubSegmentBonus, WEAK_SUBSEGMENT_SCORE_BONUS } from '../src/sim/combat/bot_brigade_eval_attack.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment, GameState, FormationState } from '../src/state/game_state.js';
 
 function makeFormation(overrides: Partial<FormationState> & { location_osid?: string }): FormationState {
@@ -432,5 +432,98 @@ describe('Phase C: findWeakestSubSegment', () => {
 
         const weakest = findWeakestSubSegment(sector, formations);
         expect(weakest!.sub_segment_id).toBe('ss_a');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase D: Gap mechanics — entrenchment reset, gap exploitation
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Phase D: entrenchment reset on sub-segment reassignment', () => {
+    it('decays entrenchment when assigned_sub_segment_id changes', () => {
+        const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
+        const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1', 'brig_2']);
+        const brig1 = makeFormation({ id: 'brig_1', location_osid: 'osid_a' }) as FormationState & { entrenchment_turns?: number; assigned_sub_segment_id?: string };
+        brig1.entrenchment_turns = 10;
+        brig1.assigned_sub_segment_id = 'ss2'; // was previously on ss2
+
+        const brig2 = makeFormation({ id: 'brig_2', location_osid: 'osid_b' }) as FormationState & { entrenchment_turns?: number; assigned_sub_segment_id?: string };
+        brig2.entrenchment_turns = 6;
+        brig2.assigned_sub_segment_id = 'ss2'; // stays on ss2
+
+        const state = {
+            military: { formations: { brig_1: brig1, brig_2: brig2 } },
+        } as unknown as GameState;
+
+        // Save prev assignments
+        const prevAssignment = new Map<string, string | undefined>();
+        prevAssignment.set('brig_1', brig1.assigned_sub_segment_id);
+        prevAssignment.set('brig_2', brig2.assigned_sub_segment_id);
+
+        const adj = makeAdjacency([['osid_a', 'osid_b']]);
+        assignBrigadesToSubSegments(state, [sector], adj);
+
+        // brig_1 at osid_a → ss1 (changed from ss2), brig_2 at osid_b → ss2 (unchanged)
+        expect(brig1.assigned_sub_segment_id).toBe('ss1');
+        expect(brig2.assigned_sub_segment_id).toBe('ss2');
+
+        // Apply entrenchment decay for changed assignments
+        for (const [fid, prevSsId] of prevAssignment) {
+            const f = (state.military.formations as Record<string, any>)[fid];
+            if (!f) continue;
+            const newSsId = f.assigned_sub_segment_id;
+            if (prevSsId != null && newSsId != null && prevSsId !== newSsId) {
+                const et = f.entrenchment_turns ?? 0;
+                if (et > 0) {
+                    f.entrenchment_turns = Math.floor(et * REASSIGNMENT_ENTRENCHMENT_RETAIN);
+                }
+            }
+        }
+
+        // brig_1 changed: 10 * 0.3 = 3 (floored)
+        expect(brig1.entrenchment_turns).toBe(3);
+        // brig_2 unchanged: still 6
+        expect(brig2.entrenchment_turns).toBe(6);
+    });
+});
+
+describe('Phase D: gap sub-segment gets double attack bonus', () => {
+    it('doubles WEAK_SUBSEGMENT_SCORE_BONUS for gap sub-segments', () => {
+        const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
+        ss1.primary_brigade_ids = ['brig_1'];
+        const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
+        ss2.primary_brigade_ids = [];
+        ss2.gap = true;
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1']);
+
+        const formations: Record<string, FormationState | undefined> = {
+            brig_1: makeFormation({ id: 'brig_1', personnel: 1500 }),
+        };
+
+        // Target in the gap sub-segment (enemy_ss2) → double bonus
+        const gapBonus = getWeakSubSegmentBonus('enemy_ss2', sector, formations);
+        expect(gapBonus).toBe(WEAK_SUBSEGMENT_SCORE_BONUS * 2);
+
+        // Target in the non-gap sub-segment (enemy_ss1) → no bonus (it's not weakest)
+        const noBonus = getWeakSubSegmentBonus('enemy_ss1', sector, formations);
+        expect(noBonus).toBe(0);
+    });
+
+    it('returns normal bonus for non-gap weakest sub-segment', () => {
+        const ss1 = makeSubSeg('ss1', ['osid_a'], 3);
+        ss1.primary_brigade_ids = ['brig_1'];
+        const ss2 = makeSubSeg('ss2', ['osid_b'], 3);
+        ss2.primary_brigade_ids = ['brig_2'];
+        const sector = makeSector('sec1', [ss1, ss2], ['brig_1', 'brig_2']);
+
+        const formations: Record<string, FormationState | undefined> = {
+            brig_1: makeFormation({ id: 'brig_1', personnel: 1500 }),
+            brig_2: makeFormation({ id: 'brig_2', personnel: 500 }),
+        };
+
+        // ss2 is weakest (less personnel) but NOT a gap
+        const bonus = getWeakSubSegmentBonus('enemy_ss2', sector, formations);
+        expect(bonus).toBe(WEAK_SUBSEGMENT_SCORE_BONUS);
     });
 });

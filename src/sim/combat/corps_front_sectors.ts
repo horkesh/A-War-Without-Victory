@@ -4115,6 +4115,9 @@ export function assignBrigadesToSubSegments(
     }
 }
 
+/** Fraction of entrenchment_turns retained when a brigade is reassigned to a different sub-segment. */
+export const REASSIGNMENT_ENTRENCHMENT_RETAIN = 0.3;
+
 /** Simple BFS distance between two OSIDs through adjacency graph. */
 function bfsDistance(from: string, to: string, adjacency: Map<string, string[]>): number {
     if (from === to) return 0;

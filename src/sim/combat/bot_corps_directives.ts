@@ -1595,4 +1595,48 @@ export function generateCorpsDirectives(
             }
         }
     }
+
+    // ── D2: Bot reserve commitment to fill gaps ──────────────────────────
+    // After all directives are generated, scan each sector's sub-segments
+    // for gaps. If a gap exists and the sector has reserve brigades, commit
+    // the nearest reserve to fill by adding it to the gap sub-segment's
+    // primary_brigade_ids. The actual movement happens via existing brigade
+    // AI movement (interior movement / column march).
+    const formations = state.military.formations ?? {};
+    for (const [, sec] of Object.entries(sectorLookup).sort((a, b) => strictCompare(a[0], b[0]))) {
+        if (sec.faction !== faction) continue;
+        const gapSubSegments = sec.sub_segments.filter(ss => ss.gap);
+        if (gapSubSegments.length === 0) continue;
+
+        const availableReserves = [...(sec.reserve_brigade_ids ?? [])].sort(strictCompare);
+        if (availableReserves.length === 0) continue;
+
+        const usedReserves = new Set<string>();
+        for (const gapSS of gapSubSegments) {
+            // Find nearest reserve brigade to this gap sub-segment
+            let bestReserve: string | null = null;
+            let bestDist = Infinity;
+            for (const rid of availableReserves) {
+                if (usedReserves.has(rid)) continue;
+                const rf = formations[rid];
+                if (!rf || rf.status !== 'active') continue;
+                const rLoc = rf.location_osid ?? '';
+                // Distance = min hops from reserve location to any friendly OSID in the gap
+                for (const fOsid of gapSS.friendly_osids) {
+                    const d = rLoc === fOsid ? 0 : (adjacency.get(rLoc as Osid)?.includes(fOsid) ? 1 : 99);
+                    if (d < bestDist) {
+                        bestDist = d;
+                        bestReserve = rid;
+                    }
+                }
+            }
+            if (bestReserve) {
+                gapSS.primary_brigade_ids.push(bestReserve);
+                gapSS.gap = false;
+                usedReserves.add(bestReserve);
+                const rf = formations[bestReserve];
+                if (rf) rf.assigned_sub_segment_id = gapSS.sub_segment_id;
+            }
+        }
+    }
 }

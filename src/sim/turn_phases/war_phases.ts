@@ -117,7 +117,7 @@ import { updateEnclaveResilience } from '../combat/enclave_resilience.js';
 import { updateExhaustion } from '../combat/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
 import { buildLocalFronts } from '../combat/local_front_defense.js';
-import { buildCorpsFrontSectors, assignBrigadesToSubSegments } from '../combat/corps_front_sectors.js';
+import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults } from '../combat/sector_offensive.js';
 import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
@@ -539,7 +539,31 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.edges?.length) return;
             const adjacency = buildOsidAdjacency(od.edges);
+
+            // D3: Save previous sub-segment assignments for entrenchment reset
+            const formations = context.state.military.formations ?? {};
+            const prevAssignment = new Map<string, string | undefined>();
+            for (const [fid, f] of Object.entries(formations)) {
+                if (f && f.status === 'active') {
+                    prevAssignment.set(fid, f.assigned_sub_segment_id);
+                }
+            }
+
             assignBrigadesToSubSegments(context.state, sectorList, adjacency);
+
+            // D3: If assigned_sub_segment_id changed, decay entrenchment
+            for (const [fid, prevSsId] of prevAssignment) {
+                const f = formations[fid];
+                if (!f) continue;
+                const newSsId = f.assigned_sub_segment_id;
+                if (prevSsId != null && newSsId != null && prevSsId !== newSsId) {
+                    const et = (f as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
+                    if (et > 0) {
+                        (f as { entrenchment_turns?: number }).entrenchment_turns =
+                            Math.floor(et * REASSIGNMENT_ENTRENCHMENT_RETAIN);
+                    }
+                }
+            }
         }
     },
 

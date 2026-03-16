@@ -581,7 +581,8 @@ export function getWeakSubSegmentBonus(
     const weakest = findWeakestSubSegment(defendingSector, formations);
     if (!weakest) return 0;
     if (weakest.enemy_osids.includes(targetOsid)) {
-        return WEAK_SUBSEGMENT_SCORE_BONUS;
+        // Gap sub-segments (no assigned brigades) are extra vulnerable — double the bonus
+        return weakest.gap ? WEAK_SUBSEGMENT_SCORE_BONUS * 2 : WEAK_SUBSEGMENT_SCORE_BONUS;
     }
     return 0;
 }
