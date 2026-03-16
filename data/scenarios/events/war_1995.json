@@ -1,0 +1,133 @@
+[
+  {
+    "id": "srebrenica_falls_1995",
+    "title": "Srebrenica Falls",
+    "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
+    "category": "humanitarian",
+    "trigger": { "turn_min": 168, "turn_max": 168, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 5 },
+    "effects": [
+      { "kind": "morale_change", "faction": "RBiH", "delta": -15 },
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -30 },
+      { "kind": "patron_pressure", "faction": "RS", "delta": 20 },
+      { "kind": "narrative", "text": "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II." }
+    ]
+  },
+  {
+    "id": "zepa_falls_1995",
+    "title": "Zepa Enclave Overrun",
+    "narrative": "Following the fall of Srebrenica, the VRS turns its attention to the neighboring Zepa enclave. Despite desperate resistance by the small garrison, the enclave falls within two weeks. The civilian population is forcibly expelled. The international community, still reeling from Srebrenica, watches another safe area collapse.",
+    "category": "territorial",
+    "trigger": { "turn_min": 170, "turn_max": 170, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 1 },
+    "effects": [
+      { "kind": "morale_change", "faction": "RBiH", "delta": -5 },
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -10 },
+      { "kind": "narrative", "text": "Zepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis." }
+    ]
+  },
+  {
+    "id": "operation_storm_1995",
+    "title": "Operation Storm — Croatia Retakes Krajina",
+    "narrative": "The Croatian Army launches Operation Storm, overrunning the Republic of Serbian Krajina in a devastating four-day offensive. The operation eliminates the Serb entity in Croatia and fundamentally shifts the strategic balance in Bosnia. VRS forces in western Bosnia lose their rear-area support, and the success emboldens Croatian and Federation forces for operations in Bosnia.",
+    "category": "military",
+    "trigger": { "turn_min": 172, "turn_max": 172, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "morale_change", "faction": "RS", "delta": -10 },
+    "effects": [
+      { "kind": "morale_change", "faction": "HRHB", "delta": 10 },
+      { "kind": "supply_delta", "faction": "RS", "delta": -15 },
+      { "kind": "narrative", "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces." }
+    ]
+  },
+  {
+    "id": "second_markale_massacre_1995",
+    "title": "Second Markale Massacre",
+    "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Zepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
+    "category": "humanitarian",
+    "trigger": { "turn_min": 176, "turn_max": 176, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 2 },
+    "effects": [
+      { "kind": "patron_pressure", "faction": "RS", "delta": 20 },
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -15 },
+      { "kind": "narrative", "text": "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces." }
+    ]
+  },
+  {
+    "id": "nato_deliberate_force_1995",
+    "title": "NATO Operation Deliberate Force",
+    "narrative": "NATO launches Operation Deliberate Force, a sustained air campaign against VRS military targets across Bosnia. Over two weeks, NATO aircraft fly 3,515 sorties and strike ammunition depots, communications facilities, air defenses, and command bunkers. Combined with a Tomahawk cruise missile strike, the campaign devastates VRS military infrastructure and shatters its ability to sustain offensive operations.",
+    "category": "military",
+    "trigger": { "turn_min": 177, "turn_max": 177, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "supply_delta", "faction": "RS", "delta": -30 },
+    "effects": [
+      { "kind": "morale_change", "faction": "RS", "delta": -10 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": 10 },
+      { "kind": "narrative", "text": "NATO launches Operation Deliberate Force. Sustained air strikes devastate VRS military infrastructure across Bosnia." }
+    ]
+  },
+  {
+    "id": "federation_ground_offensive_1995",
+    "title": "Federation Ground Offensive",
+    "narrative": "Coordinated ARBiH and HVO ground forces, supported by Croatian Army units, launch a broad offensive across western and central Bosnia. The operation rapidly captures Sipovo, Jajce, Mrkonjic Grad, and Kljuc, reducing Republika Srpska's territory from roughly 70% to near the 49% envisioned by the Contact Group plan. The VRS, battered by NATO strikes and stretched thin, cannot hold its extended lines.",
+    "category": "military",
+    "trigger": { "turn_min": 178, "turn_max": 178, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "morale_change", "faction": "RS", "delta": -10 },
+    "effects": [
+      { "kind": "morale_change", "faction": "RBiH", "delta": 10 },
+      { "kind": "morale_change", "faction": "HRHB", "delta": 5 },
+      { "kind": "supply_delta", "faction": "RS", "delta": -15 },
+      { "kind": "narrative", "text": "Federation forces launch a broad offensive. VRS lines collapse across western Bosnia as Republika Srpska's territory shrinks dramatically." }
+    ]
+  },
+  {
+    "id": "dayton_talks_begin_1995",
+    "title": "Dayton Peace Talks Convene",
+    "narrative": "The presidents of Bosnia, Croatia, and Serbia arrive at Wright-Patterson Air Force Base in Dayton, Ohio, for proximity peace talks brokered by US envoy Richard Holbrooke. The military situation — NATO air power, Federation ground gains, and VRS exhaustion — has finally created the conditions for a negotiated settlement. The outcome will define Bosnia's future.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 184, "turn_max": 184, "phase": "war" },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "accept_first",
+    "effect": { "kind": "narrative", "text": "The Dayton peace talks begin. After three and a half years of war, the outlines of a settlement take shape." },
+    "response_options": [
+      {
+        "id": "accept",
+        "label": "Negotiate in Good Faith",
+        "description": "Commit fully to the peace process. The war ends, but the compromises will define the country for decades.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 15 },
+          { "kind": "morale_change", "faction": "RBiH", "delta": 5 }
+        ]
+      },
+      {
+        "id": "hardline",
+        "label": "Push for Maximum Concessions",
+        "description": "Leverage military momentum to demand more territory and stronger central government. Risks collapse of talks.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": -5 },
+          { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ceasefire_1995",
+    "title": "General Ceasefire Takes Effect",
+    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina, freezing the front lines after 1,340 days of war. The Dayton Agreement establishes Bosnia as a single state composed of two entities — the Federation of Bosnia and Herzegovina and Republika Srpska — with NATO-led IFOR deployed to enforce the peace. The war that killed over 100,000 people and displaced two million is over.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 186, "turn_max": 186, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "narrative", "text": "The ceasefire takes effect. After three and a half years, the guns fall silent across Bosnia-Herzegovina." },
+    "effects": [
+      { "kind": "morale_change", "faction": "RBiH", "delta": 10 },
+      { "kind": "morale_change", "faction": "RS", "delta": 5 },
+      { "kind": "morale_change", "faction": "HRHB", "delta": 5 }
+    ]
+  }
+]

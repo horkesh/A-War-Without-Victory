@@ -1,0 +1,142 @@
+[
+  {
+    "id": "markale_massacre_1994",
+    "title": "First Markale Massacre",
+    "narrative": "A mortar shell strikes the Markale marketplace in Sarajevo, killing 68 civilians and wounding over 140. The images of carnage broadcast worldwide provoke outrage and push NATO toward its first decisive action in the Bosnian war. The VRS denies responsibility, but the international community overwhelmingly attributes the attack to Serb forces.",
+    "category": "humanitarian",
+    "trigger": { "turn_min": 92, "turn_max": 92, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 2 },
+    "effects": [
+      { "kind": "patron_pressure", "faction": "RS", "delta": 15 },
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -20 },
+      { "kind": "narrative", "text": "The Markale massacre kills 68 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS." }
+    ]
+  },
+  {
+    "id": "nato_ultimatum_sarajevo_1994",
+    "title": "NATO Issues Ultimatum on Sarajevo",
+    "narrative": "In the aftermath of Markale, NATO issues an ultimatum demanding the withdrawal of all VRS heavy weapons from a 20-kilometer exclusion zone around Sarajevo within ten days, or face air strikes. The ultimatum marks NATO's first credible threat of force and fundamentally changes the calculation for the VRS around the capital.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 92, "turn_max": 92, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "patron_pressure", "faction": "RS", "delta": 10 },
+    "effects": [
+      { "kind": "narrative", "text": "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time." }
+    ]
+  },
+  {
+    "id": "nato_shoots_down_planes_1994",
+    "title": "NATO Shoots Down Serb Aircraft",
+    "narrative": "NATO fighters shoot down four VRS aircraft violating the no-fly zone over Bosnia in the Banja Luka area. The incident, NATO's first combat action in its history, signals a shift from passive observation to active enforcement. The VRS command begins to factor NATO air power into its operational calculations.",
+    "category": "military",
+    "trigger": { "turn_min": 94, "turn_max": 94, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
+    "effects": [
+      { "kind": "morale_change", "faction": "RS", "delta": -3 },
+      { "kind": "narrative", "text": "NATO shoots down four VRS aircraft. The alliance demonstrates its willingness to use force for the first time." }
+    ]
+  },
+  {
+    "id": "washington_agreement_1994",
+    "title": "Washington Agreement Signed",
+    "narrative": "Under heavy American pressure, Bosniak and Bosnian Croat leaders sign the Washington Agreement, ending the Croat-Bosniak war and establishing the Federation of Bosnia and Herzegovina. The agreement transforms the military balance by uniting two of the three warring factions against the VRS and opens Croatian supply lines to the ARBiH.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 96, "turn_max": 96, "phase": "war" },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "accept_first",
+    "effect": { "kind": "alliance_change", "delta": 0.8 },
+    "effects": [
+      { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
+      { "kind": "morale_change", "faction": "HRHB", "delta": 3 },
+      { "kind": "narrative", "text": "The Washington Agreement ends the Croat-Bosniak war. The Federation of Bosnia and Herzegovina is established." }
+    ],
+    "response_options": [
+      {
+        "id": "accept",
+        "label": "Embrace the Federation",
+        "description": "Full commitment to the Federation opens supply lines and creates a unified front against the VRS.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 15 },
+          { "kind": "supply_delta", "faction": "RBiH", "delta": 10 }
+        ]
+      },
+      {
+        "id": "reluctant",
+        "label": "Accept with Reservations",
+        "description": "Accept the agreement but maintain wariness toward former enemies. Slower integration but preserved autonomy.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 5 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "anti_sniping_agreement_1994",
+    "title": "Anti-Sniping Agreement in Sarajevo",
+    "narrative": "An anti-sniping agreement is reached for Sarajevo, aiming to reduce the daily toll of civilians killed by snipers along the city's exposed boulevards and intersections. Compliance is sporadic, but the agreement represents a small step in civilian protection and provides UNPROFOR with additional monitoring authority.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 98, "turn_max": 98, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "narrative", "text": "An anti-sniping agreement is signed for Sarajevo. Compliance is uneven but civilian casualties decrease temporarily." }
+  },
+  {
+    "id": "gorazde_crisis_1994",
+    "title": "Gorazde Crisis",
+    "narrative": "The VRS launches a major offensive against the Gorazde safe area, overrunning UN observation posts and pushing into the outskirts of the town. Limited NATO air strikes prove insufficient to halt the advance. The crisis exposes the hollow nature of safe area protection and the mismatch between UN mandates and military reality.",
+    "category": "military",
+    "trigger": { "turn_min": 100, "turn_max": 100, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": -3 },
+    "effects": [
+      { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
+      { "kind": "narrative", "text": "The VRS attacks the Gorazde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection." }
+    ]
+  },
+  {
+    "id": "contact_group_plan_1994",
+    "title": "Contact Group Plan Presented",
+    "narrative": "The Contact Group — the US, Russia, UK, France, and Germany — presents a take-it-or-leave-it peace plan offering the Federation 51% and Republika Srpska 49% of Bosnian territory. The Bosnian government and Croats accept under pressure, but the Bosnian Serb leadership rejects the plan, further isolating Pale even from its Belgrade patron.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 108, "turn_max": 108, "phase": "war" },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "capital_based",
+    "effect": { "kind": "narrative", "text": "The Contact Group demands acceptance of a 51/49 territorial split. Rejection risks further international isolation." },
+    "response_options": [
+      {
+        "id": "accept",
+        "label": "Accept the Contact Group Plan",
+        "description": "Acceptance demonstrates good faith and strengthens the case for international support.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 10 },
+          { "kind": "patron_pressure", "faction": "RBiH", "delta": -10 }
+        ]
+      },
+      {
+        "id": "reject",
+        "label": "Reject the Territorial Division",
+        "description": "Rejection risks isolation but refuses to legitimize conquest. The war continues.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": -15 },
+          { "kind": "patron_pressure", "faction": "RBiH", "delta": 10 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "bihac_crisis_1994",
+    "title": "Bihac Crisis Deepens",
+    "narrative": "The VRS, supported by forces from the Republic of Serbian Krajina and Abdic's APWB militia, launches a major counteroffensive against the Bihac pocket. The 5th Corps is pushed back toward the town itself, and the crisis threatens the complete fall of the enclave. NATO air strikes against VRS airfields prove too limited to change the situation.",
+    "category": "military",
+    "trigger": { "turn_min": 130, "turn_max": 130, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": -5 },
+    "effects": [
+      { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
+      { "kind": "narrative", "text": "The Bihac pocket faces collapse as VRS and allied forces close in. NATO strikes prove inadequate to lift the siege." }
+    ]
+  }
+]

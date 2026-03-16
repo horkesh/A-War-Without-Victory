@@ -1,0 +1,203 @@
+[
+  {
+    "id": "arms_embargo_impact_1992",
+    "title": "UN Arms Embargo Strangles Bosnia",
+    "narrative": "The UN arms embargo, originally imposed on all of Yugoslavia, disproportionately impacts the fledgling Bosnian government. While the VRS inherits vast JNA stockpiles and the HVO receives supplies from Croatia, the ARBiH faces severe weapons shortages across all fronts.",
+    "category": "military",
+    "trigger": { "turn_min": 4, "turn_max": 4, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "supply_delta", "faction": "RBiH", "delta": -10 },
+    "effects": [
+      { "kind": "narrative", "text": "The UN arms embargo leaves the ARBiH critically short of weapons and ammunition." }
+    ]
+  },
+  {
+    "id": "jna_withdrawal_1992",
+    "title": "JNA Forces Begin Withdrawal from Bosnia",
+    "narrative": "The Yugoslav People's Army formally announces its withdrawal from Bosnia-Herzegovina. In practice, Bosnian Serb personnel simply change insignia, and massive quantities of heavy weapons, ammunition depots, and military infrastructure are transferred directly to the newly formed VRS.",
+    "category": "military",
+    "trigger": { "turn_min": 5, "turn_max": 5, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "supply_delta", "faction": "RS", "delta": 20 },
+    "effects": [
+      { "kind": "morale_change", "faction": "RBiH", "delta": -5 },
+      { "kind": "narrative", "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS." }
+    ]
+  },
+  {
+    "id": "sarajevo_siege_begins_1992",
+    "title": "Siege of Sarajevo Intensifies",
+    "narrative": "The SRK tightens its grip around Sarajevo as artillery bombardment from surrounding hills intensifies. The city's 350,000 residents face daily shelling, sniper fire, and the severing of water and electricity supplies. The siege becomes the longest in modern European warfare.",
+    "category": "military",
+    "trigger": { "turn_min": 6, "turn_max": 6, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "narrative", "text": "Sarajevo is encircled. The SRK begins systematic bombardment from positions on the surrounding hills." },
+    "effects": [
+      { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 1 },
+      { "kind": "patron_pressure", "faction": "RS", "delta": 5 }
+    ]
+  },
+  {
+    "id": "un_convoys_begin_1992",
+    "title": "First UN Aid Convoys Enter Bosnia",
+    "narrative": "UNHCR organizes the first humanitarian aid convoys into besieged areas of Bosnia. The convoys face obstruction at Serb checkpoints and are frequently diverted or looted. Despite the difficulties, a fragile lifeline begins to form for trapped civilian populations.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 8, "turn_max": 8, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "narrative", "text": "The first UN humanitarian convoys reach besieged populations, establishing a fragile supply lifeline." }
+  },
+  {
+    "id": "srebrenica_enclave_forms_1992",
+    "title": "Srebrenica Pocket Crystallizes",
+    "narrative": "Under the command of Naser Oric, Bosniak forces in the Drina Valley consolidate a defensive perimeter around Srebrenica. Despite being vastly outgunned, local TDF fighters and volunteers launch raids on surrounding VRS positions, establishing a tenuous enclave that shelters tens of thousands of displaced civilians.",
+    "category": "military",
+    "trigger": { "turn_min": 10, "turn_max": 10, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
+    "effects": [
+      { "kind": "narrative", "text": "Bosniak forces consolidate around Srebrenica, forming a besieged enclave that becomes a symbol of resistance." }
+    ]
+  },
+  {
+    "id": "concentration_camps_revealed_1992",
+    "title": "Concentration Camps Exposed to the World",
+    "narrative": "British journalists gain access to the Omarska and Trnopolje detention camps near Prijedor. Images of emaciated prisoners behind barbed wire shock the international community and draw direct comparisons to the Holocaust. The revelations trigger global outrage and demands for intervention.",
+    "category": "humanitarian",
+    "trigger": { "turn_min": 12, "turn_max": 12, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 2 },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -15 },
+      { "kind": "patron_pressure", "faction": "RS", "delta": 10 },
+      { "kind": "narrative", "text": "Images of Omarska and Trnopolje camps shock the world. International pressure on the Bosnian Serb leadership intensifies dramatically." }
+    ]
+  },
+  {
+    "id": "drina_valley_ethnic_cleansing_1992",
+    "title": "Drina Valley Campaign Accelerates",
+    "narrative": "VRS and paramilitary forces systematically expel the Bosniak population from towns along the Drina River valley. Visegrad, Foca, Zvornik, and Bratunac witness mass killings, forced deportations, and the destruction of mosques. The campaign aims to create a contiguous Serb-held corridor along the Serbian border.",
+    "category": "humanitarian",
+    "trigger": { "turn_min": 13, "turn_max": 13, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 3 },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -20 },
+      { "kind": "narrative", "text": "Systematic ethnic cleansing sweeps through the Drina Valley. Tens of thousands of Bosniaks are expelled or killed." }
+    ]
+  },
+  {
+    "id": "operation_corridor_1992",
+    "title": "Operation Corridor — VRS Breaks Through at Brcko",
+    "narrative": "The VRS launches Operation Corridor to link the Krajina region with Serbia proper through the narrow Posavina corridor near Brcko. Fierce fighting against HVO and ARBiH forces gradually widens the corridor, establishing a critical supply and communication link that sustains the western Bosnian Serb entity.",
+    "category": "military",
+    "trigger": { "turn_min": 14, "turn_max": 14, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "narrative", "text": "The VRS secures the Posavina Corridor near Brcko, linking Krajina with Serbia. A vital supply artery is established." },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RS", "delta": 5 },
+      { "kind": "morale_change", "faction": "RS", "delta": 3 }
+    ]
+  },
+  {
+    "id": "mostar_siege_begins_1992",
+    "title": "Siege of East Mostar Begins",
+    "narrative": "As the JNA withdraws from Mostar, HVO forces consolidate control over the western part of the city while the ARBiH holds the historic eastern bank. VRS artillery continues to shell both sides from positions to the east, but a new front line begins to crystallize along the Neretva River between former allies.",
+    "category": "military",
+    "trigger": { "turn_min": 15, "turn_max": 15, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "supply_delta", "faction": "HRHB", "delta": -5 },
+    "effects": [
+      { "kind": "narrative", "text": "Mostar becomes a divided city. Tensions between HVO and ARBiH forces foreshadow the coming Croat-Bosniak conflict." }
+    ]
+  },
+  {
+    "id": "posavina_corridor_fighting_1992",
+    "title": "Posavina Corridor Fighting Intensifies",
+    "narrative": "Control of the narrow Posavina corridor remains hotly contested. The HVO and ARBiH launch repeated counterattacks to sever the VRS supply line, while Serb forces fight to widen and secure the passage. The corridor near Brcko narrows at points to barely a few kilometers wide.",
+    "category": "military",
+    "trigger": { "turn_min": 16, "turn_max": 16, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "supply_delta", "faction": "RS", "delta": 10 },
+    "effects": [
+      { "kind": "narrative", "text": "VRS reinforces and widens the Posavina Corridor. The supply line to Krajina stabilizes despite continued pressure." }
+    ]
+  },
+  {
+    "id": "london_conference_1992",
+    "title": "London Conference on Yugoslavia",
+    "narrative": "The international community convenes in London to address the escalating Bosnian crisis. Western leaders demand an end to ethnic cleansing and the lifting of sieges. The conference produces declarations but no enforcement mechanism, establishing a pattern of diplomatic engagement without military commitment.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 18, "turn_max": 18, "phase": "war" },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "capital_based",
+    "effect": { "kind": "narrative", "text": "The London Conference demands ceasefire and end to ethnic cleansing. All parties face pressure to comply." },
+    "response_options": [
+      {
+        "id": "accept",
+        "label": "Accept Conference Terms",
+        "description": "Signal willingness to negotiate. Improves international standing but may constrain military operations.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 10 },
+          { "kind": "patron_pressure", "faction": "RBiH", "delta": -5 }
+        ]
+      },
+      {
+        "id": "reject",
+        "label": "Reject Terms as Inadequate",
+        "description": "Denounce the conference as rewarding aggression. Damages credibility but preserves freedom of action.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": -5 },
+          { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "bihac_isolation_deepens_1992",
+    "title": "Bihac Pocket Increasingly Isolated",
+    "narrative": "The Bihac pocket in northwestern Bosnia becomes increasingly cut off from the rest of government-held territory. The 5th Corps under General Atif Dudakovic maintains a resilient defense, but supply shortages and the presence of Fikret Abdic's autonomous enclave in Velika Kladusa complicate the military and political situation.",
+    "category": "military",
+    "trigger": { "turn_min": 20, "turn_max": 20, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "narrative", "text": "The Bihac pocket grows more isolated. The 5th Corps defends stubbornly but faces supply shortages and internal division." }
+  },
+  {
+    "id": "hvo_arbih_tensions_rise_1992",
+    "title": "HVO-ARBiH Tensions Escalate in Central Bosnia",
+    "narrative": "Despite nominally fighting the same enemy, tensions between HVO and ARBiH forces in central Bosnia escalate sharply. Disputes over territory, command authority, and the political future of Herceg-Bosna create an atmosphere of mutual suspicion. Sporadic clashes occur in the Lasva Valley and around Travnik.",
+    "category": "political",
+    "trigger": { "turn_min": 24, "turn_max": 24, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "alliance_change", "delta": -0.1 },
+    "effects": [
+      { "kind": "narrative", "text": "HVO and ARBiH forces clash in central Bosnia. The fragile alliance between Croats and Bosniaks shows deepening cracks." }
+    ]
+  },
+  {
+    "id": "jajce_falls_1992",
+    "title": "Jajce Falls to VRS Forces",
+    "narrative": "The strategic town of Jajce in central Bosnia falls to the VRS after a prolonged siege. The loss is a major blow to both the ARBiH and HVO, who blame each other for failing to coordinate the defense. Tens of thousands of civilians flee westward, and recriminations between the two forces deepen the growing rift.",
+    "category": "territorial",
+    "trigger": { "turn_min": 28, "turn_max": 28, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": -10 },
+    "effects": [
+      { "kind": "morale_change", "faction": "RS", "delta": 3 },
+      { "kind": "alliance_change", "delta": -0.05 },
+      { "kind": "narrative", "text": "Jajce falls to the VRS. Mutual blame between HVO and ARBiH accelerates the breakdown of their alliance." }
+    ]
+  },
+  {
+    "id": "first_un_safe_areas_1992",
+    "title": "UN Considers Protected Safe Areas",
+    "narrative": "As the humanitarian crisis deepens, the UN Security Council debates the establishment of safe areas around besieged Bosniak enclaves. The concept promises protection without the commitment of adequate military force. For the besieged populations, it represents a fragile hope; for the Bosnian government, a double-edged sword that may freeze the front lines.",
+    "category": "diplomatic",
+    "trigger": { "turn_min": 30, "turn_max": 30, "phase": "war" },
+    "once": true,
+    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
+    "effects": [
+      { "kind": "narrative", "text": "The UN moves toward establishing safe areas around besieged enclaves. The promise of protection raises cautious hope." }
+    ]
+  }
+]
