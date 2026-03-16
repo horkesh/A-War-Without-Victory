@@ -6,7 +6,7 @@
 
 import type { FactionId, GameState } from '../../state/game_state.js';
 
-/** Trigger: when to consider firing (turn range; scenario can extend with keys later). */
+/** Trigger: when to consider firing (turn range + optional prerequisites). */
 export interface EventTrigger {
     /** Inclusive. Omit for no lower bound. */
     turn_min?: number;
@@ -14,6 +14,8 @@ export interface EventTrigger {
     turn_max?: number;
     /** Require this phase. */
     phase?: 'war';
+    /** All listed event IDs must have already fired (checked against fired_event_ids). */
+    requires_events?: string[];
 }
 
 /** Effect: narrative only (no mechanical mutation). */
@@ -149,6 +151,10 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
     if (t.turn_min != null && currentTurn < t.turn_min) return false;
     if (t.turn_max != null && currentTurn > t.turn_max) return false;
     if (t.phase != null && state.meta.phase !== t.phase) return false;
+    if (t.requires_events != null && t.requires_events.length > 0) {
+        const firedIds = state.military.fired_event_ids ?? [];
+        if (!t.requires_events.every(id => firedIds.includes(id))) return false;
+    }
     return true;
 }
 

@@ -215,3 +215,53 @@ test('evaluateEvents: each RNG seed yields deterministic fired set', () => {
     assert.deepStrictEqual(seedA1, seedA2);
     assert.deepStrictEqual(seedB1, seedB2);
 });
+
+test('triggerMatches: skips event when requires_events prerequisite not met', () => {
+    const state = minimalState('war', 6);
+    const prerequisite: EventDefinition = {
+        id: 'prerequisite_event',
+        trigger: { turn_min: 5, turn_max: 5, phase: 'war' },
+        effect: { kind: 'narrative', text: 'Prerequisite event.' },
+        once: true,
+    };
+    const dependent: EventDefinition = {
+        id: 'dependent_event',
+        trigger: { turn_min: 6, turn_max: 10, phase: 'war', requires_events: ['prerequisite_event'] },
+        effect: { kind: 'narrative', text: 'Dependent event.' },
+        once: true,
+    };
+    // Prerequisite has NOT fired — fired_event_ids is empty
+    const rng = createRng('prereq-not-met');
+    const result = evaluateEvents(state, rng, 6, [prerequisite, dependent]);
+    assert.ok(!result.fired.some(f => f.id === 'dependent_event'), 'dependent should not fire without prerequisite');
+});
+
+test('triggerMatches: fires event when requires_events prerequisite is met', () => {
+    const state = minimalState('war', 6);
+    // Simulate prerequisite already fired
+    (state.military as { fired_event_ids: string[] }).fired_event_ids = ['prerequisite_event'];
+    const dependent: EventDefinition = {
+        id: 'dependent_event',
+        trigger: { turn_min: 6, turn_max: 10, phase: 'war', requires_events: ['prerequisite_event'] },
+        effect: { kind: 'narrative', text: 'Dependent event.' },
+        once: true,
+    };
+    const rng = createRng('prereq-met');
+    const result = evaluateEvents(state, rng, 6, [dependent]);
+    assert.ok(result.fired.some(f => f.id === 'dependent_event'), 'dependent should fire when prerequisite is met');
+});
+
+test('triggerMatches: requires ALL listed events in requires_events (not just one)', () => {
+    const state = minimalState('war', 6);
+    // Only one of two prerequisites fired
+    (state.military as { fired_event_ids: string[] }).fired_event_ids = ['event_a'];
+    const dependent: EventDefinition = {
+        id: 'multi_dep_event',
+        trigger: { turn_min: 6, turn_max: 10, phase: 'war', requires_events: ['event_a', 'event_b'] },
+        effect: { kind: 'narrative', text: 'Multi-dependency event.' },
+        once: true,
+    };
+    const rng = createRng('partial-prereq');
+    const result = evaluateEvents(state, rng, 6, [dependent]);
+    assert.ok(!result.fired.some(f => f.id === 'multi_dep_event'), 'should not fire with only one of two prerequisites');
+});
