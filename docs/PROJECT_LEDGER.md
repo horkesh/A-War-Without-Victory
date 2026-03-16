@@ -1,7 +1,28 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-16
-**Status:** **v0.3.1** (Playable Alpha + Endgame System). **763 tests**, 66 suites. Full v0.4.x roadmap scoped (8 milestones, all Pyrrhic compliant). Night shift system live. Night shift handoff written for v0.3.2→v0.4.4.
+**Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **778 tests**, 67 suites. Full v0.4.x roadmap scoped (8 milestones, all Pyrrhic compliant). Night shift system live. Night shift handoff written for v0.3.2→v0.4.4.
+
+## [2026-03-16] n819: Commander Override Layer Phase A — Strategic Intent
+
+**Problem:** Mechanical budget-based brigade assignment produced locally correct but strategically wrong outcomes. 2KK had 6/8 brigades at Prozor instead of Bihać. SRK siege ring was under-garrisoned while low-threat sectors had surplus. Binary supply gate blocked all operations even when limited counterattacks were feasible.
+
+**Solution:** `commanderReviewAssignment()` in `corps_front_sectors.ts` — per-corps commander review after mechanical assignment (Step 8a in buildFactionSectors pipeline). Four criteria:
+
+1. **Mission compliance** — concentrate brigades at sectors facing army priority target municipalities
+2. **Non-priority excess** — release surplus from sectors facing non-target territory
+3. **Offensive staging** — concentrate at sectors with active operation preparation
+4. **Defensive coherence** — reinforce critically under-garrisoned sectors from safe surplus
+
+Commander personality gates behavior: competence < 0.35 skips review. Aggressive commanders over-concentrate at missions. Defensive commanders keep extra garrison in non-priority sectors. Shared `transferBrigadesBetweenSectors` helper with connected-component reachability guard prevents cross-component transfers.
+
+**Supply-aware operation sizing** in `bot_corps_directives.ts` replaces binary supply gate with graduated response: critical (>50% brigades) → blocked, adequate (≥50%) → full, strained → limited to surplus count.
+
+**Results (n819):** 89.0% area-weighted. **6/6 benchmarks PASS** (was 4/6). 13/13 anchors. Hash `829e9f2b691e42f6`. War-or-Game APPROVED.
+
+**Files:** `src/sim/combat/corps_front_sectors.ts` (+315 lines), `src/sim/combat/bot_corps_directives.ts` (+46 lines), `tests/commander_override.test.ts` (NEW, 15 tests).
+
+---
 
 ## [2026-03-15/16] Mega Session — v0.3.0→v0.3.1, Canon v0.7, Studio Identity, Roadmap to 1.0
 
