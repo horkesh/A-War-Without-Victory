@@ -76,7 +76,7 @@ Tune all three faction AIs and their starting parameters so that a 52-week scena
 - `docs/knowledge/SCENARIO_SEPTEMBER_1992_SPEC.md` — September 1992 spec
 
 ### Engine Files (Tuning Surface)
-- `src/sim/combat/bot_strategy.ts` — Faction strategies, doctrine phases, standing orders, army operation priorities
+- `src/sim/combat/bot_strategy.ts` — Faction strategies, doctrine phases (fallback defaults), standing orders, army operation priorities, Army HQ Gathering (v0.4.7)
 - `src/sim/combat/bot_corps_ai.ts` — Corps directive generation
 - `src/sim/combat/bot_brigade_ai_osid.ts` — Unified brigade execution
 - `src/sim/combat/combat_predictor.ts` — Read-only combat prediction (fog of war)
@@ -193,6 +193,9 @@ Sector offensives are **active** in the 40w calibration window (n359: 26 ops acr
 | Aggression multiplier | 1.0 + aggression | Applied to entire score |
 
 ### Doctrine Phases (bot_strategy.ts)
+
+> **v0.4.7 NOTE:** These calendar-driven phases are now INITIAL DEFAULTS only. After the first Army HQ Gathering fires (VRS at turn 8, ARBiH at turn 14, HVO at turn 10), the gathering system produces adaptive `DoctrineOverride` based on theater assessment, replacing these static phases. The old `FACTION_DOCTRINE_PHASES` still apply as fallback when no gathering has occurred or for player factions. See [Army HQ Gathering (v0.4.7)](#army-hq-gathering-v047) below.
+
 | Faction | Phase | Weeks | Stance | Attack Share | Aggression |
 |---------|-------|-------|--------|-------------|------------|
 | RS | General Offensive | 0-20 | general_offensive | 0.28 | -0.05 |
@@ -206,6 +209,41 @@ Sector offensives are **active** in the 40w calibration window (n359: 26 ops acr
 | HRHB | Consolidate Herzegovina | 0-12 | balanced | 0.25 | 0.00 |
 | HRHB | Lasva Offensive | 12-26 | balanced | 0.35 | 0.05 |
 | HRHB | Washington Pivot | 26+ | balanced | 0.30 | 0.00 |
+
+## Army HQ Gathering (v0.4.7)
+
+Periodic command meetings where the army commander convenes corps COs to produce a multi-turn `CampaignPlan`. Replaces reactive per-turn strategy with deliberative planning.
+
+### Cadence
+- **VRS**: Every 8 turns (~bimonthly). Professional JNA-inherited staff, encrypted radio to all corps.
+- **ARBiH**: Every 14 turns (1992) → 10 turns (1993) → 8 turns (1994+). Improving C2 under Delic.
+- **HVO**: Every 10 turns. Zagreb-directed, small force.
+
+### Emergency Triggers
+- Municipality capital lost
+- Supply corridor severed
+- Enclave fallen
+- >5% territory lost in 4 turns
+- Corps lost >30% strength in 8 turns
+- Triggered by historical event (NATO strikes, Washington Agreement)
+- Minimum 4-turn cooldown between emergency sessions.
+
+### Communication Constraints
+- Besieged corps (ARBiH 1st Corps early war, enclaves) are EXCLUDED — receive simplified directive 2 turns late
+- Radio-only corps (ARBiH 5th Corps Bihac, HVO Posavina) get plan 2 turns late, no sync ops
+- All other corps: full attendance
+
+### Outputs (CampaignPlan)
+1. **Front priorities**: Per-corps role (primary/secondary/economy/contain) with suggested stance and targets
+2. **Doctrine override**: Adaptive army stance + aggression modifier based on theater assessment (replaces calendar-driven phases)
+3. **Synchronized operations**: Multi-corps attack windows with launch timing constraints
+4. Valid for `cadence + 2` turns, then expires forcing re-evaluation
+
+### Integration
+- Runs as pipeline step `evaluate-army-hq-gathering` BEFORE `generate-bot-corps-orders`
+- Corps directives read front priorities for targets, aggression, reserve fraction
+- Corps stances read suggested_stance as baseline (commander personality still modulates)
+- Operation preparation honors `waiting_for_sync` sub-phase for coordinated launches
 
 ### Corps Stance Multipliers (attack_resolution_osid.ts)
 | Stance | Attack Mult | Defense Mult |
