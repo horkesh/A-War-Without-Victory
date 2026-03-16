@@ -44,6 +44,7 @@ import {
     PRE_OP_STAGING_WEIGHT_STAGING,
 } from './corps_front_sectors_constants.js';
 import { getCorpsCommander } from './officer_system.js';
+import type { ArmyOperationPriority } from './bot_strategy.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Entry Point
@@ -593,7 +594,7 @@ export function filterReachableReassignmentOrders(
 // Commander Profile — per-corps personality snapshot for brigade assignment
 // ═══════════════════════════════════════════════════════════════════════════
 
-interface CorpsCommanderProfile {
+export interface CorpsCommanderProfile {
     competence: number;
     aggressiveness: number;
     /** Priority sector from the corps directive (offensive concentration point). */
@@ -655,6 +656,121 @@ function buildCorpsCommanderProfiles(
     }
 
     return profiles;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Commander Override Layer — strategic review of mechanical assignments
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface CommanderOverride {
+    brigade_id: string;
+    from_sector_id: string;
+    to_sector_id: string;
+    reason: 'mission_priority' | 'non_priority_excess' | 'offensive_staging' | 'defensive_critical';
+}
+
+const COMMANDER_COMPETENCE_OVERRIDE_THRESHOLD = 0.35;
+const DEFENSIVE_CRITICAL_THREAT = 2.0;
+const GARRISON_BUDGET_EDGES_PER_BRIGADE = 6;
+const MIN_DONOR_BRIGADES = 1;
+
+/**
+ * Commander review of mechanical brigade-to-sector assignments.
+ * A competent corps commander evaluates whether the budget-based assignment
+ * serves strategic intent, and issues overrides when it doesn't.
+ *
+ * Deterministic: sorted iteration via strictCompare, no Math.random().
+ */
+export function commanderReviewAssignment(
+    corpsId: string,
+    sectors: CorpsFrontSector[],
+    formations: Record<string, FormationState>,
+    armyPriorities: ArmyOperationPriority[],
+    commanderProfile: CorpsCommanderProfile,
+    adjacency: Map<string, string[]>,
+    componentOf: Map<string, number>,
+): CommanderOverride[] {
+    // Gate: incompetent commanders don't override mechanical assignment
+    if (commanderProfile.competence < COMMANDER_COMPETENCE_OVERRIDE_THRESHOLD) {
+        return [];
+    }
+
+    // Filter to this corps' sectors only
+    const corpsSectors = sectors
+        .filter(s => s.corps_id === corpsId)
+        .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+
+    // Gate: need at least 2 sectors to have anything to redistribute
+    if (corpsSectors.length < 2) {
+        return [];
+    }
+
+    const overrides: CommanderOverride[] = [];
+
+    // Apply four criteria in priority order
+    applyMissionCompliance(corpsSectors, formations, armyPriorities, overrides, componentOf);
+    applyNonPriorityExcess(corpsSectors, formations, commanderProfile, overrides, componentOf);
+    applyOffensiveStaging(corpsSectors, formations, commanderProfile, overrides, componentOf);
+    applyDefensiveCoherence(corpsSectors, formations, commanderProfile, overrides, componentOf);
+
+    // Execute overrides: splice from source sector, push to target sector
+    for (const ov of overrides) {
+        const fromSector = corpsSectors.find(s => s.sector_id === ov.from_sector_id);
+        const toSector = corpsSectors.find(s => s.sector_id === ov.to_sector_id);
+        if (fromSector && toSector) {
+            const idx = fromSector.assigned_brigade_ids.indexOf(ov.brigade_id);
+            if (idx !== -1) {
+                fromSector.assigned_brigade_ids.splice(idx, 1);
+                toSector.assigned_brigade_ids.push(ov.brigade_id);
+            }
+        }
+    }
+
+    return overrides;
+}
+
+/** Stub: enforce army-level mission priorities. */
+function applyMissionCompliance(
+    _corpsSectors: CorpsFrontSector[],
+    _formations: Record<string, FormationState>,
+    _armyPriorities: ArmyOperationPriority[],
+    _overrides: CommanderOverride[],
+    _componentOf: Map<string, number>,
+): void {
+    // Phase 2 — not yet implemented
+}
+
+/** Stub: redistribute excess brigades from non-priority sectors. */
+function applyNonPriorityExcess(
+    _corpsSectors: CorpsFrontSector[],
+    _formations: Record<string, FormationState>,
+    _commanderProfile: CorpsCommanderProfile,
+    _overrides: CommanderOverride[],
+    _componentOf: Map<string, number>,
+): void {
+    // Phase 2 — not yet implemented
+}
+
+/** Stub: stage brigades for planned offensive operations. */
+function applyOffensiveStaging(
+    _corpsSectors: CorpsFrontSector[],
+    _formations: Record<string, FormationState>,
+    _commanderProfile: CorpsCommanderProfile,
+    _overrides: CommanderOverride[],
+    _componentOf: Map<string, number>,
+): void {
+    // Phase 2 — not yet implemented
+}
+
+/** Stub: reinforce critically threatened defensive sectors. */
+function applyDefensiveCoherence(
+    _corpsSectors: CorpsFrontSector[],
+    _formations: Record<string, FormationState>,
+    _commanderProfile: CorpsCommanderProfile,
+    _overrides: CommanderOverride[],
+    _componentOf: Map<string, number>,
+): void {
+    // Phase 2 — not yet implemented
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
