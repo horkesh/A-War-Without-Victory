@@ -1481,8 +1481,10 @@ export function generateCorpsDirectives(
         // Don't replace recovery-phase ops — they must complete to accumulate exhaustion.
         const hasQueuedOps = cmd.queued_operations && cmd.queued_operations.length > 0;
         const canLaunchSectorOp = !hasQueuedOps && !existingOp && !isDefenseStrained;
-        if (canLaunchSectorOp &&
-            (cmd.stance === 'offensive' || cmd.stance === 'balanced') &&
+        // Army HQ override allows defensive corps to launch probe operations
+        const hasHqProbeOverride = armyHqOverrides.some(o => o.type === 'probe' || o.type === 'feint');
+        const stanceAllowsOps = cmd.stance === 'offensive' || cmd.stance === 'balanced' || hasHqProbeOverride;
+        if (canLaunchSectorOp && stanceAllowsOps &&
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
 
             // Sort sectors: priority sector first, then by offensive target overlap (descending).

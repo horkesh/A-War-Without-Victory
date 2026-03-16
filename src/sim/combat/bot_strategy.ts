@@ -478,6 +478,8 @@ const VRS_ARMY_PRIORITIES: ArmyOperationPriority[] = [
 const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 1st Corps: Sarajevo defense — friendly municipalities only until week 56
     { name: 'Sarajevo Defense', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'trnovo'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'repulsed' },
+    // 1st Corps: Sarajevo probing — test SRK weak points from week 15 (historically ARBiH probed SRK lines constantly)
+    { name: 'Sarajevo Probing', corps_id: 'arbih_1st_corps', target_municipalities: ['ilidza', 'hadzici', 'vogosca', 'ilijas'], start_week: 15, end_week: 56, weight: 60, min_outcome: 'repulsed' },
     // 1st Corps: Sarajevo counter-attacks — include RS-held suburbs from week 56
     { name: 'Sarajevo Counterattack', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'ilidza', 'hadzici', 'vogosca', 'ilijas'], start_week: 56, end_week: 9999, weight: 100, min_outcome: 'stalemate' },
     // 2nd Corps: Tuzla area defense + Brčko south (ARBiH held OSID just south of Brčko throughout war)
