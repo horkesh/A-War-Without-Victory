@@ -160,10 +160,6 @@ export interface GameStore {
   operationBriefingContext: { corpsId: string; operationName: string } | null;
   setOperationBriefingContext: (v: { corpsId: string; operationName: string } | null) => void;
 
-  /** Result of last commander selection (for modals to catch). */
-  lastSelectedOfficerId: string | null;
-  setLastSelectedOfficerId: (id: string | null) => void;
-
   /** Minimap visibility toggle. */
   minimapVisible: boolean;
   setMinimapVisible: (v: boolean) => void;
@@ -322,9 +318,6 @@ export const useGameStore = create<GameStore>((set) => ({
 
   operationBriefingContext: null,
   setOperationBriefingContext: (v) => set({ operationBriefingContext: v }),
-
-  lastSelectedOfficerId: null,
-  setLastSelectedOfficerId: (id) => set({ lastSelectedOfficerId: id }),
 
   minimapVisible: true,
   setMinimapVisible: (v) => set({ minimapVisible: v }),

@@ -43,6 +43,7 @@ export function splitNonContiguousSectors(
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
     friendlyOsids?: Set<string>,
     strictAdj?: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
 ): CorpsFrontSector[] {
     const result: CorpsFrontSector[] = [];
 
@@ -123,7 +124,7 @@ export function splitNonContiguousSectors(
         // which correctly splits at branching points. Otherwise shared-OSID.
         let edgeAdj: Map<string, string[]>;
         if (faction && edgeMeta) {
-            edgeAdj = buildEdgeAdjacency(sector.edge_ids, edgeMeta, faction, osidAdjacency, sharedBoundaryAdj);
+            edgeAdj = buildEdgeAdjacency(sector.edge_ids, edgeMeta, faction, osidAdjacency, sharedBoundaryAdj, centroids);
         } else {
             const tempMeta = new Map<string, { a: string; b: string }>();
             for (const eid of sector.edge_ids) {
@@ -148,7 +149,7 @@ export function splitNonContiguousSectors(
         // Fragments are re-merged in Step 4c using Case A only adjacency.
         if (edgeComponents.length <= 1 && faction && edgeMeta) {
             const strictCaseBAdjMap = buildEdgeAdjacencyStrictCaseB(
-                sector.edge_ids, edgeMeta, faction, sharedBoundaryAdj ?? osidAdjacency, strictAdj ?? osidAdjacency
+                sector.edge_ids, edgeMeta, faction, sharedBoundaryAdj ?? osidAdjacency, strictAdj ?? osidAdjacency, centroids
             );
             const strictComponents = findConnectedComponents(
                 new Set(sector.edge_ids),

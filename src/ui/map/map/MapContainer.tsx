@@ -1409,8 +1409,7 @@ export function MapContainer() {
       if (!ensureSectorLayers()) return false;
 
       const activeSectorIds = new Set<string>();
-      // When a brigade is selected, don't let hover highlight the whole sector
-      if (hoveredSectorId && !selectedFormationId) activeSectorIds.add(hoveredSectorId);
+      if (hoveredSectorId) activeSectorIds.add(hoveredSectorId);
       if (selectedCorpsFrontSectorId) activeSectorIds.add(selectedCorpsFrontSectorId);
 
       // If a corps is hovered or selected, highlight all its sectors

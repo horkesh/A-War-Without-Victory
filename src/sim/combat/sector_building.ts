@@ -215,7 +215,7 @@ export function buildMultiSectorsForCorps(
     // Strict Case B re-check uses caseBSplitAdj (16.6m) — wider than 5.5m strict
     // to preserve legitimate triple junctions, but catches pocket bridges (>16.6m).
     const contiguousSectors = splitNonContiguousSectors(
-        finalSectors, adjacency, faction, edgeMeta, sharedBoundaryAdj, friendlyOsids, caseBSplitAdj
+        finalSectors, adjacency, faction, edgeMeta, sharedBoundaryAdj, friendlyOsids, caseBSplitAdj, centroids
     );
 
     // Step 4c: Post-split merge — re-merge undersized sectors created by contiguity
