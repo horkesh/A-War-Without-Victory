@@ -88,6 +88,36 @@ function computeSalientRisk(
 /** Salient risk threshold: skip targets where >75% of neighbors are enemy. */
 const SALIENT_RISK_THRESHOLD = 0.75;
 
+/**
+ * Graduated supply response for operation sizing.
+ * Critical → 0 (blocked). Adequate → full. Strained → limited to surplus.
+ */
+export function computeSupplyAwareOpSize(
+    supplyHealth: { critical_fraction: number; adequate_fraction: number },
+    surplusBrigadeCount: number,
+    maxParticipatingBrigades: number,
+): number {
+    if (supplyHealth.critical_fraction > 0.5) return 0;
+    if (supplyHealth.adequate_fraction >= 0.5) return maxParticipatingBrigades;
+    return Math.min(surplusBrigadeCount, maxParticipatingBrigades);
+}
+
+/**
+ * Compute surplus brigades across all corps sectors (brigades beyond garrison budget).
+ * Budget per sector = ceil(length_edges / 6).
+ */
+function computeCorpsSurplus(
+    corpsSectors: CorpsFrontSector[],
+): number {
+    let surplus = 0;
+    for (const sector of corpsSectors) {
+        const budget = Math.ceil(sector.length_edges / 6);
+        const excess = sector.assigned_brigade_ids.length - budget;
+        if (excess > 0) surplus += excess;
+    }
+    return surplus;
+}
+
 export const AGGRESSION_FLOOR: Record<string, number> = {
     'offensive': 0.0,
     'balanced': -0.10,
@@ -936,10 +966,13 @@ export function generateCorpsDirectives(
             // This is handled below at the operation launch gate.
         }
 
-        // Supply health gating: critical majority → strip offensive targets
+        // Supply-aware operation sizing (graduated response)
         const supplyHealth = assessCorpsSupplyHealth(subordinates, faction, supplyByOsid);
-        if (supplyHealth.critical_fraction > 0.5) {
-            offensiveTargets.length = 0;
+        const surplusCount = computeCorpsSurplus(corpsSectors);
+        const maxOpSize = computeSupplyAwareOpSize(supplyHealth, surplusCount, 12);
+
+        if (maxOpSize === 0) {
+            offensiveTargets.length = 0;  // critical: no operations
         }
         // Strained supply penalty: arms embargo effect. When most brigades are
         // strained, the commander becomes more cautious — requires higher confidence
@@ -1529,7 +1562,12 @@ export function generateCorpsDirectives(
                 // Only brigades already in the sector cluster participate.
                 // If the cluster lacks enough brigades, skip — corps density
                 // balancing should reinforce the sector first.
-                const finalBrigadeIds = secBrigadeIds;
+                let finalBrigadeIds = secBrigadeIds;
+
+                // Cap operation size by supply health (graduated response)
+                if (maxOpSize > 0 && maxOpSize < finalBrigadeIds.length) {
+                    finalBrigadeIds = finalBrigadeIds.slice(0, maxOpSize);
+                }
 
                 // Filter targets to only those adjacent to at least one friendly-held OSID.
                 // Removes unreachable deep-enemy targets from operation objectives, preventing

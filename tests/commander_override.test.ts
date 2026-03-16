@@ -6,6 +6,7 @@ import {
     type CommanderOverride,
     type CorpsCommanderProfile,
 } from '../src/sim/combat/corps_front_sectors.js';
+import { computeSupplyAwareOpSize } from '../src/sim/combat/bot_corps_directives.js';
 
 // ── Factories ───────────────────────────────────────────────────────────────
 
@@ -315,5 +316,31 @@ describe('commanderReviewAssignment', () => {
             // Should NOT pull from s2 (threat 3.0 >= DEFENSIVE_CRITICAL_THREAT)
             expect(result.filter(o => o.from_sector_id === 's2').length).toBe(0);
         });
+    });
+});
+
+describe('supply-aware operation sizing', () => {
+    it('blocks operations when critical supply', () => {
+        expect(computeSupplyAwareOpSize(
+            { critical_fraction: 0.6, adequate_fraction: 0.1 }, 5, 12
+        )).toBe(0);
+    });
+
+    it('allows full operations when adequate supply', () => {
+        expect(computeSupplyAwareOpSize(
+            { critical_fraction: 0.1, adequate_fraction: 0.8 }, 5, 12
+        )).toBe(12);
+    });
+
+    it('limits to surplus when strained supply', () => {
+        expect(computeSupplyAwareOpSize(
+            { critical_fraction: 0.3, adequate_fraction: 0.4 }, 3, 12
+        )).toBe(3);
+    });
+
+    it('caps at max even when surplus exceeds it', () => {
+        expect(computeSupplyAwareOpSize(
+            { critical_fraction: 0.3, adequate_fraction: 0.4 }, 20, 12
+        )).toBe(12);
     });
 });
