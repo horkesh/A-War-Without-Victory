@@ -3,6 +3,12 @@
 **Last Updated:** 2026-03-16
 **Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **927 tests**, 80 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
 
+## [2026-03-16] Refactor: Extract corps_front_sectors.ts (4,639→349 lines)
+
+Extracted into 9 focused modules with zero behavior change. 927 tests pass, tsc clean. `/simplify` pass unified duplicate constants and consolidated imports. REPO_MAP and PIPELINE_ENTRYPOINTS updated. Modules: `sector_utils`, `sector_edge_adjacency`, `sector_assertions`, `sector_territory`, `sector_building`, `sector_splitting`, `brigade_assignment`, `commander_override`, `subsegment_assignment`. Orchestrator re-exports everything for backward compatibility.
+
+---
+
 ## [2026-03-16] n824: Army HQ Override Activation — corps_asset Fix + Organic Sarajevo Stance
 
 **Three fixes activating the dormant army HQ override system:**
