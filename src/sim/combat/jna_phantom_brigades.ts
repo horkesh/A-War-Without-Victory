@@ -151,7 +151,7 @@ const HV_PHANTOM_DEFS: PhantomDef[] = [
         corps_id: 'hvo_southeast_herzegovina' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:mostar:mostar_zapad_2',
-        withdrawal_turn: 14,
+        withdrawal_turn: 24, // Stay until Op Jackal completes + buffer; dynamic withdrawal below
         tanks: 15, artillery: 12, apcs: 8,
         no_equipment_handoff: true,
         kind_tag: 'hv_phantom',
@@ -162,8 +162,19 @@ const HV_PHANTOM_DEFS: PhantomDef[] = [
         corps_id: 'hvo_southeast_herzegovina' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:capljina:capljina_2',
-        withdrawal_turn: 14,
+        withdrawal_turn: 24,
         tanks: 10, artillery: 8, apcs: 6,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    {
+        id: 'hv_1st_guards_tg' as FormationId,
+        name: 'HV 1st Guards Brigade TG (Tigrovi)',
+        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:stolac:rotimlja_2',
+        withdrawal_turn: 24,
+        tanks: 12, artillery: 10, apcs: 8,
         no_equipment_handoff: true,
         kind_tag: 'hv_phantom',
     },
@@ -267,7 +278,14 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
     for (const phantomId of phantomIds) {
         const phantom = state.military.formations[phantomId]!;
         if (phantom.status !== 'active') continue;
-        if (phantom.withdrawal_turn == null || turn < phantom.withdrawal_turn) continue;
+
+        // HV phantoms withdraw dynamically when Graz east Herzegovina truce activates
+        // (Op Jackal complete → HV returns to Croatia), or at withdrawal_turn fallback.
+        const isHvPhantom = phantom.kind === 'hv_phantom';
+        const grazEastActive = state.political.graz_east_herzegovina_active_turn != null;
+        const hvShouldWithdraw = isHvPhantom && grazEastActive;
+
+        if (!hvShouldWithdraw && (phantom.withdrawal_turn == null || turn < phantom.withdrawal_turn)) continue;
 
         // This phantom withdraws now
         const corpsId = phantom.corps_id;
