@@ -543,6 +543,8 @@ export interface FormationState {
     // Peace-phase Overhaul: proto-brigade lifecycle tracking
     /** Municipality where formation originally emerged (for naming displaced-origin brigades). */
     origin_mun?: string;
+    /** Municipality the brigade's soldiers originally came from (refugees/displaced). Informational. */
+    displaced_from?: string;
     /** Turn when formation was promoted to its current kind. */
     promoted_turn?: number;
     /** OOB brigade catalog entry matched on promotion (inherits name/corps/equipment). */

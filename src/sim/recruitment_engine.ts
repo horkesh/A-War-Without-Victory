@@ -230,6 +230,7 @@ function buildRecruitedFormation(
         ...(brigade.defense_terrain_bonus != null ? { defense_terrain_bonus: brigade.defense_terrain_bonus } : {}),
         ...(brigade.recruit_pool_faction ? { recruit_pool_faction: brigade.recruit_pool_faction } : {}),
         ...(brigade.fallback_osid ? { fallback_osid: brigade.fallback_osid } : {}),
+        ...(brigade.displaced_from ? { displaced_from: brigade.displaced_from } : {}),
         ...(brigade.garrison ? { garrison: true } : {}),
         ...(hqSid ? { hq_sid: hqSid } : {}),
         ...(effectiveLocationOsid != null ? { location_osid: effectiveLocationOsid } : {}),

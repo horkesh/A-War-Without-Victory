@@ -67,6 +67,8 @@ export interface OobBrigade {
      * Replaces pre-awarding historical_decorations at war start.
      */
     distinction_potential?: 'tier_1' | 'tier_2' | 'tier_3';
+    /** Municipality the brigade's soldiers originally came from (refugees/displaced). Informational. */
+    displaced_from?: string;
 }
 
 export interface OobCorps {
@@ -178,6 +180,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ? Math.max(0, Math.min(1, r.initial_officer_quality)) : undefined;
         const distinction_potential = (r.distinction_potential === 'tier_1' || r.distinction_potential === 'tier_2' || r.distinction_potential === 'tier_3')
             ? r.distinction_potential as 'tier_1' | 'tier_2' | 'tier_3' : undefined;
+        const displaced_from = typeof r.displaced_from === 'string' && r.displaced_from.trim() ? r.displaced_from.trim() : undefined;
         result.push({
             id,
             faction,
@@ -209,6 +212,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(historical_decorations && historical_decorations.length > 0 && { historical_decorations }),
             ...(initial_officer_quality != null && { initial_officer_quality }),
             ...(distinction_potential && { distinction_potential }),
+            ...(displaced_from && { displaced_from }),
         });
     }
 
