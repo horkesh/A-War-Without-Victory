@@ -26,6 +26,7 @@ import type { NamedOfficer, NamedOfficerState } from '../../state/officer_types.
 import { strictCompare } from '../../state/validateGameState.js';
 import { FACTION_RECON_PROFILES } from './sector_intel_constants.js';
 import { getEquipmentOffensivePriority } from './sector_offensive.js';
+import { SYNC_WAIT_MAX_TURNS } from './army_hq_gathering_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -428,8 +429,41 @@ export function tickPreparation(
             }
 
             case 'ready': {
+                // Sync check: if part of a synchronized operation and not yet in window, wait
+                if (op.sync_operation_name && op.sync_launch_after != null) {
+                    const currentTurn = state.meta?.turn ?? 0;
+                    if (currentTurn < op.sync_launch_after) {
+                        op.preparation_sub_phase = 'waiting_for_sync';
+                        result.sub_phase = 'waiting_for_sync';
+                        result.ready = false;
+                        break;
+                    }
+                }
                 result.sub_phase = 'ready';
                 result.ready = true;
+                break;
+            }
+
+            case 'waiting_for_sync': {
+                const currentTurn = state.meta?.turn ?? 0;
+                const maxTurns = (op.preparation_max_turns ?? 5) + SYNC_WAIT_MAX_TURNS;
+                // Anti-stall: force launch if waited too long
+                if ((op.preparation_turns_elapsed ?? 0) > maxTurns) {
+                    op.preparation_sub_phase = 'ready';
+                    result.sub_phase = 'ready';
+                    result.ready = true;
+                    break;
+                }
+                // Launch once in sync window
+                if (currentTurn >= (op.sync_launch_after ?? 0)) {
+                    op.preparation_sub_phase = 'ready';
+                    result.sub_phase = 'ready';
+                    result.ready = true;
+                    break;
+                }
+                // Still waiting
+                result.sub_phase = 'waiting_for_sync';
+                result.ready = false;
                 break;
             }
         }

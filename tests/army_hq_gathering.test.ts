@@ -7,8 +7,10 @@ import {
     canCorpsAttendGathering,
     assessTheater,
     generateCampaignPlan,
+    generateSynchronizedOperations,
+    generateSyncOperationOverrides,
 } from '../src/sim/combat/army_hq_gathering.js';
-import { PLAN_VALIDITY_BUFFER } from '../src/sim/combat/army_hq_gathering_constants.js';
+import { PLAN_VALIDITY_BUFFER, SYNC_MIN_BRIGADES } from '../src/sim/combat/army_hq_gathering_constants.js';
 
 // ── Factory ──────────────────────────────────────────────────────────────────
 
@@ -453,5 +455,144 @@ describe('generateCampaignPlan', () => {
 
         expect(plan.doctrine_override!.army_stance).toBe('balanced');
         expect(plan.doctrine_override!.aggression_modifier).toBeLessThan(0);
+    });
+});
+
+// ── Synchronized Operations ──────────────────────────────────────────────
+
+describe('synchronized operations', () => {
+    it('two primary/secondary corps produce a SynchronizedOperation', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, sector_threat_avg: 0.5 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 5, sector_threat_avg: 0.4 }),
+            ],
+        });
+        const priorities = [
+            { corps_id: 'vrs_1st_krajina', role: 'primary' as const, suggested_stance: 'offensive' as const },
+            { corps_id: 'vrs_drina', role: 'secondary' as const, suggested_stance: 'balanced' as const },
+        ];
+        const result = generateSynchronizedOperations(assessment, priorities, 10);
+        expect(result).toHaveLength(1);
+        expect(result[0]!.participants).toHaveLength(2);
+        expect(result[0]!.name).toContain('sync_');
+    });
+
+    it('solo corps produces no sync ops', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, sector_threat_avg: 0.5 }),
+            ],
+        });
+        const priorities = [
+            { corps_id: 'vrs_1st_krajina', role: 'primary' as const, suggested_stance: 'offensive' as const },
+        ];
+        const result = generateSynchronizedOperations(assessment, priorities, 10);
+        expect(result).toHaveLength(0);
+    });
+
+    it('excluded corps cannot participate', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, sector_threat_avg: 0.5 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 5, attendance: 'excluded', sector_threat_avg: 0.4 }),
+            ],
+        });
+        const priorities = [
+            { corps_id: 'vrs_1st_krajina', role: 'primary' as const, suggested_stance: 'offensive' as const },
+            { corps_id: 'vrs_drina', role: 'secondary' as const, suggested_stance: 'balanced' as const },
+        ];
+        const result = generateSynchronizedOperations(assessment, priorities, 10);
+        expect(result).toHaveLength(0);
+    });
+
+    it('corps below SYNC_MIN_BRIGADES excluded', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, sector_threat_avg: 0.5 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 2, sector_threat_avg: 0.4 }),
+            ],
+        });
+        const priorities = [
+            { corps_id: 'vrs_1st_krajina', role: 'primary' as const, suggested_stance: 'offensive' as const },
+            { corps_id: 'vrs_drina', role: 'secondary' as const, suggested_stance: 'balanced' as const },
+        ];
+        const result = generateSynchronizedOperations(assessment, priorities, 10);
+        expect(result).toHaveLength(0);
+    });
+
+    it('max 2 synchronized operations per gathering', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, sector_threat_avg: 0.5 }),
+                makeCorpsAssessment({ corps_id: 'vrs_2nd_krajina', available_brigades: 5, sector_threat_avg: 0.4 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 5, sector_threat_avg: 0.4 }),
+                makeCorpsAssessment({ corps_id: 'vrs_sarajevo_romanija', available_brigades: 5, sector_threat_avg: 0.4 }),
+            ],
+        });
+        const priorities = [
+            { corps_id: 'vrs_1st_krajina', role: 'primary' as const, suggested_stance: 'offensive' as const },
+            { corps_id: 'vrs_2nd_krajina', role: 'primary' as const, suggested_stance: 'offensive' as const },
+            { corps_id: 'vrs_drina', role: 'secondary' as const, suggested_stance: 'balanced' as const },
+            { corps_id: 'vrs_sarajevo_romanija', role: 'secondary' as const, suggested_stance: 'balanced' as const },
+        ];
+        const result = generateSynchronizedOperations(assessment, priorities, 10);
+        expect(result.length).toBeLessThanOrEqual(2);
+    });
+
+    it('launch window start is currentTurn + 3', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, sector_threat_avg: 0.5 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 5, sector_threat_avg: 0.4 }),
+            ],
+        });
+        const priorities = [
+            { corps_id: 'vrs_1st_krajina', role: 'primary' as const, suggested_stance: 'offensive' as const },
+            { corps_id: 'vrs_drina', role: 'secondary' as const, suggested_stance: 'balanced' as const },
+        ];
+        const result = generateSynchronizedOperations(assessment, priorities, 20);
+        expect(result[0]!.launch_window_start).toBe(23);
+    });
+
+    it('main effort assigned to stronger corps', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 10, sector_threat_avg: 0.5 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 4, sector_threat_avg: 0.4 }),
+            ],
+        });
+        const priorities = [
+            { corps_id: 'vrs_1st_krajina', role: 'primary' as const, suggested_stance: 'offensive' as const },
+            { corps_id: 'vrs_drina', role: 'secondary' as const, suggested_stance: 'balanced' as const },
+        ];
+        const result = generateSynchronizedOperations(assessment, priorities, 10);
+        const mainEffort = result[0]!.participants.find(p => p.role === 'main_effort')!;
+        expect(mainEffort.corps_id).toBe('vrs_1st_krajina');
+    });
+
+    it('generateSyncOperationOverrides creates ArmyHQOverride entries', () => {
+        const state = makeMinimalState({ turn: 10 });
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, sector_threat_avg: 0.5 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 5, sector_threat_avg: 0.4 }),
+            ],
+        });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 10, 'regular_cadence', false);
+
+        // Plan should have sync ops since both corps are primary/secondary and in contact
+        expect(plan.synchronized_operations.length).toBeGreaterThanOrEqual(1);
+
+        generateSyncOperationOverrides(state, 'RS', plan);
+
+        expect(state.military.army_hq_overrides).toBeDefined();
+        expect(state.military.army_hq_overrides!.length).toBeGreaterThanOrEqual(2);
+
+        const override = state.military.army_hq_overrides![0]!;
+        expect(override.type).toBe('offensive');
+        expect(override.issued_turn).toBe(10);
+        expect(override.max_brigades).toBe(12);
+        expect(override.reason).toContain('Synchronized operation');
     });
 });

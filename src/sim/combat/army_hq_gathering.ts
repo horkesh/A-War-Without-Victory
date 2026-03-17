@@ -4,11 +4,12 @@
  * Deterministic: no RNG, no timestamps.
  */
 
-import type { GameState, FactionId, FormationState } from '../../state/game_state.js';
-import type { TheaterAssessment, CorpsAssessment, CampaignPlan, FrontPriority, DoctrineOverride } from './army_hq_gathering_types.js';
+import type { GameState, FactionId, FormationState, ArmyHQOverride } from '../../state/game_state.js';
+import type { TheaterAssessment, CorpsAssessment, CampaignPlan, FrontPriority, DoctrineOverride, SynchronizedOperation, SyncOpParticipant } from './army_hq_gathering_types.js';
 import {
     GATHERING_CADENCE_RS, GATHERING_CADENCE_HRHB, getGatheringCadenceRBiH,
     EMERGENCY_COOLDOWN, PLAN_VALIDITY_BUFFER,
+    SYNC_WINDOW_DEFAULT, SYNC_MIN_BRIGADES,
 } from './army_hq_gathering_constants.js';
 
 // ── Emergency event IDs that trigger an immediate gathering ──────────────────
@@ -456,6 +457,8 @@ export function generateCampaignPlan(
     const priorities = generateFrontPriorities(faction, assessment, currentTurn);
     const doctrine = generateDoctrineOverride(faction, assessment, currentTurn, priorities);
 
+    const syncOps = generateSynchronizedOperations(assessment, priorities, currentTurn);
+
     return {
         issued_turn: currentTurn,
         valid_until_turn: currentTurn + getGatheringCadence(faction, currentTurn) + PLAN_VALIDITY_BUFFER,
@@ -463,7 +466,7 @@ export function generateCampaignPlan(
         trigger_reason: reason,
         front_priorities: priorities,
         doctrine_override: doctrine,
-        synchronized_operations: [],  // Task 5 fills this in
+        synchronized_operations: syncOps,
         force_transfers: [],          // Not implemented in v0.4.7
         excluded_corps: assessment.corps_assessments
             .filter(c => c.attendance === 'excluded')
@@ -677,4 +680,128 @@ function generateDoctrineOverride(
         corps_stance_ceilings: Object.keys(corpsStanceCeilings).length > 0 ? corpsStanceCeilings : undefined,
         aggression_modifier: aggression,
     };
+}
+
+// ── Synchronized Operations ──────────────────────────────────────────────
+
+/** Max sync operations per gathering to avoid over-coordination. */
+const MAX_SYNC_OPS_PER_GATHERING = 2;
+
+/**
+ * Generate synchronized multi-corps operations from front priorities.
+ * Pairs primary/secondary corps that share enemy contact for coordinated launch.
+ */
+export function generateSynchronizedOperations(
+    assessment: TheaterAssessment,
+    priorities: FrontPriority[],
+    currentTurn: number,
+): SynchronizedOperation[] {
+    // 1. Find all corps with role 'primary' or 'secondary' that are eligible
+    const eligible: Array<{ corpsId: string; role: string; score: number }> = [];
+    for (const p of priorities) {
+        if (p.role !== 'primary' && p.role !== 'secondary') continue;
+        const ca = assessment.corps_assessments.find(c => c.corps_id === p.corps_id);
+        if (!ca) continue;
+        if (ca.attendance === 'excluded') continue;
+        if (ca.available_brigades < SYNC_MIN_BRIGADES) continue;
+        if (ca.sector_threat_avg <= 0) continue; // Not in contact with enemy
+        eligible.push({
+            corpsId: p.corps_id,
+            role: p.role,
+            score: computeOpportunityScore(ca),
+        });
+    }
+
+    // Sort for determinism
+    eligible.sort((a, b) => {
+        if (a.corpsId < b.corpsId) return -1;
+        if (a.corpsId > b.corpsId) return 1;
+        return 0;
+    });
+
+    // 2. Generate pairs: at least one must be 'primary'
+    const syncOps: SynchronizedOperation[] = [];
+    const used = new Set<string>();
+
+    for (let i = 0; i < eligible.length && syncOps.length < MAX_SYNC_OPS_PER_GATHERING; i++) {
+        if (used.has(eligible[i]!.corpsId)) continue;
+        if (eligible[i]!.role !== 'primary') continue; // First of pair must be primary
+
+        for (let j = i + 1; j < eligible.length; j++) {
+            if (used.has(eligible[j]!.corpsId)) continue;
+            if (syncOps.length >= MAX_SYNC_OPS_PER_GATHERING) break;
+
+            const a = eligible[i]!;
+            const b = eligible[j]!;
+
+            // Determine main effort vs supporting by opportunity score
+            const aIsMain = a.score >= b.score;
+            const mainCorps = aIsMain ? a : b;
+            const supportCorps = aIsMain ? b : a;
+
+            // Get offensive_targets from main effort's FrontPriority
+            const mainPriority = priorities.find(p => p.corps_id === mainCorps.corpsId);
+            const targetArea = mainPriority?.offensive_targets ?? [];
+
+            const participants: SyncOpParticipant[] = [
+                {
+                    corps_id: mainCorps.corpsId,
+                    role: 'main_effort',
+                    target_osids: [],
+                    min_brigades: SYNC_MIN_BRIGADES,
+                },
+                {
+                    corps_id: supportCorps.corpsId,
+                    role: 'supporting',
+                    target_osids: [],
+                    min_brigades: SYNC_MIN_BRIGADES,
+                },
+            ];
+
+            syncOps.push({
+                name: `sync_${mainCorps.corpsId}_${supportCorps.corpsId}`,
+                participants,
+                launch_window_start: currentTurn + 3,
+                launch_window_end: currentTurn + 3 + SYNC_WINDOW_DEFAULT,
+                target_area: targetArea,
+            });
+
+            used.add(a.corpsId);
+            used.add(b.corpsId);
+            break; // Move to next primary
+        }
+    }
+
+    return syncOps;
+}
+
+/**
+ * Convert synchronized operations from a campaign plan into ArmyHQOverride entries.
+ * These overrides are consumed by the existing corps directive system.
+ */
+export function generateSyncOperationOverrides(
+    state: GameState,
+    _faction: FactionId,
+    plan: CampaignPlan,
+): void {
+    if (plan.synchronized_operations.length === 0) return;
+
+    if (!state.military.army_hq_overrides) {
+        state.military.army_hq_overrides = [];
+    }
+
+    for (const syncOp of plan.synchronized_operations) {
+        for (const participant of syncOp.participants) {
+            state.military.army_hq_overrides.push({
+                corps_id: participant.corps_id,
+                operation_name: syncOp.name,
+                min_brigades: participant.min_brigades,
+                target_osids: participant.target_osids,
+                reason: `Synchronized operation: ${syncOp.name} (${participant.role})`,
+                issued_turn: plan.issued_turn,
+                type: participant.role === 'feint' ? 'feint' : 'offensive',
+                max_brigades: 12,
+            });
+        }
+    }
 }
