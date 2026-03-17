@@ -218,9 +218,17 @@ function buildFactionSectors(
             const profile = commanderProfiles.get(cid);
             if (!profile) continue;
             const priorities = getCorpsArmyPriorities(faction, cid, state.meta.turn);
+            // Build op participants set — never reassign brigades mid-operation
+            const opParticipants = new Set<string>();
+            const cmd = state.military.corps_command?.[cid];
+            if (cmd?.active_operation?.participating_brigades) {
+                for (const bid of cmd.active_operation.participating_brigades) {
+                    opParticipants.add(bid);
+                }
+            }
             commanderReviewAssignment(
                 cid, sectors, formations, priorities, profile,
-                componentOf, adjacency, friendlyOsids,
+                componentOf, adjacency, friendlyOsids, opParticipants,
             );
         }
     }

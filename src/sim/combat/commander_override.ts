@@ -167,6 +167,7 @@ export function commanderReviewAssignment(
     componentOf: Map<string, number>,
     adjacency: Map<string, string[]>,
     friendlyOsids: Set<string>,
+    opParticipants?: Set<string>,
 ): CommanderOverride[] {
     if (commanderProfile.competence < COMMANDER_COMPETENCE_OVERRIDE_THRESHOLD) {
         return [];
@@ -182,6 +183,10 @@ export function commanderReviewAssignment(
 
     const overrides: CommanderOverride[] = [];
     const overriddenBrigadeIds = new Set<string>();
+    // Pre-seed with operation participants — never reassign brigades mid-operation
+    if (opParticipants) {
+        for (const bid of opParticipants) overriddenBrigadeIds.add(bid);
+    }
 
     applyMissionCompliance(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
     applyNonPriorityExcess(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
