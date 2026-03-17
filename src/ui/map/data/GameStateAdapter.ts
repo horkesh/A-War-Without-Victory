@@ -91,13 +91,31 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
     id: string;
     display_name: string;
     faction: 'RBiH';
-    osid_prefixes: string[];
+    osid_prefixes?: string[];
+    osid_list?: string[];
 }> = [
     { id: 'bihac_pocket', display_name: 'Bihac Pocket', faction: 'RBiH', osid_prefixes: ['op:bihac:', 'op:cazin:', 'op:velika_kladusa:', 'op:bosanska_krupa:'] },
-    { id: 'gorazde', display_name: 'Gorazde', faction: 'RBiH', osid_prefixes: ['op:gorazde:'] },
+    { id: 'gorazde', display_name: 'Gorazde', faction: 'RBiH', osid_list: [
+        'op:gorazde:bacci', 'op:gorazde:citluk_2',
+        'op:gorazde:faocici_2', 'op:gorazde:gorazde_2',
+        'op:gorazde:hrancici', 'op:gorazde:hrusanj',
+        'op:gorazde:kola', 'op:gorazde:kolovarice',
+        'op:gorazde:mravinjac_2', 'op:gorazde:novakovici',
+        'op:gorazde:osjecani_2', 'op:gorazde:semihova_2',
+        'op:gorazde:slatina_2', 'op:gorazde:ustipraca_2',
+        'op:gorazde:zorlaci', 'op:gorazde:zorovici',
+    ] },
     { id: 'sarajevo', display_name: 'Sarajevo', faction: 'RBiH', osid_prefixes: ['op:centar_sarajevo:', 'op:novo_sarajevo:', 'op:stari_grad_sarajevo:', 'op:novi_grad_sarajevo:'] },
-    { id: 'srebrenica', display_name: 'Srebrenica', faction: 'RBiH', osid_prefixes: ['op:srebrenica:'] },
-    { id: 'zepa', display_name: 'Zepa', faction: 'RBiH', osid_prefixes: ['op:rogatica:zepa'] },
+    { id: 'srebrenica', display_name: 'Srebrenica', faction: 'RBiH', osid_list: [
+        'op:srebrenica:bostahovine_2', 'op:srebrenica:brezovice_2',
+        'op:srebrenica:donji_potocari_2', 'op:srebrenica:kalimanici',
+        'op:srebrenica:lijesce', 'op:srebrenica:ljeskovik_2',
+        'op:srebrenica:luka_2', 'op:srebrenica:milacevici',
+        'op:srebrenica:radovcici',
+        'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
+        'op:srebrenica:sulice_2',
+    ] },
+    { id: 'zepa', display_name: 'Zepa', faction: 'RBiH', osid_list: ['op:rogatica:zepa_2'] },
 ];
 
 function deriveEnclaveSupplyState(
@@ -117,7 +135,10 @@ function deriveEnclaveSupplyState(
     if (enclave) {
         for (const entry of byOsid) {
             const osid = typeof entry.osid === 'string' ? entry.osid : '';
-            if (!enclave.osid_prefixes.some((prefix) => osid.startsWith(prefix))) continue;
+            const osidMatches = enclave.osid_list
+                ? enclave.osid_list.includes(osid)
+                : enclave.osid_prefixes?.some((prefix) => osid.startsWith(prefix)) ?? false;
+            if (!osidMatches) continue;
             if (entry.state === 'critical') critical++;
             else if (entry.state === 'strained') strained++;
             else if (entry.state === 'adequate') adequate++;

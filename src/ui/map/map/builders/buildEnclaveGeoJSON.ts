@@ -6,12 +6,15 @@ interface EnclaveDefinitionUI {
   id: string;
   faction: string;
   label: string;
-  osid_prefixes: readonly string[];
+  osid_prefixes?: readonly string[];
+  osid_list?: readonly string[];
 }
 
 /**
  * Mirrors ENCLAVE_DEFINITIONS in enclave_resilience.ts — UI-side copy with display labels.
  * Must stay in sync with the sim-side definitions.
+ * Srebrenica (12 OSIDs), Žepa (1), Goražde (16) use explicit painted OSID lists.
+ * Bihać and Sarajevo use municipality-wide prefix matching (correct for those).
  */
 const ENCLAVE_DEFINITIONS_UI: readonly EnclaveDefinitionUI[] = [
   {
@@ -24,19 +27,36 @@ const ENCLAVE_DEFINITIONS_UI: readonly EnclaveDefinitionUI[] = [
     id: 'srebrenica',
     faction: 'RBiH',
     label: 'SREBRENICA',
-    osid_prefixes: ['op:srebrenica:'],
+    osid_list: [
+      'op:srebrenica:bostahovine_2', 'op:srebrenica:brezovice_2',
+      'op:srebrenica:donji_potocari_2', 'op:srebrenica:kalimanici',
+      'op:srebrenica:lijesce', 'op:srebrenica:ljeskovik_2',
+      'op:srebrenica:luka_2', 'op:srebrenica:milacevici',
+      'op:srebrenica:radovcici',
+      'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
+      'op:srebrenica:sulice_2',
+    ],
   },
   {
     id: 'zepa',
     faction: 'RBiH',
     label: 'ŽEPA',
-    osid_prefixes: ['op:rogatica:zepa'],
+    osid_list: ['op:rogatica:zepa_2'],
   },
   {
     id: 'gorazde',
     faction: 'RBiH',
     label: 'GORAŽDE',
-    osid_prefixes: ['op:gorazde:'],
+    osid_list: [
+      'op:gorazde:bacci', 'op:gorazde:citluk_2',
+      'op:gorazde:faocici_2', 'op:gorazde:gorazde_2',
+      'op:gorazde:hrancici', 'op:gorazde:hrusanj',
+      'op:gorazde:kola', 'op:gorazde:kolovarice',
+      'op:gorazde:mravinjac_2', 'op:gorazde:novakovici',
+      'op:gorazde:osjecani_2', 'op:gorazde:semihova_2',
+      'op:gorazde:slatina_2', 'op:gorazde:ustipraca_2',
+      'op:gorazde:zorlaci', 'op:gorazde:zorovici',
+    ],
   },
   {
     id: 'sarajevo',
@@ -102,7 +122,10 @@ export function buildEnclaveGeoJSON(
     const matchingOsids: string[] = [];
     for (const osid of sortedOsids) {
       if (controlBySettlement[osid] !== def.faction) continue;
-      if (def.osid_prefixes.some((prefix) => osid.startsWith(prefix))) {
+      const osidMatches = def.osid_list
+        ? def.osid_list.includes(osid)
+        : def.osid_prefixes?.some((prefix) => osid.startsWith(prefix)) ?? false;
+      if (osidMatches) {
         matchingOsids.push(osid);
       }
     }
