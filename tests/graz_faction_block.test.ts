@@ -84,10 +84,12 @@ describe('Graz faction-level HRHB→RS block (bilateral ceasefire)', () => {
         expect(shouldGrazBlockAttack(state, 'hvo_northwest_bosnia', 'HRHB', 'op:brcko:brcko_2', 'RS')).toBe(false);
     });
 
-    it('does NOT block HVO SE Herzegovina before Op Jackal ends', () => {
+    it('blocks HVO SE Herzegovina at function level (op objective exemption is caller-side)', () => {
         const state = makeActiveState();
-        // graz_east_herzegovina_active_turn is null → Op Jackal not yet complete → allow
-        expect(shouldGrazBlockAttack(state, 'hvo_southeast_herzegovina', 'HRHB', 'op:stolac:stolac_2', 'RS')).toBe(false);
+        // shouldGrazBlockAttack always blocks HRHB→RS; Op Jackal objective exemption
+        // is applied by callers (bot_brigade_ai_osid, bot_corps_directives) which
+        // check if the target is an active operation objective before calling this.
+        expect(shouldGrazBlockAttack(state, 'hvo_southeast_herzegovina', 'HRHB', 'op:stolac:stolac_2', 'RS')).toBe(true);
     });
 
     it('blocks HVO SE Herzegovina after Op Jackal ends', () => {

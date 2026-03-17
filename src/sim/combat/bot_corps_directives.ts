@@ -1067,10 +1067,19 @@ export function generateCorpsDirectives(
 
         // Graz Accords truce: corps-pair truce (Herzegovina) + OSID-level Kiseljak exclusion.
         // Posavina and Krajina HRHB cells are NOT protected — VRS attacks freely.
+        // Op Jackal exemption: active operation objectives are not filtered.
         if (isGrazAccordsActive(state)) {
             const pc = state.political.political_controllers ?? {};
+            const activeOp = state.military.corps_command?.[corps.id]?.active_operation;
+            const opObjectives = activeOp
+                ? new Set(activeOp.axes?.flatMap(a => a.objectives ?? []) ?? activeOp.objectives ?? [])
+                : new Set<string>();
+            const hasOpExemption = isEastHerzegovinaPair(corps.id)
+                && state.political.graz_east_herzegovina_active_turn == null
+                && opObjectives.size > 0;
             for (let i = offensiveTargets.length - 1; i >= 0; i--) {
                 const osid = offensiveTargets[i]!;
+                if (hasOpExemption && opObjectives.has(osid)) continue; // Op objective — exempt
                 if (shouldGrazBlockAttack(state, corps.id, faction, osid, pc[osid] ?? '')) {
                     offensiveTargets.splice(i, 1);
                 }

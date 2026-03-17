@@ -582,11 +582,16 @@ export function generateAllBotOrdersOsid(
             const corpsId = f.corps_id ?? '';
             const faction = f.faction as FactionId;
             const targetController = pc[target] ?? '';
-            // Skip Graz block for brigades in an active east-pair operation (Op Jackal)
+            // Skip Graz block for brigades attacking Op Jackal objectives only
             if (corpsCmd[corpsId]?.active_operation != null
                 && isEastHerzegovinaPair(corpsId)
                 && state.political.graz_east_herzegovina_active_turn == null) {
-                continue;
+                const op = corpsCmd[corpsId]!.active_operation!;
+                const opObjectives = new Set(
+                    op.axes?.flatMap(a => a.objectives ?? []) ?? op.objectives ?? []
+                );
+                if (opObjectives.has(target)) continue; // Target is an op objective — allow
+                // Non-objective RS targets still blocked by Graz
             }
             if (shouldGrazBlockAttack(state, corpsId, faction, target, targetController)) {
                 delete allAttackOrders[bid as FormationId];
