@@ -56,6 +56,8 @@ import {
     getFactionCorps,
     getCorpsSubordinates,
 } from './bot_corps_helpers.js';
+import type { CampaignPlan } from './army_hq_gathering_types.js';
+import { PRIORITY_AGGRESSION, PRIORITY_RESERVE } from './army_hq_gathering_constants.js';
 
 /**
  * Salient risk: fraction of a target OSID's neighbors that are enemy-controlled.
@@ -939,6 +941,28 @@ export function generateCorpsDirectives(
                 } else if (effComp <= 2) {
                     if (bestMinOutcome === 'costly_victory') {
                         bestMinOutcome = 'victory';
+                    }
+                }
+            }
+        }
+
+        // --- Campaign plan integration (gathering plan adjusts aggression + reserves) ---
+        const gatherPlan: CampaignPlan | null | undefined = state.military.campaign_plans?.[faction];
+        if (gatherPlan && gatherPlan.valid_until_turn >= turn) {
+            const fp = gatherPlan.front_priorities.find(p => p.corps_id === corps.id);
+            if (fp) {
+                aggressionModifier += PRIORITY_AGGRESSION[fp.role] ?? 0;
+                reserveFraction = Math.max(0, Math.min(0.5, reserveFraction + (PRIORITY_RESERVE[fp.role] ?? 0)));
+                if (fp.role === 'contain') {
+                    offensiveTargets.length = 0;
+                }
+                if (fp.offensive_targets && fp.offensive_targets.length > 0) {
+                    const planTargets = fp.offensive_targets.filter(t => !offensiveTargets.includes(t as Osid));
+                    offensiveTargets.unshift(...planTargets as Osid[]);
+                }
+                if (fp.hold_targets && fp.hold_targets.length > 0) {
+                    for (const ht of fp.hold_targets) {
+                        if (!holdOsids.includes(ht as Osid)) holdOsids.push(ht as Osid);
                     }
                 }
             }

@@ -27,6 +27,7 @@ import {
     THREAT_DEFENSIVE_THRESHOLD,
     THREAT_OFFENSIVE_THRESHOLD,
 } from './bot_constants.js';
+import type { CampaignPlan } from './army_hq_gathering_types.js';
 import {
     averageCohesion,
     averagePersonnelFraction,
@@ -38,6 +39,11 @@ import {
 } from './bot_corps_helpers.js';
 
 import type { CorpsStance } from '../../state/game_state.js';
+
+/** Stance aggressiveness rank for ceiling enforcement (higher = more aggressive). */
+const STANCE_RANK: Record<CorpsStance, number> = {
+    reorganize: 0, defensive: 1, balanced: 2, offensive: 3,
+};
 
 /**
  * Generate corps stance orders for a faction.
@@ -92,6 +98,20 @@ export function generateCorpsStanceOrders(
         if (doctrinePhase && stance === 'balanced') {
             // Doctrine provides a default bias when the situation is ambiguous
             stance = doctrinePhase.default_corps_stance;
+        }
+
+        // --- Campaign plan integration (gathering plan overrides doctrine default) ---
+        const plan: CampaignPlan | null | undefined = state.military.campaign_plans?.[faction];
+        if (plan && plan.valid_until_turn >= turn && stance !== 'reorganize') {
+            const fp = plan.front_priorities.find(p => p.corps_id === corps.id);
+            if (fp) {
+                stance = fp.suggested_stance;
+                // Enforce corps_stance_ceilings from doctrine_override
+                const ceiling = plan.doctrine_override?.corps_stance_ceilings?.[corps.id];
+                if (ceiling && STANCE_RANK[stance] > STANCE_RANK[ceiling]) {
+                    stance = ceiling;
+                }
+            }
         }
 
         // --- Faction-specific overrides (E1-E3 personality) ---
