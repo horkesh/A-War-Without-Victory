@@ -506,6 +506,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
     },
 ];
 
+// v0.4.7: Mostar Hills axis removed from Op Jackal — vranjevici/kruzanj painted RS
 const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED, ...ARBIH_PRE_PLANNED];
 
 // ═══════════════════════════════════════════════════════════════════════════
