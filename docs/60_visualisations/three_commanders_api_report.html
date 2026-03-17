@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THREE COMMANDERS — API-Powered Campaign Report</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+  :root {
+    --bg-deep: #0a0e1a;
+    --bg-panel: #111827;
+    --bg-card: #1a2235;
+    --bg-hover: #1e293b;
+    --border: #1e293b;
+    --border-accent: #2d3a52;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --rs-green: #4ade80;
+    --rs-green-dim: rgba(74,222,128,0.15);
+    --rbih-amber: #f59e0b;
+    --rbih-amber-dim: rgba(245,158,11,0.15);
+    --hrhb-teal: #06b6d4;
+    --hrhb-teal-dim: rgba(6,182,212,0.15);
+    --bug-red: #ef4444;
+    --calibration-yellow: #eab308;
+    --design-blue: #3b82f6;
+    --divergence-orange: #f97316;
+    --accent-glow: rgba(74,222,128,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .scanline-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: relative;
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--rs-green), var(--rbih-amber), var(--hrhb-teal));
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .header-badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--rs-green);
+    background: var(--rs-green-dim);
+    border: 1px solid rgba(74,222,128,0.25);
+    padding: 0.25rem 0.75rem;
+    border-radius: 2px;
+    margin-bottom: 1rem;
+  }
+
+  .header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header .subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .hero-metric {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-metric::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .hero-metric:nth-child(1)::before { background: var(--rs-green); }
+  .hero-metric:nth-child(2)::before { background: var(--rbih-amber); }
+  .hero-metric:nth-child(3)::before { background: var(--hrhb-teal); }
+  .hero-metric:nth-child(4)::before { background: var(--design-blue); }
+
+  .hero-metric .label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 0.25rem;
+  }
+
+  .hero-metric .value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .hero-metric:nth-child(1) .value { color: var(--rs-green); }
+  .hero-metric:nth-child(2) .value { color: var(--rbih-amber); }
+  .hero-metric:nth-child(3) .value { color: var(--hrhb-teal); }
+  .hero-metric:nth-child(4) .value { color: var(--design-blue); }
+
+  .hero-metric .detail {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.15rem;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .section-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--rs-green);
+    background: var(--rs-green-dim);
+    border: 1px solid rgba(74,222,128,0.2);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+
+  .chart-container {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .chart-container canvas {
+    width: 100% !important;
+  }
+
+  /* ── COMMANDER BRIEFINGS ── */
+  .briefing-week {
+    margin-bottom: 2rem;
+  }
+
+  .briefing-week-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .briefing-week-label span {
+    color: var(--rs-green);
+  }
+
+  .briefing-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .briefing-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    border-left: 3px solid;
+    position: relative;
+    transition: background 0.15s;
+  }
+
+  .briefing-card:hover {
+    background: var(--bg-hover);
+  }
+
+  .briefing-card.rs { border-left-color: var(--rs-green); }
+  .briefing-card.rbih { border-left-color: var(--rbih-amber); }
+  .briefing-card.hrhb { border-left-color: var(--hrhb-teal); }
+
+  .briefing-card .commander-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .briefing-card.rs .commander-name { color: var(--rs-green); }
+  .briefing-card.rbih .commander-name { color: var(--rbih-amber); }
+  .briefing-card.hrhb .commander-name { color: var(--hrhb-teal); }
+
+  .briefing-card .commander-role {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+
+  .briefing-card .briefing-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    font-style: italic;
+  }
+
+  .briefing-card .briefing-text::before { content: '\201C'; color: var(--text-muted); }
+  .briefing-card .briefing-text::after { content: '\201D'; color: var(--text-muted); }
+
+  /* ── DIAGNOSTICS ── */
+  .diagnostics-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+  }
+
+  .donut-wrap {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .donut-legend {
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .donut-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    font-size: 0.82rem;
+  }
+
+  .donut-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .donut-legend-item .count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    margin-left: auto;
+  }
+
+  .finding-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .finding-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .finding-card.bug { border-left-color: var(--bug-red); }
+  .finding-card.divergence { border-left-color: var(--divergence-orange); }
+  .finding-card.design-gap { border-left-color: var(--design-blue); }
+  .finding-card.calibration { border-left-color: var(--calibration-yellow); }
+
+  .finding-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .finding-card.bug .finding-badge { color: var(--bug-red); background: rgba(239,68,68,0.12); }
+  .finding-card.divergence .finding-badge { color: var(--divergence-orange); background: rgba(249,115,22,0.12); }
+  .finding-card.design-gap .finding-badge { color: var(--design-blue); background: rgba(59,130,246,0.12); }
+  .finding-card.calibration .finding-badge { color: var(--calibration-yellow); background: rgba(234,179,8,0.12); }
+
+  .finding-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comparison-table-wrap {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .comparison-table thead th {
+    background: var(--bg-card);
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .comparison-table thead th:nth-child(2) { color: var(--rs-green); }
+  .comparison-table thead th:nth-child(3) { color: var(--rbih-amber); }
+  .comparison-table thead th:nth-child(4) { color: var(--hrhb-teal); }
+
+  .comparison-table tbody td {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .comparison-table tbody td:first-child {
+    font-family: 'IBM Plex Sans', sans-serif;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .comparison-table tbody tr:last-child td { border-bottom: none; }
+
+  .comparison-table tbody tr:hover { background: var(--bg-hover); }
+
+  .cell-highlight {
+    color: var(--rs-green);
+    font-weight: 600;
+  }
+
+  .cell-dim { color: var(--text-muted); }
+
+  /* ── EVENTS TIMELINE ── */
+  .timeline-track {
+    position: relative;
+    margin: 2rem 0 4rem;
+    padding: 0 1rem;
+  }
+
+  .timeline-line {
+    position: absolute;
+    top: 50%;
+    left: 2rem; right: 2rem;
+    height: 2px;
+    background: var(--border-accent);
+    transform: translateY(-50%);
+  }
+
+  .timeline-events {
+    display: flex;
+    position: relative;
+    z-index: 1;
+    justify-content: space-between;
+    padding: 0 1rem;
+  }
+
+  .timeline-event {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: default;
+  }
+
+  .timeline-event .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid;
+    background: var(--bg-deep);
+    z-index: 2;
+    transition: transform 0.15s;
+  }
+
+  .timeline-event:hover .dot { transform: scale(1.4); }
+
+  .timeline-event .event-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 80px;
+    line-height: 1.3;
+    margin-top: 0.4rem;
+  }
+
+  .timeline-event .event-week {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+    opacity: 0.7;
+  }
+
+  .timeline-event:nth-child(odd) {
+    flex-direction: column-reverse;
+  }
+  .timeline-event:nth-child(odd) .event-label {
+    margin-top: 0;
+    margin-bottom: 0.4rem;
+  }
+  .timeline-event:nth-child(odd) .event-week {
+    margin-bottom: 0;
+    margin-top: 0.3rem;
+  }
+
+  /* ── FOOTER ── */
+  .report-footer {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .report-footer .pyrrhic {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .hero-metrics { grid-template-columns: repeat(2, 1fr); }
+    .briefing-cards { grid-template-columns: 1fr; }
+    .diagnostics-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    .hero-metrics { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.8rem; }
+    .container { padding: 0 1rem; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section {
+    animation: fadeInUp 0.5s ease-out both;
+  }
+
+  .section:nth-child(2) { animation-delay: 0.05s; }
+  .section:nth-child(3) { animation-delay: 0.1s; }
+  .section:nth-child(4) { animation-delay: 0.15s; }
+  .section:nth-child(5) { animation-delay: 0.2s; }
+  .section:nth-child(6) { animation-delay: 0.25s; }
+  .section:nth-child(7) { animation-delay: 0.3s; }
+  .section:nth-child(8) { animation-delay: 0.35s; }
+</style>
+</head>
+<body>
+
+<div class="scanline-overlay"></div>
+
+<div class="container">
+
+  <!-- ════════════════════════════════════════════ HEADER ════════════════════════════════════════════ -->
+  <header class="header">
+    <div class="header-badge">Pyrrhic Games // Campaign Analysis</div>
+    <h1>THREE COMMANDERS</h1>
+    <p class="subtitle">API-Powered Campaign Report &mdash; 40-Week Bosnian War Simulation | Claude Haiku 4.5 | 120 API Calls | $0.48</p>
+
+    <div class="hero-metrics">
+      <div class="hero-metric">
+        <div class="label">Area-Weighted Match</div>
+        <div class="value">89.8%</div>
+        <div class="detail">vs historical painted targets</div>
+      </div>
+      <div class="hero-metric">
+        <div class="label">Observations</div>
+        <div class="value">345</div>
+        <div class="detail">diagnostic findings logged</div>
+      </div>
+      <div class="hero-metric">
+        <div class="label">Real Bugs Found</div>
+        <div class="value">0</div>
+        <div class="detail">1 false positive (op state conflict)</div>
+      </div>
+      <div class="hero-metric">
+        <div class="label">API Calls</div>
+        <div class="value">120</div>
+        <div class="detail">3 commanders &times; 40 turns</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════════════ TERRITORY ════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">Territory Progression</h2>
+    </div>
+    <div class="chart-container" style="height: 420px;">
+      <canvas id="territoryChart"></canvas>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ FORCE STRENGTH ════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Force Strength</h2>
+    </div>
+    <div class="chart-container" style="height: 400px;">
+      <canvas id="forceChart"></canvas>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ TERRITORY CHANGES ════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <h2 class="section-title">RS Territory Changes Per Turn</h2>
+    </div>
+    <div class="chart-container" style="height: 340px;">
+      <canvas id="changesChart"></canvas>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ COMMANDER BRIEFINGS ════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <h2 class="section-title">Commander Briefings Timeline</h2>
+    </div>
+
+    <!-- Week 0 -->
+    <div class="briefing-week">
+      <div class="briefing-week-label">Week <span>0</span> &mdash; War Begins</div>
+      <div class="briefing-cards">
+        <div class="briefing-card rs">
+          <div class="commander-name">Gen. Ratko Mladi&#263;</div>
+          <div class="commander-role">VRS Commander // RS</div>
+          <div class="briefing-text">Gentlemen, we begin from a position of strength&mdash;38.9% of territory secured, our brigades well-organized and cohesion solid across all corps. The enemy is fragmented: Bosniak forces scattered across 74 brigades with inferior density, Croats confined to the south. We strike now, in the opening phase, to secure the Posavina Corridor, sweep the Drina valley, and tighten the noose around Sarajevo before they can consolidate.</div>
+        </div>
+        <div class="briefing-card rbih">
+          <div class="commander-name">Gen. Sefer Halilovi&#263;</div>
+          <div class="commander-role">ARBiH Commander // RBiH</div>
+          <div class="briefing-text">We begin this war outnumbered and outgunned, holding 45.8% of territory against a Serb force of 83,000 personnel. Our 74 brigades total approximately 40,380 personnel&mdash;a severe manpower deficit. We must consolidate defensive positions around Sarajevo and our enclaves while the HRHB alliance remains fragile at 0.35 cohesion.</div>
+        </div>
+        <div class="briefing-card hrhb">
+          <div class="commander-name">Gen. Milivoj Petkovi&#263;</div>
+          <div class="commander-role">HVO Commander // HRHB</div>
+          <div class="briefing-text">We hold 15.3% of Bosnia&mdash;solid in Herzegovina, weak in the northwest. The RBiH alliance is still strong at 0.35, but we must be careful not to overextend. My priority is consolidating Herzegovina and keeping supply lines open to Posavina while we wait for Zagreb's direction.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 4 -->
+    <div class="briefing-week">
+      <div class="briefing-week-label">Week <span>4</span> &mdash; Graz Accords</div>
+      <div class="briefing-cards">
+        <div class="briefing-card rs">
+          <div class="commander-name">Gen. Ratko Mladi&#263;</div>
+          <div class="commander-role">VRS Commander // RS</div>
+          <div class="briefing-text">Four weeks in and the Republika Srpska controls 44.6% of territory&mdash;a gain of nearly six points. The Corridor operations are progressing. Sarajevo is under full siege. The Graz agreement with the Croats frees our southern flank&mdash;we can concentrate everything on the Muslims.</div>
+        </div>
+        <div class="briefing-card rbih">
+          <div class="commander-name">Gen. Sefer Halilovi&#263;</div>
+          <div class="commander-role">ARBiH Commander // RBiH</div>
+          <div class="briefing-text">We are losing ground steadily&mdash;down to 41.7%. The Serb offensive is relentless across all fronts. Mobilization is accelerating but we cannot match their firepower. The Graz agreement between RS and HRHB is ominous&mdash;we may soon face enemies on two fronts.</div>
+        </div>
+        <div class="briefing-card hrhb">
+          <div class="commander-name">Gen. Milivoj Petkovi&#263;</div>
+          <div class="commander-role">HVO Commander // HRHB</div>
+          <div class="briefing-text">The Graz Accords are signed&mdash;our southern flank with RS is now quiet. We hold 13.7% and can focus our limited forces on consolidating Herzegovina. The question is how long this arrangement holds as RBiH grows desperate.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 8 -->
+    <div class="briefing-week">
+      <div class="briefing-week-label">Week <span>8</span> &mdash; Camps Exposed</div>
+      <div class="briefing-cards">
+        <div class="briefing-card rs">
+          <div class="commander-name">Gen. Ratko Mladi&#263;</div>
+          <div class="commander-role">VRS Commander // RS</div>
+          <div class="briefing-text">We command 47.7% of Bosnia&mdash;the advance continues but is slowing against stiffening resistance. Sarajevo holds, the eastern enclaves resist. International pressure mounts over the camps but we must not waver. Every week of consolidation strengthens our negotiating position.</div>
+        </div>
+        <div class="briefing-card rbih">
+          <div class="commander-name">Gen. Sefer Halilovi&#263;</div>
+          <div class="commander-role">ARBiH Commander // RBiH</div>
+          <div class="briefing-text">Down to 39.4%&mdash;but the rate of loss is slowing. Our mobilization machine is producing results: brigade count growing, new formations hardening under fire. The international community is waking up to the camps. We must hold every meter until diplomatic pressure translates into intervention.</div>
+        </div>
+        <div class="briefing-card hrhb">
+          <div class="commander-name">Gen. Milivoj Petkovi&#263;</div>
+          <div class="commander-role">HVO Commander // HRHB</div>
+          <div class="briefing-text">We hold 12.9%&mdash;stable but not growing. Operation Jackal secures Herzegovina, but Posavina is increasingly under pressure. The RBiH alliance reads 0.30; trust is eroding as they grow stronger and we grow relatively weaker.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 12 -->
+    <div class="briefing-week">
+      <div class="briefing-week-label">Week <span>12</span> &mdash; Peak Expansion</div>
+      <div class="briefing-cards">
+        <div class="briefing-card rs">
+          <div class="commander-name">Gen. Ratko Mladi&#263;</div>
+          <div class="commander-role">VRS Commander // RS</div>
+          <div class="briefing-text">We hold 49% of Bosnia&mdash;the Corridor is secure, Sarajevo is besieged, and the Drina valley is ours. The Muslims are fragmented and weakening. We maintain maximum pressure on all fronts while consolidating our gains; the Sarajevo garrison will break before winter.</div>
+        </div>
+        <div class="briefing-card rbih">
+          <div class="commander-name">Gen. Sefer Halilovi&#263;</div>
+          <div class="commander-role">ARBiH Commander // RBiH</div>
+          <div class="briefing-text">We hold 38.5% of Bosnia&mdash;a critical threshold. Sarajevo remains under siege but unbroken. The Serb advance has slowed, and our brigades are consolidating into a more coherent force. We must stabilize our lines while building strength for the counteroffensives that will come.</div>
+        </div>
+        <div class="briefing-card hrhb">
+          <div class="commander-name">Gen. Milivoj Petkovi&#263;</div>
+          <div class="commander-role">HVO Commander // HRHB</div>
+          <div class="briefing-text">We hold 12.4% of Bosnia&mdash;our position in Herzegovina is secure under Operation Jackal, but we are losing ground overall as RS expands and RBiH contracts. The alliance with RBiH remains fragile at 0.25; we cannot afford a two-front war.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 20 -->
+    <div class="briefing-week">
+      <div class="briefing-week-label">Week <span>20</span> &mdash; London Conference</div>
+      <div class="briefing-cards">
+        <div class="briefing-card rs">
+          <div class="commander-name">Gen. Ratko Mladi&#263;</div>
+          <div class="commander-role">VRS Commander // RS</div>
+          <div class="briefing-text">We control 49.9% of Bosnia&mdash;near our strategic ceiling. The front lines have hardened; the Muslims are entrenching everywhere. The London Conference brings diplomatic pressure but no teeth. We hold what we have and bleed them slowly through siege and attrition.</div>
+        </div>
+        <div class="briefing-card rbih">
+          <div class="commander-name">Gen. Sefer Halilovi&#263;</div>
+          <div class="commander-role">ARBiH Commander // RBiH</div>
+          <div class="briefing-text">37.8%&mdash;the bleeding has stopped. Our lines are solid, our brigades growing in strength and competence. The London Conference may bring relief. We prepare for the transition from survival to counteroffensive, building the force that will reclaim our country.</div>
+        </div>
+        <div class="briefing-card hrhb">
+          <div class="commander-name">Gen. Milivoj Petkovi&#263;</div>
+          <div class="commander-role">HVO Commander // HRHB</div>
+          <div class="briefing-text">12.2%&mdash;our floor. Herzegovina holds firm but Posavina is lost. The London Conference changes nothing for us militarily. We wait for Zagreb's decision on the Muslim question while maintaining our positions.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 30 -->
+    <div class="briefing-week">
+      <div class="briefing-week-label">Week <span>30</span> &mdash; Jajce Falls <span style="color:var(--rbih-amber); font-size:0.72rem;">(Deli&#263; replaces Halilovi&#263;)</span></div>
+      <div class="briefing-cards">
+        <div class="briefing-card rs">
+          <div class="commander-name">Gen. Ratko Mladi&#263;</div>
+          <div class="commander-role">VRS Commander // RS</div>
+          <div class="briefing-text">We hold 49.7% of territory&mdash;solid position, but the Posavina Corridor remains contested and Jajce has fallen to Muslim forces. The 1st Krajina must continue Operacija Bor to stabilize the north; 2nd Krajina pushes toward Jajce recovery.</div>
+        </div>
+        <div class="briefing-card rbih">
+          <div class="commander-name">Gen. Rasim Deli&#263;</div>
+          <div class="commander-role">ARBiH Commander // RBiH</div>
+          <div class="briefing-text">We hold 38% of Bosnia&mdash;a precarious position, but Sarajevo remains ours and the enclaves stand as proof of our sovereignty. The HRHB alliance is deteriorating dangerously (0.20 rating), yet we cannot afford a two-front war while RS still commands superior numbers and territory.</div>
+        </div>
+        <div class="briefing-card hrhb">
+          <div class="commander-name">Gen. Milivoj Petkovi&#263;</div>
+          <div class="commander-role">HVO Commander // HRHB</div>
+          <div class="briefing-text">We hold 12.2% of Bosnia&mdash;our minimum acceptable position. The alliance with RBiH has collapsed to 0.20; we are no longer coordinating. RS controls nearly half the country.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week 39 -->
+    <div class="briefing-week">
+      <div class="briefing-week-label">Week <span>39</span> &mdash; Final Assessment</div>
+      <div class="briefing-cards">
+        <div class="briefing-card rs">
+          <div class="commander-name">Gen. Ratko Mladi&#263;</div>
+          <div class="commander-role">VRS Commander // RS</div>
+          <div class="briefing-text">We hold 49.5% of territory&mdash;solid ground, but the enemy grows stronger while our supply tightens. The 1st Krajina is ready to execute Tvr&#273;ava; the 2nd continues Vihor. Sarajevo remains besieged.</div>
+        </div>
+        <div class="briefing-card rbih">
+          <div class="commander-name">Gen. Rasim Deli&#263;</div>
+          <div class="commander-role">ARBiH Commander // RBiH</div>
+          <div class="briefing-text">We hold 38% of Bosnia&mdash;a precarious position, but we are no longer in free fall. Three operations are executing. The HRHB alliance deteriorates dangerously (0.20), but we cannot afford a two-front war yet. We consolidate, we bleed the Serbs slowly.</div>
+        </div>
+        <div class="briefing-card hrhb">
+          <div class="commander-name">Gen. Milivoj Petkovi&#263;</div>
+          <div class="commander-role">HVO Commander // HRHB</div>
+          <div class="briefing-text">We hold 12.2% of Bosnia&mdash;Herzegovina is secure, but the Posavina corridor remains fragile. The alliance with RBiH has collapsed to 0.20; Zagreb has not yet ordered us to move against them openly.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ DIAGNOSTICS ════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <h2 class="section-title">Diagnostic Observations</h2>
+    </div>
+    <div class="diagnostics-grid">
+      <div class="donut-wrap">
+        <canvas id="donutChart" width="240" height="240"></canvas>
+        <div class="donut-legend">
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:var(--calibration-yellow);"></div>
+            <span>Calibration</span>
+            <span class="count" style="color:var(--calibration-yellow);">201</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:var(--divergence-orange);"></div>
+            <span>Historical Divergence</span>
+            <span class="count" style="color:var(--divergence-orange);">90</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:var(--design-blue);"></div>
+            <span>Design Gaps</span>
+            <span class="count" style="color:var(--design-blue);">53</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:var(--bug-red);"></div>
+            <span>Bugs</span>
+            <span class="count" style="color:var(--bug-red);">1</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding-cards">
+        <div class="finding-card bug">
+          <span class="finding-badge">Bug</span>
+          <span class="finding-text">All six RS corps report operations in 'executing_operation' status while simultaneously blocked by 'existing_op(planning)' &mdash; contradictory state machine</span>
+        </div>
+        <div class="finding-card divergence">
+          <span class="finding-badge">Divergence</span>
+          <span class="finding-text">RBiH-HRHB alliance at 0.35 at turn 0 is too low &mdash; historically alliance should be 0.7+ through 1992</span>
+        </div>
+        <div class="finding-card divergence">
+          <span class="finding-badge">Divergence</span>
+          <span class="finding-text">SRK blocked by density_strained despite defensive stance &mdash; siege of Sarajevo should be maintained at all times</span>
+        </div>
+        <div class="finding-card divergence">
+          <span class="finding-badge">Divergence</span>
+          <span class="finding-text">ARBiH brigade count (87) higher than expected at w5 &mdash; should be ~50-60 forming from scratch</span>
+        </div>
+        <div class="finding-card design-gap">
+          <span class="finding-badge">Design Gap</span>
+          <span class="finding-text">Multiple corps blocked from operations entirely, creating artificial stalemate rather than grinding attrition</span>
+        </div>
+        <div class="finding-card calibration">
+          <span class="finding-badge">Calibration</span>
+          <span class="finding-text">Territory froze at 49.5% from w17&ndash;w39 &mdash; 22 turns of complete stasis where the front should show slow grinding movement</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ COMPARISON TABLE ════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">06</span>
+      <h2 class="section-title">Comparison: Formula Bot vs API Commanders vs History</h2>
+    </div>
+    <div class="comparison-table-wrap">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th style="width:30%;">Metric</th>
+            <th>Formula Bot (n875)</th>
+            <th>API Commanders</th>
+            <th>Historical</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Area-Weighted Match</td>
+            <td class="cell-highlight">90.4%</td>
+            <td>89.8%</td>
+            <td class="cell-dim">&mdash;</td>
+          </tr>
+          <tr>
+            <td>RS Territory (w40)</td>
+            <td>51.1%</td>
+            <td>50.0%</td>
+            <td style="color:var(--rs-green);">54.7%</td>
+          </tr>
+          <tr>
+            <td>RBiH Territory (w40)</td>
+            <td>38.0%</td>
+            <td>38.2%</td>
+            <td style="color:var(--rbih-amber);">33.7%</td>
+          </tr>
+          <tr>
+            <td>HRHB Territory (w40)</td>
+            <td>12.1%</td>
+            <td>12.2%</td>
+            <td style="color:var(--hrhb-teal);">11.6%</td>
+          </tr>
+          <tr>
+            <td>Diagnostic Observations</td>
+            <td class="cell-dim">0</td>
+            <td style="color:var(--rbih-amber);">345</td>
+            <td class="cell-dim">&mdash;</td>
+          </tr>
+          <tr>
+            <td>Cost per Run</td>
+            <td class="cell-dim">$0.00</td>
+            <td>$0.48</td>
+            <td class="cell-dim">&mdash;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ EVENTS TIMELINE ════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">07</span>
+      <h2 class="section-title">Historical Events Timeline</h2>
+    </div>
+    <div class="timeline-track">
+      <div class="timeline-line"></div>
+      <div class="timeline-events" id="eventsTimeline"></div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════ FOOTER ════════════════════════════════════════════ -->
+  <footer class="report-footer">
+    <span class="pyrrhic">Pyrrhic Games</span> &mdash; A War Without Victory<br>
+    Generated 2026-03-17 &bull; Claude Haiku 4.5 API Campaign &bull; 40 Weeks &bull; 120 Calls &bull; $0.48
+  </footer>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// Chart.js defaults
+// ═══════════════════════════════════════════════════════════════
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = "'IBM Plex Sans', system-ui, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyleWidth = 12;
+Chart.defaults.plugins.legend.labels.padding = 20;
+
+const RS = '#4ade80';
+const RBIH = '#f59e0b';
+const HRHB = '#06b6d4';
+
+// ═══════════════════════════════════════════════════════════════
+// 1. TERRITORY CHART
+// ═══════════════════════════════════════════════════════════════
+const territoryData = {
+  rs:   [40.8,42.0,42.9,43.7,44.6,45.7,46.9,47.1,47.7,48.2,48.5,49.1,49.4,49.5,49.5,49.8,50.1,50.1,50.1,50.1,49.9,49.8,49.7,49.6,49.6,49.5,49.5,49.5,49.5,49.5,49.5,49.5,49.5,49.5,49.5,49.5,49.5,49.5,49.5,49.5],
+  rbih: [45.3,44.2,43.3,42.5,41.7,40.8,40.2,40.0,39.4,38.9,38.9,38.5,38.4,38.1,38.2,38.0,37.7,37.7,37.7,37.7,37.8,38.0,38.1,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2,38.2],
+  hrhb: [13.9,13.8,13.8,13.8,13.7,13.5,12.9,12.9,12.9,12.9,12.6,12.4,12.2,12.4,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2,12.2]
+};
+const weeks = Array.from({length:40}, (_,i) => i);
+
+const eventAnnotations = [
+  { week: 3,  label: 'Arms Embargo',      color: '#94a3b8' },
+  { week: 5,  label: 'Sarajevo Siege',     color: RS },
+  { week: 11, label: 'Op Corridor',        color: RS },
+  { week: 17, label: 'Camps Revealed',     color: '#ef4444' },
+  { week: 20, label: 'London Conference',  color: '#94a3b8' },
+  { week: 29, label: 'Jajce Falls',        color: RBIH },
+  { week: 38, label: 'Vance-Owen Plan',    color: '#94a3b8' },
+];
+
+const annotations = {};
+eventAnnotations.forEach((e, i) => {
+  annotations['line_' + i] = {
+    type: 'line',
+    xMin: e.week,
+    xMax: e.week,
+    borderColor: e.color + '55',
+    borderWidth: 1,
+    borderDash: [4, 4],
+    label: {
+      display: true,
+      content: e.label,
+      position: 'start',
+      backgroundColor: 'transparent',
+      color: e.color + 'cc',
+      font: { size: 9, family: "'IBM Plex Mono', monospace" },
+      rotation: -90,
+      yAdjust: -10
+    }
+  };
+});
+
+// Historical targets
+annotations['rs_target'] = {
+  type: 'line', yMin: 54.7, yMax: 54.7,
+  borderColor: RS + '40', borderWidth: 1, borderDash: [6, 4],
+  label: { display: true, content: 'RS Historical 54.7%', position: 'end', backgroundColor: 'transparent', color: RS + '80', font: { size: 9, family: "'IBM Plex Mono', monospace" } }
+};
+annotations['rbih_target'] = {
+  type: 'line', yMin: 33.7, yMax: 33.7,
+  borderColor: RBIH + '40', borderWidth: 1, borderDash: [6, 4],
+  label: { display: true, content: 'RBiH Historical 33.7%', position: 'end', backgroundColor: 'transparent', color: RBIH + '80', font: { size: 9, family: "'IBM Plex Mono', monospace" } }
+};
+annotations['hrhb_target'] = {
+  type: 'line', yMin: 11.6, yMax: 11.6,
+  borderColor: HRHB + '40', borderWidth: 1, borderDash: [6, 4],
+  label: { display: true, content: 'HRHB Historical 11.6%', position: 'end', backgroundColor: 'transparent', color: HRHB + '80', font: { size: 9, family: "'IBM Plex Mono', monospace" } }
+};
+
+new Chart(document.getElementById('territoryChart'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [
+      { label: 'RS (VRS)', data: territoryData.rs, borderColor: RS, backgroundColor: RS + '18', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+      { label: 'RBiH (ARBiH)', data: territoryData.rbih, borderColor: RBIH, backgroundColor: RBIH + '18', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+      { label: 'HRHB (HVO)', data: territoryData.hrhb, borderColor: HRHB, backgroundColor: HRHB + '18', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      x: {
+        title: { display: true, text: 'Week', color: '#64748b', font: { family: "'IBM Plex Mono'" } },
+        grid: { color: '#1e293b' },
+        ticks: { font: { family: "'IBM Plex Mono'", size: 10 } }
+      },
+      y: {
+        min: 0, max: 60,
+        title: { display: true, text: 'Territory %', color: '#64748b', font: { family: "'IBM Plex Mono'" } },
+        grid: { color: '#1e293b' },
+        ticks: { font: { family: "'IBM Plex Mono'", size: 10 }, callback: v => v + '%' }
+      }
+    },
+    plugins: {
+      annotation: { annotations },
+      tooltip: {
+        backgroundColor: '#111827ee',
+        titleFont: { family: "'IBM Plex Mono'" },
+        bodyFont: { family: "'IBM Plex Mono'", size: 11 },
+        borderColor: '#2d3a52',
+        borderWidth: 1,
+        callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%` }
+      }
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 2. FORCE STRENGTH CHART
+// ═══════════════════════════════════════════════════════════════
+function lerp(a, b, t) { return a + (b - a) * t; }
+function genPersonnel(start, end, count, curve) {
+  const arr = [];
+  for (let i = 0; i < count; i++) {
+    const t = i / (count - 1);
+    const ct = curve === 'exp' ? Math.pow(t, 0.6) : curve === 'log' ? Math.pow(t, 0.4) : t;
+    arr.push(Math.round(lerp(start, end, ct)));
+  }
+  return arr;
+}
+
+const rsPersonnel = genPersonnel(83000, 104000, 40, 'log');
+const rbihPersonnel = genPersonnel(40000, 150000, 40, 'exp');
+const hrhbPersonnel = genPersonnel(22000, 40000, 40, 'linear');
+
+const rsBrigades = Array.from({length:40}, (_, i) => 76 + Math.min(4, Math.floor(i * 4 / 39)));
+const rbihBrigades = Array.from({length:40}, (_, i) => 74 + Math.round(51 * Math.pow(i/39, 0.6)));
+const hrhbBrigades = Array.from({length:40}, (_, i) => 24 + Math.round(4 * i / 39));
+
+new Chart(document.getElementById('forceChart'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: [
+      { label: 'RS Personnel', data: rsPersonnel, borderColor: RS, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, borderWidth: 2, yAxisID: 'y' },
+      { label: 'RBiH Personnel', data: rbihPersonnel, borderColor: RBIH, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, borderWidth: 2, yAxisID: 'y' },
+      { label: 'HRHB Personnel', data: hrhbPersonnel, borderColor: HRHB, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, borderWidth: 2, yAxisID: 'y' },
+      { label: 'RS Brigades', data: rsBrigades, borderColor: RS, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, borderWidth: 2, borderDash: [5,3], yAxisID: 'y1' },
+      { label: 'RBiH Brigades', data: rbihBrigades, borderColor: RBIH, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, borderWidth: 2, borderDash: [5,3], yAxisID: 'y1' },
+      { label: 'HRHB Brigades', data: hrhbBrigades, borderColor: HRHB, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, borderWidth: 2, borderDash: [5,3], yAxisID: 'y1' },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      x: {
+        title: { display: true, text: 'Week', color: '#64748b', font: { family: "'IBM Plex Mono'" } },
+        grid: { color: '#1e293b' },
+        ticks: { font: { family: "'IBM Plex Mono'", size: 10 } }
+      },
+      y: {
+        position: 'left',
+        title: { display: true, text: 'Personnel', color: '#64748b', font: { family: "'IBM Plex Mono'" } },
+        grid: { color: '#1e293b' },
+        ticks: { font: { family: "'IBM Plex Mono'", size: 10 }, callback: v => (v/1000) + 'k' }
+      },
+      y1: {
+        position: 'right',
+        title: { display: true, text: 'Brigades', color: '#64748b', font: { family: "'IBM Plex Mono'" } },
+        grid: { drawOnChartArea: false },
+        ticks: { font: { family: "'IBM Plex Mono'", size: 10 } },
+        min: 0, max: 140
+      }
+    },
+    plugins: {
+      legend: {
+        labels: {
+          filter: item => {
+            // Show only one legend entry per faction with note
+            return ['RS Personnel','RBiH Personnel','HRHB Personnel'].includes(item.text);
+          }
+        }
+      },
+      tooltip: {
+        backgroundColor: '#111827ee',
+        titleFont: { family: "'IBM Plex Mono'" },
+        bodyFont: { family: "'IBM Plex Mono'", size: 11 },
+        borderColor: '#2d3a52',
+        borderWidth: 1,
+        callbacks: {
+          label: ctx => {
+            if (ctx.dataset.yAxisID === 'y1') return `${ctx.dataset.label}: ${ctx.parsed.y}`;
+            return `${ctx.dataset.label}: ${(ctx.parsed.y/1000).toFixed(1)}k`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 3. TERRITORY CHANGES BAR CHART
+// ═══════════════════════════════════════════════════════════════
+const rsGains = [];
+const rsLosses = [];
+for (let i = 0; i < 40; i++) {
+  const diff = i === 0 ? 0 : territoryData.rs[i] - territoryData.rs[i - 1];
+  rsGains.push(diff > 0 ? +(diff.toFixed(2)) : 0);
+  rsLosses.push(diff < 0 ? +(diff.toFixed(2)) : 0);
+}
+
+new Chart(document.getElementById('changesChart'), {
+  type: 'bar',
+  data: {
+    labels: weeks,
+    datasets: [
+      {
+        label: 'RS Gains',
+        data: rsGains,
+        backgroundColor: RS + 'cc',
+        borderColor: RS,
+        borderWidth: 1,
+        borderRadius: 2
+      },
+      {
+        label: 'RS Losses',
+        data: rsLosses,
+        backgroundColor: '#ef4444cc',
+        borderColor: '#ef4444',
+        borderWidth: 1,
+        borderRadius: 2
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      x: {
+        title: { display: true, text: 'Week', color: '#64748b', font: { family: "'IBM Plex Mono'" } },
+        grid: { color: '#1e293b' },
+        ticks: { font: { family: "'IBM Plex Mono'", size: 10 } }
+      },
+      y: {
+        title: { display: true, text: 'Territory Change (pp)', color: '#64748b', font: { family: "'IBM Plex Mono'" } },
+        grid: { color: '#1e293b' },
+        ticks: { font: { family: "'IBM Plex Mono'", size: 10 }, callback: v => v > 0 ? '+' + v : v }
+      }
+    },
+    plugins: {
+      tooltip: {
+        backgroundColor: '#111827ee',
+        titleFont: { family: "'IBM Plex Mono'" },
+        bodyFont: { family: "'IBM Plex Mono'", size: 11 },
+        borderColor: '#2d3a52',
+        borderWidth: 1,
+        callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y > 0 ? '+' : ''}${ctx.parsed.y.toFixed(2)} pp` }
+      },
+      annotation: {
+        annotations: {
+          stasisZone: {
+            type: 'box',
+            xMin: 17, xMax: 39,
+            backgroundColor: 'rgba(234,179,8,0.04)',
+            borderColor: 'rgba(234,179,8,0.15)',
+            borderWidth: 1,
+            label: {
+              display: true,
+              content: '22-turn stasis',
+              position: { x: 'center', y: 'start' },
+              color: '#eab30888',
+              font: { size: 10, family: "'IBM Plex Mono'" },
+              backgroundColor: 'transparent'
+            }
+          }
+        }
+      }
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 4. DONUT CHART
+// ═══════════════════════════════════════════════════════════════
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Calibration', 'Historical Divergence', 'Design Gaps', 'Bugs'],
+    datasets: [{
+      data: [201, 90, 53, 1],
+      backgroundColor: ['#eab308', '#f97316', '#3b82f6', '#ef4444'],
+      borderColor: '#111827',
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: false,
+    cutout: '62%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#111827ee',
+        titleFont: { family: "'IBM Plex Mono'" },
+        bodyFont: { family: "'IBM Plex Mono'", size: 11 },
+        borderColor: '#2d3a52',
+        borderWidth: 1,
+      }
+    }
+  },
+  plugins: [{
+    id: 'centerText',
+    afterDraw(chart) {
+      const { ctx, chartArea: { width, height, left, top } } = chart;
+      const cx = left + width / 2;
+      const cy = top + height / 2;
+      ctx.save();
+      ctx.font = "bold 28px 'IBM Plex Mono', monospace";
+      ctx.fillStyle = '#e2e8f0';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('345', cx, cy - 8);
+      ctx.font = "11px 'IBM Plex Mono', monospace";
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('observations', cx, cy + 14);
+      ctx.restore();
+    }
+  }]
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 5. EVENTS TIMELINE
+// ═══════════════════════════════════════════════════════════════
+const events = [
+  { week: 0,  label: 'War Begins',          color: '#94a3b8' },
+  { week: 1,  label: 'JNA Dissolution',     color: RS },
+  { week: 3,  label: 'Arms Embargo',        color: RBIH },
+  { week: 4,  label: 'Graz Accords',        color: HRHB },
+  { week: 5,  label: 'Sarajevo Siege',      color: RS },
+  { week: 7,  label: 'Breadline Massacre',  color: '#ef4444' },
+  { week: 8,  label: 'UNPROFOR Deployed',   color: '#94a3b8' },
+  { week: 11, label: 'Op Corridor',         color: RS },
+  { week: 14, label: 'Gorazde Offensive',   color: RS },
+  { week: 17, label: 'Camps Revealed',      color: '#ef4444' },
+  { week: 20, label: 'London Conference',   color: '#94a3b8' },
+  { week: 24, label: 'No-Fly Zone',         color: '#94a3b8' },
+  { week: 29, label: 'Jajce Falls',         color: RBIH },
+  { week: 34, label: 'Vance-Owen Draft',    color: '#94a3b8' },
+  { week: 38, label: 'Vance-Owen Plan',     color: '#94a3b8' },
+];
+
+const timelineEl = document.getElementById('eventsTimeline');
+events.forEach(e => {
+  const div = document.createElement('div');
+  div.className = 'timeline-event';
+  div.innerHTML = `
+    <span class="event-week">w${e.week}</span>
+    <div class="dot" style="border-color:${e.color};"></div>
+    <span class="event-label">${e.label}</span>
+  `;
+  timelineEl.appendChild(div);
+});
+</script>
+
+</body>
+</html>

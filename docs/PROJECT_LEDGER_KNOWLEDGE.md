@@ -1,7 +1,11 @@
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-03-15
+**Last Updated:** 2026-03-17
 **Purpose:** Knowledge accumulation by theme.
+
+**AI Commander QA findings (2026-03-17):** Three API-powered AI commanders (Mladić, Halilović→Delić, Petković) ran 40w campaign and produced 345 diagnostic observations. Six actionable themes: (1) Alliance decay too fast (95 obs — initial 0.35 should be 0.75, war target April 1993 ~w52), (2) SRK density-gated from siege ops (24 obs — siege corps should be exempt from density gate), (3) Supply gate stripping all targets (23 obs — should be graduated, not binary), (4) Event timing wrong (33 obs — events should be conditional on game state, not calendar), (5) Operation state machine bug (16 obs — ops stuck in planning), (6) Late-war stasis (9 obs — 22 turns frozen). See `memory/ai_commander_three_agents.md` and `memory/conditional_events_design.md`.
+
+**Conditional events design (2026-03-17):** Three event types: state-triggered (fires when game state condition met, e.g. Jajce falls when RS takes it), conditional-timed (fires at calendar week IF condition met, e.g. Bread massacre if Sarajevo besieged), unconditional-timed (fires regardless, e.g. Arms embargo). Condition schema: `{ type: "territory_control", municipality: "jajce", controller: "RS", threshold: 0.5 }`. Backward compatible — events without conditions fire by week as before. Next scenario: 52w+ covering Croat-Bosniak war (1993-1994).
 
 **40_reports structure (2026-02-24):** Backlog is consolidated into themed docs (BACKLOG_*.md) in docs/40_reports/backlog/; originals archived to docs/_old/40_reports/backlog/. For historical fidelity, Phase 7, mobilization, etc., use the themed doc or the archived filename in _old. See docs/_old/README.md §40_reports/backlog and CONSOLIDATED_BACKLOG. Chronological record remains in `docs/PROJECT_LEDGER.md` (append-only).
 

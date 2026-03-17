@@ -1,0 +1,306 @@
+/**
+ * API-powered commander decisions using Claude.
+ * Each faction's army commander gets a Claude API call per turn.
+ * Produces structured decisions + natural language briefing + diagnostic observations.
+ */
+
+import Anthropic from '@anthropic-ai/sdk';
+import type { FactionId, GameState, CorpsStance } from '../../src/state/game_state.js';
+import { strictCompare } from '../../src/state/validateGameState.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Types
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface ApiCommanderDecision {
+    faction: FactionId;
+    commander_name: string;
+    turn: number;
+    corps_stances: Record<string, CorpsStance>;
+    briefing: string;
+    strategic_reasoning: string;
+    observations: Array<{
+        severity: 'bug' | 'calibration' | 'design_gap' | 'historical_divergence';
+        commander: string;
+        faction: string;
+        turn: number;
+        description: string;
+        expected: string;
+        actual: string;
+        affected_system: string;
+    }>;
+    model_used: string;
+    prompt_tokens: number;
+    completion_tokens: number;
+    latency_ms: number;
+}
+
+interface CommanderProfile {
+    faction: FactionId;
+    commander: string;
+    successor?: { name: string; transition_week: number };
+    personality: { voice: string; competence: number; aggressiveness: number; risk_tolerance: string };
+    strategic_doctrine: { priorities: string[]; red_lines: string[]; historical_expectations: Record<string, string> };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// System prompts per faction
+// ═══════════════════════════════════════════════════════════════════════════
+
+function getSystemPrompt(profile: CommanderProfile, turn: number): string {
+    const name = (profile.successor && turn >= profile.successor.transition_week)
+        ? profile.successor.name : profile.commander;
+
+    const priorities = profile.strategic_doctrine.priorities.map((p, i) => `${i + 1}. ${p}`).join('\n');
+    const redLines = profile.strategic_doctrine.red_lines.map(r => `- ${r}`).join('\n');
+
+    return `You are ${name}, army commander of the ${FACTION_NAMES[profile.faction]}.
+
+PERSONALITY: ${profile.personality.voice}
+Competence: ${profile.personality.competence}/5. Aggressiveness: ${profile.personality.aggressiveness}/5. Risk tolerance: ${profile.personality.risk_tolerance}.
+
+STRATEGIC PRIORITIES:
+${priorities}
+
+RED LINES:
+${redLines}
+
+HISTORICAL EXPECTATIONS:
+${Object.entries(profile.strategic_doctrine.historical_expectations).map(([w, e]) => `  ${w}: ${e}`).join('\n')}
+
+YOUR JOB EACH TURN:
+1. Analyze the game state provided.
+2. Set corps stances (offensive/balanced/defensive) based on the situation — not rigidly, REACT to what you see.
+3. Provide a briefing IN CHARACTER (2-3 sentences, your voice).
+4. Provide strategic reasoning (1-2 sentences, analytical).
+5. Flag any OBSERVATIONS where the game doesn't match your expectations:
+   - "bug": something mechanically broken (corps with 0 brigades, etc.)
+   - "calibration": numbers seem off (too many/few troops, wrong territory %, etc.)
+   - "design_gap": you can't express an intent the engine should support
+   - "historical_divergence": game result significantly contradicts what happened historically
+
+Your output MUST be valid JSON matching the schema provided. No markdown outside JSON.`;
+}
+
+const FACTION_NAMES: Record<string, string> = {
+    RS: 'Army of Republika Srpska (VRS)',
+    RBiH: 'Army of the Republic of Bosnia and Herzegovina (ARBiH)',
+    HRHB: 'Croatian Defence Council (HVO)',
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// State serialization (enhanced from prompt_builder.ts)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function buildStatePrompt(state: GameState, faction: FactionId, prevTerritory: Record<string, number>, osidAreas: Record<string, number>): string {
+    const turn = state.meta.turn;
+    const lines: string[] = [];
+
+    lines.push(`Turn: ${turn}. Faction: ${faction}.`);
+
+    // Territory (area-weighted)
+    const pc = state.political?.political_controllers ?? {};
+    const areaByFaction: Record<string, number> = { RS: 0, RBiH: 0, HRHB: 0 };
+    let totalArea = 0;
+    for (const [osid, f] of Object.entries(pc)) {
+        const area = osidAreas[osid] ?? 0;
+        totalArea += area;
+        if (areaByFaction[f] !== undefined) areaByFaction[f] += area;
+    }
+
+    lines.push('');
+    lines.push('TERRITORY:');
+    for (const [f, area] of Object.entries(areaByFaction)) {
+        const pct = totalArea > 0 ? ((area / totalArea) * 100).toFixed(1) : '0';
+        const areaKm2 = Math.round(area);
+        const delta = prevTerritory[f] !== undefined ? areaKm2 - prevTerritory[f] : 0;
+        const deltaStr = delta > 0 ? ` (+${delta} km²)` : delta < 0 ? ` (${delta} km²)` : '';
+        lines.push(`  ${f}: ${pct}% (${areaKm2} km²)${deltaStr}`);
+    }
+
+    // Corps status with personnel, morale, cohesion, status_reason
+    const formations = state.military.formations ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
+    lines.push('');
+    lines.push('YOUR CORPS:');
+
+    const factionCorpsIds: string[] = [];
+    for (const [corpsId, cc] of Object.entries(corpsCommand).sort(([a], [b]) => strictCompare(a, b))) {
+        const cf = formations[corpsId];
+        if (!cf || cf.faction !== faction || cf.kind === 'army_hq') continue;
+        factionCorpsIds.push(corpsId);
+
+        let brigCount = 0, totalPers = 0, totalCoh = 0, totalMor = 0;
+        for (const [, f] of Object.entries(formations)) {
+            if (f.faction === faction && f.corps_id === corpsId && f.kind === 'brigade' && f.status === 'active') {
+                brigCount++;
+                totalPers += f.personnel ?? 0;
+                totalCoh += f.cohesion ?? 50;
+                totalMor += f.morale ?? 50;
+            }
+        }
+        const avgCoh = brigCount > 0 ? (totalCoh / brigCount).toFixed(0) : '?';
+        const avgMor = brigCount > 0 ? (totalMor / brigCount).toFixed(0) : '?';
+        const op = cc.active_operation;
+        const opStr = op ? `op: ${op.name} (${op.phase})` : 'no operation';
+        const statusReason = (cc as any).status_reason ?? 'unknown';
+        const trace = ((cc as any).op_launch_trace ?? []).join(', ');
+
+        lines.push(`  ${corpsId}: stance=${cc.stance}, ${brigCount} bde, ${totalPers} pers, coh=${avgCoh}, mor=${avgMor}`);
+        lines.push(`    ${opStr} | status: ${statusReason} | trace: ${trace}`);
+    }
+
+    // Supply
+    const generalSupply = state.military.general_supply_reserve?.[faction] ?? 'unknown';
+    const heavySupply = state.military.heavy_munitions_reserve?.[faction] ?? 'unknown';
+    lines.push('');
+    lines.push(`SUPPLY: general=${typeof generalSupply === 'number' ? generalSupply.toFixed(0) : generalSupply}, heavy=${typeof heavySupply === 'number' ? heavySupply.toFixed(0) : heavySupply}`);
+
+    // Enemy strength
+    lines.push('');
+    lines.push('ENEMY FORCES:');
+    for (const enemyFaction of (['RS', 'RBiH', 'HRHB'] as FactionId[])) {
+        if (enemyFaction === faction) continue;
+        let ePers = 0, eBde = 0;
+        for (const [, f] of Object.entries(formations)) {
+            if (f.faction === enemyFaction && f.kind === 'brigade' && f.status === 'active') {
+                ePers += f.personnel ?? 0;
+                eBde++;
+            }
+        }
+        lines.push(`  ${enemyFaction}: ${ePers.toLocaleString()} personnel / ${eBde} brigades`);
+    }
+
+    // Recent events
+    const firedEvents = state.military.fired_event_ids ?? [];
+    if (firedEvents.length > 0) {
+        lines.push('');
+        lines.push(`RECENT EVENTS: ${firedEvents.slice(-5).join(', ')}`);
+    }
+
+    // Alliance state (for HRHB/RBiH)
+    if (faction === 'HRHB' || faction === 'RBiH') {
+        const alliance = state.political.war_alliance_rbih_hrhb ?? 1.0;
+        lines.push('');
+        lines.push(`RBiH-HRHB ALLIANCE: ${alliance.toFixed(2)} (1.0=full alliance, 0.0=neutral, <0=war)`);
+    }
+
+    // Schema
+    lines.push('');
+    lines.push(`Respond with ONLY valid JSON:
+{
+  "corps_stances": { ${factionCorpsIds.map(c => `"${c}": "offensive|balanced|defensive"`).join(', ')} },
+  "briefing": "<2-3 sentences in character>",
+  "strategic_reasoning": "<1-2 sentences analytical>",
+  "observations": [
+    { "severity": "bug|calibration|design_gap|historical_divergence", "description": "...", "expected": "...", "actual": "...", "affected_system": "..." }
+  ]
+}`);
+
+    return lines.join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// API call
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function generateApiDecision(
+    client: Anthropic,
+    profile: CommanderProfile,
+    state: GameState,
+    turn: number,
+    prevTerritory: Record<string, number>,
+    model: string = 'claude-haiku-4-5-20251001',
+    osidAreas: Record<string, number> = {}
+): Promise<ApiCommanderDecision> {
+    const commanderName = (profile.successor && turn >= profile.successor.transition_week)
+        ? profile.successor.name : profile.commander;
+
+    const systemPrompt = getSystemPrompt(profile, turn);
+    const userPrompt = buildStatePrompt(state, profile.faction as FactionId, prevTerritory, osidAreas);
+
+    const startMs = Date.now();
+    const response = await client.messages.create({
+        model,
+        max_tokens: 1024,
+        temperature: 0,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+    });
+
+    const latencyMs = Date.now() - startMs;
+    const text = response.content
+        .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+        .map(block => block.text)
+        .join('');
+
+    // Parse response
+    const parsed = safeParseJson(text);
+    if (!parsed) {
+        console.warn(`[API] Failed to parse response for ${profile.faction}. Falling back.`);
+        return {
+            faction: profile.faction as FactionId,
+            commander_name: commanderName,
+            turn,
+            corps_stances: {},
+            briefing: `[API parse failure] Raw: ${text.slice(0, 200)}`,
+            strategic_reasoning: '',
+            observations: [],
+            model_used: response.model,
+            prompt_tokens: response.usage.input_tokens,
+            completion_tokens: response.usage.output_tokens,
+            latency_ms: latencyMs,
+        };
+    }
+
+    // Extract stances
+    const VALID_STANCES = new Set(['offensive', 'balanced', 'defensive', 'reorganize']);
+    const corpsStances: Record<string, CorpsStance> = {};
+    if (parsed.corps_stances && typeof parsed.corps_stances === 'object') {
+        for (const [corpsId, stance] of Object.entries(parsed.corps_stances)) {
+            if (VALID_STANCES.has(stance as string)) {
+                corpsStances[corpsId] = stance as CorpsStance;
+            }
+        }
+    }
+
+    // Extract observations
+    const observations: ApiCommanderDecision['observations'] = [];
+    if (Array.isArray(parsed.observations)) {
+        for (const o of parsed.observations) {
+            if (o && typeof o === 'object' && o.description) {
+                observations.push({
+                    severity: ['bug', 'calibration', 'design_gap', 'historical_divergence'].includes(o.severity) ? o.severity : 'calibration',
+                    commander: commanderName,
+                    faction: profile.faction,
+                    turn,
+                    description: String(o.description ?? ''),
+                    expected: String(o.expected ?? ''),
+                    actual: String(o.actual ?? ''),
+                    affected_system: String(o.affected_system ?? 'unknown'),
+                });
+            }
+        }
+    }
+
+    return {
+        faction: profile.faction as FactionId,
+        commander_name: commanderName,
+        turn,
+        corps_stances: corpsStances,
+        briefing: String(parsed.briefing ?? ''),
+        strategic_reasoning: String(parsed.strategic_reasoning ?? ''),
+        observations,
+        model_used: response.model,
+        prompt_tokens: response.usage.input_tokens,
+        completion_tokens: response.usage.output_tokens,
+        latency_ms: latencyMs,
+    };
+}
+
+function safeParseJson(text: string): any | null {
+    // Strip markdown code blocks if present
+    const match = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
+    const cleaned = match ? match[1].trim() : text.trim();
+    try { return JSON.parse(cleaned); } catch { return null; }
+}

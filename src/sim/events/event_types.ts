@@ -6,6 +6,18 @@
 
 import type { FactionId, GameState } from '../../state/game_state.js';
 
+/** State-based condition for conditional event triggers. */
+export type EventCondition =
+    | { type: 'territory_control'; municipality?: string; osid?: string; faction: string; threshold?: number }
+    | { type: 'alliance_below'; value: number }
+    | { type: 'alliance_above'; value: number }
+    | { type: 'faction_controls_municipality'; faction: string; municipality: string; threshold?: number }
+    | { type: 'siege_active'; osid_or_municipality: string }
+    | { type: 'operation_completed'; operation_name_pattern: string }
+    | { type: 'and'; conditions: EventCondition[] }
+    | { type: 'or'; conditions: EventCondition[] }
+    | { type: 'not'; condition: EventCondition };
+
 /** Trigger: when to consider firing (turn range + optional prerequisites). */
 export interface EventTrigger {
     /** Inclusive. Omit for no lower bound. */
@@ -16,6 +28,8 @@ export interface EventTrigger {
     phase?: 'war';
     /** All listed event IDs must have already fired (checked against fired_event_ids). */
     requires_events?: string[];
+    /** State-based condition that must be true for the event to fire. */
+    condition?: EventCondition;
 }
 
 /** Effect: narrative only (no mechanical mutation). */
@@ -155,6 +169,64 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
         const firedIds = state.military.fired_event_ids ?? [];
         if (!t.requires_events.every(id => firedIds.includes(id))) return false;
     }
+    // State-based condition check
+    if (t.condition) {
+        if (!evaluateCondition(t.condition, state)) return false;
+    }
     return true;
+}
+
+/** Evaluate a state-based condition against current game state. */
+export function evaluateCondition(condition: EventCondition, state: GameState): boolean {
+    switch (condition.type) {
+        case 'territory_control': {
+            const pc = state.political?.political_controllers ?? {};
+            if (condition.osid) {
+                return pc[condition.osid] === condition.faction;
+            }
+            if (condition.municipality) {
+                const threshold = condition.threshold ?? 0.5;
+                const munOsids = Object.keys(pc).filter(osid => osid.includes(`:${condition.municipality}:`));
+                if (munOsids.length === 0) return false;
+                const controlled = munOsids.filter(osid => pc[osid] === condition.faction).length;
+                return (controlled / munOsids.length) >= threshold;
+            }
+            return false;
+        }
+        case 'alliance_below':
+            return (state.political?.war_alliance_rbih_hrhb ?? 1.0) < condition.value;
+        case 'alliance_above':
+            return (state.political?.war_alliance_rbih_hrhb ?? 1.0) > condition.value;
+        case 'faction_controls_municipality': {
+            const pc2 = state.political?.political_controllers ?? {};
+            const threshold2 = condition.threshold ?? 0.5;
+            const munOsids2 = Object.keys(pc2).filter(osid => osid.includes(`:${condition.municipality}:`));
+            if (munOsids2.length === 0) return false;
+            const controlled2 = munOsids2.filter(osid => pc2[osid] === condition.faction).length;
+            return (controlled2 / munOsids2.length) >= threshold2;
+        }
+        case 'siege_active': {
+            const mil = state.military as any;
+            const enclaves: any[] = mil?.active_enclaves ?? [];
+            return enclaves.some((e: any) =>
+                e.municipality === condition.osid_or_municipality ||
+                e.osids?.includes(condition.osid_or_municipality)
+            );
+        }
+        case 'operation_completed': {
+            const mil2 = state.military as any;
+            const firedOps: string[] = mil2?.completed_operation_names ?? [];
+            const pattern = condition.operation_name_pattern.toLowerCase();
+            return firedOps.some((name: string) => name.toLowerCase().includes(pattern));
+        }
+        case 'and':
+            return condition.conditions.every(c => evaluateCondition(c, state));
+        case 'or':
+            return condition.conditions.some(c => evaluateCondition(c, state));
+        case 'not':
+            return !evaluateCondition(condition.condition, state);
+        default:
+            return true;
+    }
 }
 

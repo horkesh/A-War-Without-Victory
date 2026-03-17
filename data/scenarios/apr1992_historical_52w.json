@@ -10,7 +10,7 @@
   "turns": [],
   "use_harness_bots": true,
   "use_smart_bots": true,
-  "init_alliance_rbih_hrhb": 0.35,
+  "init_alliance_rbih_hrhb": 0.75,
   "rbih_hrhb_war_earliest_week": 26,
   "coercion_pressure_by_municipality": { "prijedor": 0.9, "zvornik": 0.85, "foca": 0.85 }
 }

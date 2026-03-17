@@ -19,7 +19,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 /** Positive drift per turn toward alliance when no bilateral incidents occurred last turn. */
 export const APPEASEMENT_BASE_RATE = 0.003;
 /** Negative drift per turn from HRHB patron commitment pressure. */
-export const PATRON_PRESSURE_COEFF = 0.015;
+export const PATRON_PRESSURE_COEFF = 0.018;
 /** Penalty per bilateral RBiH–HRHB control flip from the *previous* turn. */
 export const INCIDENT_PENALTY_PER_FLIP = 0.04;
 /** Positive recovery per turn when ceasefire is active. */
@@ -55,7 +55,7 @@ export const STRONG_ALLIANCE_THRESHOLD = 0.50;
 export const FULL_WAR_THRESHOLD = -0.50;
 
 /** Default initial alliance value (fragile alliance, April 1992). */
-export const DEFAULT_INIT_ALLIANCE = 0.35;
+export const DEFAULT_INIT_ALLIANCE = 0.75;
 
 /** Default mixed municipalities with both RBiH and HRHB formations. */
 export const DEFAULT_MIXED_MUNICIPALITIES: readonly string[] = [
@@ -194,7 +194,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     // Apply delta, clamp to [-1, 1]
     let newValue = Math.max(-1, Math.min(1, previousValue + delta));
     // Peace-phase §4.8 (historical fidelity): no open war before rbih_hrhb_war_earliest_turn (e.g. Oct 1992 for Apr 1992 start).
-    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
+    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 40;
     if (state.meta.turn < earliestTurn) {
         newValue = Math.max(newValue, ALLIED_THRESHOLD);
     }

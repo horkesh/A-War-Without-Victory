@@ -27,6 +27,28 @@ import { stableStringify } from '../../src/utils/stable_json.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Area-weighted territory
+// ═══════════════════════════════════════════════════════════════════════════
+
+function computeAreaWeightedTerritory(
+    pc: Record<string, string>,
+    osidAreas: Record<string, number>
+): Record<string, { area_km2: number; pct: string }> {
+    const areaByFaction: Record<string, number> = { RS: 0, RBiH: 0, HRHB: 0 };
+    let totalArea = 0;
+    for (const [osid, faction] of Object.entries(pc)) {
+        const area = osidAreas[osid] ?? 0;
+        totalArea += area;
+        if (areaByFaction[faction] !== undefined) areaByFaction[faction] += area;
+    }
+    const result: Record<string, { area_km2: number; pct: string }> = {};
+    for (const [f, area] of Object.entries(areaByFaction)) {
+        result[f] = { area_km2: Math.round(area), pct: totalArea > 0 ? ((area / totalArea) * 100).toFixed(1) : '0' };
+    }
+    return result;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -65,7 +87,7 @@ interface CommanderDecision {
 
 interface TurnLog {
     turn: number;
-    territory: Record<string, { osids: number; pct: string }>;
+    territory: Record<string, { area_km2: number; pct: string }>;
     personnel: Record<string, { total: number; brigades: number }>;
     decisions: CommanderDecision[];
     territory_changes: Array<{ osid: string; from: string; to: string }>;
@@ -113,7 +135,8 @@ function generateReactiveDecision(
     profile: CommanderProfile,
     state: GameState,
     turn: number,
-    prevTerritory: Record<string, number>
+    prevTerritory: Record<string, number>,
+    osidAreas: Record<string, number>
 ): CommanderDecision {
     const faction = profile.faction;
     const commanderName = (profile.successor && turn >= profile.successor.transition_week)
@@ -123,15 +146,14 @@ function generateReactiveDecision(
     const observations: Observation[] = [];
     const corpsStances: Record<string, CorpsStance> = {};
 
-    // Count territory
+    // Compute area-weighted territory
     const pc = state.political?.political_controllers ?? {};
-    const allOsids = Object.keys(pc);
-    const totalOsids = allOsids.length;
-    let ownOsids = 0;
-    for (const osid of allOsids) { if (pc[osid] === faction) ownOsids++; }
-    const territoryPct = totalOsids > 0 ? (ownOsids / totalOsids) * 100 : 0;
-    const prevOwnOsids = prevTerritory[faction] ?? ownOsids;
-    const territoryDelta = ownOsids - prevOwnOsids;
+    const areaTerritory = computeAreaWeightedTerritory(pc, osidAreas);
+    const ownArea = areaTerritory[faction]?.area_km2 ?? 0;
+    const totalArea = Object.values(areaTerritory).reduce((s, t) => s + t.area_km2, 0);
+    const territoryPct = totalArea > 0 ? (ownArea / totalArea) * 100 : 0;
+    const prevOwnArea = prevTerritory[faction] ?? ownArea;
+    const territoryDelta = ownArea - prevOwnArea;
 
     // Analyze corps
     const formations = state.military.formations ?? {};
@@ -187,7 +209,7 @@ function generateReactiveDecision(
                         turn,
                         description: `Territory significantly below historical expectation at week ${turn}`,
                         expected: expectation,
-                        actual: `${territoryPct.toFixed(1)}% (${ownOsids} OSIDs)`,
+                        actual: `${territoryPct.toFixed(1)}% (${ownArea} km²)`,
                         affected_system: 'territory_control',
                     });
                 } else if (territoryPct > expectedHigh + 5) {
@@ -198,7 +220,7 @@ function generateReactiveDecision(
                         turn,
                         description: `Territory significantly above historical expectation at week ${turn}`,
                         expected: expectation,
-                        actual: `${territoryPct.toFixed(1)}% (${ownOsids} OSIDs)`,
+                        actual: `${territoryPct.toFixed(1)}% (${ownArea} km²)`,
                         affected_system: 'territory_control',
                     });
                 }
@@ -255,15 +277,15 @@ function generateReactiveDecision(
     }
 
     // Check for territory loss while on offensive (possible effectiveness issue)
-    if (territoryDelta < -2 && factionCorps.some(c => c.stance === 'offensive')) {
+    if (territoryDelta < -100 && factionCorps.some(c => c.stance === 'offensive')) {
         observations.push({
             severity: 'calibration',
             commander: commanderName,
             faction,
             turn,
-            description: `Lost ${Math.abs(territoryDelta)} OSIDs this turn despite having corps on offensive`,
+            description: `Lost ${Math.abs(territoryDelta)} km² this turn despite having corps on offensive`,
             expected: 'Offensive stance should at minimum prevent significant territory loss',
-            actual: `${territoryDelta} OSIDs this turn. Offensive corps: ${factionCorps.filter(c => c.stance === 'offensive').map(c => c.id).join(', ')}`,
+            actual: `${territoryDelta} km² this turn. Offensive corps: ${factionCorps.filter(c => c.stance === 'offensive').map(c => c.id).join(', ')}`,
             affected_system: 'combat_effectiveness',
         });
     }
@@ -396,7 +418,7 @@ function formatTurnLog(log: TurnLog): string {
     // Territory
     lines.push('  TERRITORY:');
     for (const [f, t] of Object.entries(log.territory)) {
-        lines.push(`    ${f.padEnd(6)} ${t.osids} OSIDs (${t.pct}%)`);
+        lines.push(`    ${f.padEnd(6)} ${t.area_km2} km² (${t.pct}%)`);
     }
 
     // Commander briefings
@@ -493,6 +515,11 @@ async function main(): Promise<void> {
     try { const { loadMunicipalityHqSettlement } = await import('../../src/scenario/oob_loader.js'); municipalityHqSettlement = await loadMunicipalityHqSettlement(baseDir); } catch { /* non-fatal */ }
     const eventDefinitions = loadEventDefinitions(0);
 
+    let osidAreas: Record<string, number> = {};
+    try {
+        osidAreas = JSON.parse(await readFile(join(baseDir, 'data/derived/operational/osid_areas.json'), 'utf8'));
+    } catch { /* non-fatal — fall back to count-based */ }
+
     // Run
     const allLogs: TurnLog[] = [];
     const allObservations: Observation[] = [];
@@ -505,10 +532,11 @@ async function main(): Promise<void> {
     console.log('═'.repeat(72));
 
     for (let week = 0; week < weeks; week++) {
-        // Snapshot territory for delta
+        // Snapshot territory for delta (area-weighted)
         const pc = state.political?.political_controllers ?? {};
-        const territoryCounts: Record<string, number> = { RS: 0, RBiH: 0, HRHB: 0 };
-        for (const osid of Object.keys(pc)) { const f = pc[osid]; if (f && territoryCounts[f] !== undefined) territoryCounts[f]++; }
+        const territorySnapshot = computeAreaWeightedTerritory(pc, osidAreas);
+        const territoryCounts: Record<string, number> = {};
+        for (const [f, t] of Object.entries(territorySnapshot)) { territoryCounts[f] = t.area_km2; }
         const prevPc = { ...pc };
         const prevFired = [...(state.military.fired_event_ids ?? [])];
 
@@ -528,7 +556,7 @@ async function main(): Promise<void> {
                     });
                 }
             } else {
-                decisions.push(generateReactiveDecision(profile, state, week, prevTerritory));
+                decisions.push(generateReactiveDecision(profile, state, week, prevTerritory, osidAreas));
             }
         }
 
@@ -557,11 +585,7 @@ async function main(): Promise<void> {
 
         // Build turn log
         const newPc = state.political?.political_controllers ?? {};
-        const newTerritoryCounts: Record<string, number> = { RS: 0, RBiH: 0, HRHB: 0 };
-        for (const osid of Object.keys(newPc)) { const f = newPc[osid]; if (f && newTerritoryCounts[f] !== undefined) newTerritoryCounts[f]++; }
-        const totalOsids = Object.keys(newPc).length;
-        const territory: Record<string, { osids: number; pct: string }> = {};
-        for (const [f, count] of Object.entries(newTerritoryCounts)) { territory[f] = { osids: count, pct: totalOsids > 0 ? ((count / totalOsids) * 100).toFixed(1) : '0' }; }
+        const territory = computeAreaWeightedTerritory(newPc, osidAreas);
 
         const territoryChanges: Array<{ osid: string; from: string; to: string }> = [];
         for (const osid of Object.keys(newPc)) { if (prevPc[osid] && newPc[osid] && prevPc[osid] !== newPc[osid]) territoryChanges.push({ osid, from: prevPc[osid], to: newPc[osid] }); }
@@ -589,13 +613,11 @@ async function main(): Promise<void> {
     console.log('╚══════════════════════════════════════════════════════════════╝');
 
     const finalPc = state.political?.political_controllers ?? {};
-    const finalCounts: Record<string, number> = { RS: 0, RBiH: 0, HRHB: 0 };
-    for (const osid of Object.keys(finalPc)) { const f = finalPc[osid]; if (f && finalCounts[f] !== undefined) finalCounts[f]++; }
-    const total = Object.keys(finalPc).length;
+    const finalTerritory = computeAreaWeightedTerritory(finalPc, osidAreas);
 
     console.log('');
     console.log('  FINAL TERRITORY:');
-    for (const [f, count] of Object.entries(finalCounts)) console.log(`    ${f.padEnd(6)} ${count}/${total} (${((count / total) * 100).toFixed(1)}%)`);
+    for (const [f, t] of Object.entries(finalTerritory)) console.log(`    ${f.padEnd(6)} ${t.area_km2} km² (${t.pct}%)`);
 
     // Diagnostic report
     if (allObservations.length > 0) {
