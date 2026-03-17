@@ -250,6 +250,8 @@ export function MapContainer() {
       try {
         return await (pmtilesProtocol as any).tilev4(params, abortController);
       } catch (e) {
+        // Suppress AbortError (normal during pan/zoom — tiles get cancelled)
+        if (e instanceof Error && e.name === 'AbortError') throw e;
         console.error('[PMTiles] tile error', params.url, e);
         throw e;
       }
