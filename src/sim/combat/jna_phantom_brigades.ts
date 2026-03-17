@@ -87,13 +87,11 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         location_osid: 'op:mostar:mostar_istok_2',
         withdrawal_turn: 6,
         tanks: 12, artillery: 10, apcs: 6,
-        // JNA controlled east bank positions from south Mostar hills down to Stolac/Čapljina.
+        // JNA controlled positions from Stolac down to Čapljina.
         // On withdrawal, VRS inherits → Op Jackal target.
-        // EXCLUDES mostar_istok_2, blagaj_2, hodbina_2: these remain RBiH (ARBiH 4th Corps
-        // home territory — joint HVO-TO defense held central east bank while JNA held outer hills).
+        // vranjevići/kružanj REMOVED: painted RS in Jan 1993 (VRS held these Mostar hills
+        // throughout — HVO never captured them in Op Jackal).
         capture_osids: [
-            'op:mostar:kruzanj_2',
-            'op:mostar:vranjevici_2',
             'op:stolac:stolac_2',
             'op:stolac:rotimlja_2',
             'op:stolac:pjesivac_kula_2',

@@ -455,7 +455,9 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'stolac_sweep',
                 name: 'Stolac-Čapljina Sweep',
-                // Main effort: Čapljina → Tasovčići → Stolac → Hatelj
+                // Main effort: Čapljina → Tasovčići → Stolac
+                // Mostar Hills axis REMOVED: vranjevići/kružanj painted RS in Jan 1993
+                // (VRS held those positions; HVO did not take them in Op Jackal)
                 brigades: [
                     'hrhb_stolac_units',
                     'hrhb_apljina_brigade',
@@ -463,6 +465,10 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                     'hv_4th_guards_tg',
                     'hv_1st_guards_tg',
                     'hv_113th_brigade_tg',
+                    'hrhb_1st_brigade_mostar',
+                    'hrhb_2nd_brigade_mostar',
+                    'hrhb_mostar_brigade',
+                    'hv_116th_brigade_tg',
                 ],
                 objectives: [
                     'op:capljina:tasovcici_2',
@@ -471,23 +477,6 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                     'op:stolac:stolac_2',
                 ],
                 staging_osid: 'op:capljina:capljina_2',
-            },
-            {
-                axis_id: 'mostar_hills',
-                name: 'Mostar Hills',
-                // Secondary: sweep RS from Kružanj/Vranjevići hills south of Mostar
-                // These positions overlook east Mostar and threaten ARBiH lines
-                brigades: [
-                    'hrhb_1st_brigade_mostar',
-                    'hrhb_2nd_brigade_mostar',
-                    'hrhb_mostar_brigade',
-                    'hv_116th_brigade_tg',
-                ],
-                objectives: [
-                    'op:mostar:vranjevici_2',
-                    'op:mostar:kruzanj_2',
-                ],
-                staging_osid: 'op:mostar:jasenica',
             },
         ],
     },
