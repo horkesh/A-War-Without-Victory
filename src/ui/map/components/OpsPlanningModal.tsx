@@ -14,7 +14,7 @@ import styleJson from '../map/awwv_map_style.json';
 import { rewritePmtilesUrls } from '../map/rewritePmtilesUrls';
 import { buildCorpsFrontLinesGeoJSON } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { buildBezierCurve, buildArrowheadTriangle, buildTaperedArrowBody } from '../map/builders/arrowGeometry';
-import type { FormationView } from '../data/types';
+import type { FormationView, LoadedGameState, NamedOfficerView, OperationView } from '../data/types';
 import { OPERATION_NAMES, simpleHash } from '../../../sim/combat/operation_names';
 
 // --- Faction-colored axis palettes for map arrows and UI accents ---
@@ -141,6 +141,222 @@ function updateArrowSourceData(map: maplibregl.Map, data: FeatureCollection) {
 let nextAxisCounter = 0;
 function makeAxisId(): string {
     return `axis_${++nextAxisCounter}`;
+}
+
+// --- G2 Briefing Panel (right panel) ---
+
+const PREP_PHASE_LABELS: Record<string, { label: string; order: number }> = {
+    intel_gathering: { label: 'Intel Gathering', order: 1 },
+    force_staging: { label: 'Force Staging', order: 2 },
+    supply_check: { label: 'Supply Check', order: 3 },
+    assessment: { label: 'Assessment', order: 4 },
+    ready: { label: 'Ready', order: 5 },
+    waiting_for_sync: { label: 'Awaiting Sync', order: 5 },
+};
+
+const ASSESSMENT_LABELS: Record<string, { label: string; color: string }> = {
+    launch: { label: 'LAUNCH', color: 'text-green-400' },
+    postpone: { label: 'POSTPONE', color: 'text-yellow-400' },
+    abort: { label: 'ABORT', color: 'text-red-400' },
+};
+
+function G2ConfidenceBar({ value, label }: { value: number | undefined; label: string }) {
+    const pct = value != null ? Math.round(value * 100) : null;
+    const barColor = pct == null ? 'bg-gray-600'
+        : pct >= 70 ? 'bg-green-500'
+        : pct >= 40 ? 'bg-yellow-500'
+        : 'bg-red-500';
+    return (
+        <div className="space-y-1">
+            <div className="flex justify-between text-[10px]">
+                <span className="text-text-secondary uppercase tracking-wider">{label}</span>
+                <span className="text-text-primary font-semibold">{pct != null ? `${pct}%` : '--'}</span>
+            </div>
+            <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all ${barColor}`}
+                    style={{ width: pct != null ? `${pct}%` : '0%' }} />
+            </div>
+        </div>
+    );
+}
+
+function G2BriefingPanel({ sectorId, loadedGameState }: { sectorId: string | null; loadedGameState: LoadedGameState | null }) {
+    // Find the active operation for this sector (if any)
+    const sectorOp: OperationView | null = useMemo(() => {
+        if (!sectorId || !loadedGameState?.operations) return null;
+        return loadedGameState.operations.find(
+            (op) => op.sector_id === sectorId && op.phase !== 'recovery'
+        ) ?? null;
+    }, [sectorId, loadedGameState?.operations]);
+
+    // Find the commander officer for this operation
+    const commander: NamedOfficerView | null = useMemo(() => {
+        if (!sectorOp?.commander_officer_id || !loadedGameState?.namedOfficerData) return null;
+        return loadedGameState.namedOfficerData.find(
+            (o) => o.id === sectorOp.commander_officer_id
+        ) ?? null;
+    }, [sectorOp?.commander_officer_id, loadedGameState?.namedOfficerData]);
+
+    // Find corps commander as fallback
+    const sector = useMemo(() => {
+        if (!sectorId || !loadedGameState?.corpsFrontSectors) return null;
+        return loadedGameState.corpsFrontSectors.find((s) => s.sector_id === sectorId) ?? null;
+    }, [sectorId, loadedGameState?.corpsFrontSectors]);
+
+    const corpsCommander: NamedOfficerView | null = useMemo(() => {
+        if (!sector?.corps_id || !loadedGameState?.namedOfficerData) return null;
+        return loadedGameState.namedOfficerData.find(
+            (o) => o.assigned_corps_id === sector.corps_id && o.acting_commander
+        ) ?? null;
+    }, [sector?.corps_id, loadedGameState?.namedOfficerData]);
+
+    const displayCommander = commander ?? corpsCommander;
+    const prepPhase = sectorOp?.preparation_sub_phase;
+    const prepInfo = prepPhase ? PREP_PHASE_LABELS[prepPhase] : null;
+    const assessmentInfo = sectorOp?.commander_assessment ? ASSESSMENT_LABELS[sectorOp.commander_assessment] : null;
+
+    return (
+        <div className="w-[300px] shrink-0 bg-panel-bg border-l border-panel-border flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* Section header */}
+                <div className="border-b border-panel-border pb-2">
+                    <h3 className="text-[11px] font-bold text-accent-gold uppercase tracking-[0.2em]">G2 Intelligence Briefing</h3>
+                </div>
+
+                {/* Commander */}
+                <div className="bg-black/20 rounded border border-panel-border/40 p-3 space-y-2">
+                    <div className="text-[10px] font-semibold text-accent-gold uppercase tracking-widest">Commander</div>
+                    {displayCommander ? (
+                        <div className="space-y-1">
+                            <div className="text-sm font-semibold text-text-primary">{displayCommander.name}</div>
+                            <div className="text-[10px] text-text-secondary">{displayCommander.rank}</div>
+                            <div className="flex gap-3 text-[10px] mt-1">
+                                <span className="text-text-secondary">
+                                    Comp: <span className="text-text-primary font-semibold">{displayCommander.competence.toFixed(1)}</span>
+                                </span>
+                                <span className="text-text-secondary">
+                                    Aggr: <span className="text-text-primary font-semibold">{displayCommander.aggressiveness}</span>
+                                </span>
+                                <span className="text-text-secondary">
+                                    Def: <span className="text-text-primary font-semibold">{displayCommander.defensive_skill.toFixed(1)}</span>
+                                </span>
+                            </div>
+                            {!commander && corpsCommander && (
+                                <div className="text-[9px] text-text-secondary italic mt-1">Corps commander (no op commander assigned)</div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-[11px] text-text-secondary italic">No commander assigned</div>
+                    )}
+                </div>
+
+                {/* Preparation phase */}
+                <div className="bg-black/20 rounded border border-panel-border/40 p-3 space-y-2">
+                    <div className="text-[10px] font-semibold text-accent-gold uppercase tracking-widest">Preparation Phase</div>
+                    {sectorOp && prepInfo ? (
+                        <div className="space-y-2">
+                            {/* Phase step indicator */}
+                            <div className="flex items-center gap-1">
+                                {Object.entries(PREP_PHASE_LABELS).filter(([, v]) => v.order <= 5).map(([key, val]) => {
+                                    const isCurrent = key === prepPhase;
+                                    const isDone = prepInfo.order > val.order;
+                                    return (
+                                        <div key={key} className="flex-1 flex flex-col items-center gap-0.5">
+                                            <div className={`w-full h-1 rounded-full ${
+                                                isCurrent ? 'bg-accent-gold' : isDone ? 'bg-green-600' : 'bg-gray-700'
+                                            }`} />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="text-[11px] text-text-primary font-semibold">{prepInfo.label}</div>
+                            {sectorOp.preparation_turns_elapsed != null && (
+                                <div className="text-[10px] text-text-secondary">
+                                    Turn {sectorOp.preparation_turns_elapsed}
+                                    {sectorOp.preparation_max_turns != null && ` of ${sectorOp.preparation_max_turns}`}
+                                </div>
+                            )}
+                            {sectorOp.has_active_probe && (
+                                <div className="text-[10px] text-yellow-400 font-semibold flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                                    Active Probe
+                                </div>
+                            )}
+                        </div>
+                    ) : sectorOp ? (
+                        <div className="text-[11px] text-text-primary capitalize">{sectorOp.phase}</div>
+                    ) : (
+                        <div className="text-[11px] text-text-secondary italic">No active operation</div>
+                    )}
+                </div>
+
+                {/* Intel & readiness bars */}
+                <div className="bg-black/20 rounded border border-panel-border/40 p-3 space-y-3">
+                    <div className="text-[10px] font-semibold text-accent-gold uppercase tracking-widest">Readiness Assessment</div>
+                    <G2ConfidenceBar value={sectorOp?.intel_confidence_at_assessment ?? sectorOp?.readiness?.intel} label="Intel Confidence" />
+                    <G2ConfidenceBar value={sectorOp?.supply_readiness_at_assessment ?? sectorOp?.supply_readiness} label="Supply Readiness" />
+
+                    {/* Force ratio */}
+                    <div className="space-y-1">
+                        <div className="flex justify-between text-[10px]">
+                            <span className="text-text-secondary uppercase tracking-wider">Force Ratio</span>
+                            <span className={`font-semibold ${
+                                sectorOp?.force_ratio_estimate == null ? 'text-text-secondary'
+                                : sectorOp.force_ratio_estimate >= 2.0 ? 'text-green-400'
+                                : sectorOp.force_ratio_estimate >= 1.0 ? 'text-yellow-400'
+                                : 'text-red-400'
+                            }`}>
+                                {sectorOp?.force_ratio_estimate != null
+                                    ? `${sectorOp.force_ratio_estimate.toFixed(1)}:1`
+                                    : '--'}
+                            </span>
+                        </div>
+                        {sectorOp?.force_ratio_estimate != null && (
+                            <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full transition-all ${
+                                    sectorOp.force_ratio_estimate >= 2.0 ? 'bg-green-500'
+                                    : sectorOp.force_ratio_estimate >= 1.0 ? 'bg-yellow-500'
+                                    : 'bg-red-500'
+                                }`} style={{ width: `${Math.min(100, (sectorOp.force_ratio_estimate / 4) * 100)}%` }} />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Commander assessment */}
+                <div className="bg-black/20 rounded border border-panel-border/40 p-3 space-y-2">
+                    <div className="text-[10px] font-semibold text-accent-gold uppercase tracking-widest">Commander Assessment</div>
+                    {assessmentInfo ? (
+                        <div className="space-y-1">
+                            <div className={`text-sm font-bold tracking-wider ${assessmentInfo.color}`}>
+                                {assessmentInfo.label}
+                            </div>
+                            {sectorOp?.postponement_count != null && sectorOp.postponement_count > 0 && (
+                                <div className="text-[10px] text-text-secondary">
+                                    Postponements: {sectorOp.postponement_count}/2
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-[11px] text-text-secondary italic">Pending</div>
+                    )}
+                </div>
+
+                {/* Operation summary (if active) */}
+                {sectorOp && (
+                    <div className="bg-black/20 rounded border border-panel-border/40 p-3 space-y-1.5">
+                        <div className="text-[10px] font-semibold text-accent-gold uppercase tracking-widest">Active Operation</div>
+                        <div className="text-[11px] text-text-primary font-semibold">{sectorOp.name}</div>
+                        <div className="text-[10px] text-text-secondary capitalize">{sectorOp.type.replace(/_/g, ' ')}</div>
+                        <div className="text-[10px] text-text-secondary">{sectorOp.participating_brigade_count} brigades assigned</div>
+                        {sectorOp.tempo && (
+                            <div className="text-[10px] text-text-secondary capitalize">Tempo: {sectorOp.tempo}</div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 }
 
 export function OpsPlanningModal() {
@@ -868,8 +1084,8 @@ export function OpsPlanningModal() {
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
-                    {/* Left panel */}
-                    <div className="w-[440px] bg-panel-bg border-r border-panel-border flex flex-col overflow-hidden">
+                    {/* Left panel — forces & planning */}
+                    <div className="w-[440px] shrink-0 bg-panel-bg border-r border-panel-border flex flex-col overflow-hidden">
                         <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
                             {/* Operation name + type */}
@@ -1095,20 +1311,9 @@ export function OpsPlanningModal() {
                             )}
                         </div>
 
-                        {/* Footer buttons */}
-                        <div className="p-4 border-t border-panel-border flex justify-end gap-3 shrink-0 bg-panel-bg">
-                            <button type="button" onClick={() => setOpsPlanningModalOpen(false)}
-                                className="px-4 py-2 rounded text-sm font-semibold bg-panel-card text-text-primary hover:bg-panel-hover transition-colors border border-panel-border">
-                                Cancel
-                            </button>
-                            <button type="button" onClick={() => setShowConfirmation(true)} disabled={isSubmitting}
-                                className="px-4 py-2 rounded text-sm font-bold bg-interactive text-white hover:bg-interactive-hover transition-colors shadow-[0_0_15px_rgba(200,165,110,0.3)] shadow-interactive/20">
-                                {isSubmitting ? 'Staging...' : 'Draft Orders'}
-                            </button>
-                        </div>
                     </div>
 
-                    {/* Right panel: Staff Map */}
+                    {/* Center panel: Staff Map */}
                     <div className="flex-1 relative bg-[#d6ccb7]">
                         <div ref={mapContainerRef} className="absolute inset-0" />
 
@@ -1123,6 +1328,24 @@ export function OpsPlanningModal() {
                             {axes.length > 1 && <span>Colors distinguish axes of advance</span>}
                         </div>
                     </div>
+
+                    {/* Right panel: G2 Briefing */}
+                    <G2BriefingPanel
+                        sectorId={selectedSectorId}
+                        loadedGameState={loadedGameState}
+                    />
+                </div>
+
+                {/* Bottom strip — action buttons */}
+                <div className="h-12 shrink-0 border-t border-panel-border bg-panel-bg flex items-center justify-end gap-3 px-6">
+                    <button type="button" onClick={() => setOpsPlanningModalOpen(false)}
+                        className="px-4 py-2 rounded text-sm font-semibold bg-panel-card text-text-primary hover:bg-panel-hover transition-colors border border-panel-border">
+                        Cancel
+                    </button>
+                    <button type="button" onClick={() => setShowConfirmation(true)} disabled={isSubmitting}
+                        className="px-4 py-2 rounded text-sm font-bold bg-interactive text-white hover:bg-interactive-hover transition-colors shadow-[0_0_15px_rgba(200,165,110,0.3)] shadow-interactive/20">
+                        {isSubmitting ? 'Staging...' : 'Draft Orders'}
+                    </button>
                 </div>
 
                 {/* Confirmation overlay */}
