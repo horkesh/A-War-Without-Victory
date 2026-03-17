@@ -52,6 +52,8 @@ import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors, GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors.js';
+import { computeReinforcementPool } from './operation_reinforcement.js';
+import { buildFriendlyComponents } from './sector_utils.js';
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
 import {
     assessCorpsSupplyHealth,
@@ -1532,6 +1534,13 @@ export function generateCorpsDirectives(
         if (canLaunchSectorOp && stanceAllowsOps &&
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
 
+            // Build faction-wide friendly OSID set + component map for reinforcement pool.
+            const factionFriendlyOsids = new Set<string>();
+            for (const [osid, ctrl] of Object.entries(pc)) {
+                if (ctrl === faction) factionFriendlyOsids.add(osid);
+            }
+            const factionComponentOf = buildFriendlyComponents(adjacency, factionFriendlyOsids);
+
             // Sort sectors: priority sector first, then by offensive target overlap (descending).
             // This ensures pocket cleanup and high-value sectors get operations before quiet ones.
             const targetSetForSort = new Set(offensiveTargets);
@@ -1701,6 +1710,41 @@ export function generateCorpsDirectives(
                             op.planning_duration = 1;
                         }
                     }
+
+                    // ── Corps-wide reinforcement: loan brigades from other sectors ──
+                    // Only for sector_attack (probes and feints are sector-scoped).
+                    if (op.type === 'sector_attack') {
+                        const otherSectors = directiveEligibleSectors
+                            .filter(s => s.sector_id !== sec.sector_id && s.corps_id === corps.id);
+                        if (otherSectors.length > 0) {
+                            const pool = computeReinforcementPool(
+                                sec, otherSectors, state.military.formations ?? {},
+                                adjacency, factionFriendlyOsids, factionComponentOf,
+                                finalBrigadeIds.length,
+                            );
+                            if (pool.length > 0) {
+                                op.loaned_brigades = pool;
+                                // Add loaned brigade IDs to participating_brigades
+                                for (const loan of pool) {
+                                    if (!op.participating_brigades.includes(loan.brigade_id)) {
+                                        op.participating_brigades.push(loan.brigade_id);
+                                    }
+                                    // Also add to first axis if multi-axis
+                                    if (op.axes && op.axes.length > 0) {
+                                        const axis = op.axes[0]!;
+                                        if (!axis.assigned_brigades.includes(loan.brigade_id)) {
+                                            axis.assigned_brigades.push(loan.brigade_id);
+                                        }
+                                    }
+                                }
+                                op.participating_brigades.sort(strictCompare);
+                                if (op.axes?.[0]) {
+                                    op.axes[0].assigned_brigades.sort(strictCompare);
+                                }
+                            }
+                        }
+                    }
+
                     // Same-theater follow-on: corps already has recon from previous op —
                     // skip the full intel_gathering phase (cap preparation to 1 turn).
                     if (lastCompletedOp != null) {
