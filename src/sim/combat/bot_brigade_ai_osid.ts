@@ -51,6 +51,7 @@ import {
     type Osid
 } from './osid_adjacency.js';
 import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
+import { shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
@@ -563,6 +564,24 @@ export function generateAllBotOrdersOsid(
         }
         for (const [bid, dest] of Object.entries(result.column_march_orders)) {
             if (dest != null) allColumnMarchOrders[bid as FormationId] = dest;
+        }
+    }
+
+    // ── Graz Accords enforcement: remove RS↔HRHB attacks violating ceasefire ──
+    if (isGrazAccordsActive(state)) {
+        const pc = state.political.political_controllers ?? {};
+        const formations = state.military.formations ?? {};
+        for (const bid of Object.keys(allAttackOrders)) {
+            const target = allAttackOrders[bid as FormationId];
+            if (!target) continue;
+            const f = formations[bid];
+            if (!f) continue;
+            const corpsId = f.corps_id ?? '';
+            const faction = f.faction as FactionId;
+            const targetController = pc[target] ?? '';
+            if (shouldGrazBlockAttack(state, corpsId, faction, target, targetController)) {
+                delete allAttackOrders[bid as FormationId];
+            }
         }
     }
 

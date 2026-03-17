@@ -186,3 +186,17 @@ describe('isColdFront — faction-level RS↔HRHB extension', () => {
         expect(isColdFront(state, formation, sector)).toBe(true);
     });
 });
+
+describe('Graz brigade-level attack order filter', () => {
+    it('Graz filter removes RS→HRHB attack orders at brigade level', () => {
+        // This tests the concept — the actual filter is in bot_brigade_ai_osid.ts
+        // Verify shouldGrazBlockAttack blocks vrs_2nd_krajina attacking HRHB territory
+        const state = makeActiveState();
+        expect(shouldGrazBlockAttack(state, 'vrs_2nd_krajina', 'RS', 'op:prozor:prozor_2', 'HRHB')).toBe(true);
+    });
+
+    it('does not remove RS→RBiH attack orders (not covered by Graz)', () => {
+        const state = makeActiveState();
+        expect(shouldGrazBlockAttack(state, 'vrs_2nd_krajina', 'RS', 'op:bugojno:bugojno_2', 'RBiH')).toBe(false);
+    });
+});
