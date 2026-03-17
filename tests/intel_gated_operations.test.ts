@@ -16,7 +16,7 @@ describe('getSectorIntelConfidence', () => {
         expect(getSectorIntelConfidence(state, 'sector:1')).toBe(0);
     });
 
-    it('returns max confidence across all enemy sector records', () => {
+    it('returns mean confidence across all enemy sector records', () => {
         const state = {
             military: {
                 sector_intel: {
@@ -28,7 +28,8 @@ describe('getSectorIntelConfidence', () => {
                 },
             },
         } as unknown as GameState;
-        expect(getSectorIntelConfidence(state, 'sector:1')).toBe(0.6);
+        // Mean of [0.3, 0.6, 0.1] = 1.0/3 ≈ 0.333
+        expect(getSectorIntelConfidence(state, 'sector:1')).toBeCloseTo(1.0 / 3, 5);
     });
 
     it('returns 0 for unknown sector id', () => {

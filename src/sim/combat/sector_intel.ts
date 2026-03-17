@@ -275,9 +275,12 @@ function findSectorByFriendlyOsid(sectors: Record<string, CorpsFrontSector>, osi
 export function getSectorIntelConfidence(state: GameState, sectorId: string): number {
     const records = state.military.sector_intel?.[sectorId];
     if (!records || records.length === 0) return 0;
-    let best = 0;
+    // Mean confidence across all enemy sectors — the commander's overall
+    // situational awareness. One high-confidence record (from combat) shouldn't
+    // mask ignorance about other enemy sectors on the same front.
+    let sum = 0;
     for (const rec of records) {
-        if (rec.confidence > best) best = rec.confidence;
+        sum += rec.confidence;
     }
-    return best;
+    return sum / records.length;
 }
