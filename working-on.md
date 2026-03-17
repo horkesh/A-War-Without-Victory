@@ -1,20 +1,17 @@
-# Working On: Op Jackal Mostar Hills Ghost Axis
+# Session Complete — All Fixes Verified
 
-## Mystery
-Op Jackal source code has 1 axis (stolac_sweep). Debug logging confirms `buildAxesFromDef` receives 1 axis. But the FINAL SAVE shows 2 axes (stolac_sweep + mostar_hills with vranjevici/kruzanj objectives).
+## n869: 88.6% area-weighted (improved painted data baseline)
 
-No code in `src/sim/combat/` pushes new axes to operations. No source file contains "vranjevici" or "kruzanj". Yet they appear in the runtime operation.
+### Verified Working
+- **Op Jackal**: 1 axis (stolac_sweep), 4 objectives, recovery_reason=completed
+- **Vranjevici/kruzanj**: stay RS (painted RS, not captured by HRHB)
+- **Graz bilateral ceasefire**: RS↔HRHB blocked everywhere except Posavina + Op Jackal objectives
+- **Goražde brigades**: staggered spawns, correct home municipalities, displaced_from field
+- **Enclave UI**: painted OSID lists (not municipalities)
+- **Improved painted data**: 15 OSID corrections, user-reviewed
 
-## Theory
-The `mostar_hills` axis exists in `dist/desktop/desktop_sim.cjs` (the Electron build). If the scenario runner somehow imports from `dist/` instead of `src/` for some module, the old axis definition would leak in. BUT: `tsx` should use source directly, and the debug log proves `buildAxesFromDef` sees 1 axis.
-
-Another theory: something creates a NEW operation mid-execution that re-reads the definition and gets it from a different path.
-
-## What to check next
-1. Add debug logging to `buildCorpsOperation()` to verify it receives 1 axis
-2. Add a `console.log` every time `op.axes` is written or the operation is created
-3. Check if the operation is being REPLACED mid-execution (e.g., a re-injection)
-4. Check if there's a secondary operation creation path via `generateCorpsDirectives` or `bot_corps_ai`
-
-## Completed This Session
-All Graz/Goražde/Enclave/Painted fixes committed. Op Jackal correctly scoped to 4 Stolac objectives in source. Graz exemption scoped to operation objectives only. The remaining issue is this ghost axis appearing at runtime.
+### Next Priorities
+1. Run calibration comparison against old baseline (n847 was 89.5% with old painted data)
+2. Investigate Drina region (74.5%) — RBiH overexpanding
+3. Tune Army HQ Gathering parameters
+4. Begin v0.5.0 planning
