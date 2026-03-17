@@ -156,6 +156,10 @@ export interface GameStore {
   commanderSelectionContext: { corpsId: string; operationName: string } | null;
   setCommanderSelectionContext: (v: { corpsId: string; operationName: string } | null) => void;
 
+  /** Last officer selected via CommanderSelectionModal — consumed by OpsPlanningModal. */
+  lastSelectedOfficerId: string | null;
+  setLastSelectedOfficerId: (id: string | null) => void;
+
   /** Whether the Operation Briefing Modal is open, and for which corps+operation. */
   operationBriefingContext: { corpsId: string; operationName: string } | null;
   setOperationBriefingContext: (v: { corpsId: string; operationName: string } | null) => void;
@@ -315,6 +319,9 @@ export const useGameStore = create<GameStore>((set) => ({
 
   commanderSelectionContext: null,
   setCommanderSelectionContext: (v) => set({ commanderSelectionContext: v }),
+
+  lastSelectedOfficerId: null,
+  setLastSelectedOfficerId: (id) => set({ lastSelectedOfficerId: id }),
 
   operationBriefingContext: null,
   setOperationBriefingContext: (v) => set({ operationBriefingContext: v }),

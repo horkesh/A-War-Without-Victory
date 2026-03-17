@@ -465,6 +465,47 @@ export async function getRecruitmentCatalog(baseDir: string): Promise<{
 /** Re-export for main process (serialize/deserialize state for IPC). */
 export { deserializeState, serializeState };
 
+// ── Operation Prediction Query ─────────────────────────────────────────
+
+import { loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
+import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
+import { buildTerrainCache } from '../sim/combat/combat_predictor.js';
+import {
+    computeOperationPrediction,
+    type OperationPredictionRequest,
+    type OperationPredictionResponse,
+} from '../sim/combat/operation_prediction.js';
+
+/**
+ * Read-only query: predict operation outcomes using the full combat predictor.
+ * Loads operational data, builds adjacency + terrain cache, delegates to computeOperationPrediction.
+ */
+/** Cached operational data for prediction queries (immutable during gameplay). */
+let cachedOpData: Awaited<ReturnType<typeof loadOperationalData>> | null = null;
+let cachedEdges: Awaited<ReturnType<typeof loadOperationalEdges>> | null = null;
+
+export async function queryOperationPrediction(
+    state: GameState,
+    request: OperationPredictionRequest,
+    baseDir: string
+): Promise<OperationPredictionResponse> {
+    if (!cachedOpData) cachedOpData = await loadOperationalData(baseDir);
+    if (!cachedEdges) cachedEdges = await loadOperationalEdges(baseDir);
+    const adjacency = buildOsidAdjacency(cachedEdges);
+    const terrain = await loadTerrainScalars(terrainScalarsPath(baseDir));
+    const terrainCache = buildTerrainCache(cachedOpData.operationalToCanonical, terrain);
+
+    return computeOperationPrediction(
+        state,
+        request,
+        adjacency,
+        cachedOpData.operationalToCanonical,
+        terrainCache,
+    );
+}
+
+export type { OperationPredictionRequest, OperationPredictionResponse };
+
 /** Phase K: Validate settlement-level movement order (1-4 contiguous, same-faction). */
 export async function validateBrigadeMovementOrder(
     state: GameState,

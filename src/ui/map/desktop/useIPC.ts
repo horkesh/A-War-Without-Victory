@@ -58,6 +58,7 @@ interface WindowAwwv {
     resetSectorStanceToBot: (sectorId: string) => Promise<{ ok: boolean; error?: string }>;
     stageLogisticsPriority: (faction: string, sectorId: string, priority: number) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
+    queryOperationPrediction: (payload: Record<string, unknown>) => Promise<{ ok: boolean; data?: Record<string, unknown>; error?: string }>;
     stageOperationHalt: (payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => Promise<{ ok: boolean; error?: string }>;
     stageAssignOperationCommander: (payload: { corpsId: string; operationName: string; officerId: string }) => Promise<{ ok: boolean; error?: string }>;
     stageOperationForceLaunch: (payload: { corpsId: string; operationName: string }) => Promise<{ ok: boolean; error?: string }>;
@@ -314,6 +315,10 @@ export function useIPC() {
             stageCorpsOperationOrder: awwv
                 ? (payload: CorpsOperationOrderPayload) => awwv.stageCorpsOperationOrder(payload)
                 : (_payload: CorpsOperationOrderPayload) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            queryOperationPrediction: awwv
+                ? (payload: Record<string, unknown>) => awwv.queryOperationPrediction(payload)
+                : makeNoop<{ ok: boolean; data?: Record<string, unknown>; error?: string }>(),
 
             approveReserveRequest: awwv
                 ? (corpsId: string, brigadeId: string) => awwv.approveReserveRequest(corpsId, brigadeId)

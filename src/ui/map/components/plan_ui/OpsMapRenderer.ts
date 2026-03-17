@@ -1,0 +1,354 @@
+import maplibregl from 'maplibre-gl';
+import { Protocol } from 'pmtiles';
+import bezier from '@turf/bezier-spline';
+import { lineString } from '@turf/helpers';
+import { rewritePmtilesUrls } from '../../map/rewritePmtilesUrls';
+import { loadOperationalSettlements } from '../../data/DataLoader';
+import { buildControlGeoJSON } from '../../map/builders/buildControlGeoJSON';
+import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSON';
+import styleJson from '../../map/awwv_map_style.json';
+import type { FeatureCollection } from 'geojson';
+
+export type OpType = 'offensive' | 'feint' | 'recon';
+
+export interface AxisRenderingData {
+    id: string;
+    stagingCoords: [number, number] | null;
+    objectiveCoords: [number, number][];
+    color: string;
+}
+
+const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
+const DEFAULT_ZOOM = 8;
+const EMPTY_GEOJSON: FeatureCollection = { type: 'FeatureCollection', features: [] };
+
+export class OpsMapRenderer {
+    private map!: maplibregl.Map;
+    private mapReady: Promise<void>;
+    private resolveMapReady!: () => void;
+    private opType: OpType = 'offensive';
+    private ready = false;
+    private playerFaction: string | null = null;
+    public onOsidClick?: (osid: string) => void;
+
+    constructor(container: HTMLElement, controlBySettlement?: Record<string, string | null>, playerFaction?: string) {
+        this.playerFaction = playerFaction ?? null;
+        this.mapReady = new Promise(resolve => { this.resolveMapReady = resolve; });
+        // Register PMTiles protocol (same as main MapContainer)
+        const pmtilesProtocol = new Protocol();
+        const origin = window.location.origin;
+        const tileHandler = async (params: { url: string; type?: string }, abortController: AbortController) => {
+            try {
+                return await (pmtilesProtocol as any).tilev4(params, abortController);
+            } catch (e) {
+                console.error('[OpsMap PMTiles] tile error', params.url, e);
+                throw e;
+            }
+        };
+        // addProtocol is idempotent — safe to call if already registered
+        try { maplibregl.addProtocol('pmtiles', tileHandler as any); } catch { /* already registered */ }
+
+        const style = rewritePmtilesUrls(
+            JSON.parse(JSON.stringify(styleJson)) as Record<string, unknown>,
+            origin
+        ) as maplibregl.StyleSpecification;
+
+        // Pre-populate game data into the style before map init
+        this.initWithGameData(style, container, controlBySettlement);
+    }
+
+    private async initWithGameData(
+        style: maplibregl.StyleSpecification,
+        container: HTMLElement,
+        controlBySettlement?: Record<string, string | null>,
+    ) {
+        try {
+            const geojson = await loadOperationalSettlements();
+            // Use live game-state control if provided, otherwise geojson has no faction color
+            const byOsid = controlBySettlement ?? {};
+
+            const controlledGeoJson = buildControlGeoJSON(geojson, byOsid);
+            const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson);
+
+            const sources = style.sources as Record<string, { type?: string; data?: FeatureCollection }>;
+            if (sources['osid-control']) sources['osid-control'].data = controlledGeoJson;
+            if (sources['front-lines']) sources['front-lines'].data = frontLinesGeoJson;
+            if (sources['formations']) sources['formations'].data = EMPTY_GEOJSON;
+            if (sources['order-arrows']) sources['order-arrows'].data = EMPTY_GEOJSON;
+        } catch (e) {
+            console.warn('[OpsMap] Failed to pre-load game data:', e);
+        }
+
+        this.map = new maplibregl.Map({
+            container,
+            style,
+            center: BOSNIA_CENTER,
+            zoom: DEFAULT_ZOOM,
+            attributionControl: false,
+        });
+        this.map.on('error', (e) => console.error('[OpsMap] map error:', e.error));
+
+        this.map.on('load', () => {
+            this.ready = true;
+            this.setupOpsLayers();
+            this.setupInteractions();
+            this.resolveMapReady();
+        });
+    }
+
+    /** Zoom to a bounding box defined by an array of [lng, lat] coordinates. */
+    public zoomToBounds(coords: [number, number][]) {
+        if (coords.length === 0) return;
+
+        this.mapReady.then(() => {
+            const bounds = new maplibregl.LngLatBounds(coords[0], coords[0]);
+            for (const c of coords) bounds.extend(c);
+            this.map.fitBounds(bounds, { padding: 60, maxZoom: 12 });
+        });
+    }
+
+    public setOsidData(geojson: any) {
+        this.mapReady.then(() => {
+            const source = this.map.getSource('ops-osid-data') as maplibregl.GeoJSONSource;
+            if (source) {
+                source.setData(geojson);
+            }
+        });
+    }
+
+    public dispose() {
+        this.onOsidClick = undefined;
+        if (this.map) this.map.remove(); // map.remove() cleans up all listeners
+    }
+
+    public updateOpType(type: OpType) {
+        this.opType = type;
+        if (this.ready) {
+            this.updateLayerStyles();
+        }
+    }
+
+    public updateAxes(axes: AxisRenderingData[]) {
+        if (!this.ready) return;
+
+        const features = axes.map(axis => this.buildAxisFeature(axis)).filter(Boolean);
+        const source = this.map.getSource('ops-planning-arrows') as maplibregl.GeoJSONSource;
+        if (source) {
+            source.setData({
+                type: 'FeatureCollection',
+                features: features as any
+            });
+        }
+    }
+
+    public updateMarkers(objectives: string[], staging: string | null, osidCoords: Map<string, [number, number]>) {
+        this.mapReady.then(() => {
+            const features: any[] = [];
+            for (const osid of objectives) {
+                const coords = osidCoords.get(osid);
+                if (coords) {
+                    features.push({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: coords },
+                        properties: { type: 'objective', osid }
+                    });
+                }
+            }
+            if (staging) {
+                const coords = osidCoords.get(staging);
+                if (coords) {
+                    features.push({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: coords },
+                        properties: { type: 'staging', osid: staging }
+                    });
+                }
+            }
+            const source = this.map.getSource('ops-markers') as any;
+            if (source) source.setData({ type: 'FeatureCollection', features });
+        });
+    }
+
+    private buildAxisFeature(axis: AxisRenderingData) {
+        if (!axis.stagingCoords || axis.objectiveCoords.length === 0) return null;
+
+        const points = [axis.stagingCoords, ...axis.objectiveCoords];
+        if (points.length < 2) return null;
+
+        try {
+            const line = lineString(points);
+            const curved = bezier(line, { resolution: 500, sharpness: 0.85 });
+
+            return {
+                type: 'Feature',
+                properties: {
+                    id: axis.id,
+                    color: axis.color,
+                    isFeint: this.opType === 'feint'
+                },
+                geometry: curved.geometry
+            };
+        } catch (e) {
+            console.error('Failed to build bezier for axis', axis.id, e);
+            return null;
+        }
+    }
+
+    private updateLayerStyles() {
+        if (!this.map.getLayer('ops-planning-arrows-line')) return;
+
+        const isFeint = this.opType === 'feint';
+        this.map.setPaintProperty('ops-planning-arrows-line', 'line-dasharray', isFeint ? [2, 2] : [1]);
+        this.map.setPaintProperty('ops-planning-arrows-line', 'line-opacity', isFeint ? 0.4 : 0.8);
+        this.map.setPaintProperty('ops-planning-arrows-line', 'line-width', isFeint ? 3 : 5);
+    }
+
+    private setupOpsLayers() {
+        // Darken non-faction territory for contrast — non-interactive so clicks pass through
+        if (this.playerFaction) {
+            this.map.addLayer({
+                id: 'ops-enemy-darken',
+                type: 'fill',
+                source: 'osid-control',
+                paint: {
+                    'fill-color': '#000000',
+                    'fill-opacity': ['case',
+                        ['==', ['get', 'controller'], this.playerFaction], 0,
+                        0.35
+                    ]
+                }
+            });
+        }
+
+        // Arrow source for operation axes
+        this.map.addSource('ops-planning-arrows', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
+        });
+
+        // Glow behind arrows
+        this.map.addLayer({
+            id: 'ops-planning-arrows-glow',
+            type: 'line',
+            source: 'ops-planning-arrows',
+            layout: { 'line-join': 'round', 'line-cap': 'round' },
+            paint: {
+                'line-color': ['get', 'color'],
+                'line-width': 14,
+                'line-blur': 10,
+                'line-opacity': 0.25
+            }
+        });
+
+        // Main arrow line
+        this.map.addLayer({
+            id: 'ops-planning-arrows-line',
+            type: 'line',
+            source: 'ops-planning-arrows',
+            layout: { 'line-join': 'round', 'line-cap': 'round' },
+            paint: {
+                'line-color': ['get', 'color'],
+                'line-width': 5,
+                'line-opacity': 0.8
+            }
+        });
+
+        // Flow animation (dashed white overlay)
+        this.map.addLayer({
+            id: 'ops-planning-arrows-flow',
+            type: 'line',
+            source: 'ops-planning-arrows',
+            layout: { 'line-join': 'round', 'line-cap': 'round' },
+            paint: {
+                'line-color': '#fff',
+                'line-width': 2,
+                'line-opacity': 0.3,
+                'line-dasharray': [2, 4]
+            }
+        });
+
+        // Additional OSID click target layer (for ops planning clicks)
+        // The game map already has osid-control polygons — we use those for clicks
+        // But also add a dedicated point source for staging/objective selection
+        this.map.addSource('ops-osid-data', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
+        });
+
+        this.map.addLayer({
+            id: 'ops-osid-points',
+            type: 'circle',
+            source: 'ops-osid-data',
+            paint: {
+                'circle-radius': 4,
+                'circle-color': '#c4a35a',
+                'circle-opacity': 0.5,
+                'circle-stroke-width': 1,
+                'circle-stroke-color': '#c4a35a',
+                'circle-stroke-opacity': 0.3
+            }
+        });
+
+        // Objective/staging markers source
+        this.map.addSource('ops-markers', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
+        });
+
+        // Objective markers — red circles
+        this.map.addLayer({
+            id: 'ops-objective-markers',
+            type: 'circle',
+            source: 'ops-markers',
+            filter: ['==', ['get', 'type'], 'objective'],
+            paint: {
+                'circle-radius': 8,
+                'circle-color': '#e05050',
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#ff8080',
+                'circle-opacity': 0.9
+            }
+        });
+
+        // Staging marker — green circle
+        this.map.addLayer({
+            id: 'ops-staging-marker',
+            type: 'circle',
+            source: 'ops-markers',
+            filter: ['==', ['get', 'type'], 'staging'],
+            paint: {
+                'circle-radius': 10,
+                'circle-color': '#4a9a55',
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#80ff80',
+                'circle-opacity': 0.9
+            }
+        });
+    }
+
+    private setupInteractions() {
+        console.log('[OpsMap] setupInteractions called, map exists:', !!this.map);
+
+        // Raw DOM click on canvas — bypasses all MapLibre layer logic
+        this.map.getCanvas().addEventListener('click', (e) => {
+            console.log('[OpsMap] CANVAS DOM click at', e.clientX, e.clientY);
+        });
+
+        // MapLibre click event
+        this.map.on('click', (e) => {
+            console.log('[OpsMap] MAP click at', e.point, 'onOsidClick?', !!this.onOsidClick);
+            const features = this.map.queryRenderedFeatures(e.point, { layers: ['osid-control-fill'] });
+            console.log('[OpsMap] osid-control-fill features:', features.length);
+            if (!this.onOsidClick) return;
+            if (features.length > 0) {
+                const osid = features[0].properties?.osid;
+                console.log('[OpsMap] OSID:', osid);
+                if (typeof osid === 'string' && osid) this.onOsidClick(osid);
+            }
+        });
+
+        // Crosshair cursor everywhere on the map (always in planning mode)
+        this.map.getCanvas().style.cursor = 'crosshair';
+        console.log('[OpsMap] cursor set, canvas size:', this.map.getCanvas().width, 'x', this.map.getCanvas().height);
+    }
+}

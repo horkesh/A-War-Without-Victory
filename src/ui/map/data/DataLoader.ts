@@ -45,6 +45,53 @@ export async function loadOsidAdjacency(): Promise<Map<string, string[]>> {
   return adj;
 }
 
+/** Event definition from scenario JSON files. */
+export interface EventDefinitionView {
+  id: string;
+  title: string;
+  narrative: string;
+  category: string;
+  effects?: Array<{ kind: string; faction?: string; delta?: number; text?: string }>;
+  decision?: { options: Array<{ id: string; label: string; description?: string }> };
+}
+
+let _eventDefCache: Map<string, EventDefinitionView> | null = null;
+
+/**
+ * Load all event definitions from scenario event JSON files.
+ * Returns a Map<eventId, definition>. Cached after first call.
+ */
+export async function loadEventDefinitions(): Promise<Map<string, EventDefinitionView>> {
+  if (_eventDefCache) return _eventDefCache;
+
+  const files = [
+    '/data/scenarios/events/war_1992.json',
+    '/data/scenarios/events/war_1993.json',
+    '/data/scenarios/events/war_1994.json',
+    '/data/scenarios/events/war_1995.json',
+  ];
+
+  const map = new Map<string, EventDefinitionView>();
+  const results = await Promise.allSettled(files.map(f => fetchJson<any[]>(f)));
+  for (const result of results) {
+    if (result.status !== 'fulfilled') continue;
+    for (const ev of result.value) {
+      if (!ev.id) continue;
+      map.set(ev.id, {
+        id: ev.id,
+        title: ev.title ?? ev.id,
+        narrative: ev.narrative ?? '',
+        category: ev.category ?? 'military',
+        effects: Array.isArray(ev.effects) ? ev.effects : ev.effect ? [ev.effect] : [],
+        decision: ev.decision,
+      });
+    }
+  }
+
+  _eventDefCache = map;
+  return map;
+}
+
 /** Fetch latest run save as raw text. Use with loadSave(text) to parse after yielding so UI can show loading state. */
 export async function loadLatestRunSaveAsText(): Promise<string> {
   const response = await fetch('/data/derived/latest_run_final_save.json');

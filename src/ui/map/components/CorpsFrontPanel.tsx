@@ -716,7 +716,13 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 <div className="pt-3">
                   <button
                     type="button"
-                    onClick={() => setOpsPlanningModalOpen(true)}
+                    onClick={() => {
+                      // Ensure selectedCorpsId is set so OpsPlanningModal can find formations
+                      if (sector?.corps_id) {
+                        useGameStore.setState({ selectedCorpsId: sector.corps_id });
+                      }
+                      setOpsPlanningModalOpen(true);
+                    }}
                     className="kbd-focus w-full text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-2 border border-neutral-400 transition-colors"
                   >
                     Draft New Directive (Ops Planning)

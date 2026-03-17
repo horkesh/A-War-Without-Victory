@@ -39,7 +39,7 @@ import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { VerdictScreen } from './components/VerdictScreen';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
-import { loadLatestRunSaveAsText } from './data/DataLoader';
+import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -60,6 +60,7 @@ function CommanderSelectionModalWrapper() {
 
   const handleSelect = async (officerId: string) => {
     if (!ctx) return;
+    useGameStore.getState().setLastSelectedOfficerId(officerId);
     try {
       const result = await ipc.stageAssignOperationCommander({
         corpsId: ctx.corpsId,
@@ -67,7 +68,7 @@ function CommanderSelectionModalWrapper() {
         officerId,
       });
       if (!result.ok) {
-        console.warn('[CommanderSelection] assign failed:', result.error);
+        console.warn('[CommanderSelection] assign failed (likely safe if draft):', result.error);
       }
     } catch (err) {
       console.warn('[CommanderSelection] assign error:', err);
@@ -266,7 +267,9 @@ function App() {
   }, [loadSave, setLoadError]);
 
   // v0.4.1 Phase 5: detect new events from game state and queue for display
+  // Only show in live gameplay (Electron IPC), not dev map inspection
   useEffect(() => {
+    if (!ipc.isAvailable) return;
     if (!loadedGameState) return;
     const fired = loadedGameState.firedEvents;
     if (!fired || fired.length === 0) return;
@@ -275,25 +278,38 @@ function App() {
     const newEvents = fired.filter(e => !acknowledgedEventIds.has(e.id));
     if (newEvents.length === 0) return;
 
-    const displayData: EventDisplayData[] = newEvents.map(e => ({
-      id: e.id,
-      title: e.title,
-      narrative: e.narrative || '',
-      category: e.category || 'military',
-      effects: e.effects,
-      isDecision: e.isDecision,
-      responseOptions: e.responseOptions,
-    }));
+    // Load full definitions to enrich title/narrative/category
+    let stale = false;
+    loadEventDefinitions().then(defs => {
+      if (stale) return; // Effect re-ran before promise resolved — discard
+      const displayData: EventDisplayData[] = newEvents.map(e => {
+        const def = defs.get(e.id);
+        return {
+          id: e.id,
+          title: def?.title ?? e.title,
+          narrative: def?.narrative ?? e.narrative ?? '',
+          category: def?.category ?? e.category ?? 'military',
+          effects: def?.effects?.map(eff => ({
+            kind: eff.kind,
+            description: eff.text ?? (eff.faction ? `${eff.faction} ${eff.kind} ${(eff.delta ?? 0) > 0 ? '+' : ''}${eff.delta ?? ''}` : eff.kind),
+          })) ?? e.effects,
+          isDecision: e.isDecision,
+          responseOptions: e.responseOptions,
+        };
+      });
 
-    // Only show if we have new events that aren't already in queue
-    if (displayData.length > 0 && eventQueue.length === 0) {
-      setEventQueue(displayData);
-      setEventQueueIndex(0);
-    }
+      // Only show if we have new events that aren't already in queue
+      if (displayData.length > 0 && eventQueue.length === 0) {
+        setEventQueue(displayData);
+        setEventQueueIndex(0);
+      }
+    });
+    return () => { stale = true; };
   }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length]);
 
-  // v0.4.1 Phase 5: also check pending event decisions
+  // v0.4.1 Phase 5: also check pending event decisions (live only)
   useEffect(() => {
+    if (!ipc.isAvailable) return;
     if (!loadedGameState) return;
     const pending = loadedGameState.pendingEventDecisions;
     if (!pending || pending.length === 0) return;

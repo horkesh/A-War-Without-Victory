@@ -1163,6 +1163,25 @@ app.whenReady().then(() => {
     }
   });
 
+  // Read-only prediction query for ops planning G-2 panel
+  ipcMain.handle('query-operation-prediction', async (_event, payload) => {
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    if (!payload || typeof payload.corpsId !== 'string' || !Array.isArray(payload.axes)) {
+      return { ok: false, error: 'Invalid operation prediction request' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = await sim.queryOperationPrediction(state, payload, getBaseDir());
+      return { ok: true, data: result };
+    } catch (e) {
+      console.error('[IPC] query-operation-prediction error:', e);
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('stage-sector-stance-order', async (_event, payload) => {
     const { sectorId, stance } = payload || {};
     if (!currentGameStateJson || typeof sectorId !== 'string' || typeof stance !== 'string') {

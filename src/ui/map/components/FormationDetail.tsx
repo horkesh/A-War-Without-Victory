@@ -237,7 +237,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     type="button"
                     onClick={() => useGameStore.setState({
                       selectedArmyId,
-                      selectedCorpsId: selectedCorpsId ?? formation.corps_id ?? null,
+                      selectedCorpsId: null,
                       selectedCorpsFrontSectorId: currentSector.sector_id,
                       selectedFormationId,
                       selectedOperationKey: null,

@@ -56,6 +56,7 @@ contextBridge.exposeInMainWorld('awwv', {
   resetSectorStanceToBot: (sectorId) => ipcRenderer.invoke('reset-sector-stance-to-bot', { sectorId }),
   stageLogisticsPriority: (faction, sectorId, priority) => ipcRenderer.invoke('stage-logistics-priority', { faction, sectorId, priority }),
   stageCorpsOperationOrder: (payload) => ipcRenderer.invoke('stage-corps-operation-order', payload),
+  queryOperationPrediction: (payload) => ipcRenderer.invoke('query-operation-prediction', payload),
   stageOperationHalt: (payload) => ipcRenderer.invoke('stage-operation-halt', payload),
   stageOperationForceLaunch: (payload) => ipcRenderer.invoke('stage-operation-force-launch', payload),
   stageOperationDecision: (payload) => ipcRenderer.invoke('stage-operation-decision', payload),
