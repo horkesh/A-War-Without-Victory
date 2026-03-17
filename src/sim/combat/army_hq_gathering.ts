@@ -12,6 +12,7 @@ import {
     SYNC_WINDOW_DEFAULT, SYNC_MIN_BRIGADES,
     STRENGTH_THRESHOLDS, SUPPLY_STATUS_THRESHOLDS, MANPOWER_STATUS_THRESHOLDS,
     OPPORTUNITY_SCORE,
+    MAX_GATHERING_OFFENSIVE_TARGETS, MAX_GATHERING_HOLD_TARGETS,
 } from './army_hq_gathering_constants.js';
 
 // ── Emergency event IDs that trigger an immediate gathering ──────────────────
@@ -456,7 +457,7 @@ export function generateCampaignPlan(
     reason: string,
     emergency: boolean,
 ): CampaignPlan {
-    const priorities = generateFrontPriorities(faction, assessment, currentTurn);
+    const priorities = generateFrontPriorities(state, faction, assessment, currentTurn);
     const doctrine = generateDoctrineOverride(faction, assessment, currentTurn, priorities);
 
     const syncOps = generateSynchronizedOperations(assessment, priorities, currentTurn);
@@ -476,8 +477,68 @@ export function generateCampaignPlan(
     };
 }
 
+/** Extract strategic targets for a corps from its sector data. */
+function computeCorpsTargets(
+    state: GameState,
+    corpsId: string,
+    role: FrontPriority['role'],
+): { offensive_targets?: string[]; hold_targets?: string[] } {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return {};
+
+    // Collect sectors for this corps, sorted by threat_ratio descending
+    const corpsSectors: Array<{ threatRatio: number; enemyOsids: string[]; friendlyOsids: string[] }> = [];
+    for (const sec of Object.values(sectors)) {
+        if (sec.corps_id !== corpsId) continue;
+        const enemyOsids: string[] = [];
+        const friendlyOsids: string[] = [];
+        for (const ss of sec.sub_segments ?? []) {
+            for (const o of ss.enemy_osids ?? []) {
+                if (!enemyOsids.includes(o)) enemyOsids.push(o);
+            }
+            for (const o of ss.friendly_osids ?? []) {
+                if (!friendlyOsids.includes(o)) friendlyOsids.push(o);
+            }
+        }
+        corpsSectors.push({
+            threatRatio: sec.threat_ratio ?? 0,
+            enemyOsids: enemyOsids.sort(),
+            friendlyOsids: friendlyOsids.sort(),
+        });
+    }
+    // Sort sectors by threat_ratio descending (highest threat first — relieve pressure)
+    corpsSectors.sort((a, b) => b.threatRatio - a.threatRatio);
+
+    if (role === 'primary' || role === 'secondary') {
+        const targets: string[] = [];
+        for (const sec of corpsSectors) {
+            for (const osid of sec.enemyOsids) {
+                if (!targets.includes(osid) && targets.length < MAX_GATHERING_OFFENSIVE_TARGETS) {
+                    targets.push(osid);
+                }
+            }
+        }
+        return targets.length > 0 ? { offensive_targets: targets } : {};
+    }
+
+    if (role === 'economy' || role === 'contain') {
+        const targets: string[] = [];
+        for (const sec of corpsSectors) {
+            for (const osid of sec.friendlyOsids) {
+                if (!targets.includes(osid) && targets.length < MAX_GATHERING_HOLD_TARGETS) {
+                    targets.push(osid);
+                }
+            }
+        }
+        return targets.length > 0 ? { hold_targets: targets } : {};
+    }
+
+    return {};
+}
+
 /** Generate front priorities for all corps. */
 function generateFrontPriorities(
+    state: GameState,
     faction: FactionId,
     assessment: TheaterAssessment,
     currentTurn: number,
@@ -530,12 +591,14 @@ function generateFrontPriorities(
             primaryCount--;
         }
 
-        priorities.push({ corps_id: ca.corps_id, role, suggested_stance: suggestedStance });
+        const targets = computeCorpsTargets(state, ca.corps_id, role);
+        priorities.push({ corps_id: ca.corps_id, role, suggested_stance: suggestedStance, ...targets });
     }
 
     // Excluded corps always contain
     for (const ca of excluded) {
-        priorities.push({ corps_id: ca.corps_id, role: 'contain', suggested_stance: 'defensive' });
+        const targets = computeCorpsTargets(state, ca.corps_id, 'contain');
+        priorities.push({ corps_id: ca.corps_id, role: 'contain', suggested_stance: 'defensive', ...targets });
     }
 
     // Faction personality adjustments
@@ -740,24 +803,34 @@ export function generateSynchronizedOperations(
             const mainCorps = aIsMain ? a : b;
             const supportCorps = aIsMain ? b : a;
 
-            // Get offensive_targets from main effort's FrontPriority
+            // Each participant gets its own corps' offensive targets
             const mainPriority = priorities.find(p => p.corps_id === mainCorps.corpsId);
-            const targetArea = mainPriority?.offensive_targets ?? [];
+            const supportPriority = priorities.find(p => p.corps_id === supportCorps.corpsId);
 
             const participants: SyncOpParticipant[] = [
                 {
                     corps_id: mainCorps.corpsId,
                     role: 'main_effort',
-                    target_osids: [],
+                    target_osids: [...(mainPriority?.offensive_targets ?? [])],
                     min_brigades: SYNC_MIN_BRIGADES,
                 },
                 {
                     corps_id: supportCorps.corpsId,
                     role: 'supporting',
-                    target_osids: [],
+                    target_osids: [...(supportPriority?.offensive_targets ?? [])],
                     min_brigades: SYNC_MIN_BRIGADES,
                 },
             ];
+
+            // Derive target_area from participants' target OSIDs (extract municipalities)
+            const targetMuns = new Set<string>();
+            for (const p of participants) {
+                for (const osid of p.target_osids) {
+                    const parts = osid.split(':');
+                    if (parts.length >= 2) targetMuns.add(parts[1]!);
+                }
+            }
+            const targetArea = [...targetMuns].sort();
 
             syncOps.push({
                 name: `sync_${mainCorps.corpsId}_${supportCorps.corpsId}`,

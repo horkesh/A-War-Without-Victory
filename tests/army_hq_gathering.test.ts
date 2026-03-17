@@ -1011,3 +1011,241 @@ describe('serialization and validation', () => {
         expect(parsed['HRHB']).toBe(10);
     });
 });
+
+// ── Front Priority Target Population ──────────────────────────────────────
+
+/** Helper to make a sector object for target population tests. */
+function makeSector(overrides: {
+    sector_id: string;
+    corps_id: string;
+    faction?: string;
+    enemy_osids?: string[];
+    friendly_osids?: string[];
+    threat_ratio?: number;
+}) {
+    return {
+        sector_id: overrides.sector_id,
+        corps_id: overrides.corps_id,
+        faction: overrides.faction ?? 'RS',
+        sub_segments: [{
+            enemy_osids: overrides.enemy_osids ?? [],
+            friendly_osids: overrides.friendly_osids ?? [],
+        }],
+        threat_ratio: overrides.threat_ratio ?? 1.0,
+        length_edges: 5,
+        assigned_brigade_ids: ['b1'],
+        reserve_brigade_ids: [],
+        territory_osids: [],
+        edge_ids: [],
+        defensive_power: 1000,
+        density: 0.5,
+        opposing_factions: ['RBiH'],
+    };
+}
+
+describe('Front priority target population', () => {
+    it('primary corps gets offensive_targets from sector enemy OSIDs', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b3: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b4: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+            },
+        });
+        (state.military as any).corps_front_sectors = {
+            s1: makeSector({
+                sector_id: 's1', corps_id: 'vrs_1st_krajina',
+                enemy_osids: ['op:kljuc:a', 'op:kljuc:b'],
+                threat_ratio: 1.5,
+            }),
+        };
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+        const fp = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina');
+
+        expect(fp).toBeDefined();
+        expect(fp!.role).toBe('primary');
+        expect(fp!.offensive_targets).toBeDefined();
+        expect(fp!.offensive_targets!.length).toBeGreaterThan(0);
+        expect(fp!.offensive_targets).toContain('op:kljuc:a');
+        expect(fp!.offensive_targets).toContain('op:kljuc:b');
+    });
+
+    it('contain corps gets hold_targets from sector friendly OSIDs', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_drina', personnel: 100 },
+            },
+        });
+        (state.military as any).corps_front_sectors = {
+            s1: makeSector({
+                sector_id: 's1', corps_id: 'vrs_drina',
+                friendly_osids: ['op:han_pijesak:f', 'op:milici:g'],
+                threat_ratio: 2.0,
+            }),
+        };
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+        const fp = plan.front_priorities.find(p => p.corps_id === 'vrs_drina');
+
+        expect(fp).toBeDefined();
+        expect(fp!.role).toBe('contain');
+        expect(fp!.hold_targets).toBeDefined();
+        expect(fp!.hold_targets!.length).toBeGreaterThan(0);
+        expect(fp!.hold_targets).toContain('op:han_pijesak:f');
+    });
+
+    it('offensive_targets are sorted deterministically', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b3: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b4: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+            },
+        });
+        (state.military as any).corps_front_sectors = {
+            s1: makeSector({
+                sector_id: 's1', corps_id: 'vrs_1st_krajina',
+                enemy_osids: ['op:z:z', 'op:a:a', 'op:m:m'],
+                threat_ratio: 1.0,
+            }),
+        };
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+        const fp = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina');
+        const targets = fp!.offensive_targets!;
+
+        // Enemy OSIDs within a sector are sorted alphabetically
+        for (let i = 1; i < targets.length; i++) {
+            expect(targets[i]! >= targets[i - 1]!).toBe(true);
+        }
+    });
+
+    it('offensive_targets capped at MAX_GATHERING_OFFENSIVE_TARGETS', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b3: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b4: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+            },
+        });
+        const manyOsids = Array.from({ length: 20 }, (_, i) => `op:test:osid_${String(i).padStart(2, '0')}`);
+        (state.military as any).corps_front_sectors = {
+            s1: makeSector({
+                sector_id: 's1', corps_id: 'vrs_1st_krajina',
+                enemy_osids: manyOsids,
+                threat_ratio: 2.0,
+            }),
+        };
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+        const fp = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina');
+
+        expect(fp!.offensive_targets!.length).toBeLessThanOrEqual(10);
+    });
+
+    it('no sectors → no targets (graceful)', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b3: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+            },
+        });
+        // No corps_front_sectors set
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+        const fp = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina');
+
+        expect(fp).toBeDefined();
+        // Should not crash, targets just absent
+        expect(fp!.offensive_targets).toBeUndefined();
+    });
+});
+
+describe('Sync op target_osids from FrontPriority', () => {
+    it('sync op participants inherit target_osids from front priority offensive_targets', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b3: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b4: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b5: { faction: 'RS', corps_id: 'vrs_drina', personnel: 2000 },
+                b6: { faction: 'RS', corps_id: 'vrs_drina', personnel: 2000 },
+                b7: { faction: 'RS', corps_id: 'vrs_drina', personnel: 2000 },
+            },
+        });
+        (state.military as any).corps_front_sectors = {
+            s1kk: makeSector({
+                sector_id: 's1kk', corps_id: 'vrs_1st_krajina',
+                enemy_osids: ['op:kljuc:a', 'op:kljuc:b'],
+                threat_ratio: 1.5,
+            }),
+            s_drina: makeSector({
+                sector_id: 's_drina', corps_id: 'vrs_drina',
+                enemy_osids: ['op:vlasenica:c', 'op:bratunac:d'],
+                threat_ratio: 1.2,
+            }),
+        };
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+
+        expect(plan.synchronized_operations.length).toBeGreaterThan(0);
+        const syncOp = plan.synchronized_operations[0]!;
+        for (const participant of syncOp.participants) {
+            expect(participant.target_osids.length).toBeGreaterThan(0);
+        }
+        // target_area derived from OSID municipalities
+        expect(syncOp.target_area.length).toBeGreaterThan(0);
+    });
+
+    it('sync op target_area contains municipalities from participant targets', () => {
+        const state = makeMinimalState({
+            turn: 8,
+            formations: {
+                b1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b3: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b4: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 2000 },
+                b5: { faction: 'RS', corps_id: 'vrs_drina', personnel: 2000 },
+                b6: { faction: 'RS', corps_id: 'vrs_drina', personnel: 2000 },
+                b7: { faction: 'RS', corps_id: 'vrs_drina', personnel: 2000 },
+            },
+        });
+        (state.military as any).corps_front_sectors = {
+            s1kk: makeSector({
+                sector_id: 's1kk', corps_id: 'vrs_1st_krajina',
+                enemy_osids: ['op:kljuc:a'],
+                threat_ratio: 1.5,
+            }),
+            s_drina: makeSector({
+                sector_id: 's_drina', corps_id: 'vrs_drina',
+                enemy_osids: ['op:vlasenica:c'],
+                threat_ratio: 1.2,
+            }),
+        };
+
+        const assessment = assessTheater(state, 'RS');
+        const plan = generateCampaignPlan(state, 'RS', assessment, 8, 'regular_cadence', false);
+
+        const syncOp = plan.synchronized_operations[0]!;
+        expect(syncOp.target_area).toContain('kljuc');
+        expect(syncOp.target_area).toContain('vlasenica');
+    });
+});

@@ -62,6 +62,12 @@ export const SUPPLY_STATUS_THRESHOLDS = { abundant: 75, adequate: 50, strained: 
 /** Manpower status thresholds (average brigade personnel) */
 export const MANPOWER_STATUS_THRESHOLDS = { healthy: 1500, adequate: 1000, strained: 600 };
 
+/** Max offensive targets per corps in gathering plan (strategic, not tactical) */
+export const MAX_GATHERING_OFFENSIVE_TARGETS = 10;
+
+/** Max hold targets per corps in gathering plan */
+export const MAX_GATHERING_HOLD_TARGETS = 8;
+
 /** Opportunity score values for corps assessment */
 export const OPPORTUNITY_SCORE = {
     PER_BRIGADE: 10,
