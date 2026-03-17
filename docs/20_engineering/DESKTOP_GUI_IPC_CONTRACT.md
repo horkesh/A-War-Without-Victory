@@ -9,7 +9,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - Renderer consumers: `src/ui/warroom/warroom.ts`, `src/ui/map/MapApp.ts` (via embedded iframe)
 - Sim adapter: `src/desktop/desktop_sim.ts`
 
-**State contract (front assignment and theatres):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. It includes `front_edges`, `assignable_front_segments`, `brigade_front_assignment`, `theatres`, and `army_theatre_assignment`. The 2D tactical map and 3D operational map both read these from the same payload; see [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for single-source and verification.
+**State contract (front assignment and theatres):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. It includes `front_edges`, `assignable_front_segments`, `brigade_front_assignment`, `theatres`, `army_theatre_assignment`, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). The 2D tactical map and 3D operational map both read these from the same payload; see [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for single-source and verification.
 
 ## Channels
 
@@ -150,6 +150,11 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
     - Payload: `{ officerId: string, corpsId: string }`
     - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
     - Behavior: validates officer exists in pool and corps exists. Sets `officer.assignment = corpsId`, `officer.status = "active"`. If a previous commander existed, they return to the pool. Reserializes, sends update.
+
+- `query-operation-prediction` (invoke) — **READ-ONLY**
+    - Payload: `OperationPredictionRequest` — `{ corpsId: string, axes: Array<{ axisId, brigadeIds[], objectiveOsids[], stagingOsid? }>, tempo: 'methodical' | 'standard' | 'all_out', artilleryPreparation: boolean, commanderOfficerId?: string }`
+    - Returns: `{ ok: boolean, data?: OperationPredictionResponse, error?: string }`
+    - Behavior: read-only prediction query for the ops planning G-2 panel. Deserializes state, loads OSID adjacency + terrain cache (module-level cached), calls `computeOperationPrediction()` which runs `predictCombatOutcome()` per axis using the full combat predictor (terrain, entrenchment, fatigue, concentration, urban defense, etc.). Returns per-axis predicted outcomes, force ratios, estimated casualties, terrain/entrenchment classification, plus personality-driven commander assessment text. Does NOT mutate state or call `sendGameStateToRenderer()`. Debounced at 300ms on the UI side. Consumer: OpsPlanningModal → G2BriefingPanel (`src/ui/map/components/plan_ui/G2BriefingPanel.tsx`). Engine: `src/sim/combat/operation_prediction.ts`.
 
 - `stage-corps-operation-order` (invoke)
     - Payload: `CorpsOperationOrderPayload` — `{ corpsId: string, name: string, type: 'sector_attack' | 'general_offensive' | 'feint' | 'probe', targetSettlements: string[], participatingBrigades: string[], sectorId?: string, objectives?: string[], planningDuration?: number, stagingOsid?: string, minAttackOutcome?: string, tempo?: 'methodical' | 'standard' | 'all_out', schwerpunktOsid?: string, artilleryPreparation?: boolean, axes?: Array<{ axis_id, name, assigned_brigades, objectives, staging_osid?, current_objective_index, status, ... }> }`

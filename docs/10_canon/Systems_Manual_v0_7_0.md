@@ -376,6 +376,10 @@ Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/2
 
 **State:** `elite_loan_states` (per formation), `elite_brigade_trackers` (per brigade), `pending_reserve_requests`. Pipeline step: `tick-elite-loans` (after `advance-sector-offensives`, before `officer-succession`). Module: `src/sim/combat/army_reserve_system.ts`. Types: `src/state/elite_loan_types.ts`.
 
+### 7.8 Army HQ Gathering (Adaptive Doctrine)
+
+**Implementation-note (2026-03-17, v0.4.7):** Periodic army-level command meetings (`evaluateArmyHQGathering`, step 134 in `war_phases.ts`) produce multi-turn `CampaignPlan` objects stored on `state.military.campaign_plans`. After the first gathering, adaptive doctrine overrides replace calendar-driven `doctrine_phases` — attack share, aggression, corps stances, and front priorities are derived from the campaign plan rather than from the timeline JSON. Front priorities (`primary` / `secondary` / `economy` / `contain`) are consumed by `generateCorpsDirectives()` to weight offensive targeting. Synchronized multi-corps operations use a `waiting_for_sync` preparation sub-phase so that participating corps begin execution simultaneously. Module: `src/sim/combat/army_hq_gathering.ts`. Types: `src/sim/combat/army_hq_gathering_types.ts`. Constants: `src/sim/combat/army_hq_gathering_constants.ts`. 54 new tests. Report: [20260317_ARMY_HQ_GATHERING_V047.md](../40_reports/implemented/20260317_ARMY_HQ_GATHERING_V047.md).
+
 ## 8. Command and control degradation
 
 Each faction tracks Command Coherence, representing the ability to translate political intent into coordinated action.

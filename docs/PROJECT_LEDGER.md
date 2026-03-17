@@ -1,7 +1,115 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-16
-**Status:** **v0.4.6** (Playable Alpha + Endgame System + Commander Override Layer). **932 tests**, 80 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
+**Last Updated:** 2026-03-17
+**Status:** **v0.4.7** (Playable Alpha + Endgame System + Commander Override Layer + Army HQ Gathering). **1028+ tests**, 83 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
+
+## [2026-03-17] Army HQ Gathering v0.4.7
+
+**Periodic army-level command meetings producing campaign plans with adaptive doctrine, synchronized multi-corps operations, and front priorities.**
+
+### Army HQ Gathering System
+1. **New pipeline step** `evaluate-army-hq-gathering` (step 134 in war_phases.ts). Files: `src/sim/combat/army_hq_gathering.ts`, `army_hq_gathering_types.ts`, `army_hq_gathering_constants.ts`.
+2. **CampaignPlan** state on `state.military.campaign_plans` — multi-turn plans with front priorities (primary/secondary/economy/contain), doctrine overrides, and synchronized operations.
+3. **Adaptive doctrine**: After the first gathering, calendar-driven `doctrine_phases` are replaced by campaign-plan-derived attack share, aggression, and corps stances.
+4. **Synchronized operations**: Multi-corps operations use `waiting_for_sync` preparation sub-phase so participating corps begin execution simultaneously.
+5. **Front priorities**: Consumed by `generateCorpsDirectives()` to weight offensive targeting per corps sector.
+6. **54 new tests**, 1028 total vitest tests.
+7. Report: `docs/40_reports/implemented/20260317_ARMY_HQ_GATHERING_V047.md`.
+
+## [2026-03-17] Brigade Front Distribution + Ops Modal Fixes + Event Enrichment
+
+**Brigade front distribution pipeline step reduces stacking and moves rear brigades forward. Ops planning modal 4 critical bugs fixed. Historical events now display full titles/narratives.**
+
+### Brigade Front Distribution (n842)
+1. **New pipeline step** `distribute-brigades-to-front` after `assign-brigades-to-subsegments` (133 total war-phase steps). File: `src/sim/combat/brigade_front_distribution.ts`.
+2. **Phase A**: Redistributes freshly-arrived (entrenchment < 1 turn) stacked brigades to adjacent empty front OSIDs within their sub-segment. Home OSID preferred.
+3. **Phase B**: Issues column march orders (via `brigade_movement_orders`) for rear brigades to reach assigned sector front. Max 8 hops, direct move if adjacent.
+4. **Exemptions**: Sarajevo siege corps (`arbih_1st_corps`, `vrs_sarajevo_romanija`), active operation participants, disrupted brigades, single-OSID sub-segments.
+5. **Results**: Stacking 46→36 (-22%), far-from-front 36→29 (-19%), at-front 177→187 (+6%). Area 89.5%, 5/6 benchmarks, 13/13 anchors.
+6. **13 new tests** in `tests/brigade_front_distribution.test.ts`.
+
+### Ops Planning Modal Fixes
+7. **Map shows current control**: `OpsMapRenderer` now accepts `controlBySettlement` from live game state instead of loading static init file.
+8. **Zoom to sector**: `zoomToBounds()` method on `OpsMapRenderer`, called with sector front OSID centroids on modal open. Promise-based to handle async map init.
+9. **Forces populated**: `selectedCorpsId` derived from sector's `corps_id` when store value is null. Formations filtered to active brigades only.
+10. **Commander selection wired**: Added `lastSelectedOfficerId` to gameStore. `CommanderSelectionModalWrapper` sets it; `OpsPlanningModal` watches and dispatches `SET_COMMANDER`. Commander name displayed instead of raw ID.
+
+### Event System Enrichment
+11. **Full event definitions loaded in UI**: `loadEventDefinitions()` in `DataLoader.ts` fetches all `data/scenarios/events/war_*.json` files (cached). Events display title, narrative, category, and effects instead of raw IDs.
+12. **Events gated to live mode**: Event modals only fire when `ipc.isAvailable` (Electron) — dev map inspection not interrupted.
+
+### Ops Planning Modal UX Overhaul
+13. **Always-active map clicks**: Removed `mapClickMode` state. Enemy OSID click = toggle objective, friendly OSID click = set staging. No mode buttons — axis drilldown simplified to display-only with hint text.
+14. **Force shelf table rows**: Replaced unreadable horizontal TacticalCard scroll with compact vertical list. Full brigade name, personnel, cohesion bar, equipment visible. Height 180→160px.
+15. **Left panel scroll**: Narrowed 360→300px, reduced padding/gaps. Axis content no longer cut off.
+16. **Map enhancements**: 35% dark overlay on enemy territory (`ops-enemy-darken` layer). Red circle markers on objectives, green circle on staging (`ops-markers` source + `updateMarkers()` method). `playerFaction` param on `OpsMapRenderer` constructor.
+
+### Other Fixes
+17. **Sector highlight isolation**: `FormationDetail.tsx` sector click now sets `selectedCorpsId: null` to prevent highlighting entire corps line.
+18. **110th Usora Brigade**: Home corrected from `op:zepce:zeljezno_polje_2` to `op:tesanj:ularice_2`, home_mun `zepce`→`tesanj`.
+
+## [2026-03-16] Ops Planning G-2 Live Briefing + Visual Overhaul
+
+**Complete redesign of the operations planning screen. Replaced placeholder UI with live engine data, authentic military document styling, and faction identity.**
+
+### Visual Overhaul (pre-G2)
+1. **Map fixed**: Replaced Carto/OpenStreetMap tiles with the game's own PMTiles map (OSID control polygons, front lines, hillshade, faction colors).
+2. **Fullscreen takeover**: Was 95vw×90vh modal with backdrop. Now true `fixed inset-0` — no chrome, full screen.
+3. **Visual style aligned**: Purged all cyan/cyberpunk colors (30+ occurrences). Replaced with game's warm NATO ops center palette: `accent-gold`, `panel-bg`, warm borders. Matching glassmorphism, typography, and scrollbar styling.
+4. **Faction identity in top bar**: Army crest (36×36px with gold glow), corps display name, faction-colored left border accent.
+
+### G-2 Live Briefing (backend → frontend pipeline)
+5. **Prediction engine** (`src/sim/combat/operation_prediction.ts`): `predictAxisOutcome()` delegates to full `predictCombatOutcome()` from combat_predictor.ts. `generateCommanderAssessment()` produces three-tier personality-driven text (high/mid/low competence × aggressive/cautious). `computeOperationPrediction()` orchestrates per-axis predictions + commander profile resolution. 12 tests.
+6. **IPC pipeline**: `queryOperationPrediction` in desktop_sim.ts loads OSID edges + terrain cache (cached at module level), calls full combat predictor. Handler in electron-main.cjs (read-only, no state mutation). Exposed via preload.cjs → useIPC.ts.
+7. **G2BriefingPanel**: Three readiness bars (Intel/Supply/Force Ratio with qualitative labels), per-axis collapsible assessment cards (predicted outcome badge + casualties + terrain/entrenchment detail), preparation time estimate. All data live — updates via 300ms debounced IPC as player modifies the plan.
+8. **Commander's Assessment Document**: Paper-styled (`#ebe1cd` + paper-grain texture) military document modeled on real VRS/ARBiH G-2 assessments (Soviet-inherited *borbena zapovest* format). Numbered sections (ENEMY / OWN FORCES / ASSESSMENT). Faction-specific army name header + classification stamp (RBiH: "POVJERLJIVO", RS: "СТРОГО ПОВЕРЉИВО" in Cyrillic). Small desaturated army crest. Slight rotation (-0.3°) for authenticity.
+
+### UX Polish
+9. **Authorization weight pause**: Screen darkens (rgba 0→0.15 over 700ms) when player authorizes. Beat of gravity before order transmits.
+10. **Brigade fitness stripe**: TacticalCard left border now shows green/amber/red based on personnel, cohesion, fatigue — at-a-glance readiness without expanding stats.
+
+### /simplify passes (3 rounds)
+- Extracted `AXIS_COLORS` to shared `opsConstants.ts` (was duplicated in 2 files)
+- Extracted `INTEL_LABELS`, `SUPPLY_LABELS`, `FORCE_RATIO_LABELS`, `OUTCOME_STYLES`, `labelFromThresholds()`, `getCasualtySeverityColor()` to shared constants
+- Fixed: `opData.edges` always undefined (loaded edges separately via `loadOperationalEdges`)
+- Fixed: `supply_adequate` field doesn't exist on FormationState (replaced with faction reserve estimation)
+- Fixed: removed unnecessary `as any` casts on `named_officer_data`
+- Added IPC payload validation
+- Cached operational data + edges at module level (immutable during gameplay)
+- Reduced bezier resolution 10000→500 (20× CPU reduction, imperceptible visual difference)
+- Removed `loadedGameState` from axes effect dependency (prevented unnecessary bezier recalculation)
+
+### Design docs
+- `docs/plans/2026-03-16-ops-planning-redesign-g2-live-briefing.md` — full design (approved)
+- `docs/plans/2026-03-16-ops-planning-g2-implementation.md` — implementation plan (14 tasks, 4 phases)
+
+### Files created (9)
+- `src/sim/combat/operation_prediction.ts` — prediction engine + assessment generator
+- `src/ui/map/components/plan_ui/ReadinessBar.tsx`
+- `src/ui/map/components/plan_ui/AxisAssessmentCard.tsx`
+- `src/ui/map/components/plan_ui/CommanderAssessmentDoc.tsx`
+- `src/ui/map/components/plan_ui/G2BriefingPanel.tsx`
+- `tests/operation_prediction.test.ts` — 12 tests
+
+### Files modified (11)
+- `src/ui/map/components/OpsPlanningModal.tsx` — fullscreen + game map + G2BriefingPanel wiring
+- `src/ui/map/components/plan_ui/OpsMapRenderer.ts` — game map via PMTiles
+- `src/ui/map/components/plan_ui/CommandTopBar.tsx` — army crest + corps identity
+- `src/ui/map/components/plan_ui/AxisDrilldown.tsx` — warm palette
+- `src/ui/map/components/plan_ui/G2ForecastPanel.tsx` — warm palette (superseded by G2BriefingPanel)
+- `src/ui/map/components/plan_ui/RiskToleranceSelector.tsx` — warm palette
+- `src/ui/map/components/plan_ui/opsConstants.ts` — shared assessment constants
+- `src/ui/map/components/TacticalCard.tsx` — fitness stripe
+- `src/desktop/desktop_sim.ts` — queryOperationPrediction wrapper
+- `src/desktop/electron-main.cjs` — IPC handler
+- `src/desktop/preload.cjs` + `src/ui/map/desktop/useIPC.ts` — IPC wiring
+
+### Deferred (flagged for review)
+- **Axis arrow outcome glow on map**: Bezier arrow color based on predicted outcome (green/amber/red). Needs prediction → OpsMapRenderer bridge.
+- **Consequence echo banner**: "Last op: CORRIDOR 92 — Costly Victory, 1,247 casualties." Needs completed ops history.
+- **Commander preview in selection modal**: Show mechanical impact (prep time, force ratio threshold) when hovering officer.
+- **Risk tolerance → min_attack_outcome mapping**: Currently UI-only, not sent to engine.
+- **AI-generated assessment text**: Future slot for LLM commentary in the document format.
 
 ## [2026-03-16] Nightshift Audit: Event System Fix + Officer Experience Integration
 
@@ -14463,3 +14571,71 @@ Fix: added `if (isActiveSectorOperationParticipant) return false;` guard at the 
 **Files:** `data/source/apr1992_officers.json`, `data/source/oob_brigades.json`, `src/ui/map/utils/officerUtils.ts`, `src/ui/map/components/MapContainer.tsx`.
 
 **Report:** `docs/40_reports/20260315_OFFICER_ROSTER_OVERHAUL.md`
+
+---
+
+## [2026-03-16] Historical Event Timeline Fix — Chronology, Causal Chaining, Anachronism Removal
+
+**Comprehensive audit and correction of all 41→43 historical events across 4 JSON files. Added `requires_events` conditional chaining to the event trigger system. Fixed chronological errors, causal ordering violations, and factual inaccuracies.**
+
+### Engine: `requires_events` prerequisite chaining
+- Extended `EventTrigger` interface with `requires_events?: string[]` field (`src/sim/events/event_types.ts`)
+- Extended `triggerMatches()` to gate event firing on all listed prerequisite events having already fired (checked against `state.military.fired_event_ids`)
+- 9 dependency chains established across the event corpus
+
+### Chronological corrections (28 turn fixes across 4 files)
+- **Anti-sniping agreement**: 25 weeks off (turn 98→123, Aug 1994 not Feb 1994)
+- **Operation Neretva '93**: 23 weeks off (turn 52→75, Sep 1993 not Apr 1993)
+- **Stari Most destruction**: 13 weeks off (turn 70→83, Nov 9 1993)
+- **Contact Group plan**: 9 weeks off (turn 108→117, Jul 1994)
+- **Croat-Bosniak war / Ahmici**: 6 weeks off (turn 48→54, Apr 16 1993)
+- **Concentration camps revealed**: 6 weeks off (turn 12→18, Aug 5-6 1992)
+- **Washington Agreement**: 6 weeks off (turn 96→102, Mar 18 1994)
+- **Ceasefire / Dayton ordering REVERSED**: ceasefire Oct 12 (turn 186→183), Dayton Nov 1 (turn 184→186)
+- Plus 20 additional minor corrections (1-5 weeks each)
+
+### Anachronistic events replaced (3 structural errors)
+1. **`mostar_siege_begins_1992` DELETED** (turn 15, Jul 1992) — described HVO siege of East Mostar 10 months before HVO-ARBiH war. Replaced with `mostar_liberation_1992` (turn 10) — HVO+ARBiH joint liberation from JNA, Jun 12 1992.
+2. **`first_un_safe_areas_1992` DELETED** (turn 30, Nov 1992) — UNSCR 819 was Apr 16 1993. Replaced with `un_safe_areas_declared_1993` (turn 54) in 1993 file.
+3. **`rbih_5th_corps_bihac_1993` DELETED** (turn 65) — described 1994 offensive (Op Grmec). Replaced with `abdic_apwb_declared_1993` (turn 77, Sep 27 1993).
+
+### New events added (5)
+- `mostar_liberation_1992` (turn 10) — HVO+ARBiH liberate Mostar from JNA
+- `gornji_vakuf_clashes_1993` (turn 40) — first major HVO-ARBiH clash, Jan 11 1993
+- `un_safe_areas_declared_1993` (turn 54) — UNSCR 819/824
+- `east_mostar_siege_1993` (turn 57) — actual HVO siege, requires `croat_bosniak_war_begins_1993`
+- `abdic_apwb_declared_1993` (turn 77) — Fikret Abdic declares Autonomous Province of Western Bosnia
+
+### Causal dependency chains (9 `requires_events` links)
+- `ahmici_massacre_1993` → `croat_bosniak_war_begins_1993`
+- `central_bosnia_fighting_1993` → `croat_bosniak_war_begins_1993`
+- `east_mostar_siege_1993` → `croat_bosniak_war_begins_1993`
+- `operation_neretva_93_1993` → `croat_bosniak_war_begins_1993`
+- `mostar_bridge_destroyed_1993` → `east_mostar_siege_1993`
+- `nato_ultimatum_sarajevo_1994` → `markale_massacre_1994`
+- `washington_agreement_1994` → `croat_bosniak_war_begins_1993`
+- `zepa_falls_1995` → `srebrenica_falls_1995`
+- `federation_ground_offensive_1995` → `washington_agreement_1994` + `nato_deliberate_force_1995`
+
+### Factual correction
+- NATO Banja Luka incident: **five** J-21 Jastreb aircraft shot down, not four
+
+### Determinism
+No impact. Event trigger changes are deterministic (same `fired_event_ids` state + same turn → same result). No RNG changes. JSON data-only changes to turn numbers and event content.
+
+### Tests
+- 3 new `requires_events` tests in `tests/events_evaluate.test.ts` (node:test, 17 total pass)
+- 17 new timeline integrity tests in `tests/event_timeline_integrity.test.ts` (vitest) — causal ordering, chronology guardrails, structural checks
+- Full suite: 961 vitest tests pass, typecheck clean
+
+### Files
+- `src/sim/events/event_types.ts` (EventTrigger + triggerMatches)
+- `data/scenarios/events/war_1992.json` (14 events, was 16)
+- `data/scenarios/events/war_1993.json` (13 events, was 10)
+- `data/scenarios/events/war_1994.json` (8 events, reordered)
+- `data/scenarios/events/war_1995.json` (8 events, reordered)
+- `tests/events_evaluate.test.ts` (+3 tests)
+- `tests/event_timeline_integrity.test.ts` (new, 17 tests)
+
+### Plan
+`docs/plans/2026-03-16-historical-event-timeline-fix.md`
