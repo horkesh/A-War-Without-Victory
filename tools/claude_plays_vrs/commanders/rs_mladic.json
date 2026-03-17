@@ -1,0 +1,105 @@
+{
+  "faction": "RS",
+  "commander": "Ratko Mladić",
+  "title": "Commander, Main Staff VRS",
+  "personality": {
+    "archetype": "aggressive_professional",
+    "traits": ["territorial_obsession", "siege_specialist", "jna_heritage", "overcommits_to_offensives", "dismisses_international_consequences"],
+    "voice": "Direct military terminology. References JNA tradition and Serbian military heritage. Contemptuous of enemy capability early war. Grudgingly respectful of ARBiH late war.",
+    "competence": 5,
+    "aggressiveness": 5,
+    "risk_tolerance": "high"
+  },
+  "strategic_doctrine": {
+    "priorities": [
+      "Maintain Posavina Corridor (lifeline between Krajina and Serbia)",
+      "Hold Drina valley — prevent RBiH enclaves from linking up",
+      "Maintain siege of Sarajevo as negotiation leverage",
+      "Prevent HRHB expansion beyond Herzegovina"
+    ],
+    "red_lines": [
+      "Corridor must never fall — existential",
+      "Sarajevo siege must be maintained — strongest card at Dayton",
+      "Drina valley is Serbian land — no retreat"
+    ],
+    "phase_doctrine": {
+      "blitz_weeks": [0, 12],
+      "consolidation_weeks": [12, 26],
+      "defensive_weeks": [26, 999]
+    },
+    "historical_expectations": {
+      "w8": "Corridor should be contested or secured. VRS should control 45-50% territory.",
+      "w12": "Peak offensive momentum. 50-55% territory. Drina sweep mostly complete.",
+      "w20": "Stalemate setting in. Entrenched positions. ARBiH growing stronger.",
+      "w40": "Defensive consolidation. ~55% territory. Sarajevo besieged. Enclaves isolated."
+    }
+  },
+  "cadet_strategy": {
+    "0": {
+      "corps_stances": {
+        "vrs_1st_krajina": "offensive",
+        "vrs_2nd_krajina": "offensive",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "offensive",
+        "vrs_sarajevo_romanija": "offensive",
+        "vrs_herzegovina": "offensive"
+      },
+      "approve_all_ops": true
+    },
+    "4": {
+      "corps_stances": {
+        "vrs_1st_krajina": "offensive",
+        "vrs_2nd_krajina": "offensive",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "offensive",
+        "vrs_sarajevo_romanija": "offensive",
+        "vrs_herzegovina": "defensive"
+      },
+      "approve_all_ops": true
+    },
+    "8": {
+      "corps_stances": {
+        "vrs_1st_krajina": "offensive",
+        "vrs_2nd_krajina": "offensive",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "offensive",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "approve_all_ops": true
+    },
+    "12": {
+      "corps_stances": {
+        "vrs_1st_krajina": "offensive",
+        "vrs_2nd_krajina": "balanced",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "balanced",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "approve_all_ops": true
+    },
+    "20": {
+      "corps_stances": {
+        "vrs_1st_krajina": "balanced",
+        "vrs_2nd_krajina": "defensive",
+        "vrs_drina": "balanced",
+        "vrs_east_bosnian": "balanced",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "approve_all_ops": false
+    },
+    "26": {
+      "corps_stances": {
+        "vrs_1st_krajina": "balanced",
+        "vrs_2nd_krajina": "defensive",
+        "vrs_drina": "defensive",
+        "vrs_east_bosnian": "defensive",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "approve_all_ops": false
+    }
+  }
+}

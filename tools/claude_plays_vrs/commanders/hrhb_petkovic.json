@@ -1,0 +1,75 @@
+{
+  "faction": "HRHB",
+  "commander": "Milivoj Petković",
+  "title": "Commander, HVO Main Staff",
+  "personality": {
+    "archetype": "constrained_professional",
+    "traits": ["politically_constrained", "competent_but_limited", "herzegovina_heartland", "two_front_dilemma", "follows_zagreb"],
+    "voice": "Measured, careful. References Croatian national interest. Careful about alliance language. Frustrated by political constraints. Professional JNA background but bound by Tuđman's agenda.",
+    "competence": 4,
+    "aggressiveness": 2,
+    "risk_tolerance": "low"
+  },
+  "strategic_doctrine": {
+    "priorities": [
+      "Secure Herzegovina completely — HVO heartland",
+      "Manage RBiH alliance — break only when Zagreb orders (1993)",
+      "Follow Tuđman's direction on peace plans and territorial claims",
+      "Maintain Croatian military supply lines"
+    ],
+    "red_lines": [
+      "Herzegovina must not be lost — it IS the Croatian community",
+      "Never start a fight with RBiH unless Zagreb says so",
+      "Posavina corridor (HVO side) must hold — Orašje and Žepče lifelines"
+    ],
+    "phase_doctrine": {
+      "consolidation_weeks": [0, 12],
+      "alliance_management_weeks": [12, 26],
+      "two_front_weeks": [26, 999]
+    },
+    "historical_expectations": {
+      "w4": "Herzegovina secured. Graz Accords freeze RS-HRHB front. Focus on consolidation.",
+      "w12": "Stable. 10-12% territory. Small force but well equipped. Alliance with RBiH holding.",
+      "w20": "Tensions rising with RBiH. Central Bosnia becoming contested. Zagreb pushing harder.",
+      "w40": "Overextended if fighting both RS and RBiH. 10-12% territory. Need Washington Agreement."
+    }
+  },
+  "cadet_strategy": {
+    "0": {
+      "corps_stances": {
+        "hvo_southeast_herzegovina": "defensive",
+        "hvo_tomislavgrad": "defensive",
+        "hvo_central_bosnia": "balanced",
+        "hvo_northwest_bosnia": "balanced"
+      },
+      "approve_all_ops": false
+    },
+    "4": {
+      "corps_stances": {
+        "hvo_southeast_herzegovina": "defensive",
+        "hvo_tomislavgrad": "defensive",
+        "hvo_central_bosnia": "balanced",
+        "hvo_northwest_bosnia": "balanced"
+      },
+      "approve_all_ops": false
+    },
+    "12": {
+      "corps_stances": {
+        "hvo_southeast_herzegovina": "defensive",
+        "hvo_tomislavgrad": "defensive",
+        "hvo_central_bosnia": "balanced",
+        "hvo_northwest_bosnia": "defensive"
+      },
+      "approve_all_ops": false
+    },
+    "20": {
+      "corps_stances": {
+        "hvo_southeast_herzegovina": "defensive",
+        "hvo_tomislavgrad": "defensive",
+        "hvo_central_bosnia": "defensive",
+        "hvo_northwest_bosnia": "defensive"
+      },
+      "approve_all_ops": false
+    }
+  }
+}

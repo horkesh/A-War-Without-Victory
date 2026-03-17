@@ -1,0 +1,132 @@
+{
+  "_meta": {
+    "commander": "Ratko Mladić",
+    "faction": "RS",
+    "description": "VRS Army Commander strategy for 40-week scenario. Claude plays as Mladić.",
+    "design_notes": [
+      "Phase 1 (w0-8): Maximum blitz. All corps offensive. JNA inheritance advantage at peak.",
+      "Phase 2 (w8-14): Corridor priority. 1KK must secure Posavina. Drina consolidation.",
+      "Phase 3 (w14-24): Siege maintenance + selective offense. Entrenchment setting in.",
+      "Phase 4 (w24-40): Defensive consolidation. Preserve gains. Attrit enemy probes."
+    ]
+  },
+  "decisions": {
+    "0": {
+      "briefing": "The JNA is dissolving. We inherit everything — tanks, artillery, trained officers. Strike NOW while the Turks are disorganized and the Ustasha are looking the other way. Every corps attacks. Secure the Drina. Cut Posavina. Ring Sarajevo. We have weeks, not months, before they organize.",
+      "corps_stances": {
+        "vrs_1st_krajina": "offensive",
+        "vrs_2nd_krajina": "offensive",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "offensive",
+        "vrs_sarajevo_romanija": "offensive",
+        "vrs_herzegovina": "offensive"
+      },
+      "operation_decisions": { "approve_all": true },
+      "strategic_priority": "All corps attack. Maximum aggression. Exploit JNA advantage before it fades."
+    },
+    "4": {
+      "briefing": "Graz Accords. Herzegovina goes quiet — good, we don't need that front. Redouble in the Drina valley and the Corridor. East Bosnian Corps: secure Bijeljina-Zvornik axis. 1st Krajina: the Corridor is your ONLY mission now. Sarajevo stays ringed.",
+      "corps_stances": {
+        "vrs_1st_krajina": "offensive",
+        "vrs_2nd_krajina": "offensive",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "offensive",
+        "vrs_sarajevo_romanija": "offensive",
+        "vrs_herzegovina": "defensive"
+      },
+      "operation_decisions": { "approve_all": true },
+      "strategic_priority": "Herzegovina stands down (Graz). Corridor + Drina + Sarajevo siege are the three priorities."
+    },
+    "8": {
+      "briefing": "Eight weeks in. The Corridor MUST be secured — it is our lifeline between Krajina and Serbia. If we lose Brčko, we lose the war. 1st Krajina stays offensive until the Corridor is through. East Bosnian Corps: finish the Drina sweep. Drina Corps: keep pressure on the enclaves but do not overextend — let them wither. SRK: maintain the siege. Nobody enters, nobody leaves.",
+      "corps_stances": {
+        "vrs_1st_krajina": "offensive",
+        "vrs_2nd_krajina": "offensive",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "offensive",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "operation_decisions": { "approve_all": true },
+      "strategic_priority": "Corridor completion is existential. Drina sweep continues. SRK transitions to siege maintenance."
+    },
+    "12": {
+      "briefing": "Three months of war. The initial momentum is fading — the enemy is digging in, and our men are tired. But we hold the high ground everywhere that matters. 2nd Krajina: shift to balanced — hold what you have in central Bosnia. 1st Krajina: if the Corridor is through, shift to balanced and consolidate. If not, KEEP ATTACKING.",
+      "corps_stances": {
+        "vrs_1st_krajina": "offensive",
+        "vrs_2nd_krajina": "balanced",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "balanced",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "operation_decisions": { "approve_all": true },
+      "strategic_priority": "Transition from blitz to consolidation. Drina and 1KK stay offensive. Others hold gains."
+    },
+    "16": {
+      "briefing": "Four months. The ARBiH is starting to organize — I see it in the intelligence reports. More brigades, better coordination. We cannot keep attacking everywhere. Concentrate: Drina Corps finishes what it started. Everyone else HOLDS. Entrench. Let them come to us. Our advantage now is position, not momentum.",
+      "corps_stances": {
+        "vrs_1st_krajina": "balanced",
+        "vrs_2nd_krajina": "balanced",
+        "vrs_drina": "offensive",
+        "vrs_east_bosnian": "balanced",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "operation_decisions": { "approve_all": true },
+      "strategic_priority": "Only Drina stays offensive. All others transition to hold-and-entrench."
+    },
+    "20": {
+      "briefing": "Five months. The war is entering its grinding phase. Our men are entrenched, morale is steady but not what it was. The enemy grows stronger each week. This is now a war of attrition, and we are winning it — but only if we do not waste what we have on pointless offensives. Drina: if objectives achieved, shift balanced. All corps: HOLD.",
+      "corps_stances": {
+        "vrs_1st_krajina": "balanced",
+        "vrs_2nd_krajina": "defensive",
+        "vrs_drina": "balanced",
+        "vrs_east_bosnian": "balanced",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "operation_decisions": { "approve_all": false },
+      "strategic_priority": "Attrition phase. Hold everywhere. Only approve operations with >1.5 force ratio."
+    },
+    "26": {
+      "briefing": "Half a year of war. We control what matters. The Corridor holds. The Drina is ours. Sarajevo is besieged. The enclaves are isolated. Now we wait. Let them bleed against our positions. Conserve ammunition. Conserve men. When Dayton comes, we negotiate from strength.",
+      "corps_stances": {
+        "vrs_1st_krajina": "balanced",
+        "vrs_2nd_krajina": "defensive",
+        "vrs_drina": "defensive",
+        "vrs_east_bosnian": "defensive",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "operation_decisions": { "approve_all": false },
+      "strategic_priority": "Strategic defensive. Preserve force. Only SRK stays balanced for siege maintenance."
+    },
+    "32": {
+      "briefing": "Eight months. The enemy probes constantly but cannot break through entrenched positions. Good. Every failed attack costs them more than us. 1st Krajina: if they threaten the Corridor, go offensive immediately. Otherwise hold. SRK: maintain pressure on Sarajevo — it is our strongest card at the negotiating table.",
+      "corps_stances": {
+        "vrs_1st_krajina": "balanced",
+        "vrs_2nd_krajina": "defensive",
+        "vrs_drina": "defensive",
+        "vrs_east_bosnian": "defensive",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "operation_decisions": { "approve_all": false },
+      "strategic_priority": "Maintain defensive posture. Corridor protection is standing order. Sarajevo siege maintained."
+    },
+    "36": {
+      "briefing": "Nine months. The end is in sight. Hold what we have. Not one step back, not one step forward that costs us men we cannot replace. The politicians will do the rest at the table. Our job is to make sure they negotiate from the strongest possible position.",
+      "corps_stances": {
+        "vrs_1st_krajina": "defensive",
+        "vrs_2nd_krajina": "defensive",
+        "vrs_drina": "defensive",
+        "vrs_east_bosnian": "defensive",
+        "vrs_sarajevo_romanija": "balanced",
+        "vrs_herzegovina": "defensive"
+      },
+      "operation_decisions": { "approve_all": false },
+      "strategic_priority": "Full defensive except Sarajevo siege maintenance. Preserve every man for Dayton."
+    }
+  }
+}

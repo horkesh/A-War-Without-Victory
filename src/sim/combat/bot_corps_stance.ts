@@ -213,6 +213,22 @@ export function generateCorpsStanceOrders(
         // Factions are offensive or defensive because of their material capacity,
         // not because of artificial code constraints.
 
+        // --- AI/Player army-level override (highest priority) ---
+        // When an AI commander or player has issued army-level corps stance directives,
+        // those override the formula bot's computed stance. This allows the AI commander
+        // layer and player UI to actually control strategic direction.
+        // Only active when ai_army_decisions[faction] exists (never in cadet/formula-only mode).
+        const aiArmyDecision = (state.military as any).ai_army_decisions?.[faction];
+        if (aiArmyDecision?.corps_directives?.[corps.id]?.stance) {
+            const aiStance = aiArmyDecision.corps_directives[corps.id].stance as CorpsStance;
+            if (STANCE_RANK[aiStance] !== undefined) {
+                // AI override — but still respect reorganize from critical condition (layer 1)
+                if (stance !== 'reorganize') {
+                    stance = aiStance;
+                }
+            }
+        }
+
         cmd.stance = stance;
     }
 }

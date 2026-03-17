@@ -1,0 +1,69 @@
+{
+  "faction": "RBiH",
+  "commander": "Sefer Halilović",
+  "successor": { "name": "Rasim Delić", "transition_week": 24 },
+  "title": "Chief of Staff, ARBiH",
+  "personality": {
+    "archetype": "political_survivor",
+    "traits": ["defensive_priority", "population_protector", "international_sympathy_aware", "under_equipped", "builds_gradually"],
+    "voice": "Formal, appeals to multi-ethnic values and international law. Early war: desperate, survival mode. Late war: increasingly professional and confident.",
+    "competence": 3,
+    "aggressiveness": 2,
+    "risk_tolerance": "low"
+  },
+  "successor_personality": {
+    "archetype": "professional_builder",
+    "traits": ["methodical", "corps_organizer", "counteroffensive_planner", "patient"],
+    "voice": "Quiet, professional. Focuses on building capability. References corps structure and training. Less political than Halilović.",
+    "competence": 4,
+    "aggressiveness": 3,
+    "risk_tolerance": "moderate"
+  },
+  "strategic_doctrine": {
+    "priorities": [
+      "Defend Sarajevo at all costs — political heart of Bosnia",
+      "Maintain enclaves (Srebrenica, Goražde, Žepa, Bihać) as evidence of sovereignty",
+      "Build offensive capability for late war counteroffensives",
+      "Maintain HRHB alliance — two-front war is fatal"
+    ],
+    "red_lines": [
+      "Sarajevo must not fall — non-negotiable",
+      "Enclaves represent Bosnian sovereignty — cannot be abandoned voluntarily",
+      "Do not provoke HRHB into war before we are ready"
+    ],
+    "phase_doctrine": {
+      "survival_weeks": [0, 15],
+      "building_weeks": [15, 30],
+      "counteroffensive_weeks": [30, 999]
+    },
+    "historical_expectations": {
+      "w4": "Chaos. Brigades forming from nothing. Defend what we can. 35-40% territory.",
+      "w12": "Stabilizing. 120+ brigades forming. Still losing ground but slower. 30-35%.",
+      "w20": "Parity approaching. 150k+ personnel. Fronts stabilized. Ready to probe.",
+      "w40": "Strong enough to counterattack in select areas. 33-38% territory. Professional army."
+    },
+    "notes": "ARBiH corps (1st-5th) form at week 24. Before that, brigades operate under territorial defense with no formal corps structure. Cadet strategy only applies from w24+."
+  },
+  "cadet_strategy": {
+    "24": {
+      "corps_stances": {
+        "arbih_1st_corps": "defensive",
+        "arbih_2nd_corps": "balanced",
+        "arbih_3rd_corps": "balanced",
+        "arbih_4th_corps": "balanced",
+        "arbih_5th_corps": "balanced"
+      },
+      "approve_all_ops": true
+    },
+    "32": {
+      "corps_stances": {
+        "arbih_1st_corps": "balanced",
+        "arbih_2nd_corps": "balanced",
+        "arbih_3rd_corps": "offensive",
+        "arbih_4th_corps": "balanced",
+        "arbih_5th_corps": "offensive"
+      },
+      "approve_all_ops": true
+    }
+  }
+}

@@ -718,8 +718,8 @@ export function MapContainer() {
                 (m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
               }
 
-              // Sector demarcation lines: clean solid lines between adjacent same-faction sectors
-              if (state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
+              // Sector demarcation lines: disabled pending proper straight-line geometry
+              if (false && state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
                 const demarcData = buildSectorDemarcationGeoJSON(controlledGeoJson, state.corpsFrontSectors, frontEdgesOsid);
                 if (!m2.getSource(SECTOR_DEMARCATION_SOURCE_ID)) {
                   m2.addSource(SECTOR_DEMARCATION_SOURCE_ID, { type: 'geojson', data: demarcData });
