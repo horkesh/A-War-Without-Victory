@@ -41,11 +41,11 @@ describe('getSectorIntelConfidence', () => {
 
 describe('shouldLaunchProbeInstead', () => {
     it('returns false when intel is above faction threshold (RS)', () => {
-        expect(shouldLaunchProbeInstead('RS', 0.30, 0)).toBe(false);
+        expect(shouldLaunchProbeInstead('RS', 0.40, 0)).toBe(false);
     });
 
     it('returns true when intel is below faction threshold (RS)', () => {
-        expect(shouldLaunchProbeInstead('RS', 0.20, 0)).toBe(true);
+        expect(shouldLaunchProbeInstead('RS', 0.30, 0)).toBe(true);
     });
 
     it('returns false when intel is below threshold but max probes reached', () => {

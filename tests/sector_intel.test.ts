@@ -98,13 +98,13 @@ describe('T2: confidence accumulates turn over turn', () => {
         const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
         state.military.sector_intel = {};
-        // 10 turns of passive contact
-        for (let t = 1; t <= 10; t++) {
+        // 20 turns of passive contact (at 0.06/turn: 0.05 + 20*0.06 = 1.25 → capped at 1.0)
+        for (let t = 1; t <= 20; t++) {
             deriveSectorIntel(state, t);
         }
         const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.confidence).toBe(1.0);
-        expect(rec.turns_in_contact).toBe(10);
+        expect(rec.turns_in_contact).toBe(20);
     });
 });
 
@@ -261,8 +261,8 @@ describe('T6: visible_brigade_ids below threshold', () => {
         };
         deriveSectorIntel(state2, 2);
         const rec = (state2.military.sector_intel!['sector:corps-C:0'] ?? [])[0]!;
-        // Pre-seeded 0.05 + RS passive 0.20 = 0.25 < CONFIDENCE_FRONT_BRIGADES (0.30)
-        expect(rec.confidence).toBeCloseTo(0.25, 5);
+        // Pre-seeded 0.05 + RS passive 0.05 = 0.10 < CONFIDENCE_FRONT_BRIGADES (0.30)
+        expect(rec.confidence).toBeCloseTo(0.10, 5);
         expect(rec.visible_brigade_ids.length).toBe(0);
     });
 });

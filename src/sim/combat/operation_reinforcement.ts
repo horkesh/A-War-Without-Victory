@@ -18,7 +18,6 @@ import {
     MAX_OP_LOAN_DISTANCE,
     MAX_LOANED_PER_OP,
     SOURCE_SECTOR_MAX_THREAT,
-    MIN_BRIGADES_FOR_SECTOR_ATTACK,
     LOAN_ARRIVAL_THRESHOLD,
 } from './operation_reinforcement_constants.js';
 import { GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors_constants.js';
@@ -88,25 +87,25 @@ function collectTargetFriendlyOsids(targetSector: CorpsFrontSector): Set<string>
  * loaned from other sectors within the same corps.
  *
  * @param targetSector      The sector where the operation launches
- * @param sectorBrigadeCount Number of brigades already in the target sector
  * @param otherCorpsSectors  All other sectors (caller filters to same corps)
  * @param formations         All formations keyed by ID
  * @param adjacency          OSID adjacency graph
  * @param friendlyOsids      Set of all friendly OSIDs for this faction
  * @param componentOf        OSID → component index map
+ * @param sectorBrigadeCount Number of brigades already in the target sector
  * @returns Array of LoanedBrigadeEntry for brigades that can be loaned
  */
 export function computeReinforcementPool(
     targetSector: CorpsFrontSector,
-    sectorBrigadeCount: number,
     otherCorpsSectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
+    sectorBrigadeCount: number,
 ): LoanedBrigadeEntry[] {
-    // 0. No shortfall — target sector already has enough brigades
-    if (sectorBrigadeCount >= MIN_BRIGADES_FOR_SECTOR_ATTACK) return [];
+    // Corps-wide concentration always tries to draw reinforcements —
+    // even sectors with enough brigades benefit from force concentration.
 
     // 1. Collect target sector friendly OSIDs for BFS destination
     const targetFriendlyOsids = collectTargetFriendlyOsids(targetSector);

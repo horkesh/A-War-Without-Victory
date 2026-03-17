@@ -22,25 +22,31 @@ export interface FactionReconProfile {
     probe_casualty_factor: number;
 }
 
-/** Faction recon profiles (constants, not unit-level). */
+/** Faction recon profiles (constants, not unit-level).
+ *
+ * Passive buildup represents observation posts, patrols, signals intercept —
+ * slow, incremental. Real operational intelligence comes from probes (recon-by-force)
+ * and combat. Without active reconnaissance, a corps should remain uncertain about
+ * enemy strength and dispositions for weeks, not days.
+ */
 export const FACTION_RECON_PROFILES: Record<NonNullable<FactionId>, FactionReconProfile> = {
     RBiH: {
-        passive_buildup_per_turn: 0.30,
-        confidence_decay_per_turn: 0.10,
+        passive_buildup_per_turn: 0.06,   // was 0.30 — ARBiH has local informants but no C2
+        confidence_decay_per_turn: 0.08,
         recon_range: 2,
         probe_confidence_gain: 0.50,
         probe_casualty_factor: 0.15,
     },
     RS: {
-        passive_buildup_per_turn: 0.20,
-        confidence_decay_per_turn: 0.25,
+        passive_buildup_per_turn: 0.05,   // was 0.20 — JNA inheritance is initial, not ongoing
+        confidence_decay_per_turn: 0.10,
         recon_range: 1,
         probe_confidence_gain: 0.35,
         probe_casualty_factor: 0.25,
     },
     HRHB: {
-        passive_buildup_per_turn: 0.20,
-        confidence_decay_per_turn: 0.25,
+        passive_buildup_per_turn: 0.05,   // was 0.20 — Croatian SIS gives initial intel, not flow
+        confidence_decay_per_turn: 0.10,
         recon_range: 1,
         probe_confidence_gain: 0.35,
         probe_casualty_factor: 0.25,
@@ -49,14 +55,15 @@ export const FACTION_RECON_PROFILES: Record<NonNullable<FactionId>, FactionRecon
 
 /**
  * Faction-specific initial intel confidence for newly-encountered enemy sectors.
- * VRS: 0.60 — JNA intelligence inheritance (signals intercepts, pre-war mapping, informant networks).
+ * VRS: 0.30 — JNA inheritance gives general picture (maps, unit locations) but not
+ *              current dispositions. Still above rough-strength threshold (0.2).
  * RBiH: 0.05 — Near-zero; no institutional intelligence, only local knowledge.
- * HRHB: 0.25 — Croatian SIS (SIS/HIS) in Herzegovina provides moderate starting intel.
+ * HRHB: 0.15 — Croatian SIS (SIS/HIS) in Herzegovina provides some starting intel.
  */
 export const FACTION_INITIAL_INTEL_CONFIDENCE: Record<NonNullable<FactionId>, number> = {
-    RS: 0.60,
+    RS: 0.30,
     RBiH: 0.05,
-    HRHB: 0.25,
+    HRHB: 0.15,
 };
 
 /** Below this confidence: strength=unknown, posture=unknown, no visible brigades. */
@@ -79,7 +86,7 @@ export const CONFIDENCE_DEEP_INTEL = 0.8;
  * ARBiH starts blind (higher threshold to compensate), HRHB moderate.
  */
 export const INTEL_GATE_LAUNCH_THRESHOLD: Record<NonNullable<FactionId>, number> = {
-    RS: 0.25,    // JNA inheritance means they know enough to attack sooner
+    RS: 0.35,    // Post-blitz VRS should probe before committing corps-level ops
     RBiH: 0.40,  // Starting blind — need more intel before committing
     HRHB: 0.30,  // Croatian SIS provides moderate baseline
 };

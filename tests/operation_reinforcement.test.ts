@@ -90,9 +90,10 @@ function buildComponents(adjacency: Map<Osid, Osid[]>, friendly: Set<string>): M
 // ── computeReinforcementPool tests ───────────────────────────────────────────
 
 describe('computeReinforcementPool', () => {
-    it('returns empty when target sector has enough brigades (no shortfall)', () => {
-        // Target sector has 4 brigades and 12 edges => budget ceil(12/6)=2, no shortfall
-        // MIN_BRIGADES_FOR_SECTOR_ATTACK=3, sector has 4 => enough
+    it('concentrates force even when target sector already has enough brigades', () => {
+        // Target sector has 4 brigades — already above MIN_BRIGADES_FOR_SECTOR_ATTACK(3)
+        // but corps-wide concentration should still draw from surplus sectors.
+        // Source: 3 brigades, budget=ceil(6/6)=1, surplus=2
         const osids = ['op:a:1', 'op:a:2', 'op:a:3', 'op:b:1', 'op:b:2'];
         const adjacency = buildLinearAdjacency(osids);
         const friendly = new Set(osids);
@@ -129,10 +130,11 @@ describe('computeReinforcementPool', () => {
             adjacency,
             friendly,
             componentOf,
-            4, // sectorBrigadeCount — enough already
+            4, // sectorBrigadeCount — already enough, but concentration still draws
         );
 
-        expect(result).toEqual([]);
+        expect(result.length).toBe(2); // surplus of 2 from source
+        expect(result[0]!.source_sector_id).toBe('sector:corps1:1');
     });
 
     it('sources brigades from surplus sector within distance', () => {

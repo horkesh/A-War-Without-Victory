@@ -97,7 +97,7 @@ describe('H phase intelligence warfare', () => {
                     strength_category: 'moderate',
                     posture_observed: 'defensive',
                     offensive_signs: false,
-                    confidence: 0.5,
+                    confidence: 0.75,
                     turns_in_contact: 3,
                     visible_brigade_ids: [],
                     last_updated_turn: 4,
@@ -112,6 +112,7 @@ describe('H phase intelligence warfare', () => {
 
         deriveSectorIntel(state, 5);
 
+        // RBiH passive buildup 0.06 → 0.75 + 0.06 = 0.81 ≥ CONFIDENCE_DEEP_INTEL (0.80)
         expect(state.military.sector_intel?.friendly?.[0]?.offensive_signs).toBe(true);
         expect(state.military.sector_intel?.friendly?.[0]?.posture_observed).toBe('offensive_prep');
     });
