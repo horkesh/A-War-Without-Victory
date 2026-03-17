@@ -143,18 +143,19 @@ export function buildSectorDemarcationGeoJSON(
     entry.segments.push(segment);
   }
 
-  // Merge segments with endpoint-map, simplify, and emit features
+  // Merge segments with endpoint-map, simplify, smooth, and emit features
   const outFeatures: Feature<LineString, DemarcationProperties>[] = [];
   for (const { segments, faction, sector_a, sector_b } of segmentsByPair.values()) {
     const chains = mergeSegments(segments);
     const props: DemarcationProperties = { faction, sector_a, sector_b };
     for (const chain of chains) {
-      const simplified = simplifyLine(chain, 0.0008);
+      const simplified = simplifyLine(chain, 0.001);
       if (simplified.length < 2) continue;
+      const smoothed = chaikinSmooth(simplified, 3);
       outFeatures.push({
         type: 'Feature',
         properties: props,
-        geometry: { type: 'LineString', coordinates: simplified },
+        geometry: { type: 'LineString', coordinates: smoothed },
       });
     }
   }
@@ -257,6 +258,45 @@ function perpendicularDistance(p: number[], a: number[], b: number[]): number {
   const projY = a[1] + t * dy;
   return Math.sqrt((p[0] - projX) ** 2 + (p[1] - projY) ** 2);
 }
+
+// ─── Chaikin corner-cutting smoothing ─────────────────────────────────────────
+
+/**
+ * Chaikin's corner-cutting algorithm. Each pass replaces every vertex (except
+ * endpoints) with two new vertices at 25% and 75% along adjacent edges,
+ * progressively rounding corners into smooth curves.
+ * @param coords Input coordinate array
+ * @param iterations Number of smoothing passes (2-3 recommended)
+ */
+function chaikinSmooth(coords: number[][], iterations: number): number[][] {
+  if (coords.length <= 2) return coords;
+  let pts = coords;
+  for (let iter = 0; iter < iterations; iter++) {
+    const next: number[][] = [pts[0]]; // preserve first endpoint
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i];
+      const p1 = pts[i + 1];
+      // Skip subdividing the first and last segment endpoints to anchor the line
+      if (i > 0) {
+        next.push([
+          p0[0] * 0.75 + p1[0] * 0.25,
+          p0[1] * 0.75 + p1[1] * 0.25,
+        ]);
+      }
+      if (i < pts.length - 2) {
+        next.push([
+          p0[0] * 0.25 + p1[0] * 0.75,
+          p0[1] * 0.25 + p1[1] * 0.75,
+        ]);
+      }
+    }
+    next.push(pts[pts.length - 1]); // preserve last endpoint
+    pts = next;
+  }
+  return pts;
+}
+
+// ─── Douglas-Peucker line simplification ─────────────────────────────────────
 
 /** Douglas-Peucker simplification. Tolerance in degrees (~0.001° ≈ 110m). */
 function simplifyLine(coords: number[][], tolerance: number): number[][] {

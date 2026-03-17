@@ -760,6 +760,20 @@ export function MapContainer() {
                     },
                     'faction-border-glow-pos'
                   );
+                  // Invisible wide hit-target layer for easier click/hover on sector demarcation
+                  m2.addLayer(
+                    {
+                      id: SECTOR_DEMARCATION_LAYER_ID + '-hit',
+                      type: 'line',
+                      source: SECTOR_DEMARCATION_SOURCE_ID,
+                      paint: {
+                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 8, 10, 14, 14, 20],
+                        'line-opacity': 0,
+                      },
+                      layout: { 'line-cap': 'round', 'line-join': 'round' },
+                    },
+                    'faction-border-glow-pos'
+                  );
                 } else {
                   (m2.getSource(SECTOR_DEMARCATION_SOURCE_ID) as GeoJSONSource).setData(demarcData);
                 }
@@ -2055,6 +2069,9 @@ export function MapContainer() {
       }
       if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe')) {
         safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe', devMode && sectorsVisible);
+      }
+      if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID + '-hit')) {
+        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-hit', devMode && sectorsVisible);
       }
       if (!safeSetLayoutVisibility(map, FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
       if (!safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
