@@ -1,11 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import type { GameState, FormationState } from '../src/state/game_state.js';
+import type { TheaterAssessment, CorpsAssessment } from '../src/sim/combat/army_hq_gathering_types.js';
 import {
     getGatheringCadence,
     shouldGather,
     canCorpsAttendGathering,
     assessTheater,
+    generateCampaignPlan,
 } from '../src/sim/combat/army_hq_gathering.js';
+import { PLAN_VALIDITY_BUFFER } from '../src/sim/combat/army_hq_gathering_constants.js';
 
 // ── Factory ──────────────────────────────────────────────────────────────────
 
@@ -290,5 +293,165 @@ describe('assessTheater', () => {
         expect(staff.attendance).toBe('excluded');
         expect(staff.strength_class).toBe('strong');
         expect(staff.available_brigades).toBe(1);
+    });
+});
+
+// ── Campaign Plan Generation ────────────────────────────────────────────────
+
+/** Helper to build a CorpsAssessment for plan generation tests. */
+function makeCorpsAssessment(overrides: Partial<CorpsAssessment> & { corps_id: string }): CorpsAssessment {
+    return {
+        attendance: 'full',
+        strength_class: 'strong',
+        exhaustion: 10,
+        has_active_op: false,
+        recent_territory_change: 0,
+        sector_threat_avg: 0.5,
+        available_brigades: 5,
+        officer_competence: 3.0,
+        ...overrides,
+    };
+}
+
+/** Helper to build a TheaterAssessment for plan generation tests. */
+function makeAssessment(overrides: Partial<TheaterAssessment> & { corps_assessments: CorpsAssessment[] }): TheaterAssessment {
+    return {
+        territory_trend: 'stable',
+        supply_status: 'adequate',
+        manpower_status: 'adequate',
+        weakest_enemy_front: null,
+        strongest_threat: null,
+        ...overrides,
+    };
+}
+
+describe('generateCampaignPlan', () => {
+    it('VRS early war: at least one primary corps', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, strength_class: 'strong' }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 4, strength_class: 'adequate' }),
+                makeCorpsAssessment({ corps_id: 'vrs_sarajevo_romanija', available_brigades: 3, strength_class: 'adequate' }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 10 });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 10, 'regular_cadence', false);
+
+        const primaryCorps = plan.front_priorities.filter(p => p.role === 'primary');
+        expect(primaryCorps.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('VRS late war with high exhaustion: shifts to general_defensive', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', exhaustion: 55, strength_class: 'thin', available_brigades: 3 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', exhaustion: 60, strength_class: 'thin', available_brigades: 2 }),
+                makeCorpsAssessment({ corps_id: 'vrs_sarajevo_romanija', exhaustion: 50, strength_class: 'thin', available_brigades: 2 }),
+            ],
+            territory_trend: 'losing',
+            manpower_status: 'critical',
+        });
+        const state = makeMinimalState({ turn: 60 });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 60, 'regular_cadence', false);
+
+        expect(plan.doctrine_override!.army_stance).toBe('general_defensive');
+        expect(plan.doctrine_override!.aggression_modifier).toBeLessThan(0);
+    });
+
+    it('ARBiH early war: no primary corps', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'arbih_1st_corps', available_brigades: 8, strength_class: 'strong' }),
+                makeCorpsAssessment({ corps_id: 'arbih_2nd_corps', available_brigades: 6, strength_class: 'strong' }),
+                makeCorpsAssessment({ corps_id: 'arbih_3rd_corps', available_brigades: 5, strength_class: 'adequate' }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 20 });
+        const plan = generateCampaignPlan(state, 'RBiH', assessment, 20, 'regular_cadence', false);
+
+        const primaryCorps = plan.front_priorities.filter(p => p.role === 'primary');
+        expect(primaryCorps.length).toBe(0);
+    });
+
+    it('ARBiH mid-war: max one primary', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'arbih_1st_corps', available_brigades: 10, strength_class: 'fortress' }),
+                makeCorpsAssessment({ corps_id: 'arbih_2nd_corps', available_brigades: 8, strength_class: 'fortress' }),
+                makeCorpsAssessment({ corps_id: 'arbih_3rd_corps', available_brigades: 7, strength_class: 'strong' }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 50 });
+        const plan = generateCampaignPlan(state, 'RBiH', assessment, 50, 'regular_cadence', false);
+
+        const primaryCorps = plan.front_priorities.filter(p => p.role === 'primary');
+        expect(primaryCorps.length).toBe(1);
+    });
+
+    it('plan validity matches cadence + buffer', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 5 }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 16 });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 16, 'regular_cadence', false);
+
+        // RS cadence=8, PLAN_VALIDITY_BUFFER=2 → valid_until = 16 + 8 + 2 = 26
+        expect(plan.valid_until_turn).toBe(16 + getGatheringCadence('RS', 16) + PLAN_VALIDITY_BUFFER);
+    });
+
+    it('excluded corps receive contain role', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'arbih_general_staff', attendance: 'excluded', available_brigades: 3 }),
+                makeCorpsAssessment({ corps_id: 'arbih_2nd_corps', available_brigades: 6, strength_class: 'strong' }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 50 });
+        const plan = generateCampaignPlan(state, 'RBiH', assessment, 50, 'regular_cadence', false);
+
+        const staff = plan.front_priorities.find(p => p.corps_id === 'arbih_general_staff')!;
+        expect(staff.role).toBe('contain');
+        expect(staff.suggested_stance).toBe('defensive');
+        expect(plan.excluded_corps).toContain('arbih_general_staff');
+    });
+
+    it('corps with active successful op retains primary', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({
+                    corps_id: 'vrs_1st_krajina',
+                    available_brigades: 8,
+                    strength_class: 'fortress',
+                    has_active_op: true,
+                }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', available_brigades: 4, strength_class: 'adequate' }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 10 });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 10, 'regular_cadence', false);
+
+        const krajina = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina')!;
+        expect(krajina.role).toBe('primary');
+    });
+
+    it('all corps exhausted: doctrine forces balanced, negative aggression', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', exhaustion: 55, available_brigades: 4 }),
+                makeCorpsAssessment({ corps_id: 'vrs_drina', exhaustion: 50, available_brigades: 3 }),
+                makeCorpsAssessment({ corps_id: 'vrs_sarajevo_romanija', exhaustion: 45, available_brigades: 3 }),
+            ],
+            territory_trend: 'stable',
+            supply_status: 'adequate',
+            manpower_status: 'adequate',
+        });
+        // Turn > 52 so VRS early war override doesn't apply
+        const state = makeMinimalState({ turn: 60 });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 60, 'regular_cadence', false);
+
+        expect(plan.doctrine_override!.army_stance).toBe('balanced');
+        expect(plan.doctrine_override!.aggression_modifier).toBeLessThan(0);
     });
 });

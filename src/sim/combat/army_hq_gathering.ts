@@ -5,10 +5,10 @@
  */
 
 import type { GameState, FactionId, FormationState } from '../../state/game_state.js';
-import type { TheaterAssessment, CorpsAssessment } from './army_hq_gathering_types.js';
+import type { TheaterAssessment, CorpsAssessment, CampaignPlan, FrontPriority, DoctrineOverride } from './army_hq_gathering_types.js';
 import {
     GATHERING_CADENCE_RS, GATHERING_CADENCE_HRHB, getGatheringCadenceRBiH,
-    EMERGENCY_COOLDOWN,
+    EMERGENCY_COOLDOWN, PLAN_VALIDITY_BUFFER,
 } from './army_hq_gathering_constants.js';
 
 // ── Emergency event IDs that trigger an immediate gathering ──────────────────
@@ -412,4 +412,269 @@ function identifyEnemyFronts(
     }
 
     return { weakestEnemyFront, strongestThreat };
+}
+
+// ── Campaign Plan Generation ────────────────────────────────────────────────
+
+/**
+ * Compute opportunity score for a corps assessment.
+ * Higher = more capable of offensive action.
+ */
+function computeOpportunityScore(ca: CorpsAssessment): number {
+    let score = ca.available_brigades * 10;
+
+    // Strength bonuses / penalties
+    if (ca.strength_class === 'fortress') score += 30;
+    else if (ca.strength_class === 'strong') score += 15;
+    else if (ca.strength_class === 'thin') score -= 20;
+    else if (ca.strength_class === 'critical') score -= 40;
+
+    // Exhaustion penalties
+    if (ca.exhaustion > 50) score -= 40;
+    else if (ca.exhaustion > 30) score -= 20;
+
+    // Threat modifiers
+    if (ca.sector_threat_avg < 0.3) score += 10;
+    else if (ca.sector_threat_avg > 0.7) score -= 10;
+
+    return score;
+}
+
+/**
+ * Generates a campaign plan from the theater assessment.
+ * Assigns front priorities per corps, computes doctrine overrides,
+ * and applies faction personality adjustments.
+ */
+export function generateCampaignPlan(
+    state: GameState,
+    faction: FactionId,
+    assessment: TheaterAssessment,
+    currentTurn: number,
+    reason: string,
+    emergency: boolean,
+): CampaignPlan {
+    const priorities = generateFrontPriorities(faction, assessment, currentTurn);
+    const doctrine = generateDoctrineOverride(faction, assessment, currentTurn, priorities);
+
+    return {
+        issued_turn: currentTurn,
+        valid_until_turn: currentTurn + getGatheringCadence(faction, currentTurn) + PLAN_VALIDITY_BUFFER,
+        emergency,
+        trigger_reason: reason,
+        front_priorities: priorities,
+        doctrine_override: doctrine,
+        synchronized_operations: [],  // Task 5 fills this in
+        force_transfers: [],          // Not implemented in v0.4.7
+        excluded_corps: assessment.corps_assessments
+            .filter(c => c.attendance === 'excluded')
+            .map(c => c.corps_id),
+    };
+}
+
+/** Generate front priorities for all corps. */
+function generateFrontPriorities(
+    faction: FactionId,
+    assessment: TheaterAssessment,
+    currentTurn: number,
+): FrontPriority[] {
+    // Separate excluded corps from candidates
+    const excluded: CorpsAssessment[] = [];
+    const candidates: Array<{ ca: CorpsAssessment; score: number }> = [];
+
+    for (const ca of assessment.corps_assessments) {
+        if (ca.attendance === 'excluded') {
+            excluded.push(ca);
+        } else {
+            candidates.push({ ca, score: computeOpportunityScore(ca) });
+        }
+    }
+
+    // Sort candidates by score descending, then by corps_id for determinism
+    candidates.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.ca.corps_id < b.ca.corps_id ? -1 : a.ca.corps_id > b.ca.corps_id ? 1 : 0;
+    });
+
+    // Assign roles based on score ranking
+    const priorities: FrontPriority[] = [];
+    let primaryCount = 0;
+
+    for (const { ca, score } of candidates) {
+        let role: FrontPriority['role'];
+        let suggestedStance: FrontPriority['suggested_stance'];
+
+        if (ca.strength_class === 'critical') {
+            role = 'contain';
+            suggestedStance = 'reorganize';
+        } else if (score > 0 && primaryCount < 2) {
+            role = 'primary';
+            suggestedStance = 'offensive';
+            primaryCount++;
+        } else if (score > -20) {
+            role = 'secondary';
+            suggestedStance = 'balanced';
+        } else {
+            role = 'economy';
+            suggestedStance = 'defensive';
+        }
+
+        // Radio-only corps capped at secondary
+        if (ca.attendance === 'radio' && (role === 'primary')) {
+            role = 'secondary';
+            suggestedStance = 'balanced';
+            primaryCount--;
+        }
+
+        priorities.push({ corps_id: ca.corps_id, role, suggested_stance: suggestedStance });
+    }
+
+    // Excluded corps always contain
+    for (const ca of excluded) {
+        priorities.push({ corps_id: ca.corps_id, role: 'contain', suggested_stance: 'defensive' });
+    }
+
+    // Faction personality adjustments
+    applyFactionPersonality(faction, currentTurn, priorities);
+
+    // Deterministic output order by corps_id
+    priorities.sort((a, b) => a.corps_id < b.corps_id ? -1 : a.corps_id > b.corps_id ? 1 : 0);
+
+    return priorities;
+}
+
+/** Apply faction-specific constraints to front priorities. */
+function applyFactionPersonality(
+    faction: FactionId,
+    currentTurn: number,
+    priorities: FrontPriority[],
+): void {
+    const primaryCorps = priorities.filter(p => p.role === 'primary');
+    const nonExcluded = priorities.filter(p => p.role !== 'contain' || p.suggested_stance !== 'reorganize');
+
+    if (faction === 'RS') {
+        if (currentTurn < 26) {
+            // VRS early war: force at least 1 primary
+            if (primaryCorps.length === 0) {
+                // Promote the best secondary to primary
+                const best = priorities.find(p => p.role === 'secondary');
+                if (best) {
+                    best.role = 'primary';
+                    best.suggested_stance = 'offensive';
+                }
+            }
+        } else if (currentTurn > 52) {
+            // VRS late war: max 1 primary
+            let seenPrimary = false;
+            for (const p of priorities) {
+                if (p.role === 'primary') {
+                    if (seenPrimary) {
+                        p.role = 'secondary';
+                        p.suggested_stance = 'balanced';
+                    }
+                    seenPrimary = true;
+                }
+            }
+        }
+    } else if (faction === 'RBiH') {
+        if (currentTurn < 40) {
+            // ARBiH early war: no primary — survival mode
+            for (const p of priorities) {
+                if (p.role === 'primary') {
+                    p.role = 'secondary';
+                    p.suggested_stance = 'balanced';
+                }
+            }
+        } else if (currentTurn <= 80) {
+            // ARBiH mid-war: max 1 primary
+            let seenPrimary = false;
+            for (const p of priorities) {
+                if (p.role === 'primary') {
+                    if (seenPrimary) {
+                        p.role = 'secondary';
+                        p.suggested_stance = 'balanced';
+                    }
+                    seenPrimary = true;
+                }
+            }
+        }
+        // ARBiH late war (>80): up to 2 primary — no additional cap needed
+    } else if (faction === 'HRHB') {
+        // HRHB: max 1 primary. Herzegovina corps preferred.
+        const hrhbPrimary = priorities.filter(p => p.role === 'primary');
+        if (hrhbPrimary.length > 1) {
+            // Keep Herzegovina corps if present, demote others
+            const herzegovinaIdx = hrhbPrimary.findIndex(p =>
+                p.corps_id.includes('herzegovina') || p.corps_id.includes('southeast'),
+            );
+            for (let i = 0; i < hrhbPrimary.length; i++) {
+                if (i !== (herzegovinaIdx >= 0 ? herzegovinaIdx : 0)) {
+                    hrhbPrimary[i].role = 'secondary';
+                    hrhbPrimary[i].suggested_stance = 'balanced';
+                }
+            }
+        }
+    }
+}
+
+/** Generate doctrine override from theater assessment and front priorities. */
+function generateDoctrineOverride(
+    faction: FactionId,
+    assessment: TheaterAssessment,
+    currentTurn: number,
+    priorities: FrontPriority[],
+): DoctrineOverride {
+    let armyStance: DoctrineOverride['army_stance'] = 'balanced';
+    let aggression = 0.0;
+
+    // Compute average exhaustion
+    const corpsAssessments = assessment.corps_assessments;
+    const totalExhaustion = corpsAssessments.reduce((sum, c) => sum + c.exhaustion, 0);
+    const avgExhaustion = corpsAssessments.length > 0 ? totalExhaustion / corpsAssessments.length : 0;
+
+    // Territory + supply + manpower → army stance
+    if (assessment.territory_trend === 'losing' &&
+        (assessment.manpower_status === 'critical' || assessment.supply_status === 'critical')) {
+        armyStance = 'general_defensive';
+        aggression = -0.15;
+    } else if (assessment.territory_trend === 'gaining' && assessment.supply_status !== 'critical') {
+        armyStance = 'general_offensive';
+        aggression = 0.10;
+    } else if (avgExhaustion > 40) {
+        armyStance = 'balanced';
+        aggression = -0.05;
+    }
+
+    // Faction adjustments
+    if (faction === 'RS' && currentTurn < 26) {
+        if (armyStance !== 'general_offensive') {
+            aggression += 0.05;
+        }
+        if (armyStance === 'balanced') {
+            armyStance = 'general_offensive';
+        }
+    } else if (faction === 'RBiH' && currentTurn < 40) {
+        armyStance = 'general_defensive';
+        if (aggression > -0.15) aggression = -0.15;
+    } else if (faction === 'HRHB') {
+        if (armyStance === 'general_offensive') {
+            armyStance = 'balanced';
+            aggression = Math.min(aggression, 0.0);
+        }
+    }
+
+    // Corps stance ceilings from front priorities
+    const corpsStanceCeilings: Record<string, 'offensive' | 'balanced' | 'defensive' | 'reorganize'> = {};
+    for (const p of priorities) {
+        if (p.role === 'economy') {
+            corpsStanceCeilings[p.corps_id] = 'balanced';
+        } else if (p.role === 'contain') {
+            corpsStanceCeilings[p.corps_id] = 'defensive';
+        }
+    }
+
+    return {
+        army_stance: armyStance,
+        corps_stance_ceilings: Object.keys(corpsStanceCeilings).length > 0 ? corpsStanceCeilings : undefined,
+        aggression_modifier: aggression,
+    };
 }
