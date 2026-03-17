@@ -176,7 +176,7 @@ export function isKiseljakExcluded(osid: string, faction: FactionId): boolean {
 // 2KK REMOVED from exemption: it was falling through to the corps-pair
 // mechanism but the faction-level block should also apply. 2KK historically
 // did NOT fight HVO in Prozor/Gornji Vakuf — that's Herzegovina Corps area.
-const GRAZ_EXEMPT_RS_CORPS = new Set([
+export const GRAZ_EXEMPT_RS_CORPS = new Set([
     'vrs_1st_krajina',
 ]);
 

@@ -38,9 +38,11 @@ import {
     isGrazAccordsActive,
     isHerzegovinaTruceActive,
     isKiseljakExclusionActive,
-    isCorpsInGrazPair,
+    isEastHerzegovinaPair,
     GRAZ_KISELJAK_VRS_EXCLUSION,
     GRAZ_KISELJAK_HRHB_EXCLUSION,
+    GRAZ_EXEMPT_RS_CORPS,
+    GRAZ_EXEMPT_HRHB_CORPS,
 } from '../local_truces.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 
@@ -108,10 +110,12 @@ export interface FrontlineAttritionReport {
 
 /**
  * Returns true if this brigade is on a cold front under the Graz Accords.
- * Cold fronts are RS↔HRHB sectors where a corps-pair truce or Kiseljak
- * exclusion is active — no shooting, no passive attrition.
+ * Cold fronts are ALL RS↔HRHB sectors (faction-level ceasefire) except:
+ *   - Posavina exempt corps (active fighting)
+ *   - East Herzegovina pair before Op Jackal ends
+ * Also covers Kiseljak OSID exclusion zones.
  */
-function isColdFront(state: GameState, formation: FormationState, sector: CorpsFrontSector): boolean {
+export function isColdFront(state: GameState, formation: FormationState, sector: CorpsFrontSector): boolean {
     if (!isGrazAccordsActive(state)) return false;
 
     // Only applies to sectors facing RS↔HRHB
@@ -122,10 +126,22 @@ function isColdFront(state: GameState, formation: FormationState, sector: CorpsF
         (fac === 'HRHB' && opp.includes('RS'));
     if (!hasRsHrhb) return false;
 
-    // Herzegovina corps-pair truce: brigade's corps is in a Graz pair
+    // Faction-level RS↔HRHB ceasefire (Herzegovina truce component)
     if (isHerzegovinaTruceActive(state)) {
         const corpsId = getFormationCorpsId(formation);
-        if (corpsId && isCorpsInGrazPair(corpsId)) return true;
+
+        // Posavina corps are exempt (active fighting)
+        if (corpsId && GRAZ_EXEMPT_RS_CORPS.has(corpsId)) return false;
+        if (corpsId && GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) return false;
+
+        // Op Jackal: east Herzegovina pair not yet frozen
+        if (corpsId && isEastHerzegovinaPair(corpsId)
+            && state.political.graz_east_herzegovina_active_turn == null) {
+            return false;
+        }
+
+        // All other RS↔HRHB contact is cold
+        return true;
     }
 
     // Kiseljak OSID exclusion: sector includes excluded OSIDs

@@ -42,9 +42,11 @@ import {
     isGrazAccordsActive,
     isHerzegovinaTruceActive,
     isKiseljakExclusionActive,
-    isCorpsInGrazPair,
+    isEastHerzegovinaPair,
     GRAZ_KISELJAK_VRS_EXCLUSION,
     GRAZ_KISELJAK_HRHB_EXCLUSION,
+    GRAZ_EXEMPT_RS_CORPS,
+    GRAZ_EXEMPT_HRHB_CORPS,
 } from '../local_truces.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
@@ -371,6 +373,8 @@ export function findFriendlyOsidsFromMunicipalities(
 /**
  * Is this sector on a cold front (RS↔HRHB truce under Graz Accords)?
  * Simplified check for bot AI — mirrors frontline_attrition.ts isColdFront.
+ * Applies to ALL RS↔HRHB fronts except Posavina exempt corps and
+ * east Herzegovina before Op Jackal ends.
  */
 function isSectorColdFront(state: GameState, sector: CorpsFrontSector): boolean {
     if (!isGrazAccordsActive(state)) return false;
@@ -381,8 +385,25 @@ function isSectorColdFront(state: GameState, sector: CorpsFrontSector): boolean 
         (fac === 'HRHB' && opp.includes('RS'));
     if (!hasRsHrhb) return false;
 
-    if (isHerzegovinaTruceActive(state) && isCorpsInGrazPair(sector.corps_id)) return true;
+    // Faction-level RS↔HRHB ceasefire (Herzegovina truce component)
+    if (isHerzegovinaTruceActive(state)) {
+        const corpsId = sector.corps_id;
 
+        // Posavina corps are exempt (active fighting)
+        if (corpsId && GRAZ_EXEMPT_RS_CORPS.has(corpsId)) return false;
+        if (corpsId && GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) return false;
+
+        // Op Jackal: east Herzegovina pair not yet frozen
+        if (corpsId && isEastHerzegovinaPair(corpsId)
+            && state.political.graz_east_herzegovina_active_turn == null) {
+            return false;
+        }
+
+        // All other RS↔HRHB contact is cold
+        return true;
+    }
+
+    // Kiseljak OSID exclusion
     if (isKiseljakExclusionActive(state)) {
         for (const ss of sector.sub_segments) {
             for (const osid of ss.friendly_osids) {
