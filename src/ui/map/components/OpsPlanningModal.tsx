@@ -670,12 +670,17 @@ export function OpsPlanningModal() {
         const map = mapRef.current;
         if (!map) return;
         const allObjs = currentAxes.flatMap((a) => a.objectives);
+        const stagingOsids = currentAxes.map((a) => a.stagingOsid).filter((s): s is string => !!s);
         const sectorOverlay = buildOsidFilteredFeatures(controlGeoRef.current, sectorFriendlyOsids);
         const objectiveOverlay = buildOsidFilteredFeatures(controlGeoRef.current, allObjs);
+        const objectiveHighlight = buildOsidFilteredFeatures(controlGeoRef.current, allObjs);
+        const stagingHighlight = buildOsidFilteredFeatures(controlGeoRef.current, stagingOsids);
         const arrows = buildMultiAxisArrows(currentAxes);
 
         (map.getSource('ops-sector-overlay') as maplibregl.GeoJSONSource | undefined)?.setData(sectorOverlay);
         (map.getSource('ops-objectives') as maplibregl.GeoJSONSource | undefined)?.setData(objectiveOverlay);
+        (map.getSource('ops-highlight-objectives') as maplibregl.GeoJSONSource | undefined)?.setData(objectiveHighlight);
+        (map.getSource('ops-highlight-staging') as maplibregl.GeoJSONSource | undefined)?.setData(stagingHighlight);
         updateArrowSourceData(map, arrows);
     }, [sectorFriendlyOsids, formationById]);
 
@@ -942,6 +947,16 @@ export function OpsPlanningModal() {
                 map.addLayer({ id: 'ops-objectives-fill', type: 'fill', source: 'ops-objectives', paint: { 'fill-color': 'rgba(255,255,255,0.12)', 'fill-opacity': 1 } });
                 map.addLayer({ id: 'ops-objectives-line', type: 'line', source: 'ops-objectives', paint: { 'line-color': 'rgba(255,255,255,0.8)', 'line-width': 2, 'line-dasharray': [2, 1.5] } });
 
+                // Ops highlight: objectives (dark red territory fill)
+                map.addSource('ops-highlight-objectives', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+                map.addLayer({ id: 'ops-highlight-objectives-fill', type: 'fill', source: 'ops-highlight-objectives', paint: { 'fill-color': '#8b0000', 'fill-opacity': 0.25 } });
+                map.addLayer({ id: 'ops-highlight-objectives-border', type: 'line', source: 'ops-highlight-objectives', paint: { 'line-color': '#1a1a1a', 'line-width': 2, 'line-dasharray': [4, 2] } });
+
+                // Ops highlight: staging (green territory fill)
+                map.addSource('ops-highlight-staging', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+                map.addLayer({ id: 'ops-highlight-staging-fill', type: 'fill', source: 'ops-highlight-staging', paint: { 'fill-color': '#2d6a4f', 'fill-opacity': 0.20 } });
+                map.addLayer({ id: 'ops-highlight-staging-border', type: 'line', source: 'ops-highlight-staging', paint: { 'line-color': '#40916c', 'line-width': 2 } });
+
                 // Advance arrows — source + layers created via addArrowSourceAndLayers
                 addArrowSourceAndLayers(map, { type: 'FeatureCollection', features: [] });
 
@@ -950,7 +965,7 @@ export function OpsPlanningModal() {
                     const osid = event.features?.[0]?.properties?.osid;
                     if (typeof osid === 'string' && osid.length > 0) handleMapClick(osid);
                 };
-                for (const layerId of ['osid-control-fill', 'ops-sector-overlay-fill', 'ops-objectives-fill']) {
+                for (const layerId of ['osid-control-fill', 'ops-sector-overlay-fill', 'ops-objectives-fill', 'ops-highlight-objectives-fill', 'ops-highlight-staging-fill']) {
                     map.on('click', layerId, handleClick);
                     map.on('mouseenter', layerId, () => {
                         const mode = mapClickModeRef.current;
