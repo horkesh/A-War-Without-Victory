@@ -78,7 +78,10 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
             const passiveBuildup = (state.military.opsec_sectors ?? []).includes(enemySectorId)
                 ? profile.passive_buildup_per_turn * 0.5
                 : profile.passive_buildup_per_turn;
-            const newConfidence = Math.min(1.0, prevConfidence + passiveBuildup);
+            // Intel goes stale: decay applies even in contact. Passive buildup
+            // partially offsets it, but net effect is negative — only combat or
+            // probes refresh intel to full confidence.
+            const newConfidence = Math.min(1.0, Math.max(0, prevConfidence + passiveBuildup - profile.confidence_decay_per_turn));
             const turnsInContact = prevTurnsInContact + 1;
             newRecords.push(buildRecord(
                 enemySectorId, enemySector, edgeCount,

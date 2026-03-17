@@ -12,7 +12,7 @@ import type { FactionId } from '../../state/game_state.js';
 export interface FactionReconProfile {
     /** Confidence gained per turn for each sector pair sharing front edges with an enemy sector. */
     passive_buildup_per_turn: number;
-    /** Confidence lost per turn when no front edges shared with an enemy sector. */
+    /** Confidence lost per turn (applies universally — intel goes stale even in contact). */
     confidence_decay_per_turn: number;
     /** How many sector hops away deep intel (offensive_signs, second-echelon) is detectable. */
     recon_range: number;
@@ -28,25 +28,34 @@ export interface FactionReconProfile {
  * slow, incremental. Real operational intelligence comes from probes (recon-by-force)
  * and combat. Without active reconnaissance, a corps should remain uncertain about
  * enemy strength and dispositions for weeks, not days.
+ *
+ * Decay now applies universally — even in-contact sectors lose confidence each turn
+ * (intel goes stale). Passive buildup partially offsets decay but net effect is
+ * negative, so only combat or probes keep confidence high.
+ *
+ * Net in-contact rate = passive_buildup - confidence_decay:
+ *   RS:   0.05 - 0.12 = -0.07/turn → combat intel (1.0) drops to threshold (0.35) in ~9 turns
+ *   RBiH: 0.06 - 0.10 = -0.04/turn → combat intel (1.0) drops to threshold (0.40) in ~15 turns
+ *   HRHB: 0.05 - 0.12 = -0.07/turn → combat intel (1.0) drops to threshold (0.30) in ~10 turns
  */
 export const FACTION_RECON_PROFILES: Record<NonNullable<FactionId>, FactionReconProfile> = {
     RBiH: {
-        passive_buildup_per_turn: 0.06,   // was 0.30 — ARBiH has local informants but no C2
-        confidence_decay_per_turn: 0.08,
+        passive_buildup_per_turn: 0.06,
+        confidence_decay_per_turn: 0.10,   // was 0.08 — intel goes stale universally
         recon_range: 2,
         probe_confidence_gain: 0.50,
         probe_casualty_factor: 0.15,
     },
     RS: {
-        passive_buildup_per_turn: 0.05,   // was 0.20 — JNA inheritance is initial, not ongoing
-        confidence_decay_per_turn: 0.10,
+        passive_buildup_per_turn: 0.05,
+        confidence_decay_per_turn: 0.12,   // was 0.10 — blitz intel fades within ~9 turns
         recon_range: 1,
         probe_confidence_gain: 0.35,
         probe_casualty_factor: 0.25,
     },
     HRHB: {
-        passive_buildup_per_turn: 0.05,   // was 0.20 — Croatian SIS gives initial intel, not flow
-        confidence_decay_per_turn: 0.10,
+        passive_buildup_per_turn: 0.05,
+        confidence_decay_per_turn: 0.12,   // was 0.10 — intel goes stale universally
         recon_range: 1,
         probe_confidence_gain: 0.35,
         probe_casualty_factor: 0.25,
