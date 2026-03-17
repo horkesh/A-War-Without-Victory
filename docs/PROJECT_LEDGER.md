@@ -3,6 +3,50 @@
 **Last Updated:** 2026-03-17
 **Status:** **v0.4.7** (Playable Alpha + Endgame System + Commander Override Layer + Army HQ Gathering). **1028+ tests**, 83 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
 
+## [2026-03-17] Graz Bilateral Ceasefire, Op Jackal Fix, Goražde Brigade Stagger, Enclave UI Sync, Improved Painted Data
+
+**Multi-system session: Graz Accords bilateral enforcement, Op Jackal completion, Goražde OOB corrections, enclave UI sync, and improved calibration painted data (user-reviewed via Territory Painter).**
+
+### Improved Painted Control Data
+- **File:** `data/source/calibration/painted_control_jan1993.json` (replaced with user-reviewed `painted_control_jan1993_improved.json`)
+- **15 OSID corrections** reviewed via Territory Painter tool (`src/ui/map/painter.html`):
+  - Stolac area: tasovcici_2, pjesivac_kula_2, stolac_2 → HRHB (Op Jackal captures), hodbina_2 → HRHB
+  - Mostar hills: vranjevici_2, kruzanj_2 → RS (VRS held throughout, HVO never captured)
+  - Kupres: donji_malovan, goravci → RS (VRS captured)
+  - Drina enclaves: 6 OSIDs RBiH (jezestica, pobudje, donje_zesce, brcigovo, drinsko, medjedja, cerska)
+- **New totals:** RS=407, RBiH=251, HRHB=86 (was RS=410, RBiH=250, HRHB=84)
+- **Calibration baseline shifts:** all future comparisons use the improved painted data
+
+### Graz Accords Bilateral Ceasefire
+- **HRHB→RS blocking added** to `shouldGrazBlockAttack()` — ceasefire now bilateral (was RS→HRHB only)
+- **`GRAZ_EXEMPT_HRHB_CORPS`**: `hvo_northwest_bosnia` (Posavina exempt)
+- **Brigade-level enforcement** in `bot_brigade_ai_osid.ts` — Graz block now filters attack orders before writing to state (was only at directive level, bypassed by brigade AI)
+- **`isColdFront()` extended** to all RS↔HRHB fronts (was corps-pair only)
+- **Op Jackal truce activation**: only triggered by HRHB east-pair corps completion, not VRS (was triggering on VRS Herzegovina op completion, killing Op Jackal mid-execution)
+
+### Operation Jackal
+- **3 bugs fixed**: (1) VRS op completion prematurely triggered truce, (2) `hv_phantom` excluded from brigade AI kind filter, (3) `hv_phantom` excluded from sector assignment
+- **4 HV phantom brigades**: 116th, 4th Guards, 1st Guards/Tigrovi, 113th/Šibenik — all with dynamic withdrawal on Graz truce activation
+- **Mostar Hills axis removed**: vranjevici/kruzanj painted RS — VRS held them, not Op Jackal targets
+- **Final scope**: 4 objectives (tasovcici, rotimlja, pjesivac_kula, stolac) — all captured successfully
+- **n859: 89.0% area-weighted** with improved painted data
+
+### Goražde Brigade Stagger
+- **`displaced_from` field** added to FormationState (informational)
+- **7 brigades updated**: 801st/802nd (w6), 808th (w8, displaced_from visegrad), 843rd (w9, displaced_from cajnice), 851st (w8, displaced_from rogatica), 803rd/807th (w165, June 1995 formations)
+
+### Enclave UI Sync
+- `GameStateAdapter.ts` and `buildEnclaveGeoJSON.ts` updated to use `osid_list` (painted OSIDs only) instead of `osid_prefixes` (full municipalities) for Srebrenica, Žepa, Goražde
+
+### Determinism
+No impact on determinism. Graz blocking is deterministic (same state → same block decisions). Painted data is input data, not simulation logic.
+
+### Tests
+- 21 Graz tests (11 new: bilateral blocking, isColdFront, brigade-level enforcement)
+- 1040 total vitest tests pass, typecheck clean
+
+---
+
 ## [2026-03-17] Army HQ Gathering v0.4.7
 
 **Periodic army-level command meetings producing campaign plans with adaptive doctrine, synchronized multi-corps operations, and front priorities.**
