@@ -65,7 +65,7 @@ function getInitialRegionCandidates(): string[] {
 /** Year-keyed plate URLs per faction. Plates switch each April. */
 const WARROOM_YEAR_PLATE_URLS: Record<FactionId, Record<number, string>> = {
     RBiH: { 1991: hqRbih1991Url, 1992: hqRbih1992Url, 1993: hqRbih1993Url, 1994: hqRbih1994Url, 1995: hqRbih1995Url },
-    RS:   { 1991: hqRs1991Url, 1992: hqRs1992Url, 1993: hqRs1993Url, 1994: hqRs1994Url, 1995: hqRs1995Url },
+    RS: { 1991: hqRs1991Url, 1992: hqRs1992Url, 1993: hqRs1993Url, 1994: hqRs1994Url, 1995: hqRs1995Url },
     HRHB: { 1991: hqHrhb1991Url, 1992: hqHrhb1992Url, 1993: hqHrhb1993Url, 1994: hqHrhb1994Url, 1995: hqHrhb1995Url }
 };
 
@@ -232,6 +232,7 @@ class WarroomApp {
         } else if (!this.desktopBridge?.startNewCampaign) {
             // Browser/dev mode fallback
             await this.loadMockState();
+            this.showMainMenu();
         } else if (!this.userNavigatedFromMenu) {
             // Only show main menu if the user hasn't already navigated away
             // during the async init (e.g. clicked "New Campaign" while assets loaded).
@@ -272,37 +273,48 @@ class WarroomApp {
         });
     }
 
-    async loadMockState() {
-        const politicalControllers = await this.loadInitialPoliticalControllers();
+    async loadMockState(params?: { turn?: number; phase?: string; faction?: FactionId; politicalControllers?: Record<string, string | null> }) {
+        const politicalControllers = params?.politicalControllers ?? await this.loadInitialPoliticalControllers();
 
-        // September 1991 starting state (Phase 0); minimal shape for runPhase0Turn
         this.gameState = {
-  schema_version: 1,
-  meta: { turn: 0, seed: 'start_1991_09', phase: 'peace' },
-  factions: [
+            schema_version: 1,
+            meta: {
+                turn: params?.turn ?? 0,
+                seed: 'start_mock',
+                phase: (params?.phase as any) ?? 'peace',
+                player_faction: params?.faction
+            },
+            factions: [
                 { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null },
                 { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null },
                 { id: 'HRHB', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null }
             ],
-  military: {
-    formations: {},
-    front_segments: {},
-    front_posture: {},
-    front_posture_regions: {},
-    front_pressure: {},
-    militia_pools: {}
-  } as any,
-  political: {
-    political_controllers: politicalControllers,
-    municipalities: {},
-    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-    ceasefire: {},
-    negotiation_ledger: [],
-    supply_rights: { corridors: [] }
-  } as any,
-} as unknown as GameState;
+            military: {
+                formations: {},
+                front_segments: {},
+                front_posture: {},
+                front_posture_regions: {},
+                front_pressure: {},
+                militia_pools: {}
+            } as any,
+            political: {
+                political_controllers: politicalControllers,
+                municipalities: {},
+                negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+                ceasefire: {},
+                negotiation_ledger: [],
+                supply_rights: { corridors: [] }
+            } as any,
+        } as unknown as GameState;
+
+        if (params?.turn === 30) {
+            this.gameState.meta.scenario_start_date = { year: 1992, month: 4, day: 1 };
+        }
 
         setScenarioStartDate(this.gameState.meta.scenario_start_date);
+        if (params?.faction) {
+            await this.ensureRegionsLoadedForFaction(params.faction);
+        }
         this.updateUIOverlay();
     }
 
@@ -414,9 +426,11 @@ class WarroomApp {
     /** STEP 1: Show the main menu title screen. */
     private showMainMenu(): void {
         this.showScreen('main-menu');
-        // Enable "Continue" only if a game is already loaded
+        // Enable "Continue" if a game is loaded OR if we're in browser mode (to allow loading latest save)
         const continueBtn = document.getElementById('mm-continue') as HTMLButtonElement | null;
-        if (continueBtn) continueBtn.disabled = !this.gameState;
+        if (continueBtn) {
+            continueBtn.disabled = !this.gameState && !!this.getDesktopBridge()?.getCurrentGameState;
+        }
     }
 
     /** STEP 2: Show the side picker (faction selection). */
@@ -461,21 +475,35 @@ class WarroomApp {
         const loadSaveBtn = document.getElementById('mm-load-save');
         const loadReplayBtn = document.getElementById('mm-load-replay');
         const continueBtn = document.getElementById('mm-continue');
+        const fileInput = document.getElementById('mm-file-input') as HTMLInputElement | null;
 
         if (newCampaignBtn) {
             newCampaignBtn.onclick = () => this.showSidePicker();
         }
         if (continueBtn) {
             continueBtn.onclick = () => {
-                if (this.gameState) this.showScreen('none');
+                if (this.gameState) {
+                    this.showScreen('none');
+                } else {
+                    void this.loadContinueSave();
+                }
             };
         }
-        // Load Save / Load Replay — placeholder for now
-        if (loadSaveBtn) {
-            loadSaveBtn.onclick = () => {
-                console.log('[warroom] Load Save — not yet implemented');
+        if (loadSaveBtn && fileInput) {
+            loadSaveBtn.onclick = () => fileInput.click();
+            fileInput.onchange = (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                const file = target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (re) => {
+                    const text = re.target?.result as string;
+                    if (text) this.applyGameStateFromJson(text);
+                };
+                reader.readAsText(file);
             };
         }
+        // Load Replay — placeholder for now
         if (loadReplayBtn) {
             loadReplayBtn.onclick = () => {
                 console.log('[warroom] Load Replay — not yet implemented');
@@ -524,7 +552,9 @@ class WarroomApp {
                 if (!scenarioKey || !this.pendingFaction) return;
 
                 if (!this.desktopBridge?.startNewCampaign) {
-                    showError('Desktop bridge unavailable.');
+                    // Browser development mode fallback
+                    console.warn('[warroom] Desktop bridge unavailable, using fallback mock state for:', scenarioKey);
+                    await this.loadScenarioFallback(scenarioKey);
                     return;
                 }
 
@@ -551,6 +581,49 @@ class WarroomApp {
                 }
             };
         }
+    }
+
+    /** Browser fallback for "Continue" button: loads latest run final save from disk. */
+    private async loadContinueSave(): Promise<void> {
+        try {
+            const response = await fetch('/data/derived/latest_run_final_save.json');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const stateJson = await response.text();
+            this.applyGameStateFromJson(stateJson);
+        } catch (error) {
+            console.error('[warroom] Failed to load latest save:', error);
+            // If we can't load a save, just stay on the menu or show an alert
+        }
+    }
+
+    /** Browser fallback for starting a new campaign: constructs a basic mock state. */
+    private async loadScenarioFallback(scenarioKey: CampaignScenarioKey): Promise<void> {
+        let turn = 0;
+        let phase = 'peace';
+        let polControllers: Record<string, string | null> | undefined;
+
+        if (scenarioKey === 'apr_1992') {
+            turn = 30;
+            phase = 'war';
+            try {
+                const r = await fetch('/data/derived/operational/operational_political_control.json');
+                if (r.ok) {
+                    const data = await r.json();
+                    polControllers = data.by_settlement_id;
+                }
+            } catch (err) {
+                console.warn('[warroom] Failed to load 1992 political control fallback:', err);
+            }
+        }
+
+        await this.loadMockState({
+            turn,
+            phase,
+            faction: this.pendingFaction || 'RBiH',
+            politicalControllers: polControllers
+        });
+
+        this.showScreen('none');
     }
 
     /** Wire the top toolbar buttons. */
@@ -623,9 +696,9 @@ class WarroomApp {
         if (!el || !this.gameState) return;
         const turn = this.gameState.meta.turn;
         const label = turnToShortLabel(turn);
-        const phase = this.gameState.meta.phase === 'peace' ? 'Pre-War'
-            : this.gameState.meta.phase === 'war' ? 'Peace phase'
-                : 'War phase';
+        const phase = this.gameState.meta.phase === 'peace' ? 'Peace phase'
+            : this.gameState.meta.phase === 'war' ? 'War phase'
+                : 'Post-War';
         el.textContent = `Turn ${turn} \u2014 ${label} \u2014 ${phase}`;
         const investBtn = document.getElementById('wr-btn-invest') as HTMLButtonElement | null;
         if (investBtn) {

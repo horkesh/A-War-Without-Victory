@@ -37,7 +37,16 @@ function serveWarroomPublic(): Plugin {
                     return;
                 }
                 if (!pathname.startsWith('/assets/') && !pathname.startsWith('/data/')) return next();
+
+                // 1. Check if the file exists locally in the warroom directory.
+                // If it does, let Vite handle it (it's likely a component-local asset or module).
                 const relativePath = pathname.replace(/^\//, '');
+                const localPath = resolve(__dirname, relativePath);
+                if (existsSync(localPath)) return next();
+
+                // 2. Extra safety: do not intercept source files meant for the Vite module graph
+                if (pathname.endsWith('.ts') || pathname.endsWith('.js') || pathname.endsWith('.tsx') || pathname.endsWith('.jsx')) return next();
+
                 let filePath = resolve(publicDir, relativePath);
                 if (!existsSync(filePath)) {
                     const fallbackCwd = resolve(projectRootFromCwd, relativePath);
