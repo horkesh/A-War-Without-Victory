@@ -8,14 +8,13 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-17, brigade front distribution)
-**v0.4.6 (Commander Override Layer).** 974+ tests, 83 suites. tsc clean. **Latest calibration: n842 89.5% area-weighted, 5/6 benchmarks.** Brigade front distribution LIVE. Ops planning modal 4 bugs FIXED. Event system enrichment LIVE. Stacking 46→36, far-from-front 36→29.
-**v0.5.x + v0.6.x FULLY PLANNED:** 10 milestones scoped, 3 cross-plan reviews, all Pyrrhic compliant.
-**Night shift handoff ready:** v0.5.0→v0.5.4 (5 milestones). v0.6.x handoff separate (v0.6.1 Phase 2 day-shift only).
-**G-2 Live Briefing IMPLEMENTED:** Ops planning fullscreen with game map, live engine predictions, paper-styled commander assessment, faction identity. 12 new tests. Design: `docs/plans/2026-03-16-ops-planning-redesign-g2-live-briefing.md`.
-**External:** Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
-**10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots. See `CROSS_PLAN_REVIEW_V05_V06_INTEGRATED.md`.
+## Current State (2026-03-17, v0.4.8 — Ground for v0.5.x)
+**v0.4.8.** 1086 tests, 87 suites. tsc clean. **Latest calibration: n874 89.5% area-weighted, 13/13 anchors. War-or-Game APPROVED.**
+**This session:** Per-enclave personnel cap (Goražde 800, Srebrenica 600, Žepa 400). Periodic return-to-home march (step 135). G2 three-panel ops modal. Territory polygon highlighting. Drina investigation complete (P2 — VRS exhaustion).
+**v0.5.x–v0.9.1 FULLY PLANNED:** 20 milestones scoped. Night shift ready for v0.5.0→v0.5.4.
+**10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.
 **Calibration freeze rule:** After v0.6.1, any sim-affecting change needs `npm run calibrate:52w` regression check vs freeze baseline.
+**External:** Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
 
 ## Session Startup (do these EVERY session — BEFORE any work)
 1. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
@@ -80,7 +79,6 @@
 6. **[2026-03-17] Ops planning modal (P1 — NEXT SESSION)**: Map clicks confirmed working (ref-based handler fix), but modal file overwritten by worktree rewrite user rejected. Need to restore our version (forces left, controls bottom, G2 right) and add territory polygon highlighting (pencil-scratch fill + black border on objectives, green on staging). See `working-on.md` for full spec. OpsMapRenderer needs `updateHighlights()` method.
 7. **[2026-03-17] 3rd Corps brigade displacement (P2)**: 16/27 brigades far from home municipality. Operations displace brigades south, garrison-fill reassigns by proximity. Home affinity tuning regresses calibration. Fix: post-operation return-to-home-sector march logic.
 8. **[2026-03-15] Visual assets — EXTERNAL**: User generating via Gemini Pro.
-8. **RESOLVED this session**: Commander Override Layer (v0.4.6), army HQ overrides (n824), ARBiH 1st Corps probing, salient retreat (#45 → position viability), stale-count oscillation, centroids passthrough, brigade-to-sector reachability (18→2 transient), density ratio (superseded by defensive coherence).
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**

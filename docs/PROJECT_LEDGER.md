@@ -1,7 +1,50 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-17
-**Status:** **v0.4.7** (Playable Alpha + Endgame System + Commander Override Layer + Army HQ Gathering). **1028+ tests**, 83 suites. **FULL ROADMAP TO v1.0.0 PLANNED** — 20 milestones scoped (v0.5.0–v1.0.0), 5 cross-plan reviews, 13 architectural patterns, 5 freeze points, minimum viable ship path identified. Night shift handoff ready for v0.5.0→v0.5.4.
+**Status:** **v0.4.8** (Ground for v0.5.x). **1086 tests**, 87 suites. **n874: 89.5% area-weighted, 13/13 anchors. War-or-Game APPROVED.** Night shift ready for v0.5.0→v0.5.4.
+
+## [2026-03-17] v0.4.8 — Enclave Personnel Caps, Return-to-Home March, G2 Ops Modal, Drina Investigation
+
+**Four workstreams stabilizing the engine for v0.5.x (diplomatic UI).**
+
+### Per-Enclave Personnel Caps (B2)
+- **ENCLAVE_CONFIG** extended with `max_personnel`: Goražde=800, Srebrenica=600, Žepa=400, Bihać=1500, Sarajevo=1500
+- `getEnclaveMaxPersonnel()` + `getEnclaveIdForOsid()` exported from `enclave_resilience.ts`
+- `formation_spawn.ts` uses per-enclave cap instead of flat `ENCLAVE_MAX_PERSONNEL=1500`
+- **Impact**: Goražde brigades 1500→800 each (7500→4000 total). Area-weighted 88.6%→89.5%.
+- 8 new tests in `enclave_personnel_cap.test.ts`
+
+### Periodic Return-to-Home March (C2)
+- **New pipeline step** `return-displaced-brigades` (step 135 in war_phases.ts)
+- `brigade_home_return.ts`: BFS through friendly territory, identifies brigades 3+ hops from home municipality
+- Constants: `RETURN_CHECK_INTERVAL=4`, `RETURN_MAX_MARCH_HOPS=4`, `RETURN_MAX_PER_CORPS=2`
+- Conservative: gradual drift correction, not mass reassignment. Verified no calibration regression.
+- 10 new tests in `brigade_home_return.test.ts`
+
+### G2 Three-Panel Ops Modal (A2+A3)
+- **OpsPlanningModal.tsx** restructured: left panel (forces), center (map), right panel (G2 briefing), bottom strip (controls)
+- G2 panel: commander name/personality, 5-step preparation progress, intel confidence, force ratio, supply readiness, commander assessment
+- **Territory polygon highlighting**: dedicated sources/layers for objectives (dark red) and staging (green)
+- Typecheck clean, map build clean
+
+### Drina Region Investigation (B1)
+- **77% area-weighted** (28 mismatches, 122 Drina OSIDs)
+- Three root causes: (1) VRS Drina exhaustion by w13 — corps stops operating, (2) Goražde over-mobilization — FIXED by enclave cap, (3) Non-local 3rd Corps brigades at Kalinovik — addressed by return march
+- Remaining gap is structural VRS manpower (P2 backlog)
+
+### Calibration (n874)
+- **89.5% area-weighted**, 13/13 anchors, War-or-Game approved
+- 126 orders, 102 battles, 74 flips. RS 84 orders vs RBiH 27 — historically correct tempo
+- Force strength: RS 98k/80 bde, RBiH 152k/124 bde, HRHB 40k/28 bde — all plausible
+
+### CLAUDE.md Created
+- Root-level `CLAUDE.md` added as zero-cost bootstrap layer for Claude Code sessions
+- Contains session startup protocol, key commands, sacred rules, architecture pointers
+
+### Tests
+- 1086 total vitest tests (was 1068), 87 suites, typecheck clean
+
+---
 
 ## [2026-03-17] Graz Bilateral Ceasefire, Op Jackal Fix, Goražde Brigade Stagger, Enclave UI Sync, Improved Painted Data
 
