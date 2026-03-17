@@ -15,7 +15,13 @@
     "initial_cohesion": 55,
     "initial_officer_quality": 0.35,
     "is_elite": true,
-    "elite_commander": {"name":"Dževad Rađo","competence":4,"aggressiveness":3,"defensive_skill":3,"origin":"military"}
+    "elite_commander": {
+      "name": "Dževad Rađo",
+      "competence": 4,
+      "aggressiveness": 3,
+      "defensive_skill": 3,
+      "origin": "military"
+    }
   },
   {
     "id": "arbih_120th_liberation_black_swans",
@@ -32,7 +38,13 @@
     "initial_personnel": 480,
     "initial_cohesion": 55,
     "is_elite": true,
-    "elite_commander": {"name":"Hase Tirić","competence":4,"aggressiveness":4,"defensive_skill":3,"origin":"military"}
+    "elite_commander": {
+      "name": "Hase Tirić",
+      "competence": 4,
+      "aggressiveness": 4,
+      "defensive_skill": 3,
+      "origin": "military"
+    }
   },
   {
     "id": "arbih_17th_muslim_light",
@@ -1871,7 +1883,13 @@
     "initial_personnel": 1200,
     "initial_cohesion": 72,
     "is_elite": true,
-    "elite_commander": {"name":"Zdravko Samardžić","competence":4,"aggressiveness":4,"defensive_skill":4,"origin":"jna"}
+    "elite_commander": {
+      "name": "Zdravko Samardžić",
+      "competence": 4,
+      "aggressiveness": 4,
+      "defensive_skill": 4,
+      "origin": "jna"
+    }
   },
   {
     "id": "rs_1st_armored",
@@ -2758,7 +2776,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 2000,
     "initial_cohesion": 67,
     "distinction_potential": "tier_1",
     "initial_officer_quality": 0.6
@@ -2775,7 +2793,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 1800,
     "initial_cohesion": 67
   },
   {
@@ -2790,7 +2808,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 1500,
     "initial_cohesion": 67
   },
   {
@@ -2955,7 +2973,19 @@
     "initial_officer_quality": 0.85,
     "is_elite": true,
     "distinction_potential": "tier_3",
-    "elite_commander": {"name":"Milomir Savčić","competence":4,"aggressiveness":3,"defensive_skill":4,"origin":"jna","war_crimes_record":{"court":"BiH State Court","verdict":"indicted","charges":"Aiding and abetting genocide (Srebrenica)","summary":"65th Protection Regiment commander indicted for role in Srebrenica killings; fugitive in Serbia"}}
+    "elite_commander": {
+      "name": "Milomir Savčić",
+      "competence": 4,
+      "aggressiveness": 3,
+      "defensive_skill": 4,
+      "origin": "jna",
+      "war_crimes_record": {
+        "court": "BiH State Court",
+        "verdict": "indicted",
+        "charges": "Aiding and abetting genocide (Srebrenica)",
+        "summary": "65th Protection Regiment commander indicted for role in Srebrenica killings; fugitive in Serbia"
+      }
+    }
   },
   {
     "id": "rs_ilidza_brigade",
@@ -3638,7 +3668,13 @@
     "initial_officer_quality": 0.5,
     "is_elite": true,
     "distinction_potential": "tier_1",
-    "elite_commander": {"name":"Željko Glasnović","competence":4,"aggressiveness":4,"defensive_skill":3,"origin":"foreign"}
+    "elite_commander": {
+      "name": "Željko Glasnović",
+      "competence": 4,
+      "aggressiveness": 4,
+      "defensive_skill": 3,
+      "origin": "foreign"
+    }
   },
   {
     "id": "hvo_2nd_guard_mechanized",
@@ -3654,7 +3690,13 @@
     "initial_cohesion": 70,
     "is_elite": true,
     "distinction_potential": "tier_1",
-    "elite_commander": {"name":"Stanko Sopta","competence":4,"aggressiveness":4,"defensive_skill":3,"origin":"military"}
+    "elite_commander": {
+      "name": "Stanko Sopta",
+      "competence": 4,
+      "aggressiveness": 4,
+      "defensive_skill": 3,
+      "origin": "military"
+    }
   },
   {
     "id": "hvo_3rd_guard_jastrebovi",
@@ -3670,7 +3712,13 @@
     "initial_cohesion": 70,
     "is_elite": true,
     "distinction_potential": "tier_1",
-    "elite_commander": {"name":"Ilija Nakić","competence":4,"aggressiveness":4,"defensive_skill":4,"origin":"military"}
+    "elite_commander": {
+      "name": "Ilija Nakić",
+      "competence": 4,
+      "aggressiveness": 4,
+      "defensive_skill": 4,
+      "origin": "military"
+    }
   },
   {
     "id": "hvo_4th_guard_sinovi_posavine",
@@ -3686,7 +3734,13 @@
     "initial_cohesion": 65,
     "is_elite": true,
     "distinction_potential": "tier_1",
-    "elite_commander": {"name":"Mato Bilonjić","competence":3,"aggressiveness":3,"defensive_skill":4,"origin":"military"}
+    "elite_commander": {
+      "name": "Mato Bilonjić",
+      "competence": 3,
+      "aggressiveness": 3,
+      "defensive_skill": 4,
+      "origin": "military"
+    }
   },
   {
     "id": "hrhb_110th_usora_brigade",
@@ -4101,7 +4155,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 1800,
     "initial_cohesion": 67
   },
   {
@@ -4116,7 +4170,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 1500,
     "initial_cohesion": 67,
     "distinction_potential": "tier_2",
     "initial_officer_quality": 0.62
@@ -4133,7 +4187,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 1200,
     "initial_cohesion": 67
   },
   {
@@ -4148,7 +4202,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 1800,
     "initial_cohesion": 55,
     "defense_terrain_bonus": 0.3,
     "initial_officer_quality": 0.15
