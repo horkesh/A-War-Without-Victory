@@ -124,12 +124,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            4, // sectorBrigadeCount — enough already
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            4, // sectorBrigadeCount — enough already
         );
 
         expect(result).toEqual([]);
@@ -165,12 +165,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1, // only 1 brigade in target sector
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            1, // only 1 brigade in target sector
         );
 
         expect(result.length).toBe(2); // surplus of 2
@@ -207,12 +207,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1,
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            1,
         );
 
         expect(result).toEqual([]);
@@ -248,12 +248,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1,
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            1,
         );
 
         expect(result).toEqual([]);
@@ -294,12 +294,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1,
             [sourceSector],
             formations,
             adj,
             friendly,
             componentOf,
+            1,
         );
 
         expect(result).toEqual([]);
@@ -335,12 +335,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1,
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            1,
         );
 
         expect(result).toEqual([]);
@@ -377,12 +377,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1,
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            1,
         );
 
         expect(result.length).toBe(6); // MAX_LOANED_PER_OP
@@ -419,12 +419,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1,
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            1,
         );
 
         expect(result.length).toBe(2); // surplus=2
@@ -460,12 +460,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1,
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            1,
         );
 
         // Only b3 should be available (b2 is combat ineffective)
@@ -501,12 +501,12 @@ describe('computeReinforcementPool', () => {
 
         const result = computeReinforcementPool(
             targetSector,
-            1,
             [sourceSector],
             formations,
             adjacency,
             friendly,
             componentOf,
+            1,
         );
 
         expect(result.length).toBe(1);
