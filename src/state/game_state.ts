@@ -333,6 +333,14 @@ export interface CorpsOperation {
     sync_operation_name?: string;
     /** Earliest turn to launch (from sync window) */
     sync_launch_after?: number;
+
+    // --- Corps-wide operation reinforcement (brigade concentration) ---
+    /** Brigades loaned from other sectors for this operation, with source tracking. */
+    loaned_brigades?: Array<{
+        brigade_id: FormationId;
+        source_sector_id: string;
+        arrived: boolean;
+    }>;
 }
 
 /** Independent sector stances — each sector can differ from its corps stance. */
