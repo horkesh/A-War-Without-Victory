@@ -53,6 +53,7 @@ import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } f
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors, GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors.js';
 import { computeReinforcementPool } from './operation_reinforcement.js';
+import { MIN_BRIGADES_FOR_SECTOR_ATTACK } from './operation_reinforcement_constants.js';
 import { buildFriendlyComponents } from './sector_utils.js';
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
 import {
@@ -1693,6 +1694,10 @@ export function generateCorpsDirectives(
                     }
                     // If probe launch fails, fall through to try full attack
                 }
+
+                // Sector attacks require MIN_BRIGADES_FOR_SECTOR_ATTACK (3).
+                // Probes (handled above) only need 1.
+                if (finalBrigadeIds.length < MIN_BRIGADES_FOR_SECTOR_ATTACK) continue;
 
                 const op = evaluateSectorOffensiveLaunch(
                     state, corps.id, sec.sector_id, faction,
