@@ -180,6 +180,11 @@ const GRAZ_EXEMPT_RS_CORPS = new Set([
     'vrs_1st_krajina',
 ]);
 
+/** HRHB corps exempt from Graz — Posavina fighting */
+export const GRAZ_EXEMPT_HRHB_CORPS = new Set([
+    'hvo_northwest_bosnia',  // Orašje pocket — Posavina corridor fighting
+]);
+
 /**
  * Should this corps skip offensive targeting against the given OSID's controller?
  * Combines faction-level RS→HRHB block + corps-pair truce check + Kiseljak exclusion.
@@ -209,6 +214,19 @@ export function shouldGrazBlockAttack(
     // This catches SRK (vrs_sarajevo_romanija), Drina (vrs_drina), 5th Corps, etc.
     if (isHerzegovinaTruceActive(state) && faction === 'RS' && !GRAZ_EXEMPT_RS_CORPS.has(corpsId)) {
         return true;
+    }
+
+    // HRHB → RS faction-level block (bilateral ceasefire)
+    if (faction === 'HRHB' && (targetController === 'RS')
+        && isHerzegovinaTruceActive(state)
+        && !GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) {
+        // Op Jackal exemption: HVO SE Herzegovina can attack RS until Op Jackal ends
+        if (corpsId === 'hvo_southeast_herzegovina'
+            && state.political.graz_east_herzegovina_active_turn == null) {
+            // Op Jackal not yet complete — allow attack
+        } else {
+            return true;
+        }
     }
 
     // Herzegovina corps-pair truce: block if corps is in a pair and truce is unbroken.

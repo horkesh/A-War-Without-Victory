@@ -70,3 +70,28 @@ describe('Graz faction-level RS→HRHB block (n697)', () => {
         expect(shouldGrazBlockAttack(state, 'vrs_sarajevo_romanija', 'RS', 'op:kakanj:kakanj_2', 'HRHB')).toBe(false);
     });
 });
+
+describe('Graz faction-level HRHB→RS block (bilateral ceasefire)', () => {
+    it('blocks HRHB corps attacking RS territory', () => {
+        const state = makeActiveState();
+        // HVO Tomislavgrad attacking RS territory — should be blocked
+        expect(shouldGrazBlockAttack(state, 'hvo_tomislavgrad', 'HRHB', 'op:kupres:kupres_2', 'RS')).toBe(true);
+    });
+
+    it('does NOT block HVO Northwest Bosnia (Posavina exempt)', () => {
+        const state = makeActiveState();
+        expect(shouldGrazBlockAttack(state, 'hvo_northwest_bosnia', 'HRHB', 'op:brcko:brcko_2', 'RS')).toBe(false);
+    });
+
+    it('does NOT block HVO SE Herzegovina before Op Jackal ends', () => {
+        const state = makeActiveState();
+        // graz_east_herzegovina_active_turn is null → Op Jackal not yet complete → allow
+        expect(shouldGrazBlockAttack(state, 'hvo_southeast_herzegovina', 'HRHB', 'op:stolac:stolac_2', 'RS')).toBe(false);
+    });
+
+    it('blocks HVO SE Herzegovina after Op Jackal ends', () => {
+        const state = makeActiveState();
+        (state.political as any).graz_east_herzegovina_active_turn = 8;
+        expect(shouldGrazBlockAttack(state, 'hvo_southeast_herzegovina', 'HRHB', 'op:stolac:stolac_2', 'RS')).toBe(true);
+    });
+});
