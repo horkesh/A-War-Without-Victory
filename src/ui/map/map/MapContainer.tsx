@@ -314,7 +314,11 @@ export function MapContainer() {
         center: BOSNIA_CENTER,
         zoom: DEFAULT_ZOOM,
       });
-      map.on('error', (e) => console.error('[MapLibre] map error:', e.error));
+      map.on('error', (e) => {
+        // Suppress noisy PMTiles "Unimplemented type: 4" errors (MVT geometry type unsupported by MapLibre)
+        if (e.error?.message?.includes('Unimplemented type')) return;
+        console.error('[MapLibre] map error:', e.error);
+      });
       mapRef.current = map;
       ensureTacticalIcons(map);
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
