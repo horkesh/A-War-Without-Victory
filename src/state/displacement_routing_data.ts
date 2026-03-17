@@ -193,18 +193,27 @@ const CROAT_ROUTING_REGION: Record<string, string> = {
  * abroad_fraction: 0.30 for all Serb routes (Serbia to flee to).
  */
 const SERB_ROUTES: Record<string, readonly MunicipalityId[]> = {
-    TUZLA_AREA:     ['bijeljina', 'lopare', 'doboj', 'banja_luka'],
-    MAGLAJ_TESANJ:  ['doboj', 'teslic', 'banja_luka'],
-    ZENICA_KAKANJ:  ['ilijas', 'pale', 'doboj', 'banja_luka'],
-    TRAVNIK:        ['skender_vakuf', 'mrkonjic_grad', 'banja_luka'],
-    EAST_CORRIDOR:  ['vlasenica', 'han_pijesak', 'bijeljina', 'zvornik'],
+    // Eastern Bosnia / Tuzla region — stay in east, don't cross corridor
+    TUZLA_AREA:     ['bijeljina', 'lopare', 'ugljevik', 'zvornik'],
+    EAST_CORRIDOR:  ['vlasenica', 'han_pijesak', 'milici', 'bijeljina'],
+    // Maglaj/Tešanj — nearest RS is Doboj (just north), then Teslić
+    MAGLAJ_TESANJ:  ['doboj', 'teslic', 'modrica'],
+    // Zenica/Kakanj — flee east to Sarajevo RS suburbs, then Drina
+    ZENICA_KAKANJ:  ['ilijas', 'pale', 'sokolac', 'han_pijesak'],
+    // Travnik — Vlašić plateau Serbs go to Krajina (geographically west)
+    TRAVNIK:        ['skender_vakuf', 'mrkonjic_grad', 'jajce', 'banja_luka'],
+    // Vareš — flee east through Serb-held territory
+    VARES:          ['ilijas', 'sokolac', 'pale', 'han_pijesak'],
+    // Sarajevo suburbs — Pale/Sokolac (eastern RS core)
     SARAJEVO:       ['pale', 'sokolac', 'han_pijesak', 'rogatica'],
+    // Herzegovina — stay in Herzegovina RS territory
     MOSTAR:         ['nevesinje', 'gacko', 'trebinje', 'bileca'],
-    LIVNO:          ['glamoc', 'bosansko_grahovo', 'banja_luka'],
-    KONJIC:         ['kalinovik', 'foca', 'pale'],
-    BIHAC_POCKET:   ['bosanski_petrovac', 'kljuc', 'banja_luka', 'prijedor'],
+    LIVNO:          ['glamoc', 'bosansko_grahovo', 'mrkonjic_grad'],
+    KONJIC:         ['kalinovik', 'foca', 'nevesinje', 'pale'],
+    // Bihać pocket — flee to Krajina (geographically correct)
+    BIHAC_POCKET:   ['bosanski_petrovac', 'kljuc', 'prijedor', 'banja_luka'],
+    // Central Bosnia (Jajce, Bugojno) — flee to Krajina
     CENTRAL_BOSNIA: ['mrkonjic_grad', 'sipovo', 'banja_luka'],
-    VARES:          ['ilijas', 'sokolac', 'pale', 'banja_luka'],
 };
 
 /** Serb municipality → routing region. */
