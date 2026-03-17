@@ -51,7 +51,7 @@ import {
     type Osid
 } from './osid_adjacency.js';
 import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
-import { shouldGrazBlockAttack, isGrazAccordsActive } from '../local_truces.js';
+import { shouldGrazBlockAttack, isGrazAccordsActive, isEastHerzegovinaPair } from '../local_truces.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
@@ -568,9 +568,12 @@ export function generateAllBotOrdersOsid(
     }
 
     // ── Graz Accords enforcement: remove RS↔HRHB attacks violating ceasefire ──
+    // Exception: brigades in a corps with an active operation AND the east Herzegovina
+    // pair truce hasn't activated yet (Op Jackal still running) are exempt.
     if (isGrazAccordsActive(state)) {
         const pc = state.political.political_controllers ?? {};
         const formations = state.military.formations ?? {};
+        const corpsCmd = state.military.corps_command ?? {};
         for (const bid of Object.keys(allAttackOrders)) {
             const target = allAttackOrders[bid as FormationId];
             if (!target) continue;
@@ -579,6 +582,12 @@ export function generateAllBotOrdersOsid(
             const corpsId = f.corps_id ?? '';
             const faction = f.faction as FactionId;
             const targetController = pc[target] ?? '';
+            // Skip Graz block for brigades in an active east-pair operation (Op Jackal)
+            if (corpsCmd[corpsId]?.active_operation != null
+                && isEastHerzegovinaPair(corpsId)
+                && state.political.graz_east_herzegovina_active_turn == null) {
+                continue;
+            }
             if (shouldGrazBlockAttack(state, corpsId, faction, target, targetController)) {
                 delete allAttackOrders[bid as FormationId];
             }

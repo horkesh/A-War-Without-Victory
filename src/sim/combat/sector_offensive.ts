@@ -783,10 +783,12 @@ export function advanceSectorOffensives(
                 }
                 releaseOperationCommander(state, op);
 
-                // Activate east Herzegovina truce after Op Jackal (or any HRHB east-pair op) ends.
-                // Historical: VRS-HRHB ceasefire in east Herzegovina held after June 1992 offensive.
+                // Activate east Herzegovina truce after Op Jackal (HRHB east-pair op) ends.
+                // Historical: VRS-HRHB ceasefire in east Herzegovina held after June 1992 HVO offensive.
+                // Only triggered by HRHB side — VRS Herzegovina ops completing should NOT freeze the truce.
                 if (isGrazAccordsActive(state)
                     && isEastHerzegovinaPair(corpsId)
+                    && faction === 'HRHB'
                     && state.political.graz_east_herzegovina_active_turn == null) {
                     state.political.graz_east_herzegovina_active_turn = turn;
                 }
