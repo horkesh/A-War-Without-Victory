@@ -934,7 +934,7 @@ export function MapContainer() {
                       source: ENCLAVE_LABEL_SOURCE_ID,
                       layout: {
                         'text-field': ['get', 'label'],
-                        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                        'text-font': ['Open Sans Bold'],
                         'text-size': ['interpolate', ['linear'], ['zoom'], 6, 8, 10, 11, 14, 15],
                         'text-anchor': 'center',
                         'text-allow-overlap': false,

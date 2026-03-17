@@ -108,7 +108,7 @@ function addArrowSourceAndLayers(map: maplibregl.Map, data: FeatureCollection) {
     map.addLayer({
         id: 'ops-obj-labels', type: 'symbol', source: ARROW_SOURCE_ID,
         filter: ['==', ['get', 'type'], 'obj-label'],
-        layout: { 'text-field': ['get', 'label'], 'text-size': 14, 'text-font': ['Noto Sans Regular', 'Open Sans Bold'], 'text-allow-overlap': true, 'text-offset': [0, -1.2] },
+        layout: { 'text-field': ['get', 'label'], 'text-size': 14, 'text-font': ['Open Sans Regular'], 'text-allow-overlap': true, 'text-offset': [0, -1.2] },
         paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
     });
     map.addLayer({
@@ -124,7 +124,7 @@ function addArrowSourceAndLayers(map: maplibregl.Map, data: FeatureCollection) {
     map.addLayer({
         id: 'ops-staging-labels', type: 'symbol', source: ARROW_SOURCE_ID,
         filter: ['==', ['get', 'type'], 'staging-label'],
-        layout: { 'text-field': ['get', 'label'], 'text-size': 12, 'text-font': ['Noto Sans Regular', 'Open Sans Bold'], 'text-allow-overlap': true, 'text-offset': [0, -1.0] },
+        layout: { 'text-field': ['get', 'label'], 'text-size': 12, 'text-font': ['Open Sans Regular'], 'text-allow-overlap': true, 'text-offset': [0, -1.0] },
         paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
     });
 }
