@@ -182,9 +182,11 @@ export function generateAllCorpsOrders(
     supplyByOsid?: SupplyStateByOsidReport | null,
     ethnicMap?: OsidEthnicComposition | null
 ): void {
-    // 0. Generate army HQ overrides for this turn
+    // 0. Generate army HQ overrides for this turn (merge with any existing from gathering)
     const armyOverrides = generateArmyHQOverrides(state, faction);
-    state.military.army_hq_overrides = armyOverrides.length > 0 ? armyOverrides : undefined;
+    const existingOverrides = state.military.army_hq_overrides ?? [];
+    const merged = [...existingOverrides, ...armyOverrides];
+    state.military.army_hq_overrides = merged.length > 0 ? merged : undefined;
 
     // 0a. Set army stance from standing orders
     setArmyStandingOrder(state, faction);

@@ -52,3 +52,29 @@ export const PRIORITY_RESERVE: Record<string, number> = {
     economy: 0.10,
     contain: 0.15,
 };
+
+/** Strength classification thresholds (average brigade personnel) */
+export const STRENGTH_THRESHOLDS = { fortress: 1500, strong: 1000, adequate: 600, thin: 300 };
+
+/** Supply status thresholds (general_supply_reserve value) */
+export const SUPPLY_STATUS_THRESHOLDS = { abundant: 75, adequate: 50, strained: 25 };
+
+/** Manpower status thresholds (average brigade personnel) */
+export const MANPOWER_STATUS_THRESHOLDS = { healthy: 1500, adequate: 1000, strained: 600 };
+
+/** Opportunity score values for corps assessment */
+export const OPPORTUNITY_SCORE = {
+    PER_BRIGADE: 10,
+    FORTRESS_BONUS: 30,
+    STRONG_BONUS: 15,
+    THIN_PENALTY: -20,
+    CRITICAL_PENALTY: -40,
+    HIGH_EXHAUSTION_PENALTY: -40,
+    MED_EXHAUSTION_PENALTY: -20,
+    EXHAUSTION_HIGH_THRESHOLD: 50,
+    EXHAUSTION_MED_THRESHOLD: 30,
+    LOW_THREAT_BONUS: 10,
+    HIGH_THREAT_PENALTY: -10,
+    LOW_THREAT_THRESHOLD: 0.3,
+    HIGH_THREAT_THRESHOLD: 0.7,
+};

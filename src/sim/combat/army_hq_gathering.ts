@@ -10,6 +10,8 @@ import {
     GATHERING_CADENCE_RS, GATHERING_CADENCE_HRHB, getGatheringCadenceRBiH,
     EMERGENCY_COOLDOWN, PLAN_VALIDITY_BUFFER,
     SYNC_WINDOW_DEFAULT, SYNC_MIN_BRIGADES,
+    STRENGTH_THRESHOLDS, SUPPLY_STATUS_THRESHOLDS, MANPOWER_STATUS_THRESHOLDS,
+    OPPORTUNITY_SCORE,
 } from './army_hq_gathering_constants.js';
 
 // ── Emergency event IDs that trigger an immediate gathering ──────────────────
@@ -297,10 +299,10 @@ function getCorpsCommanderCompetence(state: GameState, corpsId: string): number 
 
 /** Classify corps strength from average brigade personnel. */
 function classifyStrength(avgPersonnel: number): string {
-    if (avgPersonnel >= 1500) return 'fortress';
-    if (avgPersonnel >= 1000) return 'strong';
-    if (avgPersonnel >= 600)  return 'adequate';
-    if (avgPersonnel >= 300)  return 'thin';
+    if (avgPersonnel >= STRENGTH_THRESHOLDS.fortress) return 'fortress';
+    if (avgPersonnel >= STRENGTH_THRESHOLDS.strong) return 'strong';
+    if (avgPersonnel >= STRENGTH_THRESHOLDS.adequate) return 'adequate';
+    if (avgPersonnel >= STRENGTH_THRESHOLDS.thin) return 'thin';
     return 'critical';
 }
 
@@ -347,9 +349,9 @@ function computeTerritoryTrend(assessments: CorpsAssessment[]): 'gaining' | 'sta
 /** Derive supply status from general_supply_reserve. */
 function computeSupplyStatus(state: GameState, faction: FactionId): 'abundant' | 'adequate' | 'strained' | 'critical' {
     const reserve = state.military.general_supply_reserve?.[faction] ?? 0;
-    if (reserve >= 75) return 'abundant';
-    if (reserve >= 50) return 'adequate';
-    if (reserve >= 25) return 'strained';
+    if (reserve >= SUPPLY_STATUS_THRESHOLDS.abundant) return 'abundant';
+    if (reserve >= SUPPLY_STATUS_THRESHOLDS.adequate) return 'adequate';
+    if (reserve >= SUPPLY_STATUS_THRESHOLDS.strained) return 'strained';
     return 'critical';
 }
 
@@ -367,9 +369,9 @@ function computeManpowerStatus(state: GameState, faction: FactionId): 'healthy' 
     }
 
     const avg = count > 0 ? totalPersonnel / count : 0;
-    if (avg >= 1500) return 'healthy';
-    if (avg >= 1000) return 'adequate';
-    if (avg >= 600)  return 'strained';
+    if (avg >= MANPOWER_STATUS_THRESHOLDS.healthy) return 'healthy';
+    if (avg >= MANPOWER_STATUS_THRESHOLDS.adequate) return 'adequate';
+    if (avg >= MANPOWER_STATUS_THRESHOLDS.strained) return 'strained';
     return 'critical';
 }
 
@@ -422,21 +424,21 @@ function identifyEnemyFronts(
  * Higher = more capable of offensive action.
  */
 function computeOpportunityScore(ca: CorpsAssessment): number {
-    let score = ca.available_brigades * 10;
+    let score = ca.available_brigades * OPPORTUNITY_SCORE.PER_BRIGADE;
 
     // Strength bonuses / penalties
-    if (ca.strength_class === 'fortress') score += 30;
-    else if (ca.strength_class === 'strong') score += 15;
-    else if (ca.strength_class === 'thin') score -= 20;
-    else if (ca.strength_class === 'critical') score -= 40;
+    if (ca.strength_class === 'fortress') score += OPPORTUNITY_SCORE.FORTRESS_BONUS;
+    else if (ca.strength_class === 'strong') score += OPPORTUNITY_SCORE.STRONG_BONUS;
+    else if (ca.strength_class === 'thin') score += OPPORTUNITY_SCORE.THIN_PENALTY;
+    else if (ca.strength_class === 'critical') score += OPPORTUNITY_SCORE.CRITICAL_PENALTY;
 
     // Exhaustion penalties
-    if (ca.exhaustion > 50) score -= 40;
-    else if (ca.exhaustion > 30) score -= 20;
+    if (ca.exhaustion > OPPORTUNITY_SCORE.EXHAUSTION_HIGH_THRESHOLD) score += OPPORTUNITY_SCORE.HIGH_EXHAUSTION_PENALTY;
+    else if (ca.exhaustion > OPPORTUNITY_SCORE.EXHAUSTION_MED_THRESHOLD) score += OPPORTUNITY_SCORE.MED_EXHAUSTION_PENALTY;
 
     // Threat modifiers
-    if (ca.sector_threat_avg < 0.3) score += 10;
-    else if (ca.sector_threat_avg > 0.7) score -= 10;
+    if (ca.sector_threat_avg < OPPORTUNITY_SCORE.LOW_THREAT_THRESHOLD) score += OPPORTUNITY_SCORE.LOW_THREAT_BONUS;
+    else if (ca.sector_threat_avg > OPPORTUNITY_SCORE.HIGH_THREAT_THRESHOLD) score += OPPORTUNITY_SCORE.HIGH_THREAT_PENALTY;
 
     return score;
 }
@@ -552,7 +554,6 @@ function applyFactionPersonality(
     priorities: FrontPriority[],
 ): void {
     const primaryCorps = priorities.filter(p => p.role === 'primary');
-    const nonExcluded = priorities.filter(p => p.role !== 'contain' || p.suggested_stance !== 'reorganize');
 
     if (faction === 'RS') {
         if (currentTurn < 26) {
