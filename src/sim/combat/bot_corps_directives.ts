@@ -1564,6 +1564,56 @@ export function generateCorpsDirectives(
             const inCooldown = lastCompletedOp != null
                 && (currentTurn - lastCompletedTurn) <= SECONDARY_OP_COOLDOWN_TURNS;
 
+            // ── Proactive probe: scan all corps sectors for low intel ──
+            // A real commander probes blind spots BEFORE committing to offensives.
+            // Without this, the corps always attacks from its highest-intel sector
+            // and never gathers intel about the rest of its front.
+            {
+                const consecutiveProbes = cmd.consecutive_probes ?? 0;
+                const turn = state.meta?.turn ?? 0;
+                // Find lowest-intel sector that faces enemies
+                let worstSector: typeof directiveEligibleSectors[0] | undefined;
+                let worstConf = Infinity;
+                for (const sec of directiveEligibleSectors) {
+                    const conf = getSectorIntelConfidence(state, sec.sector_id);
+                    if (conf < worstConf) {
+                        worstConf = conf;
+                        worstSector = sec;
+                    }
+                }
+                if (worstSector && shouldLaunchProbeInstead(faction, worstConf, consecutiveProbes, turn)) {
+                    const secEnemyOsids = collectSectorEnemyOsids(worstSector).sort(strictCompare);
+                    const secFriendlyOsids = new Set(collectSectorFriendlyOsids(worstSector));
+                    const probeBrigadeIds = subordinates
+                        .filter(b => b.location_osid && secFriendlyOsids.has(b.location_osid)
+                            && b.status === 'active' && (b.personnel ?? 0) >= 400)
+                        .map(b => b.id)
+                        .sort(strictCompare)
+                        .slice(0, 2);
+                    if (probeBrigadeIds.length >= 1 && secEnemyOsids.length >= 1) {
+                        const reachableTargets = secEnemyOsids.filter(target => {
+                            const neighbors = adjacency.get(target) ?? [];
+                            return neighbors.some(n => getPoliticalControllerOSID(state, n, reverseMap) === faction);
+                        });
+                        if (reachableTargets.length >= 1) {
+                            const probeOp = evaluateSectorOffensiveLaunch(
+                                state, corps.id, worstSector.sector_id, faction,
+                                probeBrigadeIds, secEnemyOsids, reachableTargets.slice(0, 1), supplyByOsid,
+                                'repulsed'
+                            );
+                            if (probeOp) {
+                                probeOp.type = 'probe';
+                                probeOp.planning_duration = 1;
+                                cmd.active_operation = probeOp;
+                                cmd.consecutive_probes = consecutiveProbes + 1;
+                                assignOperationCommander(state, probeOp, corps.id, faction);
+                                continue; // Skip to next corps — this one is probing
+                            }
+                        }
+                    }
+                }
+            }
+
             for (const sec of sortedLaunchSectors) {
                 if (inCooldown) {
                     // Check whether this sector shares theater with the last completed op.
