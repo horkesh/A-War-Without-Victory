@@ -474,13 +474,37 @@ function formatTurnLog(log: TurnLog): string {
 async function main(): Promise<void> {
     const baseDir = process.cwd();
     const mode = process.argv.includes('--mode') ? process.argv[process.argv.indexOf('--mode') + 1] : 'reactive';
+    const corpsApi = process.argv.includes('--corps-api');
+    const apiModel = process.argv.includes('--model') ? process.argv[process.argv.indexOf('--model') + 1] : 'claude-haiku-4-5-20251001';
     const scenarioPath = 'data/scenarios/apr1992_definitive_40w.json';
     const outDir = join(baseDir, 'runs/three_commanders');
     await mkdir(outDir, { recursive: true });
 
+    // API client (for --mode api and --corps-api)
+    let apiClient: any = null;
+    let totalApiCost = 0;
+    let totalApiCalls = 0;
+    if (mode === 'api' || corpsApi) {
+        const apiKey = process.env.ANTHROPIC_API_KEY;
+        if (!apiKey) {
+            console.error('ERROR: ANTHROPIC_API_KEY not set. Run with: ANTHROPIC_API_KEY=sk-ant-... npx tsx ...');
+            process.exit(1);
+        }
+        const Anthropic = (await import('@anthropic-ai/sdk')).default;
+        apiClient = new Anthropic({ apiKey });
+    }
+
+    function estimateCost(promptTokens: number, completionTokens: number, model: string): number {
+        if (model.includes('haiku')) return (promptTokens * 0.8 + completionTokens * 4) / 1_000_000;
+        if (model.includes('sonnet')) return (promptTokens * 3 + completionTokens * 15) / 1_000_000;
+        return (promptTokens * 15 + completionTokens * 75) / 1_000_000;
+    }
+
+    const corpsAssessments: Array<{ turn: number; corps_id: string; commander: string; faction: string; assessment: string; stances: Record<string, string> }> = [];
+
     console.log('╔══════════════════════════════════════════════════════════════╗');
     console.log('║          THREE COMMANDERS — All Factions AI-Driven          ║');
-    console.log(`║          Mode: ${mode.padEnd(44)}║`);
+    console.log(`║          Mode: ${mode.padEnd(20)} Corps API: ${corpsApi ? 'ON' : 'OFF'}${' '.repeat(corpsApi ? 11 : 12)}║`);
     console.log('╚══════════════════════════════════════════════════════════════╝');
 
     // Load commander profiles
@@ -517,7 +541,8 @@ async function main(): Promise<void> {
 
     let osidAreas: Record<string, number> = {};
     try {
-        osidAreas = JSON.parse(await readFile(join(baseDir, 'data/derived/operational/osid_areas.json'), 'utf8'));
+        const raw = JSON.parse(await readFile(join(baseDir, 'data/derived/operational/osid_areas.json'), 'utf8'));
+        osidAreas = raw.areas ?? raw; // areas nested under 'areas' key
     } catch { /* non-fatal — fall back to count-based */ }
 
     // Run
@@ -555,9 +580,76 @@ async function main(): Promise<void> {
                         observations: [],
                     });
                 }
+            } else if (mode === 'api' && apiClient) {
+                try {
+                    const { generateApiDecision } = await import('./api_commander.js');
+                    const apiResult = await generateApiDecision(apiClient, profile, state, week, prevTerritory, apiModel, osidAreas);
+                    decisions.push({
+                        faction: apiResult.faction,
+                        commander_name: apiResult.commander_name,
+                        turn: week,
+                        briefing: apiResult.briefing,
+                        corps_stances: apiResult.corps_stances,
+                        observations: apiResult.observations,
+                    });
+                    totalApiCost += estimateCost(apiResult.prompt_tokens, apiResult.completion_tokens, apiModel);
+                    totalApiCalls++;
+                } catch (err) {
+                    console.warn(`  [API] Error for ${profile.faction} at w${week}: ${err}. Falling back to reactive.`);
+                    decisions.push(generateReactiveDecision(profile, state, week, prevTerritory, osidAreas));
+                }
             } else {
                 decisions.push(generateReactiveDecision(profile, state, week, prevTerritory, osidAreas));
             }
+        }
+
+        // Corps-level API decisions (after army decisions, before injection)
+        if (corpsApi && apiClient && state.meta.phase === 'war') {
+            try {
+                const { generateCorpsApiDecision } = await import('./api_corps_commander.js');
+                const formations = state.military.formations ?? {};
+                const corpsCommand = state.military.corps_command ?? {};
+                for (const [corpsId, cc] of Object.entries(corpsCommand).sort(([a], [b]) => strictCompare(a, b))) {
+                    const cf = formations[corpsId];
+                    if (!cf || cf.kind === 'army_hq') continue;
+                    // Find army briefing for this faction
+                    const armyDecision = decisions.find(d => d.faction === cf.faction);
+                    const armyBriefing = armyDecision?.briefing ?? '';
+                    // Get officer stats
+                    const officerName = corpsId.replace(/_/g, ' ');
+                    const competence = 3;
+                    const aggressiveness = 3;
+                    try {
+                        const corpsResult = await generateCorpsApiDecision(
+                            apiClient, state, cf.faction as FactionId, corpsId,
+                            officerName, competence, aggressiveness, armyBriefing, osidAreas, apiModel
+                        );
+                        // Apply sector stances to state
+                        const sectors = state.military.corps_front_sectors;
+                        if (sectors && corpsResult.sector_stances) {
+                            for (const [sectorId, stance] of Object.entries(corpsResult.sector_stances)) {
+                                const sector = Object.values(sectors).find((s: any) => s.sector_id === sectorId);
+                                if (sector) {
+                                    (sector as any).sector_stance = stance;
+                                    (sector as any).stance_source = 'bot';
+                                }
+                            }
+                        }
+                        if (cc) {
+                            (cc as any).ai_assessment = corpsResult.assessment;
+                            (cc as any).ai_decided = true;
+                        }
+                        corpsAssessments.push({
+                            turn: week, corps_id: corpsId, commander: corpsResult.commander_name,
+                            faction: cf.faction, assessment: corpsResult.assessment, stances: corpsResult.sector_stances,
+                        });
+                        totalApiCost += estimateCost(corpsResult.prompt_tokens, corpsResult.completion_tokens, apiModel);
+                        totalApiCalls++;
+                    } catch (corpsErr) {
+                        // Silent fallback — formula bot handles this corps
+                    }
+                }
+            } catch { /* corps API module not available */ }
         }
 
         // Inject decisions into state
@@ -658,6 +750,15 @@ async function main(): Promise<void> {
     console.log(`  State hash: ${hash}`);
     console.log(`  Observations: ${allObservations.length} total (${allObservations.filter(o => o.severity === 'bug').length} bugs, ${allObservations.filter(o => o.severity === 'calibration').length} calibration, ${allObservations.filter(o => o.severity === 'design_gap').length} design gaps, ${allObservations.filter(o => o.severity === 'historical_divergence').length} divergences)`);
     console.log(`  Run comparison: node tools/compare_painted_vs_sim.cjs runs/three_commanders`);
+    if (totalApiCalls > 0) {
+        console.log(`  API calls: ${totalApiCalls} | Estimated cost: $${totalApiCost.toFixed(4)} (${apiModel})`);
+    }
+
+    // Save corps assessments if any
+    if (corpsAssessments.length > 0) {
+        await writeFile(join(outDir, 'corps_assessments.json'), stableStringify(corpsAssessments, 2), 'utf8');
+        console.log(`  Corps assessments: ${corpsAssessments.length} saved`);
+    }
 }
 
 main().catch(err => { console.error('FATAL:', err); process.exit(1); });
