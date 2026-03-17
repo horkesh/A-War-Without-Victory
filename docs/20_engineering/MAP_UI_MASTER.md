@@ -517,7 +517,7 @@ interface OperationView {
 The map UI now carries the live player-agency A-H surface through these components:
 
 - `CorpsFrontPanel.tsx` - sector defensive intent, logistics priority, and **Sector Assignment bridge**
-- `OpsPlanningModal.tsx` - operation shaping fields including tempo, artillery preparation, launch gating...
+- `OpsPlanningModal.tsx` - fullscreen ops planning with game map (PMTiles), live G-2 briefing panel via `query-operation-prediction` IPC (300ms debounced), faction identity (army crest + corps name). Sub-components in `plan_ui/`: `G2BriefingPanel` (readiness bars + axis cards + assessment doc), `CommanderAssessmentDoc` (paper-styled military document), `AxisAssessmentCard` (collapsible), `ReadinessBar`, `OpsMapRenderer` (game map instance), `CommandTopBar`, `PlaybookSelector`, `TempoSelector`, `RiskToleranceSelector`, `AxisDrilldown`. Shared constants: `opsConstants.ts`.
 - `OperationsPanel.tsx` - operation list/detail, readiness surfacing, and objective focus
 - **NOTE (2026-03-15):** `CorpsDetail.tsx` and `ArmyDetail.tsx` now represent organizational abstractions. Functional tactical map interaction is primarily via `FormationDetail` and `CorpsFrontPanel`.
 - `SelectionPanel.tsx` - municipality support staging for the current player faction on selected municipalities

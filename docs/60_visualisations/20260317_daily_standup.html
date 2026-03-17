@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Daily Standup — 2026-03-17</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080c12;color:#c5cdd9;font-family:'Segoe UI',system-ui,sans-serif;padding:20px;max-width:1400px;margin:0 auto}
+h1{color:#d4a843;font-size:1.5rem;letter-spacing:2px;text-transform:uppercase}
+.header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #d4a843;padding-bottom:12px;margin-bottom:20px}
+.header-meta{color:#7a8a9e;font-size:0.8rem;text-align:right}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:1fr 1fr 1fr}
+.grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.panel{background:#0d1420;border:1px solid #1e2a38;border-radius:6px;padding:16px}
+.panel-title{color:#d4a843;font-size:0.95rem;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1a2030;text-transform:uppercase;letter-spacing:1px}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:0.7rem;font-weight:600;text-transform:uppercase}
+.b-good{background:#1a3a2a;color:#4ade80;border:1px solid #2d5a3d}
+.b-bad{background:#3a1a1a;color:#f87171;border:1px solid #5a2d2d}
+.b-warn{background:#3a2a1a;color:#f59e0b;border:1px solid #5a3d1d}
+.b-info{background:#1a2a4a;color:#60a5fa;border:1px solid #2d3d6a}
+.b-purple{background:#2a1a3a;color:#c084fc;border:1px solid #3d2d5a}
+.metric{text-align:center;padding:14px}
+.metric-val{font-size:1.8rem;font-weight:700}
+.metric-lbl{font-size:0.7rem;color:#7a8a9e;margin-top:2px}
+.val-gold{color:#d4a843}
+.val-green{color:#4ade80}
+.val-red{color:#f87171}
+.val-amber{color:#f59e0b}
+table{width:100%;border-collapse:collapse;font-size:0.8rem}
+th{text-align:left;color:#7a8a9e;font-weight:500;padding:6px 8px;border-bottom:1px solid #1a2030}
+td{padding:5px 8px;border-bottom:1px solid #0a1018}
+tr:hover td{background:#111a28}
+.bar-container{width:100%;height:18px;background:#0a1018;border-radius:3px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:3px;transition:width 0.3s}
+.bar-label{position:absolute;right:4px;top:1px;font-size:0.65rem;color:#fff;font-weight:600}
+.chart{display:flex;align-items:flex-end;gap:3px;height:120px;padding:0 4px}
+.chart-bar{flex:1;background:#1e3a5a;border-radius:2px 2px 0 0;position:relative;min-width:20px;transition:height 0.3s}
+.chart-bar:hover{background:#2a5a8a}
+.chart-bar .tip{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:0.6rem;color:#d4a843;white-space:nowrap}
+.chart-label{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:0.55rem;color:#7a8a9e}
+.retro-item{padding:8px 0;border-bottom:1px solid #0a1018;font-size:0.82rem;line-height:1.5}
+.retro-item:last-child{border-bottom:none}
+.priority-card{background:#111820;border-left:3px solid #d4a843;padding:10px 14px;margin-bottom:8px;border-radius:0 4px 4px 0}
+.priority-card h4{color:#d4a843;font-size:0.85rem;margin-bottom:4px}
+.priority-card p{font-size:0.78rem;color:#9ab;line-height:1.4}
+.triage-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.8rem}
+.strength-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #0a1018}
+.faction-name{min-width:50px;font-weight:600;font-size:0.85rem}
+.faction-rbih{color:#4ade80}
+.faction-rs{color:#60a5fa}
+.faction-hrhb{color:#f59e0b}
+footer{text-align:center;color:#2a3a4e;font-size:0.65rem;margin-top:20px;padding-top:12px;border-top:1px solid #1a2030}
+@media(max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Pyrrhic Daily Standup</h1>
+  <div class="header-meta">
+    2026-03-17 (Monday) &bull; v0.4.7<br>
+    1028 tests &bull; 84 suites &bull; tsc clean<br>
+    27 commits in last 24h
+  </div>
+</div>
+
+<!-- ═══ TOP METRICS ═══ -->
+<div class="grid grid-4" style="margin-bottom:16px">
+  <div class="panel metric">
+    <div class="metric-val val-gold">89.5%</div>
+    <div class="metric-lbl">Area-Weighted (n847)</div>
+  </div>
+  <div class="panel metric">
+    <div class="metric-val val-green">5/6</div>
+    <div class="metric-lbl">Benchmarks Pass</div>
+  </div>
+  <div class="panel metric">
+    <div class="metric-val val-gold">27</div>
+    <div class="metric-lbl">Commits (24h)</div>
+  </div>
+  <div class="panel metric">
+    <div class="metric-val val-green">0</div>
+    <div class="metric-lbl">Life Lesson Violations</div>
+  </div>
+</div>
+
+<!-- ═══ PHASE 1: RETROSPECTIVE ═══ -->
+<div class="grid grid-3" style="margin-bottom:16px">
+  <div class="panel">
+    <div class="panel-title"><span class="badge b-good">Good</span> What Worked</div>
+    <div class="retro-item"><strong>Event timeline fix:</strong> 28 chronological errors corrected across 43 events. Added <code>requires_events</code> conditional chaining &mdash; 9 causal dependency links. Ceasefire/Dayton reversal caught.</div>
+    <div class="retro-item"><strong>Army HQ Gathering v0.4.7:</strong> Full implementation in one session &mdash; 838 lines of core logic, 54 tests, pipeline integration, doc propagation. Subagent-driven development worked exceptionally well.</div>
+    <div class="retro-item"><strong>/simplify caught override collision:</strong> <code>generateAllCorpsOrders</code> was REPLACING <code>army_hq_overrides</code> instead of merging. Silent data loss that would have broken sync ops. Caught before deployment.</div>
+    <div class="retro-item"><strong>Doc propagation discipline:</strong> 5 docs updated for gathering (REPO_MAP, Systems Manual, IPC contract, reports index, PROJECT_LEDGER). Canon drift = zero.</div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><span class="badge b-warn">Bad</span> What Regressed</div>
+    <div class="retro-item"><strong>No calibration run with gathering active:</strong> v0.4.7 was implemented but no 40w scenario was run to measure its impact on territorial outcomes. We don't know if gathering improves or hurts calibration.</div>
+    <div class="retro-item"><strong>Napkin not updated for v0.4.7:</strong> Current state still says "v0.4.6" with n842 metrics. Should reflect v0.4.7 + gathering system status.</div>
+    <div class="retro-item"><strong>TypeScript errors in subagent output:</strong> 3 separate type error fixes needed after subagent implementation (wrong state path, invalid mock fields, cast issues). Subagents need better type awareness.</div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><span class="badge b-bad">Ugly</span> Patterns to Break</div>
+    <div class="retro-item"><strong>Near-miss: shared array replace vs append.</strong> The override collision was the SAME pattern as the n782 defensive_power bug &mdash; a producer overwriting shared state after another producer already wrote to it. New life lesson proposed.</div>
+    <div class="retro-item"><strong>Historical dates from memory:</strong> 28/41 events had wrong dates. East Mostar siege placed 10 months before the war that caused it. All plausible enough to pass casual review. New life lesson proposed.</div>
+  </div>
+</div>
+
+<!-- ═══ PHASE 2: CALIBRATION TRAJECTORY ═══ -->
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-title">Calibration Trajectory (Last 10 Runs)</div>
+  <div class="chart" style="margin-bottom:24px">
+    <div class="chart-bar" style="height:72%"><span class="tip">88.6%</span><span class="chart-label">n696</span></div>
+    <div class="chart-bar" style="height:72%"><span class="tip">88.6%</span><span class="chart-label">n697</span></div>
+    <div class="chart-bar" style="height:72%"><span class="tip">88.6%</span><span class="chart-label">n698</span></div>
+    <div class="chart-bar" style="height:72%"><span class="tip">88.6%</span><span class="chart-label">n699</span></div>
+    <div class="chart-bar" style="height:74%"><span class="tip">88.6%</span><span class="chart-label">n700</span></div>
+    <div class="chart-bar" style="height:82%;background:#2a5a3a"><span class="tip">89.0%</span><span class="chart-label">n819</span></div>
+    <div class="chart-bar" style="height:86%;background:#2a5a3a"><span class="tip">89.4%</span><span class="chart-label">n824</span></div>
+    <div class="chart-bar" style="height:86%;background:#2a5a3a"><span class="tip">89.4%</span><span class="chart-label">n835</span></div>
+    <div class="chart-bar" style="height:88%;background:#3a6a3a"><span class="tip">89.5%</span><span class="chart-label">n842</span></div>
+    <div class="chart-bar" style="height:88%;background:#3a6a3a"><span class="tip">89.5%</span><span class="chart-label">n847</span></div>
+  </div>
+  <div style="font-size:0.8rem;color:#7a8a9e">
+    <strong>Trend:</strong> Steady climb from 88.6% (n696) to 89.5% (n847) over 3 days. +0.9pp gain from commander override + army HQ override activation. Plateauing at 89.5% &mdash; next breakthrough likely requires OOB or painted target adjustments (structural, not algorithmic).
+    <strong>Inflection:</strong> n819→n824 (+0.4pp) was the corps_asset kind fix activating army HQ overrides.
+  </div>
+</div>
+
+<!-- ═══ PHASE 3: TROOP STRENGTHS (Monday Deep-Dive) ═══ -->
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-title">Monday Deep-Dive: Troop Strengths by Faction (w40, n847)</div>
+
+  <div class="strength-row">
+    <span class="faction-name faction-rbih">RBiH</span>
+    <div style="flex:1">
+      <div class="bar-container"><div class="bar-fill" style="width:75%;background:#4ade80"><span class="bar-label">150,154</span></div></div>
+    </div>
+    <span style="font-size:0.75rem;color:#7a8a9e;min-width:120px">133 bde &bull; 1,129 avg</span>
+    <span class="badge b-good">ON TRACK</span>
+  </div>
+
+  <div class="strength-row">
+    <span class="faction-name faction-rs">RS</span>
+    <div style="flex:1">
+      <div class="bar-container"><div class="bar-fill" style="width:53%;background:#60a5fa"><span class="bar-label">106,006</span></div></div>
+    </div>
+    <span style="font-size:0.75rem;color:#7a8a9e;min-width:120px">87 bde &bull; 1,218 avg</span>
+    <span class="badge b-good">WITHIN BAND</span>
+  </div>
+
+  <div class="strength-row">
+    <span class="faction-name faction-hrhb">HRHB</span>
+    <div style="flex:1">
+      <div class="bar-container"><div class="bar-fill" style="width:20%;background:#f59e0b"><span class="bar-label">40,942</span></div></div>
+    </div>
+    <span style="font-size:0.75rem;color:#7a8a9e;min-width:120px">33 bde &bull; 1,241 avg</span>
+    <span class="badge b-warn">21% BELOW</span>
+  </div>
+
+  <table style="margin-top:12px">
+    <tr><th>Faction</th><th>Sim w40</th><th>Historical w40</th><th>Delta</th><th>Assessment</th></tr>
+    <tr><td class="faction-rbih">ARBiH</td><td>150,154</td><td>180&ndash;200k</td><td>-17%</td><td>Early mobilization plateau. On trajectory &mdash; would reach 180k by w52.</td></tr>
+    <tr><td class="faction-rs">VRS</td><td>106,006</td><td>100&ndash;110k (w40 est.)</td><td>&plusmn;0%</td><td>Organic degradation from 250k peak. Fatigue + supply drain working as designed.</td></tr>
+    <tr><td class="faction-hrhb">HVO</td><td>40,942</td><td>50&ndash;55k</td><td>-21%</td><td>Structural: OOB has 40 brigades, Graz cold-front limits growth. Pool scale 1.05 may need bump.</td></tr>
+  </table>
+</div>
+
+<!-- ═══ PHASE 4: CANON DRIFT ═══ -->
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-title">Canon & Doc Drift Detection</div>
+  <div style="font-size:0.85rem">
+    <span class="badge b-good">NO DRIFT</span> &nbsp; All 4 changed <code>src/sim/</code> files are correctly referenced in engineering and canon docs.
+  </div>
+  <table style="margin-top:8px">
+    <tr><th>Changed File</th><th>REPO_MAP</th><th>Systems Manual</th><th>IPC Contract</th></tr>
+    <tr><td><code>army_hq_gathering.ts</code></td><td class="val-green">&#10003;</td><td class="val-green">&#10003;</td><td class="val-green">&#10003;</td></tr>
+    <tr><td><code>army_hq_gathering_constants.ts</code></td><td class="val-green">&#10003;</td><td>&mdash;</td><td>&mdash;</td></tr>
+    <tr><td><code>bot_corps_ai.ts</code></td><td class="val-green">&#10003;</td><td class="val-green">&#10003;</td><td>&mdash;</td></tr>
+    <tr><td><code>brigade_assignment.ts</code></td><td class="val-green">&#10003;</td><td>&mdash;</td><td>&mdash;</td></tr>
+  </table>
+</div>
+
+<!-- ═══ PHASE 5: BACKLOG TRIAGE ═══ -->
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-title">Stale Backlog Triage</div>
+  <div class="triage-row"><span class="badge b-warn">PARK</span> <strong>#40 Operational Tempo (P3)</strong> &mdash; 3.5 battles/week. Structural &mdash; gathering sync ops may improve naturally. Revisit after calibration run with gathering.</div>
+  <div class="triage-row"><span class="badge b-info">PARK</span> <strong>#28 SRK Sarajevo siege (P2)</strong> &mdash; Gathering front priorities + "contain" role for SRK may fix organically. Revisit after calibration.</div>
+  <div class="triage-row"><span class="badge b-info">PARK</span> <strong>#27 2nd Corps thin fronts (P2)</strong> &mdash; Density imbalance. Gathering "economy" role + brigade redistribution may help. Monitor.</div>
+  <div class="triage-row"><span class="badge b-info">PARK</span> <strong>#24 RS attack success rate (P2)</strong> &mdash; 89.1% was pre-gathering. Needs fresh run to evaluate.</div>
+  <div class="triage-row"><span class="badge b-warn">PARK</span> <strong>#25 Podrinje Sweep duration (P3)</strong> &mdash; 23 weeks for 7 captures. Sync ops should improve. Revisit after calibration.</div>
+  <div class="triage-row"><span class="badge b-bad">PARK</span> <strong>HVO Central Bosnia (P2)</strong> &mdash; 7 sectorless brigades. Structural &mdash; deferred to v0.5.x (activates April 1993).</div>
+  <div class="triage-row"><span class="badge b-warn">PARK</span> <strong>HRHB w40 understrength (P2)</strong> &mdash; 40.9k vs 50-55k target. Pool scale tuning after gathering calibration.</div>
+  <div style="font-size:0.78rem;color:#7a8a9e;margin-top:8px"><strong>Rationale:</strong> All open items are PARKED pending the first calibration run with Army HQ Gathering active. The gathering system changes bot strategy fundamentally &mdash; measuring its impact before tuning individual issues avoids wasted work.</div>
+</div>
+
+<!-- ═══ PHASE 7: TODAY'S PRIORITIES ═══ -->
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-title">Today's Priorities</div>
+
+  <div class="priority-card" style="border-left-color:#f87171">
+    <h4>P0: Run 40w Calibration with Gathering Active</h4>
+    <p><strong>Why:</strong> v0.4.7 adds a new pipeline step that fundamentally changes bot strategy. We have zero data on its impact. Every open backlog item is parked pending this.<br>
+    <strong>Roles:</strong> Gameplay Programmer + War-or-Game<br>
+    <strong>Done when:</strong> 40w run completes, comparison tool shows area-weighted %, all benchmarks evaluated, CALIBRATION_MASTER updated, War-or-Game sign-off.<br>
+    <strong>Risk if skipped:</strong> We ship a feature that may have regressed calibration. All downstream work on open issues is uninformed.</p>
+  </div>
+
+  <div class="priority-card">
+    <h4>P1: Write New Life Lessons + Update Napkin for v0.4.7</h4>
+    <p><strong>Why:</strong> Two lessons proposed (shared array append vs replace, historical date verification). Napkin still says v0.4.6. Both are process hygiene.<br>
+    <strong>Roles:</strong> Orchestrator<br>
+    <strong>Done when:</strong> 2 lessons written to <code>life_lessons.md</code>, napkin current state updated to v0.4.7.<br>
+    <strong>Risk if skipped:</strong> Same override collision bug repeats. Historical date errors repeat.</p>
+  </div>
+
+  <div class="priority-card">
+    <h4>P2: Tune Gathering Parameters Based on Calibration Results</h4>
+    <p><strong>Why:</strong> After the P0 calibration run, the opportunity scores, front priority thresholds, and sync operation generation may need adjustment. This is where the gathering transitions from "implemented" to "calibrated."<br>
+    <strong>Roles:</strong> Gameplay Programmer + Game Designer + War-or-Game<br>
+    <strong>Done when:</strong> Gathering produces historically plausible front priorities (VRS Drina/Posavina primary early war, ARBiH defensive early). Sync ops fire at appropriate moments.<br>
+    <strong>Risk if skipped:</strong> Gathering produces bad plans that hurt calibration.</p>
+  </div>
+
+  <div class="priority-card">
+    <h4>P3: Begin v0.5.0 Planning (Full Diplomatic System)</h4>
+    <p><strong>Why:</strong> v0.4.7 is complete. The roadmap says v0.5.0 (Negotiations) is next. Getting the plan written today means nightshift can start implementation tomorrow.<br>
+    <strong>Roles:</strong> Product Manager + Game Designer + Technical Architect<br>
+    <strong>Done when:</strong> Implementation plan at <code>docs/plans/2026-03-17-v0.5.0-diplomatic-system.md</code> with tasks, tests, commits.<br>
+    <strong>Risk if skipped:</strong> Roadmap stalls. Nightshift has nothing to implement.</p>
+  </div>
+</div>
+
+<!-- ═══ WARNINGS ═══ -->
+<div class="panel" style="border-color:#5a3d1d">
+  <div class="panel-title" style="color:#f59e0b">Warnings & Blockers</div>
+  <div style="font-size:0.82rem">
+    <span class="badge b-warn">WARN</span> <strong>No calibration data with gathering active.</strong> All open items parked until P0 completes.<br><br>
+    <span class="badge b-warn">WARN</span> <strong>HRHB 21% below troop strength target.</strong> Pool scale may need bump from 1.05 to ~1.25 after gathering calibration.<br><br>
+    <span class="badge b-info">INFO</span> <strong>Duplicate sync op commit:</strong> <code>413fb4c</code> and <code>1952e5b</code> have identical messages. Non-functional &mdash; likely a subagent re-commit. No code impact.
+  </div>
+</div>
+
+<footer>
+  Pyrrhic Games &bull; Daily Standup &bull; 2026-03-17 06:27 &bull; Orchestrator
+</footer>
+
+</body>
+</html>

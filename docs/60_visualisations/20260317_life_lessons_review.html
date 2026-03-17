@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Lessons Review — 2026-03-17</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0e14; color: #c5cdd9; font-family: 'Segoe UI', system-ui, sans-serif; padding: 24px; }
+  h1 { color: #d4a843; font-size: 1.6rem; margin-bottom: 4px; letter-spacing: 1px; }
+  .subtitle { color: #7a8a9e; font-size: 0.85rem; margin-bottom: 24px; }
+  .section { background: #111820; border: 1px solid #1e2a38; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .section-title { color: #d4a843; font-size: 1.1rem; margin-bottom: 12px; border-bottom: 1px solid #1e2a38; padding-bottom: 8px; }
+  .status-badge { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+  .badge-pass { background: #1a3a2a; color: #4ade80; border: 1px solid #2d5a3d; }
+  .badge-warn { background: #3a2a1a; color: #f59e0b; border: 1px solid #5a3d1d; }
+  .badge-new { background: #1a2a4a; color: #60a5fa; border: 1px solid #2d3d6a; }
+  .badge-caught { background: #2a1a3a; color: #c084fc; border: 1px solid #3d2d5a; }
+  .lesson-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #0d1420; }
+  .lesson-row:last-child { border-bottom: none; }
+  .lesson-id { color: #7a8a9e; font-size: 0.75rem; min-width: 140px; }
+  .lesson-text { flex: 1; font-size: 0.85rem; line-height: 1.5; }
+  .highlight { color: #f59e0b; font-weight: 500; }
+  .good { color: #4ade80; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .metric { text-align: center; padding: 16px; background: #0d1420; border-radius: 6px; }
+  .metric-value { font-size: 2rem; font-weight: 700; color: #d4a843; }
+  .metric-label { font-size: 0.75rem; color: #7a8a9e; margin-top: 4px; }
+  .new-lesson { background: #0d1a2a; border: 1px solid #1e3a5a; border-radius: 6px; padding: 14px; margin-top: 10px; }
+  .new-lesson h4 { color: #60a5fa; font-size: 0.9rem; margin-bottom: 6px; }
+  .new-lesson p { font-size: 0.8rem; line-height: 1.5; color: #9ab; }
+  .commit-list { font-size: 0.8rem; color: #7a8a9e; }
+  .commit-list code { color: #c084fc; background: #1a1a2e; padding: 1px 4px; border-radius: 3px; }
+  footer { text-align: center; color: #3a4a5e; font-size: 0.7rem; margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<h1>LIFE LESSONS REVIEW</h1>
+<p class="subtitle">Daily Compliance Scan &mdash; 2026-03-17 06:03 &bull; 20 commits reviewed &bull; 35 active lessons checked</p>
+
+<div class="grid-2" style="margin-bottom: 16px;">
+  <div class="metric">
+    <div class="metric-value good">0</div>
+    <div class="metric-label">Violations Detected</div>
+  </div>
+  <div class="metric">
+    <div class="metric-value" style="color: #c084fc;">1</div>
+    <div class="metric-label">Near-Miss (Caught in Review)</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Near-Miss: Caught Before Damage</div>
+  <div class="lesson-row">
+    <div class="lesson-id"><span class="badge-caught">CAUGHT</span></div>
+    <div class="lesson-text">
+      <strong>[Architecture] Derived state must be computed AFTER all its producers have run</strong><br>
+      <span class="highlight">Override collision in army_hq_overrides:</span> The new gathering system wrote sync overrides to <code>state.military.army_hq_overrides</code>, but <code>generateAllCorpsOrders()</code> in <code>bot_corps_ai.ts</code> then REPLACED the entire array (line 187: <code>state.military.army_hq_overrides = armyOverrides</code>), wiping the gathering's work. Same pattern as the n782 <code>defensive_power</code> bug &mdash; a producer running after another producer overwrites shared state.<br><br>
+      <span class="good">Caught by /simplify code review.</span> Fixed by merging: <code>[...existingOverrides, ...armyOverrides]</code>. Commit <code>707f7d7</code>.
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Lessons Validated (Compliant)</div>
+
+  <div class="lesson-row">
+    <div class="lesson-id"><span class="badge-pass">PASS</span><br>Organic emergence</div>
+    <div class="lesson-text">
+      Gathering system uses <strong>adaptive doctrine based on theater assessment</strong>, not hard phase switches. Calendar-driven phases become fallback defaults. VRS blitz decays organically through exhaustion + supply, not week-number gates.
+    </div>
+  </div>
+
+  <div class="lesson-row">
+    <div class="lesson-id"><span class="badge-pass">PASS</span><br>One change per commit</div>
+    <div class="lesson-text">
+      9 gathering tasks implemented as 12 separate commits. Each commit is one logical change (types, triggers, assessment, plan gen, sync ops, integration, pipeline, serialization, fixes).
+    </div>
+  </div>
+
+  <div class="lesson-row">
+    <div class="lesson-id"><span class="badge-pass">PASS</span><br>Code comments can lie</div>
+    <div class="lesson-text">
+      Event timeline fix caught exactly this: <code>operation_corridor_1992</code> event at turn 14 described a "Brčko breakthrough" at the wrong date. The <code>mostar_siege_begins_1992</code> described an HVO siege 10 months before the HVO-ARBiH war. All 28 date errors verified against primary sources (ICTY records, Balkan Battlegrounds, UNSCR documents).
+    </div>
+  </div>
+
+  <div class="lesson-row">
+    <div class="lesson-id"><span class="badge-pass">PASS</span><br>Cross-plan reviews</div>
+    <div class="lesson-text">
+      After writing the gathering plan, explicitly checked all downstream plans (v0.5.0&ndash;v0.6.x) for conflicts. Found and updated 3 docs: BOT_AI_HOLISTIC_TUNING_REFERENCE, BOT_AI_DESIGN_SPEC, ROADMAP_TO_1_0.
+    </div>
+  </div>
+
+  <div class="lesson-row">
+    <div class="lesson-id"><span class="badge-pass">PASS</span><br>Freeze points</div>
+    <div class="lesson-text">
+      Gathering plan defers force transfers to v0.4.8, player UI to v0.5.1, LLM narrative to v0.5.4. Each deferral aligns with the correct milestone. Calendar-driven doctrine phases preserved as fallback (not deleted).
+    </div>
+  </div>
+
+  <div class="lesson-row">
+    <div class="lesson-id"><span class="badge-pass">PASS</span><br>Virtual identity routing</div>
+    <div class="lesson-text">
+      Campaign plan lookup uses <code>corps_id</code> consistently across both consumption points (<code>bot_corps_stance.ts</code> and <code>bot_corps_directives.ts</code>). No identity mismatch between stance and directive layers.
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Proposed New Lessons</div>
+
+  <div class="new-lesson">
+    <h4><span class="badge-new">PROPOSED</span> &nbsp; [Architecture] Shared mutable arrays: verify append vs replace semantics</h4>
+    <p>
+      <strong>Context:</strong> <code>generateAllCorpsOrders()</code> assigned <code>state.military.army_hq_overrides = armyOverrides</code>, replacing any sync overrides the gathering had pushed earlier in the pipeline. Silent data loss &mdash; no error, no warning.<br><br>
+      <strong>Wrong approach:</strong> Writing to a shared state array with assignment (<code>=</code>) when multiple pipeline steps contribute to it.<br><br>
+      <strong>Right approach:</strong> When multiple pipeline steps write to the same state array, use append/merge (<code>push</code> or spread) not assignment. If a step MUST reset the array, it should run FIRST, not after other contributors.<br><br>
+      <strong>How to apply:</strong> When adding a new pipeline step that writes to an existing state field, grep for ALL other writers. Check: does any writer use <code>=</code> (replace) after your step runs? If so, fix the ordering or change to merge.
+    </p>
+  </div>
+
+  <div class="new-lesson">
+    <h4><span class="badge-new">PROPOSED</span> &nbsp; [History] Verify historical dates against primary sources, never from memory</h4>
+    <p>
+      <strong>Context:</strong> 28 of 41 historical events had incorrect turn numbers. Some were 25 weeks off (anti-sniping agreement). The East Mostar siege was placed 10 months before the HVO-ARBiH war. Ceasefire and Dayton talks were in reversed chronological order. All errors were plausible enough to pass casual review.<br><br>
+      <strong>Wrong approach:</strong> Setting event dates from general knowledge ("Mostar siege was 1992, right?"). Memory conflates the JNA siege (1992) with the HVO siege (1993).<br><br>
+      <strong>Right approach:</strong> Every historical date must be verified against a primary source (ICTY records, UNSCR documents, Balkan Battlegrounds). Compute turn numbers from the formula: <code>turn = (date - April 6, 1992) / 7</code>. Cross-check causal ordering (event B cannot fire before event A if B depends on A).<br><br>
+      <strong>How to apply:</strong> When adding or modifying historical events, cite the source and date. Add a <code>requires_events</code> field for causal dependencies. The timeline integrity tests (<code>event_timeline_integrity.test.ts</code>) enforce ordering automatically.
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Session Work Summary (20 commits)</div>
+  <div class="commit-list">
+    <strong>Event Timeline Fix (7 commits):</strong> 28 date corrections, 9 causal dependency chains, 3 anachronistic events replaced, 5 new events, 1 factual error fixed, 17 integrity tests.<br><br>
+    <strong>Army HQ Gathering v0.4.7 (13 commits):</strong> Periodic command meetings, campaign plans, front priorities, synchronized multi-corps operations, adaptive doctrine, 54 tests. Override collision caught and fixed. Propagated to 5 docs.
+  </div>
+</div>
+
+<footer>
+  AWWV Life Lessons Review &bull; Pyrrhic Games &bull; Generated 2026-03-17 06:03
+</footer>
+
+</body>
+</html>

@@ -430,6 +430,22 @@
 - **Rule**: Any per-entity evaluation loop that reads entity counts at locations MUST maintain a running adjustment map (departures/arrivals) so entity N sees the effects of entities 1..N-1's decisions. This applies to: overstacking redistribution, front gap filling, sector march, and any future per-brigade movement evaluation.
 - **Fix**: `columnAssignments: Map<Osid, number>` passed through `BrigadeEvaluationContext`, decremented on departure, incremented on arrival, checked before issuing movement orders.
 
+### [React] useEffect timing: never set external handlers in a separate effect from object creation (2026-03-17) — NEW
+- **Evidence**: OpsMapRenderer's `onOsidClick` was set in a useEffect with deps `[state.selectedAxisId, state.axes, ...]`. The renderer was created in a different useEffect with dep `[isOpen]`. React's effect lifecycle cleared the handler between re-runs, leaving `onOsidClick = undefined` at click time. Console confirmed: map fired, features found, but `onOsidClick? false`.
+- **Root cause**: Separate useEffects with different dependency arrays create a timing gap where cleanup of one effect clears state that another effect set.
+- **Rule**: When an external object (class instance, MapLibre map, etc.) needs a callback from React state, use a **ref** to hold the latest state and set the callback ONCE in the same effect that creates the object. The callback reads from the ref at invocation time. Never use a separate useEffect to wire callbacks to externally-created objects.
+- **Fix**: `clickStateRef.current = { selectedAxisId, axes, ... }` updated every render. `onOsidClick` set once in `[isOpen]` effect, handler reads from ref.
+
+### [UI] Verify which server the user is testing on before debugging (2026-03-17) — NEW
+- **Evidence**: Spent multiple iterations debugging map click handlers that were "not working." The user was testing on port 3002 (Electron built bundle) while code changes only went to port 3001 (Vite dev server via HMR). All fixes were correct but invisible to the user.
+- **Root cause**: Assumed the user was on the dev server. Console errors showed `MapContainer.tsx:253` (main map) and `localhost:3002` (Electron port), not the OpsMap renderer.
+- **Rule**: When a UI fix "doesn't work" despite code being correct, check: (1) Which port/server is the user on? (2) Is HMR reaching them or do they need a rebuild? (3) Are console errors from the right component? Ask early: "Are you on localhost:3001 or 3002?"
+
+### [Calibration] Home affinity in assignment cannot be a primary sort key (2026-03-17) — NEW
+- **Evidence**: Tried 4 approaches to fix 3rd Corps displacement (Tešanj brigades at Gornji Vakuf): primary sort by home (n843), 0.5x distance (n844), pre-pass all (n845), pre-pass rear-only (n846). ALL regressed calibration from 5/6 to 4/6 benchmarks. The -2 hop discount (n842 baseline) is the sweet spot.
+- **Root cause**: Pulling brigades home weakens active fronts. The home-distance effectiveness mechanic already penalizes displacement (floor 0.70), so the sim self-corrects over time. Forcing home assignment disrupts the balance.
+- **Rule**: Brigade displacement is a STRUCTURAL issue (operations move units, garrison-fill reassigns by proximity). Fix with post-operation return-to-home logic, not assignment algorithm weighting. Never make home affinity a primary sort key in garrison fill.
+
 ---
 
 ## Internalized (Consistently Applied)

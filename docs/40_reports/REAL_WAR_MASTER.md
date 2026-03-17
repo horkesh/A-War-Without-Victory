@@ -10,6 +10,20 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ## Fixed
 
+### 31. Brigade stacking and rear idling — 6 brigades at one crossroads while front positions empty (n842/n847)
+
+**What we found:** 46 non-Sarajevo OSIDs had 2+ brigades stacked at the same position (worst: 6 at Gornji Vakuf). 36 brigades were 3-11 hops behind their assigned sector front with no code to move them forward. Sub-segment assignment was paper-only — brigades got a sub-segment AoR on paper but no code physically distributed them across that AoR's front OSIDs.
+
+**Historical context:** In the Bosnian War, every position on the front line needed to be physically held. Commanders didn't pile 6 brigades at one intersection while leaving the neighboring village undefended. Units deployed to their assigned positions and dug in. Interior movement to the front was standard — reserve units marched forward when assigned to a sector, they didn't sit in their barracks 80km behind the line.
+
+**Fix:** New `distribute-brigades-to-front` pipeline step (n842): Phase A redistributes freshly-arrived stacked brigades to adjacent empty front OSIDs. Phase B issues column march for rear brigades (max 8 hops). Exempts entrenched (≥1 turn), siege corps, operation participants.
+
+**After fix (n847):** Stacking 46→36 (-22%), far-from-front 36→29 (-19%), at-front 177→187 (+6%). 89.5% area, 5/6 benchmarks. Remaining stacking is entrenched positions — correct, you don't uproot dug-in troops for cosmetic distribution.
+
+**Still open: 3rd Corps brigade displacement (P2).** 16/27 3rd Corps brigades are far from their home municipality. Tešanj brigades at Gornji Vakuf, GV brigade at Zavidovići. Root cause: operations displace brigades south, and the garrison-fill algorithm reassigns by proximity to current location. Home affinity discount (-2 hops) isn't enough to overcome physical displacement. Attempted fix (primary sort by home): caused calibration regression (4/6 benchmarks) because pulling brigades home weakened active fronts. **Correct long-term fix:** post-operation return-to-home-sector logic.
+
+---
+
 ### 22. Attack-through picking random targets instead of marching toward objective (n636)
 
 **What we found:** During operation execution, brigades not adjacent to their assigned objective were supposed to fight through enemy territory toward the objective. Instead, `predictAllAdjacentTargets()` returned targets sorted by `power_ratio` descending, and `.find()` picked the first passable one — the *easiest* adjacent target, regardless of direction. A code comment said "Prefer targets closer to the objective (on the path)" but NO distance calculation existed. This caused VRS brigades in Operation Koridor to attack Gradačac (sideways) instead of marching toward Brčko (their actual objective). A corps commander would court-martial a brigade CO who abandoned his assigned axis of advance to attack a random town because it looked easier.

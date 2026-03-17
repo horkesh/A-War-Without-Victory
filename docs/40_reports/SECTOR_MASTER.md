@@ -6,14 +6,29 @@
 
 ---
 
-## Current State (n692)
+## Current State (n842)
 
 | Metric | Value |
 |---|---|
-| Total sectors | 131 |
-| Contiguous (friendly BFS) | 131 (0 violations) |
+| Total sectors | 107 |
+| Contiguous (friendly BFS) | 107 (0 violations) |
 | Bending front | 0 |
-| Calibration | 5/6 benchmarks, 88.2% area-weighted |
+| Calibration | 5/6 benchmarks, 89.5% area-weighted |
+| Non-Sarajevo stacking | 36 (was 46 before distribution) |
+| Brigades 3+ hops from front | 29 (was 36) |
+| At-front brigades | 187 (was 177) |
+
+### n842 Changes (Brigade Front Distribution)
+
+**Problem:** Brigades were assigned to sub-segments on paper but no code physically distributed them across the sub-segment's `friendly_osids`. This caused stacking (2-6 brigades at same OSID) and rear brigades sitting 3-11 hops behind their assigned sector front.
+
+**Fix — `distribute-brigades-to-front` pipeline step** (`src/sim/combat/brigade_front_distribution.ts`):
+1. **Phase A**: Redistributes freshly-arrived (entrenchment < 1 turn) stacked brigades to adjacent empty front OSIDs within their sub-segment. Home OSID preferred. Only moves brigades from OSIDs with 2+ units.
+2. **Phase B**: Issues column march orders for brigades NOT at any front OSID. Picks least-stacked target, max 8 hops. Direct move if adjacent.
+3. **Exemptions**: Sarajevo siege corps (`arbih_1st_corps`, `vrs_sarajevo_romanija`), active operation participants, disrupted brigades, single-OSID sub-segments.
+4. **Entrenchment guard**: Entrenched brigades (≥1 turn) are NOT redistributed — preserves defensive positions.
+
+Constants: `MAX_REDISTRIBUTION_DISTANCE=8`, `ENTRENCHMENT_REDISTRIBUTION_THRESHOLD=1`, `SIEGE_EXEMPT_CORPS`.
 
 ### n692 Changes (Case B Split Threshold + Merge Alignment)
 
