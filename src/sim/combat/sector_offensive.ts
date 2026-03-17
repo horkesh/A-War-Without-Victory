@@ -48,6 +48,8 @@ import { isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
 import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
+import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
+import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Equipment priority
@@ -669,6 +671,37 @@ export function advanceSectorOffensives(
                 // Preparation complete (sub_phase === 'ready') — fall through to execution transition
             }
 
+            // ── Loaned brigade arrival tracking ──
+            // Check arrivals each planning turn. Extend staging if loans haven't arrived.
+            if (op.loaned_brigades && op.loaned_brigades.length > 0) {
+                cleanupDissolvedLoans(op, state.military.formations ?? {});
+                const targetSector = op.sector_id ? state.military.corps_front_sectors?.[op.sector_id] : undefined;
+                if (targetSector) {
+                    const arrivalFraction = checkLoanedArrivals(op, state.military.formations ?? {}, targetSector);
+
+                    // During force_staging, block transition if loans haven't arrived
+                    if (op.preparation_sub_phase === 'force_staging' && !areLoanedBrigadesReady(arrivalFraction)) {
+                        const elapsed = op.preparation_turns_elapsed ?? 0;
+                        const maxWait = MAX_OP_LOAN_DISTANCE + LOAN_STAGING_BUFFER_TURNS;
+                        if (elapsed < maxWait) {
+                            continue; // Keep waiting for arrivals
+                        }
+                        // Timeout: drop non-arrived loans from participating_brigades
+                        for (const loan of op.loaned_brigades) {
+                            if (!loan.arrived) {
+                                op.participating_brigades = op.participating_brigades.filter(id => id !== loan.brigade_id);
+                                if (op.axes) {
+                                    for (const axis of op.axes) {
+                                        axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== loan.brigade_id);
+                                    }
+                                }
+                            }
+                        }
+                        op.loaned_brigades = op.loaned_brigades.filter(l => l.arrived);
+                    }
+                }
+            }
+
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration
                 ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!) : 1);
@@ -792,6 +825,10 @@ export function advanceSectorOffensives(
                     && state.political.graz_east_herzegovina_active_turn == null) {
                     state.political.graz_east_herzegovina_active_turn = turn;
                 }
+
+                // Loaned brigades: no explicit return march needed — brigade assignment
+                // system will naturally reassign them back to their home sectors.
+                // The op.loaned_brigades array is cleared when active_operation = null.
 
                 cmd.consecutive_probes = 0;
                 // Save completed op for theater-aware follow-on suppression.
