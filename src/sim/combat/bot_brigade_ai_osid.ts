@@ -467,7 +467,7 @@ export function generateAllBotOrdersOsid(
                 f != null &&
                 f.faction === faction &&
                 f.status === 'active' &&
-                (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia' || f.kind === 'jna_phantom') &&
+                (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom') &&
                 f.location_osid != null
             );
 
