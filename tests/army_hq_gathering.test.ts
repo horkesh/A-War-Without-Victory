@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { GameState, FormationState } from '../src/state/game_state.js';
+import type { GameState, FormationState, CorpsOperation } from '../src/state/game_state.js';
 import type { TheaterAssessment, CorpsAssessment } from '../src/sim/combat/army_hq_gathering_types.js';
 import {
     getGatheringCadence,
@@ -10,7 +10,8 @@ import {
     generateSynchronizedOperations,
     generateSyncOperationOverrides,
 } from '../src/sim/combat/army_hq_gathering.js';
-import { PLAN_VALIDITY_BUFFER, SYNC_MIN_BRIGADES } from '../src/sim/combat/army_hq_gathering_constants.js';
+import { PLAN_VALIDITY_BUFFER, SYNC_MIN_BRIGADES, SYNC_WINDOW_DEFAULT, SYNC_WAIT_MAX_TURNS } from '../src/sim/combat/army_hq_gathering_constants.js';
+import { tickPreparation } from '../src/sim/combat/operation_preparation.js';
 
 // ── Factory ──────────────────────────────────────────────────────────────────
 
@@ -540,7 +541,7 @@ describe('synchronized operations', () => {
         expect(result.length).toBeLessThanOrEqual(2);
     });
 
-    it('launch window start is currentTurn + 3', () => {
+    it('sync op has correct launch window', () => {
         const assessment = makeAssessment({
             corps_assessments: [
                 makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', available_brigades: 6, sector_threat_avg: 0.5 }),
@@ -552,7 +553,8 @@ describe('synchronized operations', () => {
             { corps_id: 'vrs_drina', role: 'secondary' as const, suggested_stance: 'balanced' as const },
         ];
         const result = generateSynchronizedOperations(assessment, priorities, 20);
-        expect(result[0]!.launch_window_start).toBe(23);
+        expect(result[0]!.launch_window_start).toBe(20 + 3);
+        expect(result[0]!.launch_window_end).toBe(20 + 3 + SYNC_WINDOW_DEFAULT);
     });
 
     it('main effort assigned to stronger corps', () => {
@@ -594,5 +596,119 @@ describe('synchronized operations', () => {
         expect(override.issued_turn).toBe(10);
         expect(override.max_brigades).toBe(12);
         expect(override.reason).toContain('Synchronized operation');
+    });
+});
+
+// ── Operation Preparation: waiting_for_sync ──────────────────────────────
+
+/** Factory for a minimal CorpsOperation with preparation fields. */
+function makeOp(overrides: Partial<CorpsOperation> = {}): CorpsOperation {
+    return {
+        id: 'op_test',
+        corps_id: 'vrs_1st_krajina',
+        sector_id: 'sector_1',
+        phase: 'planning',
+        participating_brigades: ['bde_a', 'bde_b', 'bde_c'],
+        objectives: ['op:test:target_1'],
+        started_turn: 5,
+        total_failures: 0,
+        consecutive_failures: 0,
+        preparation_sub_phase: 'ready',
+        preparation_turns_elapsed: 4,
+        preparation_max_turns: 5,
+        postponement_count: 0,
+        commander_assessment: 'launch',
+        ...overrides,
+    } as unknown as CorpsOperation;
+}
+
+/** Minimal state for tickPreparation tests. */
+function makePrepState(turn: number): GameState {
+    return {
+        meta: { turn } as GameState['meta'],
+        military: {
+            formations: {
+                bde_a: { id: 'bde_a', faction: 'RS', status: 'active', personnel: 1500 },
+                bde_b: { id: 'bde_b', faction: 'RS', status: 'active', personnel: 1200 },
+                bde_c: { id: 'bde_c', faction: 'RS', status: 'active', personnel: 1000 },
+            },
+            front_segments: {},
+            front_posture: {},
+        } as unknown as GameState['military'],
+        political: { fired_event_ids: [] } as unknown as GameState['political'],
+        factions: {} as GameState['factions'],
+        map: {} as GameState['map'],
+        displacement: {} as GameState['displacement'],
+        economy: {} as GameState['economy'],
+    } as unknown as GameState;
+}
+
+describe('operation preparation: waiting_for_sync', () => {
+    it('operation in ready with sync_launch_after transitions to waiting_for_sync', () => {
+        const state = makePrepState(10);
+        const op = makeOp({
+            preparation_sub_phase: 'ready',
+            preparation_turns_elapsed: 3,
+            preparation_max_turns: 5,
+            sync_operation_name: 'sync_vrs_1st_krajina_vrs_drina',
+            sync_launch_after: 15, // Future turn
+        });
+
+        const result = tickPreparation(state, op, 'vrs_1st_krajina', 'RS', 0.8);
+
+        expect(result.sub_phase).toBe('waiting_for_sync');
+        expect(result.ready).toBe(false);
+        expect(op.preparation_sub_phase).toBe('waiting_for_sync');
+    });
+
+    it('operation in waiting_for_sync launches when window opens', () => {
+        const state = makePrepState(15);
+        const op = makeOp({
+            preparation_sub_phase: 'waiting_for_sync',
+            preparation_turns_elapsed: 4,
+            preparation_max_turns: 5,
+            sync_operation_name: 'sync_vrs_1st_krajina_vrs_drina',
+            sync_launch_after: 15, // Current turn matches
+        });
+
+        const result = tickPreparation(state, op, 'vrs_1st_krajina', 'RS', 0.8);
+
+        expect(result.sub_phase).toBe('ready');
+        expect(result.ready).toBe(true);
+    });
+
+    it('waiting_for_sync force-launches after SYNC_WAIT_MAX_TURNS', () => {
+        const state = makePrepState(10);
+        const op = makeOp({
+            preparation_sub_phase: 'waiting_for_sync',
+            preparation_turns_elapsed: 10, // Exceeds preparation_max_turns + SYNC_WAIT_MAX_TURNS
+            preparation_max_turns: 5,
+            sync_operation_name: 'sync_vrs_1st_krajina_vrs_drina',
+            sync_launch_after: 20, // Still in the future
+        });
+
+        const result = tickPreparation(state, op, 'vrs_1st_krajina', 'RS', 0.8);
+
+        // Should force transition to ready despite sync_launch_after being in the future
+        expect(result.sub_phase).toBe('ready');
+        expect(result.ready).toBe(true);
+    });
+
+    it('waiting_for_sync does not increment preparation_turns_elapsed beyond initial tick', () => {
+        const state = makePrepState(10);
+        const op = makeOp({
+            preparation_sub_phase: 'waiting_for_sync',
+            preparation_turns_elapsed: 5,
+            preparation_max_turns: 20, // High enough to not trigger anti-paralysis
+            sync_operation_name: 'sync_vrs_1st_krajina_vrs_drina',
+            sync_launch_after: 20,
+        });
+
+        // tickPreparation increments by 1 at the top, then the waiting_for_sync
+        // branch should not add more. After tick, elapsed = 5 + 1 = 6.
+        const result = tickPreparation(state, op, 'vrs_1st_krajina', 'RS', 0.8);
+
+        expect(result.sub_phase).toBe('waiting_for_sync');
+        expect(op.preparation_turns_elapsed).toBe(6); // Only the standard +1
     });
 });
