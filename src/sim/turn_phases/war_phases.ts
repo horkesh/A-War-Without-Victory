@@ -120,6 +120,7 @@ import { detectFronts } from '../combat/front_emergence.js';
 import { buildLocalFronts } from '../combat/local_front_defense.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
+import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults } from '../combat/sector_offensive.js';
 import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
@@ -600,6 +601,17 @@ export const warPhases: NamedPhase[] = [
             if (!od?.edges?.length) return;
             const adjacency = buildOsidAdjacency(od.edges);
             distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency);
+        }
+    },
+
+    {
+        name: 'return-displaced-brigades',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const adjacency = buildOsidAdjacency(od.edges);
+            evaluateHomeReturn(context.state, adjacency);
         }
     },
 

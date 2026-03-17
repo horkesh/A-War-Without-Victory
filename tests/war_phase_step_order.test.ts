@@ -63,6 +63,7 @@ describe('war-phase step ordering', () => {
         // +1 from check-heroic-stand (v0.4.4 officer experience integration, 2026-03-16).
         // +1 from distribute-brigades-to-front (brigade front distribution, 2026-03-17).
         // +1 from evaluate-army-hq-gathering (v0.4.7 army HQ gathering, 2026-03-17).
-        expect(stepNames.length).toBe(134);
+        // +1 from return-displaced-brigades (periodic home return march, 2026-03-17).
+        expect(stepNames.length).toBe(135);
     });
 });
