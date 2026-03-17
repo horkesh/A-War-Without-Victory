@@ -805,3 +805,34 @@ export function generateSyncOperationOverrides(
         }
     }
 }
+
+// ── Pipeline Integration ─────────────────────────────────────────────────
+
+/**
+ * Top-level gathering evaluation. Called once per turn per bot faction.
+ * Checks if a gathering should occur, runs assessment, generates plan, writes to state.
+ */
+export function evaluateArmyHQGathering(
+    state: GameState, faction: FactionId, currentTurn: number
+): void {
+    const { gather, reason } = shouldGather(state, faction, currentTurn);
+    if (!gather) return;
+
+    const emergency = reason !== 'regular_cadence';
+    const assessment = assessTheater(state, faction);
+    const plan = generateCampaignPlan(state, faction, assessment, currentTurn, reason, emergency);
+
+    // Write plan to state
+    if (!state.military.campaign_plans) {
+        state.military.campaign_plans = {};
+    }
+    state.military.campaign_plans[faction] = plan;
+
+    if (!state.military.last_gathering_turn) {
+        state.military.last_gathering_turn = {};
+    }
+    state.military.last_gathering_turn[faction] = currentTurn;
+
+    // Generate army HQ overrides for synchronized operations
+    generateSyncOperationOverrides(state, faction, plan);
+}

@@ -9,6 +9,7 @@ import {
     generateCampaignPlan,
     generateSynchronizedOperations,
     generateSyncOperationOverrides,
+    evaluateArmyHQGathering,
 } from '../src/sim/combat/army_hq_gathering.js';
 import { PLAN_VALIDITY_BUFFER, SYNC_MIN_BRIGADES, SYNC_WINDOW_DEFAULT, SYNC_WAIT_MAX_TURNS, PRIORITY_AGGRESSION, PRIORITY_RESERVE } from '../src/sim/combat/army_hq_gathering_constants.js';
 import { tickPreparation } from '../src/sim/combat/operation_preparation.js';
@@ -849,5 +850,71 @@ describe('corps directive integration', () => {
         });
         const fp = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina')!;
         expect(fp.offensive_targets).toEqual(['op:brcko:brcko_1']);
+    });
+});
+
+// ── Pipeline Integration ──────────────────────────────────────────────────
+
+describe('pipeline integration', () => {
+    /** Factory for a state with 2 VRS corps, each having 4 brigades (enough for sync ops). */
+    function makePipelineState(turn: number, lastGathering?: Record<string, number>): GameState {
+        const formations: Record<string, Partial<FormationState>> = {};
+        // 4 brigades in vrs_1st_krajina
+        for (let i = 1; i <= 4; i++) {
+            formations[`bde_k${i}`] = {
+                faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1800, status: 'active',
+            };
+        }
+        // 4 brigades in vrs_drina
+        for (let i = 1; i <= 4; i++) {
+            formations[`bde_d${i}`] = {
+                faction: 'RS', corps_id: 'vrs_drina', personnel: 1500, status: 'active',
+            };
+        }
+        return makeMinimalState({ turn, lastGathering, formations });
+    }
+
+    it('evaluateArmyHQGathering writes plan to state', () => {
+        const state = makePipelineState(8);
+        evaluateArmyHQGathering(state, 'RS', 8);
+
+        expect(state.military.campaign_plans).toBeDefined();
+        expect(state.military.campaign_plans!['RS']).toBeDefined();
+        expect(state.military.campaign_plans!['RS']!.issued_turn).toBe(8);
+    });
+
+    it('evaluateArmyHQGathering updates last_gathering_turn', () => {
+        const state = makePipelineState(8);
+        evaluateArmyHQGathering(state, 'RS', 8);
+
+        expect(state.military.last_gathering_turn).toBeDefined();
+        expect(state.military.last_gathering_turn!['RS']).toBe(8);
+    });
+
+    it('evaluateArmyHQGathering skips when not time to gather', () => {
+        const state = makePipelineState(5);
+        evaluateArmyHQGathering(state, 'RS', 5);
+
+        expect(state.military.campaign_plans).toBeUndefined();
+    });
+
+    it('evaluateArmyHQGathering generates sync overrides', () => {
+        // Turn 8, two corps with 4+ brigades each — should produce sync ops + overrides.
+        // sector_threat_avg defaults to 0.5 (no sector_combat_ratings) which is > 0,
+        // so both corps are eligible for sync ops.
+        const state = makePipelineState(8);
+        evaluateArmyHQGathering(state, 'RS', 8);
+
+        // Verify plan was created with sync ops
+        const plan = state.military.campaign_plans!['RS']!;
+        expect(plan.synchronized_operations.length).toBeGreaterThanOrEqual(1);
+
+        // Verify army_hq_overrides were generated
+        expect(state.military.army_hq_overrides).toBeDefined();
+        expect(state.military.army_hq_overrides!.length).toBeGreaterThanOrEqual(2);
+        // Each sync op generates 2 overrides (main_effort + supporting)
+        const override = state.military.army_hq_overrides![0]!;
+        expect(override.reason).toContain('Synchronized operation');
+        expect(override.issued_turn).toBe(8);
     });
 });

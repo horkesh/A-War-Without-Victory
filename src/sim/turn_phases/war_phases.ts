@@ -2,6 +2,7 @@
 
 // --- Domain imports (paths adjusted: one directory deeper than turn_pipeline.ts) ---
 
+import { evaluateArmyHQGathering } from '../combat/army_hq_gathering.js';
 import { snapshotPoliticalControllers, assertControlEventConsistency } from '../combat/assert_control_events.js';
 import { assertFormationsInFriendlyTerritory } from '../combat/assert_formation_territory.js';
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
@@ -118,6 +119,7 @@ import { updateExhaustion } from '../combat/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
 import { buildLocalFronts } from '../combat/local_front_defense.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
+import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults } from '../combat/sector_offensive.js';
 import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
@@ -589,6 +591,19 @@ export const warPhases: NamedPhase[] = [
     },
 
     {
+        name: 'distribute-brigades-to-front',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const sectorMap = context.state.military.corps_front_sectors;
+            if (!sectorMap) return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const adjacency = buildOsidAdjacency(od.edges);
+            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency);
+        }
+    },
+
+    {
         name: 'compute-sector-combat-ratings',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -783,6 +798,17 @@ export const warPhases: NamedPhase[] = [
                 await generateCorpsDecisions(context.state, faction as any, armyDecision, client);
             }
         }
+    },
+    {
+        name: 'evaluate-army-hq-gathering',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const factions: FactionId[] = ['RS', 'RBiH', 'HRHB'];
+            for (const faction of factions) {
+                if (faction === context.state.meta.player_faction) continue;
+                evaluateArmyHQGathering(context.state, faction, context.state.meta.turn);
+            }
+        },
     },
     {
         name: 'generate-bot-corps-orders',
