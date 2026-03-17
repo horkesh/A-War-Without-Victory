@@ -32,6 +32,13 @@ Fix the source geometry in operational_settlements.geojson.
 Alternatively: use turf.js `buffer(0)` or `cleanCoords` to repair all polygon
 geometries before rendering.
 
+## G2 Ops Modal — NEEDS REWORK
+The OpsPlanningModal was restored to a wrong version during git reset.
+The G2 three-panel layout (forces left, map center, G2 briefing right,
+controls bottom) was implemented and spec-reviewed this session but lost
+during the map artifact debugging resets. Need to re-apply from the
+spec-reviewed commit (fe9fc6e) or reimplement.
+
 ## Key Learnings
 - `start cmd /c` from bash opens EMPTY windows — use run_in_background
 - Always kill stale Vite PIDs with `taskkill //F //PID` before restart
