@@ -44,6 +44,7 @@ import {
     HRHB_SUPPORT_PACKAGE_COHESION_BONUS,
     RS_STAFF_PRIORITY_RATE_BONUS
 } from './combat/municipality_support.js';
+import { getEnclaveIdForOsid, getEnclaveMaxPersonnel } from './combat/enclave_resilience.js';
 
 export interface SpawnFormationsOptions {
     /** If set, used for all factions; if omitted, per-faction nominal size from OOB is used (RBiH 1000, RS 2500, HRHB 1500). */
@@ -354,7 +355,10 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         if (!mun_id || !faction) continue;
 
         const current = f.personnel ?? 0;
-        if (current >= ENCLAVE_MAX_PERSONNEL) continue;
+        // Per-enclave personnel cap: Gorazde 800, Srebrenica 600, Zepa 400, etc.
+        const enclaveId = getEnclaveIdForOsid(f.location_osid ?? f.home_osid ?? '');
+        const maxPers = enclaveId ? getEnclaveMaxPersonnel(enclaveId) : ENCLAVE_MAX_PERSONNEL;
+        if (current >= maxPers) continue;
 
         const poolFaction = f.recruit_pool_faction ?? faction;
         const key = militiaPoolKey(mun_id, poolFaction);
@@ -363,7 +367,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
 
         const factionMult = getFactionReinforcementMult(faction, currentTurn, state.military.war_timeline);
         const rate = Math.max(1, Math.floor(ENCLAVE_REINFORCEMENT_RATE * factionMult));
-        const need = Math.min(ENCLAVE_MAX_PERSONNEL - current, rate);
+        const need = Math.min(maxPers - current, rate);
         const transfer = Math.min(need, pool.available);
         if (transfer <= 0) continue;
 

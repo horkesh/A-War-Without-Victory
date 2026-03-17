@@ -31,6 +31,7 @@ import {
     RESILIENCE_GROWTH_CRITICAL,
     RESILIENCE_GROWTH_STRAINED,
 } from '../../state/supply_reserve_constants.js';
+import { ENCLAVE_MAX_PERSONNEL } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ── Enclave definitions ─────────────────────────────────────────────────────
@@ -130,12 +131,12 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
  * Zepa was most vulnerable (smallest, most isolated).
  * Sarajevo was most resilient (largest, tunnel, international attention).
  */
-const ENCLAVE_CONFIG: Record<string, { max_resilience: number; growth_mult: number }> = {
-    bihac_pocket: { max_resilience: 40, growth_mult: 0.55 },   // was 1.2 — maxes ~w93 (full war), ~18 at w40
-    srebrenica: { max_resilience: 25, growth_mult: 0.35 },     // was 0.8 — maxes ~w52, ~17 at w40
-    zepa: { max_resilience: 20, growth_mult: 0.30 },           // was 0.7 — maxes ~w49, ~14 at w40
-    gorazde: { max_resilience: 35, growth_mult: 0.45 },        // was 1.0 — maxes ~w55, ~22 at w40
-    sarajevo: { max_resilience: 45, growth_mult: 0.60 },       // was 1.3 — maxes ~w45, ~38 at w40
+const ENCLAVE_CONFIG: Record<string, { max_resilience: number; growth_mult: number; max_personnel: number }> = {
+    bihac_pocket: { max_resilience: 40, growth_mult: 0.55, max_personnel: 1500 },  // Large pocket, supply routes
+    srebrenica: { max_resilience: 25, growth_mult: 0.35, max_personnel: 600 },     // Small, isolated, ~8k pop in enclave
+    zepa: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },           // Tiny, most isolated, ~3k pop
+    gorazde: { max_resilience: 35, growth_mult: 0.45, max_personnel: 800 },        // Medium, besieged, ~37k prewar but under siege
+    sarajevo: { max_resilience: 45, growth_mult: 0.60, max_personnel: 1500 },      // Largest, tunnel supply, 300k pop
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -446,6 +447,26 @@ export function getEnclaveCohesionRecovery(state: GameState, osid: string | unde
         }
     }
     return 0;
+}
+
+/**
+ * Get per-enclave max personnel cap. Uses ENCLAVE_CONFIG if the enclave is known,
+ * falls back to ENCLAVE_MAX_PERSONNEL for unknown enclaves.
+ * Used by formation_spawn.ts to differentiate enclave reinforcement caps.
+ */
+export function getEnclaveMaxPersonnel(enclaveId: string): number {
+    return ENCLAVE_CONFIG[enclaveId]?.max_personnel ?? ENCLAVE_MAX_PERSONNEL;
+}
+
+/**
+ * Map an OSID to its enclave ID, or null if the OSID is not in any enclave.
+ * Used by formation_spawn.ts to determine which enclave cap applies.
+ */
+export function getEnclaveIdForOsid(osid: string): string | null {
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        if (osidBelongsToEnclave(osid, enclave)) return enclave.id;
+    }
+    return null;
 }
 
 /**
