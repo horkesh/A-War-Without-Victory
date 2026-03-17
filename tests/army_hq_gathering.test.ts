@@ -13,7 +13,8 @@ import {
 } from '../src/sim/combat/army_hq_gathering.js';
 import { PLAN_VALIDITY_BUFFER, SYNC_MIN_BRIGADES, SYNC_WINDOW_DEFAULT, SYNC_WAIT_MAX_TURNS, PRIORITY_AGGRESSION, PRIORITY_RESERVE } from '../src/sim/combat/army_hq_gathering_constants.js';
 import { tickPreparation } from '../src/sim/combat/operation_preparation.js';
-import type { CampaignPlan, FrontPriority } from '../src/sim/combat/army_hq_gathering_types.js';
+import type { CampaignPlan, FrontPriority, SynchronizedOperation, ForceTransfer } from '../src/sim/combat/army_hq_gathering_types.js';
+import { validateGameStateShape } from '../src/state/validateGameState.js';
 
 // ── Factory ──────────────────────────────────────────────────────────────────
 
@@ -916,5 +917,104 @@ describe('pipeline integration', () => {
         const override = state.military.army_hq_overrides![0]!;
         expect(override.reason).toContain('Synchronized operation');
         expect(override.issued_turn).toBe(8);
+    });
+});
+
+// ── Serialization and Validation ──────────────────────────────────────────
+
+describe('serialization and validation', () => {
+    it('CampaignPlan round-trips through JSON', () => {
+        const plan: CampaignPlan = {
+            issued_turn: 8,
+            valid_until_turn: 18,
+            emergency: false,
+            trigger_reason: 'regular_cadence',
+            front_priorities: [
+                { corps_id: 'vrs_1st_krajina', role: 'primary', suggested_stance: 'offensive', offensive_targets: ['op:brcko:brcko_1'], hold_targets: ['op:bihac:bihac_1'] },
+                { corps_id: 'vrs_drina', role: 'secondary', suggested_stance: 'balanced' },
+            ],
+            doctrine_override: {
+                army_stance: 'balanced',
+                aggression_modifier: -0.05,
+                corps_stance_ceilings: { vrs_1st_krajina: 'offensive', vrs_drina: 'balanced' },
+            },
+            synchronized_operations: [
+                {
+                    name: 'sync_vrs_1st_krajina_vrs_drina',
+                    participants: [
+                        { corps_id: 'vrs_1st_krajina', role: 'main_effort', target_osids: ['op:brcko:brcko_1'], min_brigades: 4 },
+                        { corps_id: 'vrs_drina', role: 'supporting', target_osids: ['op:zvornik:zvornik_1'], min_brigades: 3 },
+                    ],
+                    launch_window_start: 11,
+                    launch_window_end: 15,
+                    target_area: ['brcko', 'zvornik'],
+                },
+            ],
+            force_transfers: [
+                { brigade_id: 'bde_test', from_corps: 'vrs_drina', to_corps: 'vrs_1st_krajina', march_turns: 2, issued_turn: 8, completed: false },
+            ],
+            excluded_corps: ['arbih_general_staff'],
+        };
+
+        const json = JSON.stringify(plan);
+        const parsed = JSON.parse(json) as CampaignPlan;
+
+        expect(parsed.issued_turn).toBe(8);
+        expect(parsed.valid_until_turn).toBe(18);
+        expect(parsed.emergency).toBe(false);
+        expect(parsed.trigger_reason).toBe('regular_cadence');
+        expect(parsed.front_priorities).toHaveLength(2);
+        expect(parsed.front_priorities[0]!.corps_id).toBe('vrs_1st_krajina');
+        expect(parsed.front_priorities[0]!.offensive_targets).toEqual(['op:brcko:brcko_1']);
+        expect(parsed.doctrine_override).toBeDefined();
+        expect(parsed.doctrine_override!.army_stance).toBe('balanced');
+        expect(parsed.doctrine_override!.corps_stance_ceilings!['vrs_drina']).toBe('balanced');
+        expect(parsed.synchronized_operations).toHaveLength(1);
+        expect(parsed.synchronized_operations[0]!.participants).toHaveLength(2);
+        expect(parsed.force_transfers).toHaveLength(1);
+        expect(parsed.force_transfers[0]!.completed).toBe(false);
+        expect(parsed.excluded_corps).toEqual(['arbih_general_staff']);
+    });
+
+    it('validateGameState accepts valid campaign plan', () => {
+        const state = makeMinimalState({ turn: 10 });
+        (state.military as Record<string, unknown>).campaign_plans = {
+            RS: {
+                issued_turn: 8,
+                valid_until_turn: 18,
+                emergency: false,
+                trigger_reason: 'regular_cadence',
+                front_priorities: [{ corps_id: 'vrs_1st_krajina', role: 'primary', suggested_stance: 'offensive' }],
+                synchronized_operations: [],
+                force_transfers: [],
+                excluded_corps: [],
+            },
+        };
+        (state.military as Record<string, unknown>).last_gathering_turn = { RS: 8 };
+
+        const result = validateGameStateShape(state);
+        if (!result.ok) {
+            // Filter to only campaign_plans/last_gathering_turn errors
+            const gatheringErrors = result.errors.filter(e =>
+                e.includes('campaign_plans') || e.includes('last_gathering_turn')
+            );
+            expect(gatheringErrors).toEqual([]);
+        }
+    });
+
+    it('last_gathering_turn round-trips through JSON', () => {
+        const lastGathering: Record<string, number> = {
+            RS: 8,
+            RBiH: 14,
+            HRHB: 10,
+        };
+
+        const json = JSON.stringify(lastGathering);
+        const parsed = JSON.parse(json) as Record<string, number>;
+
+        expect(parsed).toEqual(lastGathering);
+        expect(parsed['RS']).toBe(8);
+        expect(parsed['RBiH']).toBe(14);
+        expect(parsed['HRHB']).toBe(10);
     });
 });

@@ -382,6 +382,63 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
         }
     }
 
+    // Army HQ Gathering: campaign_plans and last_gathering_turn (nested under military)
+    const mil = s.military as any;
+    if (mil && typeof mil === 'object') {
+        if ('campaign_plans' in mil && mil.campaign_plans !== undefined) {
+            const cp = mil.campaign_plans;
+            if (cp === null || typeof cp !== 'object' || Array.isArray(cp)) {
+                errors.push('military.campaign_plans must be an object (Record<FactionId, CampaignPlan | null>) when present');
+            } else {
+                for (const [fid, plan] of Object.entries(cp)) {
+                    if (plan === null) continue; // null is valid (cleared plan)
+                    if (typeof plan !== 'object' || Array.isArray(plan)) {
+                        errors.push(`military.campaign_plans.${fid} must be null or a CampaignPlan object`);
+                        continue;
+                    }
+                    const p = plan as any;
+                    if (typeof p.issued_turn !== 'number' || !Number.isInteger(p.issued_turn) || p.issued_turn < 0) {
+                        errors.push(`military.campaign_plans.${fid}.issued_turn must be a non-negative integer`);
+                    }
+                    if (typeof p.valid_until_turn !== 'number' || !Number.isInteger(p.valid_until_turn) || p.valid_until_turn < 0) {
+                        errors.push(`military.campaign_plans.${fid}.valid_until_turn must be a non-negative integer`);
+                    }
+                    if (!Array.isArray(p.front_priorities)) {
+                        errors.push(`military.campaign_plans.${fid}.front_priorities must be an array`);
+                    }
+                    if (!Array.isArray(p.synchronized_operations)) {
+                        errors.push(`military.campaign_plans.${fid}.synchronized_operations must be an array`);
+                    }
+                    if (!Array.isArray(p.force_transfers)) {
+                        errors.push(`military.campaign_plans.${fid}.force_transfers must be an array`);
+                    }
+                    if (!Array.isArray(p.excluded_corps)) {
+                        errors.push(`military.campaign_plans.${fid}.excluded_corps must be an array`);
+                    }
+                    if (typeof p.emergency !== 'boolean') {
+                        errors.push(`military.campaign_plans.${fid}.emergency must be a boolean`);
+                    }
+                    if (typeof p.trigger_reason !== 'string') {
+                        errors.push(`military.campaign_plans.${fid}.trigger_reason must be a string`);
+                    }
+                }
+            }
+        }
+
+        if ('last_gathering_turn' in mil && mil.last_gathering_turn !== undefined) {
+            const lgt = mil.last_gathering_turn;
+            if (lgt === null || typeof lgt !== 'object' || Array.isArray(lgt)) {
+                errors.push('military.last_gathering_turn must be an object (Record<FactionId, number>) when present');
+            } else {
+                for (const [fid, val] of Object.entries(lgt)) {
+                    if (typeof val !== 'number' || !Number.isInteger(val) || (val as number) < 0) {
+                        errors.push(`military.last_gathering_turn.${fid} must be a non-negative integer`);
+                    }
+                }
+            }
+        }
+    }
+
     // political_controllers: every entry must have value defined (can be null)
     if (Object.prototype.hasOwnProperty.call(s, 'political_controllers')) {
         const pc = (s as any).political.political_controllers;
