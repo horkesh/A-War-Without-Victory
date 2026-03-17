@@ -171,7 +171,7 @@ function hasEmergencyEventSinceLastGathering(
     state: GameState,
     _lastGatheringTurn: number,
 ): boolean {
-    const firedIds = state.political?.fired_event_ids;
+    const firedIds = state.military?.fired_event_ids;
     if (!firedIds || firedIds.length === 0) return false;
 
     for (const id of firedIds) {

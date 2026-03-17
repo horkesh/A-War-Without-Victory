@@ -48,14 +48,11 @@ function makeMinimalState(overrides: {
             front_segments: {},
             front_posture: {},
             last_gathering_turn: overrides.lastGathering,
-        } as unknown as GameState['military'],
-        political: {
             fired_event_ids: overrides.firedEventIds ?? [],
-        } as unknown as GameState['political'],
+        } as unknown as GameState['military'],
+        political: {} as unknown as GameState['political'],
         factions: {} as GameState['factions'],
-        map: {} as GameState['map'],
         displacement: {} as GameState['displacement'],
-        economy: {} as GameState['economy'],
     } as unknown as GameState;
 }
 
@@ -201,14 +198,11 @@ function makeTheaterState(overrides: {
             front_posture: {},
             corps_command: overrides.corpsCommand ?? {},
             general_supply_reserve: overrides.generalSupplyReserve ?? {},
-        } as unknown as GameState['military'],
-        political: {
             fired_event_ids: [],
-        } as unknown as GameState['political'],
+        } as unknown as GameState['military'],
+        political: {} as unknown as GameState['political'],
         factions: {} as GameState['factions'],
-        map: {} as GameState['map'],
         displacement: {} as GameState['displacement'],
-        economy: {} as GameState['economy'],
     } as unknown as GameState;
 }
 
@@ -637,12 +631,11 @@ function makePrepState(turn: number): GameState {
             },
             front_segments: {},
             front_posture: {},
+            fired_event_ids: [],
         } as unknown as GameState['military'],
-        political: { fired_event_ids: [] } as unknown as GameState['political'],
+        political: {} as unknown as GameState['political'],
         factions: {} as GameState['factions'],
-        map: {} as GameState['map'],
         displacement: {} as GameState['displacement'],
-        economy: {} as GameState['economy'],
     } as unknown as GameState;
 }
 
@@ -776,7 +769,7 @@ describe('corps directive integration', () => {
         });
         // At turn 10, plan.valid_until_turn (8) < currentTurn (10) → plan is expired
         const state = makeMinimalState({ turn: 10 });
-        (state.military as Record<string, unknown>).campaign_plans = { RS: plan };
+        (state.military as unknown as Record<string, unknown>).campaign_plans = { RS: plan };
         const storedPlan = state.military.campaign_plans?.['RS'];
         expect(storedPlan).toBeDefined();
         expect(storedPlan!.valid_until_turn).toBeLessThan(10);
@@ -978,7 +971,7 @@ describe('serialization and validation', () => {
 
     it('validateGameState accepts valid campaign plan', () => {
         const state = makeMinimalState({ turn: 10 });
-        (state.military as Record<string, unknown>).campaign_plans = {
+        (state.military as unknown as Record<string, unknown>).campaign_plans = {
             RS: {
                 issued_turn: 8,
                 valid_until_turn: 18,
@@ -990,7 +983,7 @@ describe('serialization and validation', () => {
                 excluded_corps: [],
             },
         };
-        (state.military as Record<string, unknown>).last_gathering_turn = { RS: 8 };
+        (state.military as unknown as Record<string, unknown>).last_gathering_turn = { RS: 8 };
 
         const result = validateGameStateShape(state);
         if (!result.ok) {
