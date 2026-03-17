@@ -60,7 +60,7 @@ export function applyCorpsFrontAutoDistributionForCorps(
     const brigades = Object.keys(formations)
         .filter((id) => {
             const f = formations[id];
-            return !!f && (f.kind ?? 'brigade') === 'brigade' && f.corps_id === corpsId && f.faction === faction;
+            return !!f && (f.kind === 'brigade' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia') && f.corps_id === corpsId && f.faction === faction;
         })
         .sort(strictCompare);
     if (brigades.length === 0) return;
@@ -105,7 +105,7 @@ export function applyCorpsAttackAxisOrders(
         const brigades = Object.keys(formations)
             .filter((id) => {
                 const f = formations[id];
-                return !!f && (f.kind ?? 'brigade') === 'brigade' && f.corps_id === corpsId && f.faction === corps.faction;
+                return !!f && (f.kind === 'brigade' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia') && f.corps_id === corpsId && f.faction === corps.faction;
             })
             .sort(strictCompare);
         for (let i = 0; i < brigades.length; i++) {
