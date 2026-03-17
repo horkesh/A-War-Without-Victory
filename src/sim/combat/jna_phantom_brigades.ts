@@ -178,6 +178,17 @@ const HV_PHANTOM_DEFS: PhantomDef[] = [
         no_equipment_handoff: true,
         kind_tag: 'hv_phantom',
     },
+    {
+        id: 'hv_113th_brigade_tg' as FormationId,
+        name: 'HV 113th Brigade TG (Šibenik)',
+        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:capljina:capljina_2',
+        withdrawal_turn: 24,
+        tanks: 8, artillery: 8, apcs: 6,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════

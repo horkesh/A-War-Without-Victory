@@ -462,6 +462,7 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                     'hrhb_1st_herzegovina_brigade_knez_domagoj',
                     'hv_4th_guards_tg',
                     'hv_1st_guards_tg',
+                    'hv_113th_brigade_tg',
                 ],
                 objectives: [
                     'op:capljina:tasovcici_2',
