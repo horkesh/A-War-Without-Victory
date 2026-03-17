@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-17
-**Status:** **v0.4.8** (Ground for v0.5.x). **1086 tests**, 87 suites. **n874: 89.5% area-weighted, 13/13 anchors. War-or-Game APPROVED.** Night shift ready for v0.5.0→v0.5.4.
+**Status:** **v0.4.8** (Ground for v0.5.x). **1086 tests**, 87 suites. **n875: 90.4% area-weighted, 13/13 anchors. War-or-Game APPROVED.** Night shift ready for v0.5.0→v0.5.4.
 
 ## [2026-03-17] v0.4.8 — Enclave Personnel Caps, Return-to-Home March, G2 Ops Modal, Drina Investigation
 
@@ -32,10 +32,21 @@
 - Three root causes: (1) VRS Drina exhaustion by w13 — corps stops operating, (2) Goražde over-mobilization — FIXED by enclave cap, (3) Non-local 3rd Corps brigades at Kalinovik — addressed by return march
 - Remaining gap is structural VRS manpower (P2 backlog)
 
-### Calibration (n874)
-- **89.5% area-weighted**, 13/13 anchors, War-or-Game approved
-- 126 orders, 102 battles, 74 flips. RS 84 orders vs RBiH 27 — historically correct tempo
-- Force strength: RS 98k/80 bde, RBiH 152k/124 bde, HRHB 40k/28 bde — all plausible
+### Serb Displacement Routing Fix
+- **SERB_ROUTES** corrected in `displacement_routing_data.ts` — eastern Bosnia Serbs stay local (Bijeljina, Zvornik, Ugljevik), NOT cross-corridor to Banja Luka
+- Key changes: TUZLA_AREA routes to `[bijeljina, lopare, ugljevik, zvornik]` (was `[bijeljina, lopare, doboj, banja_luka]`). ZENICA_KAKANJ routes to `[ilijas, pale, sokolac, han_pijesak]` (was `[ilijas, pale, doboj, banja_luka]`). Krajina routes correctly keep Banja Luka.
+- **Root cause**: BB-confirmed — Posavina Corridor too narrow/contested for mass civilian traffic. Eastern Serbs fled locally or to Serbia, not to Banja Luka.
+- **Impact**: Bijeljina receives +10.2k RS displaced. VRS Drina Corps 7.5k→10.5k personnel (+39%). Posavina NE 87.7%→92.7%.
+
+### VRS Drina Corps OOB Strengthening
+- 7 brigades increased from uniform 1000 to historically differentiated 1200-2000 initial personnel
+- Key: rs_1st_zvornik 1000→2000, rs_1st_bratunac/rs_1st_birac/rs_rogatica 1000→1800, rs_1st_vlasenica/rs_1st_podrinje 1000→1500
+
+### Calibration (n875)
+- **90.4% area-weighted** (was 89.5% n874, 88.6% n869), 13/13 anchors, War-or-Game approved
+- 117 orders, 97 battles, 69 flips. RS 82 orders vs RBiH 26 — historically correct tempo
+- Force strength: RS 102k/80 bde, RBiH 151k/125 bde, HRHB 41k/28 bde — all plausible
+- Posavina NE 92.7% (+5pp), Central Corridor 94.2% (+3.9pp) — routing fix primary driver
 
 ### CLAUDE.md Created
 - Root-level `CLAUDE.md` added as zero-cost bootstrap layer for Claude Code sessions
