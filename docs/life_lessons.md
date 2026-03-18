@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-18 (Equipment rework + displacement overhaul: 6 new lessons)
+> Last updated: 2026-03-19 (TopoJSON topology lesson + equipment rework + displacement overhaul)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -20,6 +20,12 @@
 ---
 
 ## Active Lessons (no recent violations)
+
+### [Geometry] TopoJSON topology() quantizes coordinates — never rebuild topology from final GeoJSON (2026-03-19) — NEW
+- **Context**: Front line gaps caused by `topojsonClient.merge()` not creating shared arcs between cluster polygons. 37 OSID pairs have no shared polygon edges despite being adjacent. Attempted fix: Pipeline Phase 5d second topology pass to create shared arcs. TopoJSON `topology()` quantization altered polygon coordinates even at 1e8 quantization, regressing calibration from 91% to 87%.
+- **Wrong approach**: Round-tripping GeoJSON through `topology()` to fix shared arcs. The quantization step inherent in TopoJSON topology construction snaps coordinates to a grid, altering polygon shapes downstream. Even at very high quantization (1e8), the coordinate drift is enough to change polygon areas and shift calibration results.
+- **Right approach**: Fix polygon boundaries at the source (vertex snapping at the geometry level) without rebuilding topology. Snap near-miss boundary vertices directly, preserving original coordinate precision.
+- **Do instead**: Never rebuild topology from final GeoJSON if coordinate precision matters for downstream calibration. If polygons need shared boundaries, fix them at the vertex level (geometric snapping) rather than through topological reconstruction. TopoJSON is a serialization format, not a geometry repair tool.
 
 ### [Scaling] Per-brigade mechanics are explosive — use faction-level capped budgets (2026-03-18) — NEW
 - **Context**: `faction_progression.ts` gave every active brigade +1 tank/16 turns and +1 artillery/8 turns. With 125 ARBiH brigades this produced 243 phantom tanks (historical ~30-50) and 668 phantom artillery (historical ~150-250). Mountain infantry in Drina pockets were acquiring tanks.

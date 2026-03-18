@@ -1,7 +1,23 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-18
-**Status:** **v0.4.9** (AI Comes Alive). **1191 tests**, 97 suites. **n915: 91.1% area-weighted, 13/13 anchors.** Corps-level operations, equipment rework, civilian casualty overhaul.
+**Last Updated:** 2026-03-19
+**Status:** **v0.4.9** (AI Comes Alive). **1193 tests**, 97 suites. **n916: 91.0% area-weighted, 13/13 anchors.** Corps-level operations, objective cap, operation arrows, SID→OSID fix, polygon topology investigation.
+
+## [2026-03-19] n916 — Force-Scaled Objective Cap + Operation Arrows + SID→OSID Fix
+
+### Changes
+- **Force-scaled objective cap**: `maxObjectives = min(6, floor(brigades * 0.5))` — 3 brigades = 1 objective, 12 = 6. Prevents small corps from launching overambitious multi-axis operations.
+- **Operation arrows (UI)**: Single arrow per operation from staging OSID to objective centroid. Multi-axis ops: one arrow per axis from axis staging to axis objective centroid. Arrow width scales with objective count (+30% per additional objective). Removed brigade-location-based origin (O(n^2) per render, semantically wrong).
+- **SID→OSID centroid key mismatch fix**: `OsidCentroidLookup` was built only from OSID keys, but legacy SID keys used by `frontEdges`, `hq_sid`, etc. Fix: load `canonical_to_operational_map.json` (5,797 entries) at startup, enrich centroid lookup with SID aliases. `buildOrderArrowsGeoJSON.ts` switched from SID-keyed `frontEdges` to OSID-keyed `frontEdgesOsid` for edge snapping.
+- **Polygon topology investigation**: Root cause of front line gaps identified — `topojsonClient.merge()` doesn't create shared arcs between cluster polygons. 37 OSID pairs have no shared polygon edges despite being adjacent. Pipeline Phase 5d fix attempted (second topology pass) but TopoJSON quantization alters coordinates, regressing calibration 91%→87%. Data reverted. Next approach: vertex snapping. New master doc: `docs/40_reports/MAP_GEOMETRY_MASTER.md`. New diagnostic: `docs/60_visualisations/edges_viewer.html`.
+- **Deck.gl demo**: Worktree at `.worktrees/deckgl-demo` — ArcLayer ops, ScatterplotLayer units, PathLayer front lines, HeatmapLayer supply, TextLayer labels. Assessment: worth it for future visual complexity, not needed immediately.
+
+### Results
+| Metric | n915 (before) | n916 (after) |
+|--------|--------------|-------------|
+| Area-weighted | 91.1% | **91.0%** (within noise) |
+| Anchors | 13/13 | **13/13** |
+| Tests | 1191 (97 suites) | **1193 (97 suites)** |
 
 ## [2026-03-18] n915 — Corps-Level Operations
 
