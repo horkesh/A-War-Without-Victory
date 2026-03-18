@@ -585,13 +585,12 @@ console.log('Phase 5d: Rebuilding topology from merged cluster polygons...');
         mergedFeatures.push(turf.feature(f.geometry, { osid, _idx: mergedFeatures.length }));
     }
     const mergedFc = featureCollection(mergedFeatures);
-    const clusterTopo = topojson.topology({ clusters: mergedFc });
-    // Light simplification to clean up micro-artifacts from the merge,
-    // but much gentler than the canonical pass (preserves cluster shapes).
-    const clusterPresimplified = topojsonSimplify.presimplify(clusterTopo as any);
-    const clusterSimplified = topojsonSimplify.simplify(clusterPresimplified, 0.00000005);
-    // Re-extract GeoJSON with shared arcs
-    const clusterGeoms = (clusterSimplified as any).objects.clusters.geometries;
+    // Very high quantization (1e8) to preserve coordinate precision.
+    // Default quantization (1e4) rounds coordinates and changes polygon shapes,
+    // which cascades through front edge computation and regresses calibration.
+    const clusterTopo = topojson.topology({ clusters: mergedFc }, 1e8);
+    // NO simplification — only rebuild topology for shared arcs.
+    const clusterGeoms = (clusterTopo as any).objects.clusters.geometries;
     let fixedCount = 0;
     for (let gi = 0; gi < clusterGeoms.length; gi++) {
         const geom = clusterGeoms[gi];
@@ -600,7 +599,7 @@ console.log('Phase 5d: Rebuilding topology from merged cluster polygons...');
         const existing = clusteredFeatures.get(osid);
         if (!existing) continue;
         // Extract this geometry from the new topology
-        const extracted = topojsonClient.feature(clusterSimplified as any, geom);
+        const extracted = topojsonClient.feature(clusterTopo as any, geom);
         const newGeom = (extracted as any).geometry;
         if (newGeom) {
             const normalized = normalizeGeometry(newGeom, osid);
