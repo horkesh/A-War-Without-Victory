@@ -1,7 +1,11 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-19
-**Status:** **v0.4.9** (AI Comes Alive). **1193 tests**, 97 suites. **n916: 91.0% area-weighted, 13/13 anchors.** Corps-level operations, objective cap, operation arrows, SID→OSID fix, polygon topology investigation.
+**Status:** **v0.4.9** (AI Comes Alive). **1203 tests**, 98 suites. **n916: 91.0% area-weighted, 13/13 anchors.** Ops planning modal redesign (4-phase corps-level flow), corps-level operations, objective cap, operation arrows.
+
+## [2026-03-19] Ops Planning Modal Redesign — 4-Phase Corps-Level Planning Flow
+
+Complete UI redesign: 1,415-line monolith → 16 files (2,464 lines) in `src/ui/map/components/ops_modal/`. Corps-level 4-phase flow: Commander (officer cards with personality pips) → Plan (map-click objectives, auto-proposed brigades, pill-button parameters) → G2 Assessment (clipboard with narrative/raw intel, live IPC predictions) → Authorize (formal OPORD, ODOBRENO stamp animation, parallel IPC submission). Full-bleed MapLibre map background. No checkboxes — all card/pill selection. Intel gate at <40% offers probe. Faction-localized (Bosnian/Serbian/Croatian). Two simplify passes: 17 fixes. 10 new auto-propose tests. 1203 tests pass. Report: `docs/40_reports/implemented/20260319_OPS_PLANNING_MODAL_REDESIGN.md`.
 
 ## [2026-03-19] n916 — Force-Scaled Objective Cap + Operation Arrows + SID→OSID Fix
 
