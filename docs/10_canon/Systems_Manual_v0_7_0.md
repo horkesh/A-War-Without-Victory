@@ -393,19 +393,40 @@ Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/2
 
 ### 7.9 AI Commander System
 
-**Implementation-note (2026-03-18, v0.4.5+):** Optional AI command layer in `src/sim/ai_commander/` (11 files). Provides LLM-assisted army and corps decision-making with structured output parsing and deterministic fallback.
+**Implementation-note (2026-03-18, v0.4.9):** Optional AI command layer in `src/sim/ai_commander/` (14 files, ~1,683 lines). Provides LLM-assisted army and corps decision-making, plus narrative features (corps dialogue, battle narratives, war dispatches) with structured output parsing and deterministic fallback.
 
 **Four modes** (`AiCommanderMode` in `ai_config.ts`):
-- **cadet** — formula-only (default). No API calls. Deterministic heuristic decisions. All model routing set to `'formula'`.
-- **recruit** — Haiku for all decisions. Cheapest API tier.
-- **officer** — Sonnet for army/advisor, Haiku for corps. Balanced cost/quality.
-- **commander** — Opus for army/advisor/corps-ops, Haiku for corps routine. Maximum strategic depth.
+- **cadet** — formula-only (default). No API calls. Deterministic heuristic decisions. All model routing set to `'formula'`. Narrative features hidden.
+- **recruit** — Haiku for all decisions and narrative. Cheapest API tier (~$3/game).
+- **officer** — Sonnet for army/advisor, Haiku for corps and narrative. Balanced cost/quality (~$5/game).
+- **commander** — Opus for army/advisor/corps-ops, Haiku for corps routine and narrative. Maximum strategic depth (~$14/game).
 
-**Key modules:** `army_commander_ai.ts` (army-level decisions: corps stances, operation approvals, reserve deployment), `corps_commander_ai.ts` (corps-level: sector stances, operation plans, brigade movements), `player_advisor.ts` (situation analysis and recommendations for human players), `prompt_builder.ts` (game state → structured prompt), `response_parser.ts` (LLM output → validated `ArmyDecision`/`CorpsDecision`), `personality_profiles.ts` (historical commander personality templates), `anthropic_client.ts` (Anthropic API integration).
+**Core modules:** `ai_types.ts` (shared types: `ArmyDecision`, `CorpsDecision`, `AdvisorResponse`, `AiPrompt`), `ai_config.ts` (mode routing, defaults, constants), `ai_client.ts` (`AiClient` interface + `createAiClient()` factory), `anthropic_client.ts` (Anthropic SDK wrapper), `army_commander_ai.ts` (army-level decisions: corps stances, operation approvals, reserve deployment), `corps_commander_ai.ts` (corps-level: sector stances, operation plans, brigade movements), `player_advisor.ts` (situation analysis and recommendations for human players), `prompt_builder.ts` (game state → structured prompt), `response_parser.ts` (LLM output → validated game types), `personality_profiles.ts` (historical commander personality templates), `decision_log.ts` (replay determinism).
+
+**Narrative modules (v0.4.9):** `corps_dialogue.ts` (corps commanders respond to orders in character — acknowledgment, concerns, confidence), `aar_narrative.ts` (significant battles narrated by officers — queue-then-generate pattern), `war_dispatches.ts` (monthly dispatches from UNHCR/NATO/civilian/diplomatic perspectives using actual game data). All narrative output is **cosmetic-only** — stored on `MilitaryState` but never read by simulation logic.
 
 **Stance override:** AI army decisions are respected by `generateCorpsStanceOrders()` in `bot_corps_stance.ts` — AI-chosen corps stances override the formula-driven defaults.
 
 **Decision log:** `CommandDecisionLogEntry` records turn, level, faction, decision payload, model used, token counts, and latency. Enables replay determinism — logged decisions can be replayed without API calls. Module: `decision_log.ts`.
+
+**Pipeline steps** (in `war_phases.ts`, after combat resolution):
+- `ai-army-decisions` — per-faction army-level decisions (existing since v0.4.5)
+- `ai-corps-decisions` — per-corps operational decisions (existing since v0.4.5)
+- `ai-corps-dialogue` — corps commanders respond to orders in character (v0.4.9)
+- `ai-battle-narratives` — generates narratives for queued significant battles (v0.4.9)
+- `ai-war-dispatches` — monthly humanitarian/military/civilian/diplomatic dispatches (v0.4.9, every 4 turns)
+
+**GameState fields** on `MilitaryState`:
+- `ai_decision_log?: CommandDecisionLogEntry[]` — replay log
+- `ai_army_decisions?: Record<FactionId, ArmyDecision>` — current turn army decisions
+- `corps_dialogues?: CorpsDialogueEntry[]` — current turn officer responses (cleared each turn)
+- `battle_narratives?: BattleNarrative[]` — rolling buffer of 20 battle stories
+- `narrative_queue?: NarrativeQueueEntry[]` — pending battles for narrative (cleared after generation)
+- `war_dispatches?: WarDispatch[]` — rolling buffer of 10 dispatches
+
+**IPC handlers** (Electron desktop): `set-ai-commander-config`, `get-ai-commander-config`, `get-advisor-recommendation`. Preload bridge on `window.awwv`.
+
+**UI components:** `AiSettingsPanel.tsx` (API key + mode selector), `AiAdvisorPanel.tsx` (on-demand advisor overlay), `CorpsDialoguePanel.tsx` (officer reports with confidence indicators), `WarDispatchPanel.tsx` (archival dispatch display with perspective-colored borders).
 
 **QA tool:** `npm run sim:qa:commanders` — runs headless scenario with AI commander diagnostics.
 
@@ -815,7 +836,7 @@ v0.7.0 adds the following normative sections:
 - **§6.8 Ops-Only Attack Doctrine** — All attacks through CorpsOperation; march-first doctrine.
 - **§6.9 Brigade No-Destruction** — Emergency retreat replaces destruction; retreat chain.
 - **§7.7 Army HQ Reserve Pool** — Elite brigade loan lifecycle, request priority, force-recall conditions.
-- **§7.9 AI Commander System** — Optional Claude API integration, 4 modes (cadet/recruit/officer/commander), decision log, QA tool.
+- **§7.9 AI Commander System** — Optional Claude API integration, 4 modes (cadet/recruit/officer/commander), decision log, QA tool. v0.4.9: narrative features (corps dialogue, battle narratives, war dispatches).
 - **§7.10 Conditional Events** — EventCondition type (9 variants), recursive evaluator, 3 converted historical events.
 - **§7.11 Corps Diagnostic Fields** — CorpsStatusReason (8 values), op_launch_trace gate audit.
 - **System 5a: Enclave Resilience Expansion** — Garrison power, increased resilience scaling, always-besieged enclaves, urban defense.

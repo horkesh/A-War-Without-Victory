@@ -123,3 +123,15 @@ Top findings from AI commanders:
 ```
 
 The loop is manual (human reviews clusters and decides fixes), but the observation pipeline is automated. Each cycle typically addresses 1-3 themes and reduces total observations by 10-30%.
+
+## Narrative Features (v0.4.9)
+
+v0.4.9 extended the AI commander module from 11 → 14 files with three cosmetic narrative features. These do not affect the QA pipeline but share the same `src/sim/ai_commander/` module and `AiClient` interface:
+
+| Feature | Module | Pipeline Step | Cost/Event | Storage |
+|---------|--------|--------------|-----------|---------|
+| Corps Dialogue | `corps_dialogue.ts` | `ai-corps-dialogue` | ~$0.001 | `MilitaryState.corps_dialogues` (cleared each turn) |
+| Battle Narratives | `aar_narrative.ts` | `ai-battle-narratives` | ~$0.005 | `MilitaryState.battle_narratives` (rolling 20) |
+| War Dispatches | `war_dispatches.ts` | `ai-war-dispatches` | ~$0.005 | `MilitaryState.war_dispatches` (rolling 10) |
+
+All features are gated by `config.mode !== 'cadet'`, use Haiku, and degrade silently on API failure. They are cosmetic-only — the QA diagnostic system never reads narrative output.

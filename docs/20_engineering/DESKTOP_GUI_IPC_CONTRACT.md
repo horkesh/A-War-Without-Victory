@@ -213,6 +213,21 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string, sectors?: Array<{ corps_id, faction, brigade_ids, settlement_ids }> }`
   - Behavior: derives deterministic corps-sector partition via multi-source BFS from corps HQs through friendly-controlled OSIDs. Sectors split by opposing faction and capped at MAX_SECTOR_EDGES=25 / MAX_SECTOR_BRIGADES=8. Interior brigades assigned as reserves via BFS; exempt corps (general staff, HVO Central Bosnia) excluded. Each sector includes sub-segments (connected components of front edges), assigned/reserve brigade lists, density, and threat metrics. Read-only.
 
+- `set-ai-commander-config` (invoke)
+  - Payload: `{ mode: string, anthropic_api_key?: string }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: stores AI commander config on `state.meta.ai_commander_config`, preserving `session_cost_estimate`. Validates mode is string. Broadcasts state. v0.4.9.
+
+- `get-ai-commander-config` (invoke)
+  - Payload: none
+  - Returns: `{ mode: string, session_cost_estimate: number, anthropic_api_key?: string }` or default `{ mode: 'cadet', session_cost_estimate: 0 }`
+  - Behavior: returns current AI commander config from state. Read-only. v0.4.9.
+
+- `get-advisor-recommendation` (invoke)
+  - Payload: `{ faction?: string, context_type?: 'situation_analysis' | 'operation_planning' | 'peace_plan' }`
+  - Returns: `AdvisorResponse | { error: string }`
+  - Behavior: guards cadet mode (returns error). Lazy-imports `createAiClient` + `getAdvisorRecommendation` from `src/sim/ai_commander/`. Defaults faction to `player_faction`, context_type to `situation_analysis`. Async API call. v0.4.9.
+
 - `query-battle-events` (invoke)
   - Payload: none
   - Returns: `{ ok: boolean, error?: string, turn?: number, events?: Array<{ turn, settlement_id, from, to, mechanism, mun_id }> }`
