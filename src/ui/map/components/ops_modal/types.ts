@@ -22,23 +22,6 @@ export interface AxisState {
     stagingOsid?: string;
 }
 
-export interface BrigadePlanView {
-    id: string;
-    name: string;
-    personnel: number;
-    tanks: number;
-    artillery: number;
-    cohesion: number;
-    fatigue: number;
-    morale: number;
-    locationOsid: string;
-    marchTurnsToStaging: number | null;  // null = unknown
-    isAutoProposed: boolean;
-    isCombatIneffective: boolean;   // personnel < 400
-    isDisrupted: boolean;
-    status: string;
-}
-
 export interface OpsPlanState {
     opName: string;
     opType: OpType;

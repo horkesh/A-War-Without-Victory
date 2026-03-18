@@ -50,9 +50,8 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
 
     const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;
 
-    const handleAuthorize = async () => {
+    const submitOperation = async (overrides?: Partial<CorpsOperationOrderPayload>) => {
         setIsStamped(true);
-        // Wait for stamp animation
         await new Promise((r) => setTimeout(r, 1500));
         setTransmitted(true);
 
@@ -95,68 +94,41 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                 idle_execution_turn_streak: 0,
                 staging_osid: a.stagingOsid ?? plan.defaultStagingOsid,
             })),
+            ...overrides,
         };
 
-        const result = await ipc.stageCorpsOperationOrder(payload);
+        const opResult = ipc.stageCorpsOperationOrder(payload);
+        const cmdResult = officerId
+            ? ipc.stageAssignOperationCommander({ corpsId, operationName: payload.name, officerId })
+            : Promise.resolve({ ok: true });
 
-        if (!result.ok) {
-            setLoadError(result.error ?? 'Failed to stage operation order.');
+        const [opRes] = await Promise.all([opResult, cmdResult]);
+
+        if (!opRes.ok) {
+            setLoadError(opRes.error ?? 'Failed to stage operation order.');
             setIsSubmitting(false);
             return;
         }
 
-        // Assign commander
-        if (officerId) {
-            await ipc.stageAssignOperationCommander({
-                corpsId,
-                operationName: plan.opName,
-                officerId,
-            });
-        }
-
         setOperationTargetOsids(allObjs);
         setIsSubmitting(false);
-
-        // Close after brief delay
         setTimeout(() => clearContext(), 1000);
     };
 
-    const handleProbe = async () => {
-        // Submit as probe type
-        const probePlan = { ...plan, opType: 'probe' as const };
-        setIsStamped(true);
-        await new Promise((r) => setTimeout(r, 1500));
-        setTransmitted(true);
+    const handleAuthorize = () => submitOperation();
 
-        if (!ipc.isAvailable) {
-            setLoadError('Operation submission requires desktop mode.');
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        const allObjs = probePlan.axes.flatMap((a) => a.objectives);
-        const allBrigades = probePlan.axes.flatMap((a) => a.brigadeIds);
-
-        const payload: CorpsOperationOrderPayload = {
-            corpsId,
-            name: probePlan.opName + ' (Probe)',
+    const handleProbe = () => {
+        const allObjs = plan.axes.flatMap((a) => a.objectives);
+        const allBrigades = plan.axes.flatMap((a) => a.brigadeIds);
+        return submitOperation({
+            name: plan.opName + ' (Probe)',
             type: 'probe',
-            targetSettlements: allObjs,
-            participatingBrigades: allBrigades.slice(0, 3), // Limited force for probe
-            sectorId: originSectorId ?? undefined,
+            participatingBrigades: allBrigades.slice(0, 3),
             objectives: allObjs.slice(0, 1),
-            stagingOsid: probePlan.axes[0]?.stagingOsid ?? probePlan.defaultStagingOsid,
             minAttackOutcome: 'repulsed',
             tempo: 'standard',
-        };
-
-        const result = await ipc.stageCorpsOperationOrder(payload);
-        if (!result.ok) {
-            setLoadError(result.error ?? 'Failed to stage probe order.');
-        }
-        setIsSubmitting(false);
-        setTimeout(() => clearContext(), 1000);
+            axes: undefined,
+        });
     };
 
     return (

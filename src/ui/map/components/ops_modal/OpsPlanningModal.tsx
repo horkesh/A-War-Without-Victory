@@ -164,7 +164,7 @@ export function OpsPlanningModal() {
     if (!isOpen || !corpsId) return null;
 
     const currentIdx = PHASE_ORDER.indexOf(phase);
-    const allObjectives = plan.axes.flatMap((a) => a.objectives);
+    const allObjectives = useMemo(() => plan.axes.flatMap((a) => a.objectives), [plan.axes]);
 
     return (
         <div className="fixed inset-0 z-[1000] bg-black/60">

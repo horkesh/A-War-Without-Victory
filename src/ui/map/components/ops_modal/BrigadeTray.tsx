@@ -1,7 +1,7 @@
 /**
  * Brigade tray — bottom-anchored panel with parameters strip + scrollable brigade cards.
  */
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { FormationView } from '../../data/types';
 import type { OpsPlanState } from './types';
 import { BrigadeCard } from './BrigadeCard';
@@ -18,7 +18,8 @@ interface BrigadeTrayProps {
 
 export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, factionColor }: BrigadeTrayProps) {
     const activeAxis = plan.axes.find((a) => a.id === plan.activeAxisId) ?? plan.axes[0];
-    const assignedIds = new Set(activeAxis?.brigadeIds ?? []);
+    const brigadeIdList = activeAxis?.brigadeIds ?? [];
+    const assignedIds = useMemo(() => new Set(brigadeIdList), [brigadeIdList]);
 
     // Auto-proposed lookup
     const proposedMap = useMemo(() => {
@@ -40,9 +41,9 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
         });
     }, [corpsBrigades, assignedIds, proposedMap]);
 
-    const toggleBrigade = (brigadeId: string) => {
+    const toggleBrigade = useCallback((brigadeId: string) => {
         if (!activeAxis) return;
-        const isCurrentlyAssigned = assignedIds.has(brigadeId);
+        const isCurrentlyAssigned = activeAxis.brigadeIds.includes(brigadeId);
         const newBrigadeIds = isCurrentlyAssigned
             ? activeAxis.brigadeIds.filter((id) => id !== brigadeId)
             : [...activeAxis.brigadeIds, brigadeId];
@@ -52,7 +53,7 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
                 a.id === activeAxis.id ? { ...a, brigadeIds: newBrigadeIds } : a
             ),
         });
-    };
+    }, [activeAxis, plan.axes, onUpdate]);
 
     // Max assembly time
     const maxMarch = useMemo(() => {
@@ -103,7 +104,7 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
                                 isAutoProposed={proposed?.isAutoProposed ?? false}
                                 marchTurns={proposed?.marchTurns ?? null}
                                 factionColor={factionColor}
-                                onClick={() => toggleBrigade(brigade.id)}
+                                onToggle={toggleBrigade}
                             />
                         );
                     })}

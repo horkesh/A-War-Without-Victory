@@ -2,6 +2,7 @@
  * Brigade card for the ops planning tray.
  * NO CHECKBOXES — click the card to toggle assignment.
  */
+import { memo, useCallback } from 'react';
 import type { FormationView } from '../../data/types';
 
 interface BrigadeCardProps {
@@ -10,7 +11,7 @@ interface BrigadeCardProps {
     isAutoProposed: boolean;
     marchTurns: number | null;
     factionColor: string;
-    onClick: () => void;
+    onToggle: (brigadeId: string) => void;
 }
 
 function getMarchColor(turns: number | null): string {
@@ -20,7 +21,7 @@ function getMarchColor(turns: number | null): string {
     return 'text-red-400';
 }
 
-export function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, factionColor, onClick }: BrigadeCardProps) {
+export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, factionColor, onToggle }: BrigadeCardProps) {
     const personnel = brigade.personnel ?? 0;
     const isCombatIneffective = personnel < 400;
     const isDisrupted = !!brigade.disrupted_turns;
@@ -33,7 +34,7 @@ export function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, f
     return (
         <button
             type="button"
-            onClick={isUnavailable ? undefined : onClick}
+            onClick={isUnavailable ? undefined : () => onToggle(brigade.id)}
             disabled={isUnavailable}
             className={`
                 relative w-[160px] min-w-[160px] h-[140px] rounded-md border p-2.5 text-left transition-all
@@ -107,4 +108,4 @@ export function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, f
             </div>
         </button>
     );
-}
+});
