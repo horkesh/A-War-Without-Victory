@@ -6,24 +6,37 @@
 import type { FactionId } from './game_state.js';
 
 /** Default fraction of displaced population killed.
- * Only applies to first displacement; re-displacement is pass-through (0 casualties). */
-export const DISPLACEMENT_KILLED_FRACTION = 0.04;
+ * Only applies to first displacement; re-displacement is pass-through (0 casualties).
+ * n897 audit: lowered from 0.04 to 0.02 — old default was hitting HRHB civilians
+ * at 4% (double Bosniak rate), producing inverted kill ratios vs history. */
+export const DISPLACEMENT_KILLED_FRACTION = 0.02;
 
 /** RS civilian departure from RBiH/HRHB was mostly voluntary flight (~1% lethality).
  * Historical: sim was producing ~10,860 RS civ killed vs ~4k actual (n159 audit B2). */
 export const DISPLACEMENT_KILLED_FRACTION_RS_FROM_NON_RS = 0.01;
 
-/** RBiH civilians displaced by RS forces. 4% uniform was producing ~13,766 Bosniak civilian
- * deaths per 40w — roughly 2× historical ~30-38k for the full 3.5-year war. Routine mass
- * displacement at 2% better matches the historical record; acute events (Srebrenica-type)
- * are not yet modeled separately (n218 audit). */
-export const DISPLACEMENT_KILLED_FRACTION_RBIH_FROM_RS = 0.02;
+/** RBiH civilians displaced by RS forces — systematic ethnic cleansing.
+ * Historical: ~30k Bosniak civilian deaths over full war, with the worst in 1992
+ * (Prijedor, Zvornik, Foca, Visegrad). Bosniaks = ~75% of all civilian deaths.
+ * n218: was 0.04 (too high at 40w). n897: raised from 0.02 to 0.04 — the original
+ * n218 reduction overcompensated. 0.04 is correct because Bosniak ethnic cleansing
+ * was uniquely severe. Acute events (Srebrenica-type) modeled separately. */
+export const DISPLACEMENT_KILLED_FRACTION_RBIH_FROM_RS = 0.04;
 
-/** Per-context kill fraction: RS civilians displaced by non-RS controllers get 1%,
- * RBiH civilians displaced by RS get 2%, all other combinations keep the default 4%. */
+/** HRHB civilians displaced by RS forces — lower than Bosniak rate.
+ * Croat civilian deaths from Serb forces were proportionally much lower (~2k full war
+ * vs ~30k Bosniak). Croats faced expulsion but less systematic killing. */
+export const DISPLACEMENT_KILLED_FRACTION_HRHB_FROM_RS = 0.01;
+
+/** Per-context kill fraction: models asymmetric ethnic cleansing severity.
+ * RBiH displaced by RS: 4% (systematic ethnic cleansing — worst of the war)
+ * HRHB displaced by RS: 1% (expulsion, not systematic killing)
+ * RS displaced by non-RS: 1% (mostly voluntary flight)
+ * All other combinations: 2% default (general wartime displacement) */
 export function getDisplacementKillFraction(displacedFaction: FactionId, controllerFaction: FactionId): number {
     if (displacedFaction === 'RS' && controllerFaction !== 'RS') return DISPLACEMENT_KILLED_FRACTION_RS_FROM_NON_RS;
     if (displacedFaction === 'RBiH' && controllerFaction === 'RS') return DISPLACEMENT_KILLED_FRACTION_RBIH_FROM_RS;
+    if (displacedFaction === 'HRHB' && controllerFaction === 'RS') return DISPLACEMENT_KILLED_FRACTION_HRHB_FROM_RS;
     return DISPLACEMENT_KILLED_FRACTION;
 }
 

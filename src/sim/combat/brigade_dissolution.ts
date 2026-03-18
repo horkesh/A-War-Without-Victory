@@ -135,6 +135,13 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
                 targetBrigade.composition.tanks = (targetBrigade.composition.tanks ?? 0) + tanksToTransfer;
                 targetBrigade.composition.artillery = (targetBrigade.composition.artillery ?? 0) + artilleryToTransfer;
             }
+
+            // Zero out dissolved brigade's equipment to prevent duplication on reconstitution.
+            // Without this, reconstituted brigades retain their original composition AND
+            // the 70% transfer goes to the receiving brigade — duplicating equipment.
+            f.composition.tanks = 0;
+            f.composition.artillery = 0;
+            f.composition.aa_systems = 0;
         }
 
         // Record dissolution
