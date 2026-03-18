@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Front Edges Viewer</title>
+<script src="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@4.1.2/dist/maplibre-gl.css" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; }
+  #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+
+  #controls {
+    position: absolute; top: 12px; left: 12px; z-index: 10;
+    background: rgba(20, 20, 40, 0.92); border: 1px solid #444; border-radius: 8px;
+    padding: 14px 16px; min-width: 240px; backdrop-filter: blur(6px);
+  }
+  #controls h2 { font-size: 14px; margin-bottom: 10px; color: #ccc; letter-spacing: 0.5px; }
+  .ctrl-group { margin-bottom: 8px; }
+  .ctrl-group label {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    font-size: 13px; padding: 3px 0;
+  }
+  .ctrl-group label:hover { color: #fff; }
+  .ctrl-group input[type="checkbox"] { accent-color: #7c8cf8; width: 15px; height: 15px; }
+  .color-swatch {
+    display: inline-block; width: 20px; height: 4px; border-radius: 2px; vertical-align: middle;
+  }
+  .stats { font-size: 11px; color: #888; margin-top: 8px; line-height: 1.5; }
+
+  #legend {
+    position: absolute; bottom: 30px; left: 12px; z-index: 10;
+    background: rgba(20, 20, 40, 0.92); border: 1px solid #444; border-radius: 8px;
+    padding: 12px 16px; backdrop-filter: blur(6px);
+  }
+  #legend h3 { font-size: 12px; margin-bottom: 8px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 5px; }
+  .legend-line { width: 28px; height: 0; border-top: 3px solid; display: inline-block; }
+  .legend-line.thin { border-top-width: 1px; }
+
+  #info-panel {
+    position: absolute; top: 12px; right: 12px; z-index: 10;
+    background: rgba(20, 20, 40, 0.92); border: 1px solid #444; border-radius: 8px;
+    padding: 14px 16px; min-width: 280px; max-width: 360px; backdrop-filter: blur(6px);
+    display: none;
+  }
+  #info-panel h3 { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  #info-panel .prop { font-size: 12px; margin-bottom: 4px; }
+  #info-panel .prop .key { color: #888; }
+  #info-panel .prop .val { color: #e8e8e8; font-family: 'Consolas', monospace; }
+  #info-panel .close-btn {
+    position: absolute; top: 8px; right: 10px; cursor: pointer;
+    color: #888; font-size: 16px; background: none; border: none;
+  }
+  #info-panel .close-btn:hover { color: #fff; }
+
+  #loading {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20;
+    background: rgba(20, 20, 40, 0.95); border: 1px solid #555; border-radius: 10px;
+    padding: 24px 32px; text-align: center; font-size: 14px;
+  }
+  #loading .spinner {
+    width: 30px; height: 30px; border: 3px solid #444; border-top-color: #7c8cf8;
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .maplibregl-ctrl-attrib { display: none; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  Loading edge data...
+</div>
+
+<div id="controls">
+  <h2>AWWV Front Edges</h2>
+  <div class="ctrl-group">
+    <label><input type="checkbox" id="toggle-polygons" checked>
+      <span class="color-swatch" style="background: rgba(100,140,200,0.3); border: 1px solid rgba(100,140,200,0.5);"></span>
+      OSID Polygons</label>
+    <label><input type="checkbox" id="toggle-contact" checked>
+      <span class="color-swatch" style="background: #555;"></span>
+      Contact Graph (centroids)</label>
+    <label><input type="checkbox" id="toggle-front" checked>
+      <span class="color-swatch" style="background: #ff4444;"></span>
+      Front Edges (shared borders)</label>
+    <label><input type="checkbox" id="toggle-control">
+      <span class="color-swatch" style="background: rgba(200,70,70,0.3);"></span>
+      Political Control Fill</label>
+  </div>
+  <div class="stats" id="stats"></div>
+</div>
+
+<div id="legend">
+  <h3>Front Edge Colors</h3>
+  <div class="legend-item"><span class="legend-line" style="border-color: #ff4444;"></span> RBiH vs RS</div>
+  <div class="legend-item"><span class="legend-line" style="border-color: #4488ff;"></span> HRHB vs RBiH</div>
+  <div class="legend-item"><span class="legend-line" style="border-color: #cc44cc;"></span> HRHB vs RS</div>
+  <div class="legend-item"><span class="legend-line thin" style="border-color: #555;"></span> Contact graph</div>
+</div>
+
+<div id="info-panel">
+  <button class="close-btn" onclick="document.getElementById('info-panel').style.display='none'">&times;</button>
+  <h3>Edge Properties</h3>
+  <div id="info-content"></div>
+</div>
+
+<script>
+const DATA_BASE = '../../data/derived';
+
+const FACTION_FILL_COLORS = {
+  RS:   'rgba(200, 70, 70, 0.25)',
+  RBiH: 'rgba(70, 165, 90, 0.25)',
+  HRHB: 'rgba(70, 130, 200, 0.25)',
+};
+
+function getFrontEdgeColor(side_a, side_b) {
+  const pair = [side_a, side_b].sort().join('-');
+  switch (pair) {
+    case 'RBiH-RS':   return '#ff4444';
+    case 'HRHB-RBiH': return '#4488ff';
+    case 'HRHB-RS':   return '#cc44cc';
+    default:          return '#ffaa00';
+  }
+}
+
+async function loadJSON(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Failed: ${url} (${resp.status})`);
+  return resp.json();
+}
+
+// ── Shared boundary extraction ──────────────────────────────────────────
+// For each edge (a, b), find vertices shared between polygon A and polygon B.
+// Two vertices are "shared" if they're within a tolerance (GeoJSON precision).
+
+// ── Game-accurate front line extraction ────────────────────────────────
+// Same algorithm as buildCorpsFrontLinesGeoJSON.ts:
+// Walk every polygon edge segment (vertex→vertex), hash the pair,
+// track which OSIDs share each segment. If exactly 2 OSIDs with
+// different controllers → front line segment. Then stitch into polylines.
+
+function coordKey(c) { return c[0].toFixed(6) + ',' + c[1].toFixed(6); }
+
+function buildFrontSegmentsFromPolygons(settlements, controllerMap) {
+  // Step 1: Index every polygon edge → which OSIDs claim it
+  const edgeMap = new Map(); // edgeKey → Set<osid>
+  const edgeCoords = new Map(); // edgeKey → [[ax,ay],[bx,by]]
+  // Also store per-OSID ring data for boundary walks
+  const osidRings = new Map(); // osid → [ring, ring, ...]
+
+  for (const feature of settlements.features) {
+    const osid = feature.properties?.osid;
+    if (!osid || !feature.geometry) continue;
+    const rings = feature.geometry.type === 'Polygon'
+      ? feature.geometry.coordinates
+      : feature.geometry.type === 'MultiPolygon'
+        ? feature.geometry.coordinates.flat()
+        : [];
+    osidRings.set(osid, rings);
+
+    for (const ring of rings) {
+      for (let i = 0; i < ring.length - 1; i++) {
+        const a = ring[i], b = ring[i + 1];
+        const kA = coordKey(a), kB = coordKey(b);
+        const ek = kA < kB ? kA + '|' + kB : kB + '|' + kA;
+        if (!edgeMap.has(ek)) { edgeMap.set(ek, new Set()); edgeCoords.set(ek, [a, b]); }
+        edgeMap.get(ek).add(osid);
+      }
+    }
+  }
+
+  // Step 2: Classify all shared edges as hostile or friendly
+  const hostileEdgeKeys = new Set();
+  const hostileEdgeColor = new Map();
+  const segments = [];
+  for (const [ek, osids] of edgeMap) {
+    if (osids.size !== 2) continue;
+    const [osidA, osidB] = [...osids];
+    const ctrlA = controllerMap[osidA], ctrlB = controllerMap[osidB];
+    if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
+    hostileEdgeKeys.add(ek);
+    const color = getFrontEdgeColor(ctrlA, ctrlB);
+    hostileEdgeColor.set(ek, color);
+    const [a, b] = edgeCoords.get(ek);
+    segments.push({ coords: [a, b], color });
+  }
+
+  // Step 3: Build vertex adjacency along polygon rings.
+  // For each vertex, record what other vertices it connects to via
+  // same-faction (non-hostile) polygon edges. After stitching, we'll
+  // use this to walk short paths between dead-end chain endpoints.
+  const friendlyAdj = new Map(); // coordKey → Set<coordKey>
+  const coordByKey = new Map();  // coordKey → [x, y]
+
+  for (const [osid, rings] of osidRings) {
+    for (const ring of rings) {
+      const n = ring.length - 1;
+      for (let i = 0; i < n; i++) {
+        const a = ring[i], b = ring[(i+1) % n];
+        const kA = coordKey(a), kB = coordKey(b);
+        const ek = kA < kB ? kA+'|'+kB : kB+'|'+kA;
+        // Only add friendly (non-hostile) edges
+        if (!hostileEdgeKeys.has(ek)) {
+          if (!friendlyAdj.has(kA)) friendlyAdj.set(kA, new Set());
+          if (!friendlyAdj.has(kB)) friendlyAdj.set(kB, new Set());
+          friendlyAdj.get(kA).add(kB);
+          friendlyAdj.get(kB).add(kA);
+          if (!coordByKey.has(kA)) coordByKey.set(kA, a);
+          if (!coordByKey.has(kB)) coordByKey.set(kB, b);
+        }
+      }
+    }
+  }
+
+  // Step 3: Stitch ALL segments into continuous polylines (color-agnostic),
+  // then split each polyline into sub-segments by color for rendering.
+  // This ensures the front line is contiguous even where faction pairs change.
+
+  // Build endpoint adjacency across ALL segments (not per-color).
+  // Segments can have 2+ coords (connectors have intermediate vertices).
+  // Endpoints are first and last coord of each segment.
+  const endpointAdj = new Map();
+  for (let i = 0; i < segments.length; i++) {
+    const s = segments[i];
+    const startKey = coordKey(s.coords[0]);
+    const endKey = coordKey(s.coords[s.coords.length - 1]);
+    if (!endpointAdj.has(startKey)) endpointAdj.set(startKey, []);
+    endpointAdj.get(startKey).push({ idx: i, isEnd: false });
+    if (startKey !== endKey) {
+      if (!endpointAdj.has(endKey)) endpointAdj.set(endKey, []);
+      endpointAdj.get(endKey).push({ idx: i, isEnd: true });
+    }
+  }
+
+  // Stitch into polylines (color-agnostic)
+  const used = new Array(segments.length).fill(false);
+  const chains = [];
+
+  for (let seed = 0; seed < segments.length; seed++) {
+    if (used[seed]) continue;
+    used[seed] = true;
+    let line = [...segments[seed].coords];
+    // One color entry per segment. For multi-vertex connectors,
+    // the color applies to all edges within that segment.
+    let colors = [segments[seed].color];
+
+    // Extend forward
+    let growing = true;
+    while (growing) {
+      growing = false;
+      const tailKey = coordKey(line[line.length - 1]);
+      for (const c of (endpointAdj.get(tailKey) || [])) {
+        if (used[c.idx]) continue;
+        used[c.idx] = true;
+        const other = segments[c.idx];
+        if (c.isEnd) {
+          // Other's END matches our tail → append coords reversed (skip shared vertex)
+          const reversed = [...other.coords].reverse();
+          line = line.concat(reversed.slice(1));
+        } else {
+          // Other's START matches our tail → append coords (skip shared vertex)
+          line = line.concat(other.coords.slice(1));
+        }
+        colors.push(other.color);
+        growing = true;
+        break;
+      }
+    }
+    // Extend backward
+    growing = true;
+    while (growing) {
+      growing = false;
+      const headKey = coordKey(line[0]);
+      for (const c of (endpointAdj.get(headKey) || [])) {
+        if (used[c.idx]) continue;
+        used[c.idx] = true;
+        const other = segments[c.idx];
+        if (c.isEnd) {
+          // Other's END matches our head → prepend coords (skip shared vertex)
+          line = other.coords.slice(0, -1).concat(line);
+        } else {
+          // Other's START matches our head → prepend reversed (skip shared vertex)
+          const reversed = [...other.coords].reverse();
+          line = reversed.slice(0, -1).concat(line);
+        }
+        colors.unshift(other.color);
+        growing = true;
+        break;
+      }
+    }
+
+    chains.push({ coords: line, colors });
+  }
+
+  // Step after stitching: BFS-bridge dead ends through friendly polygon edges.
+  // Find chain endpoints (dead ends), do BFS through friendlyAdj to reach
+  // another chain's dead end in ≤3 hops. Merge the chains via the BFS path.
+  const MAX_BRIDGE_HOPS = 3;
+  let bridging = true;
+  while (bridging) {
+    bridging = false;
+
+    // Collect all dead-end coordKeys → chain index + which end
+    const deadEnds = new Map(); // coordKey → { chainIdx, end: 'head'|'tail' }
+    for (let ci = 0; ci < chains.length; ci++) {
+      if (!chains[ci]) continue;
+      const c = chains[ci];
+      const hk = coordKey(c.coords[0]);
+      const tk = coordKey(c.coords[c.coords.length - 1]);
+      deadEnds.set(hk + ':' + ci + ':h', { chainIdx: ci, end: 'head', key: hk });
+      deadEnds.set(tk + ':' + ci + ':t', { chainIdx: ci, end: 'tail', key: tk });
+    }
+
+    // For each dead end, BFS through friendlyAdj
+    for (const [, de] of deadEnds) {
+      if (!chains[de.chainIdx]) continue;
+      const startKey = de.key;
+      // BFS
+      const visited = new Map(); // coordKey → parent coordKey
+      visited.set(startKey, null);
+      let frontier = [startKey];
+      let found = null; // { targetChainIdx, targetEnd, path }
+
+      for (let hop = 0; hop < MAX_BRIDGE_HOPS && !found; hop++) {
+        const next = [];
+        for (const fk of frontier) {
+          for (const nk of (friendlyAdj.get(fk) || [])) {
+            if (visited.has(nk)) continue;
+            visited.set(nk, fk);
+            next.push(nk);
+
+            // Check if nk is a dead end of a DIFFERENT chain
+            for (const [, other] of deadEnds) {
+              if (other.chainIdx === de.chainIdx) continue;
+              if (!chains[other.chainIdx]) continue;
+              if (other.key === nk) {
+                // Found! Reconstruct path
+                const path = [];
+                let cur = nk;
+                while (cur !== null) { path.unshift(coordByKey.get(cur) || [0,0]); cur = visited.get(cur); }
+                found = { targetChainIdx: other.chainIdx, targetEnd: other.end, path };
+                break;
+              }
+            }
+            if (found) break;
+          }
+          if (found) break;
+        }
+        frontier = next;
+      }
+
+      if (found && found.path.length >= 2) {
+        // Merge: connect de's chain to found.target's chain via path
+        const src = chains[de.chainIdx];
+        const dst = chains[found.targetChainIdx];
+        const bridgePath = found.path.slice(1, -1); // exclude endpoints (already in chains)
+        const srcColor = src.colors[src.colors.length - 1] || src.colors[0];
+
+        let merged;
+        if (de.end === 'tail' && found.targetEnd === 'head') {
+          merged = { coords: [...src.coords, ...bridgePath, ...dst.coords], colors: [...src.colors, srcColor, ...dst.colors] };
+        } else if (de.end === 'tail' && found.targetEnd === 'tail') {
+          merged = { coords: [...src.coords, ...bridgePath, ...dst.coords.slice().reverse()], colors: [...src.colors, srcColor, ...dst.colors.slice().reverse()] };
+        } else if (de.end === 'head' && found.targetEnd === 'tail') {
+          merged = { coords: [...dst.coords, ...bridgePath.reverse(), ...src.coords], colors: [...dst.colors, srcColor, ...src.colors] };
+        } else {
+          merged = { coords: [...dst.coords.slice().reverse(), ...bridgePath.reverse(), ...src.coords], colors: [...dst.colors.slice().reverse(), srcColor, ...src.colors] };
+        }
+
+        chains[de.chainIdx] = merged;
+        chains[found.targetChainIdx] = null;
+        bridging = true;
+        break; // Restart
+      }
+    }
+  }
+  // Filter nulled chains
+  const activeChains = chains.filter(Boolean);
+
+  // Split each chain into color-homogeneous sub-polylines for rendering.
+  // Colors array has one entry per original segment. We need to map
+  // color entries to coord ranges — each segment contributed (coords.length - 1)
+  // edges to the chain, but after stitching the mapping is approximate.
+  // Simplification: render entire chain in its dominant color.
+  // Filter out tiny fragments (< 4 vertices = 3 edges or fewer)
+  const significantChains = activeChains.filter(c => c.coords.length >= 4);
+
+  const features = [];
+  for (const chain of significantChains) {
+    // Find dominant color (most frequent in this chain)
+    const colorCounts = {};
+    for (const c of chain.colors) colorCounts[c] = (colorCounts[c] || 0) + 1;
+    const dominantColor = Object.entries(colorCounts).sort((a, b) => b[1] - a[1])[0][0];
+
+    if (chain.coords.length >= 2) {
+      features.push({
+        type: 'Feature',
+        properties: { color: dominantColor, type: 'front_osid', vertex_count: chain.coords.length },
+        geometry: { type: 'LineString', coordinates: chain.coords }
+      });
+    }
+  }
+
+  return { features, segmentCount: segments.length };
+}
+
+async function init() {
+  const loadingEl = document.getElementById('loading');
+
+  let settlements, contactGraph, saveData;
+  try {
+    [settlements, contactGraph, saveData] = await Promise.all([
+      loadJSON(`${DATA_BASE}/operational/operational_settlements.geojson`),
+      loadJSON(`${DATA_BASE}/operational/operational_contact_graph.json`),
+      loadJSON(`${DATA_BASE}/latest_run_final_save.json`)
+    ]);
+  } catch (e) {
+    loadingEl.innerHTML = `<div style="color:#ff6666">Error loading data:<br>${e.message}</div>`;
+    return;
+  }
+
+  // Build feature lookup by OSID
+  const featureByOsid = {};
+  for (const f of settlements.features) {
+    const osid = f.properties?.osid;
+    if (osid) featureByOsid[osid] = f;
+  }
+
+  // Build centroid lookup from contact graph nodes (for contact graph lines)
+  const nodeMap = {};
+  for (const n of contactGraph.nodes) nodeMap[n.id] = n;
+  for (const f of settlements.features) {
+    const osid = f.properties?.osid;
+    if (!nodeMap[osid] && f.geometry) {
+      const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] :
+                     f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates[0][0] : null;
+      if (coords && coords.length > 0) {
+        let sx = 0, sy = 0;
+        for (const c of coords) { sx += c[0]; sy += c[1]; }
+        nodeMap[osid] = { lat: sy / coords.length, lon: sx / coords.length };
+      }
+    }
+  }
+
+  // Contact graph: centroid-to-centroid (thin grey lines showing adjacency)
+  const contactFeatures = [];
+  for (const edge of contactGraph.edges) {
+    const na = nodeMap[edge.a], nb = nodeMap[edge.b];
+    if (!na || !nb) continue;
+    contactFeatures.push({
+      type: 'Feature',
+      properties: { a: edge.a, b: edge.b, type: 'contact' },
+      geometry: { type: 'LineString', coordinates: [[na.lon, na.lat], [nb.lon, nb.lat]] }
+    });
+  }
+
+  const mil = saveData.military || (saveData.state?.military) || {};
+
+  // Front lines: walk every polygon edge segment, same as the game renderer.
+  // Each vertex→vertex pair shared by exactly 2 OSIDs with different controllers = front.
+  loadingEl.innerHTML = 'Computing front lines from polygon edges...';
+  await new Promise(r => setTimeout(r, 10));
+
+  // Build controller map — political_controllers is under `political`, not `military`
+  const pol = saveData.political || (saveData.state?.political) || {};
+  const controllerMap = {};
+  const pc = pol.political_controllers || mil.political_controllers || {};
+  for (const [osid, ctrl] of Object.entries(pc)) controllerMap[osid] = ctrl;
+  console.log('[edges_viewer] Political controllers loaded:', Object.keys(pc).length);
+
+  const result = buildFrontSegmentsFromPolygons(settlements, controllerMap);
+  const stitchedFeatures = result.features;
+  const segmentCount = result.segmentCount;
+
+  console.log('[edges_viewer] Hostile segments:', segmentCount, 'Stitched polylines:', stitchedFeatures.length);
+  if (segmentCount === 0) {
+    // Debug: check why zero
+    let matched = 0;
+    for (const f of settlements.features) {
+      if (controllerMap[f.properties?.osid]) matched++;
+    }
+    console.log('[edges_viewer] OSIDs with controller:', matched, '/', settlements.features.length);
+  }
+
+  document.getElementById('stats').innerHTML =
+    `${segmentCount} hostile boundary segments<br>` +
+    `Stitched into ${stitchedFeatures.length} polylines<br>` +
+    `${contactGraph.edges.length} contact graph edges<br>` +
+    `${settlements.features.length} OSID polygons`;
+
+  // ── Faction wash: color OSIDs near the front, fading with depth ──
+  // Build adjacency from contact graph for BFS depth computation
+  const osidAdj = new Map();
+  for (const edge of contactGraph.edges) {
+    if (!osidAdj.has(edge.a)) osidAdj.set(edge.a, []);
+    if (!osidAdj.has(edge.b)) osidAdj.set(edge.b, []);
+    osidAdj.get(edge.a).push(edge.b);
+    osidAdj.get(edge.b).push(edge.a);
+  }
+
+  // Identify front-line OSIDs (have at least one hostile edge)
+  const frontOsids = new Set();
+  for (const [ek, osids] of result._edgeMap || []) {} // not exposed, rebuild
+  // Rebuild from controllerMap + adjacency: front OSID = has a neighbor with different controller
+  for (const [osid, ctrl] of Object.entries(controllerMap)) {
+    if (!ctrl) continue;
+    const neighbors = osidAdj.get(osid) || [];
+    for (const n of neighbors) {
+      const nc = controllerMap[n];
+      if (nc && nc !== ctrl) { frontOsids.add(osid); break; }
+    }
+  }
+
+  // BFS from front OSIDs to compute depth (0 = front, 1 = one behind, etc.)
+  const osidDepth = new Map();
+  let frontier = [];
+  for (const osid of frontOsids) {
+    osidDepth.set(osid, 0);
+    frontier.push(osid);
+  }
+  const MAX_WASH_DEPTH = 1;
+  for (let depth = 1; depth <= MAX_WASH_DEPTH; depth++) {
+    const nextFrontier = [];
+    for (const osid of frontier) {
+      for (const n of (osidAdj.get(osid) || [])) {
+        if (osidDepth.has(n)) continue;
+        // Only paint same-faction neighbors
+        const ctrl = controllerMap[osid];
+        const nCtrl = controllerMap[n];
+        if (nCtrl === ctrl) {
+          osidDepth.set(n, depth);
+          nextFrontier.push(n);
+        }
+      }
+    }
+    frontier = nextFrontier;
+  }
+
+  // Faction wash colors with opacity by depth
+  const FACTION_WASH = {
+    RS:   { r: 200, g: 70, b: 70 },
+    RBiH: { r: 70, g: 165, b: 90 },
+    HRHB: { r: 70, g: 130, b: 200 },
+  };
+
+  const washFeatures = [];
+  for (const f of settlements.features) {
+    const osid = f.properties?.osid;
+    const depth = osidDepth.get(osid);
+    if (depth === undefined) continue;
+    const ctrl = controllerMap[osid];
+    const wash = FACTION_WASH[ctrl];
+    if (!wash) continue;
+    // Opacity fades with depth: 0 = 0.35, 1 = 0.15
+    const opacity = depth === 0 ? 0.35 : 0.15;
+    washFeatures.push({
+      type: 'Feature',
+      properties: {
+        osid, faction: ctrl,
+        fill: `rgba(${wash.r}, ${wash.g}, ${wash.b}, ${opacity})`
+      },
+      geometry: f.geometry
+    });
+  }
+
+  // Political control fill (reuse controllerMap built above)
+  const controlFeatures = [];
+  for (const f of settlements.features) {
+    const osid = f.properties?.osid;
+    const ctrl = controllerMap[osid];
+    if (!ctrl || !FACTION_FILL_COLORS[ctrl]) continue;
+    controlFeatures.push({
+      type: 'Feature',
+      properties: { osid, faction: ctrl, fill: FACTION_FILL_COLORS[ctrl] },
+      geometry: f.geometry
+    });
+  }
+
+  loadingEl.style.display = 'none';
+
+  // ── Map ─────────────────────────────────────────────────────────────────
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: { 'carto-dark': { type: 'raster', tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'], tileSize: 256 } },
+      layers: [{ id: 'background', type: 'raster', source: 'carto-dark' }]
+    },
+    center: [17.8, 44.0], zoom: 7, maxZoom: 14, minZoom: 5
+  });
+  map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+
+  map.on('load', () => {
+    // Political control fill (off by default)
+    map.addSource('control-fill', { type: 'geojson', data: { type: 'FeatureCollection', features: controlFeatures } });
+    map.addLayer({
+      id: 'control-fill-layer', type: 'fill', source: 'control-fill',
+      paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.6 },
+      layout: { visibility: 'none' }
+    });
+
+    // OSID polygons
+    map.addSource('osid-polygons', { type: 'geojson', data: settlements });
+    map.addLayer({ id: 'osid-fill', type: 'fill', source: 'osid-polygons',
+      paint: { 'fill-color': 'rgba(80, 120, 180, 0.06)', 'fill-outline-color': 'rgba(100, 140, 200, 0.3)' }
+    });
+    map.addLayer({ id: 'osid-outline', type: 'line', source: 'osid-polygons',
+      paint: { 'line-color': 'rgba(100, 140, 200, 0.25)', 'line-width': 0.5 }
+    });
+
+    // Faction wash — front-line OSIDs colored by faction, fading with depth
+    map.addSource('faction-wash', { type: 'geojson', data: { type: 'FeatureCollection', features: washFeatures } });
+    map.addLayer({ id: 'faction-wash-fill', type: 'fill', source: 'faction-wash',
+      paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 1.0 }
+    });
+
+    // Contact graph
+    map.addSource('contact-edges', { type: 'geojson', data: { type: 'FeatureCollection', features: contactFeatures } });
+    map.addLayer({ id: 'contact-lines', type: 'line', source: 'contact-edges',
+      paint: { 'line-color': '#444', 'line-width': 0.6, 'line-opacity': 0.4 }
+    });
+
+    // Front edges — shared borders
+    map.addSource('front-edges', { type: 'geojson', data: { type: 'FeatureCollection', features: stitchedFeatures } });
+    // Glow
+    map.addLayer({ id: 'front-glow', type: 'line', source: 'front-edges',
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 9, 10, 12, 14],
+        'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 4, 9, 6, 12, 8],
+        'line-opacity': 0.3
+      }
+    });
+    // Main line
+    map.addLayer({ id: 'front-lines', type: 'line', source: 'front-edges',
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1.5, 9, 3, 12, 5],
+        'line-opacity': 0.9
+      },
+      layout: { 'line-cap': 'round', 'line-join': 'round' }
+    });
+
+    // Click hit area
+    map.addLayer({ id: 'front-hit', type: 'line', source: 'front-edges',
+      paint: { 'line-color': 'transparent', 'line-width': 14 }
+    });
+    map.addLayer({ id: 'contact-hit', type: 'line', source: 'contact-edges',
+      paint: { 'line-color': 'transparent', 'line-width': 10 }
+    });
+
+    // Click handler
+    const infoPanel = document.getElementById('info-panel');
+    const infoContent = document.getElementById('info-content');
+    function showInfo(props) {
+      let html = '';
+      for (const [k, v] of Object.entries(props)) {
+        if (k === 'color' || k === 'fill') continue;
+        html += `<div class="prop"><span class="key">${k}:</span> <span class="val">${v ?? 'null'}</span></div>`;
+      }
+      infoContent.innerHTML = html;
+      infoPanel.style.display = 'block';
+    }
+
+    map.on('click', 'front-hit', e => { if (e.features?.[0]) showInfo(e.features[0].properties); });
+    map.on('click', 'contact-hit', e => { if (e.features?.[0]) showInfo(e.features[0].properties); });
+    map.on('mouseenter', 'front-hit', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'front-hit', () => { map.getCanvas().style.cursor = ''; });
+    map.on('mouseenter', 'contact-hit', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'contact-hit', () => { map.getCanvas().style.cursor = ''; });
+
+    // Toggles
+    document.getElementById('toggle-polygons').addEventListener('change', e => {
+      const v = e.target.checked ? 'visible' : 'none';
+      map.setLayoutProperty('osid-fill', 'visibility', v);
+      map.setLayoutProperty('osid-outline', 'visibility', v);
+    });
+    document.getElementById('toggle-contact').addEventListener('change', e => {
+      map.setLayoutProperty('contact-lines', 'visibility', e.target.checked ? 'visible' : 'none');
+    });
+    document.getElementById('toggle-front').addEventListener('change', e => {
+      const v = e.target.checked ? 'visible' : 'none';
+      map.setLayoutProperty('front-lines', 'visibility', v);
+      map.setLayoutProperty('front-glow', 'visibility', v);
+    });
+    document.getElementById('toggle-control').addEventListener('change', e => {
+      map.setLayoutProperty('control-fill-layer', 'visibility', e.target.checked ? 'visible' : 'none');
+    });
+  });
+}
+
+init();
+</script>
+</body>
+</html>
