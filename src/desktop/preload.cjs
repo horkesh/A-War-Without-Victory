@@ -73,4 +73,7 @@ contextBridge.exposeInMainWorld('awwv', {
   redirectReserveLoan: (brigadeId, newCorpsId) => ipcRenderer.invoke('redirect-reserve-loan', { brigadeId, newCorpsId }),
   acknowledgeOfficerEvent: (eventId) => ipcRenderer.invoke('acknowledge-officer-event', { eventId }),
   acceptOfficerReplacement: (payload) => ipcRenderer.invoke('accept-officer-replacement', payload),
+  setAiCommanderConfig: (payload) => ipcRenderer.invoke('set-ai-commander-config', payload),
+  getAiCommanderConfig: () => ipcRenderer.invoke('get-ai-commander-config'),
+  getAdvisorRecommendation: (payload) => ipcRenderer.invoke('get-advisor-recommendation', payload),
 });

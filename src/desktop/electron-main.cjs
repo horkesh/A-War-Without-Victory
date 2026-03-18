@@ -1780,6 +1780,58 @@ app.whenReady().then(() => {
     }
   });
 
+  // --- AI Commander IPC handlers ---
+  ipcMain.handle('set-ai-commander-config', async (_event, payload) => {
+    if (!currentGameStateJson) return { ok: false, error: 'No game loaded' };
+    const { mode, anthropic_api_key } = payload || {};
+    if (typeof mode !== 'string') return { ok: false, error: 'Invalid payload: mode required' };
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      if (!state.meta) state.meta = {};
+      state.meta.ai_commander_config = {
+        mode,
+        ...(typeof anthropic_api_key === 'string' ? { anthropic_api_key } : {}),
+        session_cost_estimate: state.meta.ai_commander_config?.session_cost_estimate ?? 0,
+      };
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('get-ai-commander-config', async () => {
+    if (!currentGameStateJson) return { mode: 'cadet', session_cost_estimate: 0 };
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      return state.meta?.ai_commander_config ?? { mode: 'cadet', session_cost_estimate: 0 };
+    } catch (e) {
+      return { mode: 'cadet', session_cost_estimate: 0 };
+    }
+  });
+
+  ipcMain.handle('get-advisor-recommendation', async (_event, payload) => {
+    if (!currentGameStateJson) return { error: 'No game loaded' };
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const config = state.meta?.ai_commander_config ?? { mode: 'cadet', session_cost_estimate: 0 };
+      if (config.mode === 'cadet') return { error: 'AI Commander is in cadet mode. Enable AI Commander in settings to use advisor.' };
+      const faction = payload?.faction ?? state.meta?.player_faction ?? 'RBiH';
+      const contextType = payload?.context_type ?? 'situation_analysis';
+      const { createAiClient } = await import('../sim/ai_commander/ai_client.js');
+      const { getAdvisorRecommendation } = await import('../sim/ai_commander/player_advisor.js');
+      const client = await createAiClient(config.anthropic_api_key);
+      const result = await getAdvisorRecommendation(state, faction, contextType, client);
+      return result ?? { error: 'Advisor returned no recommendation' };
+    } catch (e) {
+      return { error: e.message || String(e) };
+    }
+  });
+
   // Start the tactical map HTTP server (required because MapLibre's Web Workers
   // don't function under Electron custom protocol schemes), then create the window.
   startMapServer().then(() => {
