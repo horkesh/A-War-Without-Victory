@@ -152,6 +152,14 @@ export interface GameStore {
   opsPlanningModalOpen: boolean;
   setOpsPlanningModalOpen: (v: boolean) => void;
 
+  /** Ops planning modal — corps-level context */
+  opsPlanningCorpsId: string | null;
+  opsPlanningOriginSectorId: string | null;
+  opsPlanningSelectedOfficerId: string | null;
+  setOpsPlanningContext: (corpsId: string, originSectorId: string) => void;
+  setOpsPlanningSelectedOfficerId: (id: string | null) => void;
+  clearOpsPlanningContext: () => void;
+
   /** Whether the Commander Selection Modal is open, and for which corps+operation. */
   commanderSelectionContext: { corpsId: string; operationName: string } | null;
   setCommanderSelectionContext: (v: { corpsId: string; operationName: string } | null) => void;
@@ -316,6 +324,23 @@ export const useGameStore = create<GameStore>((set) => ({
 
   opsPlanningModalOpen: false,
   setOpsPlanningModalOpen: (v) => set({ opsPlanningModalOpen: v }),
+
+  opsPlanningCorpsId: null,
+  opsPlanningOriginSectorId: null,
+  opsPlanningSelectedOfficerId: null,
+  setOpsPlanningContext: (corpsId, originSectorId) => set({
+    opsPlanningModalOpen: true,
+    opsPlanningCorpsId: corpsId,
+    opsPlanningOriginSectorId: originSectorId,
+    opsPlanningSelectedOfficerId: null,
+  }),
+  setOpsPlanningSelectedOfficerId: (id) => set({ opsPlanningSelectedOfficerId: id }),
+  clearOpsPlanningContext: () => set({
+    opsPlanningModalOpen: false,
+    opsPlanningCorpsId: null,
+    opsPlanningOriginSectorId: null,
+    opsPlanningSelectedOfficerId: null,
+  }),
 
   commanderSelectionContext: null,
   setCommanderSelectionContext: (v) => set({ commanderSelectionContext: v }),

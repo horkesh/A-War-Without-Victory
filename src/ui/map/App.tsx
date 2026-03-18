@@ -19,7 +19,7 @@ import { AttackConfirmation } from './components/AttackConfirmation';
 import { SidePickerOverlay } from './components/SidePickerOverlay';
 import { RecruitmentModal } from './components/RecruitmentModal';
 import { WarSummaryModal } from './components/WarSummaryModal';
-import { OpsPlanningModal } from './components/OpsPlanningModal';
+import { OpsPlanningModal } from './components/ops_modal/OpsPlanningModal';
 import { CommanderSelectionModal } from './components/CommanderSelectionModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';

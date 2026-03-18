@@ -32,7 +32,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
-  const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
+  const setOpsPlanningContext = useGameStore((s) => s.setOpsPlanningContext);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
@@ -105,8 +105,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const handleOpenOpsPlanning = () => {
     const primarySector = corpsSectors[0];
     if (primarySector) {
-      setSelectedCorpsFrontSectorId(primarySector.sector_id);
-      setOpsPlanningModalOpen(true);
+      setOpsPlanningContext(selectedCorpsId, primarySector.sector_id);
     } else {
       setLoadError('Ops Planning requires the Corps to be assigned to a front sector.');
     }
