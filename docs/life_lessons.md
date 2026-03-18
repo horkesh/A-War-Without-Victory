@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-16 (night shift audit: 5 new lessons from event system v0.4.1 testing)
+> Last updated: 2026-03-18 (AI commander QA session: 5 new lessons)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -20,6 +20,36 @@
 ---
 
 ## Active Lessons (no recent violations)
+
+### [QA] AI commanders are your best alpha testers — run them after every engine change (2026-03-18) — NEW
+- **Context**: Three API-powered AI commanders (Mladić, Halilović→Delić, Petković) played a 40-week campaign and produced 321 diagnostic observations. They found: alliance decays too fast (22 obs), ARBiH over-mobilized (84 obs), operations not producing visible combat (38 obs), territory pacing wrong (16 obs), no patron directive system (12 obs), Jajce timing off (11 obs), late-war stasis (6 obs). Each observation includes severity, expected vs actual, and affected system.
+- **Wrong approach**: Relying only on area-weighted % and benchmark pass/fail to evaluate engine health. These catch territorial accuracy but miss behavioral absurdities, force strength calibration, political timeline accuracy, and design gaps.
+- **Right approach**: Run `npm run sim:qa:commanders` after every engine change. The AI commanders read the game state with historical knowledge and flag anything that doesn't match reality. The observation count is the engine's health metric — it should decrease with each fix cycle. Self-correction loop: fix → re-run → count → repeat.
+- **Do instead**: After every calibration run or engine change, run the three-commander QA. If observations increase, the change introduced problems. If they decrease, the engine improved. Target: 0 bugs, <50 calibration, <10 design gaps.
+
+### [Architecture] Redundant gates mask each other — fix one and the next blocks (2026-03-18) — NEW
+- **Context**: Offensive corps had no operations. Investigation found SECONDARY_OP_COOLDOWN_TURNS=8 was the suspected blocker. Fixed it to 3 for offensive stance. Result: zero effect (identical hash). The real blocker was isDefenseStrained (density < 0.167). Fixing that revealed supply_critical as the NEXT blocker. The engine has 5+ independent gates on operation launch; when multiple block simultaneously, fixing one reveals nothing.
+- **Wrong approach**: Assuming the first blocked gate is THE problem. Fixing cooldown when density was the binding constraint wasted a fix cycle.
+- **Right approach**: The `op_launch_trace` diagnostic was the correct solution — log ALL gates, not just the first one that blocks. Now the engine reports `blocked:density_strained(0.120<0.167)` so you know exactly which gate to fix. After fixing, re-check — the trace will show the next gate.
+- **Do instead**: When a multi-gate system blocks something, instrument ALL gates (not just the first match). Use a trace array that captures every gate's status. Then fix the binding gate first and re-run to see if the next gate becomes binding. This is why `op_launch_trace` exists.
+
+### [Architecture] Formula bots silently override player/AI intent — add override guards (2026-03-18) — NEW
+- **Context**: AI army commander set corps stances (offensive/defensive), but `generateCorpsStanceOrders()` in `bot_corps_stance.ts` overwrote them every turn with the formula bot's computed stance. The AI's strategic decisions were silently ignored. The first Mladić run produced identical results to the formula bot because every stance order was overwritten.
+- **Wrong approach**: Injecting decisions into state and assuming downstream systems will respect them. The formula bot's stance generation runs DURING the turn pipeline and overwrites any pre-turn mutations.
+- **Right approach**: Added an explicit override guard: `generateCorpsStanceOrders()` now checks `ai_army_decisions[faction]` and uses the AI stance instead of computing its own. Only active when AI decisions exist; formula-only mode unchanged.
+- **Do instead**: When adding any override mechanism (AI, player, or scripted), trace the FULL pipeline to find every system that writes to the same field. Each writer is a potential override bypass. The guard must be at EVERY write point, not just the first one. Test by checking: "if I set X before the turn, is X still set after the turn?"
+
+### [Data] Nested JSON keys cause silent zero-data bugs (2026-03-18) — NEW
+- **Context**: `osid_areas.json` has areas nested under an `areas` key: `{ total_area_km2: 51337, osid_count: 744, areas: { "op:banja_luka:...": 135.3, ... } }`. The runner loaded the top-level object and used it directly as `Record<string, number>`, getting string keys like "total_area_km2" instead of OSID keys. Result: all territory percentages showed 0% for all factions. The AI commanders diagnosed this themselves: "All factions show 0% territory — this is mechanically impossible."
+- **Wrong approach**: Assuming JSON files are flat `Record<string, number>`. Not checking the actual structure before using it.
+- **Right approach**: `osidAreas = raw.areas ?? raw` — check for nested key, fall back to flat. Better: validate the loaded data has the expected shape (keys start with `op:`).
+- **Do instead**: When loading a JSON data file, always check the actual structure first (`node -e "console.log(Object.keys(require('./file.json')))"` or read first 5 lines). Don't assume flat. Add a shape check after loading: if the first key doesn't match expected format, the data is nested or wrong.
+
+### [Process] Area-weighted territory is the ONLY valid metric — never use OSID counts (2026-03-18) — NEW
+- **Context**: Throughout the session, territory was reported as OSID count percentages (e.g., "RS 49.4%"). The user corrected: "I prefer area-weighted at all times." OSID counts are misleading because a single Krajina OSID can be 300km² while a Sarajevo OSID is 2km². RS at 49.4% by OSID count is actually 60.3% by area — a 10pp difference that completely changes the strategic picture.
+- **Wrong approach**: Using `Object.keys(pc).filter(o => pc[o] === faction).length / total` — counts OSIDs regardless of size. Quick to compute but fundamentally misleading.
+- **Right approach**: Load `data/derived/operational/osid_areas.json` (nested under `.areas` key), sum area per faction. Use area-weighted % everywhere: scripts, diagnostic prompts, reports, commander briefings.
+- **Do instead**: Any time you compute territory percentages, use area-weighted. Load osid_areas.json once at startup. If displaying territory to user, AI, or in reports, it MUST be area-weighted. OSID counts are only acceptable for internal debugging where you need to know "how many OSIDs changed."
 
 ### [Planning] Multi-milestone roadmaps need freeze points, not just feature lists (2026-03-16) — NEW
 - **Context**: Full roadmap review of 20 milestones (v0.5.0→v1.0.0) revealed a 7-step content dependency chain: events → essays → codex → help → tutorial → localization → store page. A change to event titles at v0.6.0 would cascade stale content through 6 downstream milestones. Without explicit freeze points, late changes destabilize everything.
