@@ -201,33 +201,39 @@ export function runEquipmentProgression(state: GameState): EquipmentProgressionR
 
     if (turn > 0) {
         // ARBiH: Zenica steelworks — improvised mortars/howitzers.
-        // ~3 artillery pieces per 8 turns (faction total, not per-brigade).
+        // ~5 artillery pieces per 8 turns (faction total, not per-brigade).
+        // Historical: Zenica arms industry (Bratstvo factory) produced mortars,
+        // recoilless guns, and howitzer ammunition throughout the war.
         if (turn % 8 === 0) {
-            distributeEquipmentToFaction(formations, formationIds, 'RBiH', 'artillery', 3, report);
+            distributeEquipmentToFaction(formations, formationIds, 'RBiH', 'artillery', 5, report);
         }
 
         // Arms smuggling pipeline through Croatia — ARBiH gets a trickle of
         // heavy weapons from abroad (Iran, Pakistan, black market), but HVO/Croatia
         // skims ~40% of every shipment passing through Croatian territory.
-        // Every 12 turns: 2 tanks + 3 artillery enter; ARBiH gets 60%, HVO gets 40%.
+        // Tanks: every 12 turns (heavy, hard to smuggle). 2 enter, 60/40 split.
+        // Artillery: every 8 turns (lighter, easier to move). 3 enter, 60/40 split.
         if (turn % 12 === 0) {
             const smuggleTanks = 2;
-            const smuggleArtillery = 3;
             const hvocut = 0.40;
             const rbihTanks = Math.max(1, Math.round(smuggleTanks * (1 - hvocut)));   // 1
             const hrhbTanks = smuggleTanks - rbihTanks;                                // 1
+            distributeEquipmentToFaction(formations, formationIds, 'RBiH', 'tanks', rbihTanks, report);
+            distributeEquipmentToFaction(formations, formationIds, 'HRHB', 'tanks', hrhbTanks, report);
+        }
+        if (turn % 8 === 0) {
+            const smuggleArtillery = 3;
+            const hvocut = 0.40;
             const rbihArt = Math.max(1, Math.round(smuggleArtillery * (1 - hvocut)));  // 2
             const hrhbArt = smuggleArtillery - rbihArt;                                // 1
-            distributeEquipmentToFaction(formations, formationIds, 'RBiH', 'tanks', rbihTanks, report);
             distributeEquipmentToFaction(formations, formationIds, 'RBiH', 'artillery', rbihArt, report);
-            distributeEquipmentToFaction(formations, formationIds, 'HRHB', 'tanks', hrhbTanks, report);
             distributeEquipmentToFaction(formations, formationIds, 'HRHB', 'artillery', hrhbArt, report);
         }
 
         // HRHB: Croatian Army (HV) direct transfers — separate from smuggle line.
-        // HVO gets its own pipeline from Zagreb: ~1 artillery per 12 turns.
+        // HVO gets its own pipeline from Zagreb: ~2 artillery per 12 turns.
         if (turn % 12 === 0) {
-            distributeEquipmentToFaction(formations, formationIds, 'HRHB', 'artillery', 1, report);
+            distributeEquipmentToFaction(formations, formationIds, 'HRHB', 'artillery', 2, report);
         }
     }
 
