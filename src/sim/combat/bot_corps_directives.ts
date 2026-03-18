@@ -1036,10 +1036,15 @@ export function generateCorpsDirectives(
         // Supply-aware operation sizing (graduated response)
         const supplyHealth = assessCorpsSupplyHealth(subordinates, faction, supplyByOsid);
         const surplusCount = computeCorpsSurplus(corpsSectors);
-        const maxOpSize = computeSupplyAwareOpSize(supplyHealth, surplusCount, 12);
+        let maxOpSize = computeSupplyAwareOpSize(supplyHealth, surplusCount, 12);
+        const wasSupplyCritical = maxOpSize === 0;
 
         if (maxOpSize === 0) {
-            offensiveTargets.length = 0;  // critical: no operations
+            // Supply critical: keep only top priority target for limited/desperate ops
+            if (offensiveTargets.length > 1) {
+                offensiveTargets.length = 1;  // Keep best target only
+            }
+            maxOpSize = 1;  // Allow single-brigade probe at minimum
         }
 
         // Army HQ override: inject forced targets (overrides supply gate).
@@ -1559,7 +1564,7 @@ export function generateCorpsDirectives(
         } else if (isDefenseStrained) {
             cmd.status_reason = 'density_strained';
         } else if (offensiveTargets.length === 0) {
-            cmd.status_reason = maxOpSize === 0 ? 'supply_critical' : 'no_targets';
+            cmd.status_reason = wasSupplyCritical ? 'supply_critical' : 'no_targets';
         } else if (directiveEligibleSectors.length === 0) {
             cmd.status_reason = 'no_eligible_sectors';
         } else {

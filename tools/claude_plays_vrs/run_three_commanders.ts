@@ -244,18 +244,30 @@ function generateReactiveDecision(
         }
     }
 
-    // Check for corps set to offensive but with no active operation (possible intent gap)
+    // Check for corps set to offensive but not executing.
+    // Classifies by root cause: density/cooldown/queued = calibration, supply = design gap
     for (const c of factionCorps) {
         if (c.stance === 'offensive' && !c.hasOp && c.brigades >= 5 && turn > 6) {
+            const cc = corpsCommand[c.id];
+            const statusReason = (cc as any)?.status_reason ?? 'unknown';
+            const trace = ((cc as any)?.op_launch_trace ?? []).join(', ');
+            if (statusReason === 'ready' || statusReason === 'executing_operation') continue;
+            const isCalibrationIssue = statusReason === 'density_strained' ||
+                statusReason === 'cooldown' || statusReason === 'queued_ops_pending' ||
+                trace.includes('blocked:density_strained');
             observations.push({
-                severity: 'design_gap',
+                severity: isCalibrationIssue ? 'calibration' : 'design_gap',
                 commander: commanderName,
                 faction,
                 turn,
-                description: `Corps ${c.id} is offensive with ${c.brigades} brigades but has no active operation`,
-                expected: 'Offensive corps with adequate force should be launching or preparing operations',
-                actual: `${c.id}: offensive stance, ${c.brigades} brigades, no operation`,
-                affected_system: 'operation_generation',
+                description: isCalibrationIssue
+                    ? `Corps ${c.id} under-strength for territory (${c.brigades} bde, ${statusReason})`
+                    : `Corps ${c.id} offensive with ${c.brigades} bde — ${statusReason || 'no operation'}`,
+                expected: isCalibrationIssue
+                    ? 'Corps needs more brigades or narrower front to launch operations'
+                    : 'Offensive corps should be executing or ready to launch',
+                actual: `status: ${statusReason}, trace: ${trace || 'pre-turn'}`,
+                affected_system: isCalibrationIssue ? 'force_allocation' : 'operation_generation',
             });
         }
     }

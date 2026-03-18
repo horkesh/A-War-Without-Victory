@@ -40,6 +40,11 @@
 - `SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE=3` for offensive corps (shorter cooldown)
 - MapContainer TS guard fixes, orphan test cleanup
 
+### QA Deep-Dive: 321 → 16 Observations
+- **Observation classification refinement**: Root-cause classification in `run_three_commanders.ts` using engine-native `status_reason` + `op_launch_trace`. Density/cooldown/queued → `calibration`, supply/unknown → `design_gap`. Skips `ready`/`executing_operation` corps.
+- **Graduated supply response**: `bot_corps_directives.ts` — supply-critical corps (`maxOpSize === 0`) no longer strip ALL targets. Keep 1 top-priority target, allow single-brigade probe (`maxOpSize = 1`). `wasSupplyCritical` flag preserves `status_reason` reporting.
+- **Final observation breakdown**: 5 calibration (cooldown + queued), 9 design_gap (supply), 2 historical divergence (RS pacing). 0 bugs.
+
 ### Tests
 - 1184 total vitest tests (was 1110), 96 suites, typecheck clean
 
