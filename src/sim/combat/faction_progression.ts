@@ -190,16 +190,91 @@ export function runEquipmentProgression(state: GameState): EquipmentProgressionR
         }
         const facReport = report.by_faction[faction]!;
 
-        // Equipment acquisition removed (n898): per-brigade auto-tickers were producing
-        // 243 ARBiH tanks (historical ~40-60) and 668 artillery (historical ~150-250).
-        // Equipment now comes exclusively from:
-        //   1. Battlefield scavenging in attack_resolution_osid.ts (winner recovers fraction of destroyed enemy equipment)
-        //   2. Combat capture in equipment_effects.ts / battle_resolution.ts (settlement flips, surrender)
-        //   3. JNA phantom handoff in jna_phantom_brigades.ts (one-time historical inheritance)
-        // RS: degradation-only via equipment_effects.ts (no new production, Serbia under sanctions)
+        // Per-brigade auto-tickers removed (n898) — produced 243 ARBiH tanks / 668 artillery.
+        // Primary equipment source is now battlefield scavenging + combat capture.
+        // RS: no production (Serbia under sanctions) — degradation-only.
+    }
+
+    // ── Faction-level production (capped budgets, not per-brigade) ──────────
+    // These are small, historically-grounded production/transfer pipelines.
+    // Equipment goes to the best-equipped active brigade in the faction (deterministic).
+
+    if (turn > 0) {
+        // ARBiH: Zenica steelworks — improvised mortars/howitzers.
+        // ~3 artillery pieces per 8 turns (faction total, not per-brigade).
+        if (turn % 8 === 0) {
+            distributeEquipmentToFaction(formations, formationIds, 'RBiH', 'artillery', 3, report);
+        }
+
+        // Arms smuggling pipeline through Croatia — ARBiH gets a trickle of
+        // heavy weapons from abroad (Iran, Pakistan, black market), but HVO/Croatia
+        // skims ~40% of every shipment passing through Croatian territory.
+        // Every 12 turns: 2 tanks + 3 artillery enter; ARBiH gets 60%, HVO gets 40%.
+        if (turn % 12 === 0) {
+            const smuggleTanks = 2;
+            const smuggleArtillery = 3;
+            const hvocut = 0.40;
+            const rbihTanks = Math.max(1, Math.round(smuggleTanks * (1 - hvocut)));   // 1
+            const hrhbTanks = smuggleTanks - rbihTanks;                                // 1
+            const rbihArt = Math.max(1, Math.round(smuggleArtillery * (1 - hvocut)));  // 2
+            const hrhbArt = smuggleArtillery - rbihArt;                                // 1
+            distributeEquipmentToFaction(formations, formationIds, 'RBiH', 'tanks', rbihTanks, report);
+            distributeEquipmentToFaction(formations, formationIds, 'RBiH', 'artillery', rbihArt, report);
+            distributeEquipmentToFaction(formations, formationIds, 'HRHB', 'tanks', hrhbTanks, report);
+            distributeEquipmentToFaction(formations, formationIds, 'HRHB', 'artillery', hrhbArt, report);
+        }
+
+        // HRHB: Croatian Army (HV) direct transfers — separate from smuggle line.
+        // HVO gets its own pipeline from Zagreb: ~1 artillery per 12 turns.
+        if (turn % 12 === 0) {
+            distributeEquipmentToFaction(formations, formationIds, 'HRHB', 'artillery', 1, report);
+        }
     }
 
     return report;
+}
+
+/**
+ * Distribute a fixed equipment budget to the best-equipped active brigade in a faction.
+ * "Best-equipped" = highest existing count of the given type (deterministic tie-break by ID).
+ * This concentrates production where it matters most — mechanized/motorized brigades
+ * that already have heavy equipment, not light infantry.
+ */
+function distributeEquipmentToFaction(
+    formations: Record<string, FormationState>,
+    formationIds: string[],
+    faction: FactionId,
+    type: 'tanks' | 'artillery',
+    amount: number,
+    report: EquipmentProgressionReport
+): void {
+    let bestId: string | null = null;
+    let bestCount = -1;
+    for (const fid of formationIds) {
+        const f = formations[fid];
+        if (!f || f.status !== 'active' || f.faction !== faction) continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og') continue;
+        const comp = f.composition;
+        if (!comp) continue;
+        const count = comp[type] ?? 0;
+        if (count > bestCount) {
+            bestCount = count;
+            bestId = fid;
+        }
+    }
+    if (bestId && formations[bestId]?.composition) {
+        formations[bestId].composition![type] += amount;
+        if (!report.by_faction[faction]) {
+            report.by_faction[faction] = { artillery: 0, tanks: 0 };
+        }
+        if (type === 'tanks') {
+            report.tank_additions += amount;
+            report.by_faction[faction]!.tanks += amount;
+        } else {
+            report.artillery_additions += amount;
+            report.by_faction[faction]!.artillery += amount;
+        }
+    }
 }
 
 // ── C3: RS maintenance capacity decay ───────────────────────────────────────
