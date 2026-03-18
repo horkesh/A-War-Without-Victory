@@ -64,6 +64,8 @@ describe('war-phase step ordering', () => {
         // +1 from distribute-brigades-to-front (brigade front distribution, 2026-03-17).
         // +1 from evaluate-army-hq-gathering (v0.4.7 army HQ gathering, 2026-03-17).
         // +1 from return-displaced-brigades (periodic home return march, 2026-03-17).
-        expect(stepNames.length).toBe(135);
+        // +1 from ai-war-dispatches (war dispatches from outside perspectives, 2026-03-18).
+        // +1 from ai-corps-dialogue (officers who talk back — cosmetic flavor, 2026-03-18).
+        expect(stepNames.length).toBe(137);
     });
 });
