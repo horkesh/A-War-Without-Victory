@@ -1289,6 +1289,27 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 // Edges may be missing; skip displacement
             }
         }
+        // Pre-compute front edges and sectors so reactive defense is active from turn 1.
+        // Without this, the initial state has zero sectors and the first turn's attacks
+        // bypass sector defense entirely (Brcko anchor failure root cause).
+        if (state.meta.phase === 'war' && operationalData?.operationalToCanonical) {
+            try {
+                const preEdges = await loadOperationalEdges(baseDir);
+                if (preEdges?.length) {
+                    const { computeFrontEdgesOsid } = await import('../map/front_edges.js');
+                    const { buildCorpsFrontSectors } = await import('../sim/combat/corps_front_sectors.js');
+                    state.military.war_front_edges_osid = computeFrontEdgesOsid(
+                        state, preEdges, operationalData.operationalToCanonical
+                    );
+                    state.military.corps_front_sectors = buildCorpsFrontSectors(
+                        state, preEdges, operationalData.operationalToCanonical
+                    );
+                }
+            } catch {
+                // Edges may be missing; sectors will compute on first turn
+            }
+        }
+
         const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
         const initialSavePath = join(outDir, 'initial_save.json');
