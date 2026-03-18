@@ -1,35 +1,82 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-18
-**Status:** **v0.4.9** (AI Comes Alive). **1184 tests**, 96 suites. **n899: 90.1% area-weighted, 12/13 anchors.** Equipment rework + civilian casualty fix.
+**Status:** **v0.4.9** (AI Comes Alive). **1184 tests**, 96 suites. **n905: 90.1% area-weighted, 12/13 anchors.** Equipment rework, civilian casualty overhaul, tracking unification.
 
-## [2026-03-18] n897→n899 — Equipment Rework + Civilian Kill Ratio Fix
+## [2026-03-18] n897→n905 — Equipment Rework, Civilian Casualty Overhaul, Tracking Unification
 
-### Equipment: Combat-Only Acquisition (n899)
-- **Removed** per-brigade auto-tickers from `faction_progression.ts` — were producing 243 ARBiH tanks (historical ~30-50) and 668 artillery (historical ~150-250)
-- **Added** battlefield scavenging in `attack_resolution_osid.ts` — winner recovers 10-20% of destroyed enemy equipment (scaled by outcome), starts heavily degraded
-- Equipment now comes exclusively from: combat scavenging, capture on settlement flip, surrender capture, JNA phantom handoff
-- **Result**: ARBiH tanks 24→20 (was 243), artillery 88→95 (was 668). HRHB 12→7 (needs Croatian supply line). RS 520→627 (JNA handoff by design)
+Eight flags identified from a standardized scenario run report. All resolved across 8 commits.
 
-### Equipment Duplication Bug Fix (n898)
-- `brigade_dissolution.ts`: dissolved brigade's composition was never zeroed — reconstituted brigades retained original equipment + 70% had already transferred. Now zeroes tanks/artillery/AA on dissolution.
+### Finding 1: Per-Brigade Equipment Auto-Tickers Produce Absurd Results
+`faction_progression.ts` gave every active brigade +1 tank/16 turns and +1 artillery/8 turns. With 125 ARBiH brigades this produced 243 phantom tanks (historical ~30-50) and 668 phantom artillery (historical ~150-250). Mountain infantry brigades in Drina pockets were acquiring tanks. **Lesson: per-brigade scaling is explosive — always use faction-level capped budgets for production.**
 
-### Civilian Kill Ratio Fix (n898)
-- `displacement_loss_constants.ts`: kill fractions were inverted — Croat civilians hit 4% default (double Bosniak 2%)
-- **New**: RBiH displaced by RS = 4% (systematic ethnic cleansing), HRHB displaced by RS = 1% (expulsion, not systematic killing), default = 2%
-- **Result**: Bosniak 83% of civilian deaths (was 60%), Croat 8% (was 28%). Historical target ~75/20/5.
+### Finding 2: Equipment Was Never Actually Captured in the Main Combat Resolver
+`attack_resolution_osid.ts` (the OSID-based resolver used for all sector operations) destroyed equipment but never called `captureEquipment()`. That function only existed in the legacy `battle_resolution.ts`. The auto-tickers were a proxy for captures that weren't happening. **Lesson: when a proxy mechanic exists, check whether the real mechanic is actually wired in.**
 
-### Scenario Reporting Template
-- Standardized run report format: population balance sheet, forces, equipment, military/civilian casualties by nationality, territory, supply, flags
-- Extraction paths documented in `memory/scenario_reporting.md`
+### Finding 3: Brigade Dissolution Duplicated Equipment
+`brigade_dissolution.ts` transferred 70% of equipment to nearest corps mate but never zeroed the dissolved brigade's composition. On reconstitution, the brigade kept its original equipment — duplicating 70% per cycle. **Lesson: any transfer must debit the source.**
+
+### Finding 4: Civilian Kill Fractions Were Ethnicity-Blind for Croats
+`displacement_loss_constants.ts` had: RS displaced by non-RS → 1%, RBiH displaced by RS → 2%, **everything else → 4% default**. Croats hit the 4% default — double the Bosniak rate. Historically inverted: Bosniak ethnic cleansing by RS was uniquely severe (~75% of civilian deaths), Croat displacement by RS was expulsion with much lower kill rates. **Lesson: defaults matter enormously — every faction combination needs explicit rates.**
+
+### Finding 5: Two Independent Civilian Casualty Tracking Systems Diverged by ~3,700
+Three systems wrote to different stores with incomplete overlap:
+- `processDisplacementTakeover` → both `civilian_casualties` and `displacement_event_log`
+- `advanceParamilitaries` → `civilian_casualties` only (event log missing)
+- `updateDisplacement` (old system) → event log only (civilian_casualties missing, and lumped killed+fled into `killed` field)
+**Lesson: when two stores track the same data, either unify them or make one authoritative. Every write path must update all stores.**
+
+### Finding 6: RS Equipment Appeared to Grow Despite Combat Losses (520→630)
+RS OOB shows 520 brigade tanks, but 7 JNA phantoms contribute 157 more (total 677). After phantom dissolution + handoff, RS starts with ~677. The 520 figure was misleading. Additionally, APCs are conflated into the `tanks` field in `jna_phantom_brigades.ts`. **Lesson: always count from initial_save.json, not from OOB assumptions. Report initial counts from the actual save.**
+
+### Finding 7: Equipment Degradation Never Removed Equipment From Count
+The condition system (operational/degraded/non_operational) shifts fractions but never reduces `composition.tanks`. An RS brigade with 40 tanks at 48% operational still reports 40 tanks — 21 are non-functional hulks sitting in the count. **Lesson: condition degradation needs a write-off mechanism that permanently removes equipment, not just shifts condition fractions.**
+
+### Finding 8: Defender Casualties > Attacker Casualties Is Historically Correct
+0.69:1 exchange ratio seemed wrong but is intentionally calibrated. Code comments cite Operation Corridor 92 data (VRS 413 KIA vs HVO 918 KIA = 0.45:1). Six interlocking mechanisms produce this: outcome modifiers, power-ratio casualty scaling, bombardment multiplier (defender-only), heavy weapons offensive mult, frontline bombardment exposure asymmetry, engagement cap. The 20:1 VRS tank advantage makes the defender taking more casualties the expected outcome. **Lesson: check the design comments before assuming a number is wrong.**
+
+### Changes Made (8 commits)
+
+**Equipment system overhaul:**
+- Removed per-brigade auto-tickers from `faction_progression.ts`
+- Added battlefield scavenging to `attack_resolution_osid.ts` — winner recovers 10-20% of destroyed enemy equipment (scaled by outcome: decisive 20%, victory 15%, costly 10%), starts heavily degraded (70% degraded condition)
+- Added equipment capture from retreating forces — both attacker wins (2-8% of defender equipment) and defender wins (3-8% of attacker equipment). ARBiH repulsing VRS assaults now recovers abandoned tanks.
+- Added arms smuggling pipeline: 2 tanks + 3 artillery per 12 turns, split 60/40 ARBiH/HVO (HVO skims ~40% of every shipment through Croatian territory — historical Iran/Pakistan/black market pipeline)
+- Added Zenica steelworks: ARBiH +3 artillery per 8 turns (faction-level, not per-brigade)
+- Added HV direct transfers: HVO +1 artillery per 12 turns
+- Equipment distribution goes to best-equipped brigade (concentrates on mech/motor, not light infantry)
+- `writeOffNonOperational()`: equipment with >40% non-functional scrapped 1/turn, >60% scrapped 2/turn. Formations with ≤10 units exempt (maintain carefully). Never writes off below 5.
+- Fixed dissolution duplication: zeroes composition on dissolution
+
+**Civilian casualty overhaul:**
+- Kill fractions corrected: RBiH displaced by RS = 4% (was 2%), HRHB displaced by RS = 1% (was 4% default), default = 2% (was 4%)
+- Paramilitary sweep now writes to both `civilian_casualties` AND `displacement_event_log`
+- Old displacement system now calls `recordCivilianDisplacementCasualties`
+- Event log now separates `killed` from `fled_abroad` (was lumping both into `killed`)
+- Result: zero discrepancy between two tracking systems
+
+**Reporting:**
+- Standardized scenario run report template with 10 sections: run identity, territory, population balance sheet, civilian displacement, forces, equipment, military casualties, combat, supply, flags
+- Documented in `memory/scenario_reporting.md`
+
+### Results
+
+| Metric | n897 (before) | n905 (after) | Historical |
+|--------|--------------|-------------|-----------|
+| Area-weighted | 89.6% | **90.1%** (+0.5pp) | — |
+| RS tanks | 630 | **539** (286 eff) | 400-500 |
+| RBiH tanks | 243 | **25** (14 eff) | 30-50 |
+| HRHB tanks | 35 | **10** (6 eff) | 20-40 |
+| RBiH artillery | 668 | **117** | 150-250 |
+| Bosniak civ killed % | 60% | **83%** | ~75% |
+| Croat civ killed % | 28% | **8%** | ~5% |
+| Tracking discrepancy | 3,700 | **0** | — |
 
 ### Remaining
-- ARBiH equipment slightly below historical (20 tanks vs 30-50 target) — scavenge rates may need tuning
-- HRHB needs small Croatian supply line (faction-level, not per-brigade)
-- Civilian casualty tracking unification (FLAGS 6&7) — two systems still disagree by ~3,700
-
-### Calibration
-n899: **90.1% area-weighted** (+0.5pp over n897). 656/744 OSID match. 12/13 anchors. 4/6 benchmarks. Zero calibration regression.
+- ARBiH equipment slightly below target (25 tanks vs 30-50) — scavenge rates or smuggle volumes may need a small bump
+- HRHB below target (10 tanks vs 20-40) — Croatian pipeline is modest, may need increase
+- RS artillery barely declining (1313 from 1335) — write-off threshold may need to apply to artillery more aggressively
+- Serb civilian killed at 9% (target ~20%) — acceptable at w40, most Serb civilian deaths came later in the war
 
 ---
 

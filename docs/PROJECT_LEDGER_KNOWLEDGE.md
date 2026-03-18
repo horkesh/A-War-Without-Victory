@@ -987,3 +987,36 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 - **Survivors (3):** Hajrudin Mešić ("Zmaj od Majevice", 2nd Corps), Safet Zajko (1st Corps, 2nd Motorized), Nesib Malkić (2nd Corps, 210th Mountain).
 - **Previously in roster (3):** Izet Nanić (5th Corps, KIA 1995), Midhad Hujdur "Hujka" (4th Corps, KIA 1993), Enver Šehović (3rd Corps, KIA 1992).
 - **Design note:** The decoration is informational only — no gameplay modifier. It serves as a historical marker in officer profiles. The `casualty_vulnerability` field independently handles the elevated combat risk these officers faced.
+
+---
+
+## Equipment Acquisition & Degradation (2026-03-18)
+
+### Per-brigade scaling is explosive
+Any mechanic that gives +N per brigade per tick scales linearly with brigade count. ARBiH mobilizes from 74→125 brigades, so a "modest" +1 tank/16 turns becomes +125 tanks/tick. **Always use faction-level capped budgets** for production, never per-brigade.
+
+### Three historical equipment sources for ARBiH
+1. **Battlefield scavenging/capture** — recovering destroyed/abandoned VRS equipment after battles. Primary source of tanks. Both attack wins (capture from retreating defenders) and defense wins (recovering from repulsed attackers) produce equipment.
+2. **Arms smuggling pipeline through Croatia** — Iran, Pakistan, black market. HVO/Croatia skimmed ~40% of every shipment. Split: 60% ARBiH, 40% HVO.
+3. **Zenica steelworks** — local production of improvised mortars and howitzers. Artillery only, no tanks.
+
+### RS equipment trajectory
+VRS inherited ~677 tanks (520 in OOB + 157 from JNA phantom handoff). No new production (Serbia under sanctions). Should decline through: combat losses (~8% per battle), maintenance degradation (spare parts shortage), and write-off of non-operational vehicles. By w40: ~539 total, ~286 effective. Maintenance capacity declines to 0.74× by w52, 0.50× by w100.
+
+### Equipment condition vs count
+The degradation system (operational/degraded/non_operational) shifts condition fractions but by itself never removes equipment from the count. A tank at 0% operational is still a tank in the count. Write-off mechanic needed: permanently scrap equipment when degraded+non_operational exceeds 40%. Small formations (≤10 units) exempt — they maintain their few vehicles carefully.
+
+## Civilian Casualty Modeling (2026-03-18)
+
+### Kill fraction asymmetry is essential
+Not all ethnic displacement has the same lethality. The Bosnian War's civilian deaths were overwhelmingly Bosniak (~75%), with Serbs (~20%) and Croats (~5%) much lower. Kill fractions must reflect this:
+- RBiH displaced by RS: 4% (systematic ethnic cleansing — Prijedor, Zvornik, Foca, Visegrad)
+- HRHB displaced by RS: 1% (expulsion, lower systematic killing)
+- RS displaced by non-RS: 1% (mostly voluntary flight)
+- Default: 2%
+
+### Fled abroad vs killed must be tracked separately
+Serbs having the highest fled_abroad count is correct (Serbia next door). Bosniaks having near-zero fled_abroad is correct (no neighboring state). Lumping both into a single "lost" field masks the difference between killing and displacement.
+
+### Multiple tracking systems must all update all stores
+If `civilian_casualties` and `displacement_event_log` both exist, every code path that generates civilian casualties must write to BOTH. Paramilitaries wrote to one, old displacement wrote to the other. Result: 3,700 phantom gap between systems.
