@@ -9,8 +9,8 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-17, v0.4.8 — Ground for v0.5.x)
-**v0.4.8.** 1086 tests, 87 suites. tsc clean. **Latest calibration: n875 90.4% area-weighted, 13/13 anchors. War-or-Game APPROVED.**
-**This session:** Serb displacement routing fix (stay local in eastern Bosnia). VRS Drina OOB strengthening. Per-enclave personnel cap. Return-to-home march (step 135). G2 three-panel ops modal. Territory polygon highlighting.
+**v0.4.8.** 1101 tests, 89 suites. tsc clean. **Latest calibration: n884 90.4% area-weighted (post-Phase A). War-or-Game APPROVED.**
+**This session:** AI commander system — three-agent QA. API runs: Run 1 (army) 90.9%, Run 2 (army+corps) **91.0%** (beats n884 baseline 90.4%). CO cross-assessments generated. Engine: 9 changes (stance override, density gate, status_reason, gate trace, entrenchment cap, offensive cooldown, alliance 0.75, conditional events, area-weighted). 321 obs (0 bugs). Morning report: `docs/60_visualisations/morning_report_2026_03_18.html`.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 20 milestones scoped. Night shift ready for v0.5.0→v0.5.4.
 **10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.
 **Calibration freeze rule:** After v0.6.1, any sim-affecting change needs `npm run calibrate:52w` regression check vs freeze baseline.
