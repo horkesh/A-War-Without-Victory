@@ -1,7 +1,26 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-18
-**Status:** **v0.4.9** (AI Comes Alive). **1184 tests**, 96 suites. **n905: 90.1% area-weighted, 12/13 anchors.** Equipment rework, civilian casualty overhaul, tracking unification.
+**Status:** **v0.4.9** (AI Comes Alive). **1191 tests**, 97 suites. **n915: 91.1% area-weighted, 13/13 anchors.** Corps-level operations, equipment rework, civilian casualty overhaul.
+
+## [2026-03-18] n915 — Corps-Level Operations
+
+Operations decoupled from sectors. Corps commander selects targets from full corps directive, assigns brigades from entire corps pool. Contiguity enforced from corps front, not sector front.
+
+### Changes
+- **`evaluateCorpsOffensiveLaunch`**: Renamed from `evaluateSectorOffensiveLaunch`. Contiguity seed uses ALL corps sectors' friendly OSIDs (was single sector). Staging OSID picks nearest to first objective (was first sorted OSID in sector).
+- **`bot_corps_directives.ts`**: Replaced per-sector operation loop with single corps-level launch. Corps-wide brigade pool (all active subordinates with pers >= 400, not disrupted). Corps-wide enemy OSID union across all sectors. Removed sector cluster expansion and per-sector reinforcement pool (no longer needed, -69 net lines).
+- **Probes remain sector-scoped**: Small recon-by-force actions stay at specific front segments. Proactive probe and intel-gate probe both use sector-level data.
+- **Cooldown simplified**: Corps-level cooldown (no per-sector theater adjacency check).
+- **Deprecated alias**: `evaluateSectorOffensiveLaunch` maps old signature to new for backward compat.
+- **7 new tests**: Contiguity from all corps sectors, cross-sector brigade selection, non-contiguous target rejection, primarySectorId passthrough, staging nearest objective, other-corps isolation.
+
+### Results
+| Metric | n913 (before) | n915 (after) |
+|--------|--------------|-------------|
+| Area-weighted | 90.3% | **91.1%** (+0.8pp) |
+| Anchors | 13/13 | **13/13** |
+| Tests | 1184 (96 suites) | **1191 (97 suites)** |
 
 ## [2026-03-18] n897→n905 — Equipment Rework, Civilian Casualty Overhaul, Tracking Unification
 
