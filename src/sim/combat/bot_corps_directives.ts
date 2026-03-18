@@ -6,6 +6,7 @@
  */
 
 import type { EdgeRecord } from '../../map/settlements.js';
+import { getEnclaveIdForOsid } from './enclave_resilience.js';
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import type {
     CorpsDirective,
@@ -594,12 +595,28 @@ export function generateCorpsDirectives(
         const totalCorpsEdges = corpsSectors.reduce((sum, s) => sum + s.length_edges, 0);
         const totalCorpsBrigades = subordinates.length;
         const corpsDensity = totalCorpsEdges > 0 ? totalCorpsBrigades / totalCorpsEdges : 0;
-        // Critical threshold: fewer than 1 brigade per 10 edges means the front
-        // is so thin that any attack could break through. Commander goes defensive.
-        const CRITICAL_DENSITY_THRESHOLD = 0.10;
-        // Strained threshold: fewer than 1 brigade per 6 edges. Commander stays
-        // balanced but won't launch new operations — hold what you have.
-        const STRAINED_DENSITY_THRESHOLD = 0.167;
+
+        // Siege detection: if >50% of front edges face enclave OSIDs, this is a
+        // siege/containment corps. Siege perimeters are long but don't need high
+        // density — the defender is surrounded and threat is concentrated at
+        // breakout points, not uniform. SRK (80 edges, 9 bde) is the canonical case.
+        let enclaveEdgeCount = 0;
+        for (const sec of corpsSectors) {
+            for (const ss of sec.sub_segments ?? []) {
+                const hasEnclaveEnemy = (ss.enemy_osids ?? []).some((osid: string) => getEnclaveIdForOsid(osid) !== null);
+                if (hasEnclaveEnemy) enclaveEdgeCount += ss.length_edges;
+            }
+        }
+        const enclaveFraction = totalCorpsEdges > 0 ? enclaveEdgeCount / totalCorpsEdges : 0;
+        const isSiegeCorps = enclaveFraction > 0.50;
+
+        // Density thresholds: stance-aware + siege-aware.
+        // Siege corps use relaxed thresholds — long perimeters are the norm, not a problem.
+        const CRITICAL_DENSITY_THRESHOLD = isSiegeCorps ? 0.04 : 0.10;
+        const STRAINED_DENSITY_THRESHOLD = isSiegeCorps ? 0.06
+            : cmd.stance === 'offensive' ? 0.08
+            : cmd.stance === 'balanced' ? 0.12
+            : 0.167;
         const isDefenseCritical = corpsDensity > 0 && corpsDensity < CRITICAL_DENSITY_THRESHOLD;
         const isDefenseStrained = corpsDensity > 0 && corpsDensity < STRAINED_DENSITY_THRESHOLD;
 
