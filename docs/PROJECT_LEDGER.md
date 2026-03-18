@@ -1,7 +1,37 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-18
-**Status:** **v0.4.9** (AI Comes Alive). **1184 tests**, 96 suites. **n884: 90.4% area-weighted, 13/13 anchors. War-or-Game APPROVED.** Ready for v0.5.0.
+**Status:** **v0.4.9** (AI Comes Alive). **1184 tests**, 96 suites. **n899: 90.1% area-weighted, 12/13 anchors.** Equipment rework + civilian casualty fix.
+
+## [2026-03-18] n897→n899 — Equipment Rework + Civilian Kill Ratio Fix
+
+### Equipment: Combat-Only Acquisition (n899)
+- **Removed** per-brigade auto-tickers from `faction_progression.ts` — were producing 243 ARBiH tanks (historical ~30-50) and 668 artillery (historical ~150-250)
+- **Added** battlefield scavenging in `attack_resolution_osid.ts` — winner recovers 10-20% of destroyed enemy equipment (scaled by outcome), starts heavily degraded
+- Equipment now comes exclusively from: combat scavenging, capture on settlement flip, surrender capture, JNA phantom handoff
+- **Result**: ARBiH tanks 24→20 (was 243), artillery 88→95 (was 668). HRHB 12→7 (needs Croatian supply line). RS 520→627 (JNA handoff by design)
+
+### Equipment Duplication Bug Fix (n898)
+- `brigade_dissolution.ts`: dissolved brigade's composition was never zeroed — reconstituted brigades retained original equipment + 70% had already transferred. Now zeroes tanks/artillery/AA on dissolution.
+
+### Civilian Kill Ratio Fix (n898)
+- `displacement_loss_constants.ts`: kill fractions were inverted — Croat civilians hit 4% default (double Bosniak 2%)
+- **New**: RBiH displaced by RS = 4% (systematic ethnic cleansing), HRHB displaced by RS = 1% (expulsion, not systematic killing), default = 2%
+- **Result**: Bosniak 83% of civilian deaths (was 60%), Croat 8% (was 28%). Historical target ~75/20/5.
+
+### Scenario Reporting Template
+- Standardized run report format: population balance sheet, forces, equipment, military/civilian casualties by nationality, territory, supply, flags
+- Extraction paths documented in `memory/scenario_reporting.md`
+
+### Remaining
+- ARBiH equipment slightly below historical (20 tanks vs 30-50 target) — scavenge rates may need tuning
+- HRHB needs small Croatian supply line (faction-level, not per-brigade)
+- Civilian casualty tracking unification (FLAGS 6&7) — two systems still disagree by ~3,700
+
+### Calibration
+n899: **90.1% area-weighted** (+0.5pp over n897). 656/744 OSID match. 12/13 anchors. 4/6 benchmarks. Zero calibration regression.
+
+---
 
 ## [2026-03-18] v0.4.9 — AI Comes Alive
 
