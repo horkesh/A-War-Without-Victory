@@ -609,27 +609,6 @@ export function MapContainer() {
                   'formation-markers'
                 );
 
-                // Serrated front line teeth layer
-                m2.addLayer({
-                  id: 'front-line-teeth',
-                  type: 'symbol',
-                  source: 'front-lines',
-                  filter: ['==', ['get', 'lineType'], 'front'],
-                  layout: {
-                    'icon-image': 'front-line-tooth',
-                    'symbol-placement': 'line',
-                    'symbol-spacing': 25,
-                    'icon-rotate': ['get', 'tooth_rotation'],
-                    'icon-rotation-alignment': 'map',
-                    'icon-size': ['interpolate', ['linear'], ['zoom'], 6, 0.2, 10, 0.4, 14, 0.6],
-                    'icon-allow-overlap': true,
-                    'icon-ignore-placement': true,
-                  },
-                  paint: {
-                    'icon-opacity': 0.85,
-                  }
-                }, 'formation-markers');
-
                 if (devMode) {
                   // Dev mode: offset highlight layers (one per faction side)
                   m2.addLayer(
@@ -865,31 +844,6 @@ export function MapContainer() {
                       paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 2, 10, 3, 14, 4.5], 'circle-color': ['get', 'color'], 'circle-opacity': 0.8 },
                     }, 'formation-markers');
                     (m.getSource(OP_ARROWS_SOURCE_ID) as GeoJSONSource)?.setData(opArrowsGeoJson);
-
-                    // Phase 3: Serrated front line teeth layer
-                    if (!m.hasImage('front-line-tooth')) {
-                      const toothIcon = generateFrontLineToothIcon();
-                      m.addImage('front-line-tooth', toothIcon as any);
-                    }
-                    safeEnsureLayer(m, {
-                      id: 'front-line-teeth',
-                      type: 'symbol',
-                      source: 'front-lines',
-                      filter: ['==', ['get', 'lineType'], 'front'],
-                      layout: {
-                        'icon-image': 'front-line-tooth',
-                        'symbol-placement': 'line',
-                        'symbol-spacing': 45,
-                        'icon-rotate': ['coalesce', ['get', 'tooth_rotation'], 0],
-                        'icon-rotation-alignment': 'map',
-                        'icon-size': ['interpolate', ['linear'], ['zoom'], 6, 0.12, 10, 0.28, 14, 0.42],
-                        'icon-allow-overlap': true,
-                        'icon-ignore-placement': true,
-                      },
-                      paint: {
-                        'icon-opacity': 0.85,
-                      }
-                    }, 'formation-markers');
 
                     // Fog of war: cover enemy OSIDs not confirmed empty by player recon
                     const fogGeoJson = buildFogOfWarGeoJSON(base, state.controlBySettlement, state.player_faction, state.fogOfWar);
@@ -2318,28 +2272,4 @@ export function MapContainer() {
   );
 }
 
-function generateFrontLineToothIcon(): HTMLCanvasElement {
-  const size = 32;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return canvas;
-
-  // Sharp isosceles triangle (tooth)
-  // Points toward 0 degrees (Up in Canvas/MapLibre screen space if not rotated)
-  ctx.beginPath();
-  ctx.moveTo(size / 2, 4);          // Tip
-  ctx.lineTo(size / 1.4, size - 4); // Bottom right
-  ctx.lineTo(size / 3.5, size - 4); // Bottom left
-  ctx.closePath();
-
-  ctx.fillStyle = '#101010';        // Match dark front line base
-  ctx.fill();
-  ctx.strokeStyle = '#e0e0e0';      // Soft highlight
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  return canvas;
-}
 
