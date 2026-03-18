@@ -53,9 +53,7 @@ import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors, GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors.js';
-// computeReinforcementPool no longer needed — corps-level ops draw from full brigade pool
 import { MIN_BRIGADES_FOR_SECTOR_ATTACK } from './operation_reinforcement_constants.js';
-// buildFriendlyComponents no longer needed — corps-level ops don't use component map
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
 import {
     assessCorpsSupplyHealth,
@@ -1779,7 +1777,7 @@ export function generateCorpsDirectives(
                     const op = evaluateCorpsOffensiveLaunch(
                         state, corps.id, faction,
                         corpsBrigadeIds, allCorpsEnemyOsids, reachableTargets, supplyByOsid,
-                        minAttackOutcomeForOpLaunch, primarySectorId
+                        minAttackOutcomeForOpLaunch, primarySectorId, adjacency as Map<string, readonly string[]>
                     );
                     if (op) {
                         // Army HQ override: set operation type from override directive.

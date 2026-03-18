@@ -206,7 +206,7 @@ describe('Corps-Level Operation Launch', () => {
         expect(op!.sector_id).toBe('sector:corps_1:0');
     });
 
-    it('returns null when sector_id omitted (corps-level op without sector binding)', () => {
+    it('launches without sector_id when primarySectorId omitted', () => {
         const state = makeState(5, {
             'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:f1' },
             'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:f2' },

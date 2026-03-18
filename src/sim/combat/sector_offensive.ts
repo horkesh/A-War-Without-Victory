@@ -98,6 +98,22 @@ const OBJECTIVES_PER_BRIGADE = 0.5; // 1 objective per 2 brigades
 /** Personnel floor below which a brigade cannot attack (mirrors bot_brigade_eval_attack gate). */
 const COMBAT_INEFFECTIVE_PERSONNEL = 400;
 
+/** Build OSID adjacency from front edges — fallback when caller doesn't provide one. */
+function buildOsidAdjacencyFromFrontEdges(state: GameState): Map<string, string[]> {
+    const frontEdges = state.military.war_front_edges_osid ?? [];
+    const adj = new Map<string, string[]>();
+    for (const fe of frontEdges) {
+        if (!fe.a || !fe.b) continue;
+        let listA = adj.get(fe.a);
+        if (!listA) { listA = []; adj.set(fe.a, listA); }
+        if (!listA.includes(fe.b)) listA.push(fe.b);
+        let listB = adj.get(fe.b);
+        if (!listB) { listB = []; adj.set(fe.b, listB); }
+        if (!listB.includes(fe.a)) listB.push(fe.a);
+    }
+    return adj;
+}
+
 /** Maximum brigades participating in a single sector offensive. */
 const MAX_PARTICIPATING_BRIGADES = 20;
 
@@ -1272,6 +1288,7 @@ export function evaluateCorpsOffensiveLaunch(
     supplyByOsid?: SupplyStateByOsidReport | null,
     minAttackOutcome?: CorpsOperation['min_attack_outcome'],
     primarySectorId?: string,
+    osidAdjacency?: Map<string, readonly string[]>,
 ): CorpsOperation | null {
     const turn = state.meta?.turn ?? 0;
     const formations = state.military.formations ?? {};
@@ -1323,16 +1340,9 @@ export function evaluateCorpsOffensiveLaunch(
     const corpsTargetSet = new Set(corpsEnemyOsids);
     const candidateTargets = offensiveTargets.filter(t => corpsTargetSet.has(t));
 
-    // Build OSID adjacency from front edges (same data used by sector system)
-    const frontEdges = state.military.war_front_edges_osid ?? [];
-    const osidAdj = new Map<string, Set<string>>();
-    for (const fe of frontEdges) {
-        if (!fe.a || !fe.b) continue;
-        if (!osidAdj.has(fe.a)) osidAdj.set(fe.a, new Set());
-        if (!osidAdj.has(fe.b)) osidAdj.set(fe.b, new Set());
-        osidAdj.get(fe.a)!.add(fe.b);
-        osidAdj.get(fe.b)!.add(fe.a);
-    }
+    // Use caller's adjacency if provided; otherwise build from front edges.
+    // Caller (bot_corps_directives) already builds adjacency once per turn.
+    const osidAdj: Map<string, readonly string[]> = osidAdjacency ?? buildOsidAdjacencyFromFrontEdges(state);
 
     // Seed: ALL corps friendly front OSIDs (not just one sector).
     // Corps-level operations can target any enemy OSID adjacent to the corps' front,

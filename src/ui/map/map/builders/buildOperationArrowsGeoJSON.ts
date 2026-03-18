@@ -78,20 +78,14 @@ export function buildOperationArrowsGeoJSON(
 
     const origin: [number, number] = rawOrigin;
 
-    // Compute target: centroid of ALL objective positions.
-    // Single arrow from origin → center of targeted area.
-    const objPoints: [number, number][] = [];
+    // Compute target: centroid of ALL objective positions (single pass).
+    let sumX = 0, sumY = 0, objCount = 0;
     for (const obj of op.objectives) {
       const pt = centroidLookup.get(obj);
-      if (pt) objPoints.push(pt);
+      if (pt) { sumX += pt[0]; sumY += pt[1]; objCount++; }
     }
-    if (objPoints.length === 0) continue;
-
-    // Target = geographic centroid of all objectives
-    const targetPt: [number, number] = [
-      objPoints.reduce((s, p) => s + p[0], 0) / objPoints.length,
-      objPoints.reduce((s, p) => s + p[1], 0) / objPoints.length,
-    ];
+    if (objCount === 0) continue;
+    const targetPt: [number, number] = [sumX / objCount, sumY / objCount];
 
     // Compute curve offset — deterministic per operation, sweeping military feel
     const hash = hashString(op.name + op.corps_id);
