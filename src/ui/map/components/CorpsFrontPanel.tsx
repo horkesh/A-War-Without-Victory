@@ -146,7 +146,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const panToOsid = useGameStore((s) => s.panToOsid);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
-  const setOpsPlanningModalOpen = useGameStore((s) => s.setOpsPlanningModalOpen);
+  const setOpsPlanningContext = useGameStore((s) => s.setOpsPlanningContext);
   const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
   const [activeTab, setActiveTab] = useState<'overview' | 'forces' | 'logistics' | 'ops'>('overview');
   const [sectorActionMessage, setSectorActionMessage] = useState<string | null>(null);
@@ -717,11 +717,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <button
                     type="button"
                     onClick={() => {
-                      // Ensure selectedCorpsId is set so OpsPlanningModal can find formations
                       if (sector?.corps_id) {
-                        useGameStore.setState({ selectedCorpsId: sector.corps_id });
+                        setOpsPlanningContext(sector.corps_id, sector.sector_id);
                       }
-                      setOpsPlanningModalOpen(true);
                     }}
                     className="kbd-focus w-full text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-2 border border-neutral-400 transition-colors"
                   >
