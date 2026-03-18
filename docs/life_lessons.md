@@ -21,6 +21,12 @@
 
 ## Active Lessons (no recent violations)
 
+### [Design] Engine soundness over calibration percentage (2026-03-18) — NEW
+- **Context**: After implementing 7 engine fixes, calibration dropped from 90.4% to 89.9% but AI commander observations dropped from 321 to 21. The engine is MORE correct (commanders stopped complaining) even though the number went down slightly.
+- **Wrong approach**: Optimizing for area-weighted match %. A broken engine can hit 90% if errors cancel out — wrong mobilization rate offset by wrong defense stacking offset by wrong alliance timing. The percentage is a snapshot of one scenario; it doesn't validate that mechanics are sound.
+- **Right approach**: Ask "does the command hierarchy work?" not "did the percentage go up?" When a general orders an offensive and nothing happens, that's a soundness failure regardless of the territory number. When operations claim to execute but produce zero battles, that's a broken pipeline. When alliance decays in 3 months instead of 12, the political model is wrong.
+- **Do instead**: Use AI commander observations as the primary engine health metric. Target: 0 bugs, 0 calibration issues, minimal design gaps. The area-weighted % is a secondary sanity check (stay above 85%), not the goal. An 88% run where every system works correctly is better than a 92% run where operations are stuck and morale is broken.
+
 ### [QA] AI commanders are your best alpha testers — run them after every engine change (2026-03-18) — NEW
 - **Context**: Three API-powered AI commanders (Mladić, Halilović→Delić, Petković) played a 40-week campaign and produced 321 diagnostic observations. They found: alliance decays too fast (22 obs), ARBiH over-mobilized (84 obs), operations not producing visible combat (38 obs), territory pacing wrong (16 obs), no patron directive system (12 obs), Jajce timing off (11 obs), late-war stasis (6 obs). Each observation includes severity, expected vs actual, and affected system.
 - **Wrong approach**: Relying only on area-weighted % and benchmark pass/fail to evaluate engine health. These catch territorial accuracy but miss behavioral absurdities, force strength calibration, political timeline accuracy, and design gaps.
