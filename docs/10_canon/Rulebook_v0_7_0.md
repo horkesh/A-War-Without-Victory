@@ -304,7 +304,7 @@ Exhaustion does not automatically cause collapse. When accumulated exhaustion pe
 
 ### 7.1 Corps operations
 
-Corps operations are the primary mechanism through which offensive action occurs. A corps operation designates target OSIDs, assigns participating brigades (up to 12), and coordinates the attack sequence across multiple turns. Operations launch only from the sector offensive path — there is no separate catalog of named operations.
+Corps operations are the primary mechanism through which offensive action occurs. A corps operation designates target OSIDs, assigns participating brigades (up to 12), and coordinates the attack sequence across multiple turns. Operations are corps-level: the corps commander selects targets from the full corps directive and draws brigades from the entire corps pool. Contiguity is enforced from the corps' full front (all sectors), not a single sector. Probes (small recon-by-force) remain sector-scoped.
 
 ### 7.2 Operation preparation
 

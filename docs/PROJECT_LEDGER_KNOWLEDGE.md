@@ -106,8 +106,8 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
    Do instead: Read `behavioral_health` before `historical_fit`, then explain `control_change_attribution`. A better-looking map is not a valid success signal if the combat-health layer regressed.
 7. **[2026-03-06] `CALIBRATION_MASTER.md` is the control file for resumed tuning**
    Do instead: Treat calibration changes as gated work. Read the master file first, update it during the session, and do not resume historical shaping unless the combat-causality gate is green.
-8. **[2026-03-07] Operations must be sector-sourced — no corps-wide brigade pulls**
-   Do instead: Operations launch only from `generateCorpsDirectives` sector offensive path. Only sector-assigned brigades participate. `MAX_PARTICIPATING_BRIGADES=12`. Old catalog-based `generateCorpsOperationOrders` disabled. If sector lacks brigades, density balancing reinforces first — no rear-area dump.
+8. **[2026-03-18] Operations are corps-level — brigades from entire corps pool**
+   Do instead: Operations launch from `generateCorpsDirectives` via `evaluateCorpsOffensiveLaunch`. Corps-wide brigade pool: all active subordinates with pers≥400, not disrupted, sorted by equipment priority. Contiguity seeded from ALL corps sectors' friendly OSIDs. `MAX_PARTICIPATING_BRIGADES=12`. Old catalog-based `generateCorpsOperationOrders` disabled. Probes remain sector-scoped (small recon actions). Per-sector cluster expansion and `computeReinforcementPool` REMOVED (n915).
 9. **[2026-03-08] Player operations support multi-axis advance with per-axis staging**
    Do instead: OpsPlanningModal exposes the engine's existing `CorpsOperation.axes` system to the player. Each axis has independent brigade assignment, ordered objective chain, and optional staging OSID. Single-axis operations omit the `axes` payload for backward compatibility. IPC: `stage-corps-operation-order` in `electron-main.cjs`. Force-ratio preview aggregates enemy formations per objective OSID for planning intelligence.
 10. **[2026-03-08] Frontline attrition uses corps_front_sectors, not legacy brigade_front_assignment**

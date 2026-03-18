@@ -343,7 +343,7 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 #### 7.6.1 Intel-Gated Operation Launch
 
-Before launching any new operation, the corps AI checks the target sector's intel confidence against a faction-specific threshold (`INTEL_GATE_LAUNCH_THRESHOLD`): RS 0.25, RBiH 0.40, HRHB 0.30. If confidence is below threshold, a probe operation is launched instead of a full sector attack: max 2 brigades, 1-turn planning, `repulsed` minimum attack outcome.
+Before launching any new operation, the corps AI checks intel confidence across all sectors against a faction-specific threshold (`INTEL_GATE_LAUNCH_THRESHOLD`): RS 0.25, RBiH 0.40, HRHB 0.30. If the worst sector's confidence is below threshold, a sector-scoped probe is launched instead of a full corps-level attack: max 2 brigades, 1-turn planning, `repulsed` minimum attack outcome. Full operations use `evaluateCorpsOffensiveLaunch` with corps-wide brigade pool and contiguity from all corps sectors.
 
 **RS blitz exemption:** During the RS blitz phase (w0–12), JNA pre-planned operations bypass the intel gate entirely — they attack blind, reflecting inherited JNA operational plans.
 

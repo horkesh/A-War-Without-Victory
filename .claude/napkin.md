@@ -9,8 +9,8 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-18, v0.4.9 — AI Comes Alive + Equipment/Displacement Overhaul)
-**v0.4.9.** 1184 tests, 96 suites. tsc clean. **Latest calibration: n913 90.3% area-weighted, 13/13 anchors (Brcko FIXED). War-or-Game APPROVED.**
-**This session:** Equipment rework (scavenging+capture+smuggle+production, no auto-tickers), civilian casualty overhaul (per-faction kill fractions, tracking unification), Brcko sector merge fix (13/13 anchors).
+**v0.4.9.** 1191 tests, 97 suites. tsc clean. **Latest calibration: n915 91.1% area-weighted, 13/13 anchors. War-or-Game APPROVED.**
+**This session:** Corps-level operations (n915, +0.8pp). Equipment rework (scavenging+capture+smuggle+production, no auto-tickers), civilian casualty overhaul (per-faction kill fractions, tracking unification), Brcko sector merge fix (13/13 anchors).
 **Equipment pipeline:** Battlefield scavenging (10-20% of destroyed enemy, scaled by outcome), capture from retreat (2-8%), arms smuggling (2 tanks + 3 arty / 12 turns, 60/40 ARBiH/HVO), Zenica steelworks (+3 arty / 8 turns ARBiH), HV transfers (+1 arty / 12 turns HVO). Write-off: >40% non-functional scrapped 1/turn. No per-brigade auto-tickers.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
 **10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.
@@ -166,8 +166,8 @@
    Do instead: `sector_intel.ts`. GUI fog-of-war LIVE. `recon_intelligence.ts` is DELETED — do not reference it.
 6. **[2026-03-07] Sector orders + OPSEC are sector-state, not brigade hacks**
    Do instead: `sector_stance_orders` → `applySectorStanceOrders()` → `brigade_posture_orders`. OPSEC in `state.opsec_sectors`.
-7. **[2026-03-07] Sector-only operation creation — no catalog ops, no rear dump**
-   Do instead: Operations launch ONLY from `generateCorpsDirectives` sector offensive path. `MAX_PARTICIPATING_BRIGADES=12`. Only sector-assigned brigades participate.
+7. **[2026-03-18] Corps-level operation creation — no catalog ops, no sector-scoped launch**
+   Do instead: Operations launch from `generateCorpsDirectives` via `evaluateCorpsOffensiveLaunch`. Corps-wide brigade pool (all active subordinates). Contiguity from ALL corps sectors. `MAX_PARTICIPATING_BRIGADES=12`. Probes remain sector-scoped.
 8. **[2026-03-06] Proof lane + eligible-attacker boundary**
    Do instead: Run `tests/scenario_vrs_operation_proof.test.ts` before wide calibration work.
 9. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
