@@ -295,6 +295,21 @@ export function advanceParamilitaries(
             const cc = state.displacement.civilian_casualties ??= {} as typeof state.displacement.civilian_casualties & Record<string, { killed?: number; fled_abroad?: number }>;
             const civFaction = cc![currentController] ??= { killed: 0, fled_abroad: 0 };
             civFaction.killed = (civFaction.killed ?? 0) + civCas;
+
+            // Also log to displacement event log for consistency with takeover system
+            if (!state.displacement.displacement_event_log) state.displacement.displacement_event_log = [];
+            state.displacement.displacement_event_log.push({
+                turn: state.meta.turn ?? 0,
+                origin_mun: targetOsid.split(':')[1] ?? 'unknown',
+                origin_osid: targetOsid,
+                dest_mun: targetOsid.split(':')[1] ?? 'unknown',
+                ethnicity: currentController,
+                caused_by: f.faction,
+                displaced: 0,
+                killed: civCas,
+                fled_abroad: 0,
+                settled: 0,
+            });
         }
 
         report.captured.push({

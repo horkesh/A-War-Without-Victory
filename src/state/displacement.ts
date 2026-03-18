@@ -12,7 +12,8 @@ import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
-import { DISPLACEMENT_KILLED_FRACTION, getDisplacementKillFraction } from './displacement_loss_constants.js';
+import { DISPLACEMENT_KILLED_FRACTION, getDisplacementKillFraction, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
+import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
 import {
@@ -376,7 +377,9 @@ function pushDisplacementEventLogFromMun(
     byFaction: Record<FactionId, number>,
     turn: number,
     lostAmount: number = 0,
-    causedBy?: FactionId
+    causedBy?: FactionId,
+    killedByFaction?: Record<FactionId, number>,
+    fledByFaction?: Record<FactionId, number>,
 ): void {
     const entries = Array.from(settlements.entries())
         .filter(([, rec]) => (rec.mun1990_id ?? rec.mun_code) === munId)
@@ -421,6 +424,20 @@ function pushDisplacementEventLogFromMun(
             routedRem -= routedHere;
             lostRemF -= lostHere;
             if (routedHere <= 0 && lostHere <= 0) continue;
+            // When separate killed/fled breakdowns are provided, use them.
+            // Otherwise fall back to legacy behavior (all lost → killed).
+            const factionKilled = killedByFaction?.[fid] ?? 0;
+            const factionFled = fledByFaction?.[fid] ?? 0;
+            const factionLostTotal = factionKilled + factionFled;
+            let killedHere: number;
+            let fledHere: number;
+            if (factionLostTotal > 0) {
+                killedHere = lostHere > 0 ? Math.round(lostHere * factionKilled / factionLostTotal) : 0;
+                fledHere = lostHere - killedHere;
+            } else {
+                killedHere = lostHere;
+                fledHere = 0;
+            }
             state.displacement.displacement_event_log.push({
                 turn,
                 origin_mun: munId,
@@ -429,8 +446,8 @@ function pushDisplacementEventLogFromMun(
                 ethnicity: fid,
                 caused_by: causedBy,
                 displaced: routedHere,
-                killed: lostHere,
-                fled_abroad: 0,
+                killed: killedHere,
+                fled_abroad: fledHere,
                 settled: 0,
             });
         }
@@ -509,22 +526,40 @@ export function applyDisplacementFromFlips(
             const byFaction = splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun);
             const toFaction = flip.to_faction;
             const rRBiH = Math.floor(
-                byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', toFaction)) * (1 - FLEE_ABROAD_FRACTION_RBIH)
+                byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', toFaction)) * (1 - getFactionFleeAbroadFraction('RBiH'))
             );
             const rRS = Math.floor(
-                byFaction.RS * (1 - getDisplacementKillFraction('RS', toFaction)) * (1 - FLEE_ABROAD_FRACTION_RS)
+                byFaction.RS * (1 - getDisplacementKillFraction('RS', toFaction)) * (1 - getFactionFleeAbroadFraction('RS'))
             );
             const rHRHB = Math.floor(
-                byFaction.HRHB * (1 - getDisplacementKillFraction('HRHB', toFaction)) * (1 - FLEE_ABROAD_FRACTION_HRHB)
+                byFaction.HRHB * (1 - getDisplacementKillFraction('HRHB', toFaction)) * (1 - getFactionFleeAbroadFraction('HRHB'))
             );
             routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
             routedAmount = rRBiH + rRS + rHRHB;
             lostAmount = displacementAmount - routedAmount;
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, toFaction);
+
+            const killedByFac: Record<FactionId, number> = {
+                RBiH: Math.floor(byFaction.RBiH * getDisplacementKillFraction('RBiH', toFaction)),
+                RS: Math.floor(byFaction.RS * getDisplacementKillFraction('RS', toFaction)),
+                HRHB: Math.floor(byFaction.HRHB * getDisplacementKillFraction('HRHB', toFaction)),
+            };
+            const fledByFac: Record<FactionId, number> = {
+                RBiH: Math.floor(byFaction.RBiH * getFactionFleeAbroadFraction('RBiH')),
+                RS: Math.floor(byFaction.RS * getFactionFleeAbroadFraction('RS')),
+                HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
+            };
+
+            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, toFaction, killedByFac, fledByFac);
+            for (const fid of ['RBiH', 'RS', 'HRHB'] as FactionId[]) {
+                if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
+                    recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
+                }
+            }
         } else {
             lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
             routedAmount = displacementAmount - lostAmount;
             pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, flip.to_faction);
+            recordCivilianDisplacementCasualties(state, 'RBiH', lostAmount, 0);
         }
 
         const beforeOut = dispState.displaced_out;
@@ -778,23 +813,46 @@ export function updateDisplacement(
 
             if (population1991ByMun) {
                 const byFaction = splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun);
+                const controllerFid = factionId as FactionId;
                 const rRBiH = Math.floor(
-                    byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', factionId as FactionId)) * (1 - FLEE_ABROAD_FRACTION_RBIH)
+                    byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', controllerFid)) * (1 - getFactionFleeAbroadFraction('RBiH'))
                 );
                 const rRS = Math.floor(
-                    byFaction.RS * (1 - getDisplacementKillFraction('RS', factionId as FactionId)) * (1 - FLEE_ABROAD_FRACTION_RS)
+                    byFaction.RS * (1 - getDisplacementKillFraction('RS', controllerFid)) * (1 - getFactionFleeAbroadFraction('RS'))
                 );
                 const rHRHB = Math.floor(
-                    byFaction.HRHB * (1 - getDisplacementKillFraction('HRHB', factionId as FactionId)) * (1 - FLEE_ABROAD_FRACTION_HRHB)
+                    byFaction.HRHB * (1 - getDisplacementKillFraction('HRHB', controllerFid)) * (1 - getFactionFleeAbroadFraction('HRHB'))
                 );
                 routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
                 routedAmount = rRBiH + rRS + rHRHB;
                 lostAmount = displacementAmount - routedAmount;
-                pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, lostAmount, factionId as FactionId);
+
+                // Compute separate killed/fled breakdowns per faction
+                const killedByFac: Record<FactionId, number> = {
+                    RBiH: Math.floor(byFaction.RBiH * getDisplacementKillFraction('RBiH', controllerFid)),
+                    RS: Math.floor(byFaction.RS * getDisplacementKillFraction('RS', controllerFid)),
+                    HRHB: Math.floor(byFaction.HRHB * getDisplacementKillFraction('HRHB', controllerFid)),
+                };
+                const fledByFac: Record<FactionId, number> = {
+                    RBiH: Math.floor(byFaction.RBiH * getFactionFleeAbroadFraction('RBiH')),
+                    RS: Math.floor(byFaction.RS * getFactionFleeAbroadFraction('RS')),
+                    HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
+                };
+
+                pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, lostAmount, controllerFid, killedByFac, fledByFac);
+
+                // Record to civilian_casualties (was missing — only event log was written)
+                for (const fid of ['RBiH', 'RS', 'HRHB'] as FactionId[]) {
+                    if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
+                        recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
+                    }
+                }
             } else {
                 lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
                 routedAmount = displacementAmount - lostAmount;
                 pushDisplacementEventLogFromMun(state, munId, settlements, { RBiH: displacementAmount, RS: 0, HRHB: 0 }, currentTurn, lostAmount, factionId as FactionId);
+                // Record to civilian_casualties for non-ethnic-split path
+                recordCivilianDisplacementCasualties(state, 'RBiH', lostAmount, 0);
             }
 
             // Update displacement state
