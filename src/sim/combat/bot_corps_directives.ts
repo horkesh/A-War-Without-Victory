@@ -33,7 +33,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
-import { evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive.js';
+import { evaluateCorpsOffensiveLaunch, evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH, INTEL_GATE_LAUNCH_THRESHOLD, MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT } from './sector_intel_constants.js';
 import { getSectorIntelConfidence } from './sector_intel.js';
 import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
@@ -53,9 +53,9 @@ import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors, GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors.js';
-import { computeReinforcementPool } from './operation_reinforcement.js';
+// computeReinforcementPool no longer needed — corps-level ops draw from full brigade pool
 import { MIN_BRIGADES_FOR_SECTOR_ATTACK } from './operation_reinforcement_constants.js';
-import { buildFriendlyComponents } from './sector_utils.js';
+// buildFriendlyComponents no longer needed — corps-level ops don't use component map
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
 import {
     assessCorpsSupplyHealth,
@@ -1593,13 +1593,6 @@ export function generateCorpsDirectives(
         if (canLaunchSectorOp && stanceAllowsOps &&
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
 
-            // Build faction-wide friendly OSID set + component map for reinforcement pool.
-            const factionFriendlyOsids = new Set<string>();
-            for (const [osid, ctrl] of Object.entries(pc)) {
-                if (ctrl === faction) factionFriendlyOsids.add(osid);
-            }
-            const factionComponentOf = buildFriendlyComponents(adjacency, factionFriendlyOsids);
-
             // Sort sectors: priority sector first, then by offensive target overlap (descending).
             // This ensures pocket cleanup and high-value sectors get operations before quiet ones.
             const targetSetForSort = new Set(offensiveTargets);
@@ -1676,22 +1669,15 @@ export function generateCorpsDirectives(
                 }
             }
 
-            for (const sec of sortedLaunchSectors) {
-                if (inCooldown) {
-                    // Check whether this sector shares theater with the last completed op.
-                    const secEnemySet = new Set(collectSectorEnemyOsids(sec));
-                    const sameTheater = operationsShareTheater(lastCompletedOp, sec.sector_id, secEnemySet);
-                    if (!sameTheater) {
-                        // Different theater — skip during cooldown (corps still reconsolidating).
-                        continue;
-                    }
-                }
-                const clusterSectors = [sec];
-                const clusterFriendlyOsids = new Set(collectSectorFriendlyOsids(sec));
-                const clusterEnemyOsids = new Set(collectSectorEnemyOsids(sec));
-                let secBrigadeIds = subordinates
-                    .filter((b) => b.location_osid && clusterFriendlyOsids.has(b.location_osid))
-                    .map((b) => b.id)
+            // ── Corps-level operation launch (replaces per-sector loop) ──
+            // Gather ALL corps brigades and enemy OSIDs, then evaluate a single
+            // corps-level offensive. Brigades from any sector can participate.
+            if (!inCooldown) {
+                // Corps-wide brigade pool: all active subordinates eligible for operations
+                let corpsBrigadeIds = subordinates
+                    .filter(b => b.status === 'active' && (b.personnel ?? 0) >= 400
+                        && !(b.disrupted_turns && b.disrupted_turns > 0))
+                    .map(b => b.id)
                     .sort((a, b) => {
                         const fa = state.military.formations?.[a];
                         const fb = state.military.formations?.[b];
@@ -1701,187 +1687,132 @@ export function generateCorpsDirectives(
                         return strictCompare(a, b);
                     });
 
-                while (secBrigadeIds.length < 1) {
-                    const donorCandidates = directiveEligibleSectors
-                        .filter((candidate) =>
-                            !clusterSectors.includes(candidate) &&
-                            clusterSectors.some((clusterSector) => areDirectiveSectorsAdjacent(clusterSector, candidate, adjacency))
-                        )
-                        .map((candidate) => {
-                            const candidateEnemyOsids = collectSectorEnemyOsids(candidate);
-                            const overlap = candidateEnemyOsids.filter((osid) => offensiveTargets.includes(osid)).length;
-                            const candidateFriendlyOsids = new Set(collectSectorFriendlyOsids(candidate));
-                            const brigadeCount = subordinates.filter((b) => b.location_osid && candidateFriendlyOsids.has(b.location_osid)).length;
-                            return { candidate, overlap, brigadeCount, candidateEnemyOsids, candidateFriendlyOsids };
-                        })
-                        .sort((a, b) => {
-                            if (b.overlap !== a.overlap) return b.overlap - a.overlap;
-                            if (b.brigadeCount !== a.brigadeCount) return b.brigadeCount - a.brigadeCount;
-                            if (a.candidate.length_edges !== b.candidate.length_edges) {
-                                return a.candidate.length_edges - b.candidate.length_edges;
-                            }
-                            return strictCompare(a.candidate.sector_id, b.candidate.sector_id);
-                        });
-                    const donor = donorCandidates[0];
-                    if (!donor) {
-                        break;
+                // Corps-wide enemy OSIDs: union across all corps sectors
+                const corpsEnemyOsids = new Set<string>();
+                for (const sec of directiveEligibleSectors) {
+                    for (const ss of sec.sub_segments) {
+                        for (const eo of ss.enemy_osids) corpsEnemyOsids.add(eo);
                     }
-                    clusterSectors.push(donor.candidate);
-                    for (const osid of donor.candidateFriendlyOsids) clusterFriendlyOsids.add(osid);
-                    for (const osid of donor.candidateEnemyOsids) clusterEnemyOsids.add(osid);
-                    secBrigadeIds = subordinates
-                        .filter((b) => b.location_osid && clusterFriendlyOsids.has(b.location_osid))
-                        .map((b) => b.id)
-                        .sort((a, b) => {
-                            const fa = state.military.formations?.[a];
-                            const fb = state.military.formations?.[b];
-                            const pa = getEquipmentOffensivePriority(fa ? resolveEquipmentClass(fa) : undefined);
-                            const pb = getEquipmentOffensivePriority(fb ? resolveEquipmentClass(fb) : undefined);
-                            if (pa !== pb) return pb - pa;
-                            return strictCompare(a, b);
-                        });
                 }
+                const allCorpsEnemyOsids = [...corpsEnemyOsids].sort(strictCompare);
 
-                const secEnemyOsids = [...clusterEnemyOsids].sort(strictCompare);
-
-                // Only brigades already in the sector cluster participate.
-                // If the cluster lacks enough brigades, skip — corps density
-                // balancing should reinforce the sector first.
-                let finalBrigadeIds = secBrigadeIds;
+                // Filter targets to only those adjacent to at least one friendly-held OSID.
+                const reachableTargets = offensiveTargets.filter(target => {
+                    const neighbors = adjacency.get(target) ?? [];
+                    return neighbors.some(n => getPoliticalControllerOSID(state, n, reverseMap) === faction);
+                });
 
                 // Cap operation size by supply health (graduated response)
-                if (maxOpSize > 0 && maxOpSize < finalBrigadeIds.length) {
-                    finalBrigadeIds = finalBrigadeIds.slice(0, maxOpSize);
+                if (maxOpSize > 0 && maxOpSize < corpsBrigadeIds.length) {
+                    corpsBrigadeIds = corpsBrigadeIds.slice(0, maxOpSize);
                 }
 
                 // Army HQ override: cap brigade count for probe/feint operations.
-                // Probes are small recon-by-force; feints are limited diversions.
                 const matchingHqOv = armyHqOverrides.find(o =>
-                    o.target_osids.some(t => offensiveTargets.includes(t) || secEnemyOsids.includes(t))
+                    o.target_osids.some(t => offensiveTargets.includes(t) || allCorpsEnemyOsids.includes(t))
                 );
                 if (matchingHqOv?.type === 'probe') {
                     const cap = matchingHqOv.max_brigades ?? 2;
-                    if (finalBrigadeIds.length > cap) {
-                        finalBrigadeIds = finalBrigadeIds.slice(0, cap);
+                    if (corpsBrigadeIds.length > cap) {
+                        corpsBrigadeIds = corpsBrigadeIds.slice(0, cap);
                     }
                 } else if (matchingHqOv?.type === 'feint') {
                     const cap = matchingHqOv.max_brigades ?? 3;
-                    if (finalBrigadeIds.length > cap) {
-                        finalBrigadeIds = finalBrigadeIds.slice(0, cap);
+                    if (corpsBrigadeIds.length > cap) {
+                        corpsBrigadeIds = corpsBrigadeIds.slice(0, cap);
                     }
                 }
 
-                // Filter targets to only those adjacent to at least one friendly-held OSID.
-                // Removes unreachable deep-enemy targets from operation objectives, preventing
-                // operations from launching into cells that have no adjacent RS position to attack from.
-                const reachableTargets = offensiveTargets.filter((target) => {
-                    const neighbors = adjacency.get(target) ?? [];
-                    return neighbors.some((n) => getPoliticalControllerOSID(state, n, reverseMap) === faction);
-                });
-
-                // ── Intel gate: check sector confidence before committing ──
-                const sectorConfidence = getSectorIntelConfidence(state, sec.sector_id);
+                // ── Intel gate: check worst-sector confidence before committing ──
+                // If any sector has low intel, prefer probing first.
+                let worstLaunchSectorConf = 1.0;
+                let worstLaunchSectorId: string | undefined;
+                for (const sec of sortedLaunchSectors) {
+                    const conf = getSectorIntelConfidence(state, sec.sector_id);
+                    if (conf < worstLaunchSectorConf) {
+                        worstLaunchSectorConf = conf;
+                        worstLaunchSectorId = sec.sector_id;
+                    }
+                }
                 const consecutiveProbes = cmd.consecutive_probes ?? 0;
                 const turn = state.meta?.turn ?? 0;
 
-                if (shouldLaunchProbeInstead(faction, sectorConfidence, consecutiveProbes, turn)) {
-                    // Low intel — launch a probe operation instead of full attack.
-                    // Probes are smaller (max 2 brigades), shorter planning, and generate
-                    // recon-by-force intel when they engage.
-                    const probeBrigades = finalBrigadeIds.slice(0, 2);
-                    if (probeBrigades.length >= 1 && secEnemyOsids.length >= 1) {
-                        const probeOp = evaluateSectorOffensiveLaunch(
-                            state, corps.id, sec.sector_id, faction,
-                            probeBrigades, secEnemyOsids, reachableTargets.slice(0, 1), supplyByOsid,
-                            'repulsed' // Probes accept worse outcomes
-                        );
-                        if (probeOp) {
-                            probeOp.type = 'probe';
-                            probeOp.planning_duration = 1; // Fast planning
-                            cmd.active_operation = probeOp;
-                            cmd.consecutive_probes = consecutiveProbes + 1;
-                            assignOperationCommander(state, probeOp, corps.id, faction);
-                            break;
+                if (worstLaunchSectorId && shouldLaunchProbeInstead(faction, worstLaunchSectorConf, consecutiveProbes, turn)) {
+                    // Low intel — launch a sector-scoped probe instead of full attack.
+                    const probeSector = sortedLaunchSectors.find(s => s.sector_id === worstLaunchSectorId);
+                    if (probeSector) {
+                        const secEnemyOsids = collectSectorEnemyOsids(probeSector).sort(strictCompare);
+                        const secFriendlyOsids = new Set(collectSectorFriendlyOsids(probeSector));
+                        const probeBrigades = subordinates
+                            .filter(b => b.location_osid && secFriendlyOsids.has(b.location_osid)
+                                && b.status === 'active' && (b.personnel ?? 0) >= 400)
+                            .map(b => b.id)
+                            .sort(strictCompare)
+                            .slice(0, 2);
+                        if (probeBrigades.length >= 1 && secEnemyOsids.length >= 1) {
+                            const probeTargets = reachableTargets.filter(t => secEnemyOsids.includes(t)).slice(0, 1);
+                            if (probeTargets.length >= 1) {
+                                const probeOp = evaluateSectorOffensiveLaunch(
+                                    state, corps.id, worstLaunchSectorId, faction,
+                                    probeBrigades, secEnemyOsids, probeTargets, supplyByOsid,
+                                    'repulsed'
+                                );
+                                if (probeOp) {
+                                    probeOp.type = 'probe';
+                                    probeOp.planning_duration = 1;
+                                    cmd.active_operation = probeOp;
+                                    cmd.consecutive_probes = consecutiveProbes + 1;
+                                    assignOperationCommander(state, probeOp, corps.id, faction);
+                                }
+                            }
                         }
                     }
-                    // If probe launch fails, fall through to try full attack
                 }
 
-                // Sector attacks require MIN_BRIGADES_FOR_SECTOR_ATTACK (3).
-                // Probes (handled above) only need 1.
-                if (finalBrigadeIds.length < MIN_BRIGADES_FOR_SECTOR_ATTACK) continue;
+                // Full corps-level operation (only if no probe was launched above)
+                if (!cmd.active_operation && corpsBrigadeIds.length >= MIN_BRIGADES_FOR_SECTOR_ATTACK
+                    && reachableTargets.length >= 1) {
 
-                const op = evaluateSectorOffensiveLaunch(
-                    state, corps.id, sec.sector_id, faction,
-                    finalBrigadeIds, secEnemyOsids, reachableTargets, supplyByOsid,
-                    minAttackOutcomeForOpLaunch
-                );
-                if (op) {
-                    // Army HQ override: set operation type from override directive.
-                    if (matchingHqOv) {
-                        if (matchingHqOv.type === 'probe') {
-                            op.type = 'probe';
-                            op.planning_duration = 1;
-                        } else if (matchingHqOv.type === 'feint') {
-                            op.type = 'feint';
-                            op.planning_duration = 1;
-                        }
-                    }
+                    // Primary sector: the one with most offensive target overlap (for UI display)
+                    const primarySectorId = sortedLaunchSectors[0]?.sector_id;
 
-                    // ── Corps-wide reinforcement: loan brigades from other sectors ──
-                    // Only for sector_attack (probes and feints are sector-scoped).
-                    if (op.type === 'sector_attack') {
-                        const otherSectors = directiveEligibleSectors
-                            .filter(s => s.sector_id !== sec.sector_id && s.corps_id === corps.id);
-                        if (otherSectors.length > 0) {
-                            const pool = computeReinforcementPool(
-                                sec, otherSectors, state.military.formations ?? {},
-                                adjacency, factionFriendlyOsids, factionComponentOf,
-                                finalBrigadeIds.length,
-                            );
-                            if (pool.length > 0) {
-                                op.loaned_brigades = pool;
-                                // Add loaned brigade IDs to participating_brigades
-                                for (const loan of pool) {
-                                    if (!op.participating_brigades.includes(loan.brigade_id)) {
-                                        op.participating_brigades.push(loan.brigade_id);
-                                    }
-                                    // Also add to first axis if multi-axis
-                                    if (op.axes && op.axes.length > 0) {
-                                        const axis = op.axes[0]!;
-                                        if (!axis.assigned_brigades.includes(loan.brigade_id)) {
-                                            axis.assigned_brigades.push(loan.brigade_id);
-                                        }
-                                    }
-                                }
-                                op.participating_brigades.sort(strictCompare);
-                                if (op.axes?.[0]) {
-                                    op.axes[0].assigned_brigades.sort(strictCompare);
-                                }
+                    const op = evaluateCorpsOffensiveLaunch(
+                        state, corps.id, faction,
+                        corpsBrigadeIds, allCorpsEnemyOsids, reachableTargets, supplyByOsid,
+                        minAttackOutcomeForOpLaunch, primarySectorId
+                    );
+                    if (op) {
+                        // Army HQ override: set operation type from override directive.
+                        if (matchingHqOv) {
+                            if (matchingHqOv.type === 'probe') {
+                                op.type = 'probe';
+                                op.planning_duration = 1;
+                            } else if (matchingHqOv.type === 'feint') {
+                                op.type = 'feint';
+                                op.planning_duration = 1;
                             }
                         }
-                    }
 
-                    // Same-theater follow-on: corps already has recon from previous op —
-                    // skip the full intel_gathering phase (cap preparation to 1 turn).
-                    if (lastCompletedOp != null) {
-                        const opObjSet = new Set(op.objectives ?? []);
-                        if (op.axes) {
-                            for (const axis of op.axes) {
-                                for (const obj of axis.objectives ?? []) opObjSet.add(obj);
+                        // Same-theater follow-on: corps already has recon from previous op —
+                        // skip the full intel_gathering phase (cap preparation to 1 turn).
+                        if (lastCompletedOp != null) {
+                            const opObjSet = new Set(op.objectives ?? []);
+                            if (op.axes) {
+                                for (const axis of op.axes) {
+                                    for (const obj of axis.objectives ?? []) opObjSet.add(obj);
+                                }
+                            }
+                            if (operationsShareTheater(lastCompletedOp, op.sector_id, opObjSet)) {
+                                op.preparation_sub_phase = 'intel_gathering';
+                                op.preparation_turns_elapsed = 0;
+                                op.preparation_max_turns = 1;
+                                op.postponement_count = 0;
                             }
                         }
-                        if (operationsShareTheater(lastCompletedOp, op.sector_id, opObjSet)) {
-                            op.preparation_sub_phase = 'intel_gathering';
-                            op.preparation_turns_elapsed = 0;
-                            op.preparation_max_turns = 1;
-                            op.postponement_count = 0;
-                        }
+                        cmd.active_operation = op;
+                        cmd.consecutive_probes = 0; // Reset probe counter on full attack
+                        assignOperationCommander(state, op, corps.id, faction);
                     }
-                    cmd.active_operation = op;
-                    cmd.consecutive_probes = 0; // Reset probe counter on full attack
-                    assignOperationCommander(state, op, corps.id, faction);
-                    break; // One offensive at a time per corps
                 }
             }
         }
