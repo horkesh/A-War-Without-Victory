@@ -133,7 +133,7 @@ Each brigade maintains a posture state chosen by the player. Posture modifies **
 
 ### 6.2 Entrenchment
 
-**Entrenchment** is accumulated by brigades that remain on the same OSID without moving. Each turn without movement increments **entrenchment_turns** (capped at MAX_ENTRENCHMENT = 12). **entrenchment_mult** = 1.0 + (entrenchment_level × ENTRENCHMENT_PER_TURN) with ENTRENCHMENT_PER_TURN = 0.065 (max mult 1.0 + 12×0.065 = 1.78). Entrenchment **resets to 0** when the brigade moves to a different OSID. **Degrade by 1** when the brigade is disrupted (instead of full reset). **State:** entrenchment_turns per brigade; serialized. Only deployed brigades on an OSID accrue entrenchment. **Implementation-note (Pipeline 2.3, 2026-02-25):** At War start (or scenario init in war), scenario parameter **war_entrenchment_init_turns** (legacy name: phase_ii_entrenchment_init_turns) (0..12) may set initial entrenchment for all brigades; stuck-in-Peace fallback (force transition after N turns) per War Spec §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md; report docs/40_reports/implemented/20260225_PIPELINE_2_3_2_4_2_5_EDGE_CASES_OPERATION_STORM_SCORING.md.
+**Entrenchment** is accumulated by brigades that remain on the same OSID without moving. Each turn without movement increments **entrenchment_turns** (capped at MAX_ENTRENCHMENT = 6). **entrenchment_mult** uses a sqrt diminishing-returns curve with an effective cap: `1.0 + sqrt(min(ENTRENCHMENT_EFFECTIVE_CAP_TURNS, entrenchment_turns)) * ENTRENCHMENT_PER_TURN * 2 * suppressionFactor` with ENTRENCHMENT_PER_TURN = 0.035. **ENTRENCHMENT_EFFECTIVE_CAP_TURNS = 26** — the entrenchment bonus stops growing after 26 turns, modeling complacency and diminishing returns from static positions. At 1 turn: +0.07 bonus. At 6 turns: +0.171. At 26 turns: +0.357 (maximum). Entrenchment **resets to 0** when the brigade moves to a different OSID. **Degrade by 1** when the brigade is disrupted (instead of full reset). **State:** entrenchment_turns per brigade; serialized. Only deployed brigades on an OSID accrue entrenchment. **Implementation-note (Pipeline 2.3, 2026-02-25):** At War start (or scenario init in war), scenario parameter **war_entrenchment_init_turns** (legacy name: phase_ii_entrenchment_init_turns) (0..6) may set initial entrenchment for all brigades; stuck-in-Peace fallback (force transition after N turns) per War Spec §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md; report docs/40_reports/implemented/20260225_PIPELINE_2_3_2_4_2_5_EDGE_CASES_OPERATION_STORM_SCORING.md.
 
 ### 6.2.1 Movement states (Column / Combat)
 
@@ -176,6 +176,17 @@ When active, these corps pairs do not generate attack orders against each other'
 **Player break:** Player may attack across the truce. First violation sets `truce_broken_turn[faction]`. Opponent bot gains `+0.25 aggression` for `6 turns` after truce break (`TRUCE_BREAK_SPIKE_TURNS`, `TRUCE_BREAK_AGGRESSION_SPIKE`).
 
 **State:** `vienna_declaration_turn`, `vienna_accepted`, `vienna_herzegovina_broken_by`, `vienna_kiseljak_broken`, `truce_broken_turn`. Module: `src/sim/local_truces.ts`.
+
+### 6.6a RBiH-HRHB Alliance (updated v0.7)
+
+**Implementation-note (2026-03-18, values updated):** The RBiH-HRHB alliance tracks the uneasy wartime cooperation between Bosniak and Croat forces. `war_alliance_rbih_hrhb` on `political` state, range [0, 1].
+
+**Updated constants:**
+- `DEFAULT_INIT_ALLIANCE = 0.75` (was 0.35) — alliance starts high, reflecting early cooperation against VRS.
+- `PATRON_PRESSURE_COEFF = 0.018` (was 0.015) — patron commitment drags alliance toward breakdown faster.
+- `rbih_hrhb_war_earliest_turn` default = 40 in definitive scenario (was 26) — open war between RBiH and HRHB targets ~w50-52 (April 1993, historically accurate).
+
+Alliance drift is computed per turn in `alliance_update.ts`: alliance deterioration from territorial friction, patron pressure (HRHB patron commitment × PATRON_PRESSURE_COEFF), and escalation events. When alliance drops below threshold and turn ≥ `war_earliest_turn`, RBiH-HRHB fronts activate and the factions enter open conflict.
 
 ### 6.7 Reactive Sector Defense
 
@@ -260,7 +271,7 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **Combat power (attacker):** base_power × posture_attack_mult × supply_mult × corps_stance_mult × operations_mult × og_mult × disruption_mult × **officer_quality_mult**. Base power = personnel × equipment_ratio × experience × (cohesion/100).
 
-**Combat power (defender):** base_power × posture_defense_mult × supply_mult × terrain_mult × **entrenchment_mult** × corps_stance_defense_mult × **resilience_mult** (defense_streak) × urban_mult × disruption_mult × **officer_quality_mult** × **ethnic_defense_mult**. Terrain applies to the defender's OSID (rivers, mountain, forest, road access, slope). **Entrenchment:** entrenchment_mult = 1.0 + min(entrenchment_turns, 12) × 0.065; resets on move; degrades by 1 when disrupted. **Resilience:** resilience_mult = 1.0 + min(defense_streak, 6) × 0.05; resets on move or when attacker succeeds. **Officer quality (two-tier system):** `officer_quality_mult` is computed by `getThreeTierOfficerMod(formation, state, role)` in `combat_math.ts` using a three-tier fallback: (1) When named officers are loaded (`state.named_officers`): brigade officer quality × corps commander modifier. Brigade mod = `1.0 + (quality - 0.30) × 0.4` where quality is per-brigade `officer_quality` [0, 0.90]. Corps mod = `0.90 + competence×0.03 + rating×0.01` (aggressiveness for attack, defensiveness for defense; acting commander flat 0.92). VRS pre-planned operations in execution phase use army commander (Mladić) modifier instead of corps commander. (2) When only brigade quality present: `getBrigadeOfficerMod(formation, turn)`. (3) Legacy fallback: `getOfficerQualityMult(faction, turn)` — VRS 1.10 peak decaying 0.002/w after w20 (floor 0.95), ARBiH 0.85 growing 0.003/w (cap 1.05), HVO constant 0.97. See §7.5 for full officer system specification. **Ethnic homeland defense:** +12% for ≥60% co-ethnic population in defender's OSID, graduated 30–60%, none <30% (`getEthnicDefenseBonus` in `ethnic_defense.ts`).
+**Combat power (defender):** base_power × posture_defense_mult × supply_mult × terrain_mult × **entrenchment_mult** × corps_stance_defense_mult × **resilience_mult** (defense_streak) × urban_mult × disruption_mult × **officer_quality_mult** × **ethnic_defense_mult**. Terrain applies to the defender's OSID (rivers, mountain, forest, road access, slope). **Entrenchment:** entrenchment_mult = 1.0 + sqrt(min(26, entrenchment_turns)) × 0.035 × 2 × suppressionFactor; MAX_ENTRENCHMENT = 6; ENTRENCHMENT_EFFECTIVE_CAP_TURNS = 26; resets on move; degrades by 1 when disrupted. **Resilience:** resilience_mult = 1.0 + min(defense_streak, 6) × 0.05; resets on move or when attacker succeeds. **Officer quality (two-tier system):** `officer_quality_mult` is computed by `getThreeTierOfficerMod(formation, state, role)` in `combat_math.ts` using a three-tier fallback: (1) When named officers are loaded (`state.named_officers`): brigade officer quality × corps commander modifier. Brigade mod = `1.0 + (quality - 0.30) × 0.4` where quality is per-brigade `officer_quality` [0, 0.90]. Corps mod = `0.90 + competence×0.03 + rating×0.01` (aggressiveness for attack, defensiveness for defense; acting commander flat 0.92). VRS pre-planned operations in execution phase use army commander (Mladić) modifier instead of corps commander. (2) When only brigade quality present: `getBrigadeOfficerMod(formation, turn)`. (3) Legacy fallback: `getOfficerQualityMult(faction, turn)` — VRS 1.10 peak decaying 0.002/w after w20 (floor 0.95), ARBiH 0.85 growing 0.003/w (cap 1.05), HVO constant 0.97. See §7.5 for full officer system specification. **Ethnic homeland defense:** +12% for ≥60% co-ethnic population in defender's OSID, graduated 30–60%, none <30% (`getEthnicDefenseBonus` in `ethnic_defense.ts`).
 
 **Defender casualty multiplier:** Attacker heavy weapons inflict additional defender casualties via **bombardment casualty multiplier** (1.0–1.8×): `(artEff + tankEff×0.5) / 80` from attacker firepower, scaled by attacker **heavy munitions reserve** (adequate ≥50 → 1.0×; strained 20–49 → 0.75×; critical <20 → 0.5×). Applied after base casualty calculation (`getBombardmentCasualtyMult(attackers, factionId, state)` in `combat_math.ts`; scaling via `getHeavyMunitionsMult()`). Artillery suppression of entrenchment (`getArtillerySuppression`) is similarly scaled by heavy munitions. Both functions are no-ops (return full values) when `supply_reserves_enabled` is false.
 
@@ -379,6 +390,53 @@ Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/2
 ### 7.8 Army HQ Gathering (Adaptive Doctrine)
 
 **Implementation-note (2026-03-17, v0.4.7):** Periodic army-level command meetings (`evaluateArmyHQGathering`, step 134 in `war_phases.ts`) produce multi-turn `CampaignPlan` objects stored on `state.military.campaign_plans`. After the first gathering, adaptive doctrine overrides replace calendar-driven `doctrine_phases` — attack share, aggression, corps stances, and front priorities are derived from the campaign plan rather than from the timeline JSON. Front priorities (`primary` / `secondary` / `economy` / `contain`) are consumed by `generateCorpsDirectives()` to weight offensive targeting. Synchronized multi-corps operations use a `waiting_for_sync` preparation sub-phase so that participating corps begin execution simultaneously. Module: `src/sim/combat/army_hq_gathering.ts`. Types: `src/sim/combat/army_hq_gathering_types.ts`. Constants: `src/sim/combat/army_hq_gathering_constants.ts`. 54 new tests. Report: [20260317_ARMY_HQ_GATHERING_V047.md](../40_reports/implemented/20260317_ARMY_HQ_GATHERING_V047.md).
+
+### 7.9 AI Commander System
+
+**Implementation-note (2026-03-18, v0.4.5+):** Optional AI command layer in `src/sim/ai_commander/` (11 files). Provides LLM-assisted army and corps decision-making with structured output parsing and deterministic fallback.
+
+**Four modes** (`AiCommanderMode` in `ai_config.ts`):
+- **cadet** — formula-only (default). No API calls. Deterministic heuristic decisions. All model routing set to `'formula'`.
+- **recruit** — Haiku for all decisions. Cheapest API tier.
+- **officer** — Sonnet for army/advisor, Haiku for corps. Balanced cost/quality.
+- **commander** — Opus for army/advisor/corps-ops, Haiku for corps routine. Maximum strategic depth.
+
+**Key modules:** `army_commander_ai.ts` (army-level decisions: corps stances, operation approvals, reserve deployment), `corps_commander_ai.ts` (corps-level: sector stances, operation plans, brigade movements), `player_advisor.ts` (situation analysis and recommendations for human players), `prompt_builder.ts` (game state → structured prompt), `response_parser.ts` (LLM output → validated `ArmyDecision`/`CorpsDecision`), `personality_profiles.ts` (historical commander personality templates), `anthropic_client.ts` (Anthropic API integration).
+
+**Stance override:** AI army decisions are respected by `generateCorpsStanceOrders()` in `bot_corps_stance.ts` — AI-chosen corps stances override the formula-driven defaults.
+
+**Decision log:** `CommandDecisionLogEntry` records turn, level, faction, decision payload, model used, token counts, and latency. Enables replay determinism — logged decisions can be replayed without API calls. Module: `decision_log.ts`.
+
+**QA tool:** `npm run sim:qa:commanders` — runs headless scenario with AI commander diagnostics.
+
+**Temperature:** Fixed at 0 (`AI_TEMPERATURE = 0`) for deterministic outputs. All constants in `ai_config.ts`.
+
+### 7.10 Conditional Events
+
+**Implementation-note (2026-03-18):** Historical events can now specify game-state conditions that must be satisfied before firing. Events without conditions continue to fire by week range as before (backward compatible).
+
+**EventCondition type** (9 variants in `src/sim/events/event_types.ts`):
+- `territory_control` — faction controls municipality/OSID above threshold
+- `alliance_below` / `alliance_above` — RBiH-HRHB alliance level check
+- `faction_controls_municipality` — faction controls ≥threshold fraction of municipality OSIDs
+- `siege_active` — siege detected at OSID or municipality
+- `operation_completed` — named operation matching pattern has completed
+- `and` / `or` / `not` — logical combinators (recursive)
+
+**Evaluator:** `evaluateCondition(condition, state)` — recursive evaluator in `event_types.ts`. Called from `shouldEventFire()` when an event's trigger includes a `condition` field. Returns boolean.
+
+**Converted events** (in `data/scenarios/events/war_1992.json`):
+- `operation_corridor_1992` — fires when RS controls ≥50% of Brcko municipality (w12-22)
+- `jajce_falls_1992` — fires when RS controls ≥50% of Jajce municipality (w30-40)
+- `concentration_camps_revealed_1992` — fires when RS controls ≥50% of Prijedor municipality (w18-28)
+
+### 7.11 Corps Diagnostic Fields
+
+**Implementation-note (2026-03-18):** Per-corps diagnostic state for operation launch debugging and UI status display.
+
+**CorpsStatusReason** type (8 values): `executing_operation` | `density_strained` | `supply_critical` | `no_targets` | `cooldown` | `no_eligible_sectors` | `queued_ops_pending` | `ready`. Stored as `status_reason` on `CorpsCommandState`.
+
+**op_launch_trace:** `string[]` — per-turn gate audit recording why a corps did or did not launch an operation. Each entry uses a `blocked:` or `clear:` prefix (e.g. `blocked:existing_op(Operation Drina:execution)`, `blocked:density_strained(0.120<0.167)`, `blocked:stance(defensive)`, `clear:all_gates_passed`). Consumed by AI commander tools and QA diagnostics.
 
 ## 8. Command and control degradation
 
@@ -750,11 +808,16 @@ This document (v0.6.0) consolidated the Systems and Mechanics Manual for the two
 ## v0.7 Additions
 
 v0.7.0 adds the following normative sections:
+- **§6.2 Entrenchment** — Updated: MAX_ENTRENCHMENT=6, ENTRENCHMENT_PER_TURN=0.035, ENTRENCHMENT_EFFECTIVE_CAP_TURNS=26, sqrt formula.
 - **§6.6 Graz Accords** — RS-HRHB non-aggression pact, corps-pair truces, Kiseljak exclusion, cold fronts.
+- **§6.6a RBiH-HRHB Alliance** — Updated: DEFAULT_INIT_ALLIANCE=0.75, PATRON_PRESSURE_COEFF=0.018, war_earliest_turn=40.
 - **§6.7 Reactive Sector Defense** — Distance-weighted reserve contribution (Layer A) and five sector stances (Layer B).
 - **§6.8 Ops-Only Attack Doctrine** — All attacks through CorpsOperation; march-first doctrine.
 - **§6.9 Brigade No-Destruction** — Emergency retreat replaces destruction; retreat chain.
 - **§7.7 Army HQ Reserve Pool** — Elite brigade loan lifecycle, request priority, force-recall conditions.
+- **§7.9 AI Commander System** — Optional Claude API integration, 4 modes (cadet/recruit/officer/commander), decision log, QA tool.
+- **§7.10 Conditional Events** — EventCondition type (9 variants), recursive evaluator, 3 converted historical events.
+- **§7.11 Corps Diagnostic Fields** — CorpsStatusReason (8 values), op_launch_trace gate audit.
 - **System 5a: Enclave Resilience Expansion** — Garrison power, increased resilience scaling, always-besieged enclaves, urban defense.
 - **System 8a: Sector Intel** — Per-sector confidence model, recon-by-force, bot target weighting, fog-of-war.
 
@@ -763,4 +826,4 @@ Supersedes Systems_Manual_v0_6_0.md. Deprecated docs in docs/_old/10_canon/.
 ---
 
 *Systems and Mechanics Manual v0.7.0*
-*Two-phase (Peace/War) model; v0.4 Systems 1–11, v0.7 combat/defense/intel systems integrated*
+*Two-phase (Peace/War) model; v0.4 Systems 1–11, v0.7 combat/defense/intel/AI commander systems integrated*

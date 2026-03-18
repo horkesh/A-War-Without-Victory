@@ -136,7 +136,7 @@ REFUGEE_PRESSURE_RATIO_CAP = 0.30 // ratio at which pressure is maximal
 REFUGEE_PRESSURE_MIN_RATIO = 0.05 // below this, no pressure
 ```
 
-**Effect:** `refugee_pressure` is subtracted from the alliance delta (acts like patron_drag). With 7 mixed municipalities each at 20% refugee ratio, total drag = 7 × 0.004 × (0.20/0.30) = 0.019/turn — comparable to patron pressure (0.015 × commitment). This means heavy refugee influx can push the alliance from fragile (0.35) to hostile (0.0) in ~18 turns (~4.5 months), which matches the historical Oct 1992 → Jan 1993 timeline.
+**Effect:** `refugee_pressure` is subtracted from the alliance delta (acts like patron_drag). With 7 mixed municipalities each at 20% refugee ratio, total drag = 7 × 0.004 × (0.20/0.30) = 0.019/turn — comparable to patron pressure (0.018 × commitment, updated from 0.015 in 2026-03-17). With the rebalanced alliance init (0.75, up from 0.35), heavy refugee influx contributes to the ~50-turn decay from 0.75 to 0.0, targeting open war at approximately week 52 (April 1993).
 
 **Historical calibration:** Travnik received ~50,000 refugees (original pop ~30,000) by mid-1993. That's a ratio of 1.67 — well above the 0.30 cap. Vitez received ~10,000 (original ~12,000), ratio ~0.83. These extreme values should max out the pressure term for those municipalities.
 
@@ -204,7 +204,7 @@ When `runPhase0Turn` transitions to `phase_i`:
 if (state.phase0_relationships?.rbih_hrhb !== undefined) {
   // Phase 0 rbih_hrhb is in [0, 1] range; map to Phase I range
   // Phase 0 starts at 1.0 (full cooperation) and degrades
-  // Phase I alliance starts at 0.35 (fragile) as baseline
+  // Alliance starts at 0.75 (functional cooperation) as baseline (updated 2026-03-17 from 0.35)
   // Use Phase 0 value to adjust: if Phase 0 degraded significantly, start lower
   const phase0Value = state.phase0_relationships.rbih_hrhb;
   const degradation = 1.0 - phase0Value; // 0 = no degradation, 1 = full breakdown

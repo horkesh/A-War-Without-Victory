@@ -528,7 +528,7 @@ export interface FormationState {
     equipment_class?: string;
     /** 1-turn disruption flag from AoR reshaping; reduces pressure output. */
     disrupted?: boolean;
-    /** Turns on current OSID without moving; resets on move; caps at MAX_ENTRENCHMENT (12). */
+    /** Turns on current OSID without moving; resets on move; caps at MAX_ENTRENCHMENT (6). */
     entrenchment_turns?: number;
     /** HoI: consecutive successful defenses; resets on move or attacker success; caps at MAX_RESILIENCE_STREAK (4). */
     defense_streak?: number;

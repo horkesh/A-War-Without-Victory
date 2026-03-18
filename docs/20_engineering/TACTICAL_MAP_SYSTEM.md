@@ -407,7 +407,7 @@ During `drawFrontLines()` (visible at all zoom levels):
 There is no front between RBiH and HRHB until they are at war. The map does not draw RBiH–HRHB front segments when:
 
 - No game state is loaded (baseline control), or
-- Loaded game state has `turn < rbih_hrhb_war_earliest_turn` (default 26), or
+- Loaded game state has `turn < rbih_hrhb_war_earliest_turn` (default 40, updated from 26 in 2026-03-17), or
 - `war_alliance_rbih_hrhb > 0.2` (allied threshold; same as backend).
 
 `LoadedGameState` includes `rbih_hrhb_war_earliest_turn` and `war_alliance_rbih_hrhb` (from `GameStateAdapter`); `shouldDrawFrontSegment(ca, cb)` uses them so the canvas matches sim front logic.
