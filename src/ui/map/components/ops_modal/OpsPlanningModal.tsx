@@ -1,30 +1,79 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import type { OpsPhase } from './types';
+import type { OpsPhase, OpsPlanState, AxisState } from './types';
 import { PHASE_ORDER, PHASE_LABELS } from './types';
 import { CommanderPhase } from './CommanderPhase';
+import { OpsMap } from './OpsMap';
+import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';
+
+let nextAxisCounter = 0;
+function makeAxisId(): string { return `axis_${++nextAxisCounter}`; }
+
+function generateOpName(corpsId: string, turn: number): string {
+    // OPERATION_NAMES is Record<string, readonly string[]> — flatten all names
+    const allNames = Object.values(OPERATION_NAMES).flat();
+    if (allNames.length === 0) return 'Operation Alpha';
+    const idx = simpleHash(`${corpsId}_${turn}`) % allNames.length;
+    return `Operation ${allNames[idx]}`;
+}
 
 export function OpsPlanningModal() {
     const isOpen = useGameStore((s) => s.opsPlanningModalOpen);
     const corpsId = useGameStore((s) => s.opsPlanningCorpsId);
+    const originSectorId = useGameStore((s) => s.opsPlanningOriginSectorId);
+    const selectedOfficerId = useGameStore((s) => s.opsPlanningSelectedOfficerId);
     const clearContext = useGameStore((s) => s.clearOpsPlanningContext);
+    const loadedGameState = useGameStore((s) => s.loadedGameState);
 
     const [phase, setPhase] = useState<OpsPhase>('commander');
     const [highestPhase, setHighestPhase] = useState(0);
+
+    // --- Plan state (lifted to shell for cross-phase access) ---
+    const defaultStagingOsid = useMemo(() => {
+        if (!loadedGameState?.corpsFrontSectors || !corpsId) return '';
+        const sectors = loadedGameState.corpsFrontSectors.filter((s) => s.corps_id === corpsId);
+        // Get first friendly OSID from sub-segments
+        const firstSub = sectors[0]?.sub_segments?.[0];
+        return firstSub?.friendly_osids?.[0] ?? '';
+    }, [loadedGameState, corpsId]);
+
+    const [plan, setPlan] = useState<OpsPlanState>(() => ({
+        opName: '',
+        opType: 'sector_attack',
+        tempo: 'standard',
+        tolerance: 'costly_victory',
+        artilleryPreparation: false,
+        schwerpunktOsid: '',
+        axes: [{ id: makeAxisId(), name: 'Main Axis', brigadeIds: [], objectives: [], stagingOsid: undefined }],
+        activeAxisId: '',
+        defaultStagingOsid: '',
+    }));
+
+    // Reset plan when modal opens
+    useEffect(() => {
+        if (isOpen && corpsId) {
+            const initialAxis: AxisState = { id: makeAxisId(), name: 'Main Axis', brigadeIds: [], objectives: [] };
+            setPlan({
+                opName: generateOpName(corpsId, loadedGameState?.turn ?? 0),
+                opType: 'sector_attack',
+                tempo: 'standard',
+                tolerance: 'costly_victory',
+                artilleryPreparation: false,
+                schwerpunktOsid: '',
+                axes: [initialAxis],
+                activeAxisId: initialAxis.id,
+                defaultStagingOsid,
+            });
+            setPhase('commander');
+            setHighestPhase(0);
+        }
+    }, [isOpen, corpsId, defaultStagingOsid, loadedGameState?.turn]);
 
     // Track highest reached phase for backtracking
     useEffect(() => {
         const idx = PHASE_ORDER.indexOf(phase);
         setHighestPhase((prev) => Math.max(prev, idx));
     }, [phase]);
-
-    // Reset when modal opens
-    useEffect(() => {
-        if (isOpen) {
-            setPhase('commander');
-            setHighestPhase(0);
-        }
-    }, [isOpen]);
 
     // Keyboard navigation
     useEffect(() => {
@@ -38,7 +87,6 @@ export function OpsPlanningModal() {
             if (e.key === 'ArrowLeft' && currentIdx > 0) {
                 setPhase(PHASE_ORDER[currentIdx - 1]);
             }
-            // Number keys for direct phase jump (backtracking only)
             const num = parseInt(e.key);
             if (num >= 1 && num <= 4 && num - 1 <= highestPhase) {
                 setPhase(PHASE_ORDER[num - 1]);
@@ -58,14 +106,58 @@ export function OpsPlanningModal() {
         if (targetIdx <= highestPhase) setPhase(target);
     }, [highestPhase]);
 
+    // Map click handler — adds objectives or sets staging
+    const handleOsidClick = useCallback((osid: string, isFriendly: boolean) => {
+        if (phase !== 'plan') return;
+        setPlan((prev) => {
+            const activeAxis = prev.axes.find((a) => a.id === prev.activeAxisId) ?? prev.axes[0];
+            if (!activeAxis) return prev;
+
+            if (isFriendly) {
+                // Set staging OSID
+                return {
+                    ...prev,
+                    axes: prev.axes.map((a) =>
+                        a.id === activeAxis.id ? { ...a, stagingOsid: osid } : a
+                    ),
+                };
+            } else {
+                // Toggle objective
+                const existing = activeAxis.objectives.includes(osid);
+                const newObjectives = existing
+                    ? activeAxis.objectives.filter((o) => o !== osid)
+                    : [...activeAxis.objectives, osid];
+                const newSchwerpunkt = !prev.schwerpunktOsid && newObjectives.length === 1
+                    ? newObjectives[0]
+                    : prev.schwerpunktOsid;
+                return {
+                    ...prev,
+                    schwerpunktOsid: newSchwerpunkt,
+                    axes: prev.axes.map((a) =>
+                        a.id === activeAxis.id ? { ...a, objectives: newObjectives } : a
+                    ),
+                };
+            }
+        });
+    }, [phase]);
+
     if (!isOpen || !corpsId) return null;
 
     const currentIdx = PHASE_ORDER.indexOf(phase);
+    const allObjectives = plan.axes.flatMap((a) => a.objectives);
 
     return (
         <div className="fixed inset-0 z-[1000] bg-black/60">
-            {/* Full-bleed map background — populated by OpsMap in Task 5 */}
-            <div className="absolute inset-0" />
+            {/* Full-bleed map background */}
+            <OpsMap
+                corpsId={corpsId}
+                onOsidClick={handleOsidClick}
+                objectives={allObjectives}
+                stagingOsid={plan.axes.find((a) => a.id === plan.activeAxisId)?.stagingOsid ?? plan.defaultStagingOsid}
+                schwerpunktOsid={plan.schwerpunktOsid}
+                axes={plan.axes}
+                enabled={phase === 'plan'}
+            />
 
             {/* Phase indicator — top center */}
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2
@@ -100,9 +192,53 @@ export function OpsPlanningModal() {
 
             {/* Phase content */}
             {phase === 'commander' && <CommanderPhase onAdvance={advancePhase} />}
-            {phase === 'plan' && <div />}
-            {phase === 'g2_assessment' && <div />}
-            {phase === 'authorize' && <div />}
+            {phase === 'plan' && (
+                <div className="absolute inset-0 z-10 pointer-events-none">
+                    {/* PlanPhase will render here in Task 6 */}
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto
+                                    bg-[rgba(20,18,15,0.88)] backdrop-blur-xl rounded-lg px-6 py-3
+                                    border border-[rgba(180,160,130,0.15)] text-text-secondary text-sm">
+                        Click enemy territory to add objectives. Click friendly territory to set staging area.
+                        <button
+                            type="button"
+                            onClick={advancePhase}
+                            disabled={allObjectives.length === 0}
+                            className="ml-4 px-3 py-1 rounded bg-accent-gold/20 text-accent-gold font-bold text-xs
+                                       hover:bg-accent-gold/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Continue to G2 →
+                        </button>
+                    </div>
+                </div>
+            )}
+            {phase === 'g2_assessment' && (
+                <div className="absolute inset-0 z-10 pointer-events-none">
+                    {/* G2Phase will render here in Task 9 */}
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto
+                                    bg-[rgba(20,18,15,0.88)] backdrop-blur-xl rounded-lg px-6 py-3
+                                    border border-[rgba(180,160,130,0.15)] text-text-secondary text-sm">
+                        G2 Assessment — reviewing operation plan...
+                        <button
+                            type="button"
+                            onClick={advancePhase}
+                            className="ml-4 px-3 py-1 rounded bg-accent-gold/20 text-accent-gold font-bold text-xs
+                                       hover:bg-accent-gold/30 transition-colors"
+                        >
+                            Proceed to Authorize →
+                        </button>
+                    </div>
+                </div>
+            )}
+            {phase === 'authorize' && (
+                <div className="absolute inset-0 z-10 pointer-events-none">
+                    {/* AuthorizePhase will render here in Task 10 */}
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto
+                                    bg-[rgba(20,18,15,0.88)] backdrop-blur-xl rounded-lg px-6 py-3
+                                    border border-[rgba(180,160,130,0.15)] text-text-secondary text-sm">
+                        Authorization pending — Task 10
+                    </div>
+                </div>
+            )}
 
             {/* Close button — top right */}
             <button
