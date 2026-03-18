@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, LineString, Polygon, Point } from 'geojson';
 import type { LoadedGameState } from '../../data/types';
-import type { OsidCentroidLookup } from './geojsonLookup';
+import { type OsidCentroidLookup, resolveOsidKey } from './geojsonLookup';
 import { hashString, buildBezierCurve, buildArrowheadTriangle, buildTaperedArrowBody } from './arrowGeometry';
 
 // ── Faction colors for operation arrows ─────────────────────────────────────
@@ -22,6 +22,16 @@ type OpArrowFeature =
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
+/** Resolve OSID to centroid, trying key normalization if direct lookup fails. */
+function resolveCentroid(osid: string | undefined, lookup: OsidCentroidLookup): [number, number] | null {
+  if (!osid) return null;
+  const pt = lookup.get(osid);
+  if (pt) return pt;
+  // Try key normalization (S-prefix, op: prefix variations)
+  const resolved = resolveOsidKey(osid, lookup);
+  return resolved ? lookup.get(resolved) ?? null : null;
+}
+
 /** Compute geographic centroid of a list of OSIDs. Returns null if none resolve. */
 function computeObjectiveCentroid(
   objectives: string[],
@@ -29,7 +39,7 @@ function computeObjectiveCentroid(
 ): [number, number] | null {
   let sumX = 0, sumY = 0, count = 0;
   for (const obj of objectives) {
-    const pt = centroidLookup.get(obj);
+    const pt = resolveCentroid(obj, centroidLookup);
     if (pt) { sumX += pt[0]; sumY += pt[1]; count++; }
   }
   return count > 0 ? [sumX / count, sumY / count] : null;
@@ -121,7 +131,7 @@ export function buildOperationArrowsGeoJSON(
     const colors = FACTION_ARROW_COLORS[op.faction] ?? DEFAULT_COLORS;
 
     // Resolve operation-level staging origin
-    const opStagingPt = op.staging_osid ? centroidLookup.get(op.staging_osid) ?? null : null;
+    const opStagingPt = resolveCentroid(op.staging_osid, centroidLookup);
 
     // Multi-axis: draw one arrow per axis
     if (op.axes && op.axes.length > 1) {
@@ -129,11 +139,10 @@ export function buildOperationArrowsGeoJSON(
         if (!axis.objectives || axis.objectives.length === 0) continue;
 
         // Axis origin: axis staging OSID → op staging OSID → first objective fallback
-        let axisOrigin: [number, number] | null = null;
-        if (axis.staging_osid) axisOrigin = centroidLookup.get(axis.staging_osid) ?? null;
+        let axisOrigin = resolveCentroid(axis.staging_osid, centroidLookup);
         if (!axisOrigin) axisOrigin = opStagingPt;
         if (!axisOrigin) {
-          const firstPt = centroidLookup.get(axis.objectives[0]);
+          const firstPt = resolveCentroid(axis.objectives[0], centroidLookup);
           if (firstPt) axisOrigin = [firstPt[0] - 0.03, firstPt[1] - 0.01];
         }
         if (!axisOrigin) continue;
@@ -155,12 +164,12 @@ export function buildOperationArrowsGeoJSON(
 
     // If axes[0] has a staging OSID, prefer that
     if (!origin && op.axes?.[0]?.staging_osid) {
-      origin = centroidLookup.get(op.axes[0].staging_osid) ?? null;
+      origin = resolveCentroid(op.axes[0].staging_osid, centroidLookup);
     }
 
     // Fallback: first objective with offset
     if (!origin) {
-      const firstPt = centroidLookup.get(op.objectives[0]);
+      const firstPt = resolveCentroid(op.objectives[0], centroidLookup);
       if (firstPt) origin = [firstPt[0] - 0.05, firstPt[1] - 0.02];
     }
     if (!origin) continue;
