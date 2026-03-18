@@ -1181,6 +1181,37 @@ export function resolveAttackOrdersOsid(
             }
         }
 
+        // ── AAR narrative queue ───────────────────────────────────────
+        // Enqueue significant battles for async narrative generation.
+        // Significance: decisive/catastrophic outcome, OR territory flip, OR ≥200 total casualties.
+        // Guard: skip in cadet mode (no AI client).
+        if ((state.meta as any).ai_commander_config?.mode !== 'cadet') {
+            const aarTotalCas = finalAttackerCas + finalDefenderCas;
+            const aarSignificant =
+                outcome === 'decisive_victory' ||
+                outcome === 'catastrophic' ||
+                flip ||
+                aarTotalCas >= 200;
+            if (aarSignificant && attackerCorpsId) {
+                (state.military.narrative_queue ??= []).push({
+                    faction: attackerFaction as FactionId,
+                    corpsId: attackerCorpsId,
+                    input: {
+                        officerName: 'Corps Commander',
+                        faction: attackerFaction as FactionId,
+                        corpsId: attackerCorpsId,
+                        targetOsid,
+                        outcome,
+                        attackerCasualties: finalAttackerCas,
+                        defenderCasualties: finalDefenderCas,
+                        attackerBrigades: attackerFormations.map(a => a.id),
+                        defenderBrigades: defenderFormation ? [defenderFormation.id] : [],
+                        territoryChanged: flip,
+                    },
+                });
+            }
+        }
+
         if (flip && defenderFormation) {
             const retreatDests = surrenderCascade ? [] : getFriendlyRetreatDestinations(state, defenderFormation, adjacency, reverseMap);
             const dest = retreatDests[0];

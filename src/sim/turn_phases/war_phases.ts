@@ -812,6 +812,48 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'ai-corps-dialogue',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const config = (context.state.meta as any).ai_commander_config;
+            if (!config || config.mode === 'cadet') return;
+
+            const { createAiClient } = await import('../ai_commander/ai_client.js');
+            const { generateCorpsDialogues } = await import('../ai_commander/corps_dialogue.js');
+
+            const client = await createAiClient(config.anthropic_api_key);
+            if (!client) return;
+
+            const dialogues = await generateCorpsDialogues(context.state, client);
+            if (dialogues.length > 0) {
+                context.state.military.corps_dialogues = dialogues;
+            }
+        },
+    },
+    {
+        name: 'ai-war-dispatches',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const config = (context.state.meta as any).ai_commander_config;
+            if (!config || config.mode === 'cadet') return;
+
+            const { shouldGenerateDispatch } = await import('../ai_commander/war_dispatches.js');
+            if (!shouldGenerateDispatch(context.state.meta.turn)) return;
+
+            const { createAiClient } = await import('../ai_commander/ai_client.js');
+            const { generateWarDispatch } = await import('../ai_commander/war_dispatches.js');
+
+            const client = await createAiClient(config.anthropic_api_key);
+            if (!client) return;
+
+            const dispatch = await generateWarDispatch(context.state, client);
+            if (dispatch) {
+                const existing = context.state.military.war_dispatches ?? [];
+                context.state.military.war_dispatches = [...existing, dispatch].slice(-10);
+            }
+        },
+    },
+    {
         name: 'evaluate-army-hq-gathering',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;

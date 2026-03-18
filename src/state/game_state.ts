@@ -1732,6 +1732,14 @@ pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDec
 ai_decision_log?: import('../sim/ai_commander/ai_types.js').CommandDecisionLogEntry[];
 /** AI commander army-level decisions for current turn (consumed by corps directive step). */
 ai_army_decisions?: Record<string, import('../sim/ai_commander/ai_types.js').ArmyDecision>;
+/** Corps commander dialogue responses for current turn (cosmetic flavor; never affects gameplay). */
+corps_dialogues?: import('../sim/ai_commander/corps_dialogue.js').CorpsDialogueEntry[];
+/** Rolling buffer of war dispatches from outside perspectives (UNHCR, NATO analyst, etc). Max 10. Cosmetic only. */
+war_dispatches?: import('../sim/ai_commander/war_dispatches.js').WarDispatch[];
+/** Rolling buffer of the last 20 after-action battle narratives (cosmetic, never affects gameplay). */
+battle_narratives?: import('../sim/ai_commander/aar_narrative.js').BattleNarrative[];
+/** Queue of significant battles awaiting narrative generation (populated during combat, consumed by ai-battle-narratives step). */
+narrative_queue?: import('../sim/ai_commander/aar_narrative.js').NarrativeQueueEntry[];
 }
 
 export interface PoliticalState {
