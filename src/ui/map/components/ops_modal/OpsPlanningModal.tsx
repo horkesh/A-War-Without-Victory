@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import type { OpsPhase } from './types';
 import { PHASE_ORDER, PHASE_LABELS } from './types';
+import { CommanderPhase } from './CommanderPhase';
 
 export function OpsPlanningModal() {
     const isOpen = useGameStore((s) => s.opsPlanningModalOpen);
@@ -97,8 +98,8 @@ export function OpsPlanningModal() {
                 ))}
             </div>
 
-            {/* Phase content — added in Tasks 4, 6, 9, 10 */}
-            {phase === 'commander' && <div />}
+            {/* Phase content */}
+            {phase === 'commander' && <CommanderPhase onAdvance={advancePhase} />}
             {phase === 'plan' && <div />}
             {phase === 'g2_assessment' && <div />}
             {phase === 'authorize' && <div />}
