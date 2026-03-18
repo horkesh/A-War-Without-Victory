@@ -127,7 +127,82 @@ export function buildCorpsFrontSectors(
         }
     }
 
+    // Post-processing: merge small adjacent sectors in the same corps that share
+    // municipality territory. Prevents splitting two brigades defending the same
+    // area into separate sectors (Brcko fix: 215th and 108th were in different
+    // sectors, so reactive defense couldn't concentrate them).
+    mergeSmallAdjacentSectors(result, adjacency);
+
     return result;
+}
+
+/** Maximum combined brigades for a merge candidate pair. */
+const MERGE_MAX_COMBINED_BRIGADES = 6;
+/** Maximum brigades in a single sector to be considered "small" for merging. */
+const MERGE_SMALL_SECTOR_THRESHOLD = 3;
+
+/**
+ * Merge small adjacent sectors belonging to the same corps when they share
+ * municipality territory. "Adjacent" means their territory_osids overlap in
+ * at least one municipality, OR their friendly_osids are OSID-adjacent.
+ */
+function mergeSmallAdjacentSectors(
+    sectors: Record<string, CorpsFrontSector>,
+    adjacency: Map<Osid, Osid[]>,
+): void {
+    let merged = true;
+    while (merged) {
+        merged = false;
+        const sectorIds = Object.keys(sectors).sort(strictCompare);
+        for (let i = 0; i < sectorIds.length && !merged; i++) {
+            const a = sectors[sectorIds[i]];
+            if (!a) continue;
+            if (a.assigned_brigade_ids.length > MERGE_SMALL_SECTOR_THRESHOLD) continue;
+            if (a.assigned_brigade_ids.length === 0) continue; // don't merge empty sectors
+            for (let j = i + 1; j < sectorIds.length && !merged; j++) {
+                const b = sectors[sectorIds[j]];
+                if (!b) continue;
+                if (b.corps_id !== a.corps_id) continue;
+                if (b.assigned_brigade_ids.length > MERGE_SMALL_SECTOR_THRESHOLD) continue;
+                if (b.assigned_brigade_ids.length === 0) continue; // don't merge empty sectors
+                if (a.assigned_brigade_ids.length + b.assigned_brigade_ids.length > MERGE_MAX_COMBINED_BRIGADES) continue;
+
+                // Check adjacency: do any territory OSIDs share an OSID neighbor?
+                if (!areSectorsTerritoryAdjacent(a, b, adjacency)) continue;
+
+                // Merge b into a
+                a.edge_ids = [...new Set([...a.edge_ids, ...b.edge_ids])].sort(strictCompare);
+                a.territory_osids = [...new Set([...a.territory_osids, ...b.territory_osids])].sort(strictCompare);
+                a.assigned_brigade_ids = [...new Set([...a.assigned_brigade_ids, ...b.assigned_brigade_ids])].sort(strictCompare);
+                a.reserve_brigade_ids = [...new Set([...a.reserve_brigade_ids, ...b.reserve_brigade_ids])].sort(strictCompare);
+                a.opposing_factions = [...new Set([...a.opposing_factions, ...b.opposing_factions])].sort(strictCompare);
+                a.length_edges = a.edge_ids.length;
+                a.density = a.length_edges > 0 ? a.assigned_brigade_ids.length / a.length_edges : 0;
+
+                // Merge sub-segments
+                a.sub_segments = [...a.sub_segments, ...b.sub_segments];
+
+                // Remove b
+                delete sectors[sectorIds[j]];
+                merged = true;
+            }
+        }
+    }
+}
+
+function areSectorsTerritoryAdjacent(
+    a: CorpsFrontSector,
+    b: CorpsFrontSector,
+    adjacency: Map<Osid, Osid[]>,
+): boolean {
+    const bTerrSet = new Set(b.territory_osids);
+    for (const osid of a.territory_osids) {
+        const neighbors = adjacency.get(osid as Osid) ?? [];
+        for (const n of neighbors) {
+            if (bTerrSet.has(n)) return true;
+        }
+    }
+    return false;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
