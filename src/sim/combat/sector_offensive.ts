@@ -1260,16 +1260,16 @@ function hasEligibleAttackersForLaunch(
  *
  * Returns the operation to launch, or null.
  */
-export function evaluateSectorOffensiveLaunch(
+export function evaluateCorpsOffensiveLaunch(
     state: GameState,
     corpsId: FormationId,
-    sectorId: string,
     faction: FactionId,
-    sectorBrigadeIds: FormationId[],
-    sectorEnemyOsids: string[],
+    corpsBrigadeIds: FormationId[],
+    corpsEnemyOsids: string[],
     offensiveTargets: string[],
     supplyByOsid?: SupplyStateByOsidReport | null,
-    minAttackOutcome?: CorpsOperation['min_attack_outcome']
+    minAttackOutcome?: CorpsOperation['min_attack_outcome'],
+    primarySectorId?: string,
 ): CorpsOperation | null {
     const turn = state.meta?.turn ?? 0;
     const formations = state.military.formations ?? {};
@@ -1286,7 +1286,7 @@ export function evaluateSectorOffensiveLaunch(
             const reserveLevel = state.meta?.supply_reserves_enabled
                 ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
                 : 100;
-            sectorBrigadeIds = sectorBrigadeIds.filter(bid => {
+            corpsBrigadeIds = corpsBrigadeIds.filter(bid => {
                 const b = formations[bid];
                 if (!b) return true;
                 const rawSt = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
@@ -1299,27 +1299,27 @@ export function evaluateSectorOffensiveLaunch(
     }
 
     // Must have enough brigades
-    if (sectorBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
+    if (corpsBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
 
     // Must have at least one brigade that can actually attack (active, not disrupted, personnel >= 400)
-    if (!hasEligibleAttackersForLaunch(formations, sectorBrigadeIds)) return null;
+    if (!hasEligibleAttackersForLaunch(formations, corpsBrigadeIds)) return null;
 
-    // Must have at least one enemy target adjacent to sector
-    if (sectorEnemyOsids.length < 1) return null;
+    // Must have at least one enemy target adjacent to corps front
+    if (corpsEnemyOsids.length < 1) return null;
 
     // Record supply readiness for diagnostics and downstream brigade-level attack gating.
     // Launch itself is allowed even under poor sector-wide supply so the force can stage and
     // reposition toward the next objective. Individual brigades still remain supply-gated when
     // bot_brigade_ai_osid decides whether an attack order is actually eligible.
-    const supplyReadiness = computeSupplyReadiness(state, sectorBrigadeIds, faction, supplyByOsid);
+    const supplyReadiness = computeSupplyReadiness(state, corpsBrigadeIds, faction, supplyByOsid);
 
-    // Select objectives: offensive targets that are in this sector's enemy OSIDs,
-    // filtered to a contiguous chain from the sector's friendly front.
+    // Select objectives: offensive targets that are in this corps' enemy OSIDs,
+    // filtered to a contiguous chain from the corps' friendly front.
     // Each objective must be OSID-adjacent (via war_front_edges_osid) to either
     // a friendly OSID or a previously accepted objective. Prevents operations
     // from targeting disconnected enemy OSIDs.
-    const sectorTargetSet = new Set(sectorEnemyOsids);
-    const candidateTargets = offensiveTargets.filter(t => sectorTargetSet.has(t));
+    const corpsTargetSet = new Set(corpsEnemyOsids);
+    const candidateTargets = offensiveTargets.filter(t => corpsTargetSet.has(t));
 
     // Build OSID adjacency from front edges (same data used by sector system)
     const frontEdges = state.military.war_front_edges_osid ?? [];
@@ -1332,11 +1332,14 @@ export function evaluateSectorOffensiveLaunch(
         osidAdj.get(fe.b)!.add(fe.a);
     }
 
-    // Seed: sector's friendly front OSIDs (the starting line)
-    const sectorForChain = state.military.corps_front_sectors?.[sectorId];
+    // Seed: ALL corps friendly front OSIDs (not just one sector).
+    // Corps-level operations can target any enemy OSID adjacent to the corps' front,
+    // regardless of which sector it belongs to.
+    const allSectors = state.military.corps_front_sectors ?? {};
     const reachable = new Set<string>();
-    if (sectorForChain) {
-        for (const ss of sectorForChain.sub_segments) {
+    for (const sec of Object.values(allSectors)) {
+        if (sec.corps_id !== corpsId) continue;
+        for (const ss of sec.sub_segments) {
             for (const fo of ss.friendly_osids) reachable.add(fo);
         }
     }
@@ -1370,7 +1373,7 @@ export function evaluateSectorOffensiveLaunch(
     // constraint — besieged units can raid adjacent VRS positions or expand their perimeter,
     // but cannot march through a supply corridor to attack towns 20km away.
     // This prevents Goražde brigades marching through northern Foča to attack Foča objectives.
-    sectorBrigadeIds = sectorBrigadeIds.filter(bid => {
+    corpsBrigadeIds = corpsBrigadeIds.filter(bid => {
         const b = formations[bid];
         if (!b?.tags?.includes('enclave')) return true; // Non-enclave brigades: always eligible
         const loc = b.location_osid;
@@ -1378,14 +1381,14 @@ export function evaluateSectorOffensiveLaunch(
         // Enclave brigade: include only if at least one objective is in the same enclave.
         return objectives.some(obj => isOsidInSameEnclave(loc, obj));
     });
-    if (sectorBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
+    if (corpsBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
 
     const planningDuration = computePlanningDuration(objectives.length);
     const name = pickOperationName(corpsId, turn, faction, state);
 
     // Sort by equipment priority (mechanized/motorized first) before reserve slicing.
     // Best offensive assets become participants; weakest held back as reserves.
-    const sortedByPriority = [...sectorBrigadeIds].sort((a, b) => {
+    const sortedByPriority = [...corpsBrigadeIds].sort((a, b) => {
         const fa = formations[a];
         const fb = formations[b];
         const pa = getEquipmentOffensivePriority(fa ? resolveEquipmentClass(fa) : undefined);
@@ -1399,16 +1402,25 @@ export function evaluateSectorOffensiveLaunch(
         .slice(0, sortedByPriority.length - reserveCount)
         .slice(0, MAX_PARTICIPATING_BRIGADES);
 
-    // Pick staging OSID: first friendly OSID in the sector (deterministic, sorted)
+    // Pick staging OSID: nearest corps friendly OSID to first objective.
+    // Falls back to first friendly OSID in corps territory (deterministic, sorted).
     let stagingOsid: string | undefined;
-    const sector = state.military.corps_front_sectors?.[sectorId];
-    if (sector) {
-        const friendlyOsids: string[] = [];
-        for (const ss of sector.sub_segments) {
-            for (const o of ss.friendly_osids) friendlyOsids.push(o);
+    const firstObj = objectives[0];
+    if (firstObj) {
+        // Check OSID adjacency for nearest friendly to first objective
+        const neighbors = osidAdj.get(firstObj);
+        if (neighbors) {
+            // Sort for determinism, pick first reachable neighbor
+            const sortedNeighbors = [...neighbors].sort(strictCompare);
+            for (const n of sortedNeighbors) {
+                if (reachable.has(n)) { stagingOsid = n; break; }
+            }
         }
-        friendlyOsids.sort(strictCompare);
-        if (friendlyOsids.length > 0) stagingOsid = friendlyOsids[0];
+    }
+    if (!stagingOsid) {
+        // Fallback: first friendly OSID in corps territory (deterministic)
+        const sorted = [...reachable].sort(strictCompare);
+        stagingOsid = sorted[0];
     }
 
     const sortedParticipating = participating.sort(strictCompare);
@@ -1420,7 +1432,7 @@ export function evaluateSectorOffensiveLaunch(
         started_turn: turn,
         phase_started_turn: turn,
         participating_brigades: sortedParticipating,
-        sector_id: sectorId,
+        sector_id: primarySectorId,
         axes: [createSingleAxis(sortedParticipating, objectives, stagingOsid)],
         objectives,
         current_objective_index: 0,
@@ -1436,6 +1448,24 @@ export function evaluateSectorOffensiveLaunch(
         ...(stagingOsid && { staging_osid: stagingOsid }),
         ...(minAttackOutcome && { min_attack_outcome: minAttackOutcome }),
     };
+}
+
+/** @deprecated Use evaluateCorpsOffensiveLaunch — this alias maps the old sector-scoped signature. */
+export function evaluateSectorOffensiveLaunch(
+    state: GameState,
+    corpsId: FormationId,
+    sectorId: string,
+    faction: FactionId,
+    sectorBrigadeIds: FormationId[],
+    sectorEnemyOsids: string[],
+    offensiveTargets: string[],
+    supplyByOsid?: SupplyStateByOsidReport | null,
+    minAttackOutcome?: CorpsOperation['min_attack_outcome']
+): CorpsOperation | null {
+    return evaluateCorpsOffensiveLaunch(
+        state, corpsId, faction, sectorBrigadeIds, sectorEnemyOsids,
+        offensiveTargets, supplyByOsid, minAttackOutcome, sectorId
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
