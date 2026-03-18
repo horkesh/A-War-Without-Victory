@@ -246,7 +246,7 @@ function generateReactiveDecision(
 
     // Check for corps set to offensive but with no active operation (possible intent gap)
     for (const c of factionCorps) {
-        if (c.stance === 'offensive' && !c.hasOp && c.brigades >= 3 && turn > 4) {
+        if (c.stance === 'offensive' && !c.hasOp && c.brigades >= 5 && turn > 6) {
             observations.push({
                 severity: 'design_gap',
                 commander: commanderName,
