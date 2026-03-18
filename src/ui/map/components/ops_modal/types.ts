@@ -82,3 +82,9 @@ export const PHASE_LABELS: Record<OpsPhase, string> = {
 };
 
 export const PHASE_ORDER: OpsPhase[] = ['commander', 'plan', 'g2_assessment', 'authorize'];
+
+export const FACTION_ARMY_HEADERS: Record<string, { republic: string; army: string; crest: string }> = {
+    RBiH: { republic: 'REPUBLIKA BOSNA I HERCEGOVINA', army: 'ARMIJA REPUBLIKE BOSNE I HERCEGOVINE', crest: '⚜' },
+    RS: { republic: 'REPUBLIKA SRPSKA', army: 'VOJSKA REPUBLIKE SRPSKE', crest: '🦅' },
+    HRHB: { republic: 'HRVATSKA REPUBLIKA HERCEG-BOSNA', army: 'HRVATSKO VIJEĆE OBRANE', crest: '🛡' },
+};

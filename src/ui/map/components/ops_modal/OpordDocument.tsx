@@ -3,7 +3,7 @@
  * Cream paper style with faction army crest, sections in Bosnian/Serbian/Croatian.
  */
 import type { OpsPlanState } from './types';
-import { OP_TYPE_LABELS, TEMPO_LABELS, TOLERANCE_LABELS } from './types';
+import { OP_TYPE_LABELS, TEMPO_LABELS, TOLERANCE_LABELS, FACTION_ARMY_HEADERS } from './types';
 import type { PredictionResult } from './usePrediction';
 
 interface OpordDocumentProps {
@@ -16,14 +16,8 @@ interface OpordDocumentProps {
     isStamped: boolean;
 }
 
-const FACTION_HEADERS: Record<string, { republic: string; army: string; crest: string }> = {
-    RBiH: { republic: 'REPUBLIKA BOSNA I HERCEGOVINA', army: 'ARMIJA REPUBLIKE BOSNE I HERCEGOVINE', crest: '⚜' },
-    RS: { republic: 'REPUBLIKA SRPSKA', army: 'VOJSKA REPUBLIKE SRPSKE', crest: '🦅' },
-    HRHB: { republic: 'HRVATSKA REPUBLIKA HERCEG-BOSNA', army: 'HRVATSKO VIJEĆE OBRANE', crest: '🛡' },
-};
-
 export function OpordDocument({ plan, prediction, commanderName, corpsName, faction, date, isStamped }: OpordDocumentProps) {
-    const headers = FACTION_HEADERS[faction] ?? FACTION_HEADERS.RBiH;
+    const headers = FACTION_ARMY_HEADERS[faction] ?? FACTION_ARMY_HEADERS.RBiH;
     const allBrigades = plan.axes.flatMap((a) => a.brigadeIds);
     const allObjectives = plan.axes.flatMap((a) => a.objectives);
 

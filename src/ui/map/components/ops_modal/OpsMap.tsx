@@ -37,6 +37,7 @@ interface OpsMapProps {
     stagingOsid: string | undefined;
     schwerpunktOsid: string;
     axes: AxisState[];
+    faction: string;
     enabled: boolean;
     onCentroidLookupReady?: (lookup: Map<string, [number, number]>) => void;
 }
@@ -48,6 +49,7 @@ export function OpsMap({
     stagingOsid,
     schwerpunktOsid,
     axes,
+    faction,
     enabled,
     onCentroidLookupReady,
 }: OpsMapProps) {
@@ -228,8 +230,8 @@ export function OpsMap({
         }
 
         // Arrows — build per-axis advance arrows
-        updateArrows(map, axes, centroidLookupRef.current, loadedGameState?.formations.find(f => f.id === corpsId)?.faction ?? '');
-    }, [objectives, stagingOsid, schwerpunktOsid, axes, corpsId, loadedGameState]);
+        updateArrows(map, axes, centroidLookupRef.current, faction);
+    }, [objectives, stagingOsid, schwerpunktOsid, axes, faction]);
 
     return (
         <div
@@ -351,7 +353,3 @@ function updateArrows(
     }
 }
 
-/** Expose centroid lookup for other components (auto-propose, etc.) */
-export function getOpsMapCentroidLookup(): Map<string, [number, number]> {
-    return new Map(); // fallback — real data comes from ref in use
-}

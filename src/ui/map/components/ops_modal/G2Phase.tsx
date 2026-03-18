@@ -8,7 +8,7 @@ import type { OpsPlanState } from './types';
 import type { PredictionResult } from './usePrediction';
 import { NarrativeTab } from './NarrativeTab';
 import { RawIntelTab } from './RawIntelTab';
-import { toTitleCase } from '../../utils/formatters';
+import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
 
 type G2Tab = 'assessment' | 'raw_intel';
 
@@ -30,18 +30,12 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
         const corpsFormation = loadedGameState.formations.find((f) => f.id === corpsId);
         const fac = corpsFormation?.faction ?? '';
         const name = corpsFormation
-            ? (corpsFormation.name === corpsFormation.id
-                ? toTitleCase(corpsFormation.name.replace(/^(RS|RBiH|HRHB)_/i, ''))
-                : corpsFormation.name)
+            ? formatCorpsDisplayName(corpsFormation.name, corpsFormation.id)
             : corpsId;
         const commander = (loadedGameState.namedOfficerData ?? []).find(
             (o) => o.assigned_corps_id === corpsId && o.acting_commander
         );
-        const turn = loadedGameState.turn ?? 0;
-        const d = new Date(1992, 3, 1); // April 1992
-        d.setDate(d.getDate() + turn * 7);
-        const dateStr = d.toISOString().split('T')[0];
-        return { corpsName: name, faction: fac, commanderName: commander?.name ?? 'N/A', date: dateStr };
+        return { corpsName: name, faction: fac, commanderName: commander?.name ?? 'N/A', date: turnToISODate(loadedGameState.turn ?? 0) };
     }, [loadedGameState, corpsId]);
 
     const hasObjectives = plan.axes.some((a) => a.objectives.length > 0);
@@ -90,9 +84,9 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                     {/* Content */}
                     {loading && (
                         <div className="space-y-3">
-                            {[...Array(5)].map((_, i) => (
+                            {[75, 90, 65, 82, 70].map((w, i) => (
                                 <div key={i} className="h-3 bg-[#c0b090]/30 rounded animate-pulse"
-                                     style={{ width: `${60 + Math.random() * 30}%` }} />
+                                     style={{ width: `${w}%` }} />
                             ))}
                         </div>
                     )}

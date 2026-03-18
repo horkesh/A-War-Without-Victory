@@ -10,6 +10,12 @@ interface PlanParametersProps {
     onUpdate: (partial: Partial<OpsPlanState>) => void;
 }
 
+function pillClass(isActive: boolean): string {
+    return isActive
+        ? 'bg-accent-gold/20 text-accent-gold border border-accent-gold/30'
+        : 'bg-[rgba(40,36,30,0.4)] text-text-secondary border border-transparent hover:bg-[rgba(60,54,44,0.5)]';
+}
+
 const OP_TYPES: OpType[] = ['sector_attack', 'general_offensive', 'feint', 'probe'];
 const TEMPOS: Tempo[] = ['methodical', 'standard', 'all_out'];
 const TOLERANCES: Tolerance[] = ['decisive_victory', 'victory', 'costly_victory', 'stalemate', 'repulsed'];
@@ -40,10 +46,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             type="button"
                             onClick={() => onUpdate({ opType: t })}
                             className={`px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
-                                ${plan.opType === t
-                                    ? 'bg-accent-gold/20 text-accent-gold border border-accent-gold/30'
-                                    : 'bg-[rgba(40,36,30,0.4)] text-text-secondary border border-transparent hover:bg-[rgba(60,54,44,0.5)]'
-                                }`}
+                                ${pillClass(plan.opType === t)}`}
                         >
                             {OP_TYPE_LABELS[t]}
                         </button>
@@ -61,10 +64,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             type="button"
                             onClick={() => onUpdate({ tempo: t })}
                             className={`px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
-                                ${plan.tempo === t
-                                    ? 'bg-accent-gold/20 text-accent-gold border border-accent-gold/30'
-                                    : 'bg-[rgba(40,36,30,0.4)] text-text-secondary border border-transparent hover:bg-[rgba(60,54,44,0.5)]'
-                                }`}
+                                ${pillClass(plan.tempo === t)}`}
                         >
                             {TEMPO_LABELS[t]}
                         </button>
@@ -82,10 +82,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             type="button"
                             onClick={() => onUpdate({ tolerance: t })}
                             className={`px-2 py-1 rounded text-[8px] font-bold uppercase tracking-wider transition-colors
-                                ${plan.tolerance === t
-                                    ? 'bg-accent-gold/20 text-accent-gold border border-accent-gold/30'
-                                    : 'bg-[rgba(40,36,30,0.4)] text-text-secondary border border-transparent hover:bg-[rgba(60,54,44,0.5)]'
-                                }`}
+                                ${pillClass(plan.tolerance === t)}`}
                         >
                             {TOLERANCE_LABELS[t]}
                         </button>

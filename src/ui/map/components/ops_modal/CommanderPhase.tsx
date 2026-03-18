@@ -16,7 +16,7 @@ import {
     getPersonalitySummary,
 } from '../../utils/officerCharacter';
 import { getPreparationMaxTurns } from '../../../../sim/combat/operation_preparation';
-import { toTitleCase } from '../../utils/formatters';
+import { formatCorpsDisplayName } from '../../utils/formatters';
 
 interface CommanderPhaseProps {
     onAdvance: () => void;
@@ -46,9 +46,7 @@ function getRegionalFit(officer: NamedOfficerView, targetCorpsId: string): { lab
     return { label: 'OUT OF REGION', colorClass: 'text-red-400' };
 }
 
-const FACTION_COLORS: Record<string, string> = {
-    RS: '#c24040', RBiH: '#4a9a55', HRHB: '#4080b8',
-};
+import { FACTION_HEX_COLORS } from '../plan_ui/opsConstants';
 
 export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
     const corpsId = useGameStore((s) => s.opsPlanningCorpsId);
@@ -66,11 +64,9 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
 
         const corpsFormation = loadedGameState.formations.find((f) => f.id === corpsId);
         const fac = corpsFormation?.faction ?? '';
-        const color = FACTION_COLORS[fac] ?? '#888';
+        const color = FACTION_HEX_COLORS[fac] ?? '#888';
         const name = corpsFormation
-            ? (corpsFormation.name === corpsFormation.id
-                ? toTitleCase(corpsFormation.name.replace(/^(RS|RBiH|HRHB)_/i, ''))
-                : corpsFormation.name)
+            ? formatCorpsDisplayName(corpsFormation.name, corpsFormation.id)
             : corpsId;
 
         const subordinates = loadedGameState.formations.filter(

@@ -2,7 +2,7 @@
  * Phase 2 — Plan orchestrator.
  * Renders ObjectiveList (top-right), BrigadeTray (bottom), and manages auto-propose.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import type { OpsPlanState } from './types';
 import { ObjectiveList } from './ObjectiveList';
@@ -18,9 +18,7 @@ interface PlanPhaseProps {
     centroidLookup: Map<string, [number, number]>;
 }
 
-const FACTION_COLORS: Record<string, string> = {
-    RS: '#c24040', RBiH: '#4a9a55', HRHB: '#4080b8',
-};
+import { FACTION_HEX_COLORS } from '../plan_ui/opsConstants';
 
 export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }: PlanPhaseProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -31,7 +29,7 @@ export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }
         return loadedGameState?.formations.find((f) => f.id === corpsId)?.faction ?? '';
     }, [loadedGameState, corpsId]);
 
-    const factionColor = FACTION_COLORS[faction] ?? '#888';
+    const factionColor = FACTION_HEX_COLORS[faction] ?? '#888';
 
     const corpsBrigades = useMemo(() => {
         if (!loadedGameState) return [];
@@ -44,38 +42,46 @@ export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }
     const activeAxis = plan.axes.find((a) => a.id === plan.activeAxisId) ?? plan.axes[0];
     const objectives = activeAxis?.objectives ?? [];
 
+    // Use refs for plan data inside effects to avoid unstable deps
+    const planRef = useRef(plan);
+    planRef.current = plan;
+    const activeAxisRef = useRef(activeAxis);
+    activeAxisRef.current = activeAxis;
+
     useEffect(() => {
         if (objectives.length > 0 && !hasAutoProposedRef.current && corpsBrigades.length > 0) {
             hasAutoProposedRef.current = true;
-            const staging = activeAxis?.stagingOsid ?? plan.defaultStagingOsid;
+            const currentPlan = planRef.current;
+            const currentAxis = activeAxisRef.current;
+            const staging = currentAxis?.stagingOsid ?? currentPlan.defaultStagingOsid;
             const proposed = autoProposeBrigades(corpsBrigades, objectives, centroidLookup, 12, staging);
             setAutoProposed(proposed);
 
             // Auto-assign proposed brigades to active axis
-            if (activeAxis && activeAxis.brigadeIds.length === 0) {
+            if (currentAxis && currentAxis.brigadeIds.length === 0) {
                 onUpdate({
-                    axes: plan.axes.map((a) =>
-                        a.id === activeAxis.id
+                    axes: currentPlan.axes.map((a) =>
+                        a.id === currentAxis.id
                             ? { ...a, brigadeIds: proposed.map((p) => p.brigadeId) }
                             : a
                     ),
                 });
             }
         }
-    }, [objectives.length, corpsBrigades, centroidLookup, activeAxis, plan, onUpdate]);
+    }, [objectives.length, corpsBrigades, centroidLookup, onUpdate]);
 
     // Recompute march times when staging changes
+    const stagingOsid = activeAxis?.stagingOsid ?? plan.defaultStagingOsid;
     useEffect(() => {
-        const staging = activeAxis?.stagingOsid ?? plan.defaultStagingOsid;
-        if (!staging || corpsBrigades.length === 0) return;
+        if (!stagingOsid || corpsBrigades.length === 0) return;
 
         setAutoProposed((prev) => prev.map((p) => {
             const brigade = corpsBrigades.find((b) => b.id === p.brigadeId);
             if (!brigade?.location_osid) return p;
-            const marchTurns = estimateMarchTurns(brigade.location_osid, staging, centroidLookup);
-            return { ...p, marchTurns };
+            const mt = estimateMarchTurns(brigade.location_osid, stagingOsid, centroidLookup);
+            return { ...p, marchTurns: mt };
         }));
-    }, [activeAxis?.stagingOsid, plan.defaultStagingOsid, corpsBrigades, centroidLookup]);
+    }, [stagingOsid, corpsBrigades, centroidLookup]);
 
     const allObjectives = plan.axes.flatMap((a) => a.objectives);
 
@@ -88,7 +94,7 @@ export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }
             <BrigadeTray
                 plan={plan}
                 onUpdate={onUpdate}
-                corpsId={corpsId}
+                corpsBrigades={corpsBrigades}
                 autoProposed={autoProposed}
                 factionColor={factionColor}
             />

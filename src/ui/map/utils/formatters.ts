@@ -61,3 +61,23 @@ export function formatCombatOutcome(outcome: string | undefined): string {
         default: return toTitleCase(outcome);
     }
 }
+
+/**
+ * Formats a turn number into ISO date string (YYYY-MM-DD).
+ * Baseline: 1 Apr 1992 (Scenario start).
+ */
+export function turnToISODate(turn: number): string {
+    const d = new Date(Date.UTC(1992, 3, 1));
+    d.setUTCDate(d.getUTCDate() + turn * 7);
+    return d.toISOString().split('T')[0];
+}
+
+/**
+ * Format a corps formation's display name.
+ * Strips faction prefix and converts to title case if name === id.
+ */
+export function formatCorpsDisplayName(name: string, id: string): string {
+    return name === id
+        ? toTitleCase(name.replace(/^(RS|RBiH|HRHB)_/i, ''))
+        : name;
+}

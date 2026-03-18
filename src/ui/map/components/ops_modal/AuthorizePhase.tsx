@@ -9,7 +9,7 @@ import type { CorpsOperationOrderPayload } from '../../desktop/useIPC';
 import type { OpsPlanState } from './types';
 import type { PredictionResult } from './usePrediction';
 import { OpordDocument } from './OpordDocument';
-import { toTitleCase } from '../../utils/formatters';
+import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
 
 interface AuthorizePhaseProps {
     plan: OpsPlanState;
@@ -35,9 +35,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
         const corpsFormation = loadedGameState.formations.find((f) => f.id === corpsId);
         const fac = corpsFormation?.faction ?? '';
         const name = corpsFormation
-            ? (corpsFormation.name === corpsFormation.id
-                ? toTitleCase(corpsFormation.name.replace(/^(RS|RBiH|HRHB)_/i, ''))
-                : corpsFormation.name)
+            ? formatCorpsDisplayName(corpsFormation.name, corpsFormation.id)
             : corpsId;
 
         // Find selected officer or corps commander
@@ -47,11 +45,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                 (o) => o.assigned_corps_id === corpsId && o.acting_commander
               );
 
-        const turn = loadedGameState.turn ?? 0;
-        const d = new Date(1992, 3, 1);
-        d.setDate(d.getDate() + turn * 7);
-        const dateStr = d.toISOString().split('T')[0];
-        return { corpsName: name, faction: fac, commanderName: officer?.name ?? 'N/A', date: dateStr };
+        return { corpsName: name, faction: fac, commanderName: officer?.name ?? 'N/A', date: turnToISODate(loadedGameState.turn ?? 0) };
     }, [loadedGameState, corpsId, officerId]);
 
     const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;

@@ -156,6 +156,11 @@ export function OpsPlanningModal() {
         corpsId, plan, selectedOfficerId, phase === 'g2_assessment' || phase === 'plan'
     );
 
+    // Corps faction for map arrows + phase components
+    const faction = useMemo(() => {
+        return loadedGameState?.formations.find((f) => f.id === corpsId)?.faction ?? '';
+    }, [loadedGameState, corpsId]);
+
     if (!isOpen || !corpsId) return null;
 
     const currentIdx = PHASE_ORDER.indexOf(phase);
@@ -171,6 +176,7 @@ export function OpsPlanningModal() {
                 stagingOsid={plan.axes.find((a) => a.id === plan.activeAxisId)?.stagingOsid ?? plan.defaultStagingOsid}
                 schwerpunktOsid={plan.schwerpunktOsid}
                 axes={plan.axes}
+                faction={faction}
                 enabled={phase === 'plan'}
                 onCentroidLookupReady={setCentroidLookup}
             />

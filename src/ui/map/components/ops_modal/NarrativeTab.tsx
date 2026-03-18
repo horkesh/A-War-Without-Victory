@@ -3,6 +3,7 @@
  * Renders prediction sections in typewriter font with classified stamp.
  */
 import type { PredictionResult } from './usePrediction';
+import { FACTION_ARMY_HEADERS } from './types';
 
 interface NarrativeTabProps {
     prediction: PredictionResult;
@@ -12,14 +13,8 @@ interface NarrativeTabProps {
     date: string;
 }
 
-const FACTION_HEADERS: Record<string, { republic: string; army: string }> = {
-    RBiH: { republic: 'REPUBLIKA BOSNA I HERCEGOVINA', army: 'ARMIJA REPUBLIKE BOSNE I HERCEGOVINE' },
-    RS: { republic: 'REPUBLIKA SRPSKA', army: 'VOJSKA REPUBLIKE SRPSKE' },
-    HRHB: { republic: 'HRVATSKA REPUBLIKA HERCEG-BOSNA', army: 'HRVATSKO VIJEĆE OBRANE' },
-};
-
 export function NarrativeTab({ prediction, commanderName, corpsName, faction, date }: NarrativeTabProps) {
-    const headers = FACTION_HEADERS[faction] ?? FACTION_HEADERS.RBiH;
+    const headers = FACTION_ARMY_HEADERS[faction] ?? FACTION_ARMY_HEADERS.RBiH;
     const sections = prediction.commanderAssessment?.sections ?? [];
 
     return (

@@ -2,7 +2,6 @@
  * Brigade tray — bottom-anchored panel with parameters strip + scrollable brigade cards.
  */
 import { useMemo } from 'react';
-import { useGameStore } from '../../store/gameStore';
 import type { FormationView } from '../../data/types';
 import type { OpsPlanState } from './types';
 import { BrigadeCard } from './BrigadeCard';
@@ -12,24 +11,14 @@ import type { ProposedBrigade } from './autoPropose';
 interface BrigadeTrayProps {
     plan: OpsPlanState;
     onUpdate: (partial: Partial<OpsPlanState>) => void;
-    corpsId: string;
+    corpsBrigades: FormationView[];
     autoProposed: ProposedBrigade[];
     factionColor: string;
 }
 
-export function BrigadeTray({ plan, onUpdate, corpsId, autoProposed, factionColor }: BrigadeTrayProps) {
-    const loadedGameState = useGameStore((s) => s.loadedGameState);
-
+export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, factionColor }: BrigadeTrayProps) {
     const activeAxis = plan.axes.find((a) => a.id === plan.activeAxisId) ?? plan.axes[0];
     const assignedIds = new Set(activeAxis?.brigadeIds ?? []);
-
-    // Get all corps brigades
-    const corpsBrigades = useMemo(() => {
-        if (!loadedGameState) return [];
-        return loadedGameState.formations.filter(
-            (f) => f.corps_id === corpsId && f.kind === 'brigade'
-        );
-    }, [loadedGameState, corpsId]);
 
     // Auto-proposed lookup
     const proposedMap = useMemo(() => {
