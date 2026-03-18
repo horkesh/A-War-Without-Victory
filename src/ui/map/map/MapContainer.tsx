@@ -719,8 +719,8 @@ export function MapContainer() {
               }
 
               // Sector demarcation lines: disabled pending proper straight-line geometry
-              if (false && state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
-                const demarcData = buildSectorDemarcationGeoJSON(controlledGeoJson, state.corpsFrontSectors, frontEdgesOsid);
+              if (false && state.corpsFrontSectors && state.corpsFrontSectors!.length > 0) {
+                const demarcData = buildSectorDemarcationGeoJSON(controlledGeoJson, state.corpsFrontSectors!, frontEdgesOsid!);
                 if (!m2.getSource(SECTOR_DEMARCATION_SOURCE_ID)) {
                   m2.addSource(SECTOR_DEMARCATION_SOURCE_ID, { type: 'geojson', data: demarcData });
                   // Dark base line (like front-line pattern: dark base + lighter dash on top)

@@ -454,6 +454,10 @@ export interface CorpsCommandState {
     ai_decided?: boolean;
     /** AI commander's assessment text for this corps (displayed in UI). */
     ai_assessment?: string;
+    /** Diagnostic: why this corps is/isn't launching operations. */
+    status_reason?: string;
+    /** Diagnostic: gate audit trace for operation launch evaluation. */
+    op_launch_trace?: string[];
 }
 
 /** Operational group activation order. */

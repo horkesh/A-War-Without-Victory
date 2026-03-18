@@ -139,6 +139,8 @@ export const AGGRESSION_FLOOR: Record<string, number> = {
  * follow-on ops are always allowed regardless of cooldown (they share theater with the last op).
  */
 export const SECONDARY_OP_COOLDOWN_TURNS = 8;
+/** Offensive corps use shorter cooldown — sustained pressure is the point of offensive stance. */
+export const SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE = 3;
 
 /**
  * Collect all objective OSIDs from an operation (from both the flat objectives list and
@@ -1530,17 +1532,42 @@ export function generateCorpsDirectives(
 
         cmd.directive = directive;
 
+        // ── Set corps status reason (diagnostic + UI) ────────────────────
+        const existingOp = cmd.active_operation;
+        const hasQueuedOps = cmd.queued_operations && cmd.queued_operations.length > 0;
+        if (existingOp) {
+            cmd.status_reason = 'executing_operation';
+        } else if (hasQueuedOps) {
+            cmd.status_reason = 'queued_ops_pending';
+        } else if (isDefenseStrained) {
+            cmd.status_reason = 'density_strained';
+        } else if (offensiveTargets.length === 0) {
+            cmd.status_reason = maxOpSize === 0 ? 'supply_critical' : 'no_targets';
+        } else if (directiveEligibleSectors.length === 0) {
+            cmd.status_reason = 'no_eligible_sectors';
+        } else {
+            cmd.status_reason = 'ready';
+        }
+
         // Sector offensive launch evaluation:
         // Launch if offensive/balanced, no active SECTOR operation, and multi-sector corps.
         // Sector offensives replace general_offensive/strategic_defense with targeted multi-OSID push.
-        const existingOp = cmd.active_operation;
-        // If corps has queued operations, don't launch auto-ops — let queued injection handle it.
-        // Don't replace recovery-phase ops — they must complete to accumulate exhaustion.
-        const hasQueuedOps = cmd.queued_operations && cmd.queued_operations.length > 0;
         const canLaunchSectorOp = !hasQueuedOps && !existingOp && !isDefenseStrained;
         // Army HQ override allows defensive corps to launch probe operations
         const hasHqProbeOverride = armyHqOverrides.some(o => o.type === 'probe' || o.type === 'feint');
         const stanceAllowsOps = cmd.stance === 'offensive' || cmd.stance === 'balanced' || hasHqProbeOverride;
+
+        // Gate audit trace (diagnostic — consumed by AI commander QA)
+        const trace: string[] = [];
+        if (existingOp) trace.push(`blocked:existing_op(${existingOp.name}:${existingOp.phase})`);
+        if (hasQueuedOps) trace.push('blocked:queued_ops');
+        if (isDefenseStrained) trace.push(`blocked:density_strained(${corpsDensity.toFixed(3)}<${STRAINED_DENSITY_THRESHOLD})`);
+        if (!stanceAllowsOps) trace.push(`blocked:stance(${cmd.stance})`);
+        if (directiveEligibleSectors.length === 0) trace.push('blocked:no_eligible_sectors');
+        if (offensiveTargets.length === 0) trace.push('blocked:no_targets');
+        if (trace.length === 0) trace.push('clear:all_gates_passed');
+        cmd.op_launch_trace = trace;
+
         if (canLaunchSectorOp && stanceAllowsOps &&
             directiveEligibleSectors.length > 0 && offensiveTargets.length > 0) {
 
@@ -1570,8 +1597,12 @@ export function generateCorpsDirectives(
             const lastCompletedOp = cmd.last_completed_operation ?? null;
             const lastCompletedTurn = cmd.last_completed_operation_turn ?? -999;
             const currentTurn = state.meta?.turn ?? 0;
+            // Offensive corps use shorter cooldown — sustained pressure is the point
+            const effectiveCooldown = cmd.stance === 'offensive'
+                ? SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE
+                : SECONDARY_OP_COOLDOWN_TURNS;
             const inCooldown = lastCompletedOp != null
-                && (currentTurn - lastCompletedTurn) <= SECONDARY_OP_COOLDOWN_TURNS;
+                && (currentTurn - lastCompletedTurn) <= effectiveCooldown;
 
             // ── Proactive probe: scan all corps sectors for low intel ──
             // A real commander probes blind spots BEFORE committing to offensives.
@@ -1830,6 +1861,18 @@ export function generateCorpsDirectives(
                     assignOperationCommander(state, op, corps.id, faction);
                     break; // One offensive at a time per corps
                 }
+            }
+        }
+
+        // Update status_reason if all gates passed but no op was created (cooldown or no viable sector)
+        if (!cmd.active_operation && cmd.status_reason === 'ready') {
+            const lastCompletedTurn2 = cmd.last_completed_operation_turn ?? -999;
+            const currentTurn2 = state.meta?.turn ?? 0;
+            const effectiveCooldown2 = cmd.stance === 'offensive'
+                ? SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE
+                : SECONDARY_OP_COOLDOWN_TURNS;
+            if (cmd.last_completed_operation && (currentTurn2 - lastCompletedTurn2) <= effectiveCooldown2) {
+                cmd.status_reason = 'cooldown';
             }
         }
     }
