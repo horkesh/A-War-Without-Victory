@@ -847,6 +847,12 @@ export function resolveAttackOrdersOsid(
         report.casualty_attacker += finalAttackerCas;
         report.casualty_defender += finalDefenderCas;
 
+        // Equipment loss accumulators for battlefield scavenging (summed across attacker formations)
+        let totalATanksLost = 0;
+        let totalAArtLost = 0;
+        let totalDTanksLost = 0;
+        let totalDArtLost = 0;
+
         for (const a of attackerFormations) {
             const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
             const cas = Math.round(finalAttackerCas * frac);
@@ -881,6 +887,8 @@ export function resolveAttackOrdersOsid(
                 aComp.artillery = Math.max(0, aComp.artillery - aArtLost);
                 recordEquipmentLoss(state.military.casualty_ledger!, a.faction, { tanks: aTanksLost, artillery: aArtLost });
             }
+            totalATanksLost += aTanksLost;
+            totalAArtLost += aArtLost;
         }
         if (defenderFormation) {
             // ── Distance-weighted casualty distribution ───────────────────
@@ -941,6 +949,8 @@ export function resolveAttackOrdersOsid(
                 dComp.artillery = Math.max(0, dComp.artillery - dArtLost);
                 recordEquipmentLoss(state.military.casualty_ledger!, defenderFormation.faction, { tanks: dTanksLost, artillery: dArtLost });
             }
+            totalDTanksLost += dTanksLost;
+            totalDArtLost += dArtLost;
             // Snap: Commander Casualty
             if (defenderFormation.cohesion < 20) {
                 defenderFormation.cohesion = Math.max(0, defenderFormation.cohesion - 8);
@@ -963,9 +973,56 @@ export function resolveAttackOrdersOsid(
             }
         }
 
-        // Snap: Ammunition Crisis / Pyrrhic Victory
+        // ── Battlefield scavenging ──────────────────────────────────────────
+        // Winner recovers a fraction of destroyed enemy equipment from the battlefield.
+        // Represents field repair of damaged/abandoned tanks and guns. Equipment starts
+        // degraded. Only the winning side can scavenge (losers retreat).
+        // Scavenge rates scale by outcome severity: decisive > victory > costly.
         const attackerLost = outcome === 'repulsed' || outcome === 'catastrophic';
         const attackerWon = outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory';
+        if (attackerWon && defenderFormation) {
+            const scavengeRate = outcome === 'decisive_victory' ? 0.20
+                : outcome === 'victory' ? 0.15 : 0.10;
+            const aComp2 = firstAttacker.composition;
+            if (aComp2) {
+                // Scavenge from defender's destroyed equipment (already subtracted above)
+                const scavTanks = Math.floor(totalDTanksLost * scavengeRate);
+                const scavArt = Math.floor(totalDArtLost * scavengeRate);
+                if (scavTanks > 0) {
+                    aComp2.tanks += scavTanks;
+                    // Scavenged equipment starts heavily degraded
+                    const frac = scavTanks / Math.max(1, aComp2.tanks);
+                    aComp2.tank_condition.degraded += frac * 0.7;
+                    aComp2.tank_condition.operational = Math.max(0, aComp2.tank_condition.operational - frac * 0.5);
+                }
+                if (scavArt > 0) {
+                    aComp2.artillery += scavArt;
+                    const frac = scavArt / Math.max(1, aComp2.artillery);
+                    aComp2.artillery_condition.degraded += frac * 0.7;
+                    aComp2.artillery_condition.operational = Math.max(0, aComp2.artillery_condition.operational - frac * 0.5);
+                }
+            }
+        } else if (attackerLost && defenderFormation) {
+            // Defender scavenges from attacker's destroyed equipment
+            const scavengeRate = outcome === 'catastrophic' ? 0.20 : 0.10;
+            const dComp2 = defenderFormation.composition;
+            if (dComp2) {
+                const scavTanks = Math.floor(totalATanksLost * scavengeRate);
+                const scavArt = Math.floor(totalAArtLost * scavengeRate);
+                if (scavTanks > 0) {
+                    dComp2.tanks += scavTanks;
+                    const frac = scavTanks / Math.max(1, dComp2.tanks);
+                    dComp2.tank_condition.degraded += frac * 0.7;
+                    dComp2.tank_condition.operational = Math.max(0, dComp2.tank_condition.operational - frac * 0.5);
+                }
+                if (scavArt > 0) {
+                    dComp2.artillery += scavArt;
+                    const frac = scavArt / Math.max(1, dComp2.artillery);
+                    dComp2.artillery_condition.degraded += frac * 0.7;
+                    dComp2.artillery_condition.operational = Math.max(0, dComp2.artillery_condition.operational - frac * 0.5);
+                }
+            }
+        }
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
         const pyrrhic = attackerWon && personnelAttacker > 0 && finalAttackerCas / personnelAttacker > 0.15;
         if (ammoCrisis || pyrrhic) {

@@ -190,34 +190,13 @@ export function runEquipmentProgression(state: GameState): EquipmentProgressionR
         }
         const facReport = report.by_faction[faction]!;
 
-        if (faction === 'RBiH') {
-            // Artillery: +1 every 8 turns (local production — Zenica steelworks)
-            if (turn > 0 && turn % 8 === 0) {
-                comp.artillery += 1;
-                report.artillery_additions++;
-                facReport.artillery++;
-            }
-            // Tanks: +1 every 16 turns if formation has seen combat (experience proxy: cohesion > 40)
-            if (turn > 0 && turn % 16 === 0 && (f.cohesion ?? 0) > 40) {
-                comp.tanks += 1;
-                report.tank_additions++;
-                facReport.tanks++;
-            }
-        } else if (faction === 'HRHB') {
-            // Artillery: +1 every 12 turns (Croatian supply pipeline)
-            if (turn > 0 && turn % 12 === 0) {
-                comp.artillery += 1;
-                report.artillery_additions++;
-                facReport.artillery++;
-            }
-            // Tanks: +1 every 24 turns (Croatian army transfers)
-            if (turn > 0 && turn % 24 === 0) {
-                comp.tanks += 1;
-                report.tank_additions++;
-                facReport.tanks++;
-            }
-        }
-        // RS: no equipment additions — degradation-only via equipment_effects.ts
+        // Equipment acquisition removed (n898): per-brigade auto-tickers were producing
+        // 243 ARBiH tanks (historical ~40-60) and 668 artillery (historical ~150-250).
+        // Equipment now comes exclusively from:
+        //   1. Battlefield scavenging in attack_resolution_osid.ts (winner recovers fraction of destroyed enemy equipment)
+        //   2. Combat capture in equipment_effects.ts / battle_resolution.ts (settlement flips, surrender)
+        //   3. JNA phantom handoff in jna_phantom_brigades.ts (one-time historical inheritance)
+        // RS: degradation-only via equipment_effects.ts (no new production, Serbia under sanctions)
     }
 
     return report;
