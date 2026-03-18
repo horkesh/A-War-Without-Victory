@@ -1313,11 +1313,54 @@ export function evaluateSectorOffensiveLaunch(
     // bot_brigade_ai_osid decides whether an attack order is actually eligible.
     const supplyReadiness = computeSupplyReadiness(state, sectorBrigadeIds, faction, supplyByOsid);
 
-    // Select objectives: offensive targets that are in this sector's enemy OSIDs
+    // Select objectives: offensive targets that are in this sector's enemy OSIDs,
+    // filtered to a contiguous chain from the sector's friendly front.
+    // Each objective must be OSID-adjacent (via war_front_edges_osid) to either
+    // a friendly OSID or a previously accepted objective. Prevents operations
+    // from targeting disconnected enemy OSIDs.
     const sectorTargetSet = new Set(sectorEnemyOsids);
-    const objectives = offensiveTargets
-        .filter(t => sectorTargetSet.has(t))
-        .slice(0, MAX_OBJECTIVES);
+    const candidateTargets = offensiveTargets.filter(t => sectorTargetSet.has(t));
+
+    // Build OSID adjacency from front edges (same data used by sector system)
+    const frontEdges = state.military.war_front_edges_osid ?? [];
+    const osidAdj = new Map<string, Set<string>>();
+    for (const fe of frontEdges) {
+        if (!fe.a || !fe.b) continue;
+        if (!osidAdj.has(fe.a)) osidAdj.set(fe.a, new Set());
+        if (!osidAdj.has(fe.b)) osidAdj.set(fe.b, new Set());
+        osidAdj.get(fe.a)!.add(fe.b);
+        osidAdj.get(fe.b)!.add(fe.a);
+    }
+
+    // Seed: sector's friendly front OSIDs (the starting line)
+    const sectorForChain = state.military.corps_front_sectors?.[sectorId];
+    const reachable = new Set<string>();
+    if (sectorForChain) {
+        for (const ss of sectorForChain.sub_segments) {
+            for (const fo of ss.friendly_osids) reachable.add(fo);
+        }
+    }
+
+    // Greedy chain: accept objectives adjacent to the reachable set, expand
+    const objectives: string[] = [];
+    let changed = true;
+    while (changed && objectives.length < MAX_OBJECTIVES) {
+        changed = false;
+        for (const t of candidateTargets) {
+            if (reachable.has(t)) continue; // already accepted
+            const neighbors = osidAdj.get(t);
+            if (!neighbors) continue;
+            let adjacent = false;
+            for (const n of neighbors) {
+                if (reachable.has(n)) { adjacent = true; break; }
+            }
+            if (adjacent) {
+                objectives.push(t);
+                reachable.add(t);
+                changed = true;
+            }
+        }
+    }
 
     // Need at least 1 objective for a sector offensive
     if (objectives.length < 1) return null;
