@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Morning Briefing — 2026-03-18</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg-deep: #0a0e1a;
+    --bg-card: #0f1628;
+    --bg-card-hover: #141c35;
+    --border: #1a2340;
+    --border-accent: #243060;
+    --text-primary: #e0e6f0;
+    --text-secondary: #8892a8;
+    --text-muted: #556080;
+    --rs-green: #39ff85;
+    --rs-green-dim: #1a7a40;
+    --rs-green-bg: rgba(57,255,133,0.08);
+    --rbih-amber: #ffb833;
+    --rbih-amber-dim: #8a6018;
+    --rbih-amber-bg: rgba(255,184,51,0.08);
+    --hrhb-teal: #33e0e0;
+    --hrhb-teal-dim: #187070;
+    --hrhb-teal-bg: rgba(51,224,224,0.08);
+    --accent-blue: #4488ff;
+    --accent-red: #ff4466;
+    --accent-purple: #aa66ff;
+    --glow-green: 0 0 20px rgba(57,255,133,0.15);
+    --glow-amber: 0 0 20px rgba(255,184,51,0.15);
+    --glow-teal: 0 0 20px rgba(51,224,224,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Subtle scan-line overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 32px;
+  }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    text-align: center;
+    padding: 60px 0 40px;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 200px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--rs-green), transparent);
+  }
+
+  .hero-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--rs-green);
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+
+  .hero-title {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--rs-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  .hero-subtitle em {
+    color: var(--rbih-amber);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 40px 0;
+  }
+
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .kpi-card:hover {
+    border-color: var(--border-accent);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  }
+
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi-card:nth-child(1)::after { background: var(--rs-green); }
+  .kpi-card:nth-child(2)::after { background: var(--accent-blue); }
+  .kpi-card:nth-child(3)::after { background: var(--accent-purple); }
+  .kpi-card:nth-child(4)::after { background: var(--rbih-amber); }
+
+  .kpi-value {
+    font-size: 36px;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.1;
+  }
+
+  .kpi-card:nth-child(1) .kpi-value { color: var(--rs-green); }
+  .kpi-card:nth-child(2) .kpi-value { color: var(--accent-blue); }
+  .kpi-card:nth-child(3) .kpi-value { color: var(--accent-purple); }
+  .kpi-card:nth-child(4) .kpi-value { color: var(--rbih-amber); }
+
+  .kpi-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 8px;
+  }
+
+  .kpi-detail {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 4px;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section {
+    margin: 56px 0 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--rs-green);
+    background: rgba(57,255,133,0.1);
+    border: 1px solid rgba(57,255,133,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    letter-spacing: 1px;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-accent), transparent);
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead th {
+    background: #0d1225;
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead th:first-child { border-radius: 12px 0 0 0; }
+  thead th:last-child { border-radius: 0 12px 0 0; }
+
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(26,35,64,0.5);
+    color: var(--text-primary);
+  }
+
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  tbody td:first-child {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  .highlight-cell {
+    color: var(--rs-green) !important;
+    font-weight: 600;
+  }
+
+  .dim-cell { color: var(--text-muted) !important; }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  .badge-green { background: rgba(57,255,133,0.15); color: var(--rs-green); }
+  .badge-red { background: rgba(255,68,102,0.15); color: var(--accent-red); }
+  .badge-blue { background: rgba(68,136,255,0.15); color: var(--accent-blue); }
+  .badge-amber { background: rgba(255,184,51,0.15); color: var(--rbih-amber); }
+
+  /* ── CHARTS ── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .chart-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+
+  /* ── CO ASSESSMENT CARDS ── */
+  .assessment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .assessment-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    transition: border-color 0.3s, transform 0.2s;
+  }
+
+  .assessment-card:hover {
+    border-color: var(--border-accent);
+    transform: translateY(-2px);
+  }
+
+  .assessment-card.border-rs { border-left: 3px solid var(--rs-green); }
+  .assessment-card.border-rbih { border-left: 3px solid var(--rbih-amber); }
+  .assessment-card.border-hrhb { border-left: 3px solid var(--hrhb-teal); }
+
+  .assessment-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .assessor-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .tag-rs { background: rgba(57,255,133,0.12); color: var(--rs-green); }
+  .tag-rbih { background: rgba(255,184,51,0.12); color: var(--rbih-amber); }
+  .tag-hrhb { background: rgba(51,224,224,0.12); color: var(--hrhb-teal); }
+
+  .assessment-direction {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .assessment-direction strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .assessment-section {
+    margin-bottom: 14px;
+  }
+
+  .assessment-section:last-child { margin-bottom: 0; }
+
+  .assessment-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .label-good { color: var(--rs-green); }
+  .label-bad { color: var(--rbih-amber); }
+  .label-ugly { color: var(--accent-red); }
+
+  .assessment-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .assessment-text .quote-highlight {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  /* ── DIAGNOSTIC EVOLUTION ── */
+  .evo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .evo-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+  }
+
+  .evo-card .evo-phase {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-blue);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .evo-card .evo-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .evo-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(26,35,64,0.4);
+    font-size: 13px;
+  }
+
+  .evo-stat-row:last-child { border-bottom: none; }
+
+  .evo-stat-label { color: var(--text-secondary); }
+  .evo-stat-value { font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
+
+  .evo-stat-value.bugs { color: var(--accent-red); }
+  .evo-stat-value.cal { color: var(--rbih-amber); }
+  .evo-stat-value.design { color: var(--accent-purple); }
+  .evo-stat-value.div { color: var(--accent-blue); }
+  .evo-stat-value.zero { color: var(--rs-green); }
+
+  /* ── FINDINGS LIST ── */
+  .findings-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .finding-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .finding-severity {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 7px;
+  }
+
+  .severity-high { background: var(--accent-red); box-shadow: 0 0 8px rgba(255,68,102,0.4); }
+  .severity-medium { background: var(--rbih-amber); box-shadow: 0 0 8px rgba(255,184,51,0.4); }
+  .severity-low { background: var(--accent-blue); box-shadow: 0 0 8px rgba(68,136,255,0.4); }
+
+  .finding-content h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .finding-content p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ── ENGINE CHANGES ── */
+  .changes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .change-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    transition: border-color 0.2s;
+  }
+
+  .change-item:hover { border-color: var(--border-accent); }
+
+  .change-icon {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--rs-green);
+    background: rgba(57,255,133,0.1);
+    border-radius: 4px;
+    padding: 3px 6px;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+  }
+
+  .change-text {
+    color: var(--text-secondary);
+  }
+
+  .change-text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* ── NEXT STEPS ── */
+  .next-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .next-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-blue);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .next-priority {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--accent-blue);
+    background: rgba(68,136,255,0.1);
+    border-radius: 3px;
+    padding: 2px 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── NOTE CALLOUT ── */
+  .note-callout {
+    background: rgba(255,184,51,0.06);
+    border: 1px solid rgba(255,184,51,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .note-callout strong {
+    color: var(--rbih-amber);
+    font-weight: 600;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid { grid-template-columns: 1fr; }
+    .assessment-grid { grid-template-columns: 1fr; }
+    .evo-grid { grid-template-columns: 1fr; }
+    .changes-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 28px; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+  }
+
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══════ HERO HEADER ═══════ -->
+  <div class="hero animate-in">
+    <div class="hero-label">Pyrrhic Games / A War Without Victory</div>
+    <h1 class="hero-title">MORNING BRIEFING</h1>
+    <p class="hero-subtitle">Night Shift Results &mdash; <em>AI Commander Self-Correction Loop</em> &mdash; 2026-03-18</p>
+  </div>
+
+  <!-- ═══════ KPI CARDS ═══════ -->
+  <div class="kpi-grid">
+    <div class="kpi-card animate-in delay-1">
+      <div class="kpi-value">91.0%</div>
+      <div class="kpi-label">Area-Weighted Accuracy</div>
+      <div class="kpi-detail">Run 2 &middot; +0.6pp from formula bot</div>
+    </div>
+    <div class="kpi-card animate-in delay-2">
+      <div class="kpi-value">321</div>
+      <div class="kpi-label">Observations</div>
+      <div class="kpi-detail">0 bugs &middot; 191 calibration</div>
+    </div>
+    <div class="kpi-card animate-in delay-3">
+      <div class="kpi-value">680</div>
+      <div class="kpi-label">API Calls</div>
+      <div class="kpi-detail">$1.21 total cost</div>
+    </div>
+    <div class="kpi-card animate-in delay-4">
+      <div class="kpi-value">1,101</div>
+      <div class="kpi-label">Tests Passing</div>
+      <div class="kpi-detail">83 suites &middot; 0 failures</div>
+    </div>
+  </div>
+
+  <!-- ═══════ RUN COMPARISON TABLE ═══════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">Run Comparison</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Formula Bot (n884)</th>
+            <th>Run 1 &mdash; Army API</th>
+            <th>Run 2 &mdash; Army + Corps API</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Area-Weighted</td>
+            <td>90.4%</td>
+            <td>90.9%</td>
+            <td class="highlight-cell">91.0%</td>
+          </tr>
+          <tr>
+            <td>Observations</td>
+            <td class="dim-cell">0</td>
+            <td>375 <span class="badge badge-red">93 bugs*</span></td>
+            <td>321 <span class="badge badge-green">0 bugs</span></td>
+          </tr>
+          <tr>
+            <td>API Calls</td>
+            <td class="dim-cell">0</td>
+            <td>120</td>
+            <td>680</td>
+          </tr>
+          <tr>
+            <td>Cost</td>
+            <td class="dim-cell">$0.00</td>
+            <td>$0.45</td>
+            <td>$1.21</td>
+          </tr>
+          <tr>
+            <td>Corps API</td>
+            <td><span class="badge badge-red">No</span></td>
+            <td><span class="badge badge-red">No</span></td>
+            <td><span class="badge badge-green">Yes</span> <span style="color:var(--text-muted);font-size:12px;">560 assessments</span></td>
+          </tr>
+          <tr>
+            <td>Hash</td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted)">n884</td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted)">4c937239</td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--rs-green)">d5bbb8da</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note-callout">
+      <strong>*Run 1 bugs were false positives</strong> &mdash; territory prompt loading error caused 0% territory readings. The COs self-diagnosed the issue, calling each other's armies "ghost armies" and "phantom operations." All 93 bugs eliminated in Run 2 by fixing the territory data pipeline.
+    </div>
+  </div>
+
+  <!-- ═══════ TERRITORY + FORCE CHARTS ═══════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Territory &amp; Force Progression</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Territory Control (Area-Weighted %)</h3>
+        <div class="chart-container">
+          <canvas id="territoryChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Personnel Strength (thousands)</h3>
+        <div class="chart-container">
+          <canvas id="personnelChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Brigade Count</h3>
+        <div class="chart-container">
+          <canvas id="brigadeChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Personnel per Brigade</h3>
+        <div class="chart-container">
+          <canvas id="densityChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ CO CROSS-ASSESSMENTS ═══════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <h2 class="section-title">CO Cross-Assessments &mdash; The Good, The Bad, The Ugly</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="note-callout" style="margin-bottom:20px;">
+      <strong>Context:</strong> These assessments were generated from Run 1 data, which had the 0% territory bug. The COs incorporated this into their assessments brilliantly &mdash; calling each other's armies "ghost armies" and "phantom operations." The bug became the assessment.
+    </div>
+    <div class="assessment-grid">
+
+      <!-- Mladic on Delic -->
+      <div class="assessment-card border-rs">
+        <div class="assessment-header">
+          <span class="assessor-tag tag-rs">RS</span>
+          <div class="assessment-direction"><strong>Mladi&#263;</strong> on <strong>Deli&#263;</strong> <span style="color:var(--rbih-amber)">(RBiH)</span></div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-good">THE GOOD</div>
+          <div class="assessment-text">"Deli&#263; maintained force cohesion under impossible conditions. His personnel strength grew to 149,454 across 125 brigades &mdash; <span class="quote-highlight">a 37% increase from initial deployment</span> &mdash; demonstrating effective mobilization and retention despite catastrophic system failures."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-bad">THE BAD</div>
+          <div class="assessment-text">"His command structure failed to translate manpower into territorial control, suggesting <span class="quote-highlight">poor coordination between corps and inadequate logistics</span> for sustained offensive operations."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-ugly">THE UGLY</div>
+          <div class="assessment-text">"<span class="quote-highlight">Deli&#263; presided over an army that existed only on paper.</span> His forces reported zero territorial holdings despite fielding 149,000 personnel &mdash; a catastrophic failure of command authority. His entire war effort became a phantom operation."</div>
+        </div>
+      </div>
+
+      <!-- Mladic on Petkovic -->
+      <div class="assessment-card border-rs">
+        <div class="assessment-header">
+          <span class="assessor-tag tag-rs">RS</span>
+          <div class="assessment-direction"><strong>Mladi&#263;</strong> on <strong>Petkovi&#263;</strong> <span style="color:var(--hrhb-teal)">(HRHB)</span></div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-good">THE GOOD</div>
+          <div class="assessment-text">"Petkovi&#263; maintained force cohesion under catastrophic conditions &mdash; 40,490 personnel across 28 brigades remained nominally organized despite complete territorial collapse. <span class="quote-highlight">His command structure did not disintegrate into warlordism.</span>"</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-bad">THE BAD</div>
+          <div class="assessment-text">"His forces were fundamentally undersized &mdash; 40,490 personnel against our 103,796 is a <span class="quote-highlight">2.5:1 disadvantage he could never overcome.</span> He was fighting on logistics fumes by week 35."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-ugly">THE UGLY</div>
+          <div class="assessment-text">"<span class="quote-highlight">Petkovi&#263;'s entire campaign was a strategic phantom.</span> He was commanding ghosts. That is not a war &mdash; that is an execution."</div>
+        </div>
+      </div>
+
+      <!-- Delic on Mladic -->
+      <div class="assessment-card border-rbih">
+        <div class="assessment-header">
+          <span class="assessor-tag tag-rbih">RBiH</span>
+          <div class="assessment-direction"><strong>Deli&#263;</strong> on <strong>Mladi&#263;</strong> <span style="color:var(--rs-green)">(RS)</span></div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-good">THE GOOD</div>
+          <div class="assessment-text">"Mladi&#263; maintained <span class="quote-highlight">exceptional force cohesion and discipline</span> throughout the campaign. The RS preserved 103,796 personnel across 81 brigades &mdash; a testament to their logistical infrastructure and command structure."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-bad">THE BAD</div>
+          <div class="assessment-text">"The RS failed to exploit their 32% numerical advantage decisively. Their inability to execute the Posavina Corridor operation suggests <span class="quote-highlight">either command confusion or a fundamentally broken operational framework.</span>"</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-ugly">THE UGLY</div>
+          <div class="assessment-text">"<span class="quote-highlight">Both we and Mladi&#263;'s forces became prisoners of a system that reported zero territorial control</span> despite fielding over 250,000 combined personnel. We were fighting ghosts on a blank canvas, and he knew it as well as I did."</div>
+        </div>
+      </div>
+
+      <!-- Delic on Petkovic -->
+      <div class="assessment-card border-rbih">
+        <div class="assessment-header">
+          <span class="assessor-tag tag-rbih">RBiH</span>
+          <div class="assessment-direction"><strong>Deli&#263;</strong> on <strong>Petkovi&#263;</strong> <span style="color:var(--hrhb-teal)">(HRHB)</span></div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-good">THE GOOD</div>
+          <div class="assessment-text">"Petkovi&#263; maintained force cohesion &mdash; 40,490 personnel across 28 brigades remained organized despite <span class="quote-highlight">a 3.6-to-1 numerical disadvantage.</span> He preserved command structure and prevented wholesale desertion."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-bad">THE BAD</div>
+          <div class="assessment-text">"Rather than consolidating defensible enclaves while alliance cohesion remained at 0.75, Petkovi&#263; allowed the HRHB-RBiH relationship to <span class="quote-highlight">deteriorate to 0.20 by week 39</span> &mdash; a catastrophic diplomatic failure."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-ugly">THE UGLY</div>
+          <div class="assessment-text">"<span class="quote-highlight">Petkovi&#263; presided over the complete territorial annihilation of the HRHB</span> without securing a single square kilometer &mdash; a failure of both military judgment and political vision that will define the postwar settlement for generations."</div>
+        </div>
+      </div>
+
+      <!-- Petkovic on Mladic -->
+      <div class="assessment-card border-hrhb">
+        <div class="assessment-header">
+          <span class="assessor-tag tag-hrhb">HRHB</span>
+          <div class="assessment-direction"><strong>Petkovi&#263;</strong> on <strong>Mladi&#263;</strong> <span style="color:var(--rs-green)">(RS)</span></div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-good">THE GOOD</div>
+          <div class="assessment-text">"Mladi&#263; maintained force cohesion across 81 brigades and 103,796 personnel. The VRS preserved <span class="quote-highlight">a 32% numerical advantage</span> throughout the campaign, which under normal circumstances would have been decisive."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-bad">THE BAD</div>
+          <div class="assessment-text">"Mladi&#263;'s operational planning <span class="quote-highlight">collapsed into abstraction.</span> His own briefings reveal zero territorial control despite claiming active corps deployments. This is not military failure &mdash; it is command disintegration."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-ugly">THE UGLY</div>
+          <div class="assessment-text">"<span class="quote-highlight">Mladi&#263;'s forces achieved nothing. Zero kilometers held.</span> 103,796 personnel and 81 brigades produced no measurable military outcome across 40 weeks. This is not a fighting force &mdash; it is a ghost army."</div>
+        </div>
+      </div>
+
+      <!-- Petkovic on Delic -->
+      <div class="assessment-card border-hrhb">
+        <div class="assessment-header">
+          <span class="assessor-tag tag-hrhb">HRHB</span>
+          <div class="assessment-direction"><strong>Petkovi&#263;</strong> on <strong>Deli&#263;</strong> <span style="color:var(--rbih-amber)">(RBiH)</span></div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-good">THE GOOD</div>
+          <div class="assessment-text">"Deli&#263; grew his personnel strength to 149,454 across 125 brigades &mdash; <span class="quote-highlight">a remarkable mobilization achievement</span> given the constraints of the siege economy. The RBiH demonstrated superior organizational capacity."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-bad">THE BAD</div>
+          <div class="assessment-text">"Despite <span class="quote-highlight">numerical superiority over RS forces (149k vs 103k)</span>, Deli&#263; failed to translate manpower into territorial gains. The alliance with HRHB collapsed to 0.20 under his watch."</div>
+        </div>
+        <div class="assessment-section">
+          <div class="assessment-label label-ugly">THE UGLY</div>
+          <div class="assessment-text">"Deli&#263;'s forces were <span class="quote-highlight">trapped in a strategic illusion</span>: they believed they controlled Sarajevo and central Bosnia, yet the system showed zero territorial holdings. They continued operating as if territorial control existed &mdash; wasting 40 weeks on phantom defense."</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════ DIAGNOSTIC EVOLUTION ═══════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <h2 class="section-title">Diagnostic Evolution</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="evo-grid">
+      <div class="evo-card">
+        <div class="evo-phase">Phase 0</div>
+        <div class="evo-title">Pre-Phase A (Reactive)</div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Total observations</span>
+          <span class="evo-stat-value">13</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Bugs</span>
+          <span class="evo-stat-value zero">0</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Calibration</span>
+          <span class="evo-stat-value cal">4</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Design gaps</span>
+          <span class="evo-stat-value design">9</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Divergences</span>
+          <span class="evo-stat-value div">0</span>
+        </div>
+      </div>
+      <div class="evo-card" style="border-color:rgba(255,68,102,0.3);">
+        <div class="evo-phase" style="color:var(--accent-red)">Run 1</div>
+        <div class="evo-title">Army API (Broken Territory)</div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Total observations</span>
+          <span class="evo-stat-value">375</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Bugs</span>
+          <span class="evo-stat-value bugs">93 (false positives)</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Calibration</span>
+          <span class="evo-stat-value cal">156</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Design gaps</span>
+          <span class="evo-stat-value design">32</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Divergences</span>
+          <span class="evo-stat-value div">94</span>
+        </div>
+      </div>
+      <div class="evo-card" style="border-color:rgba(57,255,133,0.3);">
+        <div class="evo-phase" style="color:var(--rs-green)">Run 2</div>
+        <div class="evo-title">Army + Corps API (Fixed)</div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Total observations</span>
+          <span class="evo-stat-value">321</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Bugs</span>
+          <span class="evo-stat-value zero">0</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Calibration</span>
+          <span class="evo-stat-value cal">191</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Design gaps</span>
+          <span class="evo-stat-value design">22</span>
+        </div>
+        <div class="evo-stat-row">
+          <span class="evo-stat-label">Divergences</span>
+          <span class="evo-stat-value div">108</span>
+        </div>
+      </div>
+    </div>
+    <div class="note-callout" style="margin-top:16px;">
+      <strong>Self-correction in action:</strong> Territory bug was self-diagnosed by the COs in Run 1. All 93 false-positive bugs eliminated in Run 2 by fixing the territory data pipeline. Calibration observations increased (156 &rarr; 191) as the COs could finally see real territory data and provide meaningful feedback.
+    </div>
+  </div>
+
+  <!-- ═══════ TOP FINDINGS ═══════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <h2 class="section-title">Top Diagnostic Findings (Run 2)</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="findings-list">
+      <div class="finding-item">
+        <div class="finding-severity severity-high"></div>
+        <div class="finding-content">
+          <h4>Alliance decay too aggressive</h4>
+          <p>Alliance at 0.20 by w39 despite fix from 0.35&rarr;0.75. Should be 0.50&ndash;0.70 through 1992. Decay rate needs further reduction &mdash; the Croat-Bosniak alliance held through 1992 historically.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-severity severity-high"></div>
+        <div class="finding-content">
+          <h4>East Bosnian Corps morale critically low</h4>
+          <p>Morale at 26 &mdash; historically should be 45&ndash;55 for the Drina Corps in this period. Likely caused by excessive attrition without adequate reinforcement.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-severity severity-medium"></div>
+        <div class="finding-content">
+          <h4>Territory stasis w17&ndash;w39</h4>
+          <p>Front lines completely frozen for 22 weeks despite continued operations and growing force disparity. Entrenchment + reactive defense stacking creates impenetrable positions.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-severity severity-medium"></div>
+        <div class="finding-content">
+          <h4>ARBiH over-ambitious operations</h4>
+          <p>Executing 3 simultaneous operations in late 1992 &mdash; historically the ARBiH had neither the command capacity nor logistics for this. Needs tighter op-cap constraints.</p>
+        </div>
+      </div>
+      <div class="finding-item">
+        <div class="finding-severity severity-low"></div>
+        <div class="finding-content">
+          <h4>SRK density-strained</h4>
+          <p>Sarajevo-Romanija Corps cannot maintain adequate density for siege operations. Brigade count insufficient for the perimeter required. Density gate blocks offensive posture.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ ENGINE CHANGES ═══════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">06</span>
+      <h2 class="section-title">Engine Changes This Session</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="changes-grid">
+      <div class="change-item">
+        <span class="change-icon">NEW</span>
+        <span class="change-text"><strong>Stance override</strong> &mdash; AI army decisions respected by engine</span>
+      </div>
+      <div class="change-item">
+        <span class="change-icon">NEW</span>
+        <span class="change-text"><strong>Stance-aware density</strong> &mdash; offensive 0.08, balanced 0.12, defensive 0.167</span>
+      </div>
+      <div class="change-item">
+        <span class="change-icon">FIX</span>
+        <span class="change-text"><strong>Offensive cooldown</strong> &mdash; reduced from 8 turns to 3</span>
+      </div>
+      <div class="change-item">
+        <span class="change-icon">NEW</span>
+        <span class="change-text"><strong>Corps status_reason</strong> &mdash; 8 diagnostic values for gate audit</span>
+      </div>
+      <div class="change-item">
+        <span class="change-icon">NEW</span>
+        <span class="change-text"><strong>Gate audit trace</strong> &mdash; op_launch_trace for debugging</span>
+      </div>
+      <div class="change-item">
+        <span class="change-icon">FIX</span>
+        <span class="change-text"><strong>Entrenchment effective cap</strong> &mdash; 26 turns maximum</span>
+      </div>
+      <div class="change-item">
+        <span class="change-icon">FIX</span>
+        <span class="change-text"><strong>Alliance rebalance</strong> &mdash; 0.35&rarr;0.75, patron 0.018, war earliest w40</span>
+      </div>
+      <div class="change-item">
+        <span class="change-icon">NEW</span>
+        <span class="change-text"><strong>Conditional events</strong> &mdash; 3 converted (corridor, Jajce, camps)</span>
+      </div>
+      <div class="change-item" style="grid-column:1/-1;">
+        <span class="change-icon">NEW</span>
+        <span class="change-text"><strong>Area-weighted territory</strong> &mdash; km&sup2;-based percentages in all CO prompts (fixes the ghost army bug)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ WHAT'S NEXT ═══════ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-number">07</span>
+      <h2 class="section-title">What's Next</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="next-list">
+      <div class="next-item">
+        <span class="next-priority">P1</span>
+        Alliance decay still too fast &mdash; needs further tuning to hold 0.50+ through 1992
+      </div>
+      <div class="next-item">
+        <span class="next-priority">P1</span>
+        Late-war stasis &mdash; investigate entrenchment + reactive defense stacking creating frozen fronts
+      </div>
+      <div class="next-item">
+        <span class="next-priority">P2</span>
+        SRK siege exemption from density gate &mdash; allow siege ops despite thin manning
+      </div>
+      <div class="next-item">
+        <span class="next-priority">P2</span>
+        Supply gate graduated response &mdash; soft penalties instead of hard blocks
+      </div>
+      <div class="next-item">
+        <span class="next-priority">P3</span>
+        More conditional events &mdash; remaining 38 of 41 historical events to convert
+      </div>
+      <div class="next-item">
+        <span class="next-priority">P3</span>
+        52-week scenario covering Croat-Bosniak war (April 1993 onwards)
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ FOOTER ═══════ -->
+  <div class="footer">
+    PYRRHIC GAMES &middot; A WAR WITHOUT VICTORY &middot; GENERATED 2026-03-18 &middot; CLAUDE OPUS 4.6
+  </div>
+
+</div>
+
+<script>
+// ═══════ CHART DATA ═══════
+const turns = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39];
+const labels = turns.map(t => 'W' + t);
+
+const rsTerritory = [54,55.1,55.6,56.4,57.6,58.3,59.4,59.5,59.6,59.9,60,60,60.3,60.2,60.2,60.3,60.5,60.5,60.5,60.5,60.5,60.5,60.5,60.5,60.5,60.5,60.5,60.5,60.3,60.3,60.3,60.3,60.3,60.3,60.3,60.3,60.3,60.3,60.3,60.3];
+const rbihTerritory = [31.8,30.9,30.4,29.6,28.7,28.2,28,27.9,27.8,27.5,27.4,27.2,27.2,27.1,27,26.9,26.8,26.8,26.8,26.8,26.8,26.8,26.8,26.8,26.8,26.8,26.8,26.8,27,27,27,27,27,27,27,27,27,27,27,27];
+const hrhbTerritory = [14.2,14,14,14,13.7,13.5,12.6,12.6,12.6,12.6,12.6,12.7,12.5,12.7,12.8,12.8,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7,12.7];
+
+const rsPers = [82916,81693,81660,81898,81872,82089,81790,81834,85968,87927,88944,89243,90274,90753,91375,92660,93206,94266,95349,96531,97752,98852,99988,101015,101670,102336,102989,103112,102782,103099,103024,103265,103449,103614,104025,104547,105155,105529,105914,106260].map(v=>v/1000);
+const rbihPers = [40116,39622,38413,38995,40570,41900,43621,46183,50161,53079,58071,65413,71817,76956,81417,87383,91670,96901,100850,104744,108566,112322,115862,119382,122376,126059,128201,130090,131838,133842,135833,137902,139967,141975,143947,145910,147869,149824,151818,153588].map(v=>v/1000);
+const hrhbPers = [21521,22716,23745,24666,25311,25712,25893,28971,30525,31136,31707,31735,30337,30333,30541,30755,30740,30928,31264,31660,32153,32534,32919,33270,33671,34039,34472,34987,35508,36017,36528,37040,37556,38075,38586,39103,39623,40144,40667,41141].map(v=>v/1000);
+
+const rsBrig = [76,76,77,78,79,80,80,80,80,80,80,80,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81];
+const rbihBrig = [74,78,80,84,88,92,96,100,104,108,111,115,118,119,119,121,121,122,122,122,122,122,122,122,122,122,124,124,124,124,124,124,124,124,124,124,124,124,124,124];
+const hrhbBrig = [24,25,25,25,25,25,25,29,29,29,29,29,29,28,28,28,28,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27];
+
+// Per-brigade density
+const rsDensity = rsPers.map((p,i) => (p * 1000) / rsBrig[i]);
+const rbihDensity = rbihPers.map((p,i) => (p * 1000) / rbihBrig[i]);
+const hrhbDensity = hrhbPers.map((p,i) => (p * 1000) / hrhbBrig[i]);
+
+// ═══════ CHART DEFAULTS ═══════
+Chart.defaults.color = '#8892a8';
+Chart.defaults.borderColor = 'rgba(26,35,64,0.6)';
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 11;
+
+const gridColor = 'rgba(26,35,64,0.8)';
+
+function makeDataset(label, data, color, fill = false) {
+  return {
+    label,
+    data,
+    borderColor: color,
+    backgroundColor: fill ? color.replace(')', ',0.08)').replace('rgb', 'rgba') : 'transparent',
+    borderWidth: 2,
+    pointRadius: 0,
+    pointHoverRadius: 4,
+    tension: 0.3,
+    fill
+  };
+}
+
+// ═══════ TERRITORY CHART ═══════
+new Chart(document.getElementById('territoryChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      makeDataset('RS', rsTerritory, '#39ff85', true),
+      makeDataset('RBiH', rbihTerritory, '#ffb833', true),
+      makeDataset('HRHB', hrhbTerritory, '#33e0e0', true),
+      // Historical targets as dashed lines
+      {
+        label: 'RS target (65.3%)',
+        data: Array(40).fill(65.3),
+        borderColor: 'rgba(57,255,133,0.3)',
+        borderWidth: 1,
+        borderDash: [6, 4],
+        pointRadius: 0,
+        fill: false
+      },
+      {
+        label: 'RBiH target (23.4%)',
+        data: Array(40).fill(23.4),
+        borderColor: 'rgba(255,184,51,0.3)',
+        borderWidth: 1,
+        borderDash: [6, 4],
+        pointRadius: 0,
+        fill: false
+      },
+      {
+        label: 'HRHB target (11.3%)',
+        data: Array(40).fill(11.3),
+        borderColor: 'rgba(51,224,224,0.3)',
+        borderWidth: 1,
+        borderDash: [6, 4],
+        pointRadius: 0,
+        fill: false
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 12, filter: item => !item.text.includes('target') } },
+      tooltip: {
+        backgroundColor: '#0f1628',
+        borderColor: '#243060',
+        borderWidth: 1,
+        titleFont: { family: "'IBM Plex Mono', monospace" },
+        bodyFont: { family: "'IBM Plex Mono', monospace" },
+        callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%` }
+      }
+    },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { maxTicksLimit: 10 } },
+      y: { grid: { color: gridColor }, min: 0, max: 70, ticks: { callback: v => v + '%' } }
+    }
+  }
+});
+
+// ═══════ PERSONNEL CHART ═══════
+new Chart(document.getElementById('personnelChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      makeDataset('RS', rsPers, '#39ff85'),
+      makeDataset('RBiH', rbihPers, '#ffb833'),
+      makeDataset('HRHB', hrhbPers, '#33e0e0')
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 12 } },
+      tooltip: {
+        backgroundColor: '#0f1628',
+        borderColor: '#243060',
+        borderWidth: 1,
+        callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}k` }
+      }
+    },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { maxTicksLimit: 10 } },
+      y: { grid: { color: gridColor }, min: 0, ticks: { callback: v => v + 'k' } }
+    }
+  }
+});
+
+// ═══════ BRIGADE CHART ═══════
+new Chart(document.getElementById('brigadeChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      makeDataset('RS', rsBrig, '#39ff85'),
+      makeDataset('RBiH', rbihBrig, '#ffb833'),
+      makeDataset('HRHB', hrhbBrig, '#33e0e0')
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 12 } },
+      tooltip: {
+        backgroundColor: '#0f1628',
+        borderColor: '#243060',
+        borderWidth: 1
+      }
+    },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { maxTicksLimit: 10 } },
+      y: { grid: { color: gridColor }, min: 0 }
+    }
+  }
+});
+
+// ═══════ DENSITY CHART ═══════
+new Chart(document.getElementById('densityChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      makeDataset('RS', rsDensity, '#39ff85'),
+      makeDataset('RBiH', rbihDensity, '#ffb833'),
+      makeDataset('HRHB', hrhbDensity, '#33e0e0')
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 12 } },
+      tooltip: {
+        backgroundColor: '#0f1628',
+        borderColor: '#243060',
+        borderWidth: 1,
+        callbacks: { label: ctx => `${ctx.dataset.label}: ${Math.round(ctx.parsed.y)} per brigade` }
+      }
+    },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { maxTicksLimit: 10 } },
+      y: { grid: { color: gridColor }, min: 0, ticks: { callback: v => Math.round(v) } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
