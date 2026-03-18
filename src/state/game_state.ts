@@ -126,6 +126,16 @@ export interface BrigadeMovementState {
 /** Corps standing stance (always active, modifies subordinate brigades). */
 export type CorpsStance = 'defensive' | 'balanced' | 'offensive' | 'reorganize';
 
+/** Political directive from a faction's patron state (e.g., Zagreb for HVO). */
+export interface PatronDirective {
+    name: string;
+    start_week: number;
+    end_week: number;
+    /** Maximum corps stance allowed under this directive. */
+    stance_ceiling: CorpsStance;
+    description: string;
+}
+
 /** Army-level stance (overrides corps stances when set). */
 export type ArmyStance = 'general_defensive' | 'balanced' | 'general_offensive' | 'total_mobilization';
 
@@ -341,6 +351,16 @@ export interface CorpsOperation {
         source_sector_id: string;
         arrived: boolean;
     }>;
+
+    // --- Combat feedback counters (for API commanders / GUI) ---
+    /** Battles conducted this turn (reset each turn). */
+    battles_this_turn?: number;
+    /** OSIDs captured this turn (reset each turn). */
+    territory_gained_this_turn?: number;
+    /** Total battles since operation started. */
+    total_battles?: number;
+    /** Total OSIDs captured since operation started. */
+    total_territory_gained?: number;
 }
 
 /** Independent sector stances — each sector can differ from its corps stance. */

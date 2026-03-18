@@ -280,7 +280,7 @@ export const PARAMILITARY_FADE_WEEK = 20;
  *  HRHB had HOS and some Croatian paramilitaries.
  *  RBiH had Patriotska Liga but lower paramilitary capability. */
 export const PARAMILITARY_SPAWN_RATE: Record<string, number> = {
-    RS: 0.85,    // High — SDS/JNA paramilitary networks
+    RS: 0.65,    // High — SDS/JNA paramilitary networks (reduced from 0.85 for initial territory pacing)
     HRHB: 0.55,  // Moderate — HOS, Croatian volunteers
     RBiH: 0.30   // Low — Patriotska Liga, Green Berets (mostly integrated early)
 };

@@ -180,7 +180,7 @@
     "title": "Jajce Falls to VRS Forces",
     "narrative": "The strategic town of Jajce in central Bosnia falls to the VRS after a prolonged siege. The loss is a major blow to both the ARBiH and HVO, who blame each other for failing to coordinate the defense. Tens of thousands of civilians flee westward, and recriminations between the two forces deepen the growing rift.",
     "category": "territorial",
-    "trigger": { "turn_min": 30, "turn_max": 40, "phase": "war", "condition": { "type": "faction_controls_municipality", "faction": "RS", "municipality": "jajce", "threshold": 0.5 } },
+    "trigger": { "turn_min": 40, "turn_max": 52, "phase": "war", "condition": { "type": "faction_controls_municipality", "faction": "RS", "municipality": "jajce", "threshold": 0.5 } },
     "once": true,
     "effect": { "kind": "morale_change", "faction": "RBiH", "delta": -10 },
     "effects": [

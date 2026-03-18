@@ -418,6 +418,12 @@ export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
 export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, loc, faction, adjacency, state, isActiveSectorOperationParticipant, result } = ctx;
 
+    // Early-war throttle: no uncontested occupation in first 2 weeks (deployment phase).
+    // Historically, territory grab was rapid but not instantaneous — units need time to
+    // deploy, establish control, and move supplies forward.
+    const turn = state.meta?.turn ?? 0;
+    if (turn <= 2) return false;
+
     // Don't interrupt active operations
     if (isActiveSectorOperationParticipant) return false;
 

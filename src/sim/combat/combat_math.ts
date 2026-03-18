@@ -270,7 +270,9 @@ export const HASTY_DEFENSE_RAMP = 5;
  * DEFENSE_ENV_COMPRESSION = fraction of excess bonus retained above threshold.
  */
 export const DEFENSE_ENV_CAP_THRESHOLD = 0.5;
-export const DEFENSE_ENV_COMPRESSION = 0.5;
+export const DEFENSE_ENV_COMPRESSION = 0.35;  // Was 0.5 — tighter compression above threshold
+/** Hard cap on total defensive environmental multiplier. Prevents impenetrable late-war walls. */
+export const DEFENSE_ENV_HARD_CAP = 2.5;
 
 /** Base experience multiplier — even green troops have some combat effectiveness. */
 export const EXPERIENCE_BASE = 0.6;
@@ -948,8 +950,9 @@ export function computeDefenderPower(
         ? envBonus
         : DEFENSE_ENV_CAP_THRESHOLD + (envBonus - DEFENSE_ENV_CAP_THRESHOLD) * DEFENSE_ENV_COMPRESSION;
     const cappedEnvMult = 1.0 + Math.max(0, cappedBonus);
+    const finalEnvMult = Math.min(cappedEnvMult, DEFENSE_ENV_HARD_CAP);
 
-    return base * postureMult * supplyMult * cappedEnvMult * disruptionMult * officerMult * fatigueMult * homeMult * moralePenalty;
+    return base * postureMult * supplyMult * finalEnvMult * disruptionMult * officerMult * fatigueMult * homeMult * moralePenalty;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

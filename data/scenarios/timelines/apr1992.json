@@ -374,6 +374,13 @@
       "divisor": 200
     }
   ],
+  "patron_directives": {
+    "HRHB": [
+      { "name": "Consolidate Herzegovina", "start_week": 0, "end_week": 40, "stance_ceiling": "defensive", "description": "Zagreb: secure Herzegovina, maintain RBiH alliance" },
+      { "name": "Prepare Central Bosnia", "start_week": 40, "end_week": 50, "stance_ceiling": "balanced", "description": "Zagreb: prepare positions in central Bosnia" },
+      { "name": "Secure Croat Territory", "start_week": 50, "end_week": 999, "stance_ceiling": "offensive", "description": "Zagreb: take central Bosnia from RBiH" }
+    ]
+  },
   "officer_config": {
     "RS": {
       "faction": "RS",

@@ -129,6 +129,9 @@ function getMobilizationSurgeFactor(turn: number, faction: string): number {
 /** Hard cap per municipality per turn to prevent single-mun dominance. */
 const MAX_MOBILIZATION_PER_MUN_PER_TURN = 300;
 
+/** ARBiH total active personnel hard cap. Historical: 80-90k by late 1992, ~180k by 1995. For 40w scenario cap at 95k. */
+export const ARBIH_PERSONNEL_CAP = 95_000;
+
 /**
  * Military-age male fraction of census ethnic population.
  * ~49% male × ~58% in the 15–60 bracket ≈ 28.4%.
@@ -201,6 +204,17 @@ export function runOngoingMobilization(
 
     const settlementsByMun = buildSettlementsByMun(settlements);
 
+    // ARBiH personnel cap: count total active RBiH brigade personnel once.
+    // If at or over cap, skip all RBiH mobilization this turn.
+    const formations = state.military.formations ?? {};
+    let rbihTotalPersonnel = 0;
+    for (const fmn of Object.values(formations)) {
+        if (fmn.faction === 'RBiH' && fmn.status === 'active') {
+            rbihTotalPersonnel += fmn.personnel ?? 0;
+        }
+    }
+    const rbihCapped = rbihTotalPersonnel >= ARBIH_PERSONNEL_CAP;
+
     // Build set of municipalities each faction controls (for pocket detection).
     // A faction in only one municipality is isolated — boost their mobilization.
     const factionMunSets = new Map<string, Set<string>>();
@@ -218,6 +232,9 @@ export function runOngoingMobilization(
         if (!sids?.length) continue;
         const controller = getMunicipalityController(state, sids, munId);
         if (!controller) continue;
+
+        // Skip RBiH mobilization if active personnel already at or over cap
+        if (controller === 'RBiH' && rbihCapped) continue;
 
         const censusEligible = getEligiblePopulationCount(population1991ByMun, munId, controller);
         if (censusEligible <= 0) continue;

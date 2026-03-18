@@ -1164,6 +1164,23 @@ export function resolveAttackOrdersOsid(
             } satisfies ControlEvent);
         }
 
+        // ── Increment operation combat feedback counters ──────────────
+        // Find the attacker's active corps operation (if any) and update
+        // per-turn and cumulative battle/territory counters.
+        const attackerCorpsId = firstAttacker.corps_id;
+        if (attackerCorpsId && state.military.corps_command) {
+            const attackerCmd = state.military.corps_command[attackerCorpsId];
+            const activeOp = attackerCmd?.active_operation;
+            if (activeOp && activeOp.phase === 'execution') {
+                activeOp.battles_this_turn = (activeOp.battles_this_turn ?? 0) + 1;
+                activeOp.total_battles = (activeOp.total_battles ?? 0) + 1;
+                if (flip) {
+                    activeOp.territory_gained_this_turn = (activeOp.territory_gained_this_turn ?? 0) + 1;
+                    activeOp.total_territory_gained = (activeOp.total_territory_gained ?? 0) + 1;
+                }
+            }
+        }
+
         if (flip && defenderFormation) {
             const retreatDests = surrenderCascade ? [] : getFriendlyRetreatDestinations(state, defenderFormation, adjacency, reverseMap);
             const dest = retreatDests[0];

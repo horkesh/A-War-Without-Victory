@@ -54,6 +54,9 @@ export const STRONG_ALLIANCE_THRESHOLD = 0.50;
 /** Threshold for "full war" (maximum pressure, formation displacement). */
 export const FULL_WAR_THRESHOLD = -0.50;
 
+/** Alliance floor before war: prevents premature collapse. Alliance cannot drop below this until war_earliest_turn. */
+export const ALLIANCE_FLOOR_BEFORE_WAR = 0.40;
+
 /** Default initial alliance value (fragile alliance, April 1992). */
 export const DEFAULT_INIT_ALLIANCE = 0.75;
 
@@ -196,7 +199,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     // Peace-phase §4.8 (historical fidelity): no open war before rbih_hrhb_war_earliest_turn (e.g. Oct 1992 for Apr 1992 start).
     const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 40;
     if (state.meta.turn < earliestTurn) {
-        newValue = Math.max(newValue, ALLIED_THRESHOLD);
+        newValue = Math.max(newValue, ALLIANCE_FLOOR_BEFORE_WAR);
     }
     state.political.war_alliance_rbih_hrhb = newValue;
 

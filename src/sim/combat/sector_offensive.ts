@@ -590,6 +590,10 @@ export function advanceSectorOffensives(
         const op = cmd.active_operation;
         if (op.type !== 'sector_attack' && op.type !== 'feint' && op.type !== 'probe') continue;
 
+        // Reset per-turn combat feedback counters
+        op.battles_this_turn = 0;
+        op.territory_gained_this_turn = 0;
+
         const turn = state.meta?.turn ?? 0;
         const corps = state.military.formations?.[corpsId];
         const faction = (corps?.faction ?? 'RS') as FactionId;

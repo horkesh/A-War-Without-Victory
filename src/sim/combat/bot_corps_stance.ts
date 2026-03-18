@@ -208,6 +208,17 @@ export function generateCorpsStanceOrders(
             }
         }
 
+        // Patron directive ceiling: Zagreb's political orders constrain HVO corps stances
+        if (faction === 'HRHB') {
+            const directives = (state.military.war_timeline as any)?.patron_directives?.['HRHB'] as Array<{ start_week: number; end_week: number; stance_ceiling: string }> | undefined;
+            if (directives) {
+                const activeDirective = directives.find(d => turn >= d.start_week && turn < d.end_week);
+                if (activeDirective && STANCE_RANK[stance] > STANCE_RANK[activeDirective.stance_ceiling as CorpsStance]) {
+                    stance = activeDirective.stance_ceiling as CorpsStance;
+                }
+            }
+        }
+
         // Army stance is informational only — corps determine their own stance
         // organically from combat readiness (personnel, cohesion, fatigue).
         // Factions are offensive or defensive because of their material capacity,
