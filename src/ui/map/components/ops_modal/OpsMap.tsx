@@ -38,6 +38,7 @@ interface OpsMapProps {
     schwerpunktOsid: string;
     axes: AxisState[];
     enabled: boolean;
+    onCentroidLookupReady?: (lookup: Map<string, [number, number]>) => void;
 }
 
 export function OpsMap({
@@ -48,6 +49,7 @@ export function OpsMap({
     schwerpunktOsid,
     axes,
     enabled,
+    onCentroidLookupReady,
 }: OpsMapProps) {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<maplibregl.Map | null>(null);
@@ -89,6 +91,7 @@ export function OpsMap({
 
                 const centroidLookup = buildOsidCentroidLookup(geojson);
                 centroidLookupRef.current = centroidLookup;
+                onCentroidLookupReady?.(centroidLookup);
 
                 // Fit bounds to corps sectors
                 const sectors = (loadedGameState.corpsFrontSectors ?? []).filter((s) => s.corps_id === corpsId);

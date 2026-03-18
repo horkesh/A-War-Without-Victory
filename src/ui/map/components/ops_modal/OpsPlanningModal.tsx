@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import type { OpsPhase, OpsPlanState, AxisState } from './types';
 import { PHASE_ORDER, PHASE_LABELS } from './types';
 import { CommanderPhase } from './CommanderPhase';
+import { PlanPhase } from './PlanPhase';
 import { OpsMap } from './OpsMap';
 import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';
 
@@ -27,6 +28,7 @@ export function OpsPlanningModal() {
 
     const [phase, setPhase] = useState<OpsPhase>('commander');
     const [highestPhase, setHighestPhase] = useState(0);
+    const [centroidLookup, setCentroidLookup] = useState<Map<string, [number, number]>>(new Map());
 
     // --- Plan state (lifted to shell for cross-phase access) ---
     const defaultStagingOsid = useMemo(() => {
@@ -141,6 +143,11 @@ export function OpsPlanningModal() {
         });
     }, [phase]);
 
+    // Update plan fields (used by PlanPhase sub-components)
+    const updatePlan = useCallback((partial: Partial<OpsPlanState>) => {
+        setPlan((prev) => ({ ...prev, ...partial }));
+    }, []);
+
     if (!isOpen || !corpsId) return null;
 
     const currentIdx = PHASE_ORDER.indexOf(phase);
@@ -157,6 +164,7 @@ export function OpsPlanningModal() {
                 schwerpunktOsid={plan.schwerpunktOsid}
                 axes={plan.axes}
                 enabled={phase === 'plan'}
+                onCentroidLookupReady={setCentroidLookup}
             />
 
             {/* Phase indicator — top center */}
@@ -193,23 +201,13 @@ export function OpsPlanningModal() {
             {/* Phase content */}
             {phase === 'commander' && <CommanderPhase onAdvance={advancePhase} />}
             {phase === 'plan' && (
-                <div className="absolute inset-0 z-10 pointer-events-none">
-                    {/* PlanPhase will render here in Task 6 */}
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto
-                                    bg-[rgba(20,18,15,0.88)] backdrop-blur-xl rounded-lg px-6 py-3
-                                    border border-[rgba(180,160,130,0.15)] text-text-secondary text-sm">
-                        Click enemy territory to add objectives. Click friendly territory to set staging area.
-                        <button
-                            type="button"
-                            onClick={advancePhase}
-                            disabled={allObjectives.length === 0}
-                            className="ml-4 px-3 py-1 rounded bg-accent-gold/20 text-accent-gold font-bold text-xs
-                                       hover:bg-accent-gold/30 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Continue to G2 →
-                        </button>
-                    </div>
-                </div>
+                <PlanPhase
+                    plan={plan}
+                    onUpdate={updatePlan}
+                    corpsId={corpsId}
+                    onAdvance={advancePhase}
+                    centroidLookup={centroidLookup}
+                />
             )}
             {phase === 'g2_assessment' && (
                 <div className="absolute inset-0 z-10 pointer-events-none">
