@@ -78,24 +78,36 @@ export function buildOperationArrowsGeoJSON(
 
     const origin: [number, number] = rawOrigin;
 
-    // Draw sweeping arrow from origin to final objective
-    const finalObjective = op.objectives[op.objectives.length - 1];
-    const finalPt = centroidLookup.get(finalObjective);
-    if (!finalPt) continue;
+    // Compute target: centroid of ALL objective positions.
+    // Single arrow from origin → center of targeted area.
+    const objPoints: [number, number][] = [];
+    for (const obj of op.objectives) {
+      const pt = centroidLookup.get(obj);
+      if (pt) objPoints.push(pt);
+    }
+    if (objPoints.length === 0) continue;
+
+    // Target = geographic centroid of all objectives
+    const targetPt: [number, number] = [
+      objPoints.reduce((s, p) => s + p[0], 0) / objPoints.length,
+      objPoints.reduce((s, p) => s + p[1], 0) / objPoints.length,
+    ];
 
     // Compute curve offset — deterministic per operation, sweeping military feel
     const hash = hashString(op.name + op.corps_id);
-    const dx = finalPt[0] - origin[0];
-    const dy = finalPt[1] - origin[1];
+    const dx = targetPt[0] - origin[0];
+    const dy = targetPt[1] - origin[1];
     const len = Math.sqrt(dx * dx + dy * dy);
     const offsetSign = (Math.abs(hash) % 2 === 0) ? 1 : -1;
     const offsetMag = len * (0.08 + ((Math.abs(hash) % 50) / 50) * 0.12) * offsetSign;
 
-    const curve = buildBezierCurve(origin, finalPt, offsetMag, 24);
+    const curve = buildBezierCurve(origin, targetPt, offsetMag, 24);
 
-    // Tapered body width scales with arrow length — HoI style
-    const baseHalfW = Math.max(0.006, len * 0.04);
-    const tipHalfW = Math.max(0.002, len * 0.012);
+    // Arrow thickness scales with number of objectives — more targets = wider arrow.
+    // Base: 1 objective = standard width. Each additional objective adds ~30% width.
+    const objScale = 1 + (op.objectives.length - 1) * 0.3;
+    const baseHalfW = Math.max(0.006, len * 0.04) * objScale;
+    const tipHalfW = Math.max(0.002, len * 0.012) * objScale;
 
     // Glow (wide, blurred — rendered behind)
     features.push({
@@ -114,8 +126,8 @@ export function buildOperationArrowsGeoJSON(
       });
     }
 
-    // Arrowhead — wider than the tip of the body
-    const headWidth = Math.max(0.009, len * 0.035);
+    // Arrowhead — wider than the tip of the body, scales with objectives
+    const headWidth = Math.max(0.009, len * 0.035) * objScale;
     const headLength = headWidth * 1.8;
     const triangle = buildArrowheadTriangle(curve, headLength, headWidth);
     if (triangle) {
@@ -132,44 +144,6 @@ export function buildOperationArrowsGeoJSON(
       geometry: { type: 'Point', coordinates: origin },
       properties: { type: 'op-arrow-origin', faction: op.faction, op_name: op.name, color: colors.line },
     });
-
-    // Intermediate objectives — smaller arrows for multi-step operations
-    if (op.objectives.length > 1) {
-      let prevPt = origin;
-      for (let i = 0; i < op.objectives.length - 1; i++) {
-        const objPt = centroidLookup.get(op.objectives[i]);
-        if (!objPt) continue;
-
-        const segDx = objPt[0] - prevPt[0];
-        const segDy = objPt[1] - prevPt[1];
-        const segLen = Math.sqrt(segDx * segDx + segDy * segDy);
-        const segOffsetMag = segLen * 0.06 * offsetSign;
-        const segCurve = buildBezierCurve(prevPt, objPt, segOffsetMag, 16);
-
-        const segBaseHalfW = Math.max(0.004, segLen * 0.03);
-        const segTipHalfW = Math.max(0.0015, segLen * 0.01);
-        const segBody = buildTaperedArrowBody(segCurve, segBaseHalfW, segTipHalfW);
-        if (segBody) {
-          features.push({
-            type: 'Feature',
-            geometry: { type: 'Polygon', coordinates: [segBody] },
-            properties: { type: 'op-arrow-body', faction: op.faction, op_name: op.name, color: colors.line },
-          });
-        }
-
-        const segHeadW = Math.max(0.006, segLen * 0.025);
-        const segTriangle = buildArrowheadTriangle(segCurve, segHeadW * 1.8, segHeadW);
-        if (segTriangle) {
-          features.push({
-            type: 'Feature',
-            geometry: { type: 'Polygon', coordinates: [segTriangle] },
-            properties: { type: 'op-arrow-head', faction: op.faction, op_name: op.name, color: colors.head },
-          });
-        }
-
-        prevPt = objPt;
-      }
-    }
   }
 
   return { type: 'FeatureCollection', features: features as Feature[] };
