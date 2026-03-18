@@ -47,6 +47,7 @@ import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/allianc
 import { isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
 import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
+import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';

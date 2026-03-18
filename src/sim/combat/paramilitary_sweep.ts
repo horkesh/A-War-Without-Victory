@@ -22,6 +22,7 @@ import type {
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import {
     PARAMILITARY_UNIT_SIZE,
     PARAMILITARY_MARCH_TURNS,
@@ -273,7 +274,11 @@ export function advanceParamilitaries(
 
         // Capture: flip control
         const pc = state.political.political_controllers ??= {};
+        const previousController = pc[targetOsid] as FactionId | undefined;
         pc[targetOsid] = f.faction;
+        if (previousController && previousController !== f.faction) {
+            seedDisplacementTimerOnFlip(state, targetOsid, previousController, f.faction);
+        }
 
         (state.political.control_events ??= []).push({
             turn,

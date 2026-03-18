@@ -13,11 +13,12 @@
  * Deterministic: sorted OSID iteration, BFS cluster detection, no randomness.
  */
 
-import type { GameState } from '../../state/game_state.js';
+import type { FactionId, GameState } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data_types.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 
 /** Max cluster size for auto-flip. Clusters > 3 are too large to flip without military action. */
 const MAX_POCKET_CLUSTER = 3;
@@ -132,6 +133,7 @@ export function consolidateRearPockets(
         if (!state.political.political_controllers) state.political.political_controllers = {};
         for (const c of cluster.sort(strictCompare)) {
             state.political.political_controllers[c] = surroundingFaction;
+            seedDisplacementTimerOnFlip(state, c, controller as FactionId, surroundingFaction as FactionId);
             report.flipped.push({ osid: c, from: controller, to: surroundingFaction });
             report.total_flipped++;
         }

@@ -20,6 +20,7 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Equipment ceilings per equipment_class
@@ -245,7 +246,11 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
         if (def.capture_osids) {
             if (!state.political.political_controllers) state.political.political_controllers = {};
             for (const osid of def.capture_osids) {
+                const previousController = state.political.political_controllers[osid] as FactionId | undefined;
                 state.political.political_controllers[osid] = faction as FactionId;
+                if (previousController && previousController !== faction) {
+                    seedDisplacementTimerOnFlip(state, osid, previousController, faction as FactionId);
+                }
             }
         }
     }

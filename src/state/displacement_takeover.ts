@@ -100,6 +100,46 @@ const FALLBACK_ROUTES_BY_FACTION: Record<string, MunicipalityId[]> = {
     HRHB: ['mostar', 'livno', 'travnik', 'brcko']
 };
 
+/**
+ * Seed a displacement timer for an OSID that changed control outside of battle resolution.
+ * Called from: rear pocket consolidation, paramilitary sweep, null-OSID auto-claim, JNA phantom captures.
+ *
+ * Seeds timers for ALL hostile factions (e.g. RS capturing a mixed Bosniak/Croat OSID seeds both
+ * RBiH and HRHB timers). Idempotent — skips if timer already exists for a given OSID+faction pair.
+ *
+ * Must be called AFTER political_controllers has been updated for the OSID.
+ */
+export function seedDisplacementTimerOnFlip(
+    state: GameState,
+    osid: string,
+    fromFaction: FactionId,
+    toFaction: FactionId,
+): void {
+    if (state.meta.phase !== 'war') return;
+    if (!fromFaction || !toFaction || fromFaction === toFaction) return;
+
+    if (!state.displacement.hostile_takeover_timers) state.displacement.hostile_takeover_timers = {};
+    const timerMap = state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
+
+    const parts = osid.split(':');
+    const munId = parts.length >= 2 ? parts[1] as MunicipalityId : undefined;
+    if (!munId) return;
+
+    const currentTurn = state.meta.turn;
+    const allFactions: FactionId[] = ['HRHB', 'RBiH', 'RS'];
+    for (const displaced of allFactions) {
+        if (displaced === toFaction) continue;
+        const timerKey = `${osid}|${displaced}`;
+        if (timerMap[timerKey]) continue;
+        timerMap[timerKey] = {
+            mun_id: munId,
+            from_faction: displaced,
+            to_faction: toFaction,
+            started_turn: currentTurn,
+        };
+    }
+}
+
 export interface TakeoverBattleRecord {
     settlement_flipped: boolean;
     location: string;
@@ -454,6 +494,7 @@ export function processDisplacementTakeover(
 
     const currentTurn = state.meta.turn;
     const timerMap = state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
+    const allFactions: FactionId[] = ['HRHB', 'RBiH', 'RS'];
     const campMap = state.displacement.displacement_camp_state as Record<MunicipalityId, DisplacementCampState>;
 
     // Build set of OSIDs on the front line (for front-adjacency gating in displacement seeding).
@@ -479,7 +520,6 @@ export function processDisplacementTakeover(
     //    warStartTurn + 1. Use +1 here to fire on that actual first war turn.
     const warStartTurn = typeof state.meta.war_start_turn === 'number' ? state.meta.war_start_turn : 0;
     if (currentTurn === warStartTurn + 1) {
-        const allFactions: FactionId[] = ['HRHB', 'RBiH', 'RS'];
         const pc = state.political.political_controllers;
         if (pc) {
             const osids = Object.keys(pc).sort(strictCompare);
@@ -512,34 +552,30 @@ export function processDisplacementTakeover(
     }
 
     // 1) Start takeover timers from flipped OSIDs (battle-driven).
+    //    Seeds timers for ALL minority factions — not just the defender.
+    //    Example: VRS captures HRHB OSID with Bosniak minority → seeds both HRHB and RBiH timers.
     for (const battle of battles) {
         if (!battle.settlement_flipped) continue;
-        const fromFaction = battle.defender_faction;
         const toFaction = battle.attacker_faction;
-        if (!fromFaction || !toFaction) continue;
-        if (!areFactionsAtWar(state, fromFaction, toFaction)) continue;
+        if (!toFaction) continue;
         const rec = settlements.get(battle.location);
         if (!rec) continue;
         const munId = getMunicipalityIdFromRecord(rec);
         if (!munId) continue;
         const osidKey = battle.osid ?? `sid:${battle.location}`;
-        const timerKey = `${osidKey}|${fromFaction}`;
-        const existing = timerMap[timerKey];
-        if (
-            existing &&
-            existing.from_faction === fromFaction &&
-            existing.to_faction === toFaction &&
-            existing.started_turn <= currentTurn
-        ) {
-            continue;
+        for (const fromFaction of allFactions) {
+            if (fromFaction === toFaction) continue;
+            if (!areFactionsAtWar(state, fromFaction, toFaction)) continue;
+            const timerKey = `${osidKey}|${fromFaction}`;
+            if (timerMap[timerKey]) continue;
+            timerMap[timerKey] = {
+                mun_id: munId,
+                from_faction: fromFaction,
+                to_faction: toFaction,
+                started_turn: currentTurn
+            };
+            report.timers_started += 1;
         }
-        timerMap[timerKey] = {
-            mun_id: munId,
-            from_faction: fromFaction,
-            to_faction: toFaction,
-            started_turn: currentTurn
-        };
-        report.timers_started += 1;
     }
 
     const friendlyMunsByFaction = buildFriendlyMunicipalitiesByFaction(state, settlements);
