@@ -4,7 +4,9 @@ import type { OpsPhase, OpsPlanState, AxisState } from './types';
 import { PHASE_ORDER, PHASE_LABELS } from './types';
 import { CommanderPhase } from './CommanderPhase';
 import { PlanPhase } from './PlanPhase';
+import { G2Phase } from './G2Phase';
 import { OpsMap } from './OpsMap';
+import { usePrediction } from './usePrediction';
 import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';
 
 let nextAxisCounter = 0;
@@ -148,6 +150,11 @@ export function OpsPlanningModal() {
         setPlan((prev) => ({ ...prev, ...partial }));
     }, []);
 
+    // G2 prediction
+    const { prediction, loading: predLoading, error: predError } = usePrediction(
+        corpsId, plan, selectedOfficerId, phase === 'g2_assessment' || phase === 'plan'
+    );
+
     if (!isOpen || !corpsId) return null;
 
     const currentIdx = PHASE_ORDER.indexOf(phase);
@@ -210,22 +217,14 @@ export function OpsPlanningModal() {
                 />
             )}
             {phase === 'g2_assessment' && (
-                <div className="absolute inset-0 z-10 pointer-events-none">
-                    {/* G2Phase will render here in Task 9 */}
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto
-                                    bg-[rgba(20,18,15,0.88)] backdrop-blur-xl rounded-lg px-6 py-3
-                                    border border-[rgba(180,160,130,0.15)] text-text-secondary text-sm">
-                        G2 Assessment — reviewing operation plan...
-                        <button
-                            type="button"
-                            onClick={advancePhase}
-                            className="ml-4 px-3 py-1 rounded bg-accent-gold/20 text-accent-gold font-bold text-xs
-                                       hover:bg-accent-gold/30 transition-colors"
-                        >
-                            Proceed to Authorize →
-                        </button>
-                    </div>
-                </div>
+                <G2Phase
+                    plan={plan}
+                    prediction={prediction}
+                    loading={predLoading}
+                    error={predError}
+                    corpsId={corpsId}
+                    onAdvance={advancePhase}
+                />
             )}
             {phase === 'authorize' && (
                 <div className="absolute inset-0 z-10 pointer-events-none">
