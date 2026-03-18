@@ -5,6 +5,7 @@ import { PHASE_ORDER, PHASE_LABELS } from './types';
 import { CommanderPhase } from './CommanderPhase';
 import { PlanPhase } from './PlanPhase';
 import { G2Phase } from './G2Phase';
+import { AuthorizePhase } from './AuthorizePhase';
 import { OpsMap } from './OpsMap';
 import { usePrediction } from './usePrediction';
 import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';
@@ -227,14 +228,13 @@ export function OpsPlanningModal() {
                 />
             )}
             {phase === 'authorize' && (
-                <div className="absolute inset-0 z-10 pointer-events-none">
-                    {/* AuthorizePhase will render here in Task 10 */}
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto
-                                    bg-[rgba(20,18,15,0.88)] backdrop-blur-xl rounded-lg px-6 py-3
-                                    border border-[rgba(180,160,130,0.15)] text-text-secondary text-sm">
-                        Authorization pending — Task 10
-                    </div>
-                </div>
+                <AuthorizePhase
+                    plan={plan}
+                    prediction={prediction}
+                    corpsId={corpsId}
+                    officerId={selectedOfficerId}
+                    originSectorId={originSectorId}
+                />
             )}
 
             {/* Close button — top right */}
