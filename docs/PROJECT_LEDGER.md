@@ -1,7 +1,49 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-17
-**Status:** **v0.4.8** (Ground for v0.5.x). **1086 tests**, 87 suites. **n875: 90.4% area-weighted, 13/13 anchors. War-or-Game APPROVED.** Night shift ready for v0.5.0→v0.5.4.
+**Last Updated:** 2026-03-18
+**Status:** **v0.4.9** (AI Comes Alive). **1184 tests**, 96 suites. **n884: 90.4% area-weighted, 13/13 anchors. War-or-Game APPROVED.** Ready for v0.5.0.
+
+## [2026-03-18] v0.4.9 — AI Comes Alive
+
+**Four features making AI commanders produce player-facing content. All Haiku-powered, cosmetic-only, graceful degradation to formula bot.**
+
+### IPC Wiring (P0)
+- `set-ai-commander-config`, `get-ai-commander-config`, `get-advisor-recommendation` handlers in `electron-main.cjs`
+- Preload bridge methods on `window.awwv`. AiSettingsPanel now functional.
+- 12 tests in `ai_commander_ipc.test.ts`
+
+### Officers Who Talk Back (P1)
+- `src/sim/ai_commander/corps_dialogue.ts`: Corps commanders respond to orders in character (Haiku, ~$0.01/turn)
+- Personality derived from officer aggressiveness (aggressive/cautious/balanced). Aggressive officers push for action, cautious ones raise concerns.
+- `CorpsDialoguePanel.tsx`: Officer reports with confidence indicators (green/amber/red)
+- Pipeline step `ai-corps-dialogue` in war_phases.ts. Skips player faction.
+- 26 tests in `corps_dialogue.test.ts`
+
+### After-Action Narrative (P2)
+- `src/sim/ai_commander/aar_narrative.ts`: Significant battles narrated in officer's voice (Haiku, ~$0.005/battle)
+- Significance filter: decisive/catastrophic outcome, territory change, or 200+ casualties
+- Queue mechanism: battles queued during sync combat resolution, consumed by async pipeline step
+- Rolling buffer of 20 narratives on state. Pipeline step `ai-battle-narratives`. Cap 5/turn.
+- 19 tests in `aar_narrative.test.ts`
+
+### War Dispatches (P3)
+- `src/sim/ai_commander/war_dispatches.ts`: Monthly dispatches from UNHCR, NATO analyst, civilian, UN mediator (Haiku, ~$0.005/dispatch)
+- Rotating perspectives (deterministic by turn). Period-appropriate language, real organizations.
+- Generated from actual displacement, casualty, siege, and territory data
+- Rolling buffer of 10 dispatches. Pipeline step `ai-war-dispatches`. Every 4 turns.
+- `WarDispatchPanel.tsx`: Colored left border by perspective type.
+- 31 tests in `war_dispatches.test.ts`
+
+### Engine Fixes (from AI Commander QA)
+- `status_reason` field on `CorpsCommandState` (diagnostic + UI legibility)
+- `op_launch_trace` audit array explains gate blocks for AI commander QA
+- `SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE=3` for offensive corps (shorter cooldown)
+- MapContainer TS guard fixes, orphan test cleanup
+
+### Tests
+- 1184 total vitest tests (was 1110), 96 suites, typecheck clean
+
+---
 
 ## [2026-03-17] v0.4.8 — Enclave Personnel Caps, Return-to-Home March, G2 Ops Modal, Drina Investigation
 
