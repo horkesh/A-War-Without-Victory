@@ -155,23 +155,44 @@ function applyConditionDegradation(cond: EquipmentCondition, rate: number): void
 }
 
 /**
- * Write off non-operational equipment that can't be repaired.
- * If non_operational fraction exceeds threshold, some equipment is permanently lost.
- * Represents cannibalization for spare parts, battlefield abandonment, etc.
- * Returns number of units written off.
+ * Write off degraded and non-operational equipment that can't be maintained.
+ * Equipment with poor condition is gradually scrapped — cannibalized for spare
+ * parts, abandoned in the field, or stripped for other vehicles.
+ *
+ * Write-off rate scales with how bad the condition is:
+ * - non_operational > 30%: scrap 1/turn (severe — beyond field repair)
+ * - degraded + non_op > 50%: scrap 1/turn (too many broken vehicles to maintain)
+ * - degraded + non_op > 70%: scrap 2/turn (formation equipment is collapsing)
+ *
+ * This primarily affects RS as maintenance capacity declines under sanctions.
+ * ARBiH/HRHB have few heavy weapons so write-off impact is minimal.
  */
 export function writeOffNonOperational(
     comp: BrigadeComposition,
     type: 'tanks' | 'artillery',
-    threshold: number = 0.50  // write off when >50% non-operational
 ): number {
     const cond = type === 'tanks' ? comp.tank_condition : comp.artillery_condition;
     const count = comp[type];
-    if (count <= 0 || cond.non_operational < threshold) return 0;
-    // Write off 1 unit per turn when condition is bad enough
-    const writeOff = 1;
-    comp[type] = Math.max(0, count - writeOff);
-    // Normalize condition (proportions stay the same, just fewer units)
+    if (count <= 0) return 0;
+
+    const nonFunctional = cond.degraded + cond.non_operational;
+
+    let writeOff = 0;
+    if (cond.non_operational > 0.30) writeOff = 2;
+    else if (nonFunctional > 0.60) writeOff = 2;
+    else if (nonFunctional > 0.40) writeOff = 1;
+
+    if (writeOff <= 0) return 0;
+
+    // Small formations maintain their few vehicles carefully — no write-off
+    // below 10 units. Represents the difference between a mechanized brigade
+    // with 40 tanks (can't maintain them all) vs a light brigade with 3
+    // captured tanks (will keep those running at all costs).
+    if (count <= 10) return 0;
+
+    writeOff = Math.min(writeOff, count - 5); // never write off below 5
+    if (writeOff <= 0) return 0;
+    comp[type] = count - writeOff;
     return writeOff;
 }
 
