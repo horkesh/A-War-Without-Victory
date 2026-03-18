@@ -2549,7 +2549,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 800,
+    "initial_personnel": 1000,
     "initial_cohesion": 67
   },
   {
@@ -2564,7 +2564,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 800,
+    "initial_personnel": 1000,
     "initial_cohesion": 67
   },
   {
@@ -2579,7 +2579,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 800,
+    "initial_personnel": 1000,
     "initial_cohesion": 67
   },
   {
@@ -3994,7 +3994,7 @@
     "home_osid": "op:srebrenica:donji_potocari_2",
     "kind": "brigade",
     "default_equipment_class": "police",
-    "available_from": 0,
+    "available_from": 4,
     "mandatory": true,
     "manpower_cost": 60,
     "initial_personnel": 400,
@@ -4030,7 +4030,7 @@
     "home_osid": "op:srebrenica:srebrenica_2",
     "kind": "brigade",
     "default_equipment_class": "police",
-    "available_from": 0,
+    "available_from": 6,
     "mandatory": true,
     "manpower_cost": 60,
     "initial_personnel": 400,
@@ -4066,7 +4066,7 @@
     "home_osid": "op:srebrenica:ljeskovik_2",
     "kind": "brigade",
     "default_equipment_class": "police",
-    "available_from": 0,
+    "available_from": 8,
     "mandatory": true,
     "manpower_cost": 60,
     "initial_personnel": 400,
@@ -4102,7 +4102,7 @@
     "home_osid": "op:srebrenica:osmace_2",
     "kind": "brigade",
     "default_equipment_class": "police",
-    "available_from": 0,
+    "available_from": 10,
     "mandatory": true,
     "manpower_cost": 60,
     "initial_personnel": 400,
