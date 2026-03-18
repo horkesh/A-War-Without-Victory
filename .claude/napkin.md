@@ -8,9 +8,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-18, v0.4.9 — AI Comes Alive)
-**v0.4.9.** 1184 tests, 96 suites. tsc clean. **Latest calibration: n884 90.4% area-weighted. War-or-Game APPROVED.**
-**This session:** v0.4.9 AI Comes Alive — 4 features: (1) IPC wiring for AI commander, (2) Officers Who Talk Back (corps dialogue), (3) After-Action Narrative (battle stories), (4) War Dispatches (humanitarian mirror). All Haiku-powered, cosmetic-only, graceful degradation.
+## Current State (2026-03-18, v0.4.9 — AI Comes Alive + Equipment/Displacement Overhaul)
+**v0.4.9.** 1184 tests, 96 suites. tsc clean. **Latest calibration: n913 90.3% area-weighted, 13/13 anchors (Brcko FIXED). War-or-Game APPROVED.**
+**This session:** Equipment rework (scavenging+capture+smuggle+production, no auto-tickers), civilian casualty overhaul (per-faction kill fractions, tracking unification), Brcko sector merge fix (13/13 anchors).
+**Equipment pipeline:** Battlefield scavenging (10-20% of destroyed enemy, scaled by outcome), capture from retreat (2-8%), arms smuggling (2 tanks + 3 arty / 12 turns, 60/40 ARBiH/HVO), Zenica steelworks (+3 arty / 8 turns ARBiH), HV transfers (+1 arty / 12 turns HVO). Write-off: >40% non-functional scrapped 1/turn. No per-brigade auto-tickers.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
 **10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.
 **Calibration freeze rule:** After v0.6.1, any sim-affecting change needs `npm run calibrate:52w` regression check vs freeze baseline.
@@ -72,13 +73,15 @@
 
 ## Known Backlog
 1. **[2026-03-16] 2KK Prozor positional lock (P2)**: Commander override mission compliance pulls toward Bihac. 3 Prozor OSIDs still mismatched. Residual positional inertia.
-2. **[2026-03-16] Drina region 80.4% (P2)**: Improved +2.7pp from n819. Remaining gap structural — may need OOB or painted target adjustments.
+2. **[2026-03-18] Drina region 78% (P2)**: Slightly regressed from equipment rework (fewer phantom ARBiH tanks). Structural gap — may need OOB or painted target adjustments.
 3. **[2026-03-10] Donji Vakuf pocket remnant (P3)**: 2 OSIDs still RBiH (was 5). Municipality priority tuning.
 4. **[2026-03-16] RBiH w40 benchmark marginal (P3)**: 0.054 deviation vs 0.05 tolerance. Within noise.
 5. **[2026-03-12] HVO Central Bosnia ghost front — DEFERRED**: Activates April 1993.
 6. **[2026-03-17] Ops planning modal (P1 — NEXT SESSION)**: Map clicks confirmed working (ref-based handler fix), but modal file overwritten by worktree rewrite user rejected. Need to restore our version (forces left, controls bottom, G2 right) and add territory polygon highlighting (pencil-scratch fill + black border on objectives, green on staging). See `working-on.md` for full spec. OpsMapRenderer needs `updateHighlights()` method.
 7. **[2026-03-17] 3rd Corps brigade displacement (P2)**: 16/27 brigades far from home municipality. Operations displace brigades south, garrison-fill reassigns by proximity. Home affinity tuning regresses calibration. Fix: post-operation return-to-home-sector march logic.
 8. **[2026-03-15] Visual assets — EXTERNAL**: User generating via Gemini Pro.
+9. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical. Smuggle volumes or scavenge rates may need small bump.
+10. **[2026-03-18] RS artillery barely declining (P3)**: 1313 from 1335. Write-off threshold may need to apply more aggressively to artillery.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**

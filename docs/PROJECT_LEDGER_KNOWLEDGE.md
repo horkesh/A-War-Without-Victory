@@ -1,6 +1,6 @@
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-03-18
 **Purpose:** Knowledge accumulation by theme.
 
 **AI Commander QA findings (2026-03-17):** Three API-powered AI commanders (Mladić, Halilović→Delić, Petković) ran 40w campaign and produced 345 diagnostic observations. Six actionable themes: (1) Alliance decay too fast (95 obs — initial 0.35 should be 0.75, war target April 1993 ~w52), (2) SRK density-gated from siege ops (24 obs — siege corps should be exempt from density gate), (3) Supply gate stripping all targets (23 obs — should be graduated, not binary), (4) Event timing wrong (33 obs — events should be conditional on game state, not calendar), (5) Operation state machine bug (16 obs — ops stuck in planning), (6) Late-war stasis (9 obs — 22 turns frozen). See `memory/ai_commander_three_agents.md` and `memory/conditional_events_design.md`.
@@ -47,9 +47,9 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 
 - **Phase:** Post-MVP — War engine (Peace/War two-phase lifecycle), full combat system active
 - **Status:** MVP declared 2026-02-08. Scope open for calibration, realism, and UI work.
-- **Focus:** Historical calibration (89.6% area w40), reactive defense system (Layers A+B+C), operation preparation system, warroom UI, elite brigade loan system.
+- **Focus:** Historical calibration (90.3% area w40, 13/13 anchors), equipment pipeline (scavenge+capture+smuggle+production), civilian casualty overhaul, reactive defense system (Layers A+B+C), operation preparation system, warroom UI, elite brigade loan system.
 - **Key Systems Live (2026-03-15):** 120-step war pipeline, OSID combat, sector stances (5 types), distance-weighted reactive defense, operation preparation (5-phase), sector intel, strategic reserve, fog-of-war, displacement, supply reserves, officer system, army HQ reserve pool (elite loan), warroom cork board + OsidThumbnailRenderer, ArmyReservePanel. 618 vitest tests.
-- **Calibration baseline:** n703 — 89.6% area-weighted, 11/13 anchors, 6/6 benchmarks, hash `10b74532c37cfaac`.
+- **Calibration baseline:** n913 — 90.3% area-weighted, 13/13 anchors (Brcko FIXED). Equipment rework + civilian casualty overhaul. Previous: n703 89.6% (11/13), hash `10b74532c37cfaac`.
 
 ### Phase tracking & milestones
 
@@ -812,7 +812,7 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 - **Supply drain critical finding:** UN airdrops at 15 pts/turn were silently dominating RBiH supply, masking the entire maintenance drain system. Reduced to 3/turn. Single constants can mask entire systems — always audit income vs drain arithmetic.
 - **Patron commitment historical basis:** RBiH 0.3 in 1992 (arms embargo), growing to 0.6 post-1994. RS 0.8 (JNA backing), declining to 0.55. HRHB 0.6 (Croatian support), increasing to 0.7. Initial material_support_level: RS 0.75, HRHB 0.65, RBiH 0.3.
 - **HRHB supply fragility:** 59 siege counters from central Bosnia pockets drain faction reserves. Need higher initial supply (75) + patron commitment to stay strained (19.3%), not collapsed (0%).
-- **Displacement kill fraction issue (deferred):** 4% DISPLACEMENT_KILLED_FRACTION uniform for all contexts. RS civilian departure from RBiH/HRHB was mostly voluntary flight (~1% lethality). Sim produces 10,860 RS civ killed vs ~4k historical. Fix: per-context kill fractions in `displacement_loss_constants.ts`.
+- **Displacement kill fraction issue (RESOLVED n905, 2026-03-18):** Per-faction kill fractions implemented. RBiH displaced by RS = 4%, HRHB displaced by RS = 1%, RS displaced by non-RS = 1%, default = 2%. `getDisplacementKillFraction()` in `displacement_loss_constants.ts`. Bosniak civilian killed % now 83% (was 60%), Croat 8% (was 28%).
 - **Calibration result:** n166 = 84.2% area-weighted (up from 81.5%). 146 attacks, 118 battles, 103 captures. RS weekly attacks decline 8→1 (organic tempo confirmed). All VRS corps still offensive at t26.
 ## 2026-03-07 - Player-agency docs synchronized after A-H closure
 

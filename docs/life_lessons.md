@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-18 (AI commander QA session: 5 new lessons)
+> Last updated: 2026-03-18 (Equipment rework + displacement overhaul: 6 new lessons)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -20,6 +20,42 @@
 ---
 
 ## Active Lessons (no recent violations)
+
+### [Scaling] Per-brigade mechanics are explosive — use faction-level capped budgets (2026-03-18) — NEW
+- **Context**: `faction_progression.ts` gave every active brigade +1 tank/16 turns and +1 artillery/8 turns. With 125 ARBiH brigades this produced 243 phantom tanks (historical ~30-50) and 668 phantom artillery (historical ~150-250). Mountain infantry in Drina pockets were acquiring tanks.
+- **Wrong approach**: Per-brigade-per-tick equipment tickers. Any per-brigade mechanic scales linearly with brigade count. As OOB grows from recruitment, the output explodes quadratically (more brigades = more production = more equipment = more brigades survive = more production).
+- **Right approach**: Faction-level capped budgets. ARBiH gets 2 tanks + 3 artillery per 12 turns from smuggling (split 60/40 ARBiH/HVO), plus 3 artillery per 8 turns from Zenica steelworks. Fixed output regardless of brigade count. Distribution goes to best-equipped brigade (concentrates on mech/motor, not light infantry).
+- **Do instead**: When designing any per-tick mechanic, ask: "what happens when there are 125 entities?" If the answer is "125x the output," use a faction-level budget instead. Per-brigade scaling is acceptable only for consumption (maintenance drain), never for production.
+
+### [Architecture] Proxy mechanics mask missing real mechanics — check before building (2026-03-18) — NEW
+- **Context**: The equipment auto-ticker in `faction_progression.ts` existed because `captureEquipment()` was never wired into `attack_resolution_osid.ts` (the OSID-based resolver used for all sector operations). The capture function existed only in the legacy `battle_resolution.ts` (dead code path). The auto-ticker was a proxy for captures that weren't happening.
+- **Wrong approach**: Building a proxy mechanic (auto-ticker) to compensate for a missing real mechanic (capture). The proxy masked the bug — nobody noticed captures weren't happening because equipment was arriving anyway.
+- **Right approach**: Before building any compensating mechanic, verify that the primary mechanic works. If ARBiH isn't capturing tanks, check whether `captureEquipment()` is called in the live combat path, not whether a separate system can inject tanks.
+- **Do instead**: When a mechanic's output seems low and you're tempted to add a supplementary source, first verify the primary source is actually producing output. Check call sites, not just function existence. A function that exists but is never called in the live path is dead code.
+
+### [Data Integrity] Transfers must debit the source — or you get duplication (2026-03-18) — NEW
+- **Context**: `brigade_dissolution.ts` transferred 70% of equipment to the nearest same-corps brigade but never zeroed the dissolved brigade's `composition`. On reconstitution, the brigade kept its original equipment — duplicating 70% per dissolution/reconstitution cycle.
+- **Wrong approach**: Transferring data without clearing the source. The transfer function updated the recipient but left the donor unchanged. Classic double-spend.
+- **Right approach**: Any function that transfers a resource (equipment, personnel, supply) MUST zero the source field after transfer. Use a pattern: `const transferred = source.field * rate; target.field += transferred; source.field = 0;`
+- **Do instead**: When writing any transfer/redistribution function, the final step must be zeroing the source. Search the codebase for other transfer functions and audit: does the source get debited? If not, there's a duplication bug.
+
+### [Defaults] Default cases in switch/if chains catch everything you forgot (2026-03-18) — NEW
+- **Context**: `displacement_loss_constants.ts` had explicit kill fractions for RS displaced by non-RS (1%) and RBiH displaced by RS (2%), with a 4% default. Croats hit the 4% default because no explicit HRHB case existed — giving them double the Bosniak rate. Historically inverted: Bosniak ethnic cleansing by RS was uniquely severe (~75% of civilian deaths), Croat displacement had much lower kill rates.
+- **Wrong approach**: Using a generous default and assuming you've covered all important cases. The default was 4% — higher than any explicit case — and silently applied to all uncovered faction combinations.
+- **Right approach**: Every faction combination (3 displaced-by x 3 displacing = 9 combinations) needs an explicit rate. The default should be the LOWEST plausible rate (1-2%), not the highest, so forgotten cases fail safe rather than fail lethal.
+- **Do instead**: In any system with faction-specific behavior (kill fractions, mobilization, doctrine), enumerate ALL faction combinations explicitly. If you must have a default, make it conservative (low impact), never aggressive. Review: what faction combinations exist? Are they all covered?
+
+### [Architecture] Two stores tracking the same data will diverge (2026-03-18) — NEW
+- **Context**: `civilian_casualties` and `displacement_event_log` tracked civilian deaths through 3 independent write paths: `processDisplacementTakeover` wrote to both, `advanceParamilitaries` wrote to `civilian_casualties` only, and `updateDisplacement` wrote to event log only (and lumped killed+fled into `killed`). Result: 3,700 divergence between the two stores.
+- **Wrong approach**: Having two parallel stores that both track "civilian deaths" but are written to by different code paths. Each new write path only updated one store (the one the author knew about).
+- **Right approach**: Either unify into one store (make one authoritative and derive the other) or ensure a single write function that updates ALL stores. `recordCivilianDisplacementCasualties()` now serves as that single function — every write path calls it.
+- **Do instead**: When you find two fields/stores tracking the same data, immediately audit ALL write paths. If any write path updates one but not the other, there's a divergence bug. Prefer a single authoritative store with a single write function. If two stores are needed (e.g., summary + log), the write function must update both atomically.
+
+### [Sectors] Small adjacent sectors in the same corps should merge (2026-03-18) — NEW
+- **Context**: Brcko anchor failed (12/13) because the 215th and 108th brigades were in different sectors despite defending the same front. Reactive defense (which operates within sectors) never activated — each brigade fought alone against 3-11x odds. The sector system split co-located brigades into separate sectors.
+- **Wrong approach**: Accepting any sector partition where brigades are technically "in a sector." The sector system created many 1-2 edge sectors at Brcko instead of merging them into a defensible unit.
+- **Right approach**: Undersized sectors (fewer edges than a threshold) adjacent to same-corps sectors should be merged. This ensures reactive defense covers the full defensive line. The merge in `mergeUndersizedSubSegments` already existed but the threshold was wrong for this case.
+- **Do instead**: When a front line defense fails despite having adequate forces present, check whether the forces are in the same sector. If two brigades are 1 hop apart but in different sectors, reactive defense won't help either one. Merge thresholds should be aggressive for same-corps sectors on the same front.
 
 ### [Design] Engine soundness over calibration percentage (2026-03-18) — NEW
 - **Context**: After implementing 7 engine fixes, calibration dropped from 90.4% to 89.9% but AI commander observations dropped from 321 to 21. The engine is MORE correct (commanders stopped complaining) even though the number went down slightly.

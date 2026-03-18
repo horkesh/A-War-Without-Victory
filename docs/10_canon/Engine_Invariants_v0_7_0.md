@@ -309,7 +309,7 @@ When a brigade has NO valid retreat destination AND a friendly OSID exists withi
 
 ### 14.6 Equipment conservation
 
-Capture transfers equipment from loser to winner; total equipment is conserved minus degradation (no creation or destruction except by defined degradation/capture rules).
+Capture transfers equipment from loser to winner. Equipment may be created by defined external sources (arms smuggling, local production, HV transfers) and destroyed by degradation write-off and battle losses. Total equipment tracks all sources and sinks — no unaccounted creation or destruction. (Updated n905: external acquisition pipelines added as defined creation rules.)
 
 ### 14.7 OG personnel conservation
 

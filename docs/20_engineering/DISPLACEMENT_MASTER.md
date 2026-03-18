@@ -284,7 +284,7 @@ When per-municipality routing is exhausted or no route is defined:
 
 | Constant | Value | Meaning |
 |----------|-------|---------|
-| `DISPLACEMENT_KILLED_FRACTION` | 0.04 | 4% of displaced killed (all ethnicities). Was 0.10, reduced in Phase A calibration (n343). |
+| `DISPLACEMENT_KILLED_FRACTION` | Per-faction (see below) | **OVERHAULED n905 (2026-03-18).** No longer uniform. RBiH displaced by RS = 4%, HRHB displaced by RS = 1%, RS displaced by non-RS = 1%, default = 2%. Was 0.04 uniform. See `getDisplacementKillFraction()` in `displacement_loss_constants.ts`. |
 | `FLEE_ABROAD_FRACTION_RS` | 0.30 | 30% of surviving displaced Serbs leave BiH |
 | `FLEE_ABROAD_FRACTION_HRHB` | 0.25 | 25% of surviving displaced Croats leave BiH |
 | `FLEE_ABROAD_FRACTION_RBIH` | 0.00 | Bosniaks have no external state to flee to |
@@ -301,7 +301,7 @@ When per-municipality routing is exhausted or no route is defined:
 
 For each displacement event:
 1. Compute `displacementAmount` from trigger
-2. `killed = floor(displacementAmount × killFraction)` (standard 10%, or 35% for enclave overrun)
+2. `killed = floor(displacementAmount × killFraction)` (per-faction rate via `getDisplacementKillFraction()`, or 35% for enclave overrun)
 3. `survivors = displacementAmount - killed`
 4. `fledAbroad = floor(survivors × fleeAbroadFraction)` (faction-specific, Posavina override)
 5. `routedToCamp = survivors - fledAbroad` (enters camp state machine)
@@ -564,7 +564,7 @@ hostileShare = Math.min(hostileShare, 0.80);  // cap at 80%
 const displacementAmount = Math.min(Math.floor(osidPop * hostileShare), remainingPop);
 ```
 
-**Example:** RS captures 1 of 11 OSIDs in Prijedor (pop 112,543, 44% Bosniak). Per-OSID pop = 10,231. Bosniak share = 0.44. Displacement = floor(10,231 × 0.44) = 4,501 Bosniaks expelled from that OSID. Of those: 10% killed (450), remainder routed to camps then to friendly municipalities. RS must hold the OSID for 4 continuous weeks before displacement fires.
+**Example:** RS captures 1 of 11 OSIDs in Prijedor (pop 112,543, 44% Bosniak). Per-OSID pop = 10,231. Bosniak share = 0.44. Displacement = floor(10,231 × 0.44) = 4,501 Bosniaks expelled from that OSID. Of those: kill fraction applied per-faction (RBiH displaced by RS = 4%, i.e. ~180 killed), remainder routed to camps then to friendly municipalities. RS must hold the OSID for 4 continuous weeks before displacement fires.
 
 ### 10.6 Re-Displacement Pass-Through
 
@@ -618,7 +618,7 @@ After the initial 4-turn timer fires (Branch A), the OSID enters **sustained dis
 
 ### 11.2 Open Issues
 
-1. **HRHB killed too high (9.2K vs 2K full-war target):** Driven by large Croat displacement from areas like Livno (17K out, 8K lost from pop 40K). The 10% kill fraction applies uniformly. May need a lower kill fraction for Croat displacement specifically, or the combat system may be over-capturing HRHB-held OSIDs.
+1. ~~**HRHB killed too high (9.2K vs 2K full-war target)**~~ **RESOLVED n905 (2026-03-18):** Per-faction kill fractions implemented. HRHB displaced by RS = 1% (was 4% default). Croat civilian killed % now 8% (was 28%). See `getDisplacementKillFraction()` in `displacement_loss_constants.ts`.
 
 2. **RS killed slightly low (2.6K vs 6K full-war target at 40w):** War-start seeding improved this from 2.1K to 2.6K. May reach target at 52w, or the 0.80 hostile share cap may still be too aggressive.
 
