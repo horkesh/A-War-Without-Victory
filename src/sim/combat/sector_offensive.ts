@@ -90,8 +90,10 @@ export function resolveEquipmentClass(f: { equipment_class?: string; tags?: stri
 // 2 brigades = minimum for realistic combined-arms commitment.
 const MIN_BRIGADES_FOR_OFFENSIVE = 2;
 
-/** Maximum objectives per offensive. */
-const MAX_OBJECTIVES = 6;
+/** Maximum objectives per offensive (absolute cap). */
+const MAX_OBJECTIVES_CAP = 6;
+/** Objectives per brigade ratio — scales op scope with force size. */
+const OBJECTIVES_PER_BRIGADE = 0.5; // 1 objective per 2 brigades
 
 /** Personnel floor below which a brigade cannot attack (mirrors bot_brigade_eval_attack gate). */
 const COMBAT_INEFFECTIVE_PERSONNEL = 400;
@@ -1344,12 +1346,16 @@ export function evaluateCorpsOffensiveLaunch(
         }
     }
 
-    // Greedy chain: accept objectives adjacent to the reachable set, expand
+    // Greedy chain: accept objectives adjacent to the reachable set, expand.
+    // Objective count scales with force size: 1 per 2 brigades, capped at 6.
+    // A 3-brigade op gets 1-2 objectives; a 12-brigade corps offensive gets 6.
+    const maxObjectives = Math.min(MAX_OBJECTIVES_CAP, Math.max(1, Math.floor(corpsBrigadeIds.length * OBJECTIVES_PER_BRIGADE)));
     const objectives: string[] = [];
     let changed = true;
-    while (changed && objectives.length < MAX_OBJECTIVES) {
+    while (changed && objectives.length < maxObjectives) {
         changed = false;
         for (const t of candidateTargets) {
+            if (objectives.length >= maxObjectives) break;
             if (reachable.has(t)) continue; // already accepted
             const neighbors = osidAdj.get(t);
             if (!neighbors) continue;

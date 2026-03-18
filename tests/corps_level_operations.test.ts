@@ -68,6 +68,7 @@ function makeSub(friendlyOsids: string[], enemyOsids: string[]): CorpsFrontSubSe
         friendly_osids: friendlyOsids,
         enemy_osids: enemyOsids,
         length_edges: friendlyOsids.length,
+        primary_brigade_ids: [],
     } as CorpsFrontSubSegment;
 }
 
@@ -75,10 +76,12 @@ describe('Corps-Level Operation Launch', () => {
     it('seeds contiguity from ALL corps sectors', () => {
         // Two sectors in the same corps, each with different friendly OSIDs.
         // Target is adjacent to sector A's front but not sector B's.
+        // 4 brigades → maxObjectives = floor(4 * 0.5) = 2
         const state = makeState(5, {
             'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:friendly1' },
             'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:friendly2' },
             'b3': { corps_id: 'corps_1' as any, location_osid: 'op:b:friendly1' },
+            'b4': { corps_id: 'corps_1' as any, location_osid: 'op:b:friendly1' },
         }, {
             'sector:corps_1:0': {
                 corps_id: 'corps_1',
@@ -99,7 +102,7 @@ describe('Corps-Level Operation Launch', () => {
 
         const op = evaluateCorpsOffensiveLaunch(
             state, 'corps_1', 'RS' as FactionId,
-            ['b1', 'b2', 'b3'],
+            ['b1', 'b2', 'b3', 'b4'],
             ['op:e:target1', 'op:e:target2'],
             ['op:e:target1', 'op:e:target2'],
             null, undefined, 'sector:corps_1:0',
@@ -289,5 +292,71 @@ describe('Corps-Level Operation Launch', () => {
         // Only t1 reachable from corps_1's front; t2 is from corps_2's front
         expect(op!.objectives).toContain('op:e:t1');
         expect(op!.objectives).not.toContain('op:e:t2');
+    });
+
+    it('caps objectives by force size (1 per 2 brigades)', () => {
+        // 3 brigades → maxObjectives = floor(3 * 0.5) = 1
+        // Even though 3 targets are contiguous, only 1 should be selected
+        const state = makeState(5, {
+            'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:f1' },
+            'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:f2' },
+            'b3': { corps_id: 'corps_1' as any, location_osid: 'op:a:f3' },
+        }, {
+            'sector:corps_1:0': {
+                corps_id: 'corps_1',
+                sub_segments: [makeSub(['op:a:f1', 'op:a:f2', 'op:a:f3'], ['op:e:t1', 'op:e:t2', 'op:e:t3'])],
+            },
+        }, [
+            { a: 'op:a:f1', b: 'op:e:t1' },
+            { a: 'op:e:t1', b: 'op:e:t2' },
+            { a: 'op:e:t2', b: 'op:e:t3' },
+        ]);
+
+        const op = evaluateCorpsOffensiveLaunch(
+            state, 'corps_1', 'RS' as FactionId,
+            ['b1', 'b2', 'b3'],
+            ['op:e:t1', 'op:e:t2', 'op:e:t3'],
+            ['op:e:t1', 'op:e:t2', 'op:e:t3'],
+            null, undefined, 'sector:corps_1:0',
+        );
+
+        expect(op).not.toBeNull();
+        // 3 brigades → max 1 objective (floor(3 * 0.5) = 1)
+        expect(op!.objectives!.length).toBe(1);
+    });
+
+    it('scales objectives up with more brigades', () => {
+        // 12 brigades → maxObjectives = min(6, floor(12 * 0.5)) = 6
+        const brigades: Record<string, Partial<FormationState>> = {};
+        for (let i = 1; i <= 12; i++) {
+            brigades[`b${i}`] = { corps_id: 'corps_1' as any, location_osid: 'op:a:f1' };
+        }
+        const state = makeState(5, brigades, {
+            'sector:corps_1:0': {
+                corps_id: 'corps_1',
+                sub_segments: [makeSub(['op:a:f1'], ['op:e:t1', 'op:e:t2', 'op:e:t3', 'op:e:t4', 'op:e:t5', 'op:e:t6', 'op:e:t7', 'op:e:t8'])],
+            },
+        }, [
+            { a: 'op:a:f1', b: 'op:e:t1' },
+            { a: 'op:e:t1', b: 'op:e:t2' },
+            { a: 'op:e:t2', b: 'op:e:t3' },
+            { a: 'op:e:t3', b: 'op:e:t4' },
+            { a: 'op:e:t4', b: 'op:e:t5' },
+            { a: 'op:e:t5', b: 'op:e:t6' },
+            { a: 'op:e:t6', b: 'op:e:t7' },
+            { a: 'op:e:t7', b: 'op:e:t8' },
+        ]);
+
+        const op = evaluateCorpsOffensiveLaunch(
+            state, 'corps_1', 'RS' as FactionId,
+            Array.from({ length: 12 }, (_, i) => `b${i + 1}`),
+            ['op:e:t1', 'op:e:t2', 'op:e:t3', 'op:e:t4', 'op:e:t5', 'op:e:t6', 'op:e:t7', 'op:e:t8'],
+            ['op:e:t1', 'op:e:t2', 'op:e:t3', 'op:e:t4', 'op:e:t5', 'op:e:t6', 'op:e:t7', 'op:e:t8'],
+            null, undefined, 'sector:corps_1:0',
+        );
+
+        expect(op).not.toBeNull();
+        // 12 brigades → max 6 objectives (min(6, floor(12 * 0.5)))
+        expect(op!.objectives!.length).toBe(6);
     });
 });
