@@ -572,42 +572,117 @@ console.log(`  Max cluster size: ${constituentSizes[0]}, Median: ${constituentSi
 
 // ─── Phase 5d: Second topology pass — shared arcs between clusters ──────────
 // After merging canonical settlements into clusters, the resulting cluster polygons
-// do NOT share arcs for inter-cluster boundaries. Rebuild topology from the merged
-// polygons so adjacent clusters share exact boundary vertices.
-// Without this, front lines have gaps where adjacent hostile OSIDs have different
-// intermediate vertices along their shared boundary. (MAP_GEOMETRY_MASTER #1)
-console.log('Phase 5d: Rebuilding topology from merged cluster polygons...');
+// do NOT share arcs for inter-cluster boundaries.
+// Fix: snap near-miss boundary vertices between adjacent clusters.
+// For each pair of adjacent OSIDs (from the contact graph), find vertices
+// on each polygon that are close but not identical, and snap them to their
+// midpoint. This creates shared vertices without altering polygon shapes
+// (only micro-adjustments of <100m). (MAP_GEOMETRY_MASTER #1)
+console.log('Phase 5d: Snapping shared boundary vertices between clusters...');
 {
-    const mergedFeatures: any[] = [];
-    const osidOrder: string[] = [];
-    for (const [osid, f] of clusteredFeatures) {
-        osidOrder.push(osid);
-        mergedFeatures.push(turf.feature(f.geometry, { osid, _idx: mergedFeatures.length }));
+    const SNAP_THRESHOLD = 0.001; // ~111m — max distance to snap
+    const coordKey6 = (c: number[]) => c[0].toFixed(6) + ',' + c[1].toFixed(6);
+
+    // Build adjacency from the contact graph (already computed above as adjMap for canonical,
+    // but we need operational adjacency — derive from clusters)
+    const opAdj = new Map<string, Set<string>>();
+    for (const edge of contactGraph.edges) {
+        const pA = mergedInto.get(edge.a) || edge.a;
+        const pB = mergedInto.get(edge.b) || edge.b;
+        if (pA === pB) continue;
+        if (!opAdj.has(pA)) opAdj.set(pA, new Set());
+        if (!opAdj.has(pB)) opAdj.set(pB, new Set());
+        opAdj.get(pA)!.add(pB);
+        opAdj.get(pB)!.add(pA);
     }
-    const mergedFc = featureCollection(mergedFeatures);
-    // Very high quantization (1e8) to preserve coordinate precision.
-    // Default quantization (1e4) rounds coordinates and changes polygon shapes,
-    // which cascades through front edge computation and regresses calibration.
-    const clusterTopo = topojson.topology({ clusters: mergedFc }, 1e8);
-    // NO simplification — only rebuild topology for shared arcs.
-    const clusterGeoms = (clusterTopo as any).objects.clusters.geometries;
-    let fixedCount = 0;
-    for (let gi = 0; gi < clusterGeoms.length; gi++) {
-        const geom = clusterGeoms[gi];
-        const osid = geom?.properties?.osid;
-        if (!osid) continue;
-        const existing = clusteredFeatures.get(osid);
-        if (!existing) continue;
-        // Extract this geometry from the new topology
-        const extracted = topojsonClient.feature(clusterTopo as any, geom);
-        const newGeom = (extracted as any).geometry;
-        if (newGeom) {
-            const normalized = normalizeGeometry(newGeom, osid);
-            existing.geometry = normalized;
-            fixedCount++;
+
+    // For each pair of adjacent OSIDs, find near-miss vertices and snap
+    let totalSnaps = 0;
+    let pairsFixed = 0;
+    const processed = new Set<string>();
+
+    for (const [osidA, neighbors] of opAdj) {
+        const fA = clusteredFeatures.get(osidA);
+        if (!fA) continue;
+
+        for (const osidB of neighbors) {
+            const pairKey = osidA < osidB ? `${osidA}|${osidB}` : `${osidB}|${osidA}`;
+            if (processed.has(pairKey)) continue;
+            processed.add(pairKey);
+
+            const fB = clusteredFeatures.get(osidB);
+            if (!fB) continue;
+
+            // Get all vertices from both polygons
+            const getRings = (geom: any): number[][][] => {
+                if (geom.type === 'Polygon') return geom.coordinates;
+                if (geom.type === 'MultiPolygon') return geom.coordinates.flat();
+                return [];
+            };
+
+            const ringsA = getRings(fA.geometry);
+            const ringsB = getRings(fB.geometry);
+
+            // Check if they already share edges (skip if so)
+            const bEdgeSet = new Set<string>();
+            for (const ring of ringsB) {
+                for (let i = 0; i < ring.length - 1; i++) {
+                    const kA = coordKey6(ring[i]), kB = coordKey6(ring[i + 1]);
+                    bEdgeSet.add(kA < kB ? `${kA}|${kB}` : `${kB}|${kA}`);
+                }
+            }
+            let hasSharedEdge = false;
+            for (const ring of ringsA) {
+                for (let i = 0; i < ring.length - 1; i++) {
+                    const kA = coordKey6(ring[i]), kB = coordKey6(ring[i + 1]);
+                    const ek = kA < kB ? `${kA}|${kB}` : `${kB}|${kA}`;
+                    if (bEdgeSet.has(ek)) { hasSharedEdge = true; break; }
+                }
+                if (hasSharedEdge) break;
+            }
+            if (hasSharedEdge) continue; // Already share edges, no fix needed
+
+            // Find near-miss vertex pairs and snap to midpoint
+            let pairSnaps = 0;
+            for (const ringA of ringsA) {
+                for (let i = 0; i < ringA.length; i++) {
+                    const vA = ringA[i];
+                    for (const ringB of ringsB) {
+                        for (let j = 0; j < ringB.length; j++) {
+                            const vB = ringB[j];
+                            const dist = Math.sqrt((vA[0] - vB[0]) ** 2 + (vA[1] - vB[1]) ** 2);
+                            if (dist > 0 && dist < SNAP_THRESHOLD) {
+                                // Snap both to midpoint
+                                const mid = [(vA[0] + vB[0]) / 2, (vA[1] + vB[1]) / 2];
+                                ringA[i] = mid;
+                                ringB[j] = mid;
+                                pairSnaps++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (pairSnaps > 0) {
+                pairsFixed++;
+                totalSnaps += pairSnaps;
+            }
         }
     }
-    console.log(`  Rebuilt ${fixedCount} cluster geometries with shared inter-cluster arcs.`);
+
+    // Re-close rings that were affected by snapping (first == last vertex)
+    for (const [, f] of clusteredFeatures) {
+        const rings = f.geometry.type === 'Polygon' ? f.geometry.coordinates
+            : f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates.flat()
+            : [];
+        for (const ring of rings) {
+            if (ring.length >= 2) {
+                ring[ring.length - 1] = ring[0]; // Ensure ring closure
+            }
+        }
+    }
+
+    console.log(`  Snapped ${totalSnaps} vertices across ${pairsFixed} OSID pairs.`);
 }
 
 const smoothedFc = featureCollection(Array.from(clusteredFeatures.values()));
