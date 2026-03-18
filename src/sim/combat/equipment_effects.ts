@@ -137,6 +137,10 @@ export function degradeEquipment(
     const repairCapacity = maintenanceCapacity * 0.05;
     applyConditionRepair(comp.tank_condition, repairCapacity * 0.8);
     applyConditionRepair(comp.artillery_condition, repairCapacity);
+
+    // Write off equipment that's beyond repair (>50% non-operational)
+    writeOffNonOperational(comp, 'tanks');
+    writeOffNonOperational(comp, 'artillery');
 }
 
 function applyConditionDegradation(cond: EquipmentCondition, rate: number): void {
@@ -148,6 +152,27 @@ function applyConditionDegradation(cond: EquipmentCondition, rate: number): void
     cond.operational = Math.max(0, Math.min(1, cond.operational));
     cond.degraded = Math.max(0, Math.min(1, cond.degraded));
     cond.non_operational = Math.max(0, Math.min(1, cond.non_operational));
+}
+
+/**
+ * Write off non-operational equipment that can't be repaired.
+ * If non_operational fraction exceeds threshold, some equipment is permanently lost.
+ * Represents cannibalization for spare parts, battlefield abandonment, etc.
+ * Returns number of units written off.
+ */
+export function writeOffNonOperational(
+    comp: BrigadeComposition,
+    type: 'tanks' | 'artillery',
+    threshold: number = 0.50  // write off when >50% non-operational
+): number {
+    const cond = type === 'tanks' ? comp.tank_condition : comp.artillery_condition;
+    const count = comp[type];
+    if (count <= 0 || cond.non_operational < threshold) return 0;
+    // Write off 1 unit per turn when condition is bad enough
+    const writeOff = 1;
+    comp[type] = Math.max(0, count - writeOff);
+    // Normalize condition (proportions stay the same, just fewer units)
+    return writeOff;
 }
 
 function applyConditionRepair(cond: EquipmentCondition, rate: number): void {

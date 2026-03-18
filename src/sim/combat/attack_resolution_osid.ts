@@ -1023,6 +1023,57 @@ export function resolveAttackOrdersOsid(
                 }
             }
         }
+
+        // ── Equipment capture (from retreating/routed forces) ────────────────
+        // Separate from scavenging (destroyed equipment). When one side wins,
+        // the loser retreats and abandons some intact equipment on the field.
+        // Capture transfers equipment from loser to winner (not destroyed — moved).
+        // Decisive outcomes cause more abandonment (rout). Captured gear starts degraded.
+        if (attackerWon && defenderFormation?.composition && firstAttacker.composition) {
+            const captureRate = outcome === 'decisive_victory' ? 0.08
+                : outcome === 'victory' ? 0.05 : 0.02;
+            const dComp3 = defenderFormation.composition;
+            const aComp3 = firstAttacker.composition;
+            const capTanks = Math.floor(dComp3.tanks * captureRate);
+            const capArt = Math.floor(dComp3.artillery * captureRate);
+            if (capTanks > 0) {
+                dComp3.tanks -= capTanks;
+                aComp3.tanks += capTanks;
+                const frac = capTanks / Math.max(1, aComp3.tanks);
+                aComp3.tank_condition.degraded += frac * 0.5;
+                aComp3.tank_condition.operational = Math.max(0, aComp3.tank_condition.operational - frac * 0.3);
+            }
+            if (capArt > 0) {
+                dComp3.artillery -= capArt;
+                aComp3.artillery += capArt;
+                const frac = capArt / Math.max(1, aComp3.artillery);
+                aComp3.artillery_condition.degraded += frac * 0.5;
+                aComp3.artillery_condition.operational = Math.max(0, aComp3.artillery_condition.operational - frac * 0.3);
+            }
+        } else if (attackerLost && defenderFormation?.composition && firstAttacker.composition) {
+            // Defender captures from retreating/routed attacker — ARBiH repulsing
+            // a VRS assault recovers abandoned tanks and artillery from the field.
+            const captureRate = outcome === 'catastrophic' ? 0.08 : 0.03;
+            const aComp3 = firstAttacker.composition;
+            const dComp3 = defenderFormation.composition;
+            const capTanks = Math.floor(aComp3.tanks * captureRate);
+            const capArt = Math.floor(aComp3.artillery * captureRate);
+            if (capTanks > 0) {
+                aComp3.tanks -= capTanks;
+                dComp3.tanks += capTanks;
+                const frac = capTanks / Math.max(1, dComp3.tanks);
+                dComp3.tank_condition.degraded += frac * 0.5;
+                dComp3.tank_condition.operational = Math.max(0, dComp3.tank_condition.operational - frac * 0.3);
+            }
+            if (capArt > 0) {
+                aComp3.artillery -= capArt;
+                dComp3.artillery += capArt;
+                const frac = capArt / Math.max(1, dComp3.artillery);
+                dComp3.artillery_condition.degraded += frac * 0.5;
+                dComp3.artillery_condition.operational = Math.max(0, dComp3.artillery_condition.operational - frac * 0.3);
+            }
+        }
+
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
         const pyrrhic = attackerWon && personnelAttacker > 0 && finalAttackerCas / personnelAttacker > 0.15;
         if (ammoCrisis || pyrrhic) {
