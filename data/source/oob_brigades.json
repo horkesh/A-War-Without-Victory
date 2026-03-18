@@ -2549,7 +2549,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 850,
     "initial_cohesion": 67
   },
   {
@@ -2579,7 +2579,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 750,
     "initial_cohesion": 67
   },
   {
