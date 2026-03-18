@@ -90,16 +90,38 @@ export function mapOsidsToCorps(
     // Only claims unclaimed OSIDs — home-based territory always wins.
     // This handles brigades that have moved into genuinely new territory
     // (captured areas not covered by any brigade's home).
-    // GUARD: Skip location seeds in municipalities where ANOTHER corps has home
-    // seeds. Prevents e.g. a 4th Corps brigade in Visoko from seeding 4th Corps
-    // territory when 1st Corps has home seeds there — BFS would then steal Sarajevo.
+    // GUARD: Build municipality→corps map from ALL brigade home_mun fields,
+    // not just locked seeds. This prevents BFS from stealing municipalities where
+    // a corps has brigades homed, even if those home OSIDs are in enemy territory.
+    // Key case: Herzegovina Corps has rs_foa_brigade homed in Foča, but Foča city
+    // is initially RBiH-controlled. Without this, SRK's BFS from Pale reaches Foča
+    // first and claims all of eastern Bosnia that should be Herzegovina/Drina.
     const homeMunCorps = new Map<string, Set<FormationId>>();
+    // Phase A: from locked seeds (as before)
     for (const seed of lockedSeeds) {
         const mun = munFromOsid(seed.osid);
         if (!mun) continue;
         let corps = homeMunCorps.get(mun);
         if (!corps) { corps = new Set(); homeMunCorps.set(mun, corps); }
         corps.add(seed.corpsId);
+    }
+    // Phase B: from ALL brigade home_mun fields (even if home_osid is in enemy territory)
+    for (const fid of sortedBrigadeIds) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        const fCorpsId = getFormationCorpsId(f);
+        if (!fCorpsId || !corpsIds.includes(fCorpsId)) continue;
+        // Extract municipality from home_osid (even if enemy-controlled)
+        const homeOsid = f.home_osid;
+        if (homeOsid) {
+            const homeMun = munFromOsid(homeOsid);
+            if (homeMun) {
+                let corps = homeMunCorps.get(homeMun);
+                if (!corps) { corps = new Set(); homeMunCorps.set(homeMun, corps); }
+                corps.add(fCorpsId);
+            }
+        }
     }
     for (const fid of sortedBrigadeIds) {
         const f = formations[fid];
