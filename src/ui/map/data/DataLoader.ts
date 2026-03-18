@@ -92,6 +92,19 @@ export async function loadEventDefinitions(): Promise<Map<string, EventDefinitio
   return map;
 }
 
+/**
+ * Load the SID→OSID mapping (canonical_to_operational_map.json).
+ * Returns Map<SID, OSID> (e.g. "S100013" → "op:banovici:banovici_2").
+ * Used to resolve legacy SID keys against the OSID centroid lookup.
+ */
+let _sidToOsidCache: Map<string, string> | null = null;
+export async function loadSidToOsidMapping(): Promise<Map<string, string>> {
+  if (_sidToOsidCache) return _sidToOsidCache;
+  const raw = await fetchJson<Record<string, string>>('/data/derived/operational/canonical_to_operational_map.json');
+  _sidToOsidCache = new Map(Object.entries(raw));
+  return _sidToOsidCache;
+}
+
 /** Fetch latest run save as raw text. Use with loadSave(text) to parse after yielding so UI can show loading state. */
 export async function loadLatestRunSaveAsText(): Promise<string> {
   const response = await fetch('/data/derived/latest_run_final_save.json');

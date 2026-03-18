@@ -7,7 +7,7 @@ import type {
   Position,
 } from 'geojson';
 
-type OsidFeature = Feature<Geometry, { osid?: unknown }>;
+type OsidFeature = Feature<Geometry, { osid?: unknown; sid?: unknown }>;
 
 export type OsidCentroidLookup = Map<string, [number, number]>;
 
@@ -40,7 +40,18 @@ function computeCentroidFromBounds(positions: Position[]): [number, number] | nu
   return [(minX + maxX) / 2, (minY + maxY) / 2];
 }
 
-export function buildOsidCentroidLookup(baseGeoJson: FeatureCollection): OsidCentroidLookup {
+/**
+ * Build centroid lookup from OSID GeoJSON features.
+ *
+ * When `sidToOsidMapping` is provided, also adds SID aliases so that
+ * legacy SID keys (e.g. "S100013") resolve to the same centroid as
+ * their OSID counterpart ("op:banovici:banovici_2"). This eliminates
+ * the systemic silent failure when SID-keyed data hits the lookup.
+ */
+export function buildOsidCentroidLookup(
+  baseGeoJson: FeatureCollection,
+  sidToOsidMapping?: Map<string, string>,
+): OsidCentroidLookup {
   const entries: Array<[string, [number, number]]> = [];
   for (const feature of baseGeoJson.features as OsidFeature[]) {
     const osid = typeof feature.properties?.osid === 'string' ? feature.properties.osid : '';
@@ -52,25 +63,52 @@ export function buildOsidCentroidLookup(baseGeoJson: FeatureCollection): OsidCen
     const centroid = computeCentroidFromBounds(positions);
     if (!centroid) continue;
     entries.push([osid, centroid]);
+
+    // Also index by SID if the feature has one (from GeoJSON properties)
+    const sid = typeof feature.properties?.sid === 'string' ? feature.properties.sid : '';
+    if (sid && sid !== osid) {
+      entries.push([sid, centroid]);
+    }
+  }
+
+  // Add SID→OSID aliases from the canonical mapping file.
+  // This ensures legacy SID keys resolve even if the GeoJSON feature
+  // doesn't have a `sid` property.
+  if (sidToOsidMapping) {
+    const osidLookup = new Map(entries);
+    for (const [sid, osid] of sidToOsidMapping) {
+      if (osidLookup.has(sid)) continue; // Already indexed from GeoJSON
+      const centroid = osidLookup.get(osid);
+      if (centroid) {
+        entries.push([sid, centroid]);
+      }
+    }
   }
 
   entries.sort((a, b) => a[0].localeCompare(b[0]));
   return new Map(entries);
 }
 
+/**
+ * Resolve a settlement key (SID or OSID) to a centroid lookup key.
+ * Tries the input as-is first, then S-prefix variations.
+ * With the enriched centroid lookup, SID keys should resolve directly.
+ */
 export function resolveOsidKey(raw: string | undefined, lookup: OsidCentroidLookup): string | null {
   const candidate = (raw ?? '').trim();
   if (!candidate) return null;
 
-  const candidates = new Set<string>([candidate]);
+  // Direct lookup (works for both OSID and SID if lookup is enriched)
+  if (lookup.has(candidate)) return candidate;
+
+  // Try S-prefix variations as fallback
   if (candidate.startsWith('S')) {
-    candidates.add(candidate.slice(1));
+    const stripped = candidate.slice(1);
+    if (lookup.has(stripped)) return stripped;
   } else if (!candidate.includes(':')) {
-    candidates.add(`S${candidate}`);
+    const prefixed = `S${candidate}`;
+    if (lookup.has(prefixed)) return prefixed;
   }
 
-  for (const key of candidates) {
-    if (lookup.has(key)) return key;
-  }
   return null;
 }

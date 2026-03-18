@@ -142,8 +142,10 @@ export function buildOrderArrowsGeoJSON(
 
   if (state.corpsFrontSectors) {
     const edgeMap = new Map<string, any>();
-    if (state.frontEdges) {
-      for (const e of state.frontEdges) edgeMap.set(e.edge_id, e);
+    // Use OSID-keyed front edges — SID-keyed frontEdges silently fail centroid lookup
+    const edges = state.frontEdgesOsid ?? state.frontEdges;
+    if (edges) {
+      for (const e of edges) edgeMap.set(e.edge_id, e);
     }
 
     for (const sector of state.corpsFrontSectors) {

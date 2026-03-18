@@ -10,7 +10,7 @@ import { useGameStore } from '../store/gameStore';
 import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
-import { loadOperationalPoliticalControl, loadOperationalSettlements } from '../data/DataLoader';
+import { loadOperationalPoliticalControl, loadOperationalSettlements, loadSidToOsidMapping } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildDensityGeoJSON } from './builders/buildDensityGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
@@ -115,13 +115,14 @@ export function MapContainer() {
 
     const init = async () => {
       try {
-        const [geojson, byOsid] = await Promise.all([
+        const [geojson, byOsid, sidToOsid] = await Promise.all([
           loadOperationalSettlements(),
           loadOperationalPoliticalControl(),
+          loadSidToOsidMapping(),
         ]);
 
         osidBaseRef.current = geojson;
-        osidCentroidsRef.current = buildOsidCentroidLookup(geojson);
+        osidCentroidsRef.current = buildOsidCentroidLookup(geojson, sidToOsid);
         setOsidDisplayNames(buildOsidDisplayNameMap(geojson));
         const osidProps: Record<string, Record<string, unknown>> = {};
         for (const f of geojson.features) {

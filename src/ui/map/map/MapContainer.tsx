@@ -10,7 +10,7 @@ import { useGameStore } from '../store/gameStore';
 import { collectSectorFriendlyOsids, buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
-import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency } from '../data/DataLoader';
+import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency, loadSidToOsidMapping } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildMoraleGeoJSON } from './builders/buildMoraleGeoJSON';
 import { buildCasualtiesGeoJSON } from './builders/buildCasualtiesGeoJSON';
@@ -263,15 +263,18 @@ export function MapContainer() {
     let initCancelled = false;
     const init = async () => {
       try {
-        const [geojson, byOsid, adjacency] = await Promise.all([
+        const [geojson, byOsid, adjacency, sidToOsid] = await Promise.all([
           loadOperationalSettlements(),
           loadOperationalPoliticalControl(),
           loadOsidAdjacency(),
+          loadSidToOsidMapping(),
         ]);
 
         osidBaseRef.current = geojson;
         osidAdjacencyRef.current = adjacency;
-        osidCentroidsRef.current = buildOsidCentroidLookup(geojson);
+        // Enriched centroid lookup: OSID keys + SID aliases from mapping.
+        // Eliminates silent failures when legacy SID-keyed data hits the lookup.
+        osidCentroidsRef.current = buildOsidCentroidLookup(geojson, sidToOsid);
         setOsidDisplayNames(buildOsidDisplayNameMap(geojson));
         const osidProps: Record<string, Record<string, unknown>> = {};
         for (const f of geojson.features) {
