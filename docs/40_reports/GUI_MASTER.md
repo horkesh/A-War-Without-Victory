@@ -118,11 +118,17 @@ Additionally, `departedByOsid` must accumulate `displaced + killed + fled_abroad
 
 In MapLibre GL JS v4, `line-offset` shifts visual rendering but does NOT update the spatial index. Features with `line-offset` cannot be found by `queryRenderedFeatures` — even a 40px bbox query returns 0 results. **Clickable hitbox layers must use NO `line-offset`** — use wider centered lines instead. Visual-only layers (highlights, glows) can use `line-offset` since they don't need to be queryable.
 
-### 4. OpsPlanningModal: `setData` on dynamic GeoJSON sources — RESOLVED (2026-03-19)
+### 4. MapLibre modal: `setData` on dynamic GeoJSON sources doesn't re-render — CONFIRMED BUG, WORKAROUND IN PLACE
 
-**Status: RESOLVED** — the ops modal redesign (`src/ui/map/components/ops_modal/OpsMap.tsx`) creates arrow sources during `map.on('load')` init and uses `setData()` successfully. The old bug was likely caused by the monolithic modal's map lifecycle (sources added before map fully loaded, or React effect timing). The new implementation uses a clean init-once pattern with ref-based click handlers, and arrow updates work correctly via `setData()`.
+**Status: CONFIRMED (2026-03-19)** — reproduced in the ops modal redesign. `setData()` on sources added via `map.addSource()` works for the INITIAL render but silently fails on subsequent updates in modal map contexts. The first arrow renders correctly; changing staging/objectives produces no visual update despite `setData()` accepting the data without error.
 
-**Files:** `src/ui/map/components/ops_modal/OpsMap.tsx` (map init + arrow layers), `arrowGeometry.ts` (shared geometry).
+**Root cause:** Unknown MapLibre internals — possibly related to the modal map canvas not being in the primary render pipeline, or WebGL context sharing with the main map. Affects only dynamically-added sources in secondary map instances.
+
+**Workaround:** `replaceArrowSource()` in `OpsMap.tsx` — remove all layers + remove source + re-add source with new data + re-add layers. This forces MapLibre to create a fresh source/layer pipeline on each update. Performance is acceptable (6 layers, runs on user click, not per-frame).
+
+**Rule:** In any MapLibre map instance created inside a modal/overlay, NEVER use `setData()` for updates on dynamically-added sources. Always use the remove+re-add pattern. Sources defined in the base style JSON (e.g. `osid-control`) work fine with `setData()` — the bug only affects `map.addSource()` sources.
+
+**Files:** `src/ui/map/components/ops_modal/OpsMap.tsx` (`replaceArrowSource()`), `arrowGeometry.ts` (shared geometry).
 
 ### 5. Layer creation race conditions (`ensureSectorLayers` polling)
 

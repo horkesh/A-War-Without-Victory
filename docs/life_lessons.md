@@ -9,6 +9,13 @@
 
 ## Recently Violated (needs reinforcement)
 
+### [MapLibre] Never use setData() on dynamic sources in modal maps — VIOLATED 2026-03-19
+- **Violation evidence**: Marked GUI_MASTER §4 as "RESOLVED" after the ops modal redesign, claiming `setData()` worked. It worked for the initial render only. When the user changed staging OSID, arrows silently stopped updating. Spent 3 fix cycles on wrong theories (distance scaling, empty centroid lookup, stale deps) before recognizing the same bug documented since 2026-03-11.
+- **Cost**: 3 wasted fix iterations. User saw broken arrows across multiple test cycles.
+- **Root cause**: `setData()` on `map.addSource()`-created GeoJSON sources works for initial data but silently fails on updates in modal/secondary MapLibre instances. Sources defined in base style JSON work fine.
+- **Right approach**: The workaround was already documented in GUI_MASTER §4 and in the old `OpsPlanningModal.tsx` (`replaceArrowSourceData`): remove all layers + source, re-add with new data. Should have applied this from the start.
+- **Rule**: In ANY MapLibre map inside a modal/overlay, NEVER use `setData()` for dynamically-added sources. Always use remove+re-add. Before claiming a known bug is "resolved," reproduce the specific failure mode (update after initial render), don't just verify initial render works.
+
 ### [Process] Prove it in a test script BEFORE pushing renderer changes — VIOLATED 2026-03-19
 - **Violation evidence**: Built an HTML edges viewer that correctly rendered continuous front lines with gap bridging. Then "ported" the fix to the game renderer (`buildCorpsFrontLinesGeoJSON.ts`) by writing new code from memory instead of extracting the proven algorithm. Pushed 4 broken versions: (1) friendlyAdj excluded exterior polygon edges (2 bridges instead of 345), (2) deadEndCoords Map overwritten during iteration, (3) `frontier=[]` didn't break outer loop, (4) bridges added as disconnected features instead of merged into chains.
 - **Cost**: 4 broken commits, user frustration, hours of churn. The working algorithm existed in the viewer the entire time.
