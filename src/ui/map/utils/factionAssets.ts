@@ -1,17 +1,17 @@
-import flagRS from '../assets/crests/flag_RS.png';
-import flagRBiH from '../assets/crests/flag_RBiH.png';
-import flagHRHB from '../assets/crests/flag_HRHB.png';
+import flagRS from '../assets/crests/flag_RS.webp';
+import flagRBiH from '../assets/crests/flag_RBiH.webp';
+import flagHRHB from '../assets/crests/flag_HRHB.webp';
 
-import crestRS from '../assets/crests/crest_RS.png';
-import crestRBiH from '../assets/crests/crest_RBiH.png';
-import crestHRHB from '../assets/crests/crest_HRHB.png';
+import crestRS from '../assets/crests/crest_RS.webp';
+import crestRBiH from '../assets/crests/crest_RBiH.webp';
+import crestHRHB from '../assets/crests/crest_HRHB.webp';
 
-import armyCrestVRS from '../assets/crests/army_crest_VRS.png';
-import armyCrestARBiH from '../assets/crests/army_crest_ARBiH.png';
-import armyCrestHVO from '../assets/crests/army_crest_HVO.png';
+import armyCrestVRS from '../assets/crests/army_crest_VRS.webp';
+import armyCrestARBiH from '../assets/crests/army_crest_ARBiH.webp';
+import armyCrestHVO from '../assets/crests/army_crest_HVO.webp';
 
-import stampSecret from '../assets/crests/stamp_secret.png';
-import paperclip from '../assets/crests/paperclip.png';
+import stampSecret from '../assets/crests/stamp_secret.webp';
+import paperclip from '../assets/crests/paperclip.webp';
 import { defaultArmyLabelForSide, normalizeFactionId, type PoliticalSideId } from '../../../state/identity.js';
 
 export const ASSETS = {

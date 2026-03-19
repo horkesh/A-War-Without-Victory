@@ -33,8 +33,8 @@ import flagHrhbUrl from './assets/flag_HRHB.webp?url';
 import flagRbihUrl from './assets/flag_RBiH.webp?url';
 import flagRsUrl from './assets/flag_RS.webp?url';
 // Scenario briefing images
-import scnApr1992Url from './assets/scenarios/apr1992_briefing.png?url';
-import scnSep1991Url from './assets/scenarios/sep1991_briefing.png?url';
+import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
+import scnSep1991Url from './assets/scenarios/sep1991_briefing.webp?url';
 // Main menu background (game start screen)
 import gameStartBgUrl from './assets/game start.webp?url';
 
