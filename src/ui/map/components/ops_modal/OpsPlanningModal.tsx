@@ -170,6 +170,19 @@ export function OpsPlanningModal() {
 
     const allObjectives = useMemo(() => plan.axes.flatMap((a) => a.objectives), [plan.axes]);
 
+    // Valid target OSIDs — enemy OSIDs adjacent to corps front (contiguity rule)
+    const validTargetOsids = useMemo(() => {
+        const targets = new Set<string>();
+        if (!loadedGameState?.corpsFrontSectors) return targets;
+        const sectors = loadedGameState.corpsFrontSectors.filter((s) => s.corps_id === corpsId);
+        for (const sec of sectors) {
+            for (const sub of (sec.sub_segments ?? [])) {
+                for (const osid of sub.enemy_osids) targets.add(osid);
+            }
+        }
+        return targets;
+    }, [loadedGameState, corpsId]);
+
     if (!isOpen || !corpsId) return null;
 
     const currentIdx = PHASE_ORDER.indexOf(phase);
@@ -181,6 +194,7 @@ export function OpsPlanningModal() {
                 corpsId={corpsId}
                 onOsidClick={handleOsidClick}
                 objectives={allObjectives}
+                validTargetOsids={validTargetOsids}
                 stagingOsid={plan.axes.find((a) => a.id === plan.activeAxisId)?.stagingOsid ?? plan.defaultStagingOsid}
                 schwerpunktOsid={plan.schwerpunktOsid}
                 axes={plan.axes}

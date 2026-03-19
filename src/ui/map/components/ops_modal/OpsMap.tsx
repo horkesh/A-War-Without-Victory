@@ -34,6 +34,7 @@ interface OpsMapProps {
     corpsId: string;
     onOsidClick: (osid: string, isFriendly: boolean) => void;
     objectives: string[];
+    validTargetOsids: Set<string>;
     stagingOsid: string | undefined;
     schwerpunktOsid: string;
     axes: AxisState[];
@@ -46,6 +47,7 @@ export function OpsMap({
     corpsId,
     onOsidClick,
     objectives,
+    validTargetOsids,
     stagingOsid,
     schwerpunktOsid,
     axes,
@@ -62,8 +64,8 @@ export function OpsMap({
     const loadedGameState = useGameStore((s) => s.loadedGameState);
 
     // Use ref for click handler to avoid stale closures (life lesson: never set handlers in separate effect)
-    const clickStateRef = useRef({ onOsidClick, enabled });
-    clickStateRef.current = { onOsidClick, enabled };
+    const clickStateRef = useRef({ onOsidClick, enabled, validTargetOsids });
+    clickStateRef.current = { onOsidClick, enabled, validTargetOsids };
 
     // Initialize map once
     useEffect(() => {
@@ -153,6 +155,29 @@ export function OpsMap({
                     paint: { 'line-color': 'rgba(255,255,255,0.25)', 'line-width': 1 },
                 });
 
+                // Valid enemy targets — front-adjacent OSIDs highlighted with subtle red tint
+                const enemyOsids = new Set<string>();
+                for (const sec of sectors) {
+                    for (const sub of (sec.sub_segments ?? [])) {
+                        for (const osid of sub.enemy_osids) enemyOsids.add(osid);
+                    }
+                }
+                const targetableFeatures: FeatureCollection = {
+                    type: 'FeatureCollection',
+                    features: geojson.features.filter((f) =>
+                        enemyOsids.has((f.properties as Record<string, unknown>)?.osid as string ?? '')
+                    ),
+                };
+                map.addSource('ops-valid-targets', { type: 'geojson', data: targetableFeatures });
+                map.addLayer({
+                    id: 'ops-valid-targets-fill', type: 'fill', source: 'ops-valid-targets',
+                    paint: { 'fill-color': 'rgba(200,60,60,0.12)' },
+                });
+                map.addLayer({
+                    id: 'ops-valid-targets-border', type: 'line', source: 'ops-valid-targets',
+                    paint: { 'line-color': 'rgba(200,60,60,0.3)', 'line-width': 1, 'line-dasharray': [3, 2] },
+                });
+
                 // Front lines
                 const frontLineGeo = buildCorpsFrontLinesGeoJSON(
                     geojson,
@@ -233,6 +258,8 @@ export function OpsMap({
                     if (typeof osid !== 'string' || osid.length === 0) return;
                     const controller = controlDataRef.current[osid] ?? null;
                     const isFriendly = controller === playerFaction;
+                    // Enemy targets must be front-adjacent (contiguity rule)
+                    if (!isFriendly && !clickStateRef.current.validTargetOsids.has(osid)) return;
                     clickStateRef.current.onOsidClick(osid, isFriendly);
                 });
 
