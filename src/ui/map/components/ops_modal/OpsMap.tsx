@@ -212,8 +212,8 @@ export function OpsMap({
                 map.addLayer({ id: 'ops-highlight-staging-border', type: 'line', source: 'ops-highlight-staging',
                     paint: { 'line-color': '#40916c', 'line-width': 2 } });
 
-                // Arrow layers
-                addArrowLayers(map);
+                // Arrow layers (initial empty)
+                replaceArrowSource(map, EMPTY_FC);
 
                 // Single map-level click handler — query features at click point
                 // Using per-layer handlers causes double-fire when layers overlap
@@ -298,9 +298,23 @@ export function OpsMap({
 }
 
 // --- Arrow source/layer management ---
+// setData() on dynamically-added GeoJSON sources does not reliably
+// trigger re-render in MapLibre modals. Remove + re-add instead.
 
-function addArrowLayers(map: maplibregl.Map) {
-    map.addSource(ARROW_SOURCE_ID, { type: 'geojson', data: EMPTY_FC });
+const ARROW_LAYER_IDS = [
+    'ops-advance-glow', 'ops-advance-body', 'ops-advance-body-outline',
+    'ops-advance-heads', 'ops-advance-head-outline', 'ops-obj-labels',
+];
+
+function replaceArrowSource(map: maplibregl.Map, data: FeatureCollection) {
+    // Remove existing layers + source
+    for (const id of ARROW_LAYER_IDS) {
+        if (map.getLayer(id)) map.removeLayer(id);
+    }
+    if (map.getSource(ARROW_SOURCE_ID)) map.removeSource(ARROW_SOURCE_ID);
+
+    // Re-add with new data
+    map.addSource(ARROW_SOURCE_ID, { type: 'geojson', data });
 
     map.addLayer({
         id: 'ops-advance-glow', type: 'line', source: ARROW_SOURCE_ID,
@@ -440,9 +454,6 @@ function updateArrows(
         });
     });
 
-    const src = map.getSource(ARROW_SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
-    if (src) {
-        src.setData({ type: 'FeatureCollection', features });
-    }
+    replaceArrowSource(map, { type: 'FeatureCollection', features });
 }
 
