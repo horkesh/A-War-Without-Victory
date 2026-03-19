@@ -14,11 +14,18 @@
 
 **Atmosphere:** Heavy, oppressive, claustrophobic. Even outdoor scenes feel enclosed — mountains close in, buildings crowd, smoke limits visibility. Light comes through clouds, through broken windows, through gaps in rubble.
 
-**People:** When shown, they should look exhausted, determined, or afraid — never heroic-poster-style. Uniforms are mismatched (especially ARBiH). Equipment is a mix of JNA surplus, civilian clothes, and whatever was available.
+**People:** Avoid showing people entirely where possible. When figures are necessary for scale or context, show them from behind, in silhouette, at extreme distance, or cropped — NEVER showing a face. No identifiable individuals. Generic mixed military clothing only.
 
 **Architecture:** Recognizable Bosnian: Ottoman-era stone buildings, Yugoslav-era concrete apartment blocks, minarets alongside church steeples. Rooftops damaged by shelling. Sandbags and makeshift barricades.
 
 **Text on images:** NONE. Never burn text into the image. The UI overlays titles.
+
+**NEUTRALITY RULES (MANDATORY):**
+- **NO FLAGS.** No faction flags, no national flags, no political symbols of any side. Not on uniforms, not on buildings, not on vehicles. The game presents all three sides without endorsement.
+- **NO FACTION IDENTIFICATION on people.** Soldiers should wear generic/mixed military clothing. Do not depict identifiable faction-specific insignia, patches, or uniforms. The player assigns meaning through gameplay, not through art.
+- **NO EDITORIAL FRAMING.** Prompts describe what is VISIBLE, not who is right or wrong. "A besieged city" not "the aggressors surround the city." "Soldiers advancing" not "liberators advancing."
+- **NO FACES.** No recognizable human faces in any image. Show people from behind, in silhouette, at distance, or cropped above/below the face. Hands, boots, helmets, backs — but never a face. This avoids likeness issues entirely.
+- **SENSITIVE CONTENT:** War crimes, massacres, and atrocities are historical facts. Depict aftermath and consequences (destroyed buildings, refugees, empty streets) — never the act itself. No graphic violence, no identifiable victims.
 
 ---
 
@@ -63,10 +70,10 @@ These set the mood for each scenario start date. Shown once per game session but
 
 | # | Scenario | Date | Prompt |
 |---|----------|------|--------|
-| 1 | **April 1992 start** | apr1992 | A Bosnian city at the moment war begins. Barricades across a boulevard. A column of JNA APCs withdrawing past anxious civilians. Smoke rising from a distant neighborhood. Spring — trees budding, but the mood is winter. Sarajevo or Mostar feel. |
-| 2 | **January 1993** | jan1993 | Deep winter in Bosnia. Snow-covered trenches on a hillside overlooking a valley town. Soldiers hunched against the cold, breath visible. The front has stabilized — this is the war of position. Distant artillery smoke against grey sky. |
-| 3 | **March 1994** | mar1994 | Aftermath of the Markale massacre. A destroyed market square. Emergency workers. International press. UN vehicles. The moment that changed everything — NATO intervention looming. Urban devastation. |
-| 4 | **January 1995** | jan1995 | Late war. An ARBiH column marching through a forest road. Better equipped than 1992 — actual uniforms, some vehicles. Mud season. The army that started with hunting rifles now has artillery. Quiet determination before the final offensives. |
+| 1 | **April 1992 start** | apr1992 | 1280x720 WebP. Desaturated oil-painting style, cinematic wide establishing shot, heavy atmosphere. A Bosnian city boulevard at the moment war begins. Barricades of furniture and sandbags across a tram line. Armored vehicles halted in the distance. Smoke rising from a neighborhood beyond rooftops. Spring — trees budding against an overcast sky. Muted earth tones, concrete grey. No people, no flags, no insignia. |
+| 2 | **January 1993** | jan1993 | 1280x720 WebP. Desaturated oil-painting style, cinematic wide establishing shot, heavy atmosphere. Deep winter in Bosnia. Snow-covered trenches on a hillside overlooking a valley town. Empty positions — helmets on stakes, ammunition boxes, a field telephone. The front stabilized into static lines. Distant artillery smoke against grey sky. No people, no flags, no insignia. |
+| 3 | **March 1994** | mar1994 | 1280x720 WebP. Desaturated oil-painting style, cinematic wide establishing shot, heavy atmosphere. A destroyed open-air market square. Shell crater in the center, scattered produce, shredded market umbrellas. Press cameras on tripods (unmanned). White UN vehicles parked nearby. Urban devastation. Overcast. No people, no flags, no insignia. |
+| 4 | **January 1995** | jan1995 | 1280x720 WebP. Desaturated oil-painting style, cinematic wide establishing shot, heavy atmosphere. Late war exhaustion. A scarred Bosnian valley — trenches on both hillsides, a destroyed bridge in the middle, shell craters in frozen fields. Three years of war visible in the landscape. Winter fog, muted tones. No people, no flags, no insignia. |
 
 ---
 
@@ -76,7 +83,7 @@ These set the mood for each scenario start date. Shown once per game session but
 **Drop path:** `src/ui/warroom/assets/transition_peace_war.webp`
 **Used by:** Full-screen transition when game shifts from peace to war phase
 
-**Prompt:** A Bosnian city street at the exact moment of transformation. Left side: normal life — a cafe with patrons, a tram, people walking. Right side: the same street but barricades are going up, windows are being sandbagged, a sniper position is being prepared on a balcony. The transition is a gradient — normalcy dissolving into war. Color shifts from warm (left) to cold desaturated (right). Spring 1992 — the last day of peace.
+**Prompt:** 1920x1080 WebP. Oil-painting style, slight desaturation, cinematic. A Bosnian city street showing the transformation from peace to war. Left side: a cafe with empty chairs, an intact tram, flower boxes on balconies — warm color tones. Right side: the same street but barricades of sandbags and furniture block the road, windows are taped and sandbagged, a balcony has been fortified — cold desaturated tones. The transition is a gradient across the image — normalcy dissolving into war. Spring 1992. No people visible, no flags, no insignia — the street tells the story through objects.
 
 ---
 
@@ -106,61 +113,63 @@ These set the mood for each scenario start date. Shown once per game session but
 
 **Placeholder works well** — the type-colored gradient with event headline is clean and functional. These images are nice-to-have but the game doesn't suffer without them.
 
-**Style:** Documentary vignette — a single powerful image that captures the essence of the event. Less detailed than portraits or briefings. More like a news photo with painterly processing. Dark vignette edges.
+**Style:** Documentary vignette — a single powerful image that captures the essence of the event. More like a news photo with painterly processing. Dark vignette edges.
+
+**Each prompt below is STANDALONE** — includes dimensions, style, and mood. Copy-paste directly into Gemini.
 
 ### 1992 Events (18)
 
 | Event | Prompt |
 |-------|--------|
-| battle_of_the_barracks_sarajevo | JNA tanks surrounded by civilians and irregular fighters in a Sarajevo street. Tense standoff. Spring. |
-| battle_of_the_barracks_tuzla | JNA column ambushed on a road. Smoke, confusion. The Brčanska Malta incident. |
-| battle_of_the_barracks_zenica | Workers and militia surrounding a JNA barracks compound. Negotiations at the gate. |
-| battle_of_the_barracks_visoko | Smaller barracks scene — rural setting, improvised barricades. |
-| arms_embargo_impact_1992 | Empty weapons racks. ARBiH soldiers with hunting rifles and a single Kalashnikov between them. Desperation. |
-| jna_withdrawal_1992 | Long column of JNA vehicles leaving through a mountain pass. Watching Bosnians — relief and dread. |
-| sarajevo_siege_begins_1992 | Sniper Alley — an empty boulevard with bullet holes in buildings. A single person sprinting across. |
-| mostar_liberation_1992 | The old bridge (Stari Most) still standing. HVO and ARBiH fighters together (they're still allies). Celebration. |
-| srebrenica_enclave_forms_1992 | Refugees flooding into a small town. Overcrowded. Forest hills surrounding. Enclave forming. |
-| posavina_corridor_fighting_1992 | Tank battle on flat Posavina farmland. VRS pushing through. Burning haystacks, tractors. |
-| drina_valley_ethnic_cleansing_1992 | Columns of refugees on a road. Burning villages on hillsides behind them. Eastern Bosnia. |
-| concentration_camps_revealed_1992 | Behind barbed wire — emaciated men. The image that shocked the world (Omarska/Trnopolje). Journalistic. |
-| london_conference_1992 | Diplomats at a conference table. Maps of Bosnia. Tension. The gap between suits and the war. |
-| bihac_isolation_deepens_1992 | The Bihać pocket from above — a valley surrounded by hostile territory. Isolated. A small airstrip. |
-| jajce_falls_1992 | Refugees fleeing a medieval fortress town. VRS flags on the castle. Autumn. |
-| hvo_arbih_tensions_rise_1992 | HVO and ARBiH soldiers at a checkpoint. Suspicious glances. Weapons not pointed but ready. Uneasy. |
-| graz_accords | Diplomats shaking hands. A ceasefire line on a map. Both sides know it won't hold. |
-| un_convoys_begin_1992 | White UN trucks on a mountain road. Escorted by APCs. A Bosnian winter. |
+| battle_of_the_barracks_sarajevo | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Armored vehicles halted on a Sarajevo boulevard. Improvised barricades of furniture and sandbags block the road. Tense spring morning, overcast. No people visible, no flags, no insignia — just the standoff frozen in objects. Muted earth tones, concrete grey, spring green budding on trees. |
+| battle_of_the_barracks_tuzla | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A military convoy halted on a road, smoke rising from the lead vehicle. Scattered personal effects on the asphalt. Confusion captured in debris. Overcast spring sky. No people, no flags, no insignia. Muted earth tones. |
+| battle_of_the_barracks_zenica | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A military compound gate, closed, seen from outside through barbed wire. Sandbags piled hastily. Civilian cars parked haphazardly nearby. Spring, overcast. No people, no flags, no insignia. |
+| battle_of_the_barracks_visoko | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A small rural military barracks compound — concrete walls, guard towers. Improvised barricades of logs and tractors at the entrance. Spring countryside, Bosnian hills. No people, no flags. |
+| arms_embargo_impact_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Empty weapon racks in a dimly lit basement armory. A single hunting rifle propped against the wall. Boxes of mismatched ammunition. Desperation told through objects. Warm tungsten light. No people, no flags, no insignia. |
+| jna_withdrawal_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A long column of military vehicles on a Bosnian mountain road, seen from above. The convoy stretching around switchbacks. Empty landscape. Spring. No people visible, no flags, no insignia. |
+| sarajevo_siege_begins_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. An empty city boulevard with bullet-pocked building facades. Tram tracks running through the middle. A single abandoned shoe at the crossing. Overcast. No people, no flags. Concrete grey, muted. |
+| mostar_liberation_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. The Stari Most (old bridge) intact, spanning the emerald Neretva river. Sunlight on the Ottoman stone. The city behind it — damaged but standing. A moment of calm. No people, no flags, no insignia. |
+| srebrenica_enclave_forms_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A small Bosnian town from above — forested hills closing in on all sides. Roads clogged with abandoned vehicles and belongings. Overcrowded rooftops. Overcast. No people visible, no flags. |
+| posavina_corridor_fighting_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Flat farmland with tank tracks cutting through plowed fields. A burning haystack. Destroyed tractor. The Posavina plain scarred by armored movement. Overcast sky. No people, no flags, no insignia. |
+| drina_valley_ethnic_cleansing_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A mountain road in eastern Bosnia. Abandoned belongings — suitcases, blankets, a child's toy — scattered along the roadside. Burning village on a distant hillside. Overcast. No people, no flags. |
+| concentration_camps_revealed_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Barbed wire fence in harsh flat daylight. Empty concrete yard behind it. A single water bucket. Industrial buildings repurposed as a compound. Journalistic framing. No people, no flags, no insignia. |
+| london_conference_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A conference table from above — maps of Bosnia spread across it, colored markers, diplomatic folders, coffee cups. No faces, no people — just the documents and the problem. Warm indoor light. |
+| bihac_isolation_deepens_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Aerial view of a valley pocket — a small airstrip, a river, mountains on all sides. Roads leading out disappear into hostile territory. Isolation captured from altitude. Overcast. No people, no flags. |
+| jajce_falls_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A medieval Bosnian fortress town in autumn. A waterfall between cliffs. Smoke rising from the old quarter. Abandoned vehicles on the bridge. Autumn foliage. No people, no flags, no insignia. |
+| hvo_arbih_tensions_rise_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A checkpoint on a Bosnian road — two sets of sandbag positions facing each other across the road. Weapons laid on sandbags pointed in both directions. No people visible, no flags, no insignia. Uneasy geometry. Overcast. |
+| graz_accords | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A ceasefire line drawn on a military map with grease pencil. Two different colored markers meeting at a boundary. Diplomatic papers and coffee cups around the edge of the table. Warm indoor light. No people, no flags. |
+| un_convoys_begin_1992 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. White UN-marked trucks on a snow-covered Bosnian mountain road. Armored escort vehicles. The convoy winding through a winter landscape. Overcast grey sky. No people visible, no faction flags. |
 
 ### 1993 Events (13)
 
 | Event | Prompt |
 |-------|--------|
-| gornji_vakuf_clashes_1993 | Street fighting in a small Bosnian town. HVO and ARBiH — former allies now shooting at each other. Confusion, betrayal. |
-| vance_owen_plan_1993 | A peace plan map being presented. Diplomats. The map that started the Croat-Bosniak war. |
-| croat_bosniak_war_begins_1993 | Three-way front lines on a map of central Bosnia. Overlapping arrows. Chaos. |
-| ahmici_massacre_1993 | A burned village. Smoke still rising. A child's bicycle in rubble. Dawn light. The horror of Ahmici. |
-| srebrenica_shelling_1993 | Artillery impacts on a crowded town. People running. UN white vehicles parked helplessly. |
-| un_safe_areas_declared_1993 | A UN flag planted on a hillside overlooking a Bosnian town. The promise. Blue helmets with binoculars. |
-| east_mostar_siege_1993 | The east bank of Mostar — narrow streets, damaged Ottoman buildings. Looking west across the Neretva at HVO positions. Siege. |
-| central_bosnia_fighting_1993 | Three-way checkpoint — VRS, HVO, ARBiH flags all visible from one intersection. The impossible geometry of the war. |
-| markale_area_shelling_1993 | A marketplace with shell crater. Aftermath. Medical workers. The image that preceded NATO intervention. |
-| owen_stoltenberg_plan_1993 | Another peace plan, another conference room. Weariness on the diplomats' faces. Maps covered in colored lines. |
-| operation_neretva_93_1993 | ARBiH soldiers advancing along the Neretva river valley. Rocky terrain, Mediterranean vegetation. Determined. |
-| abdic_apwb_declared_1993 | Fikret Abdić addressing a crowd in Velika Kladuša. Populist energy. The Bihać pocket splitting. |
-| mostar_bridge_destroyed_1993 | The moment after Stari Most collapses into the Neretva. Dust and shock. The empty space where 400 years of history stood. |
+| gornji_vakuf_clashes_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A small Bosnian town street — bullet holes on both sides of the road. Shell damage to a shop front. Broken glass, spent casings on pavement. Two sides of the same street destroyed by each other. Overcast winter. No people, no flags, no insignia. |
+| vance_owen_plan_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A peace plan map spread on a conference table — Bosnia divided into colored provinces. Diplomatic pens, folders, markers on boundaries. Warm indoor light. No faces, no people — just the map and the problem. |
+| croat_bosniak_war_begins_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A military map of central Bosnia covered in overlapping front line markings — three colors of grease pencil crossing over each other. The impossible geometry of a three-way war. Warm desk-lamp light. No people, no flags. |
+| ahmici_massacre_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A burned village at dawn. Smoke still rising from roofless stone houses. A child's bicycle in the rubble of a doorway. Empty, silent aftermath. Muted tones, early morning light. No people, no flags, no insignia. |
+| srebrenica_shelling_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Shell craters in a town square. Shattered windows. White UN vehicles parked behind a building, untouched amid the damage. Helplessness captured in architecture. Overcast. No people, no flags. |
+| un_safe_areas_declared_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A UN observation post on a hillside — sandbags, blue-painted barriers, binoculars on a tripod pointing down at a Bosnian town below. The promise of protection. Overcast. No people, no faction flags. |
+| east_mostar_siege_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Narrow streets of old Mostar — Ottoman stone buildings with shell damage. The Neretva river visible at the end of the street. A divided city. Warm Mediterranean light filtering through smoke. No people, no flags, no insignia. |
+| central_bosnia_fighting_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. An intersection in a Bosnian town with three different sets of barricades pointing in three different directions. Sandbags, concrete barriers, burned-out vehicles. Three-way war captured in one frame. Overcast. No people, no flags, no insignia. |
+| markale_area_shelling_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. An open-air marketplace with a shell crater in the center. Scattered produce, overturned stalls, shredded market umbrellas. Aftermath. No people, no flags. Overcast urban light. |
+| owen_stoltenberg_plan_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A conference room table with maps covered in colored territorial lines. Coffee cups, diplomatic folders, crumpled papers, overflowing ashtray. Diplomatic exhaustion in objects. Warm indoor light. No faces, no people. |
+| operation_neretva_93_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. The Neretva river valley from above — rocky karst terrain, Mediterranean scrub vegetation. Military vehicle tracks on a dirt road winding along the river. The landscape of an offensive. No people, no flags, no insignia. |
+| abdic_apwb_declared_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A public square in a small Bosnian town — a makeshift podium, loudspeakers on poles, scattered leaflets on the ground. The setup of a political rally, before or after the crowd. No people, no flags. Overcast. |
+| mostar_bridge_destroyed_1993 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. The empty space where Stari Most stood — two stone abutments reaching toward nothing over the emerald Neretva. Dust still settling. Four hundred years of history in the gap. Overcast light. No people. |
 
 ### 1994 Events (8)
 
 | Event | Prompt |
 |-------|--------|
-| markale_massacre_1994 | The Markale market aftermath. Emergency response. International cameras. The tipping point. |
-| nato_ultimatum_sarajevo_1994 | NATO jets over Bosnian mountains. The sky is no longer safe for Serb forces. |
-| nato_shoots_down_planes_1994 | Burning wreckage of shot-down aircraft on a snowy field. NATO's first combat since founding. |
-| washington_agreement_1994 | Signing ceremony. Bosniak and Croat leaders. American mediators. Handshake that ended the war-within-a-war. |
-| gorazde_crisis_1994 | The Goražde enclave under attack. Drina river valley. VRS armor on surrounding hills. UN impotence. |
-| bihac_crisis_1994 | The Bihać pocket's darkest hour. Attacks from four directions — VRS, Abdić, RSK. 5th Corps surrounded. |
-| contact_group_plan_1994 | Yet another map. 51/49. The template. Simpler lines this time. |
-| anti_sniping_agreement_sarajevo_1994 | Sarajevo streets with anti-sniper barriers. UN-brokered. Cautious hope. People walking but hunched. |
+| markale_massacre_1994 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. The Markale market square — a shell crater surrounded by scattered market goods. Press cameras on tripods (unmanned). Emergency tape cordoning the area. Overcast urban light. No people, no flags, no insignia. |
+| nato_ultimatum_sarajevo_1994 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Military jets seen from below against a Bosnian mountain sky. Contrails crossing over a besieged valley. The geometry of intervention from above. Clear cold sky. No people, no flags, no insignia. |
+| nato_shoots_down_planes_1994 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Burning aircraft wreckage on a snowy Bosnian field. Black smoke against white snow. Scattered debris trail. Winter. No people, no flags, no insignia. |
+| washington_agreement_1994 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A signing table — two documents, two pens, two chairs pulled back. Warm indoor light. Diplomatic formality captured in empty furniture. No people, no faces, no faction flags. |
+| gorazde_crisis_1994 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A river valley enclave from above — a small town along the Drina, armored vehicles visible as specks on surrounding hillsides. Encirclement seen from altitude. Overcast. No people, no flags, no insignia. |
+| bihac_crisis_1994 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A military map of the Bihac valley — attack arrows drawn from four directions converging on a pocket. Grease pencil on acetate overlay. Warm desk-lamp light. The most dangerous moment for an enclave. No people, no flags. |
+| contact_group_plan_1994 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. A clean cartographic map of Bosnia with a single bold line dividing it 51/49. Two colors. Simpler than previous plans. The template for Dayton. Warm indoor light on paper. No people, no flags. |
+| anti_sniping_agreement_sarajevo_1994 | 800x450 WebP. Desaturated oil-painting style, documentary vignette with dark edges. Sarajevo streets with anti-sniper barriers — corrugated metal sheets and shipping containers placed across intersections. A cautious city emerging. Overcast light. No people, no flags, no insignia. |
 
 ---
 
