@@ -69,3 +69,4 @@ Thumbs.db
 *storybook.log
 storybook-static
 .worktrees/
+*.pre-harmonize.bak

@@ -1,7 +1,31 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-19
-**Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n957: 91.2% area-weighted.** Post-operation brigade return march. Battle of the Barracks events, ARBiH tank capture overhaul, per-brigade equipment tracking, polygon harmonization, front line rendering.
+**Status:** **v0.4.9** (AI Comes Alive). **1242 tests**, 102 suites. **91.4% area-weighted (40w).** HRHB-RBiH war transition system (feature branch). Post-operation brigade return march. Battle of the Barracks, equipment overhaul, polygon harmonization, front line rendering.
+
+## [2026-03-19] HRHB-RBiH War Transition System — Emergent Alliance Breakdown
+
+Full implementation of the Croat-Bosniak conflict transition on branch `feature/hrhb-rbih-war-transition` (9 commits, `.worktrees/hrhb-rbih-war`). 38 new tests, 91.4% calibration (+0.2pp).
+
+**Core mechanics:**
+- **Mobilization phase** — 4-turn buildup when alliance ≤ 0.20: front edges appear, sectors form, combat suppressed. `isRbihHrhbMobilizing()` / `isRbihHrhbCombatEnabled()` in `alliance_update.ts`.
+- **Condition-driven events** — 6 war_1993 events fire on alliance thresholds and territorial control, not hardcoded turns. Gornji Vakuf: player decides escalate (-0.20) or negotiate (-0.05).
+- **Bot mobilization stance** — HRHB/RBiH corps facing the other faction adopt defensive during mobilization.
+- **56w transition verified** — w31 mobilization → w35 Gornji Vakuf → w40 war declared → w43 first battle.
+
+**Infrastructure fixes (5 bugs):**
+- `hvo_oz_*` stale officer IDs → current `hvo_*`
+- Corps subordinate count update on re-init (was stuck at 0)
+- Readiness reversion bug — active brigades no longer revert to `forming` on cohesion dip
+- War-phase `activate-corps` step — `hvo_central_bosnia` formation created (was peace-phase only)
+- Sector consolidation brigade-presence protection — enclave corps no longer drained edge-by-edge
+
+**Result:** `hvo_central_bosnia` (Blaskic) has 6 sectors, 102 front edges, 5 subordinate brigades. 3 HRHB-RBiH battles in 56w run.
+
+**Report:** `docs/40_reports/20260319_HRHB_RBIH_WAR_TRANSITION.md`
+**Master:** `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`
+
+**Remaining (P1):** CB brigade redistribution (5/6 sectors empty), CB operations not launching (3 battles in 16 war weeks), Kiseljak/Vitez pocket separation. **P2:** ARBiH offensive response, East Mostar siege mechanics. **P3:** Abdic APWB, Washington Agreement.
 
 ## [2026-03-19] UI/UX Polish Pass — 14 Tasks, 18 Files Changed
 

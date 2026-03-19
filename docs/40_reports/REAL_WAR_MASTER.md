@@ -8,6 +8,166 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
+## Latest Review: n960 (2026-03-19) — Post-Operation Brigade Return March
+
+**Run:** `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n960` | 91.2% area-weighted | hash `b806302bec4dae8a`
+
+### Checklist
+
+| # | Check | Verdict |
+|---|-------|---------|
+| 1 | Outcome distribution | PASS — 77% decisive, 5% costly, 4% stalemate, 4% repulsed, 4% catastrophic. Messy middle still thin but improved from n482's 83% catastrophic. |
+| 2 | Casualty volume | WATCH — 33.8k total military casualties (att 11.3k + def 22.5k). Within 40-60k range for 40 weeks, but on the low side. Scales to ~44k at 52w (acceptable). |
+| 3 | Casualty ratios | PASS — Att:Def 0.50:1 overall. RS attacks average 0.38:1 (fire superiority, correct). No zero-casualty battles. |
+| 4 | Territory | PASS — RS peaks at 370 OSIDs (w17-w21), stabilizes at 367. RBiH recovers 3 OSIDs post-w20 (organic counterattacks). HRHB stable at 86 after losing 14 to RS early. Progression is historically plausible: RS blitz peaks mid-92, front stabilizes. |
+| 5 | Force strength | PASS — RS 79 bde / 95k pers / 563 tanks. RBiH 125 bde / 140k pers / 39 tanks. HRHB 28 bde / 46k pers / 18 tanks. RBiH manpower correct (historical 60k→180k trajectory). RS JNA-inherited heavy weapons advantage intact. RBiH tank count 39 (historical ~30-50 by Jan 93, correct with barracks seizure). |
+| 6 | Operational tempo | PASS — w0-12: 4.1 battles/wk (blitz), w12-26: 1.4/wk (sustained), w26-40: 0.5/wk (consolidation). Three-phase decay matches RS doctrine. 17 operations completed. Late-war stasis: last battle at w39, but only 2 battles w30-40 — front is frozen, which is historically correct for late-92/early-93. |
+| 7 | Smell test | See below |
+
+### Smell Test — 5 Battles Reviewed
+
+1. **w0 rs_1st_posavina → samac_2 PR=9.93 decisive** — VRS 1st Posavina rolls into Bosanski Šamac at 10:1. Historically correct — VRS/paramilitary took Šamac in April 1992 with overwhelming force. PASS.
+
+2. **w3 rs_foa_brigade → brusna_2 PR=16.63 decisive att=104 def=584** — Foča brigade clearing upper Drina at 17:1. Foča fell in April 92 with exactly this kind of ratio. Defender casualties 5.6× attacker — correct for defenders under artillery without cover. PASS.
+
+3. **w12 hrhb_1st_mostar → tasovcici_2 PR=1.9 victory att=352 def=440** — HVO Mostar pushing into Čapljina at nearly even odds. Costly for both sides, marginal victory. This is the HVO-VRS friction zone. HVO attacks at 1.9:1 and barely wins — plausible for HVO limited-strength ops. PASS.
+
+4. **w15 rs_1st_doboj → novo_selo_2 PR=25.2 decisive att=282 def=145** — 25:1 ratio is extreme even for VRS. However, this is a late-blitz mop-up of an isolated position — attacker casualties (282) EXCEEDING defender casualties (145) at 25:1 PR suggests garrison/enclave power. The attacker pays more than the defender despite overwhelming force — not gamey, this is urban/fortified defense working. PASS with note.
+
+5. **w33 RS 3 attacks remaining** — Late war: 3 RS attacks, 3 RBiH attacks, 1 HRHB attack in w26-40 total. Front is frozen solid. Both sides exhausted. This matches late-1992 reality — after the initial offensives, the front stabilized into static positions with only local probing. PASS.
+
+### New Findings
+
+**Issue #32 (NEW): 3rd Corps brigade displacement — partially improved, not fully resolved.**
+
+The post-operation return march reduces 3rd Corps displacement from 16/27 to 9/27 brigades outside home municipality (33% displaced). The 9 remaining are structural: operations displace brigades to adjacent municipalities, and the front line assignment system keeps them there because they're physically at a front OSID. This is the same Phase 1 positional lock identified in issue #27 — brigades anchor where they stand, regardless of home affiliation.
+
+Historically plausible in part: ARBiH 3rd Corps brigades WERE displaced from their home positions as the VRS captured territory. But 33% displacement at w40 is high — a real corps commander would rotate units home during lulls. The return march fix addresses operation-driven drift (brigade returns when op ends). The remaining 9 are front-line-assignment drift (brigade stays at wherever it was last assigned).
+
+**Status:** P3 — improved from P2. Not blocking. The 91.2% area match with 9/27 displaced is acceptable. Full fix requires Phase 1 to consider home affinity when multiple sectors compete for the same brigade.
+
+**Issue #28 update (SRK Sarajevo): Still relevant at n960.** SRK operates with 5 brigades covering the siege ring. Operation Prsten (4 stars, 4 captures) correctly expands the ring but the aftermath leaves brigades dispersed across Vareš/Olovo. The post-op return march will now pull them back after Prsten completes — this was one of the 78 return orders issued. IMPROVED by this change.
+
+### Verdict
+
+**WAR-OR-GAME: SIGNED OFF.** n960 is a clean run. The sim produces historically plausible 1992 Bosnian War dynamics:
+- VRS blitz dominates w0-12, stabilizes w12-26, freezes w26+
+- ARBiH is overwhelmed initially but grows to 125 brigades / 140k personnel
+- Casualty ratios favor the attacker (VRS fire superiority)
+- Enclaves form at Srebrenica (2/3 RBiH), Goražde (1/2), Bihać (3/3 RBiH)
+- 17 operations complete with historically recognizable names and theaters
+- Post-op brigade return march is a sound mechanical addition — no realism regression
+
+**No P1 combat-outcome issues.** Sector audit (below) found structural assignment problems. P2: Drina 79.3% (structural). P3: 3rd Corps displacement (improved).
+
+### Deep Sector Audit (n960, w40) — 14 Empty Sectors, 17 Critically Thin
+
+Full audit of all 75 sectors across 3 factions. 235 active brigades. 497 front edges (perfect bilateral coverage — every edge has sectors on both sides).
+
+**Global statistics:** 14 sectors with 0 assigned brigades. 17 sectors with density <0.1 (critically thin). 9 sectors with density >0.5 (overstacked). 30 reachability violations (brigade location outside sector territory). 3 sectorless brigades.
+
+#### Issue #33 (NEW, P3): Sarajevo 1st Corps 29.7x density imbalance — MOSTLY CORRECT (siege)
+
+Sector :6 (inner Sarajevo, centar/stari_grad) has **9 brigades on 5 edges** (density 1.80, threat_ratio=0). Sector :0 (Gorazde enclave perimeter) has **2 brigades on 33 edges** (density 0.061, threat_ratio=683). Same corps, same commander (Talijan). A 29.7:1 density ratio.
+
+**Assessment: This is the siege working, not a bug.** Sarajevo is a surrounded city — the 9 brigades are bottled up by the SRK siege ring and *cannot* redeploy to Gorazde even if the commander wanted to. The VRS strategy is precisely to keep those brigades trapped and useless. The density imbalance is the intended consequence of encirclement. Historically, the 1st Corps had ~50,000 troops in Sarajevo with no way to use them elsewhere — this is that reality.
+
+**Remaining concern:** The Gorazde enclave (2 brigades on 33 edges, threat=683) is still genuinely thin. But the fix isn't pulling Sarajevo brigades out — it's whether Gorazde's own garrison is adequate. The 4th Corps / enclave-specific reinforcement system should handle this, not intra-corps equalization.
+
+**Status:** P3 — structurally correct for a besieged city. Monitor Gorazde enclave defense separately.
+
+---
+
+#### Issue #34 (NEW, P1): HVO Tomislavgrad — 5 of 9 sectors empty, Kiseljak double-stack
+
+`hvo_tomislavgrad` has 5 sectors with 0 brigades covering 69+ front edges. Sector :6 (Zepce/Teslic, 20 edges) has 1 brigade at **morale 0** (hrhb_111th, combat non-functional). Sector :7 (Vitez/Busovaca corridor, 32 edges) has 2 brigades totaling 1,452 pers. Sector :1 (Kakanj-Vares, 23 edges) is completely empty. Sectors :2 and :3 (Kiseljak-Fojnica, 23 edges combined) are empty.
+
+Meanwhile Kiseljak has **5,476 personnel** stacked at one OSID (hrhb_94th + hrhb_ban_jelacic) while adjacent sectors :2 and :3 have zero. Sector reassignment orders exist in corps directives but haven't executed.
+
+Additionally, `hvo_central_bosnia` has **0 sectors** despite having 7 subordinate brigades — all absorbed into `hvo_tomislavgrad` sectors. The corps exists in `corps_command` but has `status_reason: no_eligible_sectors`.
+
+**Root cause:** HVO is structurally spread across isolated enclaves (29 brigades total). The assignment system concentrates what little strength exists instead of distributing it. The `density_strained` gate correctly blocks operations but doesn't trigger redistribution to empty sectors.
+
+**Status:** P1 — 69 front edges completely undefended. Related to existing issue #14 (HVO Central Bosnia sectorless).
+
+---
+
+#### Issue #35 (NEW, P2): SRK in screening stance — wrong for a siege corps
+
+Both SRK sectors are in **screening** stance (lowest density mode, 0.0x entrenchment rate). For a besieging force that should be fortifying positions around Sarajevo, this is backwards. rs_3rd_sarajevo_infantry is at **Vares** (50km from the siege ring) with morale 6, participating in Operacija Vaganj — a probe targeting Breza. Threat ratios 172-262 on both siege sectors.
+
+**Historical context:** Dragomir Milosevic ran SRK as a siege and containment corps. Its entire mission was encircling Sarajevo. Screening stance implies minimal commitment — the opposite of siege warfare. SRK should be in `defend` or `fortify` at minimum.
+
+**Root cause:** The bot stance selection algorithm doesn't have a corps-specific floor. SRK is treated identically to offensive corps. The low density (6 brigades on 40 edges = 0.15, 4 brigades on 24 edges = 0.17) triggers screening as the "realistic" stance for thin coverage — but for SRK the answer is not "screen thinly" but "hold the ring at all costs."
+
+**Needed fix:** Corps-specific stance floor — SRK minimum `defend`. Potentially `fortify` for the inner siege ring sectors. Related to existing issue #28 (SRK Sarajevo Ring).
+
+**Status:** P2 — doesn't break combat (sector defense uses live computation, not stance), but entrenchment rate at 0.0x means SRK brigades never dig in.
+
+---
+
+#### Issue #36 (NEW, P2): VRS Herzegovina threat_ratio 2,625
+
+Sector :2 (Trebinje/Nevesinje, 20 front edges) has **2 brigades, defensive power 390, threat_ratio 2,625** — the worst in the entire VRS. The front is mostly Graz cold-front facing HRHB (no active combat), so the extreme ratio hasn't caused territorial loss. But if the truce breaks, Herzegovina collapses instantly.
+
+Additionally, `rs_gacko_brigade` (367 pers) and `rs_ajnie_brigade` (0 pers, inactive) are the weakest in the corps. The ajnie_brigade is stranded at `op:gorazde:podkozara_donja_2` — inside the ARBiH Gorazde enclave. Sectorless, no movement orders. Should have dissolved.
+
+**Status:** P2 — cold front means no immediate danger, but structurally fragile.
+
+---
+
+#### Issue #37 (NEW, P2): VRS East Bosnian Corps morale crisis + combat-ineffective in ops
+
+5 East Bosnian brigades at morale 1 (near-collapse). Threat ratios 256-321 on sectors :1 and :2. The Brcko/Posavina corridor is held by willpower alone.
+
+`rs_1st_birac` (369 personnel) is assigned to active Operation Cerska-Kamenica despite being below the 400-personnel combat-ineffective gate. This should block attack posture in `bot_brigade_eval_attack.ts` but the brigade is still listed as an operation participant.
+
+**Status:** P2 — the combat-ineffective gate should prevent actual attacks, but the brigade shouldn't be committed to an operation in the first place.
+
+---
+
+#### Issue #38 (NEW, P2): HVO stale commander IDs — Blaskic commands nothing
+
+`hvo_blaskic` is assigned to `hvo_oz_central_bosnia` — a stale corps ID that doesn't exist in `corps_command`. 4 other HVO officers (`hvo_lasic`, `hvo_matuzovic`, `hvo_tole`, etc.) also reference stale `hvo_oz_*` IDs. These officers are active but orphaned. Central Bosnia's 7 brigades have **no recognized commander** despite Blaskic being available.
+
+**Root cause:** Officer data uses `hvo_oz_*` corps IDs (likely from OOB/scenario data) that don't match the runtime `hvo_*` corps IDs in `corps_command`. The mapping was never migrated.
+
+**Status:** P2 — affects commander modifier application and operation commander selection for HVO.
+
+---
+
+#### Issue #39 (NEW, P3): VRS Drina ghost sectors — 18 edges, 0 brigades (timing artifact)
+
+Sector :2 (Rogatica/Sokolac, 18 edges) has 0 assigned brigades. SCR still shows 685 defensive power from last turn's computation. Brigades were reassigned to the new sector :3 (30 edges, 6 brigades) during sector restructuring. Any attack during the transition would face zero resistance.
+
+**Status:** P3 — timing artifact between sector rebuild and combat resolution. The rederive-osid-front-segments fix (n943) addressed stale front edges; this is the sector-assignment equivalent.
+
+---
+
+#### Issue #40 (NEW, P3): 30 reachability violations — brigades outside sector territory
+
+21 RBiH + 9 RS brigades assigned to sectors whose `territory_osids` doesn't include their `location_osid`. RS violations are almost entirely mid-march brigades (1st Krajina redeploying toward Doboj — 12-hop path). RBiH violations cluster in 1st Corps (Sarajevo outer ring) and 3rd Corps (Travnik/Zavidovici edge positions).
+
+**Status:** P3 — mostly transit-related. The sector system pre-assigns brigades to destination sectors before they arrive. No combat impact (defense uses live location, not sector membership).
+
+---
+
+#### Issue #41 (NEW, P3): Dissolution floor not enforced — hrhb_108th at 100 personnel
+
+`hrhb_108th_brko_brigade` has 100 personnel — below the 150-person absolute dissolution floor. Brigade is active, assigned to `sector:arbih_2nd_corps:8` (cross-faction recruitment — HRHB brigade under ARBiH corps). Multiple ARBiH brigades at 146 personnel are also below or at the floor. The 2-of-3 criteria dissolution check should fire with the absolute floor counting as "low personnel" criterion.
+
+**Status:** P3 — investigate `brigade_dissolution.ts` absolute floor path. May need a separate check or the 2-of-3 criteria aren't met (cohesion/morale still adequate).
+
+---
+
+#### Sector audit: what's working well
+
+- **Perfect bilateral front coverage**: 497/497 front edges have sectors on both sides.
+- **Enclave containment**: Srebrenica (5 bde), Bihac (10 bde), Gorazde (4 native bde) — all properly contained.
+- **Operation brigade management**: 9 active ops with brigades correctly committed to target sectors.
+- **VRS 1st Krajina active redeployment**: 8 brigades in column march toward Doboj — sector pre-assignment working as designed.
+- **Post-op return marches**: 78 orders across 17 operations. 3rd Corps displacement 16→9.
+
 ## Fixed
 
 ### 31. Brigade stacking and rear idling — 6 brigades at one crossroads while front positions empty (n842/n847)

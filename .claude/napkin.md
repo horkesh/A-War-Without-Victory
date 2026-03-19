@@ -4,13 +4,14 @@
 
 **Rules:** Max 10 items per category. Re-prioritize on every read (highest first). Merge duplicates, remove stale. Each entry: date + short title + "Do instead".
 
-**Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`; Sectors → `docs/40_reports/SECTOR_MASTER.md`. Do instead: When doing calibration, GUI, warroom, sector, or realism work, read the relevant master first and update it during the session.
+**Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`; Sectors → `docs/40_reports/SECTOR_MASTER.md`; **Bosniak-Croat Conflict → `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`**. Do instead: When doing calibration, GUI, warroom, sector, realism, or HRHB-RBiH conflict work, read the relevant master first and update it during the session.
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-19, v0.4.9 — Battle of the Barracks + Equipment Overhaul)
-**v0.4.9.** 1204 tests, 98 suites. tsc clean. **Latest calibration: n957 91.2% area-weighted. RBiH tanks 24→39.**
-**This session:** **UI/UX polish pass (14 tasks)**: radial right-click context menu, OSID click highlight, larger markers, minimap toggle fix, toolbar routing fix, map mode legends, commander rank insignia (historically accurate), corps health colors, settlement label polish, disabled button tooltips, stance tooltips. Post-op brigade return march (n957). Map UI deep investigation (8 fixes). Battle of the Barracks. ARBiH tank capture overhaul. Per-brigade equipment tracking + 12 accolades. Equipment system overhaul. Front line rendering overhaul. Polygon harmonization.
+**v0.4.9.** 1242 tests, 102 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w, feature branch).**
+**This session:** **HRHB-RBiH war transition system** (9 commits, feature branch): mobilization phase, condition-driven events, combat suppression, bot stance, HVO Central Bosnia activation (5 infrastructure bugs fixed), 56w transition verified. Deep sector audit (9 new REAL_WAR_MASTER issues). Post-op brigade return march. UI/UX polish pass. Map UI investigation. Battle of the Barracks. Equipment overhaul. Front line rendering. Polygon harmonization.
+**HRHB-RBiH conflict:** Mobilization at w31, war at w35-40, first battle w43. Blaskic commands CB (6 sectors). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/20260319_HRHB_RBIH_WAR_TRANSITION.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
@@ -73,16 +74,17 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-19] #33 Sarajevo 1st Corps 29.7x density imbalance (P3 — CORRECT)**: 9 brigades bottled up by SRK siege. The imbalance IS the siege working. Gorazde (2 bde / 33 edges) is the real concern — monitor enclave defense separately.
-2. **[2026-03-19] #34 HVO Tomislavgrad 5/9 sectors empty (P1)**: 69 front edges undefended. Kiseljak double-stack. hvo_central_bosnia has 0 sectors. hrhb_111th morale=0. See REAL_WAR_MASTER #34.
-3. **[2026-03-19] #35 SRK screening stance (P2)**: Siege corps in lowest density mode. Needs corps-specific stance floor (min defend). rs_3rd_sarajevo at Vares with morale 6.
-4. **[2026-03-19] #38 HVO stale commander IDs (P2)**: Blaskic→non-existent `hvo_oz_central_bosnia`. 4 officers orphaned. Officer data uses stale `hvo_oz_*` IDs.
+1. **[2026-03-19] CB brigade redistribution (P1)**: `hvo_central_bosnia` has 5 brigades in 6 sectors — 5/6 empty. Kiseljak pocket stacked, Busovaca/Vitez/NT/Zepce undefended. See BOSNIAK_CROAT_CONFLICT_MASTER.
+2. **[2026-03-19] CB operations not launching (P1)**: 3 HRHB-RBiH battles in 16 war weeks. Corps needs offensive doctrine against ARBiH + operation generation. See BOSNIAK_CROAT_CONFLICT_MASTER.
+3. **[2026-03-19] Kiseljak/Vitez pocket separation (P1)**: Historically two distinct enclaves. Currently one territory. ARBiH should sever the Fojnica/Kresevo corridor.
+4. **[2026-03-19] #35 SRK screening stance (P2)**: Siege corps in lowest density mode. Needs corps-specific stance floor.
 5. **[2026-03-18] Drina region 78% (P2)**: Structural gap — may need OOB or painted target adjustments.
-6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Remaining are structural (adjacent-mun front assignments).
-7. **[2026-03-19] #41 Dissolution floor not enforced (P3)**: hrhb_108th at 100 pers (below 150 floor). Multiple ARBiH at 146. Check `brigade_dissolution.ts`.
+6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Structural.
+7. **[2026-03-19] #41 Dissolution floor not enforced (P3)**: hrhb_108th at 100 pers below 150 floor.
 8. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical.
 9. **[2026-03-19] Map UX: right-click context menu (P3)**: Needs UX design per element type.
-10. **[2026-03-19] Map UX: heat map legend + zero-density sectors (P3)**: See `docs/40_reports/implemented/20260319_MAP_UI_DEEP_INVESTIGATION_AND_FIXES.md`.
+10. **[2026-03-19] Map UX: heat map legend + zero-density sectors (P3)**: See MAP_UI report.
+**Resolved this session:** #34 HVO sectors (FIXED — corps activation + consolidation protection), #38 HVO stale IDs (FIXED), #33 Sarajevo density (CORRECT — siege working).
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
@@ -103,8 +105,20 @@
    Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
 9. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
    Do instead: Autonomous paramilitary units for rear enemy pocket clusters (1-3 OSIDs, ALL external neighbors faction-controlled). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30.
-10. **[2026-03-16] Historical event system LIVE — 41 events from JSON, loaded via `event_loader.ts`**
-    Do instead: Events loaded from `data/scenarios/events/war_*.json` via `loadEventDefinitions(startWeek)` in scenario runner. Passed as `eventDefinitions` on `TurnInput`. `evaluateEvents()` accepts optional `registry` param. Events fire mechanical effects (morale, supply, alliance, war crimes, decisions). `events_fired` serialized to `weekly_report.jsonl`. Decision events queue for player, auto-respond for bots.
+10. **[2026-03-16] Historical event system LIVE — 47 events from JSON, loaded via `event_loader.ts`**
+    Do instead: Events loaded from `data/scenarios/events/war_*.json` via `loadEventDefinitions(startWeek)` in scenario runner. Passed as `eventDefinitions` on `TurnInput`. `evaluateEvents()` accepts optional `registry` param. Events fire mechanical effects (morale, supply, alliance, war crimes, decisions). `events_fired` serialized to `weekly_report.jsonl`. Decision events queue for player, auto-respond for bots. **6 HRHB-RBiH events now condition-triggered** (alliance_below, faction_controls_municipality).
+
+## Bosniak-Croat Conflict (HRHB-RBiH War)
+1. **[2026-03-19] Mobilization phase — 4-turn buildup (IMPLEMENTED)**
+   Do instead: `isRbihHrhbMobilizing()` / `isRbihHrhbCombatEnabled()` in `alliance_update.ts`. Front edges appear at ≤0.20 (ALLIED_THRESHOLD). Combat suppressed for `MOBILIZATION_DURATION_TURNS=4`. Gates in `bot_brigade_eval_attack.ts`, `bot_corps_directives.ts`, `attack_resolution_osid.ts`, `battle_resolution.ts`.
+2. **[2026-03-19] Condition-driven war events — no hardcoded dates (IMPLEMENTED)**
+   Do instead: `war_1993.json` events fire on `alliance_below` + `faction_controls_municipality` conditions. Gornji Vakuf: alliance<0.45 + player decision. War begins: alliance<0.10. Ahmici: requires war + HRHB controls Vitez.
+3. **[2026-03-19] hvo_central_bosnia activation — war-phase activate-corps step (IMPLEMENTED)**
+   Do instead: `war_phases.ts` step `activate-corps` creates corps formations from OOB at their `available_from` turn. CB activates at w10. Without this, CB never exists as a formation in war-start scenarios. Pipeline: 139 steps.
+4. **[2026-03-19] Sector consolidation: brigade-presence protects enclave corps (IMPLEMENTED)**
+   Do instead: `consolidateCrossCorpsFronts` in `sector_territory.ts` — if ANY edge in a component has a brigade of the minority corps, protect ALL edges of that corps in the component. Without this, isolated enclave corps (CB at Kiseljak) get drained edge-by-edge.
+5. **[2026-03-19] HRHB readiness: no reversion from active to forming (IMPLEMENTED)**
+   Do instead: `deriveReadinessState` in `formation_lifecycle.ts` — once past forming, low cohesion → overextended/degraded, NOT forming. Without this, all 29 HRHB brigades oscillated active↔forming every turn.
 
 ## Bot AI & Combat
 1. **[2026-03-13] Triple-junction adjacency: standard for grouping, strict for splitting (n664→n682)**
