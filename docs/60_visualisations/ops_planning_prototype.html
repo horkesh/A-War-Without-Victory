@@ -1,0 +1,2709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV — Operations Planning Modal v2</title>
+<style>
+/* ========================================================================
+   CSS CUSTOM PROPERTIES
+   ======================================================================== */
+:root {
+  --map-bg: #d6ccb7;
+  --map-bg-dark: #c4b89f;
+  --panel-bg: rgba(20, 18, 15, 0.88);
+  --panel-bg-light: rgba(30, 27, 22, 0.82);
+  --clipboard-bg: #f0e8d8;
+  --clipboard-edge: #5a4530;
+  --clipboard-clip: #8a8278;
+  --text-warm: #e8e0d0;
+  --text-muted: #9a9080;
+  --text-ink: #2a2520;
+  --text-ink-light: #5a5045;
+  --accent-gold: #c8a55a;
+  --accent-gold-dim: rgba(200, 165, 90, 0.3);
+  --faction-green: #4a9a55;
+  --faction-green-dim: rgba(74, 154, 85, 0.25);
+  --enemy-red: #c24040;
+  --enemy-red-dim: rgba(194, 64, 64, 0.15);
+  --neutral-gray: rgba(140, 135, 125, 0.15);
+  --warning-amber: #c4a35a;
+  --objective-red: #dd4444;
+  --staging-green: #3a8a45;
+  --stamp-red: #8b2020;
+  --march-green: #4a9a55;
+  --march-amber: #c4a35a;
+  --march-red: #c24040;
+  --paper-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  --font-header: 'Arial Narrow', 'Helvetica Neue Condensed', 'Segoe UI', sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-typewriter: 'Courier New', 'Courier', monospace;
+  --font-mono: 'Consolas', 'Courier New', monospace;
+  --transition-panel: 350ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ========================================================================
+   RESET & BASE
+   ======================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background: #1a1814;
+}
+
+/* ========================================================================
+   MAP — FULL BLEED WITH PAPER GRAIN
+   ======================================================================== */
+#map-container {
+  position: fixed;
+  inset: 0;
+  background: var(--map-bg);
+  /* Paper grain via multiple radial gradients */
+  background-image:
+    radial-gradient(ellipse 1px 1px at 20% 30%, rgba(0,0,0,0.04) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 60% 70%, rgba(0,0,0,0.03) 0%, transparent 100%),
+    radial-gradient(ellipse 2px 1px at 40% 50%, rgba(80,60,30,0.03) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 2px at 80% 20%, rgba(0,0,0,0.035) 0%, transparent 100%);
+  background-size: 4px 4px, 6px 5px, 5px 7px, 7px 6px;
+}
+
+#map-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ========================================================================
+   PHASE INDICATOR
+   ======================================================================== */
+#phase-indicator {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 10px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(200,165,90,0.15);
+  z-index: 1000;
+  user-select: none;
+}
+
+.phase-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 12px;
+  transition: background 200ms;
+}
+.phase-step:hover { background: rgba(255,255,255,0.06); }
+
+.phase-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  background: transparent;
+  transition: all 250ms;
+}
+.phase-step.active .phase-dot {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 8px rgba(200,165,90,0.5);
+}
+.phase-step.completed .phase-dot {
+  background: var(--faction-green);
+  border-color: var(--faction-green);
+}
+
+.phase-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  transition: color 250ms;
+}
+.phase-step.active .phase-label { color: var(--accent-gold); }
+.phase-step.completed .phase-label { color: var(--faction-green); }
+
+.phase-connector {
+  width: 24px; height: 1px;
+  background: rgba(255,255,255,0.12);
+}
+
+/* ========================================================================
+   CORPS IDENTITY CARD (bottom-left, always visible)
+   ======================================================================== */
+#corps-card {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  width: 320px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(200,165,90,0.12);
+  border-radius: 8px;
+  padding: 16px;
+  z-index: 800;
+  transition: transform var(--transition-panel), opacity var(--transition-panel);
+}
+
+.corps-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.faction-crest {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--faction-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid rgba(74,154,85,0.5);
+}
+
+.faction-crest svg { width: 28px; height: 28px; fill: #fff; }
+
+.corps-title {
+  font-family: var(--font-header);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-warm);
+  line-height: 1.3;
+}
+.corps-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.corps-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin-bottom: 10px;
+}
+
+.corps-stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.corps-stat-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-warm);
+}
+
+.corps-commander {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 12px;
+  color: var(--text-warm);
+}
+.corps-commander .rank { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.sector-badges {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.sector-badge {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Ops commander badge (appears after Phase 1 selection) */
+.ops-commander-badge {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--accent-gold-dim);
+  border: 1px solid rgba(200,165,90,0.3);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--accent-gold);
+}
+.ops-commander-badge.visible { display: flex; }
+.ops-commander-badge .badge-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+/* ========================================================================
+   PHASE 1: COMMANDER SELECTION
+   ======================================================================== */
+#phase-1-panel {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  max-width: calc(100vw - 380px);
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(200,165,90,0.12);
+  border-radius: 10px;
+  padding: 20px;
+  z-index: 900;
+  transition: transform var(--transition-panel), opacity var(--transition-panel);
+}
+
+.panel-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(30px);
+}
+#phase-1-panel.panel-hidden { transform: translateX(-50%) translateY(30px); }
+
+.selection-title {
+  font-family: var(--font-header);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.officer-grid {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.officer-card {
+  width: 195px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 200ms;
+  position: relative;
+}
+.officer-card:hover:not(.unavailable) {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(200,165,90,0.3);
+  transform: translateY(-2px);
+}
+.officer-card.selected {
+  border-color: var(--accent-gold);
+  background: rgba(200,165,90,0.1);
+  box-shadow: 0 0 16px rgba(200,165,90,0.15);
+}
+.officer-card.unavailable {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+}
+
+.officer-portrait {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255,255,255,0.12);
+}
+.officer-card.selected .officer-portrait { border-color: var(--accent-gold); }
+.officer-portrait svg { width: 24px; height: 24px; fill: rgba(255,255,255,0.25); }
+
+.officer-name {
+  font-family: var(--font-header);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-warm);
+  text-align: center;
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+.officer-rank {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.officer-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  width: 38px;
+  flex-shrink: 0;
+}
+.stat-bar-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 300ms;
+}
+.stat-bar-fill.comp { background: #5aa0d4; }
+.stat-bar-fill.aggr { background: #d47a5a; }
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-warm);
+  width: 16px;
+  text-align: right;
+}
+
+.officer-region {
+  text-align: center;
+  margin-bottom: 6px;
+}
+.region-badge {
+  display: inline-block;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+.region-badge.home { background: rgba(74,154,85,0.2); color: var(--faction-green); border: 1px solid rgba(74,154,85,0.3); }
+.region-badge.compatible { background: rgba(196,163,90,0.2); color: var(--warning-amber); border: 1px solid rgba(196,163,90,0.3); }
+.region-badge.out { background: rgba(194,64,64,0.15); color: var(--enemy-red); border: 1px solid rgba(194,64,64,0.25); }
+
+.officer-prep {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--warning-amber);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.officer-personality {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.unavailable-reason {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.unavailable-reason.kia { background: rgba(194,64,64,0.15); color: var(--enemy-red); }
+.unavailable-reason.locked { background: rgba(196,163,90,0.15); color: var(--warning-amber); }
+
+/* ========================================================================
+   PHASE 2: PLANNING
+   ======================================================================== */
+/* Objectives panel - top right */
+#objectives-panel {
+  position: fixed;
+  top: 70px;
+  right: 16px;
+  width: 280px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(200,165,90,0.12);
+  border-radius: 8px;
+  padding: 14px;
+  z-index: 800;
+  transition: transform var(--transition-panel), opacity var(--transition-panel);
+}
+#objectives-panel.panel-hidden { transform: translateX(30px); opacity: 0; pointer-events: none; }
+
+.objectives-title {
+  font-family: var(--font-header);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+}
+
+.objective-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+  position: relative;
+}
+
+.objective-number {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--objective-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.objective-info {
+  flex: 1;
+  min-width: 0;
+}
+.objective-name {
+  font-family: var(--font-header);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-warm);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.schwerpunkt-star {
+  color: var(--accent-gold);
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 150ms;
+}
+.schwerpunkt-star:hover { transform: scale(1.3); }
+
+.objective-detail {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.objective-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.obj-btn {
+  width: 18px; height: 18px;
+  border: none;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms;
+}
+.obj-btn:hover { background: rgba(255,255,255,0.15); color: var(--text-warm); }
+.obj-btn.remove:hover { background: rgba(194,64,64,0.3); color: var(--enemy-red); }
+
+.add-objective-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-style: italic;
+}
+
+/* Brigade tray - bottom */
+#brigade-tray {
+  position: fixed;
+  bottom: 0;
+  left: 350px;
+  right: 0;
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(200,165,90,0.12);
+  border-radius: 10px 10px 0 0;
+  z-index: 850;
+  transition: transform var(--transition-panel), opacity var(--transition-panel);
+}
+#brigade-tray.panel-hidden { transform: translateY(100%); opacity: 0; pointer-events: none; }
+
+.tray-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.tray-title {
+  font-family: var(--font-header);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent-gold);
+}
+
+.assembly-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--warning-amber);
+  padding: 3px 10px;
+  background: rgba(196,163,90,0.12);
+  border: 1px solid rgba(196,163,90,0.2);
+  border-radius: 3px;
+}
+
+/* Operation parameters strip */
+.op-params {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  flex-wrap: wrap;
+}
+.param-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.param-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.param-input {
+  font-family: var(--font-typewriter);
+  font-size: 12px;
+  color: var(--text-warm);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 3px;
+  padding: 3px 8px;
+  outline: none;
+}
+.param-input:focus { border-color: var(--accent-gold); }
+
+.param-select {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-warm);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 3px;
+  padding: 3px 8px;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.param-select option { background: #2a2520; color: var(--text-warm); }
+
+.tempo-group {
+  display: flex;
+  gap: 0;
+}
+.tempo-btn {
+  font-family: var(--font-body);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 150ms;
+}
+.tempo-btn:first-child { border-radius: 3px 0 0 3px; }
+.tempo-btn:last-child { border-radius: 0 3px 3px 0; }
+.tempo-btn:not(:first-child) { border-left: none; }
+.tempo-btn.active {
+  background: var(--accent-gold-dim);
+  color: var(--accent-gold);
+  border-color: rgba(200,165,90,0.4);
+}
+.tempo-btn:hover:not(.active) { background: rgba(255,255,255,0.08); }
+
+.toggle-switch {
+  position: relative;
+  width: 36px; height: 18px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 200ms;
+}
+.toggle-switch.on { background: var(--faction-green); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 200ms;
+}
+.toggle-switch.on::after { transform: translateX(18px); }
+
+/* Brigade cards row */
+.brigade-cards-row {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.brigade-cards-row::-webkit-scrollbar { height: 6px; }
+.brigade-cards-row::-webkit-scrollbar-track { background: transparent; }
+.brigade-cards-row::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+.brigade-card {
+  width: 160px;
+  min-width: 160px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 200ms;
+  position: relative;
+}
+.brigade-card:hover {
+  border-color: rgba(200,165,90,0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.brigade-card.assigned {
+  border-color: rgba(74,154,85,0.4);
+}
+.brigade-card.unassigned {
+  opacity: 0.65;
+  transform: scale(0.95);
+}
+.brigade-card.unassigned:hover {
+  opacity: 0.85;
+  transform: scale(0.95) translateY(-2px);
+}
+
+.card-stripe {
+  height: 3px;
+  background: var(--text-muted);
+}
+.brigade-card.assigned .card-stripe { background: var(--faction-green); }
+
+.card-body { padding: 8px 10px; }
+
+.bde-name {
+  font-family: var(--font-typewriter);
+  font-size: 11px;
+  color: var(--text-warm);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bde-personnel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-warm);
+  margin-bottom: 4px;
+}
+
+.bde-equipment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.equip-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.equip-icon {
+  width: 12px; height: 8px;
+  fill: var(--text-muted);
+}
+
+.bde-readiness {
+  margin-bottom: 4px;
+}
+.readiness-bar-track {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.readiness-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 300ms;
+}
+
+.bde-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.bde-fatigue {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.bde-march {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+.bde-march.at-staging { background: rgba(74,154,85,0.15); color: var(--march-green); }
+.bde-march.near { background: rgba(196,163,90,0.15); color: var(--march-amber); }
+.bde-march.far { background: rgba(194,64,64,0.15); color: var(--march-red); }
+
+.suggested-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 1px 5px;
+  background: rgba(200,165,90,0.2);
+  color: var(--accent-gold);
+  border-radius: 2px;
+  border: 1px solid rgba(200,165,90,0.3);
+  animation: suggestedPulse 2s ease-in-out 1;
+}
+
+@keyframes suggestedPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ========================================================================
+   PHASE 3: G2 ASSESSMENT
+   ======================================================================== */
+#g2-clipboard {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  width: 420px;
+  bottom: 0;
+  z-index: 850;
+  transition: transform var(--transition-panel), opacity var(--transition-panel);
+}
+#g2-clipboard.panel-hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
+
+.clipboard-frame {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.clipboard-top {
+  height: 44px;
+  background: #5a4530;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+/* Metal binder clip */
+.binder-clip {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px; height: 28px;
+  background: linear-gradient(180deg, #a0988e 0%, #8a8278 40%, #706860 100%);
+  border-radius: 4px 4px 0 0;
+  border: 1px solid rgba(0,0,0,0.3);
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.binder-clip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 8px; right: 8px;
+  height: 6px;
+  background: linear-gradient(180deg, #706860 0%, #8a8278 100%);
+  border-radius: 0 0 3px 3px;
+}
+
+.clipboard-tabs {
+  display: flex;
+  gap: 0;
+}
+.clipboard-tab {
+  font-family: var(--font-body);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  background: rgba(0,0,0,0.2);
+  color: rgba(240,232,216,0.5);
+  border: none;
+  cursor: pointer;
+  border-radius: 3px 3px 0 0;
+  transition: all 150ms;
+}
+.clipboard-tab.active {
+  background: var(--clipboard-bg);
+  color: var(--text-ink);
+}
+.clipboard-tab:hover:not(.active) { background: rgba(0,0,0,0.1); }
+
+.clipboard-paper {
+  flex: 1;
+  background: var(--clipboard-bg);
+  /* Paper grain */
+  background-image:
+    radial-gradient(ellipse 1px 1px at 30% 40%, rgba(80,60,30,0.05) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 70% 60%, rgba(80,60,30,0.04) 0%, transparent 100%),
+    radial-gradient(ellipse 2px 1px at 50% 50%, rgba(80,60,30,0.03) 0%, transparent 100%);
+  background-color: var(--clipboard-bg);
+  background-size: 5px 4px, 7px 6px, 6px 8px;
+  overflow-y: auto;
+  padding: 24px 20px;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(42,37,32,0.2) transparent;
+}
+.clipboard-paper::-webkit-scrollbar { width: 6px; }
+.clipboard-paper::-webkit-scrollbar-track { background: transparent; }
+.clipboard-paper::-webkit-scrollbar-thumb { background: rgba(42,37,32,0.2); border-radius: 3px; }
+
+/* Assessment tab content */
+.restricted-stamp {
+  position: absolute;
+  top: 20px; right: 20px;
+  font-family: var(--font-header);
+  font-size: 22px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--stamp-red);
+  opacity: 0.15;
+  transform: rotate(-12deg);
+  pointer-events: none;
+  border: 3px solid var(--stamp-red);
+  padding: 4px 12px;
+}
+
+.doc-header-block {
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(42,37,32,0.2);
+}
+.doc-header-line {
+  font-family: var(--font-header);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-ink);
+  line-height: 1.5;
+}
+.doc-header-line.institution {
+  font-size: 11px;
+  font-weight: bold;
+}
+.doc-ref {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  color: var(--text-ink-light);
+  margin-top: 4px;
+}
+.doc-date {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  color: var(--text-ink-light);
+}
+
+.assessment-body {
+  font-family: var(--font-typewriter);
+  font-size: 12px;
+  color: var(--text-ink);
+  line-height: 1.65;
+}
+.assessment-body .section-header {
+  font-weight: bold;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.assessment-body p {
+  margin-bottom: 10px;
+  text-indent: 0;
+}
+.assessment-body .recommendation {
+  margin-top: 16px;
+  padding: 8px 12px;
+  background: rgba(74,154,85,0.08);
+  border-left: 3px solid var(--faction-green);
+  font-weight: bold;
+}
+.assessment-body .signature {
+  margin-top: 20px;
+  text-align: right;
+  font-style: italic;
+}
+.assessment-body .sig-note {
+  font-size: 9px;
+  color: var(--text-ink-light);
+  text-align: right;
+  margin-top: 4px;
+  font-style: normal;
+}
+
+/* Raw Intel tab content */
+.raw-intel { display: none; }
+.raw-intel.visible { display: block; }
+.assessment-content { display: block; }
+.assessment-content.hidden { display: none; }
+
+.intel-bar-group {
+  margin-bottom: 14px;
+}
+.intel-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.intel-bar-name {
+  font-family: var(--font-typewriter);
+  font-size: 11px;
+  color: var(--text-ink);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.intel-bar-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: bold;
+}
+.intel-bar-track {
+  height: 8px;
+  background: rgba(42,37,32,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.intel-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+.intel-bar-status {
+  font-family: var(--font-typewriter);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.force-ratio-display {
+  text-align: center;
+  padding: 16px 0;
+  margin-bottom: 14px;
+  border-top: 1px solid rgba(42,37,32,0.1);
+  border-bottom: 1px solid rgba(42,37,32,0.1);
+}
+.force-ratio-number {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--text-ink);
+}
+.force-ratio-label {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-ink-light);
+  margin-top: 4px;
+}
+
+.casualty-display {
+  text-align: center;
+  margin-bottom: 14px;
+}
+.casualty-number {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--warning-amber);
+}
+.casualty-subtitle {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  color: var(--text-ink-light);
+}
+
+.prep-time-display {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.prep-time-number {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--text-ink);
+}
+.prep-time-label {
+  font-family: var(--font-typewriter);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-ink-light);
+}
+
+.threshold-checks {
+  margin-bottom: 16px;
+  padding: 10px;
+  background: rgba(42,37,32,0.04);
+  border-radius: 4px;
+}
+.threshold-title {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-ink-light);
+  margin-bottom: 6px;
+}
+.threshold-item {
+  font-family: var(--font-typewriter);
+  font-size: 11px;
+  color: var(--text-ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.threshold-check { color: var(--faction-green); font-size: 14px; }
+
+.axis-card {
+  background: rgba(42,37,32,0.04);
+  border: 1px solid rgba(42,37,32,0.12);
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.axis-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.axis-card-name {
+  font-family: var(--font-typewriter);
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-ink);
+}
+.outcome-badge {
+  font-family: var(--font-body);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+.outcome-badge.victory { background: rgba(74,154,85,0.15); color: var(--faction-green); }
+.outcome-badge.costly { background: rgba(196,163,90,0.15); color: var(--warning-amber); }
+.outcome-badge.stalemate { background: rgba(194,64,64,0.15); color: var(--enemy-red); }
+
+.axis-card-detail {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  color: var(--text-ink-light);
+  line-height: 1.5;
+}
+
+.commander-rec {
+  text-align: center;
+  padding: 12px;
+  margin-top: 8px;
+  background: rgba(74,154,85,0.08);
+  border: 1px solid rgba(74,154,85,0.2);
+  border-radius: 4px;
+}
+.commander-rec-text {
+  font-family: var(--font-header);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--faction-green);
+  font-weight: bold;
+}
+
+/* ========================================================================
+   PHASE 4: AUTHORIZE
+   ======================================================================== */
+#phase-4-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 400ms;
+}
+#phase-4-overlay.panel-hidden { opacity: 0; pointer-events: none; }
+
+.opord-document {
+  width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--clipboard-bg);
+  /* Paper grain */
+  background-image:
+    radial-gradient(ellipse 1px 1px at 30% 40%, rgba(80,60,30,0.05) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 70% 60%, rgba(80,60,30,0.04) 0%, transparent 100%);
+  background-color: var(--clipboard-bg);
+  background-size: 5px 4px, 7px 6px;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 2px 10px rgba(0,0,0,0.3);
+  padding: 36px 40px;
+  position: relative;
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 400ms ease-out, opacity 400ms ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(42,37,32,0.2) transparent;
+}
+.opord-document::-webkit-scrollbar { width: 6px; }
+.opord-document::-webkit-scrollbar-track { background: transparent; }
+.opord-document::-webkit-scrollbar-thumb { background: rgba(42,37,32,0.2); border-radius: 3px; }
+
+#phase-4-overlay:not(.panel-hidden) .opord-document {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.opord-crest {
+  width: 72px; height: 72px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: var(--faction-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(74,154,85,0.4);
+}
+.opord-crest svg { width: 42px; height: 42px; fill: #fff; }
+
+.opord-nation {
+  font-family: var(--font-header);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-ink);
+  text-align: center;
+  line-height: 1.5;
+}
+.opord-army {
+  font-family: var(--font-header);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-ink);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.opord-hr {
+  border: none;
+  border-top: 1px solid rgba(42,37,32,0.25);
+  margin: 10px 0;
+}
+
+.opord-order-title {
+  font-family: var(--font-header);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-ink);
+  text-align: center;
+  font-weight: bold;
+  margin: 6px 0;
+}
+
+.opord-date {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  color: var(--text-ink-light);
+  text-align: right;
+}
+
+.opord-body {
+  font-family: var(--font-typewriter);
+  font-size: 12px;
+  color: var(--text-ink);
+  line-height: 1.65;
+  margin-top: 12px;
+}
+.opord-body .section-title {
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 16px;
+  margin-bottom: 6px;
+}
+.opord-body .section-text {
+  margin-bottom: 8px;
+}
+.opord-body .forces-list {
+  margin: 4px 0 4px 16px;
+  list-style: none;
+}
+.opord-body .forces-list li::before {
+  content: '\2014\00a0';
+  color: var(--text-ink-light);
+}
+.opord-body .forces-total {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(42,37,32,0.1);
+  font-weight: bold;
+}
+
+.opord-signature {
+  margin-top: 24px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(42,37,32,0.2);
+  text-align: right;
+}
+.opord-sig-for {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-ink-light);
+  margin-bottom: 12px;
+}
+.opord-sig-name {
+  font-family: var(--font-typewriter);
+  font-size: 12px;
+  color: var(--text-ink);
+  font-style: italic;
+}
+.opord-sig-line {
+  margin-top: 6px;
+  border-bottom: 1px dashed rgba(42,37,32,0.3);
+  width: 200px;
+  margin-left: auto;
+}
+
+/* Authorize button */
+.authorize-area {
+  text-align: center;
+  margin-top: 24px;
+  position: relative;
+}
+
+.authorize-btn {
+  font-family: var(--font-header);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #fff;
+  background: #3a5a3a;
+  border: 2px solid #4a6a4a;
+  border-radius: 4px;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: all 200ms;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.authorize-btn:hover {
+  background: #4a6a4a;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transform: translateY(-1px);
+}
+.authorize-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.authorize-btn.hidden { display: none; }
+
+/* Approval stamp */
+.approval-stamp {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-15deg) scale(2);
+  font-family: var(--font-header);
+  font-size: 36px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--stamp-red);
+  border: 4px solid var(--stamp-red);
+  padding: 6px 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms;
+}
+.approval-stamp.visible {
+  opacity: 0.75;
+  transform: translateX(-50%) rotate(-15deg) scale(1);
+}
+
+.approval-date {
+  position: absolute;
+  top: -70px;
+  left: calc(50% + 100px);
+  font-family: var(--font-typewriter);
+  font-size: 12px;
+  color: var(--stamp-red);
+  opacity: 0;
+  transform: rotate(-15deg);
+  transition: opacity 300ms;
+  transition-delay: 400ms;
+}
+.approval-date.visible { opacity: 0.6; }
+
+.transmitted-text {
+  margin-top: 16px;
+  opacity: 0;
+  transition: opacity 600ms;
+  transition-delay: 1500ms;
+}
+.transmitted-text.visible { opacity: 1; }
+.transmitted-main {
+  font-family: var(--font-header);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent-gold);
+}
+.transmitted-sub {
+  font-family: var(--font-typewriter);
+  font-size: 10px;
+  color: var(--text-ink-light);
+  margin-top: 4px;
+}
+
+.close-btn {
+  margin-top: 16px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-ink-light);
+  background: rgba(42,37,32,0.08);
+  border: 1px solid rgba(42,37,32,0.2);
+  border-radius: 3px;
+  padding: 6px 20px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 600ms;
+  transition-delay: 2500ms;
+}
+.close-btn.visible { opacity: 1; }
+.close-btn:hover { background: rgba(42,37,32,0.15); }
+
+/* ========================================================================
+   SVG MAP STYLES
+   ======================================================================== */
+.territory-friendly { fill: rgba(70, 150, 80, 0.15); stroke: rgba(70,150,80,0.25); stroke-width: 0.5; }
+.territory-enemy { fill: rgba(180, 60, 60, 0.15); stroke: rgba(180,60,60,0.25); stroke-width: 0.5; }
+.territory-neutral { fill: rgba(140, 135, 125, 0.12); stroke: rgba(140,135,125,0.2); stroke-width: 0.5; }
+.river { fill: none; stroke: #8aafcc; stroke-width: 1.5; stroke-linecap: round; opacity: 0.5; }
+.road { fill: none; stroke: rgba(120,100,70,0.35); stroke-width: 1; stroke-dasharray: 6,3; }
+.contour { fill: none; stroke: rgba(120,100,70,0.12); stroke-width: 0.5; }
+.city-marker { fill: var(--text-ink); opacity: 0.6; }
+.city-label {
+  font-family: var(--font-header);
+  font-size: 9px;
+  fill: var(--text-ink);
+  opacity: 0.55;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Objective markers on map */
+.objective-marker-circle {
+  fill: none;
+  stroke: var(--objective-red);
+  stroke-width: 3;
+  filter: url(#pencilFilter);
+}
+.objective-marker-number {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: bold;
+  fill: #fff;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.objective-marker-bg {
+  fill: var(--objective-red);
+  opacity: 0.85;
+}
+
+/* Staging marker */
+.staging-diamond {
+  fill: var(--staging-green);
+  opacity: 0.8;
+}
+.staging-label {
+  font-family: var(--font-header);
+  font-size: 8px;
+  fill: var(--staging-green);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-anchor: middle;
+}
+
+/* Arrow paths */
+.attack-arrow {
+  fill: none;
+  stroke: var(--objective-red);
+  stroke-width: 2;
+  stroke-dasharray: 8,4;
+  opacity: 0.6;
+  marker-end: url(#arrowhead);
+  filter: url(#pencilFilter);
+}
+
+/* Schwerpunkt star on map */
+.schwerpunkt-map-star {
+  fill: var(--accent-gold);
+  opacity: 0.9;
+}
+
+/* ========================================================================
+   ANIMATIONS
+   ======================================================================== */
+@keyframes objectiveBounce {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.objective-group {
+  animation: objectiveBounce 400ms ease-out forwards;
+}
+
+/* ========================================================================
+   UTILITY
+   ======================================================================== */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); border: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ====================================================================
+     SVG MAP (FULL BLEED)
+     ==================================================================== -->
+<div id="map-container">
+<svg id="map-svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Pencil wobble filter -->
+    <filter id="pencilFilter" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" result="turbulence" seed="3"/>
+      <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- Arrowhead -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="var(--objective-red)" opacity="0.7"/>
+    </marker>
+    <!-- Glow for staging -->
+    <filter id="stagingGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Contour lines -->
+  <g class="contours">
+    <path class="contour" d="M0,300 Q400,280 800,320 Q1200,360 1600,300 Q1800,280 1920,310"/>
+    <path class="contour" d="M0,500 Q300,480 700,520 Q1100,560 1500,500 Q1750,475 1920,510"/>
+    <path class="contour" d="M0,700 Q400,720 800,680 Q1200,700 1600,720 Q1800,710 1920,690"/>
+    <path class="contour" d="M200,100 Q500,130 800,110 Q1100,90 1400,120"/>
+    <path class="contour" d="M100,900 Q500,880 900,910 Q1300,930 1700,890"/>
+    <path class="contour" d="M300,200 Q600,240 900,200 Q1200,170 1500,210"/>
+    <path class="contour" d="M100,400 Q500,440 900,410 Q1300,380 1700,420"/>
+    <path class="contour" d="M200,600 Q600,570 1000,610 Q1400,630 1800,590"/>
+    <path class="contour" d="M0,850 Q400,830 800,870 Q1200,890 1600,840"/>
+  </g>
+
+  <!-- Territory polygons -->
+  <g class="territories">
+    <!-- Friendly (RBiH) territory - east/southeast -->
+    <polygon class="territory-friendly" points="100,400 300,320 500,350 650,420 700,550 600,650 400,620 200,550"/>
+    <polygon class="territory-friendly" points="200,550 400,620 600,650 700,750 550,850 300,800 150,700"/>
+    <polygon class="territory-friendly" points="650,420 850,380 950,450 900,560 700,550"/>
+    <polygon class="territory-friendly" points="700,550 900,560 950,650 850,750 700,750"/>
+    <polygon class="territory-friendly" points="100,700 300,800 400,900 200,950 50,880"/>
+
+    <!-- Enemy (VRS) territory - north/northwest -->
+    <polygon class="territory-enemy" points="500,100 750,80 950,120 1050,200 950,300 800,320 600,280 450,200"/>
+    <polygon class="territory-enemy" points="950,120 1200,100 1400,150 1350,280 1150,300 1050,200"/>
+    <polygon class="territory-enemy" points="800,320 950,300 1050,200 1150,300 1100,400 900,400 850,380"/>
+    <polygon class="territory-enemy" points="1100,400 1150,300 1350,280 1450,350 1400,450 1200,430"/>
+    <polygon class="territory-enemy" points="950,450 1100,400 1200,430 1250,550 1100,580 950,540"/>
+    <polygon class="territory-enemy" points="1250,550 1400,450 1550,500 1500,620 1350,650 1200,600"/>
+
+    <!-- Neutral / contested -->
+    <polygon class="territory-neutral" points="600,280 800,320 850,380 650,420 500,350 450,300"/>
+    <polygon class="territory-neutral" points="900,560 950,450 950,540 1100,580 1050,680 950,650"/>
+
+    <!-- More enemy territory - far north and east -->
+    <polygon class="territory-enemy" points="1400,150 1650,100 1850,150 1800,300 1600,350 1450,280"/>
+    <polygon class="territory-enemy" points="1450,350 1600,350 1800,300 1850,400 1750,500 1550,500"/>
+    <polygon class="territory-enemy" points="1500,620 1750,500 1850,550 1900,700 1700,750 1550,700"/>
+
+    <!-- Friendly territory south -->
+    <polygon class="territory-friendly" points="850,750 1050,680 1200,720 1150,850 950,900 800,850"/>
+    <polygon class="territory-friendly" points="550,850 700,750 850,750 800,850 650,950 450,920"/>
+    <polygon class="territory-friendly" points="1150,850 1200,720 1350,750 1400,880 1250,950 1100,920"/>
+  </g>
+
+  <!-- Rivers -->
+  <g class="rivers">
+    <path class="river" d="M400,50 Q420,200 380,350 Q360,450 400,550 Q430,650 410,800 Q400,900 420,1080"/>
+    <path class="river" d="M900,0 Q920,150 880,300 Q870,400 900,500 Q930,600 910,750 Q900,850 920,1000"/>
+    <path class="river" d="M1300,0 Q1280,180 1320,350 Q1340,500 1300,650 Q1280,800 1310,1000"/>
+    <path class="river" d="M600,400 Q700,420 800,400 Q850,390 900,410" style="stroke-width:1;opacity:0.35"/>
+  </g>
+
+  <!-- Roads -->
+  <g class="roads">
+    <path class="road" d="M200,500 L400,480 L650,450 L900,470 L1100,500 L1400,480 L1700,510"/>
+    <path class="road" d="M750,200 L800,350 L850,500 L900,650 L950,800"/>
+    <path class="road" d="M1200,200 L1200,400 L1200,600 L1200,800"/>
+    <path class="road" d="M500,300 L700,350 L900,350 L1050,300"/>
+  </g>
+
+  <!-- City markers -->
+  <g class="cities">
+    <circle class="city-marker" cx="350" cy="500" r="4"/>
+    <text class="city-label" x="362" y="504">Tuzla</text>
+
+    <circle class="city-marker" cx="700" cy="480" r="3"/>
+    <text class="city-label" x="712" y="484">Kalesija</text>
+
+    <circle class="city-marker" cx="900" cy="350" r="3"/>
+    <text class="city-label" x="912" y="354">Maglaj</text>
+
+    <circle class="city-marker" cx="1100" cy="280" r="4"/>
+    <text class="city-label" x="1112" y="284">Doboj</text>
+
+    <circle class="city-marker" cx="1300" cy="350" r="3"/>
+    <text class="city-label" x="1265" y="342">Teslic</text>
+
+    <circle class="city-marker" cx="600" cy="700" r="3"/>
+    <text class="city-label" x="612" y="704">Zivinice</text>
+
+    <circle class="city-marker" cx="480" cy="380" r="2.5"/>
+    <text class="city-label" x="492" y="384">Gradacac</text>
+
+    <circle class="city-marker" cx="1050" cy="550" r="2.5"/>
+    <text class="city-label" x="1062" y="554">Zavidovici</text>
+
+    <circle class="city-marker" cx="1500" cy="250" r="2.5"/>
+    <text class="city-label" x="1512" y="254">Modrica</text>
+
+    <circle class="city-marker" cx="200" cy="450" r="2"/>
+    <text class="city-label" x="210" y="454">Lukavac</text>
+
+    <circle class="city-marker" cx="850" cy="800" r="2.5"/>
+    <text class="city-label" x="862" y="804">Olovo</text>
+
+    <circle class="city-marker" cx="1200" cy="750" r="2"/>
+    <text class="city-label" x="1212" y="754">Vares</text>
+  </g>
+
+  <!-- Phase 2+ elements: objectives, staging, arrows (always in SVG, visibility toggled by JS) -->
+  <g id="map-ops-layer" style="display:none;">
+    <!-- Attack arrows (grease pencil style) -->
+    <path class="attack-arrow" d="M700,480 Q780,440 860,380"/>
+    <path class="attack-arrow" d="M700,480 Q850,430 1050,310"/>
+    <path class="attack-arrow" d="M700,480 Q950,440 1250,380"/>
+
+    <!-- Staging area marker -->
+    <g filter="url(#stagingGlow)">
+      <polygon class="staging-diamond" points="700,465 715,480 700,495 685,480"/>
+      <text class="staging-label" x="700" y="510">Staging: Kalesija</text>
+    </g>
+
+    <!-- Objective 1: Maglaj (Schwerpunkt) -->
+    <g class="objective-group" transform="translate(900, 350)">
+      <circle class="objective-marker-circle" cx="0" cy="0" r="18"/>
+      <circle class="objective-marker-bg" cx="0" cy="0" r="13"/>
+      <text class="objective-marker-number" x="0" y="1">1</text>
+      <!-- Schwerpunkt star -->
+      <polygon class="schwerpunkt-map-star" points="0,-26 3,-20 9,-20 4,-16 6,-10 0,-13 -6,-10 -4,-16 -9,-20 -3,-20" transform="translate(0,0)"/>
+    </g>
+
+    <!-- Objective 2: Doboj South -->
+    <g class="objective-group" transform="translate(1100, 280)" style="animation-delay:100ms">
+      <circle class="objective-marker-circle" cx="0" cy="0" r="16"/>
+      <circle class="objective-marker-bg" cx="0" cy="0" r="11"/>
+      <text class="objective-marker-number" x="0" y="1" style="font-size:12px">2</text>
+    </g>
+
+    <!-- Objective 3: Teslic approaches -->
+    <g class="objective-group" transform="translate(1300, 350)" style="animation-delay:200ms">
+      <circle class="objective-marker-circle" cx="0" cy="0" r="16"/>
+      <circle class="objective-marker-bg" cx="0" cy="0" r="11"/>
+      <text class="objective-marker-number" x="0" y="1" style="font-size:12px">3</text>
+    </g>
+  </g>
+</svg>
+</div>
+
+<!-- ====================================================================
+     PHASE INDICATOR (top center)
+     ==================================================================== -->
+<div id="phase-indicator">
+  <div class="phase-step active" data-phase="1" onclick="goToPhase(1)">
+    <div class="phase-dot"></div>
+    <div class="phase-label">Commander</div>
+  </div>
+  <div class="phase-connector"></div>
+  <div class="phase-step" data-phase="2" onclick="goToPhase(2)">
+    <div class="phase-dot"></div>
+    <div class="phase-label">Plan</div>
+  </div>
+  <div class="phase-connector"></div>
+  <div class="phase-step" data-phase="3" onclick="goToPhase(3)">
+    <div class="phase-dot"></div>
+    <div class="phase-label">G2 Assessment</div>
+  </div>
+  <div class="phase-connector"></div>
+  <div class="phase-step" data-phase="4" onclick="goToPhase(4)">
+    <div class="phase-dot"></div>
+    <div class="phase-label">Authorize</div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     CORPS IDENTITY CARD (bottom-left, always visible)
+     ==================================================================== -->
+<div id="corps-card">
+  <div class="corps-header">
+    <div class="faction-crest">
+      <!-- Fleur-de-lis SVG -->
+      <svg viewBox="0 0 100 100">
+        <path d="M50,5 C50,5 42,20 42,30 C42,38 46,42 50,45 C54,42 58,38 58,30 C58,20 50,5 50,5 Z M30,35 C20,32 10,38 10,48 C10,58 20,62 28,58 C32,56 36,50 38,45 C34,42 30,38 30,35 Z M70,35 C80,32 90,38 90,48 C90,58 80,62 72,58 C68,56 64,50 62,45 C66,42 70,38 70,35 Z M50,45 L50,52 C44,54 36,60 36,70 C36,78 42,82 50,82 C58,82 64,78 64,70 C64,60 56,54 50,52 Z M50,82 L50,95 L46,95 L46,88 L42,88 L42,95 L50,95 L58,95 L58,88 L54,88 L54,95 L50,95"/>
+      </svg>
+    </div>
+    <div>
+      <div class="corps-title">2nd Corps</div>
+      <div class="corps-subtitle">Tuzla Operational Group</div>
+    </div>
+  </div>
+
+  <div class="corps-stats">
+    <div>
+      <div class="corps-stat-label">Personnel</div>
+      <div class="corps-stat-value">14,200</div>
+    </div>
+    <div>
+      <div class="corps-stat-label">Tanks</div>
+      <div class="corps-stat-value">23</div>
+    </div>
+    <div>
+      <div class="corps-stat-label">Artillery</div>
+      <div class="corps-stat-value">44</div>
+    </div>
+    <div>
+      <div class="corps-stat-label">Brigades</div>
+      <div class="corps-stat-value">12</div>
+    </div>
+  </div>
+
+  <div class="corps-commander">
+    <div>
+      <span class="rank">Commander:</span><br/>
+      Brig. Gen. Sead Delic
+    </div>
+  </div>
+
+  <div class="sector-badges">
+    <span class="sector-badge">Sector North</span>
+    <span class="sector-badge">Sector East</span>
+    <span class="sector-badge">Sector South</span>
+  </div>
+
+  <div class="ops-commander-badge" id="ops-commander-badge">
+    <div>
+      <span class="badge-label">Ops Commander</span><br/>
+      <span id="ops-commander-name">--</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     PHASE 1: COMMANDER SELECTION
+     ==================================================================== -->
+<div id="phase-1-panel">
+  <div class="selection-title">Select Operations Commander</div>
+  <div class="officer-grid">
+
+    <!-- Officer 1: Ajnadzic -->
+    <div class="officer-card" data-officer="ajnadzic" onclick="selectOfficer(this)">
+      <div class="officer-portrait">
+        <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+      </div>
+      <div class="officer-name">Nedzad Ajnadzic</div>
+      <div class="officer-rank">Colonel</div>
+      <div class="officer-stats">
+        <div class="stat-row">
+          <span class="stat-label">Comp</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill comp" style="width:70%"></div></div>
+          <span class="stat-value">7</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Aggr</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill aggr" style="width:60%"></div></div>
+          <span class="stat-value">6</span>
+        </div>
+      </div>
+      <div class="officer-region"><span class="region-badge home">Home Corps</span></div>
+      <div class="officer-prep">Est. preparation: 2 turns</div>
+      <div class="officer-personality">Aggressive tactician. Favors rapid exploitation.</div>
+    </div>
+
+    <!-- Officer 2: Cuskic -->
+    <div class="officer-card" data-officer="cuskic" onclick="selectOfficer(this)">
+      <div class="officer-portrait">
+        <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+      </div>
+      <div class="officer-name">Fikret Cuskic</div>
+      <div class="officer-rank">Brigadier General</div>
+      <div class="officer-stats">
+        <div class="stat-row">
+          <span class="stat-label">Comp</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill comp" style="width:80%"></div></div>
+          <span class="stat-value">8</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Aggr</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill aggr" style="width:40%"></div></div>
+          <span class="stat-value">4</span>
+        </div>
+      </div>
+      <div class="officer-region"><span class="region-badge home">Home Corps</span></div>
+      <div class="officer-prep">Est. preparation: 4 turns</div>
+      <div class="officer-personality">Methodical planner. Demands thorough reconnaissance.</div>
+    </div>
+
+    <!-- Officer 3: Patkovic -->
+    <div class="officer-card" data-officer="patkovic" onclick="selectOfficer(this)">
+      <div class="officer-portrait">
+        <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+      </div>
+      <div class="officer-name">Serif Patkovic</div>
+      <div class="officer-rank">Colonel</div>
+      <div class="officer-stats">
+        <div class="stat-row">
+          <span class="stat-label">Comp</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill comp" style="width:50%"></div></div>
+          <span class="stat-value">5</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Aggr</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill aggr" style="width:70%"></div></div>
+          <span class="stat-value">7</span>
+        </div>
+      </div>
+      <div class="officer-region"><span class="region-badge compatible">Compatible</span></div>
+      <div class="officer-prep">Est. preparation: 1 turn</div>
+      <div class="officer-personality">Bold but reckless. Tolerates high casualties.</div>
+    </div>
+
+    <!-- Officer 4: Karic -->
+    <div class="officer-card" data-officer="karic" onclick="selectOfficer(this)">
+      <div class="officer-portrait">
+        <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+      </div>
+      <div class="officer-name">Meho Karic</div>
+      <div class="officer-rank">Colonel</div>
+      <div class="officer-stats">
+        <div class="stat-row">
+          <span class="stat-label">Comp</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill comp" style="width:60%"></div></div>
+          <span class="stat-value">6</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Aggr</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill aggr" style="width:30%"></div></div>
+          <span class="stat-value">3</span>
+        </div>
+      </div>
+      <div class="officer-region"><span class="region-badge out">Out of Region</span></div>
+      <div class="officer-prep">Est. preparation: 5 turns</div>
+      <div class="officer-personality">Defensive specialist. Reluctant to commit reserves.</div>
+    </div>
+
+    <!-- Officer 5: Oric (unavailable - enclave locked) -->
+    <div class="officer-card unavailable">
+      <div class="officer-portrait">
+        <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+      </div>
+      <div class="officer-name">Naser Oric</div>
+      <div class="officer-rank">Lt. Colonel</div>
+      <div class="officer-stats">
+        <div class="stat-row">
+          <span class="stat-label">Comp</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill comp" style="width:60%"></div></div>
+          <span class="stat-value">6</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Aggr</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill aggr" style="width:80%"></div></div>
+          <span class="stat-value">8</span>
+        </div>
+      </div>
+      <div class="unavailable-reason locked">Enclave Locked (Srebrenica)</div>
+    </div>
+
+    <!-- Officer 6: Hajrulahovic (unavailable - KIA) -->
+    <div class="officer-card unavailable">
+      <div class="officer-portrait">
+        <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+      </div>
+      <div class="officer-name">Mustafa Hajrulahovic</div>
+      <div class="officer-rank">Brigadier General</div>
+      <div class="officer-stats">
+        <div class="stat-row">
+          <span class="stat-label">Comp</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill comp" style="width:70%"></div></div>
+          <span class="stat-value">7</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Aggr</span>
+          <div class="stat-bar-track"><div class="stat-bar-fill aggr" style="width:50%"></div></div>
+          <span class="stat-value">5</span>
+        </div>
+      </div>
+      <div class="unavailable-reason kia">KIA (Week 31)</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====================================================================
+     PHASE 2: OBJECTIVES PANEL (top-right)
+     ==================================================================== -->
+<div id="objectives-panel" class="panel-hidden">
+  <div class="objectives-title">Objectives</div>
+
+  <div class="objective-item">
+    <div class="objective-number">1</div>
+    <div class="objective-info">
+      <div class="objective-name"><span class="schwerpunkt-star" title="Schwerpunkt (main effort)">&#9733;</span> Maglaj</div>
+      <div class="objective-detail">2 VRS bdes est. &bull; Mountain terrain &bull; Heavy entrenchment</div>
+    </div>
+    <div class="objective-actions">
+      <button class="obj-btn" title="Move up">&#8593;</button>
+      <button class="obj-btn" title="Move down">&#8595;</button>
+      <button class="obj-btn remove" title="Remove">&times;</button>
+    </div>
+  </div>
+
+  <div class="objective-item">
+    <div class="objective-number">2</div>
+    <div class="objective-info">
+      <div class="objective-name">Doboj South</div>
+      <div class="objective-detail">1 VRS bde est. &bull; Open terrain &bull; Moderate entrenchment</div>
+    </div>
+    <div class="objective-actions">
+      <button class="obj-btn" title="Move up">&#8593;</button>
+      <button class="obj-btn" title="Move down">&#8595;</button>
+      <button class="obj-btn remove" title="Remove">&times;</button>
+    </div>
+  </div>
+
+  <div class="objective-item">
+    <div class="objective-number">3</div>
+    <div class="objective-info">
+      <div class="objective-name">Teslic approaches</div>
+      <div class="objective-detail">Unknown strength &bull; Forest terrain</div>
+    </div>
+    <div class="objective-actions">
+      <button class="obj-btn" title="Move up">&#8593;</button>
+      <button class="obj-btn" title="Move down">&#8595;</button>
+      <button class="obj-btn remove" title="Remove">&times;</button>
+    </div>
+  </div>
+
+  <div class="add-objective-hint">Click map to add objective</div>
+</div>
+
+<!-- ====================================================================
+     PHASE 2: BRIGADE TRAY (bottom)
+     ==================================================================== -->
+<div id="brigade-tray" class="panel-hidden">
+  <div class="tray-header">
+    <div class="tray-title">Assigned Forces</div>
+    <div class="assembly-badge">Full assembly: 3 turns</div>
+  </div>
+
+  <!-- Operation parameters strip -->
+  <div class="op-params">
+    <div class="param-group">
+      <span class="param-label">Name</span>
+      <input class="param-input" type="text" value="Operation BOSNA" style="width:150px"/>
+    </div>
+    <div class="param-group">
+      <span class="param-label">Type</span>
+      <select class="param-select">
+        <option selected>Sector Attack</option>
+        <option>Probe in Force</option>
+        <option>Envelopment</option>
+        <option>Breakthrough</option>
+      </select>
+    </div>
+    <div class="param-group">
+      <span class="param-label">Tempo</span>
+      <div class="tempo-group">
+        <button class="tempo-btn" onclick="setTempo(this)">Methodical</button>
+        <button class="tempo-btn active" onclick="setTempo(this)">Standard</button>
+        <button class="tempo-btn" onclick="setTempo(this)">All-Out</button>
+      </div>
+    </div>
+    <div class="param-group">
+      <span class="param-label">Tolerance</span>
+      <select class="param-select">
+        <option>Accept Decisive Only</option>
+        <option>Accept Victory</option>
+        <option selected>Accept Costly</option>
+        <option>Accept Stalemate</option>
+      </select>
+    </div>
+    <div class="param-group">
+      <span class="param-label">Arty Prep</span>
+      <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+    </div>
+  </div>
+
+  <!-- Brigade cards -->
+  <div class="brigade-cards-row">
+
+    <!-- Brigade 1: 210th Mountain -->
+    <div class="brigade-card assigned" onclick="toggleBrigade(this)">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="bde-name">210th Mountain Bde</div>
+        <div class="bde-personnel">2,400 men</div>
+        <div class="bde-equipment">
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 12"><rect x="0" y="4" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="6" width="6" height="2" rx="0.5" fill="currentColor"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg>
+            4T
+          </div>
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 14"><rect x="2" y="8" width="16" height="4" rx="1" fill="currentColor"/><rect x="8" y="0" width="3" height="8" rx="0.5" fill="currentColor" transform="rotate(-15,9,8)"/></svg>
+            6A
+          </div>
+        </div>
+        <div class="bde-readiness">
+          <div class="readiness-bar-track"><div class="readiness-bar-fill" style="width:72%;background:var(--march-amber)"></div></div>
+        </div>
+        <div class="bde-bottom">
+          <span class="bde-fatigue">Fat: 5</span>
+          <span class="bde-march at-staging">At Staging</span>
+        </div>
+      </div>
+      <div class="suggested-badge">Suggested</div>
+    </div>
+
+    <!-- Brigade 2: 221st Mountain -->
+    <div class="brigade-card assigned" onclick="toggleBrigade(this)">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="bde-name">221st Mountain Bde</div>
+        <div class="bde-personnel">1,800 men</div>
+        <div class="bde-equipment">
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 12"><rect x="0" y="4" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="6" width="6" height="2" rx="0.5" fill="currentColor"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg>
+            0T
+          </div>
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 14"><rect x="2" y="8" width="16" height="4" rx="1" fill="currentColor"/><rect x="8" y="0" width="3" height="8" rx="0.5" fill="currentColor" transform="rotate(-15,9,8)"/></svg>
+            4A
+          </div>
+        </div>
+        <div class="bde-readiness">
+          <div class="readiness-bar-track"><div class="readiness-bar-fill" style="width:65%;background:var(--march-amber)"></div></div>
+        </div>
+        <div class="bde-bottom">
+          <span class="bde-fatigue">Fat: 8</span>
+          <span class="bde-march at-staging">At Staging</span>
+        </div>
+      </div>
+      <div class="suggested-badge">Suggested</div>
+    </div>
+
+    <!-- Brigade 3: 254th Infantry -->
+    <div class="brigade-card assigned" onclick="toggleBrigade(this)">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="bde-name">254th Infantry Bde</div>
+        <div class="bde-personnel">2,100 men</div>
+        <div class="bde-equipment">
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 12"><rect x="0" y="4" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="6" width="6" height="2" rx="0.5" fill="currentColor"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg>
+            2T
+          </div>
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 14"><rect x="2" y="8" width="16" height="4" rx="1" fill="currentColor"/><rect x="8" y="0" width="3" height="8" rx="0.5" fill="currentColor" transform="rotate(-15,9,8)"/></svg>
+            3A
+          </div>
+        </div>
+        <div class="bde-readiness">
+          <div class="readiness-bar-track"><div class="readiness-bar-fill" style="width:78%;background:var(--faction-green)"></div></div>
+        </div>
+        <div class="bde-bottom">
+          <span class="bde-fatigue">Fat: 3</span>
+          <span class="bde-march near">1 turn</span>
+        </div>
+      </div>
+      <div class="suggested-badge">Suggested</div>
+    </div>
+
+    <!-- Brigade 4: 205th Mountain -->
+    <div class="brigade-card assigned" onclick="toggleBrigade(this)">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="bde-name">205th Mountain Bde</div>
+        <div class="bde-personnel">3,200 men</div>
+        <div class="bde-equipment">
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 12"><rect x="0" y="4" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="6" width="6" height="2" rx="0.5" fill="currentColor"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg>
+            8T
+          </div>
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 14"><rect x="2" y="8" width="16" height="4" rx="1" fill="currentColor"/><rect x="8" y="0" width="3" height="8" rx="0.5" fill="currentColor" transform="rotate(-15,9,8)"/></svg>
+            8A
+          </div>
+        </div>
+        <div class="bde-readiness">
+          <div class="readiness-bar-track"><div class="readiness-bar-fill" style="width:58%;background:var(--march-amber)"></div></div>
+        </div>
+        <div class="bde-bottom">
+          <span class="bde-fatigue">Fat: 12</span>
+          <span class="bde-march near">2 turns</span>
+        </div>
+      </div>
+      <div class="suggested-badge">Suggested</div>
+    </div>
+
+    <!-- Brigade 5: 215th Infantry -->
+    <div class="brigade-card assigned" onclick="toggleBrigade(this)">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="bde-name">215th Infantry Bde</div>
+        <div class="bde-personnel">1,600 men</div>
+        <div class="bde-equipment">
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 12"><rect x="0" y="4" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="6" width="6" height="2" rx="0.5" fill="currentColor"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg>
+            0T
+          </div>
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 14"><rect x="2" y="8" width="16" height="4" rx="1" fill="currentColor"/><rect x="8" y="0" width="3" height="8" rx="0.5" fill="currentColor" transform="rotate(-15,9,8)"/></svg>
+            2A
+          </div>
+        </div>
+        <div class="bde-readiness">
+          <div class="readiness-bar-track"><div class="readiness-bar-fill" style="width:71%;background:var(--march-amber)"></div></div>
+        </div>
+        <div class="bde-bottom">
+          <span class="bde-fatigue">Fat: 6</span>
+          <span class="bde-march near">2 turns</span>
+        </div>
+      </div>
+      <div class="suggested-badge">Suggested</div>
+    </div>
+
+    <!-- Brigade 6: 240th Recon (not suggested) -->
+    <div class="brigade-card unassigned" onclick="toggleBrigade(this)">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="bde-name">240th Recon Bde</div>
+        <div class="bde-personnel">900 men</div>
+        <div class="bde-equipment">
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 12"><rect x="0" y="4" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="6" width="6" height="2" rx="0.5" fill="currentColor"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg>
+            3T
+          </div>
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 14"><rect x="2" y="8" width="16" height="4" rx="1" fill="currentColor"/><rect x="8" y="0" width="3" height="8" rx="0.5" fill="currentColor" transform="rotate(-15,9,8)"/></svg>
+            0A
+          </div>
+        </div>
+        <div class="bde-readiness">
+          <div class="readiness-bar-track"><div class="readiness-bar-fill" style="width:80%;background:var(--faction-green)"></div></div>
+        </div>
+        <div class="bde-bottom">
+          <span class="bde-fatigue">Fat: 4</span>
+          <span class="bde-march far">3 turns</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brigade 7: 243rd Mountain (not suggested, low readiness) -->
+    <div class="brigade-card unassigned" onclick="toggleBrigade(this)">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="bde-name">243rd Mountain Bde</div>
+        <div class="bde-personnel">1,500 men</div>
+        <div class="bde-equipment">
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 12"><rect x="0" y="4" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="6" width="6" height="2" rx="0.5" fill="currentColor"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg>
+            0T
+          </div>
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 14"><rect x="2" y="8" width="16" height="4" rx="1" fill="currentColor"/><rect x="8" y="0" width="3" height="8" rx="0.5" fill="currentColor" transform="rotate(-15,9,8)"/></svg>
+            2A
+          </div>
+        </div>
+        <div class="bde-readiness">
+          <div class="readiness-bar-track"><div class="readiness-bar-fill" style="width:45%;background:var(--enemy-red)"></div></div>
+        </div>
+        <div class="bde-bottom">
+          <span class="bde-fatigue">Fat: 15</span>
+          <span class="bde-march far">3 turns</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brigade 8: 270th Logistics (not suggested, support unit) -->
+    <div class="brigade-card unassigned" onclick="toggleBrigade(this)">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+        <div class="bde-name">270th Logistics Bde</div>
+        <div class="bde-personnel">600 men</div>
+        <div class="bde-equipment">
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 12"><rect x="0" y="4" width="14" height="8" rx="1" fill="currentColor"/><rect x="14" y="6" width="6" height="2" rx="0.5" fill="currentColor"/><circle cx="4" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="12" r="2" fill="currentColor"/></svg>
+            0T
+          </div>
+          <div class="equip-item">
+            <svg class="equip-icon" viewBox="0 0 20 14"><rect x="2" y="8" width="16" height="4" rx="1" fill="currentColor"/><rect x="8" y="0" width="3" height="8" rx="0.5" fill="currentColor" transform="rotate(-15,9,8)"/></svg>
+            0A
+          </div>
+        </div>
+        <div class="bde-readiness">
+          <div class="readiness-bar-track"><div class="readiness-bar-fill" style="width:82%;background:var(--faction-green)"></div></div>
+        </div>
+        <div class="bde-bottom">
+          <span class="bde-fatigue">Fat: 2</span>
+          <span class="bde-march at-staging">At Staging</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====================================================================
+     PHASE 3: G2 CLIPBOARD
+     ==================================================================== -->
+<div id="g2-clipboard" class="panel-hidden">
+  <div class="clipboard-frame">
+    <div class="clipboard-top">
+      <div class="binder-clip"></div>
+      <div class="clipboard-tabs">
+        <button class="clipboard-tab active" onclick="switchClipboardTab('assessment', this)">Assessment</button>
+        <button class="clipboard-tab" onclick="switchClipboardTab('raw', this)">Raw Intel</button>
+      </div>
+    </div>
+
+    <div class="clipboard-paper">
+      <!-- Assessment tab (default) -->
+      <div class="assessment-content" id="assessment-tab">
+        <div class="restricted-stamp">OGRANICENO</div>
+
+        <div class="doc-header-block">
+          <div class="doc-header-line">Republika Bosna i Hercegovina</div>
+          <div class="doc-header-line institution">Armija Republike Bosne i Hercegovine</div>
+          <div class="doc-header-line">2. Korpus &mdash; Obavjestajni odjel (G-2)</div>
+          <div class="doc-ref">Str. pov. br. 2K-OPS/94-0312</div>
+          <div class="doc-date">12. april 1993.</div>
+        </div>
+
+        <div class="assessment-body">
+          <div class="section-header">1. Neprijatelj (Enemy)</div>
+          <p>Confirmed 3 VRS brigades occupying sector between Maglaj and Doboj. 1st Ozren Infantry Brigade holds prepared defensive positions along Krivaja river valley with estimated company-strength armored element. 2nd Doboj Light Infantry Brigade in depth at Doboj junction, assessed as operational reserve. Forward positions show heavy entrenchment (est. 4+ weeks in position). Total estimated enemy strength: 4,800 personnel.</p>
+          <p>Intel confidence: MODERATE (72%). Probe recommended before commitment.</p>
+
+          <div class="section-header">2. Vlastite snage (Own Forces)</div>
+          <p>Five brigades tasked, combined strength 10,100 personnel with organic artillery support (23 tubes). Force ratio: 1.75:1 favorable at point of main effort (Maglaj axis). Supply lines through Tuzla corridor assessed ADEQUATE &mdash; 3 weeks stores at current consumption rate.</p>
+          <p>Lead elements at staging. Full assembly estimated: 3 TURNS. 205th Mountain Brigade requires 2 turns road march from Gradacac.</p>
+
+          <div class="section-header">3. Procjena (Assessment)</div>
+          <p>Col. Ajnadzic assesses operation as FEASIBLE with METHODICAL tempo. Aggressive push beyond Ozren ridge risks overextension and supply line exposure. Main effort recommended along Highway M4 axis toward Maglaj &mdash; enemy weakest at road junction.</p>
+          <p>Expected duration: 6-8 weeks.<br/>
+          Estimated casualties: 600-900 personnel (6-9% of committed force).</p>
+          <p>Commander threshold: Minimum force ratio 1.5:1. Minimum intel confidence 65%.<br/>
+          Current plan MEETS both thresholds.</p>
+
+          <div class="recommendation">RECOMMENDATION: LAUNCH WHEN ASSEMBLED</div>
+
+          <div class="signature">Pukovnik N. Ajnadzic</div>
+          <div class="sig-note">Assessment based on commander personality profile</div>
+        </div>
+      </div>
+
+      <!-- Raw Intel tab (hidden by default) -->
+      <div class="raw-intel" id="raw-intel-tab">
+
+        <!-- Intel confidence bar -->
+        <div class="intel-bar-group">
+          <div class="intel-bar-label">
+            <span class="intel-bar-name">Intel Confidence</span>
+            <span class="intel-bar-value" style="color:var(--warning-amber)">72%</span>
+          </div>
+          <div class="intel-bar-track"><div class="intel-bar-fill" style="width:72%;background:var(--warning-amber)"></div></div>
+          <div class="intel-bar-status" style="color:var(--warning-amber)">Moderate</div>
+        </div>
+
+        <!-- Supply readiness bar -->
+        <div class="intel-bar-group">
+          <div class="intel-bar-label">
+            <span class="intel-bar-name">Supply Readiness</span>
+            <span class="intel-bar-value" style="color:var(--faction-green)">84%</span>
+          </div>
+          <div class="intel-bar-track"><div class="intel-bar-fill" style="width:84%;background:var(--faction-green)"></div></div>
+          <div class="intel-bar-status" style="color:var(--faction-green)">Adequate</div>
+        </div>
+
+        <!-- Force cohesion bar -->
+        <div class="intel-bar-group">
+          <div class="intel-bar-label">
+            <span class="intel-bar-name">Force Cohesion</span>
+            <span class="intel-bar-value" style="color:var(--warning-amber)">68%</span>
+          </div>
+          <div class="intel-bar-track"><div class="intel-bar-fill" style="width:68%;background:var(--warning-amber)"></div></div>
+          <div class="intel-bar-status" style="color:var(--warning-amber)">Fair</div>
+        </div>
+
+        <!-- Force Ratio -->
+        <div class="force-ratio-display">
+          <div class="force-ratio-number" style="color:var(--warning-amber)">1.75:1</div>
+          <div class="force-ratio-label">Force Ratio &mdash; Favorable</div>
+        </div>
+
+        <!-- Estimated casualties -->
+        <div class="casualty-display">
+          <div class="casualty-number">~750</div>
+          <div class="casualty-subtitle">(7% of force)</div>
+        </div>
+
+        <!-- Preparation time -->
+        <div class="prep-time-display">
+          <div class="prep-time-number">3 WEEKS</div>
+          <div class="prep-time-label">Preparation time (based on commander aggressiveness)</div>
+        </div>
+
+        <!-- Commander thresholds -->
+        <div class="threshold-checks">
+          <div class="threshold-title">Commander Thresholds</div>
+          <div class="threshold-item">
+            <span class="threshold-check">&#10003;</span>
+            Required force ratio: &ge;1.5:1
+          </div>
+          <div class="threshold-item">
+            <span class="threshold-check">&#10003;</span>
+            Required intel confidence: &ge;65%
+          </div>
+        </div>
+
+        <!-- Per-axis breakdown -->
+        <div class="axis-card">
+          <div class="axis-card-header">
+            <span class="axis-card-name">Axis 1: Main Advance &rarr; Maglaj</span>
+            <span class="outcome-badge victory">Victory</span>
+          </div>
+          <div class="axis-card-detail">
+            Ratio 2.1:1 &bull; Mountain terrain &bull; Heavy entrenchment<br/>
+            Est. casualties: ~350
+          </div>
+        </div>
+
+        <div class="axis-card">
+          <div class="axis-card-header">
+            <span class="axis-card-name">Axis 2: Supporting &rarr; Doboj S.</span>
+            <span class="outcome-badge costly">Costly Victory</span>
+          </div>
+          <div class="axis-card-detail">
+            Ratio 1.4:1 &bull; Open terrain &bull; Moderate entrenchment<br/>
+            Est. casualties: ~280
+          </div>
+        </div>
+
+        <div class="axis-card">
+          <div class="axis-card-header">
+            <span class="axis-card-name">Axis 3: Screening &rarr; Teslic</span>
+            <span class="outcome-badge stalemate">Stalemate</span>
+          </div>
+          <div class="axis-card-detail">
+            Ratio 0.8:1 &bull; Forest terrain &bull; Unknown entrenchment<br/>
+            Est. casualties: ~120
+          </div>
+        </div>
+
+        <!-- Commander recommendation -->
+        <div class="commander-rec">
+          <div class="commander-rec-text">Recommends Launch</div>
+        </div>
+
+      </div><!-- /raw-intel -->
+    </div><!-- /clipboard-paper -->
+  </div><!-- /clipboard-frame -->
+</div>
+
+<!-- ====================================================================
+     PHASE 4: AUTHORIZE OVERLAY
+     ==================================================================== -->
+<div id="phase-4-overlay" class="panel-hidden">
+  <div class="opord-document">
+
+    <!-- Army crest -->
+    <div class="opord-crest">
+      <svg viewBox="0 0 100 100">
+        <path d="M50,5 C50,5 42,20 42,30 C42,38 46,42 50,45 C54,42 58,38 58,30 C58,20 50,5 50,5 Z M30,35 C20,32 10,38 10,48 C10,58 20,62 28,58 C32,56 36,50 38,45 C34,42 30,38 30,35 Z M70,35 C80,32 90,38 90,48 C90,58 80,62 72,58 C68,56 64,50 62,45 C66,42 70,38 70,35 Z M50,45 L50,52 C44,54 36,60 36,70 C36,78 42,82 50,82 C58,82 64,78 64,70 C64,60 56,54 50,52 Z M50,82 L50,95 L46,95 L46,88 L42,88 L42,95 L50,95 L58,95 L58,88 L54,88 L54,95 L50,95"/>
+      </svg>
+    </div>
+
+    <div class="opord-nation">Republika Bosna i Hercegovina</div>
+    <div class="opord-army">Armija Republike Bosne i Hercegovine</div>
+    <hr class="opord-hr"/>
+    <div class="opord-order-title">Operativna zapovijed br. 2K-94/0312</div>
+    <div class="opord-date">Datum: 12. april 1993.</div>
+    <hr class="opord-hr"/>
+
+    <div class="opord-body">
+      <div class="section-title">1. Zadaca (Mission)</div>
+      <div class="section-text">2nd Corps conducts offensive operation BOSNA to seize Maglaj, Doboj South approaches, and screen Teslic sector in order to relieve pressure on Tuzla corridor and establish forward defensive positions along Krivaja-Bosna river line.</div>
+
+      <div class="section-title">2. Snage (Forces)</div>
+      <div class="section-text">
+        <ul class="forces-list">
+          <li>210th Mountain Brigade</li>
+          <li>221st Mountain Brigade</li>
+          <li>254th Infantry Brigade</li>
+          <li>205th Mountain Brigade</li>
+          <li>215th Infantry Brigade</li>
+        </ul>
+        <div class="forces-total">Total: 10,100 personnel &bull; 14 tanks &bull; 23 artillery</div>
+      </div>
+
+      <div class="section-title">3. Zapovjednik (Commander)</div>
+      <div class="section-text">Pukovnik Nedzad Ajnadzic, Operations Commander</div>
+
+      <div class="section-title">4. Provedba (Execution)</div>
+      <div class="section-text">
+        Type: Sector Attack<br/>
+        Tempo: Standard<br/>
+        Risk tolerance: Accept Costly Victory<br/>
+        Main effort (Schwerpunkt): Maglaj axis<br/>
+        Artillery preparation: No<br/>
+        Staging: Kalesija &mdash; Full assembly: 3 turns
+      </div>
+
+      <div class="section-title">5. Ciljevi (Objectives)</div>
+      <div class="section-text">
+        &#9733; 1. Maglaj &mdash; Main effort<br/>
+        2. Doboj South approaches &mdash; Supporting<br/>
+        3. Teslic sector &mdash; Screening
+      </div>
+
+      <div class="section-title">6. Logistika (Logistics)</div>
+      <div class="section-text">
+        Supply readiness: ADEQUATE (84%)<br/>
+        Estimated duration: 6-8 weeks<br/>
+        Estimated casualties: 600-900 personnel
+      </div>
+    </div>
+
+    <hr class="opord-hr"/>
+
+    <div class="opord-signature">
+      <div class="opord-sig-for">Za komandanta 2. Korpusa</div>
+      <div class="opord-sig-name">Brigadni general Sead DELIC</div>
+      <div class="opord-sig-line"></div>
+    </div>
+
+    <div class="authorize-area">
+      <div class="approval-stamp" id="approval-stamp">Odobreno</div>
+      <div class="approval-date" id="approval-date">12.04.1993.</div>
+      <button class="authorize-btn" id="authorize-btn" onclick="authorizeOperation()">Odobriti operaciju</button>
+      <div class="transmitted-text" id="transmitted-text">
+        <div class="transmitted-main">Zapovijed proslijedena</div>
+        <div class="transmitted-sub">Corps Headquarters &rarr; Brigade Commands</div>
+      </div>
+      <button class="close-btn" id="close-btn" onclick="closeAuthorize()">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====================================================================
+     JAVASCRIPT
+     ==================================================================== -->
+<script>
+(function() {
+  'use strict';
+
+  // ======== STATE ========
+  let currentPhase = 1;
+  let selectedOfficer = null;
+  let authorized = false;
+
+  // ======== OFFICER DATA ========
+  const officers = {
+    ajnadzic: { name: 'Col. N. Ajnadzic', fullName: 'Col. Nedzad Ajnadzic', prep: 2 },
+    cuskic: { name: 'Brig. Gen. F. Cuskic', fullName: 'Brig. Gen. Fikret Cuskic', prep: 4 },
+    patkovic: { name: 'Col. S. Patkovic', fullName: 'Col. Serif Patkovic', prep: 1 },
+    karic: { name: 'Col. M. Karic', fullName: 'Col. Meho Karic', prep: 5 }
+  };
+
+  // ======== PHASE NAVIGATION ========
+  window.goToPhase = function(phase) {
+    if (phase < 1 || phase > 4) return;
+    // Phase 2+ requires commander selected
+    if (phase >= 2 && !selectedOfficer) return;
+    if (phase === currentPhase) return;
+
+    const prev = currentPhase;
+    currentPhase = phase;
+    updatePhaseIndicator();
+    updatePanelVisibility(prev);
+  };
+
+  function updatePhaseIndicator() {
+    document.querySelectorAll('.phase-step').forEach(step => {
+      const p = parseInt(step.dataset.phase);
+      step.classList.remove('active', 'completed');
+      if (p === currentPhase) step.classList.add('active');
+      else if (p < currentPhase) step.classList.add('completed');
+    });
+  }
+
+  function updatePanelVisibility(prevPhase) {
+    const p1 = document.getElementById('phase-1-panel');
+    const objPanel = document.getElementById('objectives-panel');
+    const tray = document.getElementById('brigade-tray');
+    const g2 = document.getElementById('g2-clipboard');
+    const p4 = document.getElementById('phase-4-overlay');
+    const mapOps = document.getElementById('map-ops-layer');
+
+    // Hide all first
+    p1.classList.add('panel-hidden');
+    objPanel.classList.add('panel-hidden');
+    tray.classList.add('panel-hidden');
+    g2.classList.add('panel-hidden');
+    p4.classList.add('panel-hidden');
+    mapOps.style.display = 'none';
+
+    // Show based on current phase
+    switch (currentPhase) {
+      case 1:
+        p1.classList.remove('panel-hidden');
+        break;
+      case 2:
+        objPanel.classList.remove('panel-hidden');
+        tray.classList.remove('panel-hidden');
+        mapOps.style.display = 'block';
+        break;
+      case 3:
+        g2.classList.remove('panel-hidden');
+        mapOps.style.display = 'block';
+        break;
+      case 4:
+        p4.classList.remove('panel-hidden');
+        mapOps.style.display = 'block';
+        break;
+    }
+  }
+
+  // ======== PHASE 1: OFFICER SELECTION ========
+  window.selectOfficer = function(card) {
+    if (card.classList.contains('unavailable')) return;
+
+    // Deselect previous
+    document.querySelectorAll('.officer-card').forEach(c => c.classList.remove('selected'));
+
+    // Select new
+    card.classList.add('selected');
+    const officerId = card.dataset.officer;
+    selectedOfficer = officers[officerId];
+
+    // Update corps card ops commander badge
+    const badge = document.getElementById('ops-commander-badge');
+    const nameEl = document.getElementById('ops-commander-name');
+    nameEl.textContent = selectedOfficer.fullName;
+    badge.classList.add('visible');
+
+    // Auto-advance to Phase 2 after brief delay
+    setTimeout(() => goToPhase(2), 400);
+  };
+
+  // ======== PHASE 2: BRIGADE TOGGLE ========
+  window.toggleBrigade = function(card) {
+    if (card.classList.contains('assigned')) {
+      card.classList.remove('assigned');
+      card.classList.add('unassigned');
+    } else {
+      card.classList.remove('unassigned');
+      card.classList.add('assigned');
+    }
+  };
+
+  // ======== PHASE 2: TEMPO ========
+  window.setTempo = function(btn) {
+    btn.parentElement.querySelectorAll('.tempo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  };
+
+  // ======== PHASE 3: CLIPBOARD TABS ========
+  window.switchClipboardTab = function(tab, btn) {
+    document.querySelectorAll('.clipboard-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    const assessmentTab = document.getElementById('assessment-tab');
+    const rawTab = document.getElementById('raw-intel-tab');
+
+    if (tab === 'assessment') {
+      assessmentTab.classList.remove('hidden');
+      assessmentTab.classList.add('assessment-content');
+      rawTab.classList.remove('visible');
+    } else {
+      assessmentTab.classList.add('hidden');
+      rawTab.classList.add('visible');
+    }
+  };
+
+  // ======== PHASE 4: AUTHORIZE ========
+  window.authorizeOperation = function() {
+    if (authorized) return;
+    authorized = true;
+
+    const btn = document.getElementById('authorize-btn');
+    const stamp = document.getElementById('approval-stamp');
+    const date = document.getElementById('approval-date');
+    const transmitted = document.getElementById('transmitted-text');
+    const closeBtn = document.getElementById('close-btn');
+
+    btn.classList.add('hidden');
+
+    // Stamp animation
+    requestAnimationFrame(() => {
+      stamp.classList.add('visible');
+      date.classList.add('visible');
+    });
+
+    // Transmitted text and close button (CSS transition-delay handles timing)
+    transmitted.classList.add('visible');
+    closeBtn.classList.add('visible');
+  };
+
+  window.closeAuthorize = function() {
+    // Simply hide the overlay
+    document.getElementById('phase-4-overlay').classList.add('panel-hidden');
+  };
+
+  // ======== KEYBOARD NAVIGATION ========
+  document.addEventListener('keydown', function(e) {
+    // Number keys 1-4
+    if (e.key >= '1' && e.key <= '4') {
+      goToPhase(parseInt(e.key));
+      return;
+    }
+    // Arrow keys
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      goToPhase(currentPhase + 1);
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goToPhase(currentPhase - 1);
+    }
+  });
+
+  // ======== INIT ========
+  updatePhaseIndicator();
+  updatePanelVisibility(1);
+
+})();
+</script>
+</body>
+</html>
