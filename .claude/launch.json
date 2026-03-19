@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tactical-map",
+      "runtimeExecutable": "npx.cmd",
+      "runtimeArgs": ["vite"],
+      "cwd": "src/ui/map",
+      "port": 3001
+    }
+  ]
+}

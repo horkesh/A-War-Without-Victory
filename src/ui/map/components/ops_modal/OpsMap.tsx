@@ -237,8 +237,12 @@ export function OpsMap({
                 map.addLayer({ id: 'ops-highlight-staging-border', type: 'line', source: 'ops-highlight-staging',
                     paint: { 'line-color': '#40916c', 'line-width': 2 } });
 
-                // Arrow layers (initial empty)
-                replaceArrowSource(map, EMPTY_FC);
+                // Arrow layers (initial empty) — inline instead of replaceArrowSource
+                // to avoid isStyleLoaded() guard blocking during init
+                map.addSource(ARROW_SOURCE_ID, { type: 'geojson', data: EMPTY_FC });
+                for (const spec of ARROW_LAYER_SPECS) {
+                    map.addLayer({ ...spec, source: ARROW_SOURCE_ID });
+                }
 
                 // Single map-level click handler — query features at click point
                 // Using per-layer handlers causes double-fire when layers overlap
@@ -328,10 +332,46 @@ export function OpsMap({
 // setData() on dynamically-added GeoJSON sources does not reliably
 // trigger re-render in MapLibre modals. Remove + re-add instead.
 
-const ARROW_LAYER_IDS = [
-    'ops-advance-glow', 'ops-advance-body', 'ops-advance-body-outline',
-    'ops-advance-heads', 'ops-advance-head-outline', 'ops-obj-labels',
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ARROW_LAYER_SPECS: any[] = [
+    {
+        id: 'ops-advance-glow', type: 'line',
+        filter: ['==', ['get', 'type'], 'advance-glow'],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 18, 'line-blur': 8, 'line-opacity': 1.0 },
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+    },
+    {
+        id: 'ops-advance-body', type: 'fill',
+        filter: ['==', ['get', 'type'], 'advance-body'],
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
+    },
+    {
+        id: 'ops-advance-body-outline', type: 'line',
+        filter: ['==', ['get', 'type'], 'advance-body'],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 1.5, 'line-opacity': 0.8 },
+    },
+    {
+        id: 'ops-advance-heads', type: 'fill',
+        filter: ['==', ['get', 'type'], 'advance-head'],
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
+    },
+    {
+        id: 'ops-advance-head-outline', type: 'line',
+        filter: ['==', ['get', 'type'], 'advance-head'],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 2, 'line-opacity': 1 },
+    },
+    {
+        id: 'ops-obj-labels', type: 'symbol',
+        filter: ['==', ['get', 'type'], 'obj-label'],
+        layout: {
+            'text-field': ['get', 'label'], 'text-size': 14,
+            'text-font': ['Open Sans Regular'], 'text-allow-overlap': true, 'text-offset': [0, -1.2],
+        },
+        paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
+    },
 ];
+
+const ARROW_LAYER_IDS = ARROW_LAYER_SPECS.map((s) => s.id);
 
 function replaceArrowSource(map: maplibregl.Map, data: FeatureCollection) {
     // Remove existing layers + source
@@ -342,42 +382,9 @@ function replaceArrowSource(map: maplibregl.Map, data: FeatureCollection) {
 
     // Re-add with new data
     map.addSource(ARROW_SOURCE_ID, { type: 'geojson', data });
-
-    map.addLayer({
-        id: 'ops-advance-glow', type: 'line', source: ARROW_SOURCE_ID,
-        filter: ['==', ['get', 'type'], 'advance-glow'],
-        paint: { 'line-color': ['get', 'color'], 'line-width': 18, 'line-blur': 8, 'line-opacity': 1.0 },
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-    });
-    map.addLayer({
-        id: 'ops-advance-body', type: 'fill', source: ARROW_SOURCE_ID,
-        filter: ['==', ['get', 'type'], 'advance-body'],
-        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
-    });
-    map.addLayer({
-        id: 'ops-advance-body-outline', type: 'line', source: ARROW_SOURCE_ID,
-        filter: ['==', ['get', 'type'], 'advance-body'],
-        paint: { 'line-color': ['get', 'color'], 'line-width': 1.5, 'line-opacity': 0.8 },
-    });
-    map.addLayer({
-        id: 'ops-advance-heads', type: 'fill', source: ARROW_SOURCE_ID,
-        filter: ['==', ['get', 'type'], 'advance-head'],
-        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
-    });
-    map.addLayer({
-        id: 'ops-advance-head-outline', type: 'line', source: ARROW_SOURCE_ID,
-        filter: ['==', ['get', 'type'], 'advance-head'],
-        paint: { 'line-color': ['get', 'color'], 'line-width': 2, 'line-opacity': 1 },
-    });
-    map.addLayer({
-        id: 'ops-obj-labels', type: 'symbol', source: ARROW_SOURCE_ID,
-        filter: ['==', ['get', 'type'], 'obj-label'],
-        layout: {
-            'text-field': ['get', 'label'], 'text-size': 14,
-            'text-font': ['Open Sans Regular'], 'text-allow-overlap': true, 'text-offset': [0, -1.2],
-        },
-        paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
-    });
+    for (const spec of ARROW_LAYER_SPECS) {
+        map.addLayer({ ...spec, source: ARROW_SOURCE_ID });
+    }
 }
 
 function findNearestCentroid(

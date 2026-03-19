@@ -10,7 +10,7 @@
 
 ## Current State (2026-03-19, v0.4.9 — Equipment Overhaul + Front Line + Displacement)
 **v0.4.9.** 1204 tests, 98 suites. tsc clean. **Latest calibration: n948 92.1% area-weighted.**
-**This session:** Equipment system overhaul (phantom tank fix, JNA priority handoff, abandoned capture, battle report equipment fields). Front line rendering overhaul. Polygon boundary harmonization (77/134 pairs fixed). Stale front edge fix. Displacement routing (previous session). PNG→WebP asset migration.
+**This session:** Equipment system overhaul (phantom tank fix, JNA priority handoff, abandoned capture, battle report equipment fields). Front line rendering overhaul. Polygon boundary harmonization (77/134 pairs fixed). Stale front edge fix. Ops modal arrow init fix (isStyleLoaded false during load callback). Displacement routing (previous session). PNG→WebP asset migration.
 **Equipment pipeline:** Battlefield scavenging (10-20% of destroyed enemy, scaled by outcome), capture from retreat (2-8%), abandoned capture on uncontested occupation (pop-proportional, RS positions only), arms smuggling (2 tanks + 3 arty / 12 turns, 60/40 ARBiH/HVO), Zenica steelworks (+3 arty / 8 turns ARBiH), HV transfers (+1 arty / 12 turns HVO). Write-off: >40% non-functional scrapped 1/turn. No per-brigade auto-tickers. `ensureBrigadeComposition` returns empty for non-brigade formations. JNA handoff prioritizes mech/moto for tanks. Dynamic recruitment: no JNA override.
 **NEXT:** Per-brigade equipment tracking (destroyed/captured attribution). Brigade accolades (tank hunters etc). Corps panel equipment display.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
@@ -185,8 +185,8 @@
    Do instead: Mount briefing as thin overlay in `App.tsx`, fed by `GameStateAdapter.commandBriefing`.
 5. **[2026-03-07] Detail panels drill right; App owns precedence**
    Do instead: Right-side panel rail: overview → primary → secondary. `App.tsx` mounts from one deterministic selector.
-6. **[2026-03-19] Modal MapLibre: NEVER use setData() on dynamic sources**
-   Do instead: `setData()` on `map.addSource()`-created GeoJSON works for initial render but silently fails on updates. Use remove-layers + remove-source + re-add pattern (`replaceArrowSource` in `OpsMap.tsx`). Base-style sources (`osid-control`) work fine with `setData()`.
+6. **[2026-03-19] Modal MapLibre: two init-timing traps**
+   Do instead: (A) `setData()` on `map.addSource()`-created GeoJSON works for initial render but silently fails on updates. Use remove+re-add pattern (`replaceArrowSource` in `OpsMap.tsx`). (B) `isStyleLoaded()` returns false inside `map.on('load')` after adding sources in that callback. Never use style-loaded guards during init — create sources/layers inline. Use the remove+re-add helper for updates only, not init.
 7. **[2026-03-14] Tactical map player_faction: NEVER hardcode**
    Do instead: `App.tsx` must NOT override `player_faction`. Electron uses `useDesktopSession` which preserves chosen faction. Live autoload skips when IPC available.
 8. **[2026-03-15] HQ Abstraction vs Physical Units**

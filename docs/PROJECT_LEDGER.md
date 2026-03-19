@@ -3,6 +3,12 @@
 **Last Updated:** 2026-03-19
 **Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n948: 92.1% area-weighted.** Equipment system overhaul, polygon harmonization, front line rendering overhaul.
 
+## [2026-03-19] Ops Modal Arrow Init Fix — isStyleLoaded() False During Load Callback
+
+Arrow source and layers in `OpsMap.tsx` were never created during map init because `replaceArrowSource()` was called inside the `map.on('load')` callback, where `isStyleLoaded()` returns false after adding other dynamic sources in the same callback. Fix: create arrow source + layers inline during init (bypassing `replaceArrowSource`), then use `replaceArrowSource` (remove+re-add) only for subsequent updates. Refactored layer specs into `ARROW_LAYER_SPECS` array shared between init and update paths.
+
+**Files:** `src/ui/map/components/ops_modal/OpsMap.tsx`
+
 ## [2026-03-19] Per-Brigade Equipment Tracking, Accolades, Corps Panel Equipment
 
 - **Per-brigade equipment tracking**: `total_equipment_destroyed` (enemy tanks/arty this brigade helped destroy) and `total_equipment_captured` wired into `BrigadeHistory`. Updated during battle resolution via `recordAttackerEngagements`/`recordDefenderEngagement`. Fields existed on `BrigadeHistory` since creation but were never populated.

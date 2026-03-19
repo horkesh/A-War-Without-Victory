@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-19 (TopoJSON topology lesson + equipment rework + displacement overhaul)
+> Last updated: 2026-03-19 (isStyleLoaded init timing + TopoJSON topology lesson + equipment rework + displacement overhaul)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -45,6 +45,12 @@
 ---
 
 ## Active Lessons (no recent violations)
+
+### [MapLibre] isStyleLoaded() returns false during map.on('load') after adding sources — don't use style-loaded guards in init (2026-03-19) — NEW
+- **Context**: Ops modal arrow source and layers were never created during map init. `replaceArrowSource()` was called inside the `map.on('load')` callback, but after adding other sources (territory, front lines, objectives, staging) in that same callback, `isStyleLoaded()` returns false. MapLibre's style state transitions to "loaded" before the callback, but adding sources during the callback puts the style back into a non-loaded state internally. Any code that guards on `isStyleLoaded()` will skip.
+- **Wrong approach**: Using `replaceArrowSource()` (which does remove+re-add) during init. The remove step finds nothing to remove (source doesn't exist yet), then the add step runs, but the style-loaded state is already compromised by earlier source additions in the same callback. The source appears to be added but layers silently fail to render.
+- **Right approach**: During the `map.on('load')` init callback, create sources and layers directly via `map.addSource()` + `map.addLayer()` without any `isStyleLoaded()` guards. Reserve the remove+re-add pattern (`replaceArrowSource`) for subsequent updates triggered by React effects, where the style IS fully loaded.
+- **Do instead**: In any MapLibre `map.on('load')` callback, never gate source/layer creation on `isStyleLoaded()`. If you have a helper function that does remove+re-add (designed for updates), do NOT call it during init — the "remove" step is a no-op and the "add" step may silently fail. Create init sources/layers inline, then use the helper for updates only. This is distinct from the `setData()` modal bug (GUI_MASTER section 4) — that bug affects updates, this one affects init.
 
 ### [Geometry] TopoJSON topology() quantizes coordinates — never rebuild topology from final GeoJSON (2026-03-19) — NEW
 - **Context**: Front line gaps caused by `topojsonClient.merge()` not creating shared arcs between cluster polygons. 37 OSID pairs have no shared polygon edges despite being adjacent. Attempted fix: Pipeline Phase 5d second topology pass to create shared arcs. TopoJSON `topology()` quantization altered polygon coordinates even at 1e8 quantization, regressing calibration from 91% to 87%.
