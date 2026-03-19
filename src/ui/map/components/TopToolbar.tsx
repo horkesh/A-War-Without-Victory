@@ -43,12 +43,19 @@ interface TopToolbarProps {
   onOpenEventLog?: () => void;
   onOpenEconomy?: () => void;
   onOpenAiSettings?: () => void;
+  onOpenOrbat?: () => void;
+  onSelectPrimaryArmy?: () => void;
+  onSelectPrimaryCorps?: () => void;
 }
 
 /** True when loaded inside the warroom iframe (?embedded=1). */
 const isEmbedded = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embedded') === '1';
 
-export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves, onOpenAAR, onOpenOpsHistory, onOpenEventLog, onOpenEconomy, onOpenAiSettings }: TopToolbarProps) {
+export function TopToolbar({
+  onOpenRecruitment, onOpenSidePicker, onOpenSummary, onOpenEnclaves,
+  onOpenAAR, onOpenOpsHistory, onOpenEventLog, onOpenEconomy, onOpenAiSettings,
+  onOpenOrbat, onSelectPrimaryArmy, onSelectPrimaryCorps
+}: TopToolbarProps) {
   const ipc = useIPC();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const devMode = useGameStore((s) => s.devMode);
@@ -272,6 +279,34 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
           className={TOOLBAR_BUTTON_CLASS}
         >
           ECONOMY
+        </button>
+      </div>
+
+      {/* 2.1 COMMAND MODULE */}
+      <div className={MODULAR_SECTION_CLASS}>
+        <div className="module-header">Command</div>
+        <button
+          onClick={() => onSelectPrimaryArmy?.()}
+          disabled={!loadedGameState}
+          className={TOOLBAR_BUTTON_CLASS}
+          title="Select primary Army HQ"
+        >
+          ARMY
+        </button>
+        <button
+          onClick={() => onSelectPrimaryCorps?.()}
+          disabled={!loadedGameState}
+          className={TOOLBAR_BUTTON_CLASS}
+          title="Select primary Corps HQ"
+        >
+          CORPS
+        </button>
+        <button
+          onClick={() => onOpenOrbat?.()}
+          disabled={!loadedGameState}
+          className={TOOLBAR_BUTTON_CLASS}
+        >
+          ORBAT
         </button>
       </div>
 

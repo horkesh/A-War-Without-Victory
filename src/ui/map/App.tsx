@@ -478,6 +478,41 @@ function App() {
     setEventLogOpen(false);
   };
 
+  const openOrbat = () => {
+    // If no corps selected for orbat, pick the first player corps
+    if (!useGameStore.getState().selectedOrbatCorpsId && loadedGameState) {
+      const firstCorps = loadedGameState.formations.find(f => f.kind === 'corps' && f.faction === playerFaction);
+      if (firstCorps) useGameStore.getState().setSelectedOrbatCorpsId(firstCorps.id);
+    }
+    // Summary/AAR etc are full-screen modals; close them to show sidebar panels
+    setSummaryOpen(false);
+    setAarOpen(false);
+  };
+
+  const selectPrimaryArmy = () => {
+    if (!loadedGameState) return;
+    const army = loadedGameState.formations.find(f => f.kind === 'army_hq' && f.faction === playerFaction);
+    if (army) {
+      useGameStore.getState().setSelectedArmyHqId(army.id);
+      useGameStore.getState().setSelectedFormationId(null);
+      // Pan to it if possible
+      const pan = useGameStore.getState().panToOsid;
+      if (pan && army.home_osid) pan(army.home_osid);
+    }
+  };
+
+  const selectPrimaryCorps = () => {
+    if (!loadedGameState) return;
+    const corps = loadedGameState.formations.find(f => f.kind === 'corps' && f.faction === playerFaction);
+    if (corps) {
+      useGameStore.getState().setSelectedCorpsId(corps.id);
+      useGameStore.getState().setSelectedFormationId(null);
+      // Pan to it if possible
+      const pan = useGameStore.getState().panToOsid;
+      if (pan && corps.home_osid) pan(corps.home_osid);
+    }
+  };
+
   return (
     <div className="h-screen w-screen relative">
       <MapContainer />
@@ -494,6 +529,9 @@ function App() {
         onOpenEventLog={() => { setSummaryOpen(false); setAarOpen(false); setOpsHistoryOpen(false); setEventLogOpen((current) => !current); }}
         onOpenEconomy={() => setEconomyOpen((current) => !current)}
         onOpenAiSettings={() => setAiSettingsOpen((current) => !current)}
+        onOpenOrbat={openOrbat}
+        onSelectPrimaryArmy={selectPrimaryArmy}
+        onSelectPrimaryCorps={selectPrimaryCorps}
       />
       <CommandBriefingLayer
         onOpenSummary={openSummary}

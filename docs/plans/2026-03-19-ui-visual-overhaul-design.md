@@ -256,6 +256,24 @@ When hovering over an attack arrow (staged or active):
 
 ---
 
+## Technical Implementation: MapLibre + Deck.gl Hybrid
+
+To achieve the visual fidelity and performance required for Phased Overhaul items 2 (Enrichment) and 6 (Operations Visualization), we will adopt a **Hybrid Rendering Strategy**.
+
+### The Hybrid Stack
+- **MapLibre GL JS (Foundation):** Handles the "Deep Map" — terrain, PMTiles base map, water, roads, and municipality labels.
+- **Deck.gl (Tactical Overlay):** Integrated as a custom MapLibre layer. Handles all dynamic game entities (formations, frontline glows, operation markers, attack arrows).
+
+### Why this approach?
+- **Phasing & Interpolation:** Deck.gl's `transitions` prop allows units to slide smoothly across the map between turns.
+- **Layer Stacking (Phase 2):** Deck.gl allows for cleaner composition of markers. A counter isn't one static image; it's a stack of dynamic layers (NATO base + supply dot + health bar) that can animate independently.
+- **Operation Glows (Phase 6):** Shader-based effects in Deck.gl enable the high-fidelity glows and pulsing required for operation feedback without the overhead of SVG filters or hundreds of extra GeoJSON features.
+- **Picking Performance:** Deck.gl's per-pixel picking is more precise for high-density stacks than MapLibre's `queryRenderedFeatures`.
+
+---
+
+---
+
 ## Art Asset Requirements (for Gemini Pro)
 
 | Asset | Count | Format | Priority | Notes |
@@ -288,7 +306,7 @@ When hovering over an attack arrow (staged or active):
 
 ## What This Does NOT Change
 
-- Map rendering (MapLibre layers, polygon fills, front lines) — untouched
+- Map rendering (Base MapLibre layers for terrain, roads, labels) — untouched
 - Tooltip content and behavior — already good, untouched
 - Ops planning modal — already the gold standard, untouched
 - Map mode system — untouched

@@ -15135,3 +15135,20 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 
 ### Plan
 `docs/plans/2026-03-16-historical-event-timeline-fix.md`
+
+## [2026-03-20] Phase 6: G2 UI Integration & P1 Stabilization
+
+### Status
+- **G2 Live Briefing**: Integrated `usePrediction` hook and wired the G2 Assessment clipboard (Phase 3 of Ops Planning).
+- **P1 UI/UX Stabilization**: Fixed Minimap re-render (M1) and Toolbar tactical routing (T1).
+- **Visual Overhaul**: Adopted MapLibre + Deck.gl Hybrid strategy in the design plan.
+
+### Files
+- `src/ui/map/components/ops_modal/G2Phase.tsx`
+- `src/ui/map/components/Minimap.tsx`
+- `src/ui/map/components/TopToolbar.tsx`
+- `src/ui/map/App.tsx`
+- `docs/plans/2026-03-19-ui-visual-overhaul-design.md`
+
+### Verification
+- Walkthrough: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`

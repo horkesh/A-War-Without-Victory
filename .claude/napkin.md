@@ -8,10 +8,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-19, v0.4.9 — Battle of the Barracks + Equipment Overhaul)
-**v0.4.9.** 1242 tests, 102 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w, feature branch).**
-**This session:** **HRHB-RBiH war transition system** (9 commits, feature branch): mobilization phase, condition-driven events, combat suppression, bot stance, HVO Central Bosnia activation (5 infrastructure bugs fixed), 56w transition verified. Deep sector audit (9 new REAL_WAR_MASTER issues). Post-op brigade return march. UI/UX polish pass. Map UI investigation. Battle of the Barracks. Equipment overhaul. Front line rendering. Polygon harmonization.
-**HRHB-RBiH conflict:** Mobilization at w31, war at w35-40, first battle w43. Blaskic commands CB (6 sectors). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/20260319_HRHB_RBIH_WAR_TRANSITION.md`.
+## Current State (2026-03-20, v0.6.2 — Battle of the Barracks + Equipment Overhaul)
+**v0.6.2.** 1422 tests, 117 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w, feature branch).**
+**This session:** **UI/UX P1 Stabilization** (T1 routing, M1 minimap) + **G2 Live Briefing** (Ops Planning Phase 3) INTEGRATED. Hybrid Deck.gl strategy adopted.
+**HRHB-RBiH conflict:** P1 Backlog: CB brigade redistribution, CB operations not launching. Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
@@ -20,7 +20,9 @@
 **External:** Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
 
 ## Session Startup (do these EVERY session — BEFORE any work)
-1. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
+1. **[2026-03-20] Initiate MapLibre + Deck.gl Hybrid implementation (P2).**
+   Do instead: Following the approved strategy in `2026-03-19-ui-visual-overhaul-design.md`, start prototyping the Deck.gl tactical overlay. Start with unit counter enrichment.
+2. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
    Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
    **(A) Daily Pyrrhic Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Pyrrhic team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
    **(B) Life-lessons review** — cron `3 6 * * *`. Gather 24h git activity, detect life-lesson violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`.
@@ -46,6 +48,8 @@
    Do instead: Keep failing baselines pending canon/data authority review. Refresh only after user/PM sign-off.
 10. **[2026-02-24] Scenario checkpoint lengths**
     Do instead: Use 20w/30w checkpoint runs for iteration; reserve 52w for acceptance only.
+11. **[2026-03-20] Use visibility:hidden + requestAnimationFrame(resize) for MapLibre map toggles.**
+    Do instead: To prevent context loss and re-render artifacts on toggles, use CSS visibility/opacity and call `map.resize()` inside an animation frame.
 
 ## Shell & Platform
 1. **[2026-03-05] Existing-dir file generation: prefer `apply_patch` or script files**
@@ -201,7 +205,9 @@
    Do instead: Mount briefing as thin overlay in `App.tsx`, fed by `GameStateAdapter.commandBriefing`.
 5. **[2026-03-07] Detail panels drill right; App owns precedence**
    Do instead: Right-side panel rail: overview → primary → secondary. `App.tsx` mounts from one deterministic selector.
-6. **[2026-03-19] Modal MapLibre: two init-timing traps**
+6. **[2026-03-20] MapLibre + Deck.gl Hybrid strategy: Deck.gl for tactical overlays.**
+   Do instead: Use MapLibre for the terrain/base map and synchronized Deck.gl layers for dynamic tactical elements (counters, glows, previews). Deck.gl is superior for game-like overlays.
+7. **[2026-03-19] Modal MapLibre: two init-timing traps**
    Do instead: (A) `setData()` on `map.addSource()`-created GeoJSON works for initial render but silently fails on updates. Use remove+re-add pattern (`replaceArrowSource` in `OpsMap.tsx`). (B) `isStyleLoaded()` returns false inside `map.on('load')` after adding sources in that callback. Never use style-loaded guards during init — create sources/layers inline. Use the remove+re-add helper for updates only, not init.
 7. **[2026-03-14] Tactical map player_faction: NEVER hardcode**
    Do instead: `App.tsx` must NOT override `player_faction`. Electron uses `useDesktopSession` which preserves chosen faction. Live autoload skips when IPC available.

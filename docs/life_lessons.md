@@ -9,6 +9,16 @@
 
 ## Recently Violated (needs reinforcement)
 
+### [MapLibre] visibility:hidden > display:none for stable context (2026-03-20)
+- **Problem**: Toggling `display:none` on a MapLibre container (like the Minimap) frequently causes layer re-render failures or blank screens if context isn't handled perfectly (M1 - P1 UI Audit).
+- **Right approach**: Keep the map in the layout to preserve its context. Use `visibility: hidden`, `opacity: 0`, and `pointer-events: none` to hide it.
+- **Do instead**: When toggling map visibility, use CSS opacity/visibility and always call `map.resize()` inside a `requestAnimationFrame` to ensure the resize happens after the DOM has updated.
+
+### [Architecture] Map hybrid strategy for high-fidelity tactical overlays (2026-03-20)
+- **Problem**: Attempting to render hundreds of dynamic game indicators (bars, dots, floating icons) purely in MapLibre layers leads to complex GeoJSON generation and limited animation flexibility.
+- **Right approach**: Use a hybrid stack. MapLibre GL JS for the base map (roads, terrain, static labels) and Deck.gl for the tactical overlay (map counters, unit status, movement previews).
+- **Do instead**: For complex game-state-driven visuals, leverage Deck.gl's interleaved layers or synchronized overlay. Use Deck.gl for anything that requires high-frequency updates, interpolation, or advanced shader effects (glows).
+
 ### [MapLibre] Never use setData() on dynamic sources in modal maps — VIOLATED 2026-03-19
 - **Violation evidence**: Marked GUI_MASTER §4 as "RESOLVED" after the ops modal redesign, claiming `setData()` worked. It worked for the initial render only. When the user changed staging OSID, arrows silently stopped updating. Spent 3 fix cycles on wrong theories (distance scaling, empty centroid lookup, stale deps) before recognizing the same bug documented since 2026-03-11.
 - **Cost**: 3 wasted fix iterations. User saw broken arrows across multiple test cycles.

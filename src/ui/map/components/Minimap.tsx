@@ -162,7 +162,10 @@ export function Minimap() {
   // Resize map when visibility toggles (MapLibre needs resize after display:none→block)
   useEffect(() => {
     if (minimapVisible && mapRef.current) {
-      mapRef.current.resize();
+      // Small delay ensures DOM layout has settled before resize
+      requestAnimationFrame(() => {
+        mapRef.current?.resize();
+      });
     }
   }, [minimapVisible]);
 
@@ -232,7 +235,10 @@ export function Minimap() {
         overflow: 'hidden',
         border: '1px solid rgba(180, 160, 130, 0.25)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
-        display: minimapVisible ? 'block' : 'none',
+        opacity: minimapVisible ? 1 : 0,
+        visibility: minimapVisible ? 'visible' : 'hidden',
+        pointerEvents: minimapVisible ? 'auto' : 'none',
+        transition: 'opacity 0.2s ease-in-out, visibility 0.2s',
       }}
     >
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
