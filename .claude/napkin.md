@@ -8,9 +8,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-19, v0.4.9 — Ops Modal Redesign)
-**v0.4.9.** 1203 tests, 98 suites. tsc clean. **Latest calibration: n916 91.0% area-weighted, 13/13 anchors. War-or-Game APPROVED.**
-**This session:** Ops planning modal redesign — 4-phase corps-level flow (Commander→Plan→G2→Authorize). 16 files replacing 1,415-line monolith. Full-bleed MapLibre, live G2 predictions, OPORD stamp animation. Two simplify passes (17 fixes). 10 new tests.
+## Current State (2026-03-19, v0.4.9 — Displacement Fix + Routing Overhaul)
+**v0.4.9.** 1203 tests, 98 suites. tsc clean. **Latest calibration: n942 92.5% area-weighted — NEW ATH. Sarajevo 89.1% (+27.8pp).**
+**This session:** Displacement bug fix (4 control-flip paths missing timers → 21.6% of RS OSIDs had zero displacement). Routing overhaul (Drina split, per-municipality Krajina, Krajina flee-abroad 35%, Posavina Croat split). Sokolac OSID fix. 744 OSID cleanup. 10 calibration runs (n925-n942).
+**Ops modal:** Plan at `docs/plans/2026-03-18-ops-planning-modal-redesign.md`. Prototype at `docs/60_visualisations/ops_planning_prototype.html`. Branch `feat/ops-modal-redesign` for implementation.
 **Equipment pipeline:** Battlefield scavenging (10-20% of destroyed enemy, scaled by outcome), capture from retreat (2-8%), arms smuggling (2 tanks + 3 arty / 12 turns, 60/40 ARBiH/HVO), Zenica steelworks (+3 arty / 8 turns ARBiH), HV transfers (+1 arty / 12 turns HVO). Write-off: >40% non-functional scrapped 1/turn. No per-brigade auto-tickers.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
 **10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.

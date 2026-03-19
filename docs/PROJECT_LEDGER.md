@@ -1,7 +1,42 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-19
-**Status:** **v0.4.9** (AI Comes Alive). **1203 tests**, 98 suites. **n916: 91.0% area-weighted, 13/13 anchors.** Ops planning modal redesign (4-phase corps-level flow), corps-level operations, objective cap, operation arrows.
+**Status:** **v0.4.9** (AI Comes Alive). **1203 tests**, 98 suites. **n942: 92.5% area-weighted — NEW ATH.** Displacement fix (4 control-flip paths), routing overhaul, Sokolac OSID fix, 744 OSID cleanup.
+
+## [2026-03-19] n942 — Displacement Fix + Routing Overhaul + Sokolac OSID Fix → 92.5% ATH
+
+### Bug Fix: Displacement Timer on All Control-Flip Paths
+4 out of 5 OSID control-flip paths silently skipped displacement timer creation. Only battle resolution produced `settlement_flipped` records. Rear pocket consolidation, paramilitary sweep, JNA phantom captures all flipped `political_controllers` without seeding timers. Result: 21.6% of RS-controlled OSIDs (81/375) had zero Bosniak displacement — including Ključ, Derventa, Prijedor, Sanski Most, Zvornik.
+
+Fix: `seedDisplacementTimerOnFlip()` shared helper called from all non-battle flip paths. Battle-driven timer also fixed to seed ALL minority factions (not just defender). Missing rate: 21.6% → 1.6%.
+
+### Historically Accurate Routing Tables
+Root cause of post-fix regression: displaced Bosniaks from Jajce (Central Bosnia) routing to Srebrenica enclave via fallback routes — geographically impossible (surrounded). Zvornik displaced also routing to Srebrenica instead of Tuzla.
+
+- **Drina split**: `DRINA_NORTH` → `DRINA_ZVORNIK` (→Kalesija/Tuzla) + `DRINA_ENCLAVE` (→Srebrenica). Zvornik went west; Bratunac/Vlasenica went into the enclave.
+- **Per-municipality Krajina routing**: Prijedor→Bihać, Ključ→Donji Vakuf (M-5 road), Bosanski Novi→Bosanska Krupa.
+- **Krajina Bosniak flee-abroad**: 10%→35% for convoy municipalities (ICRC/UNHCR convoys to Croatia).
+- **Posavina Croat split**: Brod/Derventa→south (Žepče/Travnik), not east to Orašje (100km away).
+- **Enclave-specific reinforcement rate**: 0.005 (vs 0.02 normal) — besieged refugees less militarizable.
+- Jajce removed from routing priorities (falls to VRS w26).
+
+### Sokolac OSID Fix + 744 OSID Cleanup
+- Šaševci, Meljine, Knežina (Sokolac) flipped to RS via `osid_control_overrides` in both 40w and 52w scenarios.
+- 9 micro-OSIDs removed from `operational_political_control.json` (753→744) to match canonical stitched set.
+
+### Results
+| Metric | n916 (baseline) | n942 (after) |
+|--------|:-:|:-:|
+| Area-weighted | 91.0% | **92.5% — NEW ATH** |
+| KRAJINA | 96.8% | **99.6%** |
+| POSAVINA | 93.2% | **94.5%** |
+| DRINA | 79.0% | **81.8%** |
+| CENTRAL_CORRIDOR | 88.6% | **90.3%** |
+| CENTRAL_BOSNIA | 87.3% | **89.2%** |
+| SARAJEVO | 61.3% | **89.1% (+27.8pp)** |
+| HERZEGOVINA | 92.3% | **94.2%** |
+
+Parameters: `REINFORCEMENT_RATE=0.02`, `ENCLAVE_REINFORCEMENT_RATE=0.005`, `DISPLACED_CONTRIBUTION_CAP=300`, `KRAJINA_BOSNIAK_FLEE_ABROAD=0.35`, `RS POOL_SCALE=0.25` (original).
 
 ## [2026-03-19] Ops Planning Modal Redesign — 4-Phase Corps-Level Planning Flow
 
