@@ -1,7 +1,106 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-19
-**Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n955: 91.2% area-weighted.** Battle of the Barracks events, ARBiH tank capture overhaul, per-brigade equipment tracking, polygon harmonization, front line rendering.
+**Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n957: 91.2% area-weighted.** Post-operation brigade return march. Battle of the Barracks events, ARBiH tank capture overhaul, per-brigade equipment tracking, polygon harmonization, front line rendering.
+
+## [2026-03-19] UI/UX Polish Pass — 14 Tasks, 18 Files Changed
+
+Comprehensive UI polish pass based on deep audit. 14 tasks across 5 phases:
+
+**Phase 1 — P1 bug fixes:**
+- Toolbar button routing fixed — SUMMARY/AAR/OPS/EVENTS now open correct panels (z-index stacking was hiding panels behind War Summary backdrop)
+- Minimap toggle fixed — CSS display:none/block instead of unmount/remount
+
+**Phase 2 — Map interactions:**
+- OSID click highlight — gold outline on selected polygon (`osid-selected-outline` layer)
+- Larger brigade markers — 30% bigger at all zoom levels for easier clicking
+
+**Phase 3 — Radial right-click context menu:**
+- New `RadialMenu.tsx` component — animated radial menu at cursor position
+- Context-sensitive items: formation (View Unit/View Corps), OSID (Settlement/View Sector), front (Sector Detail), empty (Deselect)
+- Wired into `useMapInteractions.ts` contextmenu handler
+
+**Phase 4 — Labels, tooltips, legends:**
+- Map mode legends (`MapModeLegend.tsx`) — color scale per non-Political mode
+- Commander rank insignia — faction-colored stars, historically accurate names (General-pukovnik/General-bojnik)
+- Corps detail polish — ratings 4/5, Op Slots, exhaustion colors, equipment health colors, JNA tooltip
+- Settlement labels — In/Out/Lost → Arrived/Displaced/Killed
+- Disabled button tooltips, toolbar category restyling
+
+**Phase 5 — Sidebar & UX:**
+- Corps personnel color-coded (green/amber/red by strength)
+- Stance dropdown tooltips (all 4 stances explained)
+
+**Files:** 2 new components, 16 modified files. Report: `docs/40_reports/implemented/20260319_UI_UX_POLISH_PASS.md`
+
+## [2026-03-19] Deep Sector & Brigade Assignment Audit — 9 New Issues
+
+Full audit of all 75 sectors, 235 brigades, 497 front edges across 3 factions in n960 (w40). Found 14 empty sectors, 17 critically thin, 9 overstacked.
+
+**P1 issues (1):**
+- **#34 HVO Tomislavgrad 5/9 sectors empty** — 69 front edges undefended. Kiseljak double-stack (5,476 pers at one OSID) while adjacent sectors empty. hvo_central_bosnia has 0 sectors despite 7 subordinates. hrhb_111th at morale=0 covering 20 edges alone.
+
+**Downgraded to P3:**
+- **#33 Sarajevo 1st Corps 29.7x density imbalance** — CORRECT: 9 brigades bottled up by SRK siege ring. The imbalance is the siege working as intended. Gorazde thinness (2 bde / 33 edges) is the real concern — monitor enclave defense separately.
+
+**P2 issues (4):**
+- **#35 SRK screening stance** — siege corps in lowest density mode. Should be defend/fortify minimum. rs_3rd_sarajevo at Vares (50km from ring) with morale 6.
+- **#36 VRS Herzegovina threat_ratio 2,625** — 2 brigades on 20 edges. Cold front protects for now.
+- **#37 VRS East Bosnian morale crisis** — 5 brigades at morale 1. rs_1st_birac (369 pers) in active op below combat-ineffective gate.
+- **#38 HVO stale commander IDs** — Blaskic assigned to non-existent `hvo_oz_central_bosnia`. 4 other officers orphaned.
+
+**P3 issues (3):**
+- **#39 Drina ghost sectors** — 18 edges, 0 brigades (timing artifact from sector rebuild).
+- **#40 30 reachability violations** — mostly mid-march brigades pre-assigned to destination sectors.
+- **#41 Dissolution floor not enforced** — hrhb_108th at 100 pers (below 150 floor), multiple ARBiH at 146.
+
+**What's working:** Perfect bilateral coverage (497/497 edges). Enclave containment correct. Operations correctly commit brigades. Post-op return marches firing (78 orders).
+
+Written to `docs/40_reports/REAL_WAR_MASTER.md` issues #33-#41.
+
+## [2026-03-19] UI/UX Deep Audit — 53 Findings, 2 P1 Bugs
+
+Comprehensive 10-section UI/UX audit of the tactical map at 1920x1080. Every interactive element clicked, every map mode tested, every tooltip inspected.
+
+**P1 bugs found:**
+- **T1: Multiple toolbar buttons route to same War Summary modal** — SUMMARY, AAR, SITUATION, EVENTS all open identical War Summary Overview. Only IVP correctly targets its tab.
+- **M1: Minimap toggle doesn't re-render** — Toggle OFF then ON: minimap container exists in DOM (canvas visible, all ancestors visible) but MapLibre instance doesn't render. Requires page reload.
+
+**Key P2 findings:** No corps health indicators in sidebar, no right-click context menu, no heat map legends, Supply mode shows zero variation, commander rating dots are cryptic, "OG Slots" abbreviation unexplained, disabled top bar buttons have no tooltip explaining why.
+
+**8 new feature suggestions:** Radial context menu, turn timeline scrubber, war overview dashboard, commander portraits, battle replay, sound design hooks, scroll-to-cycle map modes, commander's intent overlay.
+
+**Report:** `docs/40_reports/20260319_UI_UX_DEEP_AUDIT.md`
+
+## [2026-03-19] n957 — Post-Operation Brigade Return March
+
+**Problem:** When a `CorpsOperation` completes, participating brigades stay at their operation endpoint. The sector system classifies them by current `location_osid`, not `home_osid` — causing positional drift. 3rd Corps had 16/27 brigades displaced from home. The existing `return-displaced-brigades` pipeline step only catches brigades >3 hops away and only runs every 4 turns.
+
+**Fix:** `issuePostOperationReturnMarches()` in `sector_offensive.ts`. At operation completion (recovery phase ends), issues column march orders for ALL participating brigades outside their home municipality. No distance threshold — any displacement triggers return. Orders consumed by `osid-column-movement` (step 496) next turn.
+
+**Pipeline insight:** Orders issued at step 708 (`advance-sector-offensives`) persist to next turn's step 496 (`osid-column-movement`), which runs BEFORE step 517 (`apply-brigade-movement`). Column-stance orders are consumed correctly by the column movement system's Pass 2.
+
+**Results:** n957 = **91.2% area-weighted** (identical to n955 — existing 4-turn mechanism catches distant brigades before w40). 78 return march orders fire across 17 operations. 3rd Corps displacement: 16→9 brigades far from home. Real value: 0-3 turns faster return, and brigades 1-2 hops from home (below the existing 3-hop threshold) now get returned.
+
+**Files:** `src/sim/combat/sector_offensive.ts` (+48 lines)
+
+## [2026-03-19] Map UI Deep Investigation — 8 Fixes
+
+Deep browser-based investigation of the tactical map identified 11 issues. 8 fixed:
+
+- **P0: Map blank on dev server** — 4 GeoJSON sources (`operational-heatmap`, `operation-arrows`, `enclave-osids`, `enclave-labels`) never finished tiling, blocking `isStyleLoaded()`. Fix: `triggerRepaint()` after deferred overlay setup.
+- **P1: PMTiles protocol HMR race** — rapid Vite remount cycles corrupted the protocol handler. Fix: `removeProtocol` guard before `addProtocol`.
+- **P2: Sector demarcation lines re-enabled** — was gated by `if(false)` since 2026-03-10. Now shows dashed faction-colored boundary lines between sectors when a corps is selected. Visibility: `sectorsVisible` (not devMode-gated).
+- **P2: Operation arrows hidden by default** — 36 op arrow features were always visible (pink lines in RS territory). Fix: initial `visibility: 'none'`, reactive toggle for `mapMode === 'operations'`.
+- **P2: Front-line hover priority** — settlement tooltip (`osid-control-fill`) always won over informative front-line tooltip. Fix: suppress OSID tooltip when cursor also hits `front-edges-hover-*` layers.
+- **P3: Pink polygon seam artifacts** — `fill-antialias: false` on `osid-control-fill`.
+- **P3: tsc errors** — `EventDecisionModal.tsx`, `EventModal.tsx` return type fixes.
+- **P3: Vite launch config** — `.claude/launch.json` updated for `preview_start` compatibility.
+
+3 deferred (new features): right-click context menu, heat map legend, zero-density sector investigation.
+
+**Files:** `awwv_map_style.json`, `MapContainer.tsx`, `useMapInteractions.ts`, `EventDecisionModal.tsx`, `EventModal.tsx`, `.claude/launch.json`
+**Report:** `docs/40_reports/implemented/20260319_MAP_UI_DEEP_INVESTIGATION_AND_FIXES.md`
 
 ## [2026-03-19] n955 — Battle of the Barracks + ARBiH Tank Capture Overhaul
 

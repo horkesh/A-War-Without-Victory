@@ -161,7 +161,16 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               {' · '}
               <span className="capitalize">{corpsFormation.corpsStance ?? 'unknown'}</span>
               {corpsFormation.corpsExhaustion != null && (
-                <span> · Exh: {corpsFormation.corpsExhaustion.toFixed(1)}</span>
+                <span>
+                  {' · Exhaustion: '}
+                  <span className={
+                    corpsFormation.corpsExhaustion <= 20 ? 'text-emerald-400'
+                    : corpsFormation.corpsExhaustion <= 50 ? 'text-amber-400'
+                    : 'text-red-400'
+                  }>
+                    {Math.round(corpsFormation.corpsExhaustion)}
+                  </span>
+                </span>
               )}
             </div>
 
@@ -186,7 +195,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               </div>
               {corpsFormation.corpsOgSlots != null && (
                 <div className="flex justify-between">
-                  <span className="text-text-secondary">OG Slots</span>
+                  <span className="text-text-secondary" title="Maximum simultaneous operations this corps can conduct">Op Slots</span>
                   <span className="text-text-primary tabular-nums">
                     {corpsFormation.corpsActiveOgIds?.length ?? 0}/{corpsFormation.corpsOgSlots}
                   </span>
@@ -207,22 +216,27 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 aa += c.aa_systems ?? 0;
               }
               if (tanks === 0 && arty === 0 && aa === 0) return null;
+              const equipHealthColor = (op: number, total: number) => {
+                if (total === 0) return 'text-text-primary';
+                const pct = op / total;
+                return pct > 0.8 ? 'text-emerald-400' : pct >= 0.5 ? 'text-amber-400' : 'text-red-400';
+              };
               return (
                 <div className="border-t border-panel-border pt-3 space-y-1.5">
                   <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1">Equipment</div>
                   {tanks > 0 && (
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Tanks</span>
-                      <span className="text-text-primary tabular-nums">
-                        {tanksOp}<span className="text-text-secondary">/{tanks}</span>
+                      <span className="tabular-nums">
+                        <span className={equipHealthColor(tanksOp, tanks)}>{tanksOp}</span><span className="text-text-secondary">/{tanks}</span>
                       </span>
                     </div>
                   )}
                   {arty > 0 && (
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Artillery</span>
-                      <span className="text-text-primary tabular-nums">
-                        {artyOp}<span className="text-text-secondary">/{arty}</span>
+                      <span className="tabular-nums">
+                        <span className={equipHealthColor(artyOp, arty)}>{artyOp}</span><span className="text-text-secondary">/{arty}</span>
                       </span>
                     </div>
                   )}

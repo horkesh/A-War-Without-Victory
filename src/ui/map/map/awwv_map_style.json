@@ -233,6 +233,7 @@
       "type": "fill",
       "source": "osid-control",
       "paint": {
+        "fill-antialias": false,
         "fill-color": [
           "match",
           [
@@ -256,6 +257,21 @@
       "paint": {
         "line-color": "rgba(40, 40, 50, 0.1)",
         "line-width": 0.3
+      }
+    },
+    {
+      "id": "osid-selected-outline",
+      "type": "line",
+      "source": "osid-control",
+      "filter": ["==", ["get", "osid"], "__none__"],
+      "paint": {
+        "line-color": "rgba(220, 190, 120, 0.9)",
+        "line-width": 2.5,
+        "line-opacity": 0.85
+      },
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
       }
     },
     {
@@ -1124,13 +1140,13 @@
             "zoom"
           ],
           6,
-          0.3,
+          0.4,
           9,
-          0.45,
-          12,
           0.6,
+          12,
+          0.8,
           14,
-          0.75
+          1.0
         ],
         "icon-allow-overlap": true,
         "icon-ignore-placement": true

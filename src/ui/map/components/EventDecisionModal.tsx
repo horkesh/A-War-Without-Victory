@@ -23,6 +23,7 @@ function describeEffect(effect: EventEffect): string {
         case 'alliance_change': return `RBiH-HRHB alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'negotiation_capital': return `${effect.faction} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     }
+    return effect.kind;
 }
 
 function EffectPreview({ effects }: { effects: EventEffect[] }) {

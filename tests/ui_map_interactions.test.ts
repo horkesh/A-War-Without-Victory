@@ -20,7 +20,7 @@ describe('useMapInteractions', () => {
       off: (event: string, layerId: string, handler: (e: MapLayerMouseEvent) => void) => {
         offCalls.push([event, layerId, handler]);
       },
-      getCanvas: () => ({ style: { cursor: '' } }),
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
       setFeatureState: noop,
     };
 

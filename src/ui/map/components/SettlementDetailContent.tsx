@@ -394,24 +394,24 @@ export function SettlementDetailContent({
                   </div>
                 </div>
                 <div className="text-[10px] text-text-secondary/80 mb-1.5" aria-label="Population formula">
-                  Pre-war + In − Out − Lost = Now
+                  Pre-war + Arrived − Displaced − Killed = Now
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-[10px] mb-1.5">
                   {outSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
-                      <span className="text-amber-400/90">Out</span>
+                      <span className="text-amber-400/90">Displaced</span>
                       <div className="font-mono font-semibold text-amber-300">−{outSettlement.toLocaleString()}</div>
                     </div>
                   )}
                   {inSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
-                      <span className="text-emerald-500/90">In</span>
+                      <span className="text-emerald-500/90">Arrived</span>
                       <div className="font-mono font-semibold text-emerald-400">+{inSettlement.toLocaleString()}</div>
                     </div>
                   )}
                   {lostSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
-                      <span className="text-red-400/90">Lost</span>
+                      <span className="text-red-400/90">Killed</span>
                       <div className="font-mono font-semibold text-red-300">−{lostSettlement.toLocaleString()}</div>
                     </div>
                   )}

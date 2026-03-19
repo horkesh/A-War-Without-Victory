@@ -34,6 +34,8 @@ import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
 import { buildBattleMarkersGeoJSON } from './builders/buildBattleMarkersGeoJSON';
 import { buildStrategicPointGeoJSON } from './builders/buildStrategicPointGeoJSON';
 import { StackExpansionOverlay } from '../components/StackExpansionOverlay';
+import { RadialMenu } from '../components/RadialMenu';
+import type { RadialMenuItem } from '../components/RadialMenu';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { useIPC } from '../desktop/useIPC';
 import { stageMoveOrderFromOsid, stageAssignBrigadeToSectorAction } from '../desktop/orderActions';
@@ -196,6 +198,11 @@ export function MapContainer() {
   const appliedSelectedFormationIdRef = useRef(selectedFormationId);
   const operationTargetOsidsRef = useRef(operationTargetOsids);
   const [overlayAnchor, setOverlayAnchor] = useState<{ x: number; y: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    type: 'formation' | 'front' | 'osid' | 'empty';
+    properties: Record<string, unknown> | null;
+    position: { x: number; y: number };
+  } | null>(null);
 
   // Robust anchor synchronization: if expandedStackOsid is set but we have no anchor (e.g. from sidebar),
   // calculate it from the OSID centroid.
@@ -238,6 +245,47 @@ export function MapContainer() {
     return buildOsidToSectorMap(loadedGameState.corpsFrontSectors, loadedGameState.frontEdgesOsid);
   }, [loadedGameState?.corpsFrontSectors, loadedGameState?.frontEdgesOsid]);
 
+  const contextMenuItems: RadialMenuItem[] = useMemo(() => {
+    if (!contextMenu) return [];
+    const { type, properties } = contextMenu;
+    switch (type) {
+      case 'formation': return [
+        { id: 'view', label: 'View Unit', icon: '\u{1F441}', action: () => {
+          const id = properties?.id as string;
+          if (id) useGameStore.getState().setSelectedFormationId(id);
+        }},
+        { id: 'corps', label: 'View Corps', icon: '\u2694', action: () => {
+          const corpsId = properties?.corps_id as string;
+          if (corpsId) useGameStore.getState().setSelectedCorpsId(corpsId);
+        }},
+      ];
+      case 'osid': return [
+        { id: 'info', label: 'Settlement', icon: '\u{1F3D8}', action: () => {
+          const osid = properties?.osid as string;
+          if (osid) useGameStore.getState().setSelectedOsid(osid);
+        }},
+        { id: 'sector', label: 'View Sector', icon: '\u{1F5FA}', action: () => {
+          const osid = properties?.osid as string;
+          const sectorId = osidToSector.get(osid ?? '');
+          if (sectorId) useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+        }},
+      ];
+      case 'front': return [
+        { id: 'sector', label: 'Sector Detail', icon: '\u{1F5FA}', action: () => {
+          const sectorId = properties?.sector_id as string;
+          if (sectorId) useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+        }},
+      ];
+      case 'empty': return [
+        { id: 'deselect', label: 'Deselect', icon: '\u2715', action: () => {
+          useGameStore.getState().setSelectedFormationId(null);
+          useGameStore.getState().setSelectedOsid('');
+        }},
+      ];
+      default: return [];
+    }
+  }, [contextMenu, osidToSector]);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -256,6 +304,7 @@ export function MapContainer() {
         throw e;
       }
     };
+    try { maplibregl.removeProtocol('pmtiles'); } catch { /* not registered yet */ }
     maplibregl.addProtocol('pmtiles', tileHandler as any);
 
     const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
@@ -474,6 +523,9 @@ export function MapContainer() {
         onMapMouseLeave: () => {
           clearTooltipTarget();
           setHoveredSectorId(null);
+        },
+        onContextMenu: (type, properties, position) => {
+          setContextMenu({ type, properties, position });
         },
       });
     }, 400);
@@ -700,8 +752,8 @@ export function MapContainer() {
                 (m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
               }
 
-              // Sector demarcation lines: disabled pending proper straight-line geometry
-              if (false && state.corpsFrontSectors && state.corpsFrontSectors!.length > 0) {
+              // Sector demarcation lines: dashed lines showing boundaries between sectors of the same faction
+              if (state.corpsFrontSectors && state.corpsFrontSectors!.length > 0) {
                 const demarcData = buildSectorDemarcationGeoJSON(controlledGeoJson, state.corpsFrontSectors!, frontEdgesOsid!);
                 if (!m2.getSource(SECTOR_DEMARCATION_SOURCE_ID)) {
                   m2.addSource(SECTOR_DEMARCATION_SOURCE_ID, { type: 'geojson', data: demarcData });
@@ -823,25 +875,28 @@ export function MapContainer() {
                       id: OP_ARROWS_GLOW_LAYER_ID, type: 'line', source: OP_ARROWS_SOURCE_ID,
                       filter: ['==', ['get', 'type'], 'op-arrow-glow'],
                       paint: { 'line-color': ['get', 'color'], 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 10, 10, 16, 14, 22], 'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 6, 10, 10, 14, 14], 'line-opacity': 1.0 },
-                      layout: { 'line-cap': 'round', 'line-join': 'round' },
+                      layout: { 'line-cap': 'round', 'line-join': 'round', visibility: 'none' },
                     }, 'formation-markers');
                     // Tapered body fill
                     safeEnsureLayer(m, {
                       id: OP_ARROWS_LINE_LAYER_ID, type: 'fill', source: OP_ARROWS_SOURCE_ID,
                       filter: ['==', ['get', 'type'], 'op-arrow-body'],
                       paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1.0 },
+                      layout: { visibility: 'none' },
                     }, 'formation-markers');
                     // Arrowheads
                     safeEnsureLayer(m, {
                       id: OP_ARROWS_HEAD_LAYER_ID, type: 'fill', source: OP_ARROWS_SOURCE_ID,
                       filter: ['==', ['get', 'type'], 'op-arrow-head'],
                       paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1.0 },
+                      layout: { visibility: 'none' },
                     }, 'formation-markers');
                     // Origin dots
                     safeEnsureLayer(m, {
                       id: OP_ARROWS_ORIGIN_LAYER_ID, type: 'circle', source: OP_ARROWS_SOURCE_ID,
                       filter: ['==', ['get', 'type'], 'op-arrow-origin'],
                       paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 2, 10, 3, 14, 4.5], 'circle-color': ['get', 'color'], 'circle-opacity': 0.8 },
+                      layout: { visibility: 'none' },
                     }, 'formation-markers');
                     (m.getSource(OP_ARROWS_SOURCE_ID) as GeoJSONSource)?.setData(opArrowsGeoJson);
 
@@ -992,6 +1047,10 @@ export function MapContainer() {
                     const { formationsVisible: fVis, labelsVisible: lVis } = useGameStore.getState();
                     safeSetLayoutVisibility(m, FORMATION_MARKERS_LAYER_ID, fVis);
                     safeSetLayoutVisibility(m, FORMATION_LABELS_LAYER_ID, lVis);
+                    // Force render frame to process newly-added GeoJSON sources
+                    // Without this, sources like operational-heatmap/enclave-* may never tile,
+                    // blocking isStyleLoaded() and leaving the map blank.
+                    m.triggerRepaint();
                     if (devMode) console.timeEnd('[MapContainer] overlay front+formations');
                   } catch (deferredErr) {
                     console.error('[MapContainer] deferred overlay failed:', deferredErr);
@@ -2027,15 +2086,15 @@ export function MapContainer() {
       FRONT_LAYER_IDS.forEach((id) => {
         if (!safeSetLayoutVisibility(map, id, effectiveFrontsVisible)) allExist = false;
       });
-      // In live mode, hide lateral sector demarcation lines (front lines ARE the sectors).
+      // Sector demarcation lines: visible when a corps is selected (sectorsVisible).
       if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID)) {
-        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID, devMode && sectorsVisible);
+        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID, sectorsVisible);
       }
       if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe')) {
-        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe', devMode && sectorsVisible);
+        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe', sectorsVisible);
       }
       if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID + '-hit')) {
-        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-hit', devMode && sectorsVisible);
+        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-hit', sectorsVisible);
       }
       if (!safeSetLayoutVisibility(map, FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
       if (!safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
@@ -2050,6 +2109,11 @@ export function MapContainer() {
       if (safeHasLayer(map, OSID_CASUALTIES_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_CASUALTIES_FILL_LAYER_ID, mapMode === 'casualties')) allExist = false;
       if (safeHasLayer(map, OSID_SUPPLY_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply')) allExist = false;
       if (safeHasLayer(map, OSID_OPERATIONS_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations')) allExist = false;
+      // Operation arrows: only visible in operations map mode
+      const showOps = mapMode === 'operations';
+      [OP_ARROWS_GLOW_LAYER_ID, OP_ARROWS_LINE_LAYER_ID, OP_ARROWS_HEAD_LAYER_ID, OP_ARROWS_ORIGIN_LAYER_ID].forEach(id => {
+        if (safeHasLayer(map, id)) safeSetLayoutVisibility(map, id, showOps);
+      });
       return allExist;
     };
 
@@ -2171,6 +2235,22 @@ export function MapContainer() {
     lastPanTargetRef.current = null;
   }, [loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId, selectedCorpsId]);
 
+  // Highlight selected OSID polygon outline on the map
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+    const SELECTED_OUTLINE_LAYER = 'osid-selected-outline';
+    if (!safeHasLayer(map, SELECTED_OUTLINE_LAYER)) return;
+    const filter: maplibregl.FilterSpecification = selectedOsid
+      ? ['==', ['get', 'osid'], selectedOsid]
+      : ['==', ['get', 'osid'], '__none__'];
+    try {
+      map.setFilter(SELECTED_OUTLINE_LAYER, filter);
+    } catch (e) {
+      console.error('[MapContainer] osid-selected-outline setFilter failed', e);
+    }
+  }, [selectedOsid, mapReady]);
+
   // Sync refs for animation
   useEffect(() => {
     operationTargetOsidsRef.current = operationTargetOsids;
@@ -2269,8 +2349,19 @@ export function MapContainer() {
           }}
         />
       )}
+
+      {contextMenu && contextMenuItems.length > 0 && (
+        <RadialMenu
+          items={contextMenuItems}
+          position={contextMenu.position}
+          targetLabel={
+            contextMenu.type === 'formation' ? (contextMenu.properties?.name as string)?.split(' ').pop() :
+            contextMenu.type === 'osid' ? (contextMenu.properties?.osid as string)?.split(':').pop()?.replace(/_/g, ' ') :
+            contextMenu.type === 'front' ? 'Front' : ''
+          }
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </>
   );
 }
-
-

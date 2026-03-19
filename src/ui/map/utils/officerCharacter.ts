@@ -71,6 +71,62 @@ export function formatRank(rank: string): string {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Rank insignia — historically accurate for 1992-1995 Bosnian War
+//
+// All three factions inherited the JNA (Yugoslav People's Army) rank system.
+// VRS kept JNA ranks nearly unchanged, ARBiH introduced "Brigadir",
+// HVO adopted Croatian Army (HV) terminology.
+//
+// Functional OfficerRank → historical rank mapping:
+//   army_commander → General-pukovnik (3-star equivalent, highest wartime rank)
+//   corps_commander → General-major (2-star equivalent, standard corps command)
+//   deputy → Pukovnik/Colonel (1-star equivalent, senior field officer)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Number of stars for the insignia display. */
+export function getRankStarCount(rank: string): number {
+    switch (rank) {
+        case 'army_commander': return 3;   // General-pukovnik / General-bojnik
+        case 'corps_commander': return 2;  // General-major
+        case 'deputy': return 1;           // Pukovnik (Colonel)
+        default: return 1;
+    }
+}
+
+/** Whether to show a bar beneath stars (colonels and below). */
+export function getRankHasBar(rank: string): boolean {
+    return rank === 'deputy';
+}
+
+/**
+ * Historically accurate rank title by faction.
+ * VRS: Serbian/JNA terminology.  ARBiH: mixed JNA + own.  HVO: Croatian (HV) terminology.
+ */
+export function getRankDisplayName(rank: string, faction: string): string {
+    const fid = faction.toUpperCase();
+    switch (rank) {
+        case 'army_commander':
+            if (fid === 'HRHB' || fid === 'HVO') return 'General-bojnik';
+            return 'General-pukovnik'; // RS and RBiH
+        case 'corps_commander':
+            return 'General-major'; // same across all three
+        case 'deputy':
+            return 'Pukovnik'; // Colonel — same across all three
+        default:
+            return rank;
+    }
+}
+
+/** Faction-specific insignia accent color (hex). */
+export function getRankInsigniaColor(faction: string): string {
+    const fid = faction.toUpperCase();
+    if (fid === 'RS' || fid === 'VRS') return '#b03232';
+    if (fid === 'RBIH' || fid === 'ARBIH') return '#378c4b';
+    if (fid === 'HRHB' || fid === 'HVO') return '#326eaa';
+    return '#888888';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Character archetype — derived from stat profile
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -122,7 +178,7 @@ export function getRatingColor(value: number): string {
 
 export function formatPips(value: number, max = 5): string {
     const filled = Math.round(Math.max(0, Math.min(max, value)));
-    return '●'.repeat(filled) + '○'.repeat(max - filled);
+    return '●'.repeat(filled) + '○'.repeat(max - filled) + ` ${filled}/${max}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

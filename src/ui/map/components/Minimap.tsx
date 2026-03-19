@@ -5,7 +5,7 @@
  *
  * Position: bottom-left, 250x180px. Click → pan main map.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { FeatureCollection, Feature, Polygon } from 'geojson';
@@ -116,9 +116,15 @@ export function Minimap() {
   const mapViewport = useGameStore((s) => s.mapViewport);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
 
-  // Initialize minimap
+  // Initialize minimap — also populates data on first load.
+  // We track an epoch counter so data/viewport effects re-fire on remount.
+  const epochRef = useRef(0);
+  const [mapEpoch, setMapEpoch] = useState(0);
+
+  // Create the MapLibre instance ONCE and keep it alive.
+  // Toggling visibility hides/shows the container via CSS (no destroy/recreate).
   useEffect(() => {
-    if (!containerRef.current || !minimapVisible) return;
+    if (!containerRef.current) return;
 
     const style = buildMinimapStyle();
     const map = new maplibregl.Map({
@@ -141,27 +147,36 @@ export function Minimap() {
     // Make minimap clickable (cursor)
     map.getCanvas().style.cursor = 'pointer';
 
+    // Bump epoch so data/viewport effects re-fire
+    map.once('load', () => {
+      epochRef.current += 1;
+      setMapEpoch(epochRef.current);
+    });
+
     return () => {
       map.remove();
       mapRef.current = null;
     };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resize map when visibility toggles (MapLibre needs resize after display:none→block)
+  useEffect(() => {
+    if (minimapVisible && mapRef.current) {
+      mapRef.current.resize();
+    }
   }, [minimapVisible]);
 
-  // Update control + front data when game state changes
+  // Update control + front data when game state changes or map remounts
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loadedGameState) return;
 
-    const waitForLoad = () => {
+    const updateData = () => {
       // Update control source from main map's data
       const controlSource = map.getSource('minimap-control') as GeoJSONSource | undefined;
       const frontSource = map.getSource('minimap-fronts') as GeoJSONSource | undefined;
       if (!controlSource || !frontSource) return;
 
-      // Re-use the osid-control data from the main map store
-      // We access the base GeoJSON from the loaded state's controlBySettlement
-      // For minimap we just need simple polygons — re-fetch from window or compute
-      // Actually we import the builders inline to avoid circular deps
       import('../data/DataLoader').then(async ({ loadOperationalSettlements }) => {
         try {
           const geojson = await loadOperationalSettlements();
@@ -180,24 +195,29 @@ export function Minimap() {
     };
 
     if (map.loaded()) {
-      waitForLoad();
+      updateData();
     } else {
-      map.on('load', waitForLoad);
+      map.on('load', updateData);
     }
-  }, [loadedGameState]);
+  }, [loadedGameState, mapEpoch]);
 
-  // Update viewport rectangle when main map moves
+  // Update viewport rectangle when main map moves or map remounts
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapViewport) return;
 
-    const viewportSource = map.getSource('minimap-viewport') as GeoJSONSource | undefined;
-    if (!viewportSource) return;
+    const updateViewport = () => {
+      const viewportSource = map.getSource('minimap-viewport') as GeoJSONSource | undefined;
+      if (!viewportSource) return;
+      viewportSource.setData(buildViewportRectangle(mapViewport.bounds));
+    };
 
-    viewportSource.setData(buildViewportRectangle(mapViewport.bounds));
-  }, [mapViewport]);
-
-  if (!minimapVisible) return null;
+    if (map.loaded()) {
+      updateViewport();
+    } else {
+      map.on('load', updateViewport);
+    }
+  }, [mapViewport, mapEpoch]);
 
   return (
     <div
@@ -212,6 +232,7 @@ export function Minimap() {
         overflow: 'hidden',
         border: '1px solid rgba(180, 160, 130, 0.25)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
+        display: minimapVisible ? 'block' : 'none',
       }}
     >
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />

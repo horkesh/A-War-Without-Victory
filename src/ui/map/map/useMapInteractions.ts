@@ -11,6 +11,7 @@ export interface MapInteractionCallbacks {
   onSectorHover?: (sectorId: string | null, point: { x: number; y: number } | null) => void;
   onMouseMove?: (lngLat: [number, number]) => void;
   onMapMouseLeave?: () => void;
+  onContextMenu?: (type: 'formation' | 'front' | 'osid' | 'empty', properties: Record<string, unknown> | null, point: { x: number; y: number }) => void;
 }
 
 const HOVER_DELAY_MS = 300;
@@ -55,6 +56,7 @@ export function useMapInteractions(
   const onFrontEdgeHover = typeof callbacks === 'function' ? undefined : callbacks.onFrontEdgeHover;
   const onMouseMove = typeof callbacks === 'function' ? undefined : callbacks.onMouseMove;
   const onMapMouseLeave = typeof callbacks === 'function' ? undefined : callbacks.onMapMouseLeave;
+  const onContextMenu = typeof callbacks === 'function' ? undefined : callbacks.onContextMenu;
 
 
   const handleOsidMouseMove = (e: MapLayerMouseEvent) => {
@@ -62,6 +64,11 @@ export function useMapInteractions(
     const feature = e.features?.[0];
     const osid = feature?.properties?.osid as string | undefined;
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
+    // Suppress OSID tooltip when cursor is also over a front edge (front tooltip takes priority)
+    if (e.point) {
+      const frontHits = map.queryRenderedFeatures(e.point, { layers: ['front-edges-hover-pos', 'front-edges-hover-neg'].filter(id => !!map.getLayer(id)) });
+      if (frontHits.length > 0) return; // front-edge handler will fire instead
+    }
     if (onOsidHover) {
       if (osid) {
         if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -225,6 +232,35 @@ export function useMapInteractions(
     onOsidClick?.('', {});
   };
 
+  const handleContextMenu = (e: MapLayerMouseEvent) => {
+    e.preventDefault();
+    if (!onContextMenu) return;
+    const point = { x: e.originalEvent.clientX, y: e.originalEvent.clientY };
+
+    const contextLayerIds = ['formation-markers', 'formation-labels',
+      'front-edges-hover-pos', 'front-edges-hover-neg',
+      'osid-control-fill'].filter(id => !!map.getLayer(id));
+
+    const hits = map.queryRenderedFeatures(e.point, { layers: contextLayerIds });
+    const first = hits[0];
+
+    if (!first) { onContextMenu('empty', null, point); return; }
+
+    const props = first.properties as Record<string, unknown>;
+    if (['formation-markers', 'formation-labels'].includes(first.layer.id)) {
+      onContextMenu('formation', props, point);
+    } else if (first.layer.id.includes('front-edges')) {
+      onContextMenu('front', props, point);
+    } else {
+      onContextMenu('osid', props, point);
+    }
+  };
+
+  // Suppress browser default context menu on map canvas
+  const suppressDefault = (e: Event) => e.preventDefault();
+  map.getCanvas().addEventListener('contextmenu', suppressDefault);
+
+  map.on('contextmenu', handleContextMenu);
   map.on('click', handleMapClick);
   map.on('mousemove', handleMapMouseMove);
 
@@ -262,8 +298,10 @@ export function useMapInteractions(
   }
 
   return () => {
+    map.off('contextmenu', handleContextMenu);
     map.off('click', handleMapClick);
     map.off('mousemove', handleMapMouseMove);
+    map.getCanvas().removeEventListener('contextmenu', suppressDefault);
 
     safeOff('mousemove', 'osid-control-fill', handleOsidMouseMove);
     safeOff('mouseleave', 'osid-control-fill', handleOsidMouseLeave);

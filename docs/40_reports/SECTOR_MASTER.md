@@ -1,7 +1,7 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-03-13 (n692, 40w — Case B split threshold + merge alignment)
+**Updated:** 2026-03-19 (sector demarcation lines re-enabled on map)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
@@ -17,6 +17,16 @@
 | Non-Sarajevo stacking | 36 (was 46 before distribution) |
 | Brigades 3+ hops from front | 29 (was 36) |
 | At-front brigades | 187 (was 177) |
+
+### 2026-03-19: Sector Demarcation Lines Re-Enabled
+
+**Change:** Sector demarcation lines (dashed lines showing boundaries between sectors of the same faction) were disabled since 2026-03-10 (`if (false && ...)` gate). Re-enabled with visibility tied to `sectorsVisible` (shows when any corps is selected, not just devMode).
+
+**Layers:** `sector-demarcation-lines` (dark base), `sector-demarcation-lines-stripe` (lighter dash), `sector-demarcation-lines-hit` (invisible wide hitbox for click).
+
+**Builder:** `buildSectorDemarcationGeoJSON()` — finds OSID polygon edges between front-adjacent OSIDs in different sectors of the same faction. Applies Douglas-Peucker simplification + Chaikin smoothing. Front-proximity filter eliminates deep-rear noise.
+
+**Report:** [implemented/20260319_MAP_UI_DEEP_INVESTIGATION_AND_FIXES.md](implemented/20260319_MAP_UI_DEEP_INVESTIGATION_AND_FIXES.md)
 
 ### n842 Changes (Brigade Front Distribution)
 

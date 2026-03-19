@@ -152,7 +152,7 @@ body {
 }
 
 .module-header {
-  @apply font-mono text-[9px] uppercase tracking-[0.2em] text-accent-gold/60 mb-1 pl-1 border-l-2 border-accent-gold/30;
+  @apply font-mono text-[8px] uppercase tracking-[0.15em] text-text-secondary/40 mb-1 pl-1 border-l-2 border-accent-gold/30;
 }
 
 /* CRT Screen Flickers */

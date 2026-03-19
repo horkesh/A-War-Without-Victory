@@ -34,6 +34,7 @@ import { AiSettingsPanel } from './components/AiSettingsPanel';
 import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
+import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { VerdictScreen } from './components/VerdictScreen';
@@ -471,6 +472,10 @@ function App() {
   const openSummary = (focus: SummaryFocusSection = 'overview') => {
     setSummaryFocus(focus);
     setSummaryOpen(true);
+    // Close other History-group panels so high-z summary doesn't occlude them
+    setAarOpen(false);
+    setOpsHistoryOpen(false);
+    setEventLogOpen(false);
   };
 
   return (
@@ -484,9 +489,9 @@ function App() {
         }}
         onOpenSummary={openSummary}
         onOpenEnclaves={() => setEnclaveDashboardOpen((current) => !current)}
-        onOpenAAR={() => setAarOpen((current) => !current)}
-        onOpenOpsHistory={() => setOpsHistoryOpen((current) => !current)}
-        onOpenEventLog={() => setEventLogOpen((current) => !current)}
+        onOpenAAR={() => { setSummaryOpen(false); setOpsHistoryOpen(false); setEventLogOpen(false); setAarOpen((current) => !current); }}
+        onOpenOpsHistory={() => { setSummaryOpen(false); setAarOpen(false); setEventLogOpen(false); setOpsHistoryOpen((current) => !current); }}
+        onOpenEventLog={() => { setSummaryOpen(false); setAarOpen(false); setOpsHistoryOpen(false); setEventLogOpen((current) => !current); }}
         onOpenEconomy={() => setEconomyOpen((current) => !current)}
         onOpenAiSettings={() => setAiSettingsOpen((current) => !current)}
       />
@@ -594,6 +599,7 @@ function App() {
       )}
       <PeaceWarTransitionOverlay />
       <VerdictScreen />
+      <MapModeLegend />
       <Minimap />
       <BottomStatusStrip />
     </div>

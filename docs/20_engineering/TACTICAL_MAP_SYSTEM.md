@@ -509,11 +509,34 @@ The `SpatialIndex` is a 50x50 uniform grid over the data bounds. For ~6,000 sett
 | `F` / `Home` | Fit entire map (zoom 1, center) |
 | Arrow keys | Pan by 0.05 |
 | `/` or `Ctrl+F` | Open search |
-| `Escape` | Cancel targeting mode (first priority) → close search → deselect settlement → close overlay/modal (cascade) |
+| `Escape` | Cancel targeting mode (first priority) → close radial menu → close search → deselect settlement → close overlay/modal (cascade) |
 | `O` | Toggle OOB sidebar |
 | `Space` | (Desktop) Advance turn or play/pause replay |
 | `M` | (Desktop) Toggle main menu overlay |
 | `R` | (Desktop) Open Recruitment modal when state has recruitment; otherwise focus replay scrubber |
+
+### 12.5 Right-Click Radial Context Menu (2026-03-19)
+
+Right-click on any map element opens a `RadialMenu` (animated ring of actions at cursor). Contextmenu handler in `useMapInteractions.ts` queries rendered features with same priority as click: formation > front-edge > OSID > empty.
+
+| Target | Menu items |
+|--------|-----------|
+| Formation | View Unit, View Corps |
+| OSID | Settlement Info, View Sector |
+| Front edge | Sector Detail |
+| Empty space | Deselect All |
+
+Browser default context menu suppressed on map canvas. Dismissed by click-outside or Escape.
+
+**Component:** `src/ui/map/components/RadialMenu.tsx`
+
+### 12.6 OSID Click Highlight (2026-03-19)
+
+Clicking a settlement highlights its OSID polygon with a gold outline (`osid-selected-outline` layer, `rgba(220, 190, 120, 0.9)`, 2.5px). Cleared on empty-space click.
+
+### 12.7 Hover Priority (2026-03-19)
+
+When cursor is near a front line, both OSID and front-edge hover handlers fire. OSID hover suppresses its tooltip when `queryRenderedFeatures` finds a front-edge hit at the same point — front-line tooltip takes priority.
 
 ---
 

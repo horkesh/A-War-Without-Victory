@@ -219,7 +219,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
         )}
       </div>
 
-      <div className="h-8 w-px bg-white/5 mx-1" />
+      <div className="h-8 w-[2px] bg-white/15 mx-1" />
 
       {/* 2. COMMAND & SYSTEMS MODULE (Logistics) */}
       <div className={MODULAR_SECTION_CLASS}>
@@ -246,7 +246,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
           onClick={handleSave}
           disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}
           className={`${TOOLBAR_BUTTON_CLASS} ${saveFlash ? 'border-green-500/50 text-green-400' : ''}`}
-          title="Save game (Ctrl+S for quick-save)"
+          title={!ipc.isAvailable ? 'Save — requires desktop app' : 'Save game (Ctrl+S for quick-save)'}
         >
           {saveFlash ? 'SAVED!' : 'SAVE'}
         </button>
@@ -254,6 +254,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
           onClick={handleAdvanceTurn}
           disabled={advancing || loading || !loadedGameState || !ipc.isAvailable}
           className={`${TOOLBAR_BUTTON_CLASS} border-accent-gold/30 text-accent-gold hover:bg-accent-gold/10`}
+          title={!ipc.isAvailable ? 'Advance turn — requires desktop app' : undefined}
         >
           {advancing ? 'ADVANCING...' : 'ADVANCE TURN'}
         </button>
@@ -261,6 +262,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
           onClick={() => onOpenSidePicker?.()}
           disabled={loading || advancing || !ipc.isAvailable}
           className={TOOLBAR_BUTTON_CLASS}
+          title={!ipc.isAvailable ? 'Campaign — requires desktop app' : undefined}
         >
           CAMPAIGN
         </button>
@@ -281,6 +283,7 @@ export function TopToolbar({ onOpenRecruitment, onOpenSidePicker, onOpenSummary,
           onClick={() => onOpenRecruitment?.()}
           disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}
           className={TOOLBAR_BUTTON_CLASS}
+          title={!ipc.isAvailable ? 'Recruitment — requires desktop app' : undefined}
         >
           RECRUIT
         </button>

@@ -9,8 +9,8 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-19, v0.4.9 — Battle of the Barracks + Equipment Overhaul)
-**v0.4.9.** 1204 tests, 98 suites. tsc clean. **Latest calibration: n955 91.2% area-weighted. RBiH tanks 24→39.**
-**This session:** Battle of the Barracks (4 conditional events, 13 tanks + 26 arty to ARBiH). ARBiH tank capture overhaul (fractional accumulator, both-sides scavenging 15%, scarce tank protection, defensive capture min). Per-brigade equipment tracking + 12 accolades + corps panel equipment. Equipment system overhaul (phantom tank fix, JNA priority). Front line rendering overhaul. Polygon harmonization (77/134 pairs). Displacement routing (previous session).
+**v0.4.9.** 1204 tests, 98 suites. tsc clean. **Latest calibration: n957 91.2% area-weighted. RBiH tanks 24→39.**
+**This session:** **UI/UX polish pass (14 tasks)**: radial right-click context menu, OSID click highlight, larger markers, minimap toggle fix, toolbar routing fix, map mode legends, commander rank insignia (historically accurate), corps health colors, settlement label polish, disabled button tooltips, stance tooltips. Post-op brigade return march (n957). Map UI deep investigation (8 fixes). Battle of the Barracks. ARBiH tank capture overhaul. Per-brigade equipment tracking + 12 accolades. Equipment system overhaul. Front line rendering overhaul. Polygon harmonization.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
@@ -73,16 +73,16 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-16] 2KK Prozor positional lock (P2)**: Commander override mission compliance pulls toward Bihac. 3 Prozor OSIDs still mismatched. Residual positional inertia.
-2. **[2026-03-18] Drina region 78% (P2)**: Slightly regressed from equipment rework (fewer phantom ARBiH tanks). Structural gap — may need OOB or painted target adjustments.
-3. **[2026-03-10] Donji Vakuf pocket remnant (P3)**: 2 OSIDs still RBiH (was 5). Municipality priority tuning.
-4. **[2026-03-16] RBiH w40 benchmark marginal (P3)**: 0.054 deviation vs 0.05 tolerance. Within noise.
-5. **[2026-03-12] HVO Central Bosnia ghost front — DEFERRED**: Activates April 1993.
-6. **[2026-03-19] Ops planning modal — COMPLETED**: Full redesign implemented. 16 files, 4-phase corps-level flow, live G2 predictions, stamp animation. See `docs/40_reports/implemented/20260319_OPS_PLANNING_MODAL_REDESIGN.md`.
-7. **[2026-03-17] 3rd Corps brigade displacement (P2)**: 16/27 brigades far from home municipality. Operations displace brigades south, garrison-fill reassigns by proximity. Home affinity tuning regresses calibration. Fix: post-operation return-to-home-sector march logic.
-8. **[2026-03-15] Visual assets — EXTERNAL**: User generating via Gemini Pro.
-9. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical. Smuggle volumes or scavenge rates may need small bump.
-10. **[2026-03-19] JNA barracks seizure — IMPLEMENTED**: 4 conditional events in `war_1992.json`. 13 tanks + 26 arty. RBiH tanks 24→39 at w40.
+1. **[2026-03-19] #33 Sarajevo 1st Corps 29.7x density imbalance (P3 — CORRECT)**: 9 brigades bottled up by SRK siege. The imbalance IS the siege working. Gorazde (2 bde / 33 edges) is the real concern — monitor enclave defense separately.
+2. **[2026-03-19] #34 HVO Tomislavgrad 5/9 sectors empty (P1)**: 69 front edges undefended. Kiseljak double-stack. hvo_central_bosnia has 0 sectors. hrhb_111th morale=0. See REAL_WAR_MASTER #34.
+3. **[2026-03-19] #35 SRK screening stance (P2)**: Siege corps in lowest density mode. Needs corps-specific stance floor (min defend). rs_3rd_sarajevo at Vares with morale 6.
+4. **[2026-03-19] #38 HVO stale commander IDs (P2)**: Blaskic→non-existent `hvo_oz_central_bosnia`. 4 officers orphaned. Officer data uses stale `hvo_oz_*` IDs.
+5. **[2026-03-18] Drina region 78% (P2)**: Structural gap — may need OOB or painted target adjustments.
+6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Remaining are structural (adjacent-mun front assignments).
+7. **[2026-03-19] #41 Dissolution floor not enforced (P3)**: hrhb_108th at 100 pers (below 150 floor). Multiple ARBiH at 146. Check `brigade_dissolution.ts`.
+8. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical.
+9. **[2026-03-19] Map UX: right-click context menu (P3)**: Needs UX design per element type.
+10. **[2026-03-19] Map UX: heat map legend + zero-density sectors (P3)**: See `docs/40_reports/implemented/20260319_MAP_UI_DEEP_INVESTIGATION_AND_FIXES.md`.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
@@ -173,6 +173,8 @@
    Do instead: Run `tests/scenario_vrs_operation_proof.test.ts` before wide calibration work.
 9. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
    Do instead: For April 1992 VRS opening ops, use explicit `participating_brigades`, `sector_id`, `staging_osid`.
+10. **[2026-03-19] Post-op brigade return march — immediate column march on op completion**
+    Do instead: `issuePostOperationReturnMarches()` in `sector_offensive.ts`. Fires at recovery completion for ALL participants outside home municipality (no distance threshold). Orders consumed by `osid-column-movement` (step 496) next turn. Existing `return-displaced-brigades` (step 608) only catches >3 hops + runs every 4 turns. Pipeline order: step 496 osid-column-movement → step 517 apply-brigade-movement → step 608 return-displaced → step 708 advance-sector-offensives. Column-stance orders from step 708 survive to next turn's step 496.
 
 ## GUI / HoI Map
 1. **[2026-03-15] Unified bottom strip: map modes + territory + toggles**

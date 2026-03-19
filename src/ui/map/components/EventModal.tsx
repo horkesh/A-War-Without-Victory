@@ -68,6 +68,7 @@ export function describeEventEffect(effect: EventEffect): string {
         case 'alliance_change': return `RBiH-HRHB alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'negotiation_capital': return `${effect.faction} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     }
+    return effect.kind;
 }
 
 export function EventModal({ event, queuePosition, queueTotal, onAcknowledge, onDecisionResponse }: EventModalProps) {

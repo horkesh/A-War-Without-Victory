@@ -10,6 +10,10 @@ import {
     formatPips,
     formatCombatRecord,
     formatTenure,
+    getRankStarCount,
+    getRankHasBar,
+    getRankDisplayName,
+    getRankInsigniaColor,
 } from '../utils/officerCharacter';
 import { WarCrimesBadge } from './WarCrimesBadge';
 
@@ -34,18 +38,24 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
             {/* Header: label + origin badge */}
             <div className="flex items-center justify-between">
                 <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">{label}</div>
-                <span className={`text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-black/30 border border-panel-border/30 ${origin.color}`}>
+                <span
+                    className={`text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-black/30 border border-panel-border/30 ${origin.color}`}
+                    title={origin.label === 'JNA' ? "Yugoslav People's Army (JNA) — pre-war military service" : undefined}
+                >
                     {origin.label}
                 </span>
             </div>
 
-            {/* Name + archetype */}
-            <div>
-                <div className="text-xs font-bold text-accent-gold truncate">
-                    {rank} {officer.name}
-                    {officer.acting_commander && <span className="text-[9px] text-text-secondary ml-1 font-normal">(Acting)</span>}
+            {/* Insignia + Name + archetype */}
+            <div className="flex items-start gap-2">
+                <RankInsignia rank={officer.rank} faction={officer.faction} />
+                <div className="min-w-0 flex-1">
+                    <div className="text-xs font-bold text-accent-gold truncate">
+                        {rank} {officer.name}
+                        {officer.acting_commander && <span className="text-[9px] text-text-secondary ml-1 font-normal">(Acting)</span>}
+                    </div>
+                    <div className="text-[9px] text-text-secondary italic">{archetype}</div>
                 </div>
-                <div className="text-[9px] text-text-secondary italic">{archetype}</div>
             </div>
 
             {/* Stat pips */}
@@ -120,6 +130,55 @@ function StatRow({ label, value, descriptor }: { label: string; value: number; d
             <span className="text-text-secondary w-[62px] shrink-0">{label}</span>
             <span className={`font-mono tracking-tight ${color}`}>{formatPips(value)}</span>
             <span className="text-text-secondary">{descriptor}</span>
+        </div>
+    );
+}
+
+/**
+ * Visual rank insignia — CSS-only stars on a faction-colored shoulder board.
+ *
+ * Historically accurate for the 1992-1995 Bosnian War. All three factions
+ * inherited the JNA five-pointed star insignia system:
+ *   3 stars = General-pukovnik / General-bojnik (army commander)
+ *   2 stars = General-major (corps commander)
+ *   1 star + bar = Pukovnik / Colonel (deputy / senior field officer)
+ */
+function RankInsignia({ rank, faction }: { rank: string; faction: string }) {
+    const starCount = getRankStarCount(rank);
+    const hasBar = getRankHasBar(rank);
+    const color = getRankInsigniaColor(faction);
+    const title = getRankDisplayName(rank, faction);
+
+    return (
+        <div
+            className="flex flex-col items-center justify-center shrink-0 rounded border border-white/10"
+            style={{
+                width: 40,
+                height: 28,
+                backgroundColor: `${color}18`,
+                borderColor: `${color}40`,
+            }}
+            title={title}
+        >
+            {/* Stars row */}
+            <div className="flex items-center gap-px">
+                {Array.from({ length: starCount }).map((_, i) => (
+                    <span
+                        key={i}
+                        className="leading-none"
+                        style={{ color, fontSize: starCount >= 3 ? 9 : 10 }}
+                    >
+                        {'\u2605'}
+                    </span>
+                ))}
+            </div>
+            {/* Bar beneath stars for colonel rank */}
+            {hasBar && (
+                <div
+                    className="rounded-sm mt-px"
+                    style={{ width: 14, height: 2, backgroundColor: color, opacity: 0.7 }}
+                />
+            )}
         </div>
     );
 }
