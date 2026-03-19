@@ -9,6 +9,18 @@
 
 ## Recently Violated (needs reinforcement)
 
+### [Process] Prove it in a test script BEFORE pushing renderer changes — VIOLATED 2026-03-19
+- **Violation evidence**: Built an HTML edges viewer that correctly rendered continuous front lines with gap bridging. Then "ported" the fix to the game renderer (`buildCorpsFrontLinesGeoJSON.ts`) by writing new code from memory instead of extracting the proven algorithm. Pushed 4 broken versions: (1) friendlyAdj excluded exterior polygon edges (2 bridges instead of 345), (2) deadEndCoords Map overwritten during iteration, (3) `frontier=[]` didn't break outer loop, (4) bridges added as disconnected features instead of merged into chains.
+- **Cost**: 4 broken commits, user frustration, hours of churn. The working algorithm existed in the viewer the entire time.
+- **Right approach**: (1) Write a Node script that runs the algorithm on real data and prints chain count / bridge count / dead ends. (2) Verify output matches expectations. (3) Port the verified algorithm verbatim. (4) Run the same diagnostic on the ported code.
+- **Do instead**: `tsc clean + build succeeds` is necessary but NOT sufficient. For rendering algorithm changes, always create a diagnostic script that verifies correctness on real data before pushing. The edges viewer is the test harness for front line rendering.
+
+### [Architecture] Data pipeline outputs are coupled — regenerating one file invalidates others (2026-03-19) — VIOLATED THIS SESSION
+- **Violation evidence**: Vertex snapping changed polygon vertices in `operational_settlements.geojson`. Regenerating the pipeline also regenerated `operational_contact_graph.json` with different `min_dist` values and `distance_contact` types. This changed which OSID pairs got front edges, cascading through combat. The contact graph was coupled to the polygon data but updated independently.
+- **Cost**: Regression from 91% to 88.4% (initially attributed to geometry fix, actually from contact graph change). Multiple revert cycles.
+- **Right approach**: When modifying polygon geometry, test whether the contact graph changes. If it does, the calibration WILL shift. Either: (a) modify polygons WITHOUT regenerating the contact graph, or (b) regenerate everything and recalibrate.
+- **Do instead**: Before regenerating ANY data pipeline output, check which other files it touches. The `derive_operational_settlements.ts` script regenerates 3 files simultaneously (settlements, contact graph, mapping). Changing one means changing all. Use `md5sum` before and after to verify which files actually changed.
+
 ### [Calibration] One change per run + mandatory insanity check — VIOLATED 2026-03-15
 - **Violation evidence**: n747 (`56f2ae0`) bundled FOUR independent fixes (offensive_support trigger, auto-join op, force-assign sector, bot AI corps lookup) into a single calibration run. When the first three produced 0 elite battles (n746), attribution was ambiguous. Debug logging after n746 identified Change 4 as the sole blocker — if each fix had been a separate run, identification would have been immediate.
 - **Cost**: One wasted calibration cycle (n746). No regression, but delayed root-cause identification.

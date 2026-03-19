@@ -12,6 +12,7 @@ data/derived/settlements_wgs84_1990.geojson     (5,823 canonical settlement poly
         ↓   Phase 5a: Build global TopoJSON topology (shared arcs)
         ↓   Phase 5b: Simplify topology (shared arcs simplified together)
         ↓   Phase 5c: topojsonClient.merge() per cluster
+        ↓   Phase 5d: Vertex snapping — snap near-miss boundary vertices between clusters
         ↓   Phase 6: normalizeGeometry() — close rings, remove tiny holes, fix winding
         ↓
 data/derived/operational/operational_settlements.geojson  (744 OSID polygons)
@@ -20,29 +21,23 @@ data/derived/operational/operational_contact_graph.json   (2,118 adjacency edges
 
 ## Known Issues
 
-### 1. CRITICAL: TopoJSON merge does not create shared arcs between clusters
+### 1. TopoJSON merge does not create shared arcs between clusters — PARTIALLY FIXED
 
-**Status:** Open — root cause identified 2026-03-18
-**Impact:** ~37 OSID pairs have no shared polygon edges despite being adjacent. Front lines have gaps at these boundaries. Visible at Sarajevo enclave east edge.
+**Status:** PARTIALLY FIXED 2026-03-19 (vertex snapping + renderer bridging)
 
-**Root cause:** `topojsonClient.merge()` dissolves internal boundaries within a cluster but does NOT rebuild shared arcs between the resulting cluster polygons. After merge:
-- Cluster A's boundary uses vertices from settlement S144959's outer ring
-- Cluster B's boundary uses vertices from settlement S166472's outer ring
-- Where A and B should share a boundary, each has different intermediate vertices (~100m apart)
+**Root cause:** `topojsonClient.merge()` dissolves internal boundaries within a cluster but does NOT rebuild shared arcs between the resulting cluster polygons. After merge, adjacent clusters have different intermediate vertices along their shared boundary (~50-100m apart).
 
-**Example:** `op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo` (2 SIDs) and `op:stari_grad_sarajevo:faletici` (6 SIDs) share 2 corner vertices but zero edge segments. Their canonical constituent settlements (S144959, S166472, etc.) DO share edges, but those shared edges are dissolved during merge because they're internal to cluster B.
+**Two-layer fix applied:**
 
-**Fix:** After merging all clusters in Phase 5c, rebuild topology from the merged polygons and re-export GeoJSON:
-```
-Current:  canonical → topology → simplify → merge per cluster → export GeoJSON
-Fixed:    canonical → topology → simplify → merge per cluster → NEW topology from merged → export GeoJSON
-```
-This second topology pass creates new shared arcs for inter-cluster boundaries.
+**Layer 1 — Data pipeline (Phase 5d vertex snapping):** Snap near-miss boundary vertices between adjacent OSID clusters to their midpoint. Creates shared polygon edges without altering polygon shapes. Results: 126 vertices snapped across 40 OSID pairs, +536 shared edges (12,038→12,574), Sarajevo east edge fixed (0→5 shared edges). Zero calibration regression.
 
-**Affected OSID pairs (zero shared edges, confirmed):**
-- `op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo` ↔ `op:stari_grad_sarajevo:faletici`
-- `op:trnovo:delijas` ↔ `op:novo_sarajevo:lukavica`
-- Plus ~35 others (see edges viewer stats)
+**Layer 2 — Game renderer (BFS gap bridging):** After stitching front segments via exact endpoint matching, BFS-bridge remaining dead ends through friendly polygon edges (max 3 hops). Results: 359 chains → 28 chains (331 bridges). Front line is now continuous.
+
+**IMPORTANT: Topology rebuild approach FAILED.** Rebuilding topology via `topojson.topology()` from merged polygons quantizes coordinates, regressing calibration from 91% to 87%. Even at 1e8 quantization. TopoJSON is a serialization format, not a geometry repair tool.
+
+**IMPORTANT: Data pipeline coupling.** Regenerating `operational_settlements.geojson` via `derive_operational_settlements.ts` also regenerates the contact graph with different `min_dist` values, which changes front edge computation and cascades through combat. Never regenerate the contact graph without recalibrating.
+
+**Remaining:** ~19 chain dead-end pairs that can't be bridged within 3 hops. These are genuine front discontinuities (e.g., enclaves) or vertices where all edges are hostile.
 
 ### 2. SID → OSID key mismatch in UI (FIXED 2026-03-18)
 
@@ -70,27 +65,32 @@ This second topology pass creates new shared arcs for inter-cluster boundaries.
 
 ## Front Line Rendering Algorithms
 
-### Game (buildCorpsFrontLinesGeoJSON.ts)
-Walks every polygon vertex pair → hashes → tracks which 2 OSIDs share each segment → if different controllers → front segment. Uses `toFixed(6)` coordKey. Renders individual segments with `line-cap: round` and `line-join: round` — the glow layer visually bridges small gaps.
+### Game (buildCorpsFrontLinesGeoJSON.ts) — UPDATED 2026-03-19
+Three-step algorithm (same as edges viewer):
+1. **Edge walk:** Every polygon vertex pair → hash → track which 2 OSIDs share each segment → hostile if different controllers
+2. **Stitch:** Flatten ALL segments across sector groups, chain via exact endpoint matching into continuous polylines
+3. **BFS bridge:** Connect dead-end chain endpoints through ALL non-hostile polygon edges (including exterior), max 3 hops. Merges chains in-place.
+
+**Critical detail:** `friendlyAdj` must include ALL non-hostile edges, not just edges shared by 2 OSIDs. Exterior polygon edges (shared by 1 OSID) are essential for boundary walks at triple junctions. Previous bug: `osids.size !== 2` filter excluded exterior edges → only 2 bridges instead of 345.
+
+**Result:** 359 chains → 28 after 331 BFS bridges. Largest chain: 832 vertices.
 
 ### Edges Viewer (docs/60_visualisations/edges_viewer.html)
-Same polygon-edge-walking algorithm, plus:
-- **Stitcher:** Chains segments into continuous polylines via exact endpoint matching (color-agnostic)
-- **BFS bridge:** Connects dead-end chain endpoints through friendly polygon edges (max 3 hops)
-- **Fragment filter:** Removes chains with < 4 vertices
+Same three-step algorithm as game renderer, plus:
+- **Fragment filter:** Removes chains with < 4 vertices (isolated short segments)
 - **Faction wash:** Colors front-line OSIDs (depth 0) and 1 hop behind (depth 1) with faction color
+- **Political control fill:** Toggle to show faction territory
 
-### Front Line Gap Analysis (2026-03-18)
+### Front Line Gap Analysis (2026-03-19, after vertex snapping)
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| Total hostile boundary segments | 2,577 | Polygon edges shared by 2 OSIDs with different controllers |
-| Proper shared borders | 459/496 OSID pairs | Both polygons have matching vertex-pair edges |
-| Triple junction (1 shared vertex) | 24/496 | Polygons meet at a corner point only |
-| No shared geometry (phantom) | 13/496 | Not in contact graph — distance contacts |
-| Dead-end chain endpoints | 712 | After exact stitching |
-| Dead-end nearest gap (median) | 835m | These are real geographic distances between front sections |
-| Dead-end gap < 100m | 4 | Bridgeable via BFS through friendly polygon edges |
+| Total hostile boundary segments | 2,704 | Polygon edges shared by 2 OSIDs with different controllers |
+| Shared polygon edges | 12,574 | After vertex snapping (was 12,038) |
+| Chains after exact stitch | 359 | Greedy endpoint matching |
+| Chains after BFS bridge | 28 | BFS through friendly edges, max 3 hops |
+| BFS bridges found | 331 | Dead-end pairs connected through friendly polygon edges |
+| Remaining dead ends | ~38 | Genuine discontinuities (enclaves, all-hostile vertices) |
 
 ## Diagnostic Tools
 
