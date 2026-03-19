@@ -389,8 +389,19 @@ function updateArrows(
                 : centroidLookup.get(axis.objectives[objIdx - 1]);
 
             if (fromPt && (fromPt[0] !== objPt[0] || fromPt[1] !== objPt[1])) {
-                // Build bezier curve from source to target
-                const curve = buildBezierCurve(fromPt, objPt, 0.02);
+                const dx = objPt[0] - fromPt[0];
+                const dy = objPt[1] - fromPt[1];
+                const len = Math.sqrt(dx * dx + dy * dy);
+                if (len < 0.001) return; // Degenerate
+
+                // Scale all dimensions with distance (matches main map arrows)
+                const offsetMag = len * 0.10;
+                const baseHalfW = Math.max(0.006, len * 0.04);
+                const tipHalfW = Math.max(0.002, len * 0.012);
+                const headLength = Math.max(0.009, len * 0.035) * 1.8;
+                const headWidth = Math.max(0.009, len * 0.035);
+
+                const curve = buildBezierCurve(fromPt, objPt, offsetMag);
 
                 // Glow line
                 features.push({
@@ -400,7 +411,7 @@ function updateArrows(
                 });
 
                 // Arrow body (tapered polygon)
-                const bodyCoords = buildTaperedArrowBody(curve, 0.008, 0.004);
+                const bodyCoords = buildTaperedArrowBody(curve, baseHalfW, tipHalfW);
                 if (bodyCoords) {
                     features.push({
                         type: 'Feature',
@@ -410,7 +421,7 @@ function updateArrows(
                 }
 
                 // Arrow head
-                const headCoords = buildArrowheadTriangle(curve);
+                const headCoords = buildArrowheadTriangle(curve, headLength, headWidth);
                 if (headCoords) {
                     features.push({
                         type: 'Feature',
