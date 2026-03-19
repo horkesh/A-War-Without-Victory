@@ -270,7 +270,7 @@ export function OpsMap({
         }
 
         // Arrows — build per-axis advance arrows
-        updateArrows(map, axes, centroidLookupRef.current, faction);
+        updateArrows(map, axes, centroidLookupRef.current, faction, stagingOsid);
     }, [objectives, stagingOsid, schwerpunktOsid, axes, faction]);
 
     return (
@@ -329,21 +329,24 @@ function updateArrows(
     axes: AxisState[],
     centroidLookup: Map<string, [number, number]>,
     faction: string,
+    defaultStagingOsid?: string,
 ) {
     const features: Feature[] = [];
+    if (centroidLookup.size === 0) return; // Not loaded yet
     const palette = AXIS_PALETTES[faction] ?? DEFAULT_AXIS_COLORS;
 
     axes.forEach((axis, axisIdx) => {
         const color = palette[axisIdx % palette.length];
-        const staging = axis.stagingOsid ? centroidLookup.get(axis.stagingOsid) : null;
+        const effectiveStaging = axis.stagingOsid ?? defaultStagingOsid;
+        const stagingPt = effectiveStaging ? centroidLookup.get(effectiveStaging) : null;
 
         axis.objectives.forEach((obj, objIdx) => {
             const objPt = centroidLookup.get(obj);
             if (!objPt) return;
 
-            // Arrow from staging/previous objective to this objective
+            // Arrow from staging (first obj) or previous objective (subsequent)
             const fromPt = objIdx === 0
-                ? (staging ?? (centroidLookup.get(axis.objectives[0]) ?? null))
+                ? stagingPt
                 : centroidLookup.get(axis.objectives[objIdx - 1]);
 
             if (fromPt && (fromPt[0] !== objPt[0] || fromPt[1] !== objPt[1])) {

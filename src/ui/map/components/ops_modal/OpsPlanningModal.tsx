@@ -40,9 +40,12 @@ export function OpsPlanningModal() {
     const defaultStagingOsid = useMemo(() => {
         if (!loadedGameState?.corpsFrontSectors || !corpsId) return '';
         const sectors = loadedGameState.corpsFrontSectors.filter((s) => s.corps_id === corpsId);
-        // Get first friendly OSID from sub-segments
-        const firstSub = sectors[0]?.sub_segments?.[0];
-        return firstSub?.friendly_osids?.[0] ?? '';
+        for (const sec of sectors) {
+            for (const sub of (sec.sub_segments ?? [])) {
+                if (sub.friendly_osids.length > 0) return sub.friendly_osids[0];
+            }
+        }
+        return '';
     }, [loadedGameState, corpsId]);
 
     const [plan, setPlan] = useState<OpsPlanState>(() => ({
