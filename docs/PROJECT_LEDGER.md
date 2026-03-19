@@ -3,6 +3,12 @@
 **Last Updated:** 2026-03-19
 **Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n948: 92.1% area-weighted.** Equipment system overhaul, polygon harmonization, front line rendering overhaul.
 
+## [2026-03-19] Per-Brigade Equipment Tracking, Accolades, Corps Panel Equipment
+
+- **Per-brigade equipment tracking**: `total_equipment_destroyed` (enemy tanks/arty this brigade helped destroy) and `total_equipment_captured` wired into `BrigadeHistory`. Updated during battle resolution via `recordAttackerEngagements`/`recordDefenderEngagement`. Fields existed on `BrigadeHistory` since creation but were never populated.
+- **Brigade accolades** (`src/state/brigade_accolades.ts`): 12 rules computed from `BrigadeHistory` — Tank Hunters (10+ enemy tanks), Artillery Killers (15+ arty), Armored Fist (25+ tanks), Scavengers (5+ captured), Blooded (10+ battles), Veterans (20+), Iron Wall (5+ defense streak), Breakthrough (5+ OSIDs), Conquerors (10+), Undefeated (10+ battles, 0 defeats), Last Stand (nadir <200), Meat Grinder (3000+ cas inflicted). Presentational only — no gameplay effect.
+- **Corps panel equipment**: `CorpsDetail.tsx` Overview tab shows aggregate tanks/artillery/AA across subordinate brigades. Format: operational/total (e.g. "23/40"). Hidden when corps has no heavy equipment.
+
 ## [2026-03-19] Equipment System Overhaul — Phantom Tanks, JNA Priority, Battle Reports, Abandoned Capture
 
 ### Root cause investigation
