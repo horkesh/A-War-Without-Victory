@@ -82,8 +82,8 @@
 6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Structural.
 7. **[2026-03-19] #41 Dissolution floor not enforced (P3)**: hrhb_108th at 100 pers below 150 floor.
 8. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical.
-9. **[2026-03-19] Map UX: right-click context menu (P3)**: Needs UX design per element type.
-10. **[2026-03-19] Map UX: heat map legend + zero-density sectors (P3)**: See MAP_UI report.
+9. **[2026-03-19] UI Visual Overhaul (P2 — PARKED)**: 6-phase plan: icons (P0), counter enrichment, sidebar upgrade, document panels, bottom strip, map ops viz. ~11-13 sessions. Plan: `docs/plans/2026-03-19-ui-visual-overhaul-design.md`. Asset brief: `docs/30_planning/VISUAL_ASSET_BRIEF.md`. Genre survey: HoI4/UoC2/EU4/AGEOD patterns.
+10. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
 **Resolved this session:** #34 HVO sectors (FIXED — corps activation + consolidation protection), #38 HVO stale IDs (FIXED), #33 Sarajevo density (CORRECT — siege working).
 
 ## Simulation Engine
