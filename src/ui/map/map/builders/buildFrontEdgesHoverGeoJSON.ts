@@ -108,6 +108,66 @@ export function buildFrontEdgesHoverGeoJSON(
     }
   }
 
+  // Fallback: synthesize boundary for front edge pairs with no shared polygon edges.
+  // Find near-coincident vertices between the two polygons and build approximate boundary.
+  const SNAP_THRESHOLD_SQ = 0.0005 * 0.0005; // ~55m in geographic coords
+  const osidRings = new Map<string, number[][][]>();
+  for (const feature of features) {
+    const osid = feature.properties.osid;
+    const rings = feature.geometry.type === 'Polygon'
+      ? feature.geometry.coordinates
+      : feature.geometry.coordinates.flat();
+    osidRings.set(osid, rings as number[][][]);
+  }
+
+  for (const edge of frontEdgesOsid) {
+    if (pairToSegments.has(edge.edge_id)) continue;
+    const ringsA = osidRings.get(edge.a);
+    const ringsB = osidRings.get(edge.b);
+    if (!ringsA || !ringsB) continue;
+
+    const vertsA: number[][] = [];
+    for (const r of ringsA) for (const v of r) vertsA.push(v);
+    const vertsB: number[][] = [];
+    for (const r of ringsB) for (const v of r) vertsB.push(v);
+
+    const midpoints: number[][] = [];
+    for (const va of vertsA) {
+      for (const vb of vertsB) {
+        const dx = va[0] - vb[0], dy = va[1] - vb[1];
+        if (dx * dx + dy * dy < SNAP_THRESHOLD_SQ) {
+          midpoints.push([(va[0] + vb[0]) / 2, (va[1] + vb[1]) / 2]);
+        }
+      }
+    }
+    if (midpoints.length < 2) continue;
+
+    // Greedy nearest-neighbor ordering
+    const ordered: number[][] = [midpoints[0]];
+    const remaining = new Set(midpoints.map((_, i) => i));
+    remaining.delete(0);
+    while (remaining.size > 0) {
+      const last = ordered[ordered.length - 1];
+      let bestIdx = -1, bestDist = Infinity;
+      for (const ri of remaining) {
+        const dx = midpoints[ri][0] - last[0], dy = midpoints[ri][1] - last[1];
+        const d = dx * dx + dy * dy;
+        if (d < bestDist) { bestDist = d; bestIdx = ri; }
+      }
+      if (bestIdx < 0) break;
+      remaining.delete(bestIdx);
+      ordered.push(midpoints[bestIdx]);
+    }
+    const deduped: number[][] = [ordered[0]];
+    for (let i = 1; i < ordered.length; i++) {
+      if (ordered[i][0] !== ordered[i - 1][0] || ordered[i][1] !== ordered[i - 1][1]) {
+        deduped.push(ordered[i]);
+      }
+    }
+    if (deduped.length < 2) continue;
+    pairToSegments.set(edge.edge_id, [deduped]);
+  }
+
   // Emit one feature per polygon boundary segment per faction — same approach as
   // buildCorpsFrontLinesGeoJSON. Each segment gets its own offset computed from
   // the segment's direction + the friendly OSID centroid. This avoids offset

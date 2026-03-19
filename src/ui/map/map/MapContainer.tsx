@@ -615,8 +615,8 @@ export function MapContainer() {
                     {
                       id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
                       type: 'line',
-                      source: FRONT_EDGES_HOVER_SOURCE_ID,
-                      filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+                      source: 'front-lines',
+                      filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
                       paint: {
                         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                         'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
@@ -631,8 +631,8 @@ export function MapContainer() {
                     {
                       id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
                       type: 'line',
-                      source: FRONT_EDGES_HOVER_SOURCE_ID,
-                      filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+                      source: 'front-lines',
+                      filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
                       paint: {
                         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                         'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
@@ -645,13 +645,13 @@ export function MapContainer() {
                   );
                 } else {
                   // Live mode: single centered highlight ON TOP of front lines.
-                  // No offset — glow replaces the front line for the selected sector.
+                  // Uses front-lines source so highlight trails the front line exactly.
                   m2.addLayer(
                     {
                       id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
                       type: 'line',
-                      source: FRONT_EDGES_HOVER_SOURCE_ID,
-                      filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+                      source: 'front-lines',
+                      filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
                       paint: {
                         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 5, 10, 9, 14, 14],
                         'line-opacity': 0.95,
@@ -668,8 +668,8 @@ export function MapContainer() {
                     {
                       id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
                       type: 'line',
-                      source: FRONT_EDGES_HOVER_SOURCE_ID,
-                      filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+                      source: 'front-lines',
+                      filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
                       paint: {
                         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 5, 10, 9, 14, 14],
                         'line-opacity': 0.95,
@@ -1254,9 +1254,10 @@ export function MapContainer() {
           'faction-border-glow-pos'
         );
       }
-      // Sector edge glow layers (on front-edges-hover source)
-      // If source doesn't exist yet (created in runUpdate via double-RAF), return false to keep polling.
-      if (!map.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
+      // Sector edge glow layers — use front-lines source (same geometry as front line rendering)
+      // so the highlight trails the front line exactly. Filter for lineType=glow which carries
+      // sector_id, corps_id, offset_side metadata.
+      if (!map.getSource('front-lines')) {
         return false;
       }
       if (!safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
@@ -1264,8 +1265,8 @@ export function MapContainer() {
           {
             id: SECTOR_EDGE_GLOW_POS_LAYER_ID,
             type: 'line',
-            source: FRONT_EDGES_HOVER_SOURCE_ID,
-            filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+            source: 'front-lines',
+            filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
             paint: devMode ? {
               'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5, 14, 8],
               'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
@@ -1288,8 +1289,8 @@ export function MapContainer() {
           {
             id: SECTOR_EDGE_GLOW_NEG_LAYER_ID,
             type: 'line',
-            source: FRONT_EDGES_HOVER_SOURCE_ID,
-            filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+            source: 'front-lines',
+            filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
             paint: devMode ? {
               'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5, 14, 8],
               'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
@@ -1405,16 +1406,16 @@ export function MapContainer() {
         try {
           map.setFilter(SECTOR_FILL_LAYER_ID, ['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification);
           if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
-            map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+            map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
-            map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+            map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID)) {
-            map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+            map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID)) {
-            map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+            map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, SECTOR_BRIGADE_RINGS_LAYER_ID)) {
             map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['==', ['get', 'id'], '__none__'] as maplibregl.FilterSpecification);
@@ -1463,16 +1464,16 @@ export function MapContainer() {
       const filterExpr = ['in', ['get', 'sector_id'], ['literal', ids]] as any;
       try {
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
-          map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as any);
+          map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], filterExpr] as any);
         }
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
-          map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], filterExpr] as any);
+          map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], filterExpr] as any);
         }
         if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID)) {
-          map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as any);
+          map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], filterExpr] as any);
         }
         if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID)) {
-          map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], filterExpr] as any);
+          map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], filterExpr] as any);
         }
 
         // Apply static highlight opacity

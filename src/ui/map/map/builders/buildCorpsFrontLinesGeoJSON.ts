@@ -263,12 +263,15 @@ export function buildCorpsFrontLinesGeoJSON(
     const coordKey = (c: number[]) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
     const edgeMap = new Map<string, Set<string>>();
 
+    // Build per-OSID ring vertices for fallback boundary synthesis
+    const osidRings = new Map<string, number[][][]>();
     for (const feature of features) {
         const osid = feature.properties.osid;
         const rings = feature.geometry.type === 'Polygon'
             ? feature.geometry.coordinates
             : feature.geometry.coordinates.flat();
 
+        osidRings.set(osid, rings);
         for (const ring of rings) {
             for (let i = 0; i < ring.length - 1; i++) {
                 const a = ring[i];
@@ -283,6 +286,9 @@ export function buildCorpsFrontLinesGeoJSON(
         }
     }
 
+    // Track which authoritative pairs get polygon-edge segments
+    const pairsWithSegments = new Set<string>();
+
     const glowFeatures: Feature<LineString, CorpsGlowProperties>[] = [];
     const frontSegmentsByGroup = new Map<string, Feature<LineString, CorpsFrontProperties>[]>();
 
@@ -296,6 +302,7 @@ export function buildCorpsFrontLinesGeoJSON(
 
         const pairKey = osidA < osidB ? `${osidA}__${osidB}` : `${osidB}__${osidA}`;
         if (authoritativePairs.size > 0 && !authoritativePairs.has(pairKey)) continue;
+        pairsWithSegments.add(pairKey);
 
         const [partA, partB] = edgeKey.split('|');
         const [ax, ay] = partA.split(',').map(Number);
@@ -366,6 +373,140 @@ export function buildCorpsFrontLinesGeoJSON(
             properties: frontProps,
             geometry: { type: 'LineString', coordinates: coords },
         });
+    }
+
+    // ── Fallback: synthesize boundary for authoritative pairs with no shared polygon edges ──
+    // Find near-coincident vertices between the two polygons and build approximate boundary.
+    if (frontEdgesOsid && authoritativePairs.size > 0) {
+        const SNAP_THRESHOLD = 0.0005; // ~55m in geographic coords
+        const SNAP_THRESHOLD_SQ = SNAP_THRESHOLD * SNAP_THRESHOLD;
+
+        for (const pairKey of authoritativePairs) {
+            if (pairsWithSegments.has(pairKey)) continue;
+
+            const [osidA, osidB] = pairKey.split('__');
+            const ctrlA = controllerMap.get(osidA);
+            const ctrlB = controllerMap.get(osidB);
+            if (!ctrlA || !ctrlB || ctrlA === ctrlB) continue;
+            if (rbihHrhbAllied && ((ctrlA === 'RBiH' && ctrlB === 'HRHB') || (ctrlA === 'HRHB' && ctrlB === 'RBiH'))) continue;
+
+            const ringsA = osidRings.get(osidA);
+            const ringsB = osidRings.get(osidB);
+            if (!ringsA || !ringsB) continue;
+
+            // Collect all vertices from each polygon
+            const vertsA: [number, number][] = [];
+            for (const ring of ringsA) for (const v of ring) vertsA.push([v[0], v[1]]);
+            const vertsB: [number, number][] = [];
+            for (const ring of ringsB) for (const v of ring) vertsB.push([v[0], v[1]]);
+
+            // Find pairs of near-coincident vertices — these trace the approximate shared boundary
+            const midpoints: [number, number][] = [];
+            for (const va of vertsA) {
+                for (const vb of vertsB) {
+                    const dx = va[0] - vb[0];
+                    const dy = va[1] - vb[1];
+                    if (dx * dx + dy * dy < SNAP_THRESHOLD_SQ) {
+                        midpoints.push([(va[0] + vb[0]) / 2, (va[1] + vb[1]) / 2]);
+                    }
+                }
+            }
+
+            if (midpoints.length < 2) continue;
+
+            // Order midpoints into a polyline by greedy nearest-neighbor
+            const ordered: [number, number][] = [midpoints[0]];
+            const remaining = new Set(midpoints.map((_, i) => i));
+            remaining.delete(0);
+
+            while (remaining.size > 0) {
+                const last = ordered[ordered.length - 1];
+                let bestIdx = -1;
+                let bestDist = Infinity;
+                for (const ri of remaining) {
+                    const dx = midpoints[ri][0] - last[0];
+                    const dy = midpoints[ri][1] - last[1];
+                    const d = dx * dx + dy * dy;
+                    if (d < bestDist) { bestDist = d; bestIdx = ri; }
+                }
+                if (bestIdx < 0) break;
+                remaining.delete(bestIdx);
+                ordered.push(midpoints[bestIdx]);
+            }
+
+            // Deduplicate consecutive identical points
+            const deduped: [number, number][] = [ordered[0]];
+            for (let i = 1; i < ordered.length; i++) {
+                if (ordered[i][0] !== ordered[i - 1][0] || ordered[i][1] !== ordered[i - 1][1]) {
+                    deduped.push(ordered[i]);
+                }
+            }
+            if (deduped.length < 2) continue;
+
+            const corpsA = edgeFactionToCorps.get(`${pairKey}\0${ctrlA}`) ?? 'unknown';
+            const sectorA = sectorByEdgeAndFaction.get(`${pairKey}\0${ctrlA}`);
+            const sectorB = sectorByEdgeAndFaction.get(`${pairKey}\0${ctrlB}`);
+            const corpsB = edgeFactionToCorps.get(`${pairKey}\0${ctrlB}`) ?? 'unknown';
+
+            const avgEntrenchment = calculateAvgEntrenchment(sectorA, formationsById);
+            const subSegA = edgeToSubSegment.get(`${pairKey}\0${ctrlA}`);
+            const subSegB = edgeToSubSegment.get(`${pairKey}\0${ctrlB}`);
+            const pressureData = frontPressureByEdge?.[pairKey];
+            const pressureIntensity = pressureData && pressureData.max_abs > 0 ? Math.abs(pressureData.value) / pressureData.max_abs : 0;
+
+            // Emit glow features for each synthesized point pair
+            let offsetA: 1 | -1 | undefined;
+            let offsetB: 1 | -1 | undefined;
+            if (osidCentroids) {
+                const centA = osidCentroids.get(osidA);
+                const centB = osidCentroids.get(osidB);
+                if (centA && centB && deduped.length >= 2) {
+                    const dx = deduped[1][0] - deduped[0][0];
+                    const dy = deduped[1][1] - deduped[0][1];
+                    const crossA = dx * (centA[1] - deduped[0][1]) - dy * (centA[0] - deduped[0][0]);
+                    offsetA = crossA > 0 ? -1 : 1;
+                    offsetB = crossA > 0 ? 1 : -1;
+                }
+            }
+
+            const glowPropsA = createGlowProperties(ctrlA, corpsA, sectorA?.sector_id, offsetA, pressureIntensity);
+            if (subSegA) glowPropsA.sub_segment_id = subSegA;
+            const glowPropsB = createGlowProperties(ctrlB, corpsB, sectorB?.sector_id, offsetB, pressureIntensity);
+            if (subSegB) glowPropsB.sub_segment_id = subSegB;
+
+            glowFeatures.push({
+                type: 'Feature',
+                properties: glowPropsA,
+                geometry: { type: 'LineString', coordinates: deduped },
+            });
+            glowFeatures.push({
+                type: 'Feature',
+                properties: glowPropsB,
+                geometry: { type: 'LineString', coordinates: deduped },
+            });
+
+            const pairFactionKey = [ctrlA, ctrlB].sort().join('-');
+            const groupKey = sectorA?.sector_id ? `${sectorA.sector_id}:${pairFactionKey}` : `${corpsA}:${pairFactionKey}`;
+            if (!frontSegmentsByGroup.has(groupKey)) frontSegmentsByGroup.set(groupKey, []);
+
+            const frontProps: CorpsFrontProperties = {
+                lineType: 'front',
+                factionA: ctrlA,
+                factionB: ctrlB,
+                corps_id: corpsA,
+                avg_entrenchment: avgEntrenchment,
+                brigade_count: sectorA ? sectorA.assigned_brigade_ids.length : 0,
+                threat_intensity: pressureIntensity,
+            };
+            if (sectorA?.sector_id) frontProps.sector_id = sectorA.sector_id;
+            if (subSegA) frontProps.sub_segment_id = subSegA;
+
+            frontSegmentsByGroup.get(groupKey)!.push({
+                type: 'Feature',
+                properties: frontProps,
+                geometry: { type: 'LineString', coordinates: deduped },
+            });
+        }
     }
 
     // ── Stitch ALL front segments into continuous polylines ──
