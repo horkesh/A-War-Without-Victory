@@ -109,21 +109,9 @@ These set the mood for each scenario start date. Shown once per game session but
 **Drop path:** `src/ui/warroom/assets/peace_plans/{plan_id}.webp`
 **Used by:** Diplomatic event modals (Vance-Owen, Owen-Stoltenberg, Contact Group)
 
-**Gemini CANNOT generate these** — they require exact historical territorial boundaries. Two viable approaches:
+**Gemini CANNOT generate these** — they require exact historical territorial boundaries.
 
-**Option A: Programmatic generation (RECOMMENDED).** We already have BiH municipality polygons in `data/derived/operational/operational_settlements.geojson`. Write a Node script that:
-1. Loads the municipality polygons
-2. Colors each municipality by its proposed assignment in each peace plan
-3. Renders to a static 600x400 canvas/SVG with the game's color palette
-4. Overlays major city labels (Sarajevo, Banja Luka, Mostar, Tuzla, Bihac)
-5. Exports as WebP
-
-Data needed per plan (municipality → proposed controlling entity):
-- **Vance-Owen:** 10 provinces, each municipality assigned to one. Wikipedia has the full province list.
-- **Owen-Stoltenberg:** 3 republics, each municipality assigned. Simpler.
-- **Contact Group / Dayton:** 2 entities (Federation 51%, RS 49%), municipality-level boundaries well documented.
-
-**Option B: Source historical maps.** Academic papers, ICTY exhibits, and UN documents contain period maps of each plan. Source these and process like officer photos (crop, recolor to match game palette, overlay in UI). The UN Cartographic Section published official maps for each plan.
+**Approach: Source period maps from UN/ICTY archives.** The UN Cartographic Section published official maps for each plan. ICTY exhibits and academic publications also contain them. Source the original, then crop and process to match game palette (desaturate, warm tint, vignette). These carry historical authority that no generated image can match.
 
 | # | Plan | Data Source |
 |---|------|------------|
