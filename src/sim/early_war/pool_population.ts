@@ -59,7 +59,7 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
  *   Restoring 1.60 to regain ~42k target. RS scale reduction (0.25→unchanged) irrelevant here. */
 const FACTION_POOL_SCALE: Record<string, number> = {
     RBiH: 0.08,   // n797: with 122 mandatory + emergent brigades, pool scale has diminishing returns below 0.12.
-    RS: 0.30,    // n931: displacement fix drains RS pools (Serb flight); 0.25→0.30 compensates.
+    RS: 0.30,    // n932: displacement fix cascades; 0.25→0.30 compensates without overcorrecting.
     HRHB: 1.05    // n340: cold-front+siege fix eliminated phantom HRHB attrition; 0.95→39.9k, 1.05→42.5k (target 41.5k).
 };
 const DEFAULT_FACTION_POOL_SCALE = 1.0;

@@ -79,7 +79,9 @@ const BOSNIAK_BORDER_FLEE_ABROAD = 0.10;
 export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
 
 const REINFORCEMENT_RATE = 0.02;
-const DISPLACED_CONTRIBUTION_CAP = 800;
+/** Besieged enclaves: refugees arrive starving, unarmed, traumatized — far lower militarization rate. */
+const ENCLAVE_REINFORCEMENT_RATE = 0.005;
+const DISPLACED_CONTRIBUTION_CAP = 300;
 const RBIH_HRHB_ALLIED_THRESHOLD = 0.20;
 
 const ENCLAVE_MUN_IDS = new Set<MunicipalityId>(['srebrenica', 'gorazde', 'zepa']);
@@ -399,8 +401,9 @@ function addOneTurnPoolContribution(
     for (const key of poolKeys) {
         const row = routedByPoolKey.get(key);
         if (!row) continue;
+        const effectiveRate = ENCLAVE_MUN_IDS.has(row.munId) ? ENCLAVE_REINFORCEMENT_RATE : REINFORCEMENT_RATE;
         const contribution = Math.min(
-            Math.floor(Math.max(0, row.amount) * REINFORCEMENT_RATE),
+            Math.floor(Math.max(0, row.amount) * effectiveRate),
             DISPLACED_CONTRIBUTION_CAP
         );
         if (contribution <= 0) continue;
