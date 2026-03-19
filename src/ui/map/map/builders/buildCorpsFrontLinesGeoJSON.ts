@@ -368,15 +368,82 @@ export function buildCorpsFrontLinesGeoJSON(
         });
     }
 
-    // Merge within groups first (exact vertex matching)
-    const mergedFront: Feature<LineString, CorpsFrontProperties>[] = [];
+    // ── Stitch ALL front segments into continuous polylines ──
+    // Flatten all groups, stitch via exact endpoint matching (cross-group),
+    // then BFS-bridge remaining dead ends through friendly polygon edges.
+    // Same algorithm as the edges viewer (proven working).
+    const allFrontSegments: Feature<LineString, CorpsFrontProperties>[] = [];
     for (const segments of frontSegmentsByGroup.values()) {
-        mergedFront.push(...mergeLineSegments(segments));
+        allFrontSegments.push(...segments);
     }
 
-    // Cross-group bridge: connect dead-end polylines through friendly polygon edges.
-    // At triple junctions, the front transitions through 1-3 same-faction edges before
-    // the next hostile edge. Walk these connectors so the front line is continuous.
+    // Step 1: Build endpoint adjacency across ALL segments
+    const segEndpoints = new Map<string, Array<{ idx: number; isEnd: boolean }>>();
+    for (let i = 0; i < allFrontSegments.length; i++) {
+        const c = allFrontSegments[i].geometry.coordinates;
+        const sk = coordKey(c[0]);
+        const ek = coordKey(c[c.length - 1]);
+        if (!segEndpoints.has(sk)) segEndpoints.set(sk, []);
+        segEndpoints.get(sk)!.push({ idx: i, isEnd: false });
+        if (sk !== ek) {
+            if (!segEndpoints.has(ek)) segEndpoints.set(ek, []);
+            segEndpoints.get(ek)!.push({ idx: i, isEnd: true });
+        }
+    }
+
+    // Step 2: Greedy stitch into chains
+    const used = new Set<number>();
+    const chains: { coords: [number, number][]; props: CorpsFrontProperties }[] = [];
+
+    for (let seed = 0; seed < allFrontSegments.length; seed++) {
+        if (used.has(seed)) continue;
+        used.add(seed);
+        const seg = allFrontSegments[seed];
+        let line = [...seg.geometry.coordinates] as [number, number][];
+        const props = seg.properties;
+
+        // Extend forward
+        let growing = true;
+        while (growing) {
+            growing = false;
+            const tailKey = coordKey(line[line.length - 1]);
+            for (const c of segEndpoints.get(tailKey) ?? []) {
+                if (used.has(c.idx)) continue;
+                used.add(c.idx);
+                const other = allFrontSegments[c.idx].geometry.coordinates;
+                if (c.isEnd) {
+                    line = line.concat([...other].reverse().slice(1) as [number, number][]);
+                } else {
+                    line = line.concat(other.slice(1) as [number, number][]);
+                }
+                growing = true;
+                break;
+            }
+        }
+        // Extend backward
+        growing = true;
+        while (growing) {
+            growing = false;
+            const headKey = coordKey(line[0]);
+            for (const c of segEndpoints.get(headKey) ?? []) {
+                if (used.has(c.idx)) continue;
+                used.add(c.idx);
+                const other = allFrontSegments[c.idx].geometry.coordinates;
+                if (c.isEnd) {
+                    line = (other.slice(0, -1) as [number, number][]).concat(line);
+                } else {
+                    line = ([...other].reverse().slice(0, -1) as [number, number][]).concat(line);
+                }
+                growing = true;
+                break;
+            }
+        }
+
+        chains.push({ coords: line, props });
+    }
+
+    // Step 3: BFS-bridge dead ends through friendly polygon edges (max 3 hops).
+    // Friendly = ALL non-hostile polygon edges (including exterior/boundary edges).
     const hostileEdgeKeys = new Set<string>();
     for (const [ek, osids] of edgeMap) {
         if (osids.size !== 2) continue;
@@ -385,73 +452,98 @@ export function buildCorpsFrontLinesGeoJSON(
         if (ca && cb && ca !== cb) hostileEdgeKeys.add(ek);
     }
 
-    // Build friendly-edge adjacency (ALL non-hostile polygon edges, including exterior).
-    // Must include exterior edges (osids.size === 1) because the boundary walk
-    // at triple junctions often goes through exterior polygon edges.
-    const friendlyAdj = new Map<string, Set<string>>();
+    const friendlyAdj = new Map<string, string[]>();
     for (const [ek] of edgeMap) {
         if (hostileEdgeKeys.has(ek)) continue;
         const [partA, partB] = ek.split('|');
-        if (!friendlyAdj.has(partA)) friendlyAdj.set(partA, new Set());
-        if (!friendlyAdj.has(partB)) friendlyAdj.set(partB, new Set());
-        friendlyAdj.get(partA)!.add(partB);
-        friendlyAdj.get(partB)!.add(partA);
+        if (!friendlyAdj.has(partA)) friendlyAdj.set(partA, []);
+        if (!friendlyAdj.has(partB)) friendlyAdj.set(partB, []);
+        friendlyAdj.get(partA)!.push(partB);
+        friendlyAdj.get(partB)!.push(partA);
     }
 
-    // BFS from each dead-end to find nearest other dead-end via friendly edges (max 3 hops)
     const MAX_BRIDGE_HOPS = 3;
-    const deadEndCoords = new Map<string, { idx: number; end: 'head' | 'tail' }>();
-    for (let i = 0; i < mergedFront.length; i++) {
-        const c = mergedFront[i].geometry.coordinates;
-        const hk = coordKey(c[0]);
-        const tk = coordKey(c[c.length - 1]);
-        // Only mark as dead-end if the endpoint isn't shared by another polyline
-        if (!deadEndCoords.has(hk)) deadEndCoords.set(hk, { idx: i, end: 'head' });
-        if (!deadEndCoords.has(tk)) deadEndCoords.set(tk, { idx: i, end: 'tail' });
+    let bridging = true;
+    while (bridging) {
+        bridging = false;
+
+        // Collect all chain dead ends
+        const deadEnds: Array<{ chainIdx: number; key: string; end: 'head' | 'tail' }> = [];
+        for (let ci = 0; ci < chains.length; ci++) {
+            if (!chains[ci]) continue;
+            const c = chains[ci].coords;
+            deadEnds.push({ chainIdx: ci, key: coordKey(c[0]), end: 'head' });
+            deadEnds.push({ chainIdx: ci, key: coordKey(c[c.length - 1]), end: 'tail' });
+        }
+        const deadEndByKey = new Map<string, typeof deadEnds[0]>();
+        for (const de of deadEnds) deadEndByKey.set(de.key, de);
+
+        for (const source of deadEnds) {
+            if (!(chains as any)[source.chainIdx]) continue;
+            const visited = new Map<string, string | null>();
+            visited.set(source.key, null);
+            let frontier = [source.key];
+            let found = false;
+
+            for (let hop = 0; hop < MAX_BRIDGE_HOPS && !found; hop++) {
+                const next: string[] = [];
+                for (const fk of frontier) {
+                    for (const nk of friendlyAdj.get(fk) ?? []) {
+                        if (visited.has(nk)) continue;
+                        visited.set(nk, fk);
+                        next.push(nk);
+
+                        const target = deadEndByKey.get(nk);
+                        if (target && target.chainIdx !== source.chainIdx && chains[target.chainIdx]) {
+                            // Reconstruct BFS path
+                            const path: [number, number][] = [];
+                            let cur: string | null = nk;
+                            while (cur !== null) {
+                                const [x, y] = cur.split(',').map(Number);
+                                path.unshift([x, y]);
+                                cur = visited.get(cur) ?? null;
+                            }
+
+                            // Merge chains via path
+                            const srcChain = chains[source.chainIdx];
+                            const dstChain = chains[target.chainIdx];
+                            const bridge = path.slice(1, -1); // Exclude endpoints (already in chains)
+
+                            let mergedCoords: [number, number][];
+                            if (source.end === 'tail' && target.end === 'head') {
+                                mergedCoords = [...srcChain.coords, ...bridge, ...dstChain.coords];
+                            } else if (source.end === 'tail' && target.end === 'tail') {
+                                mergedCoords = [...srcChain.coords, ...bridge, ...dstChain.coords.slice().reverse()];
+                            } else if (source.end === 'head' && target.end === 'tail') {
+                                mergedCoords = [...dstChain.coords, ...bridge.reverse(), ...srcChain.coords];
+                            } else {
+                                mergedCoords = [...dstChain.coords.slice().reverse(), ...bridge.reverse(), ...srcChain.coords];
+                            }
+
+                            chains[source.chainIdx] = { coords: mergedCoords, props: srcChain.props };
+                            (chains as any)[target.chainIdx] = null;
+                            bridging = true;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) break;
+                }
+                frontier = next;
+            }
+            if (found) break; // Restart outer loop after merge
+        }
     }
 
-    for (const [startKey, source] of deadEndCoords) {
-        const visited = new Map<string, string | null>();
-        visited.set(startKey, null);
-        let frontier = [startKey];
-
-        for (let hop = 0; hop < MAX_BRIDGE_HOPS && frontier.length > 0; hop++) {
-            const next: string[] = [];
-            for (const fk of frontier) {
-                for (const nk of friendlyAdj.get(fk) ?? []) {
-                    if (visited.has(nk)) continue;
-                    visited.set(nk, fk);
-                    next.push(nk);
-
-                    // Check if nk is a dead-end of a DIFFERENT polyline
-                    const target = deadEndCoords.get(nk);
-                    if (target && target.idx !== source.idx) {
-                        // Reconstruct path and add connector
-                        const path: [number, number][] = [];
-                        let cur: string | null = nk;
-                        while (cur !== null) {
-                            const [x, y] = cur.split(',').map(Number);
-                            path.unshift([x, y]);
-                            cur = visited.get(cur) ?? null;
-                        }
-                        if (path.length >= 2) {
-                            mergedFront.push({
-                                type: 'Feature',
-                                properties: mergedFront[source.idx].properties,
-                                geometry: { type: 'LineString', coordinates: path },
-                            });
-                        }
-                        // Remove both dead-ends so we don't bridge again
-                        deadEndCoords.delete(startKey);
-                        deadEndCoords.delete(nk);
-                        frontier = []; // Break all loops
-                        break;
-                    }
-                }
-                if (frontier.length === 0) break;
-            }
-            frontier = next;
-        }
+    // Convert chains to features
+    const mergedFront: Feature<LineString, CorpsFrontProperties>[] = [];
+    for (const chain of chains) {
+        if (!chain || chain.coords.length < 2) continue;
+        mergedFront.push({
+            type: 'Feature',
+            properties: chain.props,
+            geometry: { type: 'LineString', coordinates: chain.coords },
+        });
     }
 
     const allFeatures: Feature<LineString>[] = [...glowFeatures, ...mergedFront];
