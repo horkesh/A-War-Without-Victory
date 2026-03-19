@@ -4,7 +4,7 @@
  * advance arrows, objective markers, and staging markers.
  * Persists across all 4 phases.
  */
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
@@ -58,6 +58,7 @@ export function OpsMap({
     const centroidLookupRef = useRef<Map<string, [number, number]>>(new Map());
     const controlDataRef = useRef<Record<string, string | null>>({});
     const geoJsonRef = useRef<FeatureCollection | null>(null);
+    const [mapReady, setMapReady] = useState(false);
     const loadedGameState = useGameStore((s) => s.loadedGameState);
 
     // Use ref for click handler to avoid stale closures (life lesson: never set handlers in separate effect)
@@ -214,24 +215,37 @@ export function OpsMap({
                 // Arrow layers
                 addArrowLayers(map);
 
-                // Click handler (via ref to avoid stale closures)
-                const handleClick = (event: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
+                // Single map-level click handler — query features at click point
+                // Using per-layer handlers causes double-fire when layers overlap
+                const corpsFormation = loadedGameState.formations.find((f) => f.id === corpsId);
+                const playerFaction = corpsFormation?.faction ?? '';
+
+                map.on('click', (event) => {
                     if (!clickStateRef.current.enabled) return;
-                    const osid = event.features?.[0]?.properties?.osid;
+                    // Query all polygon fill layers at click point
+                    const queryLayers = ['osid-control-fill', 'ops-corps-territory-fill',
+                        'ops-highlight-objectives-fill', 'ops-highlight-staging-fill']
+                        .filter((id) => map.getLayer(id));
+                    const features = map.queryRenderedFeatures(event.point, { layers: queryLayers });
+                    if (features.length === 0) return;
+                    // Use the first feature's OSID (topmost layer)
+                    const osid = features[0]?.properties?.osid;
                     if (typeof osid !== 'string' || osid.length === 0) return;
                     const controller = controlDataRef.current[osid] ?? null;
-                    const corpsFormation = loadedGameState.formations.find((f) => f.id === corpsId);
-                    const isFriendly = controller === corpsFormation?.faction;
+                    const isFriendly = controller === playerFaction;
                     clickStateRef.current.onOsidClick(osid, isFriendly);
-                };
+                });
 
-                for (const layerId of ['osid-control-fill', 'ops-corps-territory-fill', 'ops-highlight-objectives-fill', 'ops-highlight-staging-fill']) {
-                    if (map.getLayer(layerId)) {
-                        map.on('click', layerId, handleClick);
-                        map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });
-                        map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = ''; });
-                    }
-                }
+                // Cursor change on hover
+                map.on('mousemove', (event) => {
+                    if (!clickStateRef.current.enabled) { map.getCanvas().style.cursor = ''; return; }
+                    const queryLayers = ['osid-control-fill', 'ops-corps-territory-fill']
+                        .filter((id) => map.getLayer(id));
+                    const features = map.queryRenderedFeatures(event.point, { layers: queryLayers });
+                    map.getCanvas().style.cursor = features.length > 0 ? 'pointer' : '';
+                });
+
+                setMapReady(true);
             } catch (e) {
                 console.warn('Failed to initialize ops map:', e);
             }
@@ -241,15 +255,16 @@ export function OpsMap({
 
         return () => {
             mapRef.current = null;
+            setMapReady(false);
             map.remove();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [corpsId]); // Only reinit on corps change, not on every state change
 
-    // Update overlays when objectives/staging/axes change
+    // Update overlays when objectives/staging/axes change, or map finishes loading
     useEffect(() => {
         const map = mapRef.current;
-        if (!map || !geoJsonRef.current) return;
+        if (!map || !geoJsonRef.current || !mapReady) return;
 
         // Objective territories
         const objFeatures = geoJsonRef.current.features.filter(
@@ -271,7 +286,7 @@ export function OpsMap({
 
         // Arrows — build per-axis advance arrows
         updateArrows(map, axes, centroidLookupRef.current, faction, stagingOsid);
-    }, [objectives, stagingOsid, schwerpunktOsid, axes, faction]);
+    }, [objectives, stagingOsid, schwerpunktOsid, axes, faction, mapReady]);
 
     return (
         <div
