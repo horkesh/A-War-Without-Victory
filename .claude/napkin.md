@@ -11,7 +11,7 @@
 ## Current State (2026-03-19, v0.4.9 — Displacement Fix + Routing Overhaul)
 **v0.4.9.** 1203 tests, 98 suites. tsc clean. **Latest calibration: n942 92.5% area-weighted — NEW ATH. Sarajevo 89.1% (+27.8pp).**
 **This session:** Displacement bug fix (4 control-flip paths missing timers → 21.6% of RS OSIDs had zero displacement). Routing overhaul (Drina split, per-municipality Krajina, Krajina flee-abroad 35%, Posavina Croat split). Sokolac OSID fix. 744 OSID cleanup. 10 calibration runs (n925-n942).
-**Ops modal:** Plan at `docs/plans/2026-03-18-ops-planning-modal-redesign.md`. Prototype at `docs/60_visualisations/ops_planning_prototype.html`. Branch `feat/ops-modal-redesign` for implementation.
+**Ops modal IMPLEMENTED (2026-03-19):** 16 files in `src/ui/map/components/ops_modal/`. 4-phase corps-level flow. Report: `docs/40_reports/implemented/20260319_OPS_PLANNING_MODAL_REDESIGN.md`. OPEN BUG: arrows don't update on staging change (replaceArrowSource applied but may have z-ordering issue).
 **Equipment pipeline:** Battlefield scavenging (10-20% of destroyed enemy, scaled by outcome), capture from retreat (2-8%), arms smuggling (2 tanks + 3 arty / 12 turns, 60/40 ARBiH/HVO), Zenica steelworks (+3 arty / 8 turns ARBiH), HV transfers (+1 arty / 12 turns HVO). Write-off: >40% non-functional scrapped 1/turn. No per-brigade auto-tickers.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
 **10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.
@@ -185,8 +185,8 @@
    Do instead: Mount briefing as thin overlay in `App.tsx`, fed by `GameStateAdapter.commandBriefing`.
 5. **[2026-03-07] Detail panels drill right; App owns precedence**
    Do instead: Right-side panel rail: overview → primary → secondary. `App.tsx` mounts from one deterministic selector.
-6. **[2026-03-08] Warroom image target: archival photograph, not AI concept art**
-   Do instead: "Real photographed room, not AI art." Keep visible year out of baked art.
+6. **[2026-03-19] Modal MapLibre: NEVER use setData() on dynamic sources**
+   Do instead: `setData()` on `map.addSource()`-created GeoJSON works for initial render but silently fails on updates. Use remove-layers + remove-source + re-add pattern (`replaceArrowSource` in `OpsMap.tsx`). Base-style sources (`osid-control`) work fine with `setData()`.
 7. **[2026-03-14] Tactical map player_faction: NEVER hardcode**
    Do instead: `App.tsx` must NOT override `player_faction`. Electron uses `useDesktopSession` which preserves chosen faction. Live autoload skips when IPC available.
 8. **[2026-03-15] HQ Abstraction vs Physical Units**
