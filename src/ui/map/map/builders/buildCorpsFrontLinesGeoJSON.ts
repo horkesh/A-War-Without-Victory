@@ -25,7 +25,6 @@ interface CorpsFrontProperties {
     sector_id?: string;
     sub_segment_id?: string;
     avg_entrenchment?: number;
-    tooth_rotation?: number;
     brigade_count?: number;
     threat_intensity?: number;
 }
@@ -312,7 +311,6 @@ export function buildCorpsFrontLinesGeoJSON(
 
         let offsetA: 1 | -1 | undefined;
         let offsetB: 1 | -1 | undefined;
-        let toothRotation: number | undefined;
         if (osidCentroids) {
             const centA = osidCentroids.get(osidA);
             const centB = osidCentroids.get(osidB);
@@ -322,7 +320,6 @@ export function buildCorpsFrontLinesGeoJSON(
                 const crossA = dx * (centA[1] - ay) - dy * (centA[0] - ax);
                 offsetA = crossA > 0 ? -1 : 1;
                 offsetB = crossA > 0 ? 1 : -1;
-                toothRotation = crossA > 0 ? 180 : 0;
             }
         }
 
@@ -363,7 +360,6 @@ export function buildCorpsFrontLinesGeoJSON(
         };
         if (sectorA?.sector_id) frontProps.sector_id = sectorA.sector_id;
         if (subSegA) frontProps.sub_segment_id = subSegA;
-        if (toothRotation != null) frontProps.tooth_rotation = toothRotation;
 
         frontSegmentsByGroup.get(groupKey)!.push({
             type: 'Feature',

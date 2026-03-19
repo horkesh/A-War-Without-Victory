@@ -37,7 +37,7 @@ const DEFAULT_ZOOM = 8;
 const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
-const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-teeth'];
+const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base'];
 /** Fill layer for ethnic map mode (majority_ethnic); toggled with osid-control-fill by mapMode. */
 const OSID_ETHNIC_FILL_LAYER_ID = 'osid-ethnic-fill';
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';

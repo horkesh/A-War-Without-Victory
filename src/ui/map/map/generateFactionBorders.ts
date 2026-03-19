@@ -16,7 +16,6 @@ interface FrontLineProperties {
   lineType: 'front';
   factionA: string;
   factionB: string;
-  tooth_rotation?: number;
   brigade_count?: number;
 }
 
@@ -167,18 +166,6 @@ export function generateFactionBorders(
     });
 
     const pairKey = [ctrlA, ctrlB].sort().join('-');
-    let toothRotation: number | undefined;
-    if (osidCentroids) {
-      const centA = osidCentroids.get(osidA);
-      const centB = osidCentroids.get(osidB);
-      if (centA && centB) {
-        const dx = bx - ax;
-        const dy = by - ay;
-        // Cross product to determine side
-        const crossA = dx * (centA[1] - ay) - dy * (centA[0] - ax);
-        toothRotation = crossA > 0 ? 180 : 0;
-      }
-    }
 
     if (!frontSegmentsByPair.has(pairKey)) {
       frontSegmentsByPair.set(pairKey, []);
@@ -189,8 +176,7 @@ export function generateFactionBorders(
         lineType: 'front',
         factionA: ctrlA,
         factionB: ctrlB,
-        tooth_rotation: toothRotation,
-        brigade_count: 0 // In base mode, we don't have sector density info
+        brigade_count: 0
       },
       geometry: { type: 'LineString', coordinates: coords },
     });
