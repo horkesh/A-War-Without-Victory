@@ -186,6 +186,54 @@ const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Post-operation brigade release
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Issue column march orders for brigades that are away from their home
+ * municipality after an operation completes. Without this, brigades stay
+ * at their operation endpoint and drift into wrong sectors.
+ *
+ * Called at the moment the operation is about to be cleared, while
+ * participating_brigades is still available on the op.
+ */
+function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): void {
+    const formations = state.military.formations ?? {};
+    const allBrigades = isMultiAxis(op) ? getAllAxisBrigades(op) : (op.participating_brigades ?? []);
+
+    for (const bid of allBrigades) {
+        const f = formations[bid];
+        if (!f || f.status !== 'active') continue;
+        if ((f.kind ?? 'brigade') !== 'brigade') continue;
+
+        const loc = f.location_osid;
+        const homeOsid = f.home_osid;
+        if (!loc || !homeOsid) continue;
+
+        // Already home — no march needed
+        const homeMun = homeOsid.split(':')[1] ?? '';
+        const currentMun = loc.split(':')[1] ?? '';
+        if (currentMun === homeMun) continue;
+
+        // Skip disrupted brigades — they can't march
+        if ((f.disrupted_turns ?? 0) > 0) continue;
+
+        // Skip if already has pending movement orders (e.g. from another system)
+        const existingOrders = state.military.brigade_movement_orders ?? {};
+        if (existingOrders[bid]) continue;
+
+        // Issue column march toward home_osid (the movement system will BFS there)
+        if (!state.military.brigade_movement_orders) {
+            (state.military as any).brigade_movement_orders = {};
+        }
+        state.military.brigade_movement_orders![bid] = {
+            destination_sids: [homeOsid],
+            stance: 'column',
+        } as any;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Multi-axis helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -849,9 +897,10 @@ export function advanceSectorOffensives(
                     state.political.graz_east_herzegovina_active_turn = turn;
                 }
 
-                // Loaned brigades: no explicit return march needed — brigade assignment
-                // system will naturally reassign them back to their home sectors.
-                // The op.loaned_brigades array is cleared when active_operation = null.
+                // Release brigades: issue return-march orders for participants away from home.
+                // Without this, brigades stay at their operation endpoint and get classified
+                // into whatever sector owns that OSID — potentially far from home.
+                issuePostOperationReturnMarches(state, op);
 
                 cmd.consecutive_probes = 0;
                 // Save completed op for theater-aware follow-on suppression.
