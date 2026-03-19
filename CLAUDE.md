@@ -13,7 +13,7 @@ Deterministic strategic-level simulation of the 1992-1995 Bosnian War. Negative-
 ## Key Commands
 
 ```bash
-npm run test:vitest          # 1040+ tests, 83 suites
+npm run test:vitest          # 1204 tests, 98 suites
 npx tsc --noEmit             # Typecheck
 npm run sim:scenario:run:40w # 40-week calibration scenario
 npm run sim:scenario:run:default  # 52-week historical scenario
@@ -46,7 +46,7 @@ Smoke-test triad after every change: `tsc --noEmit` + `vitest run` + `desktop:ma
 
 - Sim core: `src/sim/` | State: `src/state/` | Scenarios: `src/scenario/`
 - Combat: `src/sim/combat/` | Bot AI: `bot_strategy.ts`, `bot_corps_ai.ts`, `bot_brigade_ai_osid.ts`
-- War pipeline: `src/sim/turn_phases/war_phases.ts` (133 steps)
+- War pipeline: `src/sim/turn_phases/war_phases.ts` (138 steps)
 - Desktop: `src/desktop/` | Tactical map: `src/ui/map/`
 - Canon: `docs/10_canon/` | Engineering: `docs/20_engineering/` | Reports: `docs/40_reports/`
 - Skills: `.claude/skills/` (60+ Pyrrhic team roles)
