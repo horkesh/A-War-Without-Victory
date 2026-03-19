@@ -1,7 +1,32 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-19
-**Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n943: 92.2% area-weighted, 13/13 anchors.** Front line rendering overhaul, stale front edge fix, displacement routing overhaul, Sokolac OSID fix.
+**Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n948: 92.1% area-weighted.** Equipment system overhaul, polygon harmonization, front line rendering overhaul.
+
+## [2026-03-19] Equipment System Overhaul — Phantom Tanks, JNA Priority, Battle Reports, Abandoned Capture
+
+### Root cause investigation
+RS tanks grew from 677→796 (+119) in n944. Audit found three phantom sources: (1) `ensureBrigadeComposition` injected default RS composition (40 tanks) into 6 corps_assets via `siege_attrition.ts` (no kind guard), (2) JNA phantom handoff distributed tanks to mountain/light infantry brigades (3-5 tanks each via per-class ceiling), (3) dynamically recruited RS brigades got JNA-heavy composition.
+
+### Fixes
+1. **`ensureBrigadeComposition` guard**: returns empty composition for non-brigade formations (corps_asset, army_hq, paramilitary). Eliminates 240 phantom corps_asset tanks.
+2. **Dynamic recruitment**: `applyRsJnaOverride=false` for newly recruited brigades. JNA inheritance only at game start.
+3. **JNA phantom handoff**: mech/motorized get tank priority. Light infantry/mountain only as fallback. Artillery to all (historically correct).
+4. **Battle report equipment fields**: each battle in `weekly_report.jsonl` now includes `equipment: {attacker_tanks_lost, defender_tanks_lost, scavenged_tanks, scavenged_by, captured_tanks, captured_by, ...}`.
+5. **Abandoned equipment capture**: occupying undefended RS OSID recovers abandoned equipment proportional to population (0.0002 tanks/pop, 0.0004 art/pop). ARBiH captured 5 tanks + 12 artillery in n948.
+
+### Results
+| Metric | n944 (before) | n948 (after) |
+|--------|:-:|:-:|
+| Area-weighted | 92.2% | **92.1%** (noise) |
+| RS tanks | 677→796 (+119) | **677→560 (-117)** |
+| RBiH tanks | 24→20 (-4) | **24→24 (stable)** |
+| Corps_asset tanks | 240 phantom | **0** |
+| ARBiH captured | 0 | **5 tanks, 12 artillery** |
+
+## [2026-03-19] Polygon Boundary Harmonization — 77/134 Missing Pairs Fixed
+
+Standalone tool (`scripts/harmonize_polygon_boundaries.cjs`) creates shared polygon edges between adjacent OSID pairs. Contact graph never modified — zero calibration impact. Three tiers: micro-snap (24 pairs), vertex insertion (83 pairs), loose projection (19 pairs). Shared-edge pairs: 1984→2054 (+70). Missing: 134→57. Remaining 57 handled by renderer fallback.
 
 ## [2026-03-19] Front Line Rendering Overhaul + Stale Front Edge Fix
 

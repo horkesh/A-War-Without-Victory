@@ -8,11 +8,11 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-19, v0.4.9 — Front Line Overhaul + Displacement Fix)
-**v0.4.9.** 1204 tests, 98 suites. tsc clean. **Latest calibration: n943 92.2% area-weighted. 13/13 anchors.**
-**This session:** Front line rendering overhaul (uniform width, vertex snapping fallback, sector glow alignment). Stale front edge fix (rederive after control mutations — 0 stale edges). Displacement fix + routing overhaul (previous session). PNG→WebP asset migration.
-**Ops modal IMPLEMENTED (2026-03-19):** 16 files in `src/ui/map/components/ops_modal/`. 4-phase corps-level flow. Report: `docs/40_reports/implemented/20260319_OPS_PLANNING_MODAL_REDESIGN.md`.
-**Equipment pipeline:** Battlefield scavenging (10-20% of destroyed enemy, scaled by outcome), capture from retreat (2-8%), arms smuggling (2 tanks + 3 arty / 12 turns, 60/40 ARBiH/HVO), Zenica steelworks (+3 arty / 8 turns ARBiH), HV transfers (+1 arty / 12 turns HVO). Write-off: >40% non-functional scrapped 1/turn. No per-brigade auto-tickers.
+## Current State (2026-03-19, v0.4.9 — Equipment Overhaul + Front Line + Displacement)
+**v0.4.9.** 1204 tests, 98 suites. tsc clean. **Latest calibration: n948 92.1% area-weighted.**
+**This session:** Equipment system overhaul (phantom tank fix, JNA priority handoff, abandoned capture, battle report equipment fields). Front line rendering overhaul. Polygon boundary harmonization (77/134 pairs fixed). Stale front edge fix. Displacement routing (previous session). PNG→WebP asset migration.
+**Equipment pipeline:** Battlefield scavenging (10-20% of destroyed enemy, scaled by outcome), capture from retreat (2-8%), abandoned capture on uncontested occupation (pop-proportional, RS positions only), arms smuggling (2 tanks + 3 arty / 12 turns, 60/40 ARBiH/HVO), Zenica steelworks (+3 arty / 8 turns ARBiH), HV transfers (+1 arty / 12 turns HVO). Write-off: >40% non-functional scrapped 1/turn. No per-brigade auto-tickers. `ensureBrigadeComposition` returns empty for non-brigade formations. JNA handoff prioritizes mech/moto for tanks. Dynamic recruitment: no JNA override.
+**NEXT:** Per-brigade equipment tracking (destroyed/captured attribution). Brigade accolades (tank hunters etc). Corps panel equipment display.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
 **10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.
 **Calibration freeze rule:** After v0.6.1, any sim-affecting change needs `npm run calibrate:52w` regression check vs freeze baseline.
