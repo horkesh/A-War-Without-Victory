@@ -990,6 +990,8 @@ export interface JNATransitionState {
 export interface RbihHrhbState {
     /** Turn when alliance crossed below HOSTILE_THRESHOLD (0.0); null if war not started. */
     war_started_turn: number | null;
+    /** Turn when alliance first dropped below ALLIED_THRESHOLD (0.20); null if not yet. Mobilization period starts here. */
+    mobilization_started_turn: number | null;
     /** True when bilateral ceasefire preconditions met and ceasefire fired. */
     ceasefire_active: boolean;
     /** Turn when ceasefire was established; null if not yet. */

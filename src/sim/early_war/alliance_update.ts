@@ -57,6 +57,9 @@ export const FULL_WAR_THRESHOLD = -0.50;
 /** Alliance floor before war: prevents premature collapse. Alliance cannot drop below this until war_earliest_turn. */
 export const ALLIANCE_FLOOR_BEFORE_WAR = 0.40;
 
+/** Number of turns between mobilization start (alliance ≤ ALLIED_THRESHOLD) and combat enablement. */
+export const MOBILIZATION_DURATION_TURNS = 4;
+
 /** Default initial alliance value (fragile alliance, April 1992). */
 export const DEFAULT_INIT_ALLIANCE = 0.75;
 
@@ -110,6 +113,36 @@ export function isRbihHrhbAtWar(state: GameState): boolean {
     return value <= HOSTILE_THRESHOLD;
 }
 
+/**
+ * True when alliance ≤ ALLIED_THRESHOLD but combat not yet enabled.
+ * Front edges exist, sectors form, but no fighting between RBiH and HRHB.
+ */
+export function isRbihHrhbMobilizing(state: GameState): boolean {
+    const value = state.political.war_alliance_rbih_hrhb;
+    if (value === undefined || value === null) return false;
+    if (value > ALLIED_THRESHOLD) return false; // still allied
+    const rhs = state.political.rbih_hrhb_state;
+    if (!rhs?.mobilization_started_turn) return false;
+    return !isRbihHrhbCombatEnabled(state);
+}
+
+/**
+ * True when HRHB-RBiH combat is allowed: mobilization expired OR alliance ≤ HOSTILE_THRESHOLD.
+ * Returns false when still allied or during mobilization buildup.
+ */
+export function isRbihHrhbCombatEnabled(state: GameState): boolean {
+    const value = state.political.war_alliance_rbih_hrhb;
+    if (value === undefined || value === null) return false;
+    if (value > ALLIED_THRESHOLD) return false; // still allied, no combat
+    // Combat enabled if alliance is at war threshold
+    if (value <= HOSTILE_THRESHOLD) return true;
+    // Combat enabled if mobilization period expired
+    const rhs = state.political.rbih_hrhb_state;
+    if (!rhs?.mobilization_started_turn) return false;
+    const turn = state.meta?.turn ?? 0;
+    return (turn - rhs.mobilization_started_turn) >= MOBILIZATION_DURATION_TURNS;
+}
+
 export interface AllianceUpdateReport {
     previous_value: number;
     new_value: number;
@@ -123,6 +156,7 @@ export interface AllianceUpdateReport {
     };
     phase: AlliancePhase;
     war_started_this_turn: boolean;
+    mobilizing: boolean;
     locked: boolean;
 }
 
@@ -139,6 +173,7 @@ export function ensureRbihHrhbState(state: GameState, initValue?: number, initMi
             : [...DEFAULT_MIXED_MUNICIPALITIES].sort(strictCompare);
         (state as any).political.rbih_hrhb_state = {
             war_started_turn: null,
+            mobilization_started_turn: null,
             ceasefire_active: false,
             ceasefire_since_turn: null,
             washington_signed: false,
@@ -171,6 +206,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
             drivers: { appeasement: 0, patron_drag: 0, incident_penalty: 0, ceasefire_boost: 0, refugee_pressure: 0 },
             phase: getAlliancePhase(previousValue),
             war_started_this_turn: false,
+            mobilizing: false,
             locked: true
         };
     }
@@ -203,6 +239,15 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     }
     state.political.war_alliance_rbih_hrhb = newValue;
 
+    // Track mobilization start: first time alliance drops to ≤ ALLIED_THRESHOLD after earliest turn
+    if (
+        state.meta.turn >= earliestTurn &&
+        rhs.mobilization_started_turn === null &&
+        newValue <= ALLIED_THRESHOLD
+    ) {
+        rhs.mobilization_started_turn = state.meta.turn;
+    }
+
     // Track war start (only after earliest turn)
     let warStartedThisTurn = false;
     if (
@@ -230,6 +275,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
         },
         phase: getAlliancePhase(newValue),
         war_started_this_turn: warStartedThisTurn,
+        mobilizing: isRbihHrhbMobilizing(state),
         locked: false
     };
 }
