@@ -225,7 +225,7 @@ export function OpsMap({
                     clickStateRef.current.onOsidClick(osid, isFriendly);
                 };
 
-                for (const layerId of ['osid-control-fill', 'ops-highlight-objectives-fill', 'ops-highlight-staging-fill']) {
+                for (const layerId of ['osid-control-fill', 'ops-corps-territory-fill', 'ops-highlight-objectives-fill', 'ops-highlight-staging-fill']) {
                     if (map.getLayer(layerId)) {
                         map.on('click', layerId, handleClick);
                         map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });

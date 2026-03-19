@@ -9,9 +9,10 @@ interface ObjectiveListProps {
     plan: OpsPlanState;
     onUpdate: (partial: Partial<OpsPlanState>) => void;
     osidDisplayNames: Record<string, string> | null;
+    onAdvance?: () => void;
 }
 
-export function ObjectiveList({ plan, onUpdate, osidDisplayNames }: ObjectiveListProps) {
+export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: ObjectiveListProps) {
     const activeAxis = plan.axes.find((a) => a.id === plan.activeAxisId) ?? plan.axes[0];
     if (!activeAxis) return null;
 
@@ -135,6 +136,19 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames }: ObjectiveLis
                         </button>
                     ))}
                 </div>
+            )}
+
+            {/* Advance button — visible when objectives exist */}
+            {onAdvance && objectives.length > 0 && (
+                <button
+                    type="button"
+                    onClick={onAdvance}
+                    className="mt-3 w-full py-2 rounded-md text-[10px] font-bold uppercase tracking-wider
+                               bg-accent-gold/15 text-accent-gold border border-accent-gold/25
+                               hover:bg-accent-gold/25 transition-all"
+                >
+                    Request G2 Assessment →
+                </button>
             )}
         </div>
     );

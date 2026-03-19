@@ -88,7 +88,7 @@ export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }
     return (
         <div className="absolute inset-0 z-10 pointer-events-none">
             {/* Objective list — top right */}
-            <ObjectiveList plan={plan} onUpdate={onUpdate} osidDisplayNames={null} />
+            <ObjectiveList plan={plan} onUpdate={onUpdate} osidDisplayNames={null} onAdvance={onAdvance} />
 
             {/* Brigade tray — bottom */}
             <BrigadeTray
@@ -99,17 +99,19 @@ export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }
                 factionColor={factionColor}
             />
 
-            {/* Continue button — above the tray */}
-            <div className="absolute bottom-[220px] right-4 pointer-events-auto">
+            {/* Advance button — fixed right side, vertically centered */}
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-auto">
                 <button
                     type="button"
                     onClick={onAdvance}
                     disabled={allObjectives.length === 0}
-                    className="px-4 py-2 rounded-lg bg-accent-gold/20 text-accent-gold font-bold text-xs uppercase
-                               tracking-wider hover:bg-accent-gold/30 disabled:opacity-30 disabled:cursor-not-allowed
-                               transition-colors border border-accent-gold/20"
+                    className="px-5 py-3 rounded-lg font-bold text-sm uppercase tracking-wider
+                               transition-all border disabled:opacity-20 disabled:cursor-not-allowed
+                               bg-accent-gold/15 text-accent-gold border-accent-gold/25
+                               hover:bg-accent-gold/25 hover:shadow-[0_0_20px_rgba(196,163,90,0.2)]
+                               shadow-lg backdrop-blur-sm"
                 >
-                    Continue to G2 →
+                    G2 Assessment →
                 </button>
             </div>
         </div>
