@@ -194,6 +194,48 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               )}
             </div>
 
+            {/* Equipment aggregate */}
+            {(() => {
+              let tanks = 0, tanksOp = 0, arty = 0, artyOp = 0, aa = 0;
+              for (const b of subordinates) {
+                const c = b.composition;
+                if (!c) continue;
+                tanks += c.tanks ?? 0;
+                tanksOp += Math.round((c.tanks ?? 0) * (c.tank_condition?.operational ?? 1));
+                arty += c.artillery ?? 0;
+                artyOp += Math.round((c.artillery ?? 0) * (c.artillery_condition?.operational ?? 1));
+                aa += c.aa_systems ?? 0;
+              }
+              if (tanks === 0 && arty === 0 && aa === 0) return null;
+              return (
+                <div className="border-t border-panel-border pt-3 space-y-1.5">
+                  <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1">Equipment</div>
+                  {tanks > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Tanks</span>
+                      <span className="text-text-primary tabular-nums">
+                        {tanksOp}<span className="text-text-secondary">/{tanks}</span>
+                      </span>
+                    </div>
+                  )}
+                  {arty > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Artillery</span>
+                      <span className="text-text-primary tabular-nums">
+                        {artyOp}<span className="text-text-secondary">/{arty}</span>
+                      </span>
+                    </div>
+                  )}
+                  {aa > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">AA Systems</span>
+                      <span className="text-text-primary tabular-nums">{aa}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {corpsFormation.combatSummary && (
               <div className="border-t border-panel-border pt-3">
                 <CombatSummaryPanel
