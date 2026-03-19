@@ -346,8 +346,11 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
         let apcsDistributed = 0;
 
         if (corpsId) {
-            // Find eligible receiving brigades in same corps, sorted by proximity
-            const eligibleBrigades = Object.values(state.military.formations)
+            // Find eligible receiving brigades in same corps.
+            // Tank distribution priority: mech/motorized first (they can operate tanks),
+            // then light/mountain only if mech/moto ceilings are full.
+            // Artillery goes to all classes (JNA mortar/howitzer companies distributed to all TO units).
+            const allEligible = Object.values(state.military.formations)
                 .filter((f): f is FormationState =>
                     f != null &&
                     f.corps_id === corpsId &&
@@ -363,38 +366,72 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
                     if (aMatch !== bMatch) return aMatch - bMatch;
                     return strictCompare(a.id, b.id);
                 });
+            // For tank distribution: mech/moto first, then all (VRS had tanks everywhere,
+            // but prioritize units that can use them effectively)
+            const TANK_PRIORITY_CLASSES = new Set(['mechanized', 'motorized']);
+            const tankPriorityBrigades = allEligible.filter(f => TANK_PRIORITY_CLASSES.has(f.equipment_class ?? ''));
+            const tankFallbackBrigades = allEligible.filter(f => !TANK_PRIORITY_CLASSES.has(f.equipment_class ?? ''));
+            const eligibleBrigades = allEligible; // artillery uses all
 
+            // Helper: distribute tanks/APCs to a brigade list, returns remaining
+            const distributeTanksTo = (brigades: FormationState[]) => {
+                for (const brigade of brigades) {
+                    if (tanksToGive <= 0 && apcsToGive <= 0) break;
+                    const ceiling = getEquipmentCeiling(brigade.equipment_class);
+                    if (!brigade.composition) {
+                        brigade.composition = {
+                            infantry: brigade.personnel ?? 1000,
+                            tanks: 0, artillery: 0, aa_systems: 0,
+                            tank_condition: { operational: 0.8, degraded: 0.15, non_operational: 0.05 },
+                            artillery_condition: { operational: 0.8, degraded: 0.15, non_operational: 0.05 },
+                        };
+                    }
+                    const comp = brigade.composition!;
+
+                    // Tanks
+                    const tankRoom = Math.max(0, ceiling.max_tanks - comp.tanks);
+                    const tanksGiven = Math.min(tanksToGive, tankRoom);
+                    if (tanksGiven > 0) {
+                        const oldOp = comp.tank_condition.operational;
+                        const oldCount = comp.tanks;
+                        comp.tanks += tanksGiven;
+                        tanksToGive -= tanksGiven;
+                        tanksDistributed += tanksGiven;
+                        const newOp = Math.min(0.95, (oldOp * oldCount + 0.95 * tanksGiven) / comp.tanks);
+                        comp.tank_condition = { operational: newOp, degraded: (1 - newOp) * 0.8, non_operational: (1 - newOp) * 0.2 };
+                    }
+
+                    // APCs: added to tanks in composition (BrigadeComposition.tanks = MBTs + APCs)
+                    const tankCeilingTotal = ceiling.max_tanks + ceiling.max_apcs;
+                    const armorRoom = Math.max(0, tankCeilingTotal - comp.tanks);
+                    const actualApcs = Math.min(apcsToGive, armorRoom);
+                    if (actualApcs > 0) {
+                        comp.tanks += actualApcs;
+                        apcsToGive -= actualApcs;
+                        apcsDistributed += actualApcs;
+                    }
+                }
+            };
+
+            // Tanks/APCs: mech/moto first, then light/mountain as fallback
+            distributeTanksTo(tankPriorityBrigades);
+            if (tanksToGive > 0 || apcsToGive > 0) {
+                distributeTanksTo(tankFallbackBrigades);
+            }
+
+            // Artillery: all classes (JNA mortar/howitzer companies went to all TO units)
             for (const brigade of eligibleBrigades) {
-                if (tanksToGive <= 0 && artilleryToGive <= 0 && apcsToGive <= 0) break;
-
+                if (artilleryToGive <= 0) break;
                 const ceiling = getEquipmentCeiling(brigade.equipment_class);
                 if (!brigade.composition) {
                     brigade.composition = {
                         infantry: brigade.personnel ?? 1000,
-                        tanks: 0,
-                        artillery: 0,
-                        aa_systems: 0,
+                        tanks: 0, artillery: 0, aa_systems: 0,
                         tank_condition: { operational: 0.8, degraded: 0.15, non_operational: 0.05 },
                         artillery_condition: { operational: 0.8, degraded: 0.15, non_operational: 0.05 },
                     };
                 }
                 const comp = brigade.composition!;
-
-                // Tanks
-                const tankRoom = Math.max(0, ceiling.max_tanks - comp.tanks);
-                const tanksGiven = Math.min(tanksToGive, tankRoom);
-                if (tanksGiven > 0) {
-                    const oldOp = comp.tank_condition.operational;
-                    const oldCount = comp.tanks;
-                    comp.tanks += tanksGiven;
-                    tanksToGive -= tanksGiven;
-                    tanksDistributed += tanksGiven;
-                    // Blend condition: old units at old rate + new JNA units at 0.95
-                    const newOp = Math.min(0.95, (oldOp * oldCount + 0.95 * tanksGiven) / comp.tanks);
-                    comp.tank_condition = { operational: newOp, degraded: (1 - newOp) * 0.8, non_operational: (1 - newOp) * 0.2 };
-                }
-
-                // Artillery
                 const artRoom = Math.max(0, ceiling.max_artillery - comp.artillery);
                 const artGiven = Math.min(artilleryToGive, artRoom);
                 if (artGiven > 0) {
@@ -405,16 +442,6 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
                     artilleryDistributed += artGiven;
                     const newOp = Math.min(0.95, (oldOp * oldCount + 0.95 * artGiven) / comp.artillery);
                     comp.artillery_condition = { operational: newOp, degraded: (1 - newOp) * 0.8, non_operational: (1 - newOp) * 0.2 };
-                }
-
-                // APCs: added to tanks in composition (BrigadeComposition.tanks = MBTs + APCs)
-                const tankCeilingTotal = ceiling.max_tanks + ceiling.max_apcs;
-                const armorRoom = Math.max(0, tankCeilingTotal - comp.tanks);
-                const actualApcs = Math.min(apcsToGive, armorRoom);
-                if (actualApcs > 0) {
-                    comp.tanks += actualApcs;
-                    apcsToGive -= actualApcs;
-                    apcsDistributed += actualApcs;
                 }
             }
 

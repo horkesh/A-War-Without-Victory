@@ -61,9 +61,25 @@ export function getRsMountainComposition(): BrigadeComposition {
 }
 const ARBIH_CONDITION: EquipmentCondition = { operational: 0.6, degraded: 0.25, non_operational: 0.15 };
 
-/** Ensure formation has a composition; initialize from defaults if missing. */
+/** Empty composition for non-brigade formations that should never have equipment. */
+const EMPTY_COMPOSITION: BrigadeComposition = {
+    infantry: 0, tanks: 0, artillery: 0, aa_systems: 0,
+    tank_condition: { operational: 1, degraded: 0, non_operational: 0 },
+    artillery_condition: { operational: 1, degraded: 0, non_operational: 0 }
+};
+
+/** Ensure formation has a composition; initialize from defaults if missing.
+ *  Non-brigade formations (corps_asset, army_hq, paramilitary) get an empty
+ *  composition — they are command structures, not combat units with equipment. */
 export function ensureBrigadeComposition(formation: FormationState): BrigadeComposition {
     if (formation.composition) return formation.composition;
+
+    // Guard: only brigades and OGs get default equipment
+    if (formation.kind !== 'brigade' && formation.kind !== 'og') {
+        formation.composition = { ...EMPTY_COMPOSITION };
+        return formation.composition;
+    }
+
     const faction = formation.faction;
     const defaults = DEFAULT_COMPOSITION[faction] ?? DEFAULT_COMPOSITION['RBiH'];
     const condition = faction === 'RBiH' ? ARBIH_CONDITION : DEFAULT_CONDITION;

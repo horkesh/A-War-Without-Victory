@@ -1917,6 +1917,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     defender_brigade: b.defender_brigade,
                     attacker_casualties: b.attacker_casualties,
                     defender_casualties: b.defender_casualties,
+                    ...(b.equipment ? { equipment: b.equipment } : {}),
                 }));
 
             // Extract dissolution and reconstitution entries from turn report

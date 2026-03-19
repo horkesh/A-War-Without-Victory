@@ -480,6 +480,19 @@ export interface AttackResolutionOsidReport {
         defender_contributions?: DefenderContribution[];
         /** Sub-segment that defended this OSID (Phase B). */
         defending_sub_segment_id?: string;
+        /** Equipment destroyed, scavenged, and captured in this battle. */
+        equipment?: {
+            attacker_tanks_lost: number;
+            attacker_artillery_lost: number;
+            defender_tanks_lost: number;
+            defender_artillery_lost: number;
+            scavenged_tanks: number;
+            scavenged_artillery: number;
+            scavenged_by?: string;
+            captured_tanks: number;
+            captured_artillery: number;
+            captured_by?: string;
+        };
     }>;
 }
 
@@ -821,21 +834,14 @@ export function resolveAttackOrdersOsid(
             }
         }
 
-        report.battles.push({
-            attacker_brigade: firstAttacker.id,
-            attacker_faction: attackerFaction,
-            defender_faction: (controller ?? attackerFaction) as FactionId,
-            target_osid: targetOsid,
-            outcome,
-            power_ratio: powerRatio,
-            attacker_won: outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory',
-            defender_brigade: defenderFormation?.id ?? null,
-            snap_events: battleSnapEvents,
-            attacker_casualties: finalAttackerCas,
-            defender_casualties: finalDefenderCas,
-            defender_contributions: defenderContributions,
-            defending_sub_segment_id: defendingSubSegmentId,
-        });
+        // Battle report pushed AFTER equipment processing (below) so it includes equipment data.
+        // Collect equipment tracking variables here:
+        let battleEquipAttackerTanksLost = 0, battleEquipAttackerArtLost = 0;
+        let battleEquipDefenderTanksLost = 0, battleEquipDefenderArtLost = 0;
+        let battleEquipScavengedTanks = 0, battleEquipScavengedArt = 0;
+        let battleEquipCapturedTanks = 0, battleEquipCapturedArt = 0;
+        let battleEquipScavengedBy = '' as string;
+        let battleEquipCapturedBy = '' as string;
 
         const aKia = Math.floor(finalAttackerCas * KIA_FRACTION);
         const aWia = Math.floor(finalAttackerCas * WIA_FRACTION);
@@ -889,6 +895,8 @@ export function resolveAttackOrdersOsid(
             }
             totalATanksLost += aTanksLost;
             totalAArtLost += aArtLost;
+            battleEquipAttackerTanksLost += aTanksLost;
+            battleEquipAttackerArtLost += aArtLost;
         }
         if (defenderFormation) {
             // ── Distance-weighted casualty distribution ───────────────────
@@ -951,6 +959,8 @@ export function resolveAttackOrdersOsid(
             }
             totalDTanksLost += dTanksLost;
             totalDArtLost += dArtLost;
+            battleEquipDefenderTanksLost += dTanksLost;
+            battleEquipDefenderArtLost += dArtLost;
             // Snap: Commander Casualty
             if (defenderFormation.cohesion < 20) {
                 defenderFormation.cohesion = Math.max(0, defenderFormation.cohesion - 8);
@@ -985,12 +995,10 @@ export function resolveAttackOrdersOsid(
                 : outcome === 'victory' ? 0.15 : 0.10;
             const aComp2 = firstAttacker.composition;
             if (aComp2) {
-                // Scavenge from defender's destroyed equipment (already subtracted above)
                 const scavTanks = Math.floor(totalDTanksLost * scavengeRate);
                 const scavArt = Math.floor(totalDArtLost * scavengeRate);
                 if (scavTanks > 0) {
                     aComp2.tanks += scavTanks;
-                    // Scavenged equipment starts heavily degraded
                     const frac = scavTanks / Math.max(1, aComp2.tanks);
                     aComp2.tank_condition.degraded += frac * 0.7;
                     aComp2.tank_condition.operational = Math.max(0, aComp2.tank_condition.operational - frac * 0.5);
@@ -1001,9 +1009,11 @@ export function resolveAttackOrdersOsid(
                     aComp2.artillery_condition.degraded += frac * 0.7;
                     aComp2.artillery_condition.operational = Math.max(0, aComp2.artillery_condition.operational - frac * 0.5);
                 }
+                battleEquipScavengedTanks = scavTanks;
+                battleEquipScavengedArt = scavArt;
+                battleEquipScavengedBy = attackerFaction;
             }
         } else if (attackerLost && defenderFormation) {
-            // Defender scavenges from attacker's destroyed equipment
             const scavengeRate = outcome === 'catastrophic' ? 0.20 : 0.10;
             const dComp2 = defenderFormation.composition;
             if (dComp2) {
@@ -1021,6 +1031,9 @@ export function resolveAttackOrdersOsid(
                     dComp2.artillery_condition.degraded += frac * 0.7;
                     dComp2.artillery_condition.operational = Math.max(0, dComp2.artillery_condition.operational - frac * 0.5);
                 }
+                battleEquipScavengedTanks = scavTanks;
+                battleEquipScavengedArt = scavArt;
+                battleEquipScavengedBy = defenderFormation.faction as string;
             }
         }
 
@@ -1050,6 +1063,9 @@ export function resolveAttackOrdersOsid(
                 aComp3.artillery_condition.degraded += frac * 0.5;
                 aComp3.artillery_condition.operational = Math.max(0, aComp3.artillery_condition.operational - frac * 0.3);
             }
+            battleEquipCapturedTanks = capTanks;
+            battleEquipCapturedArt = capArt;
+            battleEquipCapturedBy = attackerFaction;
         } else if (attackerLost && defenderFormation?.composition && firstAttacker.composition) {
             // Defender captures from retreating/routed attacker — ARBiH repulsing
             // a VRS assault recovers abandoned tanks and artillery from the field.
@@ -1072,7 +1088,74 @@ export function resolveAttackOrdersOsid(
                 dComp3.artillery_condition.degraded += frac * 0.5;
                 dComp3.artillery_condition.operational = Math.max(0, dComp3.artillery_condition.operational - frac * 0.3);
             }
+            battleEquipCapturedTanks = capTanks;
+            battleEquipCapturedArt = capArt;
+            battleEquipCapturedBy = defenderFormation.faction as string;
         }
+        // ── Abandoned equipment on uncontested occupation ──────────────────
+        // When a force walks into a vacated enemy OSID, it recovers some equipment
+        // left behind by the retreating garrison. Historically critical for ARBiH:
+        // much of their early heavy equipment came from overrunning JNA barracks
+        // and abandoned VRS positions. Amount based on OSID population (proxy for
+        // garrison size) and the occupying faction's equipment scarcity.
+        if (!defenderFormation && firstAttacker.composition) {
+            const pop = osidPopulationMap?.get(targetOsid) ?? 0;
+            const defenderFaction = (controller ?? '') as string;
+            // Only RS positions leave significant abandoned equipment (JNA inheritance)
+            if (defenderFaction === 'RS' && pop > 500) {
+                const ABANDONED_TANK_RATE = 0.0002;  // ~1 tank per 5000 pop
+                const ABANDONED_ART_RATE = 0.0004;   // ~2 artillery per 5000 pop
+                const abandonedTanks = Math.floor(pop * ABANDONED_TANK_RATE);
+                const abandonedArt = Math.floor(pop * ABANDONED_ART_RATE);
+                if (abandonedTanks > 0 || abandonedArt > 0) {
+                    const aComp4 = firstAttacker.composition;
+                    if (abandonedTanks > 0) {
+                        aComp4.tanks += abandonedTanks;
+                        const frac = abandonedTanks / Math.max(1, aComp4.tanks);
+                        aComp4.tank_condition.degraded += frac * 0.6;
+                        aComp4.tank_condition.operational = Math.max(0, aComp4.tank_condition.operational - frac * 0.4);
+                    }
+                    if (abandonedArt > 0) {
+                        aComp4.artillery += abandonedArt;
+                        const frac = abandonedArt / Math.max(1, aComp4.artillery);
+                        aComp4.artillery_condition.degraded += frac * 0.6;
+                        aComp4.artillery_condition.operational = Math.max(0, aComp4.artillery_condition.operational - frac * 0.4);
+                    }
+                    battleEquipCapturedTanks = abandonedTanks;
+                    battleEquipCapturedArt = abandonedArt;
+                    battleEquipCapturedBy = attackerFaction;
+                }
+            }
+        }
+
+        // Push battle report with equipment data
+        report.battles.push({
+            attacker_brigade: firstAttacker.id,
+            attacker_faction: attackerFaction,
+            defender_faction: (controller ?? attackerFaction) as FactionId,
+            target_osid: targetOsid,
+            outcome,
+            power_ratio: powerRatio,
+            attacker_won: outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory',
+            defender_brigade: defenderFormation?.id ?? null,
+            snap_events: battleSnapEvents,
+            attacker_casualties: finalAttackerCas,
+            defender_casualties: finalDefenderCas,
+            defender_contributions: defenderContributions,
+            defending_sub_segment_id: defendingSubSegmentId,
+            equipment: {
+                attacker_tanks_lost: battleEquipAttackerTanksLost,
+                attacker_artillery_lost: battleEquipAttackerArtLost,
+                defender_tanks_lost: battleEquipDefenderTanksLost,
+                defender_artillery_lost: battleEquipDefenderArtLost,
+                scavenged_tanks: battleEquipScavengedTanks,
+                scavenged_artillery: battleEquipScavengedArt,
+                scavenged_by: battleEquipScavengedBy || undefined,
+                captured_tanks: battleEquipCapturedTanks,
+                captured_artillery: battleEquipCapturedArt,
+                captured_by: battleEquipCapturedBy || undefined,
+            },
+        });
 
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
         const pyrrhic = attackerWon && personnelAttacker > 0 && finalAttackerCas / personnelAttacker > 0.15;

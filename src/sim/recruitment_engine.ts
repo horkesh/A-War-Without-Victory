@@ -405,7 +405,9 @@ export function recruitBrigade(
     // All checks pass -- build formation
     const hq_sid = resolveValidHqSid(state, faction, home_mun, municipalityHqSettlement, sidToMun);
     const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
-    const composition = buildBrigadeComposition(chosenClass, faction, true);
+    // Dynamic recruitment: no JNA override — newly formed brigades are militia/TDF,
+    // they don't inherit JNA heavy equipment. Only initial OOB brigades get JNA kit.
+    const composition = buildBrigadeComposition(chosenClass, faction, false);
     const formation = buildRecruitedFormation(
         brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory, location_osid
     );
