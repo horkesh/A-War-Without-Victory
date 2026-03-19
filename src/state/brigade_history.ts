@@ -39,6 +39,10 @@ export interface BrigadeEngagement {
     territory_flipped: boolean;
     /** Whether this was part of a multi-brigade concentrated assault. */
     was_concentrated: boolean;
+    /** Enemy equipment destroyed in this engagement. */
+    equipment_destroyed?: { tanks: number; artillery: number };
+    /** Equipment captured from the enemy in this engagement. */
+    equipment_captured?: { tanks: number; artillery: number };
 }
 
 /** Cumulative brigade service record. */

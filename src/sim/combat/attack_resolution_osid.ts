@@ -1478,14 +1478,28 @@ export function resolveAttackOrdersOsid(
         // === BRIGADE HISTORY RECORDING ===
         const defFaction = (controller ?? attackerFaction) as FactionId;
         const isConcentrated = attackerFormations.length > 1;
+        // Attacker: destroyed defender equipment, captured from defender
+        const attackerEquipData = {
+            destroyed: { tanks: battleEquipDefenderTanksLost, artillery: battleEquipDefenderArtLost },
+            captured: { tanks: battleEquipCapturedBy === attackerFaction ? battleEquipCapturedTanks : 0,
+                        artillery: battleEquipCapturedBy === attackerFaction ? battleEquipCapturedArt : 0 },
+        };
         recordAttackerEngagements(
             attackerFormations, currentTurn, targetOsid, outcome,
             defFaction, flip, finalAttackerCas, finalDefenderCas, isConcentrated, state,
+            attackerEquipData,
         );
         if (defenderFormation) {
+            // Defender: destroyed attacker equipment, captured from attacker
+            const defenderEquipData = {
+                destroyed: { tanks: battleEquipAttackerTanksLost, artillery: battleEquipAttackerArtLost },
+                captured: { tanks: battleEquipCapturedBy === (defenderFormation.faction as string) ? battleEquipCapturedTanks : 0,
+                            artillery: battleEquipCapturedBy === (defenderFormation.faction as string) ? battleEquipCapturedArt : 0 },
+            };
             recordDefenderEngagement(
                 defenderFormation, currentTurn, targetOsid, outcome,
                 attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated, state,
+                defenderEquipData,
             );
         }
 

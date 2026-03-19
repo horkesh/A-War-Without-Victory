@@ -58,6 +58,16 @@ export function recordBrigadeEngagement(
     h.total_casualties_taken += engagement.casualties_taken;
     h.total_casualties_inflicted += engagement.casualties_inflicted;
 
+    // Equipment tracking
+    if (engagement.equipment_destroyed) {
+        h.total_equipment_destroyed.tanks += engagement.equipment_destroyed.tanks;
+        h.total_equipment_destroyed.artillery += engagement.equipment_destroyed.artillery;
+    }
+    if (engagement.equipment_captured) {
+        h.total_equipment_captured.tanks += engagement.equipment_captured.tanks;
+        h.total_equipment_captured.artillery += engagement.equipment_captured.artillery;
+    }
+
     // ── Sync elite loan episode if brigade is on loan ──
     const eliteLoanState = formation.elite_loan_state;
     if (state && eliteLoanState?.on_loan && eliteLoanState.current_episode_id != null) {
@@ -153,6 +163,7 @@ export function recordAttackerEngagements(
     totalDefenderCasualties: number,
     isConcentrated: boolean,
     state?: GameState,
+    equipmentData?: { destroyed: { tanks: number; artillery: number }; captured: { tanks: number; artillery: number } },
 ): void {
     const perAttackerCas = attackerFormations.length > 0
         ? Math.floor(totalAttackerCasualties / attackerFormations.length)
@@ -169,6 +180,10 @@ export function recordAttackerEngagements(
             enemy_faction: defenderFaction,
             territory_flipped: territoryFlipped,
             was_concentrated: isConcentrated,
+            ...(equipmentData ? {
+                equipment_destroyed: equipmentData.destroyed,
+                equipment_captured: equipmentData.captured,
+            } : {}),
         }, state);
     }
 }
@@ -187,6 +202,7 @@ export function recordDefenderEngagement(
     attackerCasualties: number,
     wasConcentrated: boolean,
     state?: GameState,
+    equipmentData?: { destroyed: { tanks: number; artillery: number }; captured: { tanks: number; artillery: number } },
 ): void {
     recordBrigadeEngagement(defenderFormation, {
         turn,
@@ -198,6 +214,10 @@ export function recordDefenderEngagement(
         enemy_faction: attackerFaction,
         territory_flipped: territoryFlipped,
         was_concentrated: wasConcentrated,
+        ...(equipmentData ? {
+            equipment_destroyed: equipmentData.destroyed,
+            equipment_captured: equipmentData.captured,
+        } : {}),
     }, state);
 }
 
