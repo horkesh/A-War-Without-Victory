@@ -886,7 +886,14 @@ export function resolveAttackOrdersOsid(
             });
             // Equipment losses: minimum 1 per piece type if formation has them
             const aComp = a.composition ?? ensureBrigadeComposition(a);
-            const aTanksLost = aComp.tanks > 0 ? Math.max(1, Math.round(aComp.tanks * TANK_LOSS_RATE)) : 0;
+            // Scarce tank protection: brigades with <10 tanks preserve them more carefully
+            // (hull-down positions, indirect fire, not leading assaults). No minimum-1 loss.
+            // VRS with 40 tanks loses 3+ per battle; ARBiH with 3 tanks loses 0-1.
+            const aTanksLost = aComp.tanks > 0
+                ? (aComp.tanks >= 10
+                    ? Math.max(1, Math.round(aComp.tanks * TANK_LOSS_RATE))
+                    : Math.round(aComp.tanks * TANK_LOSS_RATE * 0.5))
+                : 0;
             const aArtLost = aComp.artillery > 0 ? Math.max(1, Math.round(aComp.artillery * ARTILLERY_LOSS_RATE)) : 0;
             if (aTanksLost > 0 || aArtLost > 0) {
                 aComp.tanks = Math.max(0, aComp.tanks - aTanksLost);
@@ -950,7 +957,12 @@ export function resolveAttackOrdersOsid(
             (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = Math.max(0, prevEntrenchment - ENTRENCHMENT_DEGRADATION_PER_BATTLE);
             // Defender equipment losses (primary only)
             const dComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
-            const dTanksLost = dComp.tanks > 0 ? Math.max(1, Math.round(dComp.tanks * TANK_LOSS_RATE * 0.5)) : 0;
+            // Defender tank losses: half rate, and scarce tank protection (no min-1 below 10)
+            const dTanksLost = dComp.tanks > 0
+                ? (dComp.tanks >= 10
+                    ? Math.max(1, Math.round(dComp.tanks * TANK_LOSS_RATE * 0.5))
+                    : Math.round(dComp.tanks * TANK_LOSS_RATE * 0.25))
+                : 0;
             const dArtLost = dComp.artillery > 0 ? Math.max(1, Math.round(dComp.artillery * ARTILLERY_LOSS_RATE * 0.5)) : 0;
             if (dTanksLost > 0 || dArtLost > 0) {
                 dComp.tanks = Math.max(0, dComp.tanks - dTanksLost);
@@ -1045,26 +1057,30 @@ export function resolveAttackOrdersOsid(
             const winRate = outcome === 'decisive_victory' ? 0.20
                 : outcome === 'victory' ? 0.15 : 0.10;
             applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, winRate, attackerFaction);
-            // Loser (defender) still recovers some attacker destroyed equipment at low rate
-            // (disabled VRS tanks left on ARBiH positions before VRS advances)
+            // Loser (defender) recovers disabled enemy vehicles from the battlefield.
+            // Rate is meaningful (15%) because the defender is on home ground — they
+            // stay on the position (even if pushed back) and have time to recover
+            // knocked-out tanks. Historically: ARBiH field repair teams recovered
+            // disabled VRS T-55s and M-84s after every major VRS assault.
             if (defenderFormation) {
-                const loseRate = 0.05;
+                const loseRate = 0.15;
                 applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, loseRate, defenderFormation.faction as string);
             }
         } else if (attackerLost) {
             // Winner (defender) scavenges from attacker's destroyed equipment at high rate
+            // Defender held the field — they get everything the attacker left behind.
             if (defenderFormation) {
-                const winRate = outcome === 'catastrophic' ? 0.20 : 0.10;
+                const winRate = outcome === 'catastrophic' ? 0.25 : 0.15;
                 applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, winRate, defenderFormation.faction as string);
             }
-            // Loser (attacker) still recovers some defender destroyed equipment at low rate
+            // Loser (attacker) retreats — minimal recovery from defender losses
             const loseRate = 0.05;
             applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, loseRate, attackerFaction);
         } else {
-            // Stalemate: both sides scavenge at low rate from each other's losses
-            applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, 0.05, attackerFaction);
+            // Stalemate: both sides recover from each other's losses at moderate rate
+            applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, 0.08, attackerFaction);
             if (defenderFormation) {
-                applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, 0.05, defenderFormation.faction as string);
+                applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, 0.08, defenderFormation.faction as string);
             }
         }
 
@@ -1103,7 +1119,7 @@ export function resolveAttackOrdersOsid(
             // Minimum 1 tank captured if attacker had 10+ tanks (disabled vehicle left
             // on the battlefield — historically common when VRS attacked ARBiH positions).
             // Zero-sum: captured equipment is removed from the attacker's composition.
-            const captureRate = outcome === 'catastrophic' ? 0.08 : 0.03;
+            const captureRate = outcome === 'catastrophic' ? 0.12 : 0.05;
             const aComp3 = firstAttacker.composition;
             const dComp3 = defenderFormation.composition;
             const DEFENSIVE_CAPTURE_MIN_TANKS = 10; // attacker needs 10+ tanks for guaranteed capture
@@ -1143,8 +1159,8 @@ export function resolveAttackOrdersOsid(
             const defenderFaction = (controller ?? '') as string;
             // Only RS positions leave significant abandoned equipment (JNA inheritance)
             if (defenderFaction === 'RS' && pop > 500) {
-                const ABANDONED_TANK_RATE = 0.0002;  // ~1 tank per 5000 pop
-                const ABANDONED_ART_RATE = 0.0004;   // ~2 artillery per 5000 pop
+                const ABANDONED_TANK_RATE = 0.0004;  // ~1 tank per 2500 pop
+                const ABANDONED_ART_RATE = 0.0006;   // ~1.5 artillery per 2500 pop
                 const abandonedTanks = Math.floor(pop * ABANDONED_TANK_RATE);
                 const abandonedArt = Math.floor(pop * ABANDONED_ART_RATE);
                 if (abandonedTanks > 0 || abandonedArt > 0) {
