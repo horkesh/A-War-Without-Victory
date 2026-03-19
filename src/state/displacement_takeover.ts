@@ -78,8 +78,8 @@ const BOSNIAK_BORDER_FLEE_ABROAD = 0.10;
 // Enclave-overrun special case (historical high-lethality second displacement).
 export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
 
-const REINFORCEMENT_RATE = 0.05;
-const DISPLACED_CONTRIBUTION_CAP = 2000;
+const REINFORCEMENT_RATE = 0.02;
+const DISPLACED_CONTRIBUTION_CAP = 800;
 const RBIH_HRHB_ALLIED_THRESHOLD = 0.20;
 
 const ENCLAVE_MUN_IDS = new Set<MunicipalityId>(['srebrenica', 'gorazde', 'zepa']);
