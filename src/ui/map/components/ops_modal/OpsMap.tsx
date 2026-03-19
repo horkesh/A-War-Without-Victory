@@ -285,7 +285,7 @@ export function OpsMap({
         }
 
         // Arrows — build per-axis advance arrows
-        updateArrows(map, axes, centroidLookupRef.current, faction, stagingOsid);
+        updateArrows(map, axes, centroidLookupRef.current, faction, stagingOsid, controlDataRef.current);
     }, [objectives, stagingOsid, schwerpunktOsid, axes, faction, mapReady]);
 
     return (
@@ -339,21 +339,45 @@ function addArrowLayers(map: maplibregl.Map) {
     });
 }
 
+function findNearestCentroid(
+    target: [number, number],
+    candidates: Map<string, [number, number]>,
+    controlData: Record<string, string | null>,
+    faction: string,
+): [number, number] | null {
+    let best: [number, number] | null = null;
+    let bestDist = Infinity;
+    for (const [osid, pt] of candidates) {
+        if (controlData[osid] !== faction) continue;
+        const d = (pt[0] - target[0]) ** 2 + (pt[1] - target[1]) ** 2;
+        if (d < bestDist) { bestDist = d; best = pt; }
+    }
+    return best;
+}
+
 function updateArrows(
     map: maplibregl.Map,
     axes: AxisState[],
     centroidLookup: Map<string, [number, number]>,
     faction: string,
     defaultStagingOsid?: string,
+    controlData?: Record<string, string | null>,
 ) {
     const features: Feature[] = [];
-    if (centroidLookup.size === 0) return; // Not loaded yet
+    if (centroidLookup.size === 0) return;
     const palette = AXIS_PALETTES[faction] ?? DEFAULT_AXIS_COLORS;
 
     axes.forEach((axis, axisIdx) => {
         const color = palette[axisIdx % palette.length];
         const effectiveStaging = axis.stagingOsid ?? defaultStagingOsid;
-        const stagingPt = effectiveStaging ? centroidLookup.get(effectiveStaging) : null;
+        let stagingPt = effectiveStaging ? centroidLookup.get(effectiveStaging) : null;
+        // Fallback: find nearest friendly OSID to first objective
+        if (!stagingPt && axis.objectives.length > 0 && controlData) {
+            const firstObjPt = centroidLookup.get(axis.objectives[0]);
+            if (firstObjPt) {
+                stagingPt = findNearestCentroid(firstObjPt, centroidLookup, controlData, faction);
+            }
+        }
 
         axis.objectives.forEach((obj, objIdx) => {
             const objPt = centroidLookup.get(obj);
