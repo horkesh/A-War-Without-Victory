@@ -39,11 +39,23 @@
 
 These are the most visible assets — shown every time the player opens a corps panel or plans an operation. High impact, low count.
 
-**Style:** Oil painting. Head-and-shoulders portrait, 3/4 view, military uniform or field dress. Background: blurred field/office environment matching the officer's role. Lighting: dramatic side-light. Expression: serious, commanding — not posed or smiling. Slight desaturation, muted earth tones.
+**Style:** Processed real photography — NOT AI-generated. Source actual press/ICTY photographs of each officer, then apply a consistent artistic filter: high-contrast duotone, halftone newspaper print, or posterized/threshold treatment. The result should look like a 1990s newspaper clipping or intelligence dossier photo. Real photos = real likeness = no uncanny valley.
 
-**EXCEPTION TO NO-FACES RULE:** Portraits are the ONE category where faces are shown — that's the point of a portrait. The global no-faces rule does NOT apply here.
+**EXCEPTION TO NO-FACES RULE:** Portraits are the ONE category where faces are shown — real photographs, artistically processed.
 
-**IMPORTANT:** These are real historical figures. Base likeness on available photographs where possible, but do NOT attempt photorealistic recreation — use the photo as reference for build, age, and bearing, then render in the oil-painting style. No flags, no faction patches, no identifiable insignia on uniforms — generic military dress only.
+**Process:**
+1. Source photo in `src/ui/map/assets/officers/source/{officer_id}_source.jpg`
+2. Process via Gemini Pro (upload + request duotone/halftone filter) or manual editing
+3. Target palette: warm brown/gold tones matching game UI (#c4a35a / #1c1a17)
+4. Export at 256x320 WebP to `src/ui/warroom/assets/officers/{officer_id}.webp`
+5. Crop tight to head/shoulders — no flags, no patches
+
+**Source photos downloaded** (in `src/ui/map/assets/officers/source/`):
+- ratko_mladic (376x500), naser_oric (331x393), rasim_delic (350x485)
+- slobodan_praljak (960x1381), manojlo_milovanovic (960x1358, grayscale)
+- tihomir_blaskic (120x130 — needs better source)
+
+**Still need manual sourcing**: atif_dudakovic, momir_talic, sefer_halilovic, mehmed_alagic
 
 ### The 10 Priority Portraits
 
@@ -97,15 +109,27 @@ These set the mood for each scenario start date. Shown once per game session but
 **Drop path:** `src/ui/warroom/assets/peace_plans/{plan_id}.webp`
 **Used by:** Diplomatic event modals (Vance-Owen, Owen-Stoltenberg, Contact Group)
 
-**Note:** These CAN be programmatically generated as choropleths from partition data. Artistic versions are nicer but not essential.
+**Gemini CANNOT generate these** — they require exact historical territorial boundaries. Two viable approaches:
 
-**Style:** Clean cartographic style — like a newspaper infographic from the 1990s. Bosnia-Herzegovina outline with proposed ethnic partition colored: RS=blue, RBiH=green, HRHB=red (or period-appropriate colors). Major cities labeled. Rivers and roads lightly sketched. Title bar at top.
+**Option A: Programmatic generation (RECOMMENDED).** We already have BiH municipality polygons in `data/derived/operational/operational_settlements.geojson`. Write a Node script that:
+1. Loads the municipality polygons
+2. Colors each municipality by its proposed assignment in each peace plan
+3. Renders to a static 600x400 canvas/SVG with the game's color palette
+4. Overlays major city labels (Sarajevo, Banja Luka, Mostar, Tuzla, Bihac)
+5. Exports as WebP
 
-| # | Plan | Prompt |
-|---|------|--------|
-| 1 | **Vance-Owen Plan** | 10 semi-autonomous provinces. Complex patchwork. Each province colored by intended majority ethnicity. Sarajevo as separate district. The plan that failed. |
-| 2 | **Owen-Stoltenberg Plan** | Three ethnic republics. Simpler partition — large contiguous blocks. RS gets ~52%, RBiH gets ~30%, HRHB gets ~18%. Srebrenica as isolated enclave. |
-| 3 | **Contact Group Plan** | 51/49 split — Federation (RBiH+HRHB) 51%, RS 49%. The template for Dayton. Clean two-way division. |
+Data needed per plan (municipality → proposed controlling entity):
+- **Vance-Owen:** 10 provinces, each municipality assigned to one. Wikipedia has the full province list.
+- **Owen-Stoltenberg:** 3 republics, each municipality assigned. Simpler.
+- **Contact Group / Dayton:** 2 entities (Federation 51%, RS 49%), municipality-level boundaries well documented.
+
+**Option B: Source historical maps.** Academic papers, ICTY exhibits, and UN documents contain period maps of each plan. Source these and process like officer photos (crop, recolor to match game palette, overlay in UI). The UN Cartographic Section published official maps for each plan.
+
+| # | Plan | Data Source |
+|---|------|------------|
+| 1 | **Vance-Owen Plan** | 10 provinces: Wikipedia "Vance-Owen Peace Plan" has the full municipality→province mapping. Color by proposed majority: Bosniak (green), Serb (red), Croat (blue), Sarajevo (neutral). |
+| 2 | **Owen-Stoltenberg Plan** | 3 republics: Republika Srpska ~52%, Bosniak republic ~30%, Croat republic ~18%. Municipality boundaries from ICTY exhibits. |
+| 3 | **Contact Group / Dayton** | 51/49 Federation/RS split. Inter-Entity Boundary Line (IEBL) is well-documented. Municipality assignments from OHR. |
 
 ---
 
