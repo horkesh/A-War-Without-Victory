@@ -129,6 +129,29 @@ export function OpsMap({
                     map.setPaintProperty('osid-control-fill', 'fill-opacity', 0.55);
                 }
 
+                // Corps AO highlight — territory belonging to this corps
+                const corpsOsids = new Set<string>();
+                for (const sec of sectors) {
+                    for (const sub of (sec.sub_segments ?? [])) {
+                        for (const osid of sub.friendly_osids) corpsOsids.add(osid);
+                    }
+                }
+                const corpsTerritory: FeatureCollection = {
+                    type: 'FeatureCollection',
+                    features: geojson.features.filter((f) =>
+                        corpsOsids.has((f.properties as Record<string, unknown>)?.osid as string ?? '')
+                    ),
+                };
+                map.addSource('ops-corps-territory', { type: 'geojson', data: corpsTerritory });
+                map.addLayer({
+                    id: 'ops-corps-territory-fill', type: 'fill', source: 'ops-corps-territory',
+                    paint: { 'fill-color': 'rgba(255,255,255,0.08)' },
+                });
+                map.addLayer({
+                    id: 'ops-corps-territory-border', type: 'line', source: 'ops-corps-territory',
+                    paint: { 'line-color': 'rgba(255,255,255,0.25)', 'line-width': 1 },
+                });
+
                 // Front lines
                 const frontLineGeo = buildCorpsFrontLinesGeoJSON(
                     geojson,
@@ -155,6 +178,23 @@ export function OpsMap({
                     id: 'ops-front-line', type: 'line', source: 'ops-front-lines',
                     filter: ['==', ['get', 'lineType'], 'front'],
                     paint: { 'line-color': 'rgba(0,0,0,0.65)', 'line-width': 1.5 },
+                });
+                // Bright highlight on THIS corps' front lines
+                map.addLayer({
+                    id: 'ops-corps-front-glow', type: 'line', source: 'ops-front-lines',
+                    filter: ['all',
+                        ['==', ['get', 'lineType'], 'glow'],
+                        ['==', ['get', 'corps_id'], corpsId],
+                    ],
+                    paint: { 'line-color': 'rgba(255,220,120,0.5)', 'line-width': 16, 'line-blur': 10 },
+                });
+                map.addLayer({
+                    id: 'ops-corps-front-line', type: 'line', source: 'ops-front-lines',
+                    filter: ['all',
+                        ['==', ['get', 'lineType'], 'front'],
+                        ['==', ['get', 'corps_id'], corpsId],
+                    ],
+                    paint: { 'line-color': 'rgba(255,220,120,0.8)', 'line-width': 2.5 },
                 });
 
                 // Objective highlight (dark red fill)

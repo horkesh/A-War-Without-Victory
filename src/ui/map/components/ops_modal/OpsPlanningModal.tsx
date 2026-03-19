@@ -13,12 +13,15 @@ import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_na
 let nextAxisCounter = 0;
 function makeAxisId(): string { return `axis_${++nextAxisCounter}`; }
 
-function generateOpName(corpsId: string, turn: number): string {
-    // OPERATION_NAMES is Record<string, readonly string[]> — flatten all names
-    const allNames = Object.values(OPERATION_NAMES).flat();
-    if (allNames.length === 0) return 'Operation Alpha';
-    const idx = simpleHash(`${corpsId}_${turn}`) % allNames.length;
-    return `Operation ${allNames[idx]}`;
+function generateOpName(corpsId: string, turn: number, faction: string): string {
+    // Use faction-specific names if available, else all names
+    const factionNames = OPERATION_NAMES[faction];
+    const names = factionNames && factionNames.length > 0
+        ? factionNames
+        : Object.values(OPERATION_NAMES).flat();
+    if (names.length === 0) return 'Operacija Alfa';
+    const idx = simpleHash(`${corpsId}_${turn}`) % names.length;
+    return names[idx]; // Names already include "Operacija" prefix
 }
 
 export function OpsPlanningModal() {
@@ -59,7 +62,8 @@ export function OpsPlanningModal() {
         if (isOpen && corpsId) {
             const initialAxis: AxisState = { id: makeAxisId(), name: 'Main Axis', brigadeIds: [], objectives: [] };
             setPlan({
-                opName: generateOpName(corpsId, loadedGameState?.turn ?? 0),
+                opName: generateOpName(corpsId, loadedGameState?.turn ?? 0,
+                    loadedGameState?.formations.find((f) => f.id === corpsId)?.faction ?? ''),
                 opType: 'sector_attack',
                 tempo: 'standard',
                 tolerance: 'costly_victory',
