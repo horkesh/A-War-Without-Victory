@@ -73,7 +73,10 @@
     "op:foca:tjentiste_2": "RS",
     "op:foca:miljevina_2": "RS",
     "op:foca:izbisno": "RS",
-    "op:foca:ustikolina": "RS"
+    "op:foca:ustikolina": "RS",
+    "op:sokolac:sasevci_2": "RS",
+    "op:sokolac:meljine_2": "RS",
+    "op:sokolac:knezina_2": "RS"
   },
   "war_timeline": "apr1992",
   "init_officers": "apr1992"
