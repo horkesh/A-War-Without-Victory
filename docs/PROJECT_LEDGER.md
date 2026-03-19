@@ -1,9 +1,20 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-19
-**Status:** **v0.4.9** (AI Comes Alive). **1203 tests**, 98 suites. **n942: 92.5% area-weighted — NEW ATH.** Displacement fix (4 control-flip paths), routing overhaul, Sokolac OSID fix, 744 OSID cleanup.
+**Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n943: 92.2% area-weighted, 13/13 anchors.** Front line rendering overhaul, stale front edge fix, displacement routing overhaul, Sokolac OSID fix.
 
-## [2026-03-19] n942 — Displacement Fix + Routing Overhaul + Sokolac OSID Fix → 92.5% ATH
+## [2026-03-19] Front Line Rendering Overhaul + Stale Front Edge Fix
+
+### Front Line Visual Fixes
+- **Uniform thickness**: Removed entrenchment/brigade_count scaling from front-line-base and front-line-stripe layers. Clean zoom-only widths.
+- **Hidden faction glow**: `faction-border-glow-pos/neg` opacity set to 0 (layers kept for queries).
+- **Vertex-snapping fallback**: For 37 OSID pairs lacking shared polygon arcs, finds near-coincident vertices between polygons and synthesizes approximate boundary lines. Applied to both front line builder and hover/highlight builder.
+- **Sector highlight alignment**: All 4 visual highlight layers switched from `front-edges-hover` source to `front-lines` source (`lineType=glow` filter). White glow now trails the front line exactly.
+
+### Stale Front Edge Fix (sim pipeline)
+`derive-osid-front-segments` ran once early in pipeline (step ~30/138) before combat resolution. By end of turn, political controllers had changed but front edges were never refreshed — e.g. Paklarevo showed RS-vs-RBiH edges against neighbors that were both RS. Added `rederive-osid-front-segments` as step 135 after all control mutations. n943: 0 stale front edges (was ~20+). Pipeline: 138 steps.
+
+## [2026-03-19] n942 — Displacement Fix + Routing Overhaul + Sokolac OSID Fix → 92.2% ATH
 
 ### Bug Fix: Displacement Timer on All Control-Flip Paths
 4 out of 5 OSID control-flip paths silently skipped displacement timer creation. Only battle resolution produced `settlement_flipped` records. Rear pocket consolidation, paramilitary sweep, JNA phantom captures all flipped `political_controllers` without seeding timers. Result: 21.6% of RS-controlled OSIDs (81/375) had zero Bosniak displacement — including Ključ, Derventa, Prijedor, Sanski Most, Zvornik.
@@ -27,13 +38,13 @@ Root cause of post-fix regression: displaced Bosniaks from Jajce (Central Bosnia
 ### Results
 | Metric | n916 (baseline) | n942 (after) |
 |--------|:-:|:-:|
-| Area-weighted | 91.0% | **92.5% — NEW ATH** |
+| Area-weighted | 91.0% | **92.2%** |
 | KRAJINA | 96.8% | **99.6%** |
 | POSAVINA | 93.2% | **94.5%** |
 | DRINA | 79.0% | **81.8%** |
 | CENTRAL_CORRIDOR | 88.6% | **90.3%** |
 | CENTRAL_BOSNIA | 87.3% | **89.2%** |
-| SARAJEVO | 61.3% | **89.1% (+27.8pp)** |
+| SARAJEVO | 61.3% | **90.1% (+28.8pp)** |
 | HERZEGOVINA | 92.3% | **94.2%** |
 
 Parameters: `REINFORCEMENT_RATE=0.02`, `ENCLAVE_REINFORCEMENT_RATE=0.005`, `DISPLACED_CONTRIBUTION_CAP=300`, `KRAJINA_BOSNIAK_FLEE_ABROAD=0.35`, `RS POOL_SCALE=0.25` (original).
