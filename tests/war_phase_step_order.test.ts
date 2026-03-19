@@ -66,6 +66,7 @@ describe('war-phase step ordering', () => {
         // +1 from return-displaced-brigades (periodic home return march, 2026-03-17).
         // +1 from ai-war-dispatches (war dispatches from outside perspectives, 2026-03-18).
         // +1 from ai-corps-dialogue (officers who talk back — cosmetic flavor, 2026-03-18).
-        expect(stepNames.length).toBe(137);
+        // +1 from rederive-osid-front-segments (refresh front edges after all control mutations, 2026-03-19).
+        expect(stepNames.length).toBe(138);
     });
 });

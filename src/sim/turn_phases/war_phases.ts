@@ -2206,6 +2206,19 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'rederive-osid-front-segments',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) {
+                context.state.military.war_front_edges_osid = undefined;
+                return;
+            }
+            const osidFrontEdges = computeFrontEdgesOsid(context.state, od.edges, od.opData.operationalToCanonical);
+            context.state.military.war_front_edges_osid = osidFrontEdges;
+        }
+    },
+    {
         name: 'assert-formations-in-friendly-territory',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
