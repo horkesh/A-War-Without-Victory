@@ -2,8 +2,8 @@
   "meta": {
     "total_settlements": 753,
     "counts": {
-      "RBiH": 354,
-      "RS": 279,
+      "RBiH": 351,
+      "RS": 282,
       "HRHB": 120
     },
     "source": "April 1992 initial control from aggregated 1991 census ethnic majority",
@@ -534,9 +534,9 @@
     "op:skender_vakuf:imljani_2": "RS",
     "op:skender_vakuf:knezevo_2": "RS",
     "op:skender_vakuf:javorani_2": "RS",
-    "op:sokolac:sasevci_2": "RBiH",
-    "op:sokolac:knezina_2": "RBiH",
-    "op:sokolac:meljine_2": "RBiH",
+    "op:sokolac:sasevci_2": "RS",
+    "op:sokolac:knezina_2": "RS",
+    "op:sokolac:meljine_2": "RS",
     "op:sokolac:sahbegovici": "RS",
     "op:sokolac:sokolac_2": "RS",
     "op:sokolac:vidrici": "RS",
