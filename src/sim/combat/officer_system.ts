@@ -248,7 +248,7 @@ const CORPS_ENCLAVE_MAP: Record<string, string> = {
     // VRS Sarajevo-Romanija Corps — locked to Sarajevo siege ring
     vrs_sarajevo_romanija: 'sarajevo_ring',
     // HVO OZ Posavina — isolated in Orasje pocket
-    hvo_oz_posavina: 'orasje',
+    hvo_northwest_bosnia: 'orasje',
     // Note: Srebrenica is subordinate to 2nd Corps but geographically isolated.
     // Officers locked to 'srebrenica' can only command ops if the corps operating sector
     // overlaps Srebrenica. For now, this is handled by the home_corps_id filter:

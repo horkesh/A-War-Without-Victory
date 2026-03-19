@@ -112,8 +112,18 @@ export function initializeCorpsCommand(state: GameState): void {
     const corpsIds = [...corpsIdSet].sort(strictCompare);
 
     for (const cid of corpsIds) {
-        // Skip if already initialized
-        if (state.military.corps_command[cid]) continue;
+        // If already initialized, update subordinate count (brigades may have spawned since init)
+        if (state.military.corps_command[cid]) {
+            let subCount = 0;
+            for (const fid of formationIds) {
+                const f = state.military.formations[fid];
+                if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom') && f.status === 'active') {
+                    subCount++;
+                }
+            }
+            state.military.corps_command[cid]!.subordinate_count = subCount;
+            continue;
+        }
 
         const corps = state.military.formations[cid];
 

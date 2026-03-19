@@ -27,6 +27,7 @@ import {
     THREAT_DEFENSIVE_THRESHOLD,
     THREAT_OFFENSIVE_THRESHOLD,
 } from './bot_constants.js';
+import { isRbihHrhbMobilizing } from '../early_war/alliance_update.js';
 import type { CampaignPlan } from './army_hq_gathering_types.js';
 import {
     averageCohesion,
@@ -236,6 +237,27 @@ export function generateCorpsStanceOrders(
                 // AI override — but still respect reorganize from critical condition (layer 1)
                 if (stance !== 'reorganize') {
                     stance = aiStance;
+                }
+            }
+        }
+
+        // --- HRHB↔RBiH mobilization override (highest priority except reorganize) ---
+        // During the 4-turn mobilization buildup before HRHB-RBiH combat is enabled,
+        // both HRHB and RBiH corps that face the other faction adopt defensive posture.
+        // This represents deploying to the new front and preparing defenses.
+        // RS corps are unaffected.
+        if (stance !== 'reorganize' && isRbihHrhbMobilizing(state)) {
+            if (faction === 'HRHB' || faction === 'RBiH') {
+                const otherFaction: FactionId = faction === 'HRHB' ? 'RBiH' : 'HRHB';
+                const sectors = state.military.corps_front_sectors;
+                if (sectors) {
+                    const facesOther = Object.values(sectors).some(sec =>
+                        sec.corps_id === corps.id &&
+                        sec.opposing_factions.includes(otherFaction)
+                    );
+                    if (facesOther) {
+                        stance = 'defensive';
+                    }
                 }
             }
         }

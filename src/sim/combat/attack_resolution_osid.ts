@@ -47,6 +47,7 @@ import {
     getEthnicDefenseBonus,
 } from './ethnic_defense.js';
 import { removeFromActiveOperation } from './brigade_dissolution.js';
+import { isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -615,10 +616,20 @@ export function resolveAttackOrdersOsid(
         const neighbors = adjacency.get(attackerLoc) ?? [];
         if (!neighbors.includes(targetOsid)) continue;
 
+        // Safety gate: suppress HRHB↔RBiH combat during mobilization (belt-and-suspenders).
+        // If an attack order somehow slips through (e.g. player-ordered), skip resolution.
+        const targetController = getPoliticalControllerOSID(state, targetOsid, reverseMap);
+        {
+            const isRbihHrhbPair =
+                (attackerFaction === 'RBiH' && targetController === 'HRHB') ||
+                (attackerFaction === 'HRHB' && targetController === 'RBiH');
+            if (isRbihHrhbPair && !isRbihHrhbCombatEnabled(state)) continue;
+        }
+
         const defenderFormations = (allFormations as FormationState[])
             .filter(f => f.status === 'active' && (f as { location_osid?: string }).location_osid === targetOsid && f.faction !== attackerFaction)
             .sort((a, b) => strictCompare(a.id, b.id));
-        const controller = getPoliticalControllerOSID(state, targetOsid, reverseMap);
+        const controller = targetController;
         const isEnemyControlled = controller !== null && controller !== attackerFaction;
 
         let defenderPower: number;

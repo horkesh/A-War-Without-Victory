@@ -573,15 +573,35 @@ export function consolidateCrossCorpsFronts(
         if (!majorityCorps) continue;
 
         // Identify which minority corps can safely lose their edges in this
-        // component. Protect a corps if losing this component's edges would
-        // leave it with zero remaining edges (sector-less). Uses current
-        // remaining count (not initial) to catch cumulative losses.
+        // component. Protect a corps if:
+        // (a) losing this component's edges would leave it with zero (sector-less), OR
+        // (b) the corps has brigades stationed at ANY edge in this component
+        //     (brigade presence = corps has a physical claim, not just BFS territory).
+        // Without (b), isolated enclave corps (e.g. hvo_central_bosnia with brigades
+        // at Kiseljak) get drained edge-by-edge across multiple components until they
+        // have zero sectors despite having active brigades at the front.
         const protectedCorps = new Set<FormationId>();
         for (const [cid, countInComponent] of corpsCounts) {
             if (cid === majorityCorps) continue;
+            // (a) Zero-edge protection
             const remainingForCorps = corpsEdges.get(cid)?.length ?? 0;
             if (remainingForCorps <= countInComponent) {
                 protectedCorps.add(cid);
+                continue;
+            }
+            // (b) Brigade-presence protection: if ANY edge in this component
+            // has a brigade of this corps stationed at its friendly OSID,
+            // protect the entire corps in this component.
+            for (const eid of component) {
+                if (edgeToCorps.get(eid) !== cid) continue;
+                const meta = edgeMeta.get(eid);
+                if (!meta) continue;
+                const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
+                const brigCorps = osidBrigadeCorps.get(friendlyOsid);
+                if (brigCorps && brigCorps.has(cid)) {
+                    protectedCorps.add(cid);
+                    break;
+                }
             }
         }
 

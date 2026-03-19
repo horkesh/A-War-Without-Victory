@@ -20,7 +20,7 @@ import type { Osid } from './osid_adjacency.js';
 import type { BrigadePosture, FormationState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
-import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
+import { areRbihHrhbAllied, isFriendlyFaction, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { isOsidInSameEnclave } from './enclave_resilience.js';
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
@@ -165,8 +165,8 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 ethnicMap
             );
             // Alliance filter: HRHB must not attack RBiH targets (and vice versa)
-            // when they are allied. Applies to ALL operation attack paths.
-            const targets = (faction === 'HRHB' || faction === 'RBiH') && areRbihHrhbAllied(state)
+            // when combat is not enabled (allied OR mobilizing). Applies to ALL operation attack paths.
+            const targets = (faction === 'HRHB' || faction === 'RBiH') && !isRbihHrhbCombatEnabled(state)
                 ? allTargets.filter(t => {
                     const tc = getPoliticalControllerOSID(state, t.osid, reverseMap);
                     return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
@@ -441,9 +441,9 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         const controller = pc[n] as string | undefined;
         if (!controller || controller === faction) continue;
 
-        // Alliance guard: HRHB/RBiH don't occupy each other's territory while allied
+        // Alliance guard: HRHB/RBiH don't occupy each other's territory while allied or mobilizing
         if ((faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
-            && areRbihHrhbAllied(state)) continue;
+            && !isRbihHrhbCombatEnabled(state)) continue;
 
         // Enclave guard: enclave brigades must not expand beyond their enclave perimeter.
         // Without this, besieged ARBiH enclave brigades walk into adjacent RS positions

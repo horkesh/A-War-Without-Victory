@@ -198,8 +198,8 @@ export function deriveReadinessState(formation: FormationState): FormationReadin
         return 'overextended';
     }
 
-    // Forming (waiting for activation)
-    if (activationGated || cohesion < ACTIVE_MIN_COHESION) {
+    // Forming (waiting for FIRST activation only — never revert once activated)
+    if (activationGated) {
         return 'forming';
     }
 

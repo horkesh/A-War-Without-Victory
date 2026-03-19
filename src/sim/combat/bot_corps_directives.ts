@@ -49,7 +49,7 @@ import {
     GRAZ_EXEMPT_RS_CORPS,
     GRAZ_EXEMPT_HRHB_CORPS,
 } from '../local_truces.js';
-import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
+import { areRbihHrhbAllied, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
 import { concentrateSectorsForOffensive, rearrangeSectorsForCorps } from './sector_rearrangement.js';
 import { splitNonContiguousSectors, GARRISON_BUDGET_EDGES_PER_BRIGADE } from './corps_front_sectors.js';
@@ -1108,11 +1108,10 @@ export function generateCorpsDirectives(
             }
         }
 
-        // RBiH–HRHB alliance: when allied, do not target each other's territory.
-        // Historical: ARBiH and HVO were allies in 1992, fighting RS together.
-        // Alliance degrades over time via alliance_update.ts; attacks unlock when
-        // war_alliance_rbih_hrhb drops below ALLIED_THRESHOLD (~Oct 1992+).
-        if (areRbihHrhbAllied(state) && (faction === 'RBiH' || faction === 'HRHB')) {
+        // RBiH–HRHB combat gate: do not target each other's territory when allied OR
+        // during mobilization buildup. Combat unlocks when isRbihHrhbCombatEnabled returns true
+        // (mobilization expired or alliance ≤ HOSTILE_THRESHOLD).
+        if (!isRbihHrhbCombatEnabled(state) && (faction === 'RBiH' || faction === 'HRHB')) {
             const allyFaction = faction === 'RBiH' ? 'HRHB' : 'RBiH';
             const pc = state.political.political_controllers ?? {};
             for (let i = offensiveTargets.length - 1; i >= 0; i--) {

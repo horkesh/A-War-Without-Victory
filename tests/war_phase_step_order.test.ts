@@ -67,6 +67,7 @@ describe('war-phase step ordering', () => {
         // +1 from ai-war-dispatches (war dispatches from outside perspectives, 2026-03-18).
         // +1 from ai-corps-dialogue (officers who talk back — cosmetic flavor, 2026-03-18).
         // +1 from rederive-osid-front-segments (refresh front edges after all control mutations, 2026-03-19).
-        expect(stepNames.length).toBe(138);
+        // +1 from activate-corps (war-phase corps activation for late-starting corps like hvo_central_bosnia)
+        expect(stepNames.length).toBe(139);
     });
 });
