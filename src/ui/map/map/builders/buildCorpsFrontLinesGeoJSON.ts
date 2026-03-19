@@ -385,10 +385,11 @@ export function buildCorpsFrontLinesGeoJSON(
         if (ca && cb && ca !== cb) hostileEdgeKeys.add(ek);
     }
 
-    // Build friendly-edge adjacency (non-hostile polygon edges)
+    // Build friendly-edge adjacency (ALL non-hostile polygon edges, including exterior).
+    // Must include exterior edges (osids.size === 1) because the boundary walk
+    // at triple junctions often goes through exterior polygon edges.
     const friendlyAdj = new Map<string, Set<string>>();
-    for (const [ek, osids] of edgeMap) {
-        if (osids.size !== 2) continue;
+    for (const [ek] of edgeMap) {
         if (hostileEdgeKeys.has(ek)) continue;
         const [partA, partB] = ek.split('|');
         if (!friendlyAdj.has(partA)) friendlyAdj.set(partA, new Set());
