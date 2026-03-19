@@ -9,14 +9,16 @@ import type { EventEffect } from './event_types.js';
 
 /** Deterministic kind ordering for effect application. */
 const EFFECT_KIND_ORDER: Record<string, number> = {
-    alliance_change: 0,
-    cohesion_change: 1,
-    humanitarian_impact: 2,
-    morale_change: 3,
-    narrative: 4,
-    negotiation_capital: 5,
-    patron_pressure: 6,
-    supply_delta: 7,
+    aggression_modifier: 0,
+    alliance_change: 1,
+    cohesion_change: 2,
+    equipment_grant: 3,
+    humanitarian_impact: 4,
+    morale_change: 5,
+    narrative: 6,
+    negotiation_capital: 7,
+    patron_pressure: 8,
+    supply_delta: 9,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -64,6 +66,12 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
             break;
         case 'negotiation_capital':
             applyNegotiationCapital(state, effect.faction, effect.dimension, effect.delta);
+            break;
+        case 'equipment_grant':
+            applyEquipmentGrant(state, effect.faction, effect.tanks, effect.artillery, effect.aa_systems, effect.target_municipality);
+            break;
+        case 'aggression_modifier':
+            applyAggressionModifier(state, effect.faction, effect.delta, effect.duration_turns);
             break;
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
@@ -121,6 +129,73 @@ function applyPatronPressure(state: GameState, faction: FactionId, delta: number
 function applyAllianceChange(state: GameState, delta: number): void {
     const current = state.political.war_alliance_rbih_hrhb ?? 0;
     state.political.war_alliance_rbih_hrhb = clamp(current + delta, -1, 1);
+}
+
+/** Grant equipment to a faction's best-equipped brigade (or one in target municipality).
+ *  Equipment starts degraded (battlefield recovery / barracks seizure condition). */
+function applyEquipmentGrant(
+    state: GameState,
+    faction: FactionId,
+    tanks?: number,
+    artillery?: number,
+    aa_systems?: number,
+    target_municipality?: string
+): void {
+    const formations = state.military.formations;
+    const formationIds = Object.keys(formations).sort();
+
+    // Find best recipient: prefer brigade in target municipality, else best-equipped
+    let bestId: string | null = null;
+    let bestScore = -1;
+
+    for (const fid of formationIds) {
+        const f = formations[fid];
+        if (!f || f.status !== 'active' || f.faction !== faction) continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og') continue;
+        if (!f.composition) continue;
+
+        const munMatch = target_municipality && f.location_osid?.includes(`:${target_municipality}:`) ? 1000 : 0;
+        const score = munMatch + (f.composition.tanks ?? 0) + (f.composition.artillery ?? 0);
+        if (score > bestScore) { bestScore = score; bestId = fid; }
+    }
+
+    if (!bestId || !formations[bestId]?.composition) return;
+    const comp = formations[bestId].composition!;
+
+    if (tanks && tanks > 0) {
+        const oldCount = comp.tanks;
+        comp.tanks += tanks;
+        // Seized equipment: 70% operational (barracks storage, some neglected)
+        const frac = tanks / Math.max(1, comp.tanks);
+        comp.tank_condition.operational = comp.tank_condition.operational * (1 - frac) + 0.7 * frac;
+        comp.tank_condition.degraded = comp.tank_condition.degraded * (1 - frac) + 0.2 * frac;
+        comp.tank_condition.non_operational = Math.max(0, 1 - comp.tank_condition.operational - comp.tank_condition.degraded);
+    }
+    if (artillery && artillery > 0) {
+        comp.artillery += artillery;
+        const frac = artillery / Math.max(1, comp.artillery);
+        comp.artillery_condition.operational = comp.artillery_condition.operational * (1 - frac) + 0.7 * frac;
+        comp.artillery_condition.degraded = comp.artillery_condition.degraded * (1 - frac) + 0.2 * frac;
+        comp.artillery_condition.non_operational = Math.max(0, 1 - comp.artillery_condition.operational - comp.artillery_condition.degraded);
+    }
+    if (aa_systems && aa_systems > 0) {
+        comp.aa_systems = (comp.aa_systems ?? 0) + aa_systems;
+    }
+}
+
+/** Apply a temporary aggression modifier to a faction. Stored on state for consumption by bot AI. */
+function applyAggressionModifier(
+    state: GameState,
+    faction: FactionId,
+    delta: number,
+    durationTurns: number
+): void {
+    if (!state.military.event_aggression_modifiers) {
+        state.military.event_aggression_modifiers = [];
+    }
+    const mods = state.military.event_aggression_modifiers;
+    const currentTurn = state.meta.turn ?? 0;
+    mods.push({ faction, delta, expires_turn: currentTurn + durationTurns });
 }
 
 /** Adjust a specific negotiation capital dimension for a faction. */

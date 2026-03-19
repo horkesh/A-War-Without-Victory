@@ -1,5 +1,79 @@
 [
   {
+    "id": "battle_of_the_barracks_sarajevo",
+    "title": "Battle of the Barracks — Sarajevo",
+    "narrative": "TDF units and Green Berets storm JNA barracks across Sarajevo. The Maršal Tito barracks and Viktor Bubanj complex are seized after fierce fighting. Tanks, APCs, and artillery pieces are captured — the first heavy weapons in ARBiH hands. JNA soldiers are taken prisoner. Belgrade vows retaliation.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 4, "turn_max": 6, "phase": "war",
+      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "novo_sarajevo", "threshold": 0.3 }
+    },
+    "once": true,
+    "effect": { "kind": "equipment_grant", "faction": "RBiH", "tanks": 4, "artillery": 8, "target_municipality": "novo_sarajevo" },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RBiH", "delta": 10 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
+      { "kind": "aggression_modifier", "faction": "RS", "delta": 0.15, "duration_turns": 8 },
+      { "kind": "patron_pressure", "faction": "RBiH", "delta": 5 },
+      { "kind": "humanitarian_impact", "faction": "RBiH", "war_crimes_delta": 1 },
+      { "kind": "narrative", "text": "JNA soldiers killed during the seizure provoke international condemnation. VRS commanders vow to avenge the barracks." }
+    ]
+  },
+  {
+    "id": "battle_of_the_barracks_tuzla",
+    "title": "Battle of the Barracks — Tuzla",
+    "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Brčanska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed — the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 4, "turn_max": 6, "phase": "war",
+      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "tuzla", "threshold": 0.3 }
+    },
+    "once": true,
+    "effect": { "kind": "equipment_grant", "faction": "RBiH", "tanks": 6, "artillery": 10, "target_municipality": "tuzla" },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RBiH", "delta": 15 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": 8 },
+      { "kind": "aggression_modifier", "faction": "RS", "delta": 0.20, "duration_turns": 10 },
+      { "kind": "patron_pressure", "faction": "RBiH", "delta": 10 },
+      { "kind": "humanitarian_impact", "faction": "RBiH", "war_crimes_delta": 2 },
+      { "kind": "narrative", "text": "The Brčanska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. VRS high command redirects forces toward the Tuzla corridor." }
+    ]
+  },
+  {
+    "id": "battle_of_the_barracks_zenica",
+    "title": "Battle of the Barracks — Zenica",
+    "narrative": "ARBiH forces seize the JNA barracks in Zenica, capturing artillery pieces and ammunition stores. The Zenica garrison, weakened by Bosniak desertions, offers limited resistance. The captured equipment is distributed to 3rd Corps formations defending central Bosnia.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 4, "turn_max": 6, "phase": "war",
+      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "zenica", "threshold": 0.3 }
+    },
+    "once": true,
+    "effect": { "kind": "equipment_grant", "faction": "RBiH", "tanks": 2, "artillery": 5, "target_municipality": "zenica" },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RBiH", "delta": 8 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
+      { "kind": "narrative", "text": "3rd Corps inherits JNA artillery from the Zenica garrison. Central Bosnia defenses are strengthened." }
+    ]
+  },
+  {
+    "id": "battle_of_the_barracks_visoko",
+    "title": "Battle of the Barracks — Visoko",
+    "narrative": "The small JNA depot at Visoko is overrun by local TDF. A handful of armored vehicles and mortar tubes are captured. The symbolic victory boosts morale among defenders of the Sarajevo approaches.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 4, "turn_max": 6, "phase": "war",
+      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "visoko", "threshold": 0.3 }
+    },
+    "once": true,
+    "effect": { "kind": "equipment_grant", "faction": "RBiH", "tanks": 1, "artillery": 3, "target_municipality": "visoko" },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RBiH", "delta": 5 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": 2 },
+      { "kind": "narrative", "text": "Local TDF forces seize the Visoko depot. A few tanks and mortars join the defense of the Sarajevo corridor." }
+    ]
+  },
+  {
     "id": "arms_embargo_impact_1992",
     "title": "UN Arms Embargo Strangles Bosnia",
     "narrative": "The UN arms embargo, originally imposed on all of Yugoslavia, disproportionately impacts the fledgling Bosnian government. While the VRS inherits vast JNA stockpiles and the HVO receives supplies from Croatia, the ARBiH faces severe weapons shortages across all fronts.",

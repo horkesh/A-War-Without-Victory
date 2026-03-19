@@ -87,6 +87,27 @@ export interface EventEffectNegotiationCapital {
     delta: number;
 }
 
+/** Effect: grant equipment (tanks/artillery) to a faction's best-equipped brigade.
+ *  Zero-sum when paired with another faction's loss. Equipment starts degraded. */
+export interface EventEffectEquipmentGrant {
+    kind: 'equipment_grant';
+    faction: FactionId;
+    tanks?: number;
+    artillery?: number;
+    aa_systems?: number;
+    /** Municipality to target — equipment goes to a brigade in this municipality if possible. */
+    target_municipality?: string;
+}
+
+/** Effect: temporary aggression modifier for a faction's doctrine.
+ *  Applied as a flat bonus to corps aggression for duration_turns. */
+export interface EventEffectAggressionModifier {
+    kind: 'aggression_modifier';
+    faction: FactionId;
+    delta: number;
+    duration_turns: number;
+}
+
 export type EventEffect =
     | EventEffectNarrative
     | EventEffectMoraleChange
@@ -95,7 +116,9 @@ export type EventEffect =
     | EventEffectHumanitarianImpact
     | EventEffectPatronPressure
     | EventEffectAllianceChange
-    | EventEffectNegotiationCapital;
+    | EventEffectNegotiationCapital
+    | EventEffectEquipmentGrant
+    | EventEffectAggressionModifier;
 
 /** A player/bot response option for decision events. */
 export interface EventResponseOption {

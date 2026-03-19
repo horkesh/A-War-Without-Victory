@@ -1733,6 +1733,8 @@ negotiation?: import('./negotiation_types.js').NegotiationState;
 fired_event_ids?: string[];
 /** Pending event decisions awaiting player response. */
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
+/** Temporary aggression modifiers from events (e.g. VRS fury after barracks seizure). Expires after duration_turns. */
+event_aggression_modifiers?: Array<{ faction: string; delta: number; expires_turn: number }>;
 /** AI commander decision log for replay determinism. */
 ai_decision_log?: import('../sim/ai_commander/ai_types.js').CommandDecisionLogEntry[];
 /** AI commander army-level decisions for current turn (consumed by corps directive step). */
