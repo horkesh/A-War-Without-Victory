@@ -598,6 +598,11 @@ export interface FormationState {
     /** Turns remaining until paramilitary unit reaches target and captures it. */
     paramilitary_eta?: number;
 
+    /** Fractional scavenge accumulator — sub-integer amounts from battlefield scavenging.
+     *  When a brigade scavenges 0.3 tanks from a battle, it's stored here.
+     *  When the accumulator reaches ≥1.0, a whole unit is granted and debited. */
+    scavenge_accumulator?: { tanks: number; artillery: number };
+
     // --- OOB Rework: Brigade history, decorations, elite loan, lifecycle ---
     /** Brigade combat history (engagement log + running tallies). Initialized on first battle or at creation. */
     brigade_history?: BrigadeHistory;

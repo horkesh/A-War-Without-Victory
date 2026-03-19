@@ -983,57 +983,88 @@ export function resolveAttackOrdersOsid(
             }
         }
 
-        // ── Battlefield scavenging ──────────────────────────────────────────
+        // ── Battlefield scavenging (with fractional accumulator) ──────────────
         // Winner recovers a fraction of destroyed enemy equipment from the battlefield.
-        // Represents field repair of damaged/abandoned tanks and guns. Equipment starts
-        // degraded. Only the winning side can scavenge (losers retreat).
-        // Scavenge rates scale by outcome severity: decisive > victory > costly.
+        // Uses fractional accumulator: small amounts (e.g. 0.3 tanks) accumulate across
+        // battles. When ≥1.0, a whole unit is granted and the accumulator is debited.
+        // This ensures scavenging works even when individual battles destroy few units.
+        // Zero-sum: scavenged equipment is already destroyed — doesn't reduce the loser's count.
         const attackerLost = outcome === 'repulsed' || outcome === 'catastrophic';
         const attackerWon = outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory';
-        if (attackerWon && defenderFormation) {
-            const scavengeRate = outcome === 'decisive_victory' ? 0.20
-                : outcome === 'victory' ? 0.15 : 0.10;
-            const aComp2 = firstAttacker.composition;
-            if (aComp2) {
-                const scavTanks = Math.floor(totalDTanksLost * scavengeRate);
-                const scavArt = Math.floor(totalDArtLost * scavengeRate);
-                if (scavTanks > 0) {
-                    aComp2.tanks += scavTanks;
-                    const frac = scavTanks / Math.max(1, aComp2.tanks);
-                    aComp2.tank_condition.degraded += frac * 0.7;
-                    aComp2.tank_condition.operational = Math.max(0, aComp2.tank_condition.operational - frac * 0.5);
-                }
-                if (scavArt > 0) {
-                    aComp2.artillery += scavArt;
-                    const frac = scavArt / Math.max(1, aComp2.artillery);
-                    aComp2.artillery_condition.degraded += frac * 0.7;
-                    aComp2.artillery_condition.operational = Math.max(0, aComp2.artillery_condition.operational - frac * 0.5);
-                }
-                battleEquipScavengedTanks = scavTanks;
-                battleEquipScavengedArt = scavArt;
-                battleEquipScavengedBy = attackerFaction;
+
+        // Helper: accumulate fractional scavenge, return whole units to grant
+        const accumulateScavenge = (formation: FormationState, fracTanks: number, fracArt: number): { tanks: number; art: number } => {
+            if (!formation.scavenge_accumulator) formation.scavenge_accumulator = { tanks: 0, artillery: 0 };
+            const acc = formation.scavenge_accumulator;
+            acc.tanks += fracTanks;
+            acc.artillery += fracArt;
+            const grantTanks = Math.floor(acc.tanks);
+            const grantArt = Math.floor(acc.artillery);
+            acc.tanks -= grantTanks;
+            acc.artillery -= grantArt;
+            return { tanks: grantTanks, art: grantArt };
+        };
+
+        // Both sides scavenge from the other's destroyed equipment.
+        // Winner gets higher rate; loser still recovers some (the battlefield is
+        // contested — knocked-out vehicles left on the field are recovered by field
+        // repair teams from both sides). Historically critical: ARBiH recovered disabled
+        // VRS tanks even from lost engagements.
+        // Note: scavenging is from DESTROYED equipment (already removed from composition
+        // above). It does NOT further reduce the loser's count — it's partial recovery
+        // of equipment that would otherwise be total write-off.
+        const applyScavenge = (
+            recipient: FormationState,
+            enemyTanksLost: number, enemyArtLost: number,
+            rate: number, faction: string
+        ) => {
+            const comp = recipient.composition;
+            if (!comp) return;
+            const fracTanks = enemyTanksLost * rate;
+            const fracArt = enemyArtLost * rate;
+            const { tanks: scavTanks, art: scavArt } = accumulateScavenge(recipient, fracTanks, fracArt);
+            if (scavTanks > 0) {
+                comp.tanks += scavTanks;
+                const frac = scavTanks / Math.max(1, comp.tanks);
+                comp.tank_condition.degraded += frac * 0.7;
+                comp.tank_condition.operational = Math.max(0, comp.tank_condition.operational - frac * 0.5);
             }
-        } else if (attackerLost && defenderFormation) {
-            const scavengeRate = outcome === 'catastrophic' ? 0.20 : 0.10;
-            const dComp2 = defenderFormation.composition;
-            if (dComp2) {
-                const scavTanks = Math.floor(totalATanksLost * scavengeRate);
-                const scavArt = Math.floor(totalAArtLost * scavengeRate);
-                if (scavTanks > 0) {
-                    dComp2.tanks += scavTanks;
-                    const frac = scavTanks / Math.max(1, dComp2.tanks);
-                    dComp2.tank_condition.degraded += frac * 0.7;
-                    dComp2.tank_condition.operational = Math.max(0, dComp2.tank_condition.operational - frac * 0.5);
-                }
-                if (scavArt > 0) {
-                    dComp2.artillery += scavArt;
-                    const frac = scavArt / Math.max(1, dComp2.artillery);
-                    dComp2.artillery_condition.degraded += frac * 0.7;
-                    dComp2.artillery_condition.operational = Math.max(0, dComp2.artillery_condition.operational - frac * 0.5);
-                }
-                battleEquipScavengedTanks = scavTanks;
-                battleEquipScavengedArt = scavArt;
-                battleEquipScavengedBy = defenderFormation.faction as string;
+            if (scavArt > 0) {
+                comp.artillery += scavArt;
+                const frac = scavArt / Math.max(1, comp.artillery);
+                comp.artillery_condition.degraded += frac * 0.7;
+                comp.artillery_condition.operational = Math.max(0, comp.artillery_condition.operational - frac * 0.5);
+            }
+            battleEquipScavengedTanks += scavTanks;
+            battleEquipScavengedArt += scavArt;
+            if (scavTanks > 0 || scavArt > 0) battleEquipScavengedBy = faction;
+        };
+
+        if (attackerWon) {
+            // Winner (attacker) scavenges from defender's destroyed equipment at high rate
+            const winRate = outcome === 'decisive_victory' ? 0.20
+                : outcome === 'victory' ? 0.15 : 0.10;
+            applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, winRate, attackerFaction);
+            // Loser (defender) still recovers some attacker destroyed equipment at low rate
+            // (disabled VRS tanks left on ARBiH positions before VRS advances)
+            if (defenderFormation) {
+                const loseRate = 0.05;
+                applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, loseRate, defenderFormation.faction as string);
+            }
+        } else if (attackerLost) {
+            // Winner (defender) scavenges from attacker's destroyed equipment at high rate
+            if (defenderFormation) {
+                const winRate = outcome === 'catastrophic' ? 0.20 : 0.10;
+                applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, winRate, defenderFormation.faction as string);
+            }
+            // Loser (attacker) still recovers some defender destroyed equipment at low rate
+            const loseRate = 0.05;
+            applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, loseRate, attackerFaction);
+        } else {
+            // Stalemate: both sides scavenge at low rate from each other's losses
+            applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, 0.05, attackerFaction);
+            if (defenderFormation) {
+                applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, 0.05, defenderFormation.faction as string);
             }
         }
 
@@ -1069,11 +1100,20 @@ export function resolveAttackOrdersOsid(
         } else if (attackerLost && defenderFormation?.composition && firstAttacker.composition) {
             // Defender captures from retreating/routed attacker — ARBiH repulsing
             // a VRS assault recovers abandoned tanks and artillery from the field.
+            // Minimum 1 tank captured if attacker had 10+ tanks (disabled vehicle left
+            // on the battlefield — historically common when VRS attacked ARBiH positions).
+            // Zero-sum: captured equipment is removed from the attacker's composition.
             const captureRate = outcome === 'catastrophic' ? 0.08 : 0.03;
             const aComp3 = firstAttacker.composition;
             const dComp3 = defenderFormation.composition;
-            const capTanks = Math.floor(aComp3.tanks * captureRate);
-            const capArt = Math.floor(aComp3.artillery * captureRate);
+            const DEFENSIVE_CAPTURE_MIN_TANKS = 10; // attacker needs 10+ tanks for guaranteed capture
+            const DEFENSIVE_CAPTURE_MIN_ART = 15;   // attacker needs 15+ artillery for guaranteed capture
+            const rawCapTanks = aComp3.tanks * captureRate;
+            const rawCapArt = aComp3.artillery * captureRate;
+            const capTanks = rawCapTanks >= 1 ? Math.floor(rawCapTanks)
+                : (aComp3.tanks >= DEFENSIVE_CAPTURE_MIN_TANKS ? 1 : 0);
+            const capArt = rawCapArt >= 1 ? Math.floor(rawCapArt)
+                : (aComp3.artillery >= DEFENSIVE_CAPTURE_MIN_ART ? 1 : 0);
             if (capTanks > 0) {
                 aComp3.tanks -= capTanks;
                 dComp3.tanks += capTanks;
