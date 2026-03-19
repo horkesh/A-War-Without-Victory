@@ -1,5 +1,47 @@
 [
   {
+    "id": "gornji_vakuf_clashes_1993",
+    "title": "HVO-ARBiH Fighting Erupts at Gornji Vakuf",
+    "narrative": "Heavy fighting breaks out between HVO and ARBiH forces in Gornji Vakuf as the HVO attempts to establish control over the town in line with the proposed Vance-Owen provincial boundaries. The clashes — involving tanks, artillery, and infantry — mark a significant escalation beyond the sporadic incidents of late 1992.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 35,
+      "turn_max": 60,
+      "phase": "war",
+      "condition": {
+        "type": "alliance_below",
+        "value": 0.45
+      }
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "capital_based",
+    "effect": { "kind": "alliance_change", "delta": -0.15 },
+    "effects": [
+      { "kind": "narrative", "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a pretext for Croat territorial grabs." }
+    ],
+    "response_options": [
+      {
+        "id": "escalate",
+        "label": "Respond with force",
+        "description": "Send reinforcements to Gornji Vakuf. Escalates the confrontation significantly.",
+        "effects": [
+          { "kind": "alliance_change", "delta": -0.20 },
+          { "kind": "morale_change", "faction": "HRHB", "delta": 3 }
+        ]
+      },
+      {
+        "id": "negotiate",
+        "label": "Seek a local ceasefire",
+        "description": "Attempt to contain the fighting. De-escalates but does not resolve underlying tensions.",
+        "effects": [
+          { "kind": "alliance_change", "delta": -0.05 },
+          { "kind": "morale_change", "faction": "HRHB", "delta": -2 }
+        ]
+      }
+    ]
+  },
+  {
     "id": "vance_owen_plan_1993",
     "title": "Vance-Owen Peace Plan Presented",
     "narrative": "The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The plan is endorsed by the Bosnian Croats and reluctantly by the Bosniaks, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date.",
@@ -31,15 +73,84 @@
     ]
   },
   {
-    "id": "gornji_vakuf_clashes_1993",
-    "title": "HVO-ARBiH Fighting Erupts at Gornji Vakuf",
-    "narrative": "Heavy fighting breaks out between HVO and ARBiH forces in Gornji Vakuf as the HVO attempts to establish control over the town in line with the proposed Vance-Owen provincial boundaries. The clashes — involving tanks, artillery, and infantry — mark a significant escalation beyond the sporadic incidents of late 1992.",
+    "id": "croat_bosniak_war_begins_1993",
+    "title": "Croat-Bosniak War Erupts",
+    "narrative": "Full-scale fighting erupts between the HVO and the ARBiH across central Bosnia and Herzegovina. Emboldened by the Vance-Owen provincial map and Croatian political pressure, HVO forces launch coordinated offensives to secure territories claimed for Herceg-Bosna. What began as sporadic clashes at Prozor and Gornji Vakuf escalates into systematic ethnic cleansing on both sides, opening a devastating second front for the Bosnian government.",
     "category": "military",
-    "trigger": { "turn_min": 40, "turn_max": 40, "phase": "war" },
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 80,
+      "phase": "war",
+      "condition": {
+        "type": "alliance_below",
+        "value": 0.10
+      }
+    },
     "once": true,
-    "effect": { "kind": "alliance_change", "delta": -0.15 },
+    "effect": { "kind": "alliance_change", "delta": -0.5 },
     "effects": [
-      { "kind": "narrative", "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a pretext for Croat territorial grabs." }
+      { "kind": "morale_change", "faction": "HRHB", "delta": 5 },
+      { "kind": "narrative", "text": "The Croat-Bosniak alliance collapses. HVO and ARBiH forces engage in open warfare across central Bosnia." }
+    ]
+  },
+  {
+    "id": "ahmici_massacre_1993",
+    "title": "Ahmici Massacre",
+    "narrative": "HVO forces, supported by the Jokers special police unit, launch a coordinated attack on the Bosniak village of Ahmici in the Lasva Valley. Over 100 civilians are killed, including women and children, and the village is systematically burned. The massacre becomes one of the most documented war crimes of the conflict and a defining atrocity of the Croat-Bosniak war.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 70,
+      "phase": "war",
+      "requires_events": ["croat_bosniak_war_begins_1993"],
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "HRHB",
+        "municipality": "vitez",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "effect": { "kind": "humanitarian_impact", "faction": "HRHB", "war_crimes_delta": 3 },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "HRHB", "dimension": "international_credibility", "delta": -25 },
+      { "kind": "narrative", "text": "The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow." }
+    ]
+  },
+  {
+    "id": "east_mostar_siege_1993",
+    "title": "HVO Besieges East Mostar",
+    "narrative": "HVO forces impose a complete blockade on the eastern bank of Mostar, cutting off the Bosniak population from food, water, and medical supplies. Systematic shelling targets the densely populated old town. An estimated 55,000 Bosniaks are trapped in increasingly desperate conditions as the HVO seeks to drive them from the city entirely.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 45,
+      "turn_max": 80,
+      "phase": "war",
+      "requires_events": ["croat_bosniak_war_begins_1993"]
+    },
+    "once": true,
+    "effect": { "kind": "humanitarian_impact", "faction": "HRHB", "war_crimes_delta": 2 },
+    "effects": [
+      { "kind": "supply_delta", "faction": "HRHB", "delta": -5 },
+      { "kind": "patron_pressure", "faction": "HRHB", "delta": 5 },
+      { "kind": "narrative", "text": "East Mostar is besieged. 55,000 Bosniaks are trapped as HVO forces impose a total blockade on the eastern bank." }
+    ]
+  },
+  {
+    "id": "central_bosnia_fighting_1993",
+    "title": "Central Bosnia Engulfed in Three-Way War",
+    "narrative": "Central Bosnia becomes a patchwork of overlapping front lines as VRS, HVO, and ARBiH forces fight simultaneously. Towns like Travnik, Vitez, and Busovaca change hands or are divided street by street. The three-way nature of the conflict creates impossible tactical situations and widespread civilian suffering.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 46,
+      "turn_max": 80,
+      "phase": "war",
+      "requires_events": ["croat_bosniak_war_begins_1993"]
+    },
+    "once": true,
+    "effect": { "kind": "narrative", "text": "Three-way fighting engulfs central Bosnia. The overlapping front lines create a humanitarian catastrophe." },
+    "effects": [
+      { "kind": "morale_change", "faction": "RBiH", "delta": -3 }
     ]
   },
   {
@@ -56,32 +167,6 @@
     ]
   },
   {
-    "id": "croat_bosniak_war_begins_1993",
-    "title": "Croat-Bosniak War Erupts",
-    "narrative": "Full-scale fighting erupts between the HVO and the ARBiH across central Bosnia and Herzegovina. Emboldened by the Vance-Owen provincial map and Croatian political pressure, HVO forces launch coordinated offensives to secure territories claimed for Herceg-Bosna. What began as sporadic clashes at Prozor and Gornji Vakuf escalates into systematic ethnic cleansing on both sides, opening a devastating second front for the Bosnian government.",
-    "category": "military",
-    "trigger": { "turn_min": 54, "turn_max": 54, "phase": "war" },
-    "once": true,
-    "effect": { "kind": "alliance_change", "delta": -0.5 },
-    "effects": [
-      { "kind": "morale_change", "faction": "HRHB", "delta": 5 },
-      { "kind": "narrative", "text": "The Croat-Bosniak alliance collapses. HVO and ARBiH forces engage in open warfare across central Bosnia." }
-    ]
-  },
-  {
-    "id": "ahmici_massacre_1993",
-    "title": "Ahmici Massacre",
-    "narrative": "HVO forces, supported by the Jokers special police unit, launch a coordinated attack on the Bosniak village of Ahmici in the Lasva Valley. Over 100 civilians are killed, including women and children, and the village is systematically burned. The massacre becomes one of the most documented war crimes of the conflict and a defining atrocity of the Croat-Bosniak war.",
-    "category": "humanitarian",
-    "trigger": { "turn_min": 54, "turn_max": 54, "phase": "war", "requires_events": ["croat_bosniak_war_begins_1993"] },
-    "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "HRHB", "war_crimes_delta": 3 },
-    "effects": [
-      { "kind": "negotiation_capital", "faction": "HRHB", "dimension": "international_credibility", "delta": -25 },
-      { "kind": "narrative", "text": "The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow." }
-    ]
-  },
-  {
     "id": "un_safe_areas_declared_1993",
     "title": "UN Declares Safe Areas",
     "narrative": "The UN Security Council passes Resolution 819, declaring Srebrenica a safe area, followed by Resolution 824 extending protection to Sarajevo, Tuzla, Zepa, Gorazde, and Bihac. The resolutions promise protection without committing adequate military force to deliver it — a fatal gap between mandate and means that will have catastrophic consequences.",
@@ -95,29 +180,20 @@
     ]
   },
   {
-    "id": "east_mostar_siege_1993",
-    "title": "HVO Besieges East Mostar",
-    "narrative": "HVO forces impose a complete blockade on the eastern bank of Mostar, cutting off the Bosniak population from food, water, and medical supplies. Systematic shelling targets the densely populated old town. An estimated 55,000 Bosniaks are trapped in increasingly desperate conditions as the HVO seeks to drive them from the city entirely.",
+    "id": "operation_neretva_93_1993",
+    "title": "Operation Neretva '93",
+    "narrative": "The ARBiH launches Operation Neretva '93 against HVO positions in Herzegovina and the Neretva Valley. The offensive aims to break the HVO siege of East Mostar and secure a corridor to the coast. Fierce fighting erupts around Jablanica and along the Neretva River as the ARBiH attempts to exploit its growing numerical advantage.",
     "category": "military",
-    "trigger": { "turn_min": 57, "turn_max": 57, "phase": "war", "requires_events": ["croat_bosniak_war_begins_1993"] },
+    "trigger": {
+      "turn_min": 60,
+      "turn_max": 95,
+      "phase": "war",
+      "requires_events": ["croat_bosniak_war_begins_1993"]
+    },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "HRHB", "war_crimes_delta": 2 },
+    "effect": { "kind": "narrative", "text": "The ARBiH launches Operation Neretva '93, striking at HVO positions in the Neretva Valley and around Mostar." },
     "effects": [
-      { "kind": "supply_delta", "faction": "HRHB", "delta": -5 },
-      { "kind": "patron_pressure", "faction": "HRHB", "delta": 5 },
-      { "kind": "narrative", "text": "East Mostar is besieged. 55,000 Bosniaks are trapped as HVO forces impose a total blockade on the eastern bank." }
-    ]
-  },
-  {
-    "id": "central_bosnia_fighting_1993",
-    "title": "Central Bosnia Engulfed in Three-Way War",
-    "narrative": "Central Bosnia becomes a patchwork of overlapping front lines as VRS, HVO, and ARBiH forces fight simultaneously. Towns like Travnik, Vitez, and Busovaca change hands or are divided street by street. The three-way nature of the conflict creates impossible tactical situations and widespread civilian suffering.",
-    "category": "military",
-    "trigger": { "turn_min": 58, "turn_max": 58, "phase": "war", "requires_events": ["croat_bosniak_war_begins_1993"] },
-    "once": true,
-    "effect": { "kind": "narrative", "text": "Three-way fighting engulfs central Bosnia. The overlapping front lines create a humanitarian catastrophe." },
-    "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": -3 }
+      { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
     ]
   },
   {
@@ -162,18 +238,6 @@
           { "kind": "morale_change", "faction": "RBiH", "delta": 2 }
         ]
       }
-    ]
-  },
-  {
-    "id": "operation_neretva_93_1993",
-    "title": "Operation Neretva '93",
-    "narrative": "The ARBiH launches Operation Neretva '93 against HVO positions in Herzegovina and the Neretva Valley. The offensive aims to break the HVO siege of East Mostar and secure a corridor to the coast. Fierce fighting erupts around Jablanica and along the Neretva River as the ARBiH attempts to exploit its growing numerical advantage.",
-    "category": "military",
-    "trigger": { "turn_min": 75, "turn_max": 75, "phase": "war", "requires_events": ["croat_bosniak_war_begins_1993"] },
-    "once": true,
-    "effect": { "kind": "narrative", "text": "The ARBiH launches Operation Neretva '93, striking at HVO positions in the Neretva Valley and around Mostar." },
-    "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
     ]
   },
   {
