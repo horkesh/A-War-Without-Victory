@@ -398,6 +398,26 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'activate-corps',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            // Ensure all OOB corps exist as formations (some activate after peace phase ends).
+            // Key case: hvo_central_bosnia (available_from:10) — peace-phase activate-corps
+            // never runs when scenario starts directly in war phase.
+            // Idempotent: skips corps that already exist.
+            const catalog = await loadRecruitmentCatalog();
+            if (!catalog?.corps?.length) return;
+            const { activateCorpsForTurn } = await import('../early_war/activate_corps.js');
+            activateCorpsForTurn(
+                context.state,
+                catalog.corps,
+                context.state.meta.turn,
+                undefined,
+                catalog.municipality_hq_settlement
+            );
+        }
+    },
+    {
         name: 'load-operational-data',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
