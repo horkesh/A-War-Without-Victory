@@ -259,7 +259,7 @@ export function OpsMap({
             map.remove();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [corpsId]); // Only reinit on corps change, not on every state change
+    }, [corpsId, !!loadedGameState]); // Reinit on corps change or when game state first loads
 
     // Update overlays when objectives/staging/axes change, or map finishes loading
     useEffect(() => {
