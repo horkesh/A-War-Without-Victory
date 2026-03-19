@@ -462,7 +462,7 @@ export function buildCorpsFrontLinesGeoJSON(
         friendlyAdj.get(partB)!.push(partA);
     }
 
-    const MAX_BRIDGE_HOPS = 3;
+    const MAX_BRIDGE_HOPS = 8;
     let bridging = true;
     while (bridging) {
         bridging = false;
