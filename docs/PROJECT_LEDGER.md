@@ -1,7 +1,36 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-19
-**Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n948: 92.1% area-weighted.** Equipment system overhaul, polygon harmonization, front line rendering overhaul.
+**Status:** **v0.4.9** (AI Comes Alive). **1204 tests**, 98 suites. **n955: 91.2% area-weighted.** Battle of the Barracks events, ARBiH tank capture overhaul, per-brigade equipment tracking, polygon harmonization, front line rendering.
+
+## [2026-03-19] n955 — Battle of the Barracks + ARBiH Tank Capture Overhaul
+
+### Battle of the Barracks (emergent events)
+Four conditional events at w4-6 (2 May 1992). Each fires only if ARBiH controls ≥30% of the target municipality. Total: **13 tanks + 26 artillery** to ARBiH.
+- **Sarajevo**: 4 tanks, 8 arty, +10 supply, +5 morale, VRS fury +0.15/8t, patron pressure +5
+- **Tuzla** (Brčanska Malta column): 6 tanks, 10 arty, +15 supply, +8 morale, VRS fury +0.20/10t, patron pressure +10
+- **Zenica**: 2 tanks, 5 arty, +8 supply, +3 morale
+- **Visoko**: 1 tank, 3 arty, +5 supply, +2 morale
+
+Two new event effect types: `equipment_grant`, `aggression_modifier`. Consequences: VRS retaliation (aggression boost), international condemnation (patron pressure), war crimes (Tuzla column).
+
+### ARBiH Tank Capture Mechanics
+- Fractional scavenge accumulator (`scavenge_accumulator` on FormationState)
+- Both-sides scavenging (loser 15%, winner 15-25%, stalemate 8%)
+- Scarce tank protection (<10 tanks: half loss rate, no min-1)
+- Defensive capture minimum (repulse 10+ tanks → 1 guaranteed)
+- Abandoned capture rate 0.0004 tanks/pop (was 0.0002)
+- Per-brigade tracking: `total_equipment_destroyed` / `total_equipment_captured` on BrigadeHistory
+- 12 brigade accolades (`src/state/brigade_accolades.ts`)
+- Corps panel equipment display (CorpsDetail.tsx)
+
+### Results
+| Metric | n948 | n955 |
+|--------|:-:|:-:|
+| Area-weighted | 92.1% | **91.2%** |
+| RBiH tanks w40 | 24 | **39 (+15)** |
+| RS tanks w40 | 560 | **563** |
+| Barracks events | — | **4/4 fired** |
 
 ## [2026-03-19] Ops Modal Arrow Init Fix — isStyleLoaded() False During Load Callback
 

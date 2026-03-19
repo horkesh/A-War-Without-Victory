@@ -8,11 +8,11 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-19, v0.4.9 — Equipment Overhaul + Front Line + Displacement)
-**v0.4.9.** 1204 tests, 98 suites. tsc clean. **Latest calibration: n948 92.1% area-weighted.**
-**This session:** Equipment system overhaul (phantom tank fix, JNA priority handoff, abandoned capture, battle report equipment fields). Front line rendering overhaul. Polygon boundary harmonization (77/134 pairs fixed). Stale front edge fix. Ops modal arrow init fix (isStyleLoaded false during load callback). Displacement routing (previous session). PNG→WebP asset migration.
-**Equipment pipeline:** Battlefield scavenging (10-20% of destroyed enemy, scaled by outcome), capture from retreat (2-8%), abandoned capture on uncontested occupation (pop-proportional, RS positions only), arms smuggling (2 tanks + 3 arty / 12 turns, 60/40 ARBiH/HVO), Zenica steelworks (+3 arty / 8 turns ARBiH), HV transfers (+1 arty / 12 turns HVO). Write-off: >40% non-functional scrapped 1/turn. No per-brigade auto-tickers. `ensureBrigadeComposition` returns empty for non-brigade formations. JNA handoff prioritizes mech/moto for tanks. Dynamic recruitment: no JNA override.
-**NEXT:** Per-brigade equipment tracking (destroyed/captured attribution). Brigade accolades (tank hunters etc). Corps panel equipment display.
+## Current State (2026-03-19, v0.4.9 — Battle of the Barracks + Equipment Overhaul)
+**v0.4.9.** 1204 tests, 98 suites. tsc clean. **Latest calibration: n955 91.2% area-weighted. RBiH tanks 24→39.**
+**This session:** Battle of the Barracks (4 conditional events, 13 tanks + 26 arty to ARBiH). ARBiH tank capture overhaul (fractional accumulator, both-sides scavenging 15%, scarce tank protection, defensive capture min). Per-brigade equipment tracking + 12 accolades + corps panel equipment. Equipment system overhaul (phantom tank fix, JNA priority). Front line rendering overhaul. Polygon harmonization (77/134 pairs). Displacement routing (previous session).
+**Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
+**Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
 **10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.
 **Calibration freeze rule:** After v0.6.1, any sim-affecting change needs `npm run calibrate:52w` regression check vs freeze baseline.
@@ -82,7 +82,7 @@
 7. **[2026-03-17] 3rd Corps brigade displacement (P2)**: 16/27 brigades far from home municipality. Operations displace brigades south, garrison-fill reassigns by proximity. Home affinity tuning regresses calibration. Fix: post-operation return-to-home-sector march logic.
 8. **[2026-03-15] Visual assets — EXTERNAL**: User generating via Gemini Pro.
 9. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical. Smuggle volumes or scavenge rates may need small bump.
-10. **[2026-03-19] Polygon topology fix — vertex snapping (P2)**: `topojsonClient.merge()` doesn't create shared arcs between cluster polygons. 37 OSID pairs have no shared edges. Topology rebuild quantizes coordinates, regressing calibration 91%→87%. Next: vertex snapping approach. See `docs/40_reports/MAP_GEOMETRY_MASTER.md`.
+10. **[2026-03-19] JNA barracks seizure — IMPLEMENTED**: 4 conditional events in `war_1992.json`. 13 tanks + 26 arty. RBiH tanks 24→39 at w40.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
