@@ -6,17 +6,23 @@
 > **Canon:** v0.6.0 two-phase model (Peace / War). There is no separate "Phase I" or "Phase II".
 > As of 2026-03-07, codebase fully uses Peace/War terminology (legacy `phase_ii_*` step IDs renamed).
 >
-> **Architecture (2026-03-01):** Displacement is **OSID-based**, not municipality-based.
+> **Architecture (2026-03-01, updated 2026-03-19):** Displacement is **OSID-based**, not municipality-based.
 > Each OSID triggers its own displacement independently. Municipalities only serve as
 > grouping for camps before routing. Minority flight is **disabled** — displacement
-> triggers only from hostile OSID takeover (war-start seeding + battle flips).
+> triggers only from hostile OSID takeover (war-start seeding + ALL 5 control-flip paths).
+>
+> **n942 fix (2026-03-19):** All control-flip paths now seed displacement timers via
+> `seedDisplacementTimerOnFlip()`: battle resolution, rear pocket consolidation,
+> paramilitary sweep, JNA phantom captures. Previously only battle resolution fired.
+> Routing overhaul: per-municipality Krajina routing, Drina split (Zvornik→Tuzla,
+> Bratunac/Vlasenica→Srebrenica), Krajina flee-abroad 35%, enclave reinforcement rate 0.005.
 
 ## 1. Overview
 
 Displacement models the forced movement of civilian populations during the Bosnian War. It is a core mechanic that:
 
 - **Permanently reduces recruitment capacity** at origin municipalities (displaced_out is irreversible)
-- **Generates refugee manpower** at destination municipalities (5% of routed displaced → militia pools)
+- **Generates refugee manpower** at destination municipalities (2% of routed displaced → militia pools; 0.5% for besieged enclaves)
 - **Feeds exhaustion and humanitarian pressure** (trapped populations, siege conditions)
 - **Tracks civilian casualties** (killed, fled abroad) as aggregate faction-level counters
 
