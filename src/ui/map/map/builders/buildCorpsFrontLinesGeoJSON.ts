@@ -372,9 +372,89 @@ export function buildCorpsFrontLinesGeoJSON(
         });
     }
 
+    // Merge within groups first (exact vertex matching)
     const mergedFront: Feature<LineString, CorpsFrontProperties>[] = [];
     for (const segments of frontSegmentsByGroup.values()) {
         mergedFront.push(...mergeLineSegments(segments));
+    }
+
+    // Cross-group bridge: connect dead-end polylines through friendly polygon edges.
+    // At triple junctions, the front transitions through 1-3 same-faction edges before
+    // the next hostile edge. Walk these connectors so the front line is continuous.
+    const hostileEdgeKeys = new Set<string>();
+    for (const [ek, osids] of edgeMap) {
+        if (osids.size !== 2) continue;
+        const [a, b] = [...osids];
+        const ca = controllerMap.get(a), cb = controllerMap.get(b);
+        if (ca && cb && ca !== cb) hostileEdgeKeys.add(ek);
+    }
+
+    // Build friendly-edge adjacency (non-hostile polygon edges)
+    const friendlyAdj = new Map<string, Set<string>>();
+    for (const [ek, osids] of edgeMap) {
+        if (osids.size !== 2) continue;
+        if (hostileEdgeKeys.has(ek)) continue;
+        const [partA, partB] = ek.split('|');
+        if (!friendlyAdj.has(partA)) friendlyAdj.set(partA, new Set());
+        if (!friendlyAdj.has(partB)) friendlyAdj.set(partB, new Set());
+        friendlyAdj.get(partA)!.add(partB);
+        friendlyAdj.get(partB)!.add(partA);
+    }
+
+    // BFS from each dead-end to find nearest other dead-end via friendly edges (max 3 hops)
+    const MAX_BRIDGE_HOPS = 3;
+    const deadEndCoords = new Map<string, { idx: number; end: 'head' | 'tail' }>();
+    for (let i = 0; i < mergedFront.length; i++) {
+        const c = mergedFront[i].geometry.coordinates;
+        const hk = coordKey(c[0]);
+        const tk = coordKey(c[c.length - 1]);
+        // Only mark as dead-end if the endpoint isn't shared by another polyline
+        if (!deadEndCoords.has(hk)) deadEndCoords.set(hk, { idx: i, end: 'head' });
+        if (!deadEndCoords.has(tk)) deadEndCoords.set(tk, { idx: i, end: 'tail' });
+    }
+
+    for (const [startKey, source] of deadEndCoords) {
+        const visited = new Map<string, string | null>();
+        visited.set(startKey, null);
+        let frontier = [startKey];
+
+        for (let hop = 0; hop < MAX_BRIDGE_HOPS && frontier.length > 0; hop++) {
+            const next: string[] = [];
+            for (const fk of frontier) {
+                for (const nk of friendlyAdj.get(fk) ?? []) {
+                    if (visited.has(nk)) continue;
+                    visited.set(nk, fk);
+                    next.push(nk);
+
+                    // Check if nk is a dead-end of a DIFFERENT polyline
+                    const target = deadEndCoords.get(nk);
+                    if (target && target.idx !== source.idx) {
+                        // Reconstruct path and add connector
+                        const path: [number, number][] = [];
+                        let cur: string | null = nk;
+                        while (cur !== null) {
+                            const [x, y] = cur.split(',').map(Number);
+                            path.unshift([x, y]);
+                            cur = visited.get(cur) ?? null;
+                        }
+                        if (path.length >= 2) {
+                            mergedFront.push({
+                                type: 'Feature',
+                                properties: mergedFront[source.idx].properties,
+                                geometry: { type: 'LineString', coordinates: path },
+                            });
+                        }
+                        // Remove both dead-ends so we don't bridge again
+                        deadEndCoords.delete(startKey);
+                        deadEndCoords.delete(nk);
+                        frontier = []; // Break all loops
+                        break;
+                    }
+                }
+                if (frontier.length === 0) break;
+            }
+            frontier = next;
+        }
     }
 
     const allFeatures: Feature<LineString>[] = [...glowFeatures, ...mergedFront];
