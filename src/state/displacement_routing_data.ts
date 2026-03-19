@@ -65,19 +65,28 @@ export function getReceivingCapacityFraction(munId: MunicipalityId): number {
  * abroad_fraction: 0.00 for all Bosniak routes (no external state to flee to).
  */
 const BOSNIAK_ROUTES: Record<string, readonly MunicipalityId[]> = {
-    KRAJINA_NORTHWEST:  ['travnik', 'jajce', 'zenica', 'bihac'],
-    KRAJINA_BANJALUKA:  ['travnik', 'jajce', 'tesanj', 'zenica', 'tuzla'],
+    // Krajina: Prijedor/Sanski Most can't reach Travnik directly (RS blocks road).
+    // Primary escape was organized convoys to Croatia (handled by flee-abroad).
+    // Internal: Bihać pocket (via Bosanska Krupa) or Travnik (if Vlašić corridor open).
+    KRAJINA_PRIJEDOR:   ['bihac', 'bosanska_krupa', 'cazin', 'travnik', 'zenica'],
+    KRAJINA_SANSKI:     ['bihac', 'bosanska_krupa', 'travnik', 'zenica'],
+    KRAJINA_KLJUC:      ['donji_vakuf', 'travnik', 'bugojno', 'zenica'],  // Ključ→Donji Vakuf road (M-5)
+    KRAJINA_BOS_NOVI:   ['bosanska_krupa', 'bihac', 'cazin'],  // on Croatian border — most flee abroad
+    KRAJINA_BANJALUKA:  ['travnik', 'zenica', 'visoko'],  // convoys via Vlašić corridor; Tešanj/Tuzla unreachable
     KRAJINA_WEST:       ['bihac', 'cazin', 'velika_kladusa'],
     KRAJINA_POSAVINA:   ['doboj', 'tesanj', 'tuzla', 'zenica'],
     KRAJINA_KOTOR:      ['travnik', 'tesanj', 'zenica', 'tuzla'],
-    KRAJINA_MOUNTAIN:   ['jajce', 'travnik', 'bugojno', 'zenica'],
+    KRAJINA_MOUNTAIN:   ['donji_vakuf', 'travnik', 'bugojno', 'zenica'],  // Jajce removed (falls w26)
     POSAVINA_BIJELJINA: ['kalesija', 'zivinice', 'tuzla', 'srebrenik'],
     POSAVINA_BRCKO:     ['gradacac', 'srebrenik', 'tuzla'],
     POSAVINA_SAMAC:     ['gradacac', 'gracanica', 'tuzla'],
     POSAVINA_DOBOJ:     ['tesanj', 'maglaj', 'zenica', 'tuzla'],
     POSAVINA_DERVENTA:  ['tesanj', 'doboj', 'tuzla', 'zenica'],
     POSAVINA_BROD:      ['tesanj', 'doboj', 'zenica'],
-    DRINA_NORTH:        ['srebrenica', 'kalesija', 'tuzla', 'kladanj'],
+    // Drina: SPLIT — Zvornik displaced go west to Tuzla (not south to Srebrenica).
+    // Bratunac/Vlasenica displaced go INTO Srebrenica enclave (forming it).
+    DRINA_ZVORNIK:      ['kalesija', 'tuzla', 'zivinice', 'kladanj'],  // west via Sapna/Kalesija
+    DRINA_ENCLAVE:      ['srebrenica', 'kladanj', 'tuzla'],  // Bratunac/Vlasenica → Srebrenica enclave
     DRINA_SOUTH:        ['gorazde', 'centar_sarajevo', 'zenica'],
     DRINA_SEKOVICI:     ['kladanj', 'olovo', 'tuzla'],
     SARAJEVO_RS_HELD:   ['centar_sarajevo', 'visoko', 'zenica'],
@@ -89,8 +98,8 @@ const BOSNIAK_ROUTES: Record<string, readonly MunicipalityId[]> = {
 
 /** Bosniak municipality → routing region. */
 const BOSNIAK_ROUTING_REGION: Record<string, string> = {
-    // Region 1: Krajina
-    prijedor: 'KRAJINA_NORTHWEST', sanski_most: 'KRAJINA_NORTHWEST', kljuc: 'KRAJINA_NORTHWEST', bosanski_novi: 'KRAJINA_NORTHWEST',
+    // Region 1: Krajina — per-municipality routing (road network varies widely)
+    prijedor: 'KRAJINA_PRIJEDOR', sanski_most: 'KRAJINA_SANSKI', kljuc: 'KRAJINA_KLJUC', bosanski_novi: 'KRAJINA_BOS_NOVI',
     banja_luka: 'KRAJINA_BANJALUKA', celinac: 'KRAJINA_BANJALUKA', laktasi: 'KRAJINA_BANJALUKA', prnjavor: 'KRAJINA_BANJALUKA',
     bosanski_petrovac: 'KRAJINA_WEST', titov_drvar: 'KRAJINA_WEST', bosansko_grahovo: 'KRAJINA_WEST', glamoc: 'KRAJINA_WEST',
     bosanska_dubica: 'KRAJINA_POSAVINA', bosanska_kostajnica: 'KRAJINA_POSAVINA', bosanska_gradiska: 'KRAJINA_POSAVINA', srbac: 'KRAJINA_POSAVINA',
@@ -103,8 +112,9 @@ const BOSNIAK_ROUTING_REGION: Record<string, string> = {
     doboj: 'POSAVINA_DOBOJ',
     derventa: 'POSAVINA_DERVENTA', modrica: 'POSAVINA_DERVENTA',
     bosanski_brod: 'POSAVINA_BROD',
-    // Region 6: Drina Valley
-    zvornik: 'DRINA_NORTH', bratunac: 'DRINA_NORTH', vlasenica: 'DRINA_NORTH', srebrenica: 'DRINA_NORTH',
+    // Region 6: Drina Valley — SPLIT: Zvornik goes west to Tuzla; Bratunac/Vlasenica go to Srebrenica
+    zvornik: 'DRINA_ZVORNIK',
+    bratunac: 'DRINA_ENCLAVE', vlasenica: 'DRINA_ENCLAVE', srebrenica: 'DRINA_ENCLAVE',
     visegrad: 'DRINA_SOUTH', rogatica: 'DRINA_SOUTH', foca: 'DRINA_SOUTH', gorazde: 'DRINA_SOUTH',
     cajnice: 'DRINA_SOUTH', rudo: 'DRINA_SOUTH', kalinovik: 'DRINA_SOUTH',
     sekovici: 'DRINA_SEKOVICI', han_pijesak: 'DRINA_SEKOVICI',
@@ -141,10 +151,12 @@ const CROAT_ROUTES: Record<string, readonly MunicipalityId[]> = {
     KRAJINA_ALL:            ['livno', 'kupres', 'mostar', 'capljina'],
     KOTOR_VAROS:            ['travnik', 'vitez', 'kiseljak', 'mostar'],
     POSAVINA_ORASJE:        ['orasje'],
-    POSAVINA_REST:          ['orasje', 'gradacac'],
+    POSAVINA_SAMAC_ODZAK:   ['orasje', 'gradacac'],  // eastern Posavina → Orašje pocket
+    POSAVINA_BROD_DERVENTA: ['zepce', 'travnik', 'vitez', 'zenica'],  // western Posavina → south via Žepče
+    POSAVINA_MODRICA:       ['gradacac', 'orasje', 'tuzla'],
     DOBOJ_AREA:             ['tesanj', 'zepce', 'travnik'],
     CENTRAL_BOSNIA_LASVA:   ['kiseljak', 'kresevo', 'mostar', 'livno'],
-    CENTRAL_BOSNIA_JAJCE:   ['livno', 'mostar'],
+    CENTRAL_BOSNIA_JAJCE:   ['travnik', 'vitez', 'livno', 'mostar'],  // south through Lašva valley
     CENTRAL_BOSNIA_KUPRES:  ['livno', 'duvno', 'mostar'],
     CENTRAL_BOSNIA_PROZOR:  ['mostar', 'jablanica'],
     KAKANJ_BREZA:           ['kiseljak', 'fojnica', 'travnik', 'vitez'],
@@ -166,9 +178,10 @@ const CROAT_ROUTING_REGION: Record<string, string> = {
     kotor_varos: 'KOTOR_VAROS', skender_vakuf: 'KOTOR_VAROS',
     // Region 2: Posavina
     orasje: 'POSAVINA_ORASJE',
-    bosanski_samac: 'POSAVINA_REST', odzak: 'POSAVINA_REST', bosanski_brod: 'POSAVINA_REST',
-    derventa: 'POSAVINA_REST', modrica: 'POSAVINA_REST', brcko: 'POSAVINA_REST',
-    bijeljina: 'POSAVINA_REST', lopare: 'POSAVINA_REST', ugljevik: 'POSAVINA_REST',
+    bosanski_samac: 'POSAVINA_SAMAC_ODZAK', odzak: 'POSAVINA_SAMAC_ODZAK',
+    bosanski_brod: 'POSAVINA_BROD_DERVENTA', derventa: 'POSAVINA_BROD_DERVENTA',
+    modrica: 'POSAVINA_MODRICA', brcko: 'POSAVINA_SAMAC_ODZAK',
+    bijeljina: 'POSAVINA_SAMAC_ODZAK', lopare: 'POSAVINA_SAMAC_ODZAK', ugljevik: 'POSAVINA_SAMAC_ODZAK',
     doboj: 'DOBOJ_AREA', gradacac: 'POSAVINA_REST',
     // Region 3: Tuzla Basin / Central Corridor
     kakanj: 'KAKANJ_BREZA', breza: 'KAKANJ_BREZA',

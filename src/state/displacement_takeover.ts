@@ -56,13 +56,21 @@ const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
  * Historically, Bosniaks near international borders had realistic escape routes.
  * Interior populations (Sarajevo, Central Bosnia, Drina enclaves) displaced internally.
  */
-const BOSNIAK_BORDER_ADJACENT_MUN_IDS = new Set<MunicipalityId>([
-    // Krajina — near Croatian border
-    'prijedor', 'sanski_most', 'kljuc', 'bosanski_novi',
+/** Krajina Bosniaks: ~35% fled via organized ICRC/UNHCR convoys to Croatia (Karlovac transit camp).
+ * This was the PRIMARY escape mechanism for Prijedor, Sanski Most, Bosanski Novi.
+ * Convoys ran after international pressure forced camp closures (Aug 1992). */
+const KRAJINA_BOSNIAK_CONVOY_MUN_IDS = new Set<MunicipalityId>([
+    'prijedor', 'sanski_most', 'bosanski_novi',
+    'bosanska_dubica', 'bosanska_kostajnica', 'bosanska_gradiska',
     'banja_luka', 'celinac', 'laktasi', 'prnjavor',
+]);
+const KRAJINA_BOSNIAK_FLEE_ABROAD = 0.35;
+
+const BOSNIAK_BORDER_ADJACENT_MUN_IDS = new Set<MunicipalityId>([
+    // Krajina — near Croatian border (non-convoy municipalities)
+    'kljuc', 'kotor_varos', 'skender_vakuf', 'mrkonjic_grad', 'sipovo',
     'bosanski_petrovac', 'titov_drvar', 'bosansko_grahovo', 'glamoc',
-    'bosanska_dubica', 'bosanska_kostajnica', 'bosanska_gradiska', 'srbac',
-    'kotor_varos', 'skender_vakuf', 'mrkonjic_grad', 'sipovo',
+    'srbac',
     // Posavina — near Croatia/Serbia border
     'brcko', 'bosanski_samac', 'odzak', 'orasje',
     'derventa', 'modrica', 'bosanski_brod', 'bijeljina',
@@ -188,6 +196,7 @@ function areFactionsAtWar(state: GameState, a: FactionId, b: FactionId): boolean
 
 function getFleeAbroadFraction(sourceMun: MunicipalityId, fromFaction: FactionId): number {
     if (fromFaction === 'HRHB' && POSAVINA_MUN_IDS.has(sourceMun)) return POSAVINA_CROAT_FLEE_ABROAD;
+    if (fromFaction === 'RBiH' && KRAJINA_BOSNIAK_CONVOY_MUN_IDS.has(sourceMun)) return KRAJINA_BOSNIAK_FLEE_ABROAD;
     if (fromFaction === 'RBiH' && BOSNIAK_BORDER_ADJACENT_MUN_IDS.has(sourceMun)) return BOSNIAK_BORDER_FLEE_ABROAD;
     return getFactionFleeAbroadFraction(fromFaction);
 }
