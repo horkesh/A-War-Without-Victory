@@ -4,10 +4,12 @@ export interface MapInteractionCallbacks {
   onOsidClick?: (osid: string, properties: Record<string, unknown>) => void;
   onFormationClick?: (id: string, props: any, point: { x: number; y: number }) => void;
   onFrontEdgeClick?: (edgeId: string, properties: Record<string, unknown>) => void;
+  onBattleClick?: (osid: string, properties: Record<string, unknown>) => void;
   /** Tooltip: set after 300ms hover; position from event. */
   onOsidHover?: (osid: string | null, point: { x: number; y: number } | null) => void;
   onFormationHover?: (formationId: string | null, point: { x: number; y: number } | null) => void;
   onFrontEdgeHover?: (edgeId: string | null, point: { x: number; y: number } | null) => void;
+  onBattleHover?: (osid: string | null, point: { x: number; y: number } | null) => void;
   onSectorHover?: (sectorId: string | null, point: { x: number; y: number } | null) => void;
   onMouseMove?: (lngLat: [number, number]) => void;
   onMapMouseLeave?: () => void;
@@ -51,9 +53,11 @@ export function useMapInteractions(
   const onOsidClick = typeof callbacks === 'function' ? callbacks : callbacks.onOsidClick;
   const onFormationClick = typeof callbacks === 'function' ? undefined : callbacks.onFormationClick;
   const onFrontEdgeClick = typeof callbacks === 'function' ? undefined : callbacks.onFrontEdgeClick;
+  const onBattleClick = typeof callbacks === 'function' ? undefined : callbacks.onBattleClick;
   const onOsidHover = typeof callbacks === 'function' ? undefined : callbacks.onOsidHover;
   const onFormationHover = typeof callbacks === 'function' ? undefined : callbacks.onFormationHover;
   const onFrontEdgeHover = typeof callbacks === 'function' ? undefined : callbacks.onFrontEdgeHover;
+  const onBattleHover = typeof callbacks === 'function' ? undefined : callbacks.onBattleHover;
   const onMouseMove = typeof callbacks === 'function' ? undefined : callbacks.onMouseMove;
   const onMapMouseLeave = typeof callbacks === 'function' ? undefined : callbacks.onMapMouseLeave;
   const onContextMenu = typeof callbacks === 'function' ? undefined : callbacks.onContextMenu;
@@ -191,6 +195,7 @@ export function useMapInteractions(
   const handleMapClick = (e: MapLayerMouseEvent) => {
     // Priority: Formations > Front Edges (Sectors) > Settlements (OSIDs)
     const priorityLayers = [
+      'battle-markers-pulse',
       'formation-markers',
       'formation-labels',
       'front-edges-hover-pos',
@@ -205,6 +210,13 @@ export function useMapInteractions(
     const features = map.queryRenderedFeatures(e.point, { layers: priorityLayers.filter(id => map.getLayer(id)) });
 
     if (features.length > 0) {
+      // Battle markers have highest click priority
+      const battleFeature = features.find(f => f.layer.id === 'battle-markers-pulse');
+      if (battleFeature) {
+        const osid = battleFeature.properties?.osid as string | undefined;
+        if (osid) { onBattleClick?.(osid, battleFeature.properties as Record<string, unknown>); return; }
+      }
+
       // Find the first formation-marker or label if it exists in the hits
       const formationFeature = features.find(f => f.layer.id.startsWith('formation-'));
       if (formationFeature) {
@@ -295,6 +307,22 @@ export function useMapInteractions(
       safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
       safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
+  }
+
+  // Battle markers hover
+  if (onBattleHover) {
+    const handleBattleMouseMove = (e: MapLayerMouseEvent) => {
+      map.getCanvas().style.cursor = 'pointer';
+      const osid = e.features?.[0]?.properties?.osid as string | undefined;
+      const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
+      if (osid) onBattleHover(osid, point);
+    };
+    const handleBattleMouseLeave = () => {
+      map.getCanvas().style.cursor = '';
+      onBattleHover(null, null);
+    };
+    safeOn('mousemove', 'battle-markers-pulse', handleBattleMouseMove);
+    safeOn('mouseleave', 'battle-markers-pulse', handleBattleMouseLeave);
   }
 
   return () => {

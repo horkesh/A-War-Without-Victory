@@ -65,12 +65,12 @@ export interface GameStore {
   hoveredCorpsId: string | null;
   setHoveredCorpsId: (id: string | null) => void;
 
-  /** Tooltip hover target: type + id (osid string, formation id, or front edge_id). */
-  tooltipTarget: { type: 'osid' | 'formation' | 'front'; id: string } | null;
+  /** Tooltip hover target: type + id (osid string, formation id, front edge_id, or battle osid). */
+  tooltipTarget: { type: 'osid' | 'formation' | 'front' | 'battle'; id: string } | null;
   /** Pixel position for tooltip (from map/sidebar hover). */
   tooltipPosition: { x: number; y: number } | null;
   /** Set tooltip target and optional pixel position (e.g. from map/sidebar hover event). */
-  setTooltipTargetWithPosition: (target: { type: 'osid' | 'formation' | 'front'; id: string } | null, position?: { x: number; y: number }) => void;
+  setTooltipTargetWithPosition: (target: { type: 'osid' | 'formation' | 'front' | 'battle'; id: string } | null, position?: { x: number; y: number }) => void;
   clearTooltipTarget: () => void;
 
   /** OSID → display name from operational_settlements; null until map data loaded */

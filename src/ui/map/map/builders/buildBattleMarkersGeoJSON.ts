@@ -1,18 +1,15 @@
 /**
- * buildBattleMarkersGeoJSON — Phase 5 GUI.
+ * buildBattleMarkersGeoJSON — Enriched battle markers.
  *
- * Builds a point FeatureCollection marking OSIDs where combat control flips
- * occurred in the last 3 turns. Used for the battle-markers layer in MapContainer.
- *
- * Input:
- *   recentControlEvents — from LoadedGameState.recentControlEvents (GameStateAdapter)
- *   baseGeoJson         — the OSID polygon FeatureCollection (for centroid extraction)
- *   currentTurn         — current game turn (to compute event age)
+ * Builds a point FeatureCollection marking OSIDs where battles occurred
+ * in the last 3 turns. Enriched with TurnBattle data (attacker, defender,
+ * outcome, casualties) for tooltips and click interaction.
  *
  * Deterministic: input events are pre-sorted; output features sorted by OSID.
  */
 import type { Feature, FeatureCollection, Point, Polygon, MultiPolygon } from 'geojson';
 import type { RecentControlEventView } from '../../data/types.js';
+import type { TurnBattle } from '../../../../state/turn_summary.js';
 
 function polygonCentroid(coordinates: number[][][]): [number, number] {
   let sumX = 0;
@@ -31,7 +28,6 @@ function geometryCentroid(geometry: Polygon | MultiPolygon): [number, number] {
   if (geometry.type === 'Polygon') {
     return polygonCentroid(geometry.coordinates);
   }
-  // MultiPolygon: centroid of the first (largest by ring-count) polygon
   const coords = geometry.coordinates[0];
   return polygonCentroid(coords);
 }
@@ -40,8 +36,8 @@ export function buildBattleMarkersGeoJSON(
   recentControlEvents: RecentControlEventView[],
   baseGeoJson: FeatureCollection,
   currentTurn: number,
+  battles?: TurnBattle[],
 ): FeatureCollection<Point> {
-  // Index base features by OSID for O(1) centroid lookup
   const centroidByOsid = new Map<string, [number, number]>();
   for (const feature of baseGeoJson.features) {
     const osid = (feature.properties as Record<string, unknown> | null)?.osid;
@@ -52,12 +48,17 @@ export function buildBattleMarkersGeoJSON(
     }
   }
 
+  // Index battles by OSID for enrichment
+  const battleByOsid = new Map<string, TurnBattle>();
+  if (battles) {
+    for (const b of battles) battleByOsid.set(b.osid, b);
+  }
+
   // Filter to combat flips in the last 3 turns
   const combatEvents = recentControlEvents.filter(
     (e) => e.mechanism === 'combat' && e.turn >= currentTurn - 2,
   );
 
-  // Deduplicate: if an OSID flipped multiple times in 3 turns, keep latest flip.
   const latestByOsid = new Map<string, RecentControlEventView>();
   for (const e of combatEvents) {
     const existing = latestByOsid.get(e.settlementId);
@@ -66,10 +67,30 @@ export function buildBattleMarkersGeoJSON(
     }
   }
 
+  // Also include battles from this turn that didn't flip territory
+  if (battles) {
+    for (const b of battles) {
+      if (!latestByOsid.has(b.osid) && centroidByOsid.has(b.osid)) {
+        latestByOsid.set(b.osid, {
+          settlementId: b.osid,
+          from: b.defender_faction,
+          to: b.territory_flipped ? b.attacker_faction : b.defender_faction,
+          turn: currentTurn,
+          mechanism: 'combat',
+          municipalityId: b.mun_id ?? null,
+        });
+      }
+    }
+  }
+
   const features: Feature<Point>[] = [];
   for (const [osid, event] of [...latestByOsid.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
     const centroid = centroidByOsid.get(osid);
     if (!centroid) continue;
+
+    const battle = battleByOsid.get(osid);
+    const totalCasualties = battle ? battle.attacker_casualties + battle.defender_casualties : 0;
+
     features.push({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: centroid },
@@ -78,7 +99,19 @@ export function buildBattleMarkersGeoJSON(
         from: event.from,
         to: event.to,
         turn: event.turn,
-        age: currentTurn - event.turn, // 0 = this turn, 1 = last turn, 2 = two turns ago
+        age: currentTurn - event.turn,
+        // Enriched battle data for tooltip
+        attacker_faction: battle?.attacker_faction ?? null,
+        defender_faction: battle?.defender_faction ?? null,
+        outcome: battle?.outcome ?? null,
+        attacker_casualties: battle?.attacker_casualties ?? 0,
+        defender_casualties: battle?.defender_casualties ?? 0,
+        total_casualties: totalCasualties,
+        territory_flipped: battle?.territory_flipped ?? false,
+        was_concentrated: battle?.was_concentrated ?? false,
+        attacker_count: battle?.all_attacker_ids?.length ?? 1,
+        primary_attacker_id: battle?.primary_attacker_id ?? null,
+        primary_defender_id: battle?.primary_defender_id ?? null,
       },
     });
   }

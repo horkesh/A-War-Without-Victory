@@ -589,6 +589,17 @@ export function MapContainer() {
             clearTooltipTarget();
           }
         },
+        onBattleHover: (osid, point) => {
+          if (osid) {
+            setTooltipTargetWithPosition({ type: 'battle', id: osid }, point ?? undefined);
+          } else {
+            clearTooltipTarget();
+          }
+        },
+        onBattleClick: (_osid) => {
+          // Battle click: select the OSID so settlement panel opens with battle context
+          // The AAR button in the toolbar provides the full after-action report
+        },
         onSectorHover: (id) => {
           setHoveredSectorId(id);
         },
@@ -1080,14 +1091,31 @@ export function MapContainer() {
                       state.recentControlEvents ?? [],
                       base,
                       state.turn ?? 0,
+                      state.latestTurnSummary?.battles,
                     );
                     safeEnsureLayer(m, {
                       id: BATTLE_MARKERS_LAYER_ID,
                       type: 'circle',
                       source: BATTLE_MARKERS_SOURCE_ID,
                       paint: {
-                        'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 7, 14, 10],
-                        'circle-color': '#ffffff',
+                        // Scale by casualties: base 4-10 + up to 6 more from total_casualties
+                        'circle-radius': ['interpolate', ['linear'], ['zoom'], 6,
+                          ['+', 4, ['min', 6, ['/', ['get', 'total_casualties'], 200]]],
+                          10,
+                          ['+', 7, ['min', 8, ['/', ['get', 'total_casualties'], 150]]],
+                          14,
+                          ['+', 10, ['min', 10, ['/', ['get', 'total_casualties'], 100]]],
+                        ],
+                        // Color by outcome: green=attacker won, red=attacker lost, amber=stalemate, white=no data
+                        'circle-color': ['match', ['get', 'outcome'],
+                          'decisive_victory', 'rgba(86,211,100,0.9)',
+                          'victory', 'rgba(86,211,100,0.7)',
+                          'costly_victory', 'rgba(232,168,56,0.8)',
+                          'stalemate', 'rgba(200,200,200,0.7)',
+                          'repulsed', 'rgba(244,112,104,0.7)',
+                          'catastrophic', 'rgba(244,80,80,0.9)',
+                          '#ffffff',
+                        ],
                         'circle-opacity': ['interpolate', ['linear'], ['get', 'age'], 0, 0.90, 1, 0.60, 2, 0.30],
                         'circle-stroke-color': ['match', ['get', 'to'],
                           'RS', 'rgba(160,50,50,0.9)',
