@@ -63,7 +63,7 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                     <div>
                         <div className="text-[10px] font-bold text-[#3a3228] uppercase tracking-wider mb-1">2. VLASTITE SNAGE (Own Forces)</div>
                         <div className="text-[10px] text-[#4a4238] leading-relaxed">
-                            Estimated casualties for the planned operation: <span className="font-bold">{prediction.overall.estimatedCasualties}</span>.
+                            Estimated casualties for the planned operation: <span className="font-bold">{prediction.overall.estimatedCasualties.toLocaleString()}</span>.
                             Predicted outcome: <span className="font-bold">{prediction.overall.predictedOutcome}</span>.
                         </div>
                     </div>

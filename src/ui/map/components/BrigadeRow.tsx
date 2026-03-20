@@ -46,13 +46,13 @@ const SUPPLY_DOT_CLASS: Record<'supplied' | 'strained' | 'cutoff', string> = {
 };
 
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
-  const cohesion = Math.max(0, Math.min(100, formation.cohesion ?? 0));
+  const cohesion = Math.round(Math.max(0, Math.min(100, formation.cohesion ?? 0)));
   const filledSegments = Math.ceil(cohesion / 20);
   const bgFaction = FACTION_BG_SUBTLE[formation.faction] ?? 'bg-panel-border';
   const factionText = FACTION_COLORS[formation.faction] ?? 'text-text-primary';
   const supplyState = getSupplyState(formation);
   const rowClass = onClick ? 'cursor-pointer' : '';
-  const fat = formation.fatigue;
+  const fat = Math.round(formation.fatigue);
   const fatClass = fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
   const supplyColor = SUPPLY_DOT_CLASS[supplyState];
 

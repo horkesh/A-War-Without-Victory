@@ -44,13 +44,13 @@ function getEquipmentSummary(brigades: FormationView[]): { tanks: number; arty: 
   let tanks = 0, arty = 0, tanksTotal = 0, artyTotal = 0;
   for (const b of brigades) {
     if (b.composition) {
-      tanks += b.composition.tank_condition?.operational ?? 0;
-      arty += b.composition.artillery_condition?.operational ?? 0;
+      tanks += (b.composition.tanks ?? 0) * (b.composition.tank_condition?.operational ?? 1);
+      arty += (b.composition.artillery ?? 0) * (b.composition.artillery_condition?.operational ?? 1);
       tanksTotal += b.composition.tanks ?? 0;
       artyTotal += b.composition.artillery ?? 0;
     }
   }
-  return { tanks, arty, tanksTotal, artyTotal };
+  return { tanks: Math.round(tanks), arty: Math.round(arty), tanksTotal, artyTotal };
 }
 
 export function CorpsCard({
@@ -124,17 +124,19 @@ export function CorpsCard({
 
       {/* Equipment summary row */}
       {(equip.tanksTotal > 0 || equip.artyTotal > 0) && (
-        <div className="px-3 py-1 flex items-center gap-3 text-[10px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
+        <div className="px-3 py-1.5 flex items-center gap-4 text-[11px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
           {equip.tanksTotal > 0 && (
-            <span className="flex items-center gap-0.5" title={`Tanks: ${equip.tanks} operational / ${equip.tanksTotal} total`}>
-              <Icon name="tanks" size={10} />
-              <span className="text-text-primary">{equip.tanks}</span>/{equip.tanksTotal}
+            <span className="flex items-center gap-1" title={`Tanks: ${equip.tanks} operational / ${equip.tanksTotal} total`}>
+              <Icon name="tanks" size={13} />
+              <span className="text-text-primary font-semibold">{equip.tanks}</span>
+              <span className="text-text-secondary/70">/ {equip.tanksTotal}</span>
             </span>
           )}
           {equip.artyTotal > 0 && (
-            <span className="flex items-center gap-0.5" title={`Artillery: ${equip.arty} operational / ${equip.artyTotal} total`}>
-              <Icon name="artillery" size={10} />
-              <span className="text-text-primary">{equip.arty}</span>/{equip.artyTotal}
+            <span className="flex items-center gap-1" title={`Artillery: ${equip.arty} operational / ${equip.artyTotal} total`}>
+              <Icon name="artillery" size={13} />
+              <span className="text-text-primary font-semibold">{equip.arty}</span>
+              <span className="text-text-secondary/70">/ {equip.artyTotal}</span>
             </span>
           )}
         </div>

@@ -122,7 +122,7 @@ function FormationTooltipContent({
             />
           ))}
         </div>
-        <span className="tabular-nums">{cohesion}</span>
+        <span className="tabular-nums">{Math.round(cohesion)}</span>
       </div>
       {formation.posture && (
         <div className="text-[11px] text-text-secondary mb-1">Posture: {formation.posture}</div>

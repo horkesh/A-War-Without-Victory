@@ -46,9 +46,9 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
     };
 
     return (
-        <div className="absolute top-16 right-4 z-20 w-[280px] pointer-events-auto
+        <div className="absolute top-16 right-4 bottom-20 z-20 w-[280px] pointer-events-auto
                         bg-[rgba(20,18,15,0.92)] backdrop-blur-xl rounded-lg
-                        border border-[rgba(180,160,130,0.15)] p-3">
+                        border border-[rgba(180,160,130,0.15)] p-3 flex flex-col">
             <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold mb-2">
                 Objectives
             </div>
@@ -58,7 +58,7 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                     Click enemy territory on the map to add objectives
                 </div>
             ) : (
-                <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1">
+                <div className="space-y-1 flex-1 min-h-0 overflow-y-auto pr-1">
                     {objectives.map((osid, idx) => {
                         const isSchwerpunkt = plan.schwerpunktOsid === osid;
                         const displayName = getOsidDisplayName(osid, osidDisplayNames);

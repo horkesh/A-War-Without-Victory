@@ -86,14 +86,14 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
                     <div
                         className="h-full rounded-full transition-all"
                         style={{
-                            width: `${cohesion}%`,
+                            width: `${Math.min(100, Math.max(0, cohesion))}%`,
                             backgroundColor: cohesion >= 70 ? '#4a9a55' : cohesion >= 40 ? '#c4a35a' : '#c24040',
                         }}
                     />
                 </div>
                 <div className="flex justify-between text-[7px] text-text-secondary/50 mt-0.5">
-                    <span>COH {cohesion}</span>
-                    <span>FAT {fatigue.toFixed(0)}</span>
+                    <span>COH {Math.round(cohesion)}</span>
+                    <span>FAT {Math.round(fatigue)}</span>
                 </div>
             </div>
 

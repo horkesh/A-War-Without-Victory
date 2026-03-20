@@ -40,9 +40,9 @@ export function normalizeOperationPredictionResponse(raw: unknown): PredictionRe
     if (!overallIn || typeof overallIn !== 'object') return null;
     const o = overallIn as Record<string, unknown>;
 
-    const totalCas = Number(o.totalEstimatedCasualties ?? o.estimatedCasualties ?? 0);
-    const forceRatio = Number(o.forceRatio ?? 0);
-    const intelConfidence = Number(o.intelConfidence ?? 0);
+    const totalCas = Number(o.totalEstimatedCasualties ?? o.estimatedCasualties ?? 0) || 0;
+    const forceRatio = Number(o.forceRatio ?? 0) || 0;
+    const intelConfidence = Number(o.intelConfidence ?? 0) || 0;
 
     const axesIn = Array.isArray(r.axes) ? r.axes : [];
     const primary = axesIn[0];

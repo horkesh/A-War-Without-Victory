@@ -305,9 +305,9 @@ export function ArmyDetail({ railSlot }: ArmyDetailProps) {
                     const cs = f.combatSummary;
 
                     let lightColor = '#55d48a';
-                    if (f.corpsExhaustion != null && f.corpsExhaustion > 0.6) {
+                    if (f.corpsExhaustion != null && f.corpsExhaustion > 60) {
                       lightColor = '#d45555';
-                    } else if (f.corpsExhaustion != null && f.corpsExhaustion > 0.3) {
+                    } else if (f.corpsExhaustion != null && f.corpsExhaustion > 30) {
                       lightColor = '#d4d455';
                     }
 

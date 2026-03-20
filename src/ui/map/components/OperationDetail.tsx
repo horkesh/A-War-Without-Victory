@@ -237,7 +237,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
                       <span>Obj {axis.current_objective_index + 1}/{axis.objectives.length}</span>
                       <span>·</span>
                       <span className={axis.momentum >= 0 ? 'text-green-400' : 'text-red-400'}>
-                        {axis.momentum >= 0 ? '+' : ''}{axis.momentum}
+                        {axis.momentum >= 0 ? '+' : ''}{axis.momentum.toFixed(1)}
                       </span>
                     </div>
                   </div>

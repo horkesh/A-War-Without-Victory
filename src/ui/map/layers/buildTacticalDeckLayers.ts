@@ -121,11 +121,11 @@ export function buildTacticalDeckLayers(
         );
     }
 
-    // 1. Base Counter Icons
+    // 1. Base Counter Icons — only top-of-stack (others are invisible behind and create artifacts)
     layers.push(
         new IconLayer({
             id: 'deck-formations-icons',
-            data: formationsGeoJson.features,
+            data: topStack,
             getIcon: (d: any) => ({
                 url: getIconDataUrl(d.properties.icon_id),
                 width: 160,
@@ -248,13 +248,13 @@ export function buildTacticalDeckLayers(
         );
     }
 
-    // 2. Labels
+    // 2. Labels — top-of-stack only
     const FORMATION_LABELS_MIN_ZOOM = 9;
     if (labelsVisible && zoom >= FORMATION_LABELS_MIN_ZOOM) {
         layers.push(
             new TextLayer({
                 id: 'deck-formations-labels',
-                data: formationsGeoJson.features,
+                data: topStack,
                 getPosition: (d: any) => d.geometry.coordinates,
                 getText: (d: any) => d.properties?.title || d.properties?.name || '',
                 getSize: textSize,

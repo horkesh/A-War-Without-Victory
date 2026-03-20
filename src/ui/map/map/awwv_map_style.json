@@ -14,6 +14,12 @@
       "type": "vector",
       "url": "pmtiles:///data/derived/tiles/osm.pmtiles"
     },
+    "terrain-dem": {
+      "type": "raster-dem",
+      "url": "pmtiles:///data/derived/tiles/terrain.pmtiles",
+      "tileSize": 256,
+      "encoding": "mapbox"
+    },
     "osid-control": {
       "type": "geojson",
       "data": {

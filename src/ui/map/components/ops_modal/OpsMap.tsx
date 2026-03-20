@@ -105,19 +105,6 @@ export function OpsMap({
         mapRef.current = map;
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-        // Enable 3D terrain from local DEM
-        map.on('load', () => {
-            if (!map.getSource('terrain-dem')) {
-                map.addSource('terrain-dem', {
-                    type: 'raster-dem',
-                    url: `pmtiles://${origin}/data/derived/tiles/terrain.pmtiles`,
-                    tileSize: 256,
-                    encoding: 'mapbox',
-                });
-            }
-            map.setTerrain({ source: 'terrain-dem', exaggeration: 2.5 });
-        });
-
         const init = async () => {
             try {
                 const [geojson, terrainScalars] = await Promise.all([
@@ -154,11 +141,10 @@ export function OpsMap({
                             if (pt[1] > maxLat) maxLat = pt[1];
                         }
                     }
-                    const bearing = computeAttackBearing(aoFriendlyOsids, aoEnemyOsids, centroidLookup);
                     if (minLng !== Infinity) {
                         map.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
                             padding: 80, maxZoom: 10, animate: false,
-                            bearing,
+                            bearing: 0,
                             pitch: 30,
                         });
                     }
@@ -379,6 +365,9 @@ export function OpsMap({
                     popup.setLngLat(event.lngLat).setHTML(html).addTo(map);
                 });
 
+                // Enable 3D terrain — source defined in style JSON, just activate extrusion
+                map.setTerrain({ source: 'terrain-dem', exaggeration: 2.5 });
+
                 setMapReady(true);
             } catch (e) {
                 console.warn('Failed to initialize ops map:', e);
@@ -507,37 +496,6 @@ function findNearestCentroid(
         if (d < bestDist) { bestDist = d; best = pt; }
     }
     return best;
-}
-
-/**
- * Compute camera bearing so player looks from friendly territory toward enemy.
- * Returns degrees clockwise from north (MapLibre bearing convention).
- */
-function computeAttackBearing(
-    friendlyOsids: Set<string>,
-    enemyOsids: Set<string>,
-    centroidLookup: Map<string, [number, number]>,
-): number {
-    // Average centroid of friendly and enemy OSIDs
-    let fx = 0, fy = 0, fn = 0;
-    for (const osid of friendlyOsids) {
-        const pt = centroidLookup.get(osid);
-        if (pt) { fx += pt[0]; fy += pt[1]; fn++; }
-    }
-    let ex = 0, ey = 0, en = 0;
-    for (const osid of enemyOsids) {
-        const pt = centroidLookup.get(osid);
-        if (pt) { ex += pt[0]; ey += pt[1]; en++; }
-    }
-    if (fn === 0 || en === 0) return 0;
-    fx /= fn; fy /= fn;
-    ex /= en; ey /= en;
-
-    // Bearing from friendly centroid → enemy centroid
-    const dx = ex - fx;
-    const dy = ey - fy;
-    const radians = Math.atan2(dx, dy); // atan2(east, north) = bearing from north
-    return radians * (180 / Math.PI);
 }
 
 /** Build arrow geometry data for Deck.gl layers (no GeoJSON intermediate). */

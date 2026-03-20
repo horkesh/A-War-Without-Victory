@@ -22,6 +22,7 @@ import { FACTION_HEX_COLORS } from '../plan_ui/opsConstants';
 
 export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }: PlanPhaseProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const [autoProposed, setAutoProposed] = useState<ProposedBrigade[]>([]);
     const hasAutoProposedRef = useRef(false);
 
@@ -88,7 +89,7 @@ export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }
     return (
         <div className="absolute inset-0 z-10 pointer-events-none">
             {/* Objective list — top right */}
-            <ObjectiveList plan={plan} onUpdate={onUpdate} osidDisplayNames={null} onAdvance={onAdvance} />
+            <ObjectiveList plan={plan} onUpdate={onUpdate} osidDisplayNames={osidDisplayNames} onAdvance={onAdvance} />
 
             {/* Brigade tray — bottom */}
             <BrigadeTray

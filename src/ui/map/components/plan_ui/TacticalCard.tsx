@@ -48,7 +48,7 @@ export function TacticalCard({ formation, onClick, active }: TacticalCardProps) 
                 <div className="space-y-1">
                     <div className="flex justify-between text-[7px] uppercase font-bold">
                         <span className="text-slate-500">Cohesion</span>
-                        <span className={cohesion < 30 ? 'text-red-400' : 'text-slate-400'}>{cohesion}%</span>
+                        <span className={cohesion < 30 ? 'text-red-400' : 'text-slate-400'}>{Math.round(cohesion)}%</span>
                     </div>
                     <div className="h-1 bg-black/40 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-500/60" style={{ width: `${cohesion}%` }} />

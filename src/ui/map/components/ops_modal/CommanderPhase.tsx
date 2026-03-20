@@ -32,9 +32,9 @@ function getAvailabilityStatus(
     if (officer.status === 'retired') return { available: false, reason: 'RETIRED' };
     if (officer.rank === 'army_commander') return { available: false, reason: 'ARMY HQ' };
     if (officer.enclave_lock) return { available: false, reason: `ENCLAVE LOCKED` };
-    if (officer.assigned_operation) return { available: false, reason: `ASSIGNED: Op ${officer.assigned_operation}` };
-    if (officer.assigned_corps_id && officer.assigned_corps_id !== targetCorpsId && !officer.acting_commander) {
-        return { available: false, reason: 'CORPS CMDR' };
+    if (officer.assigned_operation) return { available: false, reason: 'ASSIGNED TO OP' };
+    if (officer.assigned_corps_id && officer.assigned_corps_id !== targetCorpsId) {
+        return { available: false, reason: officer.acting_commander ? 'ACTING CMDR (OTHER CORPS)' : 'CORPS CMDR' };
     }
     return { available: true };
 }
@@ -152,6 +152,11 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                     </div>
 
                     {/* Available officers */}
+                    {availableOfficers.length === 0 && (
+                        <div className="text-[11px] text-text-secondary/60 italic py-6 text-center">
+                            No officers available for this operation. All faction officers are assigned, KIA, or otherwise unavailable.
+                        </div>
+                    )}
                     <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
                         {availableOfficers.map(({ officer, fit }) => {
                             const prepTurns = getPreparationMaxTurns(officer.aggressiveness);

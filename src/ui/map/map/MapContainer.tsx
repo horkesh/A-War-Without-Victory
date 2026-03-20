@@ -424,7 +424,23 @@ export function MapContainer() {
 
       const deckOverlay = new MapboxOverlay({
         interleaved: true,
-        layers: []
+        layers: [],
+        onClick: (info: any) => {
+          if (!info?.object?.properties?.id) return;
+          const props = info.object.properties;
+          const id = props.id as string;
+          const store = useGameStore.getState();
+          store.setSelectedFormationId(id);
+          // Use pre-computed stack_count from GeoJSON feature properties
+          const osid = props.location_osid as string | undefined;
+          const stackCount = props.stack_count ?? 1;
+          if (osid && stackCount > 1) {
+            store.setExpandedStackOsid(osid);
+            // overlayAnchor is derived by useEffect from expandedStackOsid
+          } else {
+            store.setExpandedStackOsid(null);
+          }
+        },
       });
       map.addControl(deckOverlay as any);
       deckOverlayRef.current = deckOverlay;

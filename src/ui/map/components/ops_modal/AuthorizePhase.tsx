@@ -2,7 +2,7 @@
  * Phase 4 — Authorize.
  * Shows OPORD document, stamp animation on authorize, then IPC submission.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
 import type { CorpsOperationOrderPayload } from '../../desktop/useIPC';
@@ -29,6 +29,8 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
     const [isStamped, setIsStamped] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [transmitted, setTransmitted] = useState(false);
+    const mountedRef = useRef(true);
+    useEffect(() => { return () => { mountedRef.current = false; }; }, []);
 
     const { corpsName, faction, commanderName, date } = useMemo(() => {
         if (!loadedGameState || !corpsId) return { corpsName: '', faction: '', commanderName: '', date: '' };
@@ -53,6 +55,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
     const submitOperation = async (overrides?: Partial<CorpsOperationOrderPayload>) => {
         setIsStamped(true);
         await new Promise((r) => setTimeout(r, 1500));
+        if (!mountedRef.current) return;
         setTransmitted(true);
 
         if (!ipc.isAvailable) {
@@ -100,19 +103,23 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
         const opResult = ipc.stageCorpsOperationOrder(payload);
         const cmdResult = officerId
             ? ipc.stageAssignOperationCommander({ corpsId, operationName: payload.name, officerId })
-            : Promise.resolve({ ok: true });
+            : Promise.resolve({ ok: true } as { ok: boolean; error?: string });
 
-        const [opRes] = await Promise.all([opResult, cmdResult]);
+        const [opRes, cmdRes] = await Promise.all([opResult, cmdResult]);
+        if (!mountedRef.current) return;
 
         if (!opRes.ok) {
             setLoadError(opRes.error ?? 'Failed to stage operation order.');
             setIsSubmitting(false);
             return;
         }
+        if (!cmdRes.ok) {
+            setLoadError(cmdRes.error ?? 'Operation staged but commander assignment failed.');
+        }
 
         setOperationTargetOsids(allObjs);
         setIsSubmitting(false);
-        setTimeout(() => clearContext(), 1000);
+        setTimeout(() => { if (mountedRef.current) clearContext(); }, 1000);
     };
 
     const handleAuthorize = () => submitOperation();

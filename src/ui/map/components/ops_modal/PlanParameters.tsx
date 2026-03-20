@@ -32,7 +32,7 @@ function ParamGroup({ label, children }: { label: string; children: React.ReactN
     );
 }
 
-const OP_TYPES: OpType[] = ['sector_attack', 'general_offensive', 'feint', 'probe'];
+const OP_TYPES: OpType[] = ['sector_attack', 'general_offensive', 'strategic_defense', 'reorganization', 'feint', 'probe'];
 const TEMPOS: Tempo[] = ['methodical', 'standard', 'all_out'];
 const TOLERANCES: Tolerance[] = ['decisive_victory', 'victory', 'costly_victory', 'stalemate', 'repulsed'];
 
@@ -92,7 +92,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         key={t}
                         type="button"
                         onClick={() => onUpdate({ tolerance: t })}
-                        className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider transition-all
+                        className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all
                             ${pillClass(plan.tolerance === t)}`}
                     >
                         {TOLERANCE_LABELS[t]}

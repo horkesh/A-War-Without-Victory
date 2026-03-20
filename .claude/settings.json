@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if the file just written/edited is a plan file in docs/plans/ or docs/30_planning/. Tool input: $ARGUMENTS\n\nIf the file path does NOT match docs/plans/*.md or docs/30_planning/*.md or docs/30_planning/**/*.md, respond with: {\"decision\": \"allow\"}\n\nIf it IS a plan file in docs/plans/ or docs/30_planning/, validate it against the Pyrrhic Plan Validation Gate (docs/20_engineering/PYRRHIC_PROCESS_RULES.md §4.2). Check for:\n1. Every phase has a done gate (concrete testable criteria)\n2. Every phase has role assignments: implementer, reviewer, sign-off\n3. Post-phase discipline block is included (all 7 steps: /simplify, smoke triad, /verification-before-completion, /pre-commit-check, commit, documentation updates, canon propagation)\n4. Relevant life lessons are listed\n5. /architect flags identified for phases with new state/IPC/components\n6. Engine-touching phases have /war-or-game sign-off\n7. Scope creep rule is stated\n8. /create-report scheduled after final phase (for major features)\n\nIf ALL checks pass: {\"decision\": \"allow\", \"reason\": \"Plan passes Pyrrhic validation gate.\"}\nIf ANY check fails: respond with {\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"PYRRHIC PLAN VALIDATION FAILED. Missing: [list the specific missing items]. See docs/20_engineering/PYRRHIC_PROCESS_RULES.md §4.2. Fix the plan before proceeding.\"}}",
+            "statusMessage": "Validating plan against Pyrrhic rules..."
+          }
+        ]
+      }
+    ]
+  }
+}

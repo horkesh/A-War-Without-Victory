@@ -409,7 +409,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       <span style={{ color, letterSpacing: '1px', fontSize: '10px' }}>
                         {'■'.repeat(filled)}<span style={{ opacity: 0.2 }}>{'■'.repeat(blocks - filled)}</span>
                       </span>
-                      <span className="text-text-secondary text-[10px]">{c}</span>
+                      <span className="text-text-secondary text-[10px]">{Math.round(c)}</span>
                     </>
                   );
                 })()}
@@ -428,7 +428,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                           <span style={{ color, letterSpacing: '1px', fontSize: '10px' }}>
                             {'■'.repeat(filled)}<span style={{ opacity: 0.2 }}>{'■'.repeat(blocks - filled)}</span>
                           </span>
-                          <span className="text-text-secondary text-[10px]">{m}</span>
+                          <span className="text-text-secondary text-[10px]">{Math.round(m)}</span>
                         </>
                       );
                     })()}
@@ -436,7 +436,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 </>
               )}
               <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> Fatigue</span>
-              <span className="text-text-primary tabular-nums">{formation.fatigue}</span>
+              <span className="text-text-primary tabular-nums">{Math.round(formation.fatigue)}</span>
               {formation.personnel != null && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> Personnel</span>
@@ -465,7 +465,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               {formation.entrenchment_turns != null && formation.entrenchment_turns > 0 && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="entrenchment" size={12} /> Entrenched</span>
-                  <span className="text-text-primary tabular-nums">{formation.entrenchment_turns} turn{formation.entrenchment_turns !== 1 ? 's' : ''}</span>
+                  <span className="text-text-primary tabular-nums">{Math.round(formation.entrenchment_turns!)} turn{Math.round(formation.entrenchment_turns!) !== 1 ? 's' : ''}</span>
                 </>
               )}
               {formation.dig_in_progress != null && formation.dig_in_progress > 0 && (
