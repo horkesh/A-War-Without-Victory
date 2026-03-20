@@ -14,6 +14,7 @@ import type { FormationView } from '../data/types';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { TabBar } from './TabBar';
 import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
+import { Icon } from './icons/Icon';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -396,7 +397,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-2 py-1 bg-black/10 rounded">
-              <span className="text-text-secondary">Cohesion</span>
+              <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> Cohesion</span>
               <span className="text-text-primary tabular-nums flex items-center gap-1">
                 {(() => {
                   const c = formation.cohesion;
@@ -415,7 +416,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               </span>
               {formation.morale != null && (
                 <>
-                  <span className="text-text-secondary">Morale</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="morale" size={12} /> Morale</span>
                   <span className="text-text-primary tabular-nums flex items-center gap-1">
                     {(() => {
                       const m = formation.morale!;
@@ -434,11 +435,11 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   </span>
                 </>
               )}
-              <span className="text-text-secondary">Fatigue</span>
+              <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> Fatigue</span>
               <span className="text-text-primary tabular-nums">{formation.fatigue}</span>
               {formation.personnel != null && (
                 <>
-                  <span className="text-text-secondary">Personnel</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> Personnel</span>
                   <span className="text-text-primary tabular-nums">{formation.personnel.toLocaleString()} men</span>
                 </>
               )}
@@ -453,7 +454,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   : '';
                 return (
                   <>
-                    <span className="text-text-secondary">Effectiveness</span>
+                    <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> Effectiveness</span>
                     <span className="tabular-nums font-semibold" style={{ color }}>
                       {Math.round(eff.value).toLocaleString()}
                       <span className="text-[9px] font-normal text-text-secondary">{worstLabel}</span>
@@ -463,7 +464,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               })()}
               {formation.entrenchment_turns != null && formation.entrenchment_turns > 0 && (
                 <>
-                  <span className="text-text-secondary">Entrenched</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="entrenchment" size={12} /> Entrenched</span>
                   <span className="text-text-primary tabular-nums">{formation.entrenchment_turns} turn{formation.entrenchment_turns !== 1 ? 's' : ''}</span>
                 </>
               )}
@@ -475,7 +476,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               )}
               {formation.disrupted_turns != null && formation.disrupted_turns > 0 && (
                 <>
-                  <span className="font-bold uppercase" style={{ color: '#d45555' }}>DISRUPTED</span>
+                  <span className="font-bold uppercase flex items-center gap-1" style={{ color: '#d45555' }}><Icon name="disrupted" size={12} /> DISRUPTED</span>
                   <span className="tabular-nums font-semibold" style={{ color: '#d45555' }}>
                     {formation.disrupted_turns} turn{formation.disrupted_turns !== 1 ? 's' : ''} remaining
                   </span>
@@ -483,7 +484,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               )}
               {formation.kind === 'corps' && formation.corpsExhaustion != null && (
                 <>
-                  <span className="text-text-secondary">Exhaustion</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> Exhaustion</span>
                   <span className="text-text-primary tabular-nums">{Math.round(formation.corpsExhaustion * 100)}%</span>
                 </>
               )}

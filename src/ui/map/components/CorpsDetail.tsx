@@ -16,6 +16,7 @@ import { BrigadeRow } from './BrigadeRow';
 import { TabBar } from './TabBar';
 import { toTitleCase } from '../utils/formatters';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
+import { Icon } from './icons/Icon';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -183,7 +184,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
             <div className="border-t border-panel-border pt-3 space-y-1.5">
               <div className="flex justify-between">
-                <span className="text-text-secondary">Personnel</span>
+                <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> Personnel</span>
                 <span className="text-text-primary tabular-nums">{totalPersonnel.toLocaleString()}</span>
               </div>
               {(() => {
@@ -192,7 +193,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 const gradeColor = agg.grade === 'A' ? '#56d364' : agg.grade === 'B' ? '#e8c56d' : agg.grade === 'C' ? '#e8a838' : '#f47068';
                 return (
                   <div className="flex justify-between">
-                    <span className="text-text-secondary">Combat Eff.</span>
+                    <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> Combat Eff.</span>
                     <span className="tabular-nums">
                       <span className="text-text-primary">{agg.totalEffectiveness.toLocaleString()}</span>
                       <span className="text-[10px] ml-1 font-bold" style={{ color: gradeColor }}>
@@ -246,7 +247,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1">Equipment</div>
                   {tanks > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-text-secondary">Tanks</span>
+                      <span className="text-text-secondary flex items-center gap-1"><Icon name="tanks" size={12} /> Tanks</span>
                       <span className="tabular-nums">
                         <span className={equipHealthColor(tanksOp, tanks)}>{tanksOp}</span><span className="text-text-secondary">/{tanks}</span>
                       </span>
@@ -254,7 +255,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   )}
                   {arty > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-text-secondary">Artillery</span>
+                      <span className="text-text-secondary flex items-center gap-1"><Icon name="artillery" size={12} /> Artillery</span>
                       <span className="tabular-nums">
                         <span className={equipHealthColor(artyOp, arty)}>{artyOp}</span><span className="text-text-secondary">/{arty}</span>
                       </span>

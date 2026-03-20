@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 
 export type IconName =
     | 'personnel'
@@ -59,7 +59,7 @@ const paths: Record<IconName, string> = {
     locked: 'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z'
 };
 
-export function Icon({ name, size = 16, className = '', color = 'currentColor', style = {}, title }: IconProps) {
+export const Icon = memo(function Icon({ name, size = 16, className = '', color = 'currentColor', style = {}, title }: IconProps) {
     const path = paths[name] || paths['personnel']; // Fallback
 
     return (
@@ -69,9 +69,10 @@ export function Icon({ name, size = 16, className = '', color = 'currentColor', 
             viewBox="0 0 24 24"
             className={`awwv-icon ${className}`}
             style={{ ...style, fill: color, display: 'inline-block', verticalAlign: 'text-bottom' }}
+            {...(title ? {} : { 'aria-hidden': true as unknown as boolean })}
         >
             {title && <title>{title}</title>}
             <path d={path} />
         </svg>
     );
-}
+});

@@ -1,7 +1,19 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-20
-**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Combat effectiveness at all hierarchy levels, 3D terrain (ops modal), Deck.gl animated arrows, terrain-aware camera, terrain tooltip, staging↔objective selectability, ModalMapSource utility. HRHB-RBiH war transition system. Post-operation brigade return march. Battle of the Barracks, equipment overhaul, polygon harmonization, front line rendering.
+**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Icon language deployed (Phase 1 visual overhaul). Combat effectiveness at all hierarchy levels, 3D terrain (ops modal), Deck.gl animated arrows, terrain-aware camera, terrain tooltip, staging↔objective selectability, ModalMapSource utility. HRHB-RBiH war transition system. Post-operation brigade return march. Battle of the Barracks, equipment overhaul, polygon harmonization, front line rendering.
+
+## [2026-03-20] Visual Overhaul Phase 1 — Icon Language Deployed
+
+Deployed `Icon.tsx` (22 SVG icons, `React.memo`, `aria-hidden` on decorative) across 4 components:
+- **FormationDetail** — cohesion, morale, fatigue, personnel, effectiveness, entrenchment, disrupted, exhaustion (8 icons)
+- **CorpsDetail** — personnel, combat eff, tanks, artillery (4 icons)
+- **ArmyDetail** — personnel, combat eff (2 icons)
+- **CorpsCard** — stance icon (dynamic: offensive/defensive/balanced/reorganizing via `STANCE_ICON` lookup)
+
+Simplify pass: `React.memo` on Icon (all props are primitives), `aria-hidden="true"` when no `title`, stance ternary → lookup map, equipment icon size 11→12 for consistency.
+
+**Files:** `Icon.tsx`, `FormationDetail.tsx`, `CorpsDetail.tsx`, `ArmyDetail.tsx`, `CorpsCard.tsx`
 
 ## [2026-03-20] Combat Effectiveness System — Composite Power at Brigade/Sector/Corps/Army
 

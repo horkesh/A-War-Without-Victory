@@ -1,5 +1,10 @@
 import type { FormationView } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
+import { Icon, type IconName } from './icons/Icon';
+
+const STANCE_ICON: Record<string, IconName> = {
+  offensive: 'offensive', defensive: 'defensive', reorganize: 'reorganizing', balanced: 'balanced',
+};
 
 export interface CorpsCardProps {
   corpsId: string;
@@ -79,7 +84,10 @@ export function CorpsCard({
       {onStanceChange && (
         <div className="px-3 py-1.5 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold" title="Corps operational posture — affects aggression, operations, and entrenchment">Stance</span>
+            <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold flex items-center gap-1" title="Corps operational posture — affects aggression, operations, and entrenchment">
+              <Icon name={STANCE_ICON[stance ?? 'balanced'] ?? 'balanced'} size={11} />
+              Stance
+            </span>
             <select
               value={stance ?? 'balanced'}
               onChange={(event) => onStanceChange(event.target.value)}

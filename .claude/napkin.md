@@ -95,13 +95,13 @@
 6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Structural.
 7. **[2026-03-19] #41 Dissolution floor not enforced (P3)**: hrhb_108th at 100 pers below 150 floor.
 8. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical.
-9. **[2026-03-19] UI Visual Overhaul (P2 — PARKED)**: 6-phase plan: icons (P0), counter enrichment, sidebar upgrade, document panels, bottom strip, map ops viz. ~11-13 sessions. Plan: `docs/plans/2026-03-19-ui-visual-overhaul-design.md`. Asset brief: `docs/30_planning/VISUAL_ASSET_BRIEF.md`. Genre survey: HoI4/UoC2/EU4/AGEOD patterns.
+9. **[2026-03-20] UI Visual Overhaul (Phase 1 DONE, rest P2)**: Phase 1 icons DEPLOYED (22 SVG, 4 components, memo+a11y). Remaining: counter enrichment, sidebar upgrade, document panels, bottom strip, map ops viz. Plan: `docs/plans/2026-03-19-ui-visual-overhaul-design.md`.
 10. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
 **Resolved this session:** #34 HVO sectors (FIXED — corps activation + consolidation protection), #38 HVO stale IDs (FIXED), #33 Sarajevo density (CORRECT — siege working).
 
 ## Map & UX Upgrade Queue (strategic design: `docs/plans/2026-03-20-terrain-map-ux-strategic-design.md`)
 **Tier 1 — High Impact, Low Effort (1-2 sessions each):**
-1. **[2026-03-20] Deploy Icon Language (P0)**: Replace text labels with `<Icon name="..." />` across 8 components. `Icon.tsx` recovered. Highest single-impact visual change.
+1. ~~**Deploy Icon Language (P0)**~~ — DONE. 22 SVG icons deployed to FormationDetail, CorpsDetail, ArmyDetail, CorpsCard. React.memo + aria-hidden. Simplified: stance lookup, size consistency.
 2. **[2026-03-20] Battle Marker Upgrade**: Make battle dots clickable/hoverable. Show TurnBattle data (attacker, defender, outcome, casualties). Scale by casualties. Link to AAR. ~100 lines.
 3. **[2026-03-20] Map Counter Enrichment**: Add health bar (2px, cohesion), supply dot (4px), operation icon to formation markers. Enable `deckFormationCounters: true`.
 **Tier 2 — High Impact, Medium Effort (2-3 sessions):**
