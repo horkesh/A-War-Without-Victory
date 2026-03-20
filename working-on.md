@@ -1,23 +1,24 @@
-# Working On: Visual Overhaul — ALL PHASES COMPLETE
+# Working On: UI Overhaul Master Plan
 
-## Completed This Session
-1. **Phase 1: Icon Language** — DONE (previous session). 22 SVG icons deployed to 4 components.
-2. **Phase 2: Battle Marker Upgrade** — DONE (previous session). Interactive tooltips, outcome colors.
-3. **Phase 3: Map Counter Enrichment** — DONE. Deck.gl health bar, supply dot, status icons, stack badges, operation/disruption glows. `deckFormationCounters: true` by default. Single-pass feature classification.
-4. **Phase 4: Sidebar Visual Upgrade** — DONE. CorpsCard: stance-colored border, personnel icon, equipment summary, cohesion health bar. BrigadeRow: stance stripe, personnel count, icon-based stats, rubber-stamp status badges.
-5. **Phase 5: Document Treatment for Panels** — DONE. EventModal: dispatch paper aesthetic, category stamps with icons, field report typography, effect icons, commander decision styling.
-6. **Phase 6: Bottom Strip Enrichment** — DONE. Turn counter, active operations count, battles this turn, alliance status pill. Memoized territory computation.
-7. **Phase 7: Map Operation Visualization** — DONE. Operation glow rings on participating units, disrupted glow rings, all via Deck.gl ScatterplotLayer.
-8. **Phase 8: Battle Site Flyover** — DONE. Click battle marker → flyTo with pitch 35°, zoom 11+, OSID selection for settlement panel.
-9. **Phase 9: Terrain Visualization** — DONE. Move preview now uses terrain friction coloring (green→amber→red). Friction enriched on osid-control GeoJSON features.
+## Status: Phase 4 COMPLETE — Phase 5 next
 
-## Simplify Pass Applied
-- Single-pass feature classification (5 filters → 1)
-- Removed dead COLOR_CRIMSON constant
-- Memoized 744-entry territory loop
-- Glow layers scoped to top-stack only
+### Completed:
+- **Phase 0:** Foundation Repair — design tokens, EventDecisionModal migration, GlassPanel color fix
+- **Phase 1:** Army HQ Shell — modal, commander card, situation card, corps grid, alert strip, H key
+- **Phase 2:** Corps Drill-Down — 5 collapsible sections (commander, sectors, ops, orbat, combat record)
+- **Phase 3:** Actions — corps stance, sector stance, force launch, stand down, commander replacement
+- **Phase 4:** Deep Drill-Down — brigade/operation/sector sub-card expansions, officer dismissal IPC, ArmyDetail retired, simplify pass (shared utils, Map lookups, memoization)
 
-## Next Steps
-- Commit all visual overhaul phases
-- Ledger + napkin update
-- Return to HRHB-RBiH war transition P1 backlog
+### Remaining for Phase 5:
+- CorpsFrontPanel interior theme transition (Option A: paper unfolds from dark chrome)
+- Settlement panel quick-actions (Dig In / Attack Adjacent per brigade)
+- Map legend enrichment (numeric scale labels at key thresholds)
+- Keyboard shortcuts (Tab=cycle corps, Space=advance turn, B=briefing, O=operations)
+- Command Briefing actionability (text items → clickable links to HQ/ops/officers)
+- Map atmosphere (deeper hillshade + warm sepia tint)
+
+### Asset integration (optional, waiting on user):
+- Wood texture (512x512 webp) → src/ui/map/assets/texture_wood_dark.webp
+- Paper texture (512x512 webp) → src/ui/map/assets/texture_paper_cream.webp
+
+### Plan: `docs/plans/2026-03-20-ui-overhaul-master-plan.md`

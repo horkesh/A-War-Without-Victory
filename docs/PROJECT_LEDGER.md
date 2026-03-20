@@ -1,7 +1,22 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-20
-**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Visual Overhaul COMPLETE (9 phases). Deck.gl formation counters ON by default (health bars, supply dots, op/disrupted glows). Sidebar upgrade (stance stripes, equipment, icons). EventModal dispatch paper. Bottom strip macro indicators. Battle flyover. Terrain-cost move preview. Combat effectiveness, 3D terrain, animated arrows. HRHB-RBiH war transition system.
+**Last Updated:** 2026-03-21
+**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Visual Overhaul COMPLETE (9 phases). Army HQ Modal Phases 0-4 COMPLETE (shell, overview, drill-down, actions, deep drill-down + officer dismissal). ArmyDetail retired.
+
+## [2026-03-21] Army HQ Modal Phase 4 — Deep Drill-Down + Officer Dismissal
+
+Sub-card expansion across all three drill-down sections:
+- **Brigade (ORBAT):** Click to expand — morale, entrenchment, officer quality, home distance, equipment (tanks/arty operational/total, captured/destroyed history), narrative arc + war narrative, recent engagements (last 5 with outcome badges), campaign casualties (KIA/WIA/MIA)
+- **Operation:** Click to expand — preparation details (sub-phase, turns, probe status), readiness bars (intel/supply/cohesion), commander assessment + force ratio, objectives with current/completed markers, axes detail (per-axis brigades/status/momentum), participating brigades, execution stats, recovery reason
+- **Sector:** Click to expand — front brigades with personnel + cohesion, reserve brigades, battles this week with outcome badges + location + casualties, sector stats
+
+Officer dismissal IPC (`dismiss-officer`): full 4-layer wiring (electron-main → preload → useIPC → CommanderSection). Safety guard blocks dismissal if officer commands an active operation. Dismiss button red-styled, hidden for acting commanders.
+
+ArmyDetail.tsx retired from render — faction click auto-opens Army HQ modal.
+
+Simplify: shared `formatPersonnel()`, `formatOsidLabel()`, `getCohesionColor()`, `OUTCOME_COLORS`. Memoized sort + precomputed OSID sets. `formations.find()` → `Map.get()`. Store dependency removed from `SectorExpandedDetail`.
+
+**Files:** `OrbatSection.tsx`, `OperationsSection.tsx`, `SectorsSection.tsx`, `CommanderSection.tsx`, `App.tsx`, `electron-main.cjs`, `preload.cjs`, `useIPC.ts`, `formatters.ts`, `theme.ts`
 
 ## [2026-03-20] Visual Overhaul Phases 3-9 — Full UI Upgrade
 

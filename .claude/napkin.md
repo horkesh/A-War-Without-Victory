@@ -8,9 +8,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-20, v0.6.3 — Visual Overhaul Complete)
-**v0.6.3.** 1246 tests, 103 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w).**
-**This session:** Visual Overhaul Phases 3-9 COMPLETE. Deck.gl formation counters ON by default (health bars, supply dots, status icons, op/disrupted glows). Sidebar upgrade (stance stripes, equipment, icons). EventModal dispatch paper. Bottom strip macro indicators. Battle flyover (pitch 35°). Terrain-cost move preview. Simplify pass: single-pass feature classification, memoized territory computation.
+## Current State (2026-03-21, v0.4.9 — Army HQ Phase 4 Complete)
+**v0.4.9.** 1246 tests, 103 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w).**
+**This session:** Army HQ Phase 4 COMPLETE. Brigade/operation/sector sub-card expansions. Officer dismissal IPC (4-layer). ArmyDetail retired. Simplify: shared formatPersonnel, getCohesionColor, OUTCOME_COLORS; Map lookups; memoized sorts + OSID sets. Hook removed from settings.json.
+**Army HQ status:** Phases 0-4 done. Phase 5 (surrounding polish) next: CorpsFrontPanel theme, settlement quick-actions, map legend, keyboard shortcuts, command briefing actionability, map atmosphere.
 **HRHB-RBiH conflict:** P1 Backlog: CB brigade redistribution, CB operations not launching. Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
