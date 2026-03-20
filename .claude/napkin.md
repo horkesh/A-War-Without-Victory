@@ -99,22 +99,20 @@
 10. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
 **Resolved this session:** #34 HVO sectors (FIXED — corps activation + consolidation protection), #38 HVO stale IDs (FIXED), #33 Sarajevo density (CORRECT — siege working).
 
-## Ops Modal Deck.gl Upgrade Backlog (P3)
-1. **[2026-03-20] Brigade ScatterplotLayer**: Show participating brigades as personnel-scaled dots at current location_osid. Color by readiness (green/amber/red). Data already in BrigadeTray.
-2. **[2026-03-20] Force flow ArcLayer**: Arcs from each brigade's position → staging → objectives. "Commander's sand table" showing the full operation as a flow network.
-3. **[2026-03-20] Threat heat underlayer**: HeatmapLayer of enemy force density around the AO from sector_intel. Helps player pick objectives.
-4. **[2026-03-20] Pulsing objective markers**: ScatterplotLayer with animated radiusScale for objectives (red pulse) and staging (green pulse).
-5. **[2026-03-20] Floating axis labels**: TextLayer above each axis showing "Axis 1: 3 bde, PR 2.1" from usePrediction.
-
-## 3D Terrain Leverage Backlog (P3)
-1. ~~**Terrain-aware ops camera**~~ — DONE. Bearing from friendly→enemy centroid. Pitch 30°.
-2. **[2026-03-20] Elevation profile on advance axes**: Sample DEM along each bezier curve, show mini elevation strip in ops modal. "Axis 1: climbs 800m over 15km through Vlasic pass." DEM data already local.
-3. **[2026-03-20] Terrain-colored front lines**: Front edges at high elevation get white/blue tint. Player instantly sees mountain warfare vs valley vs flatland sectors.
-4. **[2026-03-20] LOS/visibility cones**: From selected brigade, ray-cast against DEM to show what unit can see. Artillery on hilltop sees further than infantry in valley. Feeds intel/fog system.
-5. **[2026-03-20] Terrain cost for movement**: Column march currently uses hop-count. With elevation data, mountain passes cost more turns than river valleys. Makes terrain physically real for movement planning.
-6. **[2026-03-20] 3D battle replay**: After battle resolves, camera swoops to battle site in 3D. Show attacker arrows climbing toward defender position. Terrain tells the story of why the attack succeeded or failed.
-7. ~~**Surface terrain info for player**~~ — DONE. Terrain tooltip in ops modal (elevation, slope, type, defense bonus, river/road warnings). Data from `settlements_terrain_scalars.json`. Also add to main map settlement panel + OSID tooltip (not yet done).
-8. **[2026-03-20] Main map terrain tooltip**: Port the ops modal terrain tooltip to the main map's OSID hover tooltip and settlement detail panel. Currently only ops modal shows terrain info.
+## Map & UX Upgrade Queue (strategic design: `docs/plans/2026-03-20-terrain-map-ux-strategic-design.md`)
+**Tier 1 — High Impact, Low Effort (1-2 sessions each):**
+1. **[2026-03-20] Deploy Icon Language (P0)**: Replace text labels with `<Icon name="..." />` across 8 components. `Icon.tsx` recovered. Highest single-impact visual change.
+2. **[2026-03-20] Battle Marker Upgrade**: Make battle dots clickable/hoverable. Show TurnBattle data (attacker, defender, outcome, casualties). Scale by casualties. Link to AAR. ~100 lines.
+3. **[2026-03-20] Map Counter Enrichment**: Add health bar (2px, cohesion), supply dot (4px), operation icon to formation markers. Enable `deckFormationCounters: true`.
+**Tier 2 — High Impact, Medium Effort (2-3 sessions):**
+4. **[2026-03-20] Operation Visualization on Main Map**: Objective OSID tints, Deck.gl ArcLayer brigade→objective, status glow on participating units.
+5. **[2026-03-20] Battle Site Flyover**: Click battle → `flyTo` with terrain pitch + bearing, floating battle card. 3D terrain temporary on main map during flyover.
+6. **[2026-03-20] Settlement Panel Mini-Profile**: Formation cards with combat effectiveness, siege status, terrain profile in overview tab.
+**Tier 3 — Medium Impact, Higher Effort:**
+7. **[2026-03-20] Terrain Cost Movement Overlay**: On move mode, color OSIDs by terrain friction (green/amber/red).
+8. **[2026-03-20] Elevation Profile on Ops Axes**: Pre-compute per-OSID elevation, sample along bezier, SVG area chart.
+9. **[2026-03-20] Front Line Terrain Tinting**: Enrich front edge data with friction, color high-elevation edges white/blue.
+**Explicitly rejected:** LOS cones (too expensive, wrong scale), full 3D main map (distorts polygons), 3D battle replay (no multi-step data), threat heat layer (redundant with Defense mode), pulsing markers (flashy, no info).
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
