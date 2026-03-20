@@ -10,7 +10,11 @@ import { FACTION_COLORS } from '../../utils/theme';
 import { formatCorpsDisplayName } from '../../utils/formatters';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getFormationCommander } from '../../utils/officerUtils';
-import { Icon } from '../icons/Icon';
+import { CommanderSection } from './CommanderSection';
+import { SectorsSection } from './SectorsSection';
+import { OperationsSection } from './OperationsSection';
+import { OrbatSection } from './OrbatSection';
+import { CombatRecordSection } from './CombatRecordSection';
 
 interface ArmyHQCorpsCardProps {
     corps: FormationView;
@@ -93,6 +97,49 @@ export function ArmyHQCorpsCard({
                     } ${Math.min(100, data.avgCohesion)}%, #d4ccc0 ${Math.min(100, data.avgCohesion)}%)`
                 }} />
             </button>
+        );
+    }
+
+    // Expanded: full detail with drill-down sections
+    if (isExpanded) {
+        return (
+            <div
+                className={`rounded-lg shadow-[2px_3px_8px_rgba(0,0,0,0.4)] overflow-hidden col-span-full
+                    ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
+                style={{ background: 'linear-gradient(135deg, #f0e8d8 0%, #e4dcc8 100%)' }}
+            >
+                {/* Header — clickable to collapse */}
+                <button
+                    type="button"
+                    onClick={onToggleExpand}
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#e8dcc4]/50 transition-colors"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="text-[14px] font-bold text-[#2a2016] uppercase tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
+                            {displayName}
+                        </div>
+                        <span className="text-[10px] font-bold" style={{ fontFamily: 'Courier New, monospace', color: gradeColor }}>
+                            {data.eff.grade}
+                        </span>
+                        <span className={`text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded border-2 opacity-60 ${stanceClass}`}
+                              style={{ transform: 'rotate(-3deg)' }}>
+                            {STANCE_LABELS[data.stance] ?? data.stance}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] tabular-nums" style={{ fontFamily: 'Courier New, monospace' }}>
+                        <span className="text-[#6a5a40]">{data.totalPersonnel.toLocaleString()} personnel</span>
+                        <span className="text-[#8a7a60]">{brigades.length} brg · {sectors.length} sec</span>
+                        <span className="text-[10px] text-[#8a7a60]">▼</span>
+                    </div>
+                </button>
+
+                {/* Sections */}
+                <CommanderSection corps={corps} gameState={gameState} />
+                <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} />
+                <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} />
+                <OrbatSection corpsId={corps.id} brigades={brigades} />
+                <CombatRecordSection corpsId={corps.id} corps={corps} />
+            </div>
         );
     }
 
