@@ -1,7 +1,13 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20
 **Status:** **v0.4.9** (AI Comes Alive). **1242 tests**, 102 suites. **91.4% area-weighted (40w).** HRHB-RBiH war transition system (feature branch). Post-operation brigade return march. Battle of the Barracks, equipment overhaul, polygon harmonization, front line rendering.
+
+## [2026-03-20] Documentation — Deck.gl vs MapLibre default + map master sync
+
+**Docs-only.** Corrected overstated claims that Deck.gl had permanently replaced MapLibre formation layers. **Code truth:** `DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters === false` — MapLibre `formation-markers` / `formation-labels` remain default; Deck formation stack is opt-in.
+
+**Files:** `docs/10_canon/Systems_Manual_v0_7_0.md` §7.6; `docs/10_canon/context.md` (canonical GUI bullet); `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §0; `docs/20_engineering/MAP_UI_MASTER.md` (directory `layers/`, §3.3 seven map modes, §7 formation + major-city labels + mode fill table); `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` §0 Phase 5 + §5.2 wireframe map toolbar; `docs/20_engineering/GUI_DESIGN_BLUEPRINT.md` §6.3; `docs/30_planning/.../HOI_VISUAL_GUI_OVERHAUL_SPEC.md` (formation markers); `docs/40_reports/GUI_MASTER.md` (Deck row — docs synced note).
 
 ## [2026-03-19] HRHB-RBiH War Transition System — Emergent Alliance Breakdown
 

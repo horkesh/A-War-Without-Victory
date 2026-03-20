@@ -3,7 +3,7 @@
 **Project:** A War Without Victory (AWWV)
 **Location:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
-**Date:** 2026-02-08 | **Canonical GUI update:** 2026-03-15
+**Date:** 2026-02-08 | **Canonical GUI update:** 2026-03-20
 
 ---
 
@@ -13,9 +13,9 @@ The **canonical player-facing map and GUI** is the **React + MapLibre map app** 
 
 **Glyphs and offline deployment:** The MapLibre style (`awwv_map_style.json`) references glyphs from `https://demotiles.maplibre.org/...`. Offline or air-gapped deployments will not have map labels unless glyphs are bundled locally and the style updated to point to a local or relative glyph URL.
 
-- **Phase 4/5: Deck.gl Hybrid Integration (2026-03-20)**: Replaced native MapLibre formation layers with a high-performance Deck.gl overlay. This enables superior icon scaling, z-order control, and complex enrichment (order indicators, supply dots, stack badges) without the limitations of the MapLibre sprite system.
-- **Dynamic Scaling Calibration**: Implemented zoom-dependent `getSize` logic matching MapLibre's historical curve (16px @ Z6 to 40px @ Z14). Real-time synchronization via map `zoom` events ensures smooth resizing.
-- **SVG Icon Framework**: Introduced a UI-wide SVG `Icon` component replacing the previous mix of sprites and emoji. Standardized on `Open Sans Regular` for map labels to improve legibility.
+- **Phase 4/5: Deck.gl hybrid (2026-03-20)**: **Optional** Deck.gl layers live under `src/ui/map/layers/` and are gated by **`deckLayerCapabilities.ts`**. Default (**`deckFormationCounters: false`**) keeps **MapLibre** `formation-markers` / `formation-labels` authoritative (correct picks, pre-Deck parity). Enabling formation Deck layers hides those MapLibre layers to prevent double-draw and turns on Icon/Text layers plus enrichments (supply dot, stack badge, posture glyphs). Zoom-dependent sizing targets the same curve (16px @ Z6 to 40px @ Z14) with `zoom` sync.
+- **Major-mun labels**: `buildMajorCityLabelGeoJSON.ts` → source `major-city-labels`, symbol layer above fronts; strategic settlement “Points” layer removed.
+- **SVG Icon framework**: UI-wide `Icon` component; map label typography detailed in MAP_UI_MASTER / `MapContainer.tsx`.
 - **Uniform Front Lines**: Front-line thickness for `front-line-base` and `front-line-stripe` uses uniform zoom-only widths. Vertex-snapping fallback synthesizes boundary lines for OSID pairs lacking shared polygon arcs. Sector highlight layers use `front-lines` source (`lineType=glow` filter) so the white glow trails the front line exactly.
 
 **Desktop map runtime (2026-03-03):** In Electron, the **same** map app is used as in dev: there is **one** codebase (`src/ui/map/`), no separate "player-facing" map. When you run `npm run dev:map` (Vite on port 3002), the desktop app prefers that URL for the map iframe so the in-app map is identical to the dev map. When the dev server is not running, Electron serves the built bundle from `dist/tactical-map` (local HTTP server on 127.0.0.1). Map assets (PMTiles, style, GeoJSON) and Load run data are served via that server; MapLibre blob workers do not work under the `awwv://` protocol. Rebuild with `npm run desktop:map:build` and restart Electron to refresh the built bundle when not using the dev server.

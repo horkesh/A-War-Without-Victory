@@ -4,7 +4,7 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-03-10
+**Last updated:** 2026-03-20
 **Dev/live mode (2026-03-10):** Single codebase with `devMode` boolean in `gameStore.ts`. `isDevMode()`: auto-ON in Vite dev, `?dev=1` in production, `?live=1` forces live. Dev mode shows full load/run toolbar + DEV badge; separate Fronts/Sectors toggles; offset sector glow. Live mode auto-loads `latest_run_final_save.json` as RBiH; merged "Front" toggle (controls `sectorsVisible`); sector glow centered on front line (no offset, wider, `line-blur`); lateral demarcation hidden. Front line features carry `sector_id`; merge key by sector creates natural visual breaks at sector boundaries.
 
 > **See also:** [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) — original engineering reference.
@@ -30,7 +30,7 @@ src/ui/map/
 ├── map/
 │   ├── MapContainer.tsx           Master map: MapLibre init, all sources/layers, GeoJSON updates
 │   ├── useMapInteractions.ts      Click/hover event wiring → store callbacks (300ms hover delay)
-│   ├── formationIcons.ts          Canvas-based NATO counters (legacy MapLibre source; now primarily used for Deck.gl IconLayer textures)
+│   ├── formationIcons.ts          Programmatic NATO counter sprites — MapLibre `formation-markers` by default; same bitmaps feed Deck `IconLayer` when `deckFormationCounters` is true
 │   ├── Icon.ts                    (DEPRECATED) Old icon mapping
 │   ├── frontLineIcons.ts          Front-line SVG icon helpers
 │   ├── pmtilesRoute.ts            PMTiles URL routing helper (stub)
@@ -41,7 +41,8 @@ src/ui/map/
 │       ├── buildFrontLinesGeoJSON.ts           Faction border LineStrings (shared OSID edges)
 │       ├── buildEthnicGeoJSON.ts               OSID majority ethnic (Bosniak/Serb/Croat/Other)
 │       ├── buildSupplyGeoJSON.ts               OSID supply state coloring (adequate/strained/critical)
-│       ├── buildDensityGeoJSON.ts              Front OSID density coloring (thin/normal/dense)
+│       ├── buildMajorCityLabelGeoJSON.ts       One label point per major municipality (`MAJOR_MUN_IDS`); max-pop OSID centroid
+│       ├── urbanSettlementTiers.ts             Tier constants / major-mun ID set for labeling (no urban wash on control fill)
 │       ├── buildFormationsGeoJSON.ts           Formation Point markers at OSID centroids
 │       ├── buildOrderArrowsGeoJSON.ts          Attack/move arrow LineStrings
 │       ├── buildCorpsFrontLinesGeoJSON.ts      Corps-colored front lines (glow + tooth edge)
@@ -50,7 +51,7 @@ src/ui/map/
 │       ├── buildOperationTargetIconsGeoJSON.ts Op objective markers: points + crosshairs
 │       ├── formationIconId.ts                  Icon ID string from kind + faction
 │       ├── geojsonLookup.ts                    buildOsidCentroidLookup() helper
-│       ├── resolveFormationLocationOsid.ts     location_osid or first AoR fallback
+│       ├── resolveFormationLocationOsid.ts     `location_osid`, then sorted `aorSettlementIds`, then `hq_sid`
 │       ├── generateFactionBorders.ts           Shared-edge faction boundary computation
 │       ├── buildFogOfWarGeoJSON.ts             Enemy-territory fog-of-war polygon fill from `LoadedGameState.fogOfWar`
 │       └── buildBattleMarkersGeoJSON.ts        Combat flip events → Point features (last 3 turns, age-based opacity)
@@ -91,7 +92,10 @@ src/ui/map/
 │   └── gameStore.ts               Zustand store — all UI state (see §4)
 │
 ├── layers/
-│   └── buildTacticalDeckLayers.ts Deck.gl layer factory: high-performance IconLayer (units), TextLayer (labels), and ScatterplotLayer (enrichments)
+│   ├── deckLayerCapabilities.ts   Opt-in flags; **`deckFormationCounters` default false** → MapLibre formations stay on
+│   ├── composeTacticalDeckLayers.ts Merges tactical + experimental Deck layers for `MapboxOverlay`
+│   ├── buildTacticalDeckLayers.ts   IconLayer / TextLayer / enrichments when Deck formations enabled
+│   └── buildExperimentalDeckLayers.ts Optional arcs, Deck front paths, scatter dots (all default off)
 │
 ├── data/
 │   ├── types.ts                   LoadedGameState + all sub-interfaces (see §5)
@@ -284,15 +288,17 @@ Collapsible accordion, left edge, position:fixed.
 
 ### 3.3 MapModeToolbar
 
-Five map modes (bottom bar, centered):
+Seven map modes (bottom bar, centered) — see `src/ui/map/utils/mapModes.ts`:
 
 | Button | Key | Store value | Layers activated |
 |--------|-----|-------------|-----------------|
-| Political | 1 | `'political'` | osid-control fill |
-| Ethnic | 2 | `'ethnic'` | osid-ethnic fill |
-| Supply | 3 | `'supply'` | osid-supply fill + SupplyPanel |
-| Pressure | 4 | `'pressure'` | osid-pressure fill (front pressure heatmap) |
-| Density | 5 | `'density'` | osid-density fill |
+| Political | 1 | `'political'` | `osid-control-fill` |
+| Ethnic | 2 | `'ethnic'` | `osid-ethnic-fill` |
+| Supply | 3 | `'supply'` | `osid-supply-fill` + SupplyPanel |
+| Casualties | 4 | `'casualties'` | `osid-casualties-fill` |
+| Morale | 5 | `'morale'` | `osid-morale-fill` |
+| Operations | 6 | `'operations'` | `osid-operations-fill` (+ operation arrows when applicable) |
+| Defense | 7 | `'defense'` | `osid-defense-fill` |
 
 Layer toggles (no keys):
 
@@ -622,18 +628,28 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 | `sector-glow-pos` / `sector-glow-neg` | Sector boundary glows |
 | `sector-brigade-rings` | Brigade position rings |
 
-### Formation Layers (Deck.gl Hybrid)
+### Formation layers (MapLibre default; optional Deck.gl)
+
+**Default:** MapLibre symbol layers `formation-markers` and `formation-labels` (see `buildFormationsGeoJSON.ts`, `formationIcons.ts`). **`deckFormationCounters`** in `deckLayerCapabilities.ts` is **`false`** by default so `queryRenderedFeatures` and map picks match the legacy path.
+
+When **`deckFormationCounters`** is **true**, MapLibre formation symbol layers are hidden and Deck supplies:
 
 | Layer ID | Source | Purpose |
 |----------|--------|---------|
 | `deck-formations-icons` | Deck.gl | Unit counters with zoom-dependent scaling (16px @ Z6 to 40px @ Z14) |
-| `deck-formations-labels` | Deck.gl | Formation name labels (Open Sans Regular, 10-12px) |
-| `deck-formations-orders` | Deck.gl | Posture/Order emojis (⚔️/🛡️) |
+| `deck-formations-labels` | Deck.gl | Formation name labels |
+| `deck-formations-orders` | Deck.gl | Posture / order glyphs |
 | `deck-formations-supply-dot` | Deck.gl | Supply status indicator dot |
 | `deck-formations-stack-circle` | Deck.gl | Background circle for stack count badge |
 | `deck-formations-stack-text` | Deck.gl | Text badge for stack counts |
 
-> **Note (2026-03-20):** Native MapLibre `formation-markers` and `formation-labels` layers are now HIDDEN in favor of the Deck.gl overlay for superior performance and scaling control.
+### Major-municipality label layer
+
+| Layer ID | Source | Purpose |
+|----------|--------|---------|
+| `major-city-labels-symbols` | `major-city-labels` | One symbol per major mun (`buildMajorCityLabelGeoJSON.ts`, `MAJOR_MUN_IDS`); Open Sans Bold via local `/font/` glyphs; minzoom ~6; painted above front lines |
+
+Strategic settlement “Points” / `strategic-points-circles` was **removed** (2026-03-20); op-target rings and crosshairs are unchanged.
 
 ### Front Edge Hover Layers
 
@@ -667,16 +683,17 @@ All added dynamically by MapContainer when `operationTargetOsids` is non-empty. 
 All 6 layers are hidden (`visibility: 'none'`) when `operationTargetOsids` is empty, shown when non-empty.
 `safeSetLayoutVisibility(map, layerId, targetSet.size > 0)` drives visibility each effect run.
 
-### Map Mode Fill Layers
+### Map mode fill layers
 
 | Layer ID | Active when |
 |----------|-------------|
-| `osid-control` | `mapMode === 'political'` |
+| `osid-control-fill` | `mapMode === 'political'` |
 | `osid-ethnic-fill` | `mapMode === 'ethnic'` |
 | `osid-supply-fill` | `mapMode === 'supply'` |
-| `osid-density-fill` | `mapMode === 'density'` |
-
-Pressure mode reuses the political fill with a separate coloring pass.
+| `osid-casualties-fill` | `mapMode === 'casualties'` |
+| `osid-morale-fill` | `mapMode === 'morale'` |
+| `osid-operations-fill` | `mapMode === 'operations'` |
+| `osid-defense-fill` | `mapMode === 'defense'` |
 
 ---
 

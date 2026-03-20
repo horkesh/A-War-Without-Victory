@@ -67,8 +67,8 @@
 7. **[2026-03-20] Nested package installations for Map UI**
    Do instead: The tactical map UI is a completely separate workspace at `src/ui/map` with its own `package.json`. Commands like `npm run dev:map` run `cd src/ui/map && npx vite`. When adding UI dependencies (like `deck.gl`), you MUST run `npm install` inside the `src/ui/map` directory, not the project root. Root `npm install --legacy-peer-deps` can break the inner Vite installation.
 
-8. **[2026-03-20] Deck.gl Scaling and Label Standards**
-   Do instead: When implementing Deck.gl tactical layers, match the historical MapLibre zoom-interpolation for unit markers (`16px` @ Z6 to `40px` @ Z14). Labels must use `Open Sans Regular`, `10-12px` font size, and a `~22px` pixel offset to ensure they remain thin and legible without bold overhead. Synchronization with map `zoom` events is required for real-time scaling of `IconLayer` and `TextLayer` props.
+8. **[2026-03-20] Deck.gl Scaling, Labels, and Doc Truth**
+   Do instead: **`deckFormationCounters` defaults `false`** — MapLibre formations are the default render + pick path. When implementing Deck.gl tactical layers, match MapLibre zoom-interpolation for unit markers (`16px` @ Z6 to `40px` @ Z14); sync on map `zoom`. Labels: `Open Sans Regular`, `10-12px`, `~22px` offset where used. **Do not** document Deck as having “replaced” MapLibre formations unless you qualify opt-in + `deckLayerCapabilities.ts`.
 
 ## Imports & Build
 1. **[2026-02-07] Martinez ESM import**
