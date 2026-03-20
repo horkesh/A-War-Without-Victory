@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Option B: War Room Table — VRS Army HQ</title>
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Color tokens ── */
+  :root {
+    --panel-bg: #1c1a17;
+    --card-bg: #2a2622;
+    --accent-gold: #c4a35a;
+    --text-primary: #e8e0d0;
+    --text-secondary: #8a8578;
+    --faction-rs: #e05050;
+    --faction-rbih: #4a9eff;
+    --faction-hrhb: #50b850;
+    --paper-light: #f0e8d8;
+    --paper-dark: #e4dcc8;
+    --paper-text: #3a3228;
+    --status-green: #50b850;
+    --status-amber: #c4a35a;
+    --status-red: #e05050;
+    --table-light: #2a2016;
+    --table-dark: #1e1810;
+  }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    color: var(--text-primary);
+    /* Dark wood surface */
+    background: linear-gradient(145deg, var(--table-light) 0%, var(--table-dark) 40%, #221c12 70%, var(--table-dark) 100%);
+    position: relative;
+  }
+
+  /* Wood grain texture overlay */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        87deg,
+        transparent,
+        transparent 3px,
+        rgba(60,45,25,0.08) 3px,
+        rgba(60,45,25,0.08) 4px
+      ),
+      repeating-linear-gradient(
+        89deg,
+        transparent,
+        transparent 7px,
+        rgba(40,30,15,0.06) 7px,
+        rgba(40,30,15,0.06) 8px
+      ),
+      repeating-linear-gradient(
+        86deg,
+        transparent,
+        transparent 18px,
+        rgba(80,60,30,0.04) 18px,
+        rgba(80,60,30,0.04) 20px
+      ),
+      repeating-linear-gradient(
+        88.5deg,
+        transparent,
+        transparent 40px,
+        rgba(50,35,18,0.07) 40px,
+        rgba(50,35,18,0.07) 42px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Subtle vignette on table edges */
+  body::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(10,8,5,0.5) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── Title bar ── */
+  .title-bar {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 40px;
+    background: linear-gradient(180deg, rgba(28,26,23,0.95) 0%, rgba(28,26,23,0.7) 100%);
+    border-bottom: 1px solid rgba(196,163,90,0.3);
+  }
+
+  .title-bar h1 {
+    font-size: 18px;
+    font-weight: normal;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+  }
+
+  .title-bar .faction-tag {
+    font-size: 13px;
+    color: var(--faction-rs);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid var(--faction-rs);
+    padding: 3px 12px;
+    border-radius: 2px;
+  }
+
+  .title-bar .week-tag {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  /* ── Layout container ── */
+  .table-surface {
+    position: relative;
+    z-index: 5;
+    padding: 28px 40px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ── Paper card base ── */
+  .card {
+    background: linear-gradient(160deg, var(--paper-light) 0%, var(--paper-dark) 100%);
+    color: var(--paper-text);
+    border-radius: 3px;
+    padding: 20px 24px;
+    position: relative;
+    box-shadow:
+      2px 3px 8px rgba(0,0,0,0.45),
+      1px 1px 2px rgba(0,0,0,0.3);
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.35s ease,
+                z-index 0s;
+  }
+
+  /* Slight paper texture */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(180,170,150,0.05) 2px,
+        rgba(180,170,150,0.05) 3px
+      );
+    pointer-events: none;
+  }
+
+  /* ── Top row: Commander + Overview ── */
+  .top-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .card-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8a7e6a;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .commander-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2a1f14;
+    margin-bottom: 2px;
+  }
+
+  .commander-archetype {
+    font-size: 12px;
+    font-style: italic;
+    color: #6a6050;
+    margin-bottom: 14px;
+  }
+
+  /* Pencil underline on key numbers */
+  .pencil-underline {
+    border-bottom: 1.5px solid rgba(58,50,40,0.35);
+    padding-bottom: 1px;
+    display: inline;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px 16px;
+    margin-bottom: 14px;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8a7e6a;
+  }
+
+  .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2a1f14;
+  }
+
+  .battle-record {
+    display: flex;
+    gap: 20px;
+    align-items: baseline;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(58,50,40,0.2);
+  }
+
+  .battle-record .big-num {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2a1f14;
+  }
+
+  .battle-record .record-detail {
+    font-size: 12px;
+    color: #6a6050;
+  }
+
+  /* ICTY badge */
+  .icty-badge {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: #8b1a1a;
+    color: #f0e0d0;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 2px;
+    transform: rotate(2deg);
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  }
+
+  /* ── Strategic overview card ── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+
+  .overview-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+  }
+
+  .overview-item .o-label {
+    font-size: 12px;
+    color: #6a6050;
+  }
+
+  .overview-item .o-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #2a1f14;
+  }
+
+  .this-week-box {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(58,50,40,0.06);
+    border-left: 3px solid var(--accent-gold);
+    border-radius: 0 3px 3px 0;
+  }
+
+  .this-week-box .tw-title {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8a7e6a;
+    margin-bottom: 4px;
+  }
+
+  .this-week-box .tw-content {
+    font-size: 13px;
+    color: #3a3228;
+  }
+
+  .tw-positive { color: var(--status-green); font-weight: bold; }
+  .tw-negative { color: var(--status-red); font-weight: bold; }
+
+  /* ── Corps grid ── */
+  .corps-row-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: rgba(196,163,90,0.6);
+    margin-bottom: -10px;
+  }
+
+  .corps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+
+  .corps-card {
+    cursor: pointer;
+    padding: 16px 18px;
+    min-height: 190px;
+  }
+
+  .corps-card:hover {
+    box-shadow:
+      3px 5px 14px rgba(0,0,0,0.55),
+      1px 1px 3px rgba(0,0,0,0.35);
+  }
+
+  .corps-card.expanded {
+    transform: scale(1.4);
+    z-index: 100;
+    box-shadow:
+      6px 10px 30px rgba(0,0,0,0.7),
+      2px 3px 6px rgba(0,0,0,0.4);
+  }
+
+  .corps-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .corps-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #2a1f14;
+    line-height: 1.2;
+  }
+
+  .corps-stamp {
+    font-size: 8px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1.5px solid;
+    border-radius: 2px;
+    transform: rotate(-3deg);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .stamp-offensive {
+    color: #a03030;
+    border-color: #a03030;
+  }
+
+  .stamp-besieging {
+    color: #8b6914;
+    border-color: #8b6914;
+  }
+
+  .stamp-overextended {
+    color: #c04040;
+    border-color: #c04040;
+    background: rgba(192,64,64,0.06);
+  }
+
+  .stamp-defensive {
+    color: #3a7a3a;
+    border-color: #3a7a3a;
+  }
+
+  .stamp-balanced {
+    color: #5a6a7a;
+    border-color: #5a6a7a;
+  }
+
+  .corps-commander {
+    font-size: 11px;
+    color: #6a6050;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .corps-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    margin-bottom: 8px;
+  }
+
+  .corps-stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+  }
+
+  .corps-stat .cs-label {
+    color: #8a7e6a;
+  }
+
+  .corps-stat .cs-value {
+    font-weight: bold;
+    color: #2a1f14;
+  }
+
+  .cohesion-bar {
+    height: 4px;
+    background: rgba(58,50,40,0.12);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .cohesion-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .corps-op {
+    margin-top: 8px;
+    font-size: 10px;
+    padding: 4px 8px;
+    background: rgba(58,50,40,0.05);
+    border-radius: 2px;
+  }
+
+  .corps-op .op-name {
+    font-weight: bold;
+    color: #3a3228;
+  }
+
+  .corps-op .op-status {
+    margin-left: 6px;
+    font-style: italic;
+    color: #6a6050;
+  }
+
+  .op-executing { color: var(--status-green) !important; }
+  .op-stalled { color: var(--status-red) !important; }
+
+  /* ── Expanded detail (hidden by default) ── */
+  .corps-expanded-detail {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(58,50,40,0.2);
+  }
+
+  .corps-card.expanded .corps-expanded-detail {
+    display: block;
+  }
+
+  .sector-list {
+    font-size: 10px;
+    color: #6a6050;
+    margin-bottom: 10px;
+  }
+
+  .sector-list span {
+    display: inline-block;
+    background: rgba(58,50,40,0.08);
+    padding: 2px 6px;
+    margin: 2px 3px 2px 0;
+    border-radius: 2px;
+  }
+
+  .commander-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .cmd-btn {
+    font-size: 9px;
+    font-family: 'Georgia', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border: 1px solid;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    background: transparent;
+  }
+
+  .cmd-btn.replace {
+    color: #8b4513;
+    border-color: #8b4513;
+  }
+  .cmd-btn.replace:hover {
+    background: #8b4513;
+    color: var(--paper-light);
+  }
+
+  .cmd-btn.stance {
+    color: #3a5a7a;
+    border-color: #3a5a7a;
+  }
+  .cmd-btn.stance:hover {
+    background: #3a5a7a;
+    color: var(--paper-light);
+  }
+
+  /* ── Minimap placeholder ── */
+  .minimap {
+    position: fixed;
+    bottom: 24px;
+    right: 40px;
+    width: 260px;
+    height: 170px;
+    background: linear-gradient(135deg, #1a1916 0%, #141210 100%);
+    border: 1px solid rgba(196,163,90,0.25);
+    border-radius: 3px;
+    box-shadow: 3px 4px 12px rgba(0,0,0,0.5);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .minimap-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(196,163,90,0.5);
+    margin-bottom: 8px;
+  }
+
+  /* Fake front line squiggles */
+  .minimap svg {
+    width: 220px;
+    height: 110px;
+  }
+
+  .minimap .territory-rs {
+    fill: rgba(224,80,80,0.15);
+  }
+
+  .minimap .territory-rbih {
+    fill: rgba(74,158,255,0.12);
+  }
+
+  .minimap .territory-hrhb {
+    fill: rgba(80,184,80,0.10);
+  }
+
+  .minimap .front-line {
+    stroke: var(--faction-rs);
+    stroke-width: 1.5;
+    fill: none;
+    opacity: 0.6;
+  }
+
+  .minimap .front-line-rbih {
+    stroke: var(--faction-rbih);
+  }
+
+  /* ── Overlay for expanded card ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,8,5,0.5);
+    z-index: 50;
+  }
+
+  .overlay.visible {
+    display: block;
+  }
+
+  /* ── Pencil annotation marks ── */
+  .pencil-note {
+    font-size: 10px;
+    font-style: italic;
+    color: rgba(100,80,50,0.5);
+    font-family: 'Segoe Script', 'Comic Sans MS', cursive;
+  }
+
+  /* ── War exhaustion bar ── */
+  .exhaustion-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .exhaustion-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(58,50,40,0.12);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .exhaustion-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--status-amber) 0%, var(--status-red) 100%);
+  }
+
+  .exhaustion-label {
+    font-size: 11px;
+    color: #6a6050;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- Overlay for expanded card click-away -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Title bar -->
+<div class="title-bar">
+  <h1>Option B: War Room Table</h1>
+  <span class="faction-tag">Vojska Republike Srpske</span>
+  <span class="week-tag">Week 23 &mdash; September 1992</span>
+</div>
+
+<!-- Table surface -->
+<div class="table-surface">
+
+  <!-- TOP ROW -->
+  <div class="top-row">
+
+    <!-- Army Commander card -->
+    <div class="card">
+      <span class="icty-badge">ICTY Indicted</span>
+      <span class="card-label">Army Commander</span>
+      <div class="commander-name">Gen. Ratko Mladi&#263;</div>
+      <div class="commander-archetype">"Zealous Aggressor"</div>
+
+      <div class="stat-grid">
+        <div class="stat-item">
+          <span class="stat-label">Competence</span>
+          <span class="stat-value"><span class="pencil-underline">4</span></span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Aggression</span>
+          <span class="stat-value"><span class="pencil-underline">5</span></span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Defense</span>
+          <span class="stat-value">3</span>
+        </div>
+      </div>
+
+      <div class="battle-record">
+        <div>
+          <span class="big-num"><span class="pencil-underline">47</span></span>
+          <span class="record-detail"> battles</span>
+        </div>
+        <div>
+          <span class="big-num">31</span>
+          <span class="record-detail"> victories</span>
+        </div>
+        <div>
+          <span class="big-num" style="color:#5a7a3a;"><span class="pencil-underline">66%</span></span>
+          <span class="record-detail"> win rate</span>
+        </div>
+      </div>
+      <div class="pencil-note" style="margin-top:8px;">siege of Sarajevo ongoing &mdash; int'l pressure mounting</div>
+    </div>
+
+    <!-- Strategic Overview card -->
+    <div class="card">
+      <span class="card-label">Strategic Overview</span>
+      <div class="overview-grid">
+        <div class="overview-item">
+          <span class="o-label">Territory held</span>
+          <span class="o-value"><span class="pencil-underline">64.2%</span></span>
+        </div>
+        <div class="overview-item">
+          <span class="o-label">Total personnel</span>
+          <span class="o-value"><span class="pencil-underline">87,400</span></span>
+        </div>
+        <div class="overview-item">
+          <span class="o-label">Active brigades</span>
+          <span class="o-value">78</span>
+        </div>
+        <div class="overview-item">
+          <span class="o-label">Active operations</span>
+          <span class="o-value">3</span>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <span class="o-label" style="font-size:11px; color:#6a6050;">War Exhaustion</span>
+        <div class="exhaustion-bar">
+          <div class="exhaustion-track">
+            <div class="exhaustion-fill" style="width:34%;"></div>
+          </div>
+          <span class="exhaustion-label"><span class="pencil-underline">34%</span></span>
+        </div>
+      </div>
+
+      <div class="this-week-box">
+        <div class="tw-title">This Week</div>
+        <div class="tw-content">
+          4 battles &mdash;
+          <span class="tw-positive">+3 OSID</span> /
+          <span class="tw-negative">-1 OSID</span>
+          &nbsp; (net <span class="tw-positive">+2</span>)
+        </div>
+      </div>
+      <div class="pencil-note" style="margin-top:6px;">Drina corps stretched thin &mdash; reinforce?</div>
+    </div>
+  </div>
+
+  <!-- MIDDLE ROW LABEL -->
+  <div class="corps-row-label">Corps Formations</div>
+
+  <!-- CORPS GRID: 3 x 2 -->
+  <div class="corps-grid">
+
+    <!-- 1st Krajina Corps -->
+    <div class="card corps-card" data-corps="1kk" onclick="toggleCorps(this)">
+      <div class="corps-header">
+        <div class="corps-name">1st Krajina Corps</div>
+        <div class="corps-stamp stamp-offensive">Offensive</div>
+      </div>
+      <div class="corps-commander">Gen. Momir Tali&#263; &mdash; "Methodical Professional"</div>
+      <div class="corps-stats">
+        <div class="corps-stat">
+          <span class="cs-label">Personnel</span>
+          <span class="cs-value"><span class="pencil-underline">18,200</span></span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Brigades</span>
+          <span class="cs-value">15</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Sectors</span>
+          <span class="cs-value">4</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Cohesion</span>
+          <span class="cs-value" style="color:var(--status-green);">72%</span>
+        </div>
+      </div>
+      <div class="cohesion-bar"><div class="cohesion-fill" style="width:72%; background:var(--status-green);"></div></div>
+      <div class="corps-op">
+        <span class="op-name">Op Corridor 92</span>
+        <span class="op-status op-executing">executing</span>
+      </div>
+      <div class="corps-expanded-detail">
+        <div class="sector-list">
+          Sectors: <span>Prijedor</span><span>Banja Luka South</span><span>Doboj West</span><span>Jajce</span>
+        </div>
+        <div class="commander-actions">
+          <button class="cmd-btn replace">Replace Commander</button>
+          <button class="cmd-btn stance">Change Stance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sarajevo-Romanija Corps -->
+    <div class="card corps-card" data-corps="srk" onclick="toggleCorps(this)">
+      <div class="corps-header">
+        <div class="corps-name">Sarajevo-Romanija Corps</div>
+        <div class="corps-stamp stamp-besieging">Besieging</div>
+      </div>
+      <div class="corps-commander">Gen. Stanislav Gali&#263; &mdash; "Cautious Defender"</div>
+      <div class="corps-stats">
+        <div class="corps-stat">
+          <span class="cs-label">Personnel</span>
+          <span class="cs-value"><span class="pencil-underline">14,800</span></span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Brigades</span>
+          <span class="cs-value">12</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Sectors</span>
+          <span class="cs-value">3</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Cohesion</span>
+          <span class="cs-value" style="color:var(--status-amber);">58%</span>
+        </div>
+      </div>
+      <div class="cohesion-bar"><div class="cohesion-fill" style="width:58%; background:var(--status-amber);"></div></div>
+      <div class="corps-op" style="color:#8a7e6a; font-style:italic;">No active operations</div>
+      <div class="corps-expanded-detail">
+        <div class="sector-list">
+          Sectors: <span>Pale</span><span>Ilid&#382;a</span><span>Vogos&#769;c&#769;a</span>
+        </div>
+        <div class="commander-actions">
+          <button class="cmd-btn replace">Replace Commander</button>
+          <button class="cmd-btn stance">Change Stance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drina Corps -->
+    <div class="card corps-card" data-corps="drina" onclick="toggleCorps(this)">
+      <div class="corps-header">
+        <div class="corps-name">Drina Corps</div>
+        <div class="corps-stamp stamp-overextended">Overextended</div>
+      </div>
+      <div class="corps-commander">Gen. Milenko &#381;ivanovi&#263; &mdash; "Adequate Commander"</div>
+      <div class="corps-stats">
+        <div class="corps-stat">
+          <span class="cs-label">Personnel</span>
+          <span class="cs-value"><span class="pencil-underline">8,900</span></span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Brigades</span>
+          <span class="cs-value">9</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Sectors</span>
+          <span class="cs-value">5</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Cohesion</span>
+          <span class="cs-value" style="color:var(--status-red);">41%</span>
+        </div>
+      </div>
+      <div class="cohesion-bar"><div class="cohesion-fill" style="width:41%; background:var(--status-red);"></div></div>
+      <div class="corps-op">
+        <span class="op-name">Op Drina Push</span>
+        <span class="op-status op-stalled">stalled</span>
+      </div>
+      <div class="corps-expanded-detail">
+        <div class="sector-list">
+          Sectors: <span>Zvornik</span><span>Bratunac</span><span>Vlasenica</span><span>Srebrenica Ring</span><span>Gora&#382;de Approach</span>
+        </div>
+        <div class="pencil-note" style="margin-bottom:8px;">5 sectors with only 9 brigades &mdash; critical gap</div>
+        <div class="commander-actions">
+          <button class="cmd-btn replace">Replace Commander</button>
+          <button class="cmd-btn stance">Change Stance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Herzegovina Corps -->
+    <div class="card corps-card" data-corps="herc" onclick="toggleCorps(this)">
+      <div class="corps-header">
+        <div class="corps-name">Herzegovina Corps</div>
+        <div class="corps-stamp stamp-defensive">Defensive</div>
+      </div>
+      <div class="corps-commander">Gen. Radovan Gruba&#269; &mdash; "Steady Defender"</div>
+      <div class="corps-stats">
+        <div class="corps-stat">
+          <span class="cs-label">Personnel</span>
+          <span class="cs-value">11,600</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Brigades</span>
+          <span class="cs-value">10</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Sectors</span>
+          <span class="cs-value">3</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Cohesion</span>
+          <span class="cs-value" style="color:var(--status-green);">68%</span>
+        </div>
+      </div>
+      <div class="cohesion-bar"><div class="cohesion-fill" style="width:68%; background:var(--status-green);"></div></div>
+      <div class="corps-op" style="color:#8a7e6a; font-style:italic;">Graz Accords truce in effect</div>
+      <div class="corps-expanded-detail">
+        <div class="sector-list">
+          Sectors: <span>Nevesinje</span><span>Bile&#263;a</span><span>Trebinje</span>
+        </div>
+        <div class="commander-actions">
+          <button class="cmd-btn replace">Replace Commander</button>
+          <button class="cmd-btn stance">Change Stance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- East Bosnia Corps -->
+    <div class="card corps-card" data-corps="ebc" onclick="toggleCorps(this)">
+      <div class="corps-header">
+        <div class="corps-name">East Bosnia Corps</div>
+        <div class="corps-stamp stamp-balanced">Balanced</div>
+      </div>
+      <div class="corps-commander">Gen. Novica Simi&#263; &mdash; "Cautious Professional"</div>
+      <div class="corps-stats">
+        <div class="corps-stat">
+          <span class="cs-label">Personnel</span>
+          <span class="cs-value">12,100</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Brigades</span>
+          <span class="cs-value">11</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Sectors</span>
+          <span class="cs-value">4</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Cohesion</span>
+          <span class="cs-value" style="color:var(--status-green);">65%</span>
+        </div>
+      </div>
+      <div class="cohesion-bar"><div class="cohesion-fill" style="width:65%; background:var(--status-green);"></div></div>
+      <div class="corps-op">
+        <span class="op-name">Op Posavina Grip</span>
+        <span class="op-status op-executing">executing</span>
+      </div>
+      <div class="corps-expanded-detail">
+        <div class="sector-list">
+          Sectors: <span>Bijeljina</span><span>Br&#269;ko Corridor</span><span>Posavina North</span><span>Semberija</span>
+        </div>
+        <div class="commander-actions">
+          <button class="cmd-btn replace">Replace Commander</button>
+          <button class="cmd-btn stance">Change Stance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2nd Krajina Corps -->
+    <div class="card corps-card" data-corps="2kk" onclick="toggleCorps(this)">
+      <div class="corps-header">
+        <div class="corps-name">2nd Krajina Corps</div>
+        <div class="corps-stamp stamp-balanced">Balanced</div>
+      </div>
+      <div class="corps-commander">Gen. Grujo Bori&#263; &mdash; "Reliable Organizer"</div>
+      <div class="corps-stats">
+        <div class="corps-stat">
+          <span class="cs-label">Personnel</span>
+          <span class="cs-value">9,800</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Brigades</span>
+          <span class="cs-value">8</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Sectors</span>
+          <span class="cs-value">3</span>
+        </div>
+        <div class="corps-stat">
+          <span class="cs-label">Cohesion</span>
+          <span class="cs-value" style="color:var(--status-amber);">55%</span>
+        </div>
+      </div>
+      <div class="cohesion-bar"><div class="cohesion-fill" style="width:55%; background:var(--status-amber);"></div></div>
+      <div class="corps-op" style="color:#8a7e6a; font-style:italic;">No active operations</div>
+      <div class="corps-expanded-detail">
+        <div class="sector-list">
+          Sectors: <span>Drvar</span><span>Mrkonji&#263; Grad</span><span>Kupres</span>
+        </div>
+        <div class="commander-actions">
+          <button class="cmd-btn replace">Replace Commander</button>
+          <button class="cmd-btn stance">Change Stance</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /corps-grid -->
+</div><!-- /table-surface -->
+
+<!-- Minimap -->
+<div class="minimap">
+  <div class="minimap-label">Front Line Map</div>
+  <svg viewBox="0 0 220 110">
+    <!-- Simplified Bosnia outline -->
+    <polygon points="10,30 40,10 90,8 140,12 180,25 210,45 200,70 170,90 120,100 70,95 30,80 10,55"
+             fill="none" stroke="rgba(196,163,90,0.2)" stroke-width="0.8"/>
+    <!-- RS territory (north + east) -->
+    <polygon class="territory-rs" points="10,30 40,10 90,8 140,12 180,25 210,45 200,60 160,55 130,50 100,55 70,50 40,45 15,42"/>
+    <!-- RBiH territory (central) -->
+    <polygon class="territory-rbih" points="40,45 70,50 100,55 130,50 120,70 90,80 60,75"/>
+    <!-- HRHB territory (southwest) -->
+    <polygon class="territory-hrhb" points="10,55 40,45 60,75 70,95 30,80"/>
+    <!-- Front lines -->
+    <path class="front-line" d="M 15,42 Q 40,48 70,50 T 130,50 Q 155,52 160,55 L 200,60"/>
+    <path class="front-line front-line-rbih" d="M 40,45 Q 55,65 60,75"/>
+    <!-- Dots for active ops -->
+    <circle cx="130" cy="45" r="3" fill="var(--faction-rs)" opacity="0.7"/>
+    <circle cx="130" cy="45" r="3" fill="var(--faction-rs)" opacity="0.3">
+      <animate attributeName="r" values="3;7;3" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="90" cy="35" r="2.5" fill="var(--faction-rs)" opacity="0.7"/>
+    <circle cx="175" cy="40" r="2.5" fill="var(--faction-rs)" opacity="0.7"/>
+  </svg>
+</div>
+
+<script>
+  // Track currently expanded card
+  let expandedCard = null;
+  const overlay = document.getElementById('overlay');
+
+  function toggleCorps(card) {
+    if (expandedCard === card) {
+      collapseCard(card);
+      return;
+    }
+
+    // Collapse any previously expanded card
+    if (expandedCard) {
+      collapseCard(expandedCard, true);
+    }
+
+    // Calculate transform to center the card
+    const rect = card.getBoundingClientRect();
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const cardCenterX = rect.left + rect.width / 2;
+    const cardCenterY = rect.top + rect.height / 2;
+    const dx = centerX - cardCenterX;
+    const dy = centerY - cardCenterY;
+
+    card.style.transform = `translate(${dx}px, ${dy}px) scale(1.4)`;
+    card.classList.add('expanded');
+    overlay.classList.add('visible');
+    expandedCard = card;
+  }
+
+  function collapseCard(card, skipOverlay) {
+    card.style.transform = '';
+    card.classList.remove('expanded');
+    if (!skipOverlay) {
+      overlay.classList.remove('visible');
+    }
+    if (expandedCard === card) {
+      expandedCard = null;
+    }
+  }
+
+  // Click overlay to collapse
+  overlay.addEventListener('click', function() {
+    if (expandedCard) {
+      collapseCard(expandedCard);
+    }
+  });
+
+  // Escape key to collapse
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && expandedCard) {
+      collapseCard(expandedCard);
+    }
+  });
+
+  // Prevent button clicks from toggling the card
+  document.querySelectorAll('.cmd-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      // Placeholder: flash the button
+      var original = btn.style.background;
+      btn.style.background = 'rgba(196,163,90,0.3)';
+      setTimeout(function() { btn.style.background = original; }, 200);
+    });
+  });
+</script>
+
+</body>
+</html>

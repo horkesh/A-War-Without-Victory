@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option C: Dossier Folders - Army HQ Modal</title>
+<style>
+  :root {
+    --bg: #1c1a17;
+    --cabinet-line: rgba(100, 90, 70, 0.12);
+    --manila: #d4c4a0;
+    --manila-edge: #b8a880;
+    --manila-active: #e2d5b8;
+    --manila-shadow: rgba(0,0,0,0.4);
+    --paper: #f0e8d8;
+    --paper-shadow: #e0d5c0;
+    --paper-lines: rgba(120,100,70,0.10);
+    --ink: #2a2218;
+    --ink-dim: #6b5e4a;
+    --ink-faded: #9a8b72;
+    --stamp-red: #a83228;
+    --stamp-red-dim: rgba(168,50,40,0.15);
+    --gold: #c4a35a;
+    --rs: #c04040;
+    --green: #56d364;
+    --amber: #e8a838;
+    --blue: #58a6ff;
+    --clip-silver: #b0b8c0;
+    --clip-dark: #8a9098;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Filing cabinet vertical lines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 59px,
+      var(--cabinet-line) 59px,
+      var(--cabinet-line) 60px
+    );
+    z-index: 0;
+  }
+
+  /* Title bar */
+  .title-bar {
+    position: relative;
+    z-index: 10;
+    background: rgba(20,18,14,0.95);
+    border-bottom: 2px solid var(--manila-edge);
+    padding: 10px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title-bar h1 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .title-bar .faction-tag {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: var(--rs);
+    letter-spacing: 1px;
+    border: 1px solid var(--rs);
+    padding: 2px 10px;
+  }
+  .title-bar .week-tag {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    color: var(--ink-faded);
+    background: rgba(212,196,160,0.1);
+    padding: 2px 8px;
+  }
+
+  /* Main layout */
+  .dossier-container {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    height: calc(100vh - 46px);
+    overflow: hidden;
+  }
+
+  /* LEFT: Folder tabs */
+  .folder-tabs {
+    width: 220px;
+    min-width: 220px;
+    padding: 30px 0 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+    z-index: 20;
+  }
+
+  .folder-tab {
+    position: relative;
+    width: 190px;
+    height: 56px;
+    cursor: pointer;
+    transform-origin: right center;
+    transition: all 0.3s ease;
+    z-index: 1;
+  }
+  .folder-tab:hover { z-index: 5; }
+  .folder-tab.active { z-index: 10; }
+
+  .tab-shape {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--manila);
+    border: 1px solid var(--manila-edge);
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    transform: skewY(-2deg);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .tab-shape::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--manila-edge);
+  }
+
+  .folder-tab:hover .tab-shape {
+    background: #ddd0b0;
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+    transform: skewY(-2deg) translateX(8px);
+  }
+
+  .folder-tab.active .tab-shape {
+    background: var(--manila-active);
+    box-shadow: 4px 2px 14px rgba(0,0,0,0.35);
+    transform: skewY(-2deg) translateX(16px);
+    border-color: var(--gold);
+  }
+  .folder-tab.active .tab-shape::after {
+    background: var(--gold);
+  }
+
+  .tab-label {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%) skewY(2deg);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10.5px;
+    font-weight: bold;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: color 0.3s;
+  }
+  .folder-tab.active .tab-label {
+    color: #1a1408;
+  }
+
+  .tab-index {
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9px;
+    color: var(--ink-faded);
+    transform: skewY(2deg);
+    pointer-events: none;
+  }
+
+  /* RIGHT: Folder content area */
+  .folder-viewport {
+    flex: 1;
+    position: relative;
+    padding: 20px 30px 20px 10px;
+    overflow: hidden;
+  }
+
+  /* The open folder */
+  .folder-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    border-radius: 0 6px 6px 0;
+    box-shadow:
+      -4px 0 8px rgba(0,0,0,0.15),
+      inset 0 2px 0 var(--manila),
+      inset 0 6px 0 var(--manila-edge);
+    overflow: hidden;
+  }
+
+  /* Folder top edge */
+  .folder-body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 26px;
+    background: linear-gradient(180deg, var(--manila) 0%, var(--manila-edge) 40%, var(--paper) 100%);
+    border-radius: 0 6px 0 0;
+    z-index: 5;
+  }
+
+  /* Faint horizontal rules */
+  .folder-body::after {
+    content: '';
+    position: absolute;
+    top: 30px; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      180deg,
+      transparent,
+      transparent 23px,
+      var(--paper-lines) 23px,
+      var(--paper-lines) 24px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* CLASSIFIED stamp */
+  .stamp {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    z-index: 15;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--stamp-red);
+    border: 3px solid var(--stamp-red);
+    padding: 4px 16px;
+    transform: rotate(-12deg);
+    opacity: 0.55;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    pointer-events: none;
+    text-shadow: 1px 1px 0 rgba(168,50,40,0.2);
+  }
+  .stamp::after {
+    content: 'VOJSKA REPUBLIKE SRPSKE';
+    display: block;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-top: 2px;
+    opacity: 0.6;
+  }
+
+  /* Folder inner content */
+  .folder-inner {
+    position: absolute;
+    top: 30px;
+    left: 0; right: 0; bottom: 0;
+    z-index: 3;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 30px 30px 30px;
+  }
+  .folder-inner::-webkit-scrollbar { width: 6px; }
+  .folder-inner::-webkit-scrollbar-track { background: transparent; }
+  .folder-inner::-webkit-scrollbar-thumb { background: var(--manila-edge); border-radius: 3px; }
+
+  /* Individual folder panels (hidden/shown) */
+  .folder-panel {
+    display: none;
+    animation: fadeSlideIn 0.4s ease;
+  }
+  .folder-panel.active {
+    display: block;
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Pages inside folder */
+  .page {
+    position: relative;
+    background: #faf5eb;
+    border: 1px solid #ddd2be;
+    border-radius: 2px;
+    margin-bottom: 18px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.08), -1px -1px 0 #fff;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .page.collapsed .page-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    background: linear-gradient(180deg, #f5eed8 0%, #efe6ce 100%);
+    border-bottom: 1px solid #ddd2be;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .page-header:hover {
+    background: linear-gradient(180deg, #f8f2e0 0%, #f2ead5 100%);
+  }
+  .page-number {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    color: var(--stamp-red);
+    border: 1px solid var(--stamp-red);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+  .page-title {
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: normal;
+    font-style: italic;
+  }
+  .page-toggle {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--ink-faded);
+    font-family: 'Courier New', Courier, monospace;
+    transition: transform 0.3s;
+  }
+  .page.collapsed .page-toggle {
+    transform: rotate(-90deg);
+  }
+
+  .page-body {
+    padding: 14px 16px 16px;
+    max-height: 800px;
+    opacity: 1;
+    transition: max-height 0.4s ease, padding 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+  }
+
+  /* Paper clip */
+  .paper-clip {
+    position: absolute;
+    top: -6px;
+    right: 30px;
+    width: 24px;
+    height: 60px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .paper-clip .clip-outer {
+    position: absolute;
+    top: 0; left: 4px;
+    width: 16px;
+    height: 52px;
+    border: 2px solid var(--clip-silver);
+    border-radius: 8px 8px 8px 8px;
+    background: transparent;
+  }
+  .paper-clip .clip-inner {
+    position: absolute;
+    top: 10px; left: 7px;
+    width: 10px;
+    height: 32px;
+    border: 2px solid var(--clip-dark);
+    border-radius: 5px 5px 5px 5px;
+    border-top: none;
+    background: transparent;
+  }
+  .paper-clip .clip-shine {
+    position: absolute;
+    top: 2px; left: 5px;
+    width: 4px;
+    height: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+    border-radius: 2px;
+  }
+
+  /* Data table styling */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    margin: 8px 0;
+  }
+  .data-table th {
+    text-align: left;
+    color: var(--ink-faded);
+    font-weight: normal;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border-bottom: 1px solid #d0c5a8;
+  }
+  .data-table td {
+    padding: 6px 8px;
+    color: var(--ink);
+    border-bottom: 1px dotted #ddd2be;
+    vertical-align: top;
+  }
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Typed data line */
+  .data-line {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: var(--ink);
+    margin: 4px 0;
+    line-height: 1.7;
+  }
+  .data-label {
+    color: var(--ink-faded);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    min-width: 140px;
+  }
+  .data-value {
+    color: var(--ink);
+    font-weight: bold;
+  }
+  .data-value.good { color: #2a6e30; }
+  .data-value.warn { color: #8a6a10; }
+  .data-value.bad { color: var(--stamp-red); }
+
+  /* Section divider inside page */
+  .page-divider {
+    border: none;
+    border-top: 1px dashed #c8b898;
+    margin: 12px 0;
+  }
+
+  /* Commander portrait placeholder */
+  .commander-portrait {
+    float: left;
+    width: 80px;
+    height: 100px;
+    background: #e8dfc8;
+    border: 1px solid #c8b898;
+    margin: 0 14px 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9px;
+    color: var(--ink-faded);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-block;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .badge.offensive { background: rgba(168,50,40,0.15); color: var(--stamp-red); border: 1px solid var(--stamp-red); }
+  .badge.defensive { background: rgba(42,110,48,0.12); color: #2a6e30; border: 1px solid #2a6e30; }
+  .badge.balanced { background: rgba(138,106,16,0.12); color: #8a6a10; border: 1px solid #8a6a10; }
+  .badge.executing { background: rgba(88,166,255,0.12); color: #2868a8; border: 1px solid #2868a8; }
+  .badge.fortify { background: rgba(42,110,48,0.12); color: #2a6e30; border: 1px solid #2a6e30; }
+  .badge.active-def { background: rgba(138,106,16,0.12); color: #8a6a10; border: 1px solid #8a6a10; }
+
+  /* Operation progress bar */
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0d5c0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 6px 0;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  /* Sector mini-card */
+  .sector-card {
+    background: #f5eed8;
+    border: 1px solid #ddd2be;
+    border-left: 3px solid var(--manila-edge);
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-radius: 0 2px 2px 0;
+  }
+  .sector-card .sector-name {
+    font-family: Georgia, serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .sector-card .sector-stats {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+
+  /* Clearfix */
+  .clearfix::after { content: ''; display: table; clear: both; }
+
+  /* Star rating for competence */
+  .stars {
+    display: inline;
+    color: var(--gold);
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  /* Folder section heading */
+  .folder-heading {
+    font-family: Georgia, serif;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 4px;
+    font-weight: normal;
+  }
+  .folder-subheading {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px;
+    color: var(--ink-faded);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  /* Annotation (handwritten look) */
+  .annotation {
+    font-family: 'Segoe Script', 'Comic Sans MS', cursive;
+    font-size: 11px;
+    color: #4a68a0;
+    transform: rotate(-1deg);
+    display: inline-block;
+    margin: 6px 0;
+    opacity: 0.75;
+  }
+
+  /* Coffee stain */
+  .coffee-stain {
+    position: absolute;
+    bottom: 20px;
+    left: 60px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, transparent 55%, rgba(120,80,30,0.06) 60%, rgba(120,80,30,0.04) 70%, transparent 75%);
+    pointer-events: none;
+    z-index: 2;
+  }
+</style>
+</head>
+<body>
+
+<div class="title-bar">
+  <h1>Option C: Dossier Folders</h1>
+  <span class="week-tag">SEDMICA 23 / WEEK 23</span>
+  <span class="faction-tag">VRS -- VOJSKA REPUBLIKE SRPSKE</span>
+</div>
+
+<div class="dossier-container">
+  <!-- LEFT: Folder Tabs -->
+  <nav class="folder-tabs" id="folderTabs">
+    <div class="folder-tab active" data-folder="army-hq" onclick="openFolder(this)">
+      <div class="tab-shape"></div>
+      <span class="tab-label">Army HQ</span>
+      <span class="tab-index">GS</span>
+    </div>
+    <div class="folder-tab" data-folder="1krajina" onclick="openFolder(this)">
+      <div class="tab-shape"></div>
+      <span class="tab-label">1. Krajina</span>
+      <span class="tab-index">1.K</span>
+    </div>
+    <div class="folder-tab" data-folder="srk" onclick="openFolder(this)">
+      <div class="tab-shape"></div>
+      <span class="tab-label">SRK Sarajevo</span>
+      <span class="tab-index">SRK</span>
+    </div>
+    <div class="folder-tab" data-folder="drina" onclick="openFolder(this)">
+      <div class="tab-shape"></div>
+      <span class="tab-label">Drina</span>
+      <span class="tab-index">DK</span>
+    </div>
+    <div class="folder-tab" data-folder="hercegovina" onclick="openFolder(this)">
+      <div class="tab-shape"></div>
+      <span class="tab-label">Hercegovina</span>
+      <span class="tab-index">HK</span>
+    </div>
+    <div class="folder-tab" data-folder="east-bosnia" onclick="openFolder(this)">
+      <div class="tab-shape"></div>
+      <span class="tab-label">East Bosnia</span>
+      <span class="tab-index">IBK</span>
+    </div>
+    <div class="folder-tab" data-folder="2krajina" onclick="openFolder(this)">
+      <div class="tab-shape"></div>
+      <span class="tab-label">2. Krajina</span>
+      <span class="tab-index">2.K</span>
+    </div>
+    <div class="folder-tab" data-folder="reserve" onclick="openFolder(this)">
+      <div class="tab-shape"></div>
+      <span class="tab-label">Reserve Pool</span>
+      <span class="tab-index">RES</span>
+    </div>
+  </nav>
+
+  <!-- RIGHT: Folder Content -->
+  <div class="folder-viewport">
+    <div class="folder-body">
+      <div class="stamp">POVJERLJIVO</div>
+      <div class="coffee-stain"></div>
+
+      <div class="folder-inner" id="folderInner">
+
+        <!-- ===== ARMY HQ ===== -->
+        <div class="folder-panel active" id="panel-army-hq">
+          <div class="folder-heading">Glavni Stab VRS</div>
+          <div class="folder-subheading">Army General Staff -- Status Report</div>
+
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">1</span>
+              <span class="page-title">Army Overview</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Commander</span> <span class="data-value">Gen. Ratko Mladic</span></div>
+              <div class="data-line"><span class="data-label">Total Personnel</span> <span class="data-value">67,400</span></div>
+              <div class="data-line"><span class="data-label">Active Corps</span> <span class="data-value">7</span></div>
+              <div class="data-line"><span class="data-label">Total Brigades</span> <span class="data-value">80</span></div>
+              <div class="data-line"><span class="data-label">Army Cohesion</span> <span class="data-value good">78%</span></div>
+              <div class="data-line"><span class="data-label">Army Morale</span> <span class="data-value good">71</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Tanks (op/total)</span> <span class="data-value">182 / 210</span></div>
+              <div class="data-line"><span class="data-label">Artillery</span> <span class="data-value">244 / 280</span></div>
+              <div class="data-line"><span class="data-label">Supply Level</span> <span class="data-value good">ADEQUATE</span></div>
+              <div class="annotation">-- Moral pada na jugu. Pratiti.</div>
+            </div>
+          </div>
+
+          <div class="page">
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">2</span>
+              <span class="page-title">Strategic Situation</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Active Ops</span> <span class="data-value">3</span></div>
+              <div class="data-line"><span class="data-label">Pending Ops</span> <span class="data-value warn">1 (intel phase)</span></div>
+              <div class="data-line"><span class="data-label">Territory %</span> <span class="data-value good">51.7%</span></div>
+              <div class="data-line"><span class="data-label">Active Fronts</span> <span class="data-value">4 (RS-RBiH), 2 (RS-HRHB cold)</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Patron Commit.</span> <span class="data-value">SRJ: 0.72</span></div>
+              <div class="data-line"><span class="data-label">Intl Pressure</span> <span class="data-value warn">MODERATE</span></div>
+              <div class="data-line"><span class="data-label">Sanctions</span> <span class="data-value bad">ACTIVE</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 1ST KRAJINA CORPS ===== -->
+        <div class="folder-panel" id="panel-1krajina">
+          <div class="folder-heading">1. Krajiski Korpus</div>
+          <div class="folder-subheading">1st Krajina Corps -- Banja Luka</div>
+
+          <!-- Page 1: Corps Status -->
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">1</span>
+              <span class="page-title">Corps Status Report</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Personnel</span> <span class="data-value">18,200</span></div>
+              <div class="data-line"><span class="data-label">Brigades</span> <span class="data-value">15</span></div>
+              <div class="data-line"><span class="data-label">Sectors</span> <span class="data-value">4</span></div>
+              <div class="data-line"><span class="data-label">Cohesion</span> <span class="data-value good">72%</span></div>
+              <div class="data-line"><span class="data-label">Avg. Morale</span> <span class="data-value good">68</span></div>
+              <div class="data-line"><span class="data-label">Stance</span> <span class="badge offensive">OFFENSIVE</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Tanks (op/tot)</span> <span class="data-value">48 / 55</span></div>
+              <div class="data-line"><span class="data-label">Artillery</span> <span class="data-value">62 / 71</span></div>
+              <div class="data-line"><span class="data-label">AA Systems</span> <span class="data-value">12 / 14</span></div>
+              <div class="data-line"><span class="data-label">Supply Status</span> <span class="data-value good">ADEQUATE</span></div>
+              <div class="data-line"><span class="data-label">Combat Effect.</span> <span class="data-value good">B+ (76)</span></div>
+              <div class="annotation">-- Najjaci korpus. Oklop za Koridor?</div>
+            </div>
+          </div>
+
+          <!-- Page 2: Commander Dossier -->
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">2</span>
+              <span class="page-title">Commander Dossier</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body clearfix">
+              <div class="commander-portrait">
+                [PHOTO]<br>CLASSIFIED
+              </div>
+              <div class="data-line"><span class="data-label">Name</span> <span class="data-value">Gen.-Maj. Momir Talic</span></div>
+              <div class="data-line"><span class="data-label">Competence</span> <span class="stars">&#9733;&#9733;&#9733;&#9733;</span><span style="color:#c8b898">&#9733;</span> <span style="font-family:'Courier New';font-size:11px;color:var(--ink-dim)">(4/5)</span></div>
+              <div class="data-line"><span class="data-label">Aggressiveness</span> <span class="stars">&#9733;&#9733;&#9733;</span><span style="color:#c8b898">&#9733;&#9733;</span> <span style="font-family:'Courier New';font-size:11px;color:var(--ink-dim)">(3/5)</span></div>
+              <div class="data-line"><span class="data-label">Def. Ability</span> <span class="stars">&#9733;&#9733;&#9733;&#9733;</span><span style="color:#c8b898">&#9733;</span> <span style="font-family:'Courier New';font-size:11px;color:var(--ink-dim)">(4/5)</span></div>
+              <div class="data-line"><span class="data-label">Assessment</span> <span class="data-value" style="font-style:italic">"Methodical Professional"</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Battles</span> <span class="data-value">12</span></div>
+              <div class="data-line"><span class="data-label">Victories</span> <span class="data-value good">8</span></div>
+              <div class="data-line"><span class="data-label">Defeats</span> <span class="data-value">2</span></div>
+              <div class="data-line"><span class="data-label">Stalemates</span> <span class="data-value">2</span></div>
+              <div class="data-line"><span class="data-label">Consec. Failures</span> <span class="data-value good">0</span></div>
+              <div class="annotation">-- JNA kadar. Pouzdan.</div>
+            </div>
+          </div>
+
+          <!-- Page 3: Active Operations -->
+          <div class="page">
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">3</span>
+              <span class="page-title">Active Operations</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <span style="font-family:Georgia;font-size:15px;font-style:italic;color:var(--ink)">Op. KORIDOR 92</span>
+                <span class="badge executing">EXECUTING</span>
+              </div>
+              <div class="data-line"><span class="data-label">Objective</span> <span class="data-value">Brcko Corridor -- Link Krajina to Serbia</span></div>
+              <div class="data-line"><span class="data-label">Brigades Assgn.</span> <span class="data-value">6</span></div>
+              <div class="data-line"><span class="data-label">Objectives</span> <span class="data-value">3 (Brcko, Orasje, Modrica)</span></div>
+              <div class="data-line"><span class="data-label">Op Commander</span> <span class="data-value">Col. Novica Simic</span></div>
+              <div class="data-line"><span class="data-label">Turn Started</span> <span class="data-value">W18</span></div>
+              <div class="data-line"><span class="data-label">Duration</span> <span class="data-value">5 weeks</span></div>
+              <hr class="page-divider">
+              <div style="font-family:'Courier New';font-size:10px;color:var(--ink-faded);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Progress</div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:62%;background:linear-gradient(90deg,#2868a8,#58a6ff)"></div>
+              </div>
+              <div style="font-family:'Courier New';font-size:11px;color:var(--ink-dim);margin-top:4px">
+                OBJ 1: Modrica <span style="color:#2a6e30">SECURED</span> &nbsp;|&nbsp;
+                OBJ 2: Brcko <span style="color:#8a6a10">CONTESTED</span> &nbsp;|&nbsp;
+                OBJ 3: Orasje <span style="color:var(--ink-faded)">PENDING</span>
+              </div>
+              <div class="annotation">-- Kriticno. Mostovi pod vatrom.</div>
+            </div>
+          </div>
+
+          <!-- Page 4: Sector Breakdown -->
+          <div class="page">
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">4</span>
+              <span class="page-title">Sector Breakdown</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="sector-card">
+                <div class="sector-name">Sector NORTH -- Posavina Corridor</div>
+                <div class="sector-stats">
+                  Brigades: <strong>5</strong> &nbsp;|&nbsp;
+                  Stance: <span class="badge offensive" style="font-size:9px;padding:1px 5px">OFFENSIVE</span> &nbsp;|&nbsp;
+                  Density: <strong style="color:#2a6e30">1.2</strong> &nbsp;|&nbsp;
+                  Front edges: 18
+                </div>
+              </div>
+              <div class="sector-card">
+                <div class="sector-name">Sector WEST -- Krajina Pocket</div>
+                <div class="sector-stats">
+                  Brigades: <strong>4</strong> &nbsp;|&nbsp;
+                  Stance: <span class="badge balanced" style="font-size:9px;padding:1px 5px">BALANCED</span> &nbsp;|&nbsp;
+                  Density: <strong style="color:#8a6a10">0.8</strong> &nbsp;|&nbsp;
+                  Front edges: 22
+                </div>
+              </div>
+              <div class="sector-card">
+                <div class="sector-name">Sector SOUTH -- Vlasic Plateau</div>
+                <div class="sector-stats">
+                  Brigades: <strong>3</strong> &nbsp;|&nbsp;
+                  Stance: <span class="badge fortify" style="font-size:9px;padding:1px 5px">FORTIFY</span> &nbsp;|&nbsp;
+                  Density: <strong style="color:#2a6e30">1.1</strong> &nbsp;|&nbsp;
+                  Front edges: 14
+                </div>
+              </div>
+              <div class="sector-card">
+                <div class="sector-name">Sector EAST -- Ozren Salient</div>
+                <div class="sector-stats">
+                  Brigades: <strong>3</strong> &nbsp;|&nbsp;
+                  Stance: <span class="badge active-def" style="font-size:9px;padding:1px 5px">ACTIVE DEF</span> &nbsp;|&nbsp;
+                  Density: <strong style="color:#8a6a10">0.7</strong> &nbsp;|&nbsp;
+                  Front edges: 11
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SRK SARAJEVO ===== -->
+        <div class="folder-panel" id="panel-srk">
+          <div class="folder-heading">Sarajevsko-Romanijski Korpus</div>
+          <div class="folder-subheading">Sarajevo-Romanija Corps -- Pale</div>
+
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">1</span>
+              <span class="page-title">Corps Status Report</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Personnel</span> <span class="data-value">13,600</span></div>
+              <div class="data-line"><span class="data-label">Brigades</span> <span class="data-value">12</span></div>
+              <div class="data-line"><span class="data-label">Sectors</span> <span class="data-value">3</span></div>
+              <div class="data-line"><span class="data-label">Cohesion</span> <span class="data-value good">75%</span></div>
+              <div class="data-line"><span class="data-label">Stance</span> <span class="badge defensive">SIEGE / CONTAIN</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Tanks</span> <span class="data-value">22 / 28</span></div>
+              <div class="data-line"><span class="data-label">Artillery</span> <span class="data-value">56 / 64</span></div>
+              <div class="data-line"><span class="data-label">Mission</span> <span class="data-value">Siege of Sarajevo -- contain ARBiH</span></div>
+              <div class="annotation">-- Artiljerija na Trebevicu kljucna.</div>
+            </div>
+          </div>
+
+          <div class="page collapsed">
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">2</span>
+              <span class="page-title">Commander: Gen.-Maj. Stanislav Galic</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Competence</span> <span class="stars">&#9733;&#9733;&#9733;</span><span style="color:#c8b898">&#9733;&#9733;</span></div>
+              <div class="data-line"><span class="data-label">Aggressiveness</span> <span class="stars">&#9733;&#9733;&#9733;&#9733;</span><span style="color:#c8b898">&#9733;</span></div>
+              <div class="data-line"><span class="data-label">Assessment</span> <span class="data-value" style="font-style:italic">"Aggressive Siege Specialist"</span></div>
+              <div class="data-line"><span class="data-label">Battles</span> <span class="data-value">9</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== DRINA ===== -->
+        <div class="folder-panel" id="panel-drina">
+          <div class="folder-heading">Drinski Korpus</div>
+          <div class="folder-subheading">Drina Corps -- Vlasenica</div>
+
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">1</span>
+              <span class="page-title">Corps Status Report</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Personnel</span> <span class="data-value">8,400</span></div>
+              <div class="data-line"><span class="data-label">Brigades</span> <span class="data-value">9</span></div>
+              <div class="data-line"><span class="data-label">Sectors</span> <span class="data-value">3</span></div>
+              <div class="data-line"><span class="data-label">Cohesion</span> <span class="data-value warn">64%</span></div>
+              <div class="data-line"><span class="data-label">Stance</span> <span class="badge balanced">BALANCED</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Mission</span> <span class="data-value">Enclave containment -- Srebrenica, Zepa, Gorazde</span></div>
+              <div class="data-line"><span class="data-label">Threat Level</span> <span class="data-value warn">MODERATE (enclave breakouts)</span></div>
+              <div class="annotation">-- Oric aktivan iz Srebrenice. Pojacati patroliranje.</div>
+            </div>
+          </div>
+
+          <div class="page collapsed">
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">2</span>
+              <span class="page-title">Commander: Gen.-Maj. Milenko Zivanovic</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Competence</span> <span class="stars">&#9733;&#9733;&#9733;</span><span style="color:#c8b898">&#9733;&#9733;</span></div>
+              <div class="data-line"><span class="data-label">Aggressiveness</span> <span class="stars">&#9733;&#9733;</span><span style="color:#c8b898">&#9733;&#9733;&#9733;</span></div>
+              <div class="data-line"><span class="data-label">Assessment</span> <span class="data-value" style="font-style:italic">"Cautious Containment"</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== HERCEGOVINA ===== -->
+        <div class="folder-panel" id="panel-hercegovina">
+          <div class="folder-heading">Hercegovacki Korpus</div>
+          <div class="folder-subheading">Herzegovina Corps -- Bileca</div>
+
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">1</span>
+              <span class="page-title">Corps Status Report</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Personnel</span> <span class="data-value">7,200</span></div>
+              <div class="data-line"><span class="data-label">Brigades</span> <span class="data-value">8</span></div>
+              <div class="data-line"><span class="data-label">Sectors</span> <span class="data-value">2</span></div>
+              <div class="data-line"><span class="data-label">Cohesion</span> <span class="data-value good">70%</span></div>
+              <div class="data-line"><span class="data-label">Stance</span> <span class="badge defensive">DEFENSIVE</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Tanks</span> <span class="data-value">14 / 18</span></div>
+              <div class="data-line"><span class="data-label">Note</span> <span class="data-value">Graz Accords -- cold front with HVO</span></div>
+              <div class="annotation">-- Primirje sa HVO stabilno. Za sada.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== EAST BOSNIA ===== -->
+        <div class="folder-panel" id="panel-east-bosnia">
+          <div class="folder-heading">Istocnobosanski Korpus</div>
+          <div class="folder-subheading">East Bosnia Corps -- Bijeljina</div>
+
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">1</span>
+              <span class="page-title">Corps Status Report</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Personnel</span> <span class="data-value">9,100</span></div>
+              <div class="data-line"><span class="data-label">Brigades</span> <span class="data-value">10</span></div>
+              <div class="data-line"><span class="data-label">Sectors</span> <span class="data-value">2</span></div>
+              <div class="data-line"><span class="data-label">Cohesion</span> <span class="data-value good">69%</span></div>
+              <div class="data-line"><span class="data-label">Stance</span> <span class="badge balanced">BALANCED</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Tanks</span> <span class="data-value">18 / 22</span></div>
+              <div class="data-line"><span class="data-label">Mission</span> <span class="data-value">Corridor support + Tuzla containment</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 2ND KRAJINA ===== -->
+        <div class="folder-panel" id="panel-2krajina">
+          <div class="folder-heading">2. Krajiski Korpus</div>
+          <div class="folder-subheading">2nd Krajina Corps -- Drvar</div>
+
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">1</span>
+              <span class="page-title">Corps Status Report</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Personnel</span> <span class="data-value">5,800</span></div>
+              <div class="data-line"><span class="data-label">Brigades</span> <span class="data-value">7</span></div>
+              <div class="data-line"><span class="data-label">Sectors</span> <span class="data-value">2</span></div>
+              <div class="data-line"><span class="data-label">Cohesion</span> <span class="data-value warn">62%</span></div>
+              <div class="data-line"><span class="data-label">Stance</span> <span class="badge defensive">DEFENSIVE</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Tanks</span> <span class="data-value">8 / 12</span></div>
+              <div class="data-line"><span class="data-label">Threat</span> <span class="data-value warn">HVO Livno axis + RBiH Bihac pocket</span></div>
+              <div class="annotation">-- Nedovoljno ljudstva. Traziti pojacanje iz rezerve.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== RESERVE POOL ===== -->
+        <div class="folder-panel" id="panel-reserve">
+          <div class="folder-heading">Strategijska Rezerva</div>
+          <div class="folder-subheading">Strategic Reserve Pool</div>
+
+          <div class="page">
+            <div class="paper-clip">
+              <div class="clip-outer"></div>
+              <div class="clip-inner"></div>
+              <div class="clip-shine"></div>
+            </div>
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">1</span>
+              <span class="page-title">Reserve Manpower</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Reserve Pool</span> <span class="data-value">4,200 personnel</span></div>
+              <div class="data-line"><span class="data-label">Draw Rate</span> <span class="data-value">0.25 / turn</span></div>
+              <div class="data-line"><span class="data-label">Mob. Exhaustion</span> <span class="data-value good">18% (below threshold)</span></div>
+              <hr class="page-divider">
+              <div style="font-family:'Courier New';font-size:10px;color:var(--ink-faded);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Distribution Priority</div>
+              <table class="data-table">
+                <tr><th>Corps</th><th>Need</th><th>Last Recv.</th><th>Priority</th></tr>
+                <tr><td>1. Krajina</td><td>800</td><td>W21</td><td style="color:#2a6e30">HIGH</td></tr>
+                <tr><td>SRK</td><td>400</td><td>W22</td><td style="color:#8a6a10">MEDIUM</td></tr>
+                <tr><td>Drina</td><td>600</td><td>W19</td><td style="color:#2a6e30">HIGH</td></tr>
+                <tr><td>Herzegovina</td><td>200</td><td>W20</td><td>LOW</td></tr>
+                <tr><td>East Bosnia</td><td>300</td><td>W22</td><td style="color:#8a6a10">MEDIUM</td></tr>
+                <tr><td>2. Krajina</td><td>500</td><td>W18</td><td style="color:var(--stamp-red)">CRITICAL</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="page">
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">2</span>
+              <span class="page-title">Equipment Reserves</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <div class="data-line"><span class="data-label">Tanks (depot)</span> <span class="data-value">12</span></div>
+              <div class="data-line"><span class="data-label">Artillery</span> <span class="data-value">8</span></div>
+              <div class="data-line"><span class="data-label">AA Systems</span> <span class="data-value">3</span></div>
+              <div class="data-line"><span class="data-label">Small Arms</span> <span class="data-value good">ADEQUATE</span></div>
+              <div class="data-line"><span class="data-label">Ammo Status</span> <span class="data-value warn">LOW (rationing active)</span></div>
+              <hr class="page-divider">
+              <div class="data-line"><span class="data-label">Incoming (SRJ)</span> <span class="data-value">Next shipment est. W26</span></div>
+              <div class="annotation">-- Sankcije usporavaju dostavu. Alternativni kanali?</div>
+            </div>
+          </div>
+
+          <div class="page collapsed">
+            <div class="page-header" onclick="togglePage(this)">
+              <span class="page-number">3</span>
+              <span class="page-title">Officer Reserve Pool (4 available)</span>
+              <span class="page-toggle">&#9660;</span>
+            </div>
+            <div class="page-body">
+              <table class="data-table">
+                <tr><th>Officer</th><th>Rank</th><th>Comp.</th><th>Specialization</th></tr>
+                <tr><td>Puk. Novak Djukic</td><td>Col.</td><td>3</td><td>Artillery</td></tr>
+                <tr><td>Ppuk. Vinko Pandurevic</td><td>Lt.Col.</td><td>4</td><td>Infantry Assault</td></tr>
+                <tr><td>Puk. Radislav Krstic</td><td>Col.</td><td>3</td><td>Combined Arms</td></tr>
+                <tr><td>Maj. Slavko Ognjenovic</td><td>Maj.</td><td>2</td><td>Defense</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /folder-inner -->
+    </div><!-- /folder-body -->
+  </div><!-- /folder-viewport -->
+</div><!-- /dossier-container -->
+
+<script>
+  // Folder tab navigation
+  function openFolder(tabEl) {
+    // Deactivate all tabs
+    document.querySelectorAll('.folder-tab').forEach(t => t.classList.remove('active'));
+    // Activate clicked tab
+    tabEl.classList.add('active');
+
+    // Get folder ID
+    const folderId = tabEl.getAttribute('data-folder');
+
+    // Hide all panels
+    document.querySelectorAll('.folder-panel').forEach(p => p.classList.remove('active'));
+
+    // Show target panel
+    const panel = document.getElementById('panel-' + folderId);
+    if (panel) {
+      panel.classList.add('active');
+    }
+
+    // Scroll folder content to top
+    document.getElementById('folderInner').scrollTop = 0;
+  }
+
+  // Page expand/collapse toggle
+  function togglePage(headerEl) {
+    const page = headerEl.closest('.page');
+    page.classList.toggle('collapsed');
+  }
+
+  // Default: open 1st Krajina on load
+  window.addEventListener('DOMContentLoaded', function() {
+    const defaultTab = document.querySelector('[data-folder="1krajina"]');
+    if (defaultTab) openFolder(defaultTab);
+  });
+</script>
+
+</body>
+</html>

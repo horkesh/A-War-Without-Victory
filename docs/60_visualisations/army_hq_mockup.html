@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Army HQ Modal — Intelligence Board Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    color: #e8e0d0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* === BOARD SURFACE === */
+  .board {
+    position: fixed;
+    inset: 0;
+    background:
+      /* Cork/canvas texture simulation */
+      radial-gradient(ellipse at 20% 50%, rgba(60,52,40,0.4) 0%, transparent 70%),
+      radial-gradient(ellipse at 80% 30%, rgba(50,45,35,0.3) 0%, transparent 60%),
+      linear-gradient(165deg, #2a2318 0%, #1e1a14 40%, #161310 100%);
+    overflow: hidden;
+  }
+
+  /* Subtle canvas grain overlay */
+  .board::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-conic-gradient(rgba(255,255,255,0.008) 0%, transparent 0.5%);
+    background-size: 4px 4px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Coffee ring stain */
+  .coffee-ring {
+    position: absolute;
+    bottom: 60px;
+    right: 80px;
+    width: 90px;
+    height: 85px;
+    border-radius: 50%;
+    border: 3px solid rgba(101, 67, 33, 0.12);
+    background: radial-gradient(ellipse, rgba(101, 67, 33, 0.04) 60%, transparent 70%);
+    transform: rotate(-8deg);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* === HEADER BAR === */
+  .header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(20, 18, 14, 0.9);
+    border-bottom: 1px solid rgba(196, 163, 90, 0.2);
+    backdrop-filter: blur(8px);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .faction-crest {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a5a8a 0%, #2a4060 100%);
+    border: 2px solid rgba(74, 158, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #4a9eff;
+  }
+
+  .header-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #c4a35a;
+  }
+
+  .header-subtitle {
+    font-size: 11px;
+    color: #8a8578;
+    margin-top: 2px;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #8a8578;
+  }
+
+  .breadcrumb-item {
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+
+  .breadcrumb-item:hover {
+    background: rgba(196, 163, 90, 0.15);
+    color: #c4a35a;
+  }
+
+  .breadcrumb-item.active {
+    color: #c4a35a;
+    font-weight: 600;
+  }
+
+  .breadcrumb-sep {
+    color: rgba(196, 163, 90, 0.3);
+    font-size: 10px;
+  }
+
+  .close-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #8a8578;
+    font-size: 14px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .close-btn:hover {
+    background: rgba(255,255,255,0.05);
+    color: #e8e0d0;
+  }
+
+  /* === RED STRING CONNECTIONS === */
+  .string-svg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* === CARD GRID === */
+  .card-area {
+    position: relative;
+    z-index: 2;
+    padding: 24px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+  }
+
+  /* === PINNED CARD (base) === */
+  .card {
+    position: relative;
+    width: 280px;
+    background: linear-gradient(170deg, #f0e8d8 0%, #e4dcc8 50%, #d8d0b8 100%);
+    border-radius: 4px;
+    box-shadow:
+      2px 3px 8px rgba(0,0,0,0.4),
+      0 0 1px rgba(0,0,0,0.3);
+    color: #3a3228;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transform: rotate(var(--rot, 0deg));
+  }
+
+  .card:hover {
+    transform: rotate(0deg) translateY(-3px) scale(1.02);
+    box-shadow:
+      3px 5px 14px rgba(0,0,0,0.5),
+      0 0 20px rgba(196,163,90,0.08);
+    z-index: 5;
+  }
+
+  /* Pin/tack at top */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle at 40% 35%, #d4a055 0%, #8a6530 60%, #5a4020 100%);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3);
+    z-index: 6;
+  }
+
+  /* === CORPS CARD === */
+  .card-header {
+    padding: 14px 14px 8px;
+    border-bottom: 1px solid rgba(60,50,35,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .card-header h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2a2218;
+    font-family: Georgia, serif;
+  }
+
+  .card-header .faction-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .card-body {
+    padding: 10px 14px 14px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* Stats grid inside card */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+  }
+
+  .stat-label {
+    color: #6a6050;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .stat-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #3a3228;
+    font-size: 12px;
+  }
+
+  .stat-value.good { color: #2a6a2a; }
+  .stat-value.warn { color: #8a6a20; }
+  .stat-value.bad { color: #8a2a2a; }
+
+  /* Cohesion mini bar */
+  .mini-bar {
+    height: 3px;
+    background: rgba(60,50,35,0.12);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .mini-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* Commander section */
+  .commander-section {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(60,50,35,0.15);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .commander-rank {
+    display: flex;
+    gap: 2px;
+  }
+
+  .rank-star {
+    width: 6px;
+    height: 6px;
+    background: #c4a35a;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  .commander-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #3a3228;
+  }
+
+  .commander-archetype {
+    font-size: 9px;
+    color: #8a7e68;
+    font-style: italic;
+  }
+
+  /* Stamp overlay */
+  .stamp {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 3px 8px;
+    border: 2px solid;
+    border-radius: 3px;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transform: rotate(-5deg);
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
+  .stamp-active { border-color: #2a6a2a; color: #2a6a2a; }
+  .stamp-stalled { border-color: #8a6a20; color: #8a6a20; }
+  .stamp-critical { border-color: #8a2a2a; color: #8a2a2a; }
+  .stamp-ready { border-color: #2a4a8a; color: #2a4a8a; }
+
+  /* Active operations indicator */
+  .ops-indicator {
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: rgba(60,50,35,0.06);
+    border: 1px solid rgba(60,50,35,0.1);
+    border-radius: 3px;
+  }
+
+  .ops-indicator-header {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8a7e68;
+    margin-bottom: 4px;
+  }
+
+  .ops-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    padding: 2px 0;
+  }
+
+  .ops-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .ops-name {
+    font-weight: 600;
+    color: #3a3228;
+  }
+
+  .ops-phase {
+    font-size: 9px;
+    color: #8a7e68;
+    margin-left: auto;
+  }
+
+  /* === SPECIAL CARDS === */
+
+  /* Army Commander card — larger, centered at top */
+  .card-army-commander {
+    width: 320px;
+    background: linear-gradient(170deg, #f5ede0 0%, #ece4d0 50%, #e0d8c0 100%);
+    border: 1px solid rgba(196,163,90,0.25);
+  }
+
+  .card-army-commander::before {
+    background: radial-gradient(circle at 40% 35%, #c4a35a 0%, #8a6a30 60%, #5a4020 100%);
+    width: 16px;
+    height: 16px;
+    top: -7px;
+  }
+
+  /* Situation card — strategic overview */
+  .card-situation {
+    width: 260px;
+    background: linear-gradient(170deg, #e8e0d0 0%, #ddd5c0 100%);
+  }
+
+  /* Officer Pool card */
+  .card-pool {
+    width: 240px;
+    background: linear-gradient(170deg, #e4dcd0 0%, #d8d0c0 100%);
+  }
+
+  .pool-officer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    border-bottom: 1px dotted rgba(60,50,35,0.1);
+    font-size: 10px;
+  }
+
+  .pool-officer:last-child {
+    border-bottom: none;
+  }
+
+  .pool-officer-status {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* === EXPANDED CARD STATE === */
+  .card.expanded {
+    width: 600px;
+    transform: rotate(0deg) !important;
+    z-index: 10;
+  }
+
+  .expanded-content {
+    display: none;
+    padding: 0 14px 14px;
+  }
+
+  .card.expanded .expanded-content {
+    display: block;
+  }
+
+  .expanded-section {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(60,50,35,0.12);
+  }
+
+  .expanded-section-title {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #8a7e68;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  /* Sub-cards inside expanded view */
+  .sub-card {
+    background: rgba(255,255,255,0.35);
+    border: 1px solid rgba(60,50,35,0.1);
+    border-radius: 3px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .sub-card:hover {
+    background: rgba(255,255,255,0.5);
+  }
+
+  .sub-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+  }
+
+  .sub-card-detail {
+    color: #6a6050;
+    margin-top: 3px;
+    font-size: 9px;
+  }
+
+  /* Action buttons */
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: rgba(60,50,35,0.08);
+    border: 1px solid rgba(60,50,35,0.18);
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #5a5040;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .action-btn:hover {
+    background: rgba(60,50,35,0.15);
+    border-color: rgba(60,50,35,0.3);
+  }
+
+  .action-btn.primary {
+    background: rgba(196,163,90,0.12);
+    border-color: rgba(196,163,90,0.3);
+    color: #8a7030;
+  }
+
+  .action-btn.primary:hover {
+    background: rgba(196,163,90,0.22);
+  }
+
+  .action-btn.danger {
+    background: rgba(180,50,40,0.08);
+    border-color: rgba(180,50,40,0.2);
+    color: #8a3030;
+  }
+
+  /* === HOTSPOT INDICATORS === */
+  .hotspot-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .hotspot-badge.battle {
+    background: rgba(180,50,40,0.12);
+    color: #8a2a2a;
+    border: 1px solid rgba(180,50,40,0.2);
+  }
+
+  .hotspot-badge.advance {
+    background: rgba(40,120,40,0.12);
+    color: #2a6a2a;
+    border: 1px solid rgba(40,120,40,0.2);
+  }
+
+  .hotspot-badge.retreat {
+    background: rgba(180,130,40,0.12);
+    color: #8a6a20;
+    border: 1px solid rgba(180,130,40,0.2);
+  }
+
+  /* === LEGEND === */
+  .legend {
+    position: fixed;
+    bottom: 16px;
+    left: 24px;
+    z-index: 20;
+    display: flex;
+    gap: 16px;
+    font-size: 9px;
+    color: #6a6050;
+    background: rgba(20,18,14,0.8);
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Scrollbar styling */
+  .card-area::-webkit-scrollbar { width: 6px; }
+  .card-area::-webkit-scrollbar-track { background: transparent; }
+  .card-area::-webkit-scrollbar-thumb { background: rgba(196,163,90,0.2); border-radius: 3px; }
+
+  /* === INTERACTIVITY === */
+  .card[data-expandable]:not(.expanded) .expand-hint {
+    display: block;
+    text-align: center;
+    font-size: 8px;
+    color: #8a7e68;
+    padding: 4px 0 2px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .card.expanded .expand-hint { display: none; }
+</style>
+</head>
+<body>
+
+<div class="board">
+  <div class="coffee-ring"></div>
+
+  <!-- Red string connections (SVG overlay) -->
+  <svg class="string-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+    <!-- String from Army Commander to 1st Krajina -->
+    <path d="M 480 180 C 420 250, 200 200, 180 280" stroke="rgba(180,50,40,0.12)" stroke-width="1" fill="none" stroke-dasharray="4,6"/>
+    <!-- String from Army Commander to SRK -->
+    <path d="M 520 180 C 520 250, 520 250, 520 280" stroke="rgba(180,50,40,0.12)" stroke-width="1" fill="none" stroke-dasharray="4,6"/>
+    <!-- String from Army Commander to Drina -->
+    <path d="M 560 180 C 600 250, 820 230, 850 280" stroke="rgba(180,50,40,0.12)" stroke-width="1" fill="none" stroke-dasharray="4,6"/>
+  </svg>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="faction-crest">VRS</div>
+      <div>
+        <div class="header-title">Army Headquarters</div>
+        <div class="header-subtitle">Vojska Republike Srpske - Glavni Stab - Week 23, July 1992</div>
+      </div>
+    </div>
+    <div class="breadcrumb">
+      <span class="breadcrumb-item active">HQ Overview</span>
+      <button class="close-btn">ESC</button>
+    </div>
+  </div>
+
+  <!-- CARD AREA -->
+  <div class="card-area">
+
+    <!-- ==================== ROW 1: Army Commander + Strategic Situation ==================== -->
+
+    <!-- Army Commander Card (prominent, center-ish) -->
+    <div class="card card-army-commander" style="--rot: -0.5deg">
+      <div class="card-header">
+        <div>
+          <h3 style="font-size: 14px;">Army Commander</h3>
+          <div style="font-size: 10px; color: #6a6050; margin-top: 2px;">Commanding Officer, VRS</div>
+        </div>
+        <div class="faction-dot" style="background: #e05050;"></div>
+      </div>
+      <div class="card-body">
+        <div class="commander-section" style="border: none; padding: 0; margin: 0;">
+          <div class="commander-rank">
+            <div class="rank-star"></div>
+            <div class="rank-star"></div>
+            <div class="rank-star"></div>
+          </div>
+          <div>
+            <div class="commander-name" style="font-size: 13px;">Gen. Ratko Mladic</div>
+            <div class="commander-archetype">Zealous Aggressor</div>
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <div class="stat-row">
+            <span class="stat-label">Competence</span>
+            <span class="stat-value good">4 / 5</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Aggressiveness</span>
+            <span class="stat-value" style="color: #8a2a2a;">5 / 5</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Defensive Skill</span>
+            <span class="stat-value">3 / 5</span>
+          </div>
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <div class="stat-row" style="flex: 1;">
+            <span class="stat-label">Battles</span>
+            <span class="stat-value">47</span>
+          </div>
+          <div class="stat-row" style="flex: 1;">
+            <span class="stat-label">Victories</span>
+            <span class="stat-value good">31</span>
+          </div>
+          <div class="stat-row" style="flex: 1;">
+            <span class="stat-label">Win Rate</span>
+            <span class="stat-value good">66%</span>
+          </div>
+        </div>
+        <div style="margin-top: 8px;">
+          <span class="hotspot-badge battle" style="font-size: 7px;">ICTY INDICTED</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strategic Situation Card -->
+    <div class="card card-situation" style="--rot: 1.2deg">
+      <div class="stamp stamp-active">OPERATIONAL</div>
+      <div class="card-header">
+        <h3>Strategic Situation</h3>
+      </div>
+      <div class="card-body">
+        <div class="stat-row">
+          <span class="stat-label">Territory</span>
+          <span class="stat-value good">64.2%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Total Personnel</span>
+          <span class="stat-value">87,400</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Active Brigades</span>
+          <span class="stat-value">78</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Active Operations</span>
+          <span class="stat-value">3</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">War Exhaustion</span>
+          <span class="stat-value warn">34%</span>
+        </div>
+        <div class="mini-bar" style="margin-top: 2px;">
+          <div class="mini-bar-fill" style="width: 34%; background: #c4a35a;"></div>
+        </div>
+        <div style="margin-top: 10px;">
+          <div class="ops-indicator-header">This Week</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <span class="hotspot-badge battle">4 Battles</span>
+            <span class="hotspot-badge advance">+3 OSID</span>
+            <span class="hotspot-badge retreat">-1 OSID</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Officer Reserve Pool Card -->
+    <div class="card card-pool" style="--rot: -0.8deg">
+      <div class="card-header">
+        <h3>Officer Reserve Pool</h3>
+      </div>
+      <div class="card-body">
+        <div class="stat-row" style="margin-bottom: 6px;">
+          <span class="stat-label">Available</span>
+          <span class="stat-value">8 officers</span>
+        </div>
+        <div class="pool-officer">
+          <div class="pool-officer-status" style="background: #50b850;"></div>
+          <span style="font-weight: 600;">Lisica, M.</span>
+          <span style="color: #8a7e68; margin-left: auto;">Comp 4</span>
+        </div>
+        <div class="pool-officer">
+          <div class="pool-officer-status" style="background: #50b850;"></div>
+          <span style="font-weight: 600;">Tolimir, Z.</span>
+          <span style="color: #8a7e68; margin-left: auto;">Comp 3</span>
+        </div>
+        <div class="pool-officer">
+          <div class="pool-officer-status" style="background: #50b850;"></div>
+          <span style="font-weight: 600;">Pandurevic, V.</span>
+          <span style="color: #8a7e68; margin-left: auto;">Comp 3</span>
+        </div>
+        <div class="pool-officer">
+          <div class="pool-officer-status" style="background: #fbbf24;"></div>
+          <span style="font-weight: 600;">Kelecevic, S.</span>
+          <span style="color: #8a7e68; margin-left: auto;">Comp 2</span>
+        </div>
+        <div style="text-align: center; margin-top: 6px;">
+          <span style="font-size: 9px; color: #8a7e68;">+4 more in reserve</span>
+        </div>
+      </div>
+      <div class="expand-hint">Click to manage pool</div>
+    </div>
+
+    <!-- ==================== ROW 2: Corps Cards ==================== -->
+
+    <!-- 1st Krajina Corps -->
+    <div class="card" style="--rot: 0.7deg" data-expandable onclick="toggleExpand(this)">
+      <div class="stamp stamp-active">OFFENSIVE</div>
+      <div class="card-header">
+        <div>
+          <h3>1st Krajina Corps</h3>
+          <div style="font-size: 9px; color: #6a6050;">Northwest Bosnia</div>
+        </div>
+        <div class="faction-dot" style="background: #e05050;"></div>
+      </div>
+      <div class="card-body">
+        <div class="stat-row">
+          <span class="stat-label">Personnel</span>
+          <span class="stat-value good">18,200</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Brigades</span>
+          <span class="stat-value">15</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Sectors</span>
+          <span class="stat-value">4</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Avg Cohesion</span>
+          <span class="stat-value good">72%</span>
+        </div>
+        <div class="mini-bar">
+          <div class="mini-bar-fill" style="width: 72%; background: #50b850;"></div>
+        </div>
+
+        <div class="commander-section">
+          <div class="commander-rank">
+            <div class="rank-star"></div>
+            <div class="rank-star"></div>
+          </div>
+          <div>
+            <div class="commander-name">Gen. Momir Talic</div>
+            <div class="commander-archetype">Methodical Professional</div>
+          </div>
+        </div>
+
+        <div class="ops-indicator">
+          <div class="ops-indicator-header">Active Operations</div>
+          <div class="ops-row">
+            <div class="ops-dot" style="background: #50b850;"></div>
+            <span class="ops-name">Op Corridor 92</span>
+            <span class="ops-phase">Executing</span>
+          </div>
+        </div>
+      </div>
+      <div class="expand-hint">Click to expand</div>
+
+      <!-- EXPANDED CONTENT -->
+      <div class="expanded-content">
+        <div class="expanded-section">
+          <div class="expanded-section-title">Sectors</div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Prijedor-West</span>
+              <span class="hotspot-badge advance" style="font-size: 7px;">Quiet</span>
+            </div>
+            <div class="sub-card-detail">4 brigades | 12 front edges | Stance: Defend | Density 0.33</div>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Banja Luka-South</span>
+              <span class="hotspot-badge battle" style="font-size: 7px;">2 Battles</span>
+            </div>
+            <div class="sub-card-detail">5 brigades | 18 front edges | Stance: Active Defense | Density 0.28</div>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Doboj-East</span>
+              <span class="hotspot-badge retreat" style="font-size: 7px;">Under Pressure</span>
+            </div>
+            <div class="sub-card-detail">3 brigades | 8 front edges | Stance: Fortify | Density 0.38</div>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Posavina Corridor</span>
+              <span class="hotspot-badge battle" style="font-size: 7px;">Active Op</span>
+            </div>
+            <div class="sub-card-detail">3 brigades | 6 front edges | Stance: Active Defense | Density 0.50</div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title">Commander Actions</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="action-btn primary">Replace Commander</button>
+            <button class="action-btn">Change Stance</button>
+            <button class="action-btn">View Full Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SRK Sarajevo -->
+    <div class="card" style="--rot: -1.1deg" data-expandable onclick="toggleExpand(this)">
+      <div class="stamp stamp-stalled">BESIEGING</div>
+      <div class="card-header">
+        <div>
+          <h3>Sarajevo-Romanija Corps</h3>
+          <div style="font-size: 9px; color: #6a6050;">Sarajevo Siege Ring</div>
+        </div>
+        <div class="faction-dot" style="background: #e05050;"></div>
+      </div>
+      <div class="card-body">
+        <div class="stat-row">
+          <span class="stat-label">Personnel</span>
+          <span class="stat-value">14,800</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Brigades</span>
+          <span class="stat-value">12</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Sectors</span>
+          <span class="stat-value">3</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Avg Cohesion</span>
+          <span class="stat-value warn">58%</span>
+        </div>
+        <div class="mini-bar">
+          <div class="mini-bar-fill" style="width: 58%; background: #c4a35a;"></div>
+        </div>
+
+        <div class="commander-section">
+          <div class="commander-rank">
+            <div class="rank-star"></div>
+            <div class="rank-star"></div>
+          </div>
+          <div>
+            <div class="commander-name">Gen. Stanislav Galic</div>
+            <div class="commander-archetype">Cautious Defender</div>
+          </div>
+        </div>
+
+        <div class="ops-indicator">
+          <div class="ops-indicator-header">Active Operations</div>
+          <div style="font-size: 10px; color: #8a7e68; font-style: italic; padding: 2px 0;">
+            No active operations
+          </div>
+        </div>
+      </div>
+      <div class="expand-hint">Click to expand</div>
+
+      <div class="expanded-content">
+        <div class="expanded-section">
+          <div class="expanded-section-title">Sectors</div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Sarajevo-North</span>
+              <span class="hotspot-badge battle" style="font-size: 7px;">1 Battle</span>
+            </div>
+            <div class="sub-card-detail">5 brigades | 22 front edges | Stance: Screening | Density 0.23</div>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Sarajevo-South</span>
+              <span class="hotspot-badge advance" style="font-size: 7px;">Quiet</span>
+            </div>
+            <div class="sub-card-detail">4 brigades | 16 front edges | Stance: Screening | Density 0.25</div>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Pale-Rogatica</span>
+              <span class="hotspot-badge advance" style="font-size: 7px;">Quiet</span>
+            </div>
+            <div class="sub-card-detail">3 brigades | 10 front edges | Stance: Defend | Density 0.30</div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title">Commander Actions</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="action-btn danger">Replace Commander</button>
+            <button class="action-btn">Change Stance</button>
+            <button class="action-btn">View Full Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drina Corps -->
+    <div class="card" style="--rot: 0.3deg" data-expandable onclick="toggleExpand(this)">
+      <div class="stamp stamp-critical">OVEREXTENDED</div>
+      <div class="card-header">
+        <div>
+          <h3>Drina Corps</h3>
+          <div style="font-size: 9px; color: #6a6050;">Eastern Bosnia</div>
+        </div>
+        <div class="faction-dot" style="background: #e05050;"></div>
+      </div>
+      <div class="card-body">
+        <div class="stat-row">
+          <span class="stat-label">Personnel</span>
+          <span class="stat-value bad">8,900</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Brigades</span>
+          <span class="stat-value">9</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Sectors</span>
+          <span class="stat-value">5</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Avg Cohesion</span>
+          <span class="stat-value bad">41%</span>
+        </div>
+        <div class="mini-bar">
+          <div class="mini-bar-fill" style="width: 41%; background: #e05050;"></div>
+        </div>
+
+        <div class="commander-section">
+          <div class="commander-rank">
+            <div class="rank-star"></div>
+            <div class="rank-star"></div>
+          </div>
+          <div>
+            <div class="commander-name">Gen. Milenko Zivanovic</div>
+            <div class="commander-archetype">Adequate Commander</div>
+          </div>
+        </div>
+
+        <div class="ops-indicator">
+          <div class="ops-indicator-header">Active Operations</div>
+          <div class="ops-row">
+            <div class="ops-dot" style="background: #c4a35a;"></div>
+            <span class="ops-name">Op Drina Push</span>
+            <span class="ops-phase">Stalled</span>
+          </div>
+        </div>
+      </div>
+      <div class="expand-hint">Click to expand</div>
+
+      <div class="expanded-content">
+        <div class="expanded-section">
+          <div class="expanded-section-title">Sectors</div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Zvornik</span>
+              <span class="hotspot-badge battle" style="font-size: 7px;">Active Op</span>
+            </div>
+            <div class="sub-card-detail">2 brigades | 6 front edges | Stance: Active Defense | Density 0.33</div>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Srebrenica Ring</span>
+              <span class="hotspot-badge retreat" style="font-size: 7px;">Enclave Pressure</span>
+            </div>
+            <div class="sub-card-detail">2 brigades | 10 front edges | Stance: Screening | Density 0.20</div>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span>Sector Gorazde Ring</span>
+              <span class="hotspot-badge advance" style="font-size: 7px;">Quiet</span>
+            </div>
+            <div class="sub-card-detail">2 brigades | 8 front edges | Stance: Defend | Density 0.25</div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title">Commander Actions</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="action-btn danger">Replace Commander</button>
+            <button class="action-btn">Change Stance</button>
+            <button class="action-btn">Request Reinforcements</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Herzegovina Corps -->
+    <div class="card" style="--rot: -0.6deg">
+      <div class="stamp stamp-ready">DEFENSIVE</div>
+      <div class="card-header">
+        <div>
+          <h3>Herzegovina Corps</h3>
+          <div style="font-size: 9px; color: #6a6050;">Southern Bosnia</div>
+        </div>
+        <div class="faction-dot" style="background: #e05050;"></div>
+      </div>
+      <div class="card-body">
+        <div class="stat-row">
+          <span class="stat-label">Personnel</span>
+          <span class="stat-value">11,600</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Brigades</span>
+          <span class="stat-value">10</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Avg Cohesion</span>
+          <span class="stat-value good">68%</span>
+        </div>
+        <div class="mini-bar">
+          <div class="mini-bar-fill" style="width: 68%; background: #50b850;"></div>
+        </div>
+        <div class="commander-section">
+          <div class="commander-rank">
+            <div class="rank-star"></div>
+            <div class="rank-star"></div>
+          </div>
+          <div>
+            <div class="commander-name">Gen. Radovan Grubac</div>
+            <div class="commander-archetype">Steady Defender</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- East Bosnia Corps -->
+    <div class="card" style="--rot: 1.5deg">
+      <div class="stamp stamp-active">BALANCED</div>
+      <div class="card-header">
+        <div>
+          <h3>East Bosnia Corps</h3>
+          <div style="font-size: 9px; color: #6a6050;">Bijeljina-Brcko</div>
+        </div>
+        <div class="faction-dot" style="background: #e05050;"></div>
+      </div>
+      <div class="card-body">
+        <div class="stat-row">
+          <span class="stat-label">Personnel</span>
+          <span class="stat-value">12,100</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Brigades</span>
+          <span class="stat-value">11</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Avg Cohesion</span>
+          <span class="stat-value good">65%</span>
+        </div>
+        <div class="mini-bar">
+          <div class="mini-bar-fill" style="width: 65%; background: #50b850;"></div>
+        </div>
+        <div class="commander-section">
+          <div class="commander-rank">
+            <div class="rank-star"></div>
+            <div class="rank-star"></div>
+          </div>
+          <div>
+            <div class="commander-name">Gen. Novica Simic</div>
+            <div class="commander-archetype">Cautious Professional</div>
+          </div>
+        </div>
+        <div class="ops-indicator">
+          <div class="ops-indicator-header">Active Operations</div>
+          <div class="ops-row">
+            <div class="ops-dot" style="background: #50b850;"></div>
+            <span class="ops-name">Op Posavina Grip</span>
+            <span class="ops-phase">Executing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-area -->
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item">
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #50b850;"></div>
+      <span>Healthy</span>
+    </div>
+    <div class="legend-item">
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #c4a35a;"></div>
+      <span>Strained</span>
+    </div>
+    <div class="legend-item">
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #e05050;"></div>
+      <span>Critical</span>
+    </div>
+    <div class="legend-item">
+      <span style="font-style: italic; color: rgba(180,50,40,0.5);">- - -</span>
+      <span>Command link</span>
+    </div>
+  </div>
+
+</div><!-- /board -->
+
+<script>
+function toggleExpand(card) {
+  const wasExpanded = card.classList.contains('expanded');
+  // Collapse all
+  document.querySelectorAll('.card.expanded').forEach(c => c.classList.remove('expanded'));
+  // Toggle clicked
+  if (!wasExpanded) {
+    card.classList.add('expanded');
+  }
+}
+</script>
+
+</body>
+</html>
