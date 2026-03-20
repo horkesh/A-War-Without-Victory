@@ -133,6 +133,16 @@ export interface GameStore {
   selectedArmyId: string | null;
   setSelectedArmyId: (id: string | null) => void;
 
+  /** Army HQ modal state. */
+  armyHQOpen: boolean;
+  armyHQExpandedCorpsId: string | null;
+  armyHQExpandedSections: Record<string, boolean>;
+  armyHQOfficerSelectionCorpsId: string | null;
+  setArmyHQOpen: (open: boolean) => void;
+  setArmyHQExpandedCorpsId: (id: string | null) => void;
+  toggleArmyHQSection: (key: string) => void;
+  setArmyHQOfficerSelectionCorpsId: (id: string | null) => void;
+
   /** Selected army HQ formation (opens ArmyReservePanel as primary). */
   selectedArmyHqId: string | null;
   setSelectedArmyHqId: (id: string | null) => void;
@@ -289,7 +299,37 @@ export const useGameStore = create<GameStore>((set) => ({
   setSelectedCorpsId: (id) => set({ selectedCorpsId: id, selectedArmyId: null, selectedArmyHqId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
 
   selectedArmyId: null,
-  setSelectedArmyId: (id) => set({ selectedArmyId: id, selectedArmyHqId: null, selectedCorpsId: null, selectedFormationId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),
+  setSelectedArmyId: (id) => set({
+    selectedArmyId: id,
+    armyHQOpen: !!id,
+    selectedArmyHqId: null, selectedCorpsId: null, selectedFormationId: null,
+    selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null,
+  }),
+
+  armyHQOpen: false,
+  armyHQExpandedCorpsId: null,
+  armyHQExpandedSections: {},
+  armyHQOfficerSelectionCorpsId: null,
+  setArmyHQOpen: (open) => set({
+    armyHQOpen: open,
+    ...(open ? {} : {
+      armyHQExpandedCorpsId: null,
+      armyHQExpandedSections: {},
+      armyHQOfficerSelectionCorpsId: null,
+    }),
+  }),
+  setArmyHQExpandedCorpsId: (id) => set({
+    armyHQExpandedCorpsId: id,
+    armyHQExpandedSections: {},
+    armyHQOfficerSelectionCorpsId: null,
+  }),
+  toggleArmyHQSection: (key) => set((s) => ({
+    armyHQExpandedSections: {
+      ...s.armyHQExpandedSections,
+      [key]: !s.armyHQExpandedSections[key],
+    },
+  })),
+  setArmyHQOfficerSelectionCorpsId: (id) => set({ armyHQOfficerSelectionCorpsId: id }),
 
   selectedArmyHqId: null,
   setSelectedArmyHqId: (id: string | null) => set({ selectedArmyHqId: id, selectedArmyId: null, selectedCorpsId: null, selectedCorpsFrontSectorId: null, selectedOperationKey: null, selectedOrbatCorpsId: null }),

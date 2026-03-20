@@ -7,6 +7,7 @@ import { FormationDetail } from './components/FormationDetail';
 import { ArmyReservePanel } from './components/ArmyReservePanel';
 import { CorpsDetail } from './components/CorpsDetail';
 import { ArmyDetail } from './components/ArmyDetail';
+import { ArmyHQModal } from './components/army_hq/ArmyHQModal';
 import { Minimap } from './components/Minimap';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
@@ -544,7 +545,7 @@ function App() {
       {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
       {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
       {railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
-      {railState.primary === 'army' && <ArmyDetail railSlot="primary" />}
+      {railState.primary === 'army' && !useGameStore.getState().armyHQOpen && <ArmyDetail railSlot="primary" />}
       {railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
       {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
       {railState.primary === 'operation' && <OperationDetail railSlot="primary" />}
@@ -594,6 +595,7 @@ function App() {
       />
       <AARPanel isOpen={aarOpen} onClose={() => setAarOpen(false)} />
       <OperationHistoryPanel isOpen={opsHistoryOpen} onClose={() => setOpsHistoryOpen(false)} />
+      <ArmyHQModal />
       <OpsPlanningModal />
       <CommanderSelectionModalWrapper />
       <OperationBriefingModalWrapper />

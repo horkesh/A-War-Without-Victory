@@ -56,6 +56,20 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
+      // H → toggle Army HQ modal
+      if (event.key === 'h' || event.key === 'H') {
+        const store = useGameStore.getState();
+        if (store.armyHQOpen) {
+          store.setArmyHQOpen(false);
+        } else {
+          const faction = store.loadedGameState?.player_faction;
+          if (faction) {
+            store.setSelectedArmyId(faction);
+          }
+        }
+        return;
+      }
+
       const n = Number(event.key);
       const digit = n >= 1 && n <= 7 ? n : 0;
       if (digit >= 1 && digit <= MAP_MODES_BY_KEY.length) {
