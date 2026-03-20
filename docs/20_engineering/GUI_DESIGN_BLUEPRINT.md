@@ -343,28 +343,30 @@ Front lines are the **most important visual element** after control fill.
 
 ### 6.3 Unit Markers on Map
 
-Every active brigade with a known position (HQ settlement or municipality centroid) gets an on-map marker.
+Every active brigade with a known position (HQ settlement or municipality centroid) gets an on-map marker rendered via the **Deck.gl IconLayer** (`buildTacticalDeckLayers.ts`).
 
 **Marker design (NATO APP-6 inspired):**
 ```
 ┌─────────┐
-│ ╬  1.Mz │   ← NATO symbol + abbreviated name
+│ ╬  1.Mz │   ← NATO symbol + abbreviated name (Open Sans, 10-12px)
 │ 1840    │   ← personnel count
-│ [ATK] ▶ │   ← posture + order indicator
+│ [ATK] ▶ │   ← posture emoji + order indicator
 └─────────┘
-    │
-    ● HQ location marker
 ```
 
-- Background: faction color (semi-transparent)
-- Border: white 1px
-- Size: scales with zoom level. At strategic zoom: small dot + faction color. At operational: NATO symbol + name. At tactical: full marker with personnel and posture.
-- **Posture badge:** Small icon in corner:
-  - Shield (🛡) = Defend
-  - Crosshair (⊕) = Attack
-  - Arrow (→) = Probe
-  - Wave (~) = Elastic Defense
-  - Wrench (⚒) = Consolidation
+- **Background:** Faction color (semi-transparent fill with darker border)
+- **Border:** 1px white/faction-dark
+- **Scaling:** Dynamic zoom-dependent scaling:
+  - **Strategic (Z6):** 16px size. Minimalist dot or truncated symbol.
+  - **Operational (Z10):** 28px size. Standard NATO symbol + name.
+  - **Tactical (Z14+):** 40px size. Full detail, including personnel and posture.
+- **Z-Order:** Deck.gl handles depth sorting; selected units and player-faction units are elevated to the top layer.
+- **Posture badge:** Small icon/emoji in corner or bottom strip:
+  - 🛡 = Defend
+  - ⊕ = Attack
+  - → = Probe
+  - 🌊 = Elastic Defense
+  - 🛠 = Consolidation
 
 **Forming brigades:** Shown with dashed border and "(FORMING)" label. Gray-tinted.
 

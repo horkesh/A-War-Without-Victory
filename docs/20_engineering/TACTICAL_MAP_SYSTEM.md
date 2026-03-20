@@ -13,10 +13,9 @@ The **canonical player-facing map and GUI** is the **React + MapLibre map app** 
 
 **Glyphs and offline deployment:** The MapLibre style (`awwv_map_style.json`) references glyphs from `https://demotiles.maplibre.org/...`. Offline or air-gapped deployments will not have map labels unless glyphs are bundled locally and the style updated to point to a local or relative glyph URL.
 
-**Phase 3 Implementation (2026-03-14):** Advanced symbology and heatmaps integrated for high-fidelity tactical visualization. 
-- **Serrated Front Lines (Orientation Teeth)**: Implemented directional orientation teeth along front lines to indicate control and posture toward enemy territory. Logic utilizes cross-product calculation between segment vectors and OSID centroids. 
-- **Operational Heatmaps**: Integrated dynamic heatmap mode visualizing LOGISTICAL PRESSURE (supply) and COMBAT INTENSITY (flashpoints). Heatmap intensity is weighted by `warPhaseSupplyPressure` and recent `control_events`. 
-- **Threat-Driven Chromancy**: Implemented dynamic sector coloring where `fill-color` is interpolated based on `threat_ratio`, highlighting vulnerable "Hot Red" zones in real-time. 
+- **Phase 4/5: Deck.gl Hybrid Integration (2026-03-20)**: Replaced native MapLibre formation layers with a high-performance Deck.gl overlay. This enables superior icon scaling, z-order control, and complex enrichment (order indicators, supply dots, stack badges) without the limitations of the MapLibre sprite system.
+- **Dynamic Scaling Calibration**: Implemented zoom-dependent `getSize` logic matching MapLibre's historical curve (16px @ Z6 to 40px @ Z14). Real-time synchronization via map `zoom` events ensures smooth resizing.
+- **SVG Icon Framework**: Introduced a UI-wide SVG `Icon` component replacing the previous mix of sprites and emoji. Standardized on `Open Sans Regular` for map labels to improve legibility.
 - **Uniform Front Lines**: Front-line thickness for `front-line-base` and `front-line-stripe` uses uniform zoom-only widths. Vertex-snapping fallback synthesizes boundary lines for OSID pairs lacking shared polygon arcs. Sector highlight layers use `front-lines` source (`lineType=glow` filter) so the white glow trails the front line exactly.
 
 **Desktop map runtime (2026-03-03):** In Electron, the **same** map app is used as in dev: there is **one** codebase (`src/ui/map/`), no separate "player-facing" map. When you run `npm run dev:map` (Vite on port 3002), the desktop app prefers that URL for the map iframe so the in-app map is identical to the dev map. When the dev server is not running, Electron serves the built bundle from `dist/tactical-map` (local HTTP server on 127.0.0.1). Map assets (PMTiles, style, GeoJSON) and Load run data are served via that server; MapLibre blob workers do not work under the `awwv://` protocol. Rebuild with `npm run desktop:map:build` and restart Electron to refresh the built bundle when not using the dev server.
@@ -51,7 +50,7 @@ The dev server runs Vite on port 3002 with a custom middleware plugin that serve
 
 | Doc | Location | What it specifies |
 |-----|----------|-------------------|
-| **HOI_VISUAL_GUI_OVERHAUL_SPEC** | `docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md` §2.4 | **Formation markers (HoI-style):** Precise OSID centering; NATO tactical symbols; visual stacking; brigade counter 40×20px, faction color 85%; **quantized 10% Health/Morale status banners (2026-03-15)**. |
+| **HOI_VISUAL_GUI_OVERHAUL_SPEC** | `docs/30_planning/20260221_settlement remapping and GUI rework/HOI_VISUAL_GUI_OVERHAUL_SPEC.md` §2.4 | **Formation markers (Deck.gl Hybrid):** Precise OSID centering; NATO tactical symbols; visual stacking; **10% status banners (2026-03-15)**. Zoom scaling (16-40px). |
 | **TACTICAL_MAP_SYSTEM** (this doc) | §2 map_hoi bullet | Formation **billboard sprites** (zoom scaling), layer F4 “Formations”; same GameStateAdapter/IPC; operational_settlements.geojson. |
 | **ORCHESTRATOR_VISIBLE_FORMATIONS_ON_MAP** | `docs/40_reports/convenes/ORCHESTRATOR_VISIBLE_FORMATIONS_ON_MAP_2026_02_23.md` | Implementation: `FormationMarkerInput` (id, position, name, faction, posture?, isCorps?); position from `location_osid` or `hq_sid`; `setFormations(markers)`; determinism (sort by id). Gap: map_hoi does not yet call `setFormations`; renderer needs `getWorldPositionForSettlement(osidOrSid)`. |
 | **Napkin** | `.agent/napkin.md` | 3D counters: data-mode read-only, deterministic; fixed mode cycle; corps tint from (faction, corps_id) hash. |

@@ -361,6 +361,8 @@ Before launching any new operation, the corps AI checks intel confidence across 
 
 **Phase E GUI (2026-03-03):** Tactical map FormationDetail panel shows **Command** (brigade officer quality bar, corps/army commander name and Acting status) and **Recent command changes** for corps when the last turn report includes `officer_succession`. Warroom FactionOverviewPanel lists officers in a COMMAND subsection; NewspaperModal appends officer succession lines (replacements, casualties, departures) to AAR body. Main process sends `turn-report-updated` to both renderers after advance-turn; see DESKTOP_GUI_IPC_CONTRACT.
 
+**Phase 4/5 GUI OVERHAUL (2026-03-20):** Replaced legacy MapLibre tactical layers with a high-performance **Deck.gl hybrid rendering overlay** (`buildTacticalDeckLayers.ts`). This allows for superior z-order control, smooth zoom-dependent scaling (16px @ Z6 to 40px @ Z14), and rich per-formation enrichment (stack count badges, supply indicators, posture emojis). Standardized on the **SVG Icon framework** (`Icon.tsx`) for UI-wide consistency and **Open Sans Regular** for map labels (10-12px) with precise vertical offsets (22px).
+
 Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md). Design doc: [OFFICERS_SYSTEM_COMPREHENSIVE_PLAN.md](../30_planning/OFFICERS_SYSTEM_COMPREHENSIVE_PLAN.md).
 
 ### 7.7 Army HQ Reserve Pool (Elite Brigade Loans)

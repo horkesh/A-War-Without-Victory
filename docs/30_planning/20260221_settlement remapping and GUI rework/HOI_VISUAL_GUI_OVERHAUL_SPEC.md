@@ -165,6 +165,8 @@ Merge-protected settlements (municipal seats, strategic towns from the clusterin
 
 These are the HoI "victory point" equivalents — they communicate at a glance where the strategically significant locations are, even without clicking.
 
+**React map (2026-03-20):** There is **no** dedicated map toggle or layer for this anymore; settlement panels and tooltips still carry strategic/seat context. Reintroduce here if VP-style map markers return.
+
 ### 2.7 Enclave Visualization
 
 Enclaves (detected per Engine Invariants §F) get a distinctive visual treatment:

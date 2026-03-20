@@ -25,8 +25,6 @@ export function MapModeToolbar() {
   const setFogVisible = useGameStore((s) => s.setFogVisible);
   const battlesVisible = useGameStore((s) => s.battlesVisible);
   const setBattlesVisible = useGameStore((s) => s.setBattlesVisible);
-  const strategicVisible = useGameStore((s) => s.strategicVisible);
-  const setStrategicVisible = useGameStore((s) => s.setStrategicVisible);
 
   const toggles: Record<string, { value: boolean; set: (v: boolean) => void }> = {
     frontsVisible: { value: frontsVisible, set: setFrontsVisible },
@@ -36,7 +34,6 @@ export function MapModeToolbar() {
     minimapVisible: { value: minimapVisible, set: setMinimapVisible },
     fogVisible: { value: fogVisible, set: setFogVisible },
     battlesVisible: { value: battlesVisible, set: setBattlesVisible },
-    strategicVisible: { value: strategicVisible, set: setStrategicVisible },
   };
 
   return (

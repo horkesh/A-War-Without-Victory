@@ -11,8 +11,10 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@deck.gl/mapbox": "^9.2.11",
     "@turf/bezier-spline": "^6.5.0",
     "@turf/helpers": "^6.5.0",
+    "deck.gl": "^9.2.11",
     "maplibre-gl": "^4.0.0",
     "pmtiles": "^3.0.0",
     "react": "^18.2.0",

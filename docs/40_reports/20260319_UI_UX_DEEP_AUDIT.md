@@ -5,6 +5,17 @@
 **Viewport:** 1920x1080 (desktop)
 **Build:** v0.6.1, Turn 40 (6 Jan 1993, WAR phase), live mode from `latest_run_final_save.json`
 
+### Revisit — 2026-03-20 (quick status vs P1)
+
+| ID | Status | Notes |
+|----|--------|--------|
+| **T1** P1 (toolbar → same modal) | **Addressed** (2026-03-19 polish) | SUMMARY opens War Summary `overview`; **AAR** / **OPS** / **EVENTS** toggle distinct overlays in `App.tsx` (`TopToolbar` callbacks). Re-verify if any button still lands on Overview incorrectly. |
+| **M1** P1 (minimap OFF→ON blank) | **Hardened** (2026-03-20) | `Minimap.tsx`: keep single MapLibre instance; on show — **double `requestAnimationFrame`**, `resize()`, `triggerRepaint()` after `visibility`/`opacity` restore. |
+| **M2** P2 (no right-click) | **Partially addressed** | Radial context menu from polish pass (`RadialMenu` + `useMapInteractions`). |
+| **B1** P2 (no heatmap legends) | **Addressed** | `MapModeLegend.tsx` from polish pass. |
+
+**Still open (examples):** M3 brigade hit priority, M4 empty-map click feedback, B2 supply scale, T2 disabled-button tooltips (some titles added; not exhaustive).
+
 ---
 
 ## Executive Summary
@@ -98,7 +109,7 @@ The tactical map is functional and visually distinctive. The HoI-inspired warm p
 - **Map mode pills** — clear mode labels: Political/Ethnic/Supply/Casualties/Morale/Operations/Defense
 - **Active mode highlighted gold** — immediately visible which mode is active
 - **Territory percentages** — "RS 60.6% · RBiH 27.4% · HRHB 12.0%" — excellent at-a-glance war status
-- **Layer toggles** — Front/Units/Labels/Minimap/Fog/Battles/Points — clear binary toggles with active state
+- **Layer toggles** — Front/Units/Labels/Minimap/Fog/Battles — clear binary toggles with active state
 - **Glass background** — consistent with top toolbar aesthetic
 
 ### Issues

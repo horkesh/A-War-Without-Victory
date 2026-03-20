@@ -96,14 +96,12 @@ export interface GameStore {
   sectorsVisible: boolean;
   fogVisible: boolean;
   battlesVisible: boolean;
-  strategicVisible: boolean;
   setFrontsVisible: (v: boolean) => void;
   setFormationsVisible: (v: boolean) => void;
   setLabelsVisible: (v: boolean) => void;
   setSectorsVisible: (v: boolean) => void;
   setFogVisible: (v: boolean) => void;
   setBattlesVisible: (v: boolean) => void;
-  setStrategicVisible: (v: boolean) => void;
 
   /** Phase C4: When 'attack'/'move'/'sector', next OSID click opens AttackConfirmation or stages move/sector assignment. */
   orderModeForFormation: 'attack' | 'move' | 'sector' | null;
@@ -266,14 +264,12 @@ export const useGameStore = create<GameStore>((set) => ({
   sectorsVisible: true,
   fogVisible: true,
   battlesVisible: true,
-  strategicVisible: true,
   setFrontsVisible: (v) => set({ frontsVisible: v }),
   setFormationsVisible: (v) => set({ formationsVisible: v }),
   setLabelsVisible: (v) => set({ labelsVisible: v }),
   setSectorsVisible: (v) => set({ sectorsVisible: v }),
   setFogVisible: (v) => set({ fogVisible: v }),
   setBattlesVisible: (v) => set({ battlesVisible: v }),
-  setStrategicVisible: (v) => set({ strategicVisible: v }),
 
   orderModeForFormation: null,
   setOrderModeForFormation: (mode: 'attack' | 'move' | 'sector' | null) => set({ orderModeForFormation: mode }),

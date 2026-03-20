@@ -21,6 +21,19 @@ import {
 import type { GameState, FactionId } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
+/** Cross-target pair (RBiH↔HRHB) without TS narrowing that flags impossible faction literals. */
+function isRbihHrhbControllerPair(attacker: FactionId, targetController: string): boolean {
+  if (attacker === 'RBiH') return targetController === 'HRHB';
+  if (attacker === 'HRHB') return targetController === 'RBiH';
+  return false;
+}
+
+function isRbihHrhbFactionPair(a: FactionId, b: FactionId): boolean {
+  if (a === 'RBiH') return b === 'HRHB';
+  if (a === 'HRHB') return b === 'RBiH';
+  return false;
+}
+
 // ── Helpers ──
 
 /** Minimal GameState for mobilization combat suppression tests. */
@@ -136,55 +149,45 @@ describe('mobilization combat suppression — target filtering logic', () => {
         const state = makeState({ turn: 30, allianceValue: 0.10, mobilizationStartedTurn: 28 });
         const attackerFaction: FactionId = 'RBiH';
         const targetController = 'HRHB';
-        const isRbihHrhbPair =
-            (attackerFaction === 'RBiH' && targetController === 'HRHB') ||
-            (attackerFaction === 'HRHB' && targetController === 'RBiH');
+        const pair = isRbihHrhbControllerPair(attackerFaction, targetController);
         // During mobilization, combat not enabled => filter out
-        expect(isRbihHrhbPair && !isRbihHrhbCombatEnabled(state)).toBe(true);
+        expect(pair && !isRbihHrhbCombatEnabled(state)).toBe(true);
     });
 
     it('RBiH-controlled OSID is filtered out for HRHB attacker during mobilization', () => {
         const state = makeState({ turn: 30, allianceValue: 0.10, mobilizationStartedTurn: 28 });
         const attackerFaction: FactionId = 'HRHB';
         const targetController = 'RBiH';
-        const isRbihHrhbPair =
-            (attackerFaction === 'RBiH' && targetController === 'HRHB') ||
-            (attackerFaction === 'HRHB' && targetController === 'RBiH');
-        expect(isRbihHrhbPair && !isRbihHrhbCombatEnabled(state)).toBe(true);
+        const pair = isRbihHrhbControllerPair(attackerFaction, targetController);
+        expect(pair && !isRbihHrhbCombatEnabled(state)).toBe(true);
     });
 
     it('RS-controlled OSID is NOT filtered for RBiH attacker during mobilization', () => {
         const state = makeState({ turn: 30, allianceValue: 0.10, mobilizationStartedTurn: 28 });
         const attackerFaction: FactionId = 'RBiH';
         const targetController = 'RS';
-        const isRbihHrhbPair =
-            (attackerFaction === 'RBiH' && targetController === 'HRHB') ||
-            (attackerFaction === 'HRHB' && targetController === 'RBiH');
+        const pair = isRbihHrhbControllerPair(attackerFaction, targetController);
         // RS target => not an HRHB-RBiH pair => not filtered
-        expect(isRbihHrhbPair).toBe(false);
+        expect(pair).toBe(false);
     });
 
     it('HRHB-controlled OSID becomes attackable after mobilization expires', () => {
         const state = makeState({ turn: 32, allianceValue: 0.10, mobilizationStartedTurn: 28 });
         const attackerFaction: FactionId = 'RBiH';
         const targetController = 'HRHB';
-        const isRbihHrhbPair =
-            (attackerFaction === 'RBiH' && targetController === 'HRHB') ||
-            (attackerFaction === 'HRHB' && targetController === 'RBiH');
+        const pair = isRbihHrhbControllerPair(attackerFaction, targetController);
         // After mobilization, combat enabled => NOT filtered
-        expect(isRbihHrhbPair && !isRbihHrhbCombatEnabled(state)).toBe(false);
+        expect(pair && !isRbihHrhbCombatEnabled(state)).toBe(false);
     });
 
     it('when alliance drops directly to hostile (no mobilization gap), combat is immediate', () => {
         const state = makeState({ turn: 29, allianceValue: HOSTILE_THRESHOLD, mobilizationStartedTurn: 28 });
         const attackerFaction: FactionId = 'HRHB';
         const targetController = 'RBiH';
-        const isRbihHrhbPair =
-            (attackerFaction === 'RBiH' && targetController === 'HRHB') ||
-            (attackerFaction === 'HRHB' && targetController === 'RBiH');
+        const pair = isRbihHrhbControllerPair(attackerFaction, targetController);
         // Alliance at hostile threshold => combat enabled immediately
         expect(isRbihHrhbCombatEnabled(state)).toBe(true);
-        expect(isRbihHrhbPair && !isRbihHrhbCombatEnabled(state)).toBe(false);
+        expect(pair && !isRbihHrhbCombatEnabled(state)).toBe(false);
     });
 });
 
@@ -196,20 +199,16 @@ describe('attack resolution safety gate', () => {
         // Simulate what the gate does: check attacker faction vs target controller
         const attackerFaction: FactionId = 'HRHB';
         const targetFaction: FactionId = 'RBiH';
-        const isRbihHrhbPair =
-            (attackerFaction === 'RBiH' && targetFaction === 'HRHB') ||
-            (attackerFaction === 'HRHB' && targetFaction === 'RBiH');
-        const shouldBlock = isRbihHrhbPair && !isRbihHrhbCombatEnabled(state);
+        const pair = isRbihHrhbFactionPair(attackerFaction, targetFaction);
+        const shouldBlock = pair && !isRbihHrhbCombatEnabled(state);
         expect(shouldBlock).toBe(true);
     });
 
     it('VRS vs RBiH attack should NOT be blocked during mobilization', () => {
         const state = makeState({ turn: 30, allianceValue: 0.10, mobilizationStartedTurn: 28 });
+        expect(isRbihHrhbCombatEnabled(state)).toBe(false);
         const attackerFaction: FactionId = 'RS';
         const targetFaction: FactionId = 'RBiH';
-        const isRbihHrhbPair =
-            (attackerFaction === 'RBiH' && targetFaction === 'HRHB') ||
-            (attackerFaction === 'HRHB' && targetFaction === 'RBiH');
-        expect(isRbihHrhbPair).toBe(false);
+        expect(isRbihHrhbFactionPair(attackerFaction, targetFaction)).toBe(false);
     });
 });

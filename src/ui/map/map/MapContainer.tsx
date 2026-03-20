@@ -32,7 +32,7 @@ import { ensureFormationIcons, ensureTacticalIcons } from './formationIcons';
 import { buildFogOfWarGeoJSON } from './builders/buildFogOfWarGeoJSON';
 import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
 import { buildBattleMarkersGeoJSON } from './builders/buildBattleMarkersGeoJSON';
-import { buildStrategicPointGeoJSON } from './builders/buildStrategicPointGeoJSON';
+import { buildMajorCityLabelGeoJSON } from './builders/buildMajorCityLabelGeoJSON';
 import { StackExpansionOverlay } from '../components/StackExpansionOverlay';
 import { RadialMenu } from '../components/RadialMenu';
 import type { RadialMenuItem } from '../components/RadialMenu';
@@ -40,6 +40,8 @@ import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { useIPC } from '../desktop/useIPC';
 import { stageMoveOrderFromOsid, stageAssignBrigadeToSectorAction } from '../desktop/orderActions';
 import styleJson from './awwv_map_style.json';
+import { MapboxOverlay } from '@deck.gl/mapbox';
+import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
@@ -110,6 +112,8 @@ const FORMATION_MARKERS_LAYER_ID = 'formation-markers';
 const FORMATION_WHITE_OVERLAY_LAYER_ID = 'formation-white-pulse-overlay';
 /** Layer ID for formation labels (labelsVisible). */
 const FORMATION_LABELS_LAYER_ID = 'formation-labels';
+/** Keep in sync with `formation-labels`.minzoom in awwv_map_style.json — tactical zoom only. */
+const FORMATION_LABELS_MIN_ZOOM = 9;
 /** Layer ID for home-defense badge on formations at their home municipality. */
 const FORMATION_HOME_BADGE_LAYER_ID = 'formation-home-badge';
 import { buildOperationalHeatmapGeoJSON } from './builders/buildOperationalHeatmapGeoJSON';
@@ -147,8 +151,8 @@ const FOG_OVERLAY_SOURCE_ID = 'fog-overlay';
 const FOG_FILL_LAYER_ID = 'fog-fill';
 const BATTLE_MARKERS_SOURCE_ID = 'battle-markers';
 const BATTLE_MARKERS_LAYER_ID = 'battle-markers-pulse';
-const STRATEGIC_POINTS_SOURCE_ID = 'strategic-points';
-const STRATEGIC_POINTS_LAYER_ID = 'strategic-points-circles';
+const MAJOR_CITY_LABELS_SOURCE_ID = 'major-city-labels';
+const MAJOR_CITY_LABELS_LAYER_ID = 'major-city-labels-symbols';
 const ENCLAVE_SOURCE_ID = 'enclave-osids';
 const ENCLAVE_LABEL_SOURCE_ID = 'enclave-labels';
 const ENCLAVE_OUTLINE_LAYER_ID = 'enclave-outline';
@@ -162,9 +166,11 @@ const ENCLAVE_LABEL_LAYER_ID = 'enclave-label';
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const deckOverlayRef = useRef<MapboxOverlay | null>(null);
   const osidBaseRef = useRef<FeatureCollection | null>(null);
   const osidAdjacencyRef = useRef<Map<string, string[]> | null>(null);
   const osidCentroidsRef = useRef<Map<string, [number, number]>>(new Map());
+  const lastFormationsGeoJsonRef = useRef<FeatureCollection | null>(null);
   const lastPanTargetRef = useRef<string | null>(null);
   const prevSectorIdRef = useRef<string | null>(null);
   /** When true, sector selection came from a map click — skip zoom. Cleared after the pan/zoom effect reads it. */
@@ -196,7 +202,6 @@ export function MapContainer() {
   const expandedStackOsid = useGameStore((s) => s.expandedStackOsid);
   const appliedExpandedStackOsidRef = useRef(expandedStackOsid);
   const appliedSelectedFormationIdRef = useRef(selectedFormationId);
-  const operationTargetOsidsRef = useRef(operationTargetOsids);
   const [overlayAnchor, setOverlayAnchor] = useState<{ x: number; y: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     type: 'formation' | 'front' | 'osid' | 'empty';
@@ -230,7 +235,6 @@ export function MapContainer() {
   const effectiveFrontsVisible = devMode ? frontsVisible : sectorsVisible;
   const fogVisible = useGameStore((s) => s.fogVisible);
   const battlesVisible = useGameStore((s) => s.battlesVisible);
-  const strategicVisible = useGameStore((s) => s.strategicVisible);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const hoveredSectorId = useGameStore((s) => s.hoveredSectorId);
   const hoveredCorpsId = useGameStore((s) => s.hoveredCorpsId);
@@ -250,37 +254,49 @@ export function MapContainer() {
     const { type, properties } = contextMenu;
     switch (type) {
       case 'formation': return [
-        { id: 'view', label: 'View Unit', icon: '\u{1F441}', action: () => {
-          const id = properties?.id as string;
-          if (id) useGameStore.getState().setSelectedFormationId(id);
-        }},
-        { id: 'corps', label: 'View Corps', icon: '\u2694', action: () => {
-          const corpsId = properties?.corps_id as string;
-          if (corpsId) useGameStore.getState().setSelectedCorpsId(corpsId);
-        }},
+        {
+          id: 'view', label: 'View Unit', icon: '\u{1F441}', action: () => {
+            const id = properties?.id as string;
+            if (id) useGameStore.getState().setSelectedFormationId(id);
+          }
+        },
+        {
+          id: 'corps', label: 'View Corps', icon: '\u2694', action: () => {
+            const corpsId = properties?.corps_id as string;
+            if (corpsId) useGameStore.getState().setSelectedCorpsId(corpsId);
+          }
+        },
       ];
       case 'osid': return [
-        { id: 'info', label: 'Settlement', icon: '\u{1F3D8}', action: () => {
-          const osid = properties?.osid as string;
-          if (osid) useGameStore.getState().setSelectedOsid(osid);
-        }},
-        { id: 'sector', label: 'View Sector', icon: '\u{1F5FA}', action: () => {
-          const osid = properties?.osid as string;
-          const sectorId = osidToSector.get(osid ?? '');
-          if (sectorId) useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
-        }},
+        {
+          id: 'info', label: 'Settlement', icon: '\u{1F3D8}', action: () => {
+            const osid = properties?.osid as string;
+            if (osid) useGameStore.getState().setSelectedOsid(osid);
+          }
+        },
+        {
+          id: 'sector', label: 'View Sector', icon: '\u{1F5FA}', action: () => {
+            const osid = properties?.osid as string;
+            const sectorId = osidToSector.get(osid ?? '');
+            if (sectorId) useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+          }
+        },
       ];
       case 'front': return [
-        { id: 'sector', label: 'Sector Detail', icon: '\u{1F5FA}', action: () => {
-          const sectorId = properties?.sector_id as string;
-          if (sectorId) useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
-        }},
+        {
+          id: 'sector', label: 'Sector Detail', icon: '\u{1F5FA}', action: () => {
+            const sectorId = properties?.sector_id as string;
+            if (sectorId) useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+          }
+        },
       ];
       case 'empty': return [
-        { id: 'deselect', label: 'Deselect', icon: '\u2715', action: () => {
-          useGameStore.getState().setSelectedFormationId(null);
-          useGameStore.getState().setSelectedOsid('');
-        }},
+        {
+          id: 'deselect', label: 'Deselect', icon: '\u2715', action: () => {
+            useGameStore.getState().setSelectedFormationId(null);
+            useGameStore.getState().setSelectedOsid('');
+          }
+        },
       ];
       default: return [];
     }
@@ -334,6 +350,7 @@ export function MapContainer() {
         setOsidPropertiesMap(osidProps);
 
         const controlledGeoJson = buildControlGeoJSON(geojson, byOsid);
+        const majorCityLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
         const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson);
         const sources = style.sources as Record<
           string,
@@ -353,7 +370,7 @@ export function MapContainer() {
         }
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)['fog-overlay'] = { type: 'geojson', data: EMPTY_GEOJSON };
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[BATTLE_MARKERS_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
-        (sources as Record<string, { type?: string; data?: FeatureCollection }>)[STRATEGIC_POINTS_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
+        (sources as Record<string, { type?: string; data?: FeatureCollection }>)[MAJOR_CITY_LABELS_SOURCE_ID] = { type: 'geojson', data: majorCityLabels };
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[GHOST_PATH_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
         // NOTE: front-edges-hover source is NOT pre-registered here — it's created via addSource
         // in runUpdate so that addLayer calls in the same block also execute.
@@ -375,6 +392,14 @@ export function MapContainer() {
       });
       mapRef.current = map;
       ensureTacticalIcons(map);
+
+      const deckOverlay = new MapboxOverlay({
+        interleaved: true,
+        layers: []
+      });
+      map.addControl(deckOverlay as any);
+      deckOverlayRef.current = deckOverlay;
+
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
       // Minimap sync: report viewport bounds on move
       const reportViewport = () => {
@@ -387,6 +412,23 @@ export function MapContainer() {
       };
       map.on('moveend', reportViewport);
       map.on('load', reportViewport);
+
+      // Deck.gl zoom sync: trigger layer update on zoom to handle dynamic scaling
+      map.on('zoom', () => {
+        if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
+          const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState } = useGameStore.getState();
+          deckOverlayRef.current.setProps({
+            layers: composeTacticalDeckLayers({
+              formationsGeoJson: lastFormationsGeoJsonRef.current,
+              labelsVisible: lVis,
+              formationsVisible: fVis,
+              zoom: map.getZoom(),
+              loadedGameState,
+              centroidLookup: osidCentroidsRef.current,
+            }),
+          });
+        }
+      });
 
       // Minimap: register panToCenter callback
       useGameStore.getState().setPanToCenter((center: [number, number]) => {
@@ -407,6 +449,8 @@ export function MapContainer() {
 
     return () => {
       initCancelled = true;
+      deckOverlayRef.current?.finalize();
+      deckOverlayRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
       useGameStore.getState().setPanToCenter(null);
@@ -591,6 +635,14 @@ export function MapContainer() {
           const m1 = mapRef.current;
           controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement);
           (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
+          try {
+            const majorLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
+            safeEnsureSource(m1, MAJOR_CITY_LABELS_SOURCE_ID, { type: 'geojson', data: majorLabels });
+            const lblSrc = m1.getSource(MAJOR_CITY_LABELS_SOURCE_ID) as GeoJSONSource | undefined;
+            if (lblSrc) lblSrc.setData(majorLabels);
+          } catch (labelErr) {
+            console.warn('[MapContainer] major-city-labels setData failed:', labelErr);
+          }
           if (devMode) console.timeEnd('[MapContainer] overlay control');
         } catch (e) {
           console.error('[MapContainer] overlay control failed:', e);
@@ -840,6 +892,25 @@ export function MapContainer() {
                       console.warn('[MapContainer] Formation icon registration failed (labels may still show):', iconErr);
                     }
                     if (cancelled || !mapRef.current || mapRef.current !== initialMap) return;
+
+                    const { formationsVisible: fVis, labelsVisible: lVis } = useGameStore.getState();
+                    lastFormationsGeoJsonRef.current = formationsGeoJson;
+
+                    // Update Deck.gl layers
+                    if (deckOverlayRef.current) {
+                      deckOverlayRef.current.setProps({
+                        layers: composeTacticalDeckLayers({
+                          formationsGeoJson,
+                          labelsVisible: lVis,
+                          formationsVisible: fVis,
+                          zoom: initialMap.getZoom(),
+                          loadedGameState: state,
+                          centroidLookup: osidCentroidsRef.current,
+                        }),
+                      });
+                    }
+
+                    // Keep empty source for sector highlight rings if needed, but disable MapLibre native formation symbols
                     if (m.getSource('formations')) (m.getSource('formations') as GeoJSONSource).setData(formationsGeoJson);
                     if (m.getSource('order-arrows')) (m.getSource('order-arrows') as GeoJSONSource).setData(orderArrowsGeoJson);
 
@@ -999,24 +1070,7 @@ export function MapContainer() {
                     const { battlesVisible: battlesVis } = useGameStore.getState();
                     safeSetLayoutVisibility(m, BATTLE_MARKERS_LAYER_ID, battlesVis);
 
-                    // Strategic points: gold circles for major cities and municipal seats
-                    const strategicGeoJson = buildStrategicPointGeoJSON(base);
-                    safeEnsureLayer(m, {
-                      id: STRATEGIC_POINTS_LAYER_ID,
-                      type: 'circle',
-                      source: STRATEGIC_POINTS_SOURCE_ID,
-                      minzoom: 5,
-                      paint: {
-                        'circle-radius': ['match', ['get', 'tier'], 'city', 8, 5],
-                        'circle-color': 'rgba(255, 255, 255, 0.75)', // will be animated by pulse loop
-                        'circle-opacity': 0.85,
-                        'circle-stroke-color': 'rgba(0,0,0,0.5)',
-                        'circle-stroke-width': 1,
-                      },
-                    }, 'formation-markers');
-                    if (m.getSource(STRATEGIC_POINTS_SOURCE_ID)) (m.getSource(STRATEGIC_POINTS_SOURCE_ID) as GeoJSONSource).setData(strategicGeoJson);
-                    const { strategicVisible: stratVis, selectedFormationId: selBid } = useGameStore.getState();
-                    safeSetLayoutVisibility(m, STRATEGIC_POINTS_LAYER_ID, stratVis);
+                    const { selectedFormationId: selBid } = useGameStore.getState();
 
                     // Ghost Paths: selection-driven dashed lines for staged sector/move orders
                     const ghostGeoJson = buildGhostPathsGeoJSON(
@@ -1044,9 +1098,11 @@ export function MapContainer() {
                     if (m.getSource(GHOST_PATH_SOURCE_ID)) (m.getSource(GHOST_PATH_SOURCE_ID) as GeoJSONSource).setData(ghostGeoJson);
                     safeSetLayoutVisibility(m, GHOST_PATH_LAYER_ID, !!selBid);
 
-                    const { formationsVisible: fVis, labelsVisible: lVis } = useGameStore.getState();
-                    safeSetLayoutVisibility(m, FORMATION_MARKERS_LAYER_ID, fVis);
-                    safeSetLayoutVisibility(m, FORMATION_LABELS_LAYER_ID, lVis);
+                    // Only hide MapLibre formation layers when Deck draws counters (avoids double draw + restores picks when false).
+                    if (DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters) {
+                      safeSetLayoutVisibility(m, FORMATION_MARKERS_LAYER_ID, false);
+                      safeSetLayoutVisibility(m, FORMATION_LABELS_LAYER_ID, false);
+                    }
                     // Force render frame to process newly-added GeoJSON sources
                     // Without this, sources like operational-heatmap/enclave-* may never tile,
                     // blocking isStyleLoaded() and leaving the map blank.
@@ -1093,7 +1149,47 @@ export function MapContainer() {
     };
   }, [loadedGameState, mapReady, stagedOrders, expandedStackOsid]);
 
+  // Major-mun names (game data): glyphs need local font stack; layer on top so not buried under lines.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapReady || !map) return;
 
+    const ensureMajorCityLabelLayer = () => {
+      if (!map.getSource('osid-control') || !safeHasLayer(map, 'osid-control-fill')) return false;
+
+      safeEnsureSource(map, MAJOR_CITY_LABELS_SOURCE_ID, { type: 'geojson', data: EMPTY_GEOJSON });
+      if (!safeHasLayer(map, MAJOR_CITY_LABELS_LAYER_ID)) {
+        map.addLayer({
+          id: MAJOR_CITY_LABELS_LAYER_ID,
+          type: 'symbol',
+          source: MAJOR_CITY_LABELS_SOURCE_ID,
+          minzoom: 6,
+          layout: {
+            'text-field': ['get', 'name'],
+            'text-font': ['Open Sans Bold'],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 6, 10, 9, 13, 12, 16, 14, 18],
+            'text-anchor': 'center',
+            'text-allow-overlap': true,
+            'text-ignore-placement': true,
+            'text-transform': 'uppercase',
+            'text-letter-spacing': 0.06,
+          },
+          paint: {
+            'text-color': 'rgba(28, 22, 18, 0.95)',
+            'text-halo-color': 'rgba(252, 248, 238, 0.92)',
+            'text-halo-width': 2.2,
+          },
+        });
+      }
+      return true;
+    };
+
+    if (ensureMajorCityLabelLayer()) return;
+    const poll = setInterval(() => {
+      if (ensureMajorCityLabelLayer()) clearInterval(poll);
+    }, 200);
+    return () => clearInterval(poll);
+  }, [mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1560,8 +1656,12 @@ export function MapContainer() {
         console.warn('[MapContainer] sector brigade rings focus failed:', e);
       }
 
-      // C.3b + C.3c: Unit white glow + white icon overlay — sector or corps selection
+      // C.3b + C.3c: Unit white glow + white icon overlay — sector or corps selection.
+      // When only a formation is selected (no corps/sector), the brigade AoR effect owns white overlay;
+      // skip here so hover polling / delayed applySectorHighlight does not reset icon-opacity to 0.
       const unitHighlightActive = !!(selectedCorpsId || selectedCorpsFrontSectorId);
+      const formationOnlySelected =
+        !!selectedFormationId && !selectedCorpsId && !selectedCorpsFrontSectorId;
       // Use sector_id IN filter for corps (covers all brigades assigned to corps sectors)
       const unitFilter: any = selectedCorpsId
         ? ['in', ['get', 'sector_id'], ['literal', ids]]
@@ -1569,28 +1669,32 @@ export function MapContainer() {
           ? ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]
           : ['==', ['get', 'sector_id'], '__none__'];
 
-      try {
-        if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
-          map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, unitFilter);
-          if (unitHighlightActive) {
-            map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-opacity', 0.6);
-            map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-radius', [
-              'interpolate', ['linear'], ['zoom'],
-              6, 12, 10, 16, 14, 22
-            ]);
+      if (!formationOnlySelected) {
+        try {
+          if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
+            map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, unitFilter);
+            if (unitHighlightActive) {
+              map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-opacity', 0.6);
+              map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-radius', [
+                'interpolate', ['linear'], ['zoom'],
+                6, 12, 10, 16, 14, 22
+              ]);
+            } else {
+              map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-opacity', 0);
+            }
           }
+        } catch (e) {
+          console.warn('[MapContainer] sector unit highlight failed:', e);
         }
-      } catch (e) {
-        console.warn('[MapContainer] sector unit highlight failed:', e);
-      }
 
-      try {
-        if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
-          map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, unitFilter);
-          map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', unitHighlightActive ? 0.98 : 0);
+        try {
+          if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
+            map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, unitFilter);
+            map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', unitHighlightActive ? 0.98 : 0);
+          }
+        } catch (e) {
+          console.warn('[MapContainer] unit marker white highlight failed:', e);
         }
-      } catch (e) {
-        console.warn('[MapContainer] unit marker white highlight failed:', e);
       }
 
       return true;
@@ -1609,7 +1713,7 @@ export function MapContainer() {
       if (applySectorHighlight()) clearInterval(poll);
     }, 250);
     return () => clearInterval(poll);
-  }, [mapReady, selectedCorpsFrontSectorId, selectedCorpsId, sectorsVisible, loadedGameState, hoveredSectorId, hoveredCorpsId]);
+  }, [mapReady, selectedCorpsFrontSectorId, selectedCorpsId, selectedFormationId, sectorsVisible, loadedGameState, hoveredSectorId, hoveredCorpsId]);
 
   // Brigade AoR highlight: white icon + sub-segment front line.
   // Uses DEDICATED layers (brigade-aor-pos/neg) that never touch sector highlight layers.
@@ -1853,11 +1957,11 @@ export function MapContainer() {
             paint: {
               'fill-color': [
                 'interpolate', ['linear'], ['get', 'morale'],
-                0,   'rgba(204, 34, 34, 0.45)',
-                25,  'rgba(204, 102, 34, 0.40)',
-                45,  'rgba(204, 170, 34, 0.35)',
-                65,  'rgba(136, 170, 34, 0.35)',
-                85,  'rgba(34, 136, 68, 0.35)',
+                0, 'rgba(204, 34, 34, 0.45)',
+                25, 'rgba(204, 102, 34, 0.40)',
+                45, 'rgba(204, 170, 34, 0.35)',
+                65, 'rgba(136, 170, 34, 0.35)',
+                85, 'rgba(34, 136, 68, 0.35)',
               ],
             },
           },
@@ -2005,11 +2109,11 @@ export function MapContainer() {
             paint: {
               'fill-color': [
                 'interpolate', ['linear'], ['get', 'casualties_normalized'],
-                0,   'rgba(60, 60, 70, 0.05)',
+                0, 'rgba(60, 60, 70, 0.05)',
                 0.15, 'rgba(204, 170, 34, 0.25)',
-                0.4,  'rgba(220, 130, 40, 0.35)',
-                0.7,  'rgba(220, 60, 60, 0.45)',
-                1.0,  'rgba(140, 20, 20, 0.55)',
+                0.4, 'rgba(220, 130, 40, 0.35)',
+                0.7, 'rgba(220, 60, 60, 0.45)',
+                1.0, 'rgba(140, 20, 20, 0.55)',
               ],
             },
           },
@@ -2096,8 +2200,18 @@ export function MapContainer() {
       if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID + '-hit')) {
         safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-hit', sectorsVisible);
       }
-      if (!safeSetLayoutVisibility(map, FORMATION_MARKERS_LAYER_ID, formationsVisible)) allExist = false;
-      if (!safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, labelsVisible)) allExist = false;
+      if (!safeSetLayoutVisibility(
+        map,
+        FORMATION_MARKERS_LAYER_ID,
+        DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters ? false : formationsVisible,
+      )) allExist = false;
+      const zoom = map.getZoom();
+      const showFormationLabels =
+        !DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters &&
+        labelsVisible &&
+        formationsVisible &&
+        zoom >= FORMATION_LABELS_MIN_ZOOM;
+      if (!safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, showFormationLabels)) allExist = false;
       if (safeHasLayer(map, FORMATION_HOME_BADGE_LAYER_ID)) {
         safeSetLayoutVisibility(map, FORMATION_HOME_BADGE_LAYER_ID, formationsVisible);
       }
@@ -2117,7 +2231,13 @@ export function MapContainer() {
       return allExist;
     };
 
-    if (applyVisibility()) return;
+    map.on('zoomend', applyVisibility);
+
+    if (applyVisibility()) {
+      return () => {
+        map.off('zoomend', applyVisibility);
+      };
+    }
 
     // Style may not be loaded yet; wait for load and retry once after a short delay (in case load already fired)
     const onLoad = () => {
@@ -2130,12 +2250,13 @@ export function MapContainer() {
     }, 150);
 
     return () => {
+      map.off('zoomend', applyVisibility);
       map.off('load', onLoad);
       clearTimeout(retryId);
     };
   }, [mapReady, frontsVisible, effectiveFrontsVisible, formationsVisible, labelsVisible, mapMode, devMode, sectorsVisible]);
 
-  // Phase 5 toggles: fog / battles / strategic points — reactive visibility when store changes.
+  // Phase 5 toggles: fog / battles — reactive visibility when store changes.
   useEffect(() => {
     const map = mapRef.current;
     if (!mapReady || !map) return;
@@ -2146,10 +2267,7 @@ export function MapContainer() {
     if (safeHasLayer(map, BATTLE_MARKERS_LAYER_ID)) {
       safeSetLayoutVisibility(map, BATTLE_MARKERS_LAYER_ID, battlesVisible);
     }
-    if (safeHasLayer(map, STRATEGIC_POINTS_LAYER_ID)) {
-      safeSetLayoutVisibility(map, STRATEGIC_POINTS_LAYER_ID, strategicVisible);
-    }
-  }, [mapReady, fogVisible, battlesVisible, strategicVisible]);
+  }, [mapReady, fogVisible, battlesVisible]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -2251,12 +2369,7 @@ export function MapContainer() {
     }
   }, [selectedOsid, mapReady]);
 
-  // Sync refs for animation
-  useEffect(() => {
-    operationTargetOsidsRef.current = operationTargetOsids;
-  }, [operationTargetOsids]);
-
-  // Pulse animation for staged orders and strategic objectives
+  // Pulse animation for staged orders and battle markers
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
     const map = mapRef.current;
@@ -2301,20 +2414,6 @@ export function MapContainer() {
               ]
             );
           }
-          if (map.getLayer(STRATEGIC_POINTS_LAYER_ID)) {
-            const targets = operationTargetOsidsRef.current;
-            if (targets.length > 0) {
-              const goldPulse = Math.sin(time / 200) * 0.4 + 0.6;
-              map.setPaintProperty(STRATEGIC_POINTS_LAYER_ID, 'circle-color', [
-                'case',
-                ['in', ['get', 'osid'], ['literal', targets]],
-                `rgba(255, 215, 0, ${goldPulse})`,
-                'rgba(255, 255, 255, 0.75)'
-              ]);
-            } else {
-              map.setPaintProperty(STRATEGIC_POINTS_LAYER_ID, 'circle-color', 'rgba(255, 255, 255, 0.75)');
-            }
-          }
         } catch (e) {
           // ignore if style not loaded yet
         }
@@ -2356,8 +2455,8 @@ export function MapContainer() {
           position={contextMenu.position}
           targetLabel={
             contextMenu.type === 'formation' ? (contextMenu.properties?.name as string)?.split(' ').pop() :
-            contextMenu.type === 'osid' ? (contextMenu.properties?.osid as string)?.split(':').pop()?.replace(/_/g, ' ') :
-            contextMenu.type === 'front' ? 'Front' : ''
+              contextMenu.type === 'osid' ? (contextMenu.properties?.osid as string)?.split(':').pop()?.replace(/_/g, ' ') :
+                contextMenu.type === 'front' ? 'Front' : ''
           }
           onClose={() => setContextMenu(null)}
         />

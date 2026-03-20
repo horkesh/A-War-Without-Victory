@@ -5,6 +5,8 @@
 **Baseline:** Phase 5 partially complete — posture stripes, enclave visualization, and movement preview already done. Seven items outstanding.
 **Result:** All remaining Phase 5 items implemented. Build clean, 312 tests pass. Visual sign-off pending user review.
 
+**Update 2026-03-20:** The **Strategic Points / “Points”** map layer (`buildStrategicPointGeoJSON.ts`, store `strategicVisible`, MapLibre `strategic-points-circles`) was **removed** from the React tactical map as redundant noise. Fog, battle markers, IPC, and War Summary below remain in the product.
+
 ---
 
 ## Summary

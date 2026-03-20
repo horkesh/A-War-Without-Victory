@@ -10,7 +10,7 @@
 
 ## Current State (2026-03-20, v0.6.2 — Battle of the Barracks + Equipment Overhaul)
 **v0.6.2.** 1422 tests, 117 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w, feature branch).**
-**This session:** **UI/UX P1 Stabilization** (T1 routing, M1 minimap) + **G2 Live Briefing** (Ops Planning Phase 3) INTEGRATED. Hybrid Deck.gl strategy adopted.
+**This session:** **`feature/ui-visual-overhaul` = main** — Deck.gl layers + MapContainer merged to main; worktree hard-reset to branch tip (no divergent map). **tsc:** `mobilization_combat_suppression.test.ts` uses `isRbihHrhbControllerPair` / `isRbihHrhbFactionPair` helpers (no impossible faction literals). **M1:** minimap double-rAF + `triggerRepaint` on toggle. **Audit:** `20260319_UI_UX_DEEP_AUDIT.md` §revisit marks T1/M1/B1 status.
 **HRHB-RBiH conflict:** P1 Backlog: CB brigade redistribution, CB operations not launching. Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
@@ -64,6 +64,11 @@
    Do instead: Stale paths break silently. Skills at `.claude/skills/*` — validate with glob.
 6. **[2026-03-12] Save file field names: `corps_id` not `corps`, `location_osid` not `current_osid`**
    Do instead: In diagnostic .cjs scripts, use `f.corps_id` and `f.location_osid`. Using `f.corps` returns undefined, causing false cross-corps positives and phantom bugs.
+7. **[2026-03-20] Nested package installations for Map UI**
+   Do instead: The tactical map UI is a completely separate workspace at `src/ui/map` with its own `package.json`. Commands like `npm run dev:map` run `cd src/ui/map && npx vite`. When adding UI dependencies (like `deck.gl`), you MUST run `npm install` inside the `src/ui/map` directory, not the project root. Root `npm install --legacy-peer-deps` can break the inner Vite installation.
+
+8. **[2026-03-20] Deck.gl Scaling and Label Standards**
+   Do instead: When implementing Deck.gl tactical layers, match the historical MapLibre zoom-interpolation for unit markers (`16px` @ Z6 to `40px` @ Z14). Labels must use `Open Sans Regular`, `10-12px` font size, and a `~22px` pixel offset to ensure they remain thin and legible without bold overhead. Synchronization with map `zoom` events is required for real-time scaling of `IconLayer` and `TextLayer` props.
 
 ## Imports & Build
 1. **[2026-02-07] Martinez ESM import**

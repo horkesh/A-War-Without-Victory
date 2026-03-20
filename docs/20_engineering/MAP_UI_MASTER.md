@@ -30,8 +30,9 @@ src/ui/map/
 ├── map/
 │   ├── MapContainer.tsx           Master map: MapLibre init, all sources/layers, GeoJSON updates
 │   ├── useMapInteractions.ts      Click/hover event wiring → store callbacks (300ms hover delay)
-│   ├── formationIcons.ts          HoI-style rectangular brigade counters (160×80 canvas; quantized 10% Health/Morale status banners; faction-colored fill; white kind abbreviation)
-│   ├── frontLineIcons.ts          Front-line SVG icon helpers (stub)
+│   ├── formationIcons.ts          Canvas-based NATO counters (legacy MapLibre source; now primarily used for Deck.gl IconLayer textures)
+│   ├── Icon.ts                    (DEPRECATED) Old icon mapping
+│   ├── frontLineIcons.ts          Front-line SVG icon helpers
 │   ├── pmtilesRoute.ts            PMTiles URL routing helper (stub)
 │   ├── rewritePmtilesUrls.ts      Shared PMTiles style URL rewriter (pmtiles:/// → pmtiles://origin/); used by MapContainer and OpsPlanningModal
 │   ├── awwv_map_style.json        MapLibre base style (terrain, glyphs, base layers)
@@ -52,10 +53,11 @@ src/ui/map/
 │       ├── resolveFormationLocationOsid.ts     location_osid or first AoR fallback
 │       ├── generateFactionBorders.ts           Shared-edge faction boundary computation
 │       ├── buildFogOfWarGeoJSON.ts             Enemy-territory fog-of-war polygon fill from `LoadedGameState.fogOfWar`
-│       ├── buildBattleMarkersGeoJSON.ts        Combat flip events → Point features (last 3 turns, age-based opacity)
-│       └── buildStrategicPointGeoJSON.ts       City/seat classification from OSID `{mun}_2` slug → Point features
+│       └── buildBattleMarkersGeoJSON.ts        Combat flip events → Point features (last 3 turns, age-based opacity)
 │
 ├── components/
+│   ├── icons/
+│   │   └── Icon.tsx               New SVG Icon framework (Lucide-based + custom path overrides) for UI-wide consistency
 │   ├── Entity slide-out panels (left: 19rem — see §2 for layout)
 │   │   ├── FormationDetail.tsx    Brigade/corps/army detail (highest priority; army_hq → ArmyReservePanel)
 │   │   ├── ArmyReservePanel.tsx   Army HQ panel: Reserve Pool + Pending Requests + Campaign History (rendered instead of FormationDetail when kind === 'army_hq')
@@ -87,6 +89,9 @@ src/ui/map/
 │
 ├── store/
 │   └── gameStore.ts               Zustand store — all UI state (see §4)
+│
+├── layers/
+│   └── buildTacticalDeckLayers.ts Deck.gl layer factory: high-performance IconLayer (units), TextLayer (labels), and ScatterplotLayer (enrichments)
 │
 ├── data/
 │   ├── types.ts                   LoadedGameState + all sub-interfaces (see §5)
@@ -300,7 +305,6 @@ Layer toggles (no keys):
 | Minimap | `minimapVisible` | Minimap component visibility |
 | Fog | `fogVisible` | fog-fill (AND-gated with player_faction + fogOfWar; no-op in observer mode) |
 | Battles | `battlesVisible` | battle-markers-pulse (white circles at recent combat flip OSIDs; opacity by age) |
-| Points | `strategicVisible` | strategic-points-circles (gold circles — tier city r8, seat r5; derived from `_2` OSID slug) |
 
 ### 3.4 SelectionPanel
 
@@ -618,12 +622,18 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 | `sector-glow-pos` / `sector-glow-neg` | Sector boundary glows |
 | `sector-brigade-rings` | Brigade position rings |
 
-### Formation Layers
+### Formation Layers (Deck.gl Hybrid)
 
-| Layer ID | Purpose |
-|----------|---------|
-| `formation-markers` | Unit icon symbols (icon_id → sprite) |
-| `formation-labels` | Formation name text labels |
+| Layer ID | Source | Purpose |
+|----------|--------|---------|
+| `deck-formations-icons` | Deck.gl | Unit counters with zoom-dependent scaling (16px @ Z6 to 40px @ Z14) |
+| `deck-formations-labels` | Deck.gl | Formation name labels (Open Sans Regular, 10-12px) |
+| `deck-formations-orders` | Deck.gl | Posture/Order emojis (⚔️/🛡️) |
+| `deck-formations-supply-dot` | Deck.gl | Supply status indicator dot |
+| `deck-formations-stack-circle` | Deck.gl | Background circle for stack count badge |
+| `deck-formations-stack-text` | Deck.gl | Text badge for stack counts |
+
+> **Note (2026-03-20):** Native MapLibre `formation-markers` and `formation-labels` layers are now HIDDEN in favor of the Deck.gl overlay for superior performance and scaling control.
 
 ### Front Edge Hover Layers
 

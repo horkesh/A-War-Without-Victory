@@ -159,14 +159,16 @@ export function Minimap() {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resize map when visibility toggles (MapLibre needs resize after display:none→block)
+  // Resize when visibility toggles (MapLibre needs layout + paint after hidden→visible; see audit M1 / napkin).
   useEffect(() => {
-    if (minimapVisible && mapRef.current) {
-      // Small delay ensures DOM layout has settled before resize
+    if (!minimapVisible || !mapRef.current) return;
+    const map = mapRef.current;
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        mapRef.current?.resize();
+        map.resize();
+        map.triggerRepaint();
       });
-    }
+    });
   }, [minimapVisible]);
 
   // Update control + front data when game state changes or map remounts

@@ -186,6 +186,24 @@ function createFormationIcon(iconId: string): ImageData {
   return ctx.getImageData(0, 0, ICON_WIDTH, ICON_HEIGHT);
 }
 
+const dataUrlCache = new Map<string, string>();
+
+export function getIconDataUrl(iconId: string): string {
+  if (dataUrlCache.has(iconId)) return dataUrlCache.get(iconId)!;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = ICON_WIDTH;
+  canvas.height = ICON_HEIGHT;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (ctx) {
+    drawFormationIcon(ctx, iconId);
+    const url = canvas.toDataURL('image/png');
+    dataUrlCache.set(iconId, url);
+    return url;
+  }
+  return '';
+}
+
 export function ensureFormationIcons(map: MapLibreMap, iconIds: string[]): void {
   const uniqueIds = [...new Set(iconIds)].sort((a, b) => a.localeCompare(b));
   for (const iconId of uniqueIds) {

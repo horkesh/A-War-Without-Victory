@@ -18,7 +18,6 @@ export const DEV_LAYER_TOGGLES = [
   { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
   { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
   { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
-  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
 ] as const;
 
 /** Live mode: no separate "Fronts" toggle — front lines ARE sectors.
@@ -30,5 +29,4 @@ export const LIVE_LAYER_TOGGLES = [
   { key: 'minimapVisible', setKey: 'setMinimapVisible', label: 'Minimap' },
   { key: 'fogVisible', setKey: 'setFogVisible', label: 'Fog' },
   { key: 'battlesVisible', setKey: 'setBattlesVisible', label: 'Battles' },
-  { key: 'strategicVisible', setKey: 'setStrategicVisible', label: 'Points' },
 ] as const;

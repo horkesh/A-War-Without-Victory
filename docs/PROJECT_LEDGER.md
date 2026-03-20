@@ -1041,7 +1041,7 @@ Arrow origin changed from staging_osid/sector edge to lead brigade position (clo
 - **Added `casualties` mode** (key 4): Per-OSID battle casualties from brigade `recent_engagements`. Continuous gradient: transparent → yellow → orange → deep red. Reference: 200 casualties = full intensity. Builder: `buildCasualtiesGeoJSON.ts`.
 - **Added `morale` mode** (key 5): Per-sector `combat_morale_avg` on front-adjacent OSIDs. Continuous gradient: red (0-25, critical) → orange → yellow → green (85+). Builder: `buildMoraleGeoJSON.ts`.
 
-**Current map mode lineup (7 modes, keys 1-7):** Political, Ethnic, Supply, Casualties, Morale, Operations, Defense. Layer toggles (7): Front, Units, Labels, Minimap, Fog, Battles, Points (dev mode adds Sectors separately from Front).
+**Current map mode lineup (7 modes, keys 1-7):** Political, Ethnic, Supply, Casualties, Morale, Operations, Defense. Layer toggles (6): Front, Units, Labels, Minimap, Fog, Battles (dev mode adds Sectors separately from Front). *Update 2026-03-20: removed “Points” / strategic-points layer.*
 
 **Files:** `BottomStatusStrip.tsx` (rewritten), `MapModeToolbar.tsx` (updated, not rendered), `OOBSidebar.tsx`, `panelRail.ts`, `OrderQueue.tsx`, `App.tsx`, `gameStore.ts` (`MapMode` type updated), `useKeyboardShortcuts.ts`, `MapContainer.tsx`, `buildCasualtiesGeoJSON.ts` (NEW), `buildMoraleGeoJSON.ts` (NEW).
 
@@ -1106,7 +1106,7 @@ Two independent bugs caused the tactical map to show the April 1992 initial stat
 
 **Root cause:** `runUpdate` in `MapContainer.tsx` checked for `m.getSource(GHOST_PATH_SOURCE_ID)` before proceeding (line 475). If the source was absent, it started a 500ms polling interval and returned early. However, the `ghost-paths` source was only created **inside** `runUpdate`'s nested `requestAnimationFrame` block (line 977) — which never ran because `runUpdate` always returned early. Classic deadlock: source check blocked execution; execution never reached source creation.
 
-**Fix:** Pre-registered the `ghost-paths` source in the map style init block alongside `fog-overlay`, `battle-markers`, and `strategic-points`, so the source check at line 475 passes on the first call.
+**Fix:** Pre-registered the `ghost-paths` source in the map style init block alongside `fog-overlay` and `battle-markers` (and other dynamic GeoJSON sources as added over time), so the source check at line 475 passes on the first call.
 
 **Files:** `src/state/serialize.ts` (`hasAnyPhaseII` nested-path fix + sweep additions), `src/ui/map/map/MapContainer.tsx` (pre-register `GHOST_PATH_SOURCE_ID`), `dist/desktop/desktop_sim.cjs` (rebuilt).
 
@@ -15152,3 +15152,111 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 
 ### Verification
 - Walkthrough: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`
+
+## [2026-03-20] Tactical map: formation labels visible at default zoom
+
+### Change
+- **Problem:** With Labels + Units on, no brigade names on map at the default tactical view — `DEFAULT_ZOOM` is 8 but `FORMATION_LABELS_MIN_ZOOM` and style `formation-labels.minzoom` were 9; dense layout also used `text-allow-overlap: false`, so collision hiding could suppress labels.
+- **Fix:** `FORMATION_LABELS_MIN_ZOOM = 8` in `MapContainer.tsx` (main + `ui-visual-overhaul` worktree); `awwv_map_style.json` `formation-labels` `minzoom` 8, `text-size` interpolate starts at zoom 8, `text-allow-overlap` + `text-ignore-placement` true; Deck `buildTacticalDeckLayers.ts` label gate at zoom ≥ 8 when `deckFormationCounters` is enabled.
+- **Contrast:** `formation-labels` paint was near-black text on dark political tints — effectively invisible in play. Switched to faction-tinted light `text-color` + dark `text-halo-color` (cohesion still steps halo width / halo darkness).
+
+### Determinism
+- No impact (presentation / style only).
+
+### Tests
+- `npx tsc --noEmit` (repo root).
+
+### Files
+- `src/ui/map/map/MapContainer.tsx`
+- `src/ui/map/map/awwv_map_style.json`
+- `.worktrees/ui-visual-overhaul/src/ui/map/map/MapContainer.tsx`
+- `.worktrees/ui-visual-overhaul/src/ui/map/map/awwv_map_style.json`
+- `.worktrees/ui-visual-overhaul/src/ui/map/layers/buildTacticalDeckLayers.ts`
+- `docs/40_reports/GUI_MASTER.md`
+
+**Superseded:** reverted for map performance — see following ledger entry same date.
+
+## [2026-03-20] Tactical map: revert formation-label style/zoom (performance)
+
+### Change
+- Reverted **2026-03-20 formation label** edits: `FORMATION_LABELS_MIN_ZOOM` back to **9**; `awwv_map_style.json` `formation-labels` `minzoom` 9, `text-size` from zoom 9, **`text-allow-overlap` false**, removed `text-ignore-placement`, restored original dark text + warm halo paint. Worktree `buildTacticalDeckLayers.ts` label gate back to zoom ≥ 9.
+- **Reason:** Showing all brigade names with overlap/placement ignored forced MapLibre to render a very large symbol set and made **unit/counter rendering feel very slow**.
+
+### Determinism
+- No impact on simulation.
+
+### Files
+- `src/ui/map/map/MapContainer.tsx`, `src/ui/map/map/awwv_map_style.json`
+- `.worktrees/ui-visual-overhaul/src/ui/map/map/MapContainer.tsx`, `.../awwv_map_style.json`, `.../layers/buildTacticalDeckLayers.ts`
+- `docs/40_reports/GUI_MASTER.md`
+
+## [2026-03-20] Tactical map: remove “Points” (strategic settlements) layer
+
+### Change
+- Removed the **Points** bottom-bar toggle, `strategicVisible` / `setStrategicVisible` from `gameStore`, MapLibre layer `strategic-points-circles` + source wiring and pulse animation from `MapContainer`, and deleted `buildStrategicPointGeoJSON.ts`. Operation objective markers (`operation-target-*` / `buildOperationTargetPointsGeoJSON`) unchanged.
+
+### Determinism
+- No impact on simulation.
+
+### Files
+- `src/ui/map/store/gameStore.ts`, `src/ui/map/utils/mapModes.ts`, `src/ui/map/components/BottomStatusStrip.tsx`, `src/ui/map/components/MapModeToolbar.tsx`, `src/ui/map/map/MapContainer.tsx`
+- `.worktrees/ui-visual-overhaul/` — same paths + deleted builder
+- `docs/20_engineering/MAP_UI_MASTER.md`, `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md`, `docs/40_reports/GUI_MASTER.md`, `docs/PROJECT_LEDGER.md` (retro edit to 2026-03-15 layer list + ghost-paths note), `docs/40_reports/20260319_UI_UX_DEEP_AUDIT.md`
+
+## [2026-03-20] Tactical map: urban settlement wash, major-mun outline, game-sourced city labels
+
+### Change
+- **Control GeoJSON:** Each feature gets `urban_tier` (`major` | `urban` | `rural`) from `mun1990_id` + `population_total` via `urbanSettlementTiers.ts` (`MAJOR_MUN_IDS` list + 5k urban threshold).
+- **Layers (under `osid-control-fill`):** Fill wash for `urban` and stronger wash for `major`; hairline line layer for `major` only.
+- **Labels:** `buildMajorCityLabelGeoJSON` — one point per major mun (max population OSID centroid; tie-break lexicographic `osid`; sorted mun output). Dynamic source `major-city-labels`, symbol layer before `formation-markers`, minzoom 7, overlap/placement ignored **only** for this small label set.
+- **OSM:** `place-labels-city` minzoom raised to **11** so OSM city/town names do not compete with game major labels at default/mid zoom.
+
+### Determinism
+- No simulation impact. GeoJSON builders use sorted keys and deterministic tie-breaks only.
+
+### Tests
+- Extended `tests/ui_map_render_smoke.test.ts` (`deriveUrbanTier`, `buildMajorCityLabelGeoJSON` ordering/ties).
+
+### Files
+- `src/ui/map/map/builders/urbanSettlementTiers.ts`, `buildMajorCityLabelGeoJSON.ts`, `buildControlGeoJSON.ts`, `MapContainer.tsx`, `awwv_map_style.json`
+- `.worktrees/ui-visual-overhaul/src/ui/map/map/` — same builder files + `MapContainer.tsx` + `awwv_map_style.json`
+- `docs/40_reports/GUI_MASTER.md`
+
+## [2026-03-20] Tactical map: drop urban wash; fix major-city labels (font + z-order)
+
+### Change
+- **Removed** `urban-wash-*` fill layers and `urban-major-outline`; dropped `urban_tier` from `buildControlGeoJSON` output.
+- **Labels:** `buildMajorCityLabelGeoJSON` now calls `deriveUrbanTier(munId, pop)` internally (still only `major` muns). MapLibre layer uses **`text-font`: Open Sans Bold** (matches `public/font/` glyph stacks — missing font was why text did not render). Layer added **without** `beforeId` so it sits above line-heavy tactical layers. **minzoom** 6; slightly larger `text-size` ramp.
+- **OSM:** Reverted `place-labels-city` **minzoom 11** experiment (back to style default for city/town).
+
+### Determinism
+- No simulation impact.
+
+### Tests
+- `npx vitest run tests/ui_map_render_smoke.test.ts`
+
+### Files
+- `src/ui/map/map/builders/buildControlGeoJSON.ts`, `buildMajorCityLabelGeoJSON.ts`, `MapContainer.tsx`, `awwv_map_style.json`, `tests/ui_map_render_smoke.test.ts`
+- `.worktrees/ui-visual-overhaul/...` mirror
+- `docs/40_reports/GUI_MASTER.md`
+
+## [2026-03-20] Land `feature/ui-visual-overhaul` on main + tsc gate + audit revisit + minimap M1
+
+### Change
+1. **Single map story on main:** Copied Deck.gl stack from worktree into **`src/ui/map/layers/`** (`composeTacticalDeckLayers.ts`, `deckLayerCapabilities.ts`, `buildTacticalDeckLayers.ts`, `buildExperimentalDeckLayers.ts`). **`MapContainer.tsx`** from worktree (MapboxOverlay, zoom-synced `composeTacticalDeckLayers`, optional hide of MapLibre formation layers when `deckFormationCounters` is true). **`formationIcons.ts`** — added **`getIconDataUrl`** for Deck icon layers. **`src/ui/map/package.json`** — `deck.gl` + `@deck.gl/mapbox`; `npm install` under `src/ui/map/`. **Worktree align:** from `.worktrees/ui-visual-overhaul`, **`git reset --hard main`** (cannot `branch -f` while branch is checked out in a worktree). **`feature/ui-visual-overhaul`** now points at the same commit as **`main`**. Removed stray **`temp_old_map.tsx`** from worktree; optional untracked dirs (`docs/40_reports/audit/`, `src/ui/map/components/icons/`) may be deleted locally with `git clean` if unwanted.
+2. **Typecheck:** **`tests/mobilization_combat_suppression.test.ts`** — `isRbihHrhbControllerPair` / `isRbihHrhbFactionPair` helpers replace inline comparisons that triggered TS2367 (narrowed `FactionId` vs literal branches).
+3. **Map UX (audit):** **`docs/40_reports/20260319_UI_UX_DEEP_AUDIT.md`** — new §revisit table (T1/M1/M2/B1 status). **`Minimap.tsx`** — double `requestAnimationFrame` + `resize` + **`triggerRepaint`** when minimap becomes visible (M1 hardening).
+4. **Docs:** `docs/40_reports/GUI_MASTER.md`, `docs/20_engineering/REPO_MAP.md`. Removed obsolete `docs/40_reports/tactical_map_urban_wash_browser.png`.
+
+### Determinism
+- No simulation changes from Deck merge (presentation only). Test helpers are pure.
+
+### Verification
+- `npx tsc --noEmit` (repo root) — clean.
+- `npm run test:vitest` — 102 files, 1244 passed (1 skipped).
+- `npm run desktop:map:build`
+
+### Files (high level)
+- `src/ui/map/layers/*`, `src/ui/map/map/MapContainer.tsx`, `src/ui/map/map/formationIcons.ts`, `src/ui/map/package.json`, `src/ui/map/package-lock.json`
+- `src/ui/map/components/Minimap.tsx`, `tests/mobilization_combat_suppression.test.ts`
+- `docs/40_reports/20260319_UI_UX_DEEP_AUDIT.md`, `GUI_MASTER.md`, `REPO_MAP.md`, `PROJECT_LEDGER.md`, `.claude/napkin.md`
