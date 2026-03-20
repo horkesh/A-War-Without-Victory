@@ -29,6 +29,8 @@ export function useKeyboardShortcuts(): void {
       }
 
       if (event.key === 'Escape') {
+        // If Army HQ modal is open, let it handle its own Escape (level-up navigation)
+        if (useGameStore.getState().armyHQOpen) return;
         const { setHoveredOsids, clearTooltipTarget, setPendingAttackConfirmation, setOrderModeForFormation, setOperationTargetOsids } = useGameStore.getState();
         useGameStore.setState({
           selectedOsid: null,
