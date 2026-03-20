@@ -102,7 +102,7 @@
 ## Map & UX Upgrade Queue (strategic design: `docs/plans/2026-03-20-terrain-map-ux-strategic-design.md`)
 **Tier 1 — High Impact, Low Effort (1-2 sessions each):**
 1. ~~**Deploy Icon Language (P0)**~~ — DONE. 22 SVG icons deployed to FormationDetail, CorpsDetail, ArmyDetail, CorpsCard. React.memo + aria-hidden. Simplified: stance lookup, size consistency.
-2. **[2026-03-20] Battle Marker Upgrade**: Make battle dots clickable/hoverable. Show TurnBattle data (attacker, defender, outcome, casualties). Scale by casualties. Link to AAR. ~100 lines.
+2. ~~**Battle Marker Upgrade**~~ — DONE. Enriched with TurnBattle data. Outcome-colored, size-scaled by casualties. Hover tooltip + click priority. Includes non-flip battles.
 3. **[2026-03-20] Map Counter Enrichment**: Add health bar (2px, cohesion), supply dot (4px), operation icon to formation markers. Enable `deckFormationCounters: true`.
 **Tier 2 — High Impact, Medium Effort (2-3 sessions):**
 4. **[2026-03-20] Operation Visualization on Main Map**: Objective OSID tints, Deck.gl ArcLayer brigade→objective, status glow on participating units.

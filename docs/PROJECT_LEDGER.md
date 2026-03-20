@@ -3,6 +3,17 @@
 **Last Updated:** 2026-03-20
 **Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Icon language deployed (Phase 1 visual overhaul). Combat effectiveness at all hierarchy levels, 3D terrain (ops modal), Deck.gl animated arrows, terrain-aware camera, terrain tooltip, staging↔objective selectability, ModalMapSource utility. HRHB-RBiH war transition system. Post-operation brigade return march. Battle of the Barracks, equipment overhaul, polygon harmonization, front line rendering.
 
+## [2026-03-20] Visual Overhaul Phase 2 — Battle Marker Upgrade
+
+Battle markers now interactive with enriched data from `TurnBattle`:
+- **Hover tooltip:** attacker vs defender factions, outcome (colored), casualties, concentrated assault count, territory captured
+- **Outcome-colored circles:** green (attacker won), red (repulsed/catastrophic), amber (costly/stalemate)
+- **Size scaled by casualties:** larger circles = bloodier battles
+- **Includes non-flip battles:** stalemates and repulsed attacks now visible (not just territory changes)
+- **Click priority:** battle markers > formations > front edges > OSIDs
+
+**Files:** `buildBattleMarkersGeoJSON.ts`, `MapContainer.tsx`, `useMapInteractions.ts`, `Tooltip.tsx`, `gameStore.ts`
+
 ## [2026-03-20] Visual Overhaul Phase 1 — Icon Language Deployed
 
 Deployed `Icon.tsx` (22 SVG icons, `React.memo`, `aria-hidden` on decorative) across 4 components:
