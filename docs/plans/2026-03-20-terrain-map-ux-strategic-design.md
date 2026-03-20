@@ -215,3 +215,50 @@ The combat effectiveness system, terrain info display, and 3D terrain are alread
 5. **Performance:** Each Deck.gl layer is a WebGL draw call. Keep total layers under ~20 for smooth 60fps. Currently using 5 in ops modal. Main map could add 5-8 more without issues.
 
 6. **Browser DEM access:** The DEM is a 2737x1946 Float32 GeoTIFF. Loading it in the browser for elevation sampling would require ~20MB download + TIFF parsing. Better to pre-compute per-OSID elevation and serve as JSON (already done in `settlements_terrain_scalars.json`).
+
+7. **MapLibre `queryTerrainElevation(lngLat)`:** Returns elevation in meters at any point when terrain is active. Available in ops modal (setTerrain enabled). Could annotate objectives with altitude.
+
+8. **`DataFilterExtension`:** GPU-based filtering by numeric range or category. Could toggle formation visibility by faction/posture/morale without rebuilding GeoJSON. Up to 4 simultaneous filter dimensions.
+
+9. **`CollisionFilterExtension`:** Prevents label/icon overlap at low zoom. Priority-based (corps HQ > brigade labels). Works with IconLayer, TextLayer, ScatterplotLayer only.
+
+10. **`FillStyleExtension`:** Hatch patterns for polygon layers. Could show siege zones, contested areas, ethnic-majority fills with crosshatching. Requires a pattern atlas texture.
+
+11. **`TripsLayer`:** Time-animated polyline paths with trail fade. Drives `currentTime` externally. Could replay brigade movement over a campaign as animated trails.
+
+12. **`beforeId` per Deck layer:** Z-order Deck layers between specific MapLibre layers (e.g. front lines between terrain fill and settlement labels). Not yet used — all current Deck layers render on top.
+
+---
+
+## Data Available But Not Shown to Player (Inventory)
+
+Research found significant data the sim computes but the player never sees:
+
+**High-value hidden data:**
+- `home_defense_active` on FormationView — explains why a brigade won't attack. Currently invisible.
+- `slope_index` numeric + max-attacker cap (`getMaxAttackersForTarget`: 1/2/3) — player sees "Mountain" label but not the attack width limit.
+- `total_equipment_captured` per brigade — rendered for destroyed but the captured render block is missing.
+- `firstBattleTurn`/`firstBattleOsid` — brigade's battle debut. Defined, never displayed.
+- `NotableFlip.significance` tier (municipality_seat, enclave_breach, corridor) — all flips render identically in AAR.
+- `sub_segments[].gap` on sectors — front coverage gaps computed but never shown.
+- `consecutive_failures_on_current` on operations — more precise than total failures.
+- `elevation_stddev_m` — terrain roughness, affects fighting. Never displayed.
+- Per-axis operation status (`axes[].status`/`momentum`) — only aggregate shown in OperationDetail.
+
+**Already shown (correction to earlier assumption):**
+- AAR Panel shows rich battle data: attacker/defender factions, brigade IDs, outcome, casualties, per-brigade defender contributions with distance/home info.
+- Supply mode (map mode 3) exists but is broken — uniform green, no variation visible.
+- 7 map modes exist; 2 are broken/thin (Supply, Casualties need legends and scale fixes).
+
+---
+
+## Deck.gl Extensions Worth Exploiting
+
+| Extension | Use Case | Effort |
+|-----------|----------|--------|
+| `CollisionFilterExtension` | Prevent formation label overlap at low zoom | Low — add to existing IconLayer/TextLayer |
+| `DataFilterExtension` | Toggle faction visibility on GPU, filter by morale/posture | Low — GPU filtering, no data rebuild |
+| `FillStyleExtension` | Hatch patterns for siege zones, contested territory | Medium — needs pattern atlas |
+| `PathStyleExtension` + `getOffset` | Double-line front rendering (RS side / RBiH side as offset parallels) | Medium — already proven for dashes |
+| `TripsLayer` | Campaign replay animation (brigade paths over weeks) | High — needs per-turn position history |
+| `_TerrainExtension` | Drape Deck.gl layers onto 3D terrain in ops modal | Experimental — stability not guaranteed |
