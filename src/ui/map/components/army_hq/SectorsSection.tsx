@@ -4,6 +4,8 @@
  */
 import type { CorpsFrontSectorView } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
+import { useIPC } from '../../desktop/useIPC';
+import { useGameStore } from '../../store/gameStore';
 import { CollapsibleSection } from './CollapsibleSection';
 
 interface SectorsSectionProps {
@@ -18,6 +20,15 @@ const STANCE_LABEL: Record<string, string> = {
 };
 
 export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSectionProps) {
+    const ipc = useIPC();
+    const setLoadError = useGameStore((s) => s.setLoadError);
+
+    const handleSectorStance = async (sectorId: string, stance: string) => {
+        if (!ipc.isAvailable) return;
+        const result = await ipc.stageSectorStanceOrder(sectorId, stance);
+        if (!result.ok) setLoadError(result.error ?? 'Failed to stage sector stance.');
+    };
+
     return (
         <CollapsibleSection sectionKey={`sec-${corpsId}`} title="Sectors" count={sectors.length}>
             {sectors.length === 0 ? (
@@ -57,9 +68,18 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                                     </div>
                                 </div>
                                 <div className="text-right shrink-0 ml-2">
-                                    <div className="text-[9px] font-bold uppercase text-[#6a5a40]">
-                                        {stanceLabel}
-                                    </div>
+                                    <select
+                                        value={sector.sector_stance ?? 'defend'}
+                                        onChange={(e) => { void handleSectorStance(sector.sector_id, e.target.value); }}
+                                        className="text-[9px] font-bold uppercase bg-[#e8dcc4] border border-[#c8b898] rounded px-1 py-0.5 text-[#2a2016] cursor-pointer"
+                                        style={{ fontFamily: 'Courier New, monospace' }}
+                                    >
+                                        <option value="fortify">Fortify</option>
+                                        <option value="defend">Defend</option>
+                                        <option value="elastic">Elastic</option>
+                                        <option value="active_defense">Active Def</option>
+                                        <option value="screening">Screening</option>
+                                    </select>
                                 </div>
                             </div>
                         );

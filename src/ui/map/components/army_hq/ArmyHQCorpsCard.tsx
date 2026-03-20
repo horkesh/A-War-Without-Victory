@@ -10,6 +10,8 @@ import { FACTION_COLORS } from '../../utils/theme';
 import { formatCorpsDisplayName } from '../../utils/formatters';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getFormationCommander } from '../../utils/officerUtils';
+import { useIPC } from '../../desktop/useIPC';
+import { useGameStore } from '../../store/gameStore';
 import { CommanderSection } from './CommanderSection';
 import { SectorsSection } from './SectorsSection';
 import { OperationsSection } from './OperationsSection';
@@ -102,36 +104,56 @@ export function ArmyHQCorpsCard({
 
     // Expanded: full detail with drill-down sections
     if (isExpanded) {
+        const ipc = useIPC();
+        const setLoadError = useGameStore((s) => s.setLoadError);
+
+        const handleStanceChange = async (newStance: string) => {
+            if (!ipc.isAvailable) return;
+            const result = await ipc.stageCorpsStanceOrder(corps.id, newStance);
+            if (!result.ok) setLoadError(result.error ?? 'Failed to stage corps stance.');
+        };
+
         return (
             <div
                 className={`rounded-lg shadow-[2px_3px_8px_rgba(0,0,0,0.4)] overflow-hidden col-span-full
                     ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
                 style={{ background: 'linear-gradient(135deg, #f0e8d8 0%, #e4dcc8 100%)' }}
             >
-                {/* Header — clickable to collapse */}
-                <button
-                    type="button"
-                    onClick={onToggleExpand}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#e8dcc4]/50 transition-colors"
-                >
-                    <div className="flex items-center gap-3">
+                {/* Header — clickable to collapse, with stance dropdown */}
+                <div className="flex items-center justify-between px-4 py-3">
+                    <button
+                        type="button"
+                        onClick={onToggleExpand}
+                        className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                    >
                         <div className="text-[14px] font-bold text-[#2a2016] uppercase tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
                             {displayName}
                         </div>
                         <span className="text-[10px] font-bold" style={{ fontFamily: 'Courier New, monospace', color: gradeColor }}>
                             {data.eff.grade}
                         </span>
-                        <span className={`text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded border-2 opacity-60 ${stanceClass}`}
-                              style={{ transform: 'rotate(-3deg)' }}>
-                            {STANCE_LABELS[data.stance] ?? data.stance}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-3 text-[11px] tabular-nums" style={{ fontFamily: 'Courier New, monospace' }}>
-                        <span className="text-[#6a5a40]">{data.totalPersonnel.toLocaleString()} personnel</span>
-                        <span className="text-[#8a7a60]">{brigades.length} brg · {sectors.length} sec</span>
                         <span className="text-[10px] text-[#8a7a60]">▼</span>
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 text-[11px] tabular-nums" style={{ fontFamily: 'Courier New, monospace' }}>
+                            <span className="text-[#6a5a40]">{data.totalPersonnel.toLocaleString()}</span>
+                            <span className="text-[#8a7a60]">{brigades.length}b · {sectors.length}s</span>
+                        </div>
+                        {/* Stance dropdown */}
+                        <select
+                            value={data.stance}
+                            onChange={(e) => { void handleStanceChange(e.target.value); }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[10px] font-bold uppercase bg-[#e8dcc4] border border-[#c8b898] rounded px-1.5 py-0.5 text-[#2a2016] cursor-pointer"
+                            style={{ fontFamily: 'Courier New, monospace' }}
+                        >
+                            <option value="offensive">Offensive</option>
+                            <option value="balanced">Balanced</option>
+                            <option value="defensive">Defensive</option>
+                            <option value="reorganize">Reorganize</option>
+                        </select>
                     </div>
-                </button>
+                </div>
 
                 {/* Sections */}
                 <CommanderSection corps={corps} gameState={gameState} />

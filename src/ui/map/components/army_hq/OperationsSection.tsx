@@ -3,6 +3,8 @@
  * Lists active operations with phase badges, momentum, and action placeholders.
  */
 import type { OperationView, LoadedGameState } from '../../data/types';
+import { useIPC } from '../../desktop/useIPC';
+import { useGameStore } from '../../store/gameStore';
 import { CollapsibleSection } from './CollapsibleSection';
 
 interface OperationsSectionProps {
@@ -18,6 +20,21 @@ const PHASE_BADGE: Record<string, { bg: string; text: string }> = {
 };
 
 export function OperationsSection({ corpsId, operations, gameState }: OperationsSectionProps) {
+    const ipc = useIPC();
+    const setLoadError = useGameStore((s) => s.setLoadError);
+
+    const handleForceLaunch = async (opName: string) => {
+        if (!ipc.isAvailable) return;
+        const result = await ipc.stageOperationForceLaunch({ corpsId, operationName: opName });
+        if (!result.ok) setLoadError(result.error ?? 'Failed to force-launch operation.');
+    };
+
+    const handleStandDown = async (opName: string) => {
+        if (!ipc.isAvailable) return;
+        const result = await ipc.stageOperationHalt({ corpsId, operationName: opName, digInOnHalt: true });
+        if (!result.ok) setLoadError(result.error ?? 'Failed to stand down operation.');
+    };
+
     return (
         <CollapsibleSection sectionKey={`ops-${corpsId}`} title="Operations" count={operations.length}>
             {operations.length === 0 ? (
@@ -61,17 +78,18 @@ export function OperationsSection({ corpsId, operations, gameState }: Operations
                                         Cmdr: {commander}
                                     </div>
                                 )}
-                                {/* Action buttons — wired in Phase 3 */}
                                 <div className="flex gap-2 pt-1">
-                                    {op.preparation_sub_phase === 'assessment' && (
-                                        <button type="button" disabled
-                                            className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border border-green-600/30 text-green-700/50 opacity-50 cursor-not-allowed">
+                                    {(op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready') && (
+                                        <button type="button"
+                                            onClick={() => { void handleForceLaunch(op.name); }}
+                                            className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border border-green-600/50 text-green-700 hover:bg-green-900/20 transition-colors">
                                             Force Launch
                                         </button>
                                     )}
                                     {op.phase === 'execution' && (
-                                        <button type="button" disabled
-                                            className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border border-red-600/30 text-red-700/50 opacity-50 cursor-not-allowed">
+                                        <button type="button"
+                                            onClick={() => { void handleStandDown(op.name); }}
+                                            className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border border-red-600/50 text-red-700 hover:bg-red-900/20 transition-colors">
                                             Stand Down
                                         </button>
                                     )}
