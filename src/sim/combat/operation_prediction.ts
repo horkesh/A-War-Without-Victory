@@ -53,6 +53,8 @@ export interface AxisPrediction {
     predictedOutcome: PredictedOutcome;
     forceRatio: number;
     estimatedCasualties: number;
+    /** Defender combat power (rounded) for G-2 raw intel “defense strength” column. */
+    defenderPower: number;
     terrain: TerrainType;
     entrenchment: EntrenchmentLevel;
     intelConfidence: number;
@@ -151,6 +153,7 @@ export function predictAxisOutcome(
             predictedOutcome: 'stalemate',
             forceRatio: 0,
             estimatedCasualties: 0,
+            defenderPower: 0,
             terrain: classifyTerrain(terrainCache[targetOsid] ?? 1.0),
             entrenchment: 'unknown',
             intelConfidence: 0,
@@ -163,6 +166,7 @@ export function predictAxisOutcome(
         predictedOutcome: prediction.predicted_outcome as PredictedOutcome,
         forceRatio: prediction.power_ratio,
         estimatedCasualties: prediction.expected_attacker_casualties,
+        defenderPower: Math.round(prediction.defender_power),
         terrain: classifyTerrain(prediction.defender_terrain_mult),
         entrenchment: classifyEntrenchment(prediction.defender_entrenchment),
         intelConfidence: 0, // filled by caller from sector_intel

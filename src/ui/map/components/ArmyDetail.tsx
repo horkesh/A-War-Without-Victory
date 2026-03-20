@@ -10,6 +10,7 @@ import { getFactionArmyCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { getPanelRailStyle } from './panelRail';
 import { TabBar } from './TabBar';
+import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 
 type ArmyTab = 'overview' | 'forces' | 'manpower' | 'combat';
 
@@ -201,6 +202,26 @@ export function ArmyDetail({ railSlot }: ArmyDetailProps) {
                 <span className="text-text-secondary">Personnel</span>
                 <span className="text-text-primary tabular-nums">{totalPersonnel.toLocaleString()}</span>
               </div>
+              {(() => {
+                const agg = aggregateEffectiveness(brigades);
+                if (agg.brigadeCount === 0) return null;
+                const gradeColor = agg.grade === 'A' ? '#56d364' : agg.grade === 'B' ? '#e8c56d' : agg.grade === 'C' ? '#e8a838' : '#f47068';
+                return (
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Combat Eff.</span>
+                    <span className="tabular-nums">
+                      <span className="text-text-primary">{agg.totalEffectiveness.toLocaleString()}</span>
+                      <span className="text-[10px] ml-1 font-bold" style={{ color: gradeColor }}>{agg.grade}</span>
+                      {agg.ineffectiveCount > 0 && (
+                        <span className="text-[9px] text-red-400 ml-1">({agg.ineffectiveCount} weak)</span>
+                      )}
+                      {agg.disruptedCount > 0 && (
+                        <span className="text-[9px] text-amber-400 ml-1">({agg.disruptedCount} disrupted)</span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })()}
               <div className="flex justify-between">
                 <span className="text-text-secondary">Brigades</span>
                 <span className="text-text-primary tabular-nums">{brigades.length}</span>

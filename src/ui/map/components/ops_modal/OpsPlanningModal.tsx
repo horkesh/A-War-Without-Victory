@@ -170,18 +170,88 @@ export function OpsPlanningModal() {
 
     const allObjectives = useMemo(() => plan.axes.flatMap((a) => a.objectives), [plan.axes]);
 
-    // Valid target OSIDs — enemy OSIDs adjacent to corps front (contiguity rule)
-    const validTargetOsids = useMemo(() => {
-        const targets = new Set<string>();
-        if (!loadedGameState?.corpsFrontSectors) return targets;
+    // Front adjacency maps: friendly↔enemy OSID pairs from front edges
+    const { friendlyToEnemy, enemyToFriendly, allFrontFriendly, allFrontEnemy } = useMemo(() => {
+        const f2e = new Map<string, Set<string>>(); // friendly OSID → adjacent enemy OSIDs
+        const e2f = new Map<string, Set<string>>(); // enemy OSID → adjacent friendly OSIDs
+        const allFriendly = new Set<string>();
+        const allEnemy = new Set<string>();
+        if (!loadedGameState?.frontEdgesOsid || !loadedGameState?.corpsFrontSectors) {
+            return { friendlyToEnemy: f2e, enemyToFriendly: e2f, allFrontFriendly: allFriendly, allFrontEnemy: allEnemy };
+        }
         const sectors = loadedGameState.corpsFrontSectors.filter((s) => s.corps_id === corpsId);
+        const corpsFriendlyOsids = new Set<string>();
+        const corpsEnemyOsids = new Set<string>();
         for (const sec of sectors) {
             for (const sub of (sec.sub_segments ?? [])) {
-                for (const osid of sub.enemy_osids) targets.add(osid);
+                for (const osid of sub.friendly_osids) corpsFriendlyOsids.add(osid);
+                for (const osid of sub.enemy_osids) corpsEnemyOsids.add(osid);
             }
         }
-        return targets;
+        // Build adjacency from front edges that touch this corps
+        for (const edge of loadedGameState.frontEdgesOsid) {
+            const aFriendly = corpsFriendlyOsids.has(edge.a);
+            const bFriendly = corpsFriendlyOsids.has(edge.b);
+            const aEnemy = corpsEnemyOsids.has(edge.a);
+            const bEnemy = corpsEnemyOsids.has(edge.b);
+            if (aFriendly && bEnemy) {
+                if (!f2e.has(edge.a)) f2e.set(edge.a, new Set());
+                f2e.get(edge.a)!.add(edge.b);
+                if (!e2f.has(edge.b)) e2f.set(edge.b, new Set());
+                e2f.get(edge.b)!.add(edge.a);
+                allFriendly.add(edge.a);
+                allEnemy.add(edge.b);
+            }
+            if (bFriendly && aEnemy) {
+                if (!f2e.has(edge.b)) f2e.set(edge.b, new Set());
+                f2e.get(edge.b)!.add(edge.a);
+                if (!e2f.has(edge.a)) e2f.set(edge.a, new Set());
+                e2f.get(edge.a)!.add(edge.b);
+                allFriendly.add(edge.b);
+                allEnemy.add(edge.a);
+            }
+        }
+        return { friendlyToEnemy: f2e, enemyToFriendly: e2f, allFrontFriendly: allFriendly, allFrontEnemy: allEnemy };
     }, [loadedGameState, corpsId]);
+
+    // Valid target OSIDs — all enemy OSIDs adjacent to corps front
+    const validTargetOsids = useMemo(() => allFrontEnemy, [allFrontEnemy]);
+
+    // Selectable OSIDs — constrained by current staging/objective selection
+    const selectableOsids = useMemo(() => {
+        const activeAxis = plan.axes.find((a) => a.id === plan.activeAxisId) ?? plan.axes[0];
+        const currentStaging = activeAxis?.stagingOsid ?? plan.defaultStagingOsid;
+        const currentObjectives = activeAxis?.objectives ?? [];
+
+        // If staging is set → only enemy OSIDs adjacent to that staging are selectable objectives
+        // Plus all front-friendly OSIDs remain selectable (to change staging)
+        if (currentStaging && currentObjectives.length === 0) {
+            const reachableEnemies = friendlyToEnemy.get(currentStaging) ?? new Set();
+            return new Set([...reachableEnemies, ...allFrontFriendly]);
+        }
+
+        // If objectives are set but no explicit staging → only friendly OSIDs adjacent to
+        // at least one objective are selectable for staging, plus existing objectives stay selectable
+        if (currentObjectives.length > 0 && !activeAxis?.stagingOsid) {
+            const validStaging = new Set<string>();
+            for (const obj of currentObjectives) {
+                const adjacentFriendly = enemyToFriendly.get(obj);
+                if (adjacentFriendly) {
+                    for (const f of adjacentFriendly) validStaging.add(f);
+                }
+            }
+            return new Set([...validStaging, ...allFrontEnemy]);
+        }
+
+        // Both set → objectives reachable from staging, plus all front-friendly for staging change
+        if (currentStaging && currentObjectives.length > 0) {
+            const reachableEnemies = friendlyToEnemy.get(currentStaging) ?? new Set();
+            return new Set([...reachableEnemies, ...currentObjectives.map(o => o), ...allFrontFriendly]);
+        }
+
+        // Nothing set → everything on the front is selectable
+        return new Set([...allFrontFriendly, ...allFrontEnemy]);
+    }, [plan.axes, plan.activeAxisId, plan.defaultStagingOsid, friendlyToEnemy, enemyToFriendly, allFrontFriendly, allFrontEnemy]);
 
     if (!isOpen || !corpsId) return null;
 
@@ -195,6 +265,7 @@ export function OpsPlanningModal() {
                 onOsidClick={handleOsidClick}
                 objectives={allObjectives}
                 validTargetOsids={validTargetOsids}
+                selectableOsids={selectableOsids}
                 stagingOsid={plan.axes.find((a) => a.id === plan.activeAxisId)?.stagingOsid ?? plan.defaultStagingOsid}
                 schwerpunktOsid={plan.schwerpunktOsid}
                 axes={plan.axes}

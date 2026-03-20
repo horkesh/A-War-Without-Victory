@@ -34,7 +34,7 @@ src/ui/map/
 │   ├── Icon.ts                    (DEPRECATED) Old icon mapping
 │   ├── frontLineIcons.ts          Front-line SVG icon helpers
 │   ├── pmtilesRoute.ts            PMTiles URL routing helper (stub)
-│   ├── rewritePmtilesUrls.ts      Shared PMTiles style URL rewriter (pmtiles:/// → pmtiles://origin/); used by MapContainer and OpsPlanningModal
+│   ├── rewritePmtilesUrls.ts      Shared PMTiles style URL rewriter (pmtiles:/// → pmtiles://origin/); used by MapContainer and ops_modal/OpsMap
 │   ├── awwv_map_style.json        MapLibre base style (terrain, glyphs, base layers)
 │   └── builders/
 │       ├── buildControlGeoJSON.ts              OSID polygons + faction controller property
@@ -118,6 +118,8 @@ src/ui/map/
     ├── operations.ts              getOperationId, getOperationPhaseBadgeClass/Tone, OPERATION_PHASE_TIMELINE
     ├── officerUtils.ts            getFormationCommander, getFactionArmyCommander — officer lookup from formation/faction
     ├── officerCharacter.ts        Officer character display: archetype, pip ratings, stat labels, origin badge, combat record, tenure, rank formatting
+    ├── combatEffectiveness.ts     Combat effectiveness: computeBrigadeEffectiveness(), aggregateEffectiveness() — composite power number for display at brigade/sector/corps/army levels
+    ├── ModalMapSource.ts          Safe GeoJSON source management for modal MapLibre instances — enforces remove+re-add pattern, eliminates setData() bug
     └── formatters.ts              turnToDateString, formatTurnLabel, formatOperationType, formatCombatOutcome, formatPosture
 ```
 
@@ -311,6 +313,7 @@ Layer toggles (no keys):
 | Minimap | `minimapVisible` | Minimap component visibility |
 | Fog | `fogVisible` | fog-fill (AND-gated with player_faction + fogOfWar; no-op in observer mode) |
 | Battles | `battlesVisible` | battle-markers-pulse (white circles at recent combat flip OSIDs; opacity by age) |
+| Borders | `municipalityBordersVisible` | **`mun-borders`** (1990 adm3 lines, `bih_adm3_1990.geojson`) + **`osid-control-outline`** (OSID polygon edges); **default off** |
 
 ### 3.4 SelectionPanel
 
@@ -694,6 +697,26 @@ All 6 layers are hidden (`visibility: 'none'`) when `operationTargetOsids` is em
 | `osid-morale-fill` | `mapMode === 'morale'` |
 | `osid-operations-fill` | `mapMode === 'operations'` |
 | `osid-defense-fill` | `mapMode === 'defense'` |
+
+### Municipality / OSID outline toggle
+
+| Layer ID | Source | Active when |
+|----------|--------|-------------|
+| `mun-borders` | `mun-borders` (`/data/source/boundaries/bih_adm3_1990.geojson`) | Same store flag; dashed brown adm3 boundaries |
+| `osid-control-outline` | `osid-control` | OSID polygon edges (subtle line layer) |
+
+### Settlement selection highlight (`selectedOsid`)
+
+When `selectedOsid` is set, `MapContainer` updates filters on `osid-control` + `mun-borders` layers (from `osidPropertiesMap[osid].mun1990_id`):
+
+| Layer ID | Effect |
+|----------|--------|
+| `osid-selected-fill` | Strong burnt-orange **fill** on the selected OSID (`fill-antialias: false`) |
+| `osid-selected-mun-sibling-fill` | Fainter warm tint on **other OSIDs in the same municipality** (`mun1990_id` match, `osid` ≠ selected) |
+| `osid-selected-outline` | Bright amber **rim** line on the selected polygon only |
+| `mun-borders-selection` | Solid **adm3 boundary** for that municipality only (`layout.visibility` on when `mun1990_id` known); independent of the **Borders** toggle |
+
+Map mode fill layers (ethnic, supply, …) are inserted **below** `osid-selected-mun-sibling-fill` so this stack stays visible on top of mode coloring.
 
 ---
 

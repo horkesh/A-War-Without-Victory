@@ -8,15 +8,19 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
-import type { FeatureCollection, Feature, LineString, Polygon, MultiPolygon } from 'geojson';
+import { MapboxOverlay } from '@deck.gl/mapbox';
+import { PathLayer, PolygonLayer, TextLayer } from '@deck.gl/layers';
+import { PathStyleExtension } from '@deck.gl/extensions';
+import type { FeatureCollection } from 'geojson';
 import { useGameStore } from '../../store/gameStore';
-import { loadOperationalSettlements } from '../../data/DataLoader';
+import { loadOperationalSettlements, loadTerrainScalars, type TerrainScalars } from '../../data/DataLoader';
 import { buildControlGeoJSON } from '../../map/builders/buildControlGeoJSON';
 import { buildOsidCentroidLookup } from '../../map/builders/geojsonLookup';
 import { buildCorpsFrontLinesGeoJSON } from '../../map/builders/buildCorpsFrontLinesGeoJSON';
-import { buildBezierCurve, buildArrowheadTriangle, buildTaperedArrowBody } from '../../map/builders/arrowGeometry';
+import { buildBezierCurve, buildArrowheadTriangle } from '../../map/builders/arrowGeometry';
 import { rewritePmtilesUrls } from '../../map/rewritePmtilesUrls';
 import styleJson from '../../map/awwv_map_style.json';
+import { ModalMapSource } from '../../utils/ModalMapSource';
 import type { AxisState } from './types';
 
 // Faction-colored axis palettes
@@ -27,14 +31,12 @@ const AXIS_PALETTES: Record<string, string[]> = {
 };
 const DEFAULT_AXIS_COLORS = ['rgba(255,255,255,0.95)', 'rgba(100,200,255,0.90)', 'rgba(255,180,60,0.85)', 'rgba(200,120,255,0.80)'];
 
-const ARROW_SOURCE_ID = 'ops-advance-arrows';
-const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] };
-
 interface OpsMapProps {
     corpsId: string;
     onOsidClick: (osid: string, isFriendly: boolean) => void;
     objectives: string[];
     validTargetOsids: Set<string>;
+    selectableOsids: Set<string>;
     stagingOsid: string | undefined;
     schwerpunktOsid: string;
     axes: AxisState[];
@@ -48,6 +50,7 @@ export function OpsMap({
     onOsidClick,
     objectives,
     validTargetOsids,
+    selectableOsids,
     stagingOsid,
     schwerpunktOsid,
     axes,
@@ -63,9 +66,23 @@ export function OpsMap({
     const [mapReady, setMapReady] = useState(false);
     const loadedGameState = useGameStore((s) => s.loadedGameState);
 
+    // ModalMapSource refs — safe remove+re-add pattern for modal map sources
+    const objectivesSourceRef = useRef<ModalMapSource | null>(null);
+    const stagingSourceRef = useRef<ModalMapSource | null>(null);
+    const dimmedSourceRef = useRef<ModalMapSource | null>(null);
+
+    // Deck.gl overlay for animated arrows
+    const deckOverlayRef = useRef<MapboxOverlay | null>(null);
+    const animFrameRef = useRef<number>(0);
+    const dashOffsetRef = useRef(0);
+
+    // Terrain data for hover tooltip
+    const terrainDataRef = useRef<Map<string, TerrainScalars>>(new Map());
+    const popupRef = useRef<maplibregl.Popup | null>(null);
+
     // Use ref for click handler to avoid stale closures (life lesson: never set handlers in separate effect)
-    const clickStateRef = useRef({ onOsidClick, enabled, validTargetOsids });
-    clickStateRef.current = { onOsidClick, enabled, validTargetOsids };
+    const clickStateRef = useRef({ onOsidClick, enabled, validTargetOsids, selectableOsids });
+    clickStateRef.current = { onOsidClick, enabled, validTargetOsids, selectableOsids };
 
     // Initialize map once
     useEffect(() => {
@@ -81,16 +98,34 @@ export function OpsMap({
             style,
             center: [17.7, 43.87],
             zoom: 8,
+            pitch: 30,
             interactive: true,
             attributionControl: false,
         });
         mapRef.current = map;
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
+        // Enable 3D terrain from local DEM
+        map.on('load', () => {
+            if (!map.getSource('terrain-dem')) {
+                map.addSource('terrain-dem', {
+                    type: 'raster-dem',
+                    url: `pmtiles://${origin}/data/derived/tiles/terrain.pmtiles`,
+                    tileSize: 256,
+                    encoding: 'mapbox',
+                });
+            }
+            map.setTerrain({ source: 'terrain-dem', exaggeration: 2.5 });
+        });
+
         const init = async () => {
             try {
-                const geojson = await loadOperationalSettlements();
+                const [geojson, terrainScalars] = await Promise.all([
+                    loadOperationalSettlements(),
+                    loadTerrainScalars(),
+                ]);
                 geoJsonRef.current = geojson;
+                terrainDataRef.current = terrainScalars;
                 const byOsid = loadedGameState.controlBySettlement ?? {};
                 controlDataRef.current = byOsid;
 
@@ -98,17 +133,19 @@ export function OpsMap({
                 centroidLookupRef.current = centroidLookup;
                 onCentroidLookupReady?.(centroidLookup);
 
-                // Fit bounds to corps sectors
+                // Fit bounds to corps sectors with terrain-aware camera bearing
                 const sectors = (loadedGameState.corpsFrontSectors ?? []).filter((s) => s.corps_id === corpsId);
-                const friendlyOsids = new Set<string>();
+                const aoFriendlyOsids = new Set<string>();
+                const aoEnemyOsids = new Set<string>();
                 for (const sec of sectors) {
                     for (const sub of (sec.sub_segments ?? [])) {
-                        for (const osid of sub.friendly_osids) friendlyOsids.add(osid);
+                        for (const osid of sub.friendly_osids) aoFriendlyOsids.add(osid);
+                        for (const osid of sub.enemy_osids) aoEnemyOsids.add(osid);
                     }
                 }
-                if (friendlyOsids.size > 0) {
+                if (aoFriendlyOsids.size > 0) {
                     let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
-                    for (const osid of friendlyOsids) {
+                    for (const osid of [...aoFriendlyOsids, ...aoEnemyOsids]) {
                         const pt = centroidLookup.get(osid);
                         if (pt) {
                             if (pt[0] < minLng) minLng = pt[0];
@@ -117,8 +154,13 @@ export function OpsMap({
                             if (pt[1] > maxLat) maxLat = pt[1];
                         }
                     }
+                    const bearing = computeAttackBearing(aoFriendlyOsids, aoEnemyOsids, centroidLookup);
                     if (minLng !== Infinity) {
-                        map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, maxZoom: 10, animate: false });
+                        map.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
+                            padding: 80, maxZoom: 10, animate: false,
+                            bearing,
+                            pitch: 30,
+                        });
                     }
                 }
 
@@ -223,26 +265,35 @@ export function OpsMap({
                     paint: { 'line-color': 'rgba(255,220,120,0.8)', 'line-width': 2.5 },
                 });
 
-                // Objective highlight (dark red fill)
-                map.addSource('ops-highlight-objectives', { type: 'geojson', data: EMPTY_FC });
-                map.addLayer({ id: 'ops-highlight-objectives-fill', type: 'fill', source: 'ops-highlight-objectives',
-                    paint: { 'fill-color': '#8b0000', 'fill-opacity': 0.25 } });
-                map.addLayer({ id: 'ops-highlight-objectives-border', type: 'line', source: 'ops-highlight-objectives',
-                    paint: { 'line-color': '#1a1a1a', 'line-width': 2, 'line-dasharray': [4, 2] } });
+                // Objective highlight (dark red fill) — ModalMapSource for safe updates
+                objectivesSourceRef.current = new ModalMapSource(map, 'ops-highlight-objectives', [
+                    { id: 'ops-highlight-objectives-fill', type: 'fill',
+                        paint: { 'fill-color': '#8b0000', 'fill-opacity': 0.25 } },
+                    { id: 'ops-highlight-objectives-border', type: 'line',
+                        paint: { 'line-color': '#1a1a1a', 'line-width': 2, 'line-dasharray': [4, 2] } },
+                ]);
+                objectivesSourceRef.current.init();
 
-                // Staging highlight (green fill)
-                map.addSource('ops-highlight-staging', { type: 'geojson', data: EMPTY_FC });
-                map.addLayer({ id: 'ops-highlight-staging-fill', type: 'fill', source: 'ops-highlight-staging',
-                    paint: { 'fill-color': '#2d6a4f', 'fill-opacity': 0.20 } });
-                map.addLayer({ id: 'ops-highlight-staging-border', type: 'line', source: 'ops-highlight-staging',
-                    paint: { 'line-color': '#40916c', 'line-width': 2 } });
+                // Staging highlight (green fill) — ModalMapSource for safe updates
+                stagingSourceRef.current = new ModalMapSource(map, 'ops-highlight-staging', [
+                    { id: 'ops-highlight-staging-fill', type: 'fill',
+                        paint: { 'fill-color': '#2d6a4f', 'fill-opacity': 0.20 } },
+                    { id: 'ops-highlight-staging-border', type: 'line',
+                        paint: { 'line-color': '#40916c', 'line-width': 2 } },
+                ]);
+                stagingSourceRef.current.init();
 
-                // Arrow layers (initial empty) — inline instead of replaceArrowSource
-                // to avoid isStyleLoaded() guard blocking during init
-                map.addSource(ARROW_SOURCE_ID, { type: 'geojson', data: EMPTY_FC });
-                for (const spec of ARROW_LAYER_SPECS) {
-                    map.addLayer({ ...spec, source: ARROW_SOURCE_ID });
-                }
+                // Dimmed overlay for non-selectable OSIDs
+                dimmedSourceRef.current = new ModalMapSource(map, 'ops-dimmed-osids', [
+                    { id: 'ops-dimmed-fill', type: 'fill',
+                        paint: { 'fill-color': '#000000', 'fill-opacity': 0.45 } },
+                ]);
+                dimmedSourceRef.current.init();
+
+                // Deck.gl overlay for animated advance arrows
+                const deckOverlay = new MapboxOverlay({ interleaved: true, layers: [] });
+                map.addControl(deckOverlay as any);
+                deckOverlayRef.current = deckOverlay;
 
                 // Single map-level click handler — query features at click point
                 // Using per-layer handlers causes double-fire when layers overlap
@@ -264,16 +315,68 @@ export function OpsMap({
                     const isFriendly = controller === playerFaction;
                     // Enemy targets must be front-adjacent (contiguity rule)
                     if (!isFriendly && !clickStateRef.current.validTargetOsids.has(osid)) return;
+                    // Enforce selectability constraints (staging↔objective adjacency)
+                    if (!clickStateRef.current.selectableOsids.has(osid)) return;
                     clickStateRef.current.onOsidClick(osid, isFriendly);
                 });
 
-                // Cursor change on hover
+                // Cursor + terrain tooltip on hover
+                const popup = new maplibregl.Popup({
+                    closeButton: false, closeOnClick: false,
+                    className: 'ops-terrain-tooltip',
+                    maxWidth: '240px',
+                    offset: [0, -12],
+                });
+                popupRef.current = popup;
+
                 map.on('mousemove', (event) => {
-                    if (!clickStateRef.current.enabled) { map.getCanvas().style.cursor = ''; return; }
+                    if (!clickStateRef.current.enabled) {
+                        map.getCanvas().style.cursor = '';
+                        popup.remove();
+                        return;
+                    }
                     const queryLayers = ['osid-control-fill', 'ops-corps-territory-fill']
                         .filter((id) => map.getLayer(id));
                     const features = map.queryRenderedFeatures(event.point, { layers: queryLayers });
-                    map.getCanvas().style.cursor = features.length > 0 ? 'pointer' : '';
+                    const props = features[0]?.properties as Record<string, unknown> | undefined;
+                    const hoveredOsid = props?.osid as string | undefined;
+                    const isSelectable = hoveredOsid ? clickStateRef.current.selectableOsids.has(hoveredOsid) : false;
+                    map.getCanvas().style.cursor = (features.length > 0 && isSelectable) ? 'pointer' : '';
+
+                    if (!hoveredOsid || !props) { popup.remove(); return; }
+
+                    // Build terrain tooltip content
+                    const sid = props.sid as string | undefined;
+                    const name = props.settlement_name as string ?? hoveredOsid;
+                    const terrain = sid ? terrainDataRef.current.get(sid) : undefined;
+                    const controller = controlDataRef.current[hoveredOsid] ?? '—';
+                    const selLabel = isSelectable
+                        ? '<span style="color:#56d364">selectable</span>'
+                        : '<span style="color:#f47068">out of range</span>';
+
+                    let html = `<div style="font-size:12px;line-height:1.5;">`;
+                    html += `<strong>${name}</strong> ${selLabel}<br>`;
+                    html += `<span style="color:#8b9bb0">Held by: </span>${controller}<br>`;
+                    if (terrain) {
+                        const elev = Math.round(terrain.elevation_mean_m);
+                        const slope = Math.round(terrain.slope_index * 100);
+                        const friction = terrain.terrain_friction_index;
+                        const terrainType = friction > 0.5 ? 'Mountain' : friction > 0.3 ? 'Hilly' : friction > 0.15 ? 'Rolling' : 'Flat';
+                        const defBonus = friction > 0.5 ? '+50%' : friction > 0.3 ? '+30%' : friction > 0.15 ? '+15%' : '—';
+                        html += `<span style="color:#8b9bb0">Elevation: </span>${elev}m`;
+                        html += ` <span style="color:#6b7d93">(${terrainType})</span><br>`;
+                        html += `<span style="color:#8b9bb0">Slope: </span>${slope}%`;
+                        html += ` <span style="color:#8b9bb0">Def bonus: </span>${defBonus}<br>`;
+                        if (terrain.river_crossing_penalty > 0) {
+                            html += `<span style="color:#58a6ff">River crossing penalty</span><br>`;
+                        }
+                        if (terrain.road_access_index < 0.5) {
+                            html += `<span style="color:#e8a838">Poor road access</span><br>`;
+                        }
+                    }
+                    html += `</div>`;
+
+                    popup.setLngLat(event.lngLat).setHTML(html).addTo(map);
                 });
 
                 setMapReady(true);
@@ -285,6 +388,16 @@ export function OpsMap({
         map.on('load', init);
 
         return () => {
+            if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+            popupRef.current?.remove();
+            objectivesSourceRef.current?.destroy();
+            stagingSourceRef.current?.destroy();
+            dimmedSourceRef.current?.destroy();
+            popupRef.current = null;
+            objectivesSourceRef.current = null;
+            stagingSourceRef.current = null;
+            dimmedSourceRef.current = null;
+            deckOverlayRef.current = null;
             mapRef.current = null;
             setMapReady(false);
             map.remove();
@@ -297,27 +410,47 @@ export function OpsMap({
         const map = mapRef.current;
         if (!map || !geoJsonRef.current || !mapReady) return;
 
-        // Objective territories
+        // Objective territories — safe remove+re-add via ModalMapSource
         const objFeatures = geoJsonRef.current.features.filter(
             (f) => objectives.includes((f.properties as Record<string, unknown>)?.osid as string ?? '')
         );
-        const objSrc = map.getSource('ops-highlight-objectives') as maplibregl.GeoJSONSource | undefined;
-        if (objSrc) objSrc.setData({ type: 'FeatureCollection', features: objFeatures });
+        objectivesSourceRef.current?.setData({ type: 'FeatureCollection', features: objFeatures });
 
-        // Staging territory
-        const stagingSrc = map.getSource('ops-highlight-staging') as maplibregl.GeoJSONSource | undefined;
-        if (stagingSrc) {
-            const stgFeatures = stagingOsid
-                ? geoJsonRef.current.features.filter(
-                    (f) => (f.properties as Record<string, unknown>)?.osid === stagingOsid
-                )
-                : [];
-            stagingSrc.setData({ type: 'FeatureCollection', features: stgFeatures });
+        // Staging territory — safe remove+re-add via ModalMapSource
+        const stgFeatures = stagingOsid
+            ? geoJsonRef.current.features.filter(
+                (f) => (f.properties as Record<string, unknown>)?.osid === stagingOsid
+            )
+            : [];
+        stagingSourceRef.current?.setData({ type: 'FeatureCollection', features: stgFeatures });
+
+        // Dim non-selectable OSIDs — dark overlay on everything NOT in selectableOsids
+        if (enabled && selectableOsids.size > 0) {
+            const dimmedFeatures = geoJsonRef.current.features.filter((f) => {
+                const osid = (f.properties as Record<string, unknown>)?.osid as string ?? '';
+                return osid.length > 0 && !selectableOsids.has(osid);
+            });
+            dimmedSourceRef.current?.setData({ type: 'FeatureCollection', features: dimmedFeatures });
+        } else {
+            dimmedSourceRef.current?.setData({ type: 'FeatureCollection', features: [] });
         }
 
-        // Arrows — build per-axis advance arrows
-        updateArrows(map, axes, centroidLookupRef.current, faction, stagingOsid, controlDataRef.current);
-    }, [objectives, stagingOsid, schwerpunktOsid, axes, faction, mapReady]);
+        // Arrows — build Deck.gl animated advance arrows
+        const arrowData = buildArrowData(axes, centroidLookupRef.current, faction, stagingOsid, controlDataRef.current);
+        updateDeckArrows(deckOverlayRef.current, arrowData, dashOffsetRef);
+
+        // Start animation loop if we have arrows
+        if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+        if (arrowData.paths.length > 0 && deckOverlayRef.current) {
+            const animate = () => {
+                dashOffsetRef.current = (dashOffsetRef.current + 0.3) % 1000;
+                updateDeckArrows(deckOverlayRef.current, arrowData, dashOffsetRef);
+                animFrameRef.current = requestAnimationFrame(animate);
+            };
+            animFrameRef.current = requestAnimationFrame(animate);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [objectives, stagingOsid, axes, faction, mapReady, selectableOsids, enabled]);
 
     return (
         <div
@@ -328,63 +461,36 @@ export function OpsMap({
     );
 }
 
-// --- Arrow source/layer management ---
-// setData() on dynamically-added GeoJSON sources does not reliably
-// trigger re-render in MapLibre modals. Remove + re-add instead.
+// --- Deck.gl animated arrow data structures ---
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ARROW_LAYER_SPECS: any[] = [
-    {
-        id: 'ops-advance-glow', type: 'line',
-        filter: ['==', ['get', 'type'], 'advance-glow'],
-        paint: { 'line-color': ['get', 'color'], 'line-width': 18, 'line-blur': 8, 'line-opacity': 1.0 },
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-    },
-    {
-        id: 'ops-advance-body', type: 'fill',
-        filter: ['==', ['get', 'type'], 'advance-body'],
-        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
-    },
-    {
-        id: 'ops-advance-body-outline', type: 'line',
-        filter: ['==', ['get', 'type'], 'advance-body'],
-        paint: { 'line-color': ['get', 'color'], 'line-width': 1.5, 'line-opacity': 0.8 },
-    },
-    {
-        id: 'ops-advance-heads', type: 'fill',
-        filter: ['==', ['get', 'type'], 'advance-head'],
-        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 1 },
-    },
-    {
-        id: 'ops-advance-head-outline', type: 'line',
-        filter: ['==', ['get', 'type'], 'advance-head'],
-        paint: { 'line-color': ['get', 'color'], 'line-width': 2, 'line-opacity': 1 },
-    },
-    {
-        id: 'ops-obj-labels', type: 'symbol',
-        filter: ['==', ['get', 'type'], 'obj-label'],
-        layout: {
-            'text-field': ['get', 'label'], 'text-size': 14,
-            'text-font': ['Open Sans Regular'], 'text-allow-overlap': true, 'text-offset': [0, -1.2],
-        },
-        paint: { 'text-color': ['get', 'color'], 'text-halo-color': 'rgba(0,0,0,0.8)', 'text-halo-width': 2 },
-    },
-];
+interface ArrowPathData {
+    path: [number, number][];
+    color: [number, number, number, number];
+    width: number;
+}
 
-const ARROW_LAYER_IDS = ARROW_LAYER_SPECS.map((s) => s.id);
+interface ArrowHeadData {
+    polygon: [number, number][];
+    color: [number, number, number, number];
+}
 
-function replaceArrowSource(map: maplibregl.Map, data: FeatureCollection) {
-    // Remove existing layers + source
-    for (const id of ARROW_LAYER_IDS) {
-        if (map.getLayer(id)) map.removeLayer(id);
-    }
-    if (map.getSource(ARROW_SOURCE_ID)) map.removeSource(ARROW_SOURCE_ID);
+interface ArrowLabelData {
+    position: [number, number];
+    text: string;
+    color: [number, number, number, number];
+}
 
-    // Re-add with new data
-    map.addSource(ARROW_SOURCE_ID, { type: 'geojson', data });
-    for (const spec of ARROW_LAYER_SPECS) {
-        map.addLayer({ ...spec, source: ARROW_SOURCE_ID });
-    }
+interface ArrowBuildResult {
+    paths: ArrowPathData[];
+    heads: ArrowHeadData[];
+    labels: ArrowLabelData[];
+}
+
+/** Parse "rgba(r,g,b,a)" to [r,g,b,a*255] for Deck.gl */
+function parseRgba(rgba: string): [number, number, number, number] {
+    const m = rgba.match(/[\d.]+/g);
+    if (!m || m.length < 4) return [255, 255, 255, 200];
+    return [+m[0], +m[1], +m[2], Math.round(+m[3] * 255)];
 }
 
 function findNearestCentroid(
@@ -403,23 +509,54 @@ function findNearestCentroid(
     return best;
 }
 
-function updateArrows(
-    map: maplibregl.Map,
+/**
+ * Compute camera bearing so player looks from friendly territory toward enemy.
+ * Returns degrees clockwise from north (MapLibre bearing convention).
+ */
+function computeAttackBearing(
+    friendlyOsids: Set<string>,
+    enemyOsids: Set<string>,
+    centroidLookup: Map<string, [number, number]>,
+): number {
+    // Average centroid of friendly and enemy OSIDs
+    let fx = 0, fy = 0, fn = 0;
+    for (const osid of friendlyOsids) {
+        const pt = centroidLookup.get(osid);
+        if (pt) { fx += pt[0]; fy += pt[1]; fn++; }
+    }
+    let ex = 0, ey = 0, en = 0;
+    for (const osid of enemyOsids) {
+        const pt = centroidLookup.get(osid);
+        if (pt) { ex += pt[0]; ey += pt[1]; en++; }
+    }
+    if (fn === 0 || en === 0) return 0;
+    fx /= fn; fy /= fn;
+    ex /= en; ey /= en;
+
+    // Bearing from friendly centroid → enemy centroid
+    const dx = ex - fx;
+    const dy = ey - fy;
+    const radians = Math.atan2(dx, dy); // atan2(east, north) = bearing from north
+    return radians * (180 / Math.PI);
+}
+
+/** Build arrow geometry data for Deck.gl layers (no GeoJSON intermediate). */
+function buildArrowData(
     axes: AxisState[],
     centroidLookup: Map<string, [number, number]>,
     faction: string,
     defaultStagingOsid?: string,
     controlData?: Record<string, string | null>,
-) {
-    const features: Feature[] = [];
-    if (centroidLookup.size === 0) return;
+): ArrowBuildResult {
+    const result: ArrowBuildResult = { paths: [], heads: [], labels: [] };
+    if (centroidLookup.size === 0) return result;
     const palette = AXIS_PALETTES[faction] ?? DEFAULT_AXIS_COLORS;
 
     axes.forEach((axis, axisIdx) => {
-        const color = palette[axisIdx % palette.length];
+        const colorStr = palette[axisIdx % palette.length];
+        const color = parseRgba(colorStr);
         const effectiveStaging = axis.stagingOsid ?? defaultStagingOsid;
         let stagingPt = effectiveStaging ? centroidLookup.get(effectiveStaging) : null;
-        // Fallback: find nearest friendly OSID to first objective
         if (!stagingPt && axis.objectives.length > 0 && controlData) {
             const firstObjPt = centroidLookup.get(axis.objectives[0]);
             if (firstObjPt) {
@@ -431,7 +568,6 @@ function updateArrows(
             const objPt = centroidLookup.get(obj);
             if (!objPt) return;
 
-            // Arrow from staging (first obj) or previous objective (subsequent)
             const fromPt = objIdx === 0
                 ? stagingPt
                 : centroidLookup.get(axis.objectives[objIdx - 1]);
@@ -440,54 +576,127 @@ function updateArrows(
                 const dx = objPt[0] - fromPt[0];
                 const dy = objPt[1] - fromPt[1];
                 const len = Math.sqrt(dx * dx + dy * dy);
-                if (len < 0.001) return; // Degenerate
+                if (len < 0.001) return;
 
-                // Scale all dimensions with distance (matches main map arrows)
                 const offsetMag = len * 0.10;
-                const baseHalfW = Math.max(0.006, len * 0.04);
-                const tipHalfW = Math.max(0.002, len * 0.012);
                 const headLength = Math.max(0.009, len * 0.035) * 1.8;
                 const headWidth = Math.max(0.009, len * 0.035);
-
                 const curve = buildBezierCurve(fromPt, objPt, offsetMag);
 
-                // Glow line
-                features.push({
-                    type: 'Feature',
-                    geometry: { type: 'LineString', coordinates: curve },
-                    properties: { type: 'advance-glow', color: color.replace(/[\d.]+\)$/, '0.25)') },
-                });
+                // Path for the body
+                result.paths.push({ path: curve, color, width: 8 });
 
-                // Arrow body (tapered polygon)
-                const bodyCoords = buildTaperedArrowBody(curve, baseHalfW, tipHalfW);
-                if (bodyCoords) {
-                    features.push({
-                        type: 'Feature',
-                        geometry: { type: 'Polygon', coordinates: [bodyCoords] },
-                        properties: { type: 'advance-body', color },
-                    });
-                }
-
-                // Arrow head
+                // Arrowhead triangle
                 const headCoords = buildArrowheadTriangle(curve, headLength, headWidth);
                 if (headCoords) {
-                    features.push({
-                        type: 'Feature',
-                        geometry: { type: 'Polygon', coordinates: [headCoords] },
-                        properties: { type: 'advance-head', color },
-                    });
+                    result.heads.push({ polygon: headCoords, color });
                 }
             }
 
-            // Objective label
-            features.push({
-                type: 'Feature',
-                geometry: { type: 'Point', coordinates: objPt },
-                properties: { type: 'obj-label', label: `${axisIdx + 1}.${objIdx + 1}`, color },
+            // Label
+            result.labels.push({
+                position: objPt,
+                text: `${axisIdx + 1}.${objIdx + 1}`,
+                color,
             });
         });
     });
 
-    replaceArrowSource(map, { type: 'FeatureCollection', features });
+    return result;
 }
+
+/** Update the Deck.gl overlay with animated arrow layers. */
+function updateDeckArrows(
+    overlay: MapboxOverlay | null,
+    data: ArrowBuildResult,
+    dashOffsetRef: React.MutableRefObject<number>,
+) {
+    if (!overlay) return;
+
+    const layers = [];
+
+    if (data.paths.length > 0) {
+        // Glow layer — wide, semi-transparent, no dash
+        layers.push(new PathLayer({
+            id: 'ops-arrow-glow',
+            data: data.paths,
+            getPath: (d: ArrowPathData) => d.path,
+            getColor: (d: ArrowPathData) => [d.color[0], d.color[1], d.color[2], 60],
+            getWidth: 22,
+            widthUnits: 'pixels',
+            capRounded: true,
+            jointRounded: true,
+            parameters: { depthTest: false },
+        }));
+
+        // Body — faction-colored with animated marching dashes
+        layers.push(new PathLayer({
+            id: 'ops-arrow-body',
+            data: data.paths,
+            getPath: (d: ArrowPathData) => d.path,
+            getColor: (d: ArrowPathData) => d.color,
+            getWidth: (d: ArrowPathData) => d.width,
+            widthUnits: 'pixels',
+            capRounded: true,
+            jointRounded: true,
+            getDashArray: [8, 4],
+            dashGapPickable: true,
+            dashJustified: true,
+            extensions: [new PathStyleExtension({ dash: true, offset: true })],
+            getOffset: 0,
+            parameters: { depthTest: false },
+            updateTriggers: { getOffset: dashOffsetRef.current },
+        } as any));
+
+        // Solid outline beneath the dashes
+        layers.push(new PathLayer({
+            id: 'ops-arrow-outline',
+            data: data.paths,
+            getPath: (d: ArrowPathData) => d.path,
+            getColor: (d: ArrowPathData) => [d.color[0], d.color[1], d.color[2], 180],
+            getWidth: (d: ArrowPathData) => d.width + 2,
+            widthUnits: 'pixels',
+            capRounded: true,
+            jointRounded: true,
+            parameters: { depthTest: false },
+        }));
+    }
+
+    if (data.heads.length > 0) {
+        layers.push(new PolygonLayer({
+            id: 'ops-arrow-heads',
+            data: data.heads,
+            getPolygon: (d: ArrowHeadData) => d.polygon,
+            getFillColor: (d: ArrowHeadData) => d.color,
+            getLineColor: (d: ArrowHeadData) => [d.color[0], d.color[1], d.color[2], 255],
+            getLineWidth: 2,
+            lineWidthUnits: 'pixels',
+            filled: true,
+            stroked: true,
+            parameters: { depthTest: false },
+        }));
+    }
+
+    if (data.labels.length > 0) {
+        layers.push(new TextLayer({
+            id: 'ops-arrow-labels',
+            data: data.labels,
+            getPosition: (d: ArrowLabelData) => d.position,
+            getText: (d: ArrowLabelData) => d.text,
+            getColor: (d: ArrowLabelData) => d.color,
+            getSize: 14,
+            getTextAnchor: 'middle',
+            getAlignmentBaseline: 'bottom',
+            getPixelOffset: [0, -16],
+            outlineColor: [0, 0, 0, 200],
+            outlineWidth: 2,
+            fontFamily: 'sans-serif',
+            fontWeight: 700,
+            parameters: { depthTest: false },
+        }));
+    }
+
+    overlay.setProps({ layers });
+}
+
 

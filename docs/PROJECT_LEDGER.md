@@ -1,7 +1,83 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-20
-**Status:** **v0.4.9** (AI Comes Alive). **1242 tests**, 102 suites. **91.4% area-weighted (40w).** HRHB-RBiH war transition system (feature branch). Post-operation brigade return march. Battle of the Barracks, equipment overhaul, polygon harmonization, front line rendering.
+**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Combat effectiveness at all hierarchy levels, 3D terrain (ops modal), Deck.gl animated arrows, terrain-aware camera, terrain tooltip, staging↔objective selectability, ModalMapSource utility. HRHB-RBiH war transition system. Post-operation brigade return march. Battle of the Barracks, equipment overhaul, polygon harmonization, front line rendering.
+
+## [2026-03-20] Combat Effectiveness System — Composite Power at Brigade/Sector/Corps/Army
+
+New `combatEffectiveness.ts` utility provides a single composite combat power number at every hierarchy level. Formula: `base (personnel x equipment x experience x cohesion x honor) x fatigue x officer x homeDistance x morale x disruption x supply`. Letter grade A-F based on average modifier product. Personnel always visible alongside.
+
+- **Brigade** (`FormationDetail.tsx`): number + worst-modifier callout (e.g. "morale 42%")
+- **Sector** (`CorpsDetail.tsx` Sectors tab): aggregate per sector + personnel
+- **Corps** (`CorpsDetail.tsx` Overview): total + grade + weak/disrupted counts
+- **Army** (`ArmyDetail.tsx` Overview): whole-army aggregate + grade
+
+**Terrain info visible to player:** `loadTerrainScalars()` merges `settlements_terrain_scalars.json` (6,137 SID entries) into `osidPropertiesMap` at map init. Settlement panel: terrain type badge (+15%/+30%/+50% Def), elevation, river crossing, road access. Main map tooltip + ops modal tooltip.
+
+**Report:** `docs/40_reports/implemented/20260320_3D_TERRAIN_DECKGL_ARROWS_COMBAT_EFFECTIVENESS.md`
+**Propagated to:** Systems Manual §7.6, TACTICAL_MAP_SYSTEM §0, MAP_UI_MASTER §1/Recent, REPO_MAP, GUI_MASTER, MEMORY.md
+
+## [2026-03-20] Tactical map — OSID selection: mun fill + adm3 outline
+
+**Behavior:** On `selectedOsid`, map shows **`osid-selected-fill`** (strong burnt-orange overlay), **`osid-selected-mun-sibling-fill`** (faint same-`mun1990_id` OSIDs), updated **`osid-selected-outline`** (amber rim), and **`mun-borders-selection`** (filtered `mun-borders` source for that municipality; visible even when global **Borders** toggle is off). Sibling + adm3 require `mun1990_id` on `osidPropertiesMap[selectedOsid]`.
+
+**Stack:** Ethnic/supply/morale/operations/casualties/defense fills and move-preview fill now insert **before** `osid-selected-mun-sibling-fill` so selection overlays read on top of map modes.
+
+**Files:** `src/ui/map/map/MapContainer.tsx`, `awwv_map_style.json`, `docs/20_engineering/MAP_UI_MASTER.md`, `docs/40_reports/GUI_MASTER.md`.
+
+## [2026-03-20] 3D Terrain + Deck.gl Ops Modal Arrows + ModalMapSource Utility
+
+### 3D Terrain Pipeline
+Built offline terrain pipeline from existing Copernicus 30m DEM data:
+- **Source:** `data/derived/terrain/dem_clip_h6_2.tif` (2737x1946, Float32, -2.5m to 2,434m)
+- **Encoding:** Node.js script converts elevation → Mapbox Terrain RGB (`elevation = -10000 + (R*65536 + G*256 + B) * 0.1`)
+- **Pipeline:** DEM → Terrain RGB GeoTIFF → `gdalwarp` (EPSG:3857) → MBTiles (PNG) → `gdaladdo` (overviews z6-z12) → PMTiles
+- **Output:** `data/derived/tiles/terrain.pmtiles` (11MB, 247 tiles, PNG, PMTiles header patched to type=2)
+- **Main map:** `pitch: 15` (perspective only, no terrain extrusion — keeps strategic view clean)
+- **Ops modal:** `pitch: 30`, `setTerrain({ source: 'terrain-dem', exaggeration: 2.5 })` — real 3D terrain for tactical planning
+
+### Deck.gl Animated Advance Arrows (Ops Modal)
+Replaced static MapLibre GeoJSON polygon arrows with Deck.gl layers on `MapboxOverlay`:
+- **Glow:** Wide semi-transparent `PathLayer` (soft halo behind arrows)
+- **Outline:** Solid `PathLayer` giving arrow body definition
+- **Body:** `PathLayer` + `PathStyleExtension` with `dash: true` — animated marching dashes flowing toward objectives
+- **Heads:** `PolygonLayer` for arrowhead triangles
+- **Labels:** `TextLayer` for objective numbering (1.1, 1.2)
+- **Animation:** `requestAnimationFrame` loop increments dash offset continuously
+
+### Ops Modal: Staging↔Objective Selectability Constraints
+Bidirectional constraint enforcement using front edge adjacency (`frontEdgesOsid`):
+- **Staging selected first →** only enemy OSIDs directly adjacent across the front are selectable as objectives
+- **Objective selected first →** only friendly OSIDs adjacent to the objective are selectable for staging
+- **Both set →** objectives limited to staging-reachable, plus already-selected. All front-friendly remain selectable.
+- **Visual:** non-selectable OSIDs dimmed with 45% dark overlay (`ModalMapSource`). Cursor only shows pointer on selectable OSIDs.
+- **Data:** adjacency maps built from `frontEdgesOsid` — `friendlyToEnemy` and `enemyToFriendly` per corps.
+
+### Ops Modal: Terrain-Aware Camera + Terrain Info Tooltip
+- **Camera bearing:** on modal open, bearing computed from friendly centroid → enemy centroid. Player looks *down the attack corridor*. Mountains between staging and objectives are immediately visible in 3D.
+- **Terrain tooltip on hover:** shows settlement name, controller, elevation (m), terrain type (Flat/Rolling/Hilly/Mountain), slope %, defense bonus (+15%/+30%/+50%), river crossing penalty, road access warnings. Data from `settlements_terrain_scalars.json` (6,137 SID entries). Selectable/out-of-range indicator (green/red).
+- **Data loader:** `loadTerrainScalars()` added to `DataLoader.ts` with cache.
+- Bezier curve math from `arrowGeometry.ts` retained — same staging→objective paths
+
+### ModalMapSource Utility
+Created `src/ui/map/utils/ModalMapSource.ts` — structural fix for the 3x-violated `setData()` modal MapLibre bug:
+- Wraps source + layer management; `setData()` internally does remove-all + re-add
+- Applied to `OpsMap.tsx` (objectives, staging sources) and `OpsMapRenderer.ts` (arrows, OSID data, markers)
+- Eliminates the #1 recurring life lesson violation structurally
+
+**Files:** `MapContainer.tsx`, `OpsMap.tsx`, `OpsMapRenderer.ts`, `awwv_map_style.json`, `ModalMapSource.ts` (new), `terrain.pmtiles` (new)
+
+## [2026-03-20] Tactical map — Borders toggle: include `mun-borders` (adm3 1990)
+
+**Fix:** Visible “municipality” lines were mostly **`mun-borders`** (`bih_adm3_1990.geojson`), not only `osid-control-outline`. Style default **`layout.visibility: none`** for `mun-borders`; `MapContainer` syncs **`mun-borders`** with `municipalityBordersVisible` alongside `osid-control-outline`.
+
+## [2026-03-20] Tactical map — OSID polygon outlines optional (“Borders” toggle)
+
+**Behavior:** MapLibre line layer `osid-control-outline` (OSID/settlement boundaries) is **off by default** (`layout.visibility: none` in `awwv_map_style.json`, `municipalityBordersVisible: false` in `gameStore`). New **Borders** control in dev + live layer toggles (`mapModes.ts`); `MapContainer` applies visibility on load (deferred overlay path) and when the store changes.
+
+**Rationale:** Reduce visible seam/line artifacts from always-on thin outlines; players can opt in when they need municipality edges.
+
+**Files:** `src/ui/map/map/awwv_map_style.json`, `gameStore.ts`, `utils/mapModes.ts`, `MapModeToolbar.tsx`, `BottomStatusStrip.tsx`, `MapContainer.tsx`, `docs/20_engineering/MAP_UI_MASTER.md`, `docs/40_reports/GUI_MASTER.md`.
 
 ## [2026-03-20] Documentation — Deck.gl vs MapLibre default + map master sync
 
@@ -15266,3 +15342,23 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 - `src/ui/map/layers/*`, `src/ui/map/map/MapContainer.tsx`, `src/ui/map/map/formationIcons.ts`, `src/ui/map/package.json`, `src/ui/map/package-lock.json`
 - `src/ui/map/components/Minimap.tsx`, `tests/mobilization_combat_suppression.test.ts`
 - `docs/40_reports/20260319_UI_UX_DEEP_AUDIT.md`, `GUI_MASTER.md`, `REPO_MAP.md`, `PROJECT_LEDGER.md`, `.claude/napkin.md`
+
+## [2026-03-20] Ops planning G-2 — IPC response normalization + browser message
+
+### Change
+- **`usePrediction`:** Maps `OperationPredictionResponse` from `query-operation-prediction` into the `PredictionResult` shape used by `NarrativeTab` / `RawIntelTab` (`totalEstimatedCasualties` → `estimatedCasualties`, `axes` → `perAxis` with `defenderPower` → `defenseStrength`, commander `sections` object → ordered `{ title, content }[]`, `delay` → `postpone` for recommended action, primary axis outcome for overall summary). When `window.awwv` is missing (Vite-only map), sets a clear error instead of leaving “Awaiting G2 prediction data…” forever.
+- **`operation_prediction`:** `AxisPrediction` adds **`defenderPower`** (rounded `CombatPrediction.defender_power`) for the Raw Intel “defense” column.
+
+### Determinism
+- No change to prediction math or ordering; UI-only mapping and one new numeric field on the existing axis payload.
+
+### Verification
+- `npx tsc --noEmit`
+- `npx vitest run tests/operation_prediction.test.ts tests/use_prediction_normalize.test.ts`
+
+### Files
+- `src/ui/map/components/ops_modal/usePrediction.ts`
+- `src/sim/combat/operation_prediction.ts`
+- `tests/operation_prediction.test.ts`, `tests/use_prediction_normalize.test.ts`
+- `vitest.config.ts` (include entry for normalize tests)
+- `docs/40_reports/GUI_MASTER.md`

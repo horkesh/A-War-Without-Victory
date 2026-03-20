@@ -32,7 +32,7 @@ describe('generateCommanderAssessment', () => {
             { forceRatio: 2.0, intelConfidence: 0.8, supplyReadiness: 0.9, totalCasualties: 300 },
             [{
                 axisId: 'a1', predictedOutcome: 'victory', terrain: 'open', entrenchment: 'light',
-                forceRatio: 2.0, estimatedCasualties: 300, intelConfidence: 0.8, supplyReadiness: 0.9,
+                forceRatio: 2.0, estimatedCasualties: 300, defenderPower: 100, intelConfidence: 0.8, supplyReadiness: 0.9,
             }],
         );
         expect(result.recommendation).toBe('launch');
@@ -46,7 +46,7 @@ describe('generateCommanderAssessment', () => {
             { forceRatio: 0.8, intelConfidence: 0.2, supplyReadiness: 0.3, totalCasualties: 800 },
             [{
                 axisId: 'a1', predictedOutcome: 'repulsed', terrain: 'mountain', entrenchment: 'heavy',
-                forceRatio: 0.8, estimatedCasualties: 800, intelConfidence: 0.2, supplyReadiness: 0.3,
+                forceRatio: 0.8, estimatedCasualties: 800, defenderPower: 200, intelConfidence: 0.2, supplyReadiness: 0.3,
             }],
         );
         expect(result.recommendation).toBe('abort');
@@ -58,7 +58,7 @@ describe('generateCommanderAssessment', () => {
             { forceRatio: 1.1, intelConfidence: 0.4, supplyReadiness: 0.6, totalCasualties: 500 },
             [{
                 axisId: 'a1', predictedOutcome: 'stalemate', terrain: 'forest', entrenchment: 'moderate',
-                forceRatio: 1.1, estimatedCasualties: 500, intelConfidence: 0.4, supplyReadiness: 0.6,
+                forceRatio: 1.1, estimatedCasualties: 500, defenderPower: 150, intelConfidence: 0.4, supplyReadiness: 0.6,
             }],
         );
         expect(result.recommendation).toBe('delay');
@@ -70,7 +70,7 @@ describe('generateCommanderAssessment', () => {
             { forceRatio: 1.5, intelConfidence: 0.3, supplyReadiness: 0.6, totalCasualties: 400 },
             [{
                 axisId: 'a1', predictedOutcome: 'costly_victory', terrain: 'open', entrenchment: 'light',
-                forceRatio: 1.5, estimatedCasualties: 400, intelConfidence: 0.3, supplyReadiness: 0.6,
+                forceRatio: 1.5, estimatedCasualties: 400, defenderPower: 120, intelConfidence: 0.3, supplyReadiness: 0.6,
             }],
         );
         expect(result.sections.enemy).toContain('weak');
@@ -83,7 +83,7 @@ describe('generateCommanderAssessment', () => {
             { competence: 3, aggressiveness: 1 },
             { forceRatio: 2.0, intelConfidence: 0.9, supplyReadiness: 0.9, totalCasualties: 100 },
             [{ axisId: 'a1', predictedOutcome: 'victory', terrain: 'open', entrenchment: 'light',
-                forceRatio: 2.0, estimatedCasualties: 100, intelConfidence: 0.9, supplyReadiness: 0.9 }],
+                forceRatio: 2.0, estimatedCasualties: 100, defenderPower: 80, intelConfidence: 0.9, supplyReadiness: 0.9 }],
         );
         expect(cautious.preparationWeeks).toBe(7);
 
@@ -92,7 +92,7 @@ describe('generateCommanderAssessment', () => {
             { competence: 3, aggressiveness: 5 },
             { forceRatio: 2.0, intelConfidence: 0.9, supplyReadiness: 0.9, totalCasualties: 100 },
             [{ axisId: 'a1', predictedOutcome: 'victory', terrain: 'open', entrenchment: 'light',
-                forceRatio: 2.0, estimatedCasualties: 100, intelConfidence: 0.9, supplyReadiness: 0.9 }],
+                forceRatio: 2.0, estimatedCasualties: 100, defenderPower: 80, intelConfidence: 0.9, supplyReadiness: 0.9 }],
         );
         expect(aggressive.preparationWeeks).toBe(3);
     });

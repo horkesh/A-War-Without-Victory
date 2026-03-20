@@ -20,7 +20,7 @@ Copy this to `nightshift-handoff.md` in project root before activating night shi
 - [Constants or values pre-decided by day shift]
 
 ## DO NOT Touch
-- `src/ui/map/components/OpsPlanningModal.tsx` (external expert)
+- `src/ui/map/components/ops_modal/` (16-file ops planning modal — redesigned 2026-03-19)
 - [Any other files or systems off-limits]
 
 ## Architectural Decisions Pre-Made

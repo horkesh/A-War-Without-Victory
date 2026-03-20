@@ -10,7 +10,7 @@ import { useGameStore } from '../store/gameStore';
 import { collectSectorFriendlyOsids, buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
-import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency, loadSidToOsidMapping } from '../data/DataLoader';
+import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency, loadSidToOsidMapping, loadTerrainScalars } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildMoraleGeoJSON } from './builders/buildMoraleGeoJSON';
 import { buildCasualtiesGeoJSON } from './builders/buildCasualtiesGeoJSON';
@@ -153,6 +153,17 @@ const BATTLE_MARKERS_SOURCE_ID = 'battle-markers';
 const BATTLE_MARKERS_LAYER_ID = 'battle-markers-pulse';
 const MAJOR_CITY_LABELS_SOURCE_ID = 'major-city-labels';
 const MAJOR_CITY_LABELS_LAYER_ID = 'major-city-labels-symbols';
+/** OSID polygon outlines (settlement boundaries); toggled — default off in style + store. */
+const OSID_CONTROL_OUTLINE_LAYER_ID = 'osid-control-outline';
+/** 1990 adm3 municipality boundaries (`bih_adm3_1990.geojson`); same toggle as OSID outlines. */
+const MUN_BORDERS_LAYER_ID = 'mun-borders';
+/** Stronger adm3 outline for the municipality of the selected OSID (independent of Borders toggle). */
+const MUN_BORDERS_SELECTION_LAYER_ID = 'mun-borders-selection';
+/** Map mode fills insert below this anchor so selection tints stay visible on top. */
+const OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID = 'osid-selected-mun-sibling-fill';
+const OSID_SELECTED_FILL_LAYER_ID = 'osid-selected-fill';
+/** Sentinel for `mun-borders-selection` filter when nothing selected (no real mun uses this id). */
+const MUN_BORDER_SELECTION_FILTER_NONE = '__mun_sel_none__';
 const ENCLAVE_SOURCE_ID = 'enclave-osids';
 const ENCLAVE_LABEL_SOURCE_ID = 'enclave-labels';
 const ENCLAVE_OUTLINE_LAYER_ID = 'enclave-outline';
@@ -235,6 +246,7 @@ export function MapContainer() {
   const effectiveFrontsVisible = devMode ? frontsVisible : sectorsVisible;
   const fogVisible = useGameStore((s) => s.fogVisible);
   const battlesVisible = useGameStore((s) => s.battlesVisible);
+  const municipalityBordersVisible = useGameStore((s) => s.municipalityBordersVisible);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const hoveredSectorId = useGameStore((s) => s.hoveredSectorId);
   const hoveredCorpsId = useGameStore((s) => s.hoveredCorpsId);
@@ -328,11 +340,12 @@ export function MapContainer() {
     let initCancelled = false;
     const init = async () => {
       try {
-        const [geojson, byOsid, adjacency, sidToOsid] = await Promise.all([
+        const [geojson, byOsid, adjacency, sidToOsid, terrainScalars] = await Promise.all([
           loadOperationalSettlements(),
           loadOperationalPoliticalControl(),
           loadOsidAdjacency(),
           loadSidToOsidMapping(),
+          loadTerrainScalars(),
         ]);
 
         osidBaseRef.current = geojson;
@@ -345,7 +358,22 @@ export function MapContainer() {
         for (const f of geojson.features) {
           const props = (f.properties ?? {}) as Record<string, unknown>;
           const osid = typeof props.osid === 'string' ? props.osid : '';
-          if (osid) osidProps[osid] = { ...props };
+          if (!osid) continue;
+          const merged = { ...props };
+          // Enrich with terrain scalars (keyed by SID)
+          const sid = typeof props.sid === 'string' ? props.sid : '';
+          const terrain = sid ? terrainScalars.get(sid) : undefined;
+          if (terrain) {
+            merged.elevation_mean_m = terrain.elevation_mean_m;
+            merged.slope_index = terrain.slope_index;
+            merged.terrain_friction_index = terrain.terrain_friction_index;
+            merged.road_access_index = terrain.road_access_index;
+            merged.river_crossing_penalty = terrain.river_crossing_penalty;
+            // Derive human-readable terrain type for settlement panel
+            const f = terrain.terrain_friction_index;
+            merged.terrain = f > 0.5 ? 'Mountain' : f > 0.3 ? 'Hilly' : f > 0.15 ? 'Forest' : 'Flat';
+          }
+          osidProps[osid] = merged;
         }
         setOsidPropertiesMap(osidProps);
 
@@ -384,6 +412,7 @@ export function MapContainer() {
         style,
         center: BOSNIA_CENTER,
         zoom: DEFAULT_ZOOM,
+        pitch: 15,
       });
       map.on('error', (e) => {
         // Suppress noisy PMTiles "Unimplemented type: 4" errors (MVT geometry type unsupported by MapLibre)
@@ -412,6 +441,9 @@ export function MapContainer() {
       };
       map.on('moveend', reportViewport);
       map.on('load', reportViewport);
+
+      // Note: 3D terrain (terrain-dem) is intentionally NOT enabled on the main map.
+      // Only the ops planning modal uses 3D terrain for tactical planning context.
 
       // Deck.gl zoom sync: trigger layer update on zoom to handle dynamic scaling
       map.on('zoom', () => {
@@ -1069,6 +1101,13 @@ export function MapContainer() {
                     if (m.getSource(BATTLE_MARKERS_SOURCE_ID)) (m.getSource(BATTLE_MARKERS_SOURCE_ID) as GeoJSONSource).setData(battleMarkersGeoJson);
                     const { battlesVisible: battlesVis } = useGameStore.getState();
                     safeSetLayoutVisibility(m, BATTLE_MARKERS_LAYER_ID, battlesVis);
+                    const { municipalityBordersVisible: munBordersVis } = useGameStore.getState();
+                    if (safeHasLayer(m, OSID_CONTROL_OUTLINE_LAYER_ID)) {
+                      safeSetLayoutVisibility(m, OSID_CONTROL_OUTLINE_LAYER_ID, munBordersVis);
+                    }
+                    if (safeHasLayer(m, MUN_BORDERS_LAYER_ID)) {
+                      safeSetLayoutVisibility(m, MUN_BORDERS_LAYER_ID, munBordersVis);
+                    }
 
                     const { selectedFormationId: selBid } = useGameStore.getState();
 
@@ -1822,7 +1861,7 @@ export function MapContainer() {
               'fill-outline-color': 'rgba(100, 200, 120, 0.50)',
             },
           },
-          'faction-border-glow-pos'
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
         );
       }
       return true;
@@ -1902,7 +1941,7 @@ export function MapContainer() {
               ],
             },
           },
-          'faction-border-glow-pos'
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
         );
       } else {
         (m.getSource(OSID_ETHNIC_SOURCE_ID) as GeoJSONSource).setData(ethnicGeoJson);
@@ -1965,7 +2004,7 @@ export function MapContainer() {
               ],
             },
           },
-          'faction-border-glow-pos'
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
         );
       } else {
         (m.getSource(OSID_MORALE_SOURCE_ID) as GeoJSONSource).setData(moraleGeoJson);
@@ -2023,7 +2062,7 @@ export function MapContainer() {
               'fill-opacity': 1,
             },
           },
-          'faction-border-glow-pos'
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
         );
       } else {
         (m.getSource(OSID_DEFENSE_SOURCE_ID) as GeoJSONSource).setData(defenseGeoJson);
@@ -2073,7 +2112,7 @@ export function MapContainer() {
               'fill-opacity': 1,
             },
           },
-          'faction-border-glow-pos'
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
         );
       } else {
         (m.getSource(OSID_OPERATIONS_SOURCE_ID) as GeoJSONSource).setData(operationsGeoJson);
@@ -2117,7 +2156,7 @@ export function MapContainer() {
               ],
             },
           },
-          'faction-border-glow-pos'
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
         );
       } else {
         (m.getSource(OSID_CASUALTIES_SOURCE_ID) as GeoJSONSource).setData(casualtiesGeoJson);
@@ -2167,7 +2206,7 @@ export function MapContainer() {
               'fill-opacity': 1,
             },
           },
-          'faction-border-glow-pos'
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
         );
       } else {
         (m.getSource(OSID_SUPPLY_SOURCE_ID) as GeoJSONSource).setData(supplyGeoJson);
@@ -2256,7 +2295,7 @@ export function MapContainer() {
     };
   }, [mapReady, frontsVisible, effectiveFrontsVisible, formationsVisible, labelsVisible, mapMode, devMode, sectorsVisible]);
 
-  // Phase 5 toggles: fog / battles — reactive visibility when store changes.
+  // Phase 5 toggles: fog / battles / OSID outline — reactive visibility when store changes.
   useEffect(() => {
     const map = mapRef.current;
     if (!mapReady || !map) return;
@@ -2267,7 +2306,13 @@ export function MapContainer() {
     if (safeHasLayer(map, BATTLE_MARKERS_LAYER_ID)) {
       safeSetLayoutVisibility(map, BATTLE_MARKERS_LAYER_ID, battlesVisible);
     }
-  }, [mapReady, fogVisible, battlesVisible]);
+    if (safeHasLayer(map, OSID_CONTROL_OUTLINE_LAYER_ID)) {
+      safeSetLayoutVisibility(map, OSID_CONTROL_OUTLINE_LAYER_ID, municipalityBordersVisible);
+    }
+    if (safeHasLayer(map, MUN_BORDERS_LAYER_ID)) {
+      safeSetLayoutVisibility(map, MUN_BORDERS_LAYER_ID, municipalityBordersVisible);
+    }
+  }, [mapReady, fogVisible, battlesVisible, municipalityBordersVisible]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -2353,21 +2398,89 @@ export function MapContainer() {
     lastPanTargetRef.current = null;
   }, [loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId, selectedCorpsId]);
 
-  // Highlight selected OSID polygon outline on the map
+  // OSID selection: dark fill on picked settlement, faint fill on same-mun siblings, adm3 outline, bright rim
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
-    const SELECTED_OUTLINE_LAYER = 'osid-selected-outline';
-    if (!safeHasLayer(map, SELECTED_OUTLINE_LAYER)) return;
-    const filter: maplibregl.FilterSpecification = selectedOsid
-      ? ['==', ['get', 'osid'], selectedOsid]
-      : ['==', ['get', 'osid'], '__none__'];
-    try {
-      map.setFilter(SELECTED_OUTLINE_LAYER, filter);
-    } catch (e) {
-      console.error('[MapContainer] osid-selected-outline setFilter failed', e);
-    }
-  }, [selectedOsid, mapReady]);
+
+    const noOsid: maplibregl.FilterSpecification = ['==', ['get', 'osid'], '__none__'];
+    const noMun: maplibregl.FilterSpecification = ['==', ['get', 'mun1990_id'], MUN_BORDER_SELECTION_FILTER_NONE];
+
+    const apply = (): boolean => {
+      if (!safeHasLayer(map, 'osid-selected-outline')) return false;
+
+      const clearAll = () => {
+        map.setFilter('osid-selected-outline', noOsid);
+        if (safeHasLayer(map, OSID_SELECTED_FILL_LAYER_ID)) map.setFilter(OSID_SELECTED_FILL_LAYER_ID, noOsid);
+        if (safeHasLayer(map, OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID)) {
+          map.setFilter(OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID, noOsid);
+        }
+        if (safeHasLayer(map, MUN_BORDERS_SELECTION_LAYER_ID)) {
+          map.setFilter(MUN_BORDERS_SELECTION_LAYER_ID, noMun);
+          safeSetLayoutVisibility(map, MUN_BORDERS_SELECTION_LAYER_ID, false);
+        }
+      };
+
+      if (!selectedOsid) {
+        try {
+          clearAll();
+        } catch (e) {
+          console.error('[MapContainer] selection highlight clear failed', e);
+        }
+        return true;
+      }
+
+      const munId =
+        osidPropertiesMap && typeof osidPropertiesMap[selectedOsid]?.mun1990_id === 'string'
+          ? (osidPropertiesMap[selectedOsid].mun1990_id as string)
+          : '';
+
+      try {
+        map.setFilter('osid-selected-outline', ['==', ['get', 'osid'], selectedOsid]);
+        if (safeHasLayer(map, OSID_SELECTED_FILL_LAYER_ID)) {
+          map.setFilter(OSID_SELECTED_FILL_LAYER_ID, ['==', ['get', 'osid'], selectedOsid]);
+        }
+        if (safeHasLayer(map, OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID)) {
+          if (munId) {
+            map.setFilter(OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID, [
+              'all',
+              ['==', ['get', 'mun1990_id'], munId],
+              ['!=', ['get', 'osid'], selectedOsid],
+            ] as maplibregl.FilterSpecification);
+          } else {
+            map.setFilter(OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID, noOsid);
+          }
+        }
+        if (safeHasLayer(map, MUN_BORDERS_SELECTION_LAYER_ID)) {
+          if (munId) {
+            map.setFilter(MUN_BORDERS_SELECTION_LAYER_ID, ['==', ['get', 'mun1990_id'], munId]);
+            safeSetLayoutVisibility(map, MUN_BORDERS_SELECTION_LAYER_ID, true);
+          } else {
+            map.setFilter(MUN_BORDERS_SELECTION_LAYER_ID, noMun);
+            safeSetLayoutVisibility(map, MUN_BORDERS_SELECTION_LAYER_ID, false);
+          }
+        }
+      } catch (e) {
+        console.error('[MapContainer] OSID selection highlight failed', e);
+      }
+      return true;
+    };
+
+    if (apply()) return;
+    const onLoad = () => {
+      apply();
+      map.off('load', onLoad);
+    };
+    map.once('load', onLoad);
+    const retryId = setTimeout(() => {
+      apply();
+      map.off('load', onLoad);
+    }, 200);
+    return () => {
+      map.off('load', onLoad);
+      clearTimeout(retryId);
+    };
+  }, [selectedOsid, mapReady, osidPropertiesMap]);
 
   // Pulse animation for staged orders and battle markers
   useEffect(() => {

@@ -796,7 +796,7 @@ Before building UI panels (Phase 3 / Step 5 in the implementation guide), the ke
    - **Bottom status strip:** selected OSID info, population, controller, supply status
    - **Left sidebar (collapsible):** OOB tree (Theatre → Army → Corps → Brigade hierarchy)
    - **Right panel (context-sensitive):** appears when clicking an OSID, formation, or front line. Shows detail for the selected entity.
-   - **Map mode toolbar (bottom-center):** seven modes — Political, Ethnic, Supply, Casualties, Morale, Operations, Defense (`mapModes.ts`). Layer toggles: Front/Sectors (live: single “Front”), Units, Labels, Minimap, Fog, Battles; dev mode keeps separate Fronts + Sectors. **Rendering:** MapLibre is default for formation markers; optional Deck.gl overlay under `src/ui/map/layers/` when `deckFormationCounters` is enabled (`deckLayerCapabilities.ts`).
+   - **Map mode toolbar (bottom-center):** seven modes — Political, Ethnic, Supply, Casualties, Morale, Operations, Defense (`mapModes.ts`). Layer toggles: Front/Sectors (live: single “Front”), Units, Labels, Minimap, Fog, Battles, **Borders** (`mun-borders` + `osid-control-outline`, default off); dev mode keeps separate Fronts + Sectors. **OSID click:** settlement highlight stack (`osid-selected-fill`, sibling mun tint, `mun-borders-selection`, outline) — see [MAP_UI_MASTER.md](MAP_UI_MASTER.md) §7. **Rendering:** MapLibre is default for formation markers; optional Deck.gl overlay under `src/ui/map/layers/` when `deckFormationCounters` is enabled (`deckLayerCapabilities.ts`).
 
 2. **Settlement/OSID detail panel** — right panel content when an OSID is selected:
    - OSID name, municipality, controller

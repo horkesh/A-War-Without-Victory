@@ -226,7 +226,7 @@ When all phases are done (or all unblocked phases completed):
 - Don't modify canon docs beyond what the plan's completion checklist requires
 - Don't run 52w calibration scenarios unless explicitly requested
 - Don't bump the game version for unfinished milestones
-- Don't touch files that external experts are working on (ops planning modal)
+- Don't touch files that external experts are working on (check memory for constraints)
 - Don't delete or rewrite the user's existing code unless the plan says to
 - Don't make design decisions that could go either way — flag them and pick the conservative option
 

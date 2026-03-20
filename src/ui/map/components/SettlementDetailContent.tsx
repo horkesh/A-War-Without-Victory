@@ -145,10 +145,15 @@ export function SettlementDetailContent({
   const popOriginal = num(props.population_total) || (num(props.population_bosniaks) + num(props.population_serbs) + num(props.population_croats) + num(props.population_others));
 
   const terrain = toTitleCase(str(props.terrain || props.zone_type));
+  const elevation = typeof props.elevation_mean_m === 'number' ? Math.round(props.elevation_mean_m) : null;
+  const friction = typeof props.terrain_friction_index === 'number' ? props.terrain_friction_index : null;
   const isStrategic = props.municipal_seat === true || props.strategic === true || popOriginal > 5000;
   const isHub = props.transit_hub === true || props.junction === true;
 
-  const terrainModifier = terrain === 'Urban' ? '+25% Def' : terrain === 'Mountain' ? '+40% Def' : terrain === 'Forest' ? '+15% Def' : null;
+  const terrainModifier = friction != null && friction > 0.5 ? '+50% Def'
+    : friction != null && friction > 0.3 ? '+30% Def'
+    : friction != null && friction > 0.15 ? '+15% Def'
+    : null;
 
   const ethnic = [
     { label: 'Bosniak', pct: popOriginal ? (num(props.population_bosniaks) / popOriginal) * 100 : 0 },
@@ -668,10 +673,26 @@ export function SettlementDetailContent({
           </div>
         )}
 
-        {(!isPanel || activeTab === 'overview') && terrain && !terrainModifier && (
-          <div className="pt-1 flex justify-between text-[10px] text-text-secondary italic">
-            <span>Terrain Context</span>
-            <span>{terrain}</span>
+        {(!isPanel || activeTab === 'overview') && terrain && (
+          <div className="pt-1 space-y-0.5">
+            {!terrainModifier && (
+              <div className="flex justify-between text-[10px] text-text-secondary italic">
+                <span>Terrain Context</span>
+                <span>{terrain}</span>
+              </div>
+            )}
+            {elevation != null && (
+              <div className="flex justify-between text-[10px] text-text-secondary">
+                <span>Elevation</span>
+                <span>{elevation}m{typeof props.river_crossing_penalty === 'number' && props.river_crossing_penalty > 0 ? ' | River crossing' : ''}</span>
+              </div>
+            )}
+            {typeof props.road_access_index === 'number' && props.road_access_index < 0.5 && (
+              <div className="flex justify-between text-[10px] text-amber-400/80">
+                <span>Road Access</span>
+                <span>Poor ({Math.round(props.road_access_index as number * 100)}%)</span>
+              </div>
+            )}
           </div>
         )}
       </div>

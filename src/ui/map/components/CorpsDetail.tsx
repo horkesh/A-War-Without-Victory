@@ -15,6 +15,7 @@ import { OfficerProfile } from './OfficerProfile';
 import { BrigadeRow } from './BrigadeRow';
 import { TabBar } from './TabBar';
 import { toTitleCase } from '../utils/formatters';
+import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -185,6 +186,25 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 <span className="text-text-secondary">Personnel</span>
                 <span className="text-text-primary tabular-nums">{totalPersonnel.toLocaleString()}</span>
               </div>
+              {(() => {
+                const agg = aggregateEffectiveness(subordinates);
+                if (agg.brigadeCount === 0) return null;
+                const gradeColor = agg.grade === 'A' ? '#56d364' : agg.grade === 'B' ? '#e8c56d' : agg.grade === 'C' ? '#e8a838' : '#f47068';
+                return (
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Combat Eff.</span>
+                    <span className="tabular-nums">
+                      <span className="text-text-primary">{agg.totalEffectiveness.toLocaleString()}</span>
+                      <span className="text-[10px] ml-1 font-bold" style={{ color: gradeColor }}>
+                        {agg.grade}
+                      </span>
+                      {agg.ineffectiveCount > 0 && (
+                        <span className="text-[9px] text-red-400 ml-1">({agg.ineffectiveCount} weak)</span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })()}
               <div className="flex justify-between">
                 <span className="text-text-secondary">Brigades</span>
                 <span className="text-text-primary tabular-nums">{subordinates.length}</span>
@@ -298,7 +318,12 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
             {corpsSectors.length === 0 ? (
               <div className="text-text-secondary italic text-xs">No sectors assigned.</div>
             ) : (
-              corpsSectors.map((s) => (
+              corpsSectors.map((s) => {
+                const sectorBrigadeIds = new Set([...s.assigned_brigade_ids, ...s.reserve_brigade_ids]);
+                const sectorBrigades = subordinates.filter((b) => sectorBrigadeIds.has(b.id));
+                const sectorEff = aggregateEffectiveness(sectorBrigades);
+                const sectorPers = sectorBrigades.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
+                return (
                 <button
                   key={s.sector_id}
                   type="button"
@@ -318,9 +343,14 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       {s.assigned_brigade_ids.length} front
                       {s.reserve_brigade_ids.length > 0 && ` + ${s.reserve_brigade_ids.length} reserve`}
                       {' · ~'}{s.length_edges} km
+                      {' · '}{sectorPers.toLocaleString()} men
                     </div>
                   </div>
                   <div className="shrink-0 ml-2 text-right">
+                    <div className="text-[10px] tabular-nums">
+                      <span className="text-text-secondary">Eff: </span>
+                      <span className="text-text-primary">{sectorEff.totalEffectiveness.toLocaleString()}</span>
+                    </div>
                     <div className="text-[10px] text-text-secondary tabular-nums">
                       Density: {s.density.toFixed(2)}
                     </div>
@@ -332,7 +362,8 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     )}
                   </div>
                 </button>
-              ))
+                );
+              })
             )}
           </div>
         )}

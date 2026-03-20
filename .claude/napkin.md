@@ -8,9 +8,9 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-20, v0.6.2 — Battle of the Barracks + Equipment Overhaul)
-**v0.6.2.** 1422 tests, 117 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w, feature branch).**
-**This session:** **`feature/ui-visual-overhaul` = main** — Deck.gl layers + MapContainer merged to main; worktree hard-reset to branch tip (no divergent map). **tsc:** `mobilization_combat_suppression.test.ts` uses `isRbihHrhbControllerPair` / `isRbihHrhbFactionPair` helpers (no impossible faction literals). **M1:** minimap double-rAF + `triggerRepaint` on toggle. **Audit:** `20260319_UI_UX_DEEP_AUDIT.md` §revisit marks T1/M1/B1 status.
+## Current State (2026-03-20, v0.6.2 — 3D Terrain + Deck.gl Arrows)
+**v0.6.2.** 1244 tests, 102 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w).**
+**This session:** 3D terrain pipeline (Copernicus DEM → Terrain RGB → PMTiles, 11MB). Main map pitch 15° + exaggeration 2.0. Ops modal pitch 30° + exaggeration 2.5. Deck.gl animated advance arrows (PathLayer + PathStyleExtension dash animation). ModalMapSource utility (structural fix for setData() modal bug). Municipality borders toggle layer.
 **HRHB-RBiH conflict:** P1 Backlog: CB brigade redistribution, CB operations not launching. Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
@@ -70,6 +70,10 @@
 8. **[2026-03-20] Deck.gl Scaling, Labels, and Doc Truth**
    Do instead: **`deckFormationCounters` defaults `false`** — MapLibre formations are the default render + pick path. When implementing Deck.gl tactical layers, match MapLibre zoom-interpolation for unit markers (`16px` @ Z6 to `40px` @ Z14); sync on map `zoom`. Labels: `Open Sans Regular`, `10-12px`, `~22px` offset where used. **Do not** document Deck as having “replaced” MapLibre formations unless you qualify opt-in + `deckLayerCapabilities.ts`.
 
+## GUI / Map
+1. **[2026-03-20] G-2 prediction empty in ops modal**
+   Do instead: Engine returns `OperationPredictionResponse` (`axes`, `totalEstimatedCasualties`, commander `sections` as `{enemy, ownForces, assessment}`). UI expects `PredictionResult` — normalize in `usePrediction` (`normalizeOperationPredictionResponse`). Without `window.awwv`, show explicit desktop-required message, not infinite “Awaiting…”.
+
 ## Imports & Build
 1. **[2026-02-07] Martinez ESM import**
    Do instead: `import * as martinez from 'martinez-polygon-clipping'` (not default import).
@@ -94,6 +98,23 @@
 9. **[2026-03-19] UI Visual Overhaul (P2 — PARKED)**: 6-phase plan: icons (P0), counter enrichment, sidebar upgrade, document panels, bottom strip, map ops viz. ~11-13 sessions. Plan: `docs/plans/2026-03-19-ui-visual-overhaul-design.md`. Asset brief: `docs/30_planning/VISUAL_ASSET_BRIEF.md`. Genre survey: HoI4/UoC2/EU4/AGEOD patterns.
 10. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
 **Resolved this session:** #34 HVO sectors (FIXED — corps activation + consolidation protection), #38 HVO stale IDs (FIXED), #33 Sarajevo density (CORRECT — siege working).
+
+## Ops Modal Deck.gl Upgrade Backlog (P3)
+1. **[2026-03-20] Brigade ScatterplotLayer**: Show participating brigades as personnel-scaled dots at current location_osid. Color by readiness (green/amber/red). Data already in BrigadeTray.
+2. **[2026-03-20] Force flow ArcLayer**: Arcs from each brigade's position → staging → objectives. "Commander's sand table" showing the full operation as a flow network.
+3. **[2026-03-20] Threat heat underlayer**: HeatmapLayer of enemy force density around the AO from sector_intel. Helps player pick objectives.
+4. **[2026-03-20] Pulsing objective markers**: ScatterplotLayer with animated radiusScale for objectives (red pulse) and staging (green pulse).
+5. **[2026-03-20] Floating axis labels**: TextLayer above each axis showing "Axis 1: 3 bde, PR 2.1" from usePrediction.
+
+## 3D Terrain Leverage Backlog (P3)
+1. ~~**Terrain-aware ops camera**~~ — DONE. Bearing from friendly→enemy centroid. Pitch 30°.
+2. **[2026-03-20] Elevation profile on advance axes**: Sample DEM along each bezier curve, show mini elevation strip in ops modal. "Axis 1: climbs 800m over 15km through Vlasic pass." DEM data already local.
+3. **[2026-03-20] Terrain-colored front lines**: Front edges at high elevation get white/blue tint. Player instantly sees mountain warfare vs valley vs flatland sectors.
+4. **[2026-03-20] LOS/visibility cones**: From selected brigade, ray-cast against DEM to show what unit can see. Artillery on hilltop sees further than infantry in valley. Feeds intel/fog system.
+5. **[2026-03-20] Terrain cost for movement**: Column march currently uses hop-count. With elevation data, mountain passes cost more turns than river valleys. Makes terrain physically real for movement planning.
+6. **[2026-03-20] 3D battle replay**: After battle resolves, camera swoops to battle site in 3D. Show attacker arrows climbing toward defender position. Terrain tells the story of why the attack succeeded or failed.
+7. ~~**Surface terrain info for player**~~ — DONE. Terrain tooltip in ops modal (elevation, slope, type, defense bonus, river/road warnings). Data from `settlements_terrain_scalars.json`. Also add to main map settlement panel + OSID tooltip (not yet done).
+8. **[2026-03-20] Main map terrain tooltip**: Port the ops modal terrain tooltip to the main map's OSID hover tooltip and settlement detail panel. Currently only ops modal shows terrain info.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**

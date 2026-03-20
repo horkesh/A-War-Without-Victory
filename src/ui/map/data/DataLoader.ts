@@ -105,6 +105,24 @@ export async function loadSidToOsidMapping(): Promise<Map<string, string>> {
   return _sidToOsidCache;
 }
 
+/** Terrain scalars per settlement (SID-keyed). */
+export interface TerrainScalars {
+  road_access_index: number;
+  river_crossing_penalty: number;
+  elevation_mean_m: number;
+  elevation_stddev_m: number;
+  slope_index: number;
+  terrain_friction_index: number;
+}
+
+let _terrainScalarsCache: Map<string, TerrainScalars> | null = null;
+export async function loadTerrainScalars(): Promise<Map<string, TerrainScalars>> {
+  if (_terrainScalarsCache) return _terrainScalarsCache;
+  const raw = await fetchJson<{ by_sid: Record<string, TerrainScalars> }>('/data/derived/terrain/settlements_terrain_scalars.json');
+  _terrainScalarsCache = new Map(Object.entries(raw.by_sid));
+  return _terrainScalarsCache;
+}
+
 /** Fetch latest run save as raw text. Use with loadSave(text) to parse after yielding so UI can show loading state. */
 export async function loadLatestRunSaveAsText(): Promise<string> {
   const response = await fetch('/data/derived/latest_run_final_save.json');

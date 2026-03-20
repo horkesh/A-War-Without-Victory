@@ -13,6 +13,7 @@ import { CombatSummaryPanel } from './CombatSummaryPanel';
 import type { FormationView } from '../data/types';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { TabBar } from './TabBar';
+import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -441,6 +442,25 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   <span className="text-text-primary tabular-nums">{formation.personnel.toLocaleString()} men</span>
                 </>
               )}
+              {formation.kind === 'brigade' && formation.personnel != null && (() => {
+                const eff = computeBrigadeEffectiveness(formation);
+                const color = eff.value >= 600 ? '#56d364' : eff.value >= 300 ? '#e8a838' : '#f47068';
+                // Find the worst modifier to highlight
+                const mods = eff.modifiers;
+                const worst = Object.entries(mods).reduce((a, b) => b[1] < a[1] ? b : a);
+                const worstLabel = worst[1] < 0.85
+                  ? ` (${worst[0]} ${Math.round(worst[1] * 100)}%)`
+                  : '';
+                return (
+                  <>
+                    <span className="text-text-secondary">Effectiveness</span>
+                    <span className="tabular-nums font-semibold" style={{ color }}>
+                      {Math.round(eff.value).toLocaleString()}
+                      <span className="text-[9px] font-normal text-text-secondary">{worstLabel}</span>
+                    </span>
+                  </>
+                );
+              })()}
               {formation.entrenchment_turns != null && formation.entrenchment_turns > 0 && (
                 <>
                   <span className="text-text-secondary">Entrenched</span>

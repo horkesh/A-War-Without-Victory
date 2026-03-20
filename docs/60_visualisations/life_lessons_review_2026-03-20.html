@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Lessons Review - 2026-03-20</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0a0e14;
+    color: #c5cdd9;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid #1e2a3a;
+    padding-bottom: 1.5rem;
+  }
+  .header h1 {
+    font-size: 1.8rem;
+    color: #e8c56d;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .header .subtitle {
+    font-size: 0.9rem;
+    color: #6b7d93;
+    margin-top: 0.4rem;
+  }
+  .header .period {
+    font-size: 0.8rem;
+    color: #4a5a6a;
+    margin-top: 0.3rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #111820;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 {
+    font-size: 1.1rem;
+    color: #e8c56d;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge.red { background: #3d1520; color: #f47068; border: 1px solid #5a2030; }
+  .badge.amber { background: #3d2e15; color: #e8a838; border: 1px solid #5a4520; }
+  .badge.green { background: #152d1f; color: #56d364; border: 1px solid #1a4a28; }
+  .badge.blue { background: #152035; color: #58a6ff; border: 1px solid #1a3050; }
+  .badge.purple { background: #25152e; color: #bc8cff; border: 1px solid #3a2050; }
+
+  .stat-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .stat-box {
+    flex: 1;
+    background: #0d1218;
+    border: 1px solid #1a2535;
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-box .number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-box .label {
+    font-size: 0.75rem;
+    color: #6b7d93;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .stat-box.red .number { color: #f47068; }
+  .stat-box.amber .number { color: #e8a838; }
+  .stat-box.green .number { color: #56d364; }
+  .stat-box.blue .number { color: #58a6ff; }
+
+  .violation {
+    background: #160d12;
+    border: 1px solid #3d1520;
+    border-left: 3px solid #f47068;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .violation h3 {
+    font-size: 0.9rem;
+    color: #f47068;
+    margin-bottom: 0.4rem;
+  }
+  .violation p {
+    font-size: 0.8rem;
+    color: #9aa5b4;
+    line-height: 1.5;
+  }
+  .violation .commits {
+    font-size: 0.7rem;
+    color: #6b7d93;
+    margin-top: 0.4rem;
+    font-family: monospace;
+  }
+
+  .positive {
+    background: #0d1a14;
+    border: 1px solid #1a4a28;
+    border-left: 3px solid #56d364;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .positive h3 {
+    font-size: 0.9rem;
+    color: #56d364;
+    margin-bottom: 0.4rem;
+  }
+  .positive p {
+    font-size: 0.8rem;
+    color: #9aa5b4;
+    line-height: 1.5;
+  }
+
+  .lesson-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+  .lesson-table th {
+    text-align: left;
+    color: #6b7d93;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #1e2a3a;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+  }
+  .lesson-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #141c26;
+    color: #9aa5b4;
+  }
+  .lesson-table tr:hover td { background: #0d1218; }
+  .lesson-name { color: #c5cdd9; font-weight: 500; }
+
+  .arrow-up { color: #56d364; }
+  .arrow-down { color: #f47068; }
+  .arrow-same { color: #6b7d93; }
+
+  .timeline {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.4rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #1e2a3a;
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.15rem;
+    top: 0.45rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e8c56d;
+    border: 2px solid #0a0e14;
+  }
+  .timeline-item.violation-dot::before { background: #f47068; }
+  .timeline-item.positive-dot::before { background: #56d364; }
+  .timeline-item .time {
+    font-size: 0.7rem;
+    color: #4a5a6a;
+    font-family: monospace;
+  }
+  .timeline-item .desc {
+    font-size: 0.8rem;
+    color: #9aa5b4;
+    margin-top: 0.15rem;
+  }
+
+  .new-lesson {
+    background: #15152e;
+    border: 1px solid #2a2050;
+    border-left: 3px solid #bc8cff;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .new-lesson h3 {
+    font-size: 0.9rem;
+    color: #bc8cff;
+    margin-bottom: 0.4rem;
+  }
+  .new-lesson p {
+    font-size: 0.8rem;
+    color: #9aa5b4;
+    line-height: 1.5;
+  }
+
+  .verdict-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #0d1218;
+    border-radius: 6px;
+    border: 1px solid #1a2535;
+  }
+  .verdict-bar .score {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #e8a838;
+  }
+  .verdict-bar .text {
+    font-size: 0.85rem;
+    color: #9aa5b4;
+    line-height: 1.5;
+  }
+  .verdict-bar .text strong { color: #c5cdd9; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Life Lessons Review</h1>
+  <div class="subtitle">AWWV Daily Compliance Audit</div>
+  <div class="period">Review period: 2026-03-19 to 2026-03-20 | 42 commits analyzed | 30 active lessons</div>
+</div>
+
+<div class="grid">
+
+  <!-- Summary Stats -->
+  <div class="card full">
+    <div class="stat-row">
+      <div class="stat-box red">
+        <div class="number">3</div>
+        <div class="label">Violations Detected</div>
+      </div>
+      <div class="stat-box green">
+        <div class="number">5</div>
+        <div class="label">Positive Signals</div>
+      </div>
+      <div class="stat-box blue">
+        <div class="number">6</div>
+        <div class="label">New Lessons Added</div>
+      </div>
+      <div class="stat-box amber">
+        <div class="number">42</div>
+        <div class="label">Commits Reviewed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Violations -->
+  <div class="card">
+    <h2><span class="badge red">Violations</span> Detected Incidents</h2>
+
+    <div class="violation">
+      <h3>setData() on Modal MapLibre Sources</h3>
+      <p>The ops modal arrow fix went through <strong>4 fix iterations</strong> (df21813 -> 9101042 -> 4a424f5 -> f0af052). The <code>setData()</code> bug was already documented since 2026-03-11 in GUI_MASTER &sect;4. Should have applied the remove+re-add pattern from the first attempt. Additionally, <code>isStyleLoaded()</code> guard blocked init in the same modal.</p>
+      <div class="commits">Commits: df21813, 9101042, 4a424f5, f0af052 | Lesson: [MapLibre] setData() + isStyleLoaded()</div>
+    </div>
+
+    <div class="violation">
+      <h3>Prove It In A Test Script Before Pushing Renderer Changes</h3>
+      <p>Front line rendering overhaul (834bf74) was pushed without a diagnostic script validating chain/bridge counts on real data. Required a follow-up fix (f29b92c) to increase BFS bridge hops from 5 to 8. The working algorithm existed in the edges viewer HTML but was not extracted into a testable script first.</p>
+      <div class="commits">Commits: 834bf74, f29b92c | Lesson: [Process] Prove it in a test script</div>
+    </div>
+
+    <div class="violation">
+      <h3>Data Pipeline Outputs Are Coupled</h3>
+      <p>Polygon harmonization (68c9527) modified <code>operational_settlements.geojson</code> but did not verify whether the contact graph or other derived files were affected. The script touched 77/134 polygon pairs. Per the lesson from 2026-03-19, any polygon change risks cascading through the contact graph into calibration. No <code>md5sum</code> before/after check was documented.</p>
+      <div class="commits">Commit: 68c9527 | Lesson: [Architecture] Data pipeline outputs coupled</div>
+    </div>
+  </div>
+
+  <!-- Positive Signals -->
+  <div class="card">
+    <h2><span class="badge green">Positive</span> Good Practices Observed</h2>
+
+    <div class="positive">
+      <h3>HRHB-RBiH Transition: Clean Commit Decomposition</h3>
+      <p>The war transition feature was split into <strong>7 distinct commits</strong>: alliance phase, events, combat suppression, sectors test, bot stance, corps activation fix, readiness fix. Each is independently reviewable. Follows the "one change per run" spirit.</p>
+    </div>
+
+    <div class="positive">
+      <h3>Prompt Lesson Documentation</h3>
+      <p>Three new lessons were written and committed within the same session as the incidents that spawned them (6d4c54d, ab58861, life_lessons.md updates). Violations are being captured while context is fresh.</p>
+    </div>
+
+    <div class="positive">
+      <h3>Readiness Reversion: Root Cause Fix, Not Workaround</h3>
+      <p>The HRHB readiness oscillation bug (active->forming every turn) was fixed at the state machine level (irreversible forward transitions) rather than with a band-aid. New lesson synthesized from the fix.</p>
+    </div>
+
+    <div class="positive">
+      <h3>Equipment Overhaul: Faction-Level Budgets</h3>
+      <p>The per-brigade equipment ticker was correctly identified as explosive scaling and replaced with faction-level capped budgets. Follows the "per-brigade mechanics are explosive" lesson from 2026-03-18.</p>
+    </div>
+
+    <div class="positive">
+      <h3>Test Coverage for New Features</h3>
+      <p>HRHB-RBiH transition added 38 new tests across 5 test files (alliance, mobilization, sectors, combat suppression, bot stance). The Deck.gl landing added a UI map render smoke test. Test count rose from 1204 to 1422.</p>
+    </div>
+  </div>
+
+  <!-- New Lessons Synthesized -->
+  <div class="card">
+    <h2><span class="badge purple">New</span> Lessons Added This Period</h2>
+
+    <div class="new-lesson">
+      <h3>[Architecture] Corps formation must exist in formations map</h3>
+      <p>A <code>corps_id</code> on a brigade means nothing if the corps doesn't exist as a formation. <code>hvo_central_bosnia</code> was referenced but never created in war-start scenarios. Sector system returned 0 sectors.</p>
+    </div>
+
+    <div class="new-lesson">
+      <h3>[Architecture] Readiness state machines need irreversible transitions</h3>
+      <p>Once a brigade passes <code>forming</code>, it should never revert. Low cohesion after activation = <code>overextended</code>, not <code>forming</code>. 29 HRHB brigades oscillated every turn.</p>
+    </div>
+
+    <div class="new-lesson">
+      <h3>[Sectors] Brigade-presence protects at component level</h3>
+      <p>If ANY edge in a connected component has a minority corps brigade, ALL edges of that corps must be protected from consolidation. Per-edge protection drains enclave corps edge-by-edge.</p>
+    </div>
+
+    <div class="new-lesson">
+      <h3>[Pipeline] Late-issued orders survive to next turn</h3>
+      <p>Orders issued at step 708 persist to next turn's step 496. Column march orders from <code>advance-sector-offensives</code> are consumed by <code>osid-column-movement</code> because 496 < 517.</p>
+    </div>
+
+    <div class="new-lesson">
+      <h3>[MapLibre] isStyleLoaded() false during map.on('load')</h3>
+      <p>Adding sources inside the load callback puts the style back into non-loaded state. Never guard init source/layer creation on <code>isStyleLoaded()</code>.</p>
+    </div>
+
+    <div class="new-lesson">
+      <h3>[MapLibre] visibility:hidden > display:none for map toggles</h3>
+      <p>Toggling <code>display:none</code> on MapLibre containers causes context loss. Use CSS visibility/opacity and call <code>map.resize()</code> inside <code>requestAnimationFrame</code>.</p>
+    </div>
+  </div>
+
+  <!-- Lesson Health -->
+  <div class="card">
+    <h2><span class="badge blue">Health</span> Lesson Promotion / Demotion</h2>
+
+    <table class="lesson-table">
+      <thead>
+        <tr>
+          <th>Lesson</th>
+          <th>Status</th>
+          <th>Change</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="lesson-name">[MapLibre] Never use setData() on modal sources</td>
+          <td><span class="badge red">Violated</span></td>
+          <td class="arrow-up">Stays top</td>
+          <td>3rd violation. Needs stronger enforcement.</td>
+        </tr>
+        <tr>
+          <td class="lesson-name">[Process] Prove it in a test script</td>
+          <td><span class="badge red">Violated</span></td>
+          <td class="arrow-up">Stays top</td>
+          <td>2nd violation. Pattern persists.</td>
+        </tr>
+        <tr>
+          <td class="lesson-name">[Architecture] Data pipeline coupled</td>
+          <td><span class="badge amber">At risk</span></td>
+          <td class="arrow-up">Stays top</td>
+          <td>Polygon harmonization touched coupled data.</td>
+        </tr>
+        <tr>
+          <td class="lesson-name">[Scaling] Per-brigade mechanics explosive</td>
+          <td><span class="badge green">Followed</span></td>
+          <td class="arrow-same">Stable</td>
+          <td>Equipment overhaul correctly used budgets.</td>
+        </tr>
+        <tr>
+          <td class="lesson-name">[Calibration] One change per run</td>
+          <td><span class="badge green">Followed</span></td>
+          <td class="arrow-down">Demote 1</td>
+          <td>Clean commit decomposition in HRHB work.</td>
+        </tr>
+        <tr>
+          <td class="lesson-name">[Data] Transfers must debit the source</td>
+          <td><span class="badge green">Followed</span></td>
+          <td class="arrow-same">Stable</td>
+          <td>Equipment dissolution zeroing confirmed.</td>
+        </tr>
+        <tr>
+          <td class="lesson-name">[Design] Engine soundness > calibration %</td>
+          <td><span class="badge green">Followed</span></td>
+          <td class="arrow-same">Stable</td>
+          <td>HRHB work prioritized correctness over %.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Activity Timeline -->
+  <div class="card full">
+    <h2><span class="badge amber">Timeline</span> Key Events (42 commits)</h2>
+    <div class="timeline">
+      <div class="timeline-item positive-dot">
+        <div class="time">n942-n943</div>
+        <div class="desc">Displacement routing overhaul + front edge rederive after combat. 92.2% calibration.</div>
+      </div>
+      <div class="timeline-item violation-dot">
+        <div class="time">4 commits</div>
+        <div class="desc">Ops modal arrow fix iterations -- setData() + isStyleLoaded() violations. 4 attempts before correct fix.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">n948-n955</div>
+        <div class="desc">Equipment overhaul: phantom tanks fixed, JNA priority, scavenge/capture rework, Battle of the Barracks events.</div>
+      </div>
+      <div class="timeline-item positive-dot">
+        <div class="time">7 commits</div>
+        <div class="desc">HRHB-RBiH war transition: alliance phase, events, combat suppression, corps activation, readiness fix. Clean decomposition.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">n957</div>
+        <div class="desc">Post-operation brigade return march. 91.2% main, 91.4% feature branch.</div>
+      </div>
+      <div class="timeline-item positive-dot">
+        <div class="time">14 tasks</div>
+        <div class="desc">UI/UX polish pass: toolbar routing, radial menu, legends, insignia. 18 files, 2 new components.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">Latest</div>
+        <div class="desc">Deck.gl hybrid landing: tactical overlay layers, unit counter enrichment, major city labels, minimap M1 fix.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verdict -->
+  <div class="card full">
+    <h2>Overall Verdict</h2>
+    <div class="verdict-bar">
+      <div class="score">B+</div>
+      <div class="text">
+        <strong>Productive period with known recurring violations.</strong>
+        42 commits delivered major features (HRHB-RBiH war, equipment overhaul, Deck.gl, UI polish).
+        6 new lessons synthesized promptly. Test count +218 (1204 to 1422).
+        <br><br>
+        <strong>Recurring risk:</strong> MapLibre modal patterns continue to burn cycles --
+        the setData() lesson has been violated 3 times now. Consider an architectural fix
+        (wrapper component that enforces remove+re-add) rather than relying on memory alone.
+        The "prove it in a test script" lesson also recurred -- front line rendering needed a follow-up fix.
+        <br><br>
+        <strong>Recommendation:</strong> Create a <code>MapLibreModalSource</code> utility class that
+        makes setData() impossible and enforces remove+re-add. This would eliminate the #1 recurring violation structurally.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -45,6 +45,8 @@ export function BottomStatusStrip() {
   const setFogVisible = useGameStore((s) => s.setFogVisible);
   const battlesVisible = useGameStore((s) => s.battlesVisible);
   const setBattlesVisible = useGameStore((s) => s.setBattlesVisible);
+  const municipalityBordersVisible = useGameStore((s) => s.municipalityBordersVisible);
+  const setMunicipalityBordersVisible = useGameStore((s) => s.setMunicipalityBordersVisible);
 
   const toggles: Record<string, { value: boolean; set: (v: boolean) => void }> = {
     frontsVisible: { value: frontsVisible, set: setFrontsVisible },
@@ -54,6 +56,7 @@ export function BottomStatusStrip() {
     minimapVisible: { value: minimapVisible, set: setMinimapVisible },
     fogVisible: { value: fogVisible, set: setFogVisible },
     battlesVisible: { value: battlesVisible, set: setBattlesVisible },
+    municipalityBordersVisible: { value: municipalityBordersVisible, set: setMunicipalityBordersVisible },
   };
 
   return (
@@ -113,7 +116,11 @@ export function BottomStatusStrip() {
               key={key}
               type="button"
               onClick={() => t.set(!t.value)}
-              title={`Toggle ${label}`}
+              title={
+                key === 'municipalityBordersVisible'
+                  ? 'Toggle municipality boundaries: mun-borders (adm3 1990) + osid-control-outline'
+                  : `Toggle ${label}`
+              }
               className={`px-2 py-1 rounded text-[9px] font-mono tracking-[0.1em] transition-all duration-200 uppercase ${t.value
                 ? 'bg-interactive/10 text-text-primary border border-interactive/30'
                 : 'text-text-secondary/50 hover:text-text-secondary'

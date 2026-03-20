@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Games - Daily Standup - 2026-03-20</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #080c10;
+    color: #c5cdd9;
+    min-height: 100vh;
+  }
+
+  /* Top banner */
+  .banner {
+    background: linear-gradient(135deg, #0d1520 0%, #141e2c 100%);
+    border-bottom: 2px solid #e8c56d;
+    padding: 1.2rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .banner h1 {
+    color: #e8c56d;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .banner .meta {
+    font-size: 0.75rem;
+    color: #6b7d93;
+    text-align: right;
+  }
+  .banner .meta strong { color: #9aa5b4; }
+
+  .content { padding: 1.5rem 2rem; max-width: 1600px; margin: 0 auto; }
+
+  /* Section headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 1.8rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #1e2a3a;
+  }
+  .section-header h2 {
+    font-size: 1.1rem;
+    color: #e8c56d;
+    font-weight: 600;
+  }
+  .section-num {
+    background: #e8c56d;
+    color: #080c10;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  .full-span { grid-column: 1 / -1; }
+
+  /* Cards */
+  .card {
+    background: #0d1520;
+    border: 1px solid #1a2535;
+    border-radius: 6px;
+    padding: 1.2rem;
+  }
+  .card h3 {
+    font-size: 0.9rem;
+    color: #c5cdd9;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+  .card p, .card li {
+    font-size: 0.8rem;
+    color: #8b9bb0;
+    line-height: 1.6;
+  }
+  .card ul { padding-left: 1.2rem; }
+
+  /* Stat tiles */
+  .stat-tile {
+    background: #0d1520;
+    border: 1px solid #1a2535;
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-tile .val {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .stat-tile .lbl {
+    font-size: 0.65rem;
+    color: #6b7d93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.3rem;
+  }
+  .stat-tile .sub {
+    font-size: 0.7rem;
+    color: #4a5a6a;
+    margin-top: 0.2rem;
+  }
+  .c-gold .val { color: #e8c56d; }
+  .c-green .val { color: #56d364; }
+  .c-blue .val { color: #58a6ff; }
+  .c-red .val { color: #f47068; }
+  .c-amber .val { color: #e8a838; }
+  .c-purple .val { color: #bc8cff; }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    vertical-align: middle;
+  }
+  .b-pass { background: #152d1f; color: #56d364; border: 1px solid #1a4a28; }
+  .b-watch { background: #3d2e15; color: #e8a838; border: 1px solid #5a4520; }
+  .b-fail { background: #3d1520; color: #f47068; border: 1px solid #5a2030; }
+  .b-new { background: #25152e; color: #bc8cff; border: 1px solid #3a2050; }
+  .b-done { background: #152035; color: #58a6ff; border: 1px solid #1a3050; }
+  .b-p1 { background: #3d1520; color: #f47068; border: 1px solid #5a2030; }
+  .b-p2 { background: #3d2e15; color: #e8a838; border: 1px solid #5a4520; }
+  .b-p3 { background: #152035; color: #58a6ff; border: 1px solid #1a3050; }
+
+  /* Retrospective items */
+  .retro-item {
+    padding: 0.8rem;
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
+    border-left: 3px solid;
+  }
+  .retro-good { background: #0d1a14; border-color: #56d364; }
+  .retro-bad { background: #160d12; border-color: #f47068; }
+  .retro-ugly { background: #1a1510; border-color: #e8a838; }
+  .retro-item h4 {
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+  }
+  .retro-good h4 { color: #56d364; }
+  .retro-bad h4 { color: #f47068; }
+  .retro-ugly h4 { color: #e8a838; }
+  .retro-item p { font-size: 0.78rem; color: #8b9bb0; line-height: 1.5; }
+
+  /* Priority board */
+  .priority-card {
+    background: #0d1520;
+    border: 1px solid #1a2535;
+    border-radius: 6px;
+    padding: 1.2rem;
+    border-top: 3px solid;
+    position: relative;
+  }
+  .priority-card.p-critical { border-top-color: #f47068; }
+  .priority-card.p-high { border-top-color: #e8a838; }
+  .priority-card.p-medium { border-top-color: #58a6ff; }
+  .priority-card .pri-num {
+    position: absolute;
+    top: -12px;
+    right: 12px;
+    background: #e8c56d;
+    color: #080c10;
+    font-size: 0.7rem;
+    font-weight: 800;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .priority-card h3 {
+    font-size: 0.95rem;
+    color: #c5cdd9;
+    margin-bottom: 0.5rem;
+  }
+  .priority-card .owner {
+    font-size: 0.7rem;
+    color: #6b7d93;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .priority-card p { font-size: 0.78rem; color: #8b9bb0; line-height: 1.5; }
+  .priority-card .tasks {
+    margin-top: 0.6rem;
+    padding: 0;
+    list-style: none;
+  }
+  .priority-card .tasks li {
+    font-size: 0.78rem;
+    color: #8b9bb0;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #141c26;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .priority-card .tasks li:last-child { border-bottom: none; }
+  .check { color: #56d364; }
+  .pending { color: #6b7d93; }
+
+  /* Calibration gauge */
+  .gauge-container {
+    background: #0a0e14;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid #1a2535;
+  }
+  .gauge-bar {
+    width: 100%;
+    height: 32px;
+    background: #141c26;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+  .gauge-fill {
+    height: 100%;
+    border-radius: 16px;
+    background: linear-gradient(90deg, #f47068 0%, #e8a838 60%, #56d364 85%, #58a6ff 100%);
+    position: relative;
+  }
+  .gauge-marker {
+    position: absolute;
+    top: -6px;
+    width: 3px;
+    height: 44px;
+    background: #fff;
+    border-radius: 2px;
+  }
+  .gauge-label {
+    font-size: 0.65rem;
+    color: #6b7d93;
+    display: flex;
+    justify-content: space-between;
+  }
+  .gauge-val {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #e8c56d;
+  }
+  .gauge-sub {
+    font-size: 0.8rem;
+    color: #6b7d93;
+    margin-top: 0.3rem;
+  }
+
+  /* Issue tracker */
+  .issue-row {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #141c26;
+    font-size: 0.78rem;
+    gap: 0.5rem;
+  }
+  .issue-row:last-child { border-bottom: none; }
+  .issue-id { color: #6b7d93; font-family: monospace; width: 30px; }
+  .issue-title { color: #c5cdd9; flex: 1; }
+  .issue-status { width: 60px; text-align: right; }
+
+  /* Team table */
+  .team-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  .team-table th {
+    text-align: left;
+    color: #6b7d93;
+    font-weight: 600;
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #1e2a3a;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .team-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #141c26;
+  }
+  .team-table .role { color: #e8c56d; font-weight: 600; }
+  .team-table .question { color: #8b9bb0; }
+  .team-table .answer { color: #c5cdd9; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <div>
+    <h1>PYRRHIC GAMES -- DAILY STANDUP</h1>
+    <div style="font-size:0.75rem; color:#6b7d93; margin-top:0.2rem;">A War Without Victory | War Room Briefing Board</div>
+  </div>
+  <div class="meta">
+    <strong>2026-03-20 06:27</strong><br>
+    v0.4.9 / v0.6.2 | Branch: main<br>
+    1,422 tests | 117 suites | tsc clean
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ===================== SECTION 1: STATE OF THE GAME ===================== -->
+  <div class="section-header">
+    <span class="section-num">1</span>
+    <h2>State of the Game</h2>
+  </div>
+
+  <div class="grid-4">
+    <div class="stat-tile c-gold">
+      <div class="val">91.4%</div>
+      <div class="lbl">Area-Weighted (40w)</div>
+      <div class="sub">ATH: 93.8% (n304)</div>
+    </div>
+    <div class="stat-tile c-green">
+      <div class="val">13/13</div>
+      <div class="lbl">Anchors Holding</div>
+      <div class="sub">Brcko now stable</div>
+    </div>
+    <div class="stat-tile c-blue">
+      <div class="val">1,422</div>
+      <div class="lbl">Tests Passing</div>
+      <div class="sub">+218 this period</div>
+    </div>
+    <div class="stat-tile c-purple">
+      <div class="val">42</div>
+      <div class="lbl">Commits (48h)</div>
+      <div class="sub">5 features, 12 fixes</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:1rem;">
+    <div class="gauge-container">
+      <div style="font-size:0.75rem; color:#6b7d93; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.5rem;">Calibration Gauge</div>
+      <div class="gauge-val">91.4%</div>
+      <div class="gauge-sub">n960 on main (91.2%) | feature branch (91.4%)</div>
+      <div class="gauge-bar">
+        <div class="gauge-fill" style="width:91.4%;">
+          <div class="gauge-marker" style="right:0;"></div>
+        </div>
+      </div>
+      <div class="gauge-label">
+        <span>80%</span>
+        <span>85% floor</span>
+        <span>90% target</span>
+        <span>93.8% ATH</span>
+        <span>100%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>War-or-Game Verdict: n960</h3>
+      <p style="color:#56d364; font-weight:600; margin-bottom:0.5rem;">SIGNED OFF -- clean run.</p>
+      <ul>
+        <li>VRS blitz dominates w0-12, stabilizes w12-26, freezes w26+</li>
+        <li>ARBiH grows to 125 bde / 140k pers (historical trajectory)</li>
+        <li>Casualty ratios favor attacker (RS fire superiority)</li>
+        <li>Enclaves form at Srebrenica, Gorazde, Bihac</li>
+        <li>17 operations with recognizable names and theaters</li>
+        <li>Post-op return march -- no realism regression</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Force Balance -->
+  <div class="grid-3" style="margin-top:1rem;">
+    <div class="card" style="border-left:3px solid #4488cc;">
+      <h3 style="color:#4488cc;">RS (VRS)</h3>
+      <div style="font-size:0.78rem; color:#8b9bb0; line-height:1.8;">
+        79 brigades | 95k personnel | 563 tanks<br>
+        <span class="badge b-pass">Blitz</span> peaks w17 (370 OSIDs), stabilizes 367<br>
+        <span class="badge b-watch">Morale crisis</span> East Bosnian Corps (5 bde at morale 1)<br>
+        <span class="badge b-watch">SRK screening</span> Siege corps in wrong stance
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid #55aa55;">
+      <h3 style="color:#55aa55;">RBiH (ARBiH)</h3>
+      <div style="font-size:0.78rem; color:#8b9bb0; line-height:1.8;">
+        125 brigades | 140k personnel | 39 tanks<br>
+        <span class="badge b-pass">Growth</span> 60k to 140k trajectory correct<br>
+        <span class="badge b-pass">Barracks</span> 13T + 26A seized (4/4 events fired)<br>
+        <span class="badge b-watch">3rd Corps</span> 9/27 displaced (improved from 16)
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid #cc8844;">
+      <h3 style="color:#cc8844;">HRHB (HVO)</h3>
+      <div style="font-size:0.78rem; color:#8b9bb0; line-height:1.8;">
+        28 brigades | 46k personnel | 18 tanks<br>
+        <span class="badge b-fail">CB sectors</span> 5/6 empty (69 edges undefended)<br>
+        <span class="badge b-fail">CB ops</span> 3 battles in 16 war weeks<br>
+        <span class="badge b-new">Transition</span> War mechanic working, combat isn't
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SECTION 2: RETROSPECTIVE ===================== -->
+  <div class="section-header">
+    <span class="section-num">2</span>
+    <h2>Yesterday's Retrospective -- Good / Bad / Ugly</h2>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3 style="color:#56d364;">The Good</h3>
+      <div class="retro-good retro-item">
+        <h4>HRHB-RBiH War Transition Merged</h4>
+        <p>7 clean commits. Mobilization phase, condition-driven events, combat suppression gates, corps activation, readiness fix. 38 new tests. The Croat-Bosniak war emerges organically from alliance decay.</p>
+      </div>
+      <div class="retro-good retro-item">
+        <h4>Equipment Pipeline Complete</h4>
+        <p>5-source equipment system: scavenge, capture, abandoned, smuggling, production. Phantom tanks eliminated. Per-brigade tracking + 12 accolades. Battle of the Barracks fires 4/4.</p>
+      </div>
+      <div class="retro-good retro-item">
+        <h4>Deck.gl Hybrid Landed</h4>
+        <p>Tactical overlay layers, unit counter enrichment, major city labels. Minimap M1 fix (visibility:hidden). 91 new UI smoke tests. The foundation for wargame-quality visuals is laid.</p>
+      </div>
+      <div class="retro-good retro-item">
+        <h4>+218 Tests</h4>
+        <p>1,204 to 1,422. Alliance mobilization, combat suppression, bot stance, HVO sectors, UI map render smoke. Healthy coverage growth.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="color:#f47068;">The Bad</h3>
+      <div class="retro-bad retro-item">
+        <h4>setData() Violated Again (3rd Time)</h4>
+        <p>Ops modal arrows took 4 fix iterations. The remove+re-add pattern was already documented. This is now a structural problem -- memory-based enforcement is failing. Need a utility class.</p>
+      </div>
+      <div class="retro-bad retro-item">
+        <h4>Front Line Rendering: No Test Script</h4>
+        <p>Pushed renderer changes without diagnostic validation. Needed follow-up fix (BFS bridge hops 5 to 8). The edges viewer had the working algorithm -- should have extracted it first.</p>
+      </div>
+      <div class="retro-bad retro-item">
+        <h4>HRHB Combat Is Inert</h4>
+        <p>The war transition mechanism works perfectly -- alliance decays, fronts appear, mobilization triggers. But the actual warfare produces only 3 battles in 16 weeks. Central Bosnia has 5 brigades and 0 effective sectors.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="color:#e8a838;">The Ugly</h3>
+      <div class="retro-ugly retro-item">
+        <h4>69 Undefended HVO Front Edges</h4>
+        <p>hvo_tomislavgrad: 5/9 sectors empty. hvo_central_bosnia: 0 sectors despite 7 subordinates (absorbed by consolidation). Kiseljak double-stacked while Busovaca/Vitez/Zepce exposed.</p>
+      </div>
+      <div class="retro-ugly retro-item">
+        <h4>VRS East Bosnian Morale Collapse</h4>
+        <p>5 brigades at morale 1. rs_1st_birac (369 pers) in active op below combat-ineffective gate. Brcko corridor held by willpower alone. No reinforcement mechanism pulling them out.</p>
+      </div>
+      <div class="retro-ugly retro-item">
+        <h4>Polygon Harmonization Risk</h4>
+        <p>68c9527 touched 77/134 polygon pairs without documented md5sum check of downstream coupling. The "data pipeline coupled" lesson was potentially violated.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Life Lessons Summary -->
+  <div class="card full-span" style="margin-top:1rem;">
+    <h3>Life Lessons Review Summary <span class="badge b-watch">3 violations</span> <span class="badge b-pass">5 positive signals</span> <span class="badge b-new">6 new lessons</span></h3>
+    <p style="margin-top:0.4rem;">Grade: <strong style="color:#e8a838;">B+</strong>. Recurring risk: MapLibre modal patterns (setData, isStyleLoaded). Recommendation: create MapLibreModalSource utility class. Full report: <code>docs/60_visualisations/life_lessons_review_2026-03-20.html</code></p>
+  </div>
+
+  <!-- ===================== SECTION 3: GAME ANALYSIS ===================== -->
+  <div class="section-header">
+    <span class="section-num">3</span>
+    <h2>Fresh Game Analysis -- Open Issues</h2>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Active Issues Tracker (REAL_WAR_MASTER)</h3>
+      <div class="issue-row">
+        <span class="issue-id">#34</span>
+        <span class="issue-title">HVO Tomislavgrad 5/9 sectors empty, 69 edges undefended</span>
+        <span class="issue-status"><span class="badge b-p1">P1</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">--</span>
+        <span class="issue-title">CB brigade redistribution: 5 bde in 6 sectors, 5/6 empty</span>
+        <span class="issue-status"><span class="badge b-p1">P1</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">--</span>
+        <span class="issue-title">CB operations not launching: 3 battles in 16 war weeks</span>
+        <span class="issue-status"><span class="badge b-p1">P1</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">--</span>
+        <span class="issue-title">Kiseljak/Vitez pocket separation (historically two enclaves)</span>
+        <span class="issue-status"><span class="badge b-p1">P1</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">#35</span>
+        <span class="issue-title">SRK screening stance -- siege corps in lowest density mode</span>
+        <span class="issue-status"><span class="badge b-p2">P2</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">#37</span>
+        <span class="issue-title">VRS East Bosnian morale crisis -- 5 bde at morale 1</span>
+        <span class="issue-status"><span class="badge b-p2">P2</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">#36</span>
+        <span class="issue-title">VRS Herzegovina threat_ratio 2,625 (cold front protects)</span>
+        <span class="issue-status"><span class="badge b-p2">P2</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">#41</span>
+        <span class="issue-title">Dissolution floor not enforced -- hrhb_108th at 100 pers</span>
+        <span class="issue-status"><span class="badge b-p3">P3</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">#32</span>
+        <span class="issue-title">3rd Corps displacement -- 9/27 far from home (improved)</span>
+        <span class="issue-status"><span class="badge b-p3">P3</span></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Resolved This Period <span class="badge b-done">Fixed</span></h3>
+      <div class="issue-row">
+        <span class="issue-id">#38</span>
+        <span class="issue-title">HVO stale commander IDs -- Blaskic commands nothing</span>
+        <span class="issue-status"><span class="badge b-done">Fixed</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">#14</span>
+        <span class="issue-title">hvo_central_bosnia 0 sectors -- corps formation missing</span>
+        <span class="issue-status"><span class="badge b-done">Fixed</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">#33</span>
+        <span class="issue-title">Sarajevo 29.7x density imbalance -- correct (siege)</span>
+        <span class="issue-status"><span class="badge b-done">WAI</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">--</span>
+        <span class="issue-title">Readiness reversion -- active brigades reverting to forming</span>
+        <span class="issue-status"><span class="badge b-done">Fixed</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">--</span>
+        <span class="issue-title">Equipment phantom tanks (240 corps_asset tanks)</span>
+        <span class="issue-status"><span class="badge b-done">Fixed</span></span>
+      </div>
+      <div class="issue-row">
+        <span class="issue-id">--</span>
+        <span class="issue-title">Post-op brigade displacement (16 to 9 out-of-place)</span>
+        <span class="issue-status"><span class="badge b-done">Improved</span></span>
+      </div>
+
+      <h3 style="margin-top:1.2rem;">Calibration Benchmarks (n960)</h3>
+      <div style="font-size:0.78rem; color:#8b9bb0; line-height:1.8;">
+        <span class="badge b-pass">PASS</span> Outcome distribution: 77% decisive, correct spread<br>
+        <span class="badge b-pass">PASS</span> Casualty volume: 33.8k (within 40-60k range)<br>
+        <span class="badge b-pass">PASS</span> Territory: RS 367 OSIDs, front stabilizes post-w20<br>
+        <span class="badge b-pass">PASS</span> Force strength: all 3 factions within historical<br>
+        <span class="badge b-pass">PASS</span> Operational tempo: 3-phase decay matches RS doctrine<br>
+        <span class="badge b-pass">PASS</span> Smell test: 5/5 battles historically plausible
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SECTION 4: TODAY'S PRIORITIES ===================== -->
+  <div class="section-header">
+    <span class="section-num">4</span>
+    <h2>Today's Priorities -- 5 Ambitious Items</h2>
+  </div>
+
+  <div class="grid-3">
+    <div class="priority-card p-critical">
+      <div class="pri-num">1</div>
+      <h3>CB Brigade Redistribution</h3>
+      <div class="owner">Gameplay Programmer + Formation Expert</div>
+      <p>hvo_central_bosnia has 5 brigades but 0 effective sectors. 5/6 sectors empty. Kiseljak double-stacked. Fix the assignment system so CB brigades distribute across Busovaca, Vitez, NT, Zepce. This is the #1 blocker for the Croat-Bosniak war.</p>
+      <ul class="tasks">
+        <li><span class="pending">[ ]</span> Diagnose why CB has 0 sectors (consolidation stealing?)</li>
+        <li><span class="pending">[ ]</span> Fix sector assignment for enclave corps</li>
+        <li><span class="pending">[ ]</span> Verify 5 brigades spread across 4-6 sectors</li>
+        <li><span class="pending">[ ]</span> Run 56w scenario, verify sector coverage</li>
+      </ul>
+    </div>
+
+    <div class="priority-card p-critical">
+      <div class="pri-num">2</div>
+      <h3>CB Operations Launch</h3>
+      <div class="owner">Gameplay Programmer + Game Designer</div>
+      <p>Central Bosnia corps doesn't generate operations. 3 battles in 16 war weeks. Corps needs offensive doctrine against ARBiH + operation generation. Check doctrine phases, corps directives, and the op launch gate chain.</p>
+      <ul class="tasks">
+        <li><span class="pending">[ ]</span> Trace op_launch_trace for CB corps</li>
+        <li><span class="pending">[ ]</span> Add HRHB doctrine phases for post-alliance war</li>
+        <li><span class="pending">[ ]</span> Verify operations generate and execute</li>
+        <li><span class="pending">[ ]</span> Target: 1+ ops/week during active war</li>
+      </ul>
+    </div>
+
+    <div class="priority-card p-high">
+      <div class="pri-num">3</div>
+      <h3>SRK Stance Floor</h3>
+      <div class="owner">Gameplay Programmer</div>
+      <p>Siege corps in screening stance (0.0x entrenchment). Historically SRK was fortified around Sarajevo. Add corps-specific stance floor: SRK minimum "defend", inner ring "fortify". Quick win -- single constant + check in bot_corps_stance.ts.</p>
+      <ul class="tasks">
+        <li><span class="pending">[ ]</span> Add CORPS_STANCE_FLOOR config</li>
+        <li><span class="pending">[ ]</span> SRK: defend minimum, siege sectors: fortify</li>
+        <li><span class="pending">[ ]</span> Run 40w, verify entrenchment builds</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:1rem;">
+    <div class="priority-card p-high">
+      <div class="pri-num">4</div>
+      <h3>MapLibreModalSource Utility</h3>
+      <div class="owner">Graphics Programmer + UI/UX Developer</div>
+      <p>The setData() violation is a 3x repeat offender. Create a utility class that structurally prevents setData() and enforces remove+re-add. Apply to OpsMap and any future modal maps. Eliminates the #1 recurring life lesson violation.</p>
+      <ul class="tasks">
+        <li><span class="pending">[ ]</span> Create MapLibreModalSource class</li>
+        <li><span class="pending">[ ]</span> Refactor OpsMap to use it</li>
+        <li><span class="pending">[ ]</span> Add test for update-after-init pattern</li>
+      </ul>
+    </div>
+
+    <div class="priority-card p-medium">
+      <div class="pri-num">5</div>
+      <h3>Dissolution Floor Enforcement</h3>
+      <div class="owner">Systems Programmer</div>
+      <p>hrhb_108th at 100 personnel (below 150 floor). Multiple ARBiH at 146. Investigate brigade_dissolution.ts -- either the absolute floor isn't triggering the 2-of-3 criteria correctly, or cohesion/morale are keeping them alive. Quick diagnostic.</p>
+      <ul class="tasks">
+        <li><span class="pending">[ ]</span> Audit absolute floor logic in brigade_dissolution.ts</li>
+        <li><span class="pending">[ ]</span> Verify 2-of-3 criteria interaction with floor</li>
+        <li><span class="pending">[ ]</span> Fix and verify dissolved brigades are cleaned up</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== SECTION 5: TEAM COORDINATION ===================== -->
+  <div class="section-header">
+    <span class="section-num">5</span>
+    <h2>Team Coordination & Handoffs</h2>
+  </div>
+
+  <div class="card">
+    <table class="team-table">
+      <thead>
+        <tr>
+          <th style="width:160px;">Role</th>
+          <th style="width:250px;">Question</th>
+          <th>Answer / Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="role">Orchestrator</td>
+          <td class="question">What's the single priority?</td>
+          <td class="answer">HRHB-RBiH combat activation (items #1 + #2). The war transition works but produces no warfare. This is the defining gap.</td>
+        </tr>
+        <tr>
+          <td class="role">Product Manager</td>
+          <td class="question">Phase plan for CB activation?</td>
+          <td class="answer">Handoff: PM to produce phased plan for CB redistribution + ops launch. One change per calibration run. 56w scenario for validation.</td>
+        </tr>
+        <tr>
+          <td class="role">Game Designer</td>
+          <td class="question">HRHB doctrine post-alliance break?</td>
+          <td class="answer">Need doctrine phases for HRHB-vs-RBiH conflict. Historical: HVO was defensive in Central Bosnia, offensive in Herzegovina. Should emerge from existing doctrine system.</td>
+        </tr>
+        <tr>
+          <td class="role">Gameplay Programmer</td>
+          <td class="question">Today's implementation work?</td>
+          <td class="answer">CB sector fix first (item #1), then ops launch (item #2). SRK stance floor (item #3) as quick win between calibration runs.</td>
+        </tr>
+        <tr>
+          <td class="role">Historian</td>
+          <td class="question">Kiseljak/Vitez pocket separation timing?</td>
+          <td class="answer">Deferred to Phase 2 -- research needed on when ARBiH severed the corridor and which operations cut it. BB1/BB2 extraction needed.</td>
+        </tr>
+        <tr>
+          <td class="role">War-or-Game</td>
+          <td class="question">Sign-off status?</td>
+          <td class="answer">n960 SIGNED OFF. Next sign-off after CB redistribution fix. Standing directive: /war-or-game after every phase.</td>
+        </tr>
+        <tr>
+          <td class="role">Graphics Programmer</td>
+          <td class="question">Deck.gl next steps?</td>
+          <td class="answer">Parked at P2. Foundation landed. Next: unit counter enrichment when sim work stabilizes. MapLibreModalSource utility is today's P4.</td>
+        </tr>
+        <tr>
+          <td class="role">QA Engineer</td>
+          <td class="question">Test coverage gaps?</td>
+          <td class="answer">CB sector assignment needs integration test. Operation launch for new corps needs test. Both should be written TDD-style before implementation.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bottom summary -->
+  <div class="card full-span" style="margin-top:1.5rem; border: 1px solid #e8c56d; background: linear-gradient(135deg, #0d1520 0%, #141e2c 100%);">
+    <div style="display:flex; align-items:center; gap:1.5rem;">
+      <div style="font-size:3rem; color:#e8c56d; font-weight:700; line-height:1;">!</div>
+      <div>
+        <h3 style="color:#e8c56d; font-size:1rem;">Single Priority: Make the Croat-Bosniak War Fight</h3>
+        <p style="font-size:0.85rem; color:#9aa5b4; margin-top:0.3rem; line-height:1.6;">
+          The transition system is a success -- alliance decays, fronts appear, mobilization triggers, events fire.
+          But 3 battles in 16 war weeks is a paper tiger. Fix CB brigade distribution, then enable operations.
+          One change per run. War-or-Game sign-off after each. Target: visible, historically-paced HRHB-RBiH combat by end of session.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

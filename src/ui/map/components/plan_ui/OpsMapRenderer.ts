@@ -6,6 +6,7 @@ import { rewritePmtilesUrls } from '../../map/rewritePmtilesUrls';
 import { loadOperationalSettlements } from '../../data/DataLoader';
 import { buildControlGeoJSON } from '../../map/builders/buildControlGeoJSON';
 import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSON';
+import { ModalMapSource } from '../../utils/ModalMapSource';
 import styleJson from '../../map/awwv_map_style.json';
 import type { FeatureCollection } from 'geojson';
 
@@ -29,6 +30,9 @@ export class OpsMapRenderer {
     private opType: OpType = 'offensive';
     private ready = false;
     private playerFaction: string | null = null;
+    private osidDataSource: ModalMapSource | null = null;
+    private arrowsSource: ModalMapSource | null = null;
+    private markersSource: ModalMapSource | null = null;
     public onOsidClick?: (osid: string) => void;
 
     constructor(container: HTMLElement, controlBySettlement?: Record<string, string | null>, playerFaction?: string) {
@@ -109,16 +113,19 @@ export class OpsMapRenderer {
 
     public setOsidData(geojson: any) {
         this.mapReady.then(() => {
-            const source = this.map.getSource('ops-osid-data') as maplibregl.GeoJSONSource;
-            if (source) {
-                source.setData(geojson);
-            }
+            this.osidDataSource?.setData(geojson);
         });
     }
 
     public dispose() {
         this.onOsidClick = undefined;
-        if (this.map) this.map.remove(); // map.remove() cleans up all listeners
+        this.osidDataSource?.destroy();
+        this.arrowsSource?.destroy();
+        this.markersSource?.destroy();
+        this.osidDataSource = null;
+        this.arrowsSource = null;
+        this.markersSource = null;
+        if (this.map) this.map.remove();
     }
 
     public updateOpType(type: OpType) {
@@ -132,13 +139,10 @@ export class OpsMapRenderer {
         if (!this.ready) return;
 
         const features = axes.map(axis => this.buildAxisFeature(axis)).filter(Boolean);
-        const source = this.map.getSource('ops-planning-arrows') as maplibregl.GeoJSONSource;
-        if (source) {
-            source.setData({
-                type: 'FeatureCollection',
-                features: features as any
-            });
-        }
+        this.arrowsSource?.setData({
+            type: 'FeatureCollection',
+            features: features as any
+        });
     }
 
     public updateMarkers(objectives: string[], staging: string | null, osidCoords: Map<string, [number, number]>) {
@@ -164,8 +168,7 @@ export class OpsMapRenderer {
                     });
                 }
             }
-            const source = this.map.getSource('ops-markers') as any;
-            if (source) source.setData({ type: 'FeatureCollection', features });
+            this.markersSource?.setData({ type: 'FeatureCollection', features });
         });
     }
 
@@ -220,110 +223,52 @@ export class OpsMapRenderer {
             });
         }
 
-        // Arrow source for operation axes
-        this.map.addSource('ops-planning-arrows', {
-            type: 'geojson',
-            data: { type: 'FeatureCollection', features: [] }
-        });
+        // Arrow source for operation axes — ModalMapSource for safe updates
+        this.arrowsSource = new ModalMapSource(this.map, 'ops-planning-arrows', [
+            {
+                id: 'ops-planning-arrows-glow', type: 'line',
+                layout: { 'line-join': 'round', 'line-cap': 'round' },
+                paint: { 'line-color': ['get', 'color'], 'line-width': 14, 'line-blur': 10, 'line-opacity': 0.25 },
+            },
+            {
+                id: 'ops-planning-arrows-line', type: 'line',
+                layout: { 'line-join': 'round', 'line-cap': 'round' },
+                paint: { 'line-color': ['get', 'color'], 'line-width': 5, 'line-opacity': 0.8 },
+            },
+            {
+                id: 'ops-planning-arrows-flow', type: 'line',
+                layout: { 'line-join': 'round', 'line-cap': 'round' },
+                paint: { 'line-color': '#fff', 'line-width': 2, 'line-opacity': 0.3, 'line-dasharray': [2, 4] },
+            },
+        ]);
+        this.arrowsSource.init();
 
-        // Glow behind arrows
-        this.map.addLayer({
-            id: 'ops-planning-arrows-glow',
-            type: 'line',
-            source: 'ops-planning-arrows',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: {
-                'line-color': ['get', 'color'],
-                'line-width': 14,
-                'line-blur': 10,
-                'line-opacity': 0.25
-            }
-        });
+        // OSID click target layer — ModalMapSource for safe updates
+        this.osidDataSource = new ModalMapSource(this.map, 'ops-osid-data', [
+            {
+                id: 'ops-osid-points', type: 'circle',
+                paint: {
+                    'circle-radius': 4, 'circle-color': '#c4a35a', 'circle-opacity': 0.5,
+                    'circle-stroke-width': 1, 'circle-stroke-color': '#c4a35a', 'circle-stroke-opacity': 0.3,
+                },
+            },
+        ]);
+        this.osidDataSource.init();
 
-        // Main arrow line
-        this.map.addLayer({
-            id: 'ops-planning-arrows-line',
-            type: 'line',
-            source: 'ops-planning-arrows',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: {
-                'line-color': ['get', 'color'],
-                'line-width': 5,
-                'line-opacity': 0.8
-            }
-        });
-
-        // Flow animation (dashed white overlay)
-        this.map.addLayer({
-            id: 'ops-planning-arrows-flow',
-            type: 'line',
-            source: 'ops-planning-arrows',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: {
-                'line-color': '#fff',
-                'line-width': 2,
-                'line-opacity': 0.3,
-                'line-dasharray': [2, 4]
-            }
-        });
-
-        // Additional OSID click target layer (for ops planning clicks)
-        // The game map already has osid-control polygons — we use those for clicks
-        // But also add a dedicated point source for staging/objective selection
-        this.map.addSource('ops-osid-data', {
-            type: 'geojson',
-            data: { type: 'FeatureCollection', features: [] }
-        });
-
-        this.map.addLayer({
-            id: 'ops-osid-points',
-            type: 'circle',
-            source: 'ops-osid-data',
-            paint: {
-                'circle-radius': 4,
-                'circle-color': '#c4a35a',
-                'circle-opacity': 0.5,
-                'circle-stroke-width': 1,
-                'circle-stroke-color': '#c4a35a',
-                'circle-stroke-opacity': 0.3
-            }
-        });
-
-        // Objective/staging markers source
-        this.map.addSource('ops-markers', {
-            type: 'geojson',
-            data: { type: 'FeatureCollection', features: [] }
-        });
-
-        // Objective markers — red circles
-        this.map.addLayer({
-            id: 'ops-objective-markers',
-            type: 'circle',
-            source: 'ops-markers',
-            filter: ['==', ['get', 'type'], 'objective'],
-            paint: {
-                'circle-radius': 8,
-                'circle-color': '#e05050',
-                'circle-stroke-width': 2,
-                'circle-stroke-color': '#ff8080',
-                'circle-opacity': 0.9
-            }
-        });
-
-        // Staging marker — green circle
-        this.map.addLayer({
-            id: 'ops-staging-marker',
-            type: 'circle',
-            source: 'ops-markers',
-            filter: ['==', ['get', 'type'], 'staging'],
-            paint: {
-                'circle-radius': 10,
-                'circle-color': '#4a9a55',
-                'circle-stroke-width': 2,
-                'circle-stroke-color': '#80ff80',
-                'circle-opacity': 0.9
-            }
-        });
+        // Objective/staging markers — ModalMapSource for safe updates
+        this.markersSource = new ModalMapSource(this.map, 'ops-markers', [
+            {
+                id: 'ops-objective-markers', type: 'circle',
+                filter: ['==', ['get', 'type'], 'objective'],
+                paint: { 'circle-radius': 8, 'circle-color': '#e05050', 'circle-stroke-width': 2, 'circle-stroke-color': '#ff8080', 'circle-opacity': 0.9 },
+            },
+            {
+                id: 'ops-staging-marker', type: 'circle',
+                filter: ['==', ['get', 'type'], 'staging'],
+                paint: { 'circle-radius': 10, 'circle-color': '#4a9a55', 'circle-stroke-width': 2, 'circle-stroke-color': '#80ff80', 'circle-opacity': 0.9 },
+            },
+        ]);
+        this.markersSource.init();
     }
 
     private setupInteractions() {

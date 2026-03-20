@@ -254,9 +254,32 @@
       "id": "osid-control-outline",
       "type": "line",
       "source": "osid-control",
+      "layout": {
+        "visibility": "none"
+      },
       "paint": {
         "line-color": "rgba(40, 40, 50, 0.1)",
         "line-width": 0.3
+      }
+    },
+    {
+      "id": "osid-selected-mun-sibling-fill",
+      "type": "fill",
+      "source": "osid-control",
+      "filter": ["==", ["get", "osid"], "__none__"],
+      "paint": {
+        "fill-antialias": false,
+        "fill-color": "rgba(212, 118, 48, 0.20)"
+      }
+    },
+    {
+      "id": "osid-selected-fill",
+      "type": "fill",
+      "source": "osid-control",
+      "filter": ["==", ["get", "osid"], "__none__"],
+      "paint": {
+        "fill-antialias": false,
+        "fill-color": "rgba(142, 48, 8, 0.58)"
       }
     },
     {
@@ -265,9 +288,9 @@
       "source": "osid-control",
       "filter": ["==", ["get", "osid"], "__none__"],
       "paint": {
-        "line-color": "rgba(220, 190, 120, 0.9)",
-        "line-width": 2.5,
-        "line-opacity": 0.85
+        "line-color": "rgba(255, 186, 96, 0.95)",
+        "line-width": 3,
+        "line-opacity": 0.92
       },
       "layout": {
         "line-cap": "round",
@@ -1113,6 +1136,9 @@
       "id": "mun-borders",
       "type": "line",
       "source": "mun-borders",
+      "layout": {
+        "visibility": "none"
+      },
       "paint": {
         "line-color": "rgba(80, 60, 40, 0.35)",
         "line-width": 1.5,
@@ -1120,6 +1146,43 @@
           4,
           2
         ]
+      }
+    },
+    {
+      "id": "mun-borders-selection",
+      "type": "line",
+      "source": "mun-borders",
+      "layout": {
+        "visibility": "none",
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "filter": [
+        "==",
+        [
+          "get",
+          "mun1990_id"
+        ],
+        "__mun_sel_none__"
+      ],
+      "paint": {
+        "line-color": "rgba(255, 154, 72, 0.95)",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          2.2,
+          10,
+          3,
+          14,
+          3.8
+        ],
+        "line-opacity": 0.95
       }
     },
     {
