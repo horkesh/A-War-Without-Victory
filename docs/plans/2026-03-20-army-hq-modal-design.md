@@ -364,12 +364,21 @@ ArmyHQModal (new, full-screen overlay)
 
 ## 10. Implementation Phases
 
+Each phase follows a strict discipline:
+1. Implement the phase
+2. Run `/simplify` — review for reuse, quality, efficiency; fix issues
+3. Run smoke-test triad: `tsc --noEmit` + `vitest run` + `desktop:map:build`
+4. Commit with descriptive message
+5. Update documentation: `docs/PROJECT_LEDGER.md` (behavioral entry), `.claude/napkin.md` (current state + backlog), `working-on.md` (progress snapshot for session continuity)
+6. Propagate to canon if any new IPC channels, state fields, or component patterns are introduced (Systems Manual, MAP_UI_MASTER, GUI_MASTER, REPO_MAP as applicable)
+
 ### Phase 1: Shell + Overview (MVP)
 - `ArmyHQModal` with dark wood surface
 - Army Commander card + Strategic Situation card
 - Corps card grid (collapsed only, no expansion)
 - Breadcrumb bar + ESC close
 - Wire to existing `selectedArmyId` trigger
+- **Post-phase:** `/simplify` + smoke tests + commit + ledger + napkin
 
 ### Phase 2: Corps Drill-Down
 - Corps card expand/collapse with vertical animation
@@ -377,13 +386,15 @@ ArmyHQModal (new, full-screen overlay)
 - Sectors section with sub-cards
 - Operations section with sub-cards
 - ORBAT section with brigade list
+- **Post-phase:** `/simplify` + smoke tests + commit + ledger + napkin
 
 ### Phase 3: Actions
-- Replace Commander (inline officer picker)
+- Replace Commander (inline officer picker + new `forceReplaceCorpsCommander` IPC handler)
 - Change corps stance (inline dropdown)
 - Change sector stance (inline dropdown)
 - Force launch / stand down operation
 - Alert strip with pending actions
+- **Post-phase:** `/simplify` + smoke tests + commit + ledger + napkin + propagate new IPC to Systems Manual
 
 ### Phase 4: Deep Drill-Down + Polish
 - Brigade sub-card expansion (full stats, engagement history)
@@ -392,6 +403,7 @@ ArmyHQModal (new, full-screen overlay)
 - Officer dismissal action (new `dismissOfficer` IPC handler)
 - Asset integration (wood texture, paper texture from Gemini Pro)
 - Hotkey `H` to open HQ (requires `keydown` listener in app shell)
+- **Post-phase:** `/simplify` + smoke tests + commit + ledger + napkin + propagate to GUI_MASTER, REPO_MAP, Systems Manual
 
 ---
 
