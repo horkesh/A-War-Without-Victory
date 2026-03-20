@@ -6,6 +6,13 @@ const STANCE_ICON: Record<string, IconName> = {
   offensive: 'offensive', defensive: 'defensive', reorganize: 'reorganizing', balanced: 'balanced',
 };
 
+const STANCE_COLOR: Record<string, string> = {
+  offensive: 'border-l-red-500/70',
+  defensive: 'border-l-blue-400/70',
+  balanced: 'border-l-amber-400/70',
+  reorganize: 'border-l-gray-400/70',
+};
+
 export interface CorpsCardProps {
   corpsId: string;
   corpsName?: string;
@@ -22,9 +29,30 @@ export interface CorpsCardProps {
   commanderActing?: boolean;
 }
 
-/**
- * Compact card for a corps in the OOB sidebar: header + list of BrigadeRows.
- */
+function getAvgCohesion(brigades: FormationView[]): number {
+  if (brigades.length === 0) return 0;
+  return brigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / brigades.length;
+}
+
+function getCohesionBarColor(cohesion: number): string {
+  if (cohesion >= 70) return 'bg-emerald-500';
+  if (cohesion >= 40) return 'bg-amber-400';
+  return 'bg-red-500';
+}
+
+function getEquipmentSummary(brigades: FormationView[]): { tanks: number; arty: number; tanksTotal: number; artyTotal: number } {
+  let tanks = 0, arty = 0, tanksTotal = 0, artyTotal = 0;
+  for (const b of brigades) {
+    if (b.composition) {
+      tanks += b.composition.tank_condition?.operational ?? 0;
+      arty += b.composition.artillery_condition?.operational ?? 0;
+      tanksTotal += b.composition.tanks ?? 0;
+      artyTotal += b.composition.artillery ?? 0;
+    }
+  }
+  return { tanks, arty, tanksTotal, artyTotal };
+}
+
 export function CorpsCard({
   corpsId,
   corpsName,
@@ -43,6 +71,9 @@ export function CorpsCard({
   const displayName = corpsName ?? `Corps ${corpsId}`;
   const factionClass = FACTION_COLORS[faction] ?? 'text-text-primary';
   const totalPersonnel = brigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
+  const avgCohesion = getAvgCohesion(brigades);
+  const equip = getEquipmentSummary(brigades);
+  const stanceBorder = STANCE_COLOR[stance ?? 'balanced'] ?? 'border-l-gray-400/70';
   const corpsOsids = Array.from(
     new Set(
       brigades
@@ -54,7 +85,7 @@ export function CorpsCard({
 
   return (
     <div
-      className="rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden"
+      className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden border-l-3 ${stanceBorder}`}
       onMouseEnter={() => {
         onHoverOsidsChange?.(corpsOsids);
         onMouseEnter?.();
@@ -70,17 +101,45 @@ export function CorpsCard({
         className={`w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 ${onHeaderClick ? 'hover:bg-panel-hover transition-colors cursor-pointer' : 'cursor-default'}`}
       >
         <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
-        <span className="text-[10px] tabular-nums whitespace-nowrap">
-          <span className={totalPersonnel >= 8000 ? 'text-emerald-400' : totalPersonnel >= 4000 ? 'text-amber-400' : 'text-red-400'}>{totalPersonnel.toLocaleString()}</span>
-          <span className="text-text-secondary"> · {brigades.length} brg</span>
+        <span className="flex items-center gap-1.5 text-[10px] tabular-nums whitespace-nowrap">
+          <span className="flex items-center gap-0.5">
+            <Icon name="personnel" size={11} color={totalPersonnel >= 8000 ? '#34d399' : totalPersonnel >= 4000 ? '#fbbf24' : '#f87171'} />
+            <span className={totalPersonnel >= 8000 ? 'text-emerald-400' : totalPersonnel >= 4000 ? 'text-amber-400' : 'text-red-400'}>{totalPersonnel.toLocaleString()}</span>
+          </span>
+          <span className="text-text-secondary">{brigades.length} brg</span>
         </span>
       </button>
+
+      {/* Corps health bar — average cohesion */}
+      <div className="h-[2px] bg-panel-border/50">
+        <div className={`h-full ${getCohesionBarColor(avgCohesion)} transition-all`} style={{ width: `${Math.min(100, avgCohesion)}%` }} />
+      </div>
+
       {commanderName && (
         <div className="px-3 py-1 text-[10px] bg-panel-bg flex justify-between border-b border-panel-border/50 text-text-secondary">
           <span>Commander:</span>
           <span className="text-text-primary">{commanderName}{commanderActing ? ' (Acting)' : ''}</span>
         </div>
       )}
+
+      {/* Equipment summary row */}
+      {(equip.tanksTotal > 0 || equip.artyTotal > 0) && (
+        <div className="px-3 py-1 flex items-center gap-3 text-[10px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
+          {equip.tanksTotal > 0 && (
+            <span className="flex items-center gap-0.5" title={`Tanks: ${equip.tanks} operational / ${equip.tanksTotal} total`}>
+              <Icon name="tanks" size={10} />
+              <span className="text-text-primary">{equip.tanks}</span>/{equip.tanksTotal}
+            </span>
+          )}
+          {equip.artyTotal > 0 && (
+            <span className="flex items-center gap-0.5" title={`Artillery: ${equip.arty} operational / ${equip.artyTotal} total`}>
+              <Icon name="artillery" size={10} />
+              <span className="text-text-primary">{equip.arty}</span>/{equip.artyTotal}
+            </span>
+          )}
+        </div>
+      )}
+
       {onStanceChange && (
         <div className="px-3 py-1.5 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">

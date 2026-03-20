@@ -1,7 +1,55 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-20
-**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Icon language deployed (Phase 1 visual overhaul). Combat effectiveness at all hierarchy levels, 3D terrain (ops modal), Deck.gl animated arrows, terrain-aware camera, terrain tooltip, staging↔objective selectability, ModalMapSource utility. HRHB-RBiH war transition system. Post-operation brigade return march. Battle of the Barracks, equipment overhaul, polygon harmonization, front line rendering.
+**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Visual Overhaul COMPLETE (9 phases). Deck.gl formation counters ON by default (health bars, supply dots, op/disrupted glows). Sidebar upgrade (stance stripes, equipment, icons). EventModal dispatch paper. Bottom strip macro indicators. Battle flyover. Terrain-cost move preview. Combat effectiveness, 3D terrain, animated arrows. HRHB-RBiH war transition system.
+
+## [2026-03-20] Visual Overhaul Phases 3-9 — Full UI Upgrade
+
+Completed all remaining visual overhaul phases in a single session. Simplify pass applied after each batch.
+
+### Phase 3: Map Counter Enrichment (Deck.gl)
+- **`deckFormationCounters: true`** by default — Deck.gl now renders all formation markers
+- **Cohesion health bar:** Unicode block char bar (`━`) at counter bottom, green/amber/red by cohesion (70/40 thresholds)
+- **Supply dot:** 3.5px circle at top-right, colored by derived supply state (supplied/strained/cutoff)
+- **Status icon:** Top-left corner — `!` (disrupted, red), `+` (in operation, gold), `>` (column march, blue)
+- **Stack badge:** Bottom-right circle with unit count when 2+ formations at same OSID
+- **Op/disrupted glow rings:** ScatterplotLayer behind icons — gold for active operation, red for disrupted
+- **Single-pass classification:** `classifyFeatures()` walks features once into 5 buckets (was 5 separate `.filter()` passes)
+- **Enriched GeoJSON properties:** `supply_state`, `is_in_operation`, `is_disrupted`, `movement_stance`, `morale`, `fatigue`, `is_stack_top`, `stack_count` on `FormationMarkerProperties`
+
+### Phase 4: Sidebar Visual Upgrade
+- **CorpsCard:** Stance-colored left border (red=offensive, blue=defensive, amber=balanced). Personnel icon with color-coded count. Equipment summary row (tanks/arty operational/total). Cohesion health bar (average across brigades).
+- **BrigadeRow:** Stance-colored left stripe (by posture). Personnel count with icon (compact `2.4k` format). Star icon for prestige. Fatigue icon. Rubber-stamp status badges (rotated, bordered: DISRUPTED/RESERVE/IN COMBAT/FORMING).
+
+### Phase 5: Document Treatment — EventModal Dispatch Paper
+- **Paper aesthetic:** Cream gradient background (`#f0e8d8`→`#e0d8c0`), subtle noise texture
+- **Category stamp:** Top-right rotated badge with icon (MILITARY/POLITICAL/HUMANITARIAN/DIPLOMATIC/TERRITORIAL)
+- **Effect icons:** Per-effect-kind icons (morale→heart, supply→crate, cohesion→shield, etc.)
+- **Typography:** Georgia serif titles, Courier New monospace narrative (field report style)
+- **Decision buttons:** Paper-styled with hover darkening, "Commander's Decision Required" header
+
+### Phase 6: Bottom Strip Enrichment
+- **Turn counter:** `w{turn}` + date string
+- **Active operations:** Crosshairs icon + count (gold)
+- **Battles this turn:** Sword icon + count (red)
+- **Alliance status:** Scales icon + status pill (ALLIED/STRAINED/MOBILIZING/WAR, color-coded)
+- **Territory computation memoized** with `useMemo` (was recalculating 744-entry loop on every layer toggle)
+
+### Phase 7: Map Operation Visualization
+- **Operation glow:** Gold semi-transparent ring behind participating brigade markers (ScatterplotLayer)
+- **Disrupted glow:** Red ring behind disrupted brigades
+- Both scoped to top-stack only (consistent with badge layer)
+
+### Phase 8: Battle Site Flyover
+- **Click battle marker → `flyTo`** with pitch 35°, zoom min 11, 1200ms animation
+- Selects the OSID to open settlement panel with battle context
+
+### Phase 9: Terrain Cost Move Preview
+- **Move preview** now uses terrain friction coloring instead of flat green
+- `buildControlGeoJSON` enriched with `friction` property from `osidPropertiesMap`
+- MapLibre `fill-color` interpolation: flat (green) → forest (light green) → hilly (amber) → mountain (red)
+
+**Files changed:** `buildTacticalDeckLayers.ts`, `buildFormationsGeoJSON.ts`, `deckLayerCapabilities.ts`, `CorpsCard.tsx`, `BrigadeRow.tsx`, `EventModal.tsx`, `BottomStatusStrip.tsx`, `MapContainer.tsx`, `buildControlGeoJSON.ts`
 
 ## [2026-03-20] Visual Overhaul Phase 2 — Battle Marker Upgrade
 
@@ -104,7 +152,7 @@ Created `src/ui/map/utils/ModalMapSource.ts` — structural fix for the 3x-viola
 
 ## [2026-03-20] Documentation — Deck.gl vs MapLibre default + map master sync
 
-**Docs-only.** Corrected overstated claims that Deck.gl had permanently replaced MapLibre formation layers. **Code truth:** `DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters === false` — MapLibre `formation-markers` / `formation-labels` remain default; Deck formation stack is opt-in.
+**Docs-only.** Updated documentation to reflect `deckFormationCounters` default change. **Code truth:** `DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters === true` — Deck.gl formation counters with enrichments (health bar, supply dot, status icons, stack badges, op/disrupted glow rings) are the default render path; MapLibre `formation-markers` / `formation-labels` hidden when active.
 
 **Files:** `docs/10_canon/Systems_Manual_v0_7_0.md` §7.6; `docs/10_canon/context.md` (canonical GUI bullet); `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §0; `docs/20_engineering/MAP_UI_MASTER.md` (directory `layers/`, §3.3 seven map modes, §7 formation + major-city labels + mode fill table); `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` §0 Phase 5 + §5.2 wireframe map toolbar; `docs/20_engineering/GUI_DESIGN_BLUEPRINT.md` §6.3; `docs/30_planning/.../HOI_VISUAL_GUI_OVERHAUL_SPEC.md` (formation markers); `docs/40_reports/GUI_MASTER.md` (Deck row — docs synced note).
 

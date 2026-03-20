@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strategic Design: Terrain, Map & Player Experience - Pyrrhic Games</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1520;
+    --surface-elevated: #111a28;
+    --surface-recessed: #060a0e;
+    --border: rgba(180, 160, 130, 0.10);
+    --border-bright: rgba(180, 160, 130, 0.20);
+    --text: #c8cdd5;
+    --text-dim: #6b7d93;
+    --text-muted: #3e4e60;
+    --gold: #c4a35a;
+    --gold-dim: rgba(196, 163, 90, 0.12);
+    --gold-bright: #e8c56d;
+    --rs: #c04040;
+    --rs-dim: rgba(192, 64, 64, 0.15);
+    --rbih: #4a9a55;
+    --rbih-dim: rgba(74, 154, 85, 0.15);
+    --hrhb: #4080b8;
+    --hrhb-dim: rgba(64, 128, 184, 0.15);
+    --green: #56d364;
+    --amber: #e8a838;
+    --red: #f47068;
+    --blue: #58a6ff;
+    --font: 'IBM Plex Sans', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', 'Consolas', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* --- Nav --- */
+  .nav { position: sticky; top: 0; z-index: 100; background: rgba(8,12,16,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; gap: 1.5rem; align-items: center; overflow-x: auto; }
+  .nav a { font-size: 0.7rem; font-family: var(--mono); color: var(--text-dim); text-decoration: none; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; transition: color 0.2s; }
+  .nav a:hover { color: var(--gold); }
+  .nav .brand { color: var(--gold); font-weight: 600; font-size: 0.75rem; margin-right: auto; }
+
+  /* --- Layout --- */
+  .content { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+  /* --- Hero --- */
+  .hero { text-align: center; padding: 3rem 1rem 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2.5rem;
+    background: radial-gradient(ellipse at 50% 0%, rgba(196,163,90,0.06) 0%, transparent 70%); }
+  .hero h1 { font-size: 2rem; font-weight: 700; color: var(--gold-bright); letter-spacing: 0.5px; }
+  .hero .subtitle { font-size: 0.85rem; color: var(--text-dim); margin-top: 0.5rem; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+  .hero .meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 1rem; font-family: var(--mono); }
+
+  /* --- Section --- */
+  .section { margin-bottom: 3rem; }
+  .section-label { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .section-num { background: var(--gold); color: var(--bg); font-size: 0.6rem; font-weight: 800; font-family: var(--mono);
+    padding: 2px 8px; border-radius: 3px; }
+  .section-label h2 { font-size: 1rem; font-weight: 600; color: var(--gold-bright); }
+
+  /* --- Cards --- */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; }
+  .card-hero { background: var(--surface-elevated); border-color: var(--border-bright); }
+  .card h3 { font-size: 0.9rem; color: var(--text); font-weight: 600; margin-bottom: 0.5rem; }
+  .card p, .card li { font-size: 0.78rem; color: var(--text-dim); line-height: 1.6; }
+  .card ul { padding-left: 1.2rem; }
+
+  /* --- Grids --- */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; }
+  @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+  /* --- Badges --- */
+  .badge { display: inline-block; font-size: 0.6rem; font-weight: 700; font-family: var(--mono); padding: 2px 7px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.04em; vertical-align: middle; }
+  .b-tier1 { background: rgba(86,211,100,0.15); color: var(--green); border: 1px solid rgba(86,211,100,0.25); }
+  .b-tier2 { background: rgba(232,168,56,0.15); color: var(--amber); border: 1px solid rgba(232,168,56,0.25); }
+  .b-tier3 { background: rgba(88,166,255,0.15); color: var(--blue); border: 1px solid rgba(88,166,255,0.25); }
+  .b-reject { background: rgba(244,112,104,0.12); color: var(--red); border: 1px solid rgba(244,112,104,0.20); }
+  .b-done { background: rgba(196,163,90,0.15); color: var(--gold); border: 1px solid rgba(196,163,90,0.25); }
+  .b-yes { background: rgba(86,211,100,0.12); color: var(--green); border: 1px solid rgba(86,211,100,0.20); }
+  .b-partial { background: rgba(232,168,56,0.12); color: var(--amber); border: 1px solid rgba(232,168,56,0.20); }
+  .b-ext { background: rgba(188,140,255,0.12); color: #bc8cff; border: 1px solid rgba(188,140,255,0.20); }
+
+  /* --- Proposal Cards --- */
+  .proposal { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; border-top: 3px solid; position: relative; }
+  .proposal.t1 { border-top-color: var(--green); }
+  .proposal.t2 { border-top-color: var(--amber); }
+  .proposal.t3 { border-top-color: var(--blue); }
+  .proposal .id { position: absolute; top: -11px; right: 12px; background: var(--gold); color: var(--bg);
+    font-size: 0.65rem; font-weight: 800; font-family: var(--mono); width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; }
+  .proposal h3 { font-size: 0.9rem; color: var(--text); font-weight: 600; margin-bottom: 0.3rem; }
+  .proposal .effort { font-size: 0.65rem; color: var(--text-muted); font-family: var(--mono); margin-bottom: 0.5rem; }
+  .proposal p { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
+  .proposal .realistic { margin-top: 0.5rem; font-size: 0.7rem; font-family: var(--mono); }
+
+  /* --- Rejected --- */
+  .rejected { background: var(--surface-recessed); border: 1px solid rgba(244,112,104,0.12); border-left: 3px solid var(--red);
+    border-radius: 4px; padding: 0.8rem 1rem; margin-bottom: 0.5rem; }
+  .rejected h4 { font-size: 0.8rem; color: var(--red); margin-bottom: 0.2rem; }
+  .rejected p { font-size: 0.72rem; color: var(--text-dim); line-height: 1.5; }
+
+  /* --- Tables --- */
+  table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  th { text-align: left; color: var(--text-muted); font-weight: 600; font-family: var(--mono); font-size: 0.65rem;
+    padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-bright); text-transform: uppercase; letter-spacing: 0.06em; }
+  td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text-dim); }
+  tr:hover td { background: rgba(196,163,90,0.03); }
+  td:first-child { color: var(--text); font-weight: 500; }
+
+  /* --- Gap items --- */
+  .gap-item { display: flex; align-items: flex-start; gap: 0.8rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+  .gap-item:last-child { border-bottom: none; }
+  .gap-num { background: var(--surface-elevated); color: var(--gold); font-size: 0.65rem; font-weight: 700; font-family: var(--mono);
+    width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .gap-item .title { font-size: 0.8rem; color: var(--text); font-weight: 500; }
+  .gap-item .desc { font-size: 0.72rem; color: var(--text-dim); line-height: 1.5; }
+
+  /* --- Hidden data --- */
+  .data-item { font-size: 0.75rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; gap: 0.5rem; }
+  .data-item:last-child { border-bottom: none; }
+  .data-item code { font-family: var(--mono); font-size: 0.7rem; color: var(--gold); background: var(--gold-dim); padding: 1px 5px; border-radius: 3px; }
+  .data-item .why { color: var(--text-dim); }
+
+  /* --- Stat tiles --- */
+  .stat { text-align: center; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+  .stat .val { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+  .stat .lbl { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; font-family: var(--mono); }
+  .stat .sub { font-size: 0.65rem; color: var(--text-dim); margin-top: 0.2rem; }
+
+  /* --- Anim --- */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .section { animation: fadeUp 0.5s ease both; }
+  .section:nth-child(2) { animation-delay: 0.05s; }
+  .section:nth-child(3) { animation-delay: 0.10s; }
+  .section:nth-child(4) { animation-delay: 0.15s; }
+  @media (prefers-reduced-motion: reduce) { .section { animation: none; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="brand">PYRRHIC GAMES</span>
+  <a href="#current">Current State</a>
+  <a href="#gaps">Gaps</a>
+  <a href="#tier1">Tier 1</a>
+  <a href="#tier2">Tier 2</a>
+  <a href="#tier3">Tier 3</a>
+  <a href="#rejected">Rejected</a>
+  <a href="#execution">Execution</a>
+  <a href="#data">Hidden Data</a>
+  <a href="#extensions">Extensions</a>
+  <a href="#constraints">Constraints</a>
+</nav>
+
+<div class="content">
+
+  <div class="hero">
+    <h1>Strategic Design: Terrain, Map & Player Experience</h1>
+    <div class="subtitle">How to leverage 3D terrain, Deck.gl, and 55 existing UI components to give the player maximum agency and information. Realistic proposals only &mdash; no vaporware.</div>
+    <div class="meta">2026-03-20 | Pyrrhic Games Deep-Think Session | A War Without Victory v0.4.9</div>
+  </div>
+
+  <!-- ========== CURRENT STATE ========== -->
+  <div class="section" id="current">
+    <div class="section-label">
+      <span class="section-num">01</span>
+      <h2>What We Already Have</h2>
+    </div>
+
+    <div class="grid-4" style="margin-bottom:1rem;">
+      <div class="stat"><div class="val" style="color:var(--gold)">55</div><div class="lbl">UI Components</div><div class="sub">Panels, modals, overlays</div></div>
+      <div class="stat"><div class="val" style="color:var(--green)">7</div><div class="lbl">Map Modes</div><div class="sub">2 broken (Supply, Casualties)</div></div>
+      <div class="stat"><div class="val" style="color:var(--blue)">11</div><div class="lbl">Map Layers</div><div class="sub">Front, units, fog, battle dots</div></div>
+      <div class="stat"><div class="val" style="color:var(--amber)">22</div><div class="lbl">SVG Icons</div><div class="sub">Icon.tsx recovered, not deployed</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Panels & Modals</h3>
+        <ul>
+          <li><strong>AAR Panel</strong> &mdash; rich battle data: factions, brigades, outcome, casualties, per-brigade defender contributions</li>
+          <li><strong>War Summary</strong> &mdash; overview, IVP, convoys, briefing</li>
+          <li><strong>Formation Detail</strong> &mdash; cohesion, morale, fatigue, combat effectiveness, equipment, narrative</li>
+          <li><strong>Corps Detail</strong> &mdash; effectiveness + grade, ORBAT, sectors, ops, commander</li>
+          <li><strong>Army Detail</strong> &mdash; whole-army aggregate, pools, casualties</li>
+          <li><strong>Settlement Detail</strong> &mdash; 3 tabs: terrain badges, ethnic composition, formations, orders</li>
+          <li><strong>Ops Planning</strong> &mdash; 4-phase flow, 3D terrain, Deck.gl arrows, selectability</li>
+          <li><strong>Events + Decisions</strong> &mdash; narrative events with player choices</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Map Layers</h3>
+        <ul>
+          <li>Political control fills (7 modes: Political, Ethnic, Supply, Casualties, Morale, Operations, Defense)</li>
+          <li>Front lines (stitched, continuous, faction-colored glow)</li>
+          <li>Formation markers (NATO symbols, zoom-dependent)</li>
+          <li>Battle markers (pulsing circles &mdash; <strong>no tooltip, no click</strong>)</li>
+          <li>Operation arrows (main map, pink lines in ops mode)</li>
+          <li>Sector demarcation (dashed, on corps selection)</li>
+          <li>Fog of war (sector intel based)</li>
+          <li>Hillshade raster + OSID selection highlight + minimap + enclave outlines</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== GAPS ========== -->
+  <div class="section" id="gaps">
+    <div class="section-label">
+      <span class="section-num">02</span>
+      <h2>The Actual Gaps</h2>
+    </div>
+
+    <div class="card">
+      <div class="gap-item"><div class="gap-num">1</div><div><div class="title">Battle markers are dead</div><div class="desc">Pulsing dots with no interaction. Can't click, can't hover. AAR has everything but the MAP doesn't connect to it.</div></div></div>
+      <div class="gap-item"><div class="gap-num">2</div><div><div class="title">Icon language not deployed</div><div class="desc"><code style="font-family:var(--mono);font-size:0.7rem;color:var(--gold);background:var(--gold-dim);padding:1px 5px;border-radius:3px;">Icon.tsx</code> exists with 22 SVG icons but isn't used. Every panel says "Personnel: 3,000" instead of showing a soldier icon.</div></div></div>
+      <div class="gap-item"><div class="gap-num">3</div><div><div class="title">Map counters are minimal</div><div class="desc">No health bar, no supply dot, no operation indicator. You must hover every single unit to learn anything.</div></div></div>
+      <div class="gap-item"><div class="gap-num">4</div><div><div class="title">Operations invisible on main map</div><div class="desc">No visual distinction between a brigade in an active operation vs idle. Open corps panel to see ops.</div></div></div>
+      <div class="gap-item"><div class="gap-num">5</div><div><div class="title">No terrain on main map</div><div class="desc">Terrain tooltips and 3D in ops modal, but the main map's planning experience ignores terrain entirely.</div></div></div>
+      <div class="gap-item"><div class="gap-num">6</div><div><div class="title">No battle context on map</div><div class="desc">You can read AAR text but can't SEE where the battle happened with attacker/defender/outcome context.</div></div></div>
+    </div>
+  </div>
+
+  <!-- ========== TIER 1 ========== -->
+  <div class="section" id="tier1">
+    <div class="section-label">
+      <span class="section-num">03</span>
+      <h2>Tier 1 &mdash; High Impact, Low Effort <span class="badge b-tier1">1-2 sessions each</span></h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="proposal t1">
+        <div class="id">1</div>
+        <h3>Deploy Icon Language</h3>
+        <div class="effort">1-2 sessions | ~8 components | No new data</div>
+        <p>Replace text labels with <code style="font-family:var(--mono);font-size:0.7rem;color:var(--gold);background:var(--gold-dim);padding:1px 4px;border-radius:2px;">&lt;Icon name="personnel" /&gt;</code> across FormationDetail, CorpsDetail, ArmyDetail, BrigadeRow, CorpsCard, BottomStatusStrip. Single highest-impact visual change. HoI4 proves players learn icon language in minutes.</p>
+        <div class="realistic"><span class="badge b-yes">Realistic</span> Icon.tsx recovered with 22 icons. Pure find-and-replace.</div>
+      </div>
+
+      <div class="proposal t1">
+        <div class="id">2</div>
+        <h3>Battle Marker Upgrade</h3>
+        <div class="effort">1 session | ~100 lines | No new data</div>
+        <p>Make battle dots interactive. Hover: compact tooltip with TurnBattle data (attacker vs defender, outcome, casualties). Click: open AAR scrolled to that battle. Scale radius by casualties. Color by outcome (green/red/amber). Deck.gl ScatterplotLayer alternative for precise picking.</p>
+        <div class="realistic"><span class="badge b-yes">Realistic</span> Data exists in latestTurnSummary.battles[]. Markers already at correct OSIDs.</div>
+      </div>
+
+      <div class="proposal t1">
+        <div class="id">3</div>
+        <h3>Map Counter Enrichment</h3>
+        <div class="effort">1-2 sessions | ~150 lines | Depends on icons</div>
+        <p>Add 3 micro-indicators per formation marker: 2px health bar (cohesion), 4px supply dot (adequate/strained/critical), operation icon (crosshairs/arrow). Enable <code style="font-family:var(--mono);font-size:0.68rem;color:var(--gold);background:var(--gold-dim);padding:1px 4px;border-radius:2px;">deckFormationCounters: true</code>. Deck.gl stack: ScatterplotLayer + PathLayer.</p>
+        <div class="realistic"><span class="badge b-yes">Realistic</span> Capability flag exists. buildTacticalDeckLayers ready.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TIER 2 ========== -->
+  <div class="section" id="tier2">
+    <div class="section-label">
+      <span class="section-num">04</span>
+      <h2>Tier 2 &mdash; High Impact, Medium Effort <span class="badge b-tier2">2-3 sessions each</span></h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="proposal t2">
+        <div class="id">4</div>
+        <h3>Settlement Panel Mini-Profile</h3>
+        <div class="effort">1 session | Combat effectiveness ready</div>
+        <p>Enrich settlement overview with formation cards showing combat effectiveness, elevation indicator, siege status with supply indicator. The settlement panel is the primary information interface &mdash; richer content directly helps decisions.</p>
+        <div class="realistic"><span class="badge b-yes">Realistic</span> Data in osidPropertiesMap + formationsAtOsid.</div>
+      </div>
+
+      <div class="proposal t2">
+        <div class="id">5</div>
+        <h3>Operation Visualization</h3>
+        <div class="effort">2 sessions | ~250 lines | Deck.gl overlay done</div>
+        <p>In Operations mode: objective OSIDs tinted (10% faction color), Deck.gl ArcLayer from brigades to objectives, status glow on participating units (green/amber/red). Click operation area opens OperationDetail. Operations become visible on the map.</p>
+        <div class="realistic"><span class="badge b-yes">Realistic</span> Data in LoadedGameState.operations[]. Arrow rendering exists.</div>
+      </div>
+
+      <div class="proposal t2">
+        <div class="id">6</div>
+        <h3>Battle Site Flyover</h3>
+        <div class="effort">1-2 sessions | ~200 lines | Needs battle markers</div>
+        <p>Click battle marker &rarr; camera flies to battle location with terrain pitch (30-40&deg;) and bearing aligned to attack direction. Floating UoC2-style battle card (attacker vs defender). 3D terrain activated temporarily. ESC returns to strategic view.</p>
+        <div class="realistic"><span class="badge b-yes">Realistic</span> flyTo + setTerrain proven. terrain.pmtiles ready.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TIER 3 ========== -->
+  <div class="section" id="tier3">
+    <div class="section-label">
+      <span class="section-num">05</span>
+      <h2>Tier 3 &mdash; Medium Impact, Higher Effort <span class="badge b-tier3">3+ sessions</span></h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="proposal t3">
+        <div class="id">7</div>
+        <h3>Terrain Cost for Movement</h3>
+        <div class="effort">1 session | Terrain scalars done</div>
+        <p>In move mode, color OSIDs by terrain friction: green (easy), amber (moderate), red (mountain). Helps player choose march routes. Sim already applies friction penalties.</p>
+        <div class="realistic"><span class="badge b-yes">Realistic</span> terrain_friction_index in osidPropertiesMap.</div>
+      </div>
+
+      <div class="proposal t3">
+        <div class="id">8</div>
+        <h3>Elevation Profile on Axes</h3>
+        <div class="effort">2 sessions | Needs pre-computed elevation</div>
+        <p>Sample DEM along each ops modal advance axis. Show SVG elevation strip (60px tall). Mark staging altitude, objective altitude, passes. "Axis 1: climbs 800m through Vlasic pass."</p>
+        <div class="realistic"><span class="badge b-partial">Partial</span> Need elevation_at_centroid per OSID. Pre-compute approach realistic.</div>
+      </div>
+
+      <div class="proposal t3">
+        <div class="id">9</div>
+        <h3>Front Line Terrain Tinting</h3>
+        <div class="effort">1-2 sessions | Needs front edge enrichment</div>
+        <p>Front edges at high elevation get white/blue tint for mountain passes. Instantly shows where the front is mountain warfare vs river valley.</p>
+        <div class="realistic"><span class="badge b-partial">Partial</span> Requires enriching front edge GeoJSON with friction data.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REJECTED ========== -->
+  <div class="section" id="rejected">
+    <div class="section-label">
+      <span class="section-num">06</span>
+      <h2>Explicitly Rejected <span class="badge b-reject">Won't Build</span></h2>
+    </div>
+
+    <div class="rejected">
+      <h4>LOS / Visibility Cones</h4>
+      <p>Ray-casting against DEM in the browser is expensive and hard to read at strategic scale. This is a tactical feature on a strategic game.</p>
+    </div>
+    <div class="rejected">
+      <h4>Full 3D Terrain on Main Map</h4>
+      <p>Tried it. At strategic zoom, 3D extrusion makes polygon fills unreadable and front lines distort. Ops modal (focused AO) is the right place for 3D.</p>
+    </div>
+    <div class="rejected">
+      <h4>3D Battle Replay Animation</h4>
+      <p>Sim resolves battles as single-turn discrete events, not multi-step engagements. No "attack sequence" to animate. A flyover with a static battle card is more honest.</p>
+    </div>
+    <div class="rejected">
+      <h4>Deck.gl HeatmapLayer for Threat Density</h4>
+      <p>Defense map mode already exists. Another heat layer adds complexity without new information. Better to fix the existing Defense mode.</p>
+    </div>
+    <div class="rejected">
+      <h4>Pulsing Animated ScatterplotLayer Markers</h4>
+      <p>Looks flashy but adds no information. Battle markers already pulse via MapLibre. More animation does not equal more understanding.</p>
+    </div>
+  </div>
+
+  <!-- ========== EXECUTION ORDER ========== -->
+  <div class="section" id="execution">
+    <div class="section-label">
+      <span class="section-num">07</span>
+      <h2>Recommended Execution Order</h2>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th style="width:50px;">Priority</th><th>Item</th><th style="width:90px;">Sessions</th><th>Dependencies</th><th style="width:70px;">Tier</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="color:var(--gold);font-weight:700;">1</td><td>Deploy Icon Language</td><td>1-2</td><td>Icon.tsx (recovered)</td><td><span class="badge b-tier1">Tier 1</span></td></tr>
+          <tr><td style="color:var(--gold);font-weight:700;">2</td><td>Battle Marker Upgrade</td><td>1</td><td>None</td><td><span class="badge b-tier1">Tier 1</span></td></tr>
+          <tr><td style="color:var(--gold);font-weight:700;">3</td><td>Map Counter Enrichment</td><td>1-2</td><td>Icon language (P1)</td><td><span class="badge b-tier1">Tier 1</span></td></tr>
+          <tr><td style="color:var(--gold);font-weight:700;">4</td><td>Settlement Panel Mini-Profile</td><td>1</td><td>Combat effectiveness <span class="badge b-done">done</span></td><td><span class="badge b-tier2">Tier 2</span></td></tr>
+          <tr><td style="color:var(--gold);font-weight:700;">5</td><td>Operation Visualization</td><td>2</td><td>Deck.gl overlay <span class="badge b-done">done</span></td><td><span class="badge b-tier2">Tier 2</span></td></tr>
+          <tr><td style="color:var(--gold);font-weight:700;">6</td><td>Battle Site Flyover</td><td>1-2</td><td>Battle markers (P2), 3D terrain</td><td><span class="badge b-tier2">Tier 2</span></td></tr>
+          <tr><td style="color:var(--gold);font-weight:700;">7</td><td>Terrain Cost Visualization</td><td>1</td><td>Terrain scalars <span class="badge b-done">done</span></td><td><span class="badge b-tier3">Tier 3</span></td></tr>
+          <tr><td style="color:var(--gold);font-weight:700;">8</td><td>Elevation Profile</td><td>2</td><td>Pre-computed elevation per OSID</td><td><span class="badge b-tier3">Tier 3</span></td></tr>
+          <tr><td style="color:var(--gold);font-weight:700;">9</td><td>Front Line Terrain Tinting</td><td>1-2</td><td>Terrain scalars enrichment</td><td><span class="badge b-tier3">Tier 3</span></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:1rem;padding:0.8rem;background:var(--gold-dim);border-radius:4px;border:1px solid rgba(196,163,90,0.20);">
+        <div style="font-size:0.8rem;color:var(--gold-bright);font-weight:600;">Total: 12-16 sessions for the full stack</div>
+        <div style="font-size:0.72rem;color:var(--text-dim);margin-top:0.3rem;">Items 1-4 deliver most of the impact in 4-5 sessions.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== HIDDEN DATA ========== -->
+  <div class="section" id="data">
+    <div class="section-label">
+      <span class="section-num">08</span>
+      <h2>Data Available But Not Shown to Player</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>High-Value Hidden Fields</h3>
+        <div class="data-item"><code>home_defense_active</code> <span class="why">Explains why a brigade won't attack. Currently invisible.</span></div>
+        <div class="data-item"><code>slope_index</code> + max-attacker cap <span class="why">Player sees "Mountain" but not the attack width limit (1/2/3).</span></div>
+        <div class="data-item"><code>total_equipment_captured</code> <span class="why">Rendered for destroyed but captured block is missing.</span></div>
+        <div class="data-item"><code>firstBattleTurn/Osid</code> <span class="why">Brigade's battle debut. Defined, never displayed.</span></div>
+        <div class="data-item"><code>NotableFlip.significance</code> <span class="why">enclave_breach looks identical to generic flip in AAR.</span></div>
+        <div class="data-item"><code>sub_segments[].gap</code> <span class="why">Front coverage gaps computed but never shown.</span></div>
+        <div class="data-item"><code>consecutive_failures_on_current</code> <span class="why">More precise than total failures for op health.</span></div>
+        <div class="data-item"><code>elevation_stddev_m</code> <span class="why">Terrain roughness affects fighting. Never displayed.</span></div>
+        <div class="data-item"><code>axes[].status/momentum</code> <span class="why">Per-axis op status. Only aggregate shown.</span></div>
+      </div>
+      <div class="card">
+        <h3>Already Shown (Corrections)</h3>
+        <p style="margin-bottom:0.5rem;"><span class="badge b-done">Confirmed</span> AAR Panel shows rich battle data: factions, brigade IDs, outcome, casualties, per-brigade defender contributions.</p>
+        <p style="margin-bottom:0.5rem;"><span class="badge b-reject">Broken</span> Supply mode (map mode 3) exists but is uniform green &mdash; no variation visible. Scale is broken.</p>
+        <p style="margin-bottom:0.5rem;"><span class="badge b-partial">Thin</span> Casualties mode needs more contrast and a legend. Morale untested.</p>
+        <p><span class="badge b-done">Working</span> 7 map modes exist. Political and Defense are strong. Operations mode is good.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EXTENSIONS ========== -->
+  <div class="section" id="extensions">
+    <div class="section-label">
+      <span class="section-num">09</span>
+      <h2>Deck.gl Extensions Worth Exploiting</h2>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Extension</th><th>Use Case</th><th>Effort</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge b-ext">CollisionFilter</span></td><td>Prevent formation label overlap at low zoom. Priority: corps HQ > brigade labels.</td><td>Low</td></tr>
+          <tr><td><span class="badge b-ext">DataFilter</span></td><td>Toggle faction visibility on GPU, filter by morale/posture. No data rebuild.</td><td>Low</td></tr>
+          <tr><td><span class="badge b-ext">FillStyle</span></td><td>Hatch patterns for siege zones, contested territory. Needs pattern atlas.</td><td>Medium</td></tr>
+          <tr><td><span class="badge b-ext">PathStyle + getOffset</span></td><td>Double-line front rendering (RS side / RBiH side as offset parallels). Already proven for dashes.</td><td>Medium</td></tr>
+          <tr><td><span class="badge b-ext">TripsLayer</span></td><td>Campaign replay: animate brigade movement over weeks as time-animated trails.</td><td>High</td></tr>
+          <tr><td><span class="badge b-ext">TerrainExtension</span></td><td>Drape Deck.gl layers onto 3D terrain in ops modal. <strong>Experimental.</strong></td><td>Experimental</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== CONSTRAINTS ========== -->
+  <div class="section" id="constraints">
+    <div class="section-label">
+      <span class="section-num">10</span>
+      <h2>Technical Constraints (Realism Check)</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>What Works</h3>
+        <ul>
+          <li><strong>Interleaved mode:</strong> Deck.gl layers in MapLibre stack via <code style="font-family:var(--mono);font-size:0.68rem;color:var(--gold);">beforeId</code>. Active, proven.</li>
+          <li><strong>PathStyleExtension dashes:</strong> rAF loop, minimal CPU. Proven in ops modal.</li>
+          <li><strong>Deck.gl picking:</strong> Per-pixel <code style="font-family:var(--mono);font-size:0.68rem;color:var(--gold);">onHover</code>/<code style="font-family:var(--mono);font-size:0.68rem;color:var(--gold);">onClick</code>. Better than queryRenderedFeatures for overlaps.</li>
+          <li><strong>queryTerrainElevation:</strong> Returns meters at any LngLat. Works in ops modal.</li>
+          <li><strong>Performance budget:</strong> Under 20 Deck layers for 60fps. Currently 5 in ops modal.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>What Doesn't</h3>
+        <ul>
+          <li><strong>3D terrain on main map:</strong> Distorts polygon fills at strategic zoom. Keep flat.</li>
+          <li><strong>Browser DEM sampling:</strong> 20MB TIFF load + parsing. Pre-compute per-OSID instead.</li>
+          <li><strong>_TerrainExtension:</strong> Experimental. Uses Deck.gl's own terrain, not MapLibre's <code style="font-family:var(--mono);font-size:0.68rem;color:var(--gold);">setTerrain</code>. Not interoperable.</li>
+          <li><strong>Deck.gl layers on MapLibre terrain:</strong> Don't auto-drape. Only MapLibre's own layers drape natively.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;border-color:var(--gold-dim);background:linear-gradient(135deg, var(--surface) 0%, var(--surface-elevated) 100%);">
+      <div style="display:flex;align-items:center;gap:1.2rem;">
+        <div style="font-size:2.5rem;color:var(--gold);font-weight:700;line-height:1;">!</div>
+        <div>
+          <h3 style="color:var(--gold-bright);font-size:0.95rem;">Design Principle</h3>
+          <p style="color:var(--text);font-size:0.82rem;line-height:1.6;margin-top:0.3rem;">The foundation is already built: 3D terrain, Deck.gl overlay, combat effectiveness, terrain scalars, Icon.tsx. What's missing is not capability &mdash; it's <strong>connection</strong>. Battle data exists but markers don't link to it. Icons exist but panels don't use them. Terrain data exists but the map doesn't show it. The highest-impact work is wiring existing systems together, not building new ones.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

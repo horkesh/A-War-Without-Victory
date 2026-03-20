@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { MAP_MODES, DEV_LAYER_TOGGLES, LIVE_LAYER_TOGGLES } from '../utils/mapModes';
+import { Icon } from './icons/Icon';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
@@ -11,20 +13,23 @@ const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<strin
 export function BottomStatusStrip() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
 
-  // Territory control — area-weighted (km²)
-  const controlBySettlement = loadedGameState?.controlBySettlement ?? {};
-  const areaTotals = { RS: 0, RBiH: 0, HRHB: 0 };
-  const totalArea = osidAreas.total_area_km2;
-  for (const [osid, faction] of Object.entries(controlBySettlement)) {
-    if (faction === 'RS' || faction === 'RBiH' || faction === 'HRHB') {
-      areaTotals[faction] += osidAreas.areas[osid] ?? 0;
+  // Territory control — area-weighted (km²), memoized to avoid 744-entry loop on every render
+  const controlBySettlement = loadedGameState?.controlBySettlement;
+  const territoryPct = useMemo(() => {
+    const cbs = controlBySettlement ?? {};
+    const totals = { RS: 0, RBiH: 0, HRHB: 0 };
+    const totalArea = osidAreas.total_area_km2;
+    for (const [osid, faction] of Object.entries(cbs)) {
+      if (faction === 'RS' || faction === 'RBiH' || faction === 'HRHB') {
+        totals[faction] += osidAreas.areas[osid] ?? 0;
+      }
     }
-  }
-  const territoryPct = {
-    RS: totalArea > 0 ? (areaTotals.RS / totalArea) * 100 : 0,
-    RBiH: totalArea > 0 ? (areaTotals.RBiH / totalArea) * 100 : 0,
-    HRHB: totalArea > 0 ? (areaTotals.HRHB / totalArea) * 100 : 0,
-  };
+    return {
+      RS: totalArea > 0 ? (totals.RS / totalArea) * 100 : 0,
+      RBiH: totalArea > 0 ? (totals.RBiH / totalArea) * 100 : 0,
+      HRHB: totalArea > 0 ? (totals.HRHB / totalArea) * 100 : 0,
+    };
+  }, [controlBySettlement]);
 
   // Map mode
   const devMode = useGameStore((s) => s.devMode);
@@ -102,6 +107,53 @@ export function BottomStatusStrip() {
             HRHB {territoryPct.HRHB.toFixed(1)}%
           </span>
         </div>
+      </div>
+
+      {/* Divider */}
+      <div className="w-[1px] h-4 bg-white/10 shrink-0" />
+
+      {/* 2.5 Macro indicators */}
+      <div className="hidden lg:flex items-center gap-2.5 px-2 shrink-0 text-[10px] font-mono tabular-nums">
+        {/* Turn counter */}
+        {loadedGameState && (
+          <span className="flex items-center gap-1 text-text-secondary" title={`Turn ${loadedGameState.turn}${loadedGameState.metadata?.date ? ` (${loadedGameState.metadata.date})` : ''}`}>
+            <span className="text-text-primary font-semibold">w{loadedGameState.turn}</span>
+            {loadedGameState.metadata?.date && (
+              <span className="text-text-secondary/60">{loadedGameState.metadata.date}</span>
+            )}
+          </span>
+        )}
+
+        <div className="h-3 w-px bg-white/8" />
+
+        {/* Active operations */}
+        {loadedGameState?.operations && loadedGameState.operations.length > 0 && (
+          <span className="flex items-center gap-1 text-accent-gold" title={`${loadedGameState.operations.length} active operation${loadedGameState.operations.length !== 1 ? 's' : ''}`}>
+            <Icon name="operation" size={10} color="#c4a35a" />
+            <span>{loadedGameState.operations.length}</span>
+          </span>
+        )}
+
+        {/* Battles this turn */}
+        {loadedGameState?.latestTurnSummary?.battles && loadedGameState.latestTurnSummary.battles.length > 0 && (
+          <span className="flex items-center gap-1 text-faction-rs" title={`${loadedGameState.latestTurnSummary.battles.length} battle${loadedGameState.latestTurnSummary.battles.length !== 1 ? 's' : ''} this turn`}>
+            <Icon name="offensive" size={10} color="#e05050" />
+            <span>{loadedGameState.latestTurnSummary.battles.length}</span>
+          </span>
+        )}
+
+        {/* Alliance status (RBiH-HRHB) */}
+        {loadedGameState?.war_alliance_rbih_hrhb != null && (() => {
+          const a = loadedGameState.war_alliance_rbih_hrhb!;
+          const status = a <= 0.10 ? 'WAR' : a <= 0.20 ? 'MOBILIZING' : a <= 0.45 ? 'STRAINED' : 'ALLIED';
+          const color = status === 'WAR' ? '#e05050' : status === 'MOBILIZING' ? '#d4a055' : status === 'STRAINED' ? '#d4d455' : '#50b850';
+          return (
+            <span className="flex items-center gap-1" title={`RBiH-HRHB Alliance: ${(a * 100).toFixed(0)}%`}>
+              <Icon name="balanced" size={10} color={color} />
+              <span style={{ color }} className="font-bold uppercase text-[9px] tracking-wider">{status}</span>
+            </span>
+          );
+        })()}
       </div>
 
       {/* Divider */}

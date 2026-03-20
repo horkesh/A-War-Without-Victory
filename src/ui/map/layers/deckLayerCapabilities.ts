@@ -31,9 +31,9 @@ export interface DeckLayerCapabilities {
   readonly unitScatterDots: boolean;
 }
 
-/** Safe default: MapLibre formations; no experimental Deck layers. */
+/** Default: Deck.gl formation counters ON (enriched); other experiments off. */
 export const DEFAULT_DECK_LAYER_CAPABILITIES: DeckLayerCapabilities = {
-  deckFormationCounters: false,
+  deckFormationCounters: true,
   operationArcs: false,
   deckFrontLines: false,
   unitScatterDots: false,

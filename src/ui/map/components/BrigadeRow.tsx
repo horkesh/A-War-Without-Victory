@@ -3,12 +3,24 @@ import type { FormationView } from '../data/types';
 import { FACTION_BG_SUBTLE, FACTION_COLORS } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
+import { Icon } from './icons/Icon';
 
-const STATUS_BADGE: Record<string, string> = {
-  assigned: 'bg-panel-hover text-text-secondary',
-  reserve: 'bg-panel-card text-text-secondary',
-  'in-combat': 'bg-panel-active text-text-primary',
-  active: 'bg-panel-hover text-text-secondary',
+const STATUS_BADGE: Record<string, { class: string; label: string }> = {
+  assigned: { class: 'text-text-secondary border-text-secondary/40', label: 'ASSIGNED' },
+  reserve: { class: 'text-blue-400 border-blue-400/40', label: 'RESERVE' },
+  'in-combat': { class: 'text-red-400 border-red-400/50', label: 'IN COMBAT' },
+  active: { class: 'text-text-secondary border-text-secondary/30', label: 'ACTIVE' },
+  disrupted: { class: 'text-red-400 border-red-400/50', label: 'DISRUPTED' },
+  forming: { class: 'text-amber-400 border-amber-400/40', label: 'FORMING' },
+};
+
+const STANCE_STRIPE: Record<string, string> = {
+  attack: 'border-l-red-500/80',
+  assault: 'border-l-red-600/80',
+  defend: 'border-l-blue-400/70',
+  defend_at_all_costs: 'border-l-blue-500/80',
+  hold: 'border-l-slate-400/60',
+  probe: 'border-l-amber-400/70',
 };
 
 export interface BrigadeRowProps {
@@ -19,9 +31,6 @@ export interface BrigadeRowProps {
   onHoverChange?: (hovered: boolean, e?: React.MouseEvent) => void;
 }
 
-/**
- * Single brigade row for OOB sidebar: supply dot, cohesion segments, status badge.
- */
 function getSupplyState(formation: FormationView): 'supplied' | 'strained' | 'cutoff' {
   const status = formation.status.toLowerCase();
   const cohesion = formation.cohesion ?? 0;
@@ -39,7 +48,6 @@ const SUPPLY_DOT_CLASS: Record<'supplied' | 'strained' | 'cutoff', string> = {
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
   const cohesion = Math.max(0, Math.min(100, formation.cohesion ?? 0));
   const filledSegments = Math.ceil(cohesion / 20);
-  const statusClass = STATUS_BADGE[formation.status] ?? STATUS_BADGE.active;
   const bgFaction = FACTION_BG_SUBTLE[formation.faction] ?? 'bg-panel-border';
   const factionText = FACTION_COLORS[formation.faction] ?? 'text-text-primary';
   const supplyState = getSupplyState(formation);
@@ -48,20 +56,21 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   const fatClass = fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
   const supplyColor = SUPPLY_DOT_CLASS[supplyState];
 
+  // Stance-colored left stripe
+  const stanceStripe = STANCE_STRIPE[formation.posture ?? ''] ?? 'border-l-transparent';
+
   const decorations = formation.decorations ?? [];
   const prestigeTier = getPrestigeTier(decorations);
-  const prestigeBorderClass = prestigeTier === 1
-    ? 'border-l-2 border-l-yellow-400/70'
-    : prestigeTier === 2
-    ? 'border-l-2 border-l-slate-300/55'
-    : prestigeTier === 3
-    ? 'border-l-2 border-l-amber-700/50'
-    : '';
   const prestigePipColor = getPrestigeTierColor(prestigeTier);
 
+  // Status determination — disrupted overrides normal status
+  const isDisrupted = (formation.disrupted_turns ?? 0) > 0;
+  const displayStatus = isDisrupted ? 'disrupted' : formation.status;
+  const badge = STATUS_BADGE[displayStatus] ?? STATUS_BADGE.active;
+
   const containerClasses = [
-    'flex items-center gap-2 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',
-    prestigeBorderClass,
+    'flex items-center gap-1.5 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',
+    `border-l-2 ${stanceStripe}`,
     compact ? 'py-1' : 'py-1.5',
     rowClass,
     highlighted ? 'bg-panel-active/70' : 'hover:bg-panel-hover/80'
@@ -78,19 +87,32 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       data-highlighted={highlighted ? 'true' : 'false'}
       title={`Supply: ${supplyState.toUpperCase()} | Fatigue: ${fat} | Cohesion: ${cohesion}%`}
     >
+      {/* Supply dot */}
       <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyState}>●</span>
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${bgFaction}`} />
+
+      {/* Brigade name */}
       <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formation.name}</span>
+
+      {/* Prestige pip */}
       {prestigeTier > 0 && (() => {
         const ht = getHighestTier(decorations);
         const dn = ht ? getDecorationName(formation.faction ?? '', ht) : '';
         return (
-          <span
-            className={`shrink-0 text-[9px] leading-none ${prestigePipColor}`}
-            title={dn}
-          >★</span>
+          <span className={`shrink-0 text-[9px] leading-none ${prestigePipColor}`} title={dn}>
+            <Icon name="star" size={9} />
+          </span>
         );
       })()}
+
+      {/* Personnel count */}
+      {formation.personnel != null && (
+        <span className="shrink-0 text-[10px] tabular-nums text-text-secondary flex items-center gap-0.5" title={`Personnel: ${formation.personnel.toLocaleString()}`}>
+          <Icon name="personnel" size={9} />
+          {formation.personnel >= 1000 ? `${(formation.personnel / 1000).toFixed(1)}k` : formation.personnel}
+        </span>
+      )}
+
+      {/* Cohesion bar */}
       <div className="flex items-center gap-0.5 shrink-0" aria-label={`cohesion ${cohesion}`}>
         {Array.from({ length: 5 }, (_, idx) => (
           <span
@@ -99,11 +121,19 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
           />
         ))}
       </div>
-      <div className={`w-6 text-right shrink-0 tabular-nums ${fatClass}`} aria-label={`fatigue ${fat}`}>
+
+      {/* Fatigue */}
+      <div className={`w-5 text-right shrink-0 tabular-nums text-[10px] ${fatClass} flex items-center justify-end gap-0.5`} aria-label={`fatigue ${fat}`}>
+        <Icon name="fatigue" size={8} />
         {fat}
       </div>
-      <span className={`shrink-0 text-[10px] uppercase px-1 rounded ${statusClass}`}>
-        {toTitleCase(formation.status)}
+
+      {/* Status badge — rubber stamp style */}
+      <span
+        className={`shrink-0 text-[8px] uppercase px-1 py-px rounded border font-bold tracking-wider ${badge.class}`}
+        style={{ transform: 'rotate(-1.5deg)' }}
+      >
+        {badge.label}
       </span>
     </button>
   );

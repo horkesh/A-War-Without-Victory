@@ -102,7 +102,7 @@ The front is rendered as a **thick semi-transparent band** along the faction bou
 
 **New:** Brigade markers are positioned at the centroid of their assigned settlement (OSID). When multiple brigades occupy the same settlement, they are visually stacked to remain individually visible and clickable.
 
-**Implementation (2026-03-05, clarified 2026-03-20):** Formation markers are **MapLibre symbol layers** with programmatically generated sprites in `formationIcons.ts`. An **optional Deck.gl** path (`src/ui/map/layers/`, `deckLayerCapabilities.ts`) can take over counters when `deckFormationCounters` is **true**; **default remains MapLibre** for parity and reliable map picks.
+**Implementation (2026-03-05, clarified 2026-03-20):** Formation markers are **MapLibre symbol layers** with programmatically generated sprites in `formationIcons.ts`. A **Deck.gl** path (`src/ui/map/layers/`, `deckLayerCapabilities.ts`) is the **default** (`deckFormationCounters: true`) — Deck.gl counters with enrichments (health bar, supply dot, status icons, stack badges, op/disrupted glow rings); MapLibre `formation-markers` / `formation-labels` hidden when active.
 - **Centering:** Brigade markers are positioned exactly at the OSID centroid (front-line drift removed for precision).
 - **Tactical Symbols:** Icons now feature scaled NATO tactical symbols (infantry X, mountain triangle, etc.) with refined line weights for clarity at small sizes.
 - **Visual Stacking:** Implemented in `buildFormationsGeoJSON.ts`. Subsequent units in the same OSID are slightly offset (fanned stack effect) to ensure all units are distinguishable and clickable.

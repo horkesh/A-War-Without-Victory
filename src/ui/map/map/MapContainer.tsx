@@ -596,9 +596,21 @@ export function MapContainer() {
             clearTooltipTarget();
           }
         },
-        onBattleClick: (_osid) => {
-          // Battle click: select the OSID so settlement panel opens with battle context
-          // The AAR button in the toolbar provides the full after-action report
+        onBattleClick: (osid) => {
+          // Battle flyover: fly to the battle OSID with terrain pitch and select it
+          const center = osidCentroidsRef.current.get(osid);
+          if (center && mapRef.current) {
+            mapRef.current.flyTo({
+              center,
+              zoom: Math.max(mapRef.current.getZoom(), 11),
+              pitch: 35,
+              bearing: 0,
+              duration: 1200,
+              essential: true,
+            });
+          }
+          // Select the OSID to show settlement panel with battle context
+          setSelectedOsid(osid);
         },
         onSectorHover: (id) => {
           setHoveredSectorId(id);
@@ -676,7 +688,7 @@ export function MapContainer() {
         try {
           if (devMode) console.time('[MapContainer] overlay control');
           const m1 = mapRef.current;
-          controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement);
+          controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement, useGameStore.getState().osidPropertiesMap);
           (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
           try {
             const majorLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
@@ -1878,6 +1890,8 @@ export function MapContainer() {
     const ensureMoveLayer = () => {
       if (!map.getSource('osid-control') || !safeHasLayer(map, 'osid-control-fill')) return false;
       if (!safeHasLayer(map, MOVE_PREVIEW_LAYER_ID)) {
+        // Terrain-cost coloring: green (easy) → amber (moderate) → red (difficult)
+        // Uses terrain_friction_index from osidPropertiesMap, stored as feature property 'friction'
         map.addLayer(
           {
             id: MOVE_PREVIEW_LAYER_ID,
@@ -1885,8 +1899,16 @@ export function MapContainer() {
             source: 'osid-control',
             filter: ['==', ['get', 'osid'], '__none__'],
             paint: {
-              'fill-color': 'rgba(100, 200, 120, 0.20)',
-              'fill-outline-color': 'rgba(100, 200, 120, 0.50)',
+              'fill-color': [
+                'interpolate', ['linear'],
+                ['coalesce', ['get', 'friction'], 0.15],
+                0.0, 'rgba(80, 200, 100, 0.25)',   // Flat: green
+                0.15, 'rgba(120, 200, 80, 0.20)',   // Forest: light green
+                0.30, 'rgba(210, 180, 60, 0.25)',   // Hilly: amber
+                0.50, 'rgba(210, 100, 50, 0.30)',   // Mountain: red-orange
+                0.80, 'rgba(180, 50, 40, 0.35)',    // Extreme: red
+              ],
+              'fill-outline-color': 'rgba(100, 200, 120, 0.40)',
             },
           },
           OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID

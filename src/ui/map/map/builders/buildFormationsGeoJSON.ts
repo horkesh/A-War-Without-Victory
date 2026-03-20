@@ -7,7 +7,7 @@ import { getSectorIdForFormation } from '../../utils/sectorUtils';
 
 export { formationIconId };
 
-interface FormationMarkerProperties {
+export interface FormationMarkerProperties {
   id: string;
   name: string;
   kind: string;
@@ -17,6 +17,8 @@ interface FormationMarkerProperties {
   status: string;
   readiness: string;
   cohesion: number;
+  morale: number;
+  fatigue: number;
   personnel: number | null;
   location_osid: string;
   posture: string | null;
@@ -26,6 +28,18 @@ interface FormationMarkerProperties {
   is_home: boolean;
   /** Home-distance effectiveness multiplier [0.70–1.0]. 1.0 means full effectiveness / home turf. */
   home_distance_mult: number;
+  /** Derived supply state: 'supplied' | 'strained' | 'cutoff'. */
+  supply_state: 'supplied' | 'strained' | 'cutoff';
+  /** True if brigade is participating in an active operation. */
+  is_in_operation: boolean;
+  /** True if brigade is disrupted (disrupted_turns > 0). */
+  is_disrupted: boolean;
+  /** Movement stance: 'column' when in column march, null otherwise. */
+  movement_stance: 'combat' | 'column' | null;
+  /** True when this is the topmost (first) unit at its OSID. */
+  is_stack_top: boolean;
+  /** Number of units at same OSID. */
+  stack_count: number;
 }
 
 export const getBrigadeType = (name: string): string => {
@@ -34,6 +48,13 @@ export const getBrigadeType = (name: string): string => {
   if (lower.includes('motorized') || lower.includes('mechanized')) return 'motorized';
   if (lower.includes('artillery')) return 'artillery';
   return 'brigade'; // default
+}
+
+function deriveSupplyState(formation: { status: string; fatigue: number; cohesion: number }): 'supplied' | 'strained' | 'cutoff' {
+  const status = formation.status.toLowerCase();
+  if (status.includes('cut') || status.includes('isolated')) return 'cutoff';
+  if (formation.fatigue >= 30 || formation.cohesion < 35) return 'strained';
+  return 'supplied';
 }
 
 // Tiny offset in degrees (approx 30m east, 20m south per unit) to create a 'fanned' stack effect
@@ -115,6 +136,8 @@ export function buildFormationsGeoJSON(
         status: formation.status,
         readiness: formation.readiness,
         cohesion: formation.cohesion,
+        morale: formation.morale ?? formation.cohesion ?? 50,
+        fatigue: formation.fatigue ?? 0,
         personnel: typeof formation.personnel === 'number' ? formation.personnel : null,
         location_osid: osid,
         posture: formation.posture ?? null,
@@ -122,6 +145,12 @@ export function buildFormationsGeoJSON(
         assigned_sub_segment_id: formation.assigned_sub_segment_id ?? null,
         is_home: !!(munFromOsid(formation.home_osid) && munFromOsid(formation.home_osid) === munFromOsid(osid)),
         home_distance_mult: typeof formation.homeDistanceMult === 'number' ? formation.homeDistanceMult : 1.0,
+        supply_state: deriveSupplyState({ status: formation.status, fatigue: formation.fatigue ?? 0, cohesion: formation.cohesion ?? 50 }),
+        is_in_operation: !!(formation.posture === 'attack' || formation.posture === 'assault'),
+        is_disrupted: (formation.disrupted_turns ?? 0) > 0,
+        movement_stance: formation.movementStance ?? null,
+        is_stack_top: stackIndex === 0,
+        stack_count: totalInStack,
       },
     });
   }

@@ -8,9 +8,9 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-20, v0.6.2 — 3D Terrain + Deck.gl Arrows)
-**v0.6.2.** 1244 tests, 102 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w).**
-**This session:** 3D terrain pipeline (Copernicus DEM → Terrain RGB → PMTiles, 11MB). Main map pitch 15° + exaggeration 2.0. Ops modal pitch 30° + exaggeration 2.5. Deck.gl animated advance arrows (PathLayer + PathStyleExtension dash animation). ModalMapSource utility (structural fix for setData() modal bug). Municipality borders toggle layer.
+## Current State (2026-03-20, v0.6.3 — Visual Overhaul Complete)
+**v0.6.3.** 1246 tests, 103 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w).**
+**This session:** Visual Overhaul Phases 3-9 COMPLETE. Deck.gl formation counters ON by default (health bars, supply dots, status icons, op/disrupted glows). Sidebar upgrade (stance stripes, equipment, icons). EventModal dispatch paper. Bottom strip macro indicators. Battle flyover (pitch 35°). Terrain-cost move preview. Simplify pass: single-pass feature classification, memoized territory computation.
 **HRHB-RBiH conflict:** P1 Backlog: CB brigade redistribution, CB operations not launching. Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
@@ -20,8 +20,8 @@
 **External:** Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
 
 ## Session Startup (do these EVERY session — BEFORE any work)
-1. **[2026-03-20] Initiate MapLibre + Deck.gl Hybrid implementation (P2).**
-   Do instead: Following the approved strategy in `2026-03-19-ui-visual-overhaul-design.md`, start prototyping the Deck.gl tactical overlay. Start with unit counter enrichment.
+1. **[2026-03-20] Visual Overhaul COMPLETE — return to engine work.**
+   Do instead: Phases 3-9 all shipped. Next priority: HRHB-RBiH P1 backlog (CB brigade redistribution, CB ops not launching, Kiseljak/Vitez pocket separation). See `BOSNIAK_CROAT_CONFLICT_MASTER.md`.
 2. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
    Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
    **(A) Daily Pyrrhic Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Pyrrhic team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
@@ -67,8 +67,8 @@
 7. **[2026-03-20] Nested package installations for Map UI**
    Do instead: The tactical map UI is a completely separate workspace at `src/ui/map` with its own `package.json`. Commands like `npm run dev:map` run `cd src/ui/map && npx vite`. When adding UI dependencies (like `deck.gl`), you MUST run `npm install` inside the `src/ui/map` directory, not the project root. Root `npm install --legacy-peer-deps` can break the inner Vite installation.
 
-8. **[2026-03-20] Deck.gl Scaling, Labels, and Doc Truth**
-   Do instead: **`deckFormationCounters` defaults `false`** — MapLibre formations are the default render + pick path. When implementing Deck.gl tactical layers, match MapLibre zoom-interpolation for unit markers (`16px` @ Z6 to `40px` @ Z14); sync on map `zoom`. Labels: `Open Sans Regular`, `10-12px`, `~22px` offset where used. **Do not** document Deck as having “replaced” MapLibre formations unless you qualify opt-in + `deckLayerCapabilities.ts`.
+8. **[2026-03-20] Deck.gl Scaling, Labels, and Formation Rendering**
+   Do instead: **`deckFormationCounters` defaults `true`** — Deck.gl is the primary formation render path (health bars, supply dots, status icons, op/disrupted glows, stack badges). MapLibre `formation-markers`/`formation-labels` hidden when active. Zoom-interpolation: `16px` @ Z6 to `40px` @ Z14; sync on map `zoom`. Labels: `Open Sans Regular`, `10-12px`, `~22px` offset. `classifyFeatures()` single-pass for enrichment buckets.
 
 ## GUI / Map
 1. **[2026-03-20] G-2 prediction empty in ops modal**
@@ -95,7 +95,7 @@
 6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Structural.
 7. **[2026-03-19] #41 Dissolution floor not enforced (P3)**: hrhb_108th at 100 pers below 150 floor.
 8. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical.
-9. **[2026-03-20] UI Visual Overhaul (Phase 1 DONE, rest P2)**: Phase 1 icons DEPLOYED (22 SVG, 4 components, memo+a11y). Remaining: counter enrichment, sidebar upgrade, document panels, bottom strip, map ops viz. Plan: `docs/plans/2026-03-19-ui-visual-overhaul-design.md`.
+9. ~~**UI Visual Overhaul**~~ — ALL 9 PHASES COMPLETE. Icons, battle markers, counter enrichment (Deck.gl ON by default), sidebar upgrade, EventModal paper, bottom strip, op glow, battle flyover, terrain move preview. Plan: `docs/plans/2026-03-19-ui-visual-overhaul-design.md`.
 10. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
 **Resolved this session:** #34 HVO sectors (FIXED — corps activation + consolidation protection), #38 HVO stale IDs (FIXED), #33 Sarajevo density (CORRECT — siege working).
 
@@ -103,13 +103,13 @@
 **Tier 1 — High Impact, Low Effort (1-2 sessions each):**
 1. ~~**Deploy Icon Language (P0)**~~ — DONE. 22 SVG icons deployed to FormationDetail, CorpsDetail, ArmyDetail, CorpsCard. React.memo + aria-hidden. Simplified: stance lookup, size consistency.
 2. ~~**Battle Marker Upgrade**~~ — DONE. Enriched with TurnBattle data. Outcome-colored, size-scaled by casualties. Hover tooltip + click priority. Includes non-flip battles.
-3. **[2026-03-20] Map Counter Enrichment**: Add health bar (2px, cohesion), supply dot (4px), operation icon to formation markers. Enable `deckFormationCounters: true`.
+3. ~~**Map Counter Enrichment**~~ — DONE. Deck.gl health bar, supply dot, status icons, op/disrupted glows. `deckFormationCounters: true`.
 **Tier 2 — High Impact, Medium Effort (2-3 sessions):**
-4. **[2026-03-20] Operation Visualization on Main Map**: Objective OSID tints, Deck.gl ArcLayer brigade→objective, status glow on participating units.
-5. **[2026-03-20] Battle Site Flyover**: Click battle → `flyTo` with terrain pitch + bearing, floating battle card. 3D terrain temporary on main map during flyover.
+4. ~~**Operation Visualization on Main Map**~~ — DONE. Op glow + disrupted glow on Deck.gl counters. Objective tints already in operations map mode.
+5. ~~**Battle Site Flyover**~~ — DONE. Click battle → flyTo pitch 35°, zoom 11+. OSID selected.
 6. **[2026-03-20] Settlement Panel Mini-Profile**: Formation cards with combat effectiveness, siege status, terrain profile in overview tab.
 **Tier 3 — Medium Impact, Higher Effort:**
-7. **[2026-03-20] Terrain Cost Movement Overlay**: On move mode, color OSIDs by terrain friction (green/amber/red).
+7. ~~**Terrain Cost Movement Overlay**~~ — DONE. Move preview uses friction coloring (green→amber→red).
 8. **[2026-03-20] Elevation Profile on Ops Axes**: Pre-compute per-OSID elevation, sample along bezier, SVG area chart.
 9. **[2026-03-20] Front Line Terrain Tinting**: Enrich front edge data with friction, color high-elevation edges white/blue.
 **Explicitly rejected:** LOS cones (too expensive, wrong scale), full 3D main map (distorts polygons), 3D battle replay (no multi-step data), threat heat layer (redundant with Defense mode), pulsing markers (flashy, no info).

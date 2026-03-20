@@ -92,7 +92,7 @@ src/ui/map/
 │   └── gameStore.ts               Zustand store — all UI state (see §4)
 │
 ├── layers/
-│   ├── deckLayerCapabilities.ts   Opt-in flags; **`deckFormationCounters` default false** → MapLibre formations stay on
+│   ├── deckLayerCapabilities.ts   Capability flags; **`deckFormationCounters` default true** → Deck.gl formations with enrichments (health bar, supply dot, status icons, stack badges, op/disrupted glow rings); MapLibre `formation-markers`/`formation-labels` hidden
 │   ├── composeTacticalDeckLayers.ts Merges tactical + experimental Deck layers for `MapboxOverlay`
 │   ├── buildTacticalDeckLayers.ts   IconLayer / TextLayer / enrichments when Deck formations enabled
 │   └── buildExperimentalDeckLayers.ts Optional arcs, Deck front paths, scatter dots (all default off)
@@ -633,9 +633,9 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 
 ### Formation layers (MapLibre default; optional Deck.gl)
 
-**Default:** MapLibre symbol layers `formation-markers` and `formation-labels` (see `buildFormationsGeoJSON.ts`, `formationIcons.ts`). **`deckFormationCounters`** in `deckLayerCapabilities.ts` is **`false`** by default so `queryRenderedFeatures` and map picks match the legacy path.
+**Default:** Deck.gl formation counters via `buildTacticalDeckLayers.ts`. **`deckFormationCounters`** in `deckLayerCapabilities.ts` is **`true`** by default — MapLibre `formation-markers` and `formation-labels` are hidden to prevent double-draw. Deck.gl enrichment layers include: health bar, supply dot, status icons, stack badges, and op/disrupted glow rings.
 
-When **`deckFormationCounters`** is **true**, MapLibre formation symbol layers are hidden and Deck supplies:
+When **`deckFormationCounters`** is **true** (the default), MapLibre formation symbol layers are hidden and Deck supplies:
 
 | Layer ID | Source | Purpose |
 |----------|--------|---------|

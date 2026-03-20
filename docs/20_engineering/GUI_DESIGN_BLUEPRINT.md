@@ -343,7 +343,7 @@ Front lines are the **most important visual element** after control fill.
 
 ### 6.3 Unit Markers on Map
 
-Every active brigade with a known position (HQ settlement or municipality centroid) gets an on-map marker. **Default:** MapLibre `formation-markers` (sprites from `formationIcons.ts`). **Optional:** when `deckFormationCounters` is enabled in `deckLayerCapabilities.ts`, the **Deck.gl IconLayer** in `buildTacticalDeckLayers.ts` draws counters instead (MapLibre formation layers hidden to avoid double draw).
+Every active brigade with a known position (HQ settlement or municipality centroid) gets an on-map marker. **Default:** Deck.gl formation counters (`deckFormationCounters: true` in `deckLayerCapabilities.ts`) via `buildTacticalDeckLayers.ts` with enrichments (health bar, supply dot, status icons, stack badges, op/disrupted glow rings); MapLibre `formation-markers` / `formation-labels` hidden when active. Setting `deckFormationCounters: false` restores MapLibre symbol layers as a fallback.
 
 **Marker design (NATO APP-6 inspired):**
 ```
