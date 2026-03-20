@@ -209,7 +209,14 @@ Add:
 - `B` — Toggle briefing layer
 - `O` — Open operations panel
 
-### 5.5 Command Briefing Actionability
+### 5.5 Map Atmosphere — Deeper Hillshade + Warm Tint
+
+The main map stays in day mode (night mode rejected — faction territory colors need a light base, and the dark chrome already provides contrast). But deepen the atmosphere:
+- **Increase hillshade opacity** slightly for more terrain drama
+- **Apply a subtle warm sepia tint** to the base map tiles (CSS filter or MapLibre paint property) to bring the map closer to the warm-brown palette of the surrounding UI
+- **Do NOT go full dark/night** — the Army HQ modal provides the "dark table" experience; the main map stays readable
+
+### 5.6 Command Briefing Actionability
 
 Current `CommandBriefingLayer` shows AI-generated text items. Convert each item from passive text to an actionable button:
 - "Drina Corps at 41% cohesion" -> Click -> Opens HQ with Drina expanded
