@@ -1,10 +1,11 @@
 /**
- * v0.4.1 Phase 2: Event Decision Modal.
+ * Event Decision Modal.
  * Displays a pending event decision with response options for the player.
- * Styled to match existing modals (PeacePlanModal pattern).
+ * Matches EventModal's parchment/dispatch aesthetic.
  */
 
 import type { PendingEventDecision, EventResponseOption, EventEffect } from '../../../sim/events/event_types';
+import { FACTION_COLORS } from '../utils/theme';
 
 export interface EventDecisionModalProps {
     decision: PendingEventDecision;
@@ -30,7 +31,7 @@ function EffectPreview({ effects }: { effects: EventEffect[] }) {
     const mechanical = effects.filter(e => e.kind !== 'narrative');
     if (mechanical.length === 0) return null;
     return (
-        <ul style={{ margin: '4px 0 0 0', paddingLeft: 16, fontSize: 12, color: '#aaa' }}>
+        <ul className="mt-1 pl-4 text-[11px] text-text-secondary space-y-0.5">
             {mechanical.map((e, i) => (
                 <li key={i}>{describeEffect(e)}</li>
             ))}
@@ -40,25 +41,18 @@ function EffectPreview({ effects }: { effects: EventEffect[] }) {
 
 function ResponseButton({ option, onChoose }: { option: EventResponseOption; onChoose: () => void }) {
     return (
-        <div style={{ marginBottom: 12 }}>
+        <div className="mb-2">
             <button
-                style={{
-                    padding: '10px 24px',
-                    backgroundColor: '#2a3a5e',
-                    color: '#e0e0e0',
-                    border: '1px solid #556',
-                    borderRadius: 4,
-                    cursor: 'pointer',
-                    fontSize: 14,
-                    width: '100%',
-                    textAlign: 'left',
-                }}
+                type="button"
                 onClick={onChoose}
+                className="w-full text-left px-4 py-2.5 rounded border border-panel-border
+                           bg-panel-card hover:bg-panel-hover text-text-primary font-sans text-[13px]
+                           transition-colors hover:border-accent-gold/40"
             >
                 {option.label}
             </button>
             {option.description && (
-                <p style={{ margin: '4px 0 0 8px', fontSize: 12, color: '#999', lineHeight: 1.4 }}>
+                <p className="mt-1 ml-2 text-[11px] text-text-secondary leading-relaxed">
                     {option.description}
                 </p>
             )}
@@ -68,47 +62,41 @@ function ResponseButton({ option, onChoose }: { option: EventResponseOption; onC
 }
 
 export function EventDecisionModal({ decision, onRespond }: EventDecisionModalProps) {
+    const factionColor = FACTION_COLORS[decision.faction] ?? 'text-accent-gold';
+
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-        }}>
-            <div style={{
-                backgroundColor: '#1a1a2e',
-                border: '1px solid #444',
-                borderRadius: 8,
-                padding: 32,
-                maxWidth: 560,
-                width: '90%',
-                color: '#e0e0e0',
-                fontFamily: 'system-ui, sans-serif',
-            }}>
-                <h2 style={{ margin: '0 0 4px 0', color: '#ffd700', fontSize: 18 }}>
-                    Event Decision Required
-                </h2>
-                <p style={{ margin: '0 0 4px 0', fontSize: 12, color: '#888' }}>
-                    {decision.faction} -- Turn {decision.turn_fired}
-                </p>
-                <h3 style={{ margin: '0 0 16px 0', fontWeight: 'normal', color: '#ccc', fontSize: 15 }}>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999]">
+            <div className="bg-panel-bg border border-panel-border rounded-lg p-6 max-w-[560px] w-[90%]
+                            shadow-xl backdrop-blur-sm">
+                {/* Category stamp */}
+                <div className="flex items-center gap-3 mb-4">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-panel-bg bg-accent-gold px-2 py-0.5 rounded"
+                          style={{ transform: 'rotate(-2deg)' }}>
+                        Decision Required
+                    </span>
+                    <span className={`text-[10px] font-mono ${factionColor}`}>
+                        {decision.faction} &middot; Turn {decision.turn_fired}
+                    </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="font-sans text-base text-text-primary font-semibold mb-4">
                     {decision.event_title}
                 </h3>
 
-                <div style={{ marginBottom: 8 }}>
-                    <strong style={{ fontSize: 13, color: '#aaa' }}>Choose your response:</strong>
+                {/* Response options */}
+                <div className="mb-2">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold mb-3">
+                        Commander's Response
+                    </div>
+                    {decision.response_options.map(option => (
+                        <ResponseButton
+                            key={option.id}
+                            option={option}
+                            onChoose={() => onRespond(decision.event_id, option.id)}
+                        />
+                    ))}
                 </div>
-
-                {decision.response_options.map(option => (
-                    <ResponseButton
-                        key={option.id}
-                        option={option}
-                        onChoose={() => onRespond(decision.event_id, option.id)}
-                    />
-                ))}
             </div>
         </div>
     );

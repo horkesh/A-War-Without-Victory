@@ -58,7 +58,7 @@ export function GlassPanel({
                 {/* Panel */}
                 <div
                     ref={panelRef}
-                    className={`relative bg-[#16191f]/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp ${className}`}
+                    className={`relative bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp ${className}`}
                     style={{ width, maxHeight: '80vh' }}
                 >
                     <PanelHeader title={title} onClose={onClose} />
@@ -74,7 +74,7 @@ export function GlassPanel({
         return (
             <div
                 ref={panelRef}
-                className={`${POSITION_CLASSES['bottom-tray']} bg-[#16191f]/95 backdrop-blur-md border-t border-[rgba(180,160,130,0.15)] shadow-xl animate-slideUp ${className}`}
+                className={`${POSITION_CLASSES['bottom-tray']} bg-panel-bg/95 backdrop-blur-md border-t border-[rgba(180,160,130,0.15)] shadow-xl animate-slideUp ${className}`}
                 style={{ zIndex, maxHeight: '40vh' }}
             >
                 <PanelHeader title={title} onClose={onClose} />
@@ -89,7 +89,7 @@ export function GlassPanel({
     return (
         <div
             ref={panelRef}
-            className={`${POSITION_CLASSES[position]} bg-[#16191f]/90 backdrop-blur-md border-${position === 'left' ? 'r' : 'l'} border-[rgba(180,160,130,0.15)] shadow-xl overflow-hidden animate-fadeIn ${className}`}
+            className={`${POSITION_CLASSES[position]} bg-panel-bg/90 backdrop-blur-md border-${position === 'left' ? 'r' : 'l'} border-[rgba(180,160,130,0.15)] shadow-xl overflow-hidden animate-fadeIn ${className}`}
             style={{ zIndex, width }}
         >
             <PanelHeader title={title} onClose={onClose} />
@@ -104,15 +104,15 @@ function PanelHeader({ title, onClose }: { title: string; onClose?: () => void }
     return (
         <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(180,160,130,0.15)]">
             <h2
-                className="text-[#c4a04a] uppercase tracking-[0.3em] text-sm font-black"
-                style={{ textShadow: '0 0 8px rgba(196,160,74,0.3)' }}
+                className="text-accent-gold uppercase tracking-[0.3em] text-sm font-black"
+                style={{ textShadow: '0 0 8px rgba(196,163,90,0.3)' }}
             >
                 {title}
             </h2>
             {onClose && (
                 <button
                     onClick={onClose}
-                    className="text-[#8a8578] hover:text-[#c4a04a] transition-colors text-lg leading-none"
+                    className="text-text-secondary hover:text-accent-gold transition-colors text-lg leading-none"
                     aria-label="Close panel"
                 >
                     &times;
