@@ -81,3 +81,13 @@ export function formatCorpsDisplayName(name: string, id: string): string {
         ? toTitleCase(name.replace(/^(RS|RBiH|HRHB)_/i, ''))
         : name;
 }
+
+/** Compact personnel display: 2400 → "2.4k", 800 → "800". */
+export function formatPersonnel(n: number): string {
+    return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+}
+
+/** Strip op: prefix and underscores for display. */
+export function formatOsidLabel(osid: string): string {
+    return osid.replace(/^op:/, '').replace(/_/g, ' ');
+}

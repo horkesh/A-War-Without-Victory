@@ -55,6 +55,14 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
         setPickerCorpsId(null);
     };
 
+    const handleDismiss = async () => {
+        if (!ipc.isAvailable || !commander) return;
+        const result = await ipc.dismissOfficer(commander.id);
+        if (!result.ok) {
+            setLoadError(result.error ?? 'Failed to dismiss officer.');
+        }
+    };
+
     return (
         <CollapsibleSection sectionKey={`cmd-${corps.id}`} title="Commander" defaultOpen={true}>
             {commander ? (
@@ -73,6 +81,15 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                         >
                             {showPicker ? 'Cancel' : 'Replace Commander'}
                         </button>
+                        {!isActing && !showPicker && (
+                            <button
+                                type="button"
+                                onClick={() => { void handleDismiss(); }}
+                                className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-red-600/30 text-red-700 hover:bg-red-100/30 transition-colors"
+                            >
+                                Dismiss
+                            </button>
+                        )}
                     </div>
                 </div>
             ) : (

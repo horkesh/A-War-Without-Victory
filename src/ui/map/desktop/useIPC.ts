@@ -62,6 +62,7 @@ interface WindowAwwv {
     stageOperationHalt: (payload: { corpsId: string; operationName: string; digInOnHalt: boolean }) => Promise<{ ok: boolean; error?: string }>;
     stageAssignOperationCommander: (payload: { corpsId: string; operationName: string; officerId: string }) => Promise<{ ok: boolean; error?: string }>;
     assignCommander: (officerId: string, corpsId: string) => Promise<{ ok: boolean; error?: string }>;
+    dismissOfficer: (officerId: string) => Promise<{ ok: boolean; error?: string }>;
     stageOperationForceLaunch: (payload: { corpsId: string; operationName: string }) => Promise<{ ok: boolean; error?: string }>;
     stageOperationDecision: (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => Promise<{ ok: boolean; error?: string }>;
     stageAirdropAllocation: (allocations: Record<string, number>) => Promise<{ ok: boolean; error?: string }>;
@@ -216,6 +217,10 @@ export function useIPC() {
             assignCommander: awwv
                 ? (officerId: string, corpsId: string) => awwv.assignCommander(officerId, corpsId)
                 : (_officerId: string, _corpsId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+
+            dismissOfficer: awwv
+                ? (officerId: string) => awwv.dismissOfficer(officerId)
+                : (_officerId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             stageOperationForceLaunch: awwv
                 ? (payload: { corpsId: string; operationName: string }) => awwv.stageOperationForceLaunch(payload)

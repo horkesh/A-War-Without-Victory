@@ -68,6 +68,7 @@ contextBridge.exposeInMainWorld('awwv', {
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
   stageAssignOperationCommander: (payload) => ipcRenderer.invoke('stage-assign-operation-commander', payload),
   assignCommander: (officerId, corpsId) => ipcRenderer.invoke('assign-commander', { officerId, corpsId }),
+  dismissOfficer: (officerId) => ipcRenderer.invoke('dismiss-officer', { officerId }),
   approveReserveRequest: (corpsId, brigadeId) => ipcRenderer.invoke('approve-reserve-request', { corpsId, brigadeId }),
   recallEliteBrigade: (brigadeId) => ipcRenderer.invoke('recall-elite-brigade', { brigadeId }),
   redirectReserveLoan: (brigadeId, newCorpsId) => ipcRenderer.invoke('redirect-reserve-loan', { brigadeId, newCorpsId }),

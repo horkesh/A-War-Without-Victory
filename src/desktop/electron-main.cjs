@@ -1522,6 +1522,36 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('dismiss-officer', async (_event, payload) => {
+    const { officerId } = payload || {};
+    if (!currentGameStateJson || typeof officerId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+
+      const officer = state.named_officers?.[officerId];
+      if (!officer) return { ok: false, error: `Officer ${officerId} not found` };
+
+      // Cannot dismiss an officer currently commanding an operation
+      if (officer.assigned_operation) {
+        return { ok: false, error: `Officer is commanding an active operation — stand down the operation first` };
+      }
+
+      // Unassign from corps and move to reserve
+      officer.assigned_corps_id = null;
+      officer.status = 'reserve';
+      officer.acting_commander = false;
+
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // --- Read-only query handlers (UI previews; no state mutation) ---
   ipcMain.handle('query-movement-range', async (_event, payload) => {
     const { brigadeId } = payload || {};

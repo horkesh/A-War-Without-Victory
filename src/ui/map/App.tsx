@@ -6,7 +6,7 @@ import { CorpsFrontPanel } from './components/CorpsFrontPanel';
 import { FormationDetail } from './components/FormationDetail';
 import { ArmyReservePanel } from './components/ArmyReservePanel';
 import { CorpsDetail } from './components/CorpsDetail';
-import { ArmyDetail } from './components/ArmyDetail';
+// ArmyDetail retired — faction click opens Army HQ modal directly
 import { ArmyHQModal } from './components/army_hq/ArmyHQModal';
 import { Minimap } from './components/Minimap';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
@@ -545,7 +545,7 @@ function App() {
       {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
       {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
       {railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
-      {railState.primary === 'army' && !useGameStore.getState().armyHQOpen && <ArmyDetail railSlot="primary" />}
+      {/* ArmyDetail retired — faction click opens Army HQ modal */}
       {railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
       {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
       {railState.primary === 'operation' && <OperationDetail railSlot="primary" />}
