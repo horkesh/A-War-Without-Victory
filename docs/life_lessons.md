@@ -68,6 +68,22 @@
 
 ## Active Lessons (no recent violations)
 
+### [Design] Emergent constraints beat hardcoded gates — let the supply system do its job (2026-03-21) — NEW
+- **Context**: Besieged enclave forces (Sarajevo, Goražde, Srebrenica) launched full corps offensives despite supply strangulation. Initial fix was a hardcoded enclave gate that checked `getEnclaveIdForOsid()` and blocked enclave brigades from operations.
+- **Wrong approach**: Hardcoding which enclaves can't attack. Fragile, not extensible, doesn't respond to changing game state (e.g. if a corridor opens, the hardcode still blocks).
+- **Right approach**: The supply system already derives per-OSID supply state (`adequate`/`strained`/`critical`) via `findHeartlandComponent` + BFS. Sarajevo is correctly marked `strained` (local source disconnected from heartland). Filter supply-constrained brigades from the offensive pool and the constraint emerges naturally. Bihać works correctly without exemption — its sources ARE in the heartland.
+- **Do instead**: When a game system needs to constrain behavior, look for an existing system that already derives the right signal. Wire the constraint to that signal rather than creating a parallel detection mechanism. The supply system knew Sarajevo was cut off — the offensive system just wasn't listening.
+
+### [Calibration] Graz Accords cold front check must exclude mixed-opponent sectors (2026-03-21) — NEW
+- **Context**: `isSectorColdFront()` checked if `opposing_factions.includes('HRHB')` — but SRK sectors face both HRHB (Kiseljak pocket) and RBiH (Sarajevo enclave). All 5 SRK sectors were forced to `screening` stance (0× entrenchment, 0.5× reactive defense) for the entire war.
+- **Wrong approach**: Checking if ANY opponent is the truce partner. A sector facing RS↔HRHB+RBiH is an active combat zone that happens to also border the truce partner.
+- **Right approach**: Cold front only when the sector's ONLY opponents are the truce pair. `hasNonTruceFoe` guard.
+- **Do instead**: When implementing faction-pair mechanics (truces, alliances), always check whether a third faction is also present. Two-way mechanics applied to three-way contact zones produce false positives.
+
+### [OOB] Verify unit identity across sources before treating as separate formations (2026-03-21) — NEW
+- **Context**: `rs_rogatica_brigade` and `rs_1st_podrinje` were both in the OOB — same unit (renamed when transferred from SRK to Drina Corps Nov 1992). Phantom brigade inflated Drina strength by 1800 personnel, causing 6pp Drina region error.
+- **Do instead**: When OOB has two units with the same home municipality or overlapping area, verify they aren't the same unit under different names. Cross-reference Wikipedia, ICTY, and Balkan Battlegrounds. Unit redesignation on corps transfer was common in VRS.
+
 ### [Architecture] A corps_id on a brigade means nothing if the corps formation doesn't exist (2026-03-19) — NEW
 - **Context**: `hvo_central_bosnia` was referenced by `corps_id` on 7 HRHB brigades, existed in `corps_command`, but never appeared in `formations`. The sector system's `getCorpsForFaction()` filters `formations` for `kind === 'corps_asset'` — a missing formation means 0 sectors, 0 edges, 0 operations, regardless of how many brigades point at it. The corps was a phantom — present in the org chart but absent from the game world.
 - **Root cause**: The `activate-corps` pipeline step only ran in the peace phase. Scenarios starting directly in war phase (the 40w/52w scenarios) skipped it. `hvo_central_bosnia` (`available_from: 10`) never got created.
