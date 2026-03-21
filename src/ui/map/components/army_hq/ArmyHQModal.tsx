@@ -105,31 +105,54 @@ export function ArmyHQModal() {
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-8 py-4 shrink-0 border-b border-panel-border bg-panel-card">
-                    <div>
-                        <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
-                            COMMANDER
-                        </div>
-                        <div className="text-[22px] font-bold uppercase tracking-wide text-text-primary">
-                            {FACTION_SHORT[faction] ?? faction} MAIN STAFF
+                <div className="flex items-center justify-between px-8 py-3 shrink-0 border-b border-panel-border bg-panel-card">
+                    {/* Left: back/close + title */}
+                    <div className="flex items-center gap-4">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (expandedCorpsId) {
+                                    setExpandedCorpsId(null);
+                                } else {
+                                    setOpen(false);
+                                }
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold uppercase tracking-wide text-text-secondary border border-panel-border rounded hover:bg-panel-hover hover:text-text-primary transition-colors"
+                        >
+                            {expandedCorpsId ? '← BACK' : '← MAP'}
+                        </button>
+                        <div>
+                            <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
+                                {expandedCorpsId ? `${FACTION_SHORT[faction] ?? faction} HQ` : 'COMMANDER'}
+                            </div>
+                            <div className="text-[18px] font-bold uppercase tracking-wide text-text-primary">
+                                {expandedCorpsId
+                                    ? data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name ?? expandedCorpsId
+                                    : `${FACTION_SHORT[faction] ?? faction} MAIN STAFF`
+                                }
+                            </div>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
-                            STRATEGIC SITUATION
+
+                    {/* Right: situation + close */}
+                    <div className="flex items-center gap-6">
+                        <div className="text-right">
+                            <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
+                                STRATEGIC SITUATION
+                            </div>
+                            <div className="text-[14px] font-bold text-text-primary">
+                                Week {state.turn} {state.metadata?.date ? `\u2014 ${state.metadata.date}` : ''}
+                            </div>
                         </div>
-                        <div className="text-[14px] font-bold text-text-primary">
-                            Week {state.turn} {state.metadata?.date ? `\u2014 ${state.metadata.date}` : ''}
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => { setExpandedCorpsId(null); setOpen(false); }}
+                            className="text-text-secondary hover:text-text-primary text-[22px] leading-none transition-colors px-2"
+                            title="Close [ESC]"
+                        >
+                            &times;
+                        </button>
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => { setExpandedCorpsId(null); setOpen(false); }}
-                        className="ml-6 text-text-secondary hover:text-text-primary text-[20px] leading-none transition-colors"
-                        title="Close [ESC]"
-                    >
-                        &times;
-                    </button>
                 </div>
 
                 {/* Content */}
