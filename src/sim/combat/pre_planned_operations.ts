@@ -92,7 +92,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:derventa:derventa_2',
                     'op:bosanski_brod:brod',
                 ],
-                staging_osid: 'op:bosanski_samac:pisari_2',
+                staging_osid: 'op:bosanski_samac:crkvina_2',
             },
         ],
     },
