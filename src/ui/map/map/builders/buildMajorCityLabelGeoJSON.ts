@@ -54,6 +54,18 @@ export function buildMajorCityLabelGeoJSON(controlGeoJson: FeatureCollection): F
     }
   }
 
+  // Merge Sarajevo municipalities into a single "Sarajevo" label
+  const SARAJEVO_MUNS = new Set(['centar_sarajevo', 'ilidza', 'novi_grad_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo']);
+  let sarajevoBest: Candidate | null = null;
+  for (const munId of SARAJEVO_MUNS) {
+    const c = byMun.get(munId);
+    if (c && (!sarajevoBest || c.pop > sarajevoBest.pop)) sarajevoBest = c;
+    byMun.delete(munId);
+  }
+  if (sarajevoBest) {
+    byMun.set('sarajevo', { ...sarajevoBest, munId: 'sarajevo', munName: 'Sarajevo' });
+  }
+
   const features: Feature<Point>[] = [];
   for (const munId of [...byMun.keys()].sort((a, b) => a.localeCompare(b))) {
     const c = byMun.get(munId)!;

@@ -42,6 +42,7 @@ import { stageMoveOrderFromOsid, stageAssignBrigadeToSectorAction } from '../des
 import styleJson from './awwv_map_style.json';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
+import { setSettlementLabelData } from '../layers/buildTacticalDeckLayers';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
@@ -379,6 +380,7 @@ export function MapContainer() {
 
         const controlledGeoJson = buildControlGeoJSON(geojson, byOsid);
         const majorCityLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
+        setSettlementLabelData(majorCityLabels.features);
         const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson);
         const sources = style.sources as Record<
           string,
@@ -708,6 +710,7 @@ export function MapContainer() {
           (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
           try {
             const majorLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
+            setSettlementLabelData(majorLabels.features);
             safeEnsureSource(m1, MAJOR_CITY_LABELS_SOURCE_ID, { type: 'geojson', data: majorLabels });
             const lblSrc = m1.getSource(MAJOR_CITY_LABELS_SOURCE_ID) as GeoJSONSource | undefined;
             if (lblSrc) lblSrc.setData(majorLabels);
@@ -1258,21 +1261,21 @@ export function MapContainer() {
           id: MAJOR_CITY_LABELS_LAYER_ID,
           type: 'symbol',
           source: MAJOR_CITY_LABELS_SOURCE_ID,
-          minzoom: 6,
+          minzoom: 7,
           layout: {
             'text-field': ['get', 'name'],
             'text-font': ['Open Sans Bold'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 6, 10, 9, 13, 12, 16, 14, 18],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 7, 10, 9, 12, 11, 15, 14, 20],
             'text-anchor': 'center',
             'text-allow-overlap': true,
             'text-ignore-placement': true,
             'text-transform': 'uppercase',
-            'text-letter-spacing': 0.06,
+            'text-letter-spacing': 0.1,
           },
           paint: {
-            'text-color': 'rgba(28, 22, 18, 0.95)',
-            'text-halo-color': 'rgba(252, 248, 238, 0.92)',
-            'text-halo-width': 2.2,
+            'text-color': 'rgba(235, 225, 205, 0.95)',
+            'text-halo-color': 'rgba(10, 8, 6, 0.9)',
+            'text-halo-width': 2.0,
           },
         });
       }

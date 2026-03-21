@@ -1,8 +1,11 @@
 /**
- * Deck.gl formation stack — only used when `DeckLayerCapabilities.deckFormationCounters` is true
- * (see `composeTacticalDeckLayers`). Renders clean NATO counter icons only.
+ * Deck.gl formation stack + settlement labels.
+ * Formation counters: only when `DeckLayerCapabilities.deckFormationCounters` is true.
+ * Settlement labels: always rendered via Deck.gl TextLayer (MapLibre symbol rendering
+ * is broken — "Unimplemented type: 4" errors from OSM PMTiles poison the symbol pipeline,
+ * causing ALL symbol layers to render 0 features).
  */
-import { IconLayer } from '@deck.gl/layers';
+import { IconLayer, TextLayer } from '@deck.gl/layers';
 import type { FeatureCollection, Feature } from 'geojson';
 import { getIconDataUrl } from '../map/formationIcons';
 
@@ -11,13 +14,51 @@ function getTopStack(features: Feature[]): Feature[] {
     return features.filter(f => f.properties?.is_stack_top);
 }
 
+/** Settlement label data — set externally by MapContainer when label GeoJSON is built. */
+let _labelFeatures: Feature[] = [];
+export function setSettlementLabelData(features: Feature[]) {
+    _labelFeatures = features;
+}
+
 export function buildTacticalDeckLayers(
     formationsGeoJson: FeatureCollection,
     _labelsVisible: boolean,
     formationsVisible: boolean,
     zoom: number
 ) {
-    if (!formationsVisible) return [];
+    const layers: any[] = [];
+
+    // Settlement labels via Deck.gl TextLayer (bypasses broken MapLibre symbol pipeline)
+    if (_labelFeatures.length > 0 && zoom >= 7) {
+        let fontSize = 10;
+        if (zoom >= 14) fontSize = 20;
+        else if (zoom >= 11) fontSize = 12 + (zoom - 11) * (20 - 12) / 3;
+        else if (zoom >= 9) fontSize = 10 + (zoom - 9) * (12 - 10) / 2;
+
+        layers.push(
+            new TextLayer({
+                id: 'deck-settlement-labels',
+                data: _labelFeatures,
+                getPosition: (d: any) => d.geometry.coordinates,
+                getText: (d: any) => (d.properties?.name ?? '').toUpperCase(),
+                getSize: fontSize,
+                getColor: [235, 225, 205, 240],
+                outlineColor: [10, 8, 6, 230],
+                outlineWidth: 3,
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                fontWeight: 'bold',
+                fontSettings: { sdf: true },
+                characterSet: 'auto',
+                getTextAnchor: 'middle',
+                getAlignmentBaseline: 'center',
+                sizeUnits: 'pixels',
+                parameters: { depthTest: false },
+                updateTriggers: { getSize: zoom },
+            })
+        );
+    }
+
+    if (!formationsVisible) return layers;
 
     let iconHeight = 40;
     if (zoom <= 6) iconHeight = 16;
@@ -30,7 +71,7 @@ export function buildTacticalDeckLayers(
 
     const topStack = getTopStack(formationsGeoJson.features);
 
-    return [
+    layers.push(
         new IconLayer({
             id: 'deck-formations-icons',
             data: topStack,
@@ -49,5 +90,7 @@ export function buildTacticalDeckLayers(
             parameters: { depthTest: false },
             updateTriggers: { getSize: zoom }
         }),
-    ];
+    );
+
+    return layers;
 }
