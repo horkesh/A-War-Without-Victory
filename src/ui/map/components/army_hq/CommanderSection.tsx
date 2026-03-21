@@ -1,6 +1,6 @@
 /**
  * Commander section for expanded corps card.
- * NATO Terminal Aesthetic (Option 1).
+ * Warroom dark palette.
  */
 import { useMemo } from 'react';
 import type { FormationView, LoadedGameState } from '../../data/types';
@@ -75,7 +75,7 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                         <button
                             type="button"
                             onClick={() => setPickerCorpsId(showPicker ? null : corps.id)}
-                            className="text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 border border-[#4af626]/40 text-[#4af626] hover:bg-[#4af626]/10 transition-all font-mono"
+                            className="text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 border border-panel-border text-text-primary hover:bg-panel-bg transition-all font-mono"
                         >
                             {showPicker ? 'CANCEL' : 'REASSIGN COMMANDER'}
                         </button>
@@ -107,12 +107,12 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
 
             {/* Inline officer picker */}
             {showPicker && (
-                <div className="mt-6 border-t border-[#4af626]/20 pt-4 space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4af626]/40 mb-2">
+                <div className="mt-6 border-t border-panel-border pt-4 space-y-2">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary/60 mb-2">
                         READING PERSONNEL POOL // {availableOfficers.length} MATCHES
                     </div>
                     {availableOfficers.length === 0 ? (
-                        <div className="text-[11px] text-[#4af626]/40 italic font-mono">NO COMPATIBLE OFFICERS DETECTED</div>
+                        <div className="text-[11px] text-text-secondary/60 italic font-mono">NO COMPATIBLE OFFICERS DETECTED</div>
                     ) : (
                         <div className="max-h-[250px] overflow-y-auto space-y-1 pr-2 custom-scrollbar">
                             {availableOfficers.map((officer) => {
@@ -122,14 +122,14 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                                         key={officer.id}
                                         type="button"
                                         onClick={() => { void handleAssign(officer.id); }}
-                                        className="w-full flex items-center justify-between px-3 py-2 border border-[#4af626]/10 hover:border-[#4af626]/40 hover:bg-[#4af626]/5 transition-all text-left group"
+                                        className="w-full flex items-center justify-between px-3 py-2 border border-panel-border/50 hover:border-panel-border hover:bg-panel-bg transition-all text-left group"
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <span className="text-[12px] font-bold text-[#4af626]/80 group-hover:text-[#4af626] font-mono truncate">
+                                            <span className="text-[12px] font-bold text-text-secondary group-hover:text-text-primary font-mono truncate">
                                                 {officer.name}
                                             </span>
                                             {isHome && (
-                                                <span className="text-[9px] font-bold text-black bg-[#4af626] px-1.5 py-0.5 tracking-tighter">
+                                                <span className="text-[9px] font-bold text-panel-bg bg-amber-400 px-1.5 py-0.5 tracking-tighter">
                                                     HOME
                                                 </span>
                                             )}

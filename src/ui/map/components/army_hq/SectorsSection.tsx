@@ -1,6 +1,6 @@
 /**
  * Sectors section for expanded corps card.
- * NATO Terminal Aesthetic (Option 1).
+ * Warroom dark palette.
  */
 import { useMemo, useState } from 'react';
 import type { CorpsFrontSectorView, FormationView } from '../../data/types';
@@ -22,24 +22,24 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
     const reserveIds = sector.reserve_brigade_ids;
 
     return (
-        <div className="px-4 py-3 space-y-4 text-[11px] border-t border-[#4af626]/10 bg-black/40 font-mono">
+        <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
             {/* Front brigades */}
             {frontIds.length > 0 && (
                 <div>
-                    <div className="text-[10px] font-bold uppercase text-[#4af626]/40 tracking-widest mb-1.5 border-b border-[#4af626]/5 pb-0.5">FRONT LINE DEPLOYMENT ({frontIds.length})</div>
+                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">FRONT LINE DEPLOYMENT ({frontIds.length})</div>
                     <div className="space-y-1.5">
                         {frontIds.map((id) => {
                             const b = formationMap.get(id);
-                            if (!b) return <div key={id} className="text-[#4af626]/40 italic">[!] {id} UNKNOWN</div>;
+                            if (!b) return <div key={id} className="text-text-secondary/60 italic">[!] {id} UNKNOWN</div>;
                             const cohesion = Math.round(b.cohesion ?? 0);
                             const isDisrupted = (b.disrupted_turns ?? 0) > 0;
                             return (
                                 <div key={id} className="flex items-center gap-3">
-                                    <span className="truncate flex-1 min-w-0 text-[#4af626]/80">{b.name}</span>
-                                    <span className="text-[#4af626]/60 tabular-nums w-12 text-right shrink-0">
+                                    <span className="truncate flex-1 min-w-0 text-text-secondary">{b.name}</span>
+                                    <span className="text-text-secondary tabular-nums w-12 text-right shrink-0">
                                         {formatPersonnel(b.personnel ?? 0)}
                                     </span>
-                                    <span className={`tabular-nums w-10 text-right shrink-0 font-bold ${cohesion >= 70 ? 'text-[#4af626]' : cohesion >= 40 ? 'text-accent-gold' : 'text-red-500'}`}>
+                                    <span className={`tabular-nums w-10 text-right shrink-0 font-bold ${cohesion >= 70 ? 'text-emerald-400' : cohesion >= 40 ? 'text-accent-gold' : 'text-red-500'}`}>
                                         {cohesion}%
                                     </span>
                                     {isDisrupted && <span className="text-red-500 font-bold shrink-0 animate-pulse text-[9px]">[DIS]</span>}
@@ -53,13 +53,13 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
             {/* Reserve brigades */}
             {reserveIds.length > 0 && (
                 <div>
-                    <div className="text-[10px] font-bold uppercase text-[#4af626]/40 tracking-widest mb-1.5 border-b border-[#4af626]/5 pb-0.5">SECTOR RESERVES ({reserveIds.length})</div>
+                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">SECTOR RESERVES ({reserveIds.length})</div>
                     <div className="space-y-1.5">
                         {reserveIds.map((id) => {
                             const b = formationMap.get(id);
-                            if (!b) return <div key={id} className="text-[#4af626]/40 italic">[!] {id} UNKNOWN</div>;
+                            if (!b) return <div key={id} className="text-text-secondary/60 italic">[!] {id} UNKNOWN</div>;
                             return (
-                                <div key={id} className="flex items-center gap-3 text-[#4af626]/60">
+                                <div key={id} className="flex items-center gap-3 text-text-secondary">
                                     <span className="truncate flex-1 min-w-0 font-bold">{b.name}</span>
                                     <span className="tabular-nums w-12 text-right shrink-0">
                                         {formatPersonnel(b.personnel ?? 0)}
@@ -73,16 +73,16 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
 
             {/* Recent battles in this sector */}
             {sectorBattles.length > 0 && (
-                <div className="border-t border-[#4af626]/10 pt-3">
+                <div className="border-t border-panel-border/50 pt-3">
                     <div className="text-[10px] font-bold uppercase text-red-500/60 tracking-widest mb-1.5 border-b border-red-500/5 pb-0.5">RECENT ENGAGEMENTS ({sectorBattles.length})</div>
                     <div className="space-y-1">
                         {sectorBattles.map((battle, i) => (
                             <div key={i} className="flex items-center gap-3">
                                 <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded border leading-none shrink-0"
-                                    style={{ color: OUTCOME_COLORS[battle.outcome] ?? '#4af626', borderColor: (OUTCOME_COLORS[battle.outcome] ?? '#4af626') + '40' }}>
+                                    style={{ color: OUTCOME_COLORS[battle.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[battle.outcome] ?? '#d4c5a0') + '40' }}>
                                     {battle.outcome.replace(/_/g, ' ')}
                                 </span>
-                                <span className="text-[#4af626]/60 truncate flex-1">
+                                <span className="text-text-secondary truncate flex-1">
                                     {formatOsidLabel(battle.osid)}
                                 </span>
                                 <span className="text-red-500 font-bold shrink-0">-{battle.attacker_casualties + battle.defender_casualties} PERS</span>
@@ -93,7 +93,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
             )}
 
             {/* Sector stats */}
-            <div className="border-t border-[#4af626]/10 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-[#4af626]/40 text-[10px] uppercase tracking-wider">
+            <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary/60 text-[10px] uppercase tracking-wider">
                 <span>FRONTAGE: {sector.length_edges} KM</span>
                 <span>TROOP DENSITY: {sector.density.toFixed(2)}</span>
                 {sector.sub_segments && <span>SEGMENTS: {sector.sub_segments.length}</span>}
@@ -134,7 +134,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
     return (
         <CollapsibleSection sectionKey={`sec-${corpsId}`} title="Sectors" count={sectors.length}>
             {sectors.length === 0 ? (
-                <div className="text-[11px] text-[#4af626]/40 italic py-2 font-mono uppercase">NO SECTOR ASSIGNMENTS DETECTED</div>
+                <div className="text-[11px] text-text-secondary/60 italic py-2 font-mono uppercase">NO SECTOR ASSIGNMENTS DETECTED</div>
             ) : (
                 <div className="space-y-2">
                     {sectors.map((sector) => {
@@ -144,8 +144,8 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                         const isExpanded = expandedId === sector.sector_id;
 
                         return (
-                            <div key={sector.sector_id} className="border border-[#4af626]/10 bg-black/20">
-                                <div className={`flex items-center justify-between px-3 py-2.5 transition-colors ${isExpanded ? 'bg-[#4af626]/5' : 'hover:bg-[#4af626]/5'
+                            <div key={sector.sector_id} className="border border-panel-border/50 bg-panel-card">
+                                <div className={`flex items-center justify-between px-3 py-2.5 transition-colors ${isExpanded ? 'bg-panel-bg' : 'hover:bg-panel-bg'
                                     }`}>
                                     <button
                                         type="button"
@@ -153,10 +153,10 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                                         className="min-w-0 text-left flex-1"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className={`text-[9px] text-[#4af626]/40 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}>
+                                            <span className={`text-[9px] text-text-secondary/60 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}>
                                                 ▶
                                             </span>
-                                            <span className="text-[12px] font-bold text-[#4af626]/90 uppercase font-mono truncate"
+                                            <span className="text-[12px] font-bold text-text-primary uppercase font-mono truncate"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
                                                 {sector.display_name}
                                             </span>
@@ -166,7 +166,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="text-[10px] text-[#4af626]/50 tabular-nums mt-1.5 ml-5 font-mono uppercase tracking-tight">
+                                        <div className="text-[10px] text-text-secondary tabular-nums mt-1.5 ml-5 font-mono uppercase tracking-tight">
                                             {sector.assigned_brigade_ids.length} FRONT //
                                             {sector.reserve_brigade_ids.length > 0 ? ` ${sector.reserve_brigade_ids.length} RES // ` : ''}
                                             {sector.length_edges} KM // D:{sector.density.toFixed(2)}
@@ -177,7 +177,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                                             value={sector.sector_stance ?? 'defend'}
                                             onChange={(e) => { void handleSectorStance(sector.sector_id, e.target.value); }}
                                             onClick={(e) => e.stopPropagation()}
-                                            className="text-[10px] font-bold uppercase bg-black text-[#4af626] border border-[#4af626]/30 rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-[#4af626]"
+                                            className="text-[10px] font-bold uppercase bg-panel-bg text-text-primary border border-panel-border rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-amber-400"
                                         >
                                             <option value="fortify">FORTIFY</option>
                                             <option value="defend">DEFEND</option>
