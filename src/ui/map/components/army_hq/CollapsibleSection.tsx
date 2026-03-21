@@ -1,6 +1,6 @@
 /**
  * Shared collapsible section component for Army HQ expanded corps cards.
- * Georgia serif heading, cream paper aesthetic, toggle arrow.
+ * NATO Terminal Aesthetic (Option 1).
  */
 import { useGameStore } from '../../store/gameStore';
 
@@ -17,30 +17,29 @@ export function CollapsibleSection({ sectionKey, title, count, children, default
     const toggle = useGameStore((s) => s.toggleArmyHQSection);
 
     return (
-        <div className="border-t border-[#c8b898]/50">
+        <div className="border-t border-[#4af626]/20 bg-black/20">
             <button
                 type="button"
                 onClick={() => toggle(sectionKey)}
-                className="w-full flex items-center justify-between px-4 py-2 hover:bg-[#e8dcc4]/50 transition-colors"
+                className="w-full flex items-center justify-between px-6 py-2.5 hover:bg-[#4af626]/5 transition-colors group"
             >
-                <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#6a5a40]"
-                          style={{ fontFamily: 'Georgia, serif' }}>
+                <div className="flex items-center gap-3">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#4af626]/80 group-hover:text-[#4af626]"
+                        style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
                         {title}
                     </span>
                     {count != null && (
-                        <span className="text-[9px] font-bold text-[#8a7a60] bg-[#d8ceb8] px-1.5 py-0.5 rounded-full tabular-nums"
-                              style={{ fontFamily: 'Courier New, monospace' }}>
+                        <span className="text-[10px] font-bold text-black bg-[#4af626]/80 px-2 py-0.5 rounded tabular-nums font-mono">
                             {count}
                         </span>
                     )}
                 </div>
-                <span className="text-[10px] text-[#8a7a60] transition-transform" style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                <span className={`text-[10px] text-[#4af626]/40 transition-transform duration-200 group-hover:text-[#4af626]/80 ${expanded ? 'rotate-90' : 'rotate-0'}`}>
                     ▶
                 </span>
             </button>
             {expanded && (
-                <div className="px-4 pb-3">
+                <div className="px-6 pb-4 pt-2 border-t border-[#4af626]/5">
                     {children}
                 </div>
             )}

@@ -1,9 +1,9 @@
 /**
  * Commander section for expanded corps card.
- * Shows corps commander via OfficerProfile, with Replace Commander action.
+ * NATO Terminal Aesthetic (Option 1).
  */
 import { useMemo } from 'react';
-import type { FormationView, LoadedGameState, NamedOfficerView } from '../../data/types';
+import type { FormationView, LoadedGameState } from '../../data/types';
 import { getFormationCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { useIPC } from '../../desktop/useIPC';
@@ -34,11 +34,9 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
             if (o.rank === 'army_commander') return false;
             if (o.enclave_lock) return false;
             if (o.assigned_operation) return false;
-            // Don't show officers already commanding another corps (except this one)
             if (o.assigned_corps_id && o.assigned_corps_id !== corps.id) return false;
             return true;
         }).sort((a, b) => {
-            // Home corps first, then by competence
             const aHome = a.home_corps_id === corps.id ? 0 : 1;
             const bHome = b.home_corps_id === corps.id ? 0 : 1;
             if (aHome !== bHome) return aHome - bHome;
@@ -66,55 +64,57 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
     return (
         <CollapsibleSection sectionKey={`cmd-${corps.id}`} title="Commander" defaultOpen={true}>
             {commander ? (
-                <div className="space-y-2">
+                <div className="space-y-4">
                     {isActing && (
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100/50 px-2 py-1 rounded border border-amber-300/50">
-                            Acting Commander — no permanent assignment
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
+                            [!] ACTING COMMANDER // NO PERMANENT DEPLOYMENT
                         </div>
                     )}
                     <OfficerProfile officer={commander} label="" compact={false} />
-                    <div className="flex gap-2 pt-1">
+                    <div className="flex gap-3 pt-2">
                         <button
                             type="button"
                             onClick={() => setPickerCorpsId(showPicker ? null : corps.id)}
-                            className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-[#c8b898]/50 text-[#6a5a40] hover:bg-[#e8dcc4]/50 transition-colors"
+                            className="text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 border border-[#4af626]/40 text-[#4af626] hover:bg-[#4af626]/10 transition-all font-mono"
                         >
-                            {showPicker ? 'Cancel' : 'Replace Commander'}
+                            {showPicker ? 'CANCEL' : 'REASSIGN COMMANDER'}
                         </button>
                         {!isActing && !showPicker && (
                             <button
                                 type="button"
                                 onClick={() => { void handleDismiss(); }}
-                                className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-red-600/30 text-red-700 hover:bg-red-100/30 transition-colors"
+                                className="text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 border border-red-500/40 text-red-500 hover:bg-red-500/10 transition-all font-mono"
                             >
-                                Dismiss
+                                DISMISS
                             </button>
                         )}
                     </div>
                 </div>
             ) : (
-                <div className="space-y-2">
-                    <div className="text-[12px] text-amber-700 italic py-1">No commander assigned — acting commander in place</div>
+                <div className="space-y-4">
+                    <div className="text-[12px] text-red-500/80 font-mono italic p-3 bg-red-500/5 border border-red-500/20">
+                        [!] VACANCY DETECTED: NO COMMANDER ASSIGNED
+                    </div>
                     <button
                         type="button"
                         onClick={() => setPickerCorpsId(showPicker ? null : corps.id)}
-                        className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border border-amber-500/50 text-amber-700 hover:bg-amber-100/30 transition-colors"
+                        className="text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 border border-amber-500/40 text-amber-500 hover:bg-amber-500/10 transition-all font-mono"
                     >
-                        {showPicker ? 'Cancel' : 'Assign from Pool'}
+                        {showPicker ? 'CANCEL' : 'ASSIGN FROM POOL'}
                     </button>
                 </div>
             )}
 
             {/* Inline officer picker */}
             {showPicker && (
-                <div className="mt-2 border-t border-[#c8b898]/50 pt-2 space-y-1">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#6a5a40] mb-1">
-                        Available Officers ({availableOfficers.length})
+                <div className="mt-6 border-t border-[#4af626]/20 pt-4 space-y-2">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4af626]/40 mb-2">
+                        READING PERSONNEL POOL // {availableOfficers.length} MATCHES
                     </div>
                     {availableOfficers.length === 0 ? (
-                        <div className="text-[10px] text-[#8a7a60] italic">No officers available</div>
+                        <div className="text-[11px] text-[#4af626]/40 italic font-mono">NO COMPATIBLE OFFICERS DETECTED</div>
                     ) : (
-                        <div className="max-h-[200px] overflow-y-auto space-y-1">
+                        <div className="max-h-[250px] overflow-y-auto space-y-1 pr-2 custom-scrollbar">
                             {availableOfficers.map((officer) => {
                                 const isHome = officer.home_corps_id === corps.id;
                                 return (
@@ -122,19 +122,19 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                                         key={officer.id}
                                         type="button"
                                         onClick={() => { void handleAssign(officer.id); }}
-                                        className="w-full flex items-center justify-between px-2 py-1.5 rounded hover:bg-[#e8dcc4] transition-colors text-left border border-transparent hover:border-[#c8b898]/50"
+                                        className="w-full flex items-center justify-between px-3 py-2 border border-[#4af626]/10 hover:border-[#4af626]/40 hover:bg-[#4af626]/5 transition-all text-left group"
                                     >
-                                        <div className="min-w-0">
-                                            <span className="text-[11px] font-bold text-[#2a2016]" style={{ fontFamily: 'Courier New, monospace' }}>
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <span className="text-[12px] font-bold text-[#4af626]/80 group-hover:text-[#4af626] font-mono truncate">
                                                 {officer.name}
                                             </span>
                                             {isHome && (
-                                                <span className="ml-1.5 text-[8px] font-bold text-green-700 bg-green-100/50 px-1 rounded border border-green-300/30">
+                                                <span className="text-[9px] font-bold text-black bg-[#4af626] px-1.5 py-0.5 tracking-tighter">
                                                     HOME
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-2 shrink-0 text-[10px] tabular-nums" style={{ fontFamily: 'Courier New, monospace' }}>
+                                        <div className="flex items-center gap-4 shrink-0 text-[11px] tabular-nums font-mono">
                                             <span style={{ color: getRatingColor(officer.competence) }}>C:{officer.competence.toFixed(1)}</span>
                                             <span style={{ color: getRatingColor(officer.aggressiveness) }}>A:{officer.aggressiveness.toFixed(1)}</span>
                                         </div>
