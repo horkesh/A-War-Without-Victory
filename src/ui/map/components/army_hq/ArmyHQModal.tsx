@@ -181,7 +181,7 @@ export function ArmyHQModal() {
                                     <StatRow label="Personnel" value={data.totalPersonnel.toLocaleString()} />
                                     <StatRow label="Brigades" value={`${data.brigades.length} active`} />
                                     <StatRow label="Operations" value={`${data.operations.length} active`} />
-                                    <StatRow label="Combat Eff." value={`${data.eff.score.toLocaleString()} (${data.eff.grade})`} />
+                                    <StatRow label="Combat Eff." value={`${(data.eff.score ?? 0).toLocaleString()} (${data.eff.grade ?? '?'})`} />
                                     <StatRow label="War Exhaustion" value={data.exhaustionDisplay} warn={parseFloat(data.exhaustionDisplay) > 30} />
                                     {data.reserves && (
                                         <StatRow label="Supply" value={Math.round(data.reserves.generalSupply ?? 0)} />
