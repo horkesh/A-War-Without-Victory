@@ -1552,6 +1552,25 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('get-settings', async () => {
+    try {
+      const { loadSettings } = require('./settings_store.cjs');
+      return { ok: true, settings: loadSettings(app) };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('save-settings', async (_event, payload) => {
+    try {
+      const { saveSettings } = require('./settings_store.cjs');
+      const ok = saveSettings(app, payload);
+      return { ok };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('resolve-peace-plan', async (_event, payload) => {
     const { planId, response } = payload || {};
     if (!currentGameStateJson || typeof planId !== 'string' || (response !== 'accepted' && response !== 'rejected')) {
