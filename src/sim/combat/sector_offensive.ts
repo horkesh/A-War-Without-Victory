@@ -1133,17 +1133,20 @@ function updateMultiAxisResults(
     op.objective_capture_count = totalCaptures;
     op.attack_attempt_count = totalAttempts;
 
-    // Zero-progress early abort: if ≥3 total axis failures with zero captures
-    // and at least 1 real attack attempted, force all executing axes to stalled.
-    // Fires before the per-axis cap (5) for single-axis operations, cutting
-    // suicidal attack runs from 5 turns to 3. Exempt when any objective captured.
-    if (
-        totalAxisFailures >= MAX_OPERATION_ZERO_PROGRESS_FAILURES
-        && totalCaptures === 0
-        && totalAttempts >= 1
-    ) {
-        for (const axis of axes) {
-            if (axis.status === 'executing') axis.status = 'stalled';
+    // Zero-progress early abort — now PER-AXIS for true parallel execution.
+    // Each axis stalls from its own zero-progress failures, not contaminated
+    // by other axes. A stalled Foča Valley axis won't kill a progressing Kalinovik axis.
+    for (const axis of axes) {
+        if (axis.status !== 'executing') continue;
+        const axisFailures = axis.failure_count ?? 0;
+        const axisCaptures = axis.objective_capture_count ?? 0;
+        const axisAttempts = axis.attack_attempt_count ?? 0;
+        if (
+            axisFailures >= MAX_OPERATION_ZERO_PROGRESS_FAILURES
+            && axisCaptures === 0
+            && axisAttempts >= 1
+        ) {
+            axis.status = 'stalled';
         }
     }
 
