@@ -86,12 +86,14 @@ export function buildSidToMunFromSettlements(
 }
 
 /**
- * Build OSID → mun1990_id map from operationalToCanonical reverse map + canonical SID→mun.
- * When political_controllers has been promoted to OSID keys (OSID-as-base-layer), consumers
- * like factionHasPresenceInMun need an OSID-keyed settlement→mun map instead of SID-keyed.
+ * Build OSID → municipality map from the OSID key format `op:<mun>:<cluster>`.
  *
- * For each OSID, finds the municipality by looking up one of its constituent canonical SIDs
- * in the canonical SID→mun map (all SIDs in an OSID are in the same municipality).
+ * Municipality is extracted directly from the OSID key, which is more reliable than
+ * looking up constituent canonical SIDs. SIDs can cross municipality boundaries
+ * (e.g. op:kresevo:kresevo_2 contains SIDs whose mun1990_id is "fojnica"), causing
+ * factionHasPresenceInMun to fail for the OSID's actual municipality.
+ *
+ * Falls back to canonical SID lookup if the OSID key doesn't have the expected format.
  *
  * Deterministic: OSIDs iterated in sorted order.
  */
@@ -102,6 +104,13 @@ export function buildOsidToMunFromReverseMap(
     const out = new Map<SettlementId, MunicipalityId>();
     const osids = Array.from(operationalToCanonical.keys()).sort((a, b) => a.localeCompare(b));
     for (const osid of osids) {
+        // Primary: extract municipality from OSID key format op:<mun>:<cluster>
+        const parts = osid.split(':');
+        if (parts.length >= 2 && parts[1]) {
+            out.set(osid as SettlementId, parts[1] as MunicipalityId);
+            continue;
+        }
+        // Fallback: lookup from constituent canonical SIDs
         const sids = operationalToCanonical.get(osid) ?? [];
         for (const sid of sids) {
             const mun = canonicalSidToMun.get(sid);
