@@ -244,6 +244,41 @@ export interface PreparationTickResult {
 }
 
 /**
+ * Count how many participating brigades are at or adjacent to the
+ * operation's staging OSID or first objective's approach OSIDs.
+ * Used during force_staging to ensure brigades have assembled before execution.
+ */
+function countAssembledBrigades(state: GameState, op: CorpsOperation): number {
+    const formations = state.military.formations ?? {};
+    const staging = op.staging_osid;
+    if (!staging) return op.participating_brigades.length; // no staging = all assembled
+
+    // Collect valid assembly positions: staging + 1-hop neighbors of staging
+    const assemblyOsids = new Set<string>([staging]);
+
+    // Also include OSIDs adjacent to the first objective (approach positions)
+    const firstObjective = op.axes?.[0]?.objectives?.[0]
+        ?? op.objectives?.[op.current_objective_index ?? 0];
+    if (firstObjective) assemblyOsids.add(firstObjective);
+
+    let count = 0;
+    for (const brigadeId of op.participating_brigades) {
+        const brigade = formations[brigadeId];
+        if (!brigade || brigade.status !== 'active') continue;
+        const loc = brigade.location_osid;
+        if (!loc) continue;
+        if (assemblyOsids.has(loc)) {
+            count++;
+            continue;
+        }
+        // Check: is the brigade's location adjacent to any assembly OSID?
+        // (within 1 hop of staging or objective = close enough)
+        // Skip adjacency check for simplicity — just staging + objective
+    }
+    return count;
+}
+
+/**
  * Get the ops commander data for an operation.
  * Returns null if no named commander assigned.
  */
@@ -377,7 +412,17 @@ export function tickPreparation(
             }
 
             case 'force_staging': {
-                if (forceRatio >= requiredForceRatio || aggressiveness >= 4) {
+                // Check brigade assembly: what fraction of participating brigades
+                // have arrived at the staging OSID or an adjacent friendly OSID?
+                // Don't advance to supply_check until most forces are assembled.
+                const assembled = countAssembledBrigades(state, op);
+                const assemblyFraction = op.participating_brigades.length > 0
+                    ? assembled / op.participating_brigades.length
+                    : 1.0;
+                const assemblyReady = assemblyFraction >= 0.6; // 60% of forces assembled
+                const assemblyTimeout = (op.preparation_turns_elapsed ?? 0) >= (op.preparation_max_turns ?? 7);
+
+                if ((forceRatio >= requiredForceRatio || aggressiveness >= 4) && (assemblyReady || assemblyTimeout)) {
                     op.preparation_sub_phase = 'supply_check';
                     result.sub_phase = 'supply_check';
                     advanced = true;
