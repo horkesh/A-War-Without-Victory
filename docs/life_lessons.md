@@ -98,6 +98,13 @@
 ### [Engine] MAX_ATTACKERS_PER_TARGET raised 3→12 — coordination penalty handles concentration naturally (2026-03-21) — DONE
 - **Context**: `bot_brigade_targeting.ts:35` and `battle_resolution.ts:58` capped brigades attacking the same OSID at 3 per turn. Raised to 12 (MAX_PARTICIPATING_BRIGADES). Coordination penalty (0.8× at 3+) provides natural diminishing returns.
 
+### [Engine] Ping-pong captures count as failures — raise MAX_TOTAL_FAILURES to compensate (2026-03-21) — NEW
+- **Context**: Kalinovik axis stalled at 1/5 captures. rs_kalinovik_brigade took varos_2 three times (w11-w13, all decisive r=29+) but RBiH retook it between turns. Each recapture counted as a "failure" (defender still holds). 3 ping-pong + 2 idle turns = 5 = MAX_TOTAL_FAILURES → axis stalled before reaching golubici_2.
+- **Root cause**: The op system checks OSID control the FOLLOWING turn. If RBiH retakes the OSID between attacker's decisive victory and next turn's check, the capture is a "failure." The combat was won but the HOLDING failed.
+- **Fix**: Raised MAX_TOTAL_FAILURES 5→8. Gives ops enough runway to push through ping-pong zones. The consecutive failure cap (3) and catastrophic stall (3) already prevent suicidal attacks — the total cap was too conservative.
+- **Impact**: 93.1% ATH (+0.3pp). All ops across the map benefit from the extra attempts.
+- **Future**: Distinguish between "attack failed" and "captured but retaken" in the failure tracking. The latter should not count toward the failure cap.
+
 ### [Engine] Preparation sub-phase overrides planning_duration — use force_staging assembly check (2026-03-21) — NEW
 - **Context**: Added `planning_duration: 5` to Op Teočak to give 2nd Tuzla march time. But `tickPreparation` in `operation_preparation.ts` drives through intel_gathering→force_staging→supply_check→assessment→ready based on commander personality. An aggressive commander completes in 3 turns regardless of planning_duration.
 - **Root cause**: `preparationReady` (sub_phase === 'ready') at `sector_offensive.ts:800` fires before the `elapsed > planDuration` check. Preparation is the PRIMARY gate; planning_duration is a FALLBACK for ops without preparation.
