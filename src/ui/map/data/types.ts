@@ -726,6 +726,25 @@ export interface LoadedGameState {
         }>;
     }>;
 
+    /** Pending Dayton negotiation — shown when shouldInitiateDayton fires. */
+    pendingDayton?: {
+        territorialPackages: Array<{
+            id: string;
+            name: string;
+            defaultHolder: string;
+            demandCost: number;
+            concedeCost: number;
+        }>;
+        institutionalPackages: Array<{
+            id: string;
+            name: string;
+            centralizedCost: number;
+            decentralizedCost: number;
+        }>;
+        factionCapital: Record<string, number>;
+        patronOverride: Record<string, number>;
+    };
+
     /** Pending peace plan awaiting player response. */
     pendingPeacePlan?: {
         planId: string;

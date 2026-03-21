@@ -36,6 +36,7 @@ import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
+import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
 import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransition } from './components/PeaceWarTransition';
@@ -645,6 +646,10 @@ function App() {
       {/* v0.4.1 Phase 5: Event log panel */}
       {eventLogOpen && (
         <EventLogPanel events={eventLogEntries} onClose={() => setEventLogOpen(false)} />
+      )}
+      {/* v0.5.0: Dayton Negotiation Modal — blocks when Dayton trigger fires */}
+      {loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
+        <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
       )}
       <PeaceWarTransitionOverlay />
       <VerdictScreen />

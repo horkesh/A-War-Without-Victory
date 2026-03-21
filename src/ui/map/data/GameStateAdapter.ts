@@ -1783,6 +1783,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         firedEvents: deriveFiredEvents(state),
         pendingEventDecisions: derivePendingEventDecisions(state),
         pendingPeacePlan: derivePendingPeacePlan(state),
+        pendingDayton: derivePendingDayton(state),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
         // Game over
@@ -2111,6 +2112,36 @@ function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventD
             }))
             : [],
     }));
+}
+
+function derivePendingDayton(state: any): LoadedGameState['pendingDayton'] {
+    // Only show Dayton if game is not over and no dayton_result exists yet
+    if (state.meta?.game_over) return undefined;
+    const neg = state.military?.negotiation;
+    if (neg?.dayton_result) return undefined;
+    try {
+        const { shouldInitiateDayton, initiateDaytonNegotiation } = require('../../../sim/negotiation/dayton_negotiation.js');
+        if (!shouldInitiateDayton(state)) return undefined;
+        const menu = initiateDaytonNegotiation(state);
+        if (!menu) return undefined;
+        return {
+            territorialPackages: (menu.territorial_packages ?? []).map((p: any) => ({
+                id: String(p.id ?? ''),
+                name: String(p.name ?? ''),
+                defaultHolder: String(p.default_holder ?? ''),
+                demandCost: Number(p.demand_cost ?? 0),
+                concedeCost: Number(p.concede_cost ?? 0),
+            })),
+            institutionalPackages: (menu.institutional_packages ?? []).map((p: any) => ({
+                id: String(p.id ?? ''),
+                name: String(p.name ?? ''),
+                centralizedCost: Number(p.centralized_cost ?? 0),
+                decentralizedCost: Number(p.decentralized_cost ?? 0),
+            })),
+            factionCapital: menu.faction_capital ?? {},
+            patronOverride: menu.patron_override ?? {},
+        };
+    } catch { return undefined; }
 }
 
 function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan'] {

@@ -94,6 +94,7 @@ interface WindowAwwv {
     acknowledgeOfficerEvent: (eventId: string) => Promise<{ ok: boolean; error?: string }>;
     acceptOfficerReplacement: (payload: { eventId: string; corpsId: string; newOfficerId: string; currentOfficerId?: string }) => Promise<{ ok: boolean; error?: string }>;
     resolvePeacePlan: (planId: string, response: 'accepted' | 'rejected') => Promise<{ ok: boolean; all_accepted?: boolean; rejection_factions?: string[]; error?: string }>;
+    resolveDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -354,6 +355,10 @@ export function useIPC() {
             resolvePeacePlan: awwv
                 ? (planId: string, response: 'accepted' | 'rejected') => awwv.resolvePeacePlan(planId, response)
                 : makeNoop<{ ok: boolean; all_accepted?: boolean; rejection_factions?: string[]; error?: string }>(),
+
+            resolveDayton: awwv
+                ? (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => awwv.resolveDayton(proposal)
+                : makeNoop<{ ok: boolean; result?: Record<string, unknown>; error?: string }>(),
         };
     }, []); // stable — never changes reference
 }

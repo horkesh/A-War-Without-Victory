@@ -1570,6 +1570,28 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('resolve-dayton', async (_event, payload) => {
+    const { territorial_demands, territorial_concessions, institutional_choices } = payload || {};
+    if (!currentGameStateJson) {
+      return { ok: false, error: 'No game loaded' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const { resolveDaytonNegotiation } = require('../sim/negotiation/dayton_negotiation.js');
+      const result = resolveDaytonNegotiation(state, {
+        territorial_demands: territorial_demands || [],
+        territorial_concessions: territorial_concessions || [],
+        institutional_choices: institutional_choices || {},
+      });
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true, result };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // --- Read-only query handlers (UI previews; no state mutation) ---
   ipcMain.handle('query-movement-range', async (_event, payload) => {
     const { brigadeId } = payload || {};
