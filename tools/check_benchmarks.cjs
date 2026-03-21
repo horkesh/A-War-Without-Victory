@@ -17,12 +17,16 @@ const peakWeek = weekly.find(w => (w.control_counts?.RS || 0) === rsPeak)?.week_
 // Enclaves: check if majority of OSIDs in municipality are non-RS at w40
 const final = JSON.parse(fs.readFileSync(`${dir}/final_save.json`, 'utf8'));
 const pc = final.political.political_controllers;
-const enclaves = ['srebrenica', 'gorazde', 'bihac', 'zepa'];
-const alive = enclaves.filter(e => {
-    const osids = Object.keys(pc).filter(k => k.includes(':' + e + ':'));
-    const nonRS = osids.filter(k => pc[k] !== 'RS').length;
-    return nonRS > osids.length / 2;
-});
+// Enclave survival: check capital OSID (the enclave survives if its capital is non-RS)
+const enclaveCapitals = {
+    srebrenica: 'op:srebrenica:srebrenica_2',
+    gorazde: 'op:gorazde:gorazde_2',
+    bihac: 'op:bihac:bihac_2',
+    zepa: 'op:rogatica:zepa_2',
+};
+const alive = Object.entries(enclaveCapitals).filter(([name, osid]) => {
+    return pc[osid] && pc[osid] !== 'RS';
+}).map(([name]) => name);
 
 console.log('RS w20:  ', rsW20.toFixed(3), rsW20 >= 0.54 ? 'PASS' : 'FAIL', '(>=0.54)');
 console.log('RS w40:  ', rsW40.toFixed(3), rsW40 >= 0.503 && rsW40 <= 0.60 ? 'PASS' : 'FAIL', '(0.503-0.60)');
