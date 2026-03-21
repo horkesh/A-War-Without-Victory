@@ -165,9 +165,13 @@ export function SettlementDetailContent({
   const munId = getMunIdForDisplacement(props);
   const disp = munId && displacementByMun?.[munId];
   const osidDisp = displacementByOsid?.[osid];
+  // osidDisp.out = displaced + killed + fled_abroad (total removals from this OSID)
+  // osidDisp.lost = killed + fled_abroad (subset of out — people who left the country or died)
+  // osidDisp.in = settled (arrivals from other OSIDs)
+  // Formula: Now = Pre-war - out + in (out already includes lost, don't subtract twice)
   const currentPop =
     osidDisp != null
-      ? Math.max(0, popOriginal - osidDisp.out - osidDisp.lost + osidDisp.in)
+      ? Math.max(0, popOriginal - osidDisp.out + osidDisp.in)
       : disp && disp.originalPopulation > 0 && Number.isFinite(disp.currentPopulation)
         ? Math.round(popOriginal * (disp.currentPopulation / disp.originalPopulation))
         : null;
@@ -175,8 +179,10 @@ export function SettlementDetailContent({
   /** Settlement-level flows: exact per-OSID when available, else municipality share. */
   const settlementShare =
     disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
+  // outSettlement = displaced only (moved to another OSID, alive)
+  // lostSettlement = killed + fled abroad
   const outSettlement =
-    osidDisp != null ? osidDisp.out : (disp && settlementShare > 0 ? Math.round(disp.displacedOut * settlementShare) : 0);
+    osidDisp != null ? (osidDisp.out - osidDisp.lost) : (disp && settlementShare > 0 ? Math.round((disp.displacedOut - disp.lostPopulation) * settlementShare) : 0);
   const lostSettlement =
     osidDisp != null ? osidDisp.lost : (disp && settlementShare > 0 ? Math.round(disp.lostPopulation * settlementShare) : 0);
   const inSettlement =
