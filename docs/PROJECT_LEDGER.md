@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.9% area-weighted (40w, 712 OSIDs). RS w40 0.507 PASS.** Calibration: Posavina Corridor restructure (n1002), micro-OSID merge (n982), Teočak corridor (n992-n998), Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975).
+**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **93.1% area-weighted (40w, 712 OSIDs, ATH). RS w40 0.511 PASS. 4/4 enclaves.** Settlement Timeline (12 event types, 5 engine tracking features). Displacement adapter fix. Posavina Corridor restructure (n1002). Deck.gl settlement labels.
 
 ## [2026-03-21] Army HQ Nerve Center — Full Aesthetic Rework + Situation Briefing
 
