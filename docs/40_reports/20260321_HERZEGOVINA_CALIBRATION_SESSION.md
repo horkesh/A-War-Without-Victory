@@ -168,8 +168,29 @@ Op Foča Kalinovik axis captures varos_2 but stalls before golubici_2/sela_2. Ne
 1. Stronger Kalinovik axis (add a brigade)
 2. Separate triggered op for Kalinovik cleanup
 
-### 2nd Tuzla march timing (P2)
-The brigade starts at sicki_brod_2 (Tuzla) — 5+ hops from Kalesija staging. By the time it arrives at the target, the op has 2-3 turns of execution left. Needs:
-1. Home_osid moved closer, OR
-2. Pre-positioning via march orders before op fires, OR
-3. Longer planning phase to allow march time
+### 2nd Tuzla march timing — Deep Investigation (P1)
+Only 3 BFS hops sicki_brod_2 → kalesija_grad_2. Brigade marches during planning phase (column_march_orders issued at line 114 of bot_brigade_eval_attack.ts). But the **preparation sub-phase** overrides `planning_duration`: commander personality-driven readiness completes in 3 turns regardless of the 5-turn planning_duration set on Op Teočak.
+
+**Attempted fixes:**
+1. **Global assembly gate** (areParticipantsReadyForExecution blocks transition): Slowed ALL ops — VRS blitz broke. Reverted.
+2. **RS-exempt assembly gate** (faction !== 'RS'): Still blocked Op Teočak because guards_brigade (at Visoko) never arrives → assembly never completes → timeout forces late execution.
+3. **planning_duration: 5** on PrePlannedOp: Preparation sub-phase overrides it — completes in 3 turns via tickPreparation commander personality.
+
+**Required engine fix:** The preparation system (`operation_preparation.ts`) needs a `min_planning_turns` field that FORCES the preparation to stay in planning for at least N turns, regardless of commander readiness. This gives brigades time to march. Alternatively, the preparation should track which participating brigades have arrived at staging/approach OSIDs and not declare 'ready' until a threshold (e.g. 75%) are assembled.
+
+**Pipeline detail:** Planning→execution transition at `sector_offensive.ts:800`:
+```
+preparationReady || elapsed > planDuration || stagedEarly || forcedLaunch
+```
+`preparationReady` (sub_phase === 'ready') fires first when commander assessment completes (3 turns for aggressive commanders). `elapsed > planDuration` fires second (but planDuration from tickPreparation can be 1). The `planning_duration` field on the op is only used as a FALLBACK when preparation is not active — but for sector_attack ops, preparation IS active.
+
+## Engine Design Requirements (from this session)
+
+### 1. Preparation-aware brigade assembly
+Preparation should track which participating brigades have arrived at staging/approach OSIDs. Don't declare 'ready' until a configurable threshold of brigades are assembled. This naturally extends planning for ops with distant brigades without blocking ops where all brigades are local.
+
+### 2. Parallel axis execution (P2)
+Current: ops process axes through a shared current_objective_index. First axis stall → op recovery → other axes never run. Needed: each axis maintains independent state (objective index, failure count, status). An axis can be 'stalled' while others continue.
+
+### 3. Assembly gate per-op flag (P3)
+Instead of global or faction-based assembly gates, add an `assembly_required: true` flag on PrePlannedOp that forces the planning phase to wait for brigade assembly. This gives fine-grained control without affecting other ops.
