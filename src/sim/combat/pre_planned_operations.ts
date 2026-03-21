@@ -252,6 +252,51 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // JNA Herzegovina Takeover — JNA 37th Corps (forward HQ Nevesinje, BB1 p.480)
+        // directs early seizure of Bosniak areas in eastern Herzegovina, April 1992.
+        // Uses synthetic 'jna_herzegovina_command' corps to run PARALLEL with vrs_herzegovina
+        // ops (Visegrad, Foca). Brigades are "on loan" from vrs_herzegovina — the op system
+        // doesn't require corps_id match. Paramilitaries + JNA garrison provide manpower.
+        // No equipment inflation — all JNA phantoms are no_equipment_handoff.
+        corps: 'jna_herzegovina_command',
+        faction: 'RS',
+        name: 'Operation Herzegovina',
+        staging_osid: 'op:nevesinje:krekovi_2',
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                // Mostar heights — Nevesinje brigade + JNA garrison seize Podveležje/Hum
+                // positions overlooking Mostar from east (BB1 p.193).
+                axis_id: 'mostar_heights',
+                name: 'Mostar Heights',
+                brigades: [
+                    'rs_nevesinje_brigade',
+                    'jna_nevesinje_garrison',
+                ],
+                objectives: [
+                    'op:mostar:vranjevici_2',
+                    'op:mostar:kruzanj_2',
+                ],
+                staging_osid: 'op:nevesinje:sopilja',
+            },
+            {
+                // Southern Konjic — 2nd Herzegovina + local TO take Glavatičevo/Ljuta
+                // (BB2 p.514: VRS 2nd Herzegovina LI Brigade held this area throughout).
+                axis_id: 'konjic_south',
+                name: 'Konjic South',
+                brigades: [
+                    'rs_2nd_herzegovina_light_infantry',
+                    'jna_konjic_south_tg',
+                ],
+                objectives: [
+                    'op:konjic:glavaticevo_2',
+                    'op:konjic:ljuta',
+                ],
+                staging_osid: 'op:konjic:bijela_2',
+            },
+        ],
+    },
+    {
         corps: 'vrs_herzegovina',
         faction: 'RS',
         name: 'Operation Foca',

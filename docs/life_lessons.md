@@ -68,6 +68,25 @@
 
 ## Active Lessons (no recent violations)
 
+### [Engine] Understand the FULL attack evaluation pipeline before debugging eligibility (2026-03-21) — NEW
+- **Context**: 2nd Tuzla (3000 pers, at staging, adjacent to target, in op, not disrupted, not home defense) showed as "not eligible" in Op Teočak. Spent extensive investigation checking supply filters, home defense, corps assignment, MAX_ATTACKERS_PER_TARGET, and the combat predictor before adding debug logging.
+- **Root cause**: `predictAllAdjacentTargets()` returned targets from the brigade's CURRENT position, not the staging position. 2nd Tuzla was still marching to staging in the early execution turns — it wasn't at kalesija_grad_2 yet, so rastosnica_2 wasn't adjacent. By the time it arrived, the op had accumulated failures.
+- **Key pipeline** (bot_brigade_eval_attack.ts lines 143-212): Phase check → objective resolution → friendly capture check → `predictAllAdjacentTargets()` from brigade's CURRENT location → alliance filter → avoided_osids → find objective in targets → solo prediction → concentrated estimate → attack decision → attacker cap.
+- **Do instead**: When a brigade is "not eligible" despite correct setup, FIRST add debug logging to the evaluation function. Don't theorize — trace the exact code path. The answer is always in the data: what does the brigade see at that specific turn? Check location, adjacency, and predicted targets for THAT turn, not w40 state.
+
+### [Engine] Synthetic JNA corps for parallel early-war operations (2026-03-21) — NEW
+- **Context**: VRS Herzegovina Corps needed to run Op Višegrad, Op Foča, AND Op Herzegovina simultaneously in the first weeks. Pre-planned ops queue sequentially per corps — one active at a time.
+- **Solution**: Create `jna_herzegovina_command` synthetic corps. JNA phantoms with that corps_id trigger `initializeCorpsCommand` to create the entry. Ops on this corps run PARALLEL with vrs_herzegovina ops.
+- **Gotcha 1**: `initializeCorpsCommand` must be called AFTER `spawnJnaPhantomBrigades` — the first call (before spawn) doesn't see the phantoms.
+- **Gotcha 2**: Never share brigades between ops on different corps — the first op grabs them and the second runs empty.
+- **Gotcha 3**: Staging OSID must be adjacent to the first objective — non-adjacent staging means weeks of marching and the op stalls.
+- **Do instead**: For any new JNA-level early-war operation, use a synthetic corps ID. Put only dedicated units (JNA phantoms + unshared VRS brigades) on the op. Verify staging adjacency.
+
+### [Engine] MAX_ATTACKERS_PER_TARGET = 3 is an artificial cap that should be removed (2026-03-21) — NEW
+- **Context**: `bot_brigade_targeting.ts:35` caps brigades attacking the same OSID at 3 per turn. Historically, 4-6+ brigades massed for major operations (Corridor 92, Srebrenica). The coordination penalty (0.8× at 3+) already naturally discourages over-concentration through diminishing returns.
+- **Problem**: The hard cap prevents commanders from concentrating force when ordered to. A corps with 8 brigades targeting one objective can only send 3 — the other 5 sit idle despite orders.
+- **Do instead**: Remove the hard cap. Let the coordination penalty and combat predictor handle concentration economics naturally. If the predictor says 5 brigades at ratio 0.3 each will produce a costly_victory concentrated, the commander should be able to order it.
+
 ### [Calibration] Coupled anchors need simultaneous fixes — Žepa/Teočak seesaw (2026-03-21) — NEW
 - **Context**: Žepa enclave and Teočak corridor are inversely coupled through VRS Drina Corps force allocation. Fixing Žepa alone (285th bump to 1500) blocked Teočak — VRS stayed north and 2nd Romanija blocked rastosnica_2. Fixing Teočak alone (Op Teočak) worked only when Žepa was weak (VRS pushed south, leaving north open).
 - **Wrong approach**: Fixing one anchor at a time, testing, seeing the other break, then trying to find a Goldilocks value. This wasted 4 calibration runs. The coupling was structural — no single-variable solution existed.
