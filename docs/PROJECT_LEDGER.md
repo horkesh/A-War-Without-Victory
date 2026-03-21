@@ -3,6 +3,17 @@
 **Last Updated:** 2026-03-21
 **Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** UI Overhaul Master Plan COMPLETE (Phases 0-5). Army HQ Modal fully operational. Wood/paper textures. Keyboard shortcuts. Map atmosphere. Command Briefing actionable. Sector combat ratings pipeline fix (n962).
 
+## [2026-03-21] v0.5.1 — UI Completion (Night Shift)
+
+- **Phase 1:** MapModeLegend — SKIPPED (already implemented in UI Overhaul)
+- **Phase 2:** Sim-side command briefing collector (`collect_briefing.ts`) — open registry pattern with 4 built-in collectors (military, diplomatic, humanitarian, command). Pipeline step 141. 5 tests.
+- **Phase 3:** Menu system — MainMenu (two-tier), PauseMenu (Escape key toggle), SettingsScreen (registry pattern), CreditsScreen. Architect decision: minimal overlay approach (Option B) — game map stays mounted, menus as z-indexed overlays. `pauseMenuOpen` in gameStore.
+- **Phase 4:** Settings persistence — `settings_store.cjs` with loadSettings/saveSettings from Electron userData. IPC wired.
+
+**Architect decision flagged:** Minimal overlay vs full useGameFlow state machine. v0.6+ may need full extraction for campaign management.
+
+**Version bumped:** 0.5.0 → 0.5.1. 105 suites, 1,254 tests.
+
 ## [2026-03-21] v0.5.0 — Full Diplomatic System (Night Shift)
 
 Full diplomatic UI wiring for peace plan and Dayton negotiation:
