@@ -112,6 +112,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:zvornik:zvornik',
                     'op:zvornik:novo_selo',
+                    'op:zvornik:krizevici',
+                    'op:zvornik:vitinica_2',
                     'op:zvornik:donja_kamenica',
                 ],
                 staging_osid: 'op:zvornik:kozluk_2',
