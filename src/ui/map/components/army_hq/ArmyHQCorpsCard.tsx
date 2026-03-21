@@ -43,6 +43,9 @@ export function ArmyHQCorpsCard({
     corps, brigades, sectors, operations, factionBattles, gameState,
     isExpanded, isCompressed, onToggleExpand,
 }: ArmyHQCorpsCardProps) {
+    const ipc = useIPC();
+    const setLoadError = useGameStore((s) => s.setLoadError);
+
     const data = useMemo(() => {
         const totalPersonnel = brigades.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
         const avgCohesion = brigades.length > 0
@@ -105,9 +108,6 @@ export function ArmyHQCorpsCard({
 
     // Expanded: full detail with drill-down sections
     if (isExpanded) {
-        const ipc = useIPC();
-        const setLoadError = useGameStore((s) => s.setLoadError);
-
         const handleStanceChange = async (newStance: string) => {
             if (!ipc.isAvailable) return;
             const result = await ipc.stageCorpsStanceOrder(corps.id, newStance);
