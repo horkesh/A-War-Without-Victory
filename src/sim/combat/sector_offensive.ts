@@ -796,6 +796,7 @@ export function advanceSectorOffensives(
             // For sector_attack with preparation: only reach here when preparation is 'ready'
             // (or force_launch / probe / feint which skip preparation).
             // Keep existing elapsed/staged/forcedLaunch gates for non-preparation ops.
+            //
             const preparationReady = op.type === 'sector_attack' && op.preparation_sub_phase === 'ready';
             if (preparationReady || elapsed > planDuration || stagedEarly || forcedLaunch) {
                 op.phase = 'execution';

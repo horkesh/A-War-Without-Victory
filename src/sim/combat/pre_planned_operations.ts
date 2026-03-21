@@ -50,6 +50,8 @@ interface PrePlannedOp {
     available_from?: number;
     /** Override attack threshold — brigades attack even at worse predicted outcomes. */
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
+    /** Planning duration override — gives brigades time to march to staging. */
+    planning_duration?: number;
 }
 
 const VRS_PRE_PLANNED: PrePlannedOp[] = [
@@ -549,6 +551,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         staging_osid: 'op:kalesija:kalesija_grad_2',
         available_from: 15,
         min_attack_outcome: 'repulsed',
+        planning_duration: 5, // 2nd Tuzla needs 3 hops to march from Tuzla to Kalesija
         axes: [
             {
                 axis_id: 'kalesija_assault',
@@ -635,7 +638,7 @@ function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participa
         axes,
         objectives: [...new Set(allObjectives)],
         current_objective_index: 0,
-        planning_duration: 1,
+        planning_duration: def.planning_duration ?? 1,
         supply_readiness: 1.0,
         momentum: 0,
         failure_count: 0,
