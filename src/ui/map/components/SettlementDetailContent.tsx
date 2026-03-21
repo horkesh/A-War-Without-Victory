@@ -268,20 +268,14 @@ export function SettlementDetailContent({
   /** Settlement-level flows: exact per-OSID when available, else municipality share. */
   const settlementShare =
     disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
-  // outSettlement = displaced only (moved to another OSID, alive)
-  // lostSettlement = killed + fled abroad
-  // Cap at pre-war population: engine displacement events can over-count
-  // when displacement timers fire weekly without checking remaining population.
-  const rawOut =
-    osidDisp != null ? (osidDisp.out - osidDisp.lost) : (disp && settlementShare > 0 ? Math.round((disp.displacedOut - disp.lostPopulation) * settlementShare) : 0);
-  const rawLost =
+  // outSettlement = displaced alive (moved to another OSID)
+  // lostSettlement = killed + fled abroad (subset of total displaced)
+  // osidDisp.out = total displaced (includes killed + fled as subsets)
+  // osidDisp.lost = killed + fled_abroad
+  const outSettlement =
+    osidDisp != null ? (osidDisp.out - osidDisp.lost) : (disp && settlementShare > 0 ? Math.round(disp.displacedOut * settlementShare) : 0);
+  const lostSettlement =
     osidDisp != null ? osidDisp.lost : (disp && settlementShare > 0 ? Math.round(disp.lostPopulation * settlementShare) : 0);
-  // Scale proportionally if total exceeds pre-war population
-  const totalRemovals = rawOut + rawLost;
-  const removalCap = Math.max(0, popOriginal - (osidDisp?.in ?? 0));
-  const scale = totalRemovals > removalCap && totalRemovals > 0 ? removalCap / totalRemovals : 1;
-  const outSettlement = Math.round(rawOut * scale);
-  const lostSettlement = Math.round(rawLost * scale);
   const inSettlement =
     osidDisp != null ? osidDisp.in : (currentPop != null && popOriginal > 0 && disp
       ? Math.max(0, currentPop - popOriginal + outSettlement + lostSettlement)

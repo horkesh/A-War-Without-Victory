@@ -1457,17 +1457,17 @@ export function parseGameState(json: unknown): LoadedGameState {
             displacementEventLogRaw.push({ turn: turnNum, origin_osid: originOsid || undefined, dest_osid: destOsid || undefined, origin_mun: originMun || undefined, ethnicity: ethnicity || undefined, displaced, killed, fled_abroad: fledAbroad, settled, caused_by: causedBy });
             if (originOsid) {
                 if (!displacementByOsid[originOsid]) displacementByOsid[originOsid] = { out: 0, lost: 0, in: 0 };
-                const outDelta = displaced + killed + fledAbroad;
-                displacementByOsid[originOsid].out += outDelta;
+                // displaced = total people removed (includes killed + fled as subsets)
+                // killed + fled_abroad are subsets of displaced, NOT additional
+                displacementByOsid[originOsid].out += displaced;
                 displacementByOsid[originOsid].lost += killed + fledAbroad;
             }
             if (destOsid) {
                 if (!displacementByOsid[destOsid]) displacementByOsid[destOsid] = { out: 0, lost: 0, in: 0 };
                 displacementByOsid[destOsid].in += settled;
             }
-            // Count ALL removals (displaced + killed + fled_abroad) per ethnicity so
-            // the current-ethnic computation does not leave "ghost" residents behind.
-            const totalRemoved = displaced + killed + fledAbroad;
+            // displaced = total removals (killed + fled are subsets, not additional)
+            const totalRemoved = displaced;
             if (totalRemoved > 0 && ethnicity) {
                 if (originOsid) {
                     if (!departedByOsid[originOsid]) departedByOsid[originOsid] = {};
