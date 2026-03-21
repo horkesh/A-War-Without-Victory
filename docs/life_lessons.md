@@ -98,6 +98,11 @@
 ### [Engine] MAX_ATTACKERS_PER_TARGET raised 3→12 — coordination penalty handles concentration naturally (2026-03-21) — DONE
 - **Context**: `bot_brigade_targeting.ts:35` and `battle_resolution.ts:58` capped brigades attacking the same OSID at 3 per turn. Raised to 12 (MAX_PARTICIPATING_BRIGADES). Coordination penalty (0.8× at 3+) provides natural diminishing returns.
 
+### [Engine] Per-axis zero-progress abort enables true parallel axis execution (2026-03-21) — DONE
+- **Context**: Multi-axis ops had cross-axis contamination in the zero-progress abort. If total failures across ALL axes >= 3 with zero captures, ALL executing axes stalled. A stalled Foča Valley axis (idle, no attackers) killed a progressing Kalinovik axis.
+- **Fix**: Changed zero-progress check from aggregate to per-axis. Each axis checks its OWN failure/capture/attempt counts. Per-axis tracking for objective advancement, failure counts, and stall detection was already implemented — this was the last contamination point.
+- **Architecture note**: The multi-axis system now has fully independent axes. Each axis has: `current_objective_index`, `failure_count`, `consecutive_failures_on_current`, `consecutive_catastrophic_on_current`, `idle_execution_turn_streak`, `movement_only_execution_turns`, `status`, `momentum`. The operation enters recovery only when ALL axes are terminal (complete or stalled).
+
 ### [Engine] Ping-pong captures count as failures — raise MAX_TOTAL_FAILURES to compensate (2026-03-21) — NEW
 - **Context**: Kalinovik axis stalled at 1/5 captures. rs_kalinovik_brigade took varos_2 three times (w11-w13, all decisive r=29+) but RBiH retook it between turns. Each recapture counted as a "failure" (defender still holds). 3 ping-pong + 2 idle turns = 5 = MAX_TOTAL_FAILURES → axis stalled before reaching golubici_2.
 - **Root cause**: The op system checks OSID control the FOLLOWING turn. If RBiH retakes the OSID between attacker's decisive victory and next turn's check, the capture is a "failure." The combat was won but the HOLDING failed.
