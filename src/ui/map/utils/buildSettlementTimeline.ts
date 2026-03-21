@@ -100,6 +100,7 @@ export function buildSettlementTimeline(
     const events: SettlementTimelineEvent[] = [];
 
     // --- Control flips ---
+    // 1. From persisted control_events (if any)
     for (const ce of controlEvents) {
         if (ce.settlementId !== osid) continue;
         events.push({
@@ -109,6 +110,32 @@ export function buildSettlementTimeline(
             title: `${ce.to ? factionName(ce.to) : 'Unknown'} took control`,
             detail: ce.mechanism !== 'unknown' ? ce.mechanism.replace(/_/g, ' ') : undefined,
         });
+    }
+    // 2. Infer control flips from displacement events — when `caused_by` faction
+    //    first appears or changes at this OSID, it means that faction took control.
+    //    This covers cases where control_events is empty (not persisted in save).
+    {
+        const controlFlipTurns = new Set(events.filter(e => e.type === 'control_flip').map(e => e.turn));
+        let lastCausedBy: string | null = null;
+        const dispEventsForOsid = displacementEvents
+            .filter(de => de.origin_osid === osid && de.caused_by)
+            .sort((a, b) => a.turn - b.turn);
+        for (const de of dispEventsForOsid) {
+            if (de.caused_by && de.caused_by !== lastCausedBy) {
+                // Don't duplicate if we already have a control_flip event at this turn
+                if (!controlFlipTurns.has(de.turn)) {
+                    events.push({
+                        turn: de.turn,
+                        type: 'control_flip',
+                        faction: de.caused_by,
+                        title: `${factionName(de.caused_by)} took control`,
+                        detail: 'inferred from displacement',
+                    });
+                    controlFlipTurns.add(de.turn);
+                }
+                lastCausedBy = de.caused_by;
+            }
+        }
     }
 
     // --- Displacement + civilian killed (phase-based aggregation) ---
