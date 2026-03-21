@@ -327,10 +327,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_gacko_brigade',
                     'rs_kalinovik_brigade',
                 ],
+                // Kalinovik → Konjic chain: after Kalinovik cleared, push into
+                // southern Konjic (ljuta, glavaticevo_2 — both adjacent to sela_2).
+                // Historically VRS 2nd Herzegovina held this salient throughout (BB2 p.514).
                 objectives: [
                     'op:kalinovik:varos_2',
                     'op:kalinovik:golubici_2',
                     'op:kalinovik:sela_2',
+                    'op:konjic:ljuta',
+                    'op:konjic:glavaticevo_2',
                 ],
                 staging_osid: 'op:kalinovik:kalinovik_2',
             },
