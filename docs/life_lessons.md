@@ -68,6 +68,12 @@
 
 ## Active Lessons (no recent violations)
 
+### [Calibration] NEVER add a painted-opposite-faction OSID as an operation objective (2026-03-21) — NEW
+- **Context**: Added `vitinica_2` (painted RBiH) as an Op Drina objective to maintain 5-objective tempo after micro-OSID merge. VRS captured it at w6 with ratio 29.91. vitinica_2 is part of the Sapna corridor connecting Teočak to Tuzla — a critical lifeline that must stay RBiH throughout the war. Also tried `djulici` (painted RS, valid) but that cascaded into Žepa enclave falling.
+- **Wrong approach**: Adding objectives without checking `painted_control_jan1993.json`. Assuming objectives are just tempo placeholders that won't be reached. Not verifying corridor anchors after every op change.
+- **Right approach**: Before adding ANY OSID to an operation, check its painted target. If it's painted as the DEFENDING faction, it MUST NOT be an objective — the operation will capture it. Use `node -e "console.log(require('./data/source/calibration/painted_control_jan1993.json').by_settlement_id['op:...:...'])"`.
+- **Do instead**: When replacing merged objectives, ONLY use OSIDs whose painted target matches the attacking faction. Always check: vitinica_2 (RBiH), rastosnica_2 (RBiH) = never RS objectives. After any Op Drina change, verify: vitinica_2 RBiH, Teočak connected, Žepa RBiH.
+
 ### [UI] Agent-generated aesthetics must match the established design language — never CRT/terminal on a warroom game (2026-03-21) — NEW
 - **Context**: An external agent restyled ArmyHQModal as a green CRT terminal ("NATO MISSION TERMINAL v4.2", `#4af626` phosphor green, scanline overlay, teletype ticker, glowing dots). The game's design spec (HOI_VISUAL_GUI_OVERHAUL_SPEC.md) explicitly says "warmth of wood-paneled offices and brass fixtures rather than CRT terminals."
 - **Wrong approach**: Letting agents make autonomous aesthetic decisions without referencing the design spec or matching existing panels. The agent invented a new design language instead of extending the existing one.
