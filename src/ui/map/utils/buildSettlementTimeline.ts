@@ -111,20 +111,24 @@ export function buildSettlementTimeline(
         });
     }
 
-    // --- Displacement + civilian killed (aggregate per turn per ethnicity) ---
-    const dispByTurnEth = new Map<string, { turn: number; eth: string; displaced: number; killed: number; fled: number }>();
-    const arrivalsByTurn = new Map<number, number>();
+    // --- Displacement + civilian killed (phase-based aggregation) ---
+    // Group consecutive turns of same-ethnicity displacement into phases
+    // to avoid spamming the timeline with weekly displacement ticks.
+    interface DispPhase { startTurn: number; endTurn: number; eth: string; displaced: number; killed: number; fled: number }
+    const phasesByEth = new Map<string, DispPhase[]>();
 
+    // Collect per-turn-per-ethnicity totals first
+    const turnEthTotals = new Map<string, { turn: number; eth: string; displaced: number; killed: number; fled: number }>();
     for (const de of displacementEvents) {
         if (de.origin_osid === osid) {
             const key = `${de.turn}:${de.ethnicity ?? 'unknown'}`;
-            const existing = dispByTurnEth.get(key);
+            const existing = turnEthTotals.get(key);
             if (existing) {
                 existing.displaced += de.displaced;
                 existing.killed += de.killed;
                 existing.fled += de.fled_abroad;
             } else {
-                dispByTurnEth.set(key, {
+                turnEthTotals.set(key, {
                     turn: de.turn,
                     eth: de.ethnicity ?? 'unknown',
                     displaced: de.displaced,
@@ -133,34 +137,53 @@ export function buildSettlementTimeline(
                 });
             }
         }
-        if (de.dest_osid === osid && de.settled > 0) {
-            arrivalsByTurn.set(de.turn, (arrivalsByTurn.get(de.turn) ?? 0) + de.settled);
+    }
+
+    // Build phases: consecutive turns of the same ethnicity merge into one phase.
+    // A gap of 3+ turns between events starts a new phase.
+    const GAP_THRESHOLD = 3;
+    const sorted = [...turnEthTotals.values()].sort((a, b) => a.turn - b.turn || a.eth.localeCompare(b.eth));
+    for (const d of sorted) {
+        if (!phasesByEth.has(d.eth)) phasesByEth.set(d.eth, []);
+        const phases = phasesByEth.get(d.eth)!;
+        const last = phases[phases.length - 1];
+        if (last && d.turn - last.endTurn <= GAP_THRESHOLD) {
+            last.endTurn = d.turn;
+            last.displaced += d.displaced;
+            last.killed += d.killed;
+            last.fled += d.fled;
+        } else {
+            phases.push({ startTurn: d.turn, endTurn: d.turn, eth: d.eth, displaced: d.displaced, killed: d.killed, fled: d.fled });
         }
     }
 
-    for (const d of dispByTurnEth.values()) {
-        if (d.displaced > 0) {
-            events.push({
-                turn: d.turn,
-                type: 'displacement',
-                title: `${d.displaced.toLocaleString()} ${ethnicLabel(d.eth)}s displaced`,
-                population: d.displaced,
-                ethnicity: d.eth,
-            });
-        }
-        const dead = d.killed + d.fled;
-        if (dead > 0) {
-            const parts: string[] = [];
-            if (d.killed > 0) parts.push(`${d.killed} killed`);
-            if (d.fled > 0) parts.push(`${d.fled} fled abroad`);
-            events.push({
-                turn: d.turn,
-                type: 'civilian_killed',
-                title: `${dead.toLocaleString()} ${ethnicLabel(d.eth)} civilians lost`,
-                detail: parts.join(', '),
-                population: dead,
-                ethnicity: d.eth,
-            });
+    // Emit one displacement event per phase
+    for (const phases of phasesByEth.values()) {
+        for (const phase of phases) {
+            if (phase.displaced > 0) {
+                const span = phase.endTurn > phase.startTurn ? ` (over ${phase.endTurn - phase.startTurn + 1} weeks)` : '';
+                events.push({
+                    turn: phase.startTurn,
+                    type: 'displacement',
+                    title: `${phase.displaced.toLocaleString()} ${ethnicLabel(phase.eth)}s displaced${span}`,
+                    population: phase.displaced,
+                    ethnicity: phase.eth,
+                });
+            }
+            const dead = phase.killed + phase.fled;
+            if (dead > 0) {
+                const parts: string[] = [];
+                if (phase.killed > 0) parts.push(`${phase.killed} killed`);
+                if (phase.fled > 0) parts.push(`${phase.fled} fled abroad`);
+                events.push({
+                    turn: phase.startTurn,
+                    type: 'civilian_killed',
+                    title: `${dead.toLocaleString()} ${ethnicLabel(phase.eth)} civilians lost`,
+                    detail: parts.join(', '),
+                    population: dead,
+                    ethnicity: phase.eth,
+                });
+            }
         }
     }
 
@@ -210,7 +233,7 @@ export function buildSettlementTimeline(
 
             // Track cumulative departures per ethnicity
             const cumDep: Record<string, number> = {};
-            const turnEvents = [...dispByTurnEth.values()].sort((a, b) => a.turn - b.turn);
+            const turnEvents = [...turnEthTotals.values()].sort((a, b) => a.turn - b.turn);
             let shiftDetected = false;
 
             for (const d of turnEvents) {

@@ -19,15 +19,12 @@ const EVENT_STYLES: Record<TimelineEventType, { icon: string; color: string; bg:
     ethnic_shift:       { icon: '◐', color: 'text-purple-400',   bg: 'border-purple-400/30' },
 };
 
-function turnToWeekLabel(turn: number): string {
-    // Turn 0 = April 1992 (week 1)
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const startMonth = 3; // April = index 3
-    const startYear = 1992;
-    const totalMonths = startMonth + Math.floor(turn / 4.33);
-    const month = totalMonths % 12;
-    const year = startYear + Math.floor(totalMonths / 12);
-    return `${monthNames[month]} ${year}`;
+function turnToDate(turn: number): string {
+    // Turn 0 = April 6, 1992. Each turn = 7 days.
+    const start = new Date(1992, 3, 6); // April 6, 1992
+    const d = new Date(start.getTime() + turn * 7 * 24 * 60 * 60 * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 interface Props {
@@ -65,7 +62,7 @@ export function SettlementTimeline({ events }: Props) {
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-[9px] h-[9px] rounded-full bg-panel-border/60 border border-panel-border relative z-10 -ml-[0.5px]" />
                         <span className="text-[9px] font-mono text-text-secondary tracking-wider">
-                            W{group.turn} · {turnToWeekLabel(group.turn)}
+                            {turnToDate(group.turn)}
                         </span>
                     </div>
 
