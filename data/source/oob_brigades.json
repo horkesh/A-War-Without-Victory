@@ -3893,7 +3893,7 @@
     "available_from": 0,
     "mandatory": true,
     "manpower_cost": 100,
-    "initial_personnel": 600,
+    "initial_personnel": 1500,
     "initial_cohesion": 48,
     "initial_morale": 55,
     "composition": {

@@ -68,6 +68,12 @@
 
 ## Active Lessons (no recent violations)
 
+### [Calibration] Coupled anchors need simultaneous fixes — Žepa/Teočak seesaw (2026-03-21) — NEW
+- **Context**: Žepa enclave and Teočak corridor are inversely coupled through VRS Drina Corps force allocation. Fixing Žepa alone (285th bump to 1500) blocked Teočak — VRS stayed north and 2nd Romanija blocked rastosnica_2. Fixing Teočak alone (Op Teočak) worked only when Žepa was weak (VRS pushed south, leaving north open).
+- **Wrong approach**: Fixing one anchor at a time, testing, seeing the other break, then trying to find a Goldilocks value. This wasted 4 calibration runs. The coupling was structural — no single-variable solution existed.
+- **Right approach**: When two anchors are coupled through the same corps' force allocation, fix BOTH simultaneously. Strengthen the defense (OOB bump) AND strengthen the offense (op improvement). Test the combination, not individual changes.
+- **Do instead**: Before changing any enclave OOB or corridor operation, check: is there another anchor in the same corps' area that could be affected? If yes, plan both fixes together. Known coupled pairs: Žepa↔Teočak (Drina Corps), Višegrad↔Rogatica (Herzegovina Corps).
+
 ### [Calibration] NEVER add a painted-opposite-faction OSID as an operation objective (2026-03-21) — NEW
 - **Context**: Added `vitinica_2` (painted RBiH) as an Op Drina objective to maintain 5-objective tempo after micro-OSID merge. VRS captured it at w6 with ratio 29.91. vitinica_2 is part of the Sapna corridor connecting Teočak to Tuzla — a critical lifeline that must stay RBiH throughout the war. Also tried `djulici` (painted RS, valid) but that cascaded into Žepa enclave falling.
 - **Wrong approach**: Adding objectives without checking `painted_control_jan1993.json`. Assuming objectives are just tempo placeholders that won't be reached. Not verifying corridor anchors after every op change.

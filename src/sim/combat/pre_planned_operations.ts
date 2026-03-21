@@ -498,13 +498,14 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RBiH',
         name: 'Operation Teočak',
         staging_osid: 'op:kalesija:kalesija_grad_2',
-        available_from: 25,
+        available_from: 20,
         min_attack_outcome: 'repulsed',
         axes: [
             {
                 axis_id: 'kalesija_assault',
                 name: 'Kalesija Assault',
                 brigades: [
+                    'arbih_2nd_tuzla',
                     'arbih_241st_spreca_muslim_light_gazije',
                     'arbih_242nd_zvornik_muslim_light',
                     'arbih_245th_mountain',
