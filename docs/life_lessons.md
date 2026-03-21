@@ -68,6 +68,30 @@
 
 ## Active Lessons (no recent violations)
 
+### [Rendering] MapLibre symbol layers are globally broken — use Deck.gl TextLayer (2026-03-21) — NEW
+- **Context**: Settlement labels (27 major cities) were added as a MapLibre `symbol` layer with correct data (27 features), correct font PBFs (200 OK), correct layer config — but `queryRenderedFeatures` returned 0 for ALL 7 symbol layers in the map. "Unimplemented type: 4" errors from OSM PMTiles corrupt the symbol rendering pipeline.
+- **Wrong approach**: Debugging the label layer in isolation (font loading, source data, layer ordering, collision detection). The problem is global — no symbol layer renders, not just labels.
+- **Right approach**: Bypass MapLibre symbols entirely. Use Deck.gl `TextLayer` for text rendering — it uses its own WebGL pipeline and is unaffected by MapLibre's broken symbol pass. `fontSettings: { sdf: true }` for outlines, `characterSet: 'auto'` for Bosnian diacritics (Ć, Š, Č, Ž).
+- **Do instead**: Never use MapLibre `type: 'symbol'` layers for text in this project. All text rendering goes through Deck.gl TextLayer. If you need icons, use Deck.gl IconLayer (already used for formation counters).
+
+### [Data] Displacement event `displaced` field includes killed/fled as subsets — never add them (2026-03-21) — NEW
+- **Context**: The adapter aggregated OSID displacement as `out = displaced + killed + fledAbroad`. But `displaced` means "total people removed from this OSID" — `killed` and `fled_abroad` are subsets, not additions. This inflated OSID removals by ~40% (Derventa showed 25,202 removals from 21,706 pre-war population).
+- **Wrong approach**: `out = displaced + killed + fledAbroad` (double-counts killed/fled).
+- **Right approach**: `out = displaced` (total removals). `lost = killed + fledAbroad` (subset of out, permanently gone). `displaced_alive = out - lost` (moved to another OSID).
+- **Do instead**: When aggregating displacement events, `displaced` IS the total. The municipality-level `displacement_state` uses different field semantics — `displaced_out` (alive movers) and `lost_population` (killed/fled) are non-overlapping there. Don't mix the two accounting models.
+
+### [Engine] When you find one trimming bug, check for others — same pattern repeats (2026-03-21) — NEW
+- **Context**: `control_events` was trimmed to last 3 turns every turn cycle (empty by w40). Fixed it. Then found `turn_summaries` had `MAX_TURN_SUMMARIES = 3` — same pattern, same bug. Both were silently discarding history needed for the settlement timeline.
+- **Wrong approach**: Fixing one and moving on without checking if the same pattern exists elsewhere.
+- **Right approach**: After finding `control_events` trimming, immediately grep for similar patterns: `slice(0,`, `filter(e => e.turn >=`, `MAX_*` constants that limit array size. Found `MAX_TURN_SUMMARIES` in 30 seconds.
+- **Do instead**: When you fix a "history silently discarded" bug, grep the codebase for the same pattern. Trimming/slicing constants are a code smell when the data feeds player-visible features.
+
+### [Engine] All control_flip paths must emit control_events — audit when adding new flip paths (2026-03-21) — NEW
+- **Context**: 5 code paths write `political_controllers[osid] = faction`. Only 2 of 5 emitted `control_events`. The missing 3 (rear_pocket_consolidation, sector_offensive null-claim, jna_phantom capture_osids) meant those control changes were invisible to the timeline.
+- **Wrong approach**: Assuming all control flip paths already emit events. The assertion file (`assert_control_events.ts`) existed but only logged violations — it didn't fix them.
+- **Right approach**: Grep for all `political_controllers[` assignments. Each one MUST have a corresponding `control_events.push()`. If adding a new flip path, add the event emission in the same PR.
+- **Do instead**: After any change touching `political_controllers`, run `grep -n "political_controllers\[" src/sim/combat/` and verify each hit has an adjacent `control_events` push.
+
 ### [Platform] Git worktrees do NOT isolate tsx module resolution — always merge to main and run there (2026-03-21) — NEW
 - **Context**: 14 scenario runs in the `.worktrees/zepa-calibration` worktree all used the MAIN tree's source code despite the worktree having different committed files. File hashes differed between worktree and main. `npm install` in the worktree didn't help.
 - **Root cause**: tsx resolves imports through node_modules which can chain back to the main tree. Worktrees share the git repo but import resolution follows filesystem symlinks and module resolution algorithms that cross worktree boundaries.
