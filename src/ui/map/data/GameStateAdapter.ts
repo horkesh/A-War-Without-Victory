@@ -1440,6 +1440,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     const departedByOsid: LoadedGameState['departedByOsid'] = {};
     const departedByMun: LoadedGameState['departedByMun'] = {};
     const displacementByOsid: LoadedGameState['displacementByOsid'] = {};
+    const displacementEventLogRaw: LoadedGameState['displacementEventLog'] = [];
     const rawEventLog = (state as any).displacement?.displacement_event_log;
     if (Array.isArray(rawEventLog)) {
         for (const evt of rawEventLog as Array<Record<string, unknown>>) {
@@ -1451,6 +1452,9 @@ export function parseGameState(json: unknown): LoadedGameState {
             const destOsid = typeof evt.dest_osid === 'string' ? evt.dest_osid : '';
             const originMun = typeof evt.origin_mun === 'string' ? evt.origin_mun : '';
             const ethnicity = typeof evt.ethnicity === 'string' ? evt.ethnicity : '';
+            const turnNum = typeof evt.turn === 'number' ? evt.turn : 0;
+            const causedBy = typeof evt.caused_by === 'string' ? evt.caused_by : undefined;
+            displacementEventLogRaw.push({ turn: turnNum, origin_osid: originOsid || undefined, dest_osid: destOsid || undefined, origin_mun: originMun || undefined, ethnicity: ethnicity || undefined, displaced, killed, fled_abroad: fledAbroad, settled, caused_by: causedBy });
             if (originOsid) {
                 if (!displacementByOsid[originOsid]) displacementByOsid[originOsid] = { out: 0, lost: 0, in: 0 };
                 const outDelta = displaced + killed + fledAbroad;
@@ -1732,7 +1736,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         },
         formations, militiaPools, controlBySettlement, statusBySettlement,
         brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
-        attackOrders, aorOrders, recentControlEvents, recruitment,
+        attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
         armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure, warPhaseExhaustion,
         player_faction: playerFaction ?? undefined,
