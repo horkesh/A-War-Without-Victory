@@ -229,7 +229,7 @@ export function SettlementDetailContent({
 
   // Build settlement timeline from all available data sources
   const timelineEvents = useMemo(() => {
-    if (!isPanel) return [];
+    if (variant !== 'panel') return [];
     return buildSettlementTimeline(
       osid,
       munId,
@@ -243,7 +243,7 @@ export function SettlementDetailContent({
         others: num(props.population_others),
       } : null,
     );
-  }, [osid, munId, displacementEventLog, allControlEvents, operationHistory, isPanel, popOriginal, props.population_bosniaks, props.population_serbs, props.population_croats, props.population_others]);
+  }, [osid, munId, displacementEventLog, allControlEvents, operationHistory, variant, popOriginal, props.population_bosniaks, props.population_serbs, props.population_croats, props.population_others]);
   /** Settlement-level flows: exact per-OSID when available, else municipality share. */
   const settlementShare =
     disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
