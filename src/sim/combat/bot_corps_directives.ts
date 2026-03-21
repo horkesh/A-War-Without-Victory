@@ -31,7 +31,7 @@ import type { PredictedOutcome } from './combat_predictor.js';
 import { analyzeFrontGeometry, type FrontGeometryAssessment } from './front_geometry_analysis.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
-import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateCorpsOffensiveLaunch, evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH, INTEL_GATE_LAUNCH_THRESHOLD, MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT } from './sector_intel_constants.js';
@@ -1678,10 +1678,27 @@ export function generateCorpsDirectives(
             // Gather ALL corps brigades and enemy OSIDs, then evaluate a single
             // corps-level offensive. Brigades from any sector can participate.
             if (!inCooldown) {
-                // Corps-wide brigade pool: all active subordinates eligible for operations
+                // Build per-OSID supply state lookup for filtering
+                const osidSupplyState = new Map<string, SupplyStateLevel>();
+                if (supplyByOsid?.factions) {
+                    const facSupply = supplyByOsid.factions.find(f => f.faction_id === faction);
+                    if (facSupply?.by_osid) {
+                        for (const e of facSupply.by_osid) osidSupplyState.set(e.osid, e.state);
+                    }
+                }
+
+                // Corps-wide brigade pool: all active subordinates eligible for operations.
+                // Supply-critical brigades excluded — no fuel, no ammunition for offensives.
                 let corpsBrigadeIds = subordinates
-                    .filter(b => b.status === 'active' && (b.personnel ?? 0) >= 400
-                        && !(b.disrupted_turns && b.disrupted_turns > 0))
+                    .filter(b => {
+                        if (b.status !== 'active' || (b.personnel ?? 0) < 400) return false;
+                        if (b.disrupted_turns && b.disrupted_turns > 0) return false;
+                        // Supply gate: critical/strained supply = defense only.
+                        // No fuel, minimal ammunition — can't sustain offensive operations.
+                        const supplyLevel = b.location_osid ? osidSupplyState.get(b.location_osid) : undefined;
+                        if (supplyLevel === 'critical' || supplyLevel === 'strained') return false;
+                        return true;
+                    })
                     .map(b => b.id)
                     .sort((a, b) => {
                         const fa = state.military.formations?.[a];
@@ -1691,20 +1708,6 @@ export function generateCorpsDirectives(
                         if (pa !== pb) return pb - pa;
                         return strictCompare(a, b);
                     });
-
-                // Enclave supply gate: brigades inside besieged enclaves cannot
-                // participate in offensive operations. Supply strangulation means
-                // no fuel, minimal ammunition, no reinforcements — defense only.
-                // Bihać pocket exempt: large pocket with Croatian supply corridor,
-                // historically mounted significant offensives (Op Tiger, Op Sana).
-                const ENCLAVE_OPS_EXEMPT = new Set(['bihac_pocket']);
-                corpsBrigadeIds = corpsBrigadeIds.filter(id => {
-                    const f = state.military.formations?.[id];
-                    if (!f?.location_osid) return true;
-                    const enclaveId = getEnclaveIdForOsid(f.location_osid);
-                    if (enclaveId == null) return true;
-                    return ENCLAVE_OPS_EXEMPT.has(enclaveId);
-                });
 
                 // Corps-wide enemy OSIDs: union across all corps sectors
                 const corpsEnemyOsids = new Set<string>();

@@ -1,19 +1,19 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.6% area-weighted (40w).** Sarajevo 86.8% (+3.3pp). All v0.5.x milestones delivered. Three calibration fixes: Drina OOB (n964-n966), SRK cold front (n967), enclave operations gate (n973).
+**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **92.0% area-weighted (40w).** Sarajevo 86.8% (+3.3pp). Three calibration fixes: Drina OOB (n964-n966), SRK cold front (n967), supply-based offensive constraint (n975).
 
-## [2026-03-21] Enclave Operations Gate (n973)
+## [2026-03-21] Supply-Based Offensive Constraint (n975)
 
-**Problem:** Besieged enclave forces (Sarajevo, Goražde, Srebrenica) launched full corps-level offensive operations despite being supply-starved. ARBiH 1st Corps (30 brigades) used Sarajevo city brigades in breakout operations, and Goražde brigades overexpanded into Drina territory. Historically, enclave garrisons had minimal ammunition, no fuel, and no reinforcements — they could defend but not mount sustained offensives.
+**Problem:** Besieged enclave forces (Sarajevo, Goražde, Srebrenica) launched full corps-level offensive operations despite being supply-starved. ARBiH 1st Corps (30 brigades) used Sarajevo city brigades in breakout operations. Historically, enclave garrisons had minimal ammunition, no fuel, and no reinforcements — they could defend but not mount sustained offensives.
 
-**Investigation:** SRK's Operation Prsten northern ring axis (Vogošća/Ilijaš) captured only 4/8 objectives — 0 eligible attackers by w4, stalled against 1st Corps numerical superiority (30 vs 5 brigades at start). Added JNA Rajlovac Barracks phantom (no equipment) to reinforce the axis. Tested relocating rs_4th_sarajevo from Pale to Ilijaš — caused 10-OSID Rogatica/Kalinovik cascade (brigade was sole southeastern defender). Tested 3 JNA phantoms — over-committed SRK, worse results. Root cause: not the operation, but post-operation 1st Corps retaking territory with unrestricted offensive capability from inside the enclave.
+**Investigation:** SRK's Operation Prsten captured only 4/8 objectives (northern ring stalled — 0 eligible by w4). Added JNA Rajlovac Barracks phantom (no equipment) to reinforce axis. Root cause: not the operation, but post-operation 1st Corps retaking territory with full offensive capability from the enclave. Initial hardcoded enclave gate worked (n973: 86.8%) but was replaced with emergent supply-based approach per user direction.
 
-**Fix:** Enclave supply gate in `generateCorpsDirectives` — brigades located inside known enclaves are excluded from the corps offensive brigade pool. They defend (reactive sector defense, home defense) but cannot participate in corps offensive launches. Bihać pocket exempt: large territory with Croatian supply corridor, historically mounted significant offensives (Op Tiger, Op Sana).
+**Supply system trace:** `deriveSupplyStateByOsid` uses `findHeartlandComponent` to identify the largest connected component of faction-controlled territory. Supply sources outside the heartland (e.g. Sarajevo is a supply source but disconnected from the main body) are excluded from "adequate" BFS seeding → their OSIDs classified as `strained`. RBiH has 4 connected components: heartland (237 OSIDs), Bihać (22), Srebrenica (20, all `critical`/isolated), Sarajevo (4, `strained`).
 
-**Impact:** Sarajevo 83.5% → **86.8% (+3.3pp)**. RS w40 0.500 → **0.504**. Overall 91.5% → **91.6%**. Drina stable at 84.2%. SRK now holds Vogošća (hotonj flipped to RS). Goražde brigades no longer overexpand into Čajniče. RS w40 benchmark reverted to original 0.503 floor (now passing at 0.504).
+**Fix:** Brigades on `critical` or `strained` supply OSIDs excluded from the corps offensive brigade pool in `generateCorpsDirectives`. No hardcoded enclave check — the supply system naturally detects isolated/disconnected territory and the offensive pool respects that. Bihać pocket's supply sources are in the heartland → adequate → can still launch operations (historically correct — Op Tiger, Op Sana).
 
-**Known remaining issue:** ARBiH 165th Mountain (home: Visoko) deployed to Čajniče via 1st Corps operations — non-enclave brigade ranging 100+ km from home. Corps structure problem: 1st Corps spans Sarajevo→Goražde→Čajniče. Needs corps boundary or home-distance ops constraint in future.
+**Impact:** **92.0% area-weighted** (new session ATH). Sarajevo **86.8%** (+3.3pp). RS w40 **0.507 PASS**. Drina 84.2% (stable).
 
 **Files:** `src/sim/combat/bot_corps_directives.ts`, `src/sim/combat/jna_phantom_brigades.ts`, `src/sim/combat/pre_planned_operations.ts`
 
