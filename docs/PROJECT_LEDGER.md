@@ -3,6 +3,26 @@
 **Last Updated:** 2026-03-21
 **Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.9% area-weighted (40w, 712 OSIDs). RS w40 0.507 PASS.** Calibration: Posavina Corridor restructure (n1002), micro-OSID merge (n982), Teočak corridor (n992-n998), Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975).
 
+## [2026-03-21] Army HQ Nerve Center — Full Aesthetic Rework + Situation Briefing
+
+**Scope:** Complete rework of Army HQ Modal from green CRT terminal to dark warroom aesthetic. 10 files modified, 2 created, 2 deleted.
+
+**Visual changes:** Stripped ALL `#4af626` green terminal styling from 8 components. Replaced with warroom palette (`bg-panel-bg`, `bg-panel-card`, `text-text-primary`, `text-amber-400`). Faction army crest 180px centered. Corps names in amber/gold. Equipment icons (tank/artillery) with operational/total counts on corps cards.
+
+**FlipCard animation:** Corps cards flip on click (CSS 3D transform, `rotateY(180deg)`, 600ms ease). Front = summary (name, commander, equipment, stats, stance, cohesion bar). Back = full detail (commander profile, sectors, operations, ORBAT, combat record, stance dropdown). Grid stacking layout for correct height behavior. Safari `-webkit-backface-visibility` prefix.
+
+**Situation Briefing (Task 8 — nerve center feature):** `generateBriefing()` pure function scans full `LoadedGameState` and produces prioritized intelligence alerts. Categories: CRITICAL (red: supply cutoff, cohesion collapse, ops awaiting GO/NO-GO, officer decisions), WARNING (amber: low intel, high exhaustion, combat ineffective brigades, thin fronts, low reserves, alliance decay), INFO (muted: ops in execution, weekly status). Clicking a briefing item flips the relevant corps card. Max 12 items.
+
+**Simplify pass:** Fixed `eff.score` → `eff.totalEffectiveness` (Combat Eff always showed "0"). Added `open` guard to useMemo. Replaced `FACTION_SHORT` with `getArmyName()`. Pre-computed sectorsByCorps/opsByCorps Maps. Extracted magic number constants (COHESION_CRITICAL=40, COHESION_HEALTHY=70, EXHAUSTION_WARN=30). Grade color nested ternary → Record. brigadesByCorps pre-built map in generateBriefing.
+
+**Navigation:** `← MAP` returns to map, `← BACK` returns from corps drill-down. ESC key handles both levels.
+
+**Deleted:** TeletypeTicker.tsx, Stamp.tsx (unused after rework).
+
+**Determinism:** UI-only changes. No simulation impact.
+
+**Files:** `src/ui/map/components/army_hq/ArmyHQModal.tsx`, `ArmyHQCorpsCard.tsx`, `FlipCard.tsx` (new), `SituationBriefing.tsx` (new), `CollapsibleSection.tsx`, `CommanderSection.tsx`, `SectorsSection.tsx`, `OperationsSection.tsx`, `OrbatSection.tsx`, `CombatRecordSection.tsx`. Deleted: `TeletypeTicker.tsx`, `Stamp.tsx`.
+
 ## [2026-03-21] Posavina Corridor Restructure — Operation Corridor 92 (n1002)
 
 **Problem:** Op Derventa (triggered, w4) sent 2 VRS brigades (27th Derventa + 5th Kozara) to capture derventa_2. Captured at w5 but HRHB retook it — 2 brigades can't hold against 6 HVO brigades arriving w8. Historically, VRS launched Corridor 92 at w12 with 50,000+ troops across two corps (1KK + EBK), not a 2-brigade probe at w4 (BB1 pp.181-183).
