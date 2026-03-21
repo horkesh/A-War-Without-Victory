@@ -109,6 +109,48 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         ],
     },
     {
+        // Herzegovina Consolidation — VRS secures Mostar hills + southern Konjic
+        // after Op Višegrad + Op Foča complete. Historically held throughout war
+        // (BB1 p.193 Mostar hills, BB2 p.514 Glavatičevo). Two separate axes
+        // with dedicated brigades (no sharing with Op Foča brigades).
+        name: 'Operation Herzegovina Consolidation',
+        primary_corps: 'vrs_herzegovina',
+        staging_osid: 'op:nevesinje:sopilja',
+        planning_duration: 1,
+        min_attack_outcome: 'repulsed' as const,
+        trigger: (state, _turn) => {
+            return corpsOpFinished(state, 'vrs_herzegovina');
+        },
+        axes: [
+            {
+                axis_id: 'mostar_heights',
+                name: 'Mostar Heights',
+                corps: 'vrs_herzegovina',
+                brigades: [
+                    'rs_nevesinje_brigade' as FormationId,
+                ],
+                objectives: [
+                    'op:mostar:vranjevici_2',
+                    'op:mostar:kruzanj_2',
+                ],
+                staging_osid: 'op:nevesinje:sopilja',
+            },
+            {
+                axis_id: 'konjic_south',
+                name: 'Konjic South',
+                corps: 'vrs_herzegovina',
+                brigades: [
+                    'rs_2nd_herzegovina_light_infantry' as FormationId,
+                ],
+                objectives: [
+                    'op:konjic:glavaticevo_2',
+                    'op:konjic:ljuta',
+                ],
+                staging_osid: 'op:konjic:bijela_2',
+            },
+        ],
+    },
+    {
         name: 'Operation Kotor Varos',
         primary_corps: 'vrs_1st_krajina',
         staging_osid: 'op:kotor_varos:kotor_varos_2',
