@@ -549,10 +549,111 @@ Per turn, in the `evaluate-events` pipeline step:
 
 ---
 
-## 14. Implementation Phasing
+## 14. Legacy Event Migration Plan
 
-### Phase 1: Infrastructure (v0.6.0-alpha)
+The 41 existing events must be triaged into the new system. They cannot stay as-is — calendar triggers, narrative-only effects, and the 1995 railroad all violate the new design principles.
 
+### 14.1 Migration Strategy
+
+The new system must support **both old-style and new-style events during transition**. Old events that haven't been migrated yet still fire on their `turn_min`/`turn_max` triggers — they just don't use pressure, dimensions, or flags. Migration happens incrementally per milestone:
+
+- **v0.6.0**: Migrate 1992 events (18 events → cut 4, rewrite 10, tweak 4)
+- **v0.6.2**: Migrate 1993 events (13 events → cut 2, rewrite 9, tweak 2)
+- **v0.6.3**: Migrate 1994-1995 events (22 events → cut 2, rewrite 20) — ALL emergent
+
+### 14.2 Full Triage: 1992 Events (18 events — Phase 1)
+
+| ID | Current Trigger | Verdict | Migration Notes |
+|----|-----------------|---------|-----------------|
+| `battle_of_the_barracks_sarajevo` | w4-6 + municipality control | **TWEAK** | Good condition. Add dimension shifts (`military_credibility` +5 RBiH). Convert to Decision: "Seize now (more equipment, JNA casualties) or wait (hope for diplomacy, risk JNA evacuation)?" Sets flag `barracks_timing`. |
+| `battle_of_the_barracks_tuzla` | w4-6 + municipality control | **TWEAK** | Same treatment as Sarajevo. |
+| `battle_of_the_barracks_zenica` | w4-6 + municipality control | **TWEAK** | Same treatment. |
+| `battle_of_the_barracks_visoko` | w4-6 + municipality control | **TWEAK** | Same treatment. |
+| `arms_embargo_impact_1992` | w4 calendar only | **REWRITE** | Convert from one-shot -10 supply to a **Consequence Event** that activates continuous embargo mechanic. Should fire when international community declares embargo (forced event). Dimension shift: `international_standing` context for all factions. |
+| `jna_withdrawal_1992` | w5 calendar only | **REWRITE** | Calendar is acceptable (exogenous Belgrade decision). But equipment handoff should SCALE with RS territory %. Add dimension: `military_credibility` +10 RS. Convert to Consequence Event with real mechanical weight. |
+| `sarajevo_siege_begins_1992` | w6 calendar only | **REWRITE** | Must be condition-gated on BFS encirclement of Sarajevo OSIDs. Effects pathetically weak (1 war_crimes + 5 patron). Needs to activate continuous siege system. Consequence Event with major dimension shifts. |
+| `un_convoys_begin_1992` | w8 calendar only | **CUT** | Pure narrative, zero mechanical effect. If UN convoys matter, they should be a supply mechanic, not a wallpaper notification. |
+| `srebrenica_enclave_forms_1992` | w10 calendar only | **REWRITE** | Must fire when Srebrenica OSIDs are actually encircled (BFS). Consequence Event: "Your forces in eastern Bosnia are surrounded." Dimension: `international_standing` +5 RBiH (sympathy), `negotiating_leverage` +5 RBiH (enclave as bargaining chip). |
+| `mostar_liberation_1992` | w10 calendar only | **REWRITE** | Must fire when JNA/RS forces are pushed out of Mostar municipality (condition). Convert to Consequence Event. Seeds the HVO-ARBiH "who controls Mostar" friction. Sets flag `mostar_liberated_by` = faction. |
+| `operation_corridor_1992` | w12-22 + municipality control | **TWEAK** | Good condition already. Strengthen effects: corridor width mechanic, RS supply route, dimension shifts. |
+| `drina_valley_ethnic_cleansing_1992` | w13 calendar only | **REWRITE** | Must fire when RS controls threshold % of Drina municipalities AND displaced population exceeds threshold. For RS player: **Decision Event** — intensity of cleansing (restrained/systematic/maximum). Sets flag `drina_cleansing_intensity`. Major dimension shifts on `international_standing`, `internal_cohesion`. For non-RS: Consequence Event. |
+| `posavina_corridor_fighting_1992` | w16 calendar only | **CUT** | Grants RS +10 supply regardless of corridor state. Absurd if player severed the corridor. Replace with condition-gated corridor supply mechanic. |
+| `concentration_camps_revealed_1992` | w18-28 + municipality control | **REWRITE** | Good Prijedor condition but should also require cumulative `war_crimes_above` threshold. For RS player: **Decision Event** — deny/obstruct/cooperate. Sets flag `camps_response`. Massive dimension shifts. Chain: enables London Conference with modified conditions. |
+| `bihac_isolation_deepens_1992` | w20 calendar only | **CUT** | Pure narrative. Bihac isolation should be DETECTED by the engine (supply BFS) and produce consequences through the supply system, not a wallpaper event. |
+| `london_conference_1992` | w21 calendar only | **REWRITE** | Must fire from international pressure threshold (patron_pressure + war_crimes accumulation), not calendar. Already a Decision Event — strengthen option consequences, add dimension shifts, add flags. Chain: should be ENABLED by camps_revealed or cumulative pressure. |
+| `hvo_arbih_tensions_rise_1992` | w29 calendar only | **REWRITE** | Must fire from alliance decay threshold + territorial friction conditions (e.g., both factions claim same municipalities). Consequence Event with alliance shift. Should be part of the escalation chain toward Croat-Bosniak war. Pressure modifier for future events. |
+| `jajce_falls_1992` | w40-52 + municipality control | **TWEAK** | Good condition. Strengthen: alliance hit should depend on whether BOTH factions had forces committed (mutual blame mechanic). Sets flag `jajce_blame`. Major dimension shift on `internal_cohesion` for both RBiH and HRHB. |
+
+**Summary 1992**: 4 CUT, 10 REWRITE, 4 TWEAK. Net: 14 migrated events + 3 foundational decisions + ~3-5 new events = ~20 events for 1992.
+
+### 14.3 Full Triage: 1993 Events (13 events — Phase 2)
+
+| ID | Current Trigger | Verdict | Migration Notes |
+|----|-----------------|---------|-----------------|
+| `gornji_vakuf_clashes_1993` | w35-60 + alliance_below | **TWEAK** | Good alliance condition. Already a Decision. Add flags, dimension shifts, chain to Croat-Bosniak war. Recurring with escalation (fires again if alliance keeps dropping). |
+| `vance_owen_plan_1993` | w39 calendar only | **REWRITE** | Must fire from international pressure threshold + stalemate duration. Major Decision Event per faction. Each faction's options shaped by their foundational decision flags. ICTY research: Vance-Owen map's role in triggering HVO territorial grabs. |
+| `croat_bosniak_war_begins_1993` | w40-80 + alliance_below | **TWEAK** | Good condition. Must NOT fire if HRHB chose "United Front" foundational path. Add flags, dimension shifts. Enables entire 1993 war chain. |
+| `ahmici_massacre_1993` | w40-70 + municipality + requires croat_bosniak_war | **REWRITE** | Condition structure good but must be HRHB Consequence Event (not just notification). For HRHB player specifically: this fires BECAUSE of your prior choices. Massive `international_standing` hit. ICTY: Blaskic judgment essential. |
+| `east_mostar_siege_1993` | requires croat_bosniak_war | **REWRITE** | Should fire when HVO controls West Mostar AND combat in Mostar OSIDs active. Consequence Event. Reads `mostar_liberated_by` flag. |
+| `central_bosnia_fighting_1993` | requires croat_bosniak_war | **CUT** | Negligible -3 morale. If three-way fighting is happening, the engine already knows. |
+| `srebrenica_shelling_1993` | w49 calendar only | **REWRITE** | Must fire when SRK/Drina Corps active bombardment of Srebrenica enclave (incident trigger: battles in Srebrenica OSIDs). Pressure builder toward Safe Areas declaration. |
+| `un_safe_areas_declared_1993` | w54 calendar only | **REWRITE** | Must fire when enclave under active siege + international pressure threshold crossed. For RBiH: **Decision Event** — accept demilitarization (UN protection, lose garrison capability) or maintain garrison (reduced UN presence). Sets flag `safe_area_response`. |
+| `operation_neretva_93_1993` | requires croat_bosniak_war | **CUT** | Tells you about an op that should be emergent from the bot AI. If ARBiH is fighting HVO in Neretva, the engine produces that. |
+| `markale_area_shelling_1993` | w68 calendar only | **REWRITE** | Must fire from cumulative Sarajevo civilian casualties threshold + ongoing siege. Pressure builder toward NATO intervention chain. Consequence Event. |
+| `owen_stoltenberg_plan_1993` | w70 calendar only | **REWRITE** | Must fire from pressure threshold, not calendar. Decision Event — strengthen options per faction, add dimension shifts. Options shaped by prior peace plan responses. |
+| `abdic_apwb_declared_1993` | w77 calendar only | **REWRITE** | Must fire when Bihac pocket isolated + supply below threshold + isolation duration exceeds threshold. For RBiH: **Decision Event** — negotiate/confront/ignore. Recurring with deterioration. |
+| `mostar_bridge_destroyed_1993` | requires east_mostar_siege | **REWRITE** | Good prerequisite chain. Must also require active HVO bombardment of East Mostar. Massive `international_standing` hit for HRHB. Consequence Event. |
+
+**Summary 1993**: 2 CUT, 9 REWRITE, 2 TWEAK. Net: 11 migrated events + new dynamics (embargo, tunnel, etc.)
+
+### 14.4 Full Triage: 1994 Events (9 events — Phase 3)
+
+| ID | Current Trigger | Verdict | Migration Notes |
+|----|-----------------|---------|-----------------|
+| `markale_massacre_1994` | w96 calendar only | **REWRITE** | Must fire from cumulative Sarajevo casualties + siege duration + international pressure. Consequence Event. Enables NATO ultimatum chain. ICTY: detailed forensic findings. |
+| `nato_ultimatum_sarajevo_1994` | w96 + requires markale | **REWRITE** | Chain from Markale good. For RS player: **Decision Event** — comply with exclusion zone (surrender heavy weapons advantage) or defy (risk strikes). Russian diplomatic cover flag modifies options. |
+| `nato_shoots_down_planes_1994` | w99 calendar only | **REWRITE** | Must fire when RS violates no-fly zone (incident: RS air operations while NATO enforcement active). Consequence Event. |
+| `washington_agreement_1994` | w102 + requires events | **REWRITE** | Must fire from Croat-Bosniak war duration + mutual exhaustion + patron pressure threshold. Major Decision Event. Options shaped by all prior alliance flags. Sets flag `federation_terms`. |
+| `gorazde_crisis_1994` | w105 calendar only | **REWRITE** | Must fire when VRS attacks Gorazde enclave (incident) + safe areas declared (flag). For RS: Decision — press attack or halt at outskirts. Tests safe area credibility. |
+| `contact_group_plan_1994` | w117 calendar only | **REWRITE** | Must fire from pressure threshold. Decision Event. Options shaped by territorial %, dimension scores. |
+| `anti_sniping_agreement_1994` | w123 calendar only | **CUT** | Zero effect. Delete. |
+| `bihac_crisis_1994` | w135 calendar only | **REWRITE** | Must fire when Bihac pocket territory below threshold + combined VRS/APWB force ratio exceeds threshold. For RBiH: Decision — request NATO strikes (risk hostage-taking) or rely on 5th Corps. Reads `abdic_response` flag. |
+
+**Summary 1994**: 1 CUT, 8 REWRITE.
+
+### 14.5 Full Triage: 1995 Events (ALL RAILROAD — complete rebuild)
+
+Every single 1995 event fires on a fixed turn regardless of game state. **The entire file must be rebuilt as emergent condition-gated events.**
+
+| ID | Current Trigger | New Trigger |
+|----|-----------------|-------------|
+| `srebrenica_falls_1995` | w170 calendar | RS controls >80% Srebrenica municipality + enclave resilience below threshold + enclave besieged >N turns. **NEVER fires if player defends it.** |
+| `zepa_falls_1995` | w172 + requires srebrenica | RS captures Zepa OSIDs (incident). Chain from Srebrenica only if Srebrenica fell. |
+| `operation_storm_1995` | w174 calendar | Federation capability threshold + Washington Agreement flag + RS western flank weakness + Croatian rearmament dimension. |
+| `second_markale_massacre_1995` | w177 calendar | Cumulative Sarajevo casualties + siege still active + pressure accumulation. |
+| `nato_deliberate_force_1995` | w177 calendar | Cumulative RS `international_standing` below critical threshold + triggering atrocity (Markale or Srebrenica) + patron pressure above threshold. For RS: Decision — accept ceasefire terms or defy. |
+| `federation_ground_offensive_1995` | w179 + requires washington + deliberate_force | Washington flag + Deliberate Force flag + Federation military readiness. Condition-gated, not calendar. |
+| `ceasefire_1995` | w183 calendar | ALL three conditions: (a) Federation gains reduce RS toward 49%, (b) RS military exhaustion above threshold, (c) all patron pressures above threshold. |
+| `dayton_talks_begin_1995` | w186 calendar | Ceasefire active + all factions exhaustion above threshold. Multi-event sequence reading FULL flag + dimension state. |
+
+**Plus additional 1995 events not currently modeled**: Serbia embargo consequences, ICTY indictments (Karadzic/Mladic), Bihac relief, Croatian Krajina collapse cascading into BiH.
+
+**Summary 1995**: 0 kept as-is. Complete rebuild. Every event emergent.
+
+### 14.6 Dead Code Removal (Phase 1)
+
+- Remove `narrative` as a standalone effect kind (narrative text goes in `EventDefinition.narrative`)
+- Remove `siege_active` condition handler (reads nonexistent `active_enclaves` — dead code with `as any` cast)
+- Remove `operation_completed` condition handler (reads nonexistent `completed_operation_names` — dead code with `as any` cast)
+- Replace `capital_based` and `capital_weighted` bot response logic (both fall through to `options[0]`) with `personality_weighted` and `strategic_weighted`
+
+---
+
+## 15. Implementation Phasing (Revised — Aligned to Roadmap)
+
+### v0.6.0 — Emergent Event Engine (infrastructure + 1992 migration)
+
+**Infrastructure:**
 - Pressure system (readiness counters, decay, modifiers)
 - Strategic dimensions (6 per faction, state fields, shift application)
 - Event flags (state fields, condition type `flag_equals`)
@@ -561,35 +662,50 @@ Per turn, in the `evaluate-events` pipeline step:
 - Event queue with 3/turn cap
 - Bot decision logic v1 (personality-weighted)
 - Recurrence model (max_fires, cooldown, escalation)
-- Rewrite 1992 events (16 events) to use new system
+- Dead code removal (`narrative`-only effects, dead condition handlers)
+
+**1992 Event Migration:**
+- Cut 4 wallpaper events
+- Rewrite 10 events (calendar -> emergent, weak -> strong)
+- Tweak 4 events (add dimensions, flags, stronger effects)
+- Author 3 foundational decisions (RS Strategic Goals, RBiH State Identity, HRHB Political Goal)
+- Author ~3-5 new 1992 events for missing dynamics
+- ICTY research for RS Strategic Goals (Karadzic judgment), barracks (factual findings)
+
+**Validation:**
 - Calibration run + War-or-Game sign-off
+- 1993-1995 events remain in old format (still fire on calendar triggers — backward compatible)
 
-### Phase 2: Content + Effects (v0.6.0-beta)
+### v0.6.1 — Balance & Calibration Framework
 
-- New effect types (doctrine_override, spawn_formation, truce_action, etc.)
+Unchanged — automated benchmarks, regression detection, calibration freeze baseline. Essential before adding more events.
+
+### v0.6.2 — 1993-1994 Event Content + Missing Dynamics
+
+- Migrate 1993 events (cut 2, rewrite 9, tweak 2)
+- Migrate 1994 events (cut 1, rewrite 8)
+- New effect types (doctrine_override, spawn_formation, truce_action, supply_route_modifier)
 - Incident-based triggers (battles, OSID flips, operation outcomes)
-- Foundational decisions for all 3 factions
-- Rewrite 1993 events (11 events)
-- Author new events for missing dynamics (embargo system, Sarajevo tunnel, Milosevic-Pale split, Serbia embargo on RS, UNPROFOR hostages)
 - Event chain system (enables_events)
+- Author new dynamics: embargo system, Sarajevo tunnel, Milosevic-Pale split, Serbia embargo on RS, UNPROFOR hostages, Abdic secession chain
+- ICTY research: Prlic et al. (HRHB), Blaskic (Ahmici), Karadzic (camps, Drina)
 - Calibration run + War-or-Game sign-off
 
-### Phase 3: Polish (v0.6.0-release)
+### v0.6.3 — 1995 Endgame + Dayton Synthesis
 
-- Event log sidebar UI
-- Pressure visibility ("tensions rising")
-- Notification vs decision visual distinction
+- Complete rebuild of ALL 1995 events (zero calendar, pure emergent)
+- Srebrenica/Storm/Deliberate Force chain fully condition-gated
+- New 1995 events: Serbia embargo consequences, ICTY indictments, Bihac relief, Krajina collapse
+- Dayton negotiation as multi-event sequence reading full flag + dimension state
+- Player-initiated decisions (AGEOD-style "play this card when ready")
+- ICTY research: Krstic (Srebrenica), Mladic (command responsibility), Tolimir (Zepa)
+- Event log sidebar UI, pressure visibility, notification vs decision visual distinction
 - Event validation tool (`npm run validate:events`)
 - Full calibration pass
-- Historical essay cross-linking
 
-### Phase 4: Full Event Set (v0.6.x)
+### v0.6.4 — Historical Essays
 
-- Rewrite 1994-1995 events (12 events) — ALL emergent, zero calendar rails
-- Endgame event chain (Srebrenica -> Deliberate Force -> Dayton) fully condition-gated
-- Player-initiated decisions (AGEOD-style "play this card when ready")
-- Dayton negotiation as multi-event sequence reading full flag + dimension state
-- ICTY-sourced deep research per event
+Unchanged — 100 essays, Sonnet-generated, baked into binary.
 
 ### Backlog (v0.7+)
 
