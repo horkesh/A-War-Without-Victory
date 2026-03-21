@@ -56,6 +56,7 @@ export function captureAARSnapshot(state: GameState): AARSnapshot {
         already_destroyed,
         formation_ids,
         formation_locations,
+        supply_state_by_osid: { ...(state.political?.last_supply_state_by_osid ?? {}) },
     };
 }
 
@@ -81,6 +82,7 @@ export function compileTurnSummary(
         ...compileUnitEvents(state, snapshot),
         ...compileSupplyDeltas(state, snapshot),
         movements: compileMovements(state, snapshot),
+        supply_transitions: compileSupplyTransitions(state, snapshot),
         notable_events: compileNotableEvents(state, turn),
     };
 }
@@ -337,6 +339,24 @@ function compileMovements(state: GameState, snapshot: AARSnapshot): TurnSummary[
         }
     }
     return movements;
+}
+
+// ---------------------------------------------------------------------------
+// Section: Supply transitions
+// ---------------------------------------------------------------------------
+
+function compileSupplyTransitions(state: GameState, snapshot: AARSnapshot): TurnSummary['supply_transitions'] {
+    const transitions: TurnSummary['supply_transitions'] = [];
+    const current = state.political?.last_supply_state_by_osid ?? {};
+    const prev = snapshot.supply_state_by_osid;
+    for (const osid of Object.keys(current).sort(strictCompare)) {
+        const curLevel = current[osid];
+        const prevLevel = prev[osid];
+        if (prevLevel && prevLevel !== curLevel) {
+            transitions.push({ osid, from: prevLevel, to: curLevel });
+        }
+    }
+    return transitions;
 }
 
 // ---------------------------------------------------------------------------

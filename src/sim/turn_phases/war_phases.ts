@@ -453,6 +453,16 @@ export const warPhases: NamedPhase[] = [
             if (context.report.supply_resolution) {
                 context.report.supply_resolution.supply_state_by_osid = supplyStateByOsid;
             }
+            // Persist per-OSID supply state for timeline transition tracking
+            const flatSupply: Record<string, string> = {};
+            if (supplyStateByOsid?.factions) {
+                for (const fac of supplyStateByOsid.factions) {
+                    for (const o of fac.by_osid) {
+                        flatSupply[o.osid] = o.state;
+                    }
+                }
+            }
+            context.state.political.last_supply_state_by_osid = flatSupply;
         }
     },
     {

@@ -156,6 +156,7 @@ describe('Tactical map render smoke', () => {
   displacementEventLog: [],
   battlesByOsid: {},
   movementsByOsid: {},
+  supplyTransitionsByOsid: {},
   latestTurnSummary: null,
   formations: [
         {

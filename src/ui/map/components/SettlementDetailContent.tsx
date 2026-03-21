@@ -128,6 +128,8 @@ export interface SettlementDetailContentProps {
   battlesByOsid?: Record<string, Array<{ turn: number; attacker_faction: string; defender_faction: string; outcome: string; attacker_casualties: number; defender_casualties: number; territory_flipped: boolean }>>;
   /** Per-OSID brigade movements for timeline. */
   movementsByOsid?: Record<string, Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>>;
+  /** Per-OSID supply transitions for timeline. */
+  supplyTransitionsByOsid?: Record<string, Array<{ turn: number; from: string; to: string }>>;
 }
 
 export function SettlementDetailContent({
@@ -157,6 +159,7 @@ export function SettlementDetailContent({
   operationHistory,
   battlesByOsid,
   movementsByOsid,
+  supplyTransitionsByOsid,
 }: SettlementDetailContentProps) {
   const name = getOsidDisplayName(osid, osidDisplayNames);
   const props = osidPropertiesMap?.[osid] ?? {};
@@ -244,6 +247,7 @@ export function SettlementDetailContent({
       operationHistory ?? [],
       battlesByOsid?.[osid] ?? [],
       movementsByOsid?.[osid] ?? [],
+      supplyTransitionsByOsid?.[osid] ?? [],
       popOriginal > 0 ? {
         bosniaks: num(props.population_bosniaks),
         serbs: num(props.population_serbs),

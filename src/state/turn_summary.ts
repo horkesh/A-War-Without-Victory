@@ -130,6 +130,10 @@ export interface TurnSummary {
     /** Brigade movements this turn (location_osid changed from snapshot). */
     movements: Array<{ formation_id: string; formation_name: string; from_osid: string; to_osid: string }>;
 
+    // --- Supply ---
+    /** Supply state transitions this turn (adequate→strained, strained→critical, etc.). */
+    supply_transitions: Array<{ osid: string; from: string; to: string }>;
+
     // --- Notable events ---
     notable_events: TurnNotableEvent[];
 }

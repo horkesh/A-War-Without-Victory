@@ -1823,6 +1823,8 @@ phase0_relationships?: {
      * Used by the GUI battle-markers layer — does not affect simulation logic.
      */
 control_events?: ControlEvent[];
+/** Last computed supply state per OSID. Persisted for supply transition tracking in the settlement timeline. */
+last_supply_state_by_osid?: Record<string, string>;
 // --- Local Truces (Graz Accords, 6 May 1992) ---
 /**
      * Turn at which the Graz Accords fired (RS-HRHB non-aggression).

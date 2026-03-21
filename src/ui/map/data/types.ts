@@ -499,6 +499,8 @@ export interface LoadedGameState {
     battlesByOsid: Record<string, Array<{ turn: number; attacker_faction: string; defender_faction: string; outcome: string; attacker_casualties: number; defender_casualties: number; territory_flipped: boolean }>>;
     /** Per-OSID brigade movement events (arrived/departed) from all turn summaries. */
     movementsByOsid: Record<string, Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>>;
+    /** Per-OSID supply state transitions from all turn summaries. */
+    supplyTransitionsByOsid: Record<string, Array<{ turn: number; from: string; to: string }>>;
     recruitment?: RecruitmentView;
     armyStance?: Record<string, string>;
     casualtyLedger?: Record<string, CasualtyLedgerEntryView>;

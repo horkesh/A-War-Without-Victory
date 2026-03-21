@@ -1767,6 +1767,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         commandBriefing,
         battlesByOsid: deriveBattlesByOsid(state),
         movementsByOsid: deriveMovementsByOsid(state),
+        supplyTransitionsByOsid: deriveSupplyTransitionsByOsid(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         operationHistory: deriveOperationHistory(state),
         activeOperations: deriveActiveOperations(state),
@@ -1878,6 +1879,23 @@ function deriveMovementsByOsid(state: any): LoadedGameState['movementsByOsid'] {
                 if (!result[to]) result[to] = [];
                 result[to].push({ turn, formation_id: fid, formation_name: fname, type: 'arrived' });
             }
+        }
+    }
+    return result;
+}
+
+function deriveSupplyTransitionsByOsid(state: any): LoadedGameState['supplyTransitionsByOsid'] {
+    const result: LoadedGameState['supplyTransitionsByOsid'] = {};
+    const summaries = state.turn_summaries as Array<{ turn?: number; supply_transitions?: Array<Record<string, unknown>> }> | undefined;
+    if (!Array.isArray(summaries)) return result;
+    for (const summary of summaries) {
+        const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!Array.isArray(summary.supply_transitions)) continue;
+        for (const t of summary.supply_transitions) {
+            const osid = String(t.osid ?? '');
+            if (!osid) continue;
+            if (!result[osid]) result[osid] = [];
+            result[osid].push({ turn, from: String(t.from ?? ''), to: String(t.to ?? '') });
         }
     }
     return result;
