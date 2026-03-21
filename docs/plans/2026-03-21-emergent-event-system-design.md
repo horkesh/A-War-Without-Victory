@@ -549,7 +549,263 @@ Per turn, in the `evaluate-events` pipeline step:
 
 ---
 
-## 14. Legacy Event Migration Plan
+## 14. Integration Reconciliation
+
+Four existing systems overlap or conflict with the new event system. These must be resolved during v0.6.0 infrastructure work — not discovered during implementation.
+
+### 14.1 RESOLVE: Strategic Dimensions Replace Negotiation Capital
+
+**Problem:** The existing `NegotiationCapital` has 5 per-faction dimensions computed bottom-up from raw game data:
+
+| Existing (computed from game state) | New (shifted by events) | Overlap |
+|-------------------------------------|------------------------|---------|
+| `military_position` | `military_credibility` + `territorial_legitimacy` | ~90% |
+| `humanitarian_standing` | `international_standing` (inverse) | ~80% |
+| `international_credibility` | `international_standing` | ~90% |
+| `military_effectiveness` | `military_credibility` | ~70% |
+| `political_cohesion` | `internal_cohesion` | ~95% |
+| (none) | `patron_confidence` | New |
+| (none) | `negotiating_leverage` | New (composite) |
+
+Shipping both means two parallel diplomatic score systems measuring the same things differently. The player sees two dashboards that roughly agree but diverge on specifics.
+
+**Resolution: Unified hybrid system.** One set of dimensions that combines both approaches:
+
+```typescript
+interface StrategicDimension {
+  base_value: number;      // Computed each turn from game state (old approach)
+  event_modifier: number;  // Accumulated from player decisions (new approach)
+  effective_value: number;  // base_value + event_modifier, clamped 0-100
+}
+
+// Per faction, per dimension
+strategic_dimensions: Record<FactionId, Record<DimensionId, StrategicDimension>>;
+```
+
+**Base value computation** (migrated from existing `compute_capital.ts`):
+- `military_credibility`: territory_controlled_pct, operations_successful, front_line_strength
+- `territorial_legitimacy`: territory_held vs territory_claimed, historical presence alignment
+- `international_standing`: inverse of (civilian_casualties_caused + war_crimes_events + refugees_created)
+- `patron_confidence`: migrated from existing `patron_relationships.support_level`
+- `internal_cohesion`: derived from alliance health, officer loyalty, morale averages
+- `negotiating_leverage`: weighted composite of the other five (faction-specific weights, migrated from existing faction weight tables)
+
+**Event modifier** (accumulated from decisions):
+- Shifted by `dimension_shifts` on event fire and response options
+- Persists across turns (does not recompute — it's the cumulative reputation from choices)
+- Can be positive or negative
+- Example: base `international_standing` is 60 (computed from low casualties), event_modifier is -20 (from choosing "systematic" cleansing at Drina). Effective: 40.
+
+**Migration path:**
+1. Rename `NegotiationCapital` fields to match new `DimensionId` names
+2. Add `event_modifier` field (starts at 0)
+3. Existing `compute_capital.ts` becomes `computeBaseValues()` — fills `base_value` each turn
+4. Event system fills `event_modifier` — cumulative, not recomputed
+5. All consumers (Dayton modal, patron pressure, UI) read `effective_value`
+6. Delete old dimension names after migration
+
+**Faction weights** (migrated from existing, used for `negotiating_leverage` composite):
+
+| Dimension | RBiH | RS | HRHB |
+|-----------|------|-----|------|
+| military_credibility | 0.15 | 0.30 | 0.20 |
+| territorial_legitimacy | 0.20 | 0.25 | 0.15 |
+| international_standing | 0.30 | 0.10 | 0.15 |
+| patron_confidence | 0.15 | 0.15 | 0.30 |
+| internal_cohesion | 0.20 | 0.20 | 0.20 |
+
+### 14.2 RESOLVE: Event-to-Military Connector ("Event Constraint Bus")
+
+**Problem:** The design promises events that block operations, override doctrine, restrict scope, and spawn formations. But the bot AI pipeline has no mechanism for an external system to inject constraints. The existing `event_aggression_modifiers` array is stored on state but **never read by bot_corps_directives.ts** — it's a broken stub.
+
+**Resolution: Three-layer integration.**
+
+**Layer A — Wire the existing stub (v0.6.0, prerequisite):**
+
+`bot_corps_directives.ts` must read `state.military.event_aggression_modifiers[]` and sum active (non-expired) modifiers into the aggression calculation. This is ~5 lines of code but it's the foundation — events can already set aggression modifiers, they just have no effect.
+
+**Layer B — Event constraint fields on state (v0.6.0):**
+
+New state fields that the bot AI checks before acting:
+
+```typescript
+// On GameState.military or dedicated events state
+event_constraints: {
+  // Operation blocks: faction cannot launch NEW operations for N turns
+  operation_blocks: Array<{
+    faction: FactionId;
+    expires_turn: number;
+    reason: string;  // for UI display: "NATO exclusion zone"
+  }>;
+
+  // Doctrine overrides: force a faction into a stance
+  doctrine_overrides: Array<{
+    faction: FactionId;
+    forced_stance: 'offensive' | 'balanced' | 'defensive' | 'reorganize';
+    expires_turn: number;
+    reason: string;
+  }>;
+
+  // Operational scope restrictions: faction can only attack OSIDs matching criteria
+  scope_restrictions: Array<{
+    faction: FactionId;
+    allowed_municipalities?: string[];  // only these (from Strategic Goals selection)
+    blocked_municipalities?: string[];  // not these
+    expires_turn?: number;              // permanent if omitted
+    reason: string;
+  }>;
+}
+```
+
+**Integration points in bot AI:**
+- `generateCorpsDirectives()` — check `operation_blocks` before `evaluateCorpsOffensiveLaunch()`
+- `evaluateSectorStances()` — check `doctrine_overrides` before stance selection
+- `evaluateCorpsOffensiveLaunch()` — check `scope_restrictions` when filtering target OSIDs
+
+**Layer C — New effect types that write constraints (v0.6.2):**
+
+```typescript
+// Effect: disable_operations
+{ kind: 'disable_operations', faction: 'RS', duration_turns: 6 }
+// → pushes to event_constraints.operation_blocks
+
+// Effect: doctrine_override
+{ kind: 'doctrine_override', faction: 'RS', forced_stance: 'defensive', duration_turns: 8 }
+// → pushes to event_constraints.doctrine_overrides
+
+// Effect: scope_restriction
+{ kind: 'scope_restriction', faction: 'RS',
+  allowed_municipalities: ['brcko', 'doboj', 'derventa', 'samac'],
+  reason: 'Selective Conquest: corridor objectives only' }
+// → pushes to event_constraints.scope_restrictions
+```
+
+**Layer D — Foundational decision → permanent scope restriction (v0.6.0):**
+
+When the RS player chooses "Adopt Goals Selectively," the foundational decision event sets a permanent `scope_restriction` limiting offensive operations to corridor and defensive municipalities. This doesn't need the full Layer C effect type — it can be hardcoded as a consequence of the foundational flag:
+
+```typescript
+// In bot_corps_directives.ts:
+if (getFlag(state, 'rs_strategic_goals') === 'selective') {
+  // Filter targets to corridor + majority-Serb municipalities only
+}
+```
+
+This is simpler and more maintainable than the generic effect system for this specific case. Use the generic system (Layer C) for time-limited constraints (NATO ultimatum); use flag-reading for permanent constraints (foundational decisions).
+
+### 14.3 RESOLVE: Dayton Synthesis from Flags + Dimensions (v0.6.3)
+
+**Problem:** The existing Dayton modal has real mechanics (capital budgets, territorial packages, patron override) but doesn't know about flags or dimensions. The new design says "Dayton reads everything" but doesn't specify how.
+
+**Resolution: Three integration points.**
+
+**A — Capital budget from dimensions:**
+
+Replace the existing capital computation with `negotiating_leverage` (the composite dimension):
+
+```typescript
+const capitalAvailable = getDimensionEffective(state, faction, 'negotiating_leverage');
+```
+
+This single number already synthesizes all military, political, and diplomatic factors. The player's cumulative event choices are baked in through `event_modifier`.
+
+**B — Territorial packages from flags:**
+
+Event flags modify which territorial packages appear and their costs:
+
+```typescript
+// Example: if RS declined Srebrenica assault, Srebrenica corridor is mandatory
+if (getFlag(state, 'srebrenica_assault') === 'declined') {
+  packages.push({
+    id: 'srebrenica_corridor',
+    description: 'Srebrenica connected to Tuzla',
+    locked_to: 'RBiH',  // non-negotiable
+    reason: 'Your restraint in the Drina valley established this as a precondition'
+  });
+}
+
+// Example: if HRHB chose "United Front", no separate Croat entity
+if (getFlag(state, 'hrhb_political_goal') === 'united_front') {
+  // Remove HRHB territorial packages entirely
+  // Add constitutional guarantee packages instead
+}
+```
+
+**C — Bot Dayton responses from dimensions + flags:**
+
+Bot factions evaluate Dayton proposals using their disposition profiles weighted by current dimension values. An RS bot with low `military_credibility` (lost territory) accepts worse terms than one with high credibility. Flags modify specific red lines ("RS will never accept Srebrenica corridor if they captured it").
+
+**This is the v0.6.3 capstone** — the moment the entire metagame pays off. It deserves its own detailed design document at that stage, but the architecture is clear: dimensions → budget, flags → packages, both → bot evaluation.
+
+### 14.4 RESOLVE: Calibration Strategy for Event Migration
+
+**Problem:** The 92.8% ATH was achieved with specific events firing at specific turns. Migrating events to emergent triggers changes when they fire, cascading through combat, territory, and supply. Ahistorical paths produce outcomes we can't compare against painted control.
+
+**Resolution: Three-tier calibration approach.**
+
+**Tier 1 — Historical path regression (every phase):**
+
+After each migration phase, run the 40w scenario with bot factions (all pick historical options for foundational decisions). Compare against painted control. Target: stay within 2pp of current ATH (92.8%). If regression exceeds 2pp, investigate which migrated event fired at a different turn and adjust pressure thresholds.
+
+**Key principle:** Pressure system thresholds should be tuned so that emergent events fire at approximately the same turns as their old calendar triggers under historical game conditions. The events become emergent in mechanism (they CAN fire at different times) but historically calibrated in practice (under normal conditions, they fire when history says).
+
+**Tier 2 — Event timing snapshot test:**
+
+New test suite: run 40w historical scenario, collect `events_fired` with turn numbers. Assert that key events fire within acceptable windows:
+
+```typescript
+// Barracks events: w4-6 (same as before, condition-gated)
+// Sarajevo siege: w5-8 (was w6, now BFS-gated — may shift 1-2 turns)
+// Corridor: w12-22 (same, condition-gated)
+// Camps revealed: w16-24 (was w18-28, now also needs war_crimes threshold)
+// London Conference: w18-28 (was w21, now pressure-gated — should fire within this window)
+```
+
+If an event fires outside its expected window, the pressure threshold needs adjustment.
+
+**Tier 3 — Ahistorical path plausibility bounds:**
+
+For each ahistorical branch, define plausibility bounds based on historical reasoning:
+
+| Branch | Expected Territory at w40 | Reasoning |
+|--------|--------------------------|-----------|
+| RS "All Six Goals" (historical) | 50-55% RS | Calibrated to 92.8% match |
+| RS "Selective Conquest" | 35-45% RS | No Drina campaign, no Sarajevo escalation. Corridor + defensive = smaller but more defensible |
+| RS "Pursue Aggressively" | 52-58% RS | Faster early gains but faster international pressure → earlier NATO intervention possibility |
+| HRHB "United Front" | 45-50% RBiH+HRHB combined | No Croat-Bosniak war means combined front against RS. RS should lose more territory |
+| HRHB "Croat Republic" (historical) | Calibrated baseline | Historical path |
+| RBiH "Bosniak National State" | RBiH -3-5% vs baseline | Lost minority recruitment (~20k soldiers) hurts |
+
+These are soft targets — sanity checks, not calibration goals. If RS "Selective Conquest" produces 60% RS territory, something is wrong (restraint shouldn't produce MORE territory than aggression). If it produces 25%, the scope restrictions are too tight.
+
+**Process:** Run each ahistorical path once after foundational decisions are implemented. Check against plausibility bounds. Adjust scope restrictions or dimension shifts if outside bounds. This is a one-time validation per branch, not ongoing calibration.
+
+### 14.5 RESOLVE: Patron System Reconciliation
+
+**Problem:** The existing patron system has TWO independent metrics per faction: `support_level` (0-100, decays with sanctions) and `override_authority` (0-100, computed each turn from war crimes, territory loss, defeats). The new design adds `patron_confidence` as a strategic dimension. Three numbers tracking patron relationships is two too many.
+
+**Resolution:** Fold into the unified dimension system.
+
+- **`patron_confidence` dimension** replaces `support_level`. Base value = existing support level computation. Event modifier = accumulated from player choices (following/defying patron directives).
+- **`override_authority`** stays as a DERIVED metric (not a dimension). Computed from `patron_confidence.effective_value` + situational factors (sanctions, war duration, recent defeats). It's a function, not stored state.
+- **Sanctions** become an event-driven state flag (`patron_sanctions_active: boolean` per faction), set by consequence events that fire when `patron_confidence` drops below a threshold.
+
+```typescript
+// override_authority becomes a pure function:
+function computeOverrideAuthority(state, faction): number {
+  const confidence = getDimensionEffective(state, faction, 'patron_confidence');
+  const sanctioned = getFlag(state, `${faction}_patron_sanctions`) === true;
+  const warDuration = state.meta.turn;
+  // ... existing formula but reading from unified dimension
+  return clamp(0, 100, baseAuthority + sanctionBonus + durationDecay);
+}
+```
+
+This eliminates the third parallel system while preserving the existing patron pressure mechanics.
+
+---
+
+## 15. Legacy Event Migration Plan (renumbered from 14)
 
 The 41 existing events must be triaged into the new system. They cannot stay as-is — calendar triggers, narrative-only effects, and the 1995 railroad all violate the new design principles.
 
@@ -672,36 +928,48 @@ Every single 1995 event fires on a fixed turn regardless of game state. **The en
 - Author ~3-5 new 1992 events for missing dynamics
 - ICTY research for RS Strategic Goals (Karadzic judgment), barracks (factual findings)
 
+**Integration work (from Section 14):**
+- Unify strategic dimensions with existing NegotiationCapital (Section 14.1)
+- Wire the broken event_aggression_modifiers stub (Section 14.2, Layer A)
+- Add event_constraints state fields + bot AI integration points (Section 14.2, Layer B)
+- Foundational decision → scope restriction via flag-reading (Section 14.2, Layer D)
+- Reconcile patron system: patron_confidence dimension replaces support_level (Section 14.5)
+
 **Validation:**
-- Calibration run + War-or-Game sign-off
+- Tier 1: calibration run, target within 2pp of 92.8% ATH
+- Tier 2: event timing snapshot test (key events fire within expected windows)
+- Tier 3: ahistorical path plausibility bounds for foundational decisions
+- War-or-Game sign-off
 - 1993-1995 events remain in old format (still fire on calendar triggers — backward compatible)
 
 ### v0.6.1 — Balance & Calibration Framework
 
-Unchanged — automated benchmarks, regression detection, calibration freeze baseline. Essential before adding more events.
+Unchanged — automated benchmarks, regression detection, calibration freeze baseline. Essential before adding more events. Now also includes:
+- Event timing snapshot test suite (Tier 2 from Section 14.4)
+- Ahistorical plausibility bound definitions (Tier 3 from Section 14.4)
 
 ### v0.6.2 — 1993-1994 Event Content + Missing Dynamics
 
 - Migrate 1993 events (cut 2, rewrite 9, tweak 2)
 - Migrate 1994 events (cut 1, rewrite 8)
-- New effect types (doctrine_override, spawn_formation, truce_action, supply_route_modifier)
+- New effect types that write to event_constraints (Section 14.2, Layer C): `doctrine_override`, `disable_operations`, `scope_restriction`, `spawn_formation`, `truce_action`, `supply_route_modifier`
 - Incident-based triggers (battles, OSID flips, operation outcomes)
 - Event chain system (enables_events)
 - Author new dynamics: embargo system, Sarajevo tunnel, Milosevic-Pale split, Serbia embargo on RS, UNPROFOR hostages, Abdic secession chain
 - ICTY research: Prlic et al. (HRHB), Blaskic (Ahmici), Karadzic (camps, Drina)
-- Calibration run + War-or-Game sign-off
+- Calibration run (Tier 1 + Tier 2) + War-or-Game sign-off
 
 ### v0.6.3 — 1995 Endgame + Dayton Synthesis
 
 - Complete rebuild of ALL 1995 events (zero calendar, pure emergent)
 - Srebrenica/Storm/Deliberate Force chain fully condition-gated
 - New 1995 events: Serbia embargo consequences, ICTY indictments, Bihac relief, Krajina collapse
-- Dayton negotiation as multi-event sequence reading full flag + dimension state
+- **Dayton synthesis integration (Section 14.3):** dimensions → capital budget, flags → territorial packages, disposition profiles → bot responses. Separate detailed design doc for Dayton at this stage.
 - Player-initiated decisions (AGEOD-style "play this card when ready")
 - ICTY research: Krstic (Srebrenica), Mladic (command responsibility), Tolimir (Zepa)
 - Event log sidebar UI, pressure visibility, notification vs decision visual distinction
 - Event validation tool (`npm run validate:events`)
-- Full calibration pass
+- Full calibration pass (all three tiers) + final War-or-Game sign-off
 
 ### v0.6.4 — Historical Essays
 
@@ -715,7 +983,7 @@ Unchanged — 100 essays, Sonnet-generated, baked into binary.
 
 ---
 
-## 15. The Metagame Loop
+## 17. The Metagame Loop
 
 ```
 TURNS 1-8: EARLY WAR — WHO ARE YOU?
@@ -747,7 +1015,7 @@ TURNS 40-52: RESOLUTION
 
 ---
 
-## 16. Missing Dynamics to Author (from War-or-Game audit)
+## 18. Missing Dynamics to Author (from War-or-Game audit)
 
 Events currently absent that must be authored for the full system:
 
