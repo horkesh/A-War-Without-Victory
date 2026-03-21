@@ -89,7 +89,7 @@ Location: `src/sim/combat/bot_brigade_eval_attack.ts`, lines 143-212
 10. **Attack cap** (line 204): `alreadyAssigned < MAX_ATTACKERS_PER_TARGET (3)` — max 3 brigades per OSID per turn
 
 ### Constants
-- `MAX_ATTACKERS_PER_TARGET = 3` (in `bot_brigade_targeting.ts:35`)
+- `MAX_ATTACKERS_PER_TARGET = 12` (raised from 3, in `bot_brigade_targeting.ts:35` and `battle_resolution.ts:58`)
 - `REACTIVE_DEFENSE_RATIO = 1.5` (defense cap scales with attacker count)
 - Concentration estimate: `combinedRatioMult = 1 + existingAttackers × 0.85` (N=1: 1.85×, N=2: 2.70×, N=3: 3.55×)
 
@@ -98,8 +98,8 @@ The pipeline evaluates brigades in **sorted order** (alphabetical by formation I
 
 ## Action Items
 
-### P1: Remove MAX_ATTACKERS_PER_TARGET cap
-`bot_brigade_targeting.ts:35` — `MAX_ATTACKERS_PER_TARGET = 3` is an artificial limit. Historically, VRS and ARBiH massed 4-6+ brigades for major operations (Corridor 92, Srebrenica 1995, Op Sana). The coordination penalty at 3+ (0.8×) already naturally discourages over-concentration. The hard cap prevents the engine from concentrating force when the commander orders it. **Remove the cap entirely or raise to 12 (MAX_PARTICIPATING_BRIGADES).**
+### P1: Remove MAX_ATTACKERS_PER_TARGET cap — DONE
+Raised 3→12 in both `bot_brigade_targeting.ts:35` and `battle_resolution.ts:58`. Coordination penalty (0.8× at 3+) handles diminishing returns naturally.
 
 ### P2: Fix Op Teočak timing
 2nd Tuzla needs 3-5 turns to march from sicki_brod_2 (Tuzla) to kalesija_grad_2 (staging). Op Teočak fires at w20, execution starts w23. If 2nd Tuzla hasn't arrived by w23, it misses the first attacks. Either fire earlier (w15) or add march buffer in the planning phase.
@@ -117,8 +117,22 @@ rs_nevesinje_brigade + jna_nevesinje_garrison at sopilja (adjacent to vranjevici
 2. **Synthetic corps for JNA-level ops works** — but requires `initializeCorpsCommand` after phantom spawn
 3. **Never share brigades between ops on different corps** — the first op grabs them, the second runs empty
 4. **Staging OSID must be adjacent to first objective** — non-adjacent staging means weeks of marching
-5. **Brigade eligibility in ops is NOT just adjacency + personnel** — unknown filter blocks 3000-pers brigade from attacking despite min_attack_outcome override
+5. **Brigade eligibility in ops depends on CURRENT position** — `predictAllAdjacentTargets()` uses brigade's current location, not staging. Brigades still marching don't see the target. Debug with console.log, don't theorize.
 6. **Op butterfly effects are proportional to personnel added** — 5000 extra RS pers (even temporary) cascades across the map
+7. **Ops process axes SEQUENTIALLY** — first axis stall blocks all subsequent axes. This is the core engine limitation preventing multi-front operations from working. Needs parallel axis processing or separate triggered ops.
+8. **JNA ping-pong problem** — JNA phantoms capture territory early (w2-w5) but withdraw w6-w8. Without VRS brigades holding the ground, RBiH recaptures. The op system can't coordinate JNA capture → VRS hold transition within a single operation.
+9. **Git worktrees don't isolate tsx module resolution** — scenario runs in worktrees use main tree's source files. Must merge to main and run there for accurate results. npm install in worktree doesn't help — tsx import chains still resolve from main.
+
+## Engine Limitation: Sequential Axis Processing
+
+The operation system (`sector_offensive.ts`) processes axes through a SHARED `current_objective_index`. When axis 0 stalls (e.g., Foča Valley captures 1/7 then hits max_failures), the entire operation enters recovery — axes 1, 2, 3 never get their turn.
+
+**Impact**: Any multi-axis operation (Op Foča with 5 axes) effectively only executes the FIRST axis. Herzegovina axes added as axes 3-4 are never reached.
+
+**Potential fixes**:
+1. **Parallel axis processing** — each axis maintains its own objective index and failure count. Axis 0 stalling doesn't block axis 1. Engine change in `sector_offensive.ts`.
+2. **Triggered follow-up ops** — after Op Foča completes, trigger a new op targeting Herzegovina OSIDs. Works within current engine but fires late (w20+).
+3. **Separate pre-planned ops per axis** — each axis as its own 1-axis op on the same corps. But sequential corps queue prevents parallelism.
 
 ## Calibration Summary Table
 | Run | Change | Area% | Herzegovina | Teočak | Žepa | RS w40 |
@@ -127,5 +141,7 @@ rs_nevesinje_brigade + jna_nevesinje_garrison at sopilja (adjacent to vranjevici
 | n5 | Op Herzegovina merged in Foča | 91.4% | 1/7 | YES | YES | 0.493 FAIL |
 | n6 | +JNA phantoms (shared brigades) | 91.7% | 1/7 | NO | YES | 0.501 FAIL |
 | n8 | Synthetic JNA corps (init fixed) | 91.8% | 1/7 | NO | YES | 0.503 FAIL |
-| n9 | No shared brigades + staging fix | 91.9% | 4/7 | NO | YES | 0.500 FAIL |
-| n10 | Same as n9 (syntax fix only) | 92.3% | 4/7 | NO | YES | 0.506 PASS |
+| n9-n14 | Worktree runs (tsx resolution bug — used main code) | 92.3% | 4/7 | NO | YES | 0.506 PASS |
+| n1008 | JNA-only axes on main (correct) | 92.3% | 0/7 | YES | YES | 0.508 PASS |
+| n1009 | +VRS follow-up axes on Op Foča | 92.2% | 0/7 | YES | YES | 0.504 PASS |
+| n1010 | +Kalinovik→Konjic chain | 92.3% | 0/7 | YES | YES | 0.508 PASS |

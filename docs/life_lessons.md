@@ -68,6 +68,19 @@
 
 ## Active Lessons (no recent violations)
 
+### [Platform] Git worktrees do NOT isolate tsx module resolution — always merge to main and run there (2026-03-21) — NEW
+- **Context**: 14 scenario runs in the `.worktrees/zepa-calibration` worktree all used the MAIN tree's source code despite the worktree having different committed files. File hashes differed between worktree and main. `npm install` in the worktree didn't help.
+- **Root cause**: tsx resolves imports through node_modules which can chain back to the main tree. Worktrees share the git repo but import resolution follows filesystem symlinks and module resolution algorithms that cross worktree boundaries.
+- **Impact**: Wasted hours of investigation — every "fix" appeared to have no effect because the runner was executing the old code from main.
+- **Do instead**: For calibration work, ALWAYS merge the branch to main and run from the main working directory. Use worktrees only for code editing isolation, not for running scenarios. Verify with file hash comparison: `md5sum <worktree/file> <main/file>`.
+
+### [Engine] Ops process axes SEQUENTIALLY — first axis stall blocks all others (2026-03-21) — NEW
+- **Context**: Op Foča had 5 axes (Foča Valley, Kalinovik, Mostar Heights, Konjic South, etc.). Foča Valley stalled at 1/7 captures → entire op entered recovery → axes 2-4 never executed.
+- **Root cause**: The operation system uses a shared `current_objective_index` across all axes. When the first axis hits max_failures, the op recovers — no other axis gets a turn.
+- **Impact**: Multi-front operations are structurally impossible. Any op with 2+ axes effectively only runs the first one.
+- **Workaround**: Use the synthetic JNA corps pattern for truly parallel early-war ops. For VRS follow-up, use triggered operations that fire after the first op completes.
+- **Do instead**: Never add more than 2 axes to an op expecting both to execute. If you need parallel axes, use separate ops on separate corps (real or synthetic).
+
 ### [Engine] Understand the FULL attack evaluation pipeline before debugging eligibility (2026-03-21) — NEW
 - **Context**: 2nd Tuzla (3000 pers, at staging, adjacent to target, in op, not disrupted, not home defense) showed as "not eligible" in Op Teočak. Spent extensive investigation checking supply filters, home defense, corps assignment, MAX_ATTACKERS_PER_TARGET, and the combat predictor before adding debug logging.
 - **Root cause**: `predictAllAdjacentTargets()` returned targets from the brigade's CURRENT position, not the staging position. 2nd Tuzla was still marching to staging in the early execution turns — it wasn't at kalesija_grad_2 yet, so rastosnica_2 wasn't adjacent. By the time it arrived, the op had accumulated failures.
