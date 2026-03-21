@@ -35,6 +35,7 @@ import { AiSettingsPanel } from './components/AiSettingsPanel';
 import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
+import { PeacePlanModal } from './components/PeacePlanModal';
 import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransition } from './components/PeaceWarTransition';
@@ -177,6 +178,7 @@ function App() {
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
   const [eventQueueIndex, setEventQueueIndex] = useState(0);
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
+  const [peacePlanDismissedId, setPeacePlanDismissedId] = useState<string | null>(null);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -631,6 +633,13 @@ function App() {
           queueTotal={eventQueue.length}
           onAcknowledge={handleEventAcknowledge}
           onDecisionResponse={handleEventDecisionResponse}
+        />
+      )}
+      {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds */}
+      {loadedGameState?.pendingPeacePlan && peacePlanDismissedId !== loadedGameState.pendingPeacePlan.planId && (
+        <PeacePlanModal
+          plan={loadedGameState.pendingPeacePlan}
+          onDismiss={() => setPeacePlanDismissedId(loadedGameState!.pendingPeacePlan!.planId)}
         />
       )}
       {/* v0.4.1 Phase 5: Event log panel */}

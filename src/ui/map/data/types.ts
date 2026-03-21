@@ -725,5 +725,16 @@ export interface LoadedGameState {
             effects: import('../../../sim/events/event_types.js').EventEffect[];
         }>;
     }>;
+
+    /** Pending peace plan awaiting player response. */
+    pendingPeacePlan?: {
+        planId: string;
+        planName: string;
+        narrative: string;
+        turnOffered: number;
+        proposedSplit: { RBiH: number; RS: number; HRHB: number };
+        institutionalModel: string;
+        botResponses: Record<string, 'accepted' | 'rejected'>;
+    };
 }
 

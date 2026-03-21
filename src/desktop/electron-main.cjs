@@ -1552,6 +1552,24 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('resolve-peace-plan', async (_event, payload) => {
+    const { planId, response } = payload || {};
+    if (!currentGameStateJson || typeof planId !== 'string' || (response !== 'accepted' && response !== 'rejected')) {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const { resolvePeacePlan } = require('../sim/negotiation/peace_plans.js');
+      const result = resolvePeacePlan(state, planId, response);
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true, all_accepted: result.all_accepted, rejection_factions: result.rejection_factions };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   // --- Read-only query handlers (UI previews; no state mutation) ---
   ipcMain.handle('query-movement-range', async (_event, payload) => {
     const { brigadeId } = payload || {};

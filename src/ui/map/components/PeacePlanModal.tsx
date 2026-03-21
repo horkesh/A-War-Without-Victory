@@ -1,131 +1,152 @@
 /**
- * Peace Plan Modal — STUB component.
+ * Peace Plan Modal — production UI for responding to international peace plans.
  *
- * Renders when a pending peace plan is passed via props.
- * Full UI implementation in a later phase (IPC integration, consequence preview, etc.).
- *
- * TODO (Phase 2 full UI):
- * - Add peace plan data to LoadedGameState via GameStateAdapter
- * - Wire IPC handlers for accept/reject (resolve-peace-plan channel)
- * - Show consequence preview ("Rejecting will cost X credibility...")
- * - Integrate with turn advancement flow
+ * Renders when a pending peace plan exists in LoadedGameState.
+ * Player must accept or reject before proceeding. Bot responses displayed alongside.
+ * Paper document aesthetic matching EventModal.
  */
-import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data';
+import type { LoadedGameState } from '../data/types';
+import { useIPC } from '../desktop/useIPC';
+import { useGameStore } from '../store/gameStore';
 
-export interface PeacePlanModalProps {
-    /** The pending peace plan ID. */
-    planId: string;
-    /** Bot faction responses (faction -> 'accepted' | 'rejected'). */
-    botResponses: Record<string, 'accepted' | 'rejected'>;
-    /** Called when the player makes a decision. */
-    onRespond?: (response: 'accepted' | 'rejected') => void;
+const FACTION_LABELS: Record<string, string> = {
+    RBiH: 'Republic of Bosnia-Herzegovina',
+    RS: 'Republika Srpska',
+    HRHB: 'Herceg-Bosna (HVO)',
+};
+
+const INSTITUTIONAL_LABELS: Record<string, string> = {
+    cantonization: 'Ethnic Cantonization',
+    decentralized_provinces: 'Decentralized Provinces',
+    two_entity: 'Two-Entity Federation',
+    loose_confederation: 'Loose Confederation',
+    unitary: 'Unitary State',
+};
+
+interface PeacePlanModalProps {
+    plan: NonNullable<LoadedGameState['pendingPeacePlan']>;
+    onDismiss: () => void;
 }
 
-export function PeacePlanModal({ planId, botResponses, onRespond }: PeacePlanModalProps) {
-    const planDef = PEACE_PLANS.find(p => p.id === planId);
-    if (!planDef) return null;
+export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
+    const ipc = useIPC();
+    const setLoadError = useGameStore((s) => s.setLoadError);
+
+    const handleRespond = async (response: 'accepted' | 'rejected') => {
+        if (!ipc.isAvailable) {
+            setLoadError('Peace plan response requires desktop mode.');
+            return;
+        }
+        const result = await ipc.resolvePeacePlan(plan.planId, response);
+        if (!result.ok) {
+            setLoadError(result.error ?? 'Failed to resolve peace plan.');
+            return;
+        }
+        onDismiss();
+    };
+
+    const splitTotal = plan.proposedSplit.RBiH + plan.proposedSplit.RS + plan.proposedSplit.HRHB;
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-        }}>
-            <div style={{
-                backgroundColor: '#1a1a2e',
-                border: '1px solid #444',
-                borderRadius: 8,
-                padding: 32,
-                maxWidth: 600,
-                width: '90%',
-                color: '#e0e0e0',
-                fontFamily: 'system-ui, sans-serif',
-            }}>
-                <h2 style={{ margin: '0 0 8px 0', color: '#ffd700' }}>
-                    Peace Plan Proposed
-                </h2>
-                <h3 style={{ margin: '0 0 16px 0', fontWeight: 'normal', color: '#aaa' }}>
-                    {planDef.name}
-                </h3>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+            <div className="w-[95%] max-w-[640px] max-h-[90vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
+                 style={{
+                     background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
+                     fontFamily: 'Georgia, "Times New Roman", serif',
+                 }}>
 
-                <p style={{ lineHeight: 1.5, marginBottom: 16 }}>
-                    {planDef.narrative}
-                </p>
-
-                <div style={{ marginBottom: 16 }}>
-                    <strong>Proposed territorial split:</strong>
-                    <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
-                        <li>RBiH: {planDef.proposed_split.RBiH}%</li>
-                        <li>RS: {planDef.proposed_split.RS}%</li>
-                        <li>HRHB: {planDef.proposed_split.HRHB}%</li>
-                    </ul>
+                {/* Header — document stamp */}
+                <div className="relative px-8 pt-8 pb-4 border-b-2 border-[#8a7a60]/30">
+                    <div className="absolute top-4 right-4 text-[9px] uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
+                        DIPLOMATIC
+                    </div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
+                        International Peace Proposal
+                    </div>
+                    <h2 className="text-[20px] font-bold text-[#2a2016] leading-tight">
+                        {plan.planName}
+                    </h2>
+                    <div className="text-[11px] text-[#6a5a40] mt-1"
+                         style={{ fontFamily: 'Courier New, monospace' }}>
+                        Proposed: Week {plan.turnOffered}
+                    </div>
                 </div>
 
-                <div style={{ marginBottom: 16 }}>
-                    <strong>Institutional model:</strong>{' '}
-                    {planDef.institutional_model.replace(/_/g, ' ')}
+                {/* Narrative */}
+                <div className="px-8 py-5 text-[13px] text-[#2a2016] leading-relaxed border-b border-[#c8b898]/40">
+                    {plan.narrative}
                 </div>
 
-                <div style={{ marginBottom: 24 }}>
-                    <strong>Other factions:</strong>
-                    <ul style={{ margin: '4px 0', paddingLeft: 20 }}>
-                        {Object.entries(botResponses).map(([faction, response]) => (
-                            <li key={faction}>
-                                {faction}:{' '}
-                                <span style={{
-                                    color: response === 'accepted' ? '#4caf50' : '#f44336'
-                                }}>
+                {/* Territorial Split */}
+                <div className="px-8 py-4 border-b border-[#c8b898]/40">
+                    <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
+                        Proposed Territorial Division
+                    </div>
+                    <div className="flex gap-1 h-5 rounded overflow-hidden border border-[#8a7a60]/30 mb-2">
+                        <div className="bg-[#4a7a4a]" style={{ width: `${(plan.proposedSplit.RBiH / splitTotal) * 100}%` }}
+                             title={`RBiH: ${plan.proposedSplit.RBiH}%`} />
+                        <div className="bg-[#4a5a8a]" style={{ width: `${(plan.proposedSplit.RS / splitTotal) * 100}%` }}
+                             title={`RS: ${plan.proposedSplit.RS}%`} />
+                        <div className="bg-[#8a6a3a]" style={{ width: `${(plan.proposedSplit.HRHB / splitTotal) * 100}%` }}
+                             title={`HRHB: ${plan.proposedSplit.HRHB}%`} />
+                    </div>
+                    <div className="flex justify-between text-[11px] text-[#6a5a40]"
+                         style={{ fontFamily: 'Courier New, monospace' }}>
+                        <span>RBiH {plan.proposedSplit.RBiH}%</span>
+                        <span>RS {plan.proposedSplit.RS}%</span>
+                        <span>HRHB {plan.proposedSplit.HRHB}%</span>
+                    </div>
+                    <div className="text-[11px] text-[#6a5a40] mt-2">
+                        <span className="font-bold text-[#2a2016]">Institutional model:</span>{' '}
+                        {INSTITUTIONAL_LABELS[plan.institutionalModel] ?? plan.institutionalModel.replace(/_/g, ' ')}
+                    </div>
+                </div>
+
+                {/* Bot Responses */}
+                <div className="px-8 py-4 border-b border-[#c8b898]/40">
+                    <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
+                        Other Faction Responses
+                    </div>
+                    <div className="space-y-1.5">
+                        {Object.entries(plan.botResponses).map(([faction, response]) => (
+                            <div key={faction} className="flex items-center justify-between text-[12px]">
+                                <span className="text-[#2a2016]">{FACTION_LABELS[faction] ?? faction}</span>
+                                <span className={`font-bold uppercase text-[11px] px-2 py-0.5 rounded border ${
+                                    response === 'accepted'
+                                        ? 'text-[#2a6a2a] bg-[#d0e8d0] border-[#2a6a2a]/30'
+                                        : 'text-[#8a2a2a] bg-[#e8d0d0] border-[#8a2a2a]/30'
+                                }`}>
                                     {response}
                                 </span>
-                            </li>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-                    <button
-                        style={{
-                            padding: '10px 24px',
-                            backgroundColor: '#2e7d32',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: 4,
-                            cursor: 'pointer',
-                            fontSize: 14,
-                        }}
-                        onClick={() => {
-                            if (onRespond) onRespond('accepted');
-                            else console.log('[PeacePlanModal] Player accepted:', planDef.id);
-                        }}
-                    >
-                        Accept Plan
-                    </button>
-                    <button
-                        style={{
-                            padding: '10px 24px',
-                            backgroundColor: '#c62828',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: 4,
-                            cursor: 'pointer',
-                            fontSize: 14,
-                        }}
-                        onClick={() => {
-                            if (onRespond) onRespond('rejected');
-                            else console.log('[PeacePlanModal] Player rejected:', planDef.id);
-                        }}
-                    >
-                        Reject Plan
-                    </button>
+                {/* Commander's Decision */}
+                <div className="px-8 py-5">
+                    <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-3 text-center">
+                        Commander's Decision Required
+                    </div>
+                    <div className="flex gap-4 justify-center">
+                        <button
+                            type="button"
+                            onClick={() => void handleRespond('accepted')}
+                            className="px-6 py-2.5 rounded border-2 border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#b8d8b8] transition-colors"
+                            style={{ fontFamily: 'Courier New, monospace' }}
+                        >
+                            Accept Plan
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => void handleRespond('rejected')}
+                            className="px-6 py-2.5 rounded border-2 border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#6a1a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#d8b8b8] transition-colors"
+                            style={{ fontFamily: 'Courier New, monospace' }}
+                        >
+                            Reject Plan
+                        </button>
+                    </div>
                 </div>
-
-                <p style={{ marginTop: 16, fontSize: 12, color: '#888', textAlign: 'center' }}>
-                    (Stub UI -- full implementation in a later phase)
-                </p>
             </div>
         </div>
     );

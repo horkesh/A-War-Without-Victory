@@ -93,6 +93,7 @@ interface WindowAwwv {
     redirectReserveLoan: (brigadeId: string, newCorpsId: string) => Promise<{ ok: boolean; error?: string }>;
     acknowledgeOfficerEvent: (eventId: string) => Promise<{ ok: boolean; error?: string }>;
     acceptOfficerReplacement: (payload: { eventId: string; corpsId: string; newOfficerId: string; currentOfficerId?: string }) => Promise<{ ok: boolean; error?: string }>;
+    resolvePeacePlan: (planId: string, response: 'accepted' | 'rejected') => Promise<{ ok: boolean; all_accepted?: boolean; rejection_factions?: string[]; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -349,6 +350,10 @@ export function useIPC() {
             acceptOfficerReplacement: awwv
                 ? (payload: { eventId: string; corpsId: string; newOfficerId: string; currentOfficerId?: string }) => awwv.acceptOfficerReplacement(payload)
                 : makeNoop<{ ok: boolean; error?: string }>(),
+
+            resolvePeacePlan: awwv
+                ? (planId: string, response: 'accepted' | 'rejected') => awwv.resolvePeacePlan(planId, response)
+                : makeNoop<{ ok: boolean; all_accepted?: boolean; rejection_factions?: string[]; error?: string }>(),
         };
     }, []); // stable — never changes reference
 }

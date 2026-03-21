@@ -77,4 +77,5 @@ contextBridge.exposeInMainWorld('awwv', {
   setAiCommanderConfig: (payload) => ipcRenderer.invoke('set-ai-commander-config', payload),
   getAiCommanderConfig: () => ipcRenderer.invoke('get-ai-commander-config'),
   getAdvisorRecommendation: (payload) => ipcRenderer.invoke('get-advisor-recommendation', payload),
+  resolvePeacePlan: (planId, response) => ipcRenderer.invoke('resolve-peace-plan', { planId, response }),
 });

@@ -1782,6 +1782,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         // Event system (v0.4.1 Phase 5)
         firedEvents: deriveFiredEvents(state),
         pendingEventDecisions: derivePendingEventDecisions(state),
+        pendingPeacePlan: derivePendingPeacePlan(state),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
         // Game over
@@ -2110,6 +2111,38 @@ function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventD
             }))
             : [],
     }));
+}
+
+function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan'] {
+    const neg = state.military?.negotiation;
+    const pp = neg?.pending_peace_plan;
+    if (!pp || typeof pp.plan_id !== 'string') return undefined;
+    // Look up plan definition for display data
+    let planName = pp.plan_id;
+    let narrative = '';
+    let proposedSplit = { RBiH: 0, RS: 0, HRHB: 0 };
+    let institutionalModel = '';
+    try {
+        const { PEACE_PLANS } = require('../../../sim/negotiation/peace_plan_data.js');
+        const def = PEACE_PLANS.find((p: any) => p.id === pp.plan_id);
+        if (def) {
+            planName = def.name ?? pp.plan_id;
+            narrative = def.narrative ?? '';
+            proposedSplit = def.proposed_split ?? proposedSplit;
+            institutionalModel = def.institutional_model ?? '';
+        }
+    } catch { /* non-fatal — display with raw id */ }
+    return {
+        planId: pp.plan_id,
+        planName,
+        narrative,
+        turnOffered: typeof pp.turn_offered === 'number' ? pp.turn_offered : 0,
+        proposedSplit,
+        institutionalModel,
+        botResponses: (pp.bot_responses && typeof pp.bot_responses === 'object')
+            ? pp.bot_responses as Record<string, 'accepted' | 'rejected'>
+            : {},
+    };
 }
 
 function deriveGameVerdict(state: any): GameVerdict | undefined {
