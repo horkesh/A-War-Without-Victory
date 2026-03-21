@@ -7,6 +7,7 @@ import { useGameStore } from '../../store/gameStore';
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
+import { SituationBriefing, generateBriefing } from './SituationBriefing';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest } from '../../utils/factionAssets';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
@@ -87,10 +88,12 @@ export function ArmyHQModal() {
 
         const commander = getFactionArmyCommander(faction, state);
 
+        const briefingItems = generateBriefing(state, faction as 'RS' | 'RBiH' | 'HRHB');
+
         return {
             formations, brigades, corpsFormations, totalPersonnel, sectors, operations,
             territoryPct, exhaustionDisplay, reserves,
-            eff, commander, factionBattles
+            eff, commander, factionBattles, briefingItems
         };
     }, [state, faction]);
 
@@ -212,6 +215,14 @@ export function ArmyHQModal() {
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {/* Situation Briefing */}
+                    {!expandedCorpsId && data.briefingItems.length > 0 && (
+                        <SituationBriefing
+                            items={data.briefingItems}
+                            onCorpsClick={(id) => setExpandedCorpsId(id)}
+                        />
                     )}
 
                     {/* Corps Cards */}
