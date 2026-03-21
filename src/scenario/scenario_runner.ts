@@ -1273,6 +1273,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         if (scenario.start_lifecycle_phase === 'war') {
             initializeCorpsCommand(state);
             spawnJnaPhantomBrigades(state);
+            initializeCorpsCommand(state); // re-init after JNA spawn to pick up synthetic JNA corps
             injectPrePlannedOperations(state);
         }
         if (operationalData?.canonicalToOperational) {

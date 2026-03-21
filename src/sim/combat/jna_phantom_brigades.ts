@@ -140,6 +140,38 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         tanks: 0, artillery: 0, apcs: 0,
     },
     {
+        // JNA 37th Corps forward elements at Nevesinje (BB1 p.480).
+        // Represent JNA command authority + mobilized local Serb reservists.
+        id: 'jna_nevesinje_garrison' as FormationId,
+        name: 'JNA Nevesinje Garrison',
+        corps_id: 'jna_herzegovina_command' as FormationId,
+        location_osid: 'op:nevesinje:sopilja',
+        withdrawal_turn: 6,
+        tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
+    },
+    {
+        // Serbian paramilitaries in Foča — White Eagles, local irregulars.
+        // Historically drove ethnic cleansing in Foča valley spring 1992.
+        id: 'jna_foca_paramilitaries' as FormationId,
+        name: 'Foča Serb Paramilitaries',
+        corps_id: 'jna_herzegovina_command' as FormationId,
+        location_osid: 'op:foca:foca_3',
+        withdrawal_turn: 8,
+        tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
+    },
+    {
+        // Local Serb TO mobilized by JNA for southern Konjic/Kalinovik seizure.
+        id: 'jna_konjic_south_tg' as FormationId,
+        name: 'Konjic-South Serb TO',
+        corps_id: 'jna_herzegovina_command' as FormationId,
+        location_osid: 'op:konjic:bijela_2',
+        withdrawal_turn: 6,
+        tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
+    },
+    {
         id: 'jna_2nd_md_tg' as FormationId,
         name: 'JNA 2nd Military District TG',
         corps_id: 'vrs_1st_krajina' as FormationId,
