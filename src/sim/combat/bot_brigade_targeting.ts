@@ -27,12 +27,11 @@ export type DirectiveOutcome = 'decisive_victory' | 'victory' | 'costly_victory'
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Maximum brigades that can attack the same target OSID.
- * Increased from 2→3 to allow corps-level concentration of force.
- * Historical: VRS regularly massed 3+ brigades for key operations
- * (Corridor 92, Gorazde, Bihac). The attack resolution system applies
- * coordination penalty (0.8× for 3+) to the summed power. */
-export const MAX_ATTACKERS_PER_TARGET = 3;
+/** Maximum brigades that can attack the same target OSID per turn.
+ * Set high (12 = MAX_PARTICIPATING_BRIGADES) — the coordination penalty
+ * (0.8× for 3+) handles diminishing returns naturally. Historical: VRS
+ * massed 4-6+ brigades for major ops (Corridor 92, Srebrenica 1995). */
+export const MAX_ATTACKERS_PER_TARGET = 12;
 
 /** Outcome ranking for threshold comparison. */
 export const OUTCOME_RANK: Record<PredictedOutcome, number> = {

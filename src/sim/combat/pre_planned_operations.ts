@@ -265,12 +265,12 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         min_attack_outcome: 'repulsed',
         axes: [
             {
-                // Mostar heights — Nevesinje brigade + JNA garrison seize Podveležje/Hum
-                // positions overlooking Mostar from east (BB1 p.193).
+                // Mostar heights — JNA garrison seizes Podveležje/Hum positions
+                // overlooking Mostar from east (BB1 p.193). JNA phantom only —
+                // VRS brigades follow their own corps' op (vrs_herzegovina → Op Višegrad).
                 axis_id: 'mostar_heights',
                 name: 'Mostar Heights',
                 brigades: [
-                    'rs_nevesinje_brigade',
                     'jna_nevesinje_garrison',
                 ],
                 objectives: [
@@ -280,12 +280,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 staging_osid: 'op:nevesinje:sopilja',
             },
             {
-                // Southern Konjic — 2nd Herzegovina + local TO take Glavatičevo/Ljuta
-                // (BB2 p.514: VRS 2nd Herzegovina LI Brigade held this area throughout).
+                // Southern Konjic — local Serb TO takes Glavatičevo/Ljuta salient
+                // (BB2 p.514: VRS held this area throughout). JNA phantom only.
                 axis_id: 'konjic_south',
                 name: 'Konjic South',
                 brigades: [
-                    'rs_2nd_herzegovina_light_infantry',
                     'jna_konjic_south_tg',
                 ],
                 objectives: [
@@ -543,7 +542,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RBiH',
         name: 'Operation Teočak',
         staging_osid: 'op:kalesija:kalesija_grad_2',
-        available_from: 20,
+        available_from: 15,
         min_attack_outcome: 'repulsed',
         axes: [
             {

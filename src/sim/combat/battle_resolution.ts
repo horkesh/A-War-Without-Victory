@@ -55,7 +55,7 @@ const SAME_CORPS_EFFICIENCY_2 = 0.9;
 const SAME_CORPS_EFFICIENCY_3 = 0.82;
 const OG_COORDINATION_BONUS = 1.1;
 const DEFENDER_OUTNUMBERED_BONUS = 1.15;
-const MAX_ATTACKERS_PER_TARGET = 3;
+const MAX_ATTACKERS_PER_TARGET = 12;
 const LINKING_DEFENSE_BONUS = 1.1;
 
 /** Peace phase (Battle Damage): casualties per 1.0 damage point; damage = combined_cas / divisor, cap 1.0. */
