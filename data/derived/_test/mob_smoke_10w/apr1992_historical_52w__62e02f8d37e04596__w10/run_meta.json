@@ -1,7 +1,0 @@
-{
-  "out_dir": "data/derived/_test/mob_smoke_10w/apr1992_historical_52w__62e02f8d37e04596__w10",
-  "run_id": "apr1992_historical_52w__62e02f8d37e04596__w10",
-  "scenario_id": "apr1992_historical_52w",
-  "scenario_path": "data/scenarios/apr1992_historical_52w.json",
-  "weeks": 10
-}

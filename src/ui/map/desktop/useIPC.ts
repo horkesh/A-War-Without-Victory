@@ -72,9 +72,6 @@ interface WindowAwwv {
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToFront: (brigadeId: string, frontId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToSector: (brigadeId: string, sectorId: string | null) => Promise<{ ok: boolean; error?: string }>;
-    renameFrontSegment: (frontId: string, name: string) => Promise<{ ok: boolean; error?: string }>;
-    renameTheatre: (theatreId: string, name: string) => Promise<{ ok: boolean; error?: string }>;
-    setBrigadeDesiredAoRCap: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
     queryMovementRange: (brigadeId: string) => Promise<unknown>;
     queryMovementPath: (brigadeId: string, destinationSid: string) => Promise<unknown>;
     queryCombatEstimate: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; win_probability?: number; error?: string }>;
@@ -260,17 +257,6 @@ export function useIPC() {
                 ? (brigadeId: string, sectorId: string | null) => awwv.assignBrigadeToSector(brigadeId, sectorId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
-            renameFrontSegment: awwv
-                ? (frontId: string, name: string) => awwv.renameFrontSegment(frontId, name)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            renameTheatre: awwv
-                ? (theatreId: string, name: string) => awwv.renameTheatre(theatreId, name)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            setBrigadeDesiredAoRCap: awwv
-                ? (brigadeId: string, cap: number) => awwv.setBrigadeDesiredAoRCap(brigadeId, cap)
-                : makeNoop<{ ok: boolean; error?: string }>(),
 
             queryCombatEstimate: awwv
                 ? (brigadeId: string, targetSettlementId: string) => awwv.queryCombatEstimate(brigadeId, targetSettlementId)

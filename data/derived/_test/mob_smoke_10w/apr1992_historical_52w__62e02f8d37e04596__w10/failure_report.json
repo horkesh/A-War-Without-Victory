@@ -1,8 +1,0 @@
-{
-  "error_message": "Phase F3 invariant: 753 settlement(s) have political_controller === null after init. Start control must be faction-assigned. First 10: op:banovici:banovici_2, op:banovici:banovici_selo_2, op:banovici:repnik_2, op:banovici:seona, op:banja_luka:banja_luka_2, op:banja_luka:dragocaj, op:banja_luka:kola, op:banja_luka:melina_2, op:banja_luka:motike, op:banja_luka:pavici_2",
-  "error_name": "Error",
-  "run_id": "apr1992_historical_52w__62e02f8d37e04596__w10",
-  "scenario_id": "apr1992_historical_52w",
-  "stack": "Error: Phase F3 invariant: 753 settlement(s) have political_controller === null after init. Start control must be faction-assigned. First 10: op:banovici:banovici_2, op:banovici:banovici_selo_2, op:banovici:repnik_2, op:banovici:seona, op:banja_luka:banja_luka_2, op:banja_luka:dragocaj, op:banja_luka:kola, op:banja_luka:melina_2, op:banja_luka:motike, op:banja_luka:pavici_2\n    at prepareNewGameState (F:\\A-War-Without-Victory\\src\\state\\initialize_new_game_state.ts:59:15)\n    at async createInitialGameState (F:\\A-War-Without-Victory\\src\\scenario\\scenario_runner.ts:170:5)\n    at async runScenario (F:\\A-War-Without-Victory\\src\\scenario\\scenario_runner.ts:1608:46)\n    at async main (F:\\A-War-Without-Victory\\tools\\scenario_runner\\run_scenario.ts:70:18)",
-  "weeks": 10
-}
