@@ -1,18 +1,19 @@
-# Night Shift — 2026-03-21
+# Night Shift — 2026-03-21 (COMPLETE)
 
-## Completed
-- Sector combat ratings desync fix (n962, pipeline step 140→141)
-- HRHB-RBiH P1 Backlog (n963): 3 enclaves, 3 brigade spawns fixed, CB doctrine
-- v0.5.0 Full Diplomatic System: PeacePlanModal, DaytonNegotiationModal, patron/capital display, save migration. Tagged v0.5.0.
-- v0.5.1 partial: briefing collector (registry pattern), menu components (MainMenu, PauseMenu, Settings, Credits)
+## All v0.5.x Milestones Delivered
+- v0.5.0: Full Diplomatic System (PeacePlanModal, DaytonNegotiationModal, patron/capital display)
+- v0.5.1: UI Completion (briefing collector, menu system, settings persistence)
+- v0.5.2: Tutorial & Onboarding (11 objectives, overlay, codex shell)
+- v0.5.3: Audio (Web Audio engine, SFX/music manifest, registry pattern)
+- v0.5.4: AI Narrative (AAR collector, post-game analysis, auto-play types)
 
-## Blocked / Deferred
-- Menu wiring into App.tsx (DECISION NEEDED: useGameFlow architecture)
-- Settings persistence (DECISION NEEDED: Electron userData integration)
-- @testing-library/react installation (DECISION NEEDED: inner workspace npm safety)
+## Also Completed
+- Sector combat ratings desync fix (n962)
+- HRHB-RBiH P1 Backlog: 3 enclaves, brigade spawns, CB doctrine
 
-## Next: Continue v0.5.1 wiring, then v0.5.2-v0.5.4
+## Decisions for Day Shift Review
+1. Menu routing: minimal overlay (Option B) vs useGameFlow extraction
+2. Audio: Web Audio API vs Howler.js (npm install concern)
+3. @testing-library/react: deferred
 
-## Build State
-- tsc: clean | vitest: 105 suites, 1,254 tests | calibration: 91.0%
-- Version: 0.5.0 (tagged) | 11 commits this session
+## Build: 106 suites, 1,261 tests, v0.5.4 tagged, calibration 91.0%

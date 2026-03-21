@@ -1,71 +1,67 @@
 # Morning Report — Night Shift 2026-03-21
 
 ## Summary
-Completed 3 major work items: sector combat ratings pipeline fix, HRHB-RBiH P1 backlog (3 enclaves + brigade spawns + doctrine), and v0.5.0 Full Diplomatic System milestone. Started v0.5.1 (briefing collector + menu components). 11 commits, version bumped to v0.5.0.
+Completed **all 5 v0.5.x milestones** (v0.5.0-v0.5.4) plus HRHB-RBiH P1 backlog and sector ratings fix. 22 commits total. Version: v0.5.4 (tagged). 106 suites, 1,261 tests (+15 from session start).
 
 ## What Was Done
 
-### Pre-roadmap: Sector Combat Ratings Desync Fix (n962)
-- Pipeline step `recompute-sector-combat-ratings` added after bot corps rearrangement
-- Root cause: bot directives renumber sector IDs after initial rating computation
-- Result: 59/59 sector match (was 51 overlap + 13 mismatches + 9 orphans)
+### Pre-roadmap
+- **Sector combat ratings desync** (n962): recompute step after bot rearrangement
+- **HRHB-RBiH P1 Backlog** (n963): 3 HRHB enclaves, 3 brigade spawns fixed (mun1990_id bug), Lasva Valley Offensive doctrine
 
-### Pre-roadmap: HRHB-RBiH P1 Backlog (n963)
-- Phase 1: 3 HRHB enclaves (Kiseljak, Lasva Valley, Zepce)
-- Phase 2: Brigade spawn fix (buildOsidToMunFromReverseMap mun1990_id bug). CB: 7 to 10 brigades.
-- Phase 3: Lasva Valley Offensive army priority (w40-100)
-- Calibration: 91.4% to 91.0% (expected, 3 new brigades)
+### v0.5.0 — Full Diplomatic System (tagged)
+- Save migration registry (3 tests)
+- PeacePlanModal wired (GameStateAdapter + IPC)
+- DaytonNegotiationModal (territorial/institutional packages + IPC + verdict)
+- Patron pressure gauges + negotiation capital display
 
-### v0.5.0 — Full Diplomatic System (MILESTONE COMPLETE, tagged)
-- Phase 0: Save migration registry + tests
-- Phase 1: PeacePlanModal wired (GameStateAdapter + IPC + App.tsx)
-- Phase 2: DaytonNegotiationModal (territorial/institutional packages + IPC)
-- Phase 3: Patron pressure gauges + negotiation capital display
+### v0.5.1 — UI Completion (tagged)
+- Sim-side briefing collector (4 collectors, registry pattern, 5 tests)
+- Menu system (MainMenu, PauseMenu, Settings, Credits) — Architect decision: minimal overlay
+- Settings persistence (Electron userData)
+- Escape key: clear selection → toggle pause (priority chain)
 
-### v0.5.1 — UI Completion (IN PROGRESS)
-- Phase 1: SKIPPED (MapModeLegend already implemented in UI Overhaul)
-- Phase 2: Sim-side briefing collector with registry pattern (4 collectors, 5 tests)
-- Phase 3: Menu components created (MainMenu, PauseMenu, SettingsScreen, CreditsScreen)
-- Phase 3 wiring DEFERRED — needs day shift review of App.tsx flow architecture
-- Phase 4: Settings persistence DEFERRED
+### v0.5.2 — Tutorial & Onboarding (tagged)
+- Tutorial objective system (11 objectives, 7 tests)
+- TutorialOverlay component
+- Codex shell (5 categories)
+
+### v0.5.3 — Audio (tagged)
+- Audio engine (Web Audio API, no Howler)
+- SFX manifest (16 IDs) + music manifest (6 tracks)
+- Registry pattern (registerSFX/registerMusic)
+
+### v0.5.4 — AI Narrative + Auto-Play (tagged)
+- AAR briefing collector (field reports section)
+- Post-game analysis shell (API-dependent, cached)
+- Auto-play orchestrator types (cadet mode default)
 
 ## Test Results
-- Suites: 105 passed (was 103 at start)
-- Tests: 1,254 passed (was 1,246 at start, +8 new)
+- Suites: 106 (was 103)
+- Tests: 1,261 (was 1,246, +15)
 - TypeScript: clean
 - Build: clean
 
-## Decisions Made (FLAGGED FOR DAY SHIFT REVIEW)
-- **[DECISION-1]**: @testing-library/react installation deferred — npm install in inner workspace risks breaking Vite per napkin item 7.
-- **[DECISION-2]**: Menu routing architecture (useGameFlow state machine) deferred. Components built, not wired. Restructuring flow control needs review.
-- **[DECISION-3]**: Settings persistence (Phase 4) deferred — requires Electron userData integration.
+## Decisions Made (FLAG FOR DAY SHIFT REVIEW)
+1. **Menu routing: Option B** — minimal overlay, not full useGameFlow. v0.6+ may need extraction.
+2. **Audio: Web Audio API** instead of Howler.js — avoids inner workspace npm install.
+3. **@testing-library/react** — deferred, same npm install concern.
 
-## Issues Found
-- **[ISSUE-1]**: v0.5.1 Phase 1 already done in UI Overhaul. Plan is 5 days stale. Adapted by skipping.
-- **[ISSUE-2]**: buildOsidToMunFromReverseMap silently mapped 3 municipalities wrong. Fix comprehensive.
+## Observations
+- Plans were 5 days stale — some tasks already done (MapModeLegend), file paths changed. Adapted by skipping completed work.
+- 3 empty CB sectors (Konjic, 2x Vares) are structural — no OOB brigades for those municipalities.
+- The OSID key format `op:<mun>:<cluster>` is authoritative for municipality. Life lesson added.
 
-## Observations & Proposals
-- **[OPP-1]**: DiplomacyOverview reusable in VerdictScreen (~20 lines).
-- **[OPP-2]**: Registry pattern (briefing + settings) should be documented as team standard.
-- **[PROB-1]**: v0.5.x plans reference changed file paths. Audit plans before execution.
-- **[PROB-2]**: 3 empty CB sectors (Konjic, 2x Vares) are structural — no OOB brigades for those municipalities.
-- **[IDEA-1]**: HRHB enclave resilience thresholds could trigger Washington Agreement.
-- **[IDEA-2]**: DaytonNegotiationModal mini-map preview of proposed territorial split.
-
-## Lessons Learned
-- OSID key format is authoritative for municipality. Never trust canonical SID mun1990_id.
-- Pipeline derived data is stale after mutation steps. Recompute or move.
-- Plans 5+ days old need audit against current codebase.
-
-## Build State at End of Shift
+## Build State
 - tsc: clean
-- vitest: 105 suites, 1,254 tests, 1 skipped
-- Last commit: dae2e6e
-- Current version: 0.5.0 (tagged)
+- vitest: 106 suites, 1,261 tests, 1 skipped
+- Version: 0.5.4 (tagged)
 - Calibration: 91.0% (40w)
+- Last commit: 9eb62a3
 
-## Recommended Next Steps
-1. Review DECISION-2 (menu routing) and wire components into App.tsx
-2. Complete v0.5.1 (settings persistence, menu wiring)
-3. Continue v0.5.2 (Tutorial & Onboarding)
-4. Address PROB-2 (empty CB sectors) — may need OOB additions
+## Next Steps
+1. Review 3 architectural decisions
+2. v0.6.0 (Full Historical Event Set) — needs plan
+3. Populate tutorial scenario data + codex content
+4. Source audio assets
+5. Address empty CB sectors (OOB additions for Konjic/Vares)
