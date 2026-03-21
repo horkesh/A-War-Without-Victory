@@ -9,14 +9,12 @@ import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { SituationBriefing, generateBriefing } from './SituationBriefing';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
-import { getArmyCrest } from '../../utils/factionAssets';
+import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
-const FACTION_SHORT: Record<string, string> = {
-    RS: 'VRS', RBiH: 'ARBiH', HRHB: 'HVO',
-};
+const EXHAUSTION_WARN_THRESHOLD = 30;
 
 const FACTION_DISPLAY: Record<string, string> = {
     RS: 'Vojska Republike Srpske',
@@ -59,7 +57,7 @@ export function ArmyHQModal() {
     }, [open, expandedCorpsId, setExpandedCorpsId, setOpen]);
 
     const data = useMemo(() => {
-        if (!state || !faction) return null;
+        if (!open || !state || !faction) return null;
 
         const formations = state.formations.filter((f) => f.faction === faction);
         const brigades = formations.filter((f) => f.kind === 'brigade' && f.status === 'active');
@@ -90,12 +88,26 @@ export function ArmyHQModal() {
 
         const briefingItems = generateBriefing(state, faction as 'RS' | 'RBiH' | 'HRHB');
 
+        const sectorsByCorps = new Map<string, typeof sectors>();
+        for (const s of sectors) {
+            const list = sectorsByCorps.get(s.corps_id) || [];
+            list.push(s);
+            sectorsByCorps.set(s.corps_id, list);
+        }
+        const opsByCorps = new Map<string, typeof operations>();
+        for (const o of operations) {
+            const list = opsByCorps.get(o.corps_id) || [];
+            list.push(o);
+            opsByCorps.set(o.corps_id, list);
+        }
+
         return {
             formations, brigades, corpsFormations, totalPersonnel, sectors, operations,
+            sectorsByCorps, opsByCorps,
             territoryPct, exhaustionDisplay, reserves,
             eff, commander, factionBattles, briefingItems
         };
-    }, [state, faction]);
+    }, [open, state, faction]);
 
     if (!open || !faction || !state || !data) return null;
 
@@ -126,12 +138,12 @@ export function ArmyHQModal() {
                         </button>
                         <div>
                             <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
-                                {expandedCorpsId ? `${FACTION_SHORT[faction] ?? faction} HQ` : 'COMMANDER'}
+                                {expandedCorpsId ? `${getArmyName(faction) ?? faction} HQ` : 'COMMANDER'}
                             </div>
                             <div className="text-[18px] font-bold uppercase tracking-wide text-text-primary">
                                 {expandedCorpsId
                                     ? data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name ?? expandedCorpsId
-                                    : `${FACTION_SHORT[faction] ?? faction} MAIN STAFF`
+                                    : `${getArmyName(faction) ?? faction} MAIN STAFF`
                                 }
                             </div>
                         </div>
@@ -189,7 +201,7 @@ export function ArmyHQModal() {
                                     />
                                 ) : (
                                     <div className="text-[64px] font-black text-text-secondary/20">
-                                        {FACTION_SHORT[faction] ?? faction}
+                                        {getArmyName(faction) ?? faction}
                                     </div>
                                 )}
                                 <div className="text-[11px] uppercase tracking-[0.2em] text-text-secondary mt-3 text-center leading-relaxed">
@@ -207,8 +219,8 @@ export function ArmyHQModal() {
                                     <StatRow label="Personnel" value={data.totalPersonnel.toLocaleString()} />
                                     <StatRow label="Brigades" value={`${data.brigades.length} active`} />
                                     <StatRow label="Operations" value={`${data.operations.length} active`} />
-                                    <StatRow label="Combat Eff." value={`${(data.eff.score ?? 0).toLocaleString()} (${data.eff.grade ?? '?'})`} />
-                                    <StatRow label="War Exhaustion" value={data.exhaustionDisplay} warn={parseFloat(data.exhaustionDisplay) > 30} />
+                                    <StatRow label="Combat Eff." value={`${(data.eff.totalEffectiveness ?? 0).toLocaleString()} (${data.eff.grade ?? '?'})`} />
+                                    <StatRow label="War Exhaustion" value={data.exhaustionDisplay} warn={parseFloat(data.exhaustionDisplay) > EXHAUSTION_WARN_THRESHOLD} />
                                     {data.reserves && (
                                         <StatRow label="Supply" value={Math.round(data.reserves.generalSupply ?? 0)} />
                                     )}
@@ -240,8 +252,8 @@ export function ArmyHQModal() {
                                     key={corps.id}
                                     corps={corps}
                                     brigades={data.brigades.filter((b) => b.corps_id === corps.id)}
-                                    sectors={(state.corpsFrontSectors ?? []).filter((s) => s.corps_id === corps.id)}
-                                    operations={data.operations.filter((o) => o.corps_id === corps.id)}
+                                    sectors={data.sectorsByCorps.get(corps.id) ?? []}
+                                    operations={data.opsByCorps.get(corps.id) ?? []}
                                     factionBattles={data.factionBattles}
                                     gameState={state}
                                     isExpanded={expandedCorpsId === corps.id}

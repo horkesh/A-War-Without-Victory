@@ -38,6 +38,13 @@ export function generateBriefing(
     const corpsFormations = formations.filter(
         (f) => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === faction,
     );
+    const brigadesByCorps = new Map<string, typeof brigades>();
+    for (const b of brigades) {
+        const cid = b.corps_id ?? '';
+        const list = brigadesByCorps.get(cid) || [];
+        list.push(b);
+        brigadesByCorps.set(cid, list);
+    }
     const sectors = (state.corpsFrontSectors ?? []).filter((s) => s.faction === faction);
     const operations = (state.operations ?? []).filter((op) =>
         corpsFormations.some((c) => c.id === op.corps_id),
@@ -62,7 +69,7 @@ export function generateBriefing(
     // Corps with no sectors but has brigades
     for (const corps of corpsFormations) {
         const corpsHasSectors = sectors.some((s) => s.corps_id === corps.id);
-        const corpsBrigades = brigades.filter((b) => b.corps_id === corps.id);
+        const corpsBrigades = brigadesByCorps.get(corps.id) ?? [];
         if (!corpsHasSectors && corpsBrigades.length > 0) {
             items.push({
                 id: id(), severity: 'critical', category: 'sectors',
@@ -99,7 +106,7 @@ export function generateBriefing(
 
     // Corps avg cohesion < 40
     for (const corps of corpsFormations) {
-        const corpsBrigades = brigades.filter((b) => b.corps_id === corps.id);
+        const corpsBrigades = brigadesByCorps.get(corps.id) ?? [];
         if (corpsBrigades.length === 0) continue;
         const avgCohesion = corpsBrigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / corpsBrigades.length;
         if (avgCohesion < 40) {

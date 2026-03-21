@@ -31,6 +31,13 @@ interface ArmyHQCorpsCardProps {
     onToggleExpand: () => void;
 }
 
+const COHESION_CRITICAL = 40;
+const COHESION_HEALTHY = 70;
+
+const GRADE_COLORS: Record<string, string> = {
+    A: 'text-emerald-400', B: 'text-accent-gold', C: 'text-amber-500', D: 'text-red-500', F: 'text-red-600',
+};
+
 const STANCE_LABELS: Record<string, string> = {
     offensive: '[OFFENSIVE]', defensive: '[DEFENSIVE]', balanced: '[BALANCED]', reorganize: '[REORGANIZE]',
 };
@@ -81,10 +88,10 @@ export function ArmyHQCorpsCard({
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
-    const isCritical = data.avgCohesion < 40;
+    const isCritical = data.avgCohesion < COHESION_CRITICAL;
     const noCommander = !data.commander;
     const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.balanced;
-    const gradeColor = data.eff.grade === 'A' ? 'text-emerald-400' : data.eff.grade === 'B' ? 'text-accent-gold' : data.eff.grade === 'C' ? 'text-amber-500' : 'text-red-500';
+    const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
 
     // Compressed: single line when another card is flipped
     if (isCompressed) {
@@ -106,7 +113,7 @@ export function ArmyHQCorpsCard({
                 </div>
                 {/* Thin cohesion bar */}
                 <div className="h-[1px] bg-white/5">
-                    <div className={`h-full ${data.avgCohesion >= 70 ? 'bg-emerald-400/60' : data.avgCohesion >= 40 ? 'bg-accent-gold/60' : 'bg-red-500/60'}`}
+                    <div className={`h-full ${data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400/60' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold/60' : 'bg-red-500/60'}`}
                         style={{ width: `${Math.min(100, data.avgCohesion)}%` }} />
                 </div>
             </button>
@@ -207,7 +214,7 @@ export function ArmyHQCorpsCard({
 
             {/* Cohesion bar (Bottom) */}
             <div className="h-[4px] bg-panel-bg w-full">
-                <div className={`h-full transition-all duration-500 ${data.avgCohesion >= 70 ? 'bg-emerald-400' : data.avgCohesion >= 40 ? 'bg-accent-gold' : 'bg-red-500'
+                <div className={`h-full transition-all duration-500 ${data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold' : 'bg-red-500'
                     }`}
                     style={{ width: `${Math.min(100, data.avgCohesion)}%` }} />
             </div>
@@ -218,7 +225,7 @@ export function ArmyHQCorpsCard({
     const cardBack = (
         <div
             className={`min-h-[280px] bg-panel-card border border-panel-border overflow-hidden flex flex-col
-                ${isCritical ? 'border-l-[4px] border-l-red-600' : noCommander ? 'border-l-[4px] border-l-amber-500' : ''}`}
+                ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
             {/* Header with back button + stance dropdown */}
             <div className="flex items-center justify-between px-6 py-4 bg-panel-card border-b border-panel-border">

@@ -15,23 +15,23 @@ export function FlipCard({ isFlipped, front, back, className }: FlipCardProps) {
     return (
         <div className={className} style={{ perspective: '1200px' }}>
             <div
-                className="relative w-full transition-transform duration-[600ms] ease-in-out"
+                className="relative grid transition-transform duration-[600ms] ease-in-out"
                 style={{
                     transformStyle: 'preserve-3d',
                     transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 }}
             >
-                {/* Front face */}
-                <div style={{ backfaceVisibility: 'hidden' }}>
+                <div style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', gridArea: '1/1' }}>
                     {front}
                 </div>
-                {/* Back face */}
                 <div
-                    className="absolute inset-0 overflow-y-auto"
+                    className="overflow-y-auto"
                     style={{
                         backfaceVisibility: 'hidden',
+                        WebkitBackfaceVisibility: 'hidden',
                         transform: 'rotateY(180deg)',
-                        maxHeight: '600px',
+                        gridArea: '1/1',
+                        maxHeight: '70vh',
                     }}
                 >
                     {back}
