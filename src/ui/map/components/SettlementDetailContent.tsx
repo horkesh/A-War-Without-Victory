@@ -102,6 +102,8 @@ export interface SettlementDetailContentProps {
   recentControlEvents?: RecentControlEventForSettlement[];
   /** Per-ethnicity departed counts from this OSID (fled). Only shown in panel variant. */
   departedByEthnicity?: Record<string, number>;
+  /** Per-OSID departed counts by ethnicity (for municipality current ethnic computation). */
+  departedByOsid?: Record<string, Record<string, number>> | null;
   /** Current ethnic composition (counts) for this OSID when available. Shows bar below pre-war structure. */
   currentEthnic?: { Bosniak: number; Serb: number; Croat: number; Other: number } | null;
   /** Front sector ID (for click-through to sector panel). Only shown in panel variant. */
@@ -129,6 +131,7 @@ export function SettlementDetailContent({
   operationsTargetingOsid,
   recentControlEvents,
   departedByEthnicity,
+  departedByOsid,
   currentEthnic,
   sectorId,
   sectorName,
@@ -167,24 +170,39 @@ export function SettlementDetailContent({
   const osidDisp = displacementByOsid?.[osid];
 
   // Municipality-level ethnic aggregation from all OSIDs in the same mun
-  const munEthnic = (() => {
+  const munEthnicData = (() => {
     if (!munId || !osidPropertiesMap) return null;
     let bosniaks = 0, serbs = 0, croats = 0, others = 0;
-    for (const [, p] of Object.entries(osidPropertiesMap)) {
+    let curBosniaks = 0, curSerbs = 0, curCroats = 0, curOthers = 0;
+    for (const [osidKey, p] of Object.entries(osidPropertiesMap)) {
       if (String(p.mun1990_id ?? '').toLowerCase() !== munId) continue;
-      bosniaks += num(p.population_bosniaks);
-      serbs += num(p.population_serbs);
-      croats += num(p.population_croats);
-      others += num(p.population_others);
+      const b = num(p.population_bosniaks), s = num(p.population_serbs);
+      const c = num(p.population_croats), o = num(p.population_others);
+      bosniaks += b; serbs += s; croats += c; others += o;
+      // Current: subtract per-ethnicity departures
+      const dep = departedByOsid?.[osidKey] ?? {};
+      curBosniaks += Math.max(0, b - num(dep['RBiH'] ?? dep['Bosniak']));
+      curSerbs += Math.max(0, s - num(dep['RS'] ?? dep['Serb']));
+      curCroats += Math.max(0, c - num(dep['HRHB'] ?? dep['Croat']));
+      curOthers += Math.max(0, o - num(dep['Other']));
     }
     const total = bosniaks + serbs + croats + others;
+    const curTotal = curBosniaks + curSerbs + curCroats + curOthers;
     if (total <= 0) return null;
-    return [
-      { label: 'Bosniak', count: bosniaks, pct: (bosniaks / total) * 100 },
-      { label: 'Serb', count: serbs, pct: (serbs / total) * 100 },
-      { label: 'Croat', count: croats, pct: (croats / total) * 100 },
-      { label: 'Other', count: others, pct: (others / total) * 100 },
-    ];
+    return {
+      preWar: [
+        { label: 'Bosniak', count: bosniaks, pct: (bosniaks / total) * 100 },
+        { label: 'Serb', count: serbs, pct: (serbs / total) * 100 },
+        { label: 'Croat', count: croats, pct: (croats / total) * 100 },
+        { label: 'Other', count: others, pct: (others / total) * 100 },
+      ],
+      current: curTotal > 0 ? [
+        { label: 'Bosniaks', count: curBosniaks, pct: (curBosniaks / curTotal) * 100 },
+        { label: 'Serbs', count: curSerbs, pct: (curSerbs / curTotal) * 100 },
+        { label: 'Croats', count: curCroats, pct: (curCroats / curTotal) * 100 },
+        { label: 'Others', count: curOthers, pct: (curOthers / curTotal) * 100 },
+      ] : null,
+    };
   })();
   // osidDisp.out = displaced + killed + fled_abroad (total removals from this OSID)
   // osidDisp.lost = killed + fled_abroad (subset of out — people who left the country or died)
@@ -572,7 +590,7 @@ export function SettlementDetailContent({
             <div className="pt-2 border-t border-panel-border/30 space-y-1">
               {isPanel && <div className="text-[10px] text-text-secondary uppercase font-semibold mb-0.5">Current ethnic structure</div>}
               {cur.map((e) => (
-                <div key={e.label} className="grid grid-cols-[60px_1fr_35px] items-center gap-2 text-[10px]">
+                <div key={e.label} className="grid grid-cols-[60px_1fr_50px_30px] items-center gap-2 text-[10px]">
                   <span className="text-text-secondary truncate">{e.label}</span>
                   <div className="h-1 bg-black/30 rounded overflow-hidden">
                     <div
@@ -580,6 +598,7 @@ export function SettlementDetailContent({
                       style={{ width: `${e.pct}%` }}
                     />
                   </div>
+                  <span className="text-text-primary font-mono text-right tabular-nums">{Math.round(e.count).toLocaleString()}</span>
                   <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
                 </div>
               ))}
@@ -709,24 +728,38 @@ export function SettlementDetailContent({
           <div className="pt-2 text-[10px] text-text-secondary italic">No municipality displacement data available.</div>
         )}
 
-        {/* Municipality-level ethnic structure */}
-        {isPanel && activeTab === 'municipality' && munEthnic && (
-          <div className="pt-2 border-t border-panel-border/30 space-y-1">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-0.5">Pre-war ethnic structure</div>
-            {munEthnic.filter((e) => e.pct > 2).map((e) => (
-              <div key={e.label} className="grid grid-cols-[50px_1fr_50px_30px] items-center gap-2 text-[10px]">
-                <span className="text-text-secondary truncate">{e.label}</span>
-                <div className="h-1 bg-black/30 rounded overflow-hidden">
-                  <div
-                    className={`h-full ${ethnicBarColor(e.label)}`}
-                    style={{ width: `${e.pct}%` }}
-                  />
+        {/* Municipality-level ethnic structure — pre-war and current */}
+        {isPanel && activeTab === 'municipality' && munEthnicData && (
+          <>
+            <div className="pt-2 border-t border-panel-border/30 space-y-1">
+              <div className="text-[10px] text-text-secondary uppercase font-semibold mb-0.5">Pre-war ethnic structure</div>
+              {munEthnicData.preWar.filter((e) => e.pct > 2).map((e) => (
+                <div key={e.label} className="grid grid-cols-[50px_1fr_50px_30px] items-center gap-2 text-[10px]">
+                  <span className="text-text-secondary truncate">{e.label}</span>
+                  <div className="h-1 bg-black/30 rounded overflow-hidden">
+                    <div className={`h-full ${ethnicBarColor(e.label)}`} style={{ width: `${e.pct}%` }} />
+                  </div>
+                  <span className="text-text-primary font-mono text-right tabular-nums">{e.count.toLocaleString()}</span>
+                  <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
                 </div>
-                <span className="text-text-primary font-mono text-right tabular-nums">{e.count.toLocaleString()}</span>
-                <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
+              ))}
+            </div>
+            {munEthnicData.current && (
+              <div className="pt-2 border-t border-panel-border/30 space-y-1">
+                <div className="text-[10px] text-text-secondary uppercase font-semibold mb-0.5">Current ethnic structure</div>
+                {munEthnicData.current.filter((e) => e.pct > 0.5).map((e) => (
+                  <div key={e.label} className="grid grid-cols-[60px_1fr_50px_30px] items-center gap-2 text-[10px]">
+                    <span className="text-text-secondary truncate">{e.label}</span>
+                    <div className="h-1 bg-black/30 rounded overflow-hidden">
+                      <div className={`h-full ${ethnicBarColor(e.label)}`} style={{ width: `${e.pct}%` }} />
+                    </div>
+                    <span className="text-text-primary font-mono text-right tabular-nums">{Math.round(e.count).toLocaleString()}</span>
+                    <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
         {(!isPanel || activeTab === 'overview') && terrain && (

@@ -238,6 +238,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           operationsTargetingOsid={operationsTargetingOsid.length > 0 ? operationsTargetingOsid : undefined}
           recentControlEvents={recentControlEventsForOsid.length > 0 ? recentControlEventsForOsid : undefined}
           departedByEthnicity={departedByEthnicity && Object.keys(departedByEthnicity).length > 0 ? departedByEthnicity : undefined}
+          departedByOsid={loadedGameState?.departedByOsid ?? undefined}
           sectorName={sectorInfo.sectorName}
           sectorFaction={sectorInfo.sectorFaction}
           sectorId={sectorInfo.sectorId}
