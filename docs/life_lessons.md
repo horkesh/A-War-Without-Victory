@@ -95,10 +95,14 @@
 - **Gotcha 3**: Staging OSID must be adjacent to the first objective — non-adjacent staging means weeks of marching and the op stalls.
 - **Do instead**: For any new JNA-level early-war operation, use a synthetic corps ID. Put only dedicated units (JNA phantoms + unshared VRS brigades) on the op. Verify staging adjacency.
 
-### [Engine] MAX_ATTACKERS_PER_TARGET = 3 is an artificial cap that should be removed (2026-03-21) — NEW
-- **Context**: `bot_brigade_targeting.ts:35` caps brigades attacking the same OSID at 3 per turn. Historically, 4-6+ brigades massed for major operations (Corridor 92, Srebrenica). The coordination penalty (0.8× at 3+) already naturally discourages over-concentration through diminishing returns.
-- **Problem**: The hard cap prevents commanders from concentrating force when ordered to. A corps with 8 brigades targeting one objective can only send 3 — the other 5 sit idle despite orders.
-- **Do instead**: Remove the hard cap. Let the coordination penalty and combat predictor handle concentration economics naturally. If the predictor says 5 brigades at ratio 0.3 each will produce a costly_victory concentrated, the commander should be able to order it.
+### [Engine] MAX_ATTACKERS_PER_TARGET raised 3→12 — coordination penalty handles concentration naturally (2026-03-21) — DONE
+- **Context**: `bot_brigade_targeting.ts:35` and `battle_resolution.ts:58` capped brigades attacking the same OSID at 3 per turn. Raised to 12 (MAX_PARTICIPATING_BRIGADES). Coordination penalty (0.8× at 3+) provides natural diminishing returns.
+
+### [Engine] Preparation sub-phase overrides planning_duration — use force_staging assembly check (2026-03-21) — NEW
+- **Context**: Added `planning_duration: 5` to Op Teočak to give 2nd Tuzla march time. But `tickPreparation` in `operation_preparation.ts` drives through intel_gathering→force_staging→supply_check→assessment→ready based on commander personality. An aggressive commander completes in 3 turns regardless of planning_duration.
+- **Root cause**: `preparationReady` (sub_phase === 'ready') at `sector_offensive.ts:800` fires before the `elapsed > planDuration` check. Preparation is the PRIMARY gate; planning_duration is a FALLBACK for ops without preparation.
+- **Fix implemented**: Added `countAssembledBrigades()` to `force_staging` sub-phase. Don't advance to supply_check until 60% of participating brigades are at staging/objective OSIDs (or timeout at preparation_max_turns). This naturally extends planning for ops with distant brigades.
+- **Do instead**: When an op needs assembly time, rely on the force_staging assembly check, not planning_duration. The preparation system controls the transition.
 
 ### [Calibration] Coupled anchors need simultaneous fixes — Žepa/Teočak seesaw (2026-03-21) — NEW
 - **Context**: Žepa enclave and Teočak corridor are inversely coupled through VRS Drina Corps force allocation. Fixing Žepa alone (285th bump to 1500) blocked Teočak — VRS stayed north and 2nd Romanija blocked rastosnica_2. Fixing Teočak alone (Op Teočak) worked only when Žepa was weak (VRS pushed south, leaving north open).
