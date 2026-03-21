@@ -172,29 +172,35 @@ export function buildOrderArrowsGeoJSON(
   }
 
   const features: OrderFeature[] = [];
+  const playerFaction = state.player_faction;
 
-  const attackOrders = [...state.attackOrders].sort((a, b) =>
-    a.brigadeId.localeCompare(b.brigadeId) ||
-    a.targetSettlementId.localeCompare(b.targetSettlementId),
-  );
-  for (const order of attackOrders) {
-    const formation = formationById.get(order.brigadeId);
-    const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formation, centroidLookup);
-    const sector = sectorByBrigade.get(order.brigadeId);
-    const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
-    pushArrow(features, 'attack', order.brigadeId, sourceOsid, order.targetSettlementId, centroidLookup, formation?.faction, sector, edgePoints);
-  }
-
-  if (state.movementOrdersSettlement && state.movementOrdersSettlement.length > 0) {
-    const settlementOrders = [...state.movementOrdersSettlement].sort((a, b) => a.brigadeId.localeCompare(b.brigadeId));
-    for (const order of settlementOrders) {
+  // Only show active (non-staged) orders for the player faction; hide bot orders in observer mode
+  if (playerFaction) {
+    const attackOrders = [...state.attackOrders].sort((a, b) =>
+      a.brigadeId.localeCompare(b.brigadeId) ||
+      a.targetSettlementId.localeCompare(b.targetSettlementId),
+    );
+    for (const order of attackOrders) {
       const formation = formationById.get(order.brigadeId);
+      if (formation?.faction !== playerFaction) continue;
       const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formation, centroidLookup);
       const sector = sectorByBrigade.get(order.brigadeId);
       const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
-      const targets = [...order.targetSettlementIds].sort((a, b) => a.localeCompare(b));
-      for (const target of targets) {
-        pushArrow(features, 'movement', order.brigadeId, sourceOsid, target, centroidLookup, formation?.faction, sector, edgePoints);
+      pushArrow(features, 'attack', order.brigadeId, sourceOsid, order.targetSettlementId, centroidLookup, formation?.faction, sector, edgePoints);
+    }
+
+    if (state.movementOrdersSettlement && state.movementOrdersSettlement.length > 0) {
+      const settlementOrders = [...state.movementOrdersSettlement].sort((a, b) => a.brigadeId.localeCompare(b.brigadeId));
+      for (const order of settlementOrders) {
+        const formation = formationById.get(order.brigadeId);
+        if (formation?.faction !== playerFaction) continue;
+        const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formation, centroidLookup);
+        const sector = sectorByBrigade.get(order.brigadeId);
+        const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
+        const targets = [...order.targetSettlementIds].sort((a, b) => a.localeCompare(b));
+        for (const target of targets) {
+          pushArrow(features, 'movement', order.brigadeId, sourceOsid, target, centroidLookup, formation?.faction, sector, edgePoints);
+        }
       }
     }
   }

@@ -277,7 +277,7 @@ export const useGameStore = create<GameStore>((set) => ({
   labelsVisible: true,
   sectorsVisible: true,
   fogVisible: true,
-  battlesVisible: true,
+  battlesVisible: false,
   municipalityBordersVisible: false,
   setFrontsVisible: (v) => set({ frontsVisible: v }),
   setFormationsVisible: (v) => set({ formationsVisible: v }),

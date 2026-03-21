@@ -134,14 +134,6 @@ export function BottomStatusStrip() {
           </span>
         )}
 
-        {/* Battles this turn */}
-        {loadedGameState?.latestTurnSummary?.battles && loadedGameState.latestTurnSummary.battles.length > 0 && (
-          <span className="flex items-center gap-1 text-faction-rs" title={`${loadedGameState.latestTurnSummary.battles.length} battle${loadedGameState.latestTurnSummary.battles.length !== 1 ? 's' : ''} this turn`}>
-            <Icon name="offensive" size={10} color="#e05050" />
-            <span>{loadedGameState.latestTurnSummary.battles.length}</span>
-          </span>
-        )}
-
         {/* Alliance status (RBiH-HRHB) */}
         {loadedGameState?.war_alliance_rbih_hrhb != null && (() => {
           const a = loadedGameState.war_alliance_rbih_hrhb!;
