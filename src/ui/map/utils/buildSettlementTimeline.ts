@@ -112,6 +112,7 @@ export function buildSettlementTimeline(
     battles: BattleRecord[],
     movements: Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>,
     supplyTransitions: Array<{ turn: number; from: string; to: string }>,
+    historicalEvents: Array<{ turn: number; id: string; text: string }>,
     preWarEthnic: { bosniaks: number; serbs: number; croats: number; others: number } | null,
 ): SettlementTimelineEvent[] {
     const events: SettlementTimelineEvent[] = [];
@@ -187,6 +188,15 @@ export function buildSettlementTimeline(
             title: worsened
                 ? `Supply ${t.to} (was ${t.from})`
                 : `Supply restored to ${t.to} (was ${t.from})`,
+        });
+    }
+
+    // --- Historical events ---
+    for (const e of historicalEvents) {
+        events.push({
+            turn: e.turn,
+            type: 'historical_event',
+            title: e.text || e.id.replace(/_/g, ' '),
         });
     }
 

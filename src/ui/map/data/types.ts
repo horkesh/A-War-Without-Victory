@@ -501,6 +501,8 @@ export interface LoadedGameState {
     movementsByOsid: Record<string, Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>>;
     /** Per-OSID supply state transitions from all turn summaries. */
     supplyTransitionsByOsid: Record<string, Array<{ turn: number; from: string; to: string }>>;
+    /** Historical events fired per turn (from scenario event definitions). */
+    historicalEventsByTurn: Array<{ turn: number; id: string; text: string }>;
     recruitment?: RecruitmentView;
     armyStance?: Record<string, string>;
     casualtyLedger?: Record<string, CasualtyLedgerEntryView>;

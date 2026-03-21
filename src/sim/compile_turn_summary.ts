@@ -83,6 +83,7 @@ export function compileTurnSummary(
         ...compileSupplyDeltas(state, snapshot),
         movements: compileMovements(state, snapshot),
         supply_transitions: compileSupplyTransitions(state, snapshot),
+        events_fired: report.events_fired ?? [],
         notable_events: compileNotableEvents(state, turn),
     };
 }

@@ -134,6 +134,10 @@ export interface TurnSummary {
     /** Supply state transitions this turn (adequate→strained, strained→critical, etc.). */
     supply_transitions: Array<{ osid: string; from: string; to: string }>;
 
+    // --- Historical events ---
+    /** Historical events that fired this turn (from scenario event definitions). */
+    events_fired: Array<{ id: string; text: string }>;
+
     // --- Notable events ---
     notable_events: TurnNotableEvent[];
 }

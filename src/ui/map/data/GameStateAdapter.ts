@@ -1768,6 +1768,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         battlesByOsid: deriveBattlesByOsid(state),
         movementsByOsid: deriveMovementsByOsid(state),
         supplyTransitionsByOsid: deriveSupplyTransitionsByOsid(state),
+        historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         operationHistory: deriveOperationHistory(state),
         activeOperations: deriveActiveOperations(state),
@@ -1879,6 +1880,20 @@ function deriveMovementsByOsid(state: any): LoadedGameState['movementsByOsid'] {
                 if (!result[to]) result[to] = [];
                 result[to].push({ turn, formation_id: fid, formation_name: fname, type: 'arrived' });
             }
+        }
+    }
+    return result;
+}
+
+function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsByTurn'] {
+    const result: LoadedGameState['historicalEventsByTurn'] = [];
+    const summaries = state.turn_summaries as Array<{ turn?: number; events_fired?: Array<{ id: string; text: string }> }> | undefined;
+    if (!Array.isArray(summaries)) return result;
+    for (const summary of summaries) {
+        const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!Array.isArray(summary.events_fired)) continue;
+        for (const e of summary.events_fired) {
+            result.push({ turn, id: String(e.id ?? ''), text: String(e.text ?? '') });
         }
     }
     return result;
