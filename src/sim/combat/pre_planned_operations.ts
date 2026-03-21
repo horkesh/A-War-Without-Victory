@@ -347,17 +347,27 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Operation Corridor 92 — VRS's most important 1992 campaign (BB1 p.177).
+        // 1KK under General Talić launched 24 June after preliminary ops cleared Doboj-Derventa.
+        // Historically: Modriča fell 28 June, Derventa 4-5 July, Odžak 12 July.
+        // "Most of the VRS's battle-tested former JNA units" committed here (BB1 p.183).
+        // 50,000+ troops engaged across 1KK + EBK (BB1 p.181).
+        // Brigades from Op Prijedor redeployed here after Prijedor mopping up.
         corps: 'vrs_1st_krajina',
         faction: 'RS',
         name: 'Operation Corridor',
         staging_osid: 'op:modrica:skugric_gornji_2',
+        min_attack_outcome: 'repulsed',
         axes: [
             {
                 axis_id: 'corridor_east',
                 name: 'Corridor East',
                 brigades: [
-                    'rs_43rd_prijedor_motorized',
-                    'rs_27th_derventa_motorized',
+                    'rs_27th_derventa_motorized',   // spearhead — named for Derventa, fighting for home ground
+                    'rs_43rd_prijedor_motorized',    // redeployed from Op Prijedor
+                    'rs_16th_krajina_motorized',     // redeployed from Op Prijedor (Sanski Most axis)
+                    'rs_5th_kozara_light_infantry',  // redeployed from Op Prijedor
+                    'rs_1st_trebava_infantry',       // homed at Modriča — local knowledge, natural staging
                 ],
                 objectives: [
                     'op:modrica:modrica',
@@ -370,6 +380,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 staging_osid: 'op:modrica:skugric_gornji_2',
             },
             {
+                // Southern prong toward Odžak — historically fell 12 July (BB1 p.182)
                 axis_id: 'corridor_south',
                 name: 'Corridor South',
                 brigades: [

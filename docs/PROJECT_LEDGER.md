@@ -1,7 +1,23 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.0% area-weighted (40w, 712 OSIDs). RS w40 0.510 PASS.** Calibration fixes: micro-OSID merge (n982), Op Derventa + Teočak corridor (n992-n998), Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975).
+**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.9% area-weighted (40w, 712 OSIDs). RS w40 0.507 PASS.** Calibration: Posavina Corridor restructure (n1002), micro-OSID merge (n982), Teočak corridor (n992-n998), Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975).
+
+## [2026-03-21] Posavina Corridor Restructure — Operation Corridor 92 (n1002)
+
+**Problem:** Op Derventa (triggered, w4) sent 2 VRS brigades (27th Derventa + 5th Kozara) to capture derventa_2. Captured at w5 but HRHB retook it — 2 brigades can't hold against 6 HVO brigades arriving w8. Historically, VRS launched Corridor 92 at w12 with 50,000+ troops across two corps (1KK + EBK), not a 2-brigade probe at w4 (BB1 pp.181-183).
+
+**Historical sequence (BB1 p.182):** 1KK preliminary ops early June → Corridor 92 launched 24 June → Modriča fell 28 June → three-pronged attack 4 July → Derventa fell 4-5 July → Odžak 12 July → Bosanski Brod fell 6 October after 3 months siege. "Most of the VRS's battle-tested former JNA units" committed (BB1 p.183). VRS achieved victory over "experienced and numerically superior" HVO/HV forces via "professional leadership, organization, and firepower."
+
+**Fix:** (1) Removed triggered Op Derventa — premature and understrength. (2) Strengthened 1KK pre-planned Op Corridor: added 3 brigades redeployed from Op Prijedor (16th Krajina Motorized, 5th Kozara Light Infantry, 1st Trebava Infantry — homed at Modriča). Total: 5 brigades on main Corridor East axis (~5,600 pers) + 1 on Corridor South (1st Doboj). Added `min_attack_outcome: 'repulsed'` — existential operation, brigades attack even at unfavorable odds. Combined with EBK's 3 Posavina brigades: 9 VRS brigades (~8,200 pers) vs ~5,350 HVO (without HV reinforcements we don't model).
+
+**Emergent result (n1002):** Modriča fell w10 (decisive), Odžak w12 (costly), Derventa w18-19 (stalemate→costly — HVO resisted, then fell), Bosanski Brod w27 (costly). **Historical Brod at w28 — sim at w27.** Orašje pocket holds (VRS November offensive historically failed — BB1 p.182). All Derventa/Brod/Modriča/Odžak OSIDs → RS. No hardcoded OSID flips — pure emergent outcome from correct force concentration.
+
+**Result:** n1002 = **91.9% area-weighted** (+0.9pp from n998). **Posavina NE 94.9%.** RS w40 0.507 PASS. 3/4 enclaves. REAL_WAR_MASTER Issue #34 (Corridor 92 doesn't happen) → FIXED.
+
+**Determinism:** Operation definitions only — no random/time-dependent code.
+
+**Files:** `src/sim/combat/triggered_operations.ts` (Op Derventa removed), `src/sim/combat/pre_planned_operations.ts` (Op Corridor strengthened).
 
 ## [2026-03-21] Army HQ Modal — Warroom Aesthetic Rework
 

@@ -2,7 +2,7 @@
  * Time/condition-triggered VRS operations.
  *
  * These operations appear as offers when conditions are met:
- * - Posavina Corridor: after 1KK + EBK opening ops finish
+ * - Posavina Corridor: after 1KK + EBK opening ops finish (consolidation after Op Corridor takes Derventa)
  * - Kotor Varos: ~w10
  * - Jajce: ~w24
  * - Cerska-Kamenica: ~w40
@@ -65,30 +65,6 @@ function corpsOpFinished(state: GameState, corpsId: string): boolean {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const TRIGGERED_OPS: TriggeredOpDef[] = [
-    {
-        name: 'Operation Derventa',
-        primary_corps: 'vrs_1st_krajina',
-        staging_osid: 'op:derventa:cerani_2',
-        planning_duration: 1,
-        trigger: (_state, turn) => turn >= 4,
-        axes: [
-            {
-                axis_id: 'derventa_seizure',
-                name: 'Derventa Seizure',
-                corps: 'vrs_1st_krajina',
-                brigades: [
-                    'rs_27th_derventa_motorized' as FormationId,
-                    'rs_5th_kozara_light_infantry' as FormationId,
-                ],
-                objectives: [
-                    'op:derventa:derventa_2',
-                    'op:modrica:garevac_2',
-                    'op:bosanski_samac:domaljevac_2',
-                ],
-                staging_osid: 'op:derventa:cerani_2',
-            },
-        ],
-    },
     {
         name: 'Operation Posavina Corridor',
         primary_corps: 'vrs_1st_krajina',

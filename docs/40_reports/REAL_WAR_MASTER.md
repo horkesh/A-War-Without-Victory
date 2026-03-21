@@ -742,7 +742,7 @@ Meanwhile, Donji Vakuf (central Bosnia) has enemy OSIDs adjacent to 1KK sectors 
 
 **Priority: P1.** This isn't a minor calibration miss. The Posavina Corridor was the foundational VRS strategic achievement of 1992. The sim producing a 1KK that ignores it entirely and instead drives into Donji Vakuf is historically indefensible. Every consequence of the Corridor not opening — eastern Bosnia isolated, 1KK deep in central Bosnia, RS territory in the wrong shape — cascades.
 
-**Status:** Open. Root cause is march-first staging: 1KK needs either a pre-positioned staging brigade in the Derventa/Modriča area, or the army directive needs to ensure the Corridor op is pre-planned (as a `pre_planned_operations` entry like Operation Prijedor) rather than bot-generated.
+**Status: FIXED (n1002, 2026-03-21).** Two changes: (1) Removed premature triggered Op Derventa (w4, 2 brigades — too early, too weak). (2) Strengthened pre-planned Op Corridor: 5 brigades on main axis (27th Derventa Moto, 43rd Prijedor Moto, 16th Krajina Moto, 5th Kozara, 1st Trebava) + 1st Doboj on southern axis + `min_attack_outcome: 'repulsed'`. Brigades redeployed from Op Prijedor after it completes (~w10). Combined with EBK Posavina Flank: 9 VRS brigades (~8,200 pers) vs ~5,350 HVO. Emergent result: Modriča w10, Odžak w12, Derventa w18-19 (stalemate then costly victory — HVO resisted), **Bosanski Brod w27** (historical: w28). Orašje pocket holds. **91.9% area-weighted.** Posavina NE 94.9%. No hardcoded OSID flips — pure force concentration produces historically accurate corridor opening.
 
 ---
 
