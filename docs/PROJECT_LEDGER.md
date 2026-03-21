@@ -3,6 +3,16 @@
 **Last Updated:** 2026-03-21
 **Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** UI Overhaul Master Plan COMPLETE (Phases 0-5). Army HQ Modal fully operational. Wood/paper textures. Keyboard shortcuts. Map atmosphere. Command Briefing actionable. Sector combat ratings pipeline fix (n962).
 
+## [2026-03-21] v0.5.0 — Full Diplomatic System (Night Shift)
+
+Full diplomatic UI wiring for peace plan and Dayton negotiation:
+- **Phase 0:** Save migration registry (`save_migration.ts`) — versioned field defaults for old saves. 3 tests.
+- **Phase 1:** PeacePlanModal wired to GameState + IPC — paper aesthetic, territorial split bar, bot responses, accept/reject. `resolve-peace-plan` IPC handler.
+- **Phase 2:** DaytonNegotiationModal — territorial package grid (demand/concede), institutional architecture choices (centralized/decentralized), capital budget tracking, patron override warning. `resolve-dayton` IPC handler. Auto-transitions to VerdictScreen.
+- **Phase 3:** Patron pressure gauges + negotiation capital bars in WarSummaryModal "Capital" tab. DiplomacyOverview component with 4-level patron authority + 5-dimension capital bars.
+
+**Version bumped:** 0.4.9 → 0.5.0. 104 suites, 1,249 tests. Calibration: 91.0%.
+
 ## [2026-03-21] HRHB-RBiH P1 Backlog — Enclaves, Brigade Spawns, Doctrine (n963)
 
 Three P1 items from the Bosniak-Croat Conflict Master:
