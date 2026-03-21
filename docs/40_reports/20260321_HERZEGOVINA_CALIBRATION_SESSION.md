@@ -145,3 +145,31 @@ The operation system (`sector_offensive.ts`) processes axes through a SHARED `cu
 | n1008 | JNA-only axes on main (correct) | 92.3% | 0/7 | YES | YES | 0.508 PASS |
 | n1009 | +VRS follow-up axes on Op Foča | 92.2% | 0/7 | YES | YES | 0.504 PASS |
 | n1010 | +Kalinovik→Konjic chain | 92.3% | 0/7 | YES | YES | 0.508 PASS |
+| n1011 | +Herzegovina Consolidation triggered op | **92.8%** | **5/7** | NO | YES | **0.511 PASS** |
+
+## n1011 Result — Session Best (92.8%)
+
+Op Herzegovina Consolidation fires at w21 (after Op Foča completes w20). Mostar Heights axis: rs_nevesinje_brigade captures vranjevici_2 (w24 decisive r=12.20) and kruzanj_2 (w25 decisive r=12.15). Both HELD at w40 — Nevesinje brigade (3000 pers) garrisons kruzanj_2. Konjic South axis: 2nd Herzegovina NOT in participants (corps AI moved it elsewhere during Op Foča). BUT glavaticevo_2 and ljuta are RS at w40 — captured by JNA Op Herzegovina early (w2-w3) and this time they stuck (no ping-pong).
+
+**5/7 Herzegovina OK**: kruzanj_2, vranjevici_2, glavaticevo_2, ljuta, varos_2. **2/7 MISS**: golubici_2, sela_2 (Kalinovik axis stalled in Op Foča).
+
+**Teočak broken AGAIN**: rastosnica_2 = RS. Op Teočak fires w15 but only 241st and 242nd attack (2nd Tuzla still not arriving in time). ARBiH wins w18-w19 (costly_victory, victory) but VRS morale resist holds. w20-21 repulsed — VRS reinforced.
+
+## Remaining Issues
+
+### Teočak corridor (P1)
+rastosnica_2 needs ARBiH to capture it. Op Teočak has the right setup but 2nd Tuzla doesn't arrive in time. Options:
+1. Move 2nd Tuzla's home_osid closer to Kalesija staging
+2. Fire Op Teočak even earlier (w10?)
+3. The Žepa-Teočak seesaw persists — any change that helps Herzegovina cascades into Drina
+
+### Kalinovik golubici_2 + sela_2 (P2)
+Op Foča Kalinovik axis captures varos_2 but stalls before golubici_2/sela_2. Need either:
+1. Stronger Kalinovik axis (add a brigade)
+2. Separate triggered op for Kalinovik cleanup
+
+### 2nd Tuzla march timing (P2)
+The brigade starts at sicki_brod_2 (Tuzla) — 5+ hops from Kalesija staging. By the time it arrives at the target, the op has 2-3 turns of execution left. Needs:
+1. Home_osid moved closer, OR
+2. Pre-positioning via march orders before op fires, OR
+3. Longer planning phase to allow march time
