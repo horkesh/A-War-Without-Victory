@@ -3,6 +3,16 @@
 **Last Updated:** 2026-03-21
 **Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** UI Overhaul Master Plan COMPLETE (Phases 0-5). Army HQ Modal fully operational. Wood/paper textures. Keyboard shortcuts. Map atmosphere. Command Briefing actionable. Sector combat ratings pipeline fix (n962).
 
+## [2026-03-21] v0.5.2–v0.5.4 — Tutorial, Audio, AI Narrative (Night Shift)
+
+**v0.5.2 Tutorial & Onboarding:** Tutorial objective system (11 sequential objectives with action triggers + state checks). TutorialOverlay component. Codex shell (5 categories, search, entry navigation). 7 tests.
+
+**v0.5.3 Audio:** Web Audio API engine (no Howler dependency). SFX manifest (16 IDs) + music manifest (6 tracks). Open registry pattern (registerSFX/registerMusic). Graceful degradation when files missing.
+
+**v0.5.4 AI Narrative + Auto-Play:** AAR briefing collector (field reports section). Post-game analysis generator shell (returns null without API key, cached in state). Auto-play orchestrator types (cadet mode default — formula bot, no API cost). All cosmetic-only.
+
+**Version bumped:** 0.5.1 → 0.5.4. 106 suites, 1,261 tests. Calibration: 91.0%.
+
 ## [2026-03-21] v0.5.1 — UI Completion (Night Shift)
 
 - **Phase 1:** MapModeLegend — SKIPPED (already implemented in UI Overhaul)
