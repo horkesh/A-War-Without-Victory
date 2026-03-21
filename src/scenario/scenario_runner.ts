@@ -673,11 +673,11 @@ async function createOobFormations(
                 municipalityPopulation1991,
                 canonicalToOperational
             );
-            console.log('[Recruitment] Deferred start enabled: initial setup created corps/army_hq only.');
+            console.debug('[Recruitment] Deferred start enabled: initial setup created corps/army_hq only.');
             return;
         }
         const report = runBotRecruitment(state, oobCorps, oobBrigades, resources, sidToMun, municipalityHqSettlement, { canonicalToOperational });
-        console.log(
+        console.debug(
             `[Recruitment] Mandatory: ${report.mandatory_recruited}, ` +
             `Elective: ${report.elective_recruited}, ` +
             `Skipped: control=${report.brigades_skipped_no_control} ` +
@@ -686,7 +686,7 @@ async function createOobFormations(
             `equipment=${report.brigades_skipped_no_equipment}`
         );
         for (const faction of factionIds) {
-            console.log(
+            console.debug(
                 `  ${faction}: capital=${report.remaining_capital[faction] ?? 0} ` +
                 `equipment=${report.remaining_equipment[faction] ?? 0}`
             );
@@ -704,13 +704,13 @@ async function createOobFormations(
                 const spreadReport = spreadBrigadesToFrontOsids(state, opEdges, operationalData.operationalToCanonical);
                 const totalSpread = Object.values(spreadReport.brigades_spread).reduce((a, b) => a + b, 0);
                 const totalCovered = Object.values(spreadReport.front_osids_covered).reduce((a, b) => a + b, 0);
-                console.log(`[Placement] Spread ${totalSpread} brigades to front; ${totalCovered} front OSIDs now covered`);
+                console.debug(`[Placement] Spread ${totalSpread} brigades to front; ${totalCovered} front OSIDs now covered`);
                 for (const faction of Object.keys(spreadReport.brigades_spread).sort() as FactionId[]) {
-                    console.log(`  ${faction}: spread=${spreadReport.brigades_spread[faction]} covered=${spreadReport.front_osids_covered[faction]}`);
+                    console.debug(`  ${faction}: spread=${spreadReport.brigades_spread[faction]} covered=${spreadReport.front_osids_covered[faction]}`);
                 }
             }
         } catch (e) {
-            console.log(`[Placement] Skipped front spreading: ${(e as Error).message}`);
+            console.debug(`[Placement] Skipped front spreading: ${(e as Error).message}`);
         }
     }
 }

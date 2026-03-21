@@ -100,6 +100,13 @@
 10. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
 **Resolved this session:** #34 HVO sectors (FIXED — corps activation + consolidation protection), #38 HVO stale IDs (FIXED), #33 Sarajevo density (CORRECT — siege working).
 
+## Technical Debt (Professional Audit 2026-03-21)
+1. **[P3] 217 `any` types in sim/state** — each is a type safety hole. Mostly in GameStateAdapter (save parsing). Gradual cleanup.
+2. **[P3] 8 circular dependencies** — all game_state.ts ↔ type files. Type-only, not runtime. Clean by extracting shared types to a `types.ts` barrel.
+3. **[P4] Electron 33 → 41** — 8 major versions behind. Security + performance. Plan upgrade with test pass.
+4. **[P4] No pre-commit hooks** — no husky/lint-staged. Smoke-test triad is manual only. Add `npx tsc --noEmit` as pre-commit hook.
+5. **[P4] Engine per-OSID displacement cap** — displacement timers can over-displace (more events than population). UI caps proportionally but engine should prevent at source.
+
 ## Map & UX Upgrade Queue (strategic design: `docs/plans/2026-03-20-terrain-map-ux-strategic-design.md`)
 **Tier 1 — High Impact, Low Effort (1-2 sessions each):**
 1. ~~**Deploy Icon Language (P0)**~~ — DONE. 22 SVG icons deployed to FormationDetail, CorpsDetail, ArmyDetail, CorpsCard. React.memo + aria-hidden. Simplified: stance lookup, size consistency.
