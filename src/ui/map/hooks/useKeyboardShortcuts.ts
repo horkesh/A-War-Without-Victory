@@ -31,21 +31,29 @@ export function useKeyboardShortcuts(): void {
       if (event.key === 'Escape') {
         // If Army HQ modal is open, let it handle its own Escape (level-up navigation)
         if (useGameStore.getState().armyHQOpen) return;
-        const { setHoveredOsids, clearTooltipTarget, setPendingAttackConfirmation, setOrderModeForFormation, setOperationTargetOsids } = useGameStore.getState();
-        useGameStore.setState({
-          selectedOsid: null,
-          selectedFormationId: null,
-          selectedCorpsFrontSectorId: null,
-          selectedCorpsId: null,
-          selectedArmyId: null,
-          selectedArmyHqId: null,
-          selectedOperationKey: null,
-        });
-        setHoveredOsids([]);
-        setOperationTargetOsids([]);
-        clearTooltipTarget();
-        setPendingAttackConfirmation(null);
-        setOrderModeForFormation(null);
+        const store = useGameStore.getState();
+        const hasSelection = store.selectedOsid || store.selectedFormationId || store.selectedCorpsFrontSectorId || store.selectedCorpsId || store.selectedArmyId || store.selectedOperationKey;
+        if (hasSelection) {
+          // Clear selections first
+          const { setHoveredOsids, clearTooltipTarget, setPendingAttackConfirmation, setOrderModeForFormation, setOperationTargetOsids } = store;
+          useGameStore.setState({
+            selectedOsid: null,
+            selectedFormationId: null,
+            selectedCorpsFrontSectorId: null,
+            selectedCorpsId: null,
+            selectedArmyId: null,
+            selectedArmyHqId: null,
+            selectedOperationKey: null,
+          });
+          setHoveredOsids([]);
+          setOperationTargetOsids([]);
+          clearTooltipTarget();
+          setPendingAttackConfirmation(null);
+          setOrderModeForFormation(null);
+        } else {
+          // Nothing selected — toggle pause menu
+          useGameStore.setState({ pauseMenuOpen: !store.pauseMenuOpen });
+        }
         return;
       }
 

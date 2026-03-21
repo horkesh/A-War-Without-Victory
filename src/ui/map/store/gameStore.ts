@@ -138,6 +138,7 @@ export interface GameStore {
   armyHQExpandedCorpsId: string | null;
   armyHQExpandedSections: Record<string, boolean>;
   armyHQOfficerSelectionCorpsId: string | null;
+  pauseMenuOpen: boolean;
   setArmyHQOpen: (open: boolean) => void;
   setArmyHQExpandedCorpsId: (id: string | null) => void;
   toggleArmyHQSection: (key: string) => void;
@@ -310,6 +311,7 @@ export const useGameStore = create<GameStore>((set) => ({
   armyHQExpandedCorpsId: null,
   armyHQExpandedSections: {},
   armyHQOfficerSelectionCorpsId: null,
+  pauseMenuOpen: false,
   setArmyHQOpen: (open) => set({
     armyHQOpen: open,
     ...(open ? {} : {

@@ -37,6 +37,10 @@ import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
+import { MainMenu } from './components/MainMenu';
+import { PauseMenu } from './components/PauseMenu';
+import { SettingsScreen } from './components/SettingsScreen';
+import { CreditsScreen } from './components/CreditsScreen';
 import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransition } from './components/PeaceWarTransition';
@@ -162,6 +166,11 @@ function App() {
     selectedOrbatCorpsId,
   });
 
+  const [appScreen, setAppScreen] = useState<'game' | 'mainMenu'>('game');
+  const pauseOpen = useGameStore((s) => s.pauseMenuOpen);
+  const setPauseOpen = (v: boolean) => useGameStore.setState({ pauseMenuOpen: v });
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [creditsOpen, setCreditsOpen] = useState(false);
   const [sidePickerOpen, setSidePickerOpen] = useState(false);
   const [sidePickerDismissed, setSidePickerDismissed] = useState(false);
   const [campaignStarting, setCampaignStarting] = useState(false);
@@ -656,6 +665,30 @@ function App() {
       <MapModeLegend />
       <Minimap />
       <BottomStatusStrip />
+
+      {/* v0.5.1: Menu system overlays */}
+      {appScreen === 'mainMenu' && (
+        <MainMenu
+          hasSave={!!loadedGameState}
+          onNewGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}
+          onContinue={() => setAppScreen('game')}
+          onLoadGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}
+          onSettings={() => setSettingsOpen(true)}
+          onCredits={() => setCreditsOpen(true)}
+          onQuit={() => { if (typeof window !== 'undefined') window.close(); }}
+        />
+      )}
+      {pauseOpen && (
+        <PauseMenu
+          onResume={() => setPauseOpen(false)}
+          onSave={() => { void ipc.quickSave(); setPauseOpen(false); }}
+          onSettings={() => { setPauseOpen(false); setSettingsOpen(true); }}
+          onMainMenu={() => { setPauseOpen(false); setAppScreen('mainMenu'); }}
+          onQuit={() => { if (typeof window !== 'undefined') window.close(); }}
+        />
+      )}
+      {settingsOpen && <SettingsScreen onClose={() => setSettingsOpen(false)} />}
+      {creditsOpen && <CreditsScreen onClose={() => setCreditsOpen(false)} />}
     </div>
   );
 }
