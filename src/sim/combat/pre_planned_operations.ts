@@ -111,9 +111,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: [
                     'op:zvornik:zvornik',
-                    'op:zvornik:drinjaca',
                     'op:zvornik:novo_selo',
-                    'op:zvornik:paljevici',
                     'op:zvornik:donja_kamenica',
                 ],
                 staging_osid: 'op:zvornik:kozluk_2',
@@ -176,9 +174,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:bratunac:vranesevici',
                     'op:bratunac:zapolje_2',
-                    'op:srebrenica:kalimanici',
+                    'op:srebrenica:mala_daljegosta_2',
                     'op:srebrenica:obadi',
-                    'op:srebrenica:petrica',
                     'op:srebrenica:brezovice_2',
                 ],
                 staging_osid: 'op:bratunac:slapasnica',
@@ -206,8 +203,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:visegrad:visegrad_2',
                     'op:visegrad:drinsko',
-                    'op:visegrad:bogdasici',
                     'op:visegrad:kamenica_2',
+                    'op:visegrad:medjedja_2',
                 ],
                 staging_osid: 'op:visegrad:okrugla',
             },

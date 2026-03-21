@@ -12,7 +12,7 @@ const ctrl = save.political.political_controllers;
 const counts = { RS: 0, RBiH: 0, HRHB: 0 };
 for (const v of Object.values(ctrl)) counts[v] = (counts[v] || 0) + 1;
 console.log('\nTerritory counts:', JSON.stringify(counts));
-console.log('RS fraction:', (counts.RS / 744).toFixed(3));
+console.log('RS fraction:', (counts.RS / 712).toFixed(3));
 
 // Benchmark check: RS w40 territory fraction
 console.log('\n=== SECTOR CHECK: any sector crossing enemy territory? ===');

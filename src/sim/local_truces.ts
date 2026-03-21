@@ -55,12 +55,10 @@ export const GRAZ_CORPS_PAIRS: readonly [string, string][] = [
 export const GRAZ_KISELJAK_VRS_EXCLUSION = new Set([
     'op:kiseljak:azapovici_2',
     'op:kiseljak:bilalovac_2',
-    'op:kiseljak:borina',
     'op:kiseljak:brnjaci_2',
     'op:kiseljak:bukovica',
     'op:kiseljak:drazevici',
     'op:kiseljak:gromiljak_2',
-    'op:kiseljak:hercezi',
     'op:kiseljak:kiseljak_2',
 ]);
 

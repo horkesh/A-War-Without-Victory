@@ -128,7 +128,6 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                     'op:kotor_varos:kotor_varos_2',
                     'op:kotor_varos:vrbanjci_2',
                     'op:kotor_varos:prisocka_2',
-                    'op:kotor_varos:jakotina',
                 ],
                 staging_osid: 'op:kotor_varos:kotor_varos_2',
             },
@@ -193,8 +192,7 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                 ],
                 objectives: [
                     'op:srebrenica:brezovice_2',
-                    'op:srebrenica:kalimanici',
-                    'op:srebrenica:lijesce',
+                    'op:srebrenica:mala_daljegosta_2',
                 ],
                 staging_osid: 'op:srebrenica:brezovice_2',
             },

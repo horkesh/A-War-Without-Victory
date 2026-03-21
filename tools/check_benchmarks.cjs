@@ -1,7 +1,7 @@
 const fs = require('fs');
 const dir = process.argv[2];
 const weekly = fs.readFileSync(`${dir}/weekly_report.jsonl`, 'utf8').trim().split('\n').map(l => JSON.parse(l));
-const total = 744;
+const total = 712;
 const w20 = weekly.find(r => r.week_index === 20);
 const w40 = weekly[weekly.length - 1];
 

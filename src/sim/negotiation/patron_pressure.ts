@@ -176,9 +176,9 @@ export function getTerritoryLossRate(state: GameState, faction: FactionId): numb
         }
     }
 
-    // Approximate: each OSID is ~0.135% of total area (744 OSIDs, 100%)
+    // Approximate: each OSID is ~0.14% of total area (712 OSIDs, 100%)
     // Territory loss rate as fraction of total
-    const approxLossPct = netLost * (100 / 744);
+    const approxLossPct = netLost * (100 / 712);
     // Normalize to 0-0.2 range (20 OSIDs lost in 10 turns = max)
     return Math.min(0.2, approxLossPct / 100);
 }

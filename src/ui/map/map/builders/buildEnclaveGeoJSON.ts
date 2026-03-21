@@ -29,8 +29,8 @@ const ENCLAVE_DEFINITIONS_UI: readonly EnclaveDefinitionUI[] = [
     label: 'SREBRENICA',
     osid_list: [
       'op:srebrenica:bostahovine_2', 'op:srebrenica:brezovice_2',
-      'op:srebrenica:donji_potocari_2', 'op:srebrenica:kalimanici',
-      'op:srebrenica:lijesce', 'op:srebrenica:ljeskovik_2',
+      'op:srebrenica:donji_potocari_2', 'op:srebrenica:mala_daljegosta_2',
+      'op:srebrenica:ljeskovik_2',
       'op:srebrenica:luka_2', 'op:srebrenica:milacevici',
       'op:srebrenica:radovcici',
       'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
@@ -50,7 +50,7 @@ const ENCLAVE_DEFINITIONS_UI: readonly EnclaveDefinitionUI[] = [
     osid_list: [
       'op:gorazde:bacci', 'op:gorazde:citluk_2',
       'op:gorazde:faocici_2', 'op:gorazde:gorazde_2',
-      'op:gorazde:hrancici', 'op:gorazde:hrusanj',
+      'op:gorazde:hrancici',
       'op:gorazde:kola', 'op:gorazde:kolovarice',
       'op:gorazde:mravinjac_2', 'op:gorazde:novakovici',
       'op:gorazde:osjecani_2', 'op:gorazde:semihova_2',
@@ -75,7 +75,7 @@ const ENCLAVE_DEFINITIONS_UI: readonly EnclaveDefinitionUI[] = [
     faction: 'HRHB',
     label: 'KISELJAK',
     osid_list: [
-      'op:kiseljak:azapovici_2', 'op:kiseljak:borina',
+      'op:kiseljak:azapovici_2',
       'op:kiseljak:brnjaci_2', 'op:kiseljak:gromiljak_2',
       'op:kiseljak:kiseljak_2',
       'op:kresevo:kresevo_2', 'op:kresevo:polje_2',

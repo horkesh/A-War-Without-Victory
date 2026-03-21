@@ -891,7 +891,7 @@ export async function initializePoliticalControllers(
         masterBySid.set(entry.sid, entry);
     }
 
-    // Post-merge (2026-03-03): settlement graph may have 744 OSIDs while master still has 753 (9 merged away).
+    // Post-merge (2026-03-21): settlement graph has 712 OSIDs (32 micro-OSIDs < 1 km² merged).
     // Use only master entries that exist in the graph; drop the rest (merged-away IDs) and warn.
     const extraMasterSids: string[] = [];
     for (const sid of masterBySid.keys()) {
@@ -1010,10 +1010,7 @@ export async function initializePoliticalControllers(
     return { applied: true, counts };
 }
 
-/**
- * Compute initial political controllers using mun1990_id lookup.
- * Phase E1: When use1990 is true, every settlement MUST have mun1990_id; every mun1990_id MUST be in mapping.
- */
+/*
 function computeInitialPoliticalControllersFromMun1990(
     settlementGraph: LoadedSettlementGraph,
     mapping: Record<string, PoliticalControllerId>,
@@ -1047,6 +1044,7 @@ function computeInitialPoliticalControllersFromMun1990(
 
     return controllers;
 }
+*/
 
 function resolveSettlementOverride(
     sid: SettlementId,

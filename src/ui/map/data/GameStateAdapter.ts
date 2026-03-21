@@ -98,7 +98,7 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
     { id: 'gorazde', display_name: 'Gorazde', faction: 'RBiH', osid_list: [
         'op:gorazde:bacci', 'op:gorazde:citluk_2',
         'op:gorazde:faocici_2', 'op:gorazde:gorazde_2',
-        'op:gorazde:hrancici', 'op:gorazde:hrusanj',
+        'op:gorazde:hrancici',
         'op:gorazde:kola', 'op:gorazde:kolovarice',
         'op:gorazde:mravinjac_2', 'op:gorazde:novakovici',
         'op:gorazde:osjecani_2', 'op:gorazde:semihova_2',
@@ -108,8 +108,8 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
     { id: 'sarajevo', display_name: 'Sarajevo', faction: 'RBiH', osid_prefixes: ['op:centar_sarajevo:', 'op:novo_sarajevo:', 'op:stari_grad_sarajevo:', 'op:novi_grad_sarajevo:'] },
     { id: 'srebrenica', display_name: 'Srebrenica', faction: 'RBiH', osid_list: [
         'op:srebrenica:bostahovine_2', 'op:srebrenica:brezovice_2',
-        'op:srebrenica:donji_potocari_2', 'op:srebrenica:kalimanici',
-        'op:srebrenica:lijesce', 'op:srebrenica:ljeskovik_2',
+        'op:srebrenica:donji_potocari_2', 'op:srebrenica:mala_daljegosta_2',
+        'op:srebrenica:ljeskovik_2',
         'op:srebrenica:luka_2', 'op:srebrenica:milacevici',
         'op:srebrenica:radovcici',
         'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
@@ -118,7 +118,7 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
     { id: 'zepa', display_name: 'Zepa', faction: 'RBiH', osid_list: ['op:rogatica:zepa_2'] },
     // HRHB enclaves (Bosniak-Croat conflict)
     { id: 'kiseljak', display_name: 'Kiseljak', faction: 'HRHB', osid_list: [
-        'op:kiseljak:azapovici_2', 'op:kiseljak:borina',
+        'op:kiseljak:azapovici_2',
         'op:kiseljak:brnjaci_2', 'op:kiseljak:gromiljak_2',
         'op:kiseljak:kiseljak_2',
         'op:kresevo:kresevo_2', 'op:kresevo:polje_2',
