@@ -50,9 +50,9 @@ The Bosniak-Croat conflict (October 1992 – March 1994) was a war-within-a-war 
 
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| CB brigade redistribution | P1 | 5 brigades in 6 sectors — 5/6 empty. Need front distribution. |
-| CB operations | P1 | Corps doesn't launch operations. 3 battles in 16 war weeks. |
-| Kiseljak/Vitez pocket separation | P1 | Historically two distinct enclaves. Currently one territory. |
+| CB brigade redistribution | **FIXED** | 3 mandatory brigades failing to spawn (mun1990_id cross-boundary bug). 7→10 brigades. |
+| CB operations | **FIXED** | Added Lašva Valley Offensive priority (w40-100). Gates correctly prevent ops before war starts. |
+| Kiseljak/Vitez pocket separation | **FIXED** | Added 3 HRHB enclaves (Kiseljak, Lašva Valley, Žepče). Pockets already geographically separate. |
 | ARBiH offensive response | P2 | 3rd/4th Corps need offensive doctrine against HRHB post-war-start. |
 | East Mostar siege mechanics | P2 | Event fires but no mechanical siege (supply cut, enclave state). |
 | Abdic APWB (w77) | P3 | Formation spawn, 5th Corps split, Bihac internal front. |
@@ -118,13 +118,16 @@ The Bosniak-Croat conflict (October 1992 – March 1994) was a war-within-a-war 
 
 ## Calibration Impact
 
-| Metric | Before | After |
-|--------|--------|-------|
-| 40w area-weighted | 91.2% | **91.4% (+0.2pp)** |
-| HVO Central Bosnia sectors | 0 | **6** |
-| HRHB brigade readiness | 0/29 active | **29/29 active** |
-| Blaskic commanding | Nothing | **OZ Central Bosnia** |
-| HRHB-RBiH battles (56w) | 0 | **3** |
+| Metric | Before | After P1 | After P1 Backlog |
+|--------|--------|----------|------------------|
+| 40w area-weighted | 91.2% | 91.4% (+0.2pp) | **91.0% (-0.4pp)** |
+| HVO Central Bosnia sectors | 0 | 6 | **6** |
+| CB brigades | 7 | 7 | **10 (+3 spawn fix)** |
+| HRHB enclaves | 0 | 0 | **3 (Kiseljak, Lašva, Žepče)** |
+| HRHB brigade readiness | 0/29 active | 29/29 active | **29/29 active** |
+| Blaskic commanding | Nothing | OZ Central Bosnia | **OZ Central Bosnia** |
+| HRHB-RBiH battles (56w) | 0 | 3 | **3 (40w too short for war)** |
+| CB offensive doctrine | None | None | **Lašva Valley Offensive (w40-100)** |
 
 ---
 

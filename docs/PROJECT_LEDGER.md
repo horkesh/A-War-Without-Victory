@@ -1,7 +1,29 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** UI Overhaul Master Plan COMPLETE (Phases 0-5). Army HQ Modal fully operational. Wood/paper textures. Keyboard shortcuts. Map atmosphere. Command Briefing actionable.
+**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** UI Overhaul Master Plan COMPLETE (Phases 0-5). Army HQ Modal fully operational. Wood/paper textures. Keyboard shortcuts. Map atmosphere. Command Briefing actionable. Sector combat ratings pipeline fix (n962).
+
+## [2026-03-21] HRHB-RBiH P1 Backlog — Enclaves, Brigade Spawns, Doctrine (n963)
+
+Three P1 items from the Bosniak-Croat Conflict Master:
+
+**Phase 1 — HRHB Enclaves:** Added Kiseljak (7 OSIDs, max_res 20), Lašva Valley (8 OSIDs, max_res 25), and Žepče (3 OSIDs, max_res 15) as HRHB enclaves. Engine was already faction-agnostic — garrison power, defense bonus, cohesion recovery all work with zero logic changes. UN airdrops correctly not_eligible for HRHB. Negotiation capital tracking extended from RBiH-only to per-faction lookup.
+
+**Phase 2 — Brigade Spawn Fix:** 3 mandatory CB brigades (95th, Kreševo, Vitezovi) were not spawning. Root cause: `buildOsidToMunFromReverseMap` used the first canonical SID's `mun1990_id` to determine an OSID's municipality, but SIDs can cross municipality boundaries (e.g. op:kresevo:kresevo_2 contains SIDs with mun1990_id="fojnica"). Fix: extract municipality directly from OSID key format `op:<mun>:<cluster>`. CB brigades: 7→10. Calibration: 91.4%→91.0%.
+
+**Phase 3 — CB Offensive Doctrine:** Added "Lašva Valley Offensive" army priority (w40-100, weight 85) targeting mixed HRHB/RBiH municipalities. RBiH targets only valid when `isRbihHrhbCombatEnabled` (after bilateral war starts). Patron directives already allow balanced stance at w40, offensive at w50.
+
+**Files:** `enclave_resilience.ts`, `buildEnclaveGeoJSON.ts`, `GameStateAdapter.ts`, `compute_capital.ts`, `oob_early_war_entry.ts`, `bot_strategy.ts`
+
+## [2026-03-21] Fix: Sector Combat Ratings Desync (n962)
+
+**Bug:** Sector panel showed all-zero combat ratings (personnel, offensive/defensive power, strength class) despite sectors having brigades. 8 sectors had no ratings; 9 orphan ratings pointed to non-existent sectors; 13 overlapping IDs had mismatched data.
+
+**Root cause:** `compute-sector-combat-ratings` (pipeline step 639) ran before `generate-bot-corps-orders` (step 888). Bot corps directives rearrange, concentrate, and split sectors via `rearrangeSectorsForCorps()`, `concentrateSectorsForOffensive()`, and `splitNonContiguousSectors()` — all of which renumber sector IDs (e.g. `:0`-`:8` becomes `:0`-`:11`). The ratings retained pre-rearrangement IDs; the saved `corps_front_sectors` had post-rearrangement IDs.
+
+**Fix:** Added `recompute-sector-combat-ratings` pipeline step (140th) immediately after `generate-bot-corps-orders`. The initial compute at step 639 is preserved for `evaluate-army-hq-gathering` (step 877) consumption. After fix: 59/59 sectors match, 0 mismatches, 0 orphans. Calibration unchanged at 91.4%.
+
+**Files:** `war_phases.ts`, `war_phase_step_order.test.ts`
 
 ## [2026-03-21] UI Overhaul Phase 5 — Surrounding UI Polish + Textures
 
@@ -375,7 +397,7 @@ Standalone tool (`scripts/harmonize_polygon_boundaries.cjs`) creates shared poly
 - **Sector highlight alignment**: All 4 visual highlight layers switched from `front-edges-hover` source to `front-lines` source (`lineType=glow` filter). White glow now trails the front line exactly.
 
 ### Stale Front Edge Fix (sim pipeline)
-`derive-osid-front-segments` ran once early in pipeline (step ~30/138) before combat resolution. By end of turn, political controllers had changed but front edges were never refreshed — e.g. Paklarevo showed RS-vs-RBiH edges against neighbors that were both RS. Added `rederive-osid-front-segments` as step 135 after all control mutations. n943: 0 stale front edges (was ~20+). Pipeline: 138 steps.
+`derive-osid-front-segments` ran once early in pipeline (step ~30/138) before combat resolution. By end of turn, political controllers had changed but front edges were never refreshed — e.g. Paklarevo showed RS-vs-RBiH edges against neighbors that were both RS. Added `rederive-osid-front-segments` as step 135 after all control mutations. n943: 0 stale front edges (was ~20+). Pipeline: 138→140 steps (n962: +activate-corps, +recompute-sector-combat-ratings).
 
 ## [2026-03-19] n942 — Displacement Fix + Routing Overhaul + Sokolac OSID Fix → 92.2% ATH
 

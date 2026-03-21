@@ -10,7 +10,7 @@
 
 ## Current State (2026-03-21, v0.4.9 — UI Overhaul COMPLETE)
 **v0.4.9.** 1246 tests, 103 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w).**
-**This session:** UI Overhaul Master Plan COMPLETE (all 5 phases). Phase 4: sub-card expansions + officer dismissal IPC. Phase 5: keyboard shortcuts (Tab/Space/O), map legend thresholds, hillshade+sepia atmosphere, wood/paper textures, command briefing actionability (corps + officer items → HQ), CorpsFrontPanel theme bridge.
+**This session:** Sector combat ratings pipeline desync fix (n962). `compute-sector-combat-ratings` ran before bot corps rearrangement — ratings had stale IDs. Added `recompute-sector-combat-ratings` after `generate-bot-corps-orders`. 59/59 match, 0 orphans. Pipeline: 140 steps.
 **Next priority:** HRHB-RBiH P1 backlog (CB brigade redistribution, CB ops not launching, Kiseljak/Vitez pocket separation). See `BOSNIAK_CROAT_CONFLICT_MASTER.md`.
 **HRHB-RBiH conflict:** P1 Backlog: CB brigade redistribution, CB operations not launching. Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
@@ -88,9 +88,9 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-19] CB brigade redistribution (P1)**: `hvo_central_bosnia` has 5 brigades in 6 sectors — 5/6 empty. Kiseljak pocket stacked, Busovaca/Vitez/NT/Zepce undefended. See BOSNIAK_CROAT_CONFLICT_MASTER.
-2. **[2026-03-19] CB operations not launching (P1)**: 3 HRHB-RBiH battles in 16 war weeks. Corps needs offensive doctrine against ARBiH + operation generation. See BOSNIAK_CROAT_CONFLICT_MASTER.
-3. **[2026-03-19] Kiseljak/Vitez pocket separation (P1)**: Historically two distinct enclaves. Currently one territory. ARBiH should sever the Fojnica/Kresevo corridor.
+1. ~~**CB brigade redistribution (P1)**~~ — FIXED n963. `buildOsidToMunFromReverseMap` mun1990_id cross-boundary bug. 7→10 brigades.
+2. ~~**CB operations not launching (P1)**~~ — FIXED n963. Lašva Valley Offensive priority w40-100. Gates correct.
+3. ~~**Kiseljak/Vitez pocket separation (P1)**~~ — FIXED n963. 3 HRHB enclaves added (Kiseljak, Lašva Valley, Žepče).
 4. **[2026-03-19] #35 SRK screening stance (P2)**: Siege corps in lowest density mode. Needs corps-specific stance floor.
 5. **[2026-03-18] Drina region 78% (P2)**: Structural gap — may need OOB or painted target adjustments.
 6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Structural.
@@ -143,7 +143,7 @@
 2. **[2026-03-19] Condition-driven war events — no hardcoded dates (IMPLEMENTED)**
    Do instead: `war_1993.json` events fire on `alliance_below` + `faction_controls_municipality` conditions. Gornji Vakuf: alliance<0.45 + player decision. War begins: alliance<0.10. Ahmici: requires war + HRHB controls Vitez.
 3. **[2026-03-19] hvo_central_bosnia activation — war-phase activate-corps step (IMPLEMENTED)**
-   Do instead: `war_phases.ts` step `activate-corps` creates corps formations from OOB at their `available_from` turn. CB activates at w10. Without this, CB never exists as a formation in war-start scenarios. Pipeline: 139 steps.
+   Do instead: `war_phases.ts` step `activate-corps` creates corps formations from OOB at their `available_from` turn. CB activates at w10. Without this, CB never exists as a formation in war-start scenarios. Pipeline: 140 steps.
 4. **[2026-03-19] Sector consolidation: brigade-presence protects enclave corps (IMPLEMENTED)**
    Do instead: `consolidateCrossCorpsFronts` in `sector_territory.ts` — if ANY edge in a component has a brigade of the minority corps, protect ALL edges of that corps in the component. Without this, isolated enclave corps (CB at Kiseljak) get drained edge-by-edge.
 5. **[2026-03-19] HRHB readiness: no reversion from active to forming (IMPLEMENTED)**
@@ -304,7 +304,7 @@
     Do instead: `apr1992.json` `doctrine_phases` overrides `FACTION_DOCTRINE_PHASES` in code. Always edit timeline JSON first.
 
 ## Invariant Assertions (n648)
-1. **[2026-03-17] 5 post-pipeline assertions in war_phases.ts (138 steps)**
+1. **[2026-03-21] 5 post-pipeline assertions in war_phases.ts (140 steps)**
    Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
 
 ## Engine Runtime Patterns

@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-19 (isStyleLoaded init timing + TopoJSON topology lesson + equipment rework + displacement overhaul)
+> Last updated: 2026-03-21 (sector combat ratings pipeline desync fix)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -8,6 +8,18 @@
 ---
 
 ## Recently Violated (needs reinforcement)
+
+### [Data] OSID key embeds the municipality — never trust canonical SID mun1990_id for OSID→mun mapping (2026-03-21) — NEW
+- **Context**: `buildOsidToMunFromReverseMap` used the first canonical SID's `mun1990_id` to determine an OSID's municipality. But SIDs can cross municipality boundaries — e.g. `op:kresevo:kresevo_2` contains SIDs whose `mun1990_id` is "fojnica". This caused `factionHasPresenceInMun` to return false for kresevo, blocking 3 mandatory HRHB brigade spawns (95th, Kreševo, Vitezovi).
+- **Wrong approach**: Assuming all SIDs in an OSID share the same `mun1990_id`. The OSID clustering is geographic (proximity-based), not municipality-bounded. A cluster near a municipality border can contain SIDs from both municipalities.
+- **Right approach**: Extract municipality directly from the OSID key format `op:<mun>:<cluster>`. The OSID naming convention is canonical — `parts[1]` is always the municipality slug. This is faster and immune to cross-boundary SID topology.
+- **Do instead**: When you need an OSID's municipality, use `osid.split(':')[1]`, not a reverse lookup through canonical SIDs. The OSID key is the authoritative source for municipality membership.
+
+### [Pipeline] Derived data computed before a mutation step is stale after it — recompute or move (2026-03-21) — NEW
+- **Context**: `compute-sector-combat-ratings` (step 639) ran before `generate-bot-corps-orders` (step 888). Bot directives rearrange, concentrate, and split sectors — renumbering their IDs. The saved `corps_front_sectors` had post-rearrangement IDs, but `sector_combat_ratings` retained pre-rearrangement IDs. Result: 8 sectors with no ratings, 9 orphan ratings, 13 data mismatches. The sector panel showed all-zero combat stats.
+- **Wrong approach**: Computing derived data once and assuming the source won't change. The pipeline has 140 steps; any step that mutates the source invalidates prior derivations.
+- **Right approach**: Either (a) move the derivation step AFTER all mutations, or (b) add a recompute step after the last mutation. In this case, the initial compute serves `evaluate-army-hq-gathering` (step 877), so we added a second `recompute-sector-combat-ratings` after step 888.
+- **Do instead**: When adding a pipeline step that mutates a data structure (sectors, formations, front edges), grep for ALL steps that DERIVE from that structure and check their pipeline position. If any derivation runs BEFORE the mutation, the derived data is stale in the final save. The pattern: `state.X = compute(state.Y)` is valid only if no later step mutates `state.Y`. Use `grep -n "name:" war_phases.ts` to audit step ordering.
 
 ### [MapLibre] visibility:hidden > display:none for stable context (2026-03-20)
 - **Problem**: Toggling `display:none` on a MapLibre container (like the Minimap) frequently causes layer re-render failures or blank screens if context isn't handled perfectly (M1 - P1 UI Audit).
