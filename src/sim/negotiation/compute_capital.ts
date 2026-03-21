@@ -305,13 +305,16 @@ function computeEnclaveData(state: GameState, faction: FactionId): {
     held: string[];
     lost: string[];
 } {
-    // Known enclaves for tracking
-    const KNOWN_ENCLAVES = ['sarajevo', 'srebrenica', 'zepa', 'gorazde', 'bihac'];
+    // Known enclaves for tracking — RBiH and HRHB both have besieged pockets
+    const FACTION_ENCLAVES: Record<string, string[]> = {
+        RBiH: ['sarajevo', 'srebrenica', 'zepa', 'gorazde', 'bihac'],
+        HRHB: ['kiseljak', 'lasva_valley', 'zepce'],
+    };
+    const KNOWN_ENCLAVES = FACTION_ENCLAVES[faction];
     const held: string[] = [];
     const lost: string[] = [];
 
-    // Only relevant for RBiH (enclave defender)
-    if (faction !== 'RBiH') return { held: [], lost: [] };
+    if (!KNOWN_ENCLAVES) return { held: [], lost: [] };
 
     const enclaveState = (state.military as any).enclave_state;
     if (!enclaveState) return { held: KNOWN_ENCLAVES, lost: [] };

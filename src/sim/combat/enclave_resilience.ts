@@ -2,11 +2,8 @@
  * B4 + Phase C: Enclave resilience system.
  *
  * Known enclaves that historically held despite isolation:
- * - Bihać pocket (5th Corps, 1992-1995)
- * - Srebrenica (1993-1995, fell July 1995)
- * - Žepa (1993-1995, fell July 1995)
- * - Goražde (1992-1995, never fell)
- * - Sarajevo (besieged 1992-1996, never fell)
+ * RBiH: Bihać pocket, Srebrenica, Žepa, Goražde, Sarajevo (1992-1995)
+ * HRHB: Kiseljak, Lašva Valley (Vitez/Busovača), Žepče (April 1993 – March 1994)
  *
  * Mechanics:
  * - Resilience value [0, MAX_ENCLAVE_RESILIENCE] per enclave, grows under isolation, decays under adequate supply.
@@ -121,7 +118,46 @@ const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
         resilience_start_turn: 0,   // Sarajevo barricades went up March 1 1992 — defense from day one
         initial_resilience: 20,     // Pre-organized defense: Patriotic League, TDF, barricades, urban terrain knowledge
         capital_osid: 'op:centar_sarajevo:centar_sarajevo',
-    }
+    },
+    // ── HRHB enclaves (Bosniak-Croat conflict, April 1993+) ─────────────────
+    // Kiseljak and Vitez/Busovaca pockets formed when ARBiH severed the
+    // Fojnica corridor. Žepče was an isolated northern HVO pocket. All three
+    // held until the Washington Agreement (March 1994).
+    {
+        id: 'kiseljak',
+        faction: 'HRHB',
+        osid_list: [
+            'op:kiseljak:azapovici_2', 'op:kiseljak:borina',
+            'op:kiseljak:brnjaci_2', 'op:kiseljak:gromiljak_2',
+            'op:kiseljak:kiseljak_2',
+            'op:kresevo:kresevo_2', 'op:kresevo:polje_2',
+        ],
+        resilience_start_turn: 40,  // Pocket forms after Bosniak-Croat war starts (~April 1993)
+        capital_osid: 'op:kiseljak:kiseljak_2',
+    },
+    {
+        id: 'lasva_valley',
+        faction: 'HRHB',
+        osid_list: [
+            'op:vitez:vitez_2',
+            'op:busovaca:bare_2', 'op:busovaca:buselji_2',
+            'op:busovaca:busovaca_2', 'op:busovaca:polje_2',
+            'op:novi_travnik:rankovici_2', 'op:novi_travnik:rat_2',
+            'op:novi_travnik:ruda_2',
+        ],
+        resilience_start_turn: 40,
+        capital_osid: 'op:vitez:vitez_2',
+    },
+    {
+        id: 'zepce',
+        faction: 'HRHB',
+        osid_list: [
+            'op:zepce:ozimica_2', 'op:zepce:viniste_2',
+            'op:zepce:zepce_2',
+        ],
+        resilience_start_turn: 40,
+        capital_osid: 'op:zepce:zepce_2',
+    },
 ] as const;
 
 /**
@@ -137,6 +173,10 @@ const ENCLAVE_CONFIG: Record<string, { max_resilience: number; growth_mult: numb
     zepa: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },           // Tiny, most isolated, ~3k pop
     gorazde: { max_resilience: 35, growth_mult: 0.45, max_personnel: 800 },        // Medium, besieged, ~37k prewar but under siege
     sarajevo: { max_resilience: 45, growth_mult: 0.60, max_personnel: 1500 },      // Largest, tunnel supply, 300k pop
+    // HRHB enclaves — smaller, less organized than RBiH equivalents, but held until Washington Agreement
+    kiseljak: { max_resilience: 20, growth_mult: 0.30, max_personnel: 500 },      // ~25k Croat pop, isolated, Nikola Subic-Zrinski + Ban Jelacic
+    lasva_valley: { max_resilience: 25, growth_mult: 0.35, max_personnel: 700 },  // Vitez/Busovaca, HVO command hub, ~30k Croat pop
+    zepce: { max_resilience: 15, growth_mult: 0.25, max_personnel: 400 },         // Smallest, most isolated northern pocket
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

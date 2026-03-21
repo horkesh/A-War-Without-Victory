@@ -69,6 +69,39 @@ const ENCLAVE_DEFINITIONS_UI: readonly EnclaveDefinitionUI[] = [
       'op:novi_grad_sarajevo:',
     ],
   },
+  // HRHB enclaves (Bosniak-Croat conflict, April 1993+)
+  {
+    id: 'kiseljak',
+    faction: 'HRHB',
+    label: 'KISELJAK',
+    osid_list: [
+      'op:kiseljak:azapovici_2', 'op:kiseljak:borina',
+      'op:kiseljak:brnjaci_2', 'op:kiseljak:gromiljak_2',
+      'op:kiseljak:kiseljak_2',
+      'op:kresevo:kresevo_2', 'op:kresevo:polje_2',
+    ],
+  },
+  {
+    id: 'lasva_valley',
+    faction: 'HRHB',
+    label: 'LAŠVA VALLEY',
+    osid_list: [
+      'op:vitez:vitez_2',
+      'op:busovaca:bare_2', 'op:busovaca:buselji_2',
+      'op:busovaca:busovaca_2', 'op:busovaca:polje_2',
+      'op:novi_travnik:rankovici_2', 'op:novi_travnik:rat_2',
+      'op:novi_travnik:ruda_2',
+    ],
+  },
+  {
+    id: 'zepce',
+    faction: 'HRHB',
+    label: 'ŽEPČE',
+    osid_list: [
+      'op:zepce:ozimica_2', 'op:zepce:viniste_2',
+      'op:zepce:zepce_2',
+    ],
+  },
 ] as const;
 
 export interface EnclavePolygonProperties {

@@ -8,7 +8,7 @@
 
 import type {
     AoROrderView, AttackOrderView, CommandBriefingItemView, CommandBriefingSeverity, CommandBriefingView,
-    CorpsFrontSectorView, EnclaveResilienceView, FogOfWarView, FormationView, LoadedGameState,
+    CorpsFrontSectorView, EnclaveResilienceView, FactionId, FogOfWarView, FormationView, LoadedGameState,
     MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
 } from './types';
@@ -90,7 +90,7 @@ function getAirdropAllocationValue(state: any, enclaveId: string): number {
 const ENCLAVE_UI_DEFINITIONS: Array<{
     id: string;
     display_name: string;
-    faction: 'RBiH';
+    faction: string;
     osid_prefixes?: string[];
     osid_list?: string[];
 }> = [
@@ -116,6 +116,24 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
         'op:srebrenica:sulice_2',
     ] },
     { id: 'zepa', display_name: 'Zepa', faction: 'RBiH', osid_list: ['op:rogatica:zepa_2'] },
+    // HRHB enclaves (Bosniak-Croat conflict)
+    { id: 'kiseljak', display_name: 'Kiseljak', faction: 'HRHB', osid_list: [
+        'op:kiseljak:azapovici_2', 'op:kiseljak:borina',
+        'op:kiseljak:brnjaci_2', 'op:kiseljak:gromiljak_2',
+        'op:kiseljak:kiseljak_2',
+        'op:kresevo:kresevo_2', 'op:kresevo:polje_2',
+    ] },
+    { id: 'lasva_valley', display_name: 'Lasva Valley', faction: 'HRHB', osid_list: [
+        'op:vitez:vitez_2',
+        'op:busovaca:bare_2', 'op:busovaca:buselji_2',
+        'op:busovaca:busovaca_2', 'op:busovaca:polje_2',
+        'op:novi_travnik:rankovici_2', 'op:novi_travnik:rat_2',
+        'op:novi_travnik:ruda_2',
+    ] },
+    { id: 'zepce', display_name: 'Zepce', faction: 'HRHB', osid_list: [
+        'op:zepce:ozimica_2', 'op:zepce:viniste_2',
+        'op:zepce:zepce_2',
+    ] },
 ];
 
 function deriveEnclaveSupplyState(
@@ -1663,7 +1681,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                     supply_state: deriveEnclaveSupplyState(key, rawSupplyStateByOsid, 0, false, entry),
                     airdrop_status: enclaveDef?.faction === 'RBiH' ? 'not_isolated_long_enough' : 'not_eligible',
                     airdrop_allocation: getAirdropAllocationValue(state as any, key),
-                    faction: enclaveDef?.faction ?? null,
+                    faction: (enclaveDef?.faction as FactionId | undefined) ?? undefined,
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
             } else if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
@@ -1684,7 +1702,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                             ? 'not_isolated_long_enough'
                             : 'not_eligible',
                     airdrop_allocation: getAirdropAllocationValue(state as any, key),
-                    faction: enclaveDef?.faction ?? null,
+                    faction: (enclaveDef?.faction as FactionId | undefined) ?? undefined,
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
             }
