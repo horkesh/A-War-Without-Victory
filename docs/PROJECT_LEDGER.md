@@ -1,7 +1,13 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** Visual Overhaul COMPLETE (9 phases). Army HQ Modal Phases 0-4 COMPLETE (shell, overview, drill-down, actions, deep drill-down + officer dismissal). ArmyDetail retired.
+**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** UI Overhaul Master Plan COMPLETE (Phases 0-5). Army HQ Modal fully operational. Wood/paper textures. Keyboard shortcuts. Map atmosphere. Command Briefing actionable.
+
+## [2026-03-21] UI Overhaul Phase 5 — Surrounding UI Polish + Textures
+
+Keyboard shortcuts: Tab/Shift+Tab (cycle corps in HQ or sidebar), Space (advance turn), O (toggle operations panel). Map legend enriched with numeric thresholds (supply, morale, defense density, casualties). Map atmosphere: hillshade 0.5→0.65, sepia(0.08)+saturate(0.95) warm tint. Texture integration: wood grain on HQ table surface, parchment on cards (both 512x512 WebP behind semi-transparent gradients). Command Briefing now generates corps cohesion (<40%) and pending officer items — clicking navigates to Army HQ with corps expanded. CorpsFrontPanel: gradient bridge + warm paper interior (#f0e8d8).
+
+**Files:** `useKeyboardShortcuts.ts`, `MapModeLegend.tsx`, `awwv_map_style.json`, `MapContainer.tsx`, `ArmyHQModal.tsx`, `ArmyHQCorpsCard.tsx`, `CommandBriefingLayer.tsx`, `CorpsFrontPanel.tsx`, `GameStateAdapter.ts`, `types.ts`, `texture_wood_dark.webp`, `texture_paper_cream.webp`
 
 ## [2026-03-21] Army HQ Modal Phase 4 — Deep Drill-Down + Officer Dismissal
 
