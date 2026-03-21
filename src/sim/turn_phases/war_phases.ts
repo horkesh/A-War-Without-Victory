@@ -930,6 +930,19 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // Recompute after bot corps orders: generateCorpsDirectives rearranges,
+        // concentrates, and splits sectors — renumbering their IDs. The initial
+        // compute at step 639 used pre-rearrangement IDs; this refresh aligns
+        // sector_combat_ratings with the final corps_front_sectors saved to state.
+        name: 'recompute-sector-combat-ratings',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.military.corps_front_sectors) return;
+            const supplyByOsid = context.report?.supply_resolution?.supply_state_by_osid ?? null;
+            computeSectorCombatRatings(context.state, supplyByOsid);
+        }
+    },
+    {
         name: 'generate-army-reserve-requests',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -2288,6 +2301,17 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             computeNegotiationCapital(context.state);
+        }
+    },
+    {
+        name: 'assemble-command-briefing',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const playerFaction = context.state.meta.player_faction;
+            if (!playerFaction) return;
+            const { assembleCommandBriefing } = require('../briefing/collect_briefing.js');
+            const briefing = assembleCommandBriefing(context.state, playerFaction);
+            (context.state.military as any).last_briefing = briefing;
         }
     },
     {

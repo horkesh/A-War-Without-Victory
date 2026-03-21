@@ -68,6 +68,8 @@ describe('war-phase step ordering', () => {
         // +1 from ai-corps-dialogue (officers who talk back — cosmetic flavor, 2026-03-18).
         // +1 from rederive-osid-front-segments (refresh front edges after all control mutations, 2026-03-19).
         // +1 from activate-corps (war-phase corps activation for late-starting corps like hvo_central_bosnia)
-        expect(stepNames.length).toBe(139);
+        // +1 from recompute-sector-combat-ratings (refresh after bot corps rearranges/renumbers sectors)
+        // +1 from assemble-command-briefing (sim-side briefing collector)
+        expect(stepNames.length).toBe(141);
     });
 });
