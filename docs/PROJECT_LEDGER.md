@@ -1,7 +1,17 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **92.5% area-weighted (40w).** Sarajevo 86.8%. Calibration fixes: Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975), Višegrad operation redesign (n980).
+**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.5% area-weighted (40w, 712 OSIDs).** Calibration fixes: micro-OSID merge (n982), Op Višegrad reorder (n987), Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975).
+
+## [2026-03-21] Micro-OSID Merge: 744 → 712 OSIDs (n982-n987)
+
+**Problem:** 32 OSIDs under 1 km² (down to 0.01 km²) were geometry artifacts from the settlement clustering pipeline. The worst offender, `bogdasici` (0.0 km²), caused Op Višegrad to waste 3 turns fighting over a zero-area speck — RS would capture it, RBiH would retake it, repeat.
+
+**Fix:** `tools/merge_micro_osids.cjs` merges each micro-OSID into its largest same-municipality neighbor. All data files updated: `osid_areas.json`, `operational_contact_graph.json` (712 nodes, 2047 edges), `operational_political_control.json`, `canonical_to_operational_map.json` (22 SIDs redirected), `painted_control_jan1993.json`, `oob_brigades.json` (11 home_osid redirects). Source updates: enclave lists (Srebrenica, Goražde, Kiseljak), operation objectives (Višegrad, Drina, Srebrenica Ring, Kotor Varoš), `local_truces.ts` Kiseljak exclusion, `patron_pressure.ts` + benchmarks 744→712.
+
+**Op Višegrad reorder (n987):** Objectives chained southeast-first (visegrad_2 → drinsko → medjedja_2 → velji_lug) to support Rogatica front. Butterfly effect: +3 RS OSIDs net (Kalesija×2, Kalinovik×1), zero regressions.
+
+**Result:** n987 = 91.5% area-weighted (+0.3pp), RS w40=355/712 (49.9%). 712 OSIDs confirmed in save. Merge map: `tools/micro_osid_merge_map.json`.
 
 ## [2026-03-21] Supply-Based Offensive Constraint (n975)
 
@@ -3188,7 +3198,7 @@ P0: Fix corps operation relaunch — investigate `generateCorpsDirectives()` and
 
 ## Non-negotiables
 
-1. **OSID Architecture:** Operational Settlement IDs (`op:municipality:slug`, 744 total) are the canonical spatial unit. `political_controllers` keyed by OSIDs. Contact graph between OSIDs. Corps front sectors partition OSIDs. Area-weighted territory percentages via `data/derived/operational/osid_areas.json` (51,337 km² total).
+1. **OSID Architecture:** Operational Settlement IDs (`op:municipality:slug`, 712 total — was 744, 32 micro-OSIDs < 1 km² merged 2026-03-21) are the canonical spatial unit. `political_controllers` keyed by OSIDs. Contact graph between OSIDs. Corps front sectors partition OSIDs. Area-weighted territory percentages via `data/derived/operational/osid_areas.json` (51,337 km² total).
 
 2. **Canonical Faction IDs:** `RBiH`, `RS`, `HRHB` only. No aliases in code or data.
 
@@ -3270,7 +3280,7 @@ P0: Fix corps operation relaunch — investigate `generateCorpsDirectives()` and
 
 **Spatial Architecture:**
 
-1. **OSIDs** (`op:municipality:slug`): 744 operational settlements (was 753; 9 degenerate < 0.01 km² merged 2026-03-03). Canonical spatial unit for political control, combat, displacement, and corps sectors. Keyed in `political_controllers`, contact graph, front edges. Area data: `data/derived/operational/osid_areas.json` (51,337 km² total).
+1. **OSIDs** (`op:municipality:slug`): 712 operational settlements (was 753→744→712; 9 degenerate merged 2026-03-03, 32 micro-OSIDs < 1 km² merged 2026-03-21 via `tools/merge_micro_osids.cjs`). Canonical spatial unit for political control, combat, displacement, and corps sectors. Keyed in `political_controllers`, contact graph, front edges. Area data: `data/derived/operational/osid_areas.json` (51,337 km² total).
 
 2. **Settlements** (`sid`, S-prefixed): 1991 census entities. Used for population data, displacement routing, recruitment. Linked to municipalities via `mid`.
 
@@ -3287,7 +3297,7 @@ P0: Fix corps operation relaunch — investigate `generateCorpsDirectives()` and
 | 1 | 2026-01-24 | Path A architecture: polygons (poly_id) separate from settlements (sid), linked via municipalities (mid) |
 | 2 | 2026-02-08 | MVP declared; A1 base map frozen |
 | 3 | 2026-02-14 | Corps-directed AoR: Army→Corps→Brigade bot AI hierarchy |
-| 4 | 2026-02-22 | OSID as canonical operational map unit (753 settlements; reduced to 744 on 2026-03-03 via degenerate merge) |
+| 4 | 2026-02-22 | OSID as canonical operational map unit (753→744→712: 9 degenerate merged 2026-03-03, 32 micro-OSIDs < 1 km² merged 2026-03-21) |
 | 5 | 2026-02-25 | RS_EARLY_WAR_END_WEEK = 20; RBiH general_defensive through year one |
 | 6 | 2026-02-28 | React+MapLibre as canonical player-facing GUI (replaces tactical_map.html) |
 | 7 | 2026-02-28 | Peace/War lifecycle replaces phase_i/phase_ii |

@@ -8,15 +8,15 @@
 ```
 data/derived/settlements_wgs84_1990.geojson     (5,823 canonical settlement polygons)
         ↓ derive_operational_settlements.ts
-        ↓   Phase 1-4: Cluster canonical settlements → 744 OSIDs
+        ↓   Phase 1-4: Cluster canonical settlements → 712 OSIDs (was 744; 32 micro-OSIDs merged 2026-03-21)
         ↓   Phase 5a: Build global TopoJSON topology (shared arcs)
         ↓   Phase 5b: Simplify topology (shared arcs simplified together)
         ↓   Phase 5c: topojsonClient.merge() per cluster
         ↓   Phase 5d: Vertex snapping — snap near-miss boundary vertices between clusters
         ↓   Phase 6: normalizeGeometry() — close rings, remove tiny holes, fix winding
         ↓
-data/derived/operational/operational_settlements.geojson  (744 OSID polygons)
-data/derived/operational/operational_contact_graph.json   (2,118 adjacency edges)
+data/derived/operational/operational_settlements.geojson  (712 OSID polygons, after micro-OSID merge)
+data/derived/operational/operational_contact_graph.json   (2,047 adjacency edges)
 ```
 
 ## Known Issues
@@ -107,6 +107,6 @@ Same three-step algorithm as game renderer, plus:
 | `src/map/front_edges.ts` | Front edge computation (computeFrontEdgesOsid) |
 | `src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts` | Game front line renderer |
 | `src/ui/map/map/builders/geojsonLookup.ts` | Centroid lookup (enriched with SID aliases) |
-| `data/derived/operational/operational_settlements.geojson` | 744 OSID polygons |
-| `data/derived/operational/operational_contact_graph.json` | 2,118 adjacency edges |
+| `data/derived/operational/operational_settlements.geojson` | 712 OSID polygons |
+| `data/derived/operational/operational_contact_graph.json` | 2,047 adjacency edges |
 | `data/derived/operational/canonical_to_operational_map.json` | 5,797 SID→OSID mappings |

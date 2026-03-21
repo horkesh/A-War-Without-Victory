@@ -36,7 +36,7 @@
 - **Artifact:** `data/derived/political_control_data.json` is the **canonical source** for initial (Turn 0) political control used by warroom and all map viewers.
 - **Produced by:** `npm run map:viewer:political-control-data` (script: `scripts/map/build_political_control_data.ts`).
 - **Contract:** Warroom and map UIs must use this file for initial control display; no alternate source for that purpose. When the artifact includes `control_status` or contested flags, those drive contested overlays (e.g. crosshatch) in map UIs.
-- **OSID-keyed init (dev runner, scenario with operational data):** When the settlement graph is OSID-keyed (744 entries), political control init uses `data/derived/operational/operational_initial_master.json`. **After any OSID merge** run `npm run map:derive:operational-initial-master` so this file matches `operational_settlements.geojson` (see MAP_BUILD_SYSTEM.md §Operational (OSID) layer).
+- **OSID-keyed init (dev runner, scenario with operational data):** When the settlement graph is OSID-keyed (712 entries), political control init uses `data/derived/operational/operational_initial_master.json`. **After any OSID merge** run `npm run map:derive:operational-initial-master` so this file matches `operational_settlements.geojson` (see MAP_BUILD_SYSTEM.md §Operational (OSID) layer).
 
 ### Tactical Map System (standalone map GUI)
 - **Engineering reference:** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
