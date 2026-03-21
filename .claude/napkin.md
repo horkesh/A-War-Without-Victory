@@ -10,9 +10,8 @@
 
 ## Current State (2026-03-21, v0.5.4 — All v0.5.x Milestones Delivered)
 **v0.5.4.** 1261 tests, 106 suites. tsc clean. **Latest calibration: 93.1% area-weighted (ATH), 644/712 count (90.4%). RS w40 0.511 PASS. 4/4 enclaves. 5/7 Herzegovina.**
-**This session:** Micro-OSID merge (744→712), Posavina Corridor restructure, Žepa-Teočak seesaw fix, Herzegovina takeover (JNA synthetic corps + triggered consolidation op), Army HQ Nerve Center UI rework. 7 engine improvements: MAX_ATTACKERS 3→12, planning_duration override, preparation-aware assembly, synthetic JNA corps, MAX_TOTAL_FAILURES 5→8, per-axis zero-progress abort (parallel axis execution), initializeCorpsCommand after phantom spawn.
-**Next priority:** Kalinovik golubici_2 + sela_2 (OOB — Kalinovik brigade too weak at 447 pers by w16, need stronger axis force or additional brigade), 165th Mountain displacement (1st Corps too wide), RS w20 benchmark (0.499 vs 0.54), v0.6 scope lock.
-**Key lessons (19 this session):** Micro-OSID butterfly effects, coupled anchors, painted-faction objectives, diff yesterday first, synthetic JNA corps, per-axis parallel execution, ping-pong ≠ failure, preparation overrides planning_duration, worktree tsx isolation failure.
+**This session (latest):** Settlement Timeline (12 event types, 5 engine tracking features), displacement adapter double-counting fix, Deck.gl settlement labels (MapLibre symbols broken), units toggle fix, settlement panel overhaul (Municipality tab, ethnic numbers), Posavina Corridor restructure. 23 life lessons total.
+**Next priority:** Kalinovik golubici_2 + sela_2 (OOB), 165th Mountain displacement (1st Corps too wide), RS w20 benchmark (0.499 vs 0.54), dark outside-BiH mask (proper border polygon), Army HQ Nerve Center (plan at `docs/plans/2026-03-21-army-hq-nerve-center.md`), v0.6 scope lock.
 **HRHB-RBiH conflict:** P1 Backlog ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
@@ -22,8 +21,8 @@
 **External:** Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
 
 ## Session Startup (do these EVERY session — BEFORE any work)
-1. **[2026-03-20] Visual Overhaul COMPLETE — return to engine work.**
-   Do instead: Phases 3-9 all shipped. Next priority: HRHB-RBiH P1 backlog (CB brigade redistribution, CB ops not launching, Kiseljak/Vitez pocket separation). See `BOSNIAK_CROAT_CONFLICT_MASTER.md`.
+1. **[2026-03-21] Settlement Timeline + engine tracking COMPLETE.**
+   Do instead: 12 event types wired, 5 engine persistence features shipped. Next: Kalinovik OOB, RS w20, dark BiH mask, Army HQ Nerve Center.
 2. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
    Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
    **(A) Daily Pyrrhic Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Pyrrhic team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
@@ -69,8 +68,8 @@
 7. **[2026-03-20] Nested package installations for Map UI**
    Do instead: The tactical map UI is a completely separate workspace at `src/ui/map` with its own `package.json`. Commands like `npm run dev:map` run `cd src/ui/map && npx vite`. When adding UI dependencies (like `deck.gl`), you MUST run `npm install` inside the `src/ui/map` directory, not the project root. Root `npm install --legacy-peer-deps` can break the inner Vite installation.
 
-8. **[2026-03-20] Deck.gl Scaling, Labels, and Formation Rendering**
-   Do instead: **`deckFormationCounters` defaults `true`** — Deck.gl is the primary formation render path (health bars, supply dots, status icons, op/disrupted glows, stack badges). MapLibre `formation-markers`/`formation-labels` hidden when active. Zoom-interpolation: `16px` @ Z6 to `40px` @ Z14; sync on map `zoom`. Labels: `Open Sans Regular`, `10-12px`, `~22px` offset. `classifyFeatures()` single-pass for enrichment buckets.
+8. **[2026-03-21] Deck.gl: formations (IconLayer) + settlement labels (TextLayer)**
+   Do instead: **`deckFormationCounters` defaults `true`** — clean NATO IconLayer counters only (enrichments stripped). MapLibre `formation-markers`/`formation-labels` hidden. Zoom-interpolation: `16px` @ Z6 to `40px` @ Z14. **Settlement labels**: Deck.gl TextLayer (27 cities) — MapLibre symbol layers globally broken (0 rendered features). `fontSettings: { sdf: true }`, `characterSet: 'auto'` for Bosnian diacritics. `setSettlementLabelData()` feeds from `buildMajorCityLabelGeoJSON`. Sarajevo 5 muns merged to one label.
 
 ## GUI / Map
 1. **[2026-03-20] G-2 prediction empty in ops modal**
@@ -125,8 +124,8 @@
    Do instead: All reserve logic gated by `state.meta.supply_reserves_enabled`. SIEGE_MIN_POCKET_SIZE=8. `findHeartlandComponent()` for isolated sources. HEAVY_MAINTENANCE_PER_WEAPON=0.001.
 4. **[2026-03-01] OSID/SID mismatch — never use getEffectiveSettlementSide for control**
    Do instead: `political_controllers` keyed by OSIDs in war phase. Use `buildMunControlFromOsids()` or `buildMunDominantController()`.
-5. **[2026-03-11] Displacement: per-OSID census, non-overlapping buckets, static routing, UI removal count**
-   Do instead: Use `getOsidCensusPopulation(osidRec)`. `departedByOsid` must count `displaced+killed+fled_abroad` (full removal). Event log: `state.displacement.displacement_event_log`.
+5. **[2026-03-21] Displacement: event `displaced` = total removed (killed/fled are subsets)**
+   Do instead: Use `getOsidCensusPopulation(osidRec)`. In event log, `displaced` means total people removed — `killed` and `fled_abroad` are subsets, NOT additional. Adapter: `out = displaced` (not `displaced + killed + fledAbroad`). `departedByOsid` uses `displaced` as total. Municipality `displacement_state` has separate non-overlapping `displaced_out` + `lost_population`.
 6. **[2026-02-24] OSID-keyed political_controllers init + load migration**
    Do instead: Check `isPoliticalControllersAlreadyOsidKeyed()` first. `migratePoliticalControllersToOsidIfNeeded` only for canonical SIDs.
 7. **[2026-02-28] Operational control: majority then plurality**
