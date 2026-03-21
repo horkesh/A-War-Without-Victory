@@ -164,6 +164,8 @@ function buildCommandBriefing(params: {
     internationalVisibilityPressure?: LoadedGameState['internationalVisibilityPressure'];
     ivpConsequencesActive?: LoadedGameState['ivpConsequencesActive'];
     municipalitySupportOrders?: LoadedGameState['municipalitySupportOrders'];
+    formations?: FormationView[];
+    pendingOfficerEvents?: LoadedGameState['pendingOfficerEvents'];
 }): CommandBriefingView | undefined {
     const {
         playerFaction,
@@ -175,6 +177,8 @@ function buildCommandBriefing(params: {
         internationalVisibilityPressure,
         ivpConsequencesActive,
         municipalitySupportOrders,
+        formations,
+        pendingOfficerEvents,
     } = params;
 
     if (playerFaction !== 'RS' && playerFaction !== 'RBiH' && playerFaction !== 'HRHB') {
@@ -314,6 +318,43 @@ function buildCommandBriefing(params: {
             detail: `${humanizeMunicipalitySlug(activeSupportOrder.mun_id.replace(/_/g, '-'))} is the current municipality support focus.`,
             actionLabel: 'Review support',
             target: { type: 'summary', summaryFocus: 'support' },
+        });
+    }
+
+    // Corps at critical cohesion
+    const playerCorps = (formations ?? [])
+        .filter((f) => f.faction === playerFaction && (f.kind === 'corps' || f.kind === 'corps_asset'));
+    const playerBrigades = (formations ?? [])
+        .filter((f) => f.faction === playerFaction && f.kind === 'brigade' && f.status === 'active');
+    for (const corps of playerCorps) {
+        const corpsBrigades = playerBrigades.filter((b) => b.corps_id === corps.id);
+        if (corpsBrigades.length === 0) continue;
+        const avgCohesion = corpsBrigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / corpsBrigades.length;
+        if (avgCohesion < 40) {
+            items.push({
+                id: `corps:${corps.id}`,
+                kind: 'sector',
+                severity: avgCohesion < 25 ? 'critical' : 'warning',
+                title: `${corps.name} at ${Math.round(avgCohesion)}% cohesion`,
+                detail: `${corpsBrigades.length} brigades, average cohesion critically low.`,
+                actionLabel: 'Open in HQ',
+                target: { type: 'corps', corpsId: corps.id },
+            });
+            break; // Only show worst corps
+        }
+    }
+
+    // Pending officer events
+    const unacknowledged = (pendingOfficerEvents ?? []).filter((e) => !e.acknowledged);
+    if (unacknowledged.length > 0) {
+        items.push({
+            id: 'officers:pending',
+            kind: 'support',
+            severity: 'warning',
+            title: `${unacknowledged.length} officer${unacknowledged.length !== 1 ? 's' : ''} awaiting decision`,
+            detail: 'Review pending officer replacements and assignments.',
+            actionLabel: 'Open HQ',
+            target: { type: 'officer_events' },
         });
     }
 
@@ -1661,6 +1702,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         internationalVisibilityPressure,
         ivpConsequencesActive,
         municipalitySupportOrders,
+        formations,
+        pendingOfficerEvents: state.military?.pending_officer_events as LoadedGameState['pendingOfficerEvents'],
     });
 
     return {

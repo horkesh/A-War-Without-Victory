@@ -17,6 +17,7 @@ import { SectorsSection } from './SectorsSection';
 import { OperationsSection } from './OperationsSection';
 import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
+import paperTexture from '../../assets/texture_paper_cream.webp';
 
 interface ArmyHQCorpsCardProps {
     corps: FormationView;
@@ -77,7 +78,7 @@ export function ArmyHQCorpsCard({
                 type="button"
                 onClick={onToggleExpand}
                 className="rounded-lg shadow-[1px_2px_4px_rgba(0,0,0,0.3)] overflow-hidden hover:shadow-[2px_3px_8px_rgba(0,0,0,0.4)] transition-shadow cursor-pointer"
-                style={{ background: 'linear-gradient(135deg, #f0e8d8 0%, #e4dcc8 100%)' }}
+                style={{ background: `linear-gradient(135deg, rgba(240,232,216,0.92) 0%, rgba(228,220,200,0.95) 100%), url(${paperTexture}) repeat`, backgroundSize: 'auto, 512px 512px' }}
             >
                 <div className="flex items-center justify-between px-3 py-2">
                     <span className="text-[12px] font-bold text-[#2a2016] uppercase tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
@@ -117,7 +118,7 @@ export function ArmyHQCorpsCard({
             <div
                 className={`rounded-lg shadow-[2px_3px_8px_rgba(0,0,0,0.4)] overflow-hidden col-span-full
                     ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
-                style={{ background: 'linear-gradient(135deg, #f0e8d8 0%, #e4dcc8 100%)' }}
+                style={{ background: `linear-gradient(135deg, rgba(240,232,216,0.92) 0%, rgba(228,220,200,0.95) 100%), url(${paperTexture}) repeat`, backgroundSize: 'auto, 512px 512px' }}
             >
                 {/* Header — clickable to collapse, with stance dropdown */}
                 <div className="flex items-center justify-between px-4 py-3">
@@ -172,7 +173,7 @@ export function ArmyHQCorpsCard({
             onClick={onToggleExpand}
             className={`rounded-lg shadow-[2px_3px_8px_rgba(0,0,0,0.4)] overflow-hidden hover:shadow-[3px_4px_12px_rgba(0,0,0,0.5)] transition-shadow cursor-pointer relative
                 ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
-            style={{ background: 'linear-gradient(135deg, #f0e8d8 0%, #e4dcc8 100%)' }}
+            style={{ background: `linear-gradient(135deg, rgba(240,232,216,0.92) 0%, rgba(228,220,200,0.95) 100%), url(${paperTexture}) repeat`, backgroundSize: 'auto, 512px 512px' }}
         >
             {/* Stamp overlay */}
             <div className={`absolute top-3 right-3 text-[10px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded border-2 opacity-60 ${stanceClass}`}

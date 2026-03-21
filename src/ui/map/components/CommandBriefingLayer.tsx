@@ -24,6 +24,8 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
   const setSelectedCorpsFrontSectorId = useGameStore((state) => state.setSelectedCorpsFrontSectorId);
   const setSelectedOsid = useGameStore((state) => state.setSelectedOsid);
   const setIsOperationsPanelOpen = useGameStore((state) => state.setIsOperationsPanelOpen);
+  const setSelectedArmyId = useGameStore((state) => state.setSelectedArmyId);
+  const setArmyHQExpandedCorpsId = useGameStore((state) => state.setArmyHQExpandedCorpsId);
 
   if (!commandBriefing || commandBriefing.items.length === 0) return null;
 
@@ -51,6 +53,19 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
           setSelectedOsid(item.target.osid);
         }
         return;
+      case 'corps': {
+        const faction = useGameStore.getState().loadedGameState?.player_faction;
+        if (faction) {
+          setSelectedArmyId(faction);
+          if (item.target.corpsId) setArmyHQExpandedCorpsId(item.target.corpsId);
+        }
+        return;
+      }
+      case 'officer_events': {
+        const faction = useGameStore.getState().loadedGameState?.player_faction;
+        if (faction) setSelectedArmyId(faction);
+        return;
+      }
       default:
         return;
     }

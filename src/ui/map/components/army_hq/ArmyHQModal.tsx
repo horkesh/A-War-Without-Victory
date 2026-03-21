@@ -12,6 +12,8 @@ import { Icon } from '../icons/Icon';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
+import woodTexture from '../../assets/texture_wood_dark.webp';
+import paperTexture from '../../assets/texture_paper_cream.webp';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -136,18 +138,10 @@ export function ArmyHQModal() {
             <div
                 className="relative flex-1 flex flex-col h-full overflow-hidden"
                 style={{
-                    background: 'linear-gradient(170deg, #2a2016 0%, #1e1810 40%, #161310 100%)',
+                    background: `linear-gradient(170deg, rgba(42,32,22,0.92) 0%, rgba(30,24,16,0.95) 40%, rgba(22,19,16,0.97) 100%), url(${woodTexture}) repeat`,
+                    backgroundSize: 'auto, 512px 512px',
                 }}
             >
-                {/* Wood grain overlay */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
-                    style={{
-                        backgroundImage: [
-                            'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 41px)',
-                            'repeating-linear-gradient(87deg, transparent, transparent 60px, rgba(0,0,0,0.03) 60px, rgba(0,0,0,0.03) 61px)',
-                        ].join(', '),
-                    }}
-                />
 
                 {/* Vignette */}
                 <div className="absolute inset-0 pointer-events-none"
@@ -182,7 +176,7 @@ export function ArmyHQModal() {
                     <div className="grid grid-cols-[3fr_2fr] gap-4 mb-6">
                         {/* Army Commander Card */}
                         <div className="rounded-lg shadow-[2px_3px_8px_rgba(0,0,0,0.4)] overflow-hidden"
-                             style={{ background: 'linear-gradient(135deg, #f0e8d8 0%, #e4dcc8 100%)' }}>
+                             style={{ background: `linear-gradient(135deg, rgba(240,232,216,0.92) 0%, rgba(228,220,200,0.95) 100%), url(${paperTexture}) repeat`, backgroundSize: 'auto, 512px 512px' }}>
                             <div className="px-4 py-3 border-b border-[#c8b898]">
                                 <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#8a7a60]">Army Commander</div>
                                 <div className="text-[15px] font-bold text-[#2a2016]" style={{ fontFamily: 'Georgia, serif' }}>
@@ -200,7 +194,7 @@ export function ArmyHQModal() {
 
                         {/* Strategic Situation Card */}
                         <div className="rounded-lg shadow-[2px_3px_8px_rgba(0,0,0,0.4)] overflow-hidden"
-                             style={{ background: 'linear-gradient(135deg, #f0e8d8 0%, #e4dcc8 100%)' }}>
+                             style={{ background: `linear-gradient(135deg, rgba(240,232,216,0.92) 0%, rgba(228,220,200,0.95) 100%), url(${paperTexture}) repeat`, backgroundSize: 'auto, 512px 512px' }}>
                             <div className="px-4 py-3 border-b border-[#c8b898]">
                                 <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#8a7a60]">Strategic Situation</div>
                                 <div className="text-[13px] font-bold text-[#2a2016]" style={{ fontFamily: 'Georgia, serif' }}>

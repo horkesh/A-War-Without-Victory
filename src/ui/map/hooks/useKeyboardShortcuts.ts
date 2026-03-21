@@ -72,6 +72,55 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
+      // Tab → cycle through corps (within HQ or sidebar)
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        const store = useGameStore.getState();
+        const state = store.loadedGameState;
+        const faction = state?.player_faction;
+        if (!state || !faction) return;
+        const corpsFormations = state.formations.filter(
+          (f) => f.faction === faction && (f.kind === 'corps' || f.kind === 'corps_asset')
+        );
+        if (corpsFormations.length === 0) return;
+        if (store.armyHQOpen) {
+          // Cycle expanded corps within HQ
+          const currentIdx = corpsFormations.findIndex((c) => c.id === store.armyHQExpandedCorpsId);
+          const nextIdx = event.shiftKey
+            ? (currentIdx <= 0 ? corpsFormations.length - 1 : currentIdx - 1)
+            : (currentIdx + 1) % corpsFormations.length;
+          store.setArmyHQExpandedCorpsId(corpsFormations[nextIdx].id);
+        } else {
+          // Cycle selected corps in sidebar
+          const currentIdx = corpsFormations.findIndex((c) => c.id === store.selectedCorpsId);
+          const nextIdx = event.shiftKey
+            ? (currentIdx <= 0 ? corpsFormations.length - 1 : currentIdx - 1)
+            : (currentIdx + 1) % corpsFormations.length;
+          store.setSelectedCorpsId(corpsFormations[nextIdx].id);
+        }
+        return;
+      }
+
+      // Space → advance turn (click the toolbar button)
+      if (event.key === ' ') {
+        event.preventDefault();
+        const allButtons = document.querySelectorAll('button');
+        for (const b of allButtons) {
+          if (b.textContent?.includes('ADVANCE TURN') && !b.disabled) {
+            b.click();
+            break;
+          }
+        }
+        return;
+      }
+
+      // O → toggle operations panel
+      if (event.key === 'o' || event.key === 'O') {
+        const store = useGameStore.getState();
+        store.setIsOperationsPanelOpen(!store.isOperationsPanelOpen);
+        return;
+      }
+
       const n = Number(event.key);
       const digit = n >= 1 && n <= 7 ? n : 0;
       if (digit >= 1 && digit <= MAP_MODES_BY_KEY.length) {

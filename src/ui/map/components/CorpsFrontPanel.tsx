@@ -260,7 +260,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         </button>
       </div>
 
-      <div className="flex-1 overflow-auto bg-[#faf9f6]/95 text-neutral-800 font-mono text-[11px] shadow-inner relative flex flex-col">
+      {/* Gradient bridge: dark chrome → paper */}
+      <div className="h-1.5 shrink-0" style={{ background: 'linear-gradient(to bottom, #252220, #d8d0c4)' }} />
+
+      <div className="flex-1 overflow-auto bg-[#f0e8d8]/95 text-neutral-800 font-mono text-[11px] shadow-inner relative flex flex-col">
         {/* Background watermark */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center -rotate-12 select-none">
           <span className="text-8xl font-black tracking-widest uppercase">SECRET</span>

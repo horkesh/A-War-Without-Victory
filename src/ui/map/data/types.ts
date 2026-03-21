@@ -299,12 +299,13 @@ export type CommandBriefingSeverity = 'critical' | 'warning' | 'info';
 export type SummaryFocusSection = 'overview' | 'ivp' | 'convoys' | 'casualties' | 'support' | 'opsec';
 
 export interface CommandBriefingTargetView {
-    type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement';
+    type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement' | 'corps' | 'officer_events';
     summaryFocus?: SummaryFocusSection;
     operationKey?: string;
     sectorId?: string;
     osid?: string;
     enclaveId?: string;
+    corpsId?: string;
 }
 
 export interface CommandBriefingItemView {

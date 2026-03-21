@@ -2605,7 +2605,7 @@ export function MapContainer() {
 
   return (
     <>
-      <div ref={containerRef} className="absolute inset-0" />
+      <div ref={containerRef} className="absolute inset-0" style={{ filter: 'sepia(0.08) saturate(0.95)' }} />
 
       {expandedStackOsid && overlayAnchor && loadedGameState && (
         <StackExpansionOverlay

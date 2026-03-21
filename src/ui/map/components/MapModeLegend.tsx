@@ -1,6 +1,12 @@
 import { useGameStore } from '../store/gameStore';
 
-const LEGENDS: Record<string, { title: string; stops: { color: string; label: string }[] } | null> = {
+interface LegendStop {
+  color: string;
+  label: string;
+  value?: string;
+}
+
+const LEGENDS: Record<string, { title: string; stops: LegendStop[] } | null> = {
   political: null,
   ethnic: { title: 'Majority Ethnicity', stops: [
     { color: '#8B3232', label: 'Serb' },
@@ -8,18 +14,18 @@ const LEGENDS: Record<string, { title: string; stops: { color: string; label: st
     { color: '#326EAA', label: 'Croat' },
   ]},
   supply: { title: 'Supply Status', stops: [
-    { color: '#1a4a1a', label: 'Critical' },
-    { color: '#4aaa4a', label: 'Adequate' },
-    { color: '#6ddd6d', label: 'Surplus' },
+    { color: '#1a4a1a', label: 'Critical', value: '<20' },
+    { color: '#4aaa4a', label: 'Adequate', value: '20-60' },
+    { color: '#6ddd6d', label: 'Surplus', value: '>60' },
   ]},
   casualties: { title: 'Civilian Casualties', stops: [
-    { color: 'rgba(255,220,200,0.3)', label: 'None' },
-    { color: 'rgba(200,50,50,0.6)', label: 'Severe' },
+    { color: 'rgba(255,220,200,0.3)', label: 'None', value: '0' },
+    { color: 'rgba(200,50,50,0.6)', label: 'Severe', value: '100+' },
   ]},
   morale: { title: 'Average Morale', stops: [
-    { color: '#aa2222', label: 'Broken' },
-    { color: '#ddaa33', label: 'Shaky' },
-    { color: '#44aa44', label: 'Steady' },
+    { color: '#aa2222', label: 'Broken', value: '<30' },
+    { color: '#ddaa33', label: 'Shaky', value: '30-60' },
+    { color: '#44aa44', label: 'Steady', value: '>60' },
   ]},
   operations: { title: 'Operational Effort', stops: [
     { color: 'rgba(80,124,173,0.4)', label: 'Holding' },
@@ -27,28 +33,33 @@ const LEGENDS: Record<string, { title: string; stops: { color: string; label: st
     { color: 'rgba(191,57,43,0.5)', label: 'Main Effort' },
   ]},
   defense: { title: 'Defense Density', stops: [
-    { color: '#44aa44', label: 'Dense' },
-    { color: '#ddaa33', label: 'Moderate' },
-    { color: '#aa2222', label: 'Thin' },
+    { color: '#44aa44', label: 'Dense', value: '>1.0' },
+    { color: '#ddaa33', label: 'Moderate', value: '0.5-1.0' },
+    { color: '#aa2222', label: 'Thin', value: '<0.5' },
   ]},
 };
 
 export function MapModeLegend() {
   const mapMode = useGameStore((s) => s.mapMode);
+  const faction = useGameStore((s) => s.loadedGameState?.player_faction);
   const legend = LEGENDS[mapMode];
   if (!legend) return null;
 
   return (
-    <div className="absolute bottom-24 left-4 z-10 bg-panel/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/10 shadow-lg" style={{ minWidth: 120 }}>
+    <div className="absolute bottom-24 left-4 z-10 bg-panel/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/10 shadow-lg" style={{ minWidth: 140 }}>
       <div className="text-[9px] uppercase tracking-widest text-accent-gold/80 mb-1.5 font-semibold">{legend.title}</div>
       <div className="flex flex-col gap-1">
         {legend.stops.map((stop) => (
           <div key={stop.label} className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-sm border border-white/10 shrink-0" style={{ backgroundColor: stop.color }} />
-            <span className="text-[10px] text-text-secondary">{stop.label}</span>
+            <span className="text-[10px] text-text-secondary flex-1">{stop.label}</span>
+            {stop.value && (
+              <span className="text-[9px] text-text-secondary/60 tabular-nums font-mono">{stop.value}</span>
+            )}
           </div>
         ))}
       </div>
+      {faction && mapMode === 'political' && null /* political mode has no legend */}
     </div>
   );
 }
