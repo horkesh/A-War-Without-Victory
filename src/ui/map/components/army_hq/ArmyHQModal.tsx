@@ -1,6 +1,6 @@
 /**
- * Army HQ Modal — NATO Terminal Aesthetic (Option 1).
- * Full-screen command terminal for the player's faction.
+ * Army HQ Modal — Warroom dark aesthetic matching CorpsDetail/FormationDetail.
+ * Full-screen command overview for the player's faction.
  */
 import { useEffect, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
@@ -8,7 +8,7 @@ import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
-import { TeletypeTicker } from './TeletypeTicker';
+import { getArmyCrest } from '../../utils/factionAssets';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
@@ -23,6 +23,17 @@ const FACTION_DISPLAY: Record<string, string> = {
     HRHB: 'Hrvatsko Vijeće Obrane',
 };
 
+function StatRow({ label, value, warn }: { label: string; value: string | number; warn?: boolean }) {
+    return (
+        <div className="flex justify-between items-baseline py-1 border-b border-panel-border/30">
+            <span className="text-text-secondary text-[12px] uppercase tracking-wide">{label}</span>
+            <span className={`font-mono text-[13px] font-bold tabular-nums ${warn ? 'text-red-400' : 'text-text-primary'}`}>
+                {value}
+            </span>
+        </div>
+    );
+}
+
 export function ArmyHQModal() {
     const open = useGameStore((s) => s.armyHQOpen);
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
@@ -31,7 +42,6 @@ export function ArmyHQModal() {
     const expandedCorpsId = useGameStore((s) => s.armyHQExpandedCorpsId);
     const setExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
 
-    // ESC key handler
     useEffect(() => {
         if (!open) return;
         const handler = (e: KeyboardEvent) => {
@@ -47,7 +57,6 @@ export function ArmyHQModal() {
         return () => window.removeEventListener('keydown', handler);
     }, [open, expandedCorpsId, setExpandedCorpsId, setOpen]);
 
-    // Derived data
     const data = useMemo(() => {
         if (!state || !faction) return null;
 
@@ -60,7 +69,6 @@ export function ArmyHQModal() {
             corpsFormations.some(c => c.id === op.corps_id)
         );
 
-        // Territory
         const cbs = state.controlBySettlement ?? {};
         let factionArea = 0;
         for (const [osid, ctrl] of Object.entries(cbs)) {
@@ -68,188 +76,131 @@ export function ArmyHQModal() {
         }
         const territoryPct = osidAreas.total_area_km2 > 0 ? (factionArea / osidAreas.total_area_km2) * 100 : 0;
 
-        // Exhaustion
         const exhaustion = state.warPhaseExhaustion?.[faction];
         const exhaustionDisplay = typeof exhaustion === 'number' ? exhaustion.toFixed(1) : '0.0';
 
-        // Supply
         const reserves = state.factionReserves?.[faction];
-
-        // Combat effectiveness
         const eff = aggregateEffectiveness(brigades);
 
-        // Alerts
-        const alerts: Array<{ text: string; severity: 'critical' | 'warning' | 'info'; corpsId?: string }> = [];
-
-        // This week battles/events
         const battles = state.latestTurnSummary?.battles ?? [];
         const factionBattles = battles.filter(b => b.attacker_faction === faction || b.defender_faction === faction);
-        if (factionBattles.length > 0) {
-            alerts.push({ text: `${factionBattles.length} CONTACTS REPORTED IN THEATRE`, severity: 'info' });
-        }
-
-        const pendingOfficers = (state.pendingOfficerEvents ?? []).filter((e) => !e.acknowledged);
-        if (pendingOfficers.length > 0) {
-            alerts.push({ text: `AUTH REQUIRED: ${pendingOfficers.length} PERSONNEL DECISIONS PENDING`, severity: 'warning' });
-        }
-
-        const readyOps = operations.filter((op) => op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready');
-        for (const op of readyOps) {
-            alerts.push({ text: `STRAT: ${op.name} IS GO/NO-GO READY`, severity: 'info', corpsId: op.corps_id });
-        }
-
-        for (const corps of corpsFormations) {
-            const corpsBrigades = brigades.filter((b) => b.corps_id === corps.id);
-            const avgCohesion = corpsBrigades.length > 0
-                ? corpsBrigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / corpsBrigades.length
-                : 100;
-            if (avgCohesion < 40) {
-                alerts.push({ text: `CRITICAL: ${corps.name} COHESION BELOW MINIMAL`, severity: 'critical', corpsId: corps.id });
-            }
-        }
 
         const commander = getFactionArmyCommander(faction, state);
 
         return {
             formations, brigades, corpsFormations, totalPersonnel, sectors, operations,
             territoryPct, exhaustionDisplay, reserves,
-            eff, alerts, commander, factionBattles
+            eff, commander, factionBattles
         };
     }, [state, faction]);
 
     if (!open || !faction || !state || !data) return null;
 
-    const breadcrumb = expandedCorpsId
-        ? `${FACTION_SHORT[faction] ?? faction} HQ > ${data.corpsFormations.find((c) => c.id === expandedCorpsId)?.name ?? expandedCorpsId}`
-        : `${FACTION_SHORT[faction] ?? faction} HQ OVERVIEW`;
+    const crestSrc = getArmyCrest(faction);
 
     return (
         <div className="fixed inset-0 z-[1000] flex overflow-hidden font-mono" onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
-            {/* Dark backdrop */}
-            <div className="absolute inset-0 bg-black/90" />
+            <div className="absolute inset-0 bg-black/85" />
 
-            {/* CRT overlay effect */}
-            <div className="crt-overlay absolute inset-0 pointer-events-none z-[60] opacity-[0.03]" />
+            <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
-            {/* Main Terminal UI container */}
-            <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-[#0c0b0a] text-[#4af626]">
-
-                {/* Header Row */}
-                <div className="relative flex items-end justify-between px-8 py-6 shrink-0 border-b border-[#4af626]/20 bg-[#12110f]">
-                    <div className="flex flex-col gap-1 z-10">
-                        <span className="text-[10px] uppercase font-bold text-[#4af626]/60 tracking-[0.3em]">
-                            NATO MISSION TERMINAL v4.2
-                        </span>
-                        <div className="text-[28px] font-bold text-[#4af626] uppercase tracking-widest leading-none" style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
-                            {breadcrumb}
+                {/* Header */}
+                <div className="flex items-center justify-between px-8 py-4 shrink-0 border-b border-panel-border bg-panel-card">
+                    <div>
+                        <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
+                            COMMANDER
+                        </div>
+                        <div className="text-[22px] font-bold uppercase tracking-wide text-text-primary">
+                            {FACTION_SHORT[faction] ?? faction} MAIN STAFF
                         </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1 z-10 text-right">
-                        <span className="text-[10px] uppercase font-bold text-[#4af626]/60 tracking-[0.3em]">
-                            SYSTEM CLOCK
-                        </span>
-                        <div className="text-[16px] font-bold text-[#4af626] uppercase tracking-widest leading-none">
-                            WEEK {state.turn} {state.metadata?.date ? `// ${state.metadata.date}` : ''}
+                    <div className="text-right">
+                        <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
+                            STRATEGIC SITUATION
+                        </div>
+                        <div className="text-[14px] font-bold text-text-primary">
+                            Week {state.turn} {state.metadata?.date ? `\u2014 ${state.metadata.date}` : ''}
                         </div>
                     </div>
+                    <button
+                        type="button"
+                        onClick={() => { setExpandedCorpsId(null); setOpen(false); }}
+                        className="ml-6 text-text-secondary hover:text-text-primary text-[20px] leading-none transition-colors"
+                        title="Close [ESC]"
+                    >
+                        &times;
+                    </button>
                 </div>
 
-                {/* Content area — scrollable */}
-                <div className="relative flex-1 overflow-y-auto px-10 pt-8 pb-[140px]">
+                {/* Content */}
+                <div className="relative flex-1 overflow-y-auto px-8 pt-6 pb-8">
 
-                    {/* Top Readouts: Dashboard (only if no corps selected) */}
+                    {/* Top section: Commander + Crest + Stats */}
                     {!expandedCorpsId && (
-                        <div className="grid grid-cols-[400px_1fr_400px] gap-10 mb-10">
-                            {/* Commander Dashboard */}
-                            <div className="bg-black/40 border border-[#4af626]/30 p-6 shadow-[inset_0_0_30px_rgba(0,0,0,0.8)] flex flex-col gap-4">
-                                <div className="text-[11px] font-bold text-[#4af626]/60 uppercase tracking-widest border-b border-[#4af626]/20 pb-2">
-                                    [ AUTHENTICATED COMMANDER ]
+                        <div className="grid grid-cols-[1fr_auto_1fr] gap-8 mb-8 items-start">
+                            {/* Commander */}
+                            <div className="bg-panel-card border border-panel-border rounded p-5">
+                                <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
+                                    COMMANDER
                                 </div>
                                 {data.commander ? (
                                     <OfficerProfile officer={data.commander} label="" compact={false} />
                                 ) : (
-                                    <div className="text-red-500 font-bold text-[14px] animate-pulse py-8 text-center border border-red-500/20">
-                                        &lt;&lt; NO COMMANDER DATA &gt;&gt;
+                                    <div className="text-text-secondary text-[13px] py-6 text-center">
+                                        No commander data available
                                     </div>
                                 )}
                             </div>
 
-                            {/* Central Visual */}
-                            <div className="flex items-center justify-center opacity-10 pointer-events-none select-none">
-                                <div className="text-[120px] font-black tracking-tighter text-[#4af626]">
-                                    {FACTION_SHORT[faction] ?? faction}
+                            {/* Army Crest — prominently centered */}
+                            <div className="flex flex-col items-center justify-center px-8 py-4 select-none">
+                                {crestSrc ? (
+                                    <img
+                                        src={crestSrc}
+                                        alt={`${FACTION_DISPLAY[faction] ?? faction} crest`}
+                                        className="w-[180px] h-[180px] object-contain drop-shadow-lg opacity-90"
+                                        draggable={false}
+                                    />
+                                ) : (
+                                    <div className="text-[64px] font-black text-text-secondary/20">
+                                        {FACTION_SHORT[faction] ?? faction}
+                                    </div>
+                                )}
+                                <div className="text-[11px] uppercase tracking-[0.2em] text-text-secondary mt-3 text-center leading-relaxed">
+                                    {FACTION_DISPLAY[faction] ?? faction}
                                 </div>
                             </div>
 
-                            {/* Strategic Readiness */}
-                            <div className="bg-black/40 border border-[#4af626]/30 p-6 shadow-[inset_0_0_30px_rgba(0,0,0,0.8)] flex flex-col gap-4">
-                                <div className="text-[11px] font-bold text-[#4af626]/60 uppercase tracking-widest border-b border-[#4af626]/20 pb-2">
-                                    [ STRATEGIC READINESS ]
+                            {/* Strategic Situation */}
+                            <div className="bg-panel-card border border-panel-border rounded p-5">
+                                <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
+                                    STRATEGIC SITUATION
                                 </div>
-                                <div className="space-y-3 text-[14px]">
-                                    <div className="flex justify-between items-end border-b border-[#4af626]/5 pb-1">
-                                        <span className="text-[#4af626]/70 uppercase">Territory Control</span>
-                                        <span className="text-[#4af626] font-bold tabular-nums">
-                                            {data.territoryPct.toFixed(1)}%
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-end border-b border-[#4af626]/5 pb-1">
-                                        <span className="text-[#4af626]/70 uppercase">Force Strength</span>
-                                        <span className="text-[#4af626] font-bold tabular-nums">
-                                            {data.totalPersonnel.toLocaleString()}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-end border-b border-[#4af626]/5 pb-1">
-                                        <span className="text-[#4af626]/70 uppercase">Active Formations</span>
-                                        <span className="text-[#4af626] font-bold tabular-nums">
-                                            {data.brigades.length} BRIG
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-end border-b border-[#4af626]/5 pb-1">
-                                        <span className="text-[#4af626]/70 uppercase">Current Ops</span>
-                                        <span className="text-[#4af626] font-bold tabular-nums">
-                                            {data.operations.length}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-end border-b border-[#4af626]/5 pb-1">
-                                        <span className="text-[#4af626]/70 uppercase">Theatre Efficiency</span>
-                                        <span className="text-[#4af626] font-bold tabular-nums">
-                                            {data.eff.grade}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-end border-b border-[#4af626]/5 pb-1">
-                                        <span className="text-[#4af626]/70 uppercase">War Exhaustion</span>
-                                        <span className={`${parseFloat(data.exhaustionDisplay) > 30 ? 'text-red-500' : 'text-amber-500'} font-bold tabular-nums`}>
-                                            {data.exhaustionDisplay}
-                                        </span>
-                                    </div>
+                                <div className="space-y-0.5">
+                                    <StatRow label="Territory" value={`${data.territoryPct.toFixed(1)}%`} />
+                                    <StatRow label="Personnel" value={data.totalPersonnel.toLocaleString()} />
+                                    <StatRow label="Brigades" value={`${data.brigades.length} active`} />
+                                    <StatRow label="Operations" value={`${data.operations.length} active`} />
+                                    <StatRow label="Combat Eff." value={`${data.eff.score.toLocaleString()} (${data.eff.grade})`} />
+                                    <StatRow label="War Exhaustion" value={data.exhaustionDisplay} warn={parseFloat(data.exhaustionDisplay) > 30} />
                                     {data.reserves && (
-                                        <div className="flex justify-between items-end border-b border-[#4af626]/5 pb-1 pt-2">
-                                            <span className="text-[#4af626]/70 uppercase">Supply Reserves</span>
-                                            <span className="text-cyan-400 font-bold tabular-nums">
-                                                {Math.round(data.reserves.generalSupply ?? 0)}
-                                            </span>
-                                        </div>
+                                        <StatRow label="Supply" value={Math.round(data.reserves.generalSupply ?? 0)} />
                                     )}
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Main Content Grid: Corps Cards */}
+                    {/* Corps Cards */}
                     <div className="max-w-[1600px] mx-auto">
-                        {expandedCorpsId && (
-                            <div className="mb-6 flex items-center gap-4 text-[12px] animate-pulse">
-                                <span className="bg-[#4af626] text-black px-2 py-0.5 font-bold">DRILLING</span>
-                                <span className="text-[#4af626]/80">[ ACCESSING {expandedCorpsId} ORBAT ]</span>
-                            </div>
-                        )}
-
-                        <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#4af626]/40 mb-4 border-b border-[#4af626]/10 pb-2">
-                            THEATRE ORDER OF BATTLE // {data.corpsFormations.length} CORPS IDENTIFIED
+                        <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-4 pb-2 border-b border-panel-border">
+                            ALL CORPS ({data.corpsFormations.length})
                         </div>
 
-                        <div className={`grid grid-cols-1 ${expandedCorpsId ? 'sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6' : 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'} gap-6`}>
+                        <div className={`grid gap-4 ${expandedCorpsId
+                            ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'
+                            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+                        }`}>
                             {data.corpsFormations.map((corps) => (
                                 <ArmyHQCorpsCard
                                     key={corps.id}
@@ -265,30 +216,6 @@ export function ArmyHQModal() {
                                 />
                             ))}
                         </div>
-                    </div>
-                </div>
-
-                {/* Footer Section - Teletype & Controls */}
-                <div className="shrink-0 bg-[#0a0908] border-t-2 border-[#4af626]/20 absolute bottom-0 left-0 right-0 z-50">
-                    <div className="px-8 py-4 border-b border-[#4af626]/10">
-                        <TeletypeTicker alerts={data.alerts} onAlertClick={(id) => setExpandedCorpsId(id ?? null)} />
-                    </div>
-                    <div className="flex items-center justify-between px-8 py-4 bg-[#12110f]">
-                        <div className="flex items-center gap-10 font-mono text-[11px] tracking-widest text-[#4af626]/40">
-                            <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#4af626] shadow-[0_0_5px_#4af626]" /> MODE: COMMAND</span>
-                            <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#4af626] shadow-[0_0_5px_#4af626]" /> AUTH: SECURE</span>
-                            <span className="flex items-center gap-2 animate-pulse"><div className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_5px_#06b6d4]" /> UP-LINK: NOMINAL</span>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setExpandedCorpsId(null);
-                                setOpen(false);
-                            }}
-                            className="px-6 py-2 border border-[#4af626]/40 text-[#4af626] font-bold uppercase tracking-[0.2em] text-[13px] transition-all hover:bg-[#4af626]/10 hover:border-[#4af626] shadow-[0_0_15px_rgba(74,246,38,0.1)] active:scale-95"
-                        >
-                            CLOSE TERMINAL [ESC]
-                        </button>
                     </div>
                 </div>
             </div>

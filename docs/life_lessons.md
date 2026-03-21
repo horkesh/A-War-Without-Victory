@@ -68,6 +68,12 @@
 
 ## Active Lessons (no recent violations)
 
+### [UI] Agent-generated aesthetics must match the established design language — never CRT/terminal on a warroom game (2026-03-21) — NEW
+- **Context**: An external agent restyled ArmyHQModal as a green CRT terminal ("NATO MISSION TERMINAL v4.2", `#4af626` phosphor green, scanline overlay, teletype ticker, glowing dots). The game's design spec (HOI_VISUAL_GUI_OVERHAUL_SPEC.md) explicitly says "warmth of wood-paneled offices and brass fixtures rather than CRT terminals."
+- **Wrong approach**: Letting agents make autonomous aesthetic decisions without referencing the design spec or matching existing panels. The agent invented a new design language instead of extending the existing one.
+- **Right approach**: All UI panels must use the established warroom palette: `bg-panel-bg`, `bg-panel-card`, `border-panel-border`, `text-text-primary`, `text-text-secondary`. Amber/gold accents for headings. No green terminal, no CRT effects. Reference CorpsDetail, FormationDetail, SettlementPanel for the canonical style.
+- **Do instead**: Before any UI aesthetic work, read HOI_VISUAL_GUI_OVERHAUL_SPEC.md and GUI_MASTER.md. Match existing panels. When reviewing agent-generated UI, immediately check for palette violations (green text, CRT effects, terminal chrome).
+
 ### [Calibration] Data merges have operation-tempo butterfly effects — always verify corridor connectivity (2026-03-21) — NEW
 - **Context**: Merging 32 micro-OSIDs (< 1 km²) removed `drinjaca` and `paljevici` from Op Drina Zvornik Sweep (5→3 objectives). The operation completed faster, freeing VRS brigades earlier. Those brigades took `rastosnica_2` before ARBiH Op Teočak could fire (w25), cutting the Teočak-Tuzla corridor — a historically critical lifeline.
 - **Wrong approach**: Removing operation objectives without checking what the freed brigades would do. Assuming a data-only change (OSID merge) wouldn't affect simulation behavior. Not diffing yesterday's run against today's run to identify regressions.

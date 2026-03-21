@@ -3,6 +3,16 @@
 **Last Updated:** 2026-03-21
 **Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.0% area-weighted (40w, 712 OSIDs). RS w40 0.510 PASS.** Calibration fixes: micro-OSID merge (n982), Op Derventa + Teočak corridor (n992-n998), Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975).
 
+## [2026-03-21] Army HQ Modal — Warroom Aesthetic Rework
+
+**Problem:** External agent restyled ArmyHQModal as a green CRT terminal ("NATO MISSION TERMINAL v4.2") with `#4af626` green-on-black text, CRT scanline overlay, teletype ticker, glowing status dots. Completely mismatched the established dark warroom design language (amber/gold accents, `bg-panel-bg`/`bg-panel-card` palette) used by CorpsDetail, FormationDetail, and all other panels.
+
+**Fix:** Full rewrite of `ArmyHQModal.tsx`. Stripped CRT aesthetic; adopted dark warroom palette (`bg-panel-bg`, `bg-panel-card`, `border-panel-border`, `text-text-primary`, `text-text-secondary`). Three-column top layout: Commander panel (left), faction army crest (center, 180px, `getArmyCrest()` from `factionAssets.ts`), Strategic Situation stats (right). Corps cards below in responsive grid. Clean `×` close button. TeletypeTicker component no longer imported.
+
+**Determinism:** UI-only change. No simulation, pipeline, or serialization impact.
+
+**Files:** `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+
 ## [2026-03-21] Op Derventa + Teočak Corridor Fix (n992-n998)
 
 **Problem 1 — Teočak corridor cut:** The micro-OSID merge removed `drinjaca` and `paljevici` from Op Drina Zvornik Sweep objectives (5→3). Faster completion freed VRS brigades earlier, which took `rastosnica_2` before ARBiH's Op Teočak could fire, cutting the Teočak-Tuzla corridor. **Fix:** Added `krizevici` and `vitinica_2` as replacement objectives (5 total), restoring pre-merge operation tempo. Teočak connected (component 71).

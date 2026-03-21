@@ -27,7 +27,7 @@
 
 - **Canonical GUI:** React + MapLibre map app in `src/ui/map/`; warroom in `src/ui/warroom/`. Run map via `npm run dev:map`, desktop via `npm run desktop:map:build` (or Electron).
 - **Panel rail:** One right-side rail (`panelRail.ts`); App mounts primary/secondary detail (settlement, army, corps, sector, formation, operation). Settlement panel: 3 horizontal tabs (Overview | Military | Orders & events); see [20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md](implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md).
-- **Command experience:** Army HQ Modal (`src/ui/map/components/army_hq/`, 8 components) is the primary command center — corps grid, drill-down, sub-card expansion, inline actions (stances, ops, commander replace/dismiss). Command briefing routes to IVP, convoys, support, OPSEC, operations, **corps (→HQ)**, **officers (→HQ)**. `ArmyDetail.tsx` retired. Keyboard: H=HQ, Tab=cycle corps, Space=advance, O=ops. Reports: [20260321_UI_OVERHAUL_MASTER_PLAN_COMPLETION.md](20260321_UI_OVERHAUL_MASTER_PLAN_COMPLETION.md).
+- **Command experience:** Army HQ Modal (`src/ui/map/components/army_hq/`) is the primary command center — dark warroom aesthetic matching CorpsDetail/FormationDetail (`bg-panel-bg`, `bg-panel-card`, `text-text-primary`). Three-column top: Commander (left), faction army crest 180px centered (`getArmyCrest()`), Strategic Situation stats (right). Corps grid below with drill-down and inline actions (stances, ops). Keyboard: H=HQ, Tab=cycle corps, Space=advance, O=ops, ESC=back/close.
 - **Fog of war:** Live from `sector_intel` via `GameStateAdapter` → `LoadedGameState.fogOfWar`; no legacy `recon_intelligence`.
 
 ---
