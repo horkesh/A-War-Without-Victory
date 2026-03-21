@@ -68,6 +68,12 @@
 
 ## Active Lessons (no recent violations)
 
+### [Tooling] Grep for unused files misses .js extension imports — always tsc after bulk deletions (2026-03-21) — NEW
+- **Context**: Agent-driven dead code scan grepped for `from.*filename` to find imports. TypeScript uses `.js` extensions in import paths (`from './foo.js'` resolves to `foo.ts`). The grep pattern didn't match these, flagging 18 actively-imported files as "orphaned."
+- **Wrong approach**: Trusting grep results for unused file detection without compilation verification. Deleted 18 files that were actively imported, causing tsc errors.
+- **Right approach**: After ANY bulk deletion, run `npx tsc --noEmit` immediately before committing. Restore files that cause import errors. Only commit after clean typecheck.
+- **Do instead**: For dead code detection, use `tsc` as the source of truth, not grep. Grep is a fast first pass; tsc is the verification gate. Never commit bulk deletions without a clean typecheck + test run.
+
 ### [Rendering] MapLibre symbol layers are globally broken — use Deck.gl TextLayer (2026-03-21) — NEW
 - **Context**: Settlement labels (27 major cities) were added as a MapLibre `symbol` layer with correct data (27 features), correct font PBFs (200 OK), correct layer config — but `queryRenderedFeatures` returned 0 for ALL 7 symbol layers in the map. "Unimplemented type: 4" errors from OSM PMTiles corrupt the symbol rendering pipeline.
 - **Wrong approach**: Debugging the label layer in isolation (font loading, source data, layer ordering, collision detection). The problem is global — no symbol layer renders, not just labels.

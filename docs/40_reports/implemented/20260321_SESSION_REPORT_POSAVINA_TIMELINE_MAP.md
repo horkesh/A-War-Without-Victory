@@ -217,6 +217,25 @@ Also fixed earlier in the session: `Now = pre - out + in` (was `pre - out - lost
 
 ---
 
+## 6. Deep Codebase Cleanup
+
+Three parallel research agents scanned the entire repo for dead code. Results verified with tsc + vitest before deletion.
+
+| Category | Files | Size | Details |
+|----------|-------|------|---------|
+| Dead source code | 40 | ~500 KB | 3 sim, 13 UI components, 2 builders, 22 saved/ backups |
+| Unused data | 29 | ~640 MB | Polygon fabrics, outlines, rekeyed dupes, CSVs |
+| Diagnostic tools | 180 | ~2 MB | tmp_*, check_*, n###_* one-offs, migration scripts |
+| Config duplicates | 90 | ~5 MB | .cursor/skills/ + agents/ (dupes of .claude/) |
+| Test artifacts | ~50 dirs | ~100 MB | _test/, _baseline_tmp/, _tmp_* run outputs |
+| Dead IPC handlers | 3 methods | — | renameFrontSegment, renameTheatre, setBrigadeDesiredAoRCap |
+| **Total** | **404** | **~740 MB** | |
+
+### Lesson
+Agent grep for unused files missed TypeScript `.js` extension imports (`from './foo.js'` resolves to `foo.ts`). 18 false positives had to be restored after tsc caught them. Always run tsc after bulk deletions.
+
+---
+
 ## Next Steps
 
 1. RS w20 benchmark — early-war RS underperformance needs investigation

@@ -1,7 +1,29 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **93.1% area-weighted (40w, 712 OSIDs, ATH). RS w40 0.511 PASS. 4/4 enclaves.** Settlement Timeline (12 event types, 5 engine tracking features). Displacement adapter fix. Posavina Corridor restructure (n1002). Deck.gl settlement labels.
+**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **93.1% area-weighted (40w, 712 OSIDs, ATH). RS w40 0.511 PASS. 4/4 enclaves.** Settlement Timeline (12 event types, 5 engine tracking features). Displacement adapter fix. Posavina Corridor restructure (n1002). Deck.gl settlement labels. Deep cleanup (404 files, ~740 MB).
+
+## [2026-03-21] Deep Codebase Cleanup — 404 Files, ~740 MB Reclaimed
+
+**Research:** Three parallel agents scanned sim/state, UI, and data/tools/docs layers for unused imports, dead exports, orphaned files. Verified each finding with grep + tsc + vitest before deletion.
+
+**Dead source code (40 files):** 3 sim/engine (auto_play, postgame_analysis, phase_e0_1_guard), 13 UI components (TeletypeTicker, Stamp, ArmyDetail, Codex, CorpsDialoguePanel, ScenarioSelectionScreen, TutorialOverlay, WarDispatchPanel, 5 plan_ui components), 2 builders (buildGhostLineGeoJSON, buildPressureGeoJSON), 22 backup files (entire `src/ui/map/saved/` directory).
+
+**Unused data (29 files, ~640 MB):** 18 derived geojson files (polygon fabrics, municipality outlines, rekeyed duplicates, national outline, BiH mask), 8 CSV artifacts, 3 derivation reports. All pipeline intermediates never loaded by the app.
+
+**Diagnostic tools (180 scripts):** 157 one-off diagnostic scripts (tmp_*, check_*, diag_*, trace_*, n###_*), 19 completed migration scripts, 4 old analysis scripts.
+
+**Config duplicates (90 files):** `.cursor/skills/` (60 folders duplicating `.claude/skills/`), `.cursor/agents/` (28 stale role definitions), 2 debug logs.
+
+**Test artifacts (~100 MB):** 6 test directories, 5 investigation run directories, 1 temp terrain directory.
+
+**Dead IPC (3 methods):** `renameFrontSegment`, `renameTheatre`, `setBrigadeDesiredAoRCap` removed from useIPC.ts — zero callers, AoR system removed.
+
+**Verification:** 1261 tests pass. `desktop:map:build` clean. No import breakage (18 false positives restored after tsc caught `.js` extension imports the grep missed).
+
+**Lesson:** Agent grep for unused files missed TypeScript `.js` extension imports (`from './foo.js'` resolves to `foo.ts`). Always run tsc after deletions before committing.
+
+**Files:** 404 files across `src/`, `data/derived/`, `tools/`, `.cursor/`.
 
 ## [2026-03-21] Army HQ Nerve Center — Full Aesthetic Rework + Situation Briefing
 
