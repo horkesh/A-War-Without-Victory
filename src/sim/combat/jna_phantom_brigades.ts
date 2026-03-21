@@ -116,6 +116,14 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         tanks: 20, artillery: 25, apcs: 5,
     },
     {
+        id: 'jna_rajlovac_barracks_tg' as FormationId,
+        name: 'JNA Rajlovac Barracks TG',
+        corps_id: 'vrs_sarajevo_romanija' as FormationId,
+        location_osid: 'op:ilijas:srednje',
+        withdrawal_turn: 5,
+        tanks: 0, artillery: 0, apcs: 0,
+    },
+    {
         id: 'jna_2nd_md_tg' as FormationId,
         name: 'JNA 2nd Military District TG',
         corps_id: 'vrs_1st_krajina' as FormationId,

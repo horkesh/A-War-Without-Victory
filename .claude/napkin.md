@@ -8,11 +8,11 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-21, v0.4.9 — UI Overhaul COMPLETE)
-**v0.4.9.** 1246 tests, 103 suites. tsc clean. **Latest calibration: 91.4% area-weighted (40w).**
-**This session:** Sector combat ratings pipeline desync fix (n962). `compute-sector-combat-ratings` ran before bot corps rearrangement — ratings had stale IDs. Added `recompute-sector-combat-ratings` after `generate-bot-corps-orders`. 59/59 match, 0 orphans. Pipeline: 140 steps.
-**Next priority:** HRHB-RBiH P1 backlog (CB brigade redistribution, CB ops not launching, Kiseljak/Vitez pocket separation). See `BOSNIAK_CROAT_CONFLICT_MASTER.md`.
-**HRHB-RBiH conflict:** P1 Backlog: CB brigade redistribution, CB operations not launching. Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`. Report: `docs/40_reports/2026-03-20-ops-planning-phase-6-completion-report.md`.
+## Current State (2026-03-21, v0.5.4 — All v0.5.x Milestones Delivered)
+**v0.5.4.** 1261 tests, 106 suites. tsc clean. **Latest calibration: n973 = 91.6% area-weighted (40w). Sarajevo 86.8% (+3.3pp). RS w40 0.504 PASS.**
+**This session:** (1) Drina Corps OOB correction (n964-n966): removed phantom `rs_rogatica_brigade`, added `rs_skelani_battalion`, Milići +200. Drina 84.2% (+6pp). (2) SRK cold front fix (n967): `isSectorColdFront` false positive — mixed-opponent sectors forced to screening. (3) Enclave operations gate (n973): besieged enclave brigades excluded from corps offensive pool. Bihać exempt. JNA Rajlovac phantom added to Prsten northern ring. PeacePlanModal dismiss fix.
+**Next priority:** 165th Mountain Visoko→Čajniče displacement (1st Corps too wide), RS w20 benchmark, enclave benchmark (2/4), v0.6 scope lock.
+**HRHB-RBiH conflict:** P1 Backlog ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
 **v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
@@ -91,8 +91,8 @@
 1. ~~**CB brigade redistribution (P1)**~~ — FIXED n963. `buildOsidToMunFromReverseMap` mun1990_id cross-boundary bug. 7→10 brigades.
 2. ~~**CB operations not launching (P1)**~~ — FIXED n963. Lašva Valley Offensive priority w40-100. Gates correct.
 3. ~~**Kiseljak/Vitez pocket separation (P1)**~~ — FIXED n963. 3 HRHB enclaves added (Kiseljak, Lašva Valley, Žepče).
-4. **[2026-03-19] #35 SRK screening stance (P2)**: Siege corps in lowest density mode. Needs corps-specific stance floor.
-5. **[2026-03-18] Drina region 78% (P2)**: Structural gap — may need OOB or painted target adjustments.
+4. ~~**#35 SRK screening stance (P2)**~~ — FIXED n967. `isSectorColdFront` false positive: SRK sectors face both HRHB (Kiseljak) and RBiH — cold front guard added. Entrenchment 0→12 on 6/9 brigades.
+5. ~~**Drina region 78% (P2)**~~ — FIXED n964. OOB correction (phantom Rogatica removed, Skelani added). Now 84.2%.
 6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Structural.
 7. **[2026-03-19] #41 Dissolution floor not enforced (P3)**: hrhb_108th at 100 pers below 150 floor.
 8. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical.

@@ -2823,7 +2823,7 @@
     "default_equipment_class": "mountain",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1000,
+    "initial_personnel": 1200,
     "initial_cohesion": 67
   },
   {
@@ -4161,11 +4161,11 @@
   {
     "id": "rs_1st_podrinje",
     "faction": "RS",
-    "name": "1st Podrinje",
+    "name": "1st Podrinje Light Infantry Brigade",
     "corps": "vrs_drina",
-    "home_mun": "vlasenica",
-    "home_settlement": "",
-    "home_osid": "op:vlasenica:milici_2",
+    "home_mun": "rogatica",
+    "home_settlement": "Rogatica",
+    "home_osid": "op:rogatica:rogatica_2",
     "kind": "brigade",
     "default_equipment_class": "mountain",
     "available_from": 0,
@@ -4173,7 +4173,8 @@
     "initial_personnel": 1500,
     "initial_cohesion": 67,
     "distinction_potential": "tier_2",
-    "initial_officer_quality": 0.62
+    "initial_officer_quality": 0.62,
+    "defense_terrain_bonus": 0.3
   },
   {
     "id": "rs_5th_podrinje",
@@ -4191,20 +4192,20 @@
     "initial_cohesion": 67
   },
   {
-    "id": "rs_rogatica_brigade",
+    "id": "rs_skelani_battalion",
     "faction": "RS",
-    "name": "Rogatica Brigade",
+    "name": "Independent Infantry Battalion Skelani",
     "corps": "vrs_drina",
-    "home_mun": "rogatica",
-    "home_settlement": "Rogatica",
-    "home_osid": "op:rogatica:rogatica_2",
+    "home_mun": "srebrenica",
+    "home_settlement": "Skelani",
+    "home_osid": "op:srebrenica:kalimanici",
     "kind": "brigade",
-    "default_equipment_class": "mountain",
+    "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 1800,
-    "initial_cohesion": 55,
-    "defense_terrain_bonus": 0.3,
-    "initial_officer_quality": 0.15
+    "initial_personnel": 450,
+    "initial_cohesion": 50,
+    "defense_terrain_bonus": 0.2,
+    "initial_officer_quality": 0.1
   }
 ]

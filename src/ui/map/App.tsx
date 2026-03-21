@@ -153,7 +153,7 @@ function App() {
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
   const loadSave = useGameStore((s) => s.loadSave);
   const setLoadError = useGameStore((s) => s.setLoadError);
-  const playerFaction = loadedGameState?.player_faction ?? null;
+  const playerFaction = loadedGameState?.player_faction ?? 'RBiH';
   const mapMode = useGameStore((s) => s.mapMode);
   const railState = derivePanelRailState({
     selectedOsid,
@@ -188,7 +188,7 @@ function App() {
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
   const [eventQueueIndex, setEventQueueIndex] = useState(0);
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
-  const [peacePlanDismissedId, setPeacePlanDismissedId] = useState<string | null>(null);
+  const [peacePlanDismissed, setPeacePlanDismissed] = useState(false);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -494,7 +494,7 @@ function App() {
   const openOrbat = () => {
     // If no corps selected for orbat, pick the first player corps
     if (!useGameStore.getState().selectedOrbatCorpsId && loadedGameState) {
-      const firstCorps = loadedGameState.formations.find(f => f.kind === 'corps' && f.faction === playerFaction);
+      const firstCorps = loadedGameState.formations.find(f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === playerFaction);
       if (firstCorps) useGameStore.getState().setSelectedOrbatCorpsId(firstCorps.id);
     }
     // Summary/AAR etc are full-screen modals; close them to show sidebar panels
@@ -516,7 +516,7 @@ function App() {
 
   const selectPrimaryCorps = () => {
     if (!loadedGameState) return;
-    const corps = loadedGameState.formations.find(f => f.kind === 'corps' && f.faction === playerFaction);
+    const corps = loadedGameState.formations.find(f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === playerFaction);
     if (corps) {
       useGameStore.getState().setSelectedCorpsId(corps.id);
       useGameStore.getState().setSelectedFormationId(null);
@@ -646,10 +646,10 @@ function App() {
         />
       )}
       {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds */}
-      {loadedGameState?.pendingPeacePlan && peacePlanDismissedId !== loadedGameState.pendingPeacePlan.planId && (
+      {loadedGameState?.pendingPeacePlan && !peacePlanDismissed && (
         <PeacePlanModal
           plan={loadedGameState.pendingPeacePlan}
-          onDismiss={() => setPeacePlanDismissedId(loadedGameState!.pendingPeacePlan!.planId)}
+          onDismiss={() => setPeacePlanDismissed(true)}
         />
       )}
       {/* v0.4.1 Phase 5: Event log panel */}

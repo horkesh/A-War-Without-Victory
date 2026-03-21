@@ -32,17 +32,18 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
 
-    const handleRespond = async (response: 'accepted' | 'rejected') => {
-        if (!ipc.isAvailable) {
-            setLoadError('Peace plan response requires desktop mode.');
-            return;
-        }
-        const result = await ipc.resolvePeacePlan(plan.planId, response);
-        if (!result.ok) {
-            setLoadError(result.error ?? 'Failed to resolve peace plan.');
-            return;
-        }
+    const handleRespond = (response: 'accepted' | 'rejected') => {
+        // Dismiss immediately — don't wait for IPC
         onDismiss();
+        if (ipc.isAvailable) {
+            ipc.resolvePeacePlan(plan.planId, response).then((result) => {
+                if (!result.ok) {
+                    setLoadError(result.error ?? 'Failed to resolve peace plan.');
+                }
+            }).catch((err) => {
+                console.error('[PeacePlanModal] Failed to resolve:', err);
+            });
+        }
     };
 
     const splitTotal = plan.proposedSplit.RBiH + plan.proposedSplit.RS + plan.proposedSplit.HRHB;

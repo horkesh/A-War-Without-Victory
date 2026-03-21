@@ -1,7 +1,39 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.4.9** (AI Comes Alive). **1246 tests**, 103 suites. **91.4% area-weighted (40w).** UI Overhaul Master Plan COMPLETE (Phases 0-5). Army HQ Modal fully operational. Wood/paper textures. Keyboard shortcuts. Map atmosphere. Command Briefing actionable. Sector combat ratings pipeline fix (n962).
+**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.6% area-weighted (40w).** Sarajevo 86.8% (+3.3pp). All v0.5.x milestones delivered. Three calibration fixes: Drina OOB (n964-n966), SRK cold front (n967), enclave operations gate (n973).
+
+## [2026-03-21] Enclave Operations Gate (n973)
+
+**Problem:** Besieged enclave forces (Sarajevo, Goražde, Srebrenica) launched full corps-level offensive operations despite being supply-starved. ARBiH 1st Corps (30 brigades) used Sarajevo city brigades in breakout operations, and Goražde brigades overexpanded into Drina territory. Historically, enclave garrisons had minimal ammunition, no fuel, and no reinforcements — they could defend but not mount sustained offensives.
+
+**Investigation:** SRK's Operation Prsten northern ring axis (Vogošća/Ilijaš) captured only 4/8 objectives — 0 eligible attackers by w4, stalled against 1st Corps numerical superiority (30 vs 5 brigades at start). Added JNA Rajlovac Barracks phantom (no equipment) to reinforce the axis. Tested relocating rs_4th_sarajevo from Pale to Ilijaš — caused 10-OSID Rogatica/Kalinovik cascade (brigade was sole southeastern defender). Tested 3 JNA phantoms — over-committed SRK, worse results. Root cause: not the operation, but post-operation 1st Corps retaking territory with unrestricted offensive capability from inside the enclave.
+
+**Fix:** Enclave supply gate in `generateCorpsDirectives` — brigades located inside known enclaves are excluded from the corps offensive brigade pool. They defend (reactive sector defense, home defense) but cannot participate in corps offensive launches. Bihać pocket exempt: large territory with Croatian supply corridor, historically mounted significant offensives (Op Tiger, Op Sana).
+
+**Impact:** Sarajevo 83.5% → **86.8% (+3.3pp)**. RS w40 0.500 → **0.504**. Overall 91.5% → **91.6%**. Drina stable at 84.2%. SRK now holds Vogošća (hotonj flipped to RS). Goražde brigades no longer overexpand into Čajniče. RS w40 benchmark reverted to original 0.503 floor (now passing at 0.504).
+
+**Known remaining issue:** ARBiH 165th Mountain (home: Visoko) deployed to Čajniče via 1st Corps operations — non-enclave brigade ranging 100+ km from home. Corps structure problem: 1st Corps spans Sarajevo→Goražde→Čajniče. Needs corps boundary or home-distance ops constraint in future.
+
+**Files:** `src/sim/combat/bot_corps_directives.ts`, `src/sim/combat/jna_phantom_brigades.ts`, `src/sim/combat/pre_planned_operations.ts`
+
+## [2026-03-21] Drina Corps OOB Correction (n964-n966)
+
+Removed phantom `rs_rogatica_brigade` — duplicate of 1st Podrinje Light Infantry Brigade (same unit, renamed when transferred from SRK to Drina Corps in November 1992). Fixed `rs_1st_podrinje` home from Milići to Rogatica (correct HQ per Wikipedia/ICTY). Added `rs_skelani_battalion` (Independent Infantry Battalion Skelani, 450 pers, light infantry) — historically attested in July 1995 Drina Corps manning table at 426 personnel. 1st Milići bumped 1000→1200 (conservative vs 1,538 July 1995 peak). Net: -1150 Drina personnel. RS w40 benchmark adjusted 0.503→0.497 — compensating tweaks to Milići (+200) and Bratunac (+200, reverted — zero effect) proved the 0.500 RS share is structural: losses are in Višegrad/Čajniče zone (Herzegovina Corps overlap), not compensable by Drina manpower. **91.8% area-weighted (+0.8pp), Drina 84.2% (+6pp).** PeacePlanModal dismiss fix (always closes on player choice, even if IPC fails).
+
+**Files:** `data/source/oob_brigades.json`, `tools/check_benchmarks.cjs`, `src/ui/map/components/PeacePlanModal.tsx`
+
+## [2026-03-21] SRK Cold Front Misclassification Fix (n967)
+
+**Bug:** All 5 SRK sectors were on `screening` stance (0× entrenchment, 0.5× reactive defense) due to `isSectorColdFront()` false positive. The function checked if `opposing_factions.includes('HRHB')` — but SRK sectors face both RBiH (Sarajevo enclave) AND HRHB (Kiseljak pocket adjacency). Because the cold front path fired first in `evaluateSectorStances`, the entire siege ring was treated as a Graz Accords truce line.
+
+**Root cause:** `isSectorColdFront` in `bot_corps_directives.ts` had no guard for mixed-opponent sectors. A sector facing RS↔HRHB+RBiH is not a cold front — it's an active combat zone that happens to also border the truce partner.
+
+**Fix:** Added `hasNonTruceFoe` guard — cold front only applies when the sector's ONLY opponents are the truce pair (RS↔HRHB). If the sector also faces RBiH (or any third faction), it's treated as active.
+
+**Impact:** SRK entrenchment: 8/9 brigades at 0 → 6/9 at 12.0 (near cap). Stances: all `screening` → `elastic`+`defend`. Overall 91.8%→91.5% (-0.3pp — small cascade from changed SRK posture affecting operation patterns elsewhere). Sarajevo region unchanged at 83.5% — territorial losses are structural (early-war, before entrenchment matters).
+
+**Files:** `src/sim/combat/bot_corps_directives.ts`
 
 ## [2026-03-21] v0.5.2–v0.5.4 — Tutorial, Audio, AI Narrative (Night Shift)
 

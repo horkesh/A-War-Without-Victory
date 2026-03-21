@@ -389,6 +389,14 @@ function isSectorColdFront(state: GameState, sector: CorpsFrontSector): boolean 
         (fac === 'HRHB' && opp.includes('RS'));
     if (!hasRsHrhb) return false;
 
+    // A sector that also faces a non-truce opponent (e.g. SRK facing both RBiH
+    // and HRHB Kiseljak pocket) is NOT a cold front — it's an active combat zone.
+    // Cold front only applies when the ONLY opponents are the truce pair (RS↔HRHB).
+    const hasNonTruceFoe = fac === 'RS'
+        ? opp.some(f => f !== 'HRHB')
+        : opp.some(f => f !== 'RS');
+    if (hasNonTruceFoe) return false;
+
     // Faction-level RS↔HRHB ceasefire (Herzegovina truce component)
     if (isHerzegovinaTruceActive(state)) {
         const corpsId = sector.corps_id;
@@ -1683,6 +1691,20 @@ export function generateCorpsDirectives(
                         if (pa !== pb) return pb - pa;
                         return strictCompare(a, b);
                     });
+
+                // Enclave supply gate: brigades inside besieged enclaves cannot
+                // participate in offensive operations. Supply strangulation means
+                // no fuel, minimal ammunition, no reinforcements — defense only.
+                // Bihać pocket exempt: large pocket with Croatian supply corridor,
+                // historically mounted significant offensives (Op Tiger, Op Sana).
+                const ENCLAVE_OPS_EXEMPT = new Set(['bihac_pocket']);
+                corpsBrigadeIds = corpsBrigadeIds.filter(id => {
+                    const f = state.military.formations?.[id];
+                    if (!f?.location_osid) return true;
+                    const enclaveId = getEnclaveIdForOsid(f.location_osid);
+                    if (enclaveId == null) return true;
+                    return ENCLAVE_OPS_EXEMPT.has(enclaveId);
+                });
 
                 // Corps-wide enemy OSIDs: union across all corps sectors
                 const corpsEnemyOsids = new Set<string>();

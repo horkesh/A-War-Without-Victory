@@ -71,11 +71,9 @@ export function useKeyboardShortcuts(): void {
         const store = useGameStore.getState();
         if (store.armyHQOpen) {
           store.setArmyHQOpen(false);
-        } else {
-          const faction = store.loadedGameState?.player_faction;
-          if (faction) {
-            store.setSelectedArmyId(faction);
-          }
+        } else if (store.loadedGameState) {
+          const faction = store.loadedGameState.player_faction ?? 'RBiH';
+          store.setSelectedArmyId(faction);
         }
         return;
       }
@@ -85,8 +83,8 @@ export function useKeyboardShortcuts(): void {
         event.preventDefault();
         const store = useGameStore.getState();
         const state = store.loadedGameState;
-        const faction = state?.player_faction;
-        if (!state || !faction) return;
+        const faction = state?.player_faction ?? 'RBiH';
+        if (!state) return;
         const corpsFormations = state.formations.filter(
           (f) => f.faction === faction && (f.kind === 'corps' || f.kind === 'corps_asset')
         );
