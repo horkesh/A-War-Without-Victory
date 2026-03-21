@@ -518,6 +518,10 @@ const HRHB_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     { name: 'Central Bosnia Defense', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'novi_travnik', 'zepce', 'usora', 'kakanj', 'fojnica'], start_week: 0, end_week: 12, weight: 75, min_outcome: 'stalemate' },
     // Central Bosnia OZ: continued defense (no Lasva Offensive — alliance active)
     { name: 'Central Bosnia Anti-RS', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'novi_travnik', 'zepce', 'usora', 'kakanj', 'fojnica'], start_week: 12, end_week: 26, weight: 75, min_outcome: 'stalemate' },
+    // Central Bosnia OZ: bilateral war offensive — Lašva Valley control
+    // After HRHB-RBiH war starts (~w40), CB offensively targets mixed municipalities.
+    // RBiH-controlled OSIDs in these muns only become valid targets when isRbihHrhbCombatEnabled.
+    { name: 'Lasva Valley Offensive', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'novi_travnik', 'fojnica', 'kresevo', 'kakanj'], start_week: 40, end_week: 100, weight: 85, min_outcome: 'repulsed' },
     // Central Bosnia OZ: post-Washington defense
     { name: 'Central Bosnia Hold', corps_id: 'hvo_central_bosnia', target_municipalities: ['vitez', 'busovaca', 'kiseljak', 'zepce'], start_week: 26, end_week: 9999, weight: 50, min_outcome: 'stalemate' },
     // Northwest Bosnia OZ (Posavina): initial defense, then retreat to Orašje pocket
