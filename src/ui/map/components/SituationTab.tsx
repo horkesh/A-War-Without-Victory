@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
+import { DiplomacyOverview } from './DiplomacyOverview';
 import {
     DRINA_BLOCKADE_THRESHOLD,
     INTERNATIONAL_SANCTIONS_THRESHOLD,
@@ -312,6 +313,18 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           </div>
         )}
       </section>
+
+      {/* Negotiation Capital & Patron Pressure (v0.5.0) */}
+      {(state.negotiationCapital || state.patronOverrideAuthority) && (
+        <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Diplomacy</div>
+          <DiplomacyOverview
+            capital={state.negotiationCapital}
+            patronOverride={state.patronOverrideAuthority}
+            playerFaction={playerFaction ?? undefined}
+          />
+        </section>
+      )}
 
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alerts</div>

@@ -296,7 +296,7 @@ export interface MunicipalitySupportOrderView {
 }
 
 export type CommandBriefingSeverity = 'critical' | 'warning' | 'info';
-export type SummaryFocusSection = 'overview' | 'ivp' | 'convoys' | 'casualties' | 'support' | 'opsec';
+export type SummaryFocusSection = 'overview' | 'ivp' | 'convoys' | 'casualties' | 'support' | 'opsec' | 'capital';
 
 export interface CommandBriefingTargetView {
     type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement' | 'corps' | 'officer_events';
@@ -725,6 +725,19 @@ export interface LoadedGameState {
             effects: import('../../../sim/events/event_types.js').EventEffect[];
         }>;
     }>;
+
+    /** Per-faction negotiation capital (5 dimensions, 0-100 each). */
+    negotiationCapital?: Record<string, {
+        military_position: number;
+        humanitarian_standing: number;
+        international_credibility: number;
+        military_effectiveness: number;
+        political_cohesion: number;
+        composite: number;
+    }>;
+
+    /** Per-faction patron override authority (0-100). */
+    patronOverrideAuthority?: Record<string, number>;
 
     /** Pending Dayton negotiation — shown when shouldInitiateDayton fires. */
     pendingDayton?: {

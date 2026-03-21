@@ -1784,6 +1784,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         pendingEventDecisions: derivePendingEventDecisions(state),
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingDayton: derivePendingDayton(state),
+        negotiationCapital: deriveNegotiationCapital(state),
+        patronOverrideAuthority: derivePatronOverrideAuthority(state),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
         // Game over
@@ -2112,6 +2114,53 @@ function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventD
             }))
             : [],
     }));
+}
+
+function deriveNegotiationCapital(state: any): LoadedGameState['negotiationCapital'] {
+    const neg = state.military?.negotiation;
+    const capital = neg?.capital;
+    if (!capital || typeof capital !== 'object') return undefined;
+    const out: Record<string, { military_position: number; humanitarian_standing: number; international_credibility: number; military_effectiveness: number; political_cohesion: number; composite: number }> = {};
+    for (const [faction, cap] of Object.entries(capital).sort((a, b) => a[0].localeCompare(b[0]))) {
+        const c = cap as any;
+        if (!c || typeof c !== 'object') continue;
+        try {
+            const { computeCompositeScore } = require('../../../sim/negotiation/compute_capital.js');
+            const composite = computeCompositeScore(c, faction);
+            out[faction] = {
+                military_position: Number(c.military_position ?? 0),
+                humanitarian_standing: Number(c.humanitarian_standing ?? 0),
+                international_credibility: Number(c.international_credibility ?? 0),
+                military_effectiveness: Number(c.military_effectiveness ?? 0),
+                political_cohesion: Number(c.political_cohesion ?? 0),
+                composite: typeof composite === 'number' ? composite : 50,
+            };
+        } catch {
+            out[faction] = {
+                military_position: Number(c.military_position ?? 0),
+                humanitarian_standing: Number(c.humanitarian_standing ?? 0),
+                international_credibility: Number(c.international_credibility ?? 0),
+                military_effectiveness: Number(c.military_effectiveness ?? 0),
+                political_cohesion: Number(c.political_cohesion ?? 0),
+                composite: 50,
+            };
+        }
+    }
+    return Object.keys(out).length > 0 ? out : undefined;
+}
+
+function derivePatronOverrideAuthority(state: any): LoadedGameState['patronOverrideAuthority'] {
+    const neg = state.military?.negotiation;
+    const patrons = neg?.patron_relationships;
+    if (!patrons || typeof patrons !== 'object') return undefined;
+    const out: Record<string, number> = {};
+    for (const [faction, rel] of Object.entries(patrons).sort((a, b) => a[0].localeCompare(b[0]))) {
+        const r = rel as any;
+        if (r && typeof r.override_authority === 'number') {
+            out[faction] = r.override_authority;
+        }
+    }
+    return Object.keys(out).length > 0 ? out : undefined;
 }
 
 function derivePendingDayton(state: any): LoadedGameState['pendingDayton'] {

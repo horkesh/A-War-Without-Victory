@@ -24,6 +24,7 @@ const SUMMARY_SECTIONS: Array<[SummaryFocusSection, string]> = [
     ['casualties', 'Casualties'],
     ['support', 'Support'],
     ['opsec', 'OPSEC'],
+    ['capital', 'Capital'],
 ];
 type FactionKey = typeof FACTIONS[number];
 
