@@ -69,8 +69,8 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         id: 'jna_uzice_corps_tg' as FormationId,
         name: 'JNA Uzice Corps Task Group',
         corps_id: 'vrs_herzegovina' as FormationId,
-        location_osid: 'op:visegrad:visegrad_2',
-        withdrawal_turn: 4,
+        location_osid: 'op:visegrad:okrugla',
+        withdrawal_turn: 6,
         tanks: 30, artillery: 20, apcs: 8,
     },
     {
@@ -114,6 +114,22 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         location_osid: 'op:ilidza:kasindo',
         withdrawal_turn: 6,
         tanks: 20, artillery: 25, apcs: 5,
+    },
+    {
+        id: 'jna_visegrad_local_to_tg' as FormationId,
+        name: 'Višegrad Serb TO',
+        corps_id: 'vrs_herzegovina' as FormationId,
+        location_osid: 'op:visegrad:okrugla',
+        withdrawal_turn: 8,
+        tanks: 0, artillery: 0, apcs: 0,
+    },
+    {
+        id: 'jna_rudo_to_tg' as FormationId,
+        name: 'Rudo Serb TO',
+        corps_id: 'vrs_herzegovina' as FormationId,
+        location_osid: 'op:visegrad:donji_dobrun_2',
+        withdrawal_turn: 8,
+        tanks: 0, artillery: 0, apcs: 0,
     },
     {
         id: 'jna_rajlovac_barracks_tg' as FormationId,

@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **92.0% area-weighted (40w).** Sarajevo 86.8% (+3.3pp). Three calibration fixes: Drina OOB (n964-n966), SRK cold front (n967), supply-based offensive constraint (n975).
+**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **92.5% area-weighted (40w).** Sarajevo 86.8%. Calibration fixes: Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975), Višegrad operation redesign (n980).
 
 ## [2026-03-21] Supply-Based Offensive Constraint (n975)
 
@@ -16,6 +16,12 @@
 **Impact:** **92.0% area-weighted** (new session ATH). Sarajevo **86.8%** (+3.3pp). RS w40 **0.507 PASS**. Drina 84.2% (stable).
 
 **Files:** `src/sim/combat/bot_corps_directives.ts`, `src/sim/combat/jna_phantom_brigades.ts`, `src/sim/combat/pre_planned_operations.ts`
+
+## [2026-03-21] Višegrad Operation Redesign (n978-n980)
+
+Operation Višegrad restructured: `rs_visegrad_brigade` added (was missing from its own hometown operation). Objectives trimmed 8→4 (town + immediate area). Two JNA ghost phantoms (Višegrad Serb TO + Rudo TO, no equipment — ~1,000 local territorial defense per BB1 p.174). JNA Užice withdrawal extended w4→w6. `min_attack_outcome: 'repulsed'`. Result: 2/4 objectives captured (visegrad_2 + drinsko). Bogdasici/kamenica_2 blocked by Goražde reactive defense (5 brigades pooling at 1-2 hops). **92.5% area-weighted.** Blocker: enclave reactive defense contribution needs distance-cap or supply-gating.
+
+**Files:** `src/sim/combat/pre_planned_operations.ts`, `src/sim/combat/jna_phantom_brigades.ts`
 
 ## [2026-03-21] Drina Corps OOB Correction (n964-n966)
 
@@ -15539,3 +15545,26 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 - `tests/operation_prediction.test.ts`, `tests/use_prediction_normalize.test.ts`
 - `vitest.config.ts` (include entry for normalize tests)
 - `docs/40_reports/GUI_MASTER.md`
+
+## [2026-03-21] GUI cleanup — battle markers, enrichments, labels, toolbar fixes
+
+### Change
+- **Battle markers** hidden by default (`battlesVisible: false`), toggle removed from both `DEV_LAYER_TOGGLES` and `LIVE_LAYER_TOGGLES`. Battle count removed from `BottomStatusStrip`.
+- **Deck.gl counter enrichments removed** from `buildTacticalDeckLayers.ts`: cohesion health bar, supply dot, status indicators, stack badges, op/disrupted glow rings — all deleted. Only clean NATO `IconLayer` counters remain.
+- **Formation labels removed** (Deck.gl `TextLayer` for labels deleted).
+- **PeacePlanModal dismiss fix**: synchronous `onDismiss()` fires first, IPC runs fire-and-forget. Parent uses simple boolean `peacePlanDismissed` instead of ID comparison.
+- **`playerFaction` defaults to `'RBiH'`** when save has no `player_faction` (headless scenario runs).
+- **Corps/ORBAT toolbar buttons** now match `corps_asset` kind (ARBiH uses `corps_asset`, not `corps`).
+- **Tab keyboard shortcut** `player_faction` fallback added.
+
+### Doc propagation
+- Updated: `docs/10_canon/context.md`, `docs/10_canon/Systems_Manual_v0_7_0.md`, `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md`, `docs/20_engineering/MAP_UI_MASTER.md`, `docs/20_engineering/GUI_DESIGN_BLUEPRINT.md`, `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`, `.claude/napkin.md`
+
+### Files
+- `src/ui/map/layers/buildTacticalDeckLayers.ts` (rewritten — icons only)
+- `src/ui/map/components/PeacePlanModal.tsx` (synchronous dismiss)
+- `src/ui/map/App.tsx` (playerFaction default, peacePlanDismissed boolean, corps_asset in toolbar handlers)
+- `src/ui/map/hooks/useKeyboardShortcuts.ts` (player_faction fallback)
+- `src/ui/map/utils/mapModes.ts` (battles toggle removed)
+- `src/ui/map/store/gameStore.ts` (battlesVisible: false)
+- `src/ui/map/components/BottomStatusStrip.tsx` (battle count removed)
