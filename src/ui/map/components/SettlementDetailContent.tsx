@@ -199,12 +199,12 @@ export function SettlementDetailContent({
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
 
-  type SettlementTabId = 'overview' | 'military' | 'orders';
+  type SettlementTabId = 'overview' | 'municipality' | 'orders';
   const [activeTab, setActiveTab] = useState<SettlementTabId>('overview');
 
   const settlementTabs: { id: SettlementTabId; label: string }[] = [
     { id: 'overview', label: 'Overview' },
-    { id: 'military', label: 'Military' },
+    { id: 'municipality', label: 'Municipality' },
     { id: 'orders', label: 'Orders & events' },
   ];
 
@@ -278,7 +278,7 @@ export function SettlementDetailContent({
           </div>
         )}
 
-        {(!isPanel || activeTab === 'military') && isPanel && sectorName && (
+        {(!isPanel || activeTab === 'overview') && isPanel && sectorName && (
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-text-secondary">Front sector</span>
             {sectorId ? (
@@ -570,7 +570,7 @@ export function SettlementDetailContent({
         })()}
 
         {/* Stationed Units */}
-        {(!isPanel || activeTab === 'military') && formationsAtOsid.length > 0 && (
+        {(!isPanel || activeTab === 'overview') && formationsAtOsid.length > 0 && (
           <div className="pt-2 border-t border-panel-border/50">
             <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5 flex justify-between items-center">
               <span>Stationed units</span>
@@ -636,8 +636,63 @@ export function SettlementDetailContent({
           </div>
         )}
 
-        {/* Militia pool for this municipality (available / committed / exhausted) */}
-        {(!isPanel || activeTab === 'military') && isPanel && militiaPools && militiaPools.length > 0 && (
+        {/* Municipality-level population and displacement summary */}
+        {isPanel && activeTab === 'municipality' && disp && (
+          <div className="pt-2 space-y-2">
+            <div className="text-[10px] text-text-secondary uppercase font-semibold">
+              {municipality ?? munId ?? 'Municipality'} — Population
+            </div>
+            <div className="flex items-center gap-2 text-[11px]">
+              <span className="text-text-secondary">Pre-war</span>
+              <span className="font-mono font-bold text-text-primary">{disp.originalPopulation.toLocaleString()}</span>
+              <span className="text-text-secondary">→</span>
+              <span className="text-text-secondary">Now</span>
+              <span className="font-mono font-bold text-text-primary">{disp.currentPopulation.toLocaleString()}</span>
+              <span className={`font-mono text-[10px] ${disp.currentPopulation < disp.originalPopulation ? 'text-red-400' : 'text-emerald-400'}`}>
+                {disp.currentPopulation >= disp.originalPopulation ? '+' : ''}{(disp.currentPopulation - disp.originalPopulation).toLocaleString()}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              {disp.displacedOut > 0 && (
+                <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
+                  <span className="text-[9px] text-red-400/80">Displaced</span>
+                  <div className="font-mono font-semibold text-red-400 text-[11px]">-{(disp.displacedOut - disp.lostPopulation).toLocaleString()}</div>
+                </div>
+              )}
+              {disp.lostPopulation > 0 && (
+                <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
+                  <span className="text-[9px] text-red-300/80">Killed / Fled</span>
+                  <div className="font-mono font-semibold text-red-300 text-[11px]">-{disp.lostPopulation.toLocaleString()}</div>
+                </div>
+              )}
+              {disp.displacedIn > 0 && (
+                <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
+                  <span className="text-[9px] text-emerald-500/80">Arrived</span>
+                  <div className="font-mono font-semibold text-emerald-400 text-[11px]">+{disp.displacedIn.toLocaleString()}</div>
+                </div>
+              )}
+            </div>
+            {disp.arrivedByFaction && Object.keys(disp.arrivedByFaction).length > 0 && (
+              <div className="text-[10px]">
+                <span className="text-text-secondary">Arrived by faction: </span>
+                {Object.entries(disp.arrivedByFaction)
+                  .filter(([, n]) => (n ?? 0) > 0)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([faction, n]) => (
+                    <span key={faction} className={FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary'}>
+                      {ethnicityOrFactionToNationLabel(faction)} +{(n ?? 0).toLocaleString()}{' '}
+                    </span>
+                  ))}
+              </div>
+            )}
+          </div>
+        )}
+        {isPanel && activeTab === 'municipality' && !disp && (
+          <div className="pt-2 text-[10px] text-text-secondary italic">No municipality displacement data available.</div>
+        )}
+
+        {/* Militia pool for this municipality */}
+        {(!isPanel || activeTab === 'municipality') && isPanel && militiaPools && militiaPools.length > 0 && (
           <div className="pt-2 border-t border-panel-border/50">
             <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5">Militia pool</div>
             <div className="space-y-2">
