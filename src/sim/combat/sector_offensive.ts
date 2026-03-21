@@ -156,7 +156,7 @@ const EXHAUSTION_DECAY_ACTIVE = 1;
  *   (b) Add a power-ratio viability gate: if predicted power_ratio < 0.35 for
  *       all remaining axes, abort regardless of failure budget.
  *   (c) Reduce to MAX_TOTAL_FAILURES = 3 for multi-axis and keep 5 for single. */
-const MAX_TOTAL_FAILURES = 5;
+const MAX_TOTAL_FAILURES = 8;
 
 /** Consecutive failures on same objective before skip. */
 const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 3;
