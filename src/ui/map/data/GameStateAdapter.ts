@@ -1440,6 +1440,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     const departedByOsid: LoadedGameState['departedByOsid'] = {};
     const departedByMun: LoadedGameState['departedByMun'] = {};
     const displacementByOsid: LoadedGameState['displacementByOsid'] = {};
+    const displacementEventLogRaw: LoadedGameState['displacementEventLog'] = [];
     const rawEventLog = (state as any).displacement?.displacement_event_log;
     if (Array.isArray(rawEventLog)) {
         for (const evt of rawEventLog as Array<Record<string, unknown>>) {
@@ -1451,19 +1452,22 @@ export function parseGameState(json: unknown): LoadedGameState {
             const destOsid = typeof evt.dest_osid === 'string' ? evt.dest_osid : '';
             const originMun = typeof evt.origin_mun === 'string' ? evt.origin_mun : '';
             const ethnicity = typeof evt.ethnicity === 'string' ? evt.ethnicity : '';
+            const turnNum = typeof evt.turn === 'number' ? evt.turn : 0;
+            const causedBy = typeof evt.caused_by === 'string' ? evt.caused_by : undefined;
+            displacementEventLogRaw.push({ turn: turnNum, origin_osid: originOsid || undefined, dest_osid: destOsid || undefined, origin_mun: originMun || undefined, ethnicity: ethnicity || undefined, displaced, killed, fled_abroad: fledAbroad, settled, caused_by: causedBy });
             if (originOsid) {
                 if (!displacementByOsid[originOsid]) displacementByOsid[originOsid] = { out: 0, lost: 0, in: 0 };
-                const outDelta = displaced + killed + fledAbroad;
-                displacementByOsid[originOsid].out += outDelta;
+                // displaced = total people removed (includes killed + fled as subsets)
+                // killed + fled_abroad are subsets of displaced, NOT additional
+                displacementByOsid[originOsid].out += displaced;
                 displacementByOsid[originOsid].lost += killed + fledAbroad;
             }
             if (destOsid) {
                 if (!displacementByOsid[destOsid]) displacementByOsid[destOsid] = { out: 0, lost: 0, in: 0 };
                 displacementByOsid[destOsid].in += settled;
             }
-            // Count ALL removals (displaced + killed + fled_abroad) per ethnicity so
-            // the current-ethnic computation does not leave "ghost" residents behind.
-            const totalRemoved = displaced + killed + fledAbroad;
+            // displaced = total removals (killed + fled are subsets, not additional)
+            const totalRemoved = displaced;
             if (totalRemoved > 0 && ethnicity) {
                 if (originOsid) {
                     if (!departedByOsid[originOsid]) departedByOsid[originOsid] = {};
@@ -1732,7 +1736,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         },
         formations, militiaPools, controlBySettlement, statusBySettlement,
         brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
-        attackOrders, aorOrders, recentControlEvents, recruitment,
+        attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
         armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure, warPhaseExhaustion,
         player_faction: playerFaction ?? undefined,
@@ -1761,6 +1765,10 @@ export function parseGameState(json: unknown): LoadedGameState {
         sectorEntrenchmentSummary,
         mobilizationSummary,
         commandBriefing,
+        battlesByOsid: deriveBattlesByOsid(state),
+        movementsByOsid: deriveMovementsByOsid(state),
+        supplyTransitionsByOsid: deriveSupplyTransitionsByOsid(state),
+        historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         operationHistory: deriveOperationHistory(state),
         activeOperations: deriveActiveOperations(state),
@@ -1820,6 +1828,90 @@ function deriveEliteBrigadeTracker(state: any): LoadedGameState['eliteBrigadeTra
                 osids_captured: Number(ep.osids_captured ?? 0),
             })) : [],
         };
+    }
+    return result;
+}
+
+function deriveBattlesByOsid(state: any): LoadedGameState['battlesByOsid'] {
+    const result: LoadedGameState['battlesByOsid'] = {};
+    const summaries = state.turn_summaries as Array<{ turn?: number; battles?: Array<Record<string, unknown>> }> | undefined;
+    if (!Array.isArray(summaries)) return result;
+    for (const summary of summaries) {
+        const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!Array.isArray(summary.battles)) continue;
+        for (const b of summary.battles) {
+            const osid = typeof b.osid === 'string' ? b.osid : '';
+            if (!osid) continue;
+            if (!result[osid]) result[osid] = [];
+            result[osid].push({
+                turn,
+                attacker_faction: String(b.attacker_faction ?? ''),
+                defender_faction: String(b.defender_faction ?? ''),
+                outcome: String(b.outcome ?? ''),
+                attacker_casualties: typeof b.attacker_casualties === 'number' ? b.attacker_casualties : 0,
+                defender_casualties: typeof b.defender_casualties === 'number' ? b.defender_casualties : 0,
+                territory_flipped: Boolean(b.territory_flipped),
+            });
+        }
+    }
+    return result;
+}
+
+function deriveMovementsByOsid(state: any): LoadedGameState['movementsByOsid'] {
+    const result: LoadedGameState['movementsByOsid'] = {};
+    const summaries = state.turn_summaries as Array<{ turn?: number; movements?: Array<Record<string, unknown>> }> | undefined;
+    if (!Array.isArray(summaries)) return result;
+    for (const summary of summaries) {
+        const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!Array.isArray(summary.movements)) continue;
+        for (const m of summary.movements) {
+            const fid = String(m.formation_id ?? '');
+            const fname = String(m.formation_name ?? fid);
+            const from = String(m.from_osid ?? '');
+            const to = String(m.to_osid ?? '');
+            if (!from && !to) continue;
+            // Departed from old OSID
+            if (from) {
+                if (!result[from]) result[from] = [];
+                result[from].push({ turn, formation_id: fid, formation_name: fname, type: 'departed' });
+            }
+            // Arrived at new OSID
+            if (to) {
+                if (!result[to]) result[to] = [];
+                result[to].push({ turn, formation_id: fid, formation_name: fname, type: 'arrived' });
+            }
+        }
+    }
+    return result;
+}
+
+function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsByTurn'] {
+    const result: LoadedGameState['historicalEventsByTurn'] = [];
+    const summaries = state.turn_summaries as Array<{ turn?: number; events_fired?: Array<{ id: string; text: string }> }> | undefined;
+    if (!Array.isArray(summaries)) return result;
+    for (const summary of summaries) {
+        const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!Array.isArray(summary.events_fired)) continue;
+        for (const e of summary.events_fired) {
+            result.push({ turn, id: String(e.id ?? ''), text: String(e.text ?? '') });
+        }
+    }
+    return result;
+}
+
+function deriveSupplyTransitionsByOsid(state: any): LoadedGameState['supplyTransitionsByOsid'] {
+    const result: LoadedGameState['supplyTransitionsByOsid'] = {};
+    const summaries = state.turn_summaries as Array<{ turn?: number; supply_transitions?: Array<Record<string, unknown>> }> | undefined;
+    if (!Array.isArray(summaries)) return result;
+    for (const summary of summaries) {
+        const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!Array.isArray(summary.supply_transitions)) continue;
+        for (const t of summary.supply_transitions) {
+            const osid = String(t.osid ?? '');
+            if (!osid) continue;
+            if (!result[osid]) result[osid] = [];
+            result[osid].push({ turn, from: String(t.from ?? ''), to: String(t.to ?? '') });
+        }
     }
     return result;
 }

@@ -27,12 +27,14 @@ export function captureAARSnapshot(state: GameState): AARSnapshot {
     const decoration_tiers: Record<FormationId, string[]> = {};
     const formation_ids = new Set<FormationId>();
     const already_destroyed = new Set<FormationId>();
+    const formation_locations: Record<FormationId, string> = {};
 
     // No sort needed — snapshot is transient and never serialized
     for (const fid of Object.keys(formations)) {
         const f = formations[fid];
         if (!f) continue;
         formation_ids.add(fid);
+        if (f.location_osid) formation_locations[fid] = f.location_osid;
         if (f.lifecycle_status === 'destroyed' || f.lifecycle_status === 'disbanded') {
             already_destroyed.add(fid);
         }
@@ -53,6 +55,8 @@ export function captureAARSnapshot(state: GameState): AARSnapshot {
         decoration_tiers,
         already_destroyed,
         formation_ids,
+        formation_locations,
+        supply_state_by_osid: { ...(state.political?.last_supply_state_by_osid ?? {}) },
     };
 }
 
@@ -77,6 +81,9 @@ export function compileTurnSummary(
         ...compileDisplacement(state, turn),
         ...compileUnitEvents(state, snapshot),
         ...compileSupplyDeltas(state, snapshot),
+        movements: compileMovements(state, snapshot),
+        supply_transitions: compileSupplyTransitions(state, snapshot),
+        events_fired: report.events_fired ?? [],
         notable_events: compileNotableEvents(state, turn),
     };
 }
@@ -311,6 +318,48 @@ function compileSupplyDeltas(
 
 // ---------------------------------------------------------------------------
 // Section: Notable Events
+// ---------------------------------------------------------------------------
+// Section: Movements
+// ---------------------------------------------------------------------------
+
+function compileMovements(state: GameState, snapshot: AARSnapshot): TurnSummary['movements'] {
+    const movements: TurnSummary['movements'] = [];
+    const formations = state.military.formations ?? {};
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
+        if (!f || !f.location_osid) continue;
+        if (f.lifecycle_status === 'destroyed' || f.lifecycle_status === 'disbanded') continue;
+        const prevOsid = snapshot.formation_locations[fid];
+        if (prevOsid && prevOsid !== f.location_osid) {
+            movements.push({
+                formation_id: fid,
+                formation_name: f.name ?? fid,
+                from_osid: prevOsid,
+                to_osid: f.location_osid,
+            });
+        }
+    }
+    return movements;
+}
+
+// ---------------------------------------------------------------------------
+// Section: Supply transitions
+// ---------------------------------------------------------------------------
+
+function compileSupplyTransitions(state: GameState, snapshot: AARSnapshot): TurnSummary['supply_transitions'] {
+    const transitions: TurnSummary['supply_transitions'] = [];
+    const current = state.political?.last_supply_state_by_osid ?? {};
+    const prev = snapshot.supply_state_by_osid;
+    for (const osid of Object.keys(current).sort(strictCompare)) {
+        const curLevel = current[osid];
+        const prevLevel = prev[osid];
+        if (prevLevel && prevLevel !== curLevel) {
+            transitions.push({ osid, from: prevLevel, to: curLevel });
+        }
+    }
+    return transitions;
+}
+
 // ---------------------------------------------------------------------------
 
 function compileNotableEvents(state: GameState, turn: number): TurnNotableEvent[] {

@@ -152,6 +152,12 @@ describe('Tactical map render smoke', () => {
   attackOrders: [],
   aorOrders: [],
   recentControlEvents: [],
+  allControlEvents: [],
+  displacementEventLog: [],
+  battlesByOsid: {},
+  movementsByOsid: {},
+  supplyTransitionsByOsid: {},
+  historicalEventsByTurn: [],
   latestTurnSummary: null,
   formations: [
         {

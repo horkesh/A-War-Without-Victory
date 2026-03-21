@@ -134,6 +134,14 @@ export function consolidateRearPockets(
         for (const c of cluster.sort(strictCompare)) {
             state.political.political_controllers[c] = surroundingFaction;
             seedDisplacementTimerOnFlip(state, c, controller as FactionId, surroundingFaction as FactionId);
+            (state.political.control_events ??= []).push({
+                turn: state.meta?.turn ?? 0,
+                settlement_id: c,
+                mechanism: 'consolidation',
+                from: controller as string | null,
+                to: surroundingFaction,
+                mun_id: c.split(':')[1],
+            });
             report.flipped.push({ osid: c, from: controller, to: surroundingFaction });
             report.total_flipped++;
         }

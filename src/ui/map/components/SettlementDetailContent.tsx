@@ -2,14 +2,16 @@
  * Shared settlement detail content (HoI spec §7.1).
  * Used by Tooltip (hover) and SelectionPanel (selected OSID).
  * When displacementByMun is provided, shows current population and change.
- * Panel variant uses horizontal tabs (Overview | Military | Orders & events) like sector/operations panels.
+ * Panel variant uses horizontal tabs (Overview | Municipality | Timeline).
  */
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getByOsid } from '../utils/osidLookup';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
+import { SettlementTimeline } from './SettlementTimeline';
+import { buildSettlementTimeline } from '../utils/buildSettlementTimeline';
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
@@ -116,6 +118,20 @@ export interface SettlementDetailContentProps {
   brigadeCountByFaction?: Record<string, number>;
   /** When set (panel), formation rows call this with formation id to open formation detail. */
   onFormationClick?: (formationId: string) => void;
+  /** Raw displacement event log for timeline. */
+  displacementEventLog?: Array<{ turn: number; origin_osid?: string; dest_osid?: string; origin_mun?: string; ethnicity?: string; displaced: number; killed: number; fled_abroad: number; settled: number; caused_by?: string }>;
+  /** All control events (full history, not just recent). */
+  allControlEvents?: Array<{ turn: number; settlementId: string; from: string | null; to: string | null; mechanism: string }>;
+  /** Completed operation history for timeline. */
+  operationHistory?: Array<{ operation_name: string; corps_id: string; faction: string; started_turn: number; ended_turn: number; outcome: string; objectives_targeted: string[]; objectives_captured: string[] }>;
+  /** Per-OSID battle records for timeline. */
+  battlesByOsid?: Record<string, Array<{ turn: number; attacker_faction: string; defender_faction: string; outcome: string; attacker_casualties: number; defender_casualties: number; territory_flipped: boolean }>>;
+  /** Per-OSID brigade movements for timeline. */
+  movementsByOsid?: Record<string, Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>>;
+  /** Per-OSID supply transitions for timeline. */
+  supplyTransitionsByOsid?: Record<string, Array<{ turn: number; from: string; to: string }>>;
+  /** Historical events fired, for timeline. */
+  historicalEventsByTurn?: Array<{ turn: number; id: string; text: string }>;
 }
 
 export function SettlementDetailContent({
@@ -140,6 +156,13 @@ export function SettlementDetailContent({
   pendingOrders,
   militiaPools,
   onFormationClick,
+  displacementEventLog,
+  allControlEvents,
+  operationHistory,
+  battlesByOsid,
+  movementsByOsid,
+  supplyTransitionsByOsid,
+  historicalEventsByTurn,
 }: SettlementDetailContentProps) {
   const name = getOsidDisplayName(osid, osidDisplayNames);
   const props = osidPropertiesMap?.[osid] ?? {};
@@ -215,13 +238,42 @@ export function SettlementDetailContent({
         ? Math.round(popOriginal * (disp.currentPopulation / disp.originalPopulation))
         : null;
   const popDelta = currentPop != null && popOriginal > 0 ? currentPop - popOriginal : null;
+
+  // Build settlement timeline from all available data sources
+  const timelineEvents = useMemo(() => {
+    if (variant !== 'panel') return [];
+    return buildSettlementTimeline(
+      osid,
+      munId,
+      displacementEventLog ?? [],
+      allControlEvents ?? [],
+      operationHistory ?? [],
+      battlesByOsid?.[osid] ?? [],
+      movementsByOsid?.[osid] ?? [],
+      supplyTransitionsByOsid?.[osid] ?? [],
+      (historicalEventsByTurn ?? []).filter(e => {
+        // Match events to this OSID's municipality (event IDs often contain mun name)
+        if (!munId) return false;
+        const munSlug = munId.replace(/_/g, '');
+        return e.id.replace(/_/g, '').includes(munSlug);
+      }),
+      popOriginal > 0 ? {
+        bosniaks: num(props.population_bosniaks),
+        serbs: num(props.population_serbs),
+        croats: num(props.population_croats),
+        others: num(props.population_others),
+      } : null,
+    );
+  }, [osid, munId, displacementEventLog, allControlEvents, operationHistory, variant, popOriginal, props.population_bosniaks, props.population_serbs, props.population_croats, props.population_others]);
   /** Settlement-level flows: exact per-OSID when available, else municipality share. */
   const settlementShare =
     disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
-  // outSettlement = displaced only (moved to another OSID, alive)
-  // lostSettlement = killed + fled abroad
+  // outSettlement = displaced alive (moved to another OSID)
+  // lostSettlement = killed + fled abroad (subset of total displaced)
+  // osidDisp.out = total displaced (includes killed + fled as subsets)
+  // osidDisp.lost = killed + fled_abroad
   const outSettlement =
-    osidDisp != null ? (osidDisp.out - osidDisp.lost) : (disp && settlementShare > 0 ? Math.round((disp.displacedOut - disp.lostPopulation) * settlementShare) : 0);
+    osidDisp != null ? (osidDisp.out - osidDisp.lost) : (disp && settlementShare > 0 ? Math.round(disp.displacedOut * settlementShare) : 0);
   const lostSettlement =
     osidDisp != null ? osidDisp.lost : (disp && settlementShare > 0 ? Math.round(disp.lostPopulation * settlementShare) : 0);
   const inSettlement =
@@ -238,13 +290,13 @@ export function SettlementDetailContent({
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
 
-  type SettlementTabId = 'overview' | 'municipality' | 'orders';
+  type SettlementTabId = 'overview' | 'municipality' | 'timeline';
   const [activeTab, setActiveTab] = useState<SettlementTabId>('overview');
 
   const settlementTabs: { id: SettlementTabId; label: string }[] = [
     { id: 'overview', label: 'Overview' },
     { id: 'municipality', label: 'Municipality' },
-    { id: 'orders', label: 'Orders & events' },
+    { id: 'timeline', label: 'Timeline' },
   ];
 
   return (
@@ -331,7 +383,7 @@ export function SettlementDetailContent({
           </div>
         )}
 
-        {(!isPanel || activeTab === 'orders') && isPanel && operationsTargetingOsid && operationsTargetingOsid.length > 0 && (
+        {(!isPanel || activeTab === 'overview') && isPanel && operationsTargetingOsid && operationsTargetingOsid.length > 0 && (
           <div className="pt-2 border-t border-panel-border/30">
             <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1">Operation target</div>
             <ul className="space-y-1">
@@ -364,28 +416,13 @@ export function SettlementDetailContent({
           </div>
         )}
 
-        {(!isPanel || activeTab === 'orders') && isPanel && recentControlEvents && recentControlEvents.length > 0 && (
-          <div className="pt-2 border-t border-panel-border/30">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1">Recent control</div>
-            <ul className="space-y-1.5">
-              {recentControlEvents.slice(0, 5).map((evt, i) => (
-                <li key={i} className="text-[10px]">
-                  <span className="text-text-secondary">T{evt.turn}</span>
-                  {' '}
-                  <span className={evt.from ? (FACTION_COLORS_SUBTLE[evt.from] ?? 'text-text-primary') : 'text-text-secondary'}>{evt.from ?? '—'}</span>
-                  <span className="text-text-secondary mx-0.5">→</span>
-                  <span className={evt.to ? (FACTION_COLORS_SUBTLE[evt.to] ?? 'text-text-primary') : 'text-text-primary'}>{evt.to ?? '—'}</span>
-                  {evt.mechanism && evt.mechanism !== 'unknown' && (
-                    <span className="text-text-secondary ml-1">({evt.mechanism})</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Timeline tab — "The Story of This Place" */}
+        {isPanel && activeTab === 'timeline' && (
+          <SettlementTimeline events={timelineEvents} />
         )}
 
         {/* Pending orders (attack/move/reposition affecting this settlement) */}
-        {(!isPanel || activeTab === 'orders') && isPanel && pendingOrders && (pendingOrders.attack.length > 0 || pendingOrders.move.length > 0 || pendingOrders.reposition.length > 0) && (
+        {(!isPanel || activeTab === 'overview') && isPanel && pendingOrders && (pendingOrders.attack.length > 0 || pendingOrders.move.length > 0 || pendingOrders.reposition.length > 0) && (
           <div className="pt-2 border-t border-panel-border/30">
             <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1">Pending orders</div>
             <ul className="space-y-1 text-[10px]">
@@ -693,7 +730,7 @@ export function SettlementDetailContent({
               {disp.displacedOut > 0 && (
                 <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
                   <span className="text-[9px] text-red-400/80">Displaced</span>
-                  <div className="font-mono font-semibold text-red-400 text-[11px]">-{(disp.displacedOut - disp.lostPopulation).toLocaleString()}</div>
+                  <div className="font-mono font-semibold text-red-400 text-[11px]">-{disp.displacedOut.toLocaleString()}</div>
                 </div>
               )}
               {disp.lostPopulation > 0 && (

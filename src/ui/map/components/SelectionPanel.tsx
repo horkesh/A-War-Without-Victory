@@ -238,7 +238,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           operationsTargetingOsid={operationsTargetingOsid.length > 0 ? operationsTargetingOsid : undefined}
           recentControlEvents={recentControlEventsForOsid.length > 0 ? recentControlEventsForOsid : undefined}
           departedByEthnicity={departedByEthnicity && Object.keys(departedByEthnicity).length > 0 ? departedByEthnicity : undefined}
-          departedByOsid={loadedGameState?.departedByOsid ?? undefined}
+          departedByOsid={loadedGameState?.departedByOsid as Record<string, Record<string, number>> | undefined}
           sectorName={sectorInfo.sectorName}
           sectorFaction={sectorInfo.sectorFaction}
           sectorId={sectorInfo.sectorId}
@@ -247,6 +247,13 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           militiaPools={militiaPoolsProp}
           onFormationClick={setSelectedFormationId}
           currentEthnic={currentEthnic ?? undefined}
+          displacementEventLog={loadedGameState?.displacementEventLog}
+          allControlEvents={loadedGameState?.allControlEvents}
+          operationHistory={loadedGameState?.operationHistory}
+          battlesByOsid={loadedGameState?.battlesByOsid}
+          movementsByOsid={loadedGameState?.movementsByOsid}
+          supplyTransitionsByOsid={loadedGameState?.supplyTransitionsByOsid}
+          historicalEventsByTurn={loadedGameState?.historicalEventsByTurn}
         />
         {playerFaction && selectedMunId && (
           <div className="mt-4 rounded border border-panel-border bg-panel-card p-3 space-y-2">

@@ -321,6 +321,10 @@ export interface AARSnapshot {
     already_destroyed: Set<FormationId>;
     /** All formation IDs present at turn start. */
     formation_ids: Set<FormationId>;
+    /** Formation locations at turn start (for movement tracking in timeline). */
+    formation_locations: Record<FormationId, string>;
+    /** Per-OSID supply state at turn start (for supply transition tracking). */
+    supply_state_by_osid: Record<string, string>;
 }
 
 /** Type-safe accessor for AAR snapshot attached to context. */
