@@ -224,7 +224,26 @@ registerBriefingCollector('humanitarian', (state, faction) => {
     return items;
 });
 
-// Section 4: Officer/Command
+// Section 4: Field Reports (AARs)
+registerBriefingCollector('field_reports', (state, _faction) => {
+    const items: BriefingItem[] = [];
+    const aars = (state.military as any)?.battle_narratives as Array<{ turn: number; narrative: string; officer_name: string; target_osid: string; outcome: string }> | undefined;
+    if (!aars || aars.length === 0) return items;
+    const currentTurn = state.meta?.turn ?? 0;
+    const thisTurnAars = aars.filter(a => a.turn === currentTurn);
+    for (const aar of thisTurnAars.slice(0, 3)) {
+        items.push({
+            id: `aar-${aar.target_osid}-${aar.turn}`,
+            section: 'field_reports',
+            severity: 'info',
+            title: `Field Report: ${aar.officer_name}`,
+            detail: aar.narrative.slice(0, 200) + (aar.narrative.length > 200 ? '...' : ''),
+        });
+    }
+    return items;
+});
+
+// Section 5: Officer/Command
 registerBriefingCollector('command', (state, faction) => {
     const items: BriefingItem[] = [];
     const pending = state.military?.pending_officer_events;
