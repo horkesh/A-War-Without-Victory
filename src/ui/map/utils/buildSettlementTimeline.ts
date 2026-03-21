@@ -88,12 +88,29 @@ function factionName(f: string): string {
     return f;
 }
 
+interface BattleRecord {
+    turn: number;
+    attacker_faction: string;
+    defender_faction: string;
+    outcome: string;
+    attacker_casualties: number;
+    defender_casualties: number;
+    territory_flipped: boolean;
+}
+
+/** Outcome display name. */
+function outcomeName(o: string): string {
+    return o.replace(/_/g, ' ');
+}
+
 export function buildSettlementTimeline(
     osid: string,
     munId: string | null,
     displacementEvents: DisplacementEvent[],
     controlEvents: ControlEvent[],
     operationHistory: OperationHistoryEntry[],
+    battles: BattleRecord[],
+    movements: Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>,
     preWarEthnic: { bosniaks: number; serbs: number; croats: number; others: number } | null,
 ): SettlementTimelineEvent[] {
     const events: SettlementTimelineEvent[] = [];
@@ -135,6 +152,29 @@ export function buildSettlementTimeline(
                 lastCausedBy = de.caused_by;
             }
         }
+    }
+
+    // --- Battles ---
+    for (const b of battles) {
+        events.push({
+            turn: b.turn,
+            type: 'battle',
+            faction: b.attacker_faction,
+            title: `Battle — ${outcomeName(b.outcome)}`,
+            detail: `${factionName(b.attacker_faction)} attacked ${factionName(b.defender_faction)}${b.territory_flipped ? ' · territory captured' : ''}`,
+            casualties: { attacker: b.attacker_casualties, defender: b.defender_casualties },
+            outcome: b.outcome,
+        });
+    }
+
+    // --- Brigade movements ---
+    for (const m of movements) {
+        events.push({
+            turn: m.turn,
+            type: m.type === 'arrived' ? 'brigade_arrived' : 'brigade_departed',
+            title: `${m.formation_name} ${m.type === 'arrived' ? 'stationed' : 'departed'}`,
+            brigadeName: m.formation_name,
+        });
     }
 
     // --- Displacement + civilian killed (phase-based aggregation) ---

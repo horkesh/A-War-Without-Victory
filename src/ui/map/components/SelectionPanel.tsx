@@ -250,6 +250,8 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           displacementEventLog={loadedGameState?.displacementEventLog}
           allControlEvents={loadedGameState?.allControlEvents}
           operationHistory={loadedGameState?.operationHistory}
+          battlesByOsid={loadedGameState?.battlesByOsid}
+          movementsByOsid={loadedGameState?.movementsByOsid}
         />
         {playerFaction && selectedMunId && (
           <div className="mt-4 rounded border border-panel-border bg-panel-card p-3 space-y-2">

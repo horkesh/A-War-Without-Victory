@@ -126,9 +126,13 @@ export interface TurnSummary {
     supply_deltas: Partial<Record<FactionId, number>>;
     heavy_munitions_deltas: Partial<Record<FactionId, number>>;
 
+    // --- Movement ---
+    /** Brigade movements this turn (location_osid changed from snapshot). */
+    movements: Array<{ formation_id: string; formation_name: string; from_osid: string; to_osid: string }>;
+
     // --- Notable events ---
     notable_events: TurnNotableEvent[];
 }
 
-/** Maximum number of turn summaries to retain in GameState. */
-export const MAX_TURN_SUMMARIES = 3;
+/** Keep all turn summaries — battle history feeds the settlement timeline. */
+export const MAX_TURN_SUMMARIES = 9999;

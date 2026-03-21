@@ -1765,6 +1765,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         sectorEntrenchmentSummary,
         mobilizationSummary,
         commandBriefing,
+        battlesByOsid: deriveBattlesByOsid(state),
+        movementsByOsid: deriveMovementsByOsid(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         operationHistory: deriveOperationHistory(state),
         activeOperations: deriveActiveOperations(state),
@@ -1824,6 +1826,59 @@ function deriveEliteBrigadeTracker(state: any): LoadedGameState['eliteBrigadeTra
                 osids_captured: Number(ep.osids_captured ?? 0),
             })) : [],
         };
+    }
+    return result;
+}
+
+function deriveBattlesByOsid(state: any): LoadedGameState['battlesByOsid'] {
+    const result: LoadedGameState['battlesByOsid'] = {};
+    const summaries = state.turn_summaries as Array<{ turn?: number; battles?: Array<Record<string, unknown>> }> | undefined;
+    if (!Array.isArray(summaries)) return result;
+    for (const summary of summaries) {
+        const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!Array.isArray(summary.battles)) continue;
+        for (const b of summary.battles) {
+            const osid = typeof b.osid === 'string' ? b.osid : '';
+            if (!osid) continue;
+            if (!result[osid]) result[osid] = [];
+            result[osid].push({
+                turn,
+                attacker_faction: String(b.attacker_faction ?? ''),
+                defender_faction: String(b.defender_faction ?? ''),
+                outcome: String(b.outcome ?? ''),
+                attacker_casualties: typeof b.attacker_casualties === 'number' ? b.attacker_casualties : 0,
+                defender_casualties: typeof b.defender_casualties === 'number' ? b.defender_casualties : 0,
+                territory_flipped: Boolean(b.territory_flipped),
+            });
+        }
+    }
+    return result;
+}
+
+function deriveMovementsByOsid(state: any): LoadedGameState['movementsByOsid'] {
+    const result: LoadedGameState['movementsByOsid'] = {};
+    const summaries = state.turn_summaries as Array<{ turn?: number; movements?: Array<Record<string, unknown>> }> | undefined;
+    if (!Array.isArray(summaries)) return result;
+    for (const summary of summaries) {
+        const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!Array.isArray(summary.movements)) continue;
+        for (const m of summary.movements) {
+            const fid = String(m.formation_id ?? '');
+            const fname = String(m.formation_name ?? fid);
+            const from = String(m.from_osid ?? '');
+            const to = String(m.to_osid ?? '');
+            if (!from && !to) continue;
+            // Departed from old OSID
+            if (from) {
+                if (!result[from]) result[from] = [];
+                result[from].push({ turn, formation_id: fid, formation_name: fname, type: 'departed' });
+            }
+            // Arrived at new OSID
+            if (to) {
+                if (!result[to]) result[to] = [];
+                result[to].push({ turn, formation_id: fid, formation_name: fname, type: 'arrived' });
+            }
+        }
     }
     return result;
 }
