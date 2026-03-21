@@ -157,16 +157,17 @@ Op Herzegovina Consolidation fires at w21 (after Op Foča completes w20). Mostar
 
 ## Remaining Issues
 
-### Teočak corridor (P1)
-rastosnica_2 needs ARBiH to capture it. Op Teočak has the right setup but 2nd Tuzla doesn't arrive in time. Options:
-1. Move 2nd Tuzla's home_osid closer to Kalesija staging
-2. Fire Op Teočak even earlier (w10?)
-3. The Žepa-Teočak seesaw persists — any change that helps Herzegovina cascades into Drina
+### Teočak corridor — RESOLVED
+Op Teočak captures rastosnica_2 at w29 (decisive r=7.61). Teočak connected (72). Fixed by: MAX_ATTACKERS 3→12, Op Teočak w15, preparation-aware assembly.
 
-### Kalinovik golubici_2 + sela_2 (P2)
-Op Foča Kalinovik axis captures varos_2 but stalls before golubici_2/sela_2. Need either:
-1. Stronger Kalinovik axis (add a brigade)
-2. Separate triggered op for Kalinovik cleanup
+### Kalinovik golubici_2 + sela_2 (P1 — remaining)
+Op Foča Kalinovik axis captures varos_2 but rs_kalinovik_brigade (447 pers by w16) is too weak to push further. 3 decisive victories at varos_2 ping-pong (RBiH retakes between turns) then stalls. rs_gacko_brigade not attacking (not adjacent to targets).
+
+**OOB investigation needed:**
+- rs_kalinovik_brigade starts at 1000 pers, drops to 447 by w16 from combat attrition
+- rs_gacko_brigade (1000 pers) is on the axis but never attacks — check adjacency to objectives
+- Kalinovik municipality: 1991 census ~4,700 Serbs. Historical garrison: VRS 1st Guards Motorized Brigade (HQ Kalinovik, BB1 p.496) was a MOTORIZED brigade — significantly stronger than the current light infantry kalinovik_brigade
+- **Options**: (a) bump rs_kalinovik_brigade to 1500, (b) add rs_gacko_brigade adjacency, (c) add a Kalinovik TO JNA phantom for early capture, (d) accept 5/7 and move on
 
 ### 2nd Tuzla march timing — Deep Investigation (P1)
 Only 3 BFS hops sicki_brod_2 → kalesija_grad_2. Brigade marches during planning phase (column_march_orders issued at line 114 of bot_brigade_eval_attack.ts). But the **preparation sub-phase** overrides `planning_duration`: commander personality-driven readiness completes in 3 turns regardless of the 5-turn planning_duration set on Op Teočak.
