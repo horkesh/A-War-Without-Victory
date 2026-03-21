@@ -976,6 +976,14 @@ function updateMultiAxisResults(
             // Null-controlled OSID: auto-claim — no enemy, no battle needed
             if (!state.political.political_controllers) state.political.political_controllers = {};
             state.political.political_controllers[currentObj] = faction;
+            (state.political.control_events ??= []).push({
+                turn: state.meta?.turn ?? 0,
+                settlement_id: currentObj,
+                mechanism: 'combat' as const,
+                from: null,
+                to: faction,
+                mun_id: currentObj.split(':')[1],
+            });
             capturedThisTurn.add(currentObj);
         }
     }
@@ -1188,6 +1196,14 @@ function updateLegacyFlatResults(
     if (effectiveController == null) {
         if (!state.political.political_controllers) state.political.political_controllers = {};
         state.political.political_controllers[currentObjective] = faction;
+        (state.political.control_events ??= []).push({
+            turn: state.meta?.turn ?? 0,
+            settlement_id: currentObjective,
+            mechanism: 'combat' as const,
+            from: null,
+            to: faction,
+            mun_id: currentObjective.split(':')[1],
+        });
         effectiveController = faction as ControlSide;
     }
 

@@ -275,6 +275,16 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
                 if (previousController && previousController !== faction) {
                     seedDisplacementTimerOnFlip(state, osid, previousController, faction as FactionId);
                 }
+                if (previousController !== faction) {
+                    (state.political.control_events ??= []).push({
+                        turn: state.meta?.turn ?? 0,
+                        settlement_id: osid,
+                        mechanism: 'combat' as const,
+                        from: (previousController as string) ?? null,
+                        to: faction,
+                        mun_id: osid.split(':')[1],
+                    });
+                }
             }
         }
     }

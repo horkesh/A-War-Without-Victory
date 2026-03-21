@@ -1156,13 +1156,8 @@ export const warPhases: NamedPhase[] = [
                 } catch {
                     // Non-fatal: ethnic defense bonus simply not applied
                 }
-                // Trim control_events to last 3 turns before adding new ones this turn.
-                const currentTurn = context.state.meta?.turn ?? 0;
-                if (context.state.political.control_events) {
-                    context.state.political.control_events = context.state.political.control_events.filter(
-                        (e) => e.turn >= currentTurn - 2
-                    );
-                }
+                // Control events are persisted for the full game — no trimming.
+                // They feed the settlement timeline ("The Story of This Place").
                 context.report.attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,

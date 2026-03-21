@@ -70,7 +70,6 @@ interface OperationHistoryEntry {
     outcome: string;
     objectives_targeted: string[];
     objectives_captured: string[];
-    total_attacks: number;
 }
 
 /** Ethnicity label for faction key. */
