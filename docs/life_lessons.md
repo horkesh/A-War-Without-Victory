@@ -68,6 +68,30 @@
 
 ## Active Lessons (no recent violations)
 
+### [Calibration] Data merges have operation-tempo butterfly effects — always verify corridor connectivity (2026-03-21) — NEW
+- **Context**: Merging 32 micro-OSIDs (< 1 km²) removed `drinjaca` and `paljevici` from Op Drina Zvornik Sweep (5→3 objectives). The operation completed faster, freeing VRS brigades earlier. Those brigades took `rastosnica_2` before ARBiH Op Teočak could fire (w25), cutting the Teočak-Tuzla corridor — a historically critical lifeline.
+- **Wrong approach**: Removing operation objectives without checking what the freed brigades would do. Assuming a data-only change (OSID merge) wouldn't affect simulation behavior. Not diffing yesterday's run against today's run to identify regressions.
+- **Right approach**: After any OSID merge, check ALL operations that referenced merged OSIDs. Replace removed objectives with same-area alternatives to maintain operation tempo. After running, verify corridor connectivity (BFS from enclaves/pockets to heartland). Compare with previous run's control map.
+- **Do instead**: When removing OSIDs from operations, add replacement objectives of equal count. After calibration runs, check: (1) Teočak→Tuzla, (2) Goražde connectivity, (3) Srebrenica enclave size, (4) Bihać pocket integrity. Use `bfsComponent()` checks, not visual inspection.
+
+### [Calibration] Operation objective reorder causes 200km butterfly effects — always compare full territory diff (2026-03-21) — NEW
+- **Context**: Reordering Op Višegrad objectives SE-first (toward Rogatica) caused RS to take `kalesija_selo` and `seher_2` in Kalesija municipality — 200 km from Višegrad. This encircled 3 ARBiH brigades at Djulici/Vitinica (historically connected). The reorder also shifted 12 OSIDs across Rogatica, Srebrenica, and Pale.
+- **Wrong approach**: Evaluating op changes by local effect only (Višegrad captures). Not checking distant consequences. Committing based on aggregate metrics (area-weighted %) without checking structural correctness (corridor integrity, encirclement).
+- **Right approach**: After ANY operation change, run full territory diff (`n986 vs n983` style comparison). Check for gains AND losses. Verify no RBiH pocket is newly encircled. A 0.3pp improvement that creates an ahistorical encirclement is WORSE than no change.
+- **Do instead**: After calibration runs, always run: (1) territory diff vs previous, (2) BFS connectivity for known corridors, (3) check for new 1-OSID pockets. Never commit based on aggregate % alone.
+
+### [Data] Non-existent staging OSIDs silently break operation axes (2026-03-21) — NEW
+- **Context**: Op Koridor Posavina Flank used staging OSID `op:bosanski_samac:pisari_2` which doesn't exist in the 712-OSID set (and likely never existed). The axis silently failed to execute — no error, no warning. Derventa remained HRHB for 40 weeks while 11,000 VRS personnel surrounded it.
+- **Wrong approach**: Not validating staging OSIDs against the actual OSID set. The operation builder doesn't check if the staging OSID exists — it just silently produces no eligible attackers.
+- **Right approach**: Add a validation step that checks ALL pre-planned and triggered operation staging OSIDs against `osid_areas.json` at scenario start. Log a warning for any missing OSID. Better: fail hard so broken ops are caught immediately.
+- **Do instead**: After ANY OSID merge, grep all operation definitions (pre_planned_operations.ts, triggered_operations.ts) for staging OSIDs and verify they exist. Run `node -e "const a = require('./data/derived/operational/osid_areas.json').areas; ['pisari_2',...].forEach(s => console.log(s, a['op:...'] ? 'OK' : 'MISSING'))"`.
+
+### [Calibration] Always diff yesterday's run before investigating a regression (2026-03-21) — NEW
+- **Context**: Teočak was connected yesterday, cut off today. Instead of immediately diffing yesterday's code and run output against today's, time was spent investigating reactive defense, OOB, and supply systems — none of which caused the issue. The actual cause (Op Drina objective count change from micro-OSID merge) was found only after finally bisecting the commits.
+- **Wrong approach**: Theorizing about root causes and testing hypotheses without first establishing exactly WHAT changed between the working and broken states.
+- **Right approach**: `git checkout <yesterday_commit> -- <files>; npm run sim:scenario:run:40w; diff`. Compare the territory output field by field. The diff immediately shows which OSIDs flipped. Then bisect commits to find which change caused it.
+- **Do instead**: When a previously-working feature breaks, FIRST run yesterday's code and compare output. THEN bisect commits. NEVER theorize before establishing the diff. The bisect will tell you exactly which commit broke it.
+
 ### [Design] Emergent constraints beat hardcoded gates — let the supply system do its job (2026-03-21) — NEW
 - **Context**: Besieged enclave forces (Sarajevo, Goražde, Srebrenica) launched full corps offensives despite supply strangulation. Initial fix was a hardcoded enclave gate that checked `getEnclaveIdForOsid()` and blocked enclave brigades from operations.
 - **Wrong approach**: Hardcoding which enclaves can't attack. Fragile, not extensible, doesn't respond to changing game state (e.g. if a corridor opens, the hardcode still blocks).

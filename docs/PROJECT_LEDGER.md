@@ -1,17 +1,33 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-21
-**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.5% area-weighted (40w, 712 OSIDs).** Calibration fixes: micro-OSID merge (n982), Op Višegrad reorder (n987), Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975).
+**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **91.0% area-weighted (40w, 712 OSIDs). RS w40 0.510 PASS.** Calibration fixes: micro-OSID merge (n982), Op Derventa + Teočak corridor (n992-n998), Drina OOB (n964), SRK cold front (n967), supply-based offensive constraint (n975).
 
-## [2026-03-21] Micro-OSID Merge: 744 → 712 OSIDs (n982-n987)
+## [2026-03-21] Op Derventa + Teočak Corridor Fix (n992-n998)
+
+**Problem 1 — Teočak corridor cut:** The micro-OSID merge removed `drinjaca` and `paljevici` from Op Drina Zvornik Sweep objectives (5→3). Faster completion freed VRS brigades earlier, which took `rastosnica_2` before ARBiH's Op Teočak could fire, cutting the Teočak-Tuzla corridor. **Fix:** Added `krizevici` and `vitinica_2` as replacement objectives (5 total), restoring pre-merge operation tempo. Teočak connected (component 71).
+
+**Problem 2 — Op Višegrad reorder cascade:** SE-first objectives (n987) caused RS to take `kalesija_selo` and `seher_2` 200 km away, encircling Djulici/Vitinica RBiH brigades — historically inaccurate. **Reverted** to post-merge baseline objectives.
+
+**Problem 3 — Derventa/Brod HRHB pocket:** 3 HRHB OSIDs (derventa_2, brod, novo_selo_2) surrounded by 11,000+ VRS personnel, never attacked. Root causes: (a) Op Koridor Posavina Flank had non-existent staging OSID (`pisari_2`), (b) Derventa unreachable from Šamac through RS territory, (c) triggered Op Posavina Corridor assumes derventa_2 is already RS. **Fix:** Added triggered `Operation Derventa` (1st Krajina, w4, from cerani_2) targeting derventa_2, garevac_2, domaljevac_2. Fixed Posavina Flank staging: `pisari_2` → `crkvina_2`. Derventa captured at w5 but HRHB retakes — holding problem remains as future work.
+
+**Result:** n998 = 91.0% area-weighted. **RS w40 0.510 PASS** (first time). RS w20 0.520 (+2.7pp from n992). Teočak connected. 4/4 enclaves. Derventa HRHB holding is remaining work.
+
+**Determinism:** All changes are deterministic (operation definitions only, no random/time-dependent code).
+
+**Files:** `src/sim/combat/pre_planned_operations.ts` (Op Drina objectives, Posavina Flank staging), `src/sim/combat/triggered_operations.ts` (Op Derventa added).
+
+## [2026-03-21] Micro-OSID Merge: 744 → 712 OSIDs (n982)
 
 **Problem:** 32 OSIDs under 1 km² (down to 0.01 km²) were geometry artifacts from the settlement clustering pipeline. The worst offender, `bogdasici` (0.0 km²), caused Op Višegrad to waste 3 turns fighting over a zero-area speck — RS would capture it, RBiH would retake it, repeat.
 
 **Fix:** `tools/merge_micro_osids.cjs` merges each micro-OSID into its largest same-municipality neighbor. All data files updated: `osid_areas.json`, `operational_contact_graph.json` (712 nodes, 2047 edges), `operational_political_control.json`, `canonical_to_operational_map.json` (22 SIDs redirected), `painted_control_jan1993.json`, `oob_brigades.json` (11 home_osid redirects). Source updates: enclave lists (Srebrenica, Goražde, Kiseljak), operation objectives (Višegrad, Drina, Srebrenica Ring, Kotor Varoš), `local_truces.ts` Kiseljak exclusion, `patron_pressure.ts` + benchmarks 744→712.
 
-**Op Višegrad reorder (n987):** Objectives chained southeast-first (visegrad_2 → drinsko → medjedja_2 → velji_lug) to support Rogatica front. Butterfly effect: +3 RS OSIDs net (Kalesija×2, Kalinovik×1), zero regressions.
+**Butterfly effects discovered:** Removing 2 objectives from Op Drina Zvornik Sweep changed operation tempo, freeing VRS brigades to take rastosnica_2, cutting Teočak corridor. Op Višegrad SE-first reorder caused RS to take Kalesija OSIDs 200 km away, encircling RBiH brigades. Both reverted with targeted fixes.
 
-**Result:** n987 = 91.5% area-weighted (+0.3pp), RS w40=355/712 (49.9%). 712 OSIDs confirmed in save. Merge map: `tools/micro_osid_merge_map.json`.
+**Result:** n982 baseline = 91.2% area-weighted, 712 OSIDs. Merge map: `tools/micro_osid_merge_map.json`.
+
+**Determinism:** No sim code changed. Data-only merge (OSID references updated across 18 files).
 
 ## [2026-03-21] Supply-Based Offensive Constraint (n975)
 
