@@ -270,10 +270,18 @@ export function SettlementDetailContent({
     disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
   // outSettlement = displaced only (moved to another OSID, alive)
   // lostSettlement = killed + fled abroad
-  const outSettlement =
+  // Cap at pre-war population: engine displacement events can over-count
+  // when displacement timers fire weekly without checking remaining population.
+  const rawOut =
     osidDisp != null ? (osidDisp.out - osidDisp.lost) : (disp && settlementShare > 0 ? Math.round((disp.displacedOut - disp.lostPopulation) * settlementShare) : 0);
-  const lostSettlement =
+  const rawLost =
     osidDisp != null ? osidDisp.lost : (disp && settlementShare > 0 ? Math.round(disp.lostPopulation * settlementShare) : 0);
+  // Scale proportionally if total exceeds pre-war population
+  const totalRemovals = rawOut + rawLost;
+  const removalCap = Math.max(0, popOriginal - (osidDisp?.in ?? 0));
+  const scale = totalRemovals > removalCap && totalRemovals > 0 ? removalCap / totalRemovals : 1;
+  const outSettlement = Math.round(rawOut * scale);
+  const lostSettlement = Math.round(rawLost * scale);
   const inSettlement =
     osidDisp != null ? osidDisp.in : (currentPop != null && popOriginal > 0 && disp
       ? Math.max(0, currentPop - popOriginal + outSettlement + lostSettlement)
@@ -728,7 +736,7 @@ export function SettlementDetailContent({
               {disp.displacedOut > 0 && (
                 <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
                   <span className="text-[9px] text-red-400/80">Displaced</span>
-                  <div className="font-mono font-semibold text-red-400 text-[11px]">-{(disp.displacedOut - disp.lostPopulation).toLocaleString()}</div>
+                  <div className="font-mono font-semibold text-red-400 text-[11px]">-{disp.displacedOut.toLocaleString()}</div>
                 </div>
               )}
               {disp.lostPopulation > 0 && (
