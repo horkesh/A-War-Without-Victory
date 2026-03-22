@@ -388,3 +388,50 @@ When v0.6.3 ships, a player should be able to:
 7. Understand that the player who won the map but lost the metagame gets a pyrrhic victory
 
 **That is when v0.6.x is done.**
+
+---
+
+## v0.7.x Additions (from v0.6.x design sessions)
+
+### Warroom Redesign (v0.7+)
+
+The warroom (`src/ui/warroom/`) is currently a separate Vite app (vanilla TS + canvas) running in the Electron main window. The tactical map (React + Tailwind + MapLibre) is a secondary window. These are different tech stacks in different BrowserWindows communicating via IPC bridge.
+
+**Problem:** The v0.6.0 metagame (strategic dimensions, event flags, foundational decisions, game timeline) needs to be visible in the warroom — but the warroom doesn't know about any of these systems. The player-as-political-leader identity requires smooth navigation between the warroom (political domain) and the map/Army HQ (military domain). Currently this is a jarring window switch.
+
+**Decision (v0.6.0):** Do not connect them. The map toolbar redesign focuses on the map window. Faction crest is decorative. Army crest opens Army HQ. Warroom redesign is deferred.
+
+**v0.7+ scope:**
+- Resolve tech stack: migrate warroom to React (preferred) or keep canvas + bridge state
+- Unify into single Electron window with smooth view transitions (warroom ↔ map ↔ Army HQ)
+- Integrate metagame into warroom: dimensions, event decisions, game timeline, pressure indicators
+- Consolidate modals: decide which 12+ warroom modals move to Army HQ, which stay, which merge
+- Preserve rich visual assets: faction HQ backgrounds (15 images), flags, newspaper/magazine modals
+- Navigation model: faction crest → warroom (political), army crest → Army HQ (military), seamless
+
+**Design notes:** `docs/plans/2026-03-22-warroom-redesign-backlog.md`
+
+### Toolbar Redesign (v0.6.0 merge → v0.7+)
+
+The top toolbar has been redesigned for the "president's desk" metaphor:
+- Center: faction crest (decorative for v0.6.0, warroom gateway in v0.7+) + army crest (→ Army HQ)
+- Left: week/date display
+- Right: advance turn button
+- Flanking crests: contextual alert badges (pending decisions, pressure warnings)
+- Everything else (ORBAT, economy, save, recruitment, AAR, events) moves to Army HQ or pause menu
+
+Bottom strip simplified:
+- 4-5 primary map modes (Political, Ethnic, Supply, Operations + More dropdown)
+- Player's faction territory % prominent with trend arrow, other factions compact
+- Faction-contextual indicator: alliance (RBiH/HRHB) or patron pressure (RS)
+- Layer toggles behind gear icon
+
+Full implementation spans v0.6.0 merge (Army HQ absorption of toolbar items) through v0.7+ (warroom integration, smooth transitions).
+
+### Command Autonomy Slider (v0.7+)
+
+Player chooses how autonomous the military is (full delegation → maximum control). See `memory/player_identity_and_command.md`.
+
+### Officer Defiance Events (v0.7+)
+
+Commanders exceed or ignore political directives, triggering events. Depends on command autonomy and officer personality system.
