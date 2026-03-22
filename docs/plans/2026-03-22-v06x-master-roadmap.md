@@ -414,42 +414,119 @@ When v0.6.3 ships, a player should be able to:
 
 ---
 
+## The Two Rooms — Spatial UI Metaphor
+
+The game has two physical spaces that map to two UI domains. The player (unnamed political leader) moves between them:
+
+### The President's Office (Warroom)
+
+The warroom is the president's desk. Wood paneling (RS), stucco walls (RBiH), stone arches (HRHB). Papers arrive: diplomatic cables, newspapers, international pressure reports, event decisions. The player makes **political decisions** here.
+
+**Warroom owns (v0.7+ — React migration required):**
+- Event decisions (political choices presented as documents on the desk)
+- Event log / game timeline (history of your decisions and their consequences)
+- Diplomacy / IVP breakdown (international pressure, patron relationships)
+- Peace plans / Dayton negotiation
+- Economy panel
+- Newspaper / Magazine (flavor — already built as warroom modals)
+- Settings / AI Commander config (pause menu overlay)
+
+**Existing warroom modals (vanilla TS, `src/ui/warroom/components/`):**
+- `CommandBriefingModal` — pre-war situation briefing
+- `DeclarationEventModal` — dramatic Phase 0 events
+- `DiplomacyModal` — patron status, alliance, ceasefires
+- `IvpBreakdownModal` — international pressure breakdown
+- `MagazineModal` — monthly operational review (every 4 turns)
+- `NewspaperModal` — faction newspaper with headlines
+- `OperationalSituationModal` — military situation overview
+- `ReportsModal` — municipality intelligence reports
+- `SettingsModal` — audio, system config
+
+**Status:** Separate Vite app (vanilla TS + canvas). Cannot render React components. Migration to React deferred to v0.7+.
+
+### The Command Center (Army HQ on War Map)
+
+The player walks down the hall to meet the generals. Army HQ is the **military command center**. Everything the armed forces report to you lives here.
+
+**Army HQ owns (v0.6.x — active development):**
+
+| Tab | Content | Status |
+|-----|---------|--------|
+| **BRIEFING** | CoS brief (paper missive), situation briefing (card grid), corps cards (flip detail) | ✅ Built |
+| **SUMMARY** | War Summary modal content: weekly after-action, territory changes, casualties, combat record | 🔲 Absorb `WarSummaryModal` |
+| **RECORDS** | AAR (after-action reports), operation history, combat log | 🔲 Absorb `AARPanel`, `OperationHistoryPanel` |
+| **PERSONNEL** | Recruitment, officer management, reserves, ORBAT overview | 🔲 Absorb `RecruitmentModal`, `OrbatPanel` |
+
+**Header tabs** replace the current single-view layout. Each tab shows different content in the same full-screen modal. Corps cards remain accessible from all tabs via a persistent sidebar or bottom strip.
+
+### Map-Contextual Panels (stay on the map, not modal)
+
+These open in response to map clicks and stay as sidebar/overlay panels:
+- `SelectionPanel` — click settlement/formation
+- `CorpsFrontPanel` — click sector
+- `OperationsPanel` — click operation on map
+- `CommanderSelectionModal` — triggered by player action
+- `OperationBriefingModal` — triggered by game event (GO/NO-GO)
+- `GameOverModal` — triggered by endgame
+- `EventDecisionModal` — triggered by event (stays on map until warroom absorbs it v0.7+)
+- `EventModal` — narrative event display
+
+### Orphan Audit (2026-03-22)
+
+When `PresidentialToolbar` replaced `TopToolbar`, these modals lost their entry points:
+
+| Modal | Old Entry | New Home | When |
+|-------|-----------|----------|------|
+| `WarSummaryModal` | SUMMARY button + IVP/Convoys/Briefing shortcuts | Army HQ → SUMMARY tab | v0.6.x Phase 3.5 |
+| `AARPanel` | AAR button in History module | Army HQ → RECORDS tab | v0.6.x Phase 4 |
+| `OperationHistoryPanel` | OPS button in History module | Army HQ → RECORDS tab | v0.6.x Phase 4 |
+| `EventLogPanel` | EVENTS button in History module | Warroom (political history) | v0.7+ |
+| `AiSettingsPanel` | AI button in History module | Pause menu / Settings | v0.7+ |
+| `RecruitmentModal` | RECRUIT button in Personnel module | Army HQ → PERSONNEL tab | v0.6.x Phase 4 |
+| `EnclaveDashboard` | ENCLAVES button (conditional) | Army HQ → SupplyIntelligence link | v0.6.x Phase 3.5 |
+| `EconomyPanel` | (was planned) | Warroom (political) | v0.7+ |
+| `DiplomacyOverview` | (was planned) | Warroom (political) | v0.7+ |
+
+**Interim (until absorption):** Add keyboard shortcuts for critical orphans:
+- `S` → War Summary
+- `R` → AAR
+- `E` → Event Log
+
+These shortcuts are temporary — removed once the modals are absorbed into Army HQ tabs or warroom.
+
+---
+
 ## v0.7.x Additions (from v0.6.x design sessions)
 
-### Warroom Redesign (v0.7+)
+### Warroom React Migration (v0.7+)
 
-The warroom (`src/ui/warroom/`) is currently a separate Vite app (vanilla TS + canvas) running in the Electron main window. The tactical map (React + Tailwind + MapLibre) is a secondary window. These are different tech stacks in different BrowserWindows communicating via IPC bridge.
-
-**Problem:** The v0.6.0 metagame (strategic dimensions, event flags, foundational decisions, game timeline) needs to be visible in the warroom — but the warroom doesn't know about any of these systems. The player-as-political-leader identity requires smooth navigation between the warroom (political domain) and the map/Army HQ (military domain). Currently this is a jarring window switch.
-
-**Decision (v0.6.0):** Do not connect them. The map toolbar redesign focuses on the map window. Faction crest is decorative. Army crest opens Army HQ. Warroom redesign is deferred.
+The warroom (`src/ui/warroom/`) is currently a separate Vite app (vanilla TS + canvas). The tactical map (React + Tailwind + MapLibre) is a secondary Electron window. Different tech stacks, different BrowserWindows, IPC bridge.
 
 **v0.7+ scope:**
-- Resolve tech stack: migrate warroom to React (preferred) or keep canvas + bridge state
-- Unify into single Electron window with smooth view transitions (warroom ↔ map ↔ Army HQ)
-- Integrate metagame into warroom: dimensions, event decisions, game timeline, pressure indicators
-- Consolidate modals: decide which 12+ warroom modals move to Army HQ, which stay, which merge
-- Preserve rich visual assets: faction HQ backgrounds (15 images), flags, newspaper/magazine modals
-- Navigation model: faction crest → warroom (political), army crest → Army HQ (military), seamless
+- Migrate warroom to React — unify tech stack with tactical map
+- Single Electron window with smooth view transitions (warroom ↔ map ↔ Army HQ)
+- Integrate metagame: dimensions, event decisions, game timeline, pressure indicators
+- Absorb political modals: event log, diplomacy, economy, peace plans
+- Preserve rich visual assets: 15 faction HQ backgrounds (year-specific), flags, newspaper/magazine
+- Navigation: faction crest → warroom (political domain), army crest → Army HQ (military domain)
+- Settings/AI config → pause menu overlay accessible from both rooms
 
 **Design notes:** `docs/plans/2026-03-22-warroom-redesign-backlog.md`
 
-### Toolbar Redesign (v0.6.0 merge → v0.7+)
+### Toolbar (v0.6.0 merge — DONE)
 
-The top toolbar has been redesigned for the "president's desk" metaphor:
-- Center: faction crest (decorative for v0.6.0, warroom gateway in v0.7+) + army crest (→ Army HQ)
+Presidential Toolbar implemented:
+- Center: floating army crest (extends below toolbar, click → Army HQ)
 - Left: week/date display
 - Right: advance turn button
-- Flanking crests: contextual alert badges (pending decisions, pressure warnings)
-- Everything else (ORBAT, economy, save, recruitment, AAR, events) moves to Army HQ or pause menu
+- Flanking: contextual alert badges (pending decisions, pressure warnings, officer events)
+- Dev tools: compact sub-strip in dev mode
 
-Bottom strip simplified:
-- 4-5 primary map modes (Political, Ethnic, Supply, Operations + More dropdown)
-- Player's faction territory % prominent with trend arrow, other factions compact
-- Faction-contextual indicator: alliance (RBiH/HRHB) or patron pressure (RS)
-- Layer toggles behind gear icon
-
-Full implementation spans v0.6.0 merge (Army HQ absorption of toolbar items) through v0.7+ (warroom integration, smooth transitions).
+Bottom strip:
+- 4 primary map modes + MORE dropdown
+- Player territory % prominent, others compact
+- Faction-contextual indicator (alliance or patron confidence)
+- LAYERS dropdown
 
 ### Command Autonomy Slider (v0.7+)
 
