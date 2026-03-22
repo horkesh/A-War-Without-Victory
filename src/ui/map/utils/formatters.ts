@@ -87,6 +87,17 @@ export function formatPersonnel(n: number): string {
     return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 }
 
+/** Compact number: 2400 → "2k", 800 → "800". Integer rounding (for summaries). */
+export function fmtK(n: number): string {
+    if (n >= 1000) return `${Math.round(n / 1000)}k`;
+    return String(Math.round(n));
+}
+
+/** Format percentage with one decimal. */
+export function fmtPct(n: number): string {
+    return `${n.toFixed(1)}%`;
+}
+
 /** Strip op: prefix and underscores for display. */
 export function formatOsidLabel(osid: string): string {
     return osid.replace(/^op:/, '').replace(/_/g, ' ');

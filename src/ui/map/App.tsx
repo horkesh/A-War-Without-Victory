@@ -356,7 +356,14 @@ function App() {
     const current = eventQueue[eventQueueIndex];
     if (!current || current.isDecision) return;
     const timer = setTimeout(() => {
-      handleEventAcknowledge();
+      // Inline dismiss logic to avoid stale closure over handleEventAcknowledge
+      setAcknowledgedEventIds(prev => new Set(prev).add(current.id));
+      if (eventQueueIndex < eventQueue.length - 1) {
+        setEventQueueIndex(eventQueueIndex + 1);
+      } else {
+        setEventQueue([]);
+        setEventQueueIndex(0);
+      }
     }, 4000);
     return () => clearTimeout(timer);
   }, [eventQueue, eventQueueIndex]);

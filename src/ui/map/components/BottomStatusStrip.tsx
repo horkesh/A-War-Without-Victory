@@ -9,6 +9,8 @@ const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<strin
 
 /** Primary modes shown as pills. The rest go in "+More" dropdown. */
 const PRIMARY_MODES = ['political', 'ethnic', 'supply', 'operations'];
+const primaryModes = MAP_MODES.filter(m => PRIMARY_MODES.includes(m.id));
+const secondaryModes = MAP_MODES.filter(m => !PRIMARY_MODES.includes(m.id));
 
 /**
  * Redesigned bottom bar — president's map controls.
@@ -72,8 +74,6 @@ export function BottomStatusStrip() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
 
-  const primaryModes = MAP_MODES.filter(m => PRIMARY_MODES.includes(m.id));
-  const secondaryModes = MAP_MODES.filter(m => !PRIMARY_MODES.includes(m.id));
 
   // Faction-specific ordering: player faction first
   const factions: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];

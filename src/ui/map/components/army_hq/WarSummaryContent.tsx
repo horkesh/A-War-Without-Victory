@@ -2,19 +2,16 @@
  * War Summary content — extracted from WarSummaryModal for inline rendering
  * inside Army HQ SUMMARY tab. Same data, no modal wrapper.
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import osidAreas from '../../../../../data/derived/operational/osid_areas.json';
 import type { SummaryFocusSection } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
-import { formatTurnLabel } from '../../utils/formatters';
+import { formatTurnLabel, fmtK, fmtPct } from '../../utils/formatters';
 import { getFactionFlag } from '../../utils/factionAssets';
+import { FACTION_HEX_COLORS, FACTION_SHORT_LABELS } from '../../utils/theme';
 import { SituationTab } from '../SituationTab';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
-type FactionKey = typeof FACTIONS[number];
-
-const FACTION_LABEL: Record<string, string> = { RS: 'RS', RBiH: 'RBiH', HRHB: 'HRHB' };
-const FACTION_COLOR: Record<FactionKey, string> = { RS: '#c04040', RBiH: '#4a9a55', HRHB: '#4080b8' };
 
 const SUMMARY_SECTIONS: Array<[SummaryFocusSection, string]> = [
     ['overview', 'Overview'],
@@ -26,15 +23,6 @@ const SUMMARY_SECTIONS: Array<[SummaryFocusSection, string]> = [
     ['capital', 'Capital'],
 ];
 
-function fmtK(n: number): string {
-    if (n >= 1000) return `${Math.round(n / 1000)}k`;
-    return String(Math.round(n));
-}
-
-function fmtPct(n: number): string {
-    return `${n.toFixed(1)}%`;
-}
-
 export function WarSummaryContent() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const [activeSection, setActiveSection] = useState<SummaryFocusSection>('overview');
@@ -43,45 +31,51 @@ export function WarSummaryContent() {
 
     const { label, formations, controlBySettlement, casualtyLedger, civilianCasualties, displacementByMun, departedByOsid } = loadedGameState;
 
-    // Territory: area-weighted percentage per faction
-    const areasMap = (osidAreas as { total_area_km2: number; areas: Record<string, number> }).areas;
-    const areaByFaction: Record<string, number> = {};
-    let totalArea = 0;
-    for (const [osid, controller] of Object.entries(controlBySettlement)) {
-        if (!controller) continue;
-        const area = areasMap[osid] ?? 0;
-        areaByFaction[controller] = (areaByFaction[controller] ?? 0) + area;
-        totalArea += area;
-    }
-    const areaPct: Record<string, number> = {};
-    for (const f of FACTIONS) {
-        areaPct[f] = totalArea > 0 ? ((areaByFaction[f] ?? 0) / totalArea) * 100 : 0;
-    }
+    const data = useMemo(() => {
+        // Territory: area-weighted percentage per faction
+        const areasMap = (osidAreas as { total_area_km2: number; areas: Record<string, number> }).areas;
+        const areaByFaction: Record<string, number> = {};
+        let totalArea = 0;
+        for (const [osid, controller] of Object.entries(controlBySettlement)) {
+            if (!controller) continue;
+            const area = areasMap[osid] ?? 0;
+            areaByFaction[controller] = (areaByFaction[controller] ?? 0) + area;
+            totalArea += area;
+        }
+        const areaPct: Record<string, number> = {};
+        for (const f of FACTIONS) {
+            areaPct[f] = totalArea > 0 ? ((areaByFaction[f] ?? 0) / totalArea) * 100 : 0;
+        }
 
-    // Military: personnel and casualties
-    const personnelByFaction: Record<string, number> = {};
-    for (const f of formations) {
-        if (f.status === 'destroyed' || f.personnel == null) continue;
-        personnelByFaction[f.faction] = (personnelByFaction[f.faction] ?? 0) + f.personnel;
-    }
+        // Military: personnel and casualties
+        const personnelByFaction: Record<string, number> = {};
+        for (const f of formations) {
+            if (f.status === 'destroyed' || f.personnel == null) continue;
+            personnelByFaction[f.faction] = (personnelByFaction[f.faction] ?? 0) + f.personnel;
+        }
 
-    // Displacement
-    let totalDisplaced = 0;
-    const displacedByFaction: Record<string, number> = {};
-    if (departedByOsid) {
-        for (const factionCounts of Object.values(departedByOsid)) {
-            for (const [faction, count] of Object.entries(factionCounts)) {
-                if (typeof count === 'number') {
-                    displacedByFaction[faction] = (displacedByFaction[faction] ?? 0) + count;
-                    totalDisplaced += count;
+        // Displacement
+        let totalDisplaced = 0;
+        const displacedByFaction: Record<string, number> = {};
+        if (departedByOsid) {
+            for (const factionCounts of Object.values(departedByOsid)) {
+                for (const [faction, count] of Object.entries(factionCounts)) {
+                    if (typeof count === 'number') {
+                        displacedByFaction[faction] = (displacedByFaction[faction] ?? 0) + count;
+                        totalDisplaced += count;
+                    }
                 }
             }
+        } else if (displacementByMun) {
+            for (const mun of Object.values(displacementByMun)) {
+                totalDisplaced += mun.displacedOut ?? 0;
+            }
         }
-    } else if (displacementByMun) {
-        for (const mun of Object.values(displacementByMun)) {
-            totalDisplaced += mun.displacedOut ?? 0;
-        }
-    }
+
+        return { areaPct, personnelByFaction, totalDisplaced, displacedByFaction };
+    }, [controlBySettlement, formations, departedByOsid, displacementByMun]);
+
+    const { areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;
 
     return (
         <div className="max-w-[560px]">
@@ -121,10 +115,10 @@ export function WarSummaryContent() {
                                 <tr>
                                     <th className="text-[10px] text-text-secondary font-semibold text-left py-1">Faction</th>
                                     {FACTIONS.map((f) => (
-                                        <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_COLOR[f] }}>
+                                        <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_HEX_COLORS[f] }}>
                                             <div className="flex flex-col items-end gap-0.5">
                                                 {getFactionFlag(f) && <img src={getFactionFlag(f)} alt="" className="w-3.5 h-2.5 object-cover rounded-[1px]" />}
-                                                {FACTION_LABEL[f]}
+                                                {FACTION_SHORT_LABELS[f]}
                                             </div>
                                         </th>
                                     ))}
@@ -147,8 +141,8 @@ export function WarSummaryContent() {
                                 <tr>
                                     <th className="text-[10px] text-text-secondary font-semibold text-left py-1" />
                                     {FACTIONS.map((f) => (
-                                        <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_COLOR[f] }}>
-                                            {FACTION_LABEL[f]}
+                                        <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_HEX_COLORS[f] }}>
+                                            {FACTION_SHORT_LABELS[f]}
                                         </th>
                                     ))}
                                 </tr>
@@ -188,7 +182,7 @@ export function WarSummaryContent() {
                                 return (
                                     <div key={f} className="flex items-center gap-1">
                                         {getFactionFlag(f) && <img src={getFactionFlag(f)} alt="" className="w-3 h-2 object-cover rounded-[1px]" />}
-                                        <span style={{ color: FACTION_COLOR[f] }}>{FACTION_LABEL[f]}: </span>
+                                        <span style={{ color: FACTION_HEX_COLORS[f] }}>{FACTION_SHORT_LABELS[f]}: </span>
                                         <span className="text-text-primary tabular-nums">{fmtK(n)}</span>
                                     </div>
                                 );

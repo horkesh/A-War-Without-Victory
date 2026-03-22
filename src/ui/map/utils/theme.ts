@@ -35,6 +35,21 @@ export const FACTION_BG_SUBTLE: Record<string, string> = expandFactionMap({
   HRHB: 'bg-faction-hrhb-subtle',
 });
 
+/** Faction hex colors for inline styles (not Tailwind classes). */
+export const FACTION_HEX_COLORS: Record<string, string> = {
+    RS: '#c04040', RBiH: '#4a9a55', HRHB: '#4080b8',
+};
+
+/** Short faction labels for compact display. */
+export const FACTION_SHORT_LABELS: Record<string, string> = {
+    RS: 'RS', RBiH: 'RBiH', HRHB: 'HRHB',
+};
+
+/** Military faction labels. */
+export const FACTION_MILITARY_LABELS: Record<string, string> = {
+    RS: 'VRS', RBiH: 'ARBiH', HRHB: 'HVO',
+};
+
 /** Cohesion thresholds → hex color. Green ≥70, amber ≥40, red <40. */
 export function getCohesionColor(cohesion: number): string {
   return cohesion >= 70 ? '#4a9a55' : cohesion >= 40 ? '#c4a35a' : '#c24040';
