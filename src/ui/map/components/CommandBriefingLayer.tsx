@@ -27,6 +27,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
   const setIsOperationsPanelOpen = useGameStore((state) => state.setIsOperationsPanelOpen);
   const setSelectedArmyId = useGameStore((state) => state.setSelectedArmyId);
   const setArmyHQExpandedCorpsId = useGameStore((state) => state.setArmyHQExpandedCorpsId);
+  const devMode = useGameStore((state) => state.devMode);
   const [dismissed, setDismissed] = useState(false);
   const turn = useGameStore((state) => state.loadedGameState?.turn);
   const lastDismissedTurn = useRef<number | null>(null);
@@ -80,7 +81,6 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
     }
   };
 
-  const devMode = useGameStore((state) => state.devMode);
   const topOffset = devMode ? 'top-[4.75rem]' : 'top-[3.25rem]';
 
   return (
