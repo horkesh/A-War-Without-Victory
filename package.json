@@ -273,7 +273,8 @@
     "phaseF4:unknown_control_attribution_audit": "tsx src/cli/phaseF4_unknown_control_attribution_audit.ts",
     "map:geo:g1:audit": "tsx scripts/map/geo/phase_g1_geoboundaries_audit.ts",
     "map:geo:g1:overlay": "tsx scripts/map/geo/phase_g1_overlay_pack.ts",
-    "map:geo:g1:serve": "npx http-server -p 8081 -c-1"
+    "map:geo:g1:serve": "npx http-server -p 8081 -c-1",
+    "prepare": "husky"
   },
   "ts-node": {
     "esm": true,
@@ -289,7 +290,9 @@
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0",
     "esbuild": "^0.27.3",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.1",
+    "lint-staged": "^16.4.0",
     "puppeteer": "^24.37.5",
     "sharp": "^0.33.5",
     "ts-node": "^10.9.2",
