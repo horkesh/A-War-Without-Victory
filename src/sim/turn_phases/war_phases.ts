@@ -69,6 +69,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 
 import { applyPhase3DCollapseResolution } from '../collapse/phase3d_collapse_resolution.js';
 import { evaluateEvents } from '../events/evaluate_events.js';
+import { updateEventReadiness } from '../events/pressure_system.js';
 import { collectStrategicReserves, reinforceFromStrategicReserves } from '../combat/strategic_reserve.js';
 import { reinforceBrigadesFromPools, applyWiaTrickleback } from '../formation_spawn.js';
 import { runFormationHqRelocation } from '../formation_hq_relocation.js';
@@ -210,6 +211,14 @@ export const warPhases: NamedPhase[] = [
                     migratePoliticalControllersToOsidIfNeeded(context.state, opData.operationalToCanonical);
             } catch {
                 // Operational data optional; skip migration when unavailable
+            }
+        }
+    },
+    {
+        name: 'update-event-readiness',
+        run: (context) => {
+            if (context.input.eventDefinitions) {
+                updateEventReadiness(context.state, context.input.eventDefinitions);
             }
         }
     },

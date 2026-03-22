@@ -332,20 +332,12 @@ export function evaluateCondition(condition: EventCondition, state: GameState): 
             const controlled2 = munOsids2.filter(osid => pc2[osid] === condition.faction).length;
             return (controlled2 / munOsids2.length) >= threshold2;
         }
-        case 'siege_active': {
-            const mil = state.military as any;
-            const enclaves: any[] = mil?.active_enclaves ?? [];
-            return enclaves.some((e: any) =>
-                e.municipality === condition.osid_or_municipality ||
-                e.osids?.includes(condition.osid_or_municipality)
-            );
-        }
-        case 'operation_completed': {
-            const mil2 = state.military as any;
-            const firedOps: string[] = mil2?.completed_operation_names ?? [];
-            const pattern = condition.operation_name_pattern.toLowerCase();
-            return firedOps.some((name: string) => name.toLowerCase().includes(pattern));
-        }
+        case 'siege_active':
+            // TODO: integrate with enclave/siege system when state fields are available
+            return false;
+        case 'operation_completed':
+            // TODO: integrate with operation tracking when state fields are available
+            return false;
         case 'and':
             return condition.conditions.every(c => evaluateCondition(c, state));
         case 'or':

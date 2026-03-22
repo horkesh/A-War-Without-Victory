@@ -70,6 +70,7 @@ describe('war-phase step ordering', () => {
         // +1 from activate-corps (war-phase corps activation for late-starting corps like hvo_central_bosnia)
         // +1 from recompute-sector-combat-ratings (refresh after bot corps rearranges/renumbers sectors)
         // +1 from assemble-command-briefing (sim-side briefing collector)
-        expect(stepNames.length).toBe(141);
+        // +1 from update-event-readiness (v0.6.0 pressure system readiness tick before evaluate-events)
+        expect(stepNames.length).toBe(142);
     });
 });
