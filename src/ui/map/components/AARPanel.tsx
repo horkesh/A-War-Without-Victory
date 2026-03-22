@@ -250,9 +250,11 @@ function TerritoryNet({ net }: { net: Partial<Record<string, number>> }) {
 interface AARPanelProps {
     isOpen: boolean;
     onClose: () => void;
+    /** When true, renders content only (no modal wrapper/backdrop). */
+    embedded?: boolean;
 }
 
-export function AARPanel({ isOpen, onClose }: AARPanelProps) {
+export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
 
@@ -260,38 +262,8 @@ export function AARPanel({ isOpen, onClose }: AARPanelProps) {
 
     const summary: TurnSummary | null = loadedGameState.latestTurnSummary;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-start justify-end pointer-events-none">
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/40 pointer-events-auto"
-                onClick={onClose}
-            />
-
-            {/* Panel */}
-            <div className="relative panel-slide-in-right pointer-events-auto w-[22rem] max-h-[calc(100vh-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
-                    <div>
-                        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-                            After-Action Report
-                        </span>
-                        {summary && (
-                            <span className="text-[10px] text-text-secondary ml-2 font-mono">
-                                {formatTurnLabel(loadedGameState.label)}
-                            </span>
-                        )}
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="text-text-secondary hover:text-interactive text-sm leading-none"
-                    >
-                        &#x2715;
-                    </button>
-                </div>
-
-                {/* Body */}
-                <div className="p-3 overflow-auto text-[11px] flex-1">
+    const body = (
+                <div className={embedded ? "text-[11px]" : "p-3 overflow-auto text-[11px] flex-1"}>
                     {!summary ? (
                         <div className="text-text-muted text-center py-8">
                             No report yet — advance a turn to generate the first AAR.
@@ -468,6 +440,24 @@ export function AARPanel({ isOpen, onClose }: AARPanelProps) {
                             )}
                         </>
                     )}
+                </div>
+    );
+
+    if (embedded) return body;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-start justify-end pointer-events-none">
+            <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={onClose} />
+            <div className="relative panel-slide-in-right pointer-events-auto w-[22rem] max-h-[calc(100vh-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
+                    <div>
+                        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">After-Action Report</span>
+                        {summary && <span className="text-[10px] text-text-secondary ml-2 font-mono">{formatTurnLabel(loadedGameState.label)}</span>}
+                    </div>
+                    <button onClick={onClose} className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
+                </div>
+                <div className="p-3 overflow-auto text-[11px] flex-1">
+                    {body}
                 </div>
             </div>
         </div>

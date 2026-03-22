@@ -1,5 +1,6 @@
 /**
- * Army HQ Modal — Warroom dark aesthetic matching CorpsDetail/FormationDetail.
+ * Army HQ Modal — Multi-tab military command center.
+ * Tabs: BRIEFING | SUMMARY | RECORDS | PERSONNEL
  * Full-screen command overview for the player's faction.
  */
 import { useCallback, useEffect, useMemo } from 'react';
@@ -13,7 +14,17 @@ import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
+import { WarSummaryContent } from './WarSummaryContent';
+import { RecordsContent } from './RecordsContent';
+import { PersonnelContent } from './PersonnelContent';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
+
+const HQ_TABS = [
+    { id: 'briefing' as const, label: 'BRIEFING' },
+    { id: 'summary' as const, label: 'SUMMARY' },
+    { id: 'records' as const, label: 'RECORDS' },
+    { id: 'personnel' as const, label: 'PERSONNEL' },
+];
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -28,6 +39,8 @@ export function ArmyHQModal() {
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
     const faction = useGameStore((s) => s.selectedArmyId);
     const state = useGameStore((s) => s.loadedGameState);
+    const activeTab = useGameStore((s) => s.armyHQTab);
+    const setActiveTab = useGameStore((s) => s.setArmyHQTab);
     const expandedCorpsId = useGameStore((s) => s.armyHQExpandedCorpsId);
     const setExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
     const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
@@ -210,90 +223,128 @@ export function ArmyHQModal() {
                     </div>
                 </div>
 
+                {/* Tab Bar */}
+                <div className="flex items-center gap-0.5 px-6 py-1.5 bg-panel-bg border-b border-panel-border shrink-0">
+                    {HQ_TABS.map(({ id, label }) => (
+                        <button
+                            key={id}
+                            type="button"
+                            onClick={() => setActiveTab(id)}
+                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded-md transition-all ${
+                                activeTab === id
+                                    ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30'
+                                    : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
+                            }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
                 {/* Content */}
                 <div className="relative flex-1 overflow-y-auto px-6 pt-4 pb-6">
 
-                    {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
-                    {!expandedCorpsId && (
-                        <div className="grid grid-cols-[1fr_1fr_auto_1fr] gap-4 mb-4 items-stretch">
-                            {/* Commander */}
-                            <div className="bg-panel-card border border-panel-border rounded-lg p-4">
-                                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1.5 border-b border-panel-border">
-                                    COMMANDER
-                                </div>
-                                {data.commander ? (
-                                    <OfficerProfile officer={data.commander} label="" compact={false} />
-                                ) : (
-                                    <div className="text-text-secondary text-[12px] py-4 text-center italic">
-                                        No commander data available
+                    {/* ═══ BRIEFING TAB ═══ */}
+                    {activeTab === 'briefing' && (
+                        <>
+                            {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
+                            {!expandedCorpsId && (
+                                <div className="grid grid-cols-[1fr_1fr_auto_1fr] gap-4 mb-4 items-stretch">
+                                    {/* Commander */}
+                                    <div className="bg-panel-card border border-panel-border rounded-lg p-4">
+                                        <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1.5 border-b border-panel-border">
+                                            COMMANDER
+                                        </div>
+                                        {data.commander ? (
+                                            <OfficerProfile officer={data.commander} label="" compact={false} />
+                                        ) : (
+                                            <div className="text-text-secondary text-[12px] py-4 text-center italic">
+                                                No commander data available
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
 
-                            {/* Chief of Staff Briefing */}
-                            <ChiefOfStaffBriefing
-                                briefingItems={data.briefingItems}
-                                gameState={state}
-                                faction={faction}
-                            />
-
-                            {/* Army Crest */}
-                            <div className="flex flex-col items-center justify-center px-4 py-2 select-none">
-                                {crestSrc && (
-                                    <img
-                                        src={crestSrc}
-                                        alt={`${FACTION_DISPLAY[faction] ?? faction} crest`}
-                                        className="w-[140px] h-[140px] object-contain drop-shadow-lg"
-                                        draggable={false}
+                                    {/* Chief of Staff Briefing */}
+                                    <ChiefOfStaffBriefing
+                                        briefingItems={data.briefingItems}
+                                        gameState={state}
+                                        faction={faction}
                                     />
-                                )}
-                                <div className="text-[10px] uppercase tracking-[0.2em] text-text-secondary mt-2 text-center leading-relaxed">
-                                    {FACTION_DISPLAY[faction] ?? faction}
+
+                                    {/* Army Crest */}
+                                    <div className="flex flex-col items-center justify-center px-4 py-2 select-none">
+                                        {crestSrc && (
+                                            <img
+                                                src={crestSrc}
+                                                alt={`${FACTION_DISPLAY[faction] ?? faction} crest`}
+                                                className="w-[140px] h-[140px] object-contain drop-shadow-lg"
+                                                draggable={false}
+                                            />
+                                        )}
+                                        <div className="text-[10px] uppercase tracking-[0.2em] text-text-secondary mt-2 text-center leading-relaxed">
+                                            {FACTION_DISPLAY[faction] ?? faction}
+                                        </div>
+                                    </div>
+
+                                    {/* Strategic Position — 6 dimension bars */}
+                                    <StrategicPosition
+                                        dimensions={state.strategicDimensions?.[faction]}
+                                        faction={faction}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Situation Briefing */}
+                            {!expandedCorpsId && data.briefingItems.length > 0 && (
+                                <SituationBriefing
+                                    items={data.briefingItems}
+                                    onNavigate={handleBriefingNavigate}
+                                />
+                            )}
+
+                            {/* Corps Cards */}
+                            <div>
+                                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
+                                    ALL CORPS ({data.corpsFormations.length})
+                                </div>
+
+                                <div className={`grid gap-3 ${expandedCorpsId
+                                    ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'
+                                    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+                                }`}>
+                                    {data.corpsFormations.map((corps) => (
+                                        <ArmyHQCorpsCard
+                                            key={corps.id}
+                                            corps={corps}
+                                            brigades={data.brigades.filter((b) => b.corps_id === corps.id)}
+                                            sectors={data.sectorsByCorps.get(corps.id) ?? []}
+                                            operations={data.opsByCorps.get(corps.id) ?? []}
+                                            factionBattles={data.factionBattles}
+                                            gameState={state}
+                                            isExpanded={expandedCorpsId === corps.id}
+                                            isCompressed={expandedCorpsId !== null && expandedCorpsId !== corps.id}
+                                            onToggleExpand={() => setExpandedCorpsId(expandedCorpsId === corps.id ? null : corps.id)}
+                                        />
+                                    ))}
                                 </div>
                             </div>
-
-                            {/* Strategic Position — 6 dimension bars */}
-                            <StrategicPosition
-                                dimensions={state.strategicDimensions?.[faction]}
-                                faction={faction}
-                            />
-                        </div>
+                        </>
                     )}
 
-                    {/* Situation Briefing */}
-                    {!expandedCorpsId && data.briefingItems.length > 0 && (
-                        <SituationBriefing
-                            items={data.briefingItems}
-                            onNavigate={handleBriefingNavigate}
-                        />
+                    {/* ═══ SUMMARY TAB ═══ */}
+                    {activeTab === 'summary' && (
+                        <WarSummaryContent />
                     )}
 
-                    {/* Corps Cards */}
-                    <div>
-                        <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
-                            ALL CORPS ({data.corpsFormations.length})
-                        </div>
+                    {/* ═══ RECORDS TAB ═══ */}
+                    {activeTab === 'records' && (
+                        <RecordsContent />
+                    )}
 
-                        <div className={`grid gap-3 ${expandedCorpsId
-                            ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'
-                            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
-                        }`}>
-                            {data.corpsFormations.map((corps) => (
-                                <ArmyHQCorpsCard
-                                    key={corps.id}
-                                    corps={corps}
-                                    brigades={data.brigades.filter((b) => b.corps_id === corps.id)}
-                                    sectors={data.sectorsByCorps.get(corps.id) ?? []}
-                                    operations={data.opsByCorps.get(corps.id) ?? []}
-                                    factionBattles={data.factionBattles}
-                                    gameState={state}
-                                    isExpanded={expandedCorpsId === corps.id}
-                                    isCompressed={expandedCorpsId !== null && expandedCorpsId !== corps.id}
-                                    onToggleExpand={() => setExpandedCorpsId(expandedCorpsId === corps.id ? null : corps.id)}
-                                />
-                            ))}
-                        </div>
-                    </div>
+                    {/* ═══ PERSONNEL TAB ═══ */}
+                    {activeTab === 'personnel' && (
+                        <PersonnelContent />
+                    )}
                 </div>
             </div>
         </div>

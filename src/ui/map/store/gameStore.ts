@@ -135,11 +135,13 @@ export interface GameStore {
 
   /** Army HQ modal state. */
   armyHQOpen: boolean;
+  armyHQTab: 'briefing' | 'summary' | 'records' | 'personnel';
   armyHQExpandedCorpsId: string | null;
   armyHQExpandedSections: Record<string, boolean>;
   armyHQOfficerSelectionCorpsId: string | null;
   pauseMenuOpen: boolean;
   setArmyHQOpen: (open: boolean) => void;
+  setArmyHQTab: (tab: 'briefing' | 'summary' | 'records' | 'personnel') => void;
   setArmyHQExpandedCorpsId: (id: string | null) => void;
   toggleArmyHQSection: (key: string) => void;
   setArmyHQOfficerSelectionCorpsId: (id: string | null) => void;
@@ -308,6 +310,7 @@ export const useGameStore = create<GameStore>((set) => ({
   }),
 
   armyHQOpen: false,
+  armyHQTab: 'briefing',
   armyHQExpandedCorpsId: null,
   armyHQExpandedSections: {},
   armyHQOfficerSelectionCorpsId: null,
@@ -319,6 +322,12 @@ export const useGameStore = create<GameStore>((set) => ({
       armyHQExpandedSections: {},
       armyHQOfficerSelectionCorpsId: null,
     }),
+  }),
+  setArmyHQTab: (tab) => set({
+    armyHQTab: tab,
+    armyHQExpandedCorpsId: null,
+    armyHQExpandedSections: {},
+    armyHQOfficerSelectionCorpsId: null,
   }),
   setArmyHQExpandedCorpsId: (id) => set({
     armyHQExpandedCorpsId: id,

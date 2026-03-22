@@ -492,6 +492,32 @@ function App() {
     setEventLogOpen(false);
   };
 
+  // Keyboard shortcuts for Army HQ tabs + orphaned modals
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Don't trigger in input/select/textarea
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+      if (e.key === 'h' || e.key === 'H') {
+        e.preventDefault();
+        const gs = useGameStore.getState();
+        const pf = gs.loadedGameState?.player_faction;
+        if (pf) { gs.setSelectedArmyId(pf); gs.setArmyHQOpen(true); gs.setArmyHQTab('briefing'); }
+      } else if (e.key === 's' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        const gs = useGameStore.getState();
+        const pf = gs.loadedGameState?.player_faction;
+        if (pf) { gs.setSelectedArmyId(pf); gs.setArmyHQOpen(true); gs.setArmyHQTab('summary'); }
+      } else if (e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+        setEventLogOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   const openOrbat = () => {
     // If no corps selected for orbat, pick the first player corps
     if (!useGameStore.getState().selectedOrbatCorpsId && loadedGameState) {

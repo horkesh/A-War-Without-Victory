@@ -306,9 +306,11 @@ function ActiveOpCard({ op }: { op: ActiveOp }) {
 interface OperationHistoryPanelProps {
     isOpen: boolean;
     onClose: () => void;
+    /** When true, renders content only (no modal wrapper/backdrop). */
+    embedded?: boolean;
 }
 
-export function OperationHistoryPanel({ isOpen, onClose }: OperationHistoryPanelProps) {
+export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHistoryPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const [tab, setTab] = useState<Tab>('active');
 
@@ -316,8 +318,6 @@ export function OperationHistoryPanel({ isOpen, onClose }: OperationHistoryPanel
 
     const history = loadedGameState.operationHistory ?? [];
     const active = loadedGameState.activeOperations ?? [];
-
-    // Sort history by ended_turn desc (most recent first)
     const sortedHistory = [...history].sort((a, b) => b.ended_turn - a.ended_turn);
 
     const tabClass = (t: Tab) =>
@@ -327,64 +327,50 @@ export function OperationHistoryPanel({ isOpen, onClose }: OperationHistoryPanel
                 : 'text-text-secondary border-transparent hover:text-text-primary'
         }`;
 
+    const body = (
+        <div>
+            <div className="flex border-b border-panel-border mb-3">
+                <button type="button" className={tabClass('active')} onClick={() => setTab('active')}>
+                    Active {active.length > 0 && <span className="ml-1 text-text-muted">({active.length})</span>}
+                </button>
+                <button type="button" className={tabClass('history')} onClick={() => setTab('history')}>
+                    History {history.length > 0 && <span className="ml-1 text-text-muted">({history.length})</span>}
+                </button>
+            </div>
+            <div>
+                {tab === 'active' && (
+                    active.length === 0 ? (
+                        <div className="text-text-muted text-center py-8 text-[11px]">No active operations.</div>
+                    ) : (
+                        active.map((op) => (
+                            <ActiveOpCard key={`${op.corps_id}:${op.operation_name}:${op.started_turn}`} op={op} />
+                        ))
+                    )
+                )}
+                {tab === 'history' && (
+                    sortedHistory.length === 0 ? (
+                        <div className="text-text-muted text-center py-8 text-[11px]">No completed operations yet.</div>
+                    ) : (
+                        sortedHistory.map((op) => (
+                            <CompletedOpCard key={op.operation_id} op={op} />
+                        ))
+                    )
+                )}
+            </div>
+        </div>
+    );
+
+    if (embedded) return body;
+
     return (
         <div className="fixed inset-0 z-50 flex items-start justify-end pointer-events-none">
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/40 pointer-events-auto"
-                onClick={onClose}
-            />
-
-            {/* Panel */}
+            <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={onClose} />
             <div className="relative panel-slide-in-right pointer-events-auto w-[24rem] max-h-[calc(100vh-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
-                {/* Header */}
                 <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
-                    <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-                        Operations
-                    </span>
-                    <button
-                        onClick={onClose}
-                        className="text-text-secondary hover:text-interactive text-sm leading-none"
-                    >
-                        &#x2715;
-                    </button>
+                    <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">Operations</span>
+                    <button onClick={onClose} className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
                 </div>
-
-                {/* Tabs */}
-                <div className="flex border-b border-panel-border shrink-0">
-                    <button type="button" className={tabClass('active')} onClick={() => setTab('active')}>
-                        Active {active.length > 0 && <span className="ml-1 text-text-muted">({active.length})</span>}
-                    </button>
-                    <button type="button" className={tabClass('history')} onClick={() => setTab('history')}>
-                        History {history.length > 0 && <span className="ml-1 text-text-muted">({history.length})</span>}
-                    </button>
-                </div>
-
-                {/* Body */}
-                <div className="p-3 overflow-auto flex-1">
-                    {tab === 'active' && (
-                        active.length === 0 ? (
-                            <div className="text-text-muted text-center py-8 text-[11px]">
-                                No active operations.
-                            </div>
-                        ) : (
-                            active.map((op) => (
-                                <ActiveOpCard key={`${op.corps_id}:${op.operation_name}:${op.started_turn}`} op={op} />
-                            ))
-                        )
-                    )}
-                    {tab === 'history' && (
-                        sortedHistory.length === 0 ? (
-                            <div className="text-text-muted text-center py-8 text-[11px]">
-                                No completed operations yet.
-                            </div>
-                        ) : (
-                            sortedHistory.map((op) => (
-                                <CompletedOpCard key={op.operation_id} op={op} />
-                            ))
-                        )
-                    )}
-                </div>
+                <div className="p-3 overflow-auto flex-1">{body}</div>
             </div>
         </div>
     );
