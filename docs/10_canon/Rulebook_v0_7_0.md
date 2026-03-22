@@ -333,6 +333,10 @@ Before an operation executes, it passes through a **five-phase preparation state
 
 Once launched, the operation enters execution. Brigades march toward the objective through friendly territory first; attacking through enemy territory is a last resort when no friendly path exists. Operations track total failures (max 5) and consecutive failures on the current target (max 3). Movement-only stalls are capped at 4 turns. When an operation stalls or exhausts its failure budget, it concludes and participating brigades return to normal sector duties.
 
+### 7.4 Event Conditions (v0.6.0 expansion)
+
+**v0.6.0 expansion:** 14 additional condition types: `supply_below/above`, `territory_percentage`, `dimension_above/below`, `flag_equals/not_set`, `patron_pressure_above`, `war_crimes_above`, `morale_average_below`, `week_since_event`, `event_fire_count`, `enclave_supply_status`, `corridor_severed`.
+
 ## 8. Authority and Governance
 
 ### 8.1 Authority vs control
@@ -529,6 +533,29 @@ War phase adds operational depth (corps, fronts, supply, officer management, arm
 - **No total control:** Orders may be degraded by command friction, supply shortages, or low cohesion.
 - **Consequences accumulate:** Displacement, exhaustion, and international pressure compound over time.
 - **Officers matter:** Commander quality shapes operation tempo, launch decisions, and combat effectiveness. Losing a good commander is a strategic setback.
+
+### 17.5 Event Decisions and the Metagame
+
+The event system presents the player with political and strategic decisions throughout the war. Events fire from game state conditions through the **pressure system** (not calendar triggers).
+
+**Decision events** offer 2-4 options. Each option:
+- Has immediate mechanical effects (morale, supply, equipment changes)
+- Sets **event flags** that downstream events read
+- Shifts **strategic dimensions** (6 per faction: military_credibility, territorial_legitimacy, international_standing, patron_confidence, internal_cohesion, negotiating_leverage)
+
+**Foundational decisions** (w1-7) define faction identity:
+- RS: Six Strategic Goals — scope of offensive operations, cleansing policy
+- RBiH: State identity — multi-ethnic recruitment, international standing
+- HRHB: Political goal — alliance with ARBiH, relationship with Zagreb
+
+**Event constraints** — some events impose military restrictions:
+- **Operation blocks:** faction cannot launch new operations for N turns
+- **Scope restrictions:** offensive targets limited to specific municipalities
+- **Doctrine overrides:** forced defensive/offensive posture
+
+**Recurring decisions** — some events fire multiple times with escalating stakes. Options narrow as the player defers.
+
+**Maximum 3 events per turn.** Overflow queued to next turn by priority.
 
 ## 18. Victory Conditions
 

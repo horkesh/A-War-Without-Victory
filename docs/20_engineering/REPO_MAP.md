@@ -24,7 +24,18 @@ Populate this section from the discovery checklist.
   - Peace phase / canonical pipeline: `src/state/turn_pipeline.ts`
   - Legacy/minimal turn harness: `src/turn/pipeline.ts` (used by `src/index.ts`)
 - Militia/brigade formation (early-war): pool population `src/sim/early_war/pool_population.ts`, formation spawn `src/sim/formation_spawn.ts`, recruitment (player_choice mode) `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`; design: `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`. CLI: `src/cli/sim_generate_formations.ts`.
-- B1 Events: `src/sim/events/` — `event_types.ts` (trigger/effect types), `event_registry.ts` (historical + random events), `evaluate_events.ts` (deterministic evaluation). Runs first in both early-war and war-phase pipelines (`evaluate-events` step).
+- B1 Events: `src/sim/events/` — emergent event system (v0.6.0)
+  - `event_types.ts` — EventCondition (23 variants), EventDefinition, EventResponseOption, PressureConfig, RecurrenceConfig, DimensionId, StrategicDimension, DimensionShift
+  - `evaluate_events.ts` — collect-then-fire evaluation, pressure integration, recurrence gating, 3/turn queue cap
+  - `event_registry.ts` — registry initialization from JSON
+  - `event_loader.ts` — loads `data/scenarios/events/war_*.json`
+  - `apply_effects.ts` — deterministic effect application (10 effect kinds)
+  - `resolve_decision.ts` — player decision resolution
+  - `pressure_system.ts` — readiness counters (increment/decay/threshold)
+  - `strategic_dimensions.ts` — 6-dimension hybrid store (base + modifier = effective)
+  - `event_constraints.ts` — operation blocks, scope restrictions, doctrine overrides
+  - `bot_response.ts` — personality-weighted bot decision selection
+  - `turn_incidents.ts` — per-turn incident collection (battles, flips, dissolutions)
 
 ### Scenario Loading/Execution
 - Canon references: `docs/10_canon/Rulebook_v0_7_0.md`

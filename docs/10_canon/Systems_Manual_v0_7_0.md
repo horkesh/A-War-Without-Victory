@@ -457,6 +457,105 @@ Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/2
 - `jajce_falls_1992` — fires when RS controls ≥50% of Jajce municipality (w30-40)
 - `concentration_camps_revealed_1992` — fires when RS controls ≥50% of Prijedor municipality (w18-28)
 
+#### §7.10.1 v0.6.0 Expanded Condition Types
+
+14 additional condition types added to `EventCondition` union in `event_types.ts`:
+
+| Type | Parameters | Evaluates |
+|------|-----------|-----------|
+| `supply_below` | faction, threshold | `general_supply_reserve[faction] < threshold` |
+| `supply_above` | faction, threshold | `general_supply_reserve[faction] >= threshold` |
+| `territory_percentage` | faction, comparator (above/below), threshold | Fraction of all OSIDs controlled by faction |
+| `dimension_above` | faction, dimension, threshold | `strategic_dimensions[faction][dimension].effective_value >= threshold` |
+| `dimension_below` | faction, dimension, threshold | Same, `< threshold` |
+| `flag_equals` | flag, value | `event_flags[flag] === value` |
+| `flag_not_set` | flag | `!(flag in event_flags)` |
+| `patron_pressure_above` | faction, threshold | `patron_relationships[faction].override_authority >= threshold` |
+| `war_crimes_above` | faction, threshold | `capital[faction].war_crimes_events >= threshold` |
+| `morale_average_below` | faction, threshold | Average morale of active brigades < threshold |
+| `week_since_event` | event_id, min_weeks?, max_weeks? | Weeks since event last fired within range |
+| `event_fire_count` | event_id, min_count?, max_count? | Event fire count within range |
+| `enclave_supply_status` | municipality, status | Placeholder — deferred to supply integration |
+| `corridor_severed` | from_osid, to_osid, faction | Placeholder — deferred to BFS integration |
+
+All combinators (`and`, `or`, `not`) work with all condition types.
+
+#### §7.10.2 Pressure System
+
+Events with a `pressure` config fire through readiness counters instead of direct trigger matching:
+
+```
+Each turn:
+  1. Check trigger conditions
+  2. If met: readiness += base_rate (+ modifier bonuses)
+  3. If readiness >= threshold: EVENT FIRES, readiness resets to 0
+  4. If conditions NOT met: readiness -= decay_rate (floor 0)
+```
+
+`PressureConfig` fields: `base_rate` (increment per turn), `threshold` (fire point), `decay_rate` (decay when conditions lapse), `modifiers[]` (conditional rate bonuses).
+
+Pipeline: `update-event-readiness` step runs BEFORE `evaluate-events` (step ~139 of 142).
+
+Events WITHOUT pressure config use legacy `triggerMatches()` (backward compatible).
+
+#### §7.10.3 Strategic Dimensions
+
+6 per-faction dimensions track cumulative reputation. Hybrid model:
+
+| Dimension | What it measures |
+|-----------|-----------------|
+| `military_credibility` | Operation outcomes, decisive victories |
+| `territorial_legitimacy` | Holding claimed territory, historical presence |
+| `international_standing` | Inverse of war crimes, UN cooperation |
+| `patron_confidence` | Following patron directives |
+| `internal_cohesion` | Officer loyalty, civil-military relations |
+| `negotiating_leverage` | Weighted composite of the other five |
+
+Each dimension: `base_value` (computed from game state each turn) + `event_modifier` (accumulated from player decisions) = `effective_value` (clamped 0-100).
+
+Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strategic_dimensions.ts`.
+
+#### §7.10.4 Event Flags and Metagame State
+
+`event_flags: Record<string, string | number | boolean>` on MilitaryState. Set by `sets_flags` on EventDefinition or EventResponseOption. Read by `flag_equals` / `flag_not_set` conditions.
+
+Key flags set by foundational decisions:
+- `rs_strategic_goals`: `'all_six'` | `'selective'` | `'aggressive'`
+- `rbih_state_identity`: `'civic'` | `'bosniak_national'` | `'pragmatic'`
+- `hrhb_political_goal`: `'united_front'` | `'croat_republic'` | `'strategic_ambiguity'`
+
+#### §7.10.5 Recurrence Model
+
+Events can fire multiple times via `RecurrenceConfig`:
+- `max_fires`: maximum fire count (replaces binary `once`)
+- `cooldown_turns`: minimum turns between firings
+- `escalation`: `'static'` | `'escalating'` | `'deteriorating'` (how stakes change)
+
+Response options can have `available_from_fire` / `unavailable_after_fire` to change available choices on each recurrence.
+
+#### §7.10.6 Event Constraint Bus
+
+`event_constraints` on MilitaryState. Three constraint types:
+- `operation_blocks[]`: `{ faction, expires_turn, reason }` — blocks new operation launches
+- `doctrine_overrides[]`: `{ faction, forced_stance, expires_turn, reason }` — forces corps stance
+- `scope_restrictions[]`: `{ faction, allowed_municipalities?, blocked_municipalities?, expires_turn?, reason }` — filters offensive targets
+
+Checked by `bot_corps_directives.ts` via `isOperationBlocked()` and `filterByScope()` from `event_constraints.ts`.
+
+#### §7.10.7 Bot Decision Logic
+
+`pickBotResponseV1()` in `bot_response.ts`. Personality-weighted scoring:
+
+- `historical` / `accept_first`: always picks first option (historical choice)
+- `reject_all`: always picks last option
+- `personality_weighted`: scores each option as `aggression_affinity × aggrNorm × 2 + (1 - risk_level) × compNorm` where `aggrNorm = (aggressiveness - 3) / 2` and `compNorm = (competence - 3) / 2`
+
+Bot factions always pick historical option for foundational decisions.
+
+#### §7.10.8 Event Queue
+
+Maximum 3 events per turn. Candidates sorted by `priority` (lower fires first, default 100). Overflow queued to next turn. `mutex_group` field prevents two events in same group from co-firing (not yet implemented — deferred to v0.6.2).
+
 ### 7.11 Corps Diagnostic Fields
 
 **Implementation-note (2026-03-18):** Per-corps diagnostic state for operation launch debugging and UI status display.

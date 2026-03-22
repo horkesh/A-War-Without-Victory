@@ -231,3 +231,44 @@ These boundaries are non-negotiable and define what this game is and what it is 
 ## 20. v0.6 Canon consolidation
 
 This document (v0.6.0) is the Game Bible for the two-phase (Peace/War) model. It supersedes Game_Bible_v0_5_0.md; deprecated canon versions are archived in docs/_old/10_canon/.
+
+## 21. The Metagame — Political Leadership and the Event System
+
+The player is the wartime political leader of their faction. This identity is never stated explicitly — the game says "you" and "your faction." Events, briefings, and diplomatic encounters address the player as head of state. Military officers are subordinates who report to you.
+
+### 21.1 Event System
+
+Events are the primary vehicle for political and strategic dynamics. They are NOT scripted history — they emerge from game state conditions. Three types:
+
+- **Decision events (~60%):** Player chooses between 2-4 options. Every option costs something.
+- **Consequence events (~30%):** Something happened because of another faction's action or your prior choices. Real mechanical state change, no choice.
+- **Forced events (~10%):** Truly exogenous (UN resolution, external power decision). Often followed by a decision event.
+
+Events fire through the **pressure system**: conditions ripen, a readiness counter builds, and when it crosses threshold the event fires. The player can sometimes prevent events by changing the conditions.
+
+### 21.2 Strategic Dimensions
+
+Six dimensions per faction track cumulative reputation and position:
+
+1. **Military credibility** — can your army deliver?
+2. **Territorial legitimacy** — is your claim defensible?
+3. **International standing** — how does the world see you?
+4. **Patron confidence** — does your patron back you?
+5. **Internal cohesion** — is your faction unified?
+6. **Negotiating leverage** — composite strength at the table
+
+Each dimension has a base value (computed from game state) plus an event modifier (accumulated from player decisions). Both contribute to the effective value that determines future event options and Dayton outcomes.
+
+### 21.3 Foundational Decisions
+
+At game start, each faction faces a defining choice that reshapes the entire event tree:
+
+- **RS:** The Six Strategic Goals — adopt all, adopt selectively, or pursue aggressively
+- **RBiH:** State identity — civic multi-ethnic republic, Bosniak national state, or pragmatic hybrid
+- **HRHB:** Political goal — united front with ARBiH, separate Croat republic, or strategic ambiguity
+
+These are ahistorical branching points. The bot always picks the historical option. The player can choose differently — and live with the consequences.
+
+### 21.4 Event Flags
+
+Player decisions set named flags on game state (e.g., `rs_strategic_goals: 'selective'`). Downstream events read these flags to modify their conditions, options, and consequences. Flags create explicit causal chains across the entire game.
