@@ -352,6 +352,77 @@ export function evaluateCondition(condition: EventCondition, state: GameState): 
             return condition.conditions.some(c => evaluateCondition(c, state));
         case 'not':
             return !evaluateCondition(condition.condition, state);
+        case 'supply_below': {
+            const supply = (state.military as any).general_supply_reserve?.[condition.faction] ?? 0;
+            return supply < condition.threshold;
+        }
+        case 'supply_above': {
+            const supply = (state.military as any).general_supply_reserve?.[condition.faction] ?? 0;
+            return supply >= condition.threshold;
+        }
+        case 'territory_percentage': {
+            const pc = state.political?.political_controllers ?? {};
+            const allOsids = Object.keys(pc);
+            const factionOsids = allOsids.filter(osid => pc[osid] === condition.faction);
+            const pct = allOsids.length > 0 ? factionOsids.length / allOsids.length : 0;
+            return condition.comparator === 'above' ? pct >= condition.threshold : pct < condition.threshold;
+        }
+        case 'dimension_above': {
+            const dims = (state.military as any).negotiation?.strategic_dimensions?.[condition.faction];
+            const dim = dims?.[condition.dimension];
+            return (dim?.effective_value ?? 50) >= condition.threshold;
+        }
+        case 'dimension_below': {
+            const dims = (state.military as any).negotiation?.strategic_dimensions?.[condition.faction];
+            const dim = dims?.[condition.dimension];
+            return (dim?.effective_value ?? 50) < condition.threshold;
+        }
+        case 'flag_equals': {
+            const flags = (state.military as any).event_flags ?? {};
+            return flags[condition.flag] === condition.value;
+        }
+        case 'flag_not_set': {
+            const flags = (state.military as any).event_flags ?? {};
+            return !(condition.flag in flags);
+        }
+        case 'patron_pressure_above': {
+            const pr = (state.military as any).negotiation?.patron_relationships?.[condition.faction];
+            return (pr?.override_authority ?? 0) >= condition.threshold;
+        }
+        case 'war_crimes_above': {
+            const cap = (state.military as any).negotiation?.capital?.[condition.faction];
+            return (cap?.war_crimes_events ?? 0) >= condition.threshold;
+        }
+        case 'morale_average_below': {
+            const formations = state.military?.formations ?? {};
+            const factionBrigades = Object.values(formations)
+                .filter((f: any) => f.faction === condition.faction && f.kind === 'brigade' && f.status === 'active');
+            if (factionBrigades.length === 0) return false;
+            const avgMorale = factionBrigades.reduce((sum: number, f: any) => sum + (f.morale ?? 50), 0) / factionBrigades.length;
+            return avgMorale < condition.threshold;
+        }
+        case 'week_since_event': {
+            const lastFired = (state.military as any).event_last_fired_turn?.[condition.event_id];
+            if (lastFired == null) return false;
+            const weeksSince = (state.meta?.turn ?? 0) - lastFired;
+            if (condition.min_weeks != null && weeksSince < condition.min_weeks) return false;
+            if (condition.max_weeks != null && weeksSince > condition.max_weeks) return false;
+            return true;
+        }
+        case 'event_fire_count': {
+            const count = (state.military as any).event_fire_counts?.[condition.event_id] ?? 0;
+            if (condition.min_count != null && count < condition.min_count) return false;
+            if (condition.max_count != null && count > condition.max_count) return false;
+            return true;
+        }
+        case 'enclave_supply_status': {
+            // Placeholder — needs supply system integration (deferred)
+            return false;
+        }
+        case 'corridor_severed': {
+            // Placeholder — needs adjacency graph BFS integration (deferred)
+            return false;
+        }
         default:
             return true;
     }
