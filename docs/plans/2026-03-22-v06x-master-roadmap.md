@@ -163,7 +163,30 @@ The tracks are mostly independent. They converge at two points:
 | Event history log | Collapsible sidebar or tab showing last 8-10 events with category icons + titles. Click to re-read. |
 | Pressure indicators | "Tensions rising" warnings on relevant corps cards or in Situation Briefing when event readiness > 50% of threshold. |
 
-**Done gate:** Player can play through 1992 (first 40 weeks) experiencing the full metagame loop — foundational decision at w1-2, emergent events through w4-40, dimension shifts visible, flags set, consequences arriving. War-or-Game sign-off on the experience.
+### UI Chrome Redesign (v0.6.0 merge)
+
+| Feature | Notes |
+|---------|-------|
+| Presidential Toolbar | Army crest center (→ Army HQ), date left, advance turn right. ~5 elements. Dev strip below in dev mode. |
+| Bottom strip cleanup | 4-5 map modes + territory % (player faction prominent + trend arrows, others compact) + faction-contextual indicator (alliance or patron pressure). Layer toggles behind gear icon. |
+| Command Briefing compact | Frosted glass strip under toolbar with dark pills per item. Red title, dismiss button. |
+| Strategic Position bars | 6 dimension bars replace StatRow in Army HQ (DONE). |
+
+### Operation Detail Redesign (v0.6.0 merge)
+
+| Feature | Notes |
+|---------|-------|
+| Commander SITREP | Typewriter-style situation report from op commander: status, timeline, force assessment, enemy situation, recommendation, projected outcome. Same visual treatment as G2 NarrativeTab. Pure function from game state. |
+| Halt / Force-Launch buttons | Player can stop or force-launch operations from OperationDetail (IPC exists, just missing UI buttons). |
+| Commander personality in reports | Aggressive commanders recommend pressing the attack; cautious ones recommend abort. Uses existing aggressiveness/competence scores. |
+
+Design spec: `docs/plans/2026-03-22-operation-detail-redesign.md`
+
+### Game Timeline (v0.6.0 merge or v0.6.2)
+
+War chronicle showing the story of THIS war — decisions, consequences, dimension shifts, operations, peace plans. Vertical spine like settlement timeline but at game level. See `docs/plans/2026-03-22-game-timeline-design-notes.md`.
+
+**Done gate:** Player can play through 1992 (first 40 weeks) experiencing the full metagame loop — foundational decision at w1-2, emergent events through w4-40, dimension shifts visible, flags set, consequences arriving. Operations feel like presidential briefings. War-or-Game sign-off on the experience.
 
 ---
 
