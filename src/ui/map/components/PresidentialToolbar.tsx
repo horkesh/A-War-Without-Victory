@@ -134,26 +134,23 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                     {/* Army Crest — gateway to HQ */}
                     <button
                         onClick={handleOpenHQ}
-                        className="group relative flex items-center gap-3 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-all"
+                        className="group relative flex flex-col items-center px-5 -my-1 rounded-lg hover:bg-white/5 transition-all"
                         aria-label={`${armyName ?? 'Army'} HQ [H]`}
                     >
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-400/80 group-hover:text-amber-400 transition-colors">
+                            {armyName ?? playerFaction ?? 'COMMAND'}
+                        </span>
                         {crestUrl && (
                             <img
                                 src={crestUrl}
                                 alt=""
-                                className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(212,167,58,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(212,167,58,0.6)] transition-all"
+                                className="w-24 h-24 -mt-1 -mb-3 object-contain drop-shadow-[0_0_12px_rgba(212,167,58,0.4)] group-hover:drop-shadow-[0_0_20px_rgba(212,167,58,0.6)] transition-all"
                                 draggable={false}
                             />
                         )}
-                        <div className="flex flex-col">
-                            <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-amber-400/90 group-hover:text-amber-400 transition-colors">
-                                {armyName ?? playerFaction ?? 'COMMAND'}
-                            </span>
-                            <span className="text-[8px] font-mono uppercase tracking-[0.2em] text-text-secondary/60">
-                                Headquarters
-                            </span>
-                        </div>
-                        {/* Subtle glow ring when alerts pending */}
+                        <span className="text-[7px] font-mono uppercase tracking-[0.25em] text-text-secondary/50 -mt-1">
+                            Headquarters
+                        </span>
                         {hasAlerts && (
                             <div className="absolute inset-0 rounded-lg border border-amber-400/20 animate-pulse pointer-events-none" />
                         )}
