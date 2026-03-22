@@ -56,6 +56,10 @@ data/derived/scenario/_baseline_tmp/
 .env
 .env.*
 
+# Archived plans (historical, in git history if needed)
+docs/plans/_completed/
+docs/30_planning/_legacy/
+
 # IDE
 .vscode/
 .cursor/
