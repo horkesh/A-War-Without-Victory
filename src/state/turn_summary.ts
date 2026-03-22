@@ -140,6 +140,12 @@ export interface TurnSummary {
 
     // --- Notable events ---
     notable_events: TurnNotableEvent[];
+
+    // --- Snapshots (for Chronicle / trend tracking) ---
+    /** Area-weighted territory % per faction at end of this turn. */
+    territory_snapshot?: Partial<Record<FactionId, number>>;
+    /** General supply reserve per faction at end of this turn. */
+    supply_snapshot?: Partial<Record<FactionId, number>>;
 }
 
 /** Keep all turn summaries — battle history feeds the settlement timeline. */

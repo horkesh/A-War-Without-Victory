@@ -14,6 +14,26 @@ import type { TurnSummary, TurnBattle, NotableFlip, ArcTransition, DecorationAwa
 import type { AARSnapshot, TurnReport } from './turn_pipeline_types.js';
 import type { NarrativeArc } from './war_stories.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
+// ---------------------------------------------------------------------------
+// OSID area data (lazy singleton — same pattern as compute_capital.ts)
+// ---------------------------------------------------------------------------
+
+let osidAreaCache: { total: number; areas: Record<string, number> } | null = null;
+
+function getOsidAreas(): { total: number; areas: Record<string, number> } {
+    if (osidAreaCache) return osidAreaCache;
+    try {
+        const filePath = resolve(process.cwd(), 'data/derived/operational/osid_areas.json');
+        const raw = JSON.parse(readFileSync(filePath, 'utf8')) as { total_area_km2: number; areas: Record<string, number> };
+        osidAreaCache = { total: raw.total_area_km2, areas: raw.areas };
+    } catch {
+        osidAreaCache = { total: 51337, areas: {} };
+    }
+    return osidAreaCache;
+}
 
 // ---------------------------------------------------------------------------
 // Snapshot capture (turn start)
@@ -85,6 +105,7 @@ export function compileTurnSummary(
         supply_transitions: compileSupplyTransitions(state, snapshot),
         events_fired: report.events_fired ?? [],
         notable_events: compileNotableEvents(state, turn),
+        ...compileTerritoryAndSupplySnapshots(state),
     };
 }
 
@@ -358,6 +379,41 @@ function compileSupplyTransitions(state: GameState, snapshot: AARSnapshot): Turn
         }
     }
     return transitions;
+}
+
+// ---------------------------------------------------------------------------
+// Section: Territory + Supply Snapshots (end-of-turn absolute values)
+// ---------------------------------------------------------------------------
+
+function compileTerritoryAndSupplySnapshots(
+    state: GameState,
+): Pick<TurnSummary, 'territory_snapshot' | 'supply_snapshot'> {
+    const pc = state.political?.political_controllers ?? {};
+    const { total, areas } = getOsidAreas();
+
+    const areaByFaction: Partial<Record<FactionId, number>> = {};
+    for (const osid of Object.keys(pc).sort(strictCompare)) {
+        const faction = pc[osid] as FactionId | undefined;
+        if (!faction) continue;
+        const osidArea = areas[osid] ?? 0;
+        areaByFaction[faction] = (areaByFaction[faction] ?? 0) + osidArea;
+    }
+
+    const territory_snapshot: Partial<Record<FactionId, number>> = {};
+    if (total > 0) {
+        for (const faction of (Object.keys(areaByFaction) as FactionId[]).sort(strictCompare)) {
+            territory_snapshot[faction] = Math.round(((areaByFaction[faction] ?? 0) / total) * 10000) / 10000;
+        }
+    }
+
+    const supply_snapshot: Partial<Record<FactionId, number>> = {};
+    const reserves = state.military?.general_supply_reserve ?? {};
+    for (const faction of (Object.keys(reserves) as FactionId[]).sort(strictCompare)) {
+        const val = reserves[faction];
+        if (val != null) supply_snapshot[faction] = val;
+    }
+
+    return { territory_snapshot, supply_snapshot };
 }
 
 // ---------------------------------------------------------------------------
