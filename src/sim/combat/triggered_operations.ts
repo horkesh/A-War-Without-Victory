@@ -47,6 +47,8 @@ interface TriggeredOpDef {
     trigger: (state: GameState, turn: number) => boolean;
     /** Planning duration in turns. */
     planning_duration: number;
+    /** Override minimum attack outcome for brigades in this operation. */
+    min_attack_outcome?: string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
