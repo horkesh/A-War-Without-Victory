@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-22
-**Status:** **v0.5.4** (v0.6.0-alpha infrastructure complete). **1317 tests**, 111 suites. **93.1% area-weighted (n1021, backward compatible).** Emergent event system infrastructure: pressure, dimensions, flags, conditions, constraints, bot logic, recurrence, queue cap, pipeline integration.
+**Status:** **v0.5.4** (v0.6.0-beta complete, pending version bump). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS. War-or-Game SIGNED OFF.** v0.6.0: emergent event infrastructure + 1992 metagame (3 foundational decisions, 19 events, ICTY-sourced). Next: event decision UI, dimension visualization, v0.6.1 calibration framework.
 
 ## [2026-03-22] v0.6.0-alpha — Emergent Event System Infrastructure (Night Shift)
 
