@@ -1793,6 +1793,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingDayton: derivePendingDayton(state),
         negotiationCapital: deriveNegotiationCapital(state),
+        strategicDimensions: deriveStrategicDimensions(state),
+        eventFlags: state.military?.event_flags ?? undefined,
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
@@ -2235,6 +2237,26 @@ function deriveNegotiationCapital(state: any): LoadedGameState['negotiationCapit
                 military_effectiveness: Number(c.military_effectiveness ?? 0),
                 political_cohesion: Number(c.political_cohesion ?? 0),
                 composite: 50,
+            };
+        }
+    }
+    return Object.keys(out).length > 0 ? out : undefined;
+}
+
+function deriveStrategicDimensions(state: any): LoadedGameState['strategicDimensions'] {
+    const dims = state.military?.negotiation?.strategic_dimensions;
+    if (!dims || typeof dims !== 'object') return undefined;
+    const out: Record<string, Record<string, { base_value: number; event_modifier: number; effective_value: number }>> = {};
+    for (const [faction, factionDims] of Object.entries(dims).sort((a, b) => a[0].localeCompare(b[0]))) {
+        const fd = factionDims as any;
+        if (!fd || typeof fd !== 'object') continue;
+        out[faction] = {};
+        for (const [dim, val] of Object.entries(fd).sort((a, b) => a[0].localeCompare(b[0]))) {
+            const v = val as any;
+            out[faction][dim] = {
+                base_value: Number(v?.base_value ?? 50),
+                event_modifier: Number(v?.event_modifier ?? 0),
+                effective_value: Number(v?.effective_value ?? 50),
             };
         }
     }

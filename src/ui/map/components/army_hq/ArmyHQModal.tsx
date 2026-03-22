@@ -9,30 +9,18 @@ import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { SituationBriefing, generateBriefing } from './SituationBriefing';
+import { StrategicPosition } from './StrategicPosition';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
-const EXHAUSTION_WARN_THRESHOLD = 30;
-
 const FACTION_DISPLAY: Record<string, string> = {
     RS: 'Vojska Republike Srpske',
     RBiH: 'Armija Republike Bosne i Hercegovine',
     HRHB: 'Hrvatsko Vijeće Obrane',
 };
-
-function StatRow({ label, value, warn }: { label: string; value: string | number; warn?: boolean }) {
-    return (
-        <div className="flex justify-between items-baseline py-1 border-b border-panel-border/30">
-            <span className="text-text-secondary text-[12px] uppercase tracking-wide">{label}</span>
-            <span className={`font-mono text-[13px] font-bold tabular-nums ${warn ? 'text-red-400' : 'text-text-primary'}`}>
-                {value}
-            </span>
-        </div>
-    );
-}
 
 export function ArmyHQModal() {
     const open = useGameStore((s) => s.armyHQOpen);
@@ -239,23 +227,11 @@ export function ArmyHQModal() {
                                 </div>
                             </div>
 
-                            {/* Strategic Situation */}
-                            <div className="bg-panel-card border border-panel-border rounded p-5">
-                                <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
-                                    STRATEGIC SITUATION
-                                </div>
-                                <div className="space-y-0.5">
-                                    <StatRow label="Territory" value={`${data.territoryPct.toFixed(1)}%`} />
-                                    <StatRow label="Personnel" value={data.totalPersonnel.toLocaleString()} />
-                                    <StatRow label="Brigades" value={`${data.brigades.length} active`} />
-                                    <StatRow label="Operations" value={`${data.operations.length} active`} />
-                                    <StatRow label="Combat Eff." value={`${(data.eff.totalEffectiveness ?? 0).toLocaleString()} (${data.eff.grade ?? '?'})`} />
-                                    <StatRow label="War Exhaustion" value={data.exhaustionDisplay} warn={parseFloat(data.exhaustionDisplay) > EXHAUSTION_WARN_THRESHOLD} />
-                                    {data.reserves && (
-                                        <StatRow label="Supply" value={Math.round(data.reserves.generalSupply ?? 0)} />
-                                    )}
-                                </div>
-                            </div>
+                            {/* Strategic Position — 6 dimension bars */}
+                            <StrategicPosition
+                                dimensions={state.strategicDimensions?.[faction]}
+                                faction={faction}
+                            />
                         </div>
                     )}
 

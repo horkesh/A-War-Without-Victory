@@ -748,6 +748,16 @@ export interface LoadedGameState {
         composite: number;
     }>;
 
+    /** Per-faction strategic dimensions (v0.6.0 metagame). 6 dimensions, hybrid base + modifier = effective. */
+    strategicDimensions?: Record<string, Record<string, {
+        base_value: number;
+        event_modifier: number;
+        effective_value: number;
+    }>>;
+
+    /** Per-faction event flags set by player decisions. */
+    eventFlags?: Record<string, string | number | boolean>;
+
     /** Per-faction patron override authority (0-100). */
     patronOverrideAuthority?: Record<string, number>;
 
