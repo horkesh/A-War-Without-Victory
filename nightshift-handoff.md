@@ -1,80 +1,75 @@
-# Night Shift Handoff — 2026-03-22
+# Night Shift Handoff — 2026-03-22 (Evening)
 
 ## Plans to Execute
 
-1. **`docs/plans/2026-03-22-v060-alpha-implementation-plan.md`** — 17 tasks
+### Primary: v0.6.0 Gate Completion
+**Plan:** `docs/plans/2026-03-22-v060-gate-completion-plan.md`
+**Tasks:** 5 tasks, execution order specified in plan
+**Priority:** Tasks 4 (VERSIONING), 1 (Event Decision IPC), 2 (Pressure), 3 (Notification), 5 (Briefing decisions)
+**Parallelizable:** Tasks 1, 2, 3 are independent. Task 5 depends on Task 1.
+
+### Scope
+Close the v0.6.0 merge gate: player can respond to event decisions, pressure indicators visible, consequence events auto-dismiss.
 
 ## Execution Order
 
-Tasks 1-2 first (types + state fields — everything depends on these).
-Tasks 3-13 in listed order (Track A engine work).
-Tasks 14-16 after Task 2 (Track B UI work — independent of Track A Tasks 3-13).
-Task 17 last (final verification).
-
-Track A and Track B are independent after Tasks 1-2. They CAN be parallelized.
-
-## Dependency DAG
-
-```
-Task 1 (types) → Task 2 (state) → ┬→ Tasks 3-13 (Track A, sequential)
-                                    └→ Tasks 14-16 (Track B, sequential)
-
-Both tracks → Task 17 (final verification)
-```
+1. **Task 4** — VERSIONING.md update (housekeeping, 10 min)
+2. **Task 1** — Event Decision IPC wiring (critical path, ~1 hr)
+3. **Task 2** — Pressure indicators (independent, ~30 min)
+4. **Task 3** — Notification UI for consequence events (~30 min)
+5. **Task 5** — Pending decisions in SituationBriefing (~20 min)
 
 ## Special Instructions
 
-- **Backward compatibility is sacred.** All new state fields are optional. Existing events must continue to work unchanged. The 40w scenario must produce the same results as the current baseline (92.8% area-weighted).
-- **Determinism is sacred.** No Math.random(), no timestamps, sorted iteration via strictCompare in any new code.
-- **Test-first.** Every task that creates new modules must write failing tests before implementation.
-- **Two placeholder conditions** (`enclave_supply_status` and `corridor_severed`) are expected to return `false` — they need supply system and adjacency graph integration that's deferred. Leave them as documented placeholders.
-- **Bot decision logic** uses a default moderate commander profile `{ aggressiveness: 3, competence: 3 }` for now — wiring to actual faction army commander is deferred to v0.6.0-beta.
-- **Do NOT modify any event JSON files** (`data/scenarios/events/`). Infrastructure only — content migration is v0.6.0-beta.
-- **Uncommitted changes stashed** as `pre-nightshift: uncommitted planning_duration + latest_run_final_save`. Do NOT pop the stash.
+- **UI-only changes.** Zero engine or calibration impact.
+- **Do NOT bump package.json to 0.6.0** — that happens after War-or-Game sign-off
+- **Do NOT create v0.6.0 git tag** — same reason
+- **Smoke test after every task:** `tsc --noEmit` + `vitest run` + `desktop:map:build`
+- **Run 40w scenario at the end** to verify no regression: `npm run sim:scenario:run:40w`
+- **Determinism is sacred.** No Math.random() or timestamps in any new code.
+- **Follow existing IPC patterns** — `stageCorpsStanceOrder` for handler shape, `advanceTurnAndSync` for reload pattern.
 
 ## DO NOT Touch
 
-- `data/scenarios/events/*.json` — event content migration is v0.6.0-beta, not alpha
-- `src/sim/combat/pre_planned_operations.ts` — operations code, not in scope
-- `src/sim/combat/triggered_operations.ts` — same
+- `src/sim/` engine code (no calibration changes)
+- `data/scenarios/events/` event definitions
+- `src/sim/ai_commander/` (AI Commander integration is v0.6.2+ scope)
+- `.env` file (contains rotated API keys)
 - `docs/10_canon/FORAWWV.md` — never auto-edit
-- Any files in `.worktrees/` — stale worktrees, ignore
 
 ## Pre-Made Architectural Decisions
 
-These are DECIDED. Do not revisit:
+1. **Event Decision IPC** follows the pattern of `stageCorpsStanceOrder` — IPC handler in electron-main.cjs calls engine function, returns `{ ok, error }`.
+2. **Pressure indicators** derive from `state.military.event_readiness` — any event with readiness > 50 counts as pressure warning.
+3. **Consequence events** (no response options) auto-dismiss after 3-5 seconds. No button needed.
+4. **Pending decisions in briefing** use severity `critical`, target type `none` (stays in HQ).
 
-1. **Strategic dimensions replace NegotiationCapital** — unified hybrid with `base_value + event_modifier = effective_value`. See design spec Section 14.1.
-2. **Event constraint bus is 4 layers** — wire stub (A), add constraint fields (B), flag-reading for foundational decisions (D). Layer C (new effect types) is v0.6.2, skip it.
-3. **Pressure system uses readiness counters** — increment while conditions hold, decay when they lapse. See design spec Section 5.
-4. **Bot decisions use personality-weighted scoring** — aggressive commanders prefer high aggression_affinity options. See design spec Section 10.
-5. **3/turn event cap** — overflow queued to next turn sorted by priority.
+## Build State
 
-## Reference Documents
+- tsc: clean
+- vitest: 1317 tests, 111 suites
+- desktop:map:build: passes
+- Calibration: n1024, 93.1% area-weighted
+- Last commit: b5bd77c (master roadmap update)
+- No uncommitted changes (except nightshift-handoff.md itself)
 
-- Design spec: `docs/plans/2026-03-21-emergent-event-system-design.md`
-- Master roadmap: `docs/plans/2026-03-22-v06x-master-roadmap.md`
-- HQ roadmap: `docs/plans/2026-03-22-army-hq-nerve-center-roadmap.md`
-- Implementation plan: `docs/plans/2026-03-22-v060-alpha-implementation-plan.md`
-- Life lessons: `docs/life_lessons.md`
-- Napkin: `.claude/napkin.md`
+## Context Files
 
-## Current Build State
-
-- **Version:** v0.5.4
-- **Tests:** 1261 tests, 106 suites
-- **tsc:** clean
-- **Calibration:** 92.8% area-weighted ATH (n1011)
-- **Uncommitted changes:** STASHED (do not pop)
-- **Last commit:** b478a90 (implementation plan)
+- `.claude/napkin.md` — runbook
+- `docs/plans/2026-03-22-v06x-master-roadmap.md` — master roadmap (has "Two Rooms" section, orphan audit, integration review)
+- `docs/plans/2026-03-22-army-hq-nerve-center-roadmap.md` — HQ phases (3/3.5 complete, 4 complete with tabs)
+- `docs/plans/2026-03-22-v060-gate-completion-plan.md` — **THE PLAN TO EXECUTE**
+- `docs/life_lessons.md` — scan before starting
 
 ## What Success Looks Like
 
 After the nightshift:
-- All 17 tasks complete
-- New test count: ~1280-1300 (20-40 new tests from Tasks 3-6, 9-10)
-- tsc clean, vitest green
-- 40w scenario produces same baseline results (infrastructure is inert)
+- Player can respond to event decisions from EventDecisionModal
+- Pressure "TENSIONS RISING" badge appears in toolbar when events approach threshold
+- Consequence events auto-dismiss (no infinite modal blocking)
+- Pending event decisions appear in Army HQ Situation Briefing
+- VERSIONING.md matches reality (v0.5.4, milestone status correct)
+- tsc clean, vitest green, desktop:map:build passes
+- 40w scenario passes (no regression)
 - Morning report in project root
-- Ledger updated
-- Napkin updated
+- Ledger + napkin updated
