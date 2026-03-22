@@ -141,6 +141,12 @@ export interface NegotiationState {
     pyrrhic_scores?: Record<string, number>;
     /** Result of the Dayton negotiation (set when Dayton resolves). */
     dayton_result?: DaytonResult;
+    /** v0.6.0: Strategic dimensions per faction — hybrid base_value + event_modifier. */
+    strategic_dimensions?: Record<string, Record<string, {
+        base_value: number;
+        event_modifier: number;
+        effective_value: number;
+    }>>;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

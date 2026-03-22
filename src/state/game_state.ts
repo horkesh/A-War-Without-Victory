@@ -1737,6 +1737,32 @@ fired_event_ids?: string[];
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
 /** Temporary aggression modifiers from events (e.g. VRS fury after barracks seizure). Expires after duration_turns. */
 event_aggression_modifiers?: Array<{ faction: string; delta: number; expires_turn: number }>;
+// v0.6.0 emergent event system state
+/** Pressure system readiness counters per event ID. */
+event_readiness?: Record<string, number>;
+/** How many times each event has fired (for recurrence tracking). */
+event_fire_counts?: Record<string, number>;
+/** Turn number when each event last fired (for cooldown tracking). */
+event_last_fired_turn?: Record<string, number>;
+/** Named flags set by player decisions — read by downstream events. */
+event_flags?: Record<string, string | number | boolean>;
+/** Event IDs unlocked by event chains (enables_events). */
+enabled_event_ids?: string[];
+/** Event-imposed constraints on military operations. */
+event_constraints?: {
+    /** Faction cannot launch NEW operations until expires_turn. */
+    operation_blocks?: Array<{ faction: string; expires_turn: number; reason: string }>;
+    /** Force a faction into a specific stance until expires_turn. */
+    doctrine_overrides?: Array<{ faction: string; forced_stance: string; expires_turn: number; reason: string }>;
+    /** Restrict which municipalities a faction can target offensively. */
+    scope_restrictions?: Array<{
+        faction: string;
+        allowed_municipalities?: string[];
+        blocked_municipalities?: string[];
+        expires_turn?: number;
+        reason: string;
+    }>;
+};
 /** AI commander decision log for replay determinism. */
 ai_decision_log?: import('../sim/ai_commander/ai_types.js').CommandDecisionLogEntry[];
 /** AI commander army-level decisions for current turn (consumed by corps directive step). */
