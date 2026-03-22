@@ -80,11 +80,12 @@ Same as G2 NarrativeTab in OpsPlanningModal:
 
 ### Where It Lives
 
-Replace the current flat data list in `OperationDetail.tsx` with a tabbed view:
-- **Tab 1: SITREP** — commander's situation report (default, what you see when you click an op)
-- **Tab 2: ORDER** — the current raw data (objectives, axes, parameters) for reference
+The existing OperationDetail panel stays UNCHANGED — raw data (commander, objectives, axes, momentum) remains the default view. Two additions:
 
-Or simpler: the SITREP IS the main view, with the raw data in a collapsible "Technical Details" section at the bottom.
+1. **HALT button** — at the top of the panel, always visible during execution phase. Calls existing `stageOperationHalt` IPC.
+2. **REQUEST SITREP button** — opens the commander's situation report as a modal overlay (same z-level as OpsPlanningModal). The SITREP is on-demand — the president asks for the commander's assessment when they want it.
+
+The SITREP modal uses the same visual treatment as the G2 NarrativeTab (typewriter font, classified stamps, faction headers). It is NOT a replacement for the operation panel — it is an additive briefing launched from it.
 
 ---
 
