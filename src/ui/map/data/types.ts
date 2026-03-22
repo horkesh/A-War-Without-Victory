@@ -558,6 +558,8 @@ export interface LoadedGameState {
     commandBriefing?: CommandBriefingView;
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
+    /** All turn summaries (for Chronicle timeline). */
+    turnSummaries: import('../../../state/turn_summary.js').TurnSummary[];
     /** Completed operation AARs. */
     operationHistory?: Array<{
         operation_id: string;

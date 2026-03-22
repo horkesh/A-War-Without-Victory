@@ -9,12 +9,13 @@ export function ChronicleOverlay() {
     const setOpen = useGameStore(s => s.setChronicleOpen);
     const state = useGameStore(s => s.loadedGameState);
 
+    const turnSummaries = state?.turnSummaries ?? [];
+
     const entries = useMemo(() =>
-        state ? generateChronicleEntries(state) : [],
-        [state]
+        turnSummaries.length > 0 ? generateChronicleEntries(state) : [],
+        [turnSummaries]
     );
 
-    // Group entries by turn for spine layout
     const turnGroups = useMemo(() => {
         const groups = new Map<number, typeof entries>();
         for (const entry of entries) {
@@ -22,7 +23,6 @@ export function ChronicleOverlay() {
             existing.push(entry);
             groups.set(entry.turn, existing);
         }
-        // Sort by turn descending (newest first)
         return Array.from(groups.entries()).sort((a, b) => b[0] - a[0]);
     }, [entries]);
 
@@ -42,8 +42,6 @@ export function ChronicleOverlay() {
     }, [open, handleClose]);
 
     if (!open || !state) return null;
-
-    const turnSummaries = (state as any).turnSummaries ?? [];
 
     return (
         <div className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-sm flex flex-col">

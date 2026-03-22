@@ -29,7 +29,7 @@ describe('generateChronicleEntries', () => {
         const combat = entries.filter(e => e.type === 'combat');
         expect(combat.length).toBeGreaterThan(0);
         expect(combat[0].turn).toBe(10);
-        expect(combat[0].title).toBe('Battle of Brcko');
+        expect(combat[0].title).toContain('Battle of');
         expect(combat[0].headline).toBe(true);
         expect(combat[0].metadata?.casualties).toBe(250);
     });

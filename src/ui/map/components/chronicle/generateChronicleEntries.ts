@@ -16,18 +16,12 @@ export interface ChronicleEntry {
     };
 }
 
+import { humanizeOsid } from '../../utils/osidDisplayName.js';
+
 const HEADLINE_EVENT_PATTERNS = ['strategic_goals', 'state_identity', 'political_goal'];
 const DIPLOMATIC_EVENT_PATTERNS = ['graz', 'ceasefire', 'alliance', 'embargo', 'conference'];
 const CASUALTY_THRESHOLD = 100;
 const DISPLACEMENT_THRESHOLD = 500;
-
-function extractLocationName(osid: string): string {
-    const parts = osid.split(':');
-    if (parts.length >= 2) {
-        return parts[1].replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    }
-    return osid;
-}
 
 function formatOutcome(outcome: string): string {
     return outcome.replace(/_/g, ' ');
@@ -51,13 +45,12 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
     for (const summary of state.turnSummaries) {
         const turn = summary.turn;
 
-        // Combat cards: significant battles only
         if (Array.isArray(summary.battles)) {
             for (const battle of summary.battles) {
                 const totalCasualties = (battle.attacker_casualties || 0) + (battle.defender_casualties || 0);
                 if (!battle.territory_flipped && totalCasualties <= CASUALTY_THRESHOLD) continue;
 
-                const location = extractLocationName(battle.osid || '');
+                const location = humanizeOsid(battle.osid || '');
                 entries.push({
                     turn,
                     type: 'combat',
@@ -72,7 +65,6 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
             }
         }
 
-        // Political and diplomatic cards from events
         if (Array.isArray(summary.events_fired)) {
             for (const event of summary.events_fired) {
                 const id = event.id || '';
@@ -98,7 +90,6 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
             }
         }
 
-        // Humanitarian cards: displacement waves
         if (summary.displacement_total > DISPLACEMENT_THRESHOLD) {
             const ethnicBreakdown = summary.displacement_by_ethnicity || {};
             const detail = Object.entries(ethnicBreakdown)
@@ -116,7 +107,6 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
             });
         }
 
-        // Military cards: formation spawns
         if (Array.isArray(summary.formation_spawns)) {
             for (const spawn of summary.formation_spawns) {
                 entries.push({
@@ -129,7 +119,6 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
             }
         }
 
-        // Military cards: formation destructions
         if (Array.isArray(summary.formation_destructions)) {
             for (const destruction of summary.formation_destructions) {
                 entries.push({
@@ -142,7 +131,6 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
             }
         }
 
-        // Narrative cards: notable events
         if (Array.isArray(summary.notable_events)) {
             for (const event of summary.notable_events) {
                 entries.push({

@@ -159,6 +159,7 @@ describe('Tactical map render smoke', () => {
   supplyTransitionsByOsid: {},
   historicalEventsByTurn: [],
   latestTurnSummary: null,
+  turnSummaries: [],
   pressureWarning: false,
   formations: [
         {

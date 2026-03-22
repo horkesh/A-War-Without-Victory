@@ -1772,6 +1772,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         supplyTransitionsByOsid: deriveSupplyTransitionsByOsid(state),
         historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
+        turnSummaries: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined) ?? [],
         operationHistory: deriveOperationHistory(state),
         activeOperations: deriveActiveOperations(state),
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,

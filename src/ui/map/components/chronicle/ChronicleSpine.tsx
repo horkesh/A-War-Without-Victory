@@ -1,11 +1,5 @@
 import React from 'react';
-
-/** Faction colors matching the game's palette. */
-const FACTION_COLORS = {
-    RS: '#c04040',
-    RBiH: '#4a9a55',
-    HRHB: '#4080b8',
-} as const;
+import { FACTION_HEX_COLORS } from '../../utils/theme.js';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -51,7 +45,7 @@ export const ChronicleSpine = React.memo(function ChronicleSpine({ turnSummaries
                                         key={f}
                                         style={{
                                             width: `${pct}%`,
-                                            backgroundColor: FACTION_COLORS[f],
+                                            backgroundColor: FACTION_HEX_COLORS[f],
                                         }}
                                     />
                                 );
