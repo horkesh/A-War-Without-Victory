@@ -24,7 +24,6 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
   const setSelectedOperationKey = useGameStore((state) => state.setSelectedOperationKey);
   const setSelectedCorpsFrontSectorId = useGameStore((state) => state.setSelectedCorpsFrontSectorId);
   const setSelectedOsid = useGameStore((state) => state.setSelectedOsid);
-  const setIsOperationsPanelOpen = useGameStore((state) => state.setIsOperationsPanelOpen);
   const setSelectedArmyId = useGameStore((state) => state.setSelectedArmyId);
   const setArmyHQExpandedCorpsId = useGameStore((state) => state.setArmyHQExpandedCorpsId);
   const devMode = useGameStore((state) => state.devMode);
@@ -50,7 +49,6 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
       case 'operation':
         if (item.target.operationKey) {
           setSelectedOperationKey(item.target.operationKey);
-          setIsOperationsPanelOpen(true);
         }
         return;
       case 'sector':
