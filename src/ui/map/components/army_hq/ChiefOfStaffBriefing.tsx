@@ -2,11 +2,7 @@
  * Chief of Staff Briefing — paper missive from the named deputy.
  * Styled like a formal military document (cream paper, neutral tones, stamp).
  * Template-based personality-driven narrative from game state.
- *
- * Deputies:
- *   RBiH — Gen. Jovan Divjak (cautious, analytical)
- *   RS   — Gen. Manojlo Milovanović (professional, precise)
- *   HRHB — Gen. Milivoj Petković (direct, aggressive)
+ * Inline clickable links for corps, sectors, operations.
  */
 import { useMemo } from 'react';
 import type { LoadedGameState } from '../../data/types';
@@ -26,6 +22,16 @@ const COS_PROFILES: Record<string, CoSProfile> = {
     RBiH: { name: 'Jovan Divjak', rank: 'Gen.', title: 'Deputy Commander', tone: 'cautious' },
     HRHB: { name: 'Milivoj Petković', rank: 'Gen.', title: 'Chief of Main Staff', tone: 'aggressive' },
 };
+
+// ── Segment types ───────────────────────────────────────────────────
+
+type TextSegment = { type: 'text'; value: string };
+type LinkSegment = { type: 'link'; label: string; corpsId: string };
+type Segment = TextSegment | LinkSegment;
+type Paragraph = Segment[];
+
+function text(value: string): TextSegment { return { type: 'text', value }; }
+function link(label: string, corpsId: string): LinkSegment { return { type: 'link', label, corpsId }; }
 
 // ── Tone phrases ────────────────────────────────────────────────────
 
@@ -47,37 +53,11 @@ const GREETINGS: Record<CoSProfile['tone'], string[]> = {
     ],
 };
 
-const THREAT_PHRASES: Record<CoSProfile['tone'], (corps: string) => string> = {
-    cautious: (c) => `I am concerned about ${c} — their cohesion is dangerously low. We should consider reorganization.`,
-    precise: (c) => `${c} reports critical cohesion. Force readiness degraded. Recommend reorganization assessment.`,
-    aggressive: (c) => `${c} is in trouble. We need to reinforce them or pull them back — half measures cost more.`,
-};
+function pickPhrase(phrases: string[], turn: number): string {
+    return phrases[turn % phrases.length];
+}
 
-const THIN_FRONT_PHRASES: Record<CoSProfile['tone'], (sector: string) => string> = {
-    cautious: (s) => `Our line at ${s} is dangerously thin. If the enemy probes there, we may not hold.`,
-    precise: (s) => `Sector ${s} is undermanned relative to frontage. Vulnerability: high.`,
-    aggressive: (s) => `${s} is exposed — one push and the line breaks. We need brigades there now.`,
-};
-
-const OP_PHRASES: Record<CoSProfile['tone'], (op: string) => string> = {
-    cautious: (o) => `Operation ${o} awaits your authorization. I recommend reviewing force ratios first.`,
-    precise: (o) => `Operation ${o} has completed preparation. Awaiting GO/NO-GO decision.`,
-    aggressive: (o) => `${o} is ready to launch. The longer we wait, the more the enemy prepares.`,
-};
-
-const EXHAUSTION_PHRASES: Record<CoSProfile['tone'], string> = {
-    cautious: 'War exhaustion is taking its toll. Our offensive capacity is diminishing.',
-    precise: 'War exhaustion levels affecting offensive capability. Tempo reduction advisable.',
-    aggressive: 'The men are tired, but so is the enemy. Push through or lose initiative.',
-};
-
-const STABLE_PHRASES: Record<CoSProfile['tone'], string> = {
-    cautious: 'The situation is stable for now, but we should remain vigilant.',
-    precise: 'No critical issues. All sectors maintaining adequate readiness.',
-    aggressive: 'Things are quiet — too quiet. We should be planning our next move.',
-};
-
-// ── Last-turn events ────────────────────────────────────────────────
+// ── Generator ───────────────────────────────────────────────────────
 
 const BATTLE_PHRASES: Record<CoSProfile['tone'], (won: number, lost: number, total: number) => string> = {
     cautious: (w, l, t) => {
@@ -112,17 +92,11 @@ const TERRITORY_PHRASES: Record<CoSProfile['tone'], (gained: number, lost: numbe
     },
 };
 
-// ── Generator ───────────────────────────────────────────────────────
-
-function pickPhrase(phrases: string[], turn: number): string {
-    return phrases[turn % phrases.length];
-}
-
 export function generateCoSBriefing(
     briefingItems: BriefingItem[],
     state: LoadedGameState,
     faction: string,
-): string[] {
+): Paragraph[] {
     const profile = COS_PROFILES[faction];
     if (!profile) return [];
     const tone = profile.tone;
@@ -131,7 +105,7 @@ export function generateCoSBriefing(
     const criticals = briefingItems.filter(i => i.severity === 'critical');
     const warnings = briefingItems.filter(i => i.severity === 'warning');
 
-    const paragraphs: string[] = [];
+    const paragraphs: Paragraph[] = [];
 
     // § 1 — Last turn events
     const battles = state.latestTurnSummary?.battles ?? [];
@@ -144,7 +118,7 @@ export function generateCoSBriefing(
     const lost = netChange < 0 ? -netChange : 0;
 
     if (factionBattles.length > 0 || gained > 0 || lost > 0) {
-        const lastTurnParts: string[] = [];
+        const segments: Segment[] = [];
         if (factionBattles.length > 0) {
             const won = factionBattles.filter(b =>
                 (b.attacker_faction === faction && (b.outcome === 'decisive_victory' || b.outcome === 'victory' || b.outcome === 'costly_victory')) ||
@@ -154,40 +128,97 @@ export function generateCoSBriefing(
                 (b.attacker_faction === faction && (b.outcome === 'repulsed' || b.outcome === 'catastrophic')) ||
                 (b.defender_faction === faction && (b.outcome === 'decisive_victory' || b.outcome === 'victory' || b.outcome === 'costly_victory')),
             ).length;
-            lastTurnParts.push(BATTLE_PHRASES[tone](won, lost_b, factionBattles.length));
+            segments.push(text(BATTLE_PHRASES[tone](won, lost_b, factionBattles.length)));
         }
         const terrText = TERRITORY_PHRASES[tone](gained, lost);
-        if (terrText) lastTurnParts.push(terrText);
-        if (lastTurnParts.length > 0) paragraphs.push(lastTurnParts.join(' '));
+        if (terrText) {
+            if (segments.length > 0) segments.push(text(' '));
+            segments.push(text(terrText));
+        }
+        if (segments.length > 0) paragraphs.push(segments);
     }
 
-    // § 2 — Current situation
+    // § 2 — Current situation with linked entities
     if (criticals.length === 0 && warnings.length === 0) {
-        paragraphs.push(`${pickPhrase(GREETINGS[tone], turn)} ${STABLE_PHRASES[tone]}`);
+        paragraphs.push([
+            text(pickPhrase(GREETINGS[tone], turn) + ' '),
+            text(tone === 'cautious'
+                ? 'The situation is stable for now, but we should remain vigilant.'
+                : tone === 'precise'
+                    ? 'No critical issues. All sectors maintaining adequate readiness.'
+                    : 'Things are quiet — too quiet. We should be planning our next move.'),
+        ]);
     } else {
-        const sitParts: string[] = [pickPhrase(GREETINGS[tone], turn)];
+        const segments: Segment[] = [text(pickPhrase(GREETINGS[tone], turn) + ' ')];
+        let count = 0;
 
         const cohesionItem = criticals.find(i => i.category === 'cohesion');
-        if (cohesionItem) {
-            sitParts.push(THREAT_PHRASES[tone](cohesionItem.title.split(' cohesion')[0]));
+        if (cohesionItem && count < 3) {
+            const corpsName = cohesionItem.title.split(' cohesion')[0];
+            const corpsId = cohesionItem.corpsId;
+            if (tone === 'cautious') {
+                segments.push(text('I am concerned about '));
+                segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
+                segments.push(text(' — their cohesion is dangerously low. We should consider reorganization. '));
+            } else if (tone === 'precise') {
+                segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
+                segments.push(text(' reports critical cohesion. Force readiness degraded. Recommend reorganization. '));
+            } else {
+                segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
+                segments.push(text(' is in trouble. We need to reinforce them or pull them back. '));
+            }
+            count++;
         }
 
         const opItem = criticals.find(i => i.category === 'operations');
-        if (opItem) {
-            sitParts.push(OP_PHRASES[tone](opItem.title.replace(/^Op /, '').replace(/ awaits.*/, '')));
+        if (opItem && count < 3) {
+            const opName = opItem.title.replace(/^Op /, '').replace(/ awaits.*/, '');
+            const corpsId = opItem.corpsId;
+            if (tone === 'cautious') {
+                segments.push(text('Operation '));
+                segments.push(corpsId ? link(opName, corpsId) : text(opName));
+                segments.push(text(' awaits your authorization. I recommend reviewing force ratios first. '));
+            } else if (tone === 'precise') {
+                segments.push(text('Operation '));
+                segments.push(corpsId ? link(opName, corpsId) : text(opName));
+                segments.push(text(' has completed preparation. Awaiting GO/NO-GO decision. '));
+            } else {
+                segments.push(corpsId ? link(opName, corpsId) : text(opName));
+                segments.push(text(' is ready to launch. The longer we wait, the more the enemy prepares. '));
+            }
+            count++;
         }
 
         const thinItem = warnings.find(i => i.category === 'defense');
-        if (thinItem) {
-            sitParts.push(THIN_FRONT_PHRASES[tone](thinItem.title.replace(/^Thin front: /, '')));
+        if (thinItem && count < 3) {
+            const sectorName = thinItem.title.replace(/^Thin front: /, '');
+            const corpsId = thinItem.corpsId;
+            if (tone === 'cautious') {
+                segments.push(text('Our line at '));
+                segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
+                segments.push(text(' is dangerously thin. If the enemy probes there, we may not hold. '));
+            } else if (tone === 'precise') {
+                segments.push(text('Sector '));
+                segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
+                segments.push(text(' is undermanned relative to frontage. Vulnerability: high. '));
+            } else {
+                segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
+                segments.push(text(' is exposed — one push and the line breaks. We need brigades there now. '));
+            }
+            count++;
         }
 
         const exhaustionItem = warnings.find(i => i.category === 'exhaustion');
-        if (exhaustionItem) {
-            sitParts.push(EXHAUSTION_PHRASES[tone]);
+        if (exhaustionItem && count < 3) {
+            segments.push(text(
+                tone === 'cautious' ? 'War exhaustion is taking its toll. Our offensive capacity is diminishing.'
+                    : tone === 'precise' ? 'War exhaustion levels affecting offensive capability. Tempo reduction advisable.'
+                        : 'The men are tired, but so is the enemy. Push through or lose initiative.',
+            ));
+            count++;
         }
 
-        paragraphs.push(sitParts.slice(0, 3).join(' '));
+        paragraphs.push(segments);
     }
 
     return paragraphs;
@@ -199,9 +230,10 @@ interface ChiefOfStaffBriefingProps {
     briefingItems: BriefingItem[];
     gameState: LoadedGameState;
     faction: string;
+    onCorpsClick?: (corpsId: string) => void;
 }
 
-export function ChiefOfStaffBriefing({ briefingItems, gameState, faction }: ChiefOfStaffBriefingProps) {
+export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorpsClick }: ChiefOfStaffBriefingProps) {
     const profile = COS_PROFILES[faction];
     const turn = gameState.turn ?? 0;
 
@@ -228,11 +260,27 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction }: Chie
                 <div className="text-[8px] text-neutral-500 italic">{profile.title}</div>
             </div>
 
-            {/* Body — missive text */}
+            {/* Body — missive text with inline links */}
             <div className="px-3 py-2 flex-1 overflow-y-auto">
-                {paragraphs.map((p, i) => (
+                {paragraphs.map((segments, i) => (
                     <p key={i} className="text-[10px] text-neutral-700 leading-relaxed mb-2 last:mb-0" style={{ fontFamily: 'Georgia, serif' }}>
-                        {p}
+                        {i === 0 && <>&ldquo;</>}
+                        {segments.map((seg, j) =>
+                            seg.type === 'link' && onCorpsClick ? (
+                                <button
+                                    key={j}
+                                    type="button"
+                                    onClick={() => onCorpsClick(seg.corpsId)}
+                                    className="underline decoration-amber-700/40 hover:decoration-amber-700 text-amber-900 font-semibold hover:text-amber-700 transition-colors cursor-pointer"
+                                    style={{ fontFamily: 'Georgia, serif' }}
+                                >
+                                    {seg.label}
+                                </button>
+                            ) : (
+                                <span key={j}>{(seg as TextSegment).value}</span>
+                            ),
+                        )}
+                        {i === paragraphs.length - 1 && <>&rdquo;</>}
                     </p>
                 ))}
             </div>

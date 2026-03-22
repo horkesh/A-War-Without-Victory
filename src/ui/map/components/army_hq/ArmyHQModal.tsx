@@ -43,9 +43,7 @@ export function ArmyHQModal() {
     const setActiveTab = useGameStore((s) => s.setArmyHQTab);
     const expandedCorpsId = useGameStore((s) => s.armyHQExpandedCorpsId);
     const setExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
-    const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
-    const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
-    const setIsOperationsPanelOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
+    // These remain available for future use but briefing navigation now stays inside HQ
 
     useEffect(() => {
         if (!open) return;
@@ -125,22 +123,30 @@ export function ArmyHQModal() {
         }
     }, [ipc, data]);
 
+    const navigateToCorps = useCallback((corpsId: string) => {
+        setActiveTab('briefing');
+        setExpandedCorpsId(corpsId);
+    }, [setActiveTab, setExpandedCorpsId]);
+
     const handleBriefingNavigate = useCallback((target: BriefingTarget) => {
         switch (target.type) {
             case 'corps':
-                setExpandedCorpsId(target.corpsId);
+                navigateToCorps(target.corpsId);
                 break;
-            case 'sector':
-                setOpen(false);
-                setSelectedCorpsFrontSectorId(target.sectorId);
+            case 'sector': {
+                // Find which corps owns this sector and expand it
+                const sector = data?.sectors.find(s => s.sector_id === target.sectorId);
+                if (sector) navigateToCorps(sector.corps_id);
                 break;
-            case 'operation':
-                setOpen(false);
-                setSelectedOperationKey(target.operationKey);
-                setIsOperationsPanelOpen(true);
+            }
+            case 'operation': {
+                // operationKey is "corpsId|opName" — extract corps
+                const corpsId = target.operationKey.split('|')[0];
+                if (corpsId) navigateToCorps(corpsId);
                 break;
+            }
         }
-    }, [setOpen, setExpandedCorpsId, setSelectedCorpsFrontSectorId, setSelectedOperationKey, setIsOperationsPanelOpen]);
+    }, [data, navigateToCorps]);
 
     if (!open || !faction || !state || !data) return null;
 
@@ -269,6 +275,7 @@ export function ArmyHQModal() {
                                         briefingItems={data.briefingItems}
                                         gameState={state}
                                         faction={faction}
+                                        onCorpsClick={navigateToCorps}
                                     />
 
                                     {/* Army Crest */}
