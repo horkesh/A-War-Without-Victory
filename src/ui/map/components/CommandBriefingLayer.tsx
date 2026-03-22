@@ -7,16 +7,16 @@ interface CommandBriefingLayerProps {
   onOpenEnclaves: () => void;
 }
 
-const SEVERITY_CLASSES: Record<CommandBriefingItemView['severity'], string> = {
-  critical: 'border-red-500/60 bg-red-950/35',
-  warning: 'border-amber-400/50 bg-amber-950/25',
-  info: 'border-sky-400/40 bg-sky-950/20',
+const SEVERITY_DOT: Record<CommandBriefingItemView['severity'], string> = {
+  critical: 'bg-red-500',
+  warning: 'bg-amber-400',
+  info: 'bg-sky-400',
 };
 
-const SEVERITY_LABELS: Record<CommandBriefingItemView['severity'], string> = {
-  critical: 'Critical',
-  warning: 'Warning',
-  info: 'Info',
+const SEVERITY_TEXT: Record<CommandBriefingItemView['severity'], string> = {
+  critical: 'text-red-300',
+  warning: 'text-amber-300',
+  info: 'text-sky-300',
 };
 
 export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandBriefingLayerProps) {
@@ -80,60 +80,50 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
     }
   };
 
+  const devMode = useGameStore((state) => state.devMode);
+  const topOffset = devMode ? 'top-[4.75rem]' : 'top-[3.25rem]';
+
   return (
-    <div className="absolute top-14 left-[19rem] right-4 z-20 pointer-events-none">
-      <section className="pointer-events-auto rounded-lg border border-panel-border bg-panel-bg/92 shadow-xl backdrop-blur-sm">
-        <div className="flex items-center justify-between gap-3 border-b border-panel-border px-4 py-2.5">
-          <div>
-            <div className="font-sans text-[10px] uppercase tracking-[0.25em] text-accent-gold font-semibold">
-              Command Briefing
-            </div>
-            <div className="text-sm text-text-primary font-semibold">
-              {commandBriefing.headline}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wide text-text-secondary">
-            <span className="rounded border border-panel-border bg-panel-card px-2 py-1">
-              Critical {commandBriefing.criticalCount}
-            </span>
-            <span className="rounded border border-panel-border bg-panel-card px-2 py-1">
-              Queue {commandBriefing.pendingCount}
-            </span>
-            <button
-              type="button"
-              onClick={() => { lastDismissedTurn.current = turn ?? null; setDismissed(true); }}
-              className="ml-2 rounded border border-panel-border bg-panel-card px-2 py-1 text-text-secondary hover:text-text-primary hover:border-white/20 transition-colors"
-            >
-              DISMISS
-            </button>
-          </div>
+    <div className={`fixed ${topOffset} left-[19rem] right-0 z-20 pointer-events-none`}>
+      <div className="pointer-events-auto bg-[#0c0c18]/95 border-b border-white/8 px-3 py-1.5">
+        {/* Header line */}
+        <div className="flex items-center gap-3 mb-1">
+          <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-amber-400/80">
+            BRIEFING
+          </span>
+          <span className="text-[9px] font-mono text-white/30">
+            {commandBriefing.headline}
+          </span>
+          <button
+            type="button"
+            onClick={() => { lastDismissedTurn.current = turn ?? null; setDismissed(true); }}
+            className="ml-auto text-[9px] font-mono uppercase tracking-wide text-white/30 hover:text-white/60 transition-colors"
+          >
+            DISMISS
+          </button>
         </div>
-        <div className="grid grid-cols-1 gap-2 p-3 xl:grid-cols-3">
+        {/* Item rows */}
+        <div className="flex flex-wrap gap-x-4 gap-y-0.5">
           {commandBriefing.items.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => handleOpenItem(item)}
-              className={`rounded-lg border p-3 text-left transition-colors hover:bg-panel-hover ${SEVERITY_CLASSES[item.severity]}`}
+              className="flex items-center gap-1.5 py-0.5 group"
             >
-              <div className="mb-1 flex items-center justify-between gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-secondary">
-                  {SEVERITY_LABELS[item.severity]}
-                </span>
-                <span className="text-[10px] uppercase tracking-wide text-accent-gold">
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${SEVERITY_DOT[item.severity]}`} />
+              <span className={`text-[11px] font-semibold ${SEVERITY_TEXT[item.severity]} group-hover:text-white transition-colors`}>
+                {item.title}
+              </span>
+              {item.actionLabel && (
+                <span className="text-[9px] font-mono uppercase text-amber-400/60 group-hover:text-amber-400 transition-colors">
                   {item.actionLabel}
                 </span>
-              </div>
-              <div className="text-sm font-semibold text-text-primary">
-                {item.title}
-              </div>
-              <div className="mt-1 text-xs text-text-secondary">
-                {item.detail}
-              </div>
+              )}
             </button>
           ))}
         </div>
-      </section>
+      </div>
     </div>
   );
 }
