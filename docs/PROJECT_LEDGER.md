@@ -3,6 +3,37 @@
 **Last Updated:** 2026-03-22
 **Status:** **v0.5.4** (v0.6.0-beta complete, pending version bump). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS. War-or-Game SIGNED OFF.** v0.6.0: emergent event infrastructure + 1992 metagame (3 foundational decisions, 19 events, ICTY-sourced). Next: event decision UI, dimension visualization, v0.6.1 calibration framework.
 
+## [2026-03-22] v0.6.0-beta — 1992 Event Migration + Foundational Decisions
+
+**Scope:** Replace all 18 1992 events with emergent equivalents. Add 3 ICTY-sourced foundational faction decisions. 7 phases, 6 commits.
+
+**Phase 1 — Cut 4 wallpaper events:** un_convoys, bihac_isolation, posavina_corridor_fighting, mostar_liberation (reimplemented Phase 6).
+
+**Phase 2 — Tweaked 6 events:** 4 barracks (dimension_shifts: military_credibility +5 RBiH, sets_flags per city), operation_corridor (territorial_legitimacy +10 RS, corridor_secured flag), jajce_falls (internal_cohesion -10 RBiH/HRHB, jajce_fell flag).
+
+**Phase 3 — Rewrote 8 calendar→emergent:** arms_embargo (turn window 3-6 + pressure), sarajevo_siege (RS territory >45% condition + pressure), srebrenica_enclave (RS territory >48%), hvo_arbih_tensions (alliance <0.7), london_conference (war_crimes>2 AND patron_pressure>15, enables vance_owen), drina_cleansing (RS territory >45%), concentration_camps (prijedor + war_crimes>3, enables london_conference), jna_withdrawal (added dimensions).
+
+**Phase 4 — 2 new RS decision events:**
+- Drina Cleansing Decision: "The Drina Valley Question" (systematic vs restrained). Gated on rs_strategic_goals=all_six AND RS territory >45%. Sets drina_cleansing_intensity flag. international_standing -25 (systematic) or -5 (restrained).
+- Camps Revealed REWRITE: "The World Is Watching" (deny/obstruct/cooperate). 3 options with distinct dimension/flag consequences. Enables london_conference chain.
+
+**Phase 5 — 3 foundational decisions (ICTY-sourced):**
+- RS Strategic Goals: "The Assembly Speaks" (w1-3). Mladić's genocide warning. All Six / Selective / Aggressive. Sets rs_strategic_goals flag. ICTY: Karadžić IT-95-5/18 paras 3521, 3524; ICJ para 372.
+- RBiH State Identity: "What Is Bosnia?" (w2-5). Civic / Bosniak National / Pragmatic. Sets rbih_state_identity flag. ARBiH 70/18/12 ethnic composition.
+- HRHB Political Goal: "What Is Herceg-Bosna?" (w3-7). United Front / Croat Republic / Strategic Ambiguity. Sets hrhb_political_goal flag. ICTY: Kordić para 491, Prlić JCE.
+
+**Phase 6 — Mostar liberation reimplemented:** Condition-gated (RS <30% Mostar), dimension_shifts, mostar_liberated flag.
+
+**Phase 7 — Calibration:** n1024 = 93.1% area-weighted. 6/6 benchmarks PASS. 19 events fired in correct sequence. War-or-Game SIGNED OFF.
+
+**/simplify review:** 6 fixes applied — clamp import (utils/math), event_constraints helpers wired (was inline duplicate), munFromOsid (was inline split), EventConstraints type import (was duplicate), emergency posture BUG fix (kind==='corps' matched nothing), CANONICAL_FACTIONS shared export.
+
+**ICTY research:** 3 documents in docs/research/ and docs/50_research/ (RS 410 lines, RBiH 280, HRHB 360). Primary sources: Karadžić IT-95-5/18, Mladić IT-09-92, Krstić IT-98-33, Kordić IT-95-14/2, Prlić IT-04-74.
+
+**19 events in 1992 set.** Calibration: 93.1% (zero regression from baseline). **Determinism:** All new code deterministic.
+
+**Files:** data/scenarios/events/war_1992.json, src/sim/events/ (7 modules), src/sim/combat/bot_corps_directives.ts, src/state/game_state.ts, src/state/negotiation_types.ts, src/ui/map/components/army_hq/ArmyHQModal.tsx.
+
 ## [2026-03-22] v0.6.0-alpha — Emergent Event System Infrastructure (Night Shift)
 
 **Scope:** Build engine foundation for the v0.6.0 emergent event system. 17 tasks across 2 tracks (13 engine + 3 UI + 1 verification). 8 commits.
