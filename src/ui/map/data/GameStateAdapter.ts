@@ -1365,7 +1365,9 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     const rbih_hrhb_war_earliest_turn = typeof meta?.rbih_hrhb_war_earliest_turn === 'number' ? meta.rbih_hrhb_war_earliest_turn : undefined;
     const war_alliance_rbih_hrhb = typeof state.political.war_alliance_rbih_hrhb === 'number' ? state.political.war_alliance_rbih_hrhb : undefined;
-    const playerFaction = (meta?.player_faction as string | null | undefined) ?? null;
+    // Default to RS in dev mode when no player faction set (headless scenario runs)
+    const rawPlayerFaction = (meta?.player_faction as string | null | undefined) ?? null;
+    const playerFaction = rawPlayerFaction ?? (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1' ? 'RS' : null) ?? (typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'RS' : null);
 
     const rawDesiredCap = state.military.brigade_desired_aor_cap as Record<string, number> | undefined;
     const brigadeDesiredAoRCap: Record<string, number> | undefined =

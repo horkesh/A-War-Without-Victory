@@ -135,7 +135,7 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                     <button
                         onClick={handleOpenHQ}
                         className="group relative flex items-center gap-3 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-all"
-                        title={`${armyName ?? 'Army'} HQ [H]`}
+                        aria-label={`${armyName ?? 'Army'} HQ [H]`}
                     >
                         {crestUrl && (
                             <img

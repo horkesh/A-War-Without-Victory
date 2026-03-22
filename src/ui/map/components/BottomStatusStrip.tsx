@@ -77,7 +77,6 @@ export function BottomStatusStrip() {
               key={id}
               type="button"
               onClick={() => setMapMode(id)}
-              title={`${label} (${key})`}
               className={`px-2 py-1 rounded text-[9px] font-mono tracking-widest transition-all duration-200 uppercase ${active
                 ? 'bg-accent-gold/20 text-accent-gold shadow-glow-sm font-bold'
                 : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
@@ -116,7 +115,7 @@ export function BottomStatusStrip() {
       <div className="hidden lg:flex items-center gap-2.5 px-2 shrink-0 text-[10px] font-mono tabular-nums">
         {/* Turn counter */}
         {loadedGameState && (
-          <span className="flex items-center gap-1 text-text-secondary" title={`Turn ${loadedGameState.turn}${loadedGameState.metadata?.date ? ` (${loadedGameState.metadata.date})` : ''}`}>
+          <span className="flex items-center gap-1 text-text-secondary">
             <span className="text-text-primary font-semibold">w{loadedGameState.turn}</span>
             {loadedGameState.metadata?.date && (
               <span className="text-text-secondary/60">{loadedGameState.metadata.date}</span>
@@ -128,7 +127,7 @@ export function BottomStatusStrip() {
 
         {/* Active operations */}
         {loadedGameState?.operations && loadedGameState.operations.length > 0 && (
-          <span className="flex items-center gap-1 text-accent-gold" title={`${loadedGameState.operations.length} active operation${loadedGameState.operations.length !== 1 ? 's' : ''}`}>
+          <span className="flex items-center gap-1 text-accent-gold">
             <Icon name="operation" size={10} color="#c4a35a" />
             <span>{loadedGameState.operations.length}</span>
           </span>
@@ -140,7 +139,7 @@ export function BottomStatusStrip() {
           const status = a <= 0.10 ? 'WAR' : a <= 0.20 ? 'MOBILIZING' : a <= 0.45 ? 'STRAINED' : 'ALLIED';
           const color = status === 'WAR' ? '#e05050' : status === 'MOBILIZING' ? '#d4a055' : status === 'STRAINED' ? '#d4d455' : '#50b850';
           return (
-            <span className="flex items-center gap-1" title={`RBiH-HRHB Alliance: ${(a * 100).toFixed(0)}%`}>
+            <span className="flex items-center gap-1">
               <Icon name="balanced" size={10} color={color} />
               <span style={{ color }} className="font-bold uppercase text-[9px] tracking-wider">{status}</span>
             </span>
@@ -160,11 +159,6 @@ export function BottomStatusStrip() {
               key={key}
               type="button"
               onClick={() => t.set(!t.value)}
-              title={
-                key === 'municipalityBordersVisible'
-                  ? 'Toggle municipality boundaries: mun-borders (adm3 1990) + osid-control-outline'
-                  : `Toggle ${label}`
-              }
               className={`px-2 py-1 rounded text-[9px] font-mono tracking-[0.1em] transition-all duration-200 uppercase ${t.value
                 ? 'bg-interactive/10 text-text-primary border border-interactive/30'
                 : 'text-text-secondary/50 hover:text-text-secondary'
