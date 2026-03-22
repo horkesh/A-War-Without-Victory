@@ -10,6 +10,7 @@
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { NegotiationCapital, NegotiationState } from '../../state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
+import { initializeStrategicDimensions } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
@@ -50,6 +51,11 @@ export function computeNegotiationCapital(state: GameState): void {
 
     const neg = state.military.negotiation;
 
+    // Initialize strategic dimensions if missing (existing saves)
+    if (!neg.strategic_dimensions) {
+        neg.strategic_dimensions = initializeStrategicDimensions();
+    }
+
     for (const faction of CANONICAL_FACTIONS) {
         if (!neg.capital[faction]) {
             neg.capital[faction] = createEmptyCapital();
@@ -75,6 +81,7 @@ function initializeNegotiationState(state: GameState): NegotiationState {
         capital,
         patron_relationships,
         peace_plan_history: [],
+        strategic_dimensions: initializeStrategicDimensions(),
     };
 }
 
