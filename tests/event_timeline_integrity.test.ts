@@ -103,8 +103,8 @@ describe('Event timeline historical integrity', () => {
         expect(all1992.find((e: any) => e.id === 'first_un_safe_areas_1992')).toBeUndefined();
     });
 
-    it('Mostar liberation event cut in v0.6.0 Phase 1 (will be reimplemented in Phase 6)', () => {
-        expect(all1992.find((e: any) => e.id === 'mostar_liberation_1992')).toBeUndefined();
+    it('Mostar liberation event reimplemented in v0.6.0 Phase 6', () => {
+        expect(all1992.find((e: any) => e.id === 'mostar_liberation_1992')).toBeDefined();
     });
 
     it('all events have required fields', () => {
@@ -115,7 +115,7 @@ describe('Event timeline historical integrity', () => {
         }
     });
 
-    it('total event count is 43', () => {
-        expect(allEvents.length).toBe(43);
+    it('total event count is 48', () => {
+        expect(allEvents.length).toBe(48);
     });
 });
