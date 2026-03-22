@@ -85,7 +85,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
 
   return (
     <div className={`fixed ${topOffset} left-[19rem] right-0 z-20 pointer-events-none`}>
-      <div className="pointer-events-auto bg-[#0c0c18]/95 border-b border-white/8 px-3 py-1.5">
+      <div className="pointer-events-auto bg-[#0c0c18]/70 backdrop-blur-md border-b border-white/10 px-3 py-1.5">
         {/* Header line */}
         <div className="flex items-center gap-3 mb-1">
           <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-amber-400/80">
