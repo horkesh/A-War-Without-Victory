@@ -84,39 +84,39 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
   const topOffset = devMode ? 'top-[4.75rem]' : 'top-[3.25rem]';
 
   return (
-    <div className={`fixed ${topOffset} left-[19rem] right-0 z-20 pointer-events-none`}>
-      <div className="pointer-events-auto bg-[#0c0c18]/70 backdrop-blur-md border-b border-white/10 px-3 py-1.5">
+    <div className={`fixed ${topOffset} left-[19rem] right-4 z-20 pointer-events-none`}>
+      <div className="pointer-events-auto mt-2 rounded-lg bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl px-4 py-2.5">
         {/* Header line */}
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-2">
           <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-amber-400/80">
-            BRIEFING
+            COMMAND BRIEFING
           </span>
-          <span className="text-[9px] font-mono text-white/30">
+          <span className="text-[9px] font-mono text-white/40">
             {commandBriefing.headline}
           </span>
           <button
             type="button"
             onClick={() => { lastDismissedTurn.current = turn ?? null; setDismissed(true); }}
-            className="ml-auto text-[9px] font-mono uppercase tracking-wide text-white/30 hover:text-white/60 transition-colors"
+            className="ml-auto text-[9px] font-mono uppercase tracking-wide text-white/30 hover:text-white/60 transition-colors px-2 py-0.5 rounded hover:bg-white/5"
           >
             DISMISS
           </button>
         </div>
-        {/* Item rows */}
-        <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+        {/* Item pills */}
+        <div className="flex flex-wrap gap-2">
           {commandBriefing.items.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => handleOpenItem(item)}
-              className="flex items-center gap-1.5 py-0.5 group"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-black/40 backdrop-blur-sm border border-white/8 hover:bg-black/50 hover:border-white/15 transition-all group"
             >
               <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${SEVERITY_DOT[item.severity]}`} />
               <span className={`text-[11px] font-semibold ${SEVERITY_TEXT[item.severity]} group-hover:text-white transition-colors`}>
                 {item.title}
               </span>
               {item.actionLabel && (
-                <span className="text-[9px] font-mono uppercase text-amber-400/60 group-hover:text-amber-400 transition-colors">
+                <span className="text-[9px] font-mono uppercase text-amber-400/50 group-hover:text-amber-400 transition-colors">
                   {item.actionLabel}
                 </span>
               )}
