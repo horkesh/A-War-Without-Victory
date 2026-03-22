@@ -6,101 +6,97 @@
 
 ## Plans to Execute
 
-Execute in order. Complete each plan fully before starting the next. Run `/simplify` between plans.
+Execute in order. Complete each plan fully before starting the next. Run `/simplify` between plans. Keep going until all plans are done or you're blocked.
 
-### Plan 1: Game Chronicle (v0.6.2 scope, ~3-4 hrs)
-**Plan:** `docs/plans/2026-03-22-game-chronicle-impl-plan.md`
-**Design spec:** `docs/plans/2026-03-22-game-chronicle-design.md`
-**Tasks:** 6
+| # | Plan | Scope | Tasks | Hours | Plan File |
+|---|------|-------|-------|-------|-----------|
+| 1 | **Game Chronicle** | v0.6.2 | 6 | 3-4 | `docs/plans/2026-03-22-game-chronicle-impl-plan.md` |
+| 2 | **AI Commander Events** | v0.6.2 | 3 | 2-3 | `docs/plans/2026-03-22-ai-commander-events-impl-plan.md` |
+| 3 | **Dayton Dimension Merge** | v0.6.3 | 5 | 2-3 | `docs/plans/2026-03-22-dayton-dimension-merge-impl-plan.md` |
+| 4 | **Calibration Framework** | v0.6.1 | 3 | 1-2 | `docs/plans/2026-03-22-calibration-framework-impl-plan.md` |
+| 5 | **HQ Deep Drill-Down** | v0.6.2 | 4 | 2-3 | `docs/plans/2026-03-22-hq-deep-drill-impl-plan.md` |
+| 6 | **Chronicle Wrapped** | v0.6.3 | 4 | 2-3 | `docs/plans/2026-03-22-chronicle-wrapped-impl-plan.md` |
+| 7 | **Historical Essays** | v0.6.4 | 3 | 2-3 | `docs/plans/2026-03-22-historical-essays-impl-plan.md` |
 
-### Plan 2: AI Commander + Events Integration (v0.6.2 scope, ~2-3 hrs)
-**Plan:** `docs/plans/2026-03-22-ai-commander-events-impl-plan.md`
-**Audit:** `docs/plans/2026-03-22-integration-audit-findings.md` §2
-**Tasks:** 3
+**Total: 28 tasks, ~15-21 hours. Do as many as possible before morning.**
 
-### Plan 3: Dayton Dimension Merge (v0.6.3 scope, ~2-3 hrs)
-**Plan:** `docs/plans/2026-03-22-dayton-dimension-merge-impl-plan.md`
-**Design spec:** `docs/plans/2026-03-22-dayton-dimension-merge-design.md`
-**Tasks:** 5
+## Execution Order & Dependencies
 
-**Total: 14 tasks, ~7-10 hours.**
-
-## Execution Order
-
-### Plan 1: Chronicle (6 tasks)
 ```
-Task 1 (engine snapshots) ─────────────→ Task 5 (spine) ─┐
-Task 2 (entry generator) → Task 4 (cards) ──────────────→ Task 6 (overlay)
-Task 3 (store + toolbar) ────────────────────────────────→ Task 6 (overlay)
+Plan 1 (Chronicle) ────────────────→ Plan 6 (Wrapped) — needs Chronicle
+Plan 2 (AI Commander) ─── independent
+Plan 3 (Dayton Merge) ─── independent (run 40w after)
+Plan 4 (Calibration) ──── should run AFTER Plan 3 (baseline includes new dims)
+Plan 5 (HQ Deep Drill) ── independent
+Plan 7 (Essays) ────────── independent (needs ANTHROPIC_API_KEY from .env)
 ```
-Tasks 1, 2, 3 parallelizable.
 
-### /simplify gate
+**Recommended order:** 1 → 2 → 3 → 4 → 5 → 6 → 7
 
-### Plan 2: AI Commander Events (3 tasks)
-```
-Task 1 (prompt enrichment) — independent
-Task 2 (event decisions) — independent
-Task 3 (validation) — independent
-```
-All 3 parallelizable.
-
-### /simplify gate
-
-### Plan 3: Dayton Merge (5 tasks)
-```
-Task 1 → Task 2 → Task 3 → Task 4
-                          ↘ Task 5
-```
-Sequential except Task 5 (UI) can parallel with Task 4.
-
-### Final verification
-- `npx tsc --noEmit`
-- `npx vitest run`
-- `npm run desktop:map:build`
-- `npm run sim:scenario:run:40w` — verify zero regression
+- Plan 6 depends on Plan 1 (Chronicle must exist for Wrapped)
+- Plan 4 should come after Plan 3 (freeze baseline AFTER dimension merge)
+- Everything else is independent
 
 ## Special Instructions
 
-- **Plan 1 Task 1 is the only engine change in Plan 1.** Everything else is UI.
-- **Plan 2 is engine-only.** AI Commander code, no UI changes.
-- **Plan 3 touches both engine and UI.** Task 3 renames a type across many files — be careful.
 - **Determinism is sacred.** Sorted iteration via `strictCompare`. No Math.random().
 - **Create Chronicle files in `src/ui/map/components/chronicle/`** — new subdirectory.
 - **Run 40w scenario after Plan 3 Task 4** — dimension merge changes negotiation computation.
-- **AI Commander integration is opt-in** — no calibration impact (formula bot is default).
-- **Read `docs/life_lessons.md` at startup.** Write new lessons under `## Night Shift Lessons` if anything goes wrong.
+- **Plan 4 (Calibration) freezes the baseline AFTER Plan 3** — otherwise baseline is stale.
+- **Plan 7 (Essays) uses the Anthropic API key from `.env`** — read it with `process.env.ANTHROPIC_API_KEY` or `require('dotenv')`. Generate a test batch of 5 first, review quality, then generate all 100.
+- **ArmyDetail.tsx is already retired.** Do NOT archive it again. The OOB Sidebar (left Command panel) STAYS.
+- **Read `docs/life_lessons.md` at startup.** Write new lessons under `## Night Shift Lessons`.
+- **Run `/simplify` between each plan.**
 
 ## DO NOT Touch
 
 - `data/scenarios/events/` — no event definition changes
-- `.env` file — contains rotated API keys
+- `.env` file — read but don't modify
 - `docs/10_canon/FORAWWV.md` — never auto-edit
+- OOB Sidebar / Command panel — stays as-is
 - Any worktree files
 
 ## Pre-Made Architectural Decisions
 
-### Chronicle
-1. Full-screen overlay (z-1000), not inside Army HQ
-2. Entry points: toolbar button + clickable date + C key
-3. generateChronicleEntries() is pure function, no IPC
-4. Spine is CSS (not canvas), newest at top
-5. 6 card types with distinct border colors
-6. Wrapped (game-end) NOT in scope
+### Chronicle (Plan 1)
+- Full-screen overlay (z-1000), not inside Army HQ
+- Entry points: toolbar button + clickable date + C key
+- Spine is CSS (not canvas), newest at top
+- 6 card types with distinct border colors
+- Wrapped NOT in scope for Plan 1
 
-### AI Commander Events
-1. Prompt enrichment: add fired event titles, aggression mods, constraints to army/corps prompts
-2. Event decisions: `generateEventDecision()` with personality, JSON output, fallback to formula
-3. Validation: reject illegal decisions (forced stance, operation blocks), fallback to formula
-4. Model: claude-haiku-4-5-20251001 for event decisions (cheap, fast)
+### AI Commander Events (Plan 2)
+- Enrich army/corps prompts with event context
+- generateEventDecision() with personality, JSON output, fallback to formula
+- Model: claude-haiku-4-5-20251001 for event decisions
 
-### Dayton Merge
-1. 6 strategic dimensions = single source of truth
-2. base_value from state, event_modifier from choices, effective_value = clamp(base+mod, 0, 100)
-3. NegotiationCapital → NegotiationBreakdown (raw stats only)
-4. DIMENSION_WEIGHTS replaces CAPITAL_WEIGHTS (6-dim, faction-specific)
-5. Pipeline: compute-dimension-bases AFTER evaluate-events
-6. UI: composite bar + weight emphasis + tooltips
+### Dayton Merge (Plan 3)
+- 6 strategic dimensions = single source of truth
+- NegotiationCapital → NegotiationBreakdown (raw stats only)
+- DIMENSION_WEIGHTS replaces CAPITAL_WEIGHTS
+- Pipeline: compute-dimension-bases AFTER evaluate-events
+
+### Calibration (Plan 4)
+- Freeze baseline AFTER Plan 3 (includes new dimension computation)
+- npm run calibrate:40w = run + compare + report
+
+### HQ Deep Drill (Plan 5)
+- Expand existing sections (OrbatSection, OperationsSection, SectorsSection)
+- No new components — enhance what's there
+- ArmyDetail already retired, don't touch
+
+### Wrapped (Plan 6)
+- Depends on Chronicle (Plan 1) being implemented
+- 10-slide cinematic, SpiderChart for final dimensions
+- generateWrappedSlides() is pure analysis function
+- Trigger: "VIEW YOUR WAR" button in GameOverModal
+
+### Essays (Plan 7)
+- Sonnet-generated at dev time, ~$5-10 total cost
+- Generate test batch of 5 first, review, then all 100
+- Stored as JSON in data/scenarios/essays/
+- Unlock state from fired_event_ids
+- No runtime API calls
 
 ## Build State
 
@@ -108,14 +104,22 @@ Sequential except Task 5 (UI) can parallel with Task 4.
 - vitest: 1317 tests, 111 suites
 - desktop:map:build: passes
 - Calibration: n1024, 93.1% area-weighted
-- Last commit: 1d6e054
+- Last commit: 244e4ba
+
+## Design Specs (read before implementing)
+
+| Plan | Design Spec |
+|------|-------------|
+| 1, 6 | `docs/plans/2026-03-22-game-chronicle-design.md` |
+| 2 | `docs/plans/2026-03-22-integration-audit-findings.md` §2 |
+| 3 | `docs/plans/2026-03-22-dayton-dimension-merge-design.md` |
 
 ## What Success Looks Like
 
-**Chronicle:** CHRONICLE button + date click + C shortcut → full-screen spine timeline with 6 card types + territory ribbon.
+**Best case (all 7 plans):** 28 tasks done, ~1345 tests, Chronicle + Wrapped + AI Commander Events + Dayton Merge + Calibration Framework + HQ Deep Drill + 100 Essays. Full v0.6.1-v0.6.4 scope complete.
 
-**AI Commander:** Army/corps prompts include event context. generateEventDecision() lets Claude make event choices. Constraint validation rejects illegal decisions.
+**Realistic (Plans 1-5):** 21 tasks done, Chronicle + AI Commander + Dayton + Calibration + HQ Drill. Major infrastructure complete.
 
-**Dayton Merge:** Single unified dimension system. Composite Negotiating Capital score in UI. Dayton reads from DimensionStore. 40w regression: zero.
+**Minimum (Plans 1-3):** 14 tasks done, Chronicle + AI Commander + Dayton. Core v0.6.2-v0.6.3 features.
 
-**All:** tsc clean, vitest green (~1330-1350 tests), desktop:map:build passes, morning report, ledger + napkin updated.
+Morning report in project root. Ledger + napkin updated. Life lessons appended if anything went wrong.
