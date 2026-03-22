@@ -7,10 +7,11 @@
  * Replaces TopToolbar for the "president's desk" metaphor.
  */
 
-import { useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
+import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { formatTurnLabel } from '../utils/formatters';
 import { OfficerEventBadge } from './OfficerEventBadge';
@@ -57,6 +58,39 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
     }, [playerFaction, setSelectedArmyId, setArmyHQOpen]);
 
     const hasAlerts = pendingDecisions > 0 || pressureWarning || pendingOfficerEvents;
+
+    // Dev tools state
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [runIdInput, setRunIdInput] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [saveFlash, setSaveFlash] = useState(false);
+
+    const handleLoadFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setLoading(true);
+        try { await loadSave(JSON.parse(await file.text())); } catch (err) { setLoadError(String(err)); }
+        finally { setLoading(false); if (fileInputRef.current) fileInputRef.current.value = ''; }
+    }, [loadSave, setLoadError]);
+
+    const handleLoadLatest = useCallback(async () => {
+        setLoading(true);
+        try { await loadSave(await loadLatestRunSaveAsText()); } catch (err) { setLoadError(String(err)); }
+        finally { setLoading(false); }
+    }, [loadSave, setLoadError]);
+
+    const handleLoadRun = useCallback(async () => {
+        const id = runIdInput.trim(); if (!id) return;
+        setLoading(true);
+        try { await loadSave(await loadRunFinalSaveAsText(id)); } catch (err) { setLoadError(String(err)); }
+        finally { setLoading(false); }
+    }, [runIdInput, loadSave, setLoadError]);
+
+    const handleSave = useCallback(async () => {
+        if (!ipc.isAvailable) return;
+        try { await ipc.saveGame(); setSaveFlash(true); setTimeout(() => setSaveFlash(false), 1500); }
+        catch (err) { setLoadError(String(err)); }
+    }, [ipc, setLoadError]);
 
     return (
         <>
@@ -149,9 +183,26 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                 </div>
             </div>
 
+            {/* Dev tools strip — compact, below main toolbar */}
+            {devMode && (
+                <div className="fixed top-12 left-0 right-0 z-10 flex items-center gap-2 px-4 py-1 bg-[#0a0a14]/90 border-b border-amber-500/20">
+                    <span className="text-[8px] font-mono text-amber-500/60 uppercase tracking-widest mr-2">DEV</span>
+                    <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">LOAD</button>
+                    <button onClick={handleLoadLatest} disabled={loading} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">LATEST</button>
+                    <input
+                        type="text" value={runIdInput} onChange={(e) => setRunIdInput(e.target.value)}
+                        placeholder="RUN_ID" onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
+                        className="w-20 px-1 py-0.5 text-[9px] font-mono bg-black/40 border border-white/10 rounded text-text-primary focus:border-amber-400/40 focus:outline-none"
+                    />
+                    <button onClick={handleLoadRun} disabled={loading || !runIdInput.trim()} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">SYNC</button>
+                    <button onClick={handleSave} disabled={!loadedGameState || !ipc.isAvailable} className={`px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 border border-white/10 rounded transition-colors disabled:opacity-30 ${saveFlash ? 'text-green-400 border-green-500/30' : 'text-text-secondary hover:text-text-primary hover:border-white/20'}`}>{saveFlash ? 'SAVED!' : 'SAVE'}</button>
+                    <input ref={fileInputRef} type="file" accept=".json" onChange={handleLoadFile} className="hidden" />
+                </div>
+            )}
+
             {/* Error bar */}
             {loadError && (
-                <div className="fixed top-12 left-0 right-0 z-10 bg-red-900/60 backdrop-blur-md border-b border-red-500/30 px-4 py-1 flex items-center justify-between">
+                <div className={`fixed ${devMode ? 'top-[4.5rem]' : 'top-12'} left-0 right-0 z-10 bg-red-900/60 backdrop-blur-md border-b border-red-500/30 px-4 py-1 flex items-center justify-between`}>
                     <span className="text-[10px] font-mono text-red-200 uppercase tracking-widest">
                         {loadError}
                     </span>
