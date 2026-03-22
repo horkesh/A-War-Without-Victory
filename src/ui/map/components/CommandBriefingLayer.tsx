@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import type { CommandBriefingItemView, SummaryFocusSection } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 
@@ -26,8 +27,16 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
   const setIsOperationsPanelOpen = useGameStore((state) => state.setIsOperationsPanelOpen);
   const setSelectedArmyId = useGameStore((state) => state.setSelectedArmyId);
   const setArmyHQExpandedCorpsId = useGameStore((state) => state.setArmyHQExpandedCorpsId);
+  const [dismissed, setDismissed] = useState(false);
+  const turn = useGameStore((state) => state.loadedGameState?.turn);
+  const lastDismissedTurn = useRef<number | null>(null);
 
-  if (!commandBriefing || commandBriefing.items.length === 0) return null;
+  // Reset dismissed state when turn changes (new briefing after advance)
+  if (turn != null && lastDismissedTurn.current !== turn && dismissed) {
+    setDismissed(false);
+  }
+
+  if (!commandBriefing || commandBriefing.items.length === 0 || dismissed) return null;
 
   const handleOpenItem = (item: CommandBriefingItemView) => {
     switch (item.target.type) {
@@ -90,6 +99,13 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
             <span className="rounded border border-panel-border bg-panel-card px-2 py-1">
               Queue {commandBriefing.pendingCount}
             </span>
+            <button
+              type="button"
+              onClick={() => { lastDismissedTurn.current = turn ?? null; setDismissed(true); }}
+              className="ml-2 rounded border border-panel-border bg-panel-card px-2 py-1 text-text-secondary hover:text-text-primary hover:border-white/20 transition-colors"
+            >
+              DISMISS
+            </button>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2 p-3 xl:grid-cols-3">
