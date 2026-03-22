@@ -94,7 +94,7 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
 
     return (
         <>
-            <div className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8">
+            <div className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8 overflow-visible">
 
                 {/* LEFT: Date */}
                 <div className="flex items-center gap-3 min-w-[180px]">
@@ -134,7 +134,7 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                     {/* Army Crest — gateway to HQ */}
                     <button
                         onClick={handleOpenHQ}
-                        className="group relative flex flex-col items-center px-5 -my-1 rounded-lg hover:bg-white/5 transition-all"
+                        className="group relative z-[200] flex flex-col items-center px-5 -my-1 rounded-lg hover:bg-white/5 transition-all"
                         aria-label={`${armyName ?? 'Army'} HQ [H]`}
                     >
                         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-400/80 group-hover:text-amber-400 transition-colors">
