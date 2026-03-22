@@ -2,8 +2,9 @@
  * Army HQ Modal — Warroom dark aesthetic matching CorpsDetail/FormationDetail.
  * Full-screen command overview for the player's faction.
  */
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
+import { useIPC } from '../../desktop/useIPC';
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
@@ -109,6 +110,16 @@ export function ArmyHQModal() {
         };
     }, [open, state, faction]);
 
+    const ipc = useIPC();
+
+    const handleEmergencyPosture = useCallback(async (stance: string) => {
+        if (!ipc.isAvailable || !data) return;
+        const corpsIds = data.corpsFormations.filter(c => c.kind === 'corps').map(c => c.id);
+        for (const corpsId of corpsIds) {
+            await ipc.stageCorpsStanceOrder(corpsId, stance);
+        }
+    }, [ipc, data]);
+
     if (!open || !faction || !state || !data) return null;
 
     const crestSrc = getArmyCrest(faction);
@@ -149,8 +160,27 @@ export function ArmyHQModal() {
                         </div>
                     </div>
 
-                    {/* Right: situation + close */}
+                    {/* Right: emergency posture + situation + close */}
                     <div className="flex items-center gap-6">
+                        {!expandedCorpsId && ipc.isAvailable && (
+                            <select
+                                defaultValue=""
+                                onChange={(e) => {
+                                    if (e.target.value) {
+                                        void handleEmergencyPosture(e.target.value);
+                                        e.target.value = '';
+                                    }
+                                }}
+                                className="text-[10px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded px-3 py-2 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors"
+                                title="Set all corps to the same stance"
+                            >
+                                <option value="" disabled>EMERGENCY POSTURE</option>
+                                <option value="defensive">ALL DEFENSIVE</option>
+                                <option value="balanced">ALL BALANCED</option>
+                                <option value="offensive">ALL OFFENSIVE</option>
+                                <option value="reorganize">ALL REORGANIZE</option>
+                            </select>
+                        )}
                         <div className="text-right">
                             <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
                                 STRATEGIC SITUATION
