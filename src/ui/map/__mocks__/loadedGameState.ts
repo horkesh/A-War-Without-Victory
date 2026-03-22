@@ -56,5 +56,12 @@ export function makeMockLoadedGameState(): LoadedGameState {
     aorOrders: [],
     recentControlEvents: [],
     latestTurnSummary: null,
-  };
+    pressureWarning: false,
+    allControlEvents: [],
+    displacementEventLog: [],
+    battlesByOsid: {},
+    movementsByOsid: {},
+    supplyTransitionsByOsid: {},
+    controlEventsByOsid: {},
+  } as LoadedGameState;
 }

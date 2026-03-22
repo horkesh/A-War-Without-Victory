@@ -757,6 +757,8 @@ export interface LoadedGameState {
 
     /** Per-faction event flags set by player decisions. */
     eventFlags?: Record<string, string | number | boolean>;
+    /** True when any event has readiness >= 50 (approaching threshold). */
+    pressureWarning: boolean;
 
     /** Per-faction patron override authority (0-100). */
     patronOverrideAuthority?: Record<string, number>;

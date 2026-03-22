@@ -62,6 +62,19 @@ export function generateBriefing(
 
     // ── CRITICAL ─────────────────────────────────────────────────────
 
+    // Pending event decisions
+    const pendingDecisions = (state.pendingEventDecisions ?? []).filter(
+        (d) => d.faction === faction,
+    );
+    for (const decision of pendingDecisions) {
+        items.push({
+            id: id(), severity: 'critical', category: 'event_decision',
+            title: decision.event_title ?? `Decision: ${decision.event_id}`,
+            detail: `${decision.response_options?.length ?? 0} options — awaiting your response`,
+            target: { type: 'none' },
+        });
+    }
+
     // Enclaves with critical supply
     for (const [enclaveId, enc] of Object.entries(state.enclaveResilience ?? {})) {
         if (enc.supply_state === 'critical' && enc.faction === faction) {

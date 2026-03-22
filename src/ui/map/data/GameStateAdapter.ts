@@ -1797,6 +1797,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         negotiationCapital: deriveNegotiationCapital(state),
         strategicDimensions: deriveStrategicDimensions(state),
         eventFlags: state.military?.event_flags ?? undefined,
+        pressureWarning: derivePressureWarning(state),
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
@@ -2347,5 +2348,14 @@ function deriveGameVerdict(state: any): GameVerdict | undefined {
     } catch {
         return undefined;
     }
+}
+
+function derivePressureWarning(state: any): boolean {
+    const readiness = state.military?.event_readiness;
+    if (!readiness || typeof readiness !== 'object') return false;
+    for (const value of Object.values(readiness)) {
+        if (typeof value === 'number' && value >= 50) return true;
+    }
+    return false;
 }
 

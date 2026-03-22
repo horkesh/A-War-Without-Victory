@@ -1552,6 +1552,24 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('respond-to-event-decision', async (_event, payload) => {
+    const { eventId, responseId } = payload || {};
+    if (!currentGameStateJson || typeof eventId !== 'string' || typeof responseId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const { resolveEventDecision } = await import('../sim/events/resolve_decision.js');
+      resolveEventDecision(state, eventId, responseId);
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('get-settings', async () => {
     try {
       const { loadSettings } = require('./settings_store.cjs');

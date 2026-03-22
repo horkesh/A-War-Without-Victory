@@ -350,6 +350,17 @@ function App() {
     }
   }, [loadedGameState?.pendingEventDecisions?.length]);
 
+  // Auto-dismiss non-decision events after 4 seconds
+  useEffect(() => {
+    if (eventQueue.length === 0) return;
+    const current = eventQueue[eventQueueIndex];
+    if (!current || current.isDecision) return;
+    const timer = setTimeout(() => {
+      handleEventAcknowledge();
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [eventQueue, eventQueueIndex]);
+
   const handleEventAcknowledge = () => {
     const current = eventQueue[eventQueueIndex];
     if (current) {
@@ -363,11 +374,15 @@ function App() {
     }
   };
 
-  const handleEventDecisionResponse = (responseId: string) => {
+  const handleEventDecisionResponse = async (responseId: string) => {
     const current = eventQueue[eventQueueIndex];
     if (current) {
-      // TODO: Send decision response via IPC when backend support is added
-      console.log('[EventModal] Decision response:', current.id, responseId);
+      if (ipc.isAvailable) {
+        const result = await ipc.respondToEventDecision(current.id, responseId);
+        if (!result.ok) {
+          console.error('[EventModal] Decision response failed:', result.error);
+        }
+      }
       setAcknowledgedEventIds(prev => new Set(prev).add(current.id));
     }
     if (eventQueueIndex < eventQueue.length - 1) {
@@ -558,7 +573,7 @@ function App() {
       <MapContainer />
       <PresidentialToolbar
         pendingDecisions={loadedGameState?.pendingEventDecisions?.length ?? 0}
-        pressureWarning={false}
+        pressureWarning={loadedGameState?.pressureWarning ?? false}
         pendingOfficerEvents={Boolean(loadedGameState?.pendingOfficerEvents?.length)}
       />
       <CommandBriefingLayer

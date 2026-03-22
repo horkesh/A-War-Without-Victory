@@ -149,25 +149,30 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Operations + preparation | ✓ Complete |
 | Named officers + succession | ✓ Complete |
 | Supply reserves | ✓ Complete |
+| Equipment pipeline | ✓ Complete |
 | OOB (247 brigades) | ✓ Complete |
 | Scenario runner | ✓ Complete |
-| Calibration pipeline | ✓ Complete |
+| Calibration pipeline | ✓ Complete (93.1% area-weighted, 6/6 benchmarks) |
 | Desktop app (Electron) | ✓ Functional |
-| Tactical map | ✓ Functional |
-| Warroom | ✓ Functional |
+| Tactical map (React + MapLibre + Deck.gl) | ✓ Functional |
+| Warroom (vanilla TS + canvas) | ✓ Functional (v0.7+ React migration planned) |
+| Army HQ (4-tab command center) | ✓ Functional (Briefing/Summary/Records/Personnel) |
+| Events/decisions | ✓ Functional (19 events, pressure system, 14 condition types, 56 tests) |
+| Strategic dimensions | ✓ Functional (6 dimensions, event-driven, UI display) |
+| Scenarios (40w/52w/56w) | ✓ Complete |
+| AI Commander infrastructure | ✓ Functional (14 modules, multi-model routing) |
 | Peace phase | ○ Partial (framework exists, not playable) |
+| Dayton negotiation | ○ Partial (UI + engine exist, dimension merge pending) |
 | Full turn cycle | ○ Partial |
 | Save/load | ○ Partial (headless OK, desktop partial) |
-| Player orders UX | ○ Partial |
+| Player orders UX | ○ Partial (HQ actions wired, event decisions pending IPC) |
 | Victory conditions | ○ Stub |
-| Scenarios beyond April 1992 | ✗ Not started |
-| Events/decisions | ✗ Not started |
-| Diplomacy layer | ✗ Not started |
+| Diplomacy layer | ○ Partial (patron pressure, alliance, IVP exist) |
 | Tutorial | ✗ Not started |
 | Sound/music | ✗ Not started |
-| Localization | ✗ Not started |
+| Localization | ✗ Not started (v0.8+ scope: B/C/S + English) |
 
-**Current version: 0.3.1** — Playable Alpha + Endgame & Negotiation System. All foundational simulation systems built and calibrated. Desktop app functional. Not yet a playable game for end users.
+**Current version: 0.5.4** — Feature Complete Beta. 1317 tests, 111 suites. Emergent event system (v0.6.0 merge in progress). Army HQ multi-tab command center. Presidential Toolbar. 93.1% calibration accuracy.
 
 ---
 
