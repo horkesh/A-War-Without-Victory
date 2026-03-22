@@ -99,10 +99,19 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
 
                 {/* LEFT: Date */}
                 <div className="flex items-center gap-3 min-w-[180px]">
+                    <button
+                        onClick={() => useGameStore.getState().setChronicleOpen(true)}
+                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors"
+                    >
+                        CHRONICLE
+                    </button>
                     {loadedGameState ? (
-                        <div className="font-mono text-[12px] text-text-primary tracking-wider uppercase">
+                        <button
+                            onClick={() => useGameStore.getState().setChronicleOpen(true)}
+                            className="font-mono text-[12px] text-text-primary tracking-wider uppercase hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none p-0"
+                        >
                             {formatTurnLabel(loadedGameState.label)}
-                        </div>
+                        </button>
                     ) : (
                         <div className="font-mono text-[10px] text-text-secondary italic uppercase">
                             No state loaded

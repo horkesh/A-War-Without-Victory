@@ -534,6 +534,10 @@ function App() {
       } else if (e.key === 'e' || e.key === 'E') {
         e.preventDefault();
         setEventLogOpen(prev => !prev);
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        const gs = useGameStore.getState();
+        gs.setChronicleOpen(!gs.chronicleOpen);
       }
     };
     window.addEventListener('keydown', handler);

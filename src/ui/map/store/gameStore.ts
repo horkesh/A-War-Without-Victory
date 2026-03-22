@@ -233,6 +233,10 @@ export interface GameStore {
   /** Whether the peace-to-war transition overlay has been dismissed. */
   peaceWarTransitionSeen: boolean;
   setPeaceWarTransitionSeen: (v: boolean) => void;
+
+  /** Whether the Game Chronicle panel is open. */
+  chronicleOpen: boolean;
+  setChronicleOpen: (open: boolean) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -496,4 +500,7 @@ export const useGameStore = create<GameStore>((set) => ({
 
   peaceWarTransitionSeen: false,
   setPeaceWarTransitionSeen: (v) => set({ peaceWarTransitionSeen: v }),
+
+  chronicleOpen: false,
+  setChronicleOpen: (open) => set({ chronicleOpen: open }),
 }));
