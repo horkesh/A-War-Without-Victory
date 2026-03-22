@@ -453,9 +453,9 @@ The player walks down the hall to meet the generals. Army HQ is the **military c
 | Tab | Content | Status |
 |-----|---------|--------|
 | **BRIEFING** | CoS brief (paper missive), situation briefing (card grid), corps cards (flip detail) | ✅ Built |
-| **SUMMARY** | War Summary modal content: weekly after-action, territory changes, casualties, combat record | 🔲 Absorb `WarSummaryModal` |
-| **RECORDS** | AAR (after-action reports), operation history, combat log | 🔲 Absorb `AARPanel`, `OperationHistoryPanel` |
-| **PERSONNEL** | Recruitment, officer management, reserves, ORBAT overview | 🔲 Absorb `RecruitmentModal`, `OrbatPanel` |
+| **SUMMARY** | War Summary modal content: weekly after-action, territory changes, casualties, combat record | ✅ Absorbed `WarSummaryModal` |
+| **RECORDS** | AAR (after-action reports), operation history, combat log | ✅ Absorbed `AARPanel`, `OperationHistoryPanel` |
+| **PERSONNEL** | Recruitment, officer management, reserves, ORBAT overview | ✅ Absorbed `RecruitmentModal`, `OrbatPanel` |
 
 **Header tabs** replace the current single-view layout. Each tab shows different content in the same full-screen modal. Corps cards remain accessible from all tabs via a persistent sidebar or bottom strip.
 
@@ -547,3 +547,83 @@ Full multilingual support. Two languages at launch: **English** and **Bosnian/Cr
 - Language selector in settings/pause menu
 - B/C/S uses Latin script (not Cyrillic) — standard for all three variants
 - Consider: faction-specific B/C/S dialect flavor (Bosnian for RBiH, Serbian for RS, Croatian for HRHB) as optional polish
+
+### Anthropic Developer Relations Pitch (after v0.6.3)
+
+**Trigger:** Working AI Commander prototype where Claude-as-Mladić makes real strategic decisions in a full game.
+
+**Prerequisites:**
+1. v0.4.5 AI Commander infrastructure exists (`src/sim/ai_commander/`)
+2. Complete one full AI-vs-formula game with compelling moments
+3. Record 2-minute demo video ("watch Claude decide whether to reinforce Srebrenica or press Brčko")
+4. Steam page live with wishlists accumulating
+
+**What to ask (not money):**
+- API credits for dev + early access (~$500–1,000)
+- Case study opportunity (they write, we get exposure)
+- Technical guidance on prompt caching + structured output
+- Early access to new models
+
+**The pitch:** "We built a historically calibrated Bosnian War simulation where Claude commands opposing armies with historically accurate personalities — the first strategy game where your enemy genuinely thinks."
+
+**Full strategy:** `docs/30_planning/design/PRICING_AND_BUSINESS_MODEL.md` §Anthropic Partnership
+**AI Commander design:** `docs/30_planning/design/CLAUDE_AI_COMMANDER_DESIGN.md`
+
+---
+
+## v0.7.x–v1.0 Roadmap Outline
+
+VERSIONING.md defines the path to Gold. Current actual version: v0.5.4 (VERSIONING.md needs update from v0.3.1). Here's the outline with scope notes:
+
+| Version | Name | Scope | Status |
+|---------|------|-------|--------|
+| **v0.6.x** | Content Complete Beta | Emergent events, metagame, Dayton, Army HQ | **Active** (this roadmap) |
+| **v0.7.x** | Polish Beta | Warroom React migration, unified UI, command autonomy, officer defiance | Planned (design notes exist) |
+| **v0.8.x** | Release Candidate | Localization (B/C/S + EN), tutorial/onboarding, performance optimization, accessibility | Planned (scope only) |
+| **v0.9.x** | Gold Candidate | Platform packaging, Steam integration, achievements, final balance pass, QA | Not scoped |
+| **v1.0.0** | Gold / Public Release | Feature-complete, fully polished, localized, playtested | Target |
+
+### Unscoped items that need homes:
+
+| Item | Natural Home | Notes |
+|------|-------------|-------|
+| Tutorial / onboarding | v0.8.x | How does a new player learn? Guided first 5 turns? |
+| Steam integration | v0.9.x | Achievements, cloud saves, workshop? |
+| Performance optimization | v0.8.x | 52-week scenario speed, map render, memory |
+| Accessibility | v0.8.x | Colorblind modes, key remapping, screen reader basics |
+| Modding support | v1.x+ | JSON event definitions already moddable; scenario editor? |
+| Multiplayer | v2.0+ | Each player controls one faction; Claude fills others |
+| AI Commander demo video | Before Anthropic pitch | 2-minute compelling moment |
+| Steam page + capsule art | Before v0.8.x | Wishlists need time to accumulate |
+
+---
+
+## Integration Review (2026-03-22)
+
+Cross-cutting concerns that span multiple milestones:
+
+### 1. AI Commander + Event System
+The AI Commander (v0.4.5 infra, partially built) and the emergent event system (v0.6.x) need to integrate:
+- **Events affect AI behavior:** Event flags (e.g., `rs_strategic_goals: 'all_six'`) should influence Claude's strategic personality. The prompt builder needs flag awareness.
+- **AI responds to events:** When an event fires for a bot faction, `pickBotResponseV1` handles it. When AI Commander is active, Claude should make the event decision instead.
+- **Event constraint bus:** `operation_blocks` and `scope_restrictions` constrain bot AI. The AI Commander prompt must include active constraints.
+- **Status:** Infrastructure exists separately. Integration point is the prompt builder reading event state.
+
+### 2. Dayton Synthesis
+v0.6.3 says "dimensions → capital budget, flags → territorial packages" but no design spec exists:
+- How do 6 dimensions × 3 factions map to Dayton negotiating positions?
+- How do event flags (e.g., `drina_cleansing_intensity: 'systematic'`) affect what's on the table?
+- Is Dayton player-driven (you negotiate) or emergent (dimensions auto-resolve)?
+- **Action needed:** Design spec before v0.6.3 implementation.
+
+### 3. Warroom ↔ Events
+Events fire on the map but the warroom is the President's Office:
+- In v0.6.x: event decisions appear as map overlay modals
+- In v0.7+: event decisions should appear as documents on the president's desk
+- **The transition:** v0.6.x event decisions must be designed so they can later be re-skinned as warroom documents without logic changes. Keep decision logic separate from presentation.
+
+### 4. Version Number Drift
+VERSIONING.md says v0.3.1 but actual state is v0.5.4:
+- v0.4.x milestones (Content Alpha) were completed but VERSIONING.md not updated
+- v0.5.x milestones (Feature Complete Beta) partially completed
+- **Action needed:** Update VERSIONING.md milestone tracking to match reality.
