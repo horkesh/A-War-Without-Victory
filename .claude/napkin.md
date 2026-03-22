@@ -97,9 +97,9 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
-2. **[2026-03-22] Front Line Terrain Tinting (P4)**: Enrich front edge data with friction, color high-elevation edges white/blue. Not started.
-3. **[2026-03-22] Elevation Profile on Ops Axes (P4)**: Elevation data + hover tooltips DONE. SVG area chart along axis of advance NOT DONE.
+1. ~~**[2026-03-19] Map UX: heat map legend + context menu (P3)**~~ — RESOLVED (2026-03-22 audit). `MapModeLegend.tsx` ships for all 7 modes. `RadialMenu.tsx` deploys right-click context menu with 4 element types.
+2. **[2026-03-22] Front Line Terrain Tinting (P4)**: → v0.7.3 Phase 2 Task 2.3.
+3. **[2026-03-22] Elevation Profile on Ops Axes (P4)**: → v0.7.3 Phase 2 Task 2.5.
 
 ## Technical Debt (Professional Audit 2026-03-21, updated 2026-03-22)
 1. ~~**[P3] ~216 `any` types in sim/state**~~ — RESOLVED (2026-03-22). 214→64. Remaining 55 are serialize.ts + validateGameState.ts (save migration, inherently untyped). 9 trivial remnants.
