@@ -58,21 +58,19 @@ export function OperationsPanel() {
   );
 
   const selectedOperation = useMemo(() => {
-    const matched = operations.find((op) => getOperationId(op) === selectedOperationKey);
-    if (matched) return matched;
-    return operations[0] ?? null;
+    if (selectedOperationKey == null) return null;
+    return operations.find((op) => getOperationId(op) === selectedOperationKey) ?? null;
   }, [operations, selectedOperationKey]);
 
-  // Auto-select first operation when panel opens without a selection
+  // Auto-select first operation ONLY when the panel first opens with no selection
+  const prevIsOpenRef = useRef(false);
   useEffect(() => {
-    if (!isOpen || operations.length === 0) return;
-    const hasSelected =
-      selectedOperationKey != null &&
-      operations.some((op) => getOperationId(op) === selectedOperationKey);
-    if (hasSelected) return;
+    const justOpened = isOpen && !prevIsOpenRef.current;
+    prevIsOpenRef.current = isOpen;
+    if (!justOpened || operations.length === 0) return;
+    if (selectedOperationKey != null && operations.some((op) => getOperationId(op) === selectedOperationKey)) return;
     const first = operations[0];
-    if (!first) return;
-    setSelectedOperationKey(getOperationId(first));
+    if (first) setSelectedOperationKey(getOperationId(first));
   }, [isOpen, operations, selectedOperationKey, setSelectedOperationKey]);
 
   // Sync hoveredOsids + operationTargetOsids with current selection / objective hover.
