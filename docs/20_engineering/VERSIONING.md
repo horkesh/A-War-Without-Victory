@@ -52,52 +52,70 @@ Core simulation loop exists. Turn pipeline runs. Factions exist. Map renders.
 - All three factions selectable and playable
 - Desktop app stable (no crashes on normal play)
 
-### 0.4.x — Content Alpha
-- Historical scenarios beyond April 1992 (1993 start, 1994 start)
-- Event system (historical events, decisions, news)
-- Diplomatic layer (international pressure, negotiations, Dayton-track)
-- Economy/industry (beyond supply reserves)
-- Full endgame and war termination
+### 0.4.x — Content Alpha ✓ (COMPLETED 2026-03-18)
+- AI Commander infrastructure (14 modules, multi-model routing)
+- Operation preparation system (5-phase state machine)
+- Officer succession (player-choice for player faction)
+- Equipment pipeline (scavenging, capture, barracks events)
+- Commander override layer (Phase A + B)
+- Corps-level operations replacing per-sector
+- HRHB-RBiH war transition (alliance breakdown, mobilization, 6 events)
+- Settlement timeline (12 event types, 5 engine tracking features)
+- 1100+ tests
 
-### 0.5.x — Feature Complete Beta
-- ALL game systems implemented and integrated
-- UI/UX complete (all panels, all modes, all tooltips)
-- Sound design and music
-- Tutorial/onboarding system
-- Encyclopedia/Codex
-- No placeholder art or missing UI
+### 0.5.x — Feature Complete Beta ✓ (COMPLETED 2026-03-22)
+- Emergent event system (pressure-based triggers, 14 condition types, recurrence)
+- Strategic dimensions (6 per faction, hybrid base_value + event_modifier)
+- 19 events migrated (1992), 3 ICTY-sourced foundational decisions
+- Presidential Toolbar (army crest center, floating above toolbar)
+- Army HQ multi-tab command center (Briefing/Summary/Records/Personnel)
+- Chief of Staff briefing (paper missive, personality-driven)
+- Event decision IPC wired (player can respond)
+- Pressure indicators, consequence auto-dismiss
+- Deck.gl settlement labels, formation counters
+- Displacement adapter, Posavina Corridor restructure
+- 93.1% area-weighted calibration (n1024), 1317 tests, 111 suites
 
-### 0.6.x — Content Complete Beta
-- All scenarios authored and tested
-- All historical events in place
-- Balance pass complete (all factions, all starts)
-- Campaign mode structured
-- Achievements/statistics tracking
+### 0.6.x — Political Wargame (ACTIVE)
+Transforms AWWV from military simulation into political wargame. Master roadmap: `docs/plans/2026-03-22-v06x-master-roadmap.md`
 
-### 0.7.x — Polish Beta
+- v0.6.1: Calibration framework (automated regression, baseline freeze)
+- v0.6.2: 1993-1994 events, Game Chronicle, AI Commander + Events integration, HQ deep drill-down
+- v0.6.3: 1995 endgame events, Dayton dimension merge, Chronicle Wrapped, Staff Map
+- v0.6.4: Historical essays (100 × 500 words, Sonnet-generated)
+
+### 0.7.x — Unified UI + Command Layer
+Plan: `docs/plans/2026-03-16-v0.7.0-performance.md` through `v0.7.3`
+
+- Warroom React migration (single Electron window, smooth transitions)
+- Command autonomy slider (player chooses military autonomy level)
+- Officer defiance events
 - Performance optimization pass
-- Accessibility pass (colorblind, screen reader, rebindable keys)
-- Localization infrastructure + first language
-- Platform-specific fixes (Windows, Mac, Linux)
-- Memory/leak audits
+- Accessibility (colorblind, key remapping)
+- Localization (B/C/S + English)
+- Visual polish
 
 ### 0.8.x — Release Candidate
+Plan: `docs/plans/2026-03-16-v0.8.0-external-playtesting.md` through `v0.8.2`
+
 - External playtesting feedback incorporated
 - Final balance tuning
-- No known crash bugs
-- No known save-breaking bugs
-- Determinism verified across platforms
-- All tests green, CI pipeline solid
+- Platform packaging (Windows, Mac, Linux)
+- Steam page + capsule art + wishlists
+- Anthropic developer relations pitch (after AI Commander demo)
 
 ### 0.9.x — Gold Candidate
+Plan: `docs/plans/2026-03-16-v0.9.0-final-qa.md` through `v0.9.1`
+
 - Final QA sweep
-- Store page, marketing materials
-- Platform certification (if applicable)
-- Installer/packaging finalized
-- Last-minute hotfixes only
+- Store marketing materials
+- Platform certification
+- Installer finalized
 
 ### 1.0.0 — Gold / Public Release
-Ship it.
+Plan: `docs/plans/2026-03-16-v1.0.0-gold.md`
+
+Ship it. "Another such victory and we are undone."
 
 ---
 

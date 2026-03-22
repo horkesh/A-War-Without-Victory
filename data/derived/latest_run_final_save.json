@@ -365100,8 +365100,8 @@
           "artillery": 32,
           "tanks": 0
         },
-        "killed": 16714,
-        "missing_captured": 13691,
+        "killed": 16716,
+        "missing_captured": 13690,
         "per_formation": {
           "arbih_101st_mountain": {
             "killed": 73,
@@ -365224,8 +365224,8 @@
             "wounded": 120
           },
           "arbih_165th_mountain": {
-            "killed": 360,
-            "missing_captured": 231,
+            "killed": 361,
+            "missing_captured": 230,
             "wounded": 670
           },
           "arbih_17th_muslim_light": {
@@ -365439,7 +365439,7 @@
             "wounded": 662
           },
           "arbih_303rd_vitezka_mountain": {
-            "killed": 117,
+            "killed": 118,
             "missing_captured": 104,
             "wounded": 231
           },
@@ -368554,7 +368554,7 @@
         "consecutive_probes": 1,
         "corps_exhaustion": 17,
         "directive": {
-          "aggression_modifier": 0,
+          "aggression_modifier": 0.12999999999999998,
           "assigned_front_ids": [
             "HRHB__RS__op:bugojno:medini__op:donji_vakuf:komar_2",
             "HRHB__RS__op:teslic:blatnica_2__op:teslic:kamenica_2",
@@ -369120,7 +369120,7 @@
         "consecutive_probes": 1,
         "corps_exhaustion": 13,
         "directive": {
-          "aggression_modifier": -0.1,
+          "aggression_modifier": -0.08000000000000003,
           "assigned_front_ids": [
             "HRHB__RS__op:duvno:kongora__op:kupres:bucovaca",
             "RBiH__RS__op:bihac:bihac_2__op:bihac:ripac",
@@ -369347,7 +369347,7 @@
         "consecutive_probes": 0,
         "corps_exhaustion": 0,
         "directive": {
-          "aggression_modifier": -0.1,
+          "aggression_modifier": -2.7755575615628914e-17,
           "assigned_front_ids": [
             "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
             "RBiH__RS__op:bratunac:vranesevici__op:srebrenica:brezovice_2"
@@ -369494,7 +369494,7 @@
           "current_objective_index": 0,
           "failure_count": 0,
           "force_launch": false,
-          "force_ratio_estimate": 0.5853181455326989,
+          "force_ratio_estimate": 0.5854080147397515,
           "initial_strength": 5733,
           "intel_confidence_at_assessment": 0.3400000000000003,
           "is_pre_planned": true,
@@ -369897,7 +369897,7 @@
                   "attacks_this_turn": 1,
                   "casualties_inflicted": {
                     "killed": 157,
-                    "wounded": 288
+                    "wounded": 287
                   },
                   "casualties_suffered": {
                     "killed": 35,
@@ -369947,7 +369947,7 @@
               "brigade_count": 4,
               "casualties_inflicted": {
                 "killed": 284,
-                "wounded": 520
+                "wounded": 519
               },
               "casualties_suffered": {
                 "killed": 70,
@@ -370719,7 +370719,7 @@
         "consecutive_probes": 1,
         "corps_exhaustion": 0,
         "directive": {
-          "aggression_modifier": -0.1,
+          "aggression_modifier": -2.7755575615628914e-17,
           "assigned_front_ids": [
             "HRHB__RS__op:bosanski_samac:domaljevac_2__op:bosanski_samac:tisina",
             "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2"
@@ -370879,7 +370879,7 @@
         "consecutive_probes": 0,
         "corps_exhaustion": 12,
         "directive": {
-          "aggression_modifier": -0.1,
+          "aggression_modifier": -2.7755575615628914e-17,
           "assigned_front_ids": [
             "HRHB__RS__op:ljubinje:bancici__op:neum:gornje_hrasno_2",
             "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2",
@@ -371056,7 +371056,7 @@
         "command_span": 5,
         "corps_exhaustion": 0,
         "directive": {
-          "aggression_modifier": -0.1,
+          "aggression_modifier": -2.7755575615628914e-17,
           "assigned_front_ids": [
             "RBiH__RS__op:banovici:seona__op:lukavac:brijesnica_donja_2"
           ],
@@ -371138,7 +371138,7 @@
         "consecutive_probes": 1,
         "corps_exhaustion": 3,
         "directive": {
-          "aggression_modifier": 0,
+          "aggression_modifier": 0.12999999999999998,
           "assigned_front_ids": [
             "HRHB__RS__op:hadzici:misevici_2__op:kiseljak:azapovici_2",
             "HRHB__RS__op:vares:toljenak__op:vares:vares_2",
@@ -374944,7 +374944,7 @@
           "op:teslic:cecava_2",
           "op:teslic:donji_ruzevic"
         ],
-        "threat_ratio": 42.85651092843519
+        "threat_ratio": 42.65874545329116
       },
       "sector:vrs_2nd_krajina:0": {
         "assigned_brigade_ids": [
@@ -376675,7 +376675,15 @@
         "total_turns_deployed": 37
       }
     },
+    "enabled_event_ids": [
+      "london_conference_1992"
+    ],
     "event_aggression_modifiers": [
+      {
+        "delta": 0.15,
+        "expires_turn": 53,
+        "faction": "RS"
+      },
       {
         "delta": 0.15,
         "expires_turn": 12,
@@ -376687,27 +376695,93 @@
         "faction": "RS"
       }
     ],
+    "event_fire_counts": {
+      "arms_embargo_impact_1992": 1,
+      "battle_of_the_barracks_sarajevo": 1,
+      "battle_of_the_barracks_tuzla": 1,
+      "battle_of_the_barracks_visoko": 1,
+      "battle_of_the_barracks_zenica": 1,
+      "concentration_camps_revealed_1992": 1,
+      "drina_valley_ethnic_cleansing_1992": 1,
+      "gornji_vakuf_clashes_1993": 1,
+      "hrhb_political_goal": 1,
+      "hvo_arbih_tensions_rise_1992": 1,
+      "jajce_falls_1992": 1,
+      "jna_withdrawal_1992": 1,
+      "mostar_liberation_1992": 1,
+      "rbih_state_identity": 1,
+      "rs_strategic_goals": 1,
+      "sarajevo_siege_begins_1992": 1,
+      "srebrenica_enclave_forms_1992": 1,
+      "vance_owen_plan_1993": 1
+    },
+    "event_flags": {
+      "arms_embargo_active": true,
+      "barracks_sarajevo_seized": true,
+      "barracks_tuzla_seized": true,
+      "barracks_visoko_seized": true,
+      "barracks_zenica_seized": true,
+      "camps_revealed": true,
+      "drina_cleansing_occurred": true,
+      "hvo_arbih_tensions_rising": true,
+      "jajce_fell": true,
+      "jna_withdrawn": true,
+      "mostar_liberated": true,
+      "sarajevo_siege_active": true,
+      "srebrenica_enclave_formed": true
+    },
+    "event_last_fired_turn": {
+      "arms_embargo_impact_1992": 3,
+      "battle_of_the_barracks_sarajevo": 4,
+      "battle_of_the_barracks_tuzla": 4,
+      "battle_of_the_barracks_visoko": 5,
+      "battle_of_the_barracks_zenica": 5,
+      "concentration_camps_revealed_1992": 17,
+      "drina_valley_ethnic_cleansing_1992": 11,
+      "gornji_vakuf_clashes_1993": 35,
+      "hrhb_political_goal": 4,
+      "hvo_arbih_tensions_rise_1992": 24,
+      "jajce_falls_1992": 40,
+      "jna_withdrawal_1992": 5,
+      "mostar_liberation_1992": 7,
+      "rbih_state_identity": 3,
+      "rs_strategic_goals": 1,
+      "sarajevo_siege_begins_1992": 7,
+      "srebrenica_enclave_forms_1992": 17,
+      "vance_owen_plan_1993": 39
+    },
+    "event_readiness": {
+      "arms_embargo_impact_1992": 0,
+      "concentration_camps_revealed_1992": 16.499999999999993,
+      "drina_valley_ethnic_cleansing_1992": 11.00000000000001,
+      "hrhb_political_goal": 7.5,
+      "hvo_arbih_tensions_rise_1992": 16,
+      "mostar_liberation_1992": 16,
+      "rbih_state_identity": 6,
+      "rs_strategic_goals": 10,
+      "sarajevo_siege_begins_1992": 0,
+      "srebrenica_enclave_forms_1992": 0.49999999999999817
+    },
     "faction_officer_maturity": {
       "HRHB": 3.1666666666666665,
       "RBiH": 3.5225,
       "RS": 3.533333333333333
     },
     "fired_event_ids": [
+      "rs_strategic_goals",
+      "rbih_state_identity",
       "arms_embargo_impact_1992",
+      "hrhb_political_goal",
       "battle_of_the_barracks_sarajevo",
       "battle_of_the_barracks_tuzla",
       "battle_of_the_barracks_visoko",
       "battle_of_the_barracks_zenica",
       "jna_withdrawal_1992",
       "sarajevo_siege_begins_1992",
-      "un_convoys_begin_1992",
       "mostar_liberation_1992",
-      "srebrenica_enclave_forms_1992",
       "drina_valley_ethnic_cleansing_1992",
-      "posavina_corridor_fighting_1992",
+      "srebrenica_enclave_forms_1992",
       "concentration_camps_revealed_1992",
-      "bihac_isolation_deepens_1992",
-      "london_conference_1992",
       "hvo_arbih_tensions_rise_1992",
       "gornji_vakuf_clashes_1993",
       "vance_owen_plan_1993",
@@ -377126,7 +377200,7 @@
             },
             {
               "casualties_inflicted": 116,
-              "casualties_taken": 523,
+              "casualties_taken": 522,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -377152,7 +377226,7 @@
           "peak_personnel": 800,
           "stalemates": 0,
           "total_casualties_inflicted": 303,
-          "total_casualties_taken": 1538,
+          "total_casualties_taken": 1537,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -377229,7 +377303,7 @@
         },
         "location_osid": "op:trnovo:tusila",
         "max_personnel": 3000,
-        "morale": 81,
+        "morale": 86,
         "name": "104th Vitezka Motorized",
         "officer_quality": 0.05014625,
         "ops": {
@@ -377257,7 +377331,7 @@
           "faction": "RBiH",
           "formation_id": "arbih_104th_vitezka_motorized",
           "formation_name": "104th Vitezka Motorized",
-          "narrative": "The 104th Vitezka Motorized has been nearly destroyed and rebuilt. Over 3 battles, it has suffered 1538 total casualties — far exceeding its peak strength of 800. But it rises each time. It currently stands at 502 men, a testament to the will to fight on.",
+          "narrative": "The 104th Vitezka Motorized has been nearly destroyed and rebuilt. Over 3 battles, it has suffered 1537 total casualties — far exceeding its peak strength of 800. But it rises each time. It currently stands at 502 men, a testament to the will to fight on.",
           "notable_moments": [
             {
               "description": "First battle at op:gorazde:podkozara_donja_2",
@@ -377275,7 +377349,7 @@
             "nadir_personnel": 366,
             "peak_personnel": 800,
             "total_casualties_inflicted": 303,
-            "total_casualties_taken": 1538,
+            "total_casualties_taken": 1537,
             "victories": 0
           }
         }
@@ -377369,7 +377443,7 @@
         "kind": "brigade",
         "location_osid": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
         "max_personnel": 3000,
-        "morale": 75,
+        "morale": 78,
         "name": "105th Motorized",
         "officer_quality": 0.05,
         "origin_mun": "centar_sarajevo",
@@ -377684,7 +377758,7 @@
         "kind": "brigade",
         "location_osid": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
         "max_personnel": 3000,
-        "morale": 77,
+        "morale": 80,
         "name": "10th Mountain Brigade",
         "officer_quality": 0.05,
         "origin_mun": "stari_grad_sarajevo",
@@ -377807,7 +377881,7 @@
         "kind": "brigade",
         "location_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "111th Vitezka Motorized",
         "officer_quality": 0.15,
         "origin_mun": "novi_grad_sarajevo",
@@ -377930,7 +378004,7 @@
         "kind": "brigade",
         "location_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "112th Vitezka Motorized",
         "officer_quality": 0.15,
         "origin_mun": "novi_grad_sarajevo",
@@ -378309,7 +378383,7 @@
         "kind": "brigade",
         "location_osid": "op:travnik:cukle_2",
         "max_personnel": 3000,
-        "morale": 50,
+        "morale": 55,
         "name": "120th Liberation \"Black Swans\"",
         "officer_quality": 0.1062130670097874,
         "origin_mun": "kakanj",
@@ -378432,7 +378506,7 @@
         "kind": "brigade",
         "location_osid": "op:kiseljak:bilalovac_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "123rd Light",
         "officer_quality": 0.05,
         "origin_mun": "kiseljak",
@@ -378725,7 +378799,7 @@
         },
         "location_osid": "op:fojnica:turkovici",
         "max_personnel": 3000,
-        "morale": 55,
+        "morale": 58,
         "name": "131st Light",
         "officer_quality": 0.05014625,
         "ops": {
@@ -379157,7 +379231,7 @@
         "kind": "brigade",
         "location_osid": "op:fojnica:fojnica_2",
         "max_personnel": 3000,
-        "morale": 55,
+        "morale": 58,
         "name": "145th Light",
         "officer_quality": 0.05014625,
         "ops": {
@@ -379301,7 +379375,7 @@
         "kind": "brigade",
         "location_osid": "op:fojnica:plocari_polje",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "146th Light",
         "officer_quality": 0.05,
         "origin_mun": "fojnica",
@@ -379424,7 +379498,7 @@
         "kind": "brigade",
         "location_osid": "op:vares:budozelje_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "147th Light",
         "officer_quality": 0.05,
         "origin_mun": "vares",
@@ -379916,7 +379990,7 @@
         "kind": "brigade",
         "location_osid": "op:vares:ravne",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "162nd Mountain",
         "officer_quality": 0.05,
         "origin_mun": "vares",
@@ -380175,7 +380249,7 @@
           "first_battle_turn": 2,
           "longest_defense_streak": 0,
           "longest_victory_streak": 0,
-          "nadir_personnel": 536,
+          "nadir_personnel": 535,
           "peak_personnel": 1005,
           "stalemates": 0,
           "total_casualties_inflicted": 436,
@@ -380202,15 +380276,15 @@
           "aa_systems": 0,
           "artillery": 2,
           "artillery_condition": {
-            "degraded": 0.2832500000000003,
-            "non_operational": 0.016749999999999966,
+            "degraded": 0.2810000000000003,
+            "non_operational": 0.01899999999999997,
             "operational": 0.7
           },
           "infantry": 800,
           "tank_condition": {
-            "degraded": 0.5514999999999999,
-            "non_operational": 0.15550000000000008,
-            "operational": 0.2929999999999996
+            "degraded": 0.5419999999999999,
+            "non_operational": 0.15400000000000008,
+            "operational": 0.3039999999999996
           },
           "tanks": 1
         },
@@ -380255,7 +380329,7 @@
         },
         "location_osid": "op:foca:mazlina",
         "max_personnel": 3000,
-        "morale": 69,
+        "morale": 72,
         "name": "165th Mountain",
         "officer_quality": 0.05014625,
         "ops": {
@@ -380298,7 +380372,7 @@
             "battles_fought": 2,
             "defeats": 2,
             "final_personnel": 1468,
-            "nadir_personnel": 536,
+            "nadir_personnel": 535,
             "peak_personnel": 1005,
             "total_casualties_inflicted": 436,
             "total_casualties_taken": 2235,
@@ -380519,7 +380593,7 @@
         "kind": "brigade",
         "location_osid": "op:travnik:gluha_bukovica",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "17th Vitezka Mountain",
         "officer_quality": 0.15041621097851363,
         "origin_mun": "travnik",
@@ -380930,7 +381004,7 @@
         "kind": "brigade",
         "location_osid": "op:vares:budozelje_2",
         "max_personnel": 3000,
-        "morale": 55,
+        "morale": 58,
         "name": "185th Light",
         "officer_quality": 0.05014625,
         "ops": {
@@ -381129,16 +381203,16 @@
           "battles_as_defender": 19,
           "battles_fought": 19,
           "brigade_count": 35,
-          "casualty_exchange_ratio": 0.23184416684310818,
+          "casualty_exchange_ratio": 0.23186871360508204,
           "current_personnel": 21280,
           "defeats": 19,
           "most_casualties_brigade_id": "arbih_165th_mountain",
           "most_victories_brigade_id": "arbih_101st_mountain",
-          "nadir_aggregate_personnel": 14144,
+          "nadir_aggregate_personnel": 14143,
           "peak_aggregate_personnel": 17649,
           "stalemates": 0,
           "total_casualties_inflicted": 2190,
-          "total_casualties_taken": 9446,
+          "total_casualties_taken": 9445,
           "total_osids_captured": 0,
           "total_osids_lost": 10,
           "victories": 0,
@@ -382098,7 +382172,7 @@
         },
         "location_osid": "op:gradacac:donja_tramosnica_2",
         "max_personnel": 3000,
-        "morale": 63,
+        "morale": 66,
         "name": "213th Vitezka Mountain",
         "officer_quality": 0.050219369515625,
         "ops": {
@@ -382262,7 +382336,7 @@
         "kind": "brigade",
         "location_osid": "op:brcko:bijela_2",
         "max_personnel": 3000,
-        "morale": 63,
+        "morale": 66,
         "name": "215th Vitezka Mountain",
         "officer_quality": 0.05014625,
         "ops": {
@@ -382431,7 +382505,7 @@
         },
         "location_osid": "op:gradacac:mionica",
         "max_personnel": 3000,
-        "morale": 63,
+        "morale": 66,
         "name": "217th Vitezka Mountain",
         "officer_quality": 0.05014625,
         "ops": {
@@ -382940,7 +383014,7 @@
         "kind": "brigade",
         "location_osid": "op:doboj:brijesnica_velika",
         "max_personnel": 3000,
-        "morale": 58,
+        "morale": 55,
         "name": "224th Mountain",
         "officer_quality": 0.07400000000000001,
         "origin_mun": "doboj",
@@ -383377,7 +383451,7 @@
         "kind": "brigade",
         "location_osid": "op:zvornik:rastosnica_2",
         "max_personnel": 3000,
-        "morale": 90,
+        "morale": 87,
         "name": "241st Spreca Muslim Light \"Gazije\"",
         "officer_quality": 0.050219369515625,
         "ops": {
@@ -384113,7 +384187,7 @@
         "kind": "brigade",
         "location_osid": "op:zvornik:djulici",
         "max_personnel": 3000,
-        "morale": 58,
+        "morale": 55,
         "name": "246th Vitezka Mountain",
         "officer_quality": 0.15,
         "origin_mun": "zvornik",
@@ -384236,7 +384310,7 @@
         "kind": "brigade",
         "location_osid": "op:tuzla:gornja_tuzla",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "250th Liberation",
         "officer_quality": 0.05,
         "origin_mun": "tuzla",
@@ -384483,7 +384557,7 @@
         "kind": "brigade",
         "location_osid": "op:tuzla:obodnica_donja_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "253rd Mountain",
         "officer_quality": 0.05,
         "origin_mun": "tuzla",
@@ -384607,7 +384681,7 @@
         "kind": "brigade",
         "location_osid": "op:lopare:celic_3",
         "max_personnel": 3000,
-        "morale": 58,
+        "morale": 55,
         "name": "254th Mountain",
         "officer_quality": 0.082,
         "origin_mun": "lopare",
@@ -384731,7 +384805,7 @@
         "kind": "brigade",
         "location_osid": "op:ugljevik:teocak_krstac_2",
         "max_personnel": 3000,
-        "morale": 52,
+        "morale": 55,
         "name": "255th Slavna Mountain \"Hajrudin Mesić\"",
         "officer_quality": 0.25,
         "origin_mun": "ugljevik",
@@ -385848,7 +385922,7 @@
         "kind": "brigade",
         "location_osid": "op:rogatica:zepa_2",
         "max_personnel": 3000,
-        "morale": 42,
+        "morale": 45,
         "name": "285th Light Brigade",
         "officer_quality": 0.05014625,
         "ops": {
@@ -386579,15 +386653,15 @@
           "aa_systems": 0,
           "artillery": 6,
           "artillery_condition": {
-            "degraded": 0.15550000000000092,
+            "degraded": 0.15550000000000086,
             "non_operational": 0,
             "operational": 0.8444999999999986
           },
           "infantry": 800,
           "tank_condition": {
-            "degraded": 0.45700000000000013,
-            "non_operational": 0.11500000000000005,
-            "operational": 0.4279999999999997
+            "degraded": 0.4475000000000001,
+            "non_operational": 0.11350000000000005,
+            "operational": 0.4389999999999997
           },
           "tanks": 2
         },
@@ -386625,7 +386699,7 @@
         "kind": "brigade",
         "location_osid": "op:doboj:makljenovac",
         "max_personnel": 3000,
-        "morale": 83,
+        "morale": 86,
         "name": "303rd Vitezka Mountain",
         "officer_quality": 0.15187221213685717,
         "origin_mun": "zenica",
@@ -386791,7 +386865,7 @@
         "kind": "brigade",
         "location_osid": "op:donji_vakuf:korenici",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "314th Slavna Liberation",
         "officer_quality": 0.05087732177940548,
         "ops": {
@@ -387058,7 +387132,7 @@
         "kind": "brigade",
         "location_osid": "op:maglaj:cobe_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "327th Vitezka Mountain",
         "officer_quality": 0.15,
         "origin_mun": "maglaj",
@@ -387453,7 +387527,7 @@
         "kind": "brigade",
         "location_osid": "op:bugojno:vrpec",
         "max_personnel": 3000,
-        "morale": 73,
+        "morale": 76,
         "name": "330th Liberation",
         "officer_quality": 0.05095041387983875,
         "ops": {
@@ -388090,7 +388164,7 @@
         "kind": "brigade",
         "location_osid": "op:bugojno:prijaci",
         "max_personnel": 3000,
-        "morale": 60,
+        "morale": 65,
         "name": "375th Liberation",
         "officer_quality": 0.094,
         "origin_mun": "tesanj",
@@ -388442,7 +388516,7 @@
         },
         "location_osid": "op:mostar:hodbina_2",
         "max_personnel": 3000,
-        "morale": 63,
+        "morale": 66,
         "name": "441st Vitezka Mountain",
         "officer_quality": 0.05014625,
         "ops": {
@@ -388583,7 +388657,7 @@
         "kind": "brigade",
         "location_osid": "op:mostar:potoci",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "442nd Mountain",
         "officer_quality": 0.05,
         "origin_mun": "mostar",
@@ -388768,7 +388842,7 @@
         "kind": "brigade",
         "location_osid": "op:konjic:dzepi_2",
         "max_personnel": 3000,
-        "morale": 47,
+        "morale": 50,
         "name": "443rd Mountain",
         "officer_quality": 0.05014625,
         "ops": {
@@ -389036,7 +389110,7 @@
         "kind": "brigade",
         "location_osid": "op:mostar:blagaj_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "445th Mountain",
         "officer_quality": 0.05,
         "origin_mun": "mostar",
@@ -389347,7 +389421,7 @@
         "kind": "brigade",
         "location_osid": "op:mostar:gornja_dreznica",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "447th Liberation",
         "officer_quality": 0.05,
         "origin_mun": "mostar",
@@ -389470,7 +389544,7 @@
         "kind": "brigade",
         "location_osid": "op:mostar:mostar_istok_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "448th Liberation",
         "officer_quality": 0.05,
         "origin_mun": "mostar",
@@ -389593,7 +389667,7 @@
         "kind": "brigade",
         "location_osid": "op:mostar:potoci",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "449th Eastern Herzegovina Mountain",
         "officer_quality": 0.05,
         "origin_mun": "mostar",
@@ -389716,7 +389790,7 @@
         "kind": "brigade",
         "location_osid": "op:konjic:celebici_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "450th Light",
         "officer_quality": 0.05,
         "origin_mun": "konjic",
@@ -389941,7 +390015,7 @@
         "kind": "brigade",
         "location_osid": "op:konjic:konjic_2",
         "max_personnel": 3000,
-        "morale": 63,
+        "morale": 66,
         "name": "4th Muslim Light",
         "officer_quality": 0.05014625,
         "ops": {
@@ -390333,7 +390407,7 @@
         "kind": "brigade",
         "location_osid": "op:bihac:bihac_2",
         "max_personnel": 3000,
-        "morale": 89,
+        "morale": 92,
         "name": "503rd Slavna Mountain",
         "officer_quality": 0.1,
         "origin_mun": "cazin",
@@ -390950,7 +391024,7 @@
         "kind": "brigade",
         "location_osid": "op:bosanska_krupa:otoka_2",
         "max_personnel": 3000,
-        "morale": 79,
+        "morale": 82,
         "name": "511th Slavna Mountain",
         "officer_quality": 0.1,
         "origin_mun": "bosanska_krupa",
@@ -391275,7 +391349,7 @@
         "kind": "brigade",
         "location_osid": "op:zavidovici:hajderovici_2",
         "max_personnel": 3000,
-        "morale": 91,
+        "morale": 92,
         "name": "705th Slavna Mountain",
         "officer_quality": 0.10064115382091593,
         "origin_mun": "bugojno",
@@ -391399,7 +391473,7 @@
         "kind": "brigade",
         "location_osid": "op:travnik:gornje_krcevine",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "706th Muslim Mountain",
         "officer_quality": 0.050146247257812505,
         "origin_mun": "travnik",
@@ -391522,7 +391596,7 @@
         "kind": "brigade",
         "location_osid": "op:bugojno:vesela_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "707th Slavna Mountain",
         "officer_quality": 0.1,
         "origin_mun": "bugojno",
@@ -391775,7 +391849,7 @@
         },
         "location_osid": "op:travnik:paklarevo",
         "max_personnel": 3000,
-        "morale": 40,
+        "morale": 45,
         "name": "712th Mountain",
         "officer_quality": 0.05,
         "origin_mun": "travnik",
@@ -391898,7 +391972,7 @@
         "kind": "brigade",
         "location_osid": "op:gornji_vakuf:jagnjid_2",
         "max_personnel": 3000,
-        "morale": 50,
+        "morale": 55,
         "name": "717th Slavna Mountain",
         "officer_quality": 0.1,
         "origin_mun": "gornji_vakuf",
@@ -392146,7 +392220,7 @@
         "kind": "brigade",
         "location_osid": "op:donji_vakuf:oborci_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "727th Slavna",
         "officer_quality": 0.10163807419303765,
         "origin_mun": "travnik",
@@ -392269,7 +392343,7 @@
         "kind": "brigade",
         "location_osid": "op:zenica:serici_2",
         "max_personnel": 3000,
-        "morale": 50,
+        "morale": 55,
         "name": "733rd Mountain",
         "officer_quality": 0.098,
         "origin_mun": "busovaca",
@@ -392391,7 +392465,7 @@
         "kind": "brigade",
         "location_osid": "op:travnik:travnik_2",
         "max_personnel": 3000,
-        "morale": 71,
+        "morale": 74,
         "name": "737th Muslim Light",
         "officer_quality": 0.05,
         "origin_mun": "travnik",
@@ -392514,7 +392588,7 @@
         "kind": "brigade",
         "location_osid": "op:donji_vakuf:donji_vakuf_2",
         "max_personnel": 3000,
-        "morale": 50,
+        "morale": 55,
         "name": "770th Slavna Mountain",
         "officer_quality": 0.1,
         "origin_mun": "donji_vakuf",
@@ -392638,7 +392712,7 @@
         "kind": "brigade",
         "location_osid": "op:maglaj:kosova_2",
         "max_personnel": 3000,
-        "morale": 77,
+        "morale": 80,
         "name": "7th Vitezka Muslim Liberation",
         "officer_quality": 0.15173359475558848,
         "origin_mun": "zenica",
@@ -393526,16 +393600,16 @@
           "battles_as_defender": 54,
           "battles_fought": 56,
           "brigade_count": 125,
-          "casualty_exchange_ratio": 0.3584296744148045,
+          "casualty_exchange_ratio": 0.3584443173461884,
           "current_personnel": 137728,
           "defeats": 48,
           "most_casualties_brigade_id": "arbih_443rd_mountain",
           "most_victories_brigade_id": "arbih_242nd_zvornik_muslim_light",
-          "nadir_aggregate_personnel": 61756,
+          "nadir_aggregate_personnel": 61755,
           "peak_aggregate_personnel": 78784,
           "stalemates": 2,
           "total_casualties_inflicted": 8774,
-          "total_casualties_taken": 24479,
+          "total_casualties_taken": 24478,
           "total_osids_captured": 1,
           "total_osids_lost": 25,
           "victories": 6,
@@ -393977,7 +394051,7 @@
         "kind": "brigade",
         "location_osid": "op:orasje:ostra_luka",
         "max_personnel": 3000,
-        "morale": 30,
+        "morale": 27,
         "name": "101st Orašje Brigade",
         "officer_quality": 0.22522186390652735,
         "origin_mun": "orasje",
@@ -394102,7 +394176,7 @@
         "kind": "brigade",
         "location_osid": "op:bosanski_samac:domaljevac_2",
         "max_personnel": 3000,
-        "morale": 36,
+        "morale": 31,
         "name": "102nd Brigade",
         "officer_quality": 0.2261977356904859,
         "origin_mun": "orasje",
@@ -394274,7 +394348,7 @@
         },
         "location_osid": "op:orasje:orasje",
         "max_personnel": 3000,
-        "morale": 24,
+        "morale": 19,
         "name": "103rd Derventa Brigade",
         "officer_quality": 0.05034122562591405,
         "ops": {
@@ -394636,7 +394710,7 @@
         },
         "location_osid": "op:orasje:orasje",
         "max_personnel": 3000,
-        "morale": 22,
+        "morale": 17,
         "name": "105th Modriča Brigade",
         "officer_quality": 0.0500975,
         "ops": {
@@ -395097,7 +395171,7 @@
         },
         "location_osid": "op:brcko:gornji_rahic_2",
         "max_personnel": 3000,
-        "morale": 63,
+        "morale": 66,
         "name": "108th \"Brčko\" Brigade",
         "officer_quality": 0.05014625,
         "ops": {
@@ -395367,7 +395441,7 @@
         "name": "111th Brigade",
         "officer_quality": 0.22659680129173265,
         "origin_mun": "zepce",
-        "personnel": 827,
+        "personnel": 802,
         "posture": "defend",
         "readiness": "active",
         "status": "active",
@@ -395383,12 +395457,12 @@
           "faction": "HRHB",
           "formation_id": "hrhb_111th_brigade",
           "formation_name": "111th Brigade",
-          "narrative": "The 111th Brigade has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 827 personnel.",
+          "narrative": "The 111th Brigade has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 802 personnel.",
           "notable_moments": [],
           "stats": {
             "battles_fought": 0,
             "defeats": 0,
-            "final_personnel": 827,
+            "final_personnel": 802,
             "nadir_personnel": 700,
             "peak_personnel": 700,
             "total_casualties_inflicted": 0,
@@ -395486,7 +395560,7 @@
         "kind": "brigade",
         "location_osid": "op:tuzla:tuzla_2",
         "max_personnel": 3000,
-        "morale": 50,
+        "morale": 55,
         "name": "115th \"Zrinski\" Brigade",
         "officer_quality": 0.10600000000000001,
         "origin_mun": "tuzla",
@@ -395689,7 +395763,7 @@
         "kind": "brigade",
         "location_osid": "op:stolac:stolac_2",
         "max_personnel": 3000,
-        "morale": 85,
+        "morale": 82,
         "name": "1st Brigade (Mostar)",
         "officer_quality": 0.0500975,
         "ops": {
@@ -395855,7 +395929,7 @@
         "kind": "brigade",
         "location_osid": "op:stolac:stolac_2",
         "max_personnel": 3000,
-        "morale": 76,
+        "morale": 73,
         "name": "1st Herzegovina Brigade \"Knez Domagoj\"",
         "officer_quality": 0.08021929839704071,
         "ops": {
@@ -396150,7 +396224,7 @@
         "kind": "brigade",
         "location_osid": "op:stolac:stolac_2",
         "max_personnel": 3000,
-        "morale": 48,
+        "morale": 45,
         "name": "6th Brigade \"Ranko Boban\"",
         "officer_quality": 0.22544370008145298,
         "origin_mun": "grude",
@@ -396273,7 +396347,7 @@
         "kind": "brigade",
         "location_osid": "op:kiseljak:azapovici_2",
         "max_personnel": 3000,
-        "morale": 28,
+        "morale": 25,
         "name": "94th Brigade",
         "officer_quality": 0.225,
         "origin_mun": "kiseljak",
@@ -396396,7 +396470,7 @@
         "kind": "brigade",
         "location_osid": "op:kiseljak:azapovici_2",
         "max_personnel": 3000,
-        "morale": 28,
+        "morale": 25,
         "name": "95th Brigade",
         "officer_quality": 0.225,
         "origin_mun": "kresevo",
@@ -396677,7 +396751,7 @@
         "kind": "brigade",
         "location_osid": "op:kiseljak:azapovici_2",
         "max_personnel": 3000,
-        "morale": 28,
+        "morale": 25,
         "name": "Ban Jelačić Brigade",
         "officer_quality": 0.225,
         "origin_mun": "kiseljak",
@@ -396801,7 +396875,7 @@
         "kind": "brigade",
         "location_osid": "op:trebinje:trebimlja_2",
         "max_personnel": 3000,
-        "morale": 44,
+        "morale": 41,
         "name": "Grude Brigade",
         "officer_quality": 0.22588728925036386,
         "origin_mun": "grude",
@@ -396925,7 +396999,7 @@
         "kind": "brigade",
         "location_osid": "op:stolac:pjesivac_kula_2",
         "max_personnel": 3000,
-        "morale": 68,
+        "morale": 65,
         "name": "Herceg Stjepan Brigade",
         "officer_quality": 0.225,
         "origin_mun": "konjic",
@@ -397049,7 +397123,7 @@
         "kind": "brigade",
         "location_osid": "op:trebinje:trebimlja_2",
         "max_personnel": 3000,
-        "morale": 22,
+        "morale": 19,
         "name": "Široki Brijeg Brigade",
         "officer_quality": 0.2261090422512803,
         "origin_mun": "listica",
@@ -397172,7 +397246,7 @@
         "kind": "brigade",
         "location_osid": "op:capljina:tasovcici_2",
         "max_personnel": 3000,
-        "morale": 98,
+        "morale": 95,
         "name": "Čitluk Brigade",
         "officer_quality": 0.225,
         "origin_mun": "citluk",
@@ -397296,7 +397370,7 @@
         "kind": "brigade",
         "location_osid": "op:bugojno:medini",
         "max_personnel": 3000,
-        "morale": 28,
+        "morale": 25,
         "name": "\"Jure Francetić\" Brigade",
         "officer_quality": 0.22659680129173265,
         "origin_mun": "busovaca",
@@ -397418,7 +397492,7 @@
         "kind": "brigade",
         "location_osid": "op:kiseljak:brnjaci_2",
         "max_personnel": 3000,
-        "morale": 28,
+        "morale": 25,
         "name": "Kiseljak Brigade",
         "officer_quality": 0.225,
         "origin_mun": "kiseljak",
@@ -397787,7 +397861,7 @@
         "kind": "brigade",
         "location_osid": "op:kiseljak:azapovici_2",
         "max_personnel": 3000,
-        "morale": 28,
+        "morale": 25,
         "name": "Kreševo Brigade",
         "officer_quality": 0.225,
         "origin_mun": "kresevo",
@@ -397910,7 +397984,7 @@
         "kind": "brigade",
         "location_osid": "op:stolac:pjesivac_kula_2",
         "max_personnel": 3000,
-        "morale": 72,
+        "morale": 69,
         "name": "Ljubuški Brigade",
         "officer_quality": 0.225,
         "origin_mun": "ljubuski",
@@ -398033,7 +398107,7 @@
         "kind": "brigade",
         "location_osid": "op:stolac:prenj",
         "max_personnel": 3000,
-        "morale": 92,
+        "morale": 89,
         "name": "Mario Hrkač Čikota Brigade",
         "officer_quality": 0.225,
         "origin_mun": "listica",
@@ -398216,7 +398290,7 @@
         "kind": "brigade",
         "location_osid": "op:stolac:prenj",
         "max_personnel": 3000,
-        "morale": 82,
+        "morale": 79,
         "name": "Mostar Brigade",
         "officer_quality": 0.0500975,
         "ops": {
@@ -398353,7 +398427,7 @@
         "kind": "brigade",
         "location_osid": "op:bugojno:medini",
         "max_personnel": 3000,
-        "morale": 28,
+        "morale": 25,
         "name": "\"Stjepan Tomašević\" Brigade",
         "officer_quality": 0.22664113637170036,
         "origin_mun": "novi_travnik",
@@ -398536,7 +398610,7 @@
         "kind": "brigade",
         "location_osid": "op:stolac:prenj",
         "max_personnel": 3000,
-        "morale": 82,
+        "morale": 79,
         "name": "Stolac Units",
         "officer_quality": 0.0500975,
         "ops": {
@@ -398671,7 +398745,7 @@
         "kind": "brigade",
         "location_osid": "op:novi_travnik:rat_2",
         "max_personnel": 3000,
-        "morale": 68,
+        "morale": 65,
         "name": "Travnik Brigade",
         "officer_quality": 0.225,
         "origin_mun": "novi_travnik",
@@ -398795,7 +398869,7 @@
         "kind": "brigade",
         "location_osid": "op:bugojno:medini",
         "max_personnel": 3000,
-        "morale": 28,
+        "morale": 25,
         "name": "\"Vitezovi\" Brigade (Vitez)",
         "officer_quality": 0.22659680129173265,
         "origin_mun": "vitez",
@@ -398918,7 +398992,7 @@
         "kind": "brigade",
         "location_osid": "op:bosanska_krupa:jezerski_2",
         "max_personnel": 3000,
-        "morale": 60,
+        "morale": 65,
         "name": "101st Bihać HVO Brigade",
         "officer_quality": 0.094,
         "origin_mun": "bihac",
@@ -398968,7 +399042,7 @@
           "battles_fought": 0,
           "brigade_count": 10,
           "casualty_exchange_ratio": 0,
-          "current_personnel": 11854,
+          "current_personnel": 11829,
           "defeats": 0,
           "most_casualties_brigade_id": "hrhb_111th_brigade",
           "most_victories_brigade_id": "hrhb_111th_brigade",
@@ -399168,7 +399242,7 @@
         },
         "location_osid": "op:bosanski_samac:domaljevac_2",
         "max_personnel": 3000,
-        "morale": 20,
+        "morale": 17,
         "name": "Hrvoje Vukčić Hrvatinić Brigade",
         "officer_quality": 0.0500975,
         "ops": {
@@ -399235,7 +399309,7 @@
           "battles_fought": 20,
           "brigade_count": 34,
           "casualty_exchange_ratio": 1.4448935596874157,
-          "current_personnel": 44046,
+          "current_personnel": 43937,
           "defeats": 6,
           "most_casualties_brigade_id": "hrhb_103rd_derventa_brigade",
           "most_victories_brigade_id": "hrhb_1st_brigade_mostar",
@@ -399537,7 +399611,7 @@
           "worst_single_battle_casualties": 0,
           "worst_single_battle_turn": null
         },
-        "cohesion": 43.949999999999996,
+        "cohesion": 39.949999999999996,
         "composition": {
           "aa_systems": 0,
           "artillery": 1,
@@ -399593,7 +399667,7 @@
         "name": "Rama Brigade",
         "officer_quality": 0.22677413496145232,
         "origin_mun": "prozor",
-        "personnel": 900,
+        "personnel": 816,
         "posture": "dig_in",
         "readiness": "active",
         "status": "active",
@@ -399609,12 +399683,12 @@
           "faction": "HRHB",
           "formation_id": "hvo_rama_brigade",
           "formation_name": "Rama Brigade",
-          "narrative": "The Rama Brigade has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 900 personnel.",
+          "narrative": "The Rama Brigade has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 816 personnel.",
           "notable_moments": [],
           "stats": {
             "battles_fought": 0,
             "defeats": 0,
-            "final_personnel": 900,
+            "final_personnel": 816,
             "nadir_personnel": 1200,
             "peak_personnel": 1200,
             "total_casualties_inflicted": 0,
@@ -399717,7 +399791,7 @@
           "battles_fought": 0,
           "brigade_count": 3,
           "casualty_exchange_ratio": 0,
-          "current_personnel": 6039,
+          "current_personnel": 5955,
           "defeats": 0,
           "most_casualties_brigade_id": "hrhb_kralj_petar_kreimir_iv_brigade",
           "most_victories_brigade_id": "hrhb_kralj_petar_kreimir_iv_brigade",
@@ -404680,7 +404754,7 @@
               "was_concentrated": false
             },
             {
-              "casualties_inflicted": 523,
+              "casualties_inflicted": 522,
               "casualties_taken": 116,
               "enemy_faction": "RBiH",
               "equipment_captured": {
@@ -404725,7 +404799,7 @@
           "nadir_personnel": 879,
           "peak_personnel": 1500,
           "stalemates": 0,
-          "total_casualties_inflicted": 1416,
+          "total_casualties_inflicted": 1415,
           "total_casualties_taken": 390,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -404848,7 +404922,7 @@
             "final_personnel": 762,
             "nadir_personnel": 879,
             "peak_personnel": 1500,
-            "total_casualties_inflicted": 1416,
+            "total_casualties_inflicted": 1415,
             "total_casualties_taken": 390,
             "victories": 4
           }
@@ -413746,7 +413820,7 @@
           "battles_as_defender": 2,
           "battles_fought": 29,
           "brigade_count": 9,
-          "casualty_exchange_ratio": 2.363831308077198,
+          "casualty_exchange_ratio": 2.3635930426495118,
           "current_personnel": 9183,
           "defeats": 5,
           "most_casualties_brigade_id": "rs_1st_birac",
@@ -413754,7 +413828,7 @@
           "nadir_aggregate_personnel": 8329,
           "peak_aggregate_personnel": 13050,
           "stalemates": 1,
-          "total_casualties_inflicted": 9921,
+          "total_casualties_inflicted": 9920,
           "total_casualties_taken": 4197,
           "total_osids_captured": 16,
           "total_osids_lost": 1,
@@ -413990,7 +414064,7 @@
           "battles_as_defender": 6,
           "battles_fought": 95,
           "brigade_count": 82,
-          "casualty_exchange_ratio": 1.8113220338983052,
+          "casualty_exchange_ratio": 1.8112542372881355,
           "current_personnel": 101462,
           "defeats": 11,
           "most_casualties_brigade_id": "rs_1st_birac",
@@ -413998,7 +414072,7 @@
           "nadir_aggregate_personnel": 76239,
           "peak_aggregate_personnel": 90826,
           "stalemates": 2,
-          "total_casualties_inflicted": 26717,
+          "total_casualties_inflicted": 26716,
           "total_casualties_taken": 14750,
           "total_osids_captured": 61,
           "total_osids_lost": 5,
@@ -414439,7 +414513,7 @@
         ],
         "coverage_length": 1,
         "created_turn": 40,
-        "defensive_power": 1022.971875,
+        "defensive_power": 1015.8468749999998,
         "edge_ids": [
           "op:bugojno:medini__op:donji_vakuf:komar_2"
         ],
@@ -414457,7 +414531,7 @@
         ],
         "coverage_length": 11,
         "created_turn": 40,
-        "defensive_power": 193.52252677685948,
+        "defensive_power": 189.8664203305785,
         "edge_ids": [
           "op:duvno:kongora__op:kupres:bucovaca",
           "op:duvno:suica_2__op:kupres:donji_malovan",
@@ -417880,7 +417954,7 @@
       },
       "zenica:RBiH": {
         "available": 5000,
-        "committed": 16693,
+        "committed": 16694,
         "exhausted": 414,
         "faction": "RBiH",
         "fatigue": 40,
@@ -422252,7 +422326,7 @@
           "defenderBrigades": [
             "arbih_104th_vitezka_motorized"
           ],
-          "defenderCasualties": 523,
+          "defenderCasualties": 522,
           "faction": "RS",
           "officerName": "Corps Commander",
           "outcome": "decisive_victory",
@@ -422803,7 +422877,7 @@
           "operations_successful": 14,
           "peace_plans_accepted": [],
           "peace_plans_rejected": [],
-          "political_cohesion": 47.71985294117647,
+          "political_cohesion": 47.6610294117647,
           "refugees_created": 69662,
           "refugees_received": 0,
           "territory_controlled_km2": 6515.704999999999,
@@ -422824,8 +422898,8 @@
           "humanitarian_standing": 0,
           "international_credibility": 35,
           "military_casualties_inflicted": 8774,
-          "military_casualties_taken": 24479,
-          "military_effectiveness": 11.828179255688548,
+          "military_casualties_taken": 24478,
+          "military_effectiveness": 11.828662472424218,
           "military_position": 37.26347221862673,
           "operations_launched": 2,
           "operations_successful": 6,
@@ -422844,10 +422918,10 @@
           "enclaves_held": [],
           "enclaves_lost": [],
           "humanitarian_standing": 0,
-          "international_credibility": 20,
-          "military_casualties_inflicted": 26717,
+          "international_credibility": 5,
+          "military_casualties_inflicted": 26716,
           "military_casualties_taken": 14750,
-          "military_effectiveness": 59.77362711864407,
+          "military_effectiveness": 59.77138983050847,
           "military_position": 93.69858522047652,
           "operations_launched": 89,
           "operations_successful": 82,
@@ -422858,7 +422932,7 @@
           "refugees_received": 0,
           "territory_controlled_km2": 32068.189000000006,
           "territory_controlled_pct": 62.46572348031768,
-          "war_crimes_events": 6
+          "war_crimes_events": 9
         }
       },
       "patron_relationships": {
@@ -422874,14 +422948,14 @@
           "patron_id": "international_community",
           "relationship_events": [],
           "sanctions_active": false,
-          "support_level": 45
+          "support_level": 50
         },
         "RS": {
           "override_authority": 0,
           "patron_id": "serbia",
           "relationship_events": [],
           "sanctions_active": false,
-          "support_level": 95
+          "support_level": 100
         }
       },
       "peace_plan_history": [],
@@ -422892,6 +422966,104 @@
         },
         "plan_id": "vance_owen",
         "turn_offered": 40
+      },
+      "strategic_dimensions": {
+        "HRHB": {
+          "internal_cohesion": {
+            "base_value": 50,
+            "effective_value": 35,
+            "event_modifier": -15
+          },
+          "international_standing": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "military_credibility": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "negotiating_leverage": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "patron_confidence": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "territorial_legitimacy": {
+            "base_value": 50,
+            "effective_value": 60,
+            "event_modifier": 10
+          }
+        },
+        "RBiH": {
+          "internal_cohesion": {
+            "base_value": 50,
+            "effective_value": 35,
+            "event_modifier": -15
+          },
+          "international_standing": {
+            "base_value": 50,
+            "effective_value": 70,
+            "event_modifier": 20
+          },
+          "military_credibility": {
+            "base_value": 50,
+            "effective_value": 63,
+            "event_modifier": 13
+          },
+          "negotiating_leverage": {
+            "base_value": 50,
+            "effective_value": 55,
+            "event_modifier": 5
+          },
+          "patron_confidence": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "territorial_legitimacy": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          }
+        },
+        "RS": {
+          "internal_cohesion": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "international_standing": {
+            "base_value": 50,
+            "effective_value": 0,
+            "event_modifier": -50
+          },
+          "military_credibility": {
+            "base_value": 50,
+            "effective_value": 70,
+            "event_modifier": 20
+          },
+          "negotiating_leverage": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "patron_confidence": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "territorial_legitimacy": {
+            "base_value": 50,
+            "effective_value": 45,
+            "event_modifier": -5
+          }
+        }
       }
     },
     "og_orders": [],
@@ -423316,7 +423488,7 @@
         "edge_count": 16,
         "faction": "RBiH",
         "fatigue_avg": 2,
-        "morale_avg": 68,
+        "morale_avg": 71,
         "offensive_power": 87,
         "personnel": 1064,
         "sector_id": "sector:arbih_1st_corps:0",
@@ -423330,7 +423502,7 @@
         "edge_count": 32,
         "faction": "RBiH",
         "fatigue_avg": 2.7,
-        "morale_avg": 79,
+        "morale_avg": 81,
         "offensive_power": 391,
         "personnel": 3778,
         "sector_id": "sector:arbih_1st_corps:1",
@@ -423344,7 +423516,7 @@
         "edge_count": 6,
         "faction": "RBiH",
         "fatigue_avg": 0,
-        "morale_avg": 71,
+        "morale_avg": 74,
         "offensive_power": 140,
         "personnel": 912,
         "sector_id": "sector:arbih_1st_corps:2",
@@ -423358,7 +423530,7 @@
         "edge_count": 11,
         "faction": "RBiH",
         "fatigue_avg": 0,
-        "morale_avg": 81,
+        "morale_avg": 82,
         "offensive_power": 51,
         "personnel": 714,
         "sector_id": "sector:arbih_1st_corps:3",
@@ -423386,7 +423558,7 @@
         "edge_count": 20,
         "faction": "RBiH",
         "fatigue_avg": 2,
-        "morale_avg": 85,
+        "morale_avg": 86,
         "offensive_power": 49,
         "personnel": 564,
         "sector_id": "sector:arbih_1st_corps:5",
@@ -423428,7 +423600,7 @@
         "edge_count": 22,
         "faction": "RBiH",
         "fatigue_avg": 1.5,
-        "morale_avg": 62,
+        "morale_avg": 63,
         "offensive_power": 1416,
         "personnel": 7178,
         "sector_id": "sector:arbih_2nd_corps:1",
@@ -423442,7 +423614,7 @@
         "edge_count": 30,
         "faction": "RBiH",
         "fatigue_avg": 4.3,
-        "morale_avg": 25,
+        "morale_avg": 27,
         "offensive_power": 118,
         "personnel": 1173,
         "sector_id": "sector:arbih_2nd_corps:2",
@@ -423456,7 +423628,7 @@
         "edge_count": 11,
         "faction": "RBiH",
         "fatigue_avg": 1.1,
-        "morale_avg": 76,
+        "morale_avg": 77,
         "offensive_power": 2945,
         "personnel": 15766,
         "sector_id": "sector:arbih_2nd_corps:3",
@@ -423512,7 +423684,7 @@
         "edge_count": 8,
         "faction": "RBiH",
         "fatigue_avg": 1,
-        "morale_avg": 63,
+        "morale_avg": 67,
         "offensive_power": 955,
         "personnel": 6594,
         "sector_id": "sector:arbih_3rd_corps:0",
@@ -423526,7 +423698,7 @@
         "edge_count": 11,
         "faction": "RBiH",
         "fatigue_avg": 0,
-        "morale_avg": 87,
+        "morale_avg": 88,
         "offensive_power": 949,
         "personnel": 6798,
         "sector_id": "sector:arbih_3rd_corps:1",
@@ -423541,7 +423713,7 @@
         "faction": "RBiH",
         "fatigue_avg": 0,
         "morale_avg": 87,
-        "offensive_power": 2696,
+        "offensive_power": 2697,
         "personnel": 16778,
         "sector_id": "sector:arbih_3rd_corps:2",
         "strength_class": "critical"
@@ -423554,7 +423726,7 @@
         "edge_count": 13,
         "faction": "RBiH",
         "fatigue_avg": 0,
-        "morale_avg": 59,
+        "morale_avg": 62,
         "offensive_power": 1631,
         "personnel": 12814,
         "sector_id": "sector:arbih_3rd_corps:3",
@@ -423568,7 +423740,7 @@
         "edge_count": 9,
         "faction": "RBiH",
         "fatigue_avg": 0.4,
-        "morale_avg": 59,
+        "morale_avg": 61,
         "offensive_power": 759,
         "personnel": 5146,
         "sector_id": "sector:arbih_3rd_corps:4",
@@ -423582,7 +423754,7 @@
         "edge_count": 5,
         "faction": "RBiH",
         "fatigue_avg": 2.7,
-        "morale_avg": 60,
+        "morale_avg": 63,
         "offensive_power": 111,
         "personnel": 779,
         "sector_id": "sector:arbih_4th_corps:0",
@@ -423596,7 +423768,7 @@
         "edge_count": 5,
         "faction": "RBiH",
         "fatigue_avg": 1,
-        "morale_avg": 64,
+        "morale_avg": 67,
         "offensive_power": 165,
         "personnel": 1059,
         "sector_id": "sector:arbih_4th_corps:1",
@@ -423610,7 +423782,7 @@
         "edge_count": 8,
         "faction": "RBiH",
         "fatigue_avg": 0,
-        "morale_avg": 83,
+        "morale_avg": 84,
         "offensive_power": 2696,
         "personnel": 14153,
         "sector_id": "sector:arbih_5th_corps:0",
@@ -423624,7 +423796,7 @@
         "edge_count": 1,
         "faction": "HRHB",
         "fatigue_avg": 0,
-        "morale_avg": 29,
+        "morale_avg": 26,
         "offensive_power": 580,
         "personnel": 2859,
         "sector_id": "sector:hvo_central_bosnia:0",
@@ -423638,7 +423810,7 @@
         "edge_count": 2,
         "faction": "HRHB",
         "fatigue_avg": 0,
-        "morale_avg": 29,
+        "morale_avg": 26,
         "offensive_power": 808,
         "personnel": 6629,
         "sector_id": "sector:hvo_central_bosnia:1",
@@ -423694,7 +423866,7 @@
         "edge_count": 5,
         "faction": "HRHB",
         "fatigue_avg": 2,
-        "morale_avg": 27,
+        "morale_avg": 24,
         "offensive_power": 1061,
         "personnel": 7987,
         "sector_id": "sector:hvo_northwest_bosnia:0",
@@ -423722,7 +423894,7 @@
         "edge_count": 6,
         "faction": "HRHB",
         "fatigue_avg": 4,
-        "morale_avg": 75,
+        "morale_avg": 72,
         "offensive_power": 674,
         "personnel": 10326,
         "sector_id": "sector:hvo_southeast_herzegovina:0",
@@ -423736,7 +423908,7 @@
         "edge_count": 9,
         "faction": "HRHB",
         "fatigue_avg": 4,
-        "morale_avg": 75,
+        "morale_avg": 73,
         "offensive_power": 408,
         "personnel": 6363,
         "sector_id": "sector:hvo_southeast_herzegovina:1",
@@ -425458,7 +425630,7 @@
     ],
     "strategic_reserves": {
       "HRHB": 0,
-      "RBiH": 9063
+      "RBiH": 9062
     },
     "theatres": {
       "HRHB_default": {
@@ -435447,7 +435619,7 @@
           ],
           "casualties_inflicted": {
             "killed": 425,
-            "wounded": 778
+            "wounded": 777
           },
           "casualties_suffered": {
             "killed": 117,
@@ -435524,7 +435696,7 @@
       ],
       "casualties_inflicted": {
         "killed": 2258,
-        "wounded": 4135
+        "wounded": 4134
       },
       "casualties_suffered": {
         "killed": 805,
@@ -435552,7 +435724,7 @@
       "final_strength": 2244,
       "grade": {
         "factors": {
-          "exchange_ratio": 92.40867279894876,
+          "exchange_ratio": 92.39421813403416,
           "objective_completion": 88.88888888888889,
           "preservation": 39.141810570382,
           "tempo": 0
@@ -435955,7 +436127,7 @@
               "attacks_this_turn": 1,
               "casualties_inflicted": {
                 "killed": 157,
-                "wounded": 288
+                "wounded": 287
               },
               "casualties_suffered": {
                 "killed": 35,
@@ -436005,7 +436177,7 @@
           "brigade_count": 4,
           "casualties_inflicted": {
             "killed": 284,
-            "wounded": 520
+            "wounded": 519
           },
           "casualties_suffered": {
             "killed": 70,
@@ -453044,12 +453216,7 @@
       },
       "displacement_hotspot": "novi_grad_sarajevo",
       "displacement_total": 6447,
-      "events_fired": [
-        {
-          "id": "hvo_arbih_tensions_rise_1992",
-          "text": "HVO-ARBiH Clash at Prozor"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
@@ -453969,7 +454136,12 @@
       },
       "displacement_hotspot": "bosanski_brod",
       "displacement_total": 14755,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "hvo_arbih_tensions_rise_1992",
+          "text": "HVO-ARBiH Clash at Prozor"
+        }
+      ],
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
@@ -454768,12 +454940,7 @@
       },
       "displacement_hotspot": "derventa",
       "displacement_total": 15667,
-      "events_fired": [
-        {
-          "id": "london_conference_1992",
-          "text": "London Conference on Yugoslavia"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
@@ -455146,12 +455313,7 @@
       },
       "displacement_hotspot": "derventa",
       "displacement_total": 22382,
-      "events_fired": [
-        {
-          "id": "bihac_isolation_deepens_1992",
-          "text": "Bihac Pocket Increasingly Isolated"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -455507,8 +455669,8 @@
       "formation_spawns": [],
       "heavy_munitions_deltas": {
         "HRHB": 1.29478702008889,
-        "RBiH": 0.07081464224965117,
-        "RS": 0.10535497436679009
+        "RBiH": 0.07083363526149,
+        "RS": 0.10539296039047485
       },
       "movements": [
         {
@@ -455639,8 +455801,8 @@
       ],
       "supply_deltas": {
         "HRHB": -0.051682539682545325,
-        "RBiH": 1.029506100937354,
-        "RS": 0.06913600122425123
+        "RBiH": 1.029514014692289,
+        "RS": 0.06915182873412107
       },
       "supply_transitions": [],
       "territory_net": {
@@ -455687,7 +455849,7 @@
           ],
           "attacker_casualties": 116,
           "attacker_faction": "RS",
-          "defender_casualties": 523,
+          "defender_casualties": 522,
           "defender_contributions": [
             {
               "brigade_id": "arbih_104th_vitezka_motorized",
@@ -455705,10 +455867,10 @@
             },
             {
               "brigade_id": "arbih_165th_mountain",
-              "casualties_taken": 523,
+              "casualties_taken": 522,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 16.24
+              "reactive_weight": 16.21
             },
             {
               "brigade_id": "arbih_17th_muslim_light",
@@ -455837,12 +455999,7 @@
       },
       "displacement_hotspot": "skender_vakuf",
       "displacement_total": 15224,
-      "events_fired": [
-        {
-          "id": "concentration_camps_revealed_1992",
-          "text": "Concentration Camps Exposed to the World"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -455854,8 +456011,8 @@
       ],
       "heavy_munitions_deltas": {
         "HRHB": 1.3181449513015906,
-        "RBiH": -0.033705725443164525,
-        "RS": -0.014835192171133826
+        "RBiH": -0.033724718455003355,
+        "RS": -0.014873178194818593
       },
       "movements": [
         {
@@ -455967,8 +456124,8 @@
       ],
       "supply_deltas": {
         "HRHB": 0.13927119718337622,
-        "RBiH": -0.014044052267983886,
-        "RS": 0.019056765166794776
+        "RBiH": -0.014051966022918805,
+        "RS": 0.01904093765692494
       },
       "supply_transitions": [
         {
@@ -456223,7 +456380,16 @@
       },
       "displacement_hotspot": "odzak",
       "displacement_total": 48655,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "srebrenica_enclave_forms_1992",
+          "text": "Srebrenica Pocket Crystallizes"
+        },
+        {
+          "id": "concentration_camps_revealed_1992",
+          "text": "The World Is Watching"
+        }
+      ],
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
@@ -456643,12 +456809,7 @@
       },
       "displacement_hotspot": "jajce",
       "displacement_total": 18965,
-      "events_fired": [
-        {
-          "id": "posavina_corridor_fighting_1992",
-          "text": "Posavina Corridor Fighting Intensifies"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -457398,7 +457559,7 @@
       "heavy_munitions_deltas": {
         "HRHB": 0.9382784152401271,
         "RBiH": 0.15514020012172658,
-        "RS": 0.45956623243951356
+        "RS": 0.4596833562114142
       },
       "movements": [
         {
@@ -457748,12 +457909,7 @@
       },
       "displacement_hotspot": "doboj",
       "displacement_total": 14314,
-      "events_fired": [
-        {
-          "id": "drina_valley_ethnic_cleansing_1992",
-          "text": "Drina Valley Campaign Accelerates"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -458345,7 +458501,7 @@
       "supply_deltas": {
         "HRHB": 0.022529676318910674,
         "RBiH": -0.009310997767940421,
-        "RS": 0.2245731856481683
+        "RS": 0.224621987219777
       },
       "supply_transitions": [
         {
@@ -458456,7 +458612,12 @@
       },
       "displacement_hotspot": "novi_grad_sarajevo",
       "displacement_total": 9336,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "drina_valley_ethnic_cleansing_1992",
+          "text": "Drina Valley Campaign Accelerates"
+        }
+      ],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -458697,16 +458858,7 @@
       },
       "displacement_hotspot": "bosanski_novi",
       "displacement_total": 21757,
-      "events_fired": [
-        {
-          "id": "mostar_liberation_1992",
-          "text": "HVO and ARBiH Jointly Liberate Mostar"
-        },
-        {
-          "id": "srebrenica_enclave_forms_1992",
-          "text": "Srebrenica Pocket Crystallizes"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -459040,12 +459192,7 @@
       },
       "displacement_hotspot": "sanski_most",
       "displacement_total": 26808,
-      "events_fired": [
-        {
-          "id": "un_convoys_begin_1992",
-          "text": "First UN Aid Convoys Enter Bosnia"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -459270,7 +459417,16 @@
       },
       "displacement_hotspot": "sanski_most",
       "displacement_total": 34557,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "sarajevo_siege_begins_1992",
+          "text": "Siege of Sarajevo Intensifies"
+        },
+        {
+          "id": "mostar_liberation_1992",
+          "text": "Mostar Liberated"
+        }
+      ],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -459301,7 +459457,7 @@
       "heavy_munitions_deltas": {
         "HRHB": 1.390145991822223,
         "RBiH": 0.37430413740481683,
-        "RS": 1.2961193429786562
+        "RS": 1.296119342978642
       },
       "movements": [
         {
@@ -459536,12 +459692,7 @@
       },
       "displacement_hotspot": "ilidza",
       "displacement_total": 81192,
-      "events_fired": [
-        {
-          "id": "sarajevo_siege_begins_1992",
-          "text": "Siege of Sarajevo Intensifies"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -459595,7 +459746,7 @@
       ],
       "heavy_munitions_deltas": {
         "HRHB": 1.4100006349206318,
-        "RBiH": -0.013066573750998955,
+        "RBiH": -0.013008011865053959,
         "RS": 0.4931961570076169
       },
       "movements": [
@@ -459780,7 +459931,7 @@
       ],
       "supply_deltas": {
         "HRHB": 0.5687441269841287,
-        "RBiH": -0.005444405729583934,
+        "RBiH": -0.005420004943779588,
         "RS": -0.20129895124684083
       },
       "supply_transitions": [
@@ -460144,6 +460295,14 @@
       "displacement_total": 479373,
       "events_fired": [
         {
+          "id": "battle_of_the_barracks_visoko",
+          "text": "Battle of the Barracks — Visoko"
+        },
+        {
+          "id": "battle_of_the_barracks_zenica",
+          "text": "Battle of the Barracks — Zenica"
+        },
+        {
           "id": "jna_withdrawal_1992",
           "text": "JNA Forces Begin Withdrawal from Bosnia"
         }
@@ -460195,8 +460354,8 @@
       ],
       "heavy_munitions_deltas": {
         "HRHB": 1.4249311875950461,
-        "RBiH": 0.3781758356254663,
-        "RS": 0.29240680232220484
+        "RBiH": 0.3781172737395213,
+        "RS": 0.2922896785503184
       },
       "movements": [
         {
@@ -460414,8 +460573,8 @@
       ],
       "supply_deltas": {
         "HRHB": 0.5715546394958153,
-        "RBiH": 0.15757326484394696,
-        "RS": 19.968065383159697
+        "RBiH": 0.1575488640581426,
+        "RS": 19.96801658158809
       },
       "supply_transitions": [
         {
@@ -460763,8 +460922,8 @@
       "displacement_total": 15819,
       "events_fired": [
         {
-          "id": "arms_embargo_impact_1992",
-          "text": "UN Arms Embargo Strangles Bosnia"
+          "id": "hrhb_political_goal",
+          "text": "What Is Herceg-Bosna?"
         },
         {
           "id": "battle_of_the_barracks_sarajevo",
@@ -460773,14 +460932,6 @@
         {
           "id": "battle_of_the_barracks_tuzla",
           "text": "Battle of the Barracks — Tuzla"
-        },
-        {
-          "id": "battle_of_the_barracks_visoko",
-          "text": "Battle of the Barracks — Visoko"
-        },
-        {
-          "id": "battle_of_the_barracks_zenica",
-          "text": "Battle of the Barracks — Zenica"
         },
         {
           "id": "graz_accords",
@@ -460984,7 +461135,7 @@
       ],
       "supply_deltas": {
         "HRHB": 0.6002714920634844,
-        "RBiH": 6.640978635814449,
+        "RBiH": 16.64097863581446,
         "RS": -0.2756483803523935
       },
       "supply_transitions": [
@@ -461474,7 +461625,16 @@
       "decoration_awards": [],
       "displacement_by_ethnicity": {},
       "displacement_total": 0,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "rbih_state_identity",
+          "text": "What Is Bosnia?"
+        },
+        {
+          "id": "arms_embargo_impact_1992",
+          "text": "UN Arms Embargo Strangles Bosnia"
+        }
+      ],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -461852,7 +462012,7 @@
       ],
       "supply_deltas": {
         "HRHB": -1.9137928253968255,
-        "RBiH": 4.037245953006014,
+        "RBiH": -5.962754046993997,
         "RS": -2.3925445710537616
       },
       "supply_transitions": [
@@ -462787,7 +462947,12 @@
         "RS": 0
       },
       "displacement_total": 0,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "rs_strategic_goals",
+          "text": "The Assembly Speaks"
+        }
+      ],
       "formation_destructions": [
         {
           "faction": "RBiH",
