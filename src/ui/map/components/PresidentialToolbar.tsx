@@ -94,7 +94,8 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
 
     return (
         <>
-            <div className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8 overflow-visible">
+            {/* Toolbar bar */}
+            <div className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8">
 
                 {/* LEFT: Date */}
                 <div className="flex items-center gap-3 min-w-[180px]">
@@ -114,9 +115,8 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                     )}
                 </div>
 
-                {/* CENTER: Alert + Crest + Alert */}
+                {/* CENTER: Alert badges (crest is separate floating element below) */}
                 <div className="flex items-center gap-4">
-
                     {/* Left alert: Pending decisions */}
                     {pendingDecisions > 0 && (
                         <button
@@ -131,30 +131,8 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                     {/* Officer badge */}
                     {pendingOfficerEvents && <OfficerEventBadge />}
 
-                    {/* Army Crest — gateway to HQ */}
-                    <button
-                        onClick={handleOpenHQ}
-                        className="group relative z-[200] flex flex-col items-center px-5 -my-1 rounded-lg hover:bg-white/5 transition-all"
-                        aria-label={`${armyName ?? 'Army'} HQ [H]`}
-                    >
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-400/80 group-hover:text-amber-400 transition-colors">
-                            {armyName ?? playerFaction ?? 'COMMAND'}
-                        </span>
-                        {crestUrl && (
-                            <img
-                                src={crestUrl}
-                                alt=""
-                                className="w-24 h-24 -mt-1 -mb-3 object-contain drop-shadow-[0_0_12px_rgba(212,167,58,0.4)] group-hover:drop-shadow-[0_0_20px_rgba(212,167,58,0.6)] transition-all"
-                                draggable={false}
-                            />
-                        )}
-                        <span className="text-[7px] font-mono uppercase tracking-[0.25em] text-text-secondary/50 -mt-1">
-                            Headquarters
-                        </span>
-                        {hasAlerts && (
-                            <div className="absolute inset-0 rounded-lg border border-amber-400/20 animate-pulse pointer-events-none" />
-                        )}
-                    </button>
+                    {/* Spacer for crest area */}
+                    <div className="w-28" />
 
                     {/* Right alert: Pressure warning */}
                     {pressureWarning && (
@@ -179,6 +157,28 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                     </button>
                 </div>
             </div>
+
+            {/* Army Crest — floating on top of toolbar, extends below */}
+            <button
+                onClick={handleOpenHQ}
+                className="fixed top-0 left-1/2 -translate-x-1/2 z-[200] group flex flex-col items-center pointer-events-auto"
+                aria-label={`${armyName ?? 'Army'} HQ [H]`}
+            >
+                <span className="text-[8px] font-mono font-bold uppercase tracking-[0.25em] text-amber-400/60 group-hover:text-amber-400 transition-colors mt-1 mb-0.5">
+                    {armyName ?? playerFaction ?? 'COMMAND'}
+                </span>
+                {crestUrl && (
+                    <img
+                        src={crestUrl}
+                        alt=""
+                        className="w-[100px] h-[100px] object-contain drop-shadow-[0_0_12px_rgba(212,167,58,0.4)] group-hover:drop-shadow-[0_0_20px_rgba(212,167,58,0.6)] transition-all"
+                        draggable={false}
+                    />
+                )}
+                {hasAlerts && (
+                    <div className="absolute inset-0 rounded-lg border border-amber-400/20 animate-pulse pointer-events-none" />
+                )}
+            </button>
 
             {/* Dev tools strip — compact, below main toolbar */}
             {devMode && (

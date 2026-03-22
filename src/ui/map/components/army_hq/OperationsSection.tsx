@@ -141,7 +141,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">AXIS OF ADVANCE STATUS ({axes.length})</div>
                     <div className="grid gap-2">
                         {axes.map((axis) => (
-                            <div key={axis.axis_id} className="px-3 py-2 border border-panel-border/50 bg-panel-card">
+                            <div key={axis.axis_id} className="px-3 py-2 border border-panel-border/50 bg-panel-card rounded-md">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="font-bold text-text-primary uppercase tracking-wider">{axis.name}</span>
                                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 border border-current bg-current/5 ${AXIS_STATUS_COLOR[axis.status] ?? 'text-text-secondary/60'}`}>
@@ -239,7 +239,7 @@ export function OperationsSection({ corpsId, operations, gameState }: Operations
                         const isExpanded = expandedOp === opKey;
 
                         return (
-                            <div key={opKey} className="border border-panel-border/50 bg-panel-card">
+                            <div key={opKey} className="border border-panel-border/50 bg-panel-card rounded-md">
                                 <button
                                     type="button"
                                     onClick={() => setExpandedOp(isExpanded ? null : opKey)}

@@ -8,8 +8,9 @@ import { useIPC } from '../../desktop/useIPC';
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
-import { SituationBriefing, generateBriefing } from './SituationBriefing';
+import { SituationBriefing, generateBriefing, type BriefingTarget } from './SituationBriefing';
 import { StrategicPosition } from './StrategicPosition';
+import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
@@ -29,6 +30,9 @@ export function ArmyHQModal() {
     const state = useGameStore((s) => s.loadedGameState);
     const expandedCorpsId = useGameStore((s) => s.armyHQExpandedCorpsId);
     const setExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
+    const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
+    const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
+    const setIsOperationsPanelOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
 
     useEffect(() => {
         if (!open) return;
@@ -108,6 +112,23 @@ export function ArmyHQModal() {
         }
     }, [ipc, data]);
 
+    const handleBriefingNavigate = useCallback((target: BriefingTarget) => {
+        switch (target.type) {
+            case 'corps':
+                setExpandedCorpsId(target.corpsId);
+                break;
+            case 'sector':
+                setOpen(false);
+                setSelectedCorpsFrontSectorId(target.sectorId);
+                break;
+            case 'operation':
+                setOpen(false);
+                setSelectedOperationKey(target.operationKey);
+                setIsOperationsPanelOpen(true);
+                break;
+        }
+    }, [setOpen, setExpandedCorpsId, setSelectedCorpsFrontSectorId, setSelectedOperationKey, setIsOperationsPanelOpen]);
+
     if (!open || !faction || !state || !data) return null;
 
     const crestSrc = getArmyCrest(faction);
@@ -119,8 +140,8 @@ export function ArmyHQModal() {
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-8 py-3 shrink-0 border-b border-panel-border bg-panel-card">
-                    {/* Left: back/close + title */}
+                <div className="flex items-center justify-between px-6 py-2.5 shrink-0 border-b border-panel-border bg-panel-card">
+                    {/* Left: back/close + crest + title */}
                     <div className="flex items-center gap-4">
                         <button
                             type="button"
@@ -131,15 +152,18 @@ export function ArmyHQModal() {
                                     setOpen(false);
                                 }
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold uppercase tracking-wide text-text-secondary border border-panel-border rounded hover:bg-panel-hover hover:text-text-primary transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
                         >
                             {expandedCorpsId ? '← BACK' : '← MAP'}
                         </button>
+                        {crestSrc && (
+                            <img src={crestSrc} alt="" className="w-10 h-10 object-contain opacity-80" draggable={false} />
+                        )}
                         <div>
-                            <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
-                                {expandedCorpsId ? `${getArmyName(faction) ?? faction} HQ` : 'COMMANDER'}
+                            <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold">
+                                {expandedCorpsId ? `${getArmyName(faction) ?? faction} HQ` : (FACTION_DISPLAY[faction] ?? faction)}
                             </div>
-                            <div className="text-[18px] font-bold uppercase tracking-wide text-text-primary">
+                            <div className="text-[16px] font-bold uppercase tracking-wide text-text-primary">
                                 {expandedCorpsId
                                     ? data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name ?? expandedCorpsId
                                     : `${getArmyName(faction) ?? faction} MAIN STAFF`
@@ -149,7 +173,7 @@ export function ArmyHQModal() {
                     </div>
 
                     {/* Right: emergency posture + situation + close */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
                         {!expandedCorpsId && ipc.isAvailable && (
                             <select
                                 defaultValue=""
@@ -159,8 +183,7 @@ export function ArmyHQModal() {
                                         e.target.value = '';
                                     }
                                 }}
-                                className="text-[10px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded px-3 py-2 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors"
-                                title="Set all corps to the same stance"
+                                className="text-[10px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded-md px-3 py-1.5 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors"
                             >
                                 <option value="" disabled>EMERGENCY POSTURE</option>
                                 <option value="defensive">ALL DEFENSIVE</option>
@@ -170,18 +193,17 @@ export function ArmyHQModal() {
                             </select>
                         )}
                         <div className="text-right">
-                            <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold">
+                            <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold">
                                 STRATEGIC SITUATION
                             </div>
-                            <div className="text-[14px] font-bold text-text-primary">
+                            <div className="text-[13px] font-bold text-text-primary tabular-nums">
                                 Week {state.turn} {state.metadata?.date ? `\u2014 ${state.metadata.date}` : ''}
                             </div>
                         </div>
                         <button
                             type="button"
                             onClick={() => { setExpandedCorpsId(null); setOpen(false); }}
-                            className="text-text-secondary hover:text-text-primary text-[22px] leading-none transition-colors px-2"
-                            title="Close [ESC]"
+                            className="text-text-secondary hover:text-text-primary text-[20px] leading-none transition-colors px-1"
                         >
                             &times;
                         </button>
@@ -189,40 +211,43 @@ export function ArmyHQModal() {
                 </div>
 
                 {/* Content */}
-                <div className="relative flex-1 overflow-y-auto px-8 pt-6 pb-8">
+                <div className="relative flex-1 overflow-y-auto px-6 pt-4 pb-6">
 
-                    {/* Top section: Commander + Crest + Stats */}
+                    {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
                     {!expandedCorpsId && (
-                        <div className="grid grid-cols-[1fr_auto_1fr] gap-8 mb-8 items-start">
+                        <div className="grid grid-cols-[1fr_1fr_auto_1fr] gap-4 mb-4 items-stretch">
                             {/* Commander */}
-                            <div className="bg-panel-card border border-panel-border rounded p-5">
-                                <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
+                            <div className="bg-panel-card border border-panel-border rounded-lg p-4">
+                                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1.5 border-b border-panel-border">
                                     COMMANDER
                                 </div>
                                 {data.commander ? (
                                     <OfficerProfile officer={data.commander} label="" compact={false} />
                                 ) : (
-                                    <div className="text-text-secondary text-[13px] py-6 text-center">
+                                    <div className="text-text-secondary text-[12px] py-4 text-center italic">
                                         No commander data available
                                     </div>
                                 )}
                             </div>
 
-                            {/* Army Crest — prominently centered */}
-                            <div className="flex flex-col items-center justify-center px-8 py-4 select-none">
-                                {crestSrc ? (
+                            {/* Chief of Staff Briefing */}
+                            <ChiefOfStaffBriefing
+                                briefingItems={data.briefingItems}
+                                gameState={state}
+                                faction={faction}
+                            />
+
+                            {/* Army Crest */}
+                            <div className="flex flex-col items-center justify-center px-4 py-2 select-none">
+                                {crestSrc && (
                                     <img
                                         src={crestSrc}
                                         alt={`${FACTION_DISPLAY[faction] ?? faction} crest`}
-                                        className="w-[180px] h-[180px] object-contain drop-shadow-lg opacity-90"
+                                        className="w-[140px] h-[140px] object-contain drop-shadow-lg"
                                         draggable={false}
                                     />
-                                ) : (
-                                    <div className="text-[64px] font-black text-text-secondary/20">
-                                        {getArmyName(faction) ?? faction}
-                                    </div>
                                 )}
-                                <div className="text-[11px] uppercase tracking-[0.2em] text-text-secondary mt-3 text-center leading-relaxed">
+                                <div className="text-[10px] uppercase tracking-[0.2em] text-text-secondary mt-2 text-center leading-relaxed">
                                     {FACTION_DISPLAY[faction] ?? faction}
                                 </div>
                             </div>
@@ -239,17 +264,17 @@ export function ArmyHQModal() {
                     {!expandedCorpsId && data.briefingItems.length > 0 && (
                         <SituationBriefing
                             items={data.briefingItems}
-                            onCorpsClick={(id) => setExpandedCorpsId(id)}
+                            onNavigate={handleBriefingNavigate}
                         />
                     )}
 
                     {/* Corps Cards */}
-                    <div className="max-w-[1600px] mx-auto">
-                        <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-4 pb-2 border-b border-panel-border">
+                    <div>
+                        <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
                             ALL CORPS ({data.corpsFormations.length})
                         </div>
 
-                        <div className={`grid gap-4 ${expandedCorpsId
+                        <div className={`grid gap-3 ${expandedCorpsId
                             ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'
                             : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
                         }`}>

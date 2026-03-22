@@ -52,6 +52,10 @@ runs_ops_compare/
 runs_probe/
 data/derived/scenario/_baseline_tmp/
 
+# Secrets
+.env
+.env.*
+
 # IDE
 .vscode/
 .cursor/

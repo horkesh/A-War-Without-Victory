@@ -9,16 +9,15 @@
 const DIMENSION_CONFIG: Array<{
     id: string;
     label: string;
-    shortLabel: string;
     color: string;
     bgColor: string;
 }> = [
-    { id: 'military_credibility', label: 'Military Credibility', shortLabel: 'MIL CRED', color: 'bg-red-500', bgColor: 'bg-red-500/20' },
-    { id: 'territorial_legitimacy', label: 'Territorial Legitimacy', shortLabel: 'TERR LEG', color: 'bg-amber-500', bgColor: 'bg-amber-500/20' },
-    { id: 'international_standing', label: 'International Standing', shortLabel: 'INTL STD', color: 'bg-blue-400', bgColor: 'bg-blue-400/20' },
-    { id: 'patron_confidence', label: 'Patron Confidence', shortLabel: 'PATRON', color: 'bg-emerald-500', bgColor: 'bg-emerald-500/20' },
-    { id: 'internal_cohesion', label: 'Internal Cohesion', shortLabel: 'COHESION', color: 'bg-purple-400', bgColor: 'bg-purple-400/20' },
-    { id: 'negotiating_leverage', label: 'Negotiating Leverage', shortLabel: 'LEVERAGE', color: 'bg-yellow-400', bgColor: 'bg-yellow-400/20' },
+    { id: 'military_credibility', label: 'Military Credibility', color: 'bg-red-500', bgColor: 'bg-red-500/20' },
+    { id: 'territorial_legitimacy', label: 'Territorial Legitimacy', color: 'bg-amber-500', bgColor: 'bg-amber-500/20' },
+    { id: 'international_standing', label: 'International Standing', color: 'bg-blue-400', bgColor: 'bg-blue-400/20' },
+    { id: 'patron_confidence', label: 'Patron Confidence', color: 'bg-emerald-500', bgColor: 'bg-emerald-500/20' },
+    { id: 'internal_cohesion', label: 'Internal Cohesion', color: 'bg-purple-400', bgColor: 'bg-purple-400/20' },
+    { id: 'negotiating_leverage', label: 'Negotiating Leverage', color: 'bg-yellow-400', bgColor: 'bg-yellow-400/20' },
 ];
 
 interface DimValue {
@@ -47,7 +46,7 @@ function modifierDisplay(modifier: number): { text: string; color: string } | nu
 export function StrategicPosition({ dimensions, faction }: StrategicPositionProps) {
     if (!dimensions) {
         return (
-            <div className="bg-panel-card border border-panel-border rounded p-5">
+            <div className="bg-panel-card border border-panel-border rounded-lg p-4">
                 <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
                     STRATEGIC POSITION
                 </div>
@@ -59,12 +58,12 @@ export function StrategicPosition({ dimensions, faction }: StrategicPositionProp
     }
 
     return (
-        <div className="bg-panel-card border border-panel-border rounded p-5">
+        <div className="bg-panel-card border border-panel-border rounded-lg p-4">
             <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
                 STRATEGIC POSITION
             </div>
             <div className="space-y-2">
-                {DIMENSION_CONFIG.map(({ id, shortLabel, color, bgColor }) => {
+                {DIMENSION_CONFIG.map(({ id, label, color, bgColor }) => {
                     const dim = dimensions[id];
                     const effective = dim?.effective_value ?? 50;
                     const mod = modifierDisplay(dim?.event_modifier ?? 0);
@@ -73,7 +72,7 @@ export function StrategicPosition({ dimensions, faction }: StrategicPositionProp
                         <div key={id} className="group">
                             <div className="flex items-center justify-between mb-0.5">
                                 <span className="text-[10px] font-bold uppercase tracking-wide text-text-secondary">
-                                    {shortLabel}
+                                    {label}
                                 </span>
                                 <div className="flex items-center gap-1.5">
                                     {mod && (

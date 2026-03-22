@@ -79,7 +79,8 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
     }
   };
 
-  const topOffset = devMode ? 'top-[4.75rem]' : 'top-[3.25rem]';
+  // Position below the floating crest (~120px tall) — dev strip adds another row
+  const topOffset = devMode ? 'top-[8.5rem]' : 'top-[7.5rem]';
 
   return (
     <div className={`fixed ${topOffset} left-[19rem] right-4 z-20 pointer-events-none`}>

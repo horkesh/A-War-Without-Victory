@@ -144,7 +144,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                         const isExpanded = expandedId === sector.sector_id;
 
                         return (
-                            <div key={sector.sector_id} className="border border-panel-border/50 bg-panel-card">
+                            <div key={sector.sector_id} className="border border-panel-border/50 bg-panel-card rounded-md">
                                 <div className={`flex items-center justify-between px-3 py-2.5 transition-colors ${isExpanded ? 'bg-panel-bg' : 'hover:bg-panel-bg'
                                     }`}>
                                     <button

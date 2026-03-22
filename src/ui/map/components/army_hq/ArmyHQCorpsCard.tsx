@@ -99,7 +99,7 @@ export function ArmyHQCorpsCard({
             <button
                 type="button"
                 onClick={onToggleExpand}
-                className="bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group"
+                className="bg-panel-card border border-panel-border rounded-lg overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group"
             >
                 <div className="flex items-center justify-between px-3 py-2 bg-panel-card">
                     <span className="text-[11px] font-bold text-text-secondary uppercase tracking-widest font-mono">
@@ -131,7 +131,7 @@ export function ArmyHQCorpsCard({
         <button
             type="button"
             onClick={onToggleExpand}
-            className={`min-h-[280px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
+            className={`min-h-[280px] w-full bg-panel-card border border-panel-border rounded-lg overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
                 ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
             {/* Status Stamp */}
@@ -156,17 +156,17 @@ export function ArmyHQCorpsCard({
                     <span className={`font-bold ${gradeColor}`}>EF: {data.eff.grade}</span>
                 </div>
 
-                {/* Equipment icons */}
+                {/* Equipment */}
                 <div className="flex items-center gap-4 mt-2 text-[12px]">
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 cursor-help" title={`Tanks: ${Math.round(data.equipment.tanksOp)} operational / ${Math.round(data.equipment.tanksTotal)} total`}>
                         <Icon name="tanks" size={14} className="text-text-secondary" />
-                        <span className="text-text-primary font-bold tabular-nums">{data.equipment.tanksOp}</span>
-                        <span className="text-text-secondary/60">/{data.equipment.tanksTotal}</span>
+                        <span className="text-text-primary font-bold tabular-nums">{Math.round(data.equipment.tanksOp)}</span>
+                        <span className="text-text-secondary/60">/{Math.round(data.equipment.tanksTotal)}</span>
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 cursor-help" title={`Artillery: ${Math.round(data.equipment.artyOp)} operational / ${Math.round(data.equipment.artyTotal)} total`}>
                         <Icon name="artillery" size={14} className="text-text-secondary" />
-                        <span className="text-text-primary font-bold tabular-nums">{data.equipment.artyOp}</span>
-                        <span className="text-text-secondary/60">/{data.equipment.artyTotal}</span>
+                        <span className="text-text-primary font-bold tabular-nums">{Math.round(data.equipment.artyOp)}</span>
+                        <span className="text-text-secondary/60">/{Math.round(data.equipment.artyTotal)}</span>
                     </span>
                 </div>
 
@@ -224,7 +224,7 @@ export function ArmyHQCorpsCard({
     // Back face: full detail sections (scrollable)
     const cardBack = (
         <div
-            className={`min-h-[280px] bg-panel-card border border-panel-border overflow-hidden flex flex-col
+            className={`min-h-[280px] bg-panel-card border border-panel-border rounded-lg overflow-hidden flex flex-col
                 ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
             {/* Header with back button + stance dropdown */}

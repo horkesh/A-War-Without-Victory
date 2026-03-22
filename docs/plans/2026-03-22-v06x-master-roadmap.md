@@ -458,3 +458,15 @@ Player chooses how autonomous the military is (full delegation → maximum contr
 ### Officer Defiance Events (v0.7+)
 
 Commanders exceed or ignore political directives, triggering events. Depends on command autonomy and officer personality system.
+
+### Localization — B/C/S + English (v0.8+)
+
+Full multilingual support. Two languages at launch: **English** and **Bosnian/Croatian/Serbian** (B/C/S). Scope:
+- i18n framework (react-intl or lightweight key-based system)
+- Extract all UI strings to locale files (toolbar, HQ, panels, modals, briefings, tooltips)
+- Event text (titles, descriptions, option labels) — locale key per event in JSON
+- Dimension names, stance labels, officer ranks, formation names
+- Historical essays and in-game documentation
+- Language selector in settings/pause menu
+- B/C/S uses Latin script (not Cyrillic) — standard for all three variants
+- Consider: faction-specific B/C/S dialect flavor (Bosnian for RBiH, Serbian for RS, Croatian for HRHB) as optional polish
