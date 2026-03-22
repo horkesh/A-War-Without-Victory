@@ -1,7 +1,55 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-22
-**Status:** **v0.5.4** (v0.6.0 merge in progress). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS.** UI chrome redesign: Presidential Toolbar (army crest center → HQ), bottom strip (faction-contextual, clean), Command Briefing (frost glass pills), Strategic Position dimension bars, pre-commit hooks. Next: event decision UI in Army HQ, Operation SITREP, game timeline.
+**Status:** **v0.5.4** (v0.6.0 merge in progress). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS.** Army HQ: 4-tab command center (BRIEFING/SUMMARY/RECORDS/PERSONNEL), CoS missive, orphan absorption complete. "Two Rooms" spatial metaphor documented. Toolbar: floating crest. Next: Phase 5 deep drill-down, event decision UI, warroom React migration (v0.7+).
+
+## [2026-03-22] Army HQ Phase 3.5–4 — Tab System + CoS Briefing (Evening Session)
+
+**Scope:** Restructure Army HQ into multi-tab command center. Absorb orphaned military modals. Add Chief of Staff briefing. 6 commits.
+
+**Toolbar fixes:**
+- Crest now a floating element above toolbar (extends below, z-200). Text label above crest.
+- Command briefing repositioned below crest end (`top-[7.5rem]`).
+
+**Army HQ layout redesign:**
+- 4-column top row: Commander | CoS Brief | Crest | Strategic Position (was 3-col with huge crest column)
+- Rounded corners (`rounded-lg`/`rounded-md`) on all panels, cards, sections
+- Full dimension names ("Military Credibility" not "MIL CRED")
+- Equipment: `Math.round()` fix + hover tooltips ("Tanks: X operational / Y total")
+- Situation Briefing: grid of compact cards (2-3 cols) with specific navigation (→ SECTOR, → OP, → CORPS)
+
+**Chief of Staff Briefing** (`ChiefOfStaffBriefing.tsx`, new):
+- Paper missive aesthetic (cream `#f5f0e8`, Georgia serif, "BRIEFING" stamp, signature line)
+- Named deputy per faction: Divjak (cautious), Milovanović (precise), Petković (aggressive)
+- Two paragraphs: last-turn events (battles won/lost, territory changes) + current situation assessment
+- Template-based personality-driven text from game state
+
+**Tab system** (Phase 4):
+- Tab bar: BRIEFING | SUMMARY | RECORDS | PERSONNEL
+- `armyHQTab` state in gameStore
+- SUMMARY: absorbs `WarSummaryModal` content inline (`WarSummaryContent.tsx`)
+- RECORDS: absorbs `AARPanel` + `OperationHistoryPanel` via `embedded` prop (`RecordsContent.tsx`)
+- PERSONNEL: force overview, ORBAT by corps, officer roster, reserves (`PersonnelContent.tsx`)
+
+**Orphan audit + resolution:**
+- 5 modals were unreachable after TopToolbar removal (WarSummary, AAR, OpsHistory, EventLog, AiSettings)
+- Military modals absorbed into Army HQ tabs — no longer orphaned
+- Political modals (EventLog, Economy, Diplomacy) deferred to warroom v0.7+
+- Keyboard shortcuts: H → HQ briefing, S → HQ summary, E → event log
+
+**"Two Rooms" spatial metaphor** (master roadmap):
+- President's Office (warroom) = political decisions, diplomacy, events, newspapers
+- Command Center (Army HQ) = military reports, orders, records, personnel
+- Each modal classified into its proper room. Full orphan audit table in roadmap.
+
+**Other:**
+- `.gitignore`: added `.env`/`.env.*` (leaked API key incident)
+- `.env`: both API keys rotated (Google + Anthropic)
+- Localization (B/C/S + English) slotted at v0.8+ in master roadmap
+
+**Determinism:** UI-only changes. No simulation impact.
+
+**Files:** `src/ui/map/components/` (PresidentialToolbar, CommandBriefingLayer, army_hq/ArmyHQModal, army_hq/ChiefOfStaffBriefing new, army_hq/WarSummaryContent new, army_hq/RecordsContent new, army_hq/PersonnelContent new, army_hq/SituationBriefing, army_hq/StrategicPosition, army_hq/ArmyHQCorpsCard, army_hq/SectorsSection, army_hq/OperationsSection, AARPanel, OperationHistoryPanel), `src/ui/map/store/gameStore.ts`, `src/ui/map/App.tsx`, `.gitignore`, `docs/plans/` (v06x-master-roadmap, army-hq-nerve-center-roadmap).
 
 ## [2026-03-22] v0.6.0 Merge — UI Chrome Redesign (Day Session)
 
