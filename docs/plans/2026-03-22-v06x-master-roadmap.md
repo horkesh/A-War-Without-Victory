@@ -241,15 +241,27 @@ War chronicle showing the story of THIS war — decisions, consequences, dimensi
 - ArmyDetail.tsx retirement (all functionality in HQ)
 - Operation readiness composite indicator
 
-### Track B addition: Campaign Statistics
+### Track B addition: Game Chronicle (Living Timeline)
+
+**Design spec:** `docs/plans/2026-03-22-game-chronicle-design.md`
+
+The Chronicle is the story of YOUR war — a vertical spine timeline weaving military, political, humanitarian, diplomatic, and narrative threads. Transcends the Two Rooms metaphor (not Army HQ, not Warroom — its own top-level feature).
+
+**Deliverables:**
+- `ChronicleOverlay.tsx` — full-screen overlay with spine renderer
+- `ChronicleSpine.tsx` — multi-layered ribbon (territory bands, casualty line, supply line)
+- `ChronicleCard.tsx` — 6 card types (Combat/Political/Humanitarian/Military/Diplomatic/Narrative)
+- `generateChronicleEntries()` — pure function reading all 20 engine data sources
+- Toolbar CHRONICLE button + clickable date label + `C` keyboard shortcut
+- Significance filtering (not every battle — only territory flips, major casualties, decisions)
+- Minimal engine addition: `territory_snapshot` + `supply_snapshot` per-turn on TurnSummary (~10 lines)
 
 **Absorbed from old v0.6.2 (Campaign Structure & Achievements):**
-- Campaign statistics module (aggregate from brigade_history, casualty_ledger, operation_history)
-- Achievement registry (12+ achievements computed from game state)
-- Statistics display screen accessible from HQ
+- Campaign statistics module → folded into Chronicle data + Wrapped slides
+- Achievement registry (12+ achievements computed from game state) → Wrapped slide content
 - Save metadata
 
-**Done gate:** Full military depth accessible from HQ. Campaign stats visible. No legacy panels needed.
+**Done gate:** Chronicle opens from toolbar, shows full war history as scrollable spine with cards. All 6 card types rendering. Spine ribbon shows territory/casualty/supply trends.
 
 ---
 
@@ -281,6 +293,26 @@ War chronicle showing the story of THIS war — decisions, consequences, dimensi
 - Interactive: hover → highlight, click → detail
 - CorpsFrontPanel interior theme
 - Keyboard shortcut system (1-5 for corps, Tab to cycle)
+
+### Track B addition: Chronicle Wrapped (Game End Experience)
+
+**Design spec:** `docs/plans/2026-03-22-game-chronicle-design.md` §Wrapped
+
+"Spotify Wrapped for your war." A 10-slide cinematic reveal at game end:
+1. Your War (faction, weeks, verdict)
+2. The Opening (foundational decision, early territory)
+3. Your Bloodiest Week (max casualties turn)
+4. The Brigade That Wouldn't Die (most decorated/resilient unit)
+5. What You Built (peak territory, peak personnel, ops launched)
+6. What It Cost (total casualties all factions, displacement, civilian toll)
+7. The World Was Watching (international standing trajectory, war crimes)
+8. Your Decisions (3-5 event choices with largest dimension impact)
+9. At The Table (Dayton capital, packages won/lost, final split)
+10. Another Such Victory (spider chart, pyrrhic score, historical comparison)
+
+Post-reveal: Chronicle annotated with "turning point" gold markers at Wrapped-identified moments.
+
+**Deliverables:** `WrappedOverlay.tsx`, `WrappedSlide.tsx` (10 variants), `SpiderChart.tsx`, `generateWrappedSlides()`.
 
 ### Track B: Dayton Modal Integration
 
