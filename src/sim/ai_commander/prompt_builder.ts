@@ -12,6 +12,7 @@ import { AI_TEMPERATURE, MAX_TOKENS, MODEL_ROUTING } from './ai_config.js';
 import type { AiCommanderMode } from './ai_config.js';
 import { getArmyCommander, getCorpsCommander } from '../combat/officer_system.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import type { EventConstraints } from '../events/event_constraints.js';
 
 /** Read AI mode from GameState config. Defaults to 'officer' if not set. */
 function getMode(state: GameState): AiCommanderMode {
@@ -140,13 +141,8 @@ function buildArmyUserPrompt(state: GameState, faction: FactionId): string {
         lines.push(`Pending operation decisions: ${pendingOps.join(', ')}`);
     }
 
-    // Recent events
-    const firedEvents = state.military.fired_event_ids ?? [];
-    if (firedEvents.length > 0) {
-        const recent = firedEvents.slice(-5);
-        lines.push('');
-        lines.push(`Recent events: ${recent.join(', ')}`);
-    }
+    // Event context (fired events, aggression, constraints)
+    appendEventContext(lines, state, faction);
 
     // Output schema
     lines.push('');
@@ -200,6 +196,9 @@ function buildCorpsUserPrompt(
         }
     }
 
+    // Event context (fired events, aggression, constraints)
+    appendEventContext(lines, state, faction);
+
     // Output schema
     lines.push('');
     lines.push('Respond with ONLY valid JSON:');
@@ -221,4 +220,56 @@ function buildAdvisorUserPrompt(
     // Reuse army prompt data but frame as advisory
     const armyData = buildArmyUserPrompt(state, faction);
     return `Context: ${contextType}\n\nThe player commands ${faction}. Analyze this situation and recommend the top 3 priorities.\n\n${armyData}\n\nRespond with JSON:\n{\n  "commander_name": "<your name>",\n  "faction": "${faction}",\n  "assessment": "<overall situation assessment>",\n  "recommendations": [\n    { "priority": 1, "action": "<specific action>", "reasoning": "<why>" },\n    { "priority": 2, "action": "<specific action>", "reasoning": "<why>" },\n    { "priority": 3, "action": "<specific action>", "reasoning": "<why>" }\n  ],\n  "context_type": "${contextType}"\n}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Event context — shared across army + corps prompts
+// ═══════════════════════════════════════════════════════════════════════════
+
+const MAX_RECENT_EVENTS = 8;
+
+/**
+ * Append event-driven context to prompt lines: fired events, aggression
+ * modifiers, operation blocks, and doctrine overrides for the given faction.
+ */
+function appendEventContext(lines: string[], state: GameState, faction: FactionId): void {
+    const turn = state.meta?.turn ?? 0;
+
+    // Recent fired events (last 8)
+    const firedEvents = state.military.fired_event_ids ?? [];
+    if (firedEvents.length > 0) {
+        const recent = firedEvents.slice(-MAX_RECENT_EVENTS);
+        lines.push('');
+        lines.push(`Recent events fired: ${recent.join(', ')}`);
+    }
+
+    // Active aggression modifiers for this faction
+    const allMods = state.military.event_aggression_modifiers ?? [];
+    const activeMods = allMods
+        .filter(m => m.faction === faction && m.expires_turn > turn)
+        .sort((a, b) => strictCompare(String(a.expires_turn), String(b.expires_turn)));
+    for (const mod of activeMods) {
+        const sign = mod.delta >= 0 ? '+' : '';
+        lines.push(`Aggression modifier: ${sign}${mod.delta} (expires turn ${mod.expires_turn})`);
+    }
+
+    // Active constraints from events
+    const constraints: EventConstraints | undefined = state.military.event_constraints;
+    if (constraints) {
+        // Operation blocks
+        const blocks = (constraints.operation_blocks ?? [])
+            .filter(b => b.faction === faction && b.expires_turn > turn)
+            .sort((a, b) => strictCompare(a.reason, b.reason));
+        for (const block of blocks) {
+            lines.push(`OPERATION BLOCKED: ${block.reason} until turn ${block.expires_turn}`);
+        }
+
+        // Doctrine overrides
+        const overrides = (constraints.doctrine_overrides ?? [])
+            .filter(d => d.faction === faction && d.expires_turn > turn)
+            .sort((a, b) => strictCompare(a.reason, b.reason));
+        for (const ov of overrides) {
+            lines.push(`FORCED STANCE: ${ov.forced_stance} until turn ${ov.expires_turn}`);
+        }
+    }
 }

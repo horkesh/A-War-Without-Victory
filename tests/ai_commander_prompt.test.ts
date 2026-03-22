@@ -80,3 +80,104 @@ describe('prompt builder', () => {
         expect(prompt.temperature).toBe(0);
     });
 });
+
+describe('army prompt event context', () => {
+    it('includes fired event IDs when events have fired', () => {
+        const state = makeMinimalState({
+            military: {
+                ...makeMinimalState().military,
+                fired_event_ids: ['graz_accords_signed', 'arms_embargo', 'srebrenica_declared'],
+                event_aggression_modifiers: [
+                    { faction: 'RS', delta: 0.3, expires_turn: 15 },
+                    { faction: 'RBiH', delta: -0.1, expires_turn: 20 }, // different faction, should not appear
+                ],
+            },
+        } as Partial<GameState>);
+        const prompt = buildArmyPrompt(state, 'RS');
+        expect(prompt.user).toContain('Recent events fired: graz_accords_signed, arms_embargo, srebrenica_declared');
+        expect(prompt.user).toContain('Aggression modifier: +0.3 (expires turn 15)');
+        expect(prompt.user).not.toContain('-0.1'); // RBiH modifier should not appear for RS
+    });
+
+    it('includes active constraints when present', () => {
+        const state = makeMinimalState({
+            military: {
+                ...makeMinimalState().military,
+                event_constraints: {
+                    operation_blocks: [
+                        { faction: 'RS', expires_turn: 20, reason: 'ceasefire' },
+                        { faction: 'RBiH', expires_turn: 25, reason: 'other_ceasefire' }, // wrong faction
+                    ],
+                    doctrine_overrides: [
+                        { faction: 'RS', forced_stance: 'defensive', expires_turn: 15, reason: 'peace_talks' },
+                    ],
+                },
+            },
+        } as Partial<GameState>);
+        const prompt = buildArmyPrompt(state, 'RS');
+        expect(prompt.user).toContain('OPERATION BLOCKED: ceasefire until turn 20');
+        expect(prompt.user).not.toContain('other_ceasefire');
+        expect(prompt.user).toContain('FORCED STANCE: defensive until turn 15');
+    });
+
+    it('does not include expired constraints', () => {
+        const state = makeMinimalState({
+            military: {
+                ...makeMinimalState().military,
+                event_aggression_modifiers: [
+                    { faction: 'RS', delta: 0.5, expires_turn: 5 }, // expired (turn is 10)
+                ],
+                event_constraints: {
+                    operation_blocks: [
+                        { faction: 'RS', expires_turn: 8, reason: 'old_ceasefire' }, // expired
+                    ],
+                },
+            },
+        } as Partial<GameState>);
+        const prompt = buildArmyPrompt(state, 'RS');
+        expect(prompt.user).not.toContain('Aggression modifier');
+        expect(prompt.user).not.toContain('OPERATION BLOCKED');
+    });
+
+    it('limits fired events to last 8', () => {
+        const ids = Array.from({ length: 12 }, (_, i) => `event_${i}`);
+        const state = makeMinimalState({
+            military: {
+                ...makeMinimalState().military,
+                fired_event_ids: ids,
+            },
+        } as Partial<GameState>);
+        const prompt = buildArmyPrompt(state, 'RS');
+        expect(prompt.user).not.toContain('event_3');
+        expect(prompt.user).toContain('event_4');
+        expect(prompt.user).toContain('event_11');
+    });
+});
+
+describe('corps prompt event context', () => {
+    it('includes event context in corps prompt', () => {
+        const state = makeMinimalState({
+            military: {
+                ...makeMinimalState().military,
+                fired_event_ids: ['graz_accords_signed'],
+                event_aggression_modifiers: [
+                    { faction: 'RS', delta: 0.2, expires_turn: 18 },
+                ],
+                event_constraints: {
+                    operation_blocks: [
+                        { faction: 'RS', expires_turn: 16, reason: 'truce' },
+                    ],
+                    doctrine_overrides: [
+                        { faction: 'RS', forced_stance: 'defensive', expires_turn: 14, reason: 'orders' },
+                    ],
+                },
+            },
+        } as Partial<GameState>);
+        const directive = { stance: 'offensive' as const };
+        const prompt = buildCorpsPrompt(state, 'RS', 'vrs_1st_krajina', directive);
+        expect(prompt.user).toContain('Recent events fired: graz_accords_signed');
+        expect(prompt.user).toContain('Aggression modifier: +0.2 (expires turn 18)');
+        expect(prompt.user).toContain('OPERATION BLOCKED: truce until turn 16');
+        expect(prompt.user).toContain('FORCED STANCE: defensive until turn 14');
+    });
+});
