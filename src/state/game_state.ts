@@ -43,6 +43,8 @@ export const CURRENT_SCHEMA_VERSION = 1 as const;
 export type FactionId = string;
 /** Alias for faction identity in political control and authority contexts. */
 export type FactionKey = FactionId;
+/** The three canonical factions in AWWV. */
+export const CANONICAL_FACTIONS: readonly FactionId[] = ['RBiH', 'RS', 'HRHB'] as const;
 
 export type FormationId = string;
 
@@ -1749,20 +1751,7 @@ event_flags?: Record<string, string | number | boolean>;
 /** Event IDs unlocked by event chains (enables_events). */
 enabled_event_ids?: string[];
 /** Event-imposed constraints on military operations. */
-event_constraints?: {
-    /** Faction cannot launch NEW operations until expires_turn. */
-    operation_blocks?: Array<{ faction: string; expires_turn: number; reason: string }>;
-    /** Force a faction into a specific stance until expires_turn. */
-    doctrine_overrides?: Array<{ faction: string; forced_stance: string; expires_turn: number; reason: string }>;
-    /** Restrict which municipalities a faction can target offensively. */
-    scope_restrictions?: Array<{
-        faction: string;
-        allowed_municipalities?: string[];
-        blocked_municipalities?: string[];
-        expires_turn?: number;
-        reason: string;
-    }>;
-};
+event_constraints?: import('../sim/events/event_constraints.js').EventConstraints;
 /** AI commander decision log for replay determinism. */
 ai_decision_log?: import('../sim/ai_commander/ai_types.js').CommandDecisionLogEntry[];
 /** AI commander army-level decisions for current turn (consumed by corps directive step). */

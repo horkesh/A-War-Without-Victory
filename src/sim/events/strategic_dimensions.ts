@@ -1,4 +1,6 @@
 import type { DimensionId } from './event_types.js';
+import { clamp } from '../../utils/math.js';
+import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 
 export const DIMENSION_IDS: DimensionId[] = [
     'military_credibility',
@@ -9,8 +11,6 @@ export const DIMENSION_IDS: DimensionId[] = [
     'negotiating_leverage',
 ];
 
-const CANONICAL_FACTIONS = ['RBiH', 'RS', 'HRHB'];
-
 export interface DimensionStore {
     [faction: string]: {
         [dimension: string]: {
@@ -19,10 +19,6 @@ export interface DimensionStore {
             effective_value: number;
         };
     };
-}
-
-function clamp(value: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, value));
 }
 
 export function initializeStrategicDimensions(): DimensionStore {

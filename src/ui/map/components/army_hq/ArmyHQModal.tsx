@@ -114,7 +114,7 @@ export function ArmyHQModal() {
 
     const handleEmergencyPosture = useCallback(async (stance: string) => {
         if (!ipc.isAvailable || !data) return;
-        const corpsIds = data.corpsFormations.filter(c => c.kind === 'corps').map(c => c.id);
+        const corpsIds = data.corpsFormations.map(c => c.id);
         for (const corpsId of corpsIds) {
             await ipc.stageCorpsStanceOrder(corpsId, stance);
         }

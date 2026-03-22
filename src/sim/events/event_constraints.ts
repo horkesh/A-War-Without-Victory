@@ -7,6 +7,8 @@
  * the constraint fields directly.
  */
 
+import { munFromOsid } from '../combat/osid_adjacency.js';
+
 export interface EventConstraints {
     operation_blocks?: Array<{ faction: string; expires_turn: number; reason: string }>;
     doctrine_overrides?: Array<{ faction: string; forced_stance: string; expires_turn: number; reason: string }>;
@@ -64,13 +66,13 @@ export function filterByScope(
     for (const restriction of activeRestrictions) {
         if (restriction.allowed_municipalities) {
             filtered = filtered.filter(osid => {
-                const mun = osid.split(':')[1];
+                const mun = munFromOsid(osid) ?? '';
                 return restriction.allowed_municipalities!.includes(mun);
             });
         }
         if (restriction.blocked_municipalities) {
             filtered = filtered.filter(osid => {
-                const mun = osid.split(':')[1];
+                const mun = munFromOsid(osid) ?? '';
                 return !restriction.blocked_municipalities!.includes(mun);
             });
         }

@@ -62,6 +62,7 @@ import {
 } from './bot_corps_helpers.js';
 import type { CampaignPlan } from './army_hq_gathering_types.js';
 import { PRIORITY_AGGRESSION, PRIORITY_RESERVE } from './army_hq_gathering_constants.js';
+import { isOperationBlocked, filterByScope } from '../events/event_constraints.js';
 
 /**
  * Sum active (non-expired) event aggression modifiers for a faction.
@@ -1739,22 +1740,7 @@ export function generateCorpsDirectives(
                 });
 
                 // Event constraint: scope restrictions (e.g. "Selective Conquest" — corridor only)
-                const scopeRestrictions = (state.military.event_constraints?.scope_restrictions ?? [])
-                    .filter(r => r.faction === faction && (r.expires_turn == null || r.expires_turn > (state.meta?.turn ?? 0)));
-                for (const restriction of scopeRestrictions) {
-                    if (restriction.allowed_municipalities) {
-                        reachableTargets = reachableTargets.filter(osid => {
-                            const mun = osid.split(':')[1];
-                            return restriction.allowed_municipalities!.includes(mun);
-                        });
-                    }
-                    if (restriction.blocked_municipalities) {
-                        reachableTargets = reachableTargets.filter(osid => {
-                            const mun = osid.split(':')[1];
-                            return !restriction.blocked_municipalities!.includes(mun);
-                        });
-                    }
-                }
+                reachableTargets = filterByScope(state.military.event_constraints, faction, reachableTargets, state.meta?.turn ?? 0);
 
                 // Cap operation size by supply health (graduated response)
                 if (maxOpSize > 0 && maxOpSize < corpsBrigadeIds.length) {
@@ -1825,8 +1811,7 @@ export function generateCorpsDirectives(
 
                 // Full corps-level operation (only if no probe was launched above)
                 // Event constraint: check operation blocks (e.g. NATO ultimatum)
-                const opBlocked = (state.military.event_constraints?.operation_blocks ?? [])
-                    .some(b => b.faction === faction && b.expires_turn > (state.meta?.turn ?? 0));
+                const opBlocked = isOperationBlocked(state.military.event_constraints, faction, state.meta?.turn ?? 0);
                 if (!cmd.active_operation && !opBlocked && corpsBrigadeIds.length >= MIN_BRIGADES_FOR_SECTOR_ATTACK
                     && reachableTargets.length >= 1) {
 
