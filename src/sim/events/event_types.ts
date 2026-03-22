@@ -16,7 +16,22 @@ export type EventCondition =
     | { type: 'operation_completed'; operation_name_pattern: string }
     | { type: 'and'; conditions: EventCondition[] }
     | { type: 'or'; conditions: EventCondition[] }
-    | { type: 'not'; condition: EventCondition };
+    | { type: 'not'; condition: EventCondition }
+    // v0.6.0 emergent condition types
+    | { type: 'supply_below'; faction: FactionId; threshold: number }
+    | { type: 'supply_above'; faction: FactionId; threshold: number }
+    | { type: 'territory_percentage'; faction: FactionId; comparator: 'above' | 'below'; threshold: number }
+    | { type: 'dimension_above'; faction: FactionId; dimension: DimensionId; threshold: number }
+    | { type: 'dimension_below'; faction: FactionId; dimension: DimensionId; threshold: number }
+    | { type: 'flag_equals'; flag: string; value: string | number | boolean }
+    | { type: 'flag_not_set'; flag: string }
+    | { type: 'patron_pressure_above'; faction: FactionId; threshold: number }
+    | { type: 'war_crimes_above'; faction: FactionId; threshold: number }
+    | { type: 'morale_average_below'; faction: FactionId; threshold: number }
+    | { type: 'week_since_event'; event_id: string; min_weeks?: number; max_weeks?: number }
+    | { type: 'event_fire_count'; event_id: string; min_count?: number; max_count?: number }
+    | { type: 'enclave_supply_status'; municipality: string; status: 'adequate' | 'strained' | 'critical' }
+    | { type: 'corridor_severed'; from_osid: string; to_osid: string; faction: FactionId };
 
 /** Trigger: when to consider firing (turn range + optional prerequisites). */
 export interface EventTrigger {
@@ -130,6 +145,19 @@ export interface EventResponseOption {
     description?: string;
     /** Effects applied when this response is chosen. */
     effects: EventEffect[];
+    // v0.6.0 metagame fields
+    /** Flags set when this option is chosen. */
+    sets_flags?: Record<string, string | number | boolean>;
+    /** Strategic dimension shifts applied when chosen. */
+    dimension_shifts?: DimensionShift[];
+    /** Only appears on Nth+ firing of a recurring event. */
+    available_from_fire?: number;
+    /** Disappears after Nth firing of a recurring event. */
+    unavailable_after_fire?: number;
+    /** Bot scoring hint: aggressive commanders prefer positive values. [-1, 1] */
+    aggression_affinity?: number;
+    /** Bot scoring hint: cautious commanders avoid high risk. [0, 1] */
+    risk_level?: number;
 }
 
 /** Event category for UI display and filtering. */
@@ -161,8 +189,29 @@ export interface EventDefinition {
     response_options?: EventResponseOption[];
     /** When true, blocks turn advance until the player responds. */
     requires_player_response?: boolean;
-    /** How bot factions auto-respond: accept_first picks first option, reject_all picks last, capital_based/capital_weighted uses negotiation capital position. */
-    bot_response_logic?: 'accept_first' | 'reject_all' | 'capital_based' | 'capital_weighted';
+    /** How bot factions auto-respond. */
+    bot_response_logic?: 'accept_first' | 'reject_all' | 'capital_based' | 'capital_weighted' | 'historical' | 'personality_weighted' | 'strategic_weighted';
+    // v0.6.0 metagame fields (all optional for backward compat)
+    /** Pressure system config: readiness counter with increment/decay. */
+    pressure?: PressureConfig;
+    /** Recurrence model: how many times this event can fire. */
+    recurrence?: RecurrenceConfig;
+    /** Flags set on fire (before player choice). */
+    sets_flags?: Record<string, string | number | boolean>;
+    /** Strategic dimension shifts on fire (before player choice). */
+    dimension_shifts?: DimensionShift[];
+    /** Auto-resolve after N turns if player doesn't respond. Worst option applied. */
+    auto_resolve_turns?: number;
+    /** Lower = fires first when multiple events trigger. Default 100. */
+    priority?: number;
+    /** Only one event per mutex group fires per turn. */
+    mutex_group?: string;
+    /** Tags for querying/filtering. */
+    tags?: string[];
+    /** Chain: firing this event unlocks these event IDs for evaluation. */
+    enables_events?: string[];
+    /** ICTY/BB citation for historical grounding. */
+    historical_source?: string;
 }
 
 /** A pending decision awaiting player response. Stored on MilitaryState. */
@@ -181,6 +230,61 @@ export interface FiredEvent {
 }
 
 export type Rng = () => number;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// v0.6.0 Metagame Types
+// ══════════════════════════════════════════════════════════════════════════════
+
+/** The six strategic dimensions that track faction reputation and position. */
+export type DimensionId =
+    | 'military_credibility'
+    | 'territorial_legitimacy'
+    | 'international_standing'
+    | 'patron_confidence'
+    | 'internal_cohesion'
+    | 'negotiating_leverage';
+
+/** A single dimension's value: base (computed from state) + event modifier (from choices). */
+export interface StrategicDimension {
+    base_value: number;
+    event_modifier: number;
+    effective_value: number;
+}
+
+/** A shift to a strategic dimension, applied by events or response options. */
+export interface DimensionShift {
+    faction: FactionId;
+    dimension: DimensionId;
+    delta: number;
+}
+
+/** Pressure system config on an EventDefinition. */
+export interface PressureConfig {
+    /** Readiness increment per turn while conditions hold. */
+    base_rate: number;
+    /** Readiness value at which the event fires. */
+    threshold: number;
+    /** Readiness decay per turn when conditions lapse. */
+    decay_rate: number;
+    /** Situational rate adjustments. */
+    modifiers?: PressureModifier[];
+}
+
+/** A conditional rate modifier for the pressure system. */
+export interface PressureModifier {
+    condition: EventCondition;
+    rate_bonus: number;
+}
+
+/** Recurrence model for events that fire multiple times. */
+export interface RecurrenceConfig {
+    /** Maximum number of times this event can fire. */
+    max_fires: number;
+    /** Minimum turns between firings. */
+    cooldown_turns: number;
+    /** How stakes change on each recurrence. */
+    escalation: 'static' | 'escalating' | 'deteriorating';
+}
 
 /** Check if trigger matches current state (deterministic). */
 export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number): boolean {
