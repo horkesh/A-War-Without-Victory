@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MapContainer } from './map/MapContainer';
 import { TopToolbar } from './components/TopToolbar';
+import { PresidentialToolbar } from './components/PresidentialToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
 import { FormationDetail } from './components/FormationDetail';
@@ -529,23 +530,31 @@ function App() {
   return (
     <div className="h-screen w-screen relative">
       <MapContainer />
-      <TopToolbar
-        onOpenRecruitment={openRecruitmentModal}
-        onOpenSidePicker={() => {
-          setSidePickerDismissed(false);
-          setSidePickerOpen(true);
-        }}
-        onOpenSummary={openSummary}
-        onOpenEnclaves={() => setEnclaveDashboardOpen((current) => !current)}
-        onOpenAAR={() => { setSummaryOpen(false); setOpsHistoryOpen(false); setEventLogOpen(false); setAarOpen((current) => !current); }}
-        onOpenOpsHistory={() => { setSummaryOpen(false); setAarOpen(false); setEventLogOpen(false); setOpsHistoryOpen((current) => !current); }}
-        onOpenEventLog={() => { setSummaryOpen(false); setAarOpen(false); setOpsHistoryOpen(false); setEventLogOpen((current) => !current); }}
-        onOpenEconomy={() => setEconomyOpen((current) => !current)}
-        onOpenAiSettings={() => setAiSettingsOpen((current) => !current)}
-        onOpenOrbat={openOrbat}
-        onSelectPrimaryArmy={selectPrimaryArmy}
-        onSelectPrimaryCorps={selectPrimaryCorps}
-      />
+      {useGameStore.getState().devMode ? (
+        <TopToolbar
+          onOpenRecruitment={openRecruitmentModal}
+          onOpenSidePicker={() => {
+            setSidePickerDismissed(false);
+            setSidePickerOpen(true);
+          }}
+          onOpenSummary={openSummary}
+          onOpenEnclaves={() => setEnclaveDashboardOpen((current) => !current)}
+          onOpenAAR={() => { setSummaryOpen(false); setOpsHistoryOpen(false); setEventLogOpen(false); setAarOpen((current) => !current); }}
+          onOpenOpsHistory={() => { setSummaryOpen(false); setAarOpen(false); setEventLogOpen(false); setOpsHistoryOpen((current) => !current); }}
+          onOpenEventLog={() => { setSummaryOpen(false); setAarOpen(false); setOpsHistoryOpen(false); setEventLogOpen((current) => !current); }}
+          onOpenEconomy={() => setEconomyOpen((current) => !current)}
+          onOpenAiSettings={() => setAiSettingsOpen((current) => !current)}
+          onOpenOrbat={openOrbat}
+          onSelectPrimaryArmy={selectPrimaryArmy}
+          onSelectPrimaryCorps={selectPrimaryCorps}
+        />
+      ) : (
+        <PresidentialToolbar
+          pendingDecisions={loadedGameState?.pendingEventDecisions?.length ?? 0}
+          pressureWarning={false}
+          pendingOfficerEvents={Boolean(loadedGameState?.pendingOfficerEvents?.length)}
+        />
+      )}
       <CommandBriefingLayer
         onOpenSummary={openSummary}
         onOpenEnclaves={() => setEnclaveDashboardOpen(true)}
