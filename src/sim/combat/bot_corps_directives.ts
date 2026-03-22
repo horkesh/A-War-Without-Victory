@@ -64,6 +64,18 @@ import type { CampaignPlan } from './army_hq_gathering_types.js';
 import { PRIORITY_AGGRESSION, PRIORITY_RESERVE } from './army_hq_gathering_constants.js';
 
 /**
+ * Sum active (non-expired) event aggression modifiers for a faction.
+ * Wired into the corps aggression computation (was a broken stub before v0.6.0).
+ */
+export function getEventAggressionBonus(faction: FactionId, state: GameState): number {
+    const mods = state.military.event_aggression_modifiers ?? [];
+    const currentTurn = state.meta?.turn ?? 0;
+    return mods
+        .filter(m => m.faction === faction && m.expires_turn > currentTurn)
+        .reduce((sum, m) => sum + m.delta, 0);
+}
+
+/**
  * Salient risk: fraction of a target OSID's neighbors that are enemy-controlled.
  * High risk (>0.75) means capturing this OSID creates an indefensible salient —
  * one friendly position surrounded by enemy on 3+ sides. No real commander would
@@ -961,7 +973,9 @@ export function generateCorpsDirectives(
         ).aggression_adj;
         // Truce-break retaliation: opponent faction broke truce → this faction gets aggression spike
         const truceBreakBonus = getTruceBreakAggressionBonus(faction, state);
-        let aggressionModifier = (doctrinePhase?.aggression_modifier ?? 0) + armyAggressionBonus + seasonalAdj + truceBreakBonus;
+        // Event aggression modifiers (e.g. VRS fury after barracks seizure)
+        const eventAggBonus = getEventAggressionBonus(faction, state);
+        let aggressionModifier = (doctrinePhase?.aggression_modifier ?? 0) + armyAggressionBonus + seasonalAdj + truceBreakBonus + eventAggBonus;
 
         // C.1: Named officer aggressiveness shifts corps aggression
         if (state.military.named_officers && state.military.named_officer_data) {
@@ -1719,10 +1733,28 @@ export function generateCorpsDirectives(
                 const allCorpsEnemyOsids = [...corpsEnemyOsids].sort(strictCompare);
 
                 // Filter targets to only those adjacent to at least one friendly-held OSID.
-                const reachableTargets = offensiveTargets.filter(target => {
+                let reachableTargets = offensiveTargets.filter(target => {
                     const neighbors = adjacency.get(target) ?? [];
                     return neighbors.some(n => getPoliticalControllerOSID(state, n, reverseMap) === faction);
                 });
+
+                // Event constraint: scope restrictions (e.g. "Selective Conquest" — corridor only)
+                const scopeRestrictions = (state.military.event_constraints?.scope_restrictions ?? [])
+                    .filter(r => r.faction === faction && (r.expires_turn == null || r.expires_turn > (state.meta?.turn ?? 0)));
+                for (const restriction of scopeRestrictions) {
+                    if (restriction.allowed_municipalities) {
+                        reachableTargets = reachableTargets.filter(osid => {
+                            const mun = osid.split(':')[1];
+                            return restriction.allowed_municipalities!.includes(mun);
+                        });
+                    }
+                    if (restriction.blocked_municipalities) {
+                        reachableTargets = reachableTargets.filter(osid => {
+                            const mun = osid.split(':')[1];
+                            return !restriction.blocked_municipalities!.includes(mun);
+                        });
+                    }
+                }
 
                 // Cap operation size by supply health (graduated response)
                 if (maxOpSize > 0 && maxOpSize < corpsBrigadeIds.length) {
@@ -1792,7 +1824,10 @@ export function generateCorpsDirectives(
                 }
 
                 // Full corps-level operation (only if no probe was launched above)
-                if (!cmd.active_operation && corpsBrigadeIds.length >= MIN_BRIGADES_FOR_SECTOR_ATTACK
+                // Event constraint: check operation blocks (e.g. NATO ultimatum)
+                const opBlocked = (state.military.event_constraints?.operation_blocks ?? [])
+                    .some(b => b.faction === faction && b.expires_turn > (state.meta?.turn ?? 0));
+                if (!cmd.active_operation && !opBlocked && corpsBrigadeIds.length >= MIN_BRIGADES_FOR_SECTOR_ATTACK
                     && reachableTargets.length >= 1) {
 
                     // Primary sector: the one with most offensive target overlap (for UI display)
