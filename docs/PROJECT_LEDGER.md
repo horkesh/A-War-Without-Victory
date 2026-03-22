@@ -1,7 +1,41 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-21
-**Status:** **v0.5.4** (AI Narrative + Auto-Play). **1261 tests**, 106 suites. **93.1% area-weighted (40w, 712 OSIDs, ATH). RS w40 0.511 PASS. 4/4 enclaves.** Settlement Timeline (12 event types, 5 engine tracking features). Displacement adapter fix. Posavina Corridor restructure (n1002). Deck.gl settlement labels. Deep cleanup (404 files, ~740 MB).
+**Last Updated:** 2026-03-22
+**Status:** **v0.5.4** (v0.6.0-alpha infrastructure complete). **1317 tests**, 111 suites. **93.1% area-weighted (n1021, backward compatible).** Emergent event system infrastructure: pressure, dimensions, flags, conditions, constraints, bot logic, recurrence, queue cap, pipeline integration.
+
+## [2026-03-22] v0.6.0-alpha — Emergent Event System Infrastructure (Night Shift)
+
+**Scope:** Build engine foundation for the v0.6.0 emergent event system. 17 tasks across 2 tracks (13 engine + 3 UI + 1 verification). 8 commits.
+
+**Track A — Event Infrastructure (13 tasks):**
+- Extended EventDefinition: pressure config, recurrence model, sets_flags, dimension_shifts, auto_resolve_turns, priority, mutex_group, tags, enables_events, historical_source. EventResponseOption: sets_flags, dimension_shifts, aggression_affinity, risk_level.
+- 14 new EventCondition types: supply_below/above, territory_percentage, dimension_above/below, flag_equals/not_set, patron_pressure_above, war_crimes_above, morale_average_below, week_since_event, event_fire_count, enclave_supply_status (placeholder), corridor_severed (placeholder).
+- Pressure system: `updateEventReadiness()` increments/decays readiness counters. `isEventReady()` checks threshold. New pipeline step `update-event-readiness` before `evaluate-events`.
+- Strategic dimensions: 6 dimensions x 3 factions. Hybrid `base_value + event_modifier = effective_value`. `initializeStrategicDimensions`, `applyDimensionShift`, `getDimensionEffective`, `updateBaseValue`.
+- Wired broken `event_aggression_modifiers` stub: `getEventAggressionBonus()` now summed into corps aggression in `bot_corps_directives.ts`.
+- Event constraint bus: `operation_blocks` prevent new op launches, `scope_restrictions` filter target OSIDs. Both checked inline in bot AI. Standalone module at `event_constraints.ts`.
+- TurnIncidents: type + factory for per-turn incident collection (population deferred).
+- Bot response v1: `pickBotResponseV1()` with personality-weighted scoring (aggressiveness × affinity + competence × risk avoidance). Replaces placeholder `pickBotResponse`.
+- Recurrence model: `canEventFire()` checks once, max_fires, cooldown_turns.
+- Event queue: collect-then-fire with `MAX_EVENTS_PER_TURN=3`, sorted by priority.
+- Pipeline integration: pressure events use `isEventReady()`, old events use `triggerMatches()` (backward compatible). All events record fire counts, last turn, dimension shifts, flags, enables.
+- Dead code: siege_active and operation_completed condition handlers replaced with false + TODO.
+
+**Track B — HQ Phase 3 Player Actions (3 tasks):**
+- Emergency posture sweep: "EMERGENCY POSTURE" dropdown in Army HQ header sets all corps to defensive/balanced/offensive/reorganize.
+- Tasks 14 (sector stance) and 16 (smoke test) were already implemented in Phase 2.5.
+
+**New state fields:** event_readiness, event_fire_counts, event_last_fired_turn, event_flags, enabled_event_ids, event_constraints (operation_blocks, doctrine_overrides, scope_restrictions), strategic_dimensions on NegotiationState.
+
+**New modules:** pressure_system.ts, strategic_dimensions.ts, event_constraints.ts, turn_incidents.ts, bot_response.ts.
+
+**Calibration:** n1021 = 93.1% area-weighted (same as baseline — backward compatible). Pipeline step count 141→142.
+
+**Tests:** 1261→1317 (+56 new tests). 106→111 suites.
+
+**Determinism:** All new code deterministic. No Math.random(), no timestamps. Sorted iteration maintained.
+
+**Files:** src/sim/events/ (event_types.ts, evaluate_events.ts, pressure_system.ts, strategic_dimensions.ts, event_constraints.ts, turn_incidents.ts, bot_response.ts), src/state/ (game_state.ts, negotiation_types.ts), src/sim/combat/bot_corps_directives.ts, src/sim/turn_phases/war_phases.ts, src/ui/map/components/army_hq/ArmyHQModal.tsx.
 
 ## [2026-03-21] Deep Codebase Cleanup — 404 Files, ~740 MB Reclaimed
 
