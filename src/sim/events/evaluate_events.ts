@@ -71,7 +71,7 @@ function getNarrativeText(def: EventDefinition): string {
 /** Apply dimension_shifts from an event definition to the strategic dimensions store. */
 function applyDefinitionDimensionShifts(state: GameState, shifts: DimensionShift[] | undefined): void {
     if (!shifts || shifts.length === 0) return;
-    const negotiation = (state.military as any).negotiation;
+    const negotiation = state.military.negotiation;
     if (!negotiation?.strategic_dimensions) return;
     const store = negotiation.strategic_dimensions as DimensionStore;
     for (const shift of shifts) {
