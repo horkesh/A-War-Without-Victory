@@ -158,7 +158,6 @@ export function ArmyHQModal() {
 
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
-                {/* Header */}
                 <div className="flex items-center justify-between px-6 py-2.5 shrink-0 border-b border-panel-border bg-panel-card">
                     {/* Left: back/close + crest + title */}
                     <div className="flex items-center gap-4">
@@ -229,7 +228,6 @@ export function ArmyHQModal() {
                     </div>
                 </div>
 
-                {/* Tab Bar */}
                 <div className="flex items-center gap-0.5 px-6 py-1.5 bg-panel-bg border-b border-panel-border shrink-0">
                     {HQ_TABS.map(({ id, label }) => (
                         <button
@@ -247,7 +245,6 @@ export function ArmyHQModal() {
                     ))}
                 </div>
 
-                {/* Content */}
                 <div className="relative flex-1 overflow-y-auto px-6 pt-4 pb-6">
 
                     {/* ═══ BRIEFING TAB ═══ */}
