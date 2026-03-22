@@ -8,11 +8,13 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-22, v0.5.4 — v0.6.0-beta COMPLETE, War-or-Game signed off)
-**v0.5.4 (pending v0.6.0 version bump).** 1317 tests, 111 suites. tsc clean. **n1024: 93.1% area-weighted. 6/6 benchmarks PASS. RS w40 0.511.**
-**v0.6.0-alpha (nightshift):** Event infrastructure — pressure system, strategic dimensions, event flags, 14 condition types, constraint bus, TurnIncidents, bot response v1, recurrence, 3/turn cap, pipeline step. Emergency posture sweep. 56 new tests.
-**v0.6.0-beta (day session):** 1992 event migration complete. 19 events (was 18). 4 cut, 6 tweaked, 8 rewritten calendar→emergent. 3 foundational decisions (RS Strategic Goals, RBiH State Identity, HRHB Political Goal — ICTY-sourced). Drina cleansing + camps revealed RS decisions. Mostar reimplemented. /simplify: 6 fixes (clamp import, constraint helpers wired, munFromOsid, EventConstraints type, emergency posture BUG fix, CANONICAL_FACTIONS shared).
-**Next priority:** v0.6.0 merge (event decision UI in Army HQ, dimension visualization, pressure visibility). Then v0.6.1 calibration framework. See `docs/plans/2026-03-22-v06x-master-roadmap.md`.
+## Current State (2026-03-22, v0.5.4 — v0.6.0 merge in progress)
+**v0.5.4 (pending v0.6.0 version bump).** 1317 tests, 111 suites. tsc clean. **n1024: 93.1% area-weighted. 6/6 benchmarks PASS.** Pre-commit hooks active (husky, tsc).
+**v0.6.0-alpha (nightshift):** Event infrastructure — pressure, dimensions, flags, 14 conditions, constraint bus, bot response v1, recurrence, 3/turn cap, pipeline step. 56 new tests.
+**v0.6.0-beta (morning):** 1992 event migration. 19 events. 3 foundational decisions (ICTY-sourced). /simplify: 6 fixes.
+**v0.6.0 merge UI (day session):** Presidential Toolbar (army crest center → HQ). Bottom strip (faction-contextual, +MORE/LAYERS dropdowns). Command Briefing (frost glass pills, red title, dismiss). Strategic Position dimension bars in Army HQ. Dimension initialization wired. OperationsPanel cycling fix. Pre-commit hooks. RS default player in dev mode.
+**Next priority:** Event decision UI in Army HQ, Operation SITREP (halt button + commander report), game timeline. See `docs/plans/2026-03-22-v06x-master-roadmap.md`.
+**Plans written this session:** warroom-redesign-backlog, operation-detail-redesign, game-timeline-design-notes.
 **HRHB-RBiH conflict:** P1 Backlog ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
 **Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
 **Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.

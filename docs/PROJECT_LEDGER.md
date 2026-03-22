@@ -1,7 +1,37 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-22
-**Status:** **v0.5.4** (v0.6.0-beta complete, pending version bump). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS. War-or-Game SIGNED OFF.** v0.6.0: emergent event infrastructure + 1992 metagame (3 foundational decisions, 19 events, ICTY-sourced). Next: event decision UI, dimension visualization, v0.6.1 calibration framework.
+**Status:** **v0.5.4** (v0.6.0 merge in progress). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS.** UI chrome redesign: Presidential Toolbar (army crest center → HQ), bottom strip (faction-contextual, clean), Command Briefing (frost glass pills), Strategic Position dimension bars, pre-commit hooks. Next: event decision UI in Army HQ, Operation SITREP, game timeline.
+
+## [2026-03-22] v0.6.0 Merge — UI Chrome Redesign (Day Session)
+
+**Scope:** Redesign UI chrome for the "president's desk" metaphor. Player is the political leader — the interface should reflect that. 14 commits.
+
+**Presidential Toolbar** (`PresidentialToolbar.tsx`, new): Replaces TopToolbar with 5 elements — date (left), alert badges + army crest (center, click → Army HQ), advance turn (right). Dev tools as compact sub-strip in dev mode. Old TopToolbar preserved but no longer rendered. ~35 visible controls → 5.
+
+**Bottom Strip redesign** (`BottomStatusStrip.tsx`, rewritten): 4 primary map modes (Political, Ethnic, Supply, Operations) + "+MORE" dropdown for Casualties/Morale/Defense. Territory %: player faction prominent and bold, others compact. Faction-contextual indicator: alliance status (RBiH/HRHB) or Belgrade patron confidence from strategic dimensions (RS). Layer toggles behind "LAYERS" dropdown. Turn counter removed (in toolbar).
+
+**Command Briefing** (`CommandBriefingLayer.tsx`, rewritten): Compact frost glass strip under toolbar with dark glass pills per item. Red "COMMAND BRIEFING" title. Prominent red ✕ DISMISS button. Severity-colored dots (red/amber/blue). Items clickable → open relevant panel. Dismiss hides until next turn. React hooks order fix (useGameStore before early return).
+
+**Strategic Position** (`StrategicPosition.tsx`, new): 6 dimension bars (MIL CRED, TERR LEG, INTL STD, PATRON, COHESION, LEVERAGE) replace StatRow list in Army HQ. Color-coded fill bars + event_modifier delta indicators (+N green / -N red). Adapter: `deriveStrategicDimensions()` + `eventFlags` forwarded. Dimensions initialized in `computeNegotiationCapital()` via `initializeStrategicDimensions()`.
+
+**Bug fixes:**
+- OperationsPanel cycling: `selectedOperation` no longer falls back to `operations[0]` on close. Auto-select only on panel open, not key change.
+- Briefing op click no longer opens blank "OPERATIONS CENTER" panel.
+- Window-styled `title=""` hover tooltips removed from both toolbars (6 removed).
+- Emergency posture `kind === 'corps'` filter fixed (matched nothing — all corps are `corps_asset`).
+- Dev mode defaults to RS player faction for headless scenario saves.
+
+**Tech debt:** Pre-commit hooks via husky (tsc --noEmit on every commit).
+
+**Plans written:**
+- `docs/plans/2026-03-22-warroom-redesign-backlog.md` — warroom needs React migration + metagame integration (v0.7+)
+- `docs/plans/2026-03-22-operation-detail-redesign.md` — Commander SITREP concept (on-demand, not replacement)
+- `docs/plans/2026-03-22-game-timeline-design-notes.md` — war chronicle concept
+
+**Determinism:** UI-only changes. No simulation impact.
+
+**Files:** `src/ui/map/components/` (PresidentialToolbar.tsx new, BottomStatusStrip.tsx rewritten, CommandBriefingLayer.tsx rewritten, OperationsPanel.tsx fixed, army_hq/StrategicPosition.tsx new, army_hq/ArmyHQModal.tsx modified), `src/ui/map/data/` (GameStateAdapter.ts, types.ts), `src/sim/negotiation/compute_capital.ts`, `.husky/pre-commit`.
 
 ## [2026-03-22] v0.6.0-beta — 1992 Event Migration + Foundational Decisions
 
