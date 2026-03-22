@@ -13,6 +13,7 @@
 ---
 
 ### Task 1: Add per-turn snapshots to TurnSummary
+**Role:** Systems Programmer
 
 **Files:**
 - Modify: `src/state/turn_summary.ts`
@@ -73,6 +74,7 @@ git commit -m "feat(engine): territory + supply snapshots on TurnSummary for Chr
 ---
 
 ### Task 2: Chronicle entry generator
+**Role:** Gameplay Programmer
 
 **Files:**
 - Create: `src/ui/map/components/chronicle/generateChronicleEntries.ts`
@@ -199,6 +201,7 @@ git commit -m "feat(chronicle): generateChronicleEntries — pure function produ
 ---
 
 ### Task 3: Chronicle store state + toolbar wiring
+**Role:** UI/UX Developer
 
 **Files:**
 - Modify: `src/ui/map/store/gameStore.ts`
@@ -254,7 +257,12 @@ git commit -m "feat(chronicle): store state + toolbar button + date click + C sh
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 4: ChronicleCard component
+**Role:** UI/UX Developer
 
 **Files:**
 - Create: `src/ui/map/components/chronicle/ChronicleCard.tsx`
@@ -289,6 +297,7 @@ git commit -m "feat(chronicle): ChronicleCard — 6 card types + headline varian
 ---
 
 ### Task 5: ChronicleSpine component (ribbon renderer)
+**Role:** UI/UX Developer
 
 **Files:**
 - Create: `src/ui/map/components/chronicle/ChronicleSpine.tsx`
@@ -316,7 +325,12 @@ git commit -m "feat(chronicle): ChronicleSpine — territory ribbon + turn ticks
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 6: ChronicleOverlay — full-screen assembly
+**Role:** UI/UX Developer
 
 **Files:**
 - Create: `src/ui/map/components/chronicle/ChronicleOverlay.tsx`
@@ -398,6 +412,30 @@ Tasks 1, 2, 3 can be parallelized.
 - [ ] `vitest run` passes (new tests for entry generator)
 - [ ] `desktop:map:build` passes
 - [ ] 40w scenario: zero regression (snapshot fields are additive)
+
+---
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect decisions flagged for user review
+- [ ] Napkin read at start, updated during work
+- [ ] Ledger entry appended on completion
+- [ ] Life lessons scanned, relevant ones flagged
+- [ ] tsc + vitest after every phase
+- [ ] /simplify between each phase
+- [ ] Version bump + tag on milestone completion
+
+## Completion Checklist
+
+- [ ] Implementation report in `docs/40_reports/implemented/`
+- [ ] Canon docs updated (if applicable)
+- [ ] Master files updated (if applicable)
+- [ ] VERSIONING.md milestone marked complete
+- [ ] PROJECT_LEDGER.md entry appended
+- [ ] Napkin updated
+
+---
 
 ## Not In Scope (v0.6.3 — Wrapped)
 

@@ -13,6 +13,7 @@
 ---
 
 ### Task 1: Add DIMENSION_WEIGHTS and computeNegotiatingCapital
+**Role:** Gameplay Programmer
 
 **Files:**
 - Modify: `src/sim/events/strategic_dimensions.ts`
@@ -91,6 +92,7 @@ git commit -m "feat(dimensions): DIMENSION_WEIGHTS + computeNegotiatingCapital"
 ---
 
 ### Task 2: Add computeDimensionBaseValues
+**Role:** Gameplay Programmer
 
 **Files:**
 - Modify: `src/sim/events/strategic_dimensions.ts`
@@ -206,7 +208,12 @@ git commit -m "feat(dimensions): computeDimensionBaseValues — 6 base formulas 
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 3: Rename NegotiationCapital → NegotiationBreakdown
+**Role:** Systems Programmer
 
 **Files:**
 - Modify: `src/state/negotiation_types.ts` — remove 5 scoring fields, rename interface
@@ -248,6 +255,7 @@ git commit -m "refactor(types): NegotiationCapital → NegotiationBreakdown, rem
 ---
 
 ### Task 4: Add pipeline step + wire Dayton
+**Role:** Systems Programmer
 
 **Files:**
 - Modify: `src/sim/turn_phases/war_phases.ts` — add `compute-dimension-bases` step
@@ -294,7 +302,12 @@ git commit -m "feat(pipeline): compute-dimension-bases step + Dayton reads unifi
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 5: UI — Composite score + weight emphasis + tooltips
+**Role:** UI/UX Developer
 
 **Files:**
 - Modify: `src/ui/map/components/army_hq/StrategicPosition.tsx`
@@ -377,3 +390,25 @@ Task 1 → Task 2 → Task 3 → Task 4
 - [ ] `vitest run` passes
 - [ ] `desktop:map:build` passes
 - [ ] 40w scenario: zero combat/territory regression
+
+---
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect decisions flagged for user review
+- [ ] Napkin read at start, updated during work
+- [ ] Ledger entry appended on completion
+- [ ] Life lessons scanned, relevant ones flagged
+- [ ] tsc + vitest after every phase
+- [ ] /simplify between each phase
+- [ ] Version bump + tag on milestone completion
+
+## Completion Checklist
+
+- [ ] Implementation report in `docs/40_reports/implemented/`
+- [ ] Canon docs updated (if applicable)
+- [ ] Master files updated (if applicable)
+- [ ] VERSIONING.md milestone marked complete
+- [ ] PROJECT_LEDGER.md entry appended
+- [ ] Napkin updated

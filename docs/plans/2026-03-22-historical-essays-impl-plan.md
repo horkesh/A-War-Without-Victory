@@ -11,6 +11,7 @@
 ---
 
 ### Task 1: Essay schema and storage
+**Role:** Systems Programmer
 
 **Files:**
 - Create: `data/scenarios/essays/essay_schema.json` (type definition)
@@ -47,7 +48,12 @@ git commit -m "feat(essays): schema + event-to-essay mapping"
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 2: Sonnet generation script
+**Role:** Systems Programmer
 
 **Files:**
 - Create: `tools/generate_essays.cjs`
@@ -91,7 +97,12 @@ git commit -m "feat(essays): 100 historical essays generated via Sonnet"
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 3: Codex UI integration
+**Role:** UI/UX Developer
 
 **Files:**
 - Modify: existing Codex component (search for Codex in src/ui/)
@@ -133,6 +144,30 @@ git commit -m "feat(essays): Codex UI — unlockable essays tied to fired events
 - [ ] Codex accessible from Army HQ or keyboard shortcut
 - [ ] No runtime API calls — all content baked in
 - [ ] tsc clean, desktop:map:build passes
+
+---
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect decisions flagged for user review
+- [ ] Napkin read at start, updated during work
+- [ ] Ledger entry appended on completion
+- [ ] Life lessons scanned, relevant ones flagged
+- [ ] tsc + vitest after every phase
+- [ ] /simplify between each phase
+- [ ] Version bump + tag on milestone completion
+
+## Completion Checklist
+
+- [ ] Implementation report in `docs/40_reports/implemented/`
+- [ ] Canon docs updated (if applicable)
+- [ ] Master files updated (if applicable)
+- [ ] VERSIONING.md milestone marked complete
+- [ ] PROJECT_LEDGER.md entry appended
+- [ ] Napkin updated
+
+---
 
 ## Notes
 

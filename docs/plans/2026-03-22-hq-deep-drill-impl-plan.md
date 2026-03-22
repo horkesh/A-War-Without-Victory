@@ -13,6 +13,7 @@
 ---
 
 ### Task 1: Brigade Sub-Card Expansion
+**Role:** UI/UX Developer
 
 **Files:**
 - Modify: `src/ui/map/components/army_hq/OrbatSection.tsx`
@@ -47,6 +48,7 @@ git commit -m "feat(hq): brigade sub-card expansion — stats, history, equipmen
 ---
 
 ### Task 2: Operation Sub-Card Expansion
+**Role:** UI/UX Developer
 
 **Files:**
 - Modify: `src/ui/map/components/army_hq/OperationsSection.tsx`
@@ -72,7 +74,12 @@ git commit -m "feat(hq): operation sub-card expansion — weekly log, per-brigad
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 3: Sector Sub-Card Expansion
+**Role:** UI/UX Developer
 
 **Files:**
 - Modify: `src/ui/map/components/army_hq/SectorsSection.tsx`
@@ -98,7 +105,12 @@ git commit -m "feat(hq): sector sub-card expansion — intel, threats, positions
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 4: Operation Readiness Composite Indicator
+**Role:** UI/UX Developer
 
 **Files:**
 - Modify: `src/ui/map/components/army_hq/OperationsSection.tsx`
@@ -135,3 +147,25 @@ git commit -m "feat(hq): operation readiness composite indicator (green/amber/re
 - [ ] Sector sub-cards show intel confidence, threats, positions
 - [ ] Operation readiness dot visible on collapsed operation cards
 - [ ] tsc clean, desktop:map:build passes
+
+---
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect decisions flagged for user review
+- [ ] Napkin read at start, updated during work
+- [ ] Ledger entry appended on completion
+- [ ] Life lessons scanned, relevant ones flagged
+- [ ] tsc + vitest after every phase
+- [ ] /simplify between each phase
+- [ ] Version bump + tag on milestone completion
+
+## Completion Checklist
+
+- [ ] Implementation report in `docs/40_reports/implemented/`
+- [ ] Canon docs updated (if applicable)
+- [ ] Master files updated (if applicable)
+- [ ] VERSIONING.md milestone marked complete
+- [ ] PROJECT_LEDGER.md entry appended
+- [ ] Napkin updated

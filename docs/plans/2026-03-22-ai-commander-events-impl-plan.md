@@ -13,6 +13,7 @@
 ---
 
 ### Task 1: Enrich Army Prompt with Event Context
+**Role:** Systems Programmer
 
 **Files:**
 - Modify: `src/sim/ai_commander/prompt_builder.ts`
@@ -134,7 +135,12 @@ git commit -m "feat(ai): enrich army/corps prompts with event context, constrain
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 2: generateEventDecision — Claude responds to events
+**Role:** Systems Programmer
 
 **Files:**
 - Create: `src/sim/ai_commander/event_decision_ai.ts`
@@ -250,7 +256,12 @@ git commit -m "feat(ai): generateEventDecision — Claude responds to events in 
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 3: Constraint Validation for AI Decisions
+**Role:** Systems Programmer
 
 **Files:**
 - Create: `src/sim/ai_commander/decision_validator.ts`
@@ -380,3 +391,25 @@ All 3 tasks are independent and can be parallelized.
 - [ ] `tsc --noEmit` clean
 - [ ] `vitest run` passes (6+ new tests)
 - [ ] No calibration impact (AI Commander is opt-in, not default)
+
+---
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect decisions flagged for user review
+- [ ] Napkin read at start, updated during work
+- [ ] Ledger entry appended on completion
+- [ ] Life lessons scanned, relevant ones flagged
+- [ ] tsc + vitest after every phase
+- [ ] /simplify between each phase
+- [ ] Version bump + tag on milestone completion
+
+## Completion Checklist
+
+- [ ] Implementation report in `docs/40_reports/implemented/`
+- [ ] Canon docs updated (if applicable)
+- [ ] Master files updated (if applicable)
+- [ ] VERSIONING.md milestone marked complete
+- [ ] PROJECT_LEDGER.md entry appended
+- [ ] Napkin updated

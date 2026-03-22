@@ -11,6 +11,7 @@
 ---
 
 ### Task 1: Freeze calibration baseline
+**Role:** Systems Programmer
 
 **Files:**
 - Create: `data/calibration/baseline_40w.json`
@@ -44,7 +45,12 @@ git commit -m "chore(calibration): freeze 40w baseline for regression detection"
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 2: Regression comparison script
+**Role:** Systems Programmer
 
 **Files:**
 - Create: `tools/calibrate_40w.cjs`
@@ -79,7 +85,12 @@ git commit -m "feat(calibration): npm run calibrate:40w — automated regression
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 3: Event timing assertions
+**Role:** Systems Programmer
 
 **Files:**
 - Create: `tests/event_timing.test.ts`
@@ -121,3 +132,25 @@ git commit -m "test(calibration): event timing window assertions"
 - [ ] `npm run calibrate:40w` runs and produces PASS/FAIL report
 - [ ] Event timing tests assert key events fire within expected windows
 - [ ] tsc clean, vitest passes
+
+---
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect decisions flagged for user review
+- [ ] Napkin read at start, updated during work
+- [ ] Ledger entry appended on completion
+- [ ] Life lessons scanned, relevant ones flagged
+- [ ] tsc + vitest after every phase
+- [ ] /simplify between each phase
+- [ ] Version bump + tag on milestone completion
+
+## Completion Checklist
+
+- [ ] Implementation report in `docs/40_reports/implemented/`
+- [ ] Canon docs updated (if applicable)
+- [ ] Master files updated (if applicable)
+- [ ] VERSIONING.md milestone marked complete
+- [ ] PROJECT_LEDGER.md entry appended
+- [ ] Napkin updated

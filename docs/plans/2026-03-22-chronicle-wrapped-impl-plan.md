@@ -15,6 +15,7 @@
 ---
 
 ### Task 1: generateWrappedSlides analysis function
+**Role:** Gameplay Programmer
 
 **Files:**
 - Create: `src/ui/map/components/chronicle/generateWrappedSlides.ts`
@@ -81,6 +82,7 @@ git commit -m "feat(wrapped): generateWrappedSlides — 10-slide analysis from g
 ---
 
 ### Task 2: SpiderChart component
+**Role:** UI/UX Developer
 
 **Files:**
 - Create: `src/ui/map/components/chronicle/SpiderChart.tsx`
@@ -107,7 +109,12 @@ git commit -m "feat(wrapped): SpiderChart — 6-axis radar for dimension display
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 3: WrappedSlide component (10 variants)
+**Role:** UI/UX Developer
 
 **Files:**
 - Create: `src/ui/map/components/chronicle/WrappedSlide.tsx`
@@ -136,7 +143,12 @@ git commit -m "feat(wrapped): WrappedSlide — 10 slide type variants"
 
 ---
 
+→ /simplify → commit
+
+---
+
 ### Task 4: WrappedOverlay + wiring
+**Role:** UI/UX Developer
 
 **Files:**
 - Create: `src/ui/map/components/chronicle/WrappedOverlay.tsx`
@@ -181,3 +193,25 @@ git commit -m "feat(wrapped): WrappedOverlay — game-end cinematic + turning po
 - [ ] "VIEW YOUR WAR" button in GameOverModal
 - [ ] Turning point markers appear in Chronicle after Wrapped viewed
 - [ ] tsc clean, vitest passes, desktop:map:build passes
+
+---
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect decisions flagged for user review
+- [ ] Napkin read at start, updated during work
+- [ ] Ledger entry appended on completion
+- [ ] Life lessons scanned, relevant ones flagged
+- [ ] tsc + vitest after every phase
+- [ ] /simplify between each phase
+- [ ] Version bump + tag on milestone completion
+
+## Completion Checklist
+
+- [ ] Implementation report in `docs/40_reports/implemented/`
+- [ ] Canon docs updated (if applicable)
+- [ ] Master files updated (if applicable)
+- [ ] VERSIONING.md milestone marked complete
+- [ ] PROJECT_LEDGER.md entry appended
+- [ ] Napkin updated
