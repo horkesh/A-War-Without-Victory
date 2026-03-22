@@ -6,7 +6,7 @@ import type { EdgeRecord } from '../map/settlements.js';
 import type { ExhaustionStats } from './exhaustion.js';
 import type { FormationFatigueStepReport } from './formation_fatigue.js';
 import { computeFrontBreaches } from './front_breaches.js';
-import type { FactionId, GameState } from './game_state.js';
+import type { FactionId, GameState, NegotiationStatus } from './game_state.js';
 import type { MilitiaFatigueStepReport } from './militia_fatigue.js';
 import { computeSupplyReachability } from './supply_reachability.js';
 
@@ -105,7 +105,7 @@ function computeEnforceabilityMetrics(state: GameState, activeEdgeIds: string[])
     let activeCount = 0;
 
     for (const edgeId of activeEdgeIds) {
-        const seg = (state.military.front_segments as any)?.[edgeId];
+        const seg = state.military.front_segments[edgeId];
         if (seg && typeof seg === 'object' && seg.active === true) {
             activeCount += 1;
             const friction = Number.isInteger(seg.friction) ? seg.friction : 0;
@@ -369,7 +369,7 @@ export function generateNegotiationOffers(
     // Compute active edges
     const activeEdgeIds: string[] = [];
     for (const edge of derivedFrontEdges) {
-        const seg = (state.military.front_segments as any)?.[edge.edge_id];
+        const seg = state.military.front_segments[edge.edge_id];
         if (seg && typeof seg === 'object' && seg.active === true) {
             activeEdgeIds.push(edge.edge_id);
         }
@@ -449,7 +449,7 @@ export function checkOfferAcceptance(
     // Get active edges
     const activeEdgeIds: string[] = [];
     for (const edge of derivedFrontEdges) {
-        const seg = (state.military.front_segments as any)?.[edge.edge_id];
+        const seg = state.military.front_segments[edge.edge_id];
         if (seg && typeof seg === 'object' && seg.active === true) {
             activeEdgeIds.push(edge.edge_id);
         }
@@ -542,7 +542,7 @@ export function applyEnforcementPackage(state: GameState, enforcementPackage: En
     state.political.negotiation_status.ceasefire_since_turn = currentTurn;
     state.political.negotiation_status.last_offer_turn = currentTurn;
     // Store offer_id reference (for audit)
-    (state.political.negotiation_status as any).last_enforcement_offer_id = enforcementPackage.offer_id;
+    (state.political.negotiation_status as NegotiationStatus & { last_enforcement_offer_id?: string }).last_enforcement_offer_id = enforcementPackage.offer_id;
 
     // Add freeze entries
     const untilTurn = enforcementPackage.duration_turns === 'indefinite' ? null : currentTurn + enforcementPackage.duration_turns;

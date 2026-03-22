@@ -8,7 +8,7 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-22, v0.5.4 — v0.6.0 merge in progress)
+## Current State (2026-03-23, v0.5.4 — v0.6.0 merge in progress)
 **v0.5.4 (pending v0.6.0 version bump).** 1317 tests, 111 suites. tsc clean. **n1024: 93.1% area-weighted. 6/6 benchmarks PASS.** Pre-commit hooks active (husky, tsc).
 **v0.6.0-alpha (nightshift):** Event infrastructure — pressure, dimensions, flags, 14 conditions, constraint bus, bot response v1, recurrence, 3/turn cap, pipeline step. 56 new tests.
 **v0.6.0-beta (morning):** 1992 event migration. 19 events. 3 foundational decisions (ICTY-sourced). /simplify: 6 fixes.
@@ -97,39 +97,23 @@
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
 ## Known Backlog
-1. ~~**CB brigade redistribution (P1)**~~ — FIXED n963. `buildOsidToMunFromReverseMap` mun1990_id cross-boundary bug. 7→10 brigades.
-2. ~~**CB operations not launching (P1)**~~ — FIXED n963. Lašva Valley Offensive priority w40-100. Gates correct.
-3. ~~**Kiseljak/Vitez pocket separation (P1)**~~ — FIXED n963. 3 HRHB enclaves added (Kiseljak, Lašva Valley, Žepče).
-4. ~~**#35 SRK screening stance (P2)**~~ — FIXED n967. `isSectorColdFront` false positive: SRK sectors face both HRHB (Kiseljak) and RBiH — cold front guard added. Entrenchment 0→12 on 6/9 brigades.
-5. ~~**Drina region 78% (P2)**~~ — FIXED n964. OOB correction (phantom Rogatica removed, Skelani added). Now 84.2%.
-6. **[2026-03-19] 3rd Corps displacement (PARTIALLY FIXED, P3)**: 9/27 far from home. Structural.
-7. **[2026-03-19] #41 Dissolution floor not enforced (P3)**: hrhb_108th at 100 pers below 150 floor.
-8. **[2026-03-18] RBiH artillery below target (P3)**: 117 vs 150-250 historical.
-9. ~~**UI Visual Overhaul**~~ — ALL 9 PHASES COMPLETE. Icons, battle markers, counter enrichment (Deck.gl ON by default), sidebar upgrade, EventModal paper, bottom strip, op glow, battle flyover, terrain move preview. Plan: `docs/plans/2026-03-19-ui-visual-overhaul-design.md`.
-10. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
-**Resolved this session:** #34 HVO sectors (FIXED — corps activation + consolidation protection), #38 HVO stale IDs (FIXED), #33 Sarajevo density (CORRECT — siege working).
+1. **[2026-03-19] Map UX: heat map legend + context menu (P3)**: Legends for color gradients. Right-click context menu per element type. See MAP_UI report.
+2. **[2026-03-22] Front Line Terrain Tinting (P4)**: Enrich front edge data with friction, color high-elevation edges white/blue. Not started.
+3. **[2026-03-22] Elevation Profile on Ops Axes (P4)**: Elevation data + hover tooltips DONE. SVG area chart along axis of advance NOT DONE.
 
-## Technical Debt (Professional Audit 2026-03-21)
-1. **[P3] 217 `any` types in sim/state** — each is a type safety hole. Mostly in GameStateAdapter (save parsing). Gradual cleanup.
-2. **[P3] 8 circular dependencies** — all game_state.ts ↔ type files. Type-only, not runtime. Clean by extracting shared types to a `types.ts` barrel.
-3. **[P4] Electron 33 → 41** — 8 major versions behind. Security + performance. Plan upgrade with test pass.
-4. **[P4] No pre-commit hooks** — no husky/lint-staged. Smoke-test triad is manual only. Add `npx tsc --noEmit` as pre-commit hook.
-5. **[P4] Engine per-OSID displacement cap** — displacement timers can over-displace (more events than population). UI caps proportionally but engine should prevent at source.
+## Technical Debt (Professional Audit 2026-03-21, updated 2026-03-22)
+1. ~~**[P3] ~216 `any` types in sim/state**~~ — RESOLVED (2026-03-22). 214→64. Remaining 55 are serialize.ts + validateGameState.ts (save migration, inherently untyped). 9 trivial remnants.
+2. ~~**[P3] 8 circular dependencies**~~ — RESOLVED. All type-only imports (`import type`), no runtime cycles. No barrel needed.
+3. ~~**[P4] Electron 33 → 41**~~ — RESOLVED (2026-03-22). Upgraded to v41.0.3. Zero code changes needed. Smoke-test triad passes.
+4. ~~**[P4] No pre-commit hooks**~~ — RESOLVED. Husky active: `npx tsc --noEmit` on every commit.
+5. ~~**[P4] Engine displacement cap**~~ — RESOLVED on audit (2026-03-22). Branch A: one-time proportional to osidPop, capped by mun remainingPop. Branch B: `cumulative_displaced` per-OSID aggregate tracking, stops at `remainingMinority < 10`. Municipality: `Math.min(amount, remainingPopulation)`. Settlement: [0,1] fraction. All paths guarded.
 
 ## Map & UX Upgrade Queue (strategic design: `docs/plans/2026-03-20-terrain-map-ux-strategic-design.md`)
-**Tier 1 — High Impact, Low Effort (1-2 sessions each):**
-1. ~~**Deploy Icon Language (P0)**~~ — DONE. 22 SVG icons deployed to FormationDetail, CorpsDetail, ArmyDetail, CorpsCard. React.memo + aria-hidden. Simplified: stance lookup, size consistency.
-2. ~~**Battle Marker Upgrade**~~ — DONE. Enriched with TurnBattle data. Outcome-colored, size-scaled by casualties. Hover tooltip + click priority. Includes non-flip battles.
-3. ~~**Map Counter Enrichment**~~ — DONE. Deck.gl health bar, supply dot, status icons, op/disrupted glows. `deckFormationCounters: true`.
-**Tier 2 — High Impact, Medium Effort (2-3 sessions):**
-4. ~~**Operation Visualization on Main Map**~~ — DONE. Op glow + disrupted glow on Deck.gl counters. Objective tints already in operations map mode.
-5. ~~**Battle Site Flyover**~~ — DONE. Click battle → flyTo pitch 35°, zoom 11+. OSID selected.
-6. **[2026-03-20] Settlement Panel Mini-Profile**: Formation cards with combat effectiveness, siege status, terrain profile in overview tab.
-**Tier 3 — Medium Impact, Higher Effort:**
-7. ~~**Terrain Cost Movement Overlay**~~ — DONE. Move preview uses friction coloring (green→amber→red).
-8. **[2026-03-20] Elevation Profile on Ops Axes**: Pre-compute per-OSID elevation, sample along bezier, SVG area chart.
-9. **[2026-03-20] Front Line Terrain Tinting**: Enrich front edge data with friction, color high-elevation edges white/blue.
-**Explicitly rejected:** LOS cones (too expensive, wrong scale), full 3D main map (distorts polygons), 3D battle replay (no multi-step data), threat heat layer (redundant with Defense mode), pulsing markers (flashy, no info).
+**Tier 1-2: ALL DONE.** Icon language, battle markers, counter enrichment, op visualization, battle flyover, settlement panel mini-profile (full `SettlementDetailContent.tsx`), terrain cost movement overlay.
+**Remaining (Tier 3):**
+1. **Elevation Profile on Ops Axes (P4)**: Hover tooltips done. SVG area chart along axis of advance not done.
+2. **Front Line Terrain Tinting (P4)**: Front lines colored by corps/sector only. Friction data exists but not wired to edge rendering.
+**Explicitly rejected:** LOS cones, full 3D main map, 3D battle replay, threat heat layer, pulsing markers.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**

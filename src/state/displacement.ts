@@ -211,8 +211,8 @@ function isMunicipalityUnderPressure(
     // Check if any settlement in the municipality is part of an active front edge
     const munSettlementSet = new Set(munSettlements);
     for (const edge of frontEdges) {
-        const seg = (state.military.front_segments as any)?.[edge.edge_id];
-        const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
+        const seg = state.military.front_segments[edge.edge_id];
+        const isActive = seg && typeof seg === 'object' && seg.active === true;
         if (!isActive) continue;
 
         if (munSettlementSet.has(edge.a) || munSettlementSet.has(edge.b)) {

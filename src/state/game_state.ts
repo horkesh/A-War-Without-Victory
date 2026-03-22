@@ -1092,6 +1092,10 @@ export interface StateMeta {
     max_turns?: number;
     /** Scenario victory conditions, stored at scenario load for pipeline evaluation. */
     victory_conditions?: import('../scenario/scenario_types.js').ScenarioVictoryConditions;
+    /** AI Commander configuration (mode, API key, cost estimate). Desktop-only; not used by sim engine. */
+    ai_commander_config?: import('../sim/ai_commander/ai_config.js').AiCommanderConfig;
+    /** Calendar date string for current turn (set at runtime in saves, not always present). */
+    date?: string;
 }
 
 export interface NegotiationLedgerEntry {
@@ -1764,6 +1768,10 @@ war_dispatches?: import('../sim/ai_commander/war_dispatches.js').WarDispatch[];
 battle_narratives?: import('../sim/ai_commander/aar_narrative.js').BattleNarrative[];
 /** Queue of significant battles awaiting narrative generation (populated during combat, consumed by ai-battle-narratives step). */
 narrative_queue?: import('../sim/ai_commander/aar_narrative.js').NarrativeQueueEntry[];
+/** Command briefing assembled for player faction each turn (cosmetic, never affects gameplay). */
+last_briefing?: import('../sim/briefing/collect_briefing.js').CommandBriefing;
+/** Per-enclave state tracking (fallen status, resilience, etc). Key: enclave name. */
+enclave_state?: Record<string, { fallen?: boolean; status?: string; [key: string]: unknown }>;
 }
 
 export interface PoliticalState {

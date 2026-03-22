@@ -105,8 +105,8 @@ export function accumulateFrontPressure(
 
     for (const edge of edgesSorted) {
         const edge_id = edge.edge_id;
-        const seg = (state.military.front_segments as any)?.[edge_id];
-        const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
+        const seg = state.military.front_segments[edge_id];
+        const isActive = seg && seg.active === true;
         if (!isActive) continue;
         edges_considered += 1;
 
@@ -168,9 +168,9 @@ export function accumulateFrontPressure(
         const delta = clampDelta(delta_generated, -10, 10);
         pressure_deltas[edge_id] = delta;
 
-        const existing = (state.military.front_pressure as any)[edge_id];
-        if (!existing || typeof existing !== 'object') {
-            (state.military.front_pressure as any)[edge_id] = {
+        const existing = state.military.front_pressure[edge_id];
+        if (!existing) {
+            state.military.front_pressure[edge_id] = {
                 edge_id,
                 value: 0,
                 max_abs: 0,
@@ -178,7 +178,7 @@ export function accumulateFrontPressure(
             };
         }
 
-        const rec = (state.military.front_pressure as any)[edge_id];
+        const rec = state.military.front_pressure[edge_id];
         const prevValue = Number.isInteger(rec.value) ? rec.value : 0;
         const nextValue = prevValue + delta;
         rec.value = nextValue;

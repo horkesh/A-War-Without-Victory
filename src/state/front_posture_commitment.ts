@@ -3,7 +3,7 @@ import type { FrontEdge } from '../map/front_edges.js';
 import type { FrontRegionsFile } from '../map/front_regions.js';
 import type { FormationFatigueStepReport } from './formation_fatigue.js';
 import { computeLocalSupplyForEdges, isFormationSupplied } from './formation_fatigue.js';
-import type { FactionId, GameState } from './game_state.js';
+import type { FactionId, FormationAssignment, GameState } from './game_state.js';
 
 /**
  * Effective posture weight after commitment and friction.
@@ -90,8 +90,8 @@ export function applyFormationCommitment(
     const activeEdgesByFactionSidePair = new Map<string, string[]>();
     for (const edge of derivedFrontEdges) {
         if (!edge.side_a || !edge.side_b) continue;
-        const seg = (state.military.front_segments as any)?.[edge.edge_id];
-        if (!seg || typeof seg !== 'object' || (seg as any).active !== true) continue;
+        const seg = state.military.front_segments[edge.edge_id];
+        if (!seg || seg.active !== true) continue;
 
         // Add to side_a's active edges
         const keyA = `${edge.side_a}::${edge.side_a}--${edge.side_b}`;
@@ -118,10 +118,10 @@ export function applyFormationCommitment(
     // Build region lookup
     const regionById = new Map<string, { edge_ids: string[]; side_pair: string }>();
     for (const r of frontRegions.regions ?? []) {
-        if (r && typeof r === 'object' && typeof (r as any).region_id === 'string') {
-            regionById.set((r as any).region_id, {
-                edge_ids: Array.isArray((r as any).edge_ids) ? (r as any).edge_ids : [],
-                side_pair: typeof (r as any).side_pair === 'string' ? (r as any).side_pair : ''
+        if (r && typeof r.region_id === 'string') {
+            regionById.set(r.region_id, {
+                edge_ids: Array.isArray(r.edge_ids) ? r.edge_ids : [],
+                side_pair: typeof r.side_pair === 'string' ? r.side_pair : ''
             });
         }
     }
@@ -135,14 +135,14 @@ export function applyFormationCommitment(
         const commandCapacity = (faction.command_capacity !== undefined && Number.isInteger(faction.command_capacity) && faction.command_capacity >= 0) ? faction.command_capacity : 0;
 
         // Collect active formations for this faction
-        const formations = (state as any).formations as Record<string, any> | undefined;
-        const activeFormations: Array<{ id: string; assignment: any }> = [];
+        const formations = state.military.formations;
+        const activeFormations: Array<{ id: string; assignment: FormationAssignment | null }> = [];
         if (formations && typeof formations === 'object') {
             for (const [id, f] of Object.entries(formations)) {
                 if (!f || typeof f !== 'object') continue;
-                if ((f as any).faction !== factionId) continue;
-                if ((f as any).status !== 'active') continue;
-                const assignment = (f as any).assignment;
+                if (f.faction !== factionId) continue;
+                if (f.status !== 'active') continue;
+                const assignment = f.assignment;
                 activeFormations.push({ id, assignment });
             }
         }
@@ -164,9 +164,9 @@ export function applyFormationCommitment(
             if (!f.assignment || typeof f.assignment !== 'object') continue;
 
             // Phase 10: Compute commit points with supply/fatigue penalties
-            const formationData = formations?.[f.id];
-            const ops = formationData && typeof formationData === 'object' ? (formationData as any).ops : undefined;
-            const fatigue = ops && typeof ops === 'object' && Number.isInteger(ops.fatigue) ? (ops.fatigue as number) : 0;
+            const formationData = formations[f.id];
+            const ops = formationData?.ops;
+            const fatigue = ops && Number.isInteger(ops.fatigue) ? ops.fatigue : 0;
 
             // Phase 12A: Determine supply from formation_fatigue_report if available (preferred),
             // otherwise recompute deterministically using the same helper used by fatigue step
@@ -184,7 +184,7 @@ export function applyFormationCommitment(
                     } else {
                         // Last resort: use last_supplied_turn equality (should not happen in normal pipeline)
                         const currentTurn = state.meta.turn;
-                        const lastSuppliedTurn = ops && typeof ops === 'object' ? (ops.last_supplied_turn as number | null | undefined) : null;
+                        const lastSuppliedTurn = ops ? ops.last_supplied_turn : null;
                         supplied_this_turn = lastSuppliedTurn === currentTurn;
                     }
                 }
@@ -197,7 +197,7 @@ export function applyFormationCommitment(
                 } else {
                     // Last resort: use last_supplied_turn equality (should not happen in normal pipeline)
                     const currentTurn = state.meta.turn;
-                    const lastSuppliedTurn = ops && typeof ops === 'object' ? (ops.last_supplied_turn as number | null | undefined) : null;
+                    const lastSuppliedTurn = ops ? ops.last_supplied_turn : null;
                     supplied_this_turn = lastSuppliedTurn === currentTurn;
                 }
             }
@@ -287,9 +287,9 @@ export function applyFormationCommitment(
             const demandPoints = baseWeight * 1000; // convert to milli-points for comparison
 
             // Phase 11B: Check if edge is frozen by ceasefire
-            const ceasefire = (state as any).ceasefire as Record<string, any> | undefined;
+            const ceasefire = state.political.ceasefire;
             const freezeEntry = ceasefire?.[edgeId];
-            const isFrozen = freezeEntry && typeof freezeEntry === 'object';
+            const isFrozen = !!freezeEntry;
             if (isFrozen) {
                 // Edge is frozen: set effective_weight to 0
                 effectiveAssignments[edgeId] = {

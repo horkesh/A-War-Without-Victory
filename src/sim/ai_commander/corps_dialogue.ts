@@ -182,7 +182,7 @@ function getCorpsPersonnel(state: GameState, corpsId: string): number {
 
 /** Build a brief recent-battle summary for a corps from combat_summary if available. */
 function buildRecentBattleSummary(state: GameState, corpsId: string): string {
-    const summary = (state.military as any).combat_summary as
+    const summary = (state.military as unknown as Record<string, unknown>).combat_summary as
         | { battles?: Array<{ attacker_corps?: string; defender_corps?: string; outcome?: string }> }
         | undefined;
     if (!summary?.battles?.length) return '';
@@ -216,7 +216,7 @@ export async function generateCorpsDialogues(
 ): Promise<CorpsDialogueEntry[]> {
     if (!client.isAvailable()) return [];
 
-    const playerFaction = (state.meta as any).player_faction ?? null;
+    const playerFaction = state.meta.player_faction ?? null;
     const formations = state.military.formations ?? {};
     const corpsCommand = state.military.corps_command ?? {};
     const turn = state.meta.turn;

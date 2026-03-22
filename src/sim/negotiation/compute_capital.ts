@@ -280,7 +280,8 @@ function computeCohesionData(state: GameState, faction: FactionId): { score: num
 
     // Alliance management (RBiH and HRHB)
     if (faction === 'RBiH' || faction === 'HRHB') {
-        const alliance = (state.military as any).rbih_hrhb_state?.alliance_value;
+        const allianceState = (state.military as unknown as Record<string, unknown>)['rbih_hrhb_state'] as Record<string, unknown> | undefined;
+        const alliance = allianceState?.['alliance_value'];
         if (typeof alliance === 'number') {
             // Allied = +20, strained = 0, hostile = -20
             score += alliance * 20;
@@ -323,7 +324,7 @@ function computeEnclaveData(state: GameState, faction: FactionId): {
 
     if (!KNOWN_ENCLAVES) return { held: [], lost: [] };
 
-    const enclaveState = (state.military as any).enclave_state;
+    const enclaveState = state.military.enclave_state;
     if (!enclaveState) return { held: KNOWN_ENCLAVES, lost: [] };
 
     for (const eid of KNOWN_ENCLAVES) {

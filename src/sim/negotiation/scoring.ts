@@ -290,14 +290,13 @@ export function computeFactionVerdict(
  * Compute the complete game verdict for all factions.
  */
 export function computeFullVerdict(state: GameState): GameVerdict {
-    const meta = state.meta ?? {} as any;
+    const meta = state.meta;
     const turn = meta.turn ?? 0;
-    // meta.date is set at runtime in saves but not in the StateMeta interface
-    const date = typeof (meta as any).date === 'string' ? (meta as any).date : `Week ${turn}`;
+    const date = typeof meta.date === 'string' ? meta.date : `Week ${turn}`;
     const neg = state.military?.negotiation;
 
     // Determine outcome type
-    const outcome = (meta as any).outcome as string | undefined;
+    const outcome = meta.outcome;
     let outcomeType: 'dayton' | 'peace_plan' | 'termination' = 'termination';
     let outcomeLabel = 'War Ended';
 

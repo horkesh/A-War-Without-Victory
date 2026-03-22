@@ -31,6 +31,7 @@ import type {
     FormationId,
     GameState,
     OperationAxis,
+    SettlementId,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
@@ -224,12 +225,12 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
 
         // Issue column march toward home_osid (the movement system will BFS there)
         if (!state.military.brigade_movement_orders) {
-            (state.military as any).brigade_movement_orders = {};
+            state.military.brigade_movement_orders = {};
         }
         state.military.brigade_movement_orders![bid] = {
-            destination_sids: [homeOsid],
+            destination_sids: [homeOsid as SettlementId],
             stance: 'column',
-        } as any;
+        } as { destination_sids: SettlementId[] };
     }
 }
 

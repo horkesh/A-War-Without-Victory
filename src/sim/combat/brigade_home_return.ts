@@ -8,7 +8,7 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { FormationId, FormationState, GameState } from '../../state/game_state.js';
+import type { CorpsCommandState, FormationId, FormationState, GameState, OperationAxis, SettlementId } from '../../state/game_state.js';
 import type { TurnContext } from '../turn_pipeline_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -97,11 +97,10 @@ function isOperationParticipant(state: GameState, brigadeId: FormationId): boole
     for (const fid of Object.keys(formations)) {
         const f = formations[fid as FormationId]!;
         if (f.kind !== 'corps_asset') continue;
-        const op = (f as any).active_operation;
+        const op = (f as unknown as Partial<CorpsCommandState>).active_operation;
         if (!op) continue;
-        // Check axes-based ops
         if (op.axes) {
-            if (op.axes.some((a: any) => a.assigned_brigades?.includes(brigadeId))) return true;
+            if (op.axes.some((a: OperationAxis) => a.assigned_brigades?.includes(brigadeId))) return true;
         }
         // Check flat participating_brigades
         if (op.participating_brigades?.includes(brigadeId)) return true;
@@ -114,7 +113,7 @@ function isOperationParticipant(state: GameState, brigadeId: FormationId): boole
             const op = cmd?.active_operation;
             if (!op || op.phase !== 'execution') continue;
             if (op.axes) {
-                if (op.axes.some((a: any) => a.assigned_brigades?.includes(brigadeId))) return true;
+                if (op.axes.some((a: OperationAxis) => a.assigned_brigades?.includes(brigadeId))) return true;
             }
             if (op.participating_brigades?.includes(brigadeId)) return true;
         }
@@ -251,12 +250,12 @@ export function evaluateHomeReturn(
         // Issue column march orders (same pattern as brigade_front_distribution.ts)
         for (const order of orders) {
             if (!state.military.brigade_movement_orders) {
-                (state.military as any).brigade_movement_orders = {};
+                state.military.brigade_movement_orders = {};
             }
             state.military.brigade_movement_orders![order.brigade_id] = {
-                destination_sids: [order.target_osid],
+                destination_sids: [order.target_osid as SettlementId],
                 stance: 'column',
-            } as any;
+            } as { destination_sids: SettlementId[] };
         }
     }
 }

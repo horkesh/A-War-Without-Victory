@@ -15,7 +15,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 
 /** Read AI mode from GameState config. Defaults to 'officer' if not set. */
 function getMode(state: GameState): AiCommanderMode {
-    return (state.meta as any).ai_commander_config?.mode ?? 'officer';
+    return (state.meta as unknown as Record<string, { mode?: AiCommanderMode }>).ai_commander_config?.mode ?? 'officer';
 }
 
 export function buildArmyPrompt(state: GameState, faction: FactionId): AiPrompt {
@@ -132,8 +132,8 @@ function buildArmyUserPrompt(state: GameState, faction: FactionId): string {
 
     // Pending decisions
     const pendingOps = Object.values(corpsCommand)
-        .filter((cc: any) => cc?.active_operation?.commander_assessment === 'postpone' || cc?.active_operation?.preparation_sub_phase === 'assessment')
-        .map((cc: any) => cc.active_operation?.name)
+        .filter((cc) => cc?.active_operation?.commander_assessment === 'postpone' || cc?.active_operation?.preparation_sub_phase === 'assessment')
+        .map((cc) => cc?.active_operation?.name)
         .filter(Boolean);
     if (pendingOps.length > 0) {
         lines.push('');

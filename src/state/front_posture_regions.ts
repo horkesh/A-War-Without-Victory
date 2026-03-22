@@ -35,8 +35,8 @@ export function expandRegionPostureToEdges(
 
     const regionById = new Map<string, { edge_ids: string[] }>();
     for (const r of frontRegions.regions ?? []) {
-        if (r && typeof r === 'object' && typeof (r as any).region_id === 'string' && Array.isArray((r as any).edge_ids)) {
-            regionById.set((r as any).region_id, { edge_ids: (r as any).edge_ids as string[] });
+        if (r && typeof r.region_id === 'string' && Array.isArray(r.edge_ids)) {
+            regionById.set(r.region_id, { edge_ids: r.edge_ids });
         }
     }
 
@@ -44,14 +44,14 @@ export function expandRegionPostureToEdges(
     const factionIdsSorted = Object.keys(state.military.front_posture_regions).sort();
 
     for (const factionId of factionIdsSorted) {
-        const rp = (state.military.front_posture_regions as any)[factionId];
+        const rp = state.military.front_posture_regions[factionId];
         if (!rp || typeof rp !== 'object') continue;
-        const regionAssignments = (rp as any).assignments as Record<string, any> | undefined;
+        const regionAssignments = rp.assignments;
         if (!regionAssignments || typeof regionAssignments !== 'object') continue;
 
         if (!state.military.front_posture[factionId]) state.military.front_posture[factionId] = { assignments: {} };
         if (!state.military.front_posture[factionId].assignments) state.military.front_posture[factionId].assignments = {};
-        const edgeAssignments = state.military.front_posture[factionId].assignments as Record<string, any>;
+        const edgeAssignments = state.military.front_posture[factionId].assignments;
 
         const regionIdsSorted = Object.keys(regionAssignments).sort();
         for (const region_id of regionIdsSorted) {
@@ -61,12 +61,12 @@ export function expandRegionPostureToEdges(
             const region = regionById.get(region_id);
             if (!region) continue;
 
-            const posture: PostureLevel = isPostureLevel((a as any).posture) ? (a as any).posture : 'hold';
-            const weight = clampWeight((a as any).weight);
+            const posture: PostureLevel = isPostureLevel(a.posture) ? a.posture : 'hold';
+            const weight = clampWeight(a.weight);
 
             for (const edge_id of region.edge_ids) {
-                const seg = (state.military.front_segments as any)?.[edge_id];
-                const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
+                const seg = state.military.front_segments[edge_id];
+                const isActive = seg && seg.active === true;
                 if (!isActive) continue;
 
                 if (edgeAssignments[edge_id] && typeof edgeAssignments[edge_id] === 'object') {

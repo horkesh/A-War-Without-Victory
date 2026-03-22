@@ -4,6 +4,7 @@
  * Helper functions for creating and sorting treaty drafts.
  */
 
+import type { TerritorialValuationReport } from './territorial_valuation.js';
 import type { TreatyClause, TreatyDraft, TreatyScope } from './treaty.js';
 import { computeClauseAcceptanceImpact, computeClauseCost, getClauseEnforcementBurden } from './treaty_clause_library.js';
 import { computePackageWarnings } from './treaty_package_warnings.js';
@@ -121,7 +122,7 @@ export function createClause(
     giverSide?: string,
     receiverSide?: string,
     beneficiary?: string,
-    valuationOpts?: { valuation?: any; giver_side?: string; receiver_side?: string },
+    valuationOpts?: { valuation?: TerritorialValuationReport; giver_side?: string; receiver_side?: string },
     competence?: string, // Phase 13A.0: CompetenceId for allocate_competence
     holder?: string // Phase 13A.0: Holder for allocate_competence
 ): TreatyClause {

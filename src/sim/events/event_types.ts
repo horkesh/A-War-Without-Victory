@@ -388,9 +388,9 @@ export function evaluateCondition(condition: EventCondition, state: GameState): 
         case 'morale_average_below': {
             const formations = state.military?.formations ?? {};
             const factionBrigades = Object.values(formations)
-                .filter((f: any) => f.faction === condition.faction && f.kind === 'brigade' && f.status === 'active');
+                .filter((f) => f.faction === condition.faction && f.kind === 'brigade' && f.status === 'active');
             if (factionBrigades.length === 0) return false;
-            const avgMorale = factionBrigades.reduce((sum: number, f: any) => sum + (f.morale ?? 50), 0) / factionBrigades.length;
+            const avgMorale = factionBrigades.reduce((sum, f) => sum + (f.morale ?? 50), 0) / factionBrigades.length;
             return avgMorale < condition.threshold;
         }
         case 'week_since_event': {

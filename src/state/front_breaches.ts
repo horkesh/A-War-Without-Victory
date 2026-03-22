@@ -34,15 +34,15 @@ export function computeFrontBreaches(state: GameState, derivedFrontEdges: FrontE
     const breaches: FrontBreach[] = [];
 
     for (const edge_id of edgeIdsSorted) {
-        const seg = (state.military.front_segments as any)?.[edge_id];
-        const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
+        const seg = state.military.front_segments[edge_id];
+        const isActive = seg && seg.active === true;
         if (!isActive) continue;
 
         const edge = edgeById.get(edge_id)!;
         if (typeof edge.side_a !== 'string' || typeof edge.side_b !== 'string') continue;
 
-        const pressure_value = Number.isInteger((state.military.front_pressure as any)?.[edge_id]?.value)
-            ? ((state.military.front_pressure as any)[edge_id].value as number)
+        const pressure_value = Number.isInteger(state.military.front_pressure[edge_id]?.value)
+            ? state.military.front_pressure[edge_id].value
             : 0;
 
         const abs = Math.abs(pressure_value);

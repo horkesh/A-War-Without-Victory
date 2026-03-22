@@ -85,11 +85,11 @@ function computeFrontStabilityProxies(
 
     for (const edgeId of activeEdgeIds) {
         const seg = state.military.front_segments?.[edgeId];
-        if (seg && typeof seg === 'object' && (seg as any).active === true) {
+        if (seg && typeof seg === 'object' && seg.active === true) {
             activeCount += 1;
-            const friction = Number.isInteger((seg as any).friction) ? (seg as any).friction : 0;
+            const friction = Number.isInteger(seg.friction) ? seg.friction : 0;
             totalFriction += friction;
-            const streak = Number.isInteger((seg as any).max_active_streak) ? (seg as any).max_active_streak : 0;
+            const streak = Number.isInteger(seg.max_active_streak) ? seg.max_active_streak : 0;
             if (streak > maxStreak) maxStreak = streak;
         }
     }

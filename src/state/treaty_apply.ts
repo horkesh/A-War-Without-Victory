@@ -166,7 +166,7 @@ export function applyTreatyMilitaryAnnex(
     const activeEdgeIds = new Set<string>();
     for (const edge of derivedFrontEdges) {
         const seg = state.military.front_segments?.[edge.edge_id];
-        if (seg && typeof seg === 'object' && (seg as any).active === true) {
+        if (seg && typeof seg === 'object' && seg.active === true) {
             activeEdgeIds.add(edge.edge_id);
         }
     }
@@ -188,9 +188,9 @@ export function applyTreatyMilitaryAnnex(
     if (regionClauses.length > 0 && opts.frontRegions) {
         const regionById = new Map<string, string[]>();
         for (const region of opts.frontRegions.regions ?? []) {
-            if (region && typeof region === 'object' && typeof (region as any).region_id === 'string') {
-                const edgeIds = Array.isArray((region as any).edge_ids) ? (region as any).edge_ids : [];
-                regionById.set((region as any).region_id, edgeIds);
+            if (region && typeof region === 'object' && typeof region.region_id === 'string') {
+                const edgeIds = Array.isArray(region.edge_ids) ? region.edge_ids : [];
+                regionById.set(region.region_id, edgeIds);
             }
         }
 
@@ -246,7 +246,7 @@ export function applyTreatyMilitaryAnnex(
         if (clause.scope.kind === 'region' && opts.frontRegions) {
             const regionId = clause.scope.region_id;
             const regionEdgeIds = opts.frontRegions.regions
-                ?.find((r) => (r as any).region_id === regionId)
+                ?.find((r) => r.region_id === regionId)
                 ?.edge_ids ?? [];
             for (const edgeId of regionEdgeIds) {
                 if (edgesToFreeze.has(edgeId) && !baseDurations.has(edgeId)) {
@@ -1059,7 +1059,7 @@ export function applyTreatyCorridorRights(
             // Validate region exists if frontRegions provided
             if (opts.frontRegions) {
                 const regionId = (clause.scope as { kind: 'region'; region_id: string }).region_id;
-                const regionExists = opts.frontRegions.regions?.some((r: any) => (r as any).region_id === regionId);
+                const regionExists = opts.frontRegions.regions?.some((r) => r.region_id === regionId);
                 if (!regionExists) {
                     failures.push(`corridor_invalid_region:${clause.id}`);
                     continue;

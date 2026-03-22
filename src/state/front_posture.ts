@@ -1,4 +1,4 @@
-import { GameState, PostureLevel } from './game_state.js';
+import { FrontPostureAssignment, GameState, PostureLevel } from './game_state.js';
 
 function isPostureLevel(value: unknown): value is PostureLevel {
     return value === 'hold' || value === 'probe' || value === 'push';
@@ -30,16 +30,16 @@ export function normalizeFrontPosture(state: GameState): void {
     const factionIdsSorted = Object.keys(state.military.front_posture).sort();
 
     for (const factionId of factionIdsSorted) {
-        const fp = (state.military.front_posture as any)[factionId];
+        const fp = state.military.front_posture[factionId];
         if (!fp || typeof fp !== 'object') continue;
-        const assignments = (fp as any).assignments as Record<string, any> | undefined;
+        const assignments = fp.assignments;
         if (!assignments || typeof assignments !== 'object') {
-            (fp as any).assignments = {};
+            fp.assignments = {};
             continue;
         }
 
         const edgeIdsSorted = Object.keys(assignments).sort();
-        const next: Record<string, any> = {};
+        const next: Record<string, FrontPostureAssignment> = {};
 
         for (const edge_id of edgeIdsSorted) {
             const a = assignments[edge_id];
@@ -48,16 +48,16 @@ export function normalizeFrontPosture(state: GameState): void {
             // Remove stale edge assignments not present in front_segments.
             if (!segmentKeys.has(edge_id)) continue;
 
-            const seg = (state.military.front_segments as any)[edge_id];
-            const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
+            const seg = state.military.front_segments[edge_id];
+            const isActive = seg && seg.active === true;
 
-            const posture: PostureLevel = isPostureLevel((a as any).posture) ? (a as any).posture : 'hold';
-            const weight = isActive ? clampWeight((a as any).weight) : 0;
+            const posture: PostureLevel = isPostureLevel(a.posture) ? a.posture : 'hold';
+            const weight = isActive ? clampWeight(a.weight) : 0;
 
             next[edge_id] = { edge_id, posture, weight };
         }
 
-        (fp as any).assignments = next;
+        fp.assignments = next;
     }
 }
 

@@ -1,7 +1,42 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-22
-**Status:** **v0.5.4** (v0.6.0 merge in progress). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS.** Army HQ: 4-tab command center (BRIEFING/SUMMARY/RECORDS/PERSONNEL), CoS missive, orphan absorption complete. "Two Rooms" spatial metaphor documented. Toolbar: floating crest. Next: Phase 5 deep drill-down, event decision UI, warroom React migration (v0.7+).
+**Last Updated:** 2026-03-23
+**Status:** **v0.5.4** (v0.6.0 merge in progress). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS.** Electron 41. Tech debt audit: `any` types 214→64, circular deps resolved, displacement cap verified. Army HQ: 4-tab command center. Next: Phase 5 deep drill-down, event decision UI, warroom React migration (v0.7+).
+
+## [2026-03-23] Technical Debt Cleanup — Type Safety + Electron Upgrade
+
+**Scope:** Orchestrator-driven gap audit of napkin backlog vs master roadmap. 11 items investigated, 6 struck as already resolved, 3 tech debt items addressed. 31 files changed.
+
+**Napkin backlog audit (11 items checked):**
+- 3rd Corps displacement — FIXED (return march system, n957). Struck.
+- Dissolution floor (hrhb_108th) — FIXED (2-of-3 criteria, not hard bypass). Struck.
+- RBiH artillery (117 vs 150-250) — FIXED (equipment pipeline, now 167 in latest run). Struck.
+- Settlement Panel Mini-Profile — DONE (`SettlementDetailContent.tsx`). Struck.
+- Circular dependencies — RESOLVED (all type-only imports). Struck.
+- Pre-commit hooks — RESOLVED (husky shipped 2026-03-22). Struck.
+- Displacement cap — RESOLVED on audit (all paths guarded: per-OSID cumulative tracking, per-municipality remainingPop cap, per-settlement [0,1] fraction). No code change needed.
+- Map UX (elevation profile, front line tinting) — confirmed NOT STARTED, kept in backlog.
+- `any` types, Electron — addressed below.
+
+**`any` type cleanup (214→64, 150 eliminated):**
+- 5 parallel agents cleaned 29 files across sim/ and state/
+- Front posture system: 38 `any` → 0 (5 files)
+- Combat system: 23 `any` → 0 (5 files)
+- Briefing + AI commander: 23 `any` → 0 (5 files)
+- State files: 28 `any` → 0 (7 files)
+- War phases + misc: 33 `any` → 0 (5 files)
+- Added proper types to `game_state.ts`: `ai_commander_config` on StateMeta, `last_briefing` + `enclave_state` on MilitaryState
+- Remaining 55: serialize.ts (42) + validateGameState.ts (13) — save migration code, inherently untyped
+- Remaining 9: scattered singles, mostly false positives (word "any" in comments)
+
+**Electron 33→41 upgrade:**
+- Feasibility audit: zero deprecated APIs, all modern patterns (contextBridge, protocol.handle, ipcMain.handle)
+- `package.json`: `"electron": "^33.0.0"` → `"^41.0.0"`. Installed v41.0.3.
+- Zero code changes required. Native modules auto-rebuilt.
+
+**Determinism:** Type-only changes + dependency upgrade. No simulation impact.
+
+**Files:** 29 src/ files (type changes), package.json, package-lock.json, .claude/napkin.md.
 
 ## [2026-03-22] Army HQ Phase 3.5–4 — Tab System + CoS Briefing (Evening Session)
 

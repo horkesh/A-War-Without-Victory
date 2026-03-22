@@ -32,7 +32,7 @@ import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
 import { deriveAssignableFrontSegments } from '../../state/assignable_front_segments.js';
 import { assignFrontSegmentTheatres, ensureDefaultTheatres } from '../../state/theatres.js';
-import { GameState, type FactionId, type LegacyBrigadeAoRState } from '../../state/game_state.js';
+import { GameState, type FactionId, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
@@ -172,6 +172,13 @@ import {
     setSiegeStateCache,
     loadRecruitmentCatalog
 } from '../turn_pipeline_types.js';
+import type { EffectivePostureState } from '../../state/front_posture_commitment.js';
+import type { EffectivePressureEdge } from '../pressure/phase3a_pressure_eligibility.js';
+
+interface WarPhaseContextExtensions {
+    effectivePosture?: Record<FactionId, EffectivePostureState>;
+    phase3aEffectiveEdges?: EffectivePressureEdge[];
+}
 
 // ---------------------------------------------------------------------------
 // War-phase step array
@@ -797,7 +804,7 @@ export const warPhases: NamedPhase[] = [
         name: 'ai-army-decisions',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const config = (context.state.meta as any).ai_commander_config;
+            const config = context.state.meta.ai_commander_config;
             if (!config || config.mode === 'cadet') return;
 
             const { createAiClient } = await import('../ai_commander/ai_client.js');
@@ -810,17 +817,17 @@ export const warPhases: NamedPhase[] = [
 
             const playerFaction = context.state.meta.player_faction ?? null;
             const botFactions = (context.state.factions ?? [])
-                .map((f: any) => f.id)
+                .map((f) => f.id)
                 .filter((fid: string) => playerFaction == null || fid !== playerFaction);
 
             const results = await Promise.allSettled(
                 botFactions.map(async (faction: string) => {
-                    const decision = await generateArmyDecision(context.state, faction as any, client);
+                    const decision = await generateArmyDecision(context.state, faction as FactionId, client);
                     if (decision) {
                         if (!context.state.military.ai_army_decisions) {
-                            context.state.military.ai_army_decisions = {} as any;
+                            context.state.military.ai_army_decisions = {};
                         }
-                        (context.state.military.ai_army_decisions as any)[faction] = decision;
+                        context.state.military.ai_army_decisions[faction] = decision;
                     }
                 })
             );
@@ -830,7 +837,7 @@ export const warPhases: NamedPhase[] = [
         name: 'ai-corps-decisions',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const config = (context.state.meta as any).ai_commander_config;
+            const config = context.state.meta.ai_commander_config;
             if (!config || config.mode === 'cadet') return;
 
             const { createAiClient } = await import('../ai_commander/ai_client.js');
@@ -841,12 +848,12 @@ export const warPhases: NamedPhase[] = [
 
             const playerFaction = context.state.meta.player_faction ?? null;
             const botFactions = (context.state.factions ?? [])
-                .map((f: any) => f.id)
+                .map((f) => f.id)
                 .filter((fid: string) => playerFaction == null || fid !== playerFaction);
 
             for (const faction of botFactions) {
-                const armyDecision = (context.state.military.ai_army_decisions as any)?.[faction] ?? null;
-                await generateCorpsDecisions(context.state, faction as any, armyDecision, client);
+                const armyDecision = context.state.military.ai_army_decisions?.[faction] ?? null;
+                await generateCorpsDecisions(context.state, faction as FactionId, armyDecision, client);
             }
         }
     },
@@ -854,7 +861,7 @@ export const warPhases: NamedPhase[] = [
         name: 'ai-corps-dialogue',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const config = (context.state.meta as any).ai_commander_config;
+            const config = context.state.meta.ai_commander_config;
             if (!config || config.mode === 'cadet') return;
 
             const { createAiClient } = await import('../ai_commander/ai_client.js');
@@ -873,7 +880,7 @@ export const warPhases: NamedPhase[] = [
         name: 'ai-war-dispatches',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const config = (context.state.meta as any).ai_commander_config;
+            const config = context.state.meta.ai_commander_config;
             if (!config || config.mode === 'cadet') return;
 
             const { shouldGenerateDispatch } = await import('../ai_commander/war_dispatches.js');
@@ -1105,7 +1112,7 @@ export const warPhases: NamedPhase[] = [
                 ensureBrigadeComposition(f);
                 // Use faction maintenance capacity (0.0-1.0)
                 const factionState = (context.state.factions ?? []).find(fac => fac.id === f.faction);
-                const baseMaintenance = (factionState as any)?.profile?.logistics ?? 50;
+                const baseMaintenance = factionState?.profile?.logistics ?? 50;
                 // C3: RS maintenance capacity decays over time (spare parts depletion)
                 const maintenanceMult = f.faction === 'RS' ? getRSMaintenanceCapacityMult(turn, context.state.military.war_timeline) : 1.0;
                 const maintenance = (baseMaintenance / 100) * maintenanceMult;
@@ -1912,14 +1919,14 @@ export const warPhases: NamedPhase[] = [
             );
             context.report.commitment = report;
             // Store effective posture in context for pressure step (transient, not persisted)
-            (context as any).effectivePosture = effectivePosture;
+            (context as TurnContext & WarPhaseContextExtensions).effectivePosture = effectivePosture;
         }
     },
     {
         name: 'update-doctrine-eligibility',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            updateDoctrineState(context.state, context.report.supply_resolution?.supply_state, (context as any).effectivePosture);
+            updateDoctrineState(context.state, context.report.supply_resolution?.supply_state, (context as TurnContext & WarPhaseContextExtensions).effectivePosture);
             context.report.doctrine_update = { formations: Object.keys(context.state.military.formations ?? {}).length };
         }
     },
@@ -1931,7 +1938,7 @@ export const warPhases: NamedPhase[] = [
             for (const formation of Object.values(context.state.military.formations ?? {})) {
                 doctrineTempoByFormation[formation.id] = getDoctrineTempoMultiplier(formation);
             }
-            updateHeavyEquipmentState(context.state, (context as any).effectivePosture, doctrineTempoByFormation);
+            updateHeavyEquipmentState(context.state, (context as TurnContext & WarPhaseContextExtensions).effectivePosture, doctrineTempoByFormation);
             context.report.equipment_update = { formations: Object.keys(context.state.military.formations ?? {}).length };
         }
     },
@@ -1943,13 +1950,13 @@ export const warPhases: NamedPhase[] = [
             if (!commitmentReport) return;
 
             const turn = context.state.meta.turn;
-            const exposure: any = {
-                by_faction: {},
+            const exposure: EffectivePostureExposureState = {
+                by_faction: {} as EffectivePostureExposureState['by_faction'],
                 last_updated_turn: turn
             };
 
             // Get effective posture from context (computed in commitment step)
-            const effectivePosture = (context as any).effectivePosture as Record<string, any> | undefined;
+            const effectivePosture = (context as TurnContext & WarPhaseContextExtensions).effectivePosture;
 
             // Build exposure from commitment report by_edge audits
             // Match audits to factions by checking base posture assignments and effective posture values
@@ -1990,11 +1997,7 @@ export const warPhases: NamedPhase[] = [
                 }
             }
 
-            // Initialize if needed
-            if (!context.state.political.effective_posture_exposure) {
-                (context.state as any).political.effective_posture_exposure = {};
-            }
-            (context.state as any).political.effective_posture_exposure = exposure;
+            context.state.political.effective_posture_exposure = exposure;
         }
     },
     {
@@ -2004,7 +2007,7 @@ export const warPhases: NamedPhase[] = [
             if (!edges) return;
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
             const adjacencyMap = buildAdjacencyMap(edges);
-            const effectivePosture = (context as any).effectivePosture;
+            const effectivePosture = (context as TurnContext & WarPhaseContextExtensions).effectivePosture;
             context.report.front_pressure = accumulateFrontPressure(context.state, derivedFrontEdges, adjacencyMap, effectivePosture);
         }
     },
@@ -2052,7 +2055,7 @@ export const warPhases: NamedPhase[] = [
                 }
 
                 // Store effective edges in context for potential use by pressure propagation
-                (context as any).phase3aEffectiveEdges = result.edgesEffective;
+                (context as TurnContext & WarPhaseContextExtensions).phase3aEffectiveEdges = result.edgesEffective;
             } catch (err) {
                 // If Phase 3A fails, log but don't crash the simulation
                 console.warn(`Phase 3A pressure eligibility failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -2325,7 +2328,7 @@ export const warPhases: NamedPhase[] = [
             if (!playerFaction) return;
             const { assembleCommandBriefing } = require('../briefing/collect_briefing.js');
             const briefing = assembleCommandBriefing(context.state, playerFaction);
-            (context.state.military as any).last_briefing = briefing;
+            context.state.military.last_briefing = briefing;
         }
     },
     {

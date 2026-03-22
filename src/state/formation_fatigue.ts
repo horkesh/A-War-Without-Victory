@@ -2,7 +2,7 @@ import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
 import type { FrontEdge } from '../map/front_edges.js';
 import type { FrontRegionsFile } from '../map/front_regions.js';
 import { FATIGUE_MAX } from './formation_constants.js';
-import type { FactionId, FormationId, GameState } from './game_state.js';
+import type { FactionId, FormationId, FormationState, GameState } from './game_state.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import { computeSupplyReachability } from './supply_reachability.js';
 
@@ -52,7 +52,7 @@ export interface FormationFatigueStepReport {
  */
 export function isFormationSupplied(
     state: GameState,
-    formation: any,
+    formation: FormationState,
     localSupplyByEdge: Map<string, { side_a_supplied: boolean; side_b_supplied: boolean }>,
     frontRegions: FrontRegionsFile,
     derivedFrontEdges: FrontEdge[]
@@ -133,8 +133,8 @@ export function computeLocalSupplyForEdges(
 
     for (const edge of edgesSorted) {
         const edge_id = edge.edge_id;
-        const seg = (state.military.front_segments as any)?.[edge_id];
-        const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
+        const seg = state.military.front_segments[edge_id];
+        const isActive = seg && typeof seg === 'object' && seg.active === true;
         if (!isActive) continue;
 
         const side_a = edge.side_a;
@@ -200,7 +200,7 @@ function parseEdgeId(edgeId: string): [string, string] | null {
  */
 function getFormationSupplyMultiplier(
     state: GameState,
-    formation: any,
+    formation: FormationState,
     frontRegions: FrontRegionsFile,
     derivedFrontEdges: FrontEdge[]
 ): number {
@@ -278,11 +278,11 @@ const FRONTLINE_FATIGUE_PER_TURN = 0.5;
  * an equilibrium. Brigades in active combat accumulate faster and need rotation.
  */
 export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set<string>): void {
-    const formations = (state as any).formations as Record<string, any> | undefined;
+    const formations = state.military.formations;
     if (!formations) return;
     const currentTurn = state.meta?.turn ?? 0;
     const isRecoveryTurn = currentTurn % FATIGUE_RECOVERY_INTERVAL === 0;
-    const assignments = (state as any).brigade_front_assignment as Record<string, string> | undefined;
+    const assignments = state.military.brigade_front_assignment;
 
     for (const [fid, formation] of Object.entries(formations)) {
         if (!formation || formation.status !== 'active') continue;
@@ -311,7 +311,7 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
  * Increment formation fatigue (combat/attrition).
  * Ensures ops field exists and clamps to FATIGUE_MAX.
  */
-export function recordFormationFatigue(formation: any, delta: number): void {
+export function recordFormationFatigue(formation: FormationState, delta: number): void {
     if (!formation.ops || typeof formation.ops !== 'object') {
         formation.ops = { fatigue: 0, last_supplied_turn: null };
     }
@@ -336,7 +336,7 @@ export function updateFormationFatigue(
     settlementEdges: EdgeRecord[]
 ): FormationFatigueStepReport {
     const currentTurn = state.meta.turn;
-    const formations = (state as any).formations as Record<string, any> | undefined;
+    const formations = state.military.formations;
     if (!formations || typeof formations !== 'object') {
         return { by_formation: [], by_faction: [] };
     }

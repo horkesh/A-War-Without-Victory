@@ -39,8 +39,8 @@ export function accumulateExhaustion(
 
     for (const edge of edgesSorted) {
         const edge_id = edge.edge_id;
-        const seg = (state.military.front_segments as any)?.[edge_id];
-        const isActive = seg && typeof seg === 'object' && (seg as any).active === true;
+        const seg = state.military.front_segments[edge_id];
+        const isActive = seg && typeof seg === 'object' && seg.active === true;
         if (!isActive) continue;
 
         const side_a = edge.side_a;

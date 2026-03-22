@@ -202,9 +202,9 @@ export function recomputePhase3DCapacityModifiersFromDamage(state: GameState): v
         const damage = byEntity[entityId];
         if (!damage || typeof damage !== 'object') continue;
         updateCapacityModifiers(state, entityId, {
-            authority: Number.isFinite((damage as any).authority) ? (damage as any).authority : 0,
-            cohesion: Number.isFinite((damage as any).cohesion) ? (damage as any).cohesion : 0,
-            spatial: Number.isFinite((damage as any).spatial) ? (damage as any).spatial : 0
+            authority: Number.isFinite(damage.authority) ? damage.authority : 0,
+            cohesion: Number.isFinite(damage.cohesion) ? damage.cohesion : 0,
+            spatial: Number.isFinite(damage.spatial) ? damage.spatial : 0
         });
     }
 }

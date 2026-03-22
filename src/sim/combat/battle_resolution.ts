@@ -938,8 +938,8 @@ export function resolveBattleOrders(
         for (const nSid of neighbors) {
             const segId = nSid < targetSid ? `${nSid}:${targetSid}` : `${targetSid}:${nSid}`;
             const seg = frontSegments[segId];
-            if (seg && typeof (seg as any).active_streak === 'number') {
-                activeStreak = Math.max(activeStreak, (seg as any).active_streak);
+            if (seg && typeof seg.active_streak === 'number') {
+                activeStreak = Math.max(activeStreak, seg.active_streak);
             }
         }
 

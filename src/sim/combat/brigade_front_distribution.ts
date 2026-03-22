@@ -13,7 +13,7 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { CorpsFrontSector, FormationState, GameState } from '../../state/game_state.js';
+import type { CorpsFrontSector, CorpsCommandState, FormationState, GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { bfsDistance } from './sector_utils.js';
 
@@ -41,10 +41,9 @@ function buildOperationParticipantSet(state: GameState): Set<string> {
     for (const fid of Object.keys(formations)) {
         const f = formations[fid]!;
         if (f.kind !== 'corps_asset') continue;
-        const op = (f as any).active_operation;
+        const op = (f as unknown as Partial<CorpsCommandState>).active_operation;
         if (!op) continue;
-        const brigades = op.participating_brigades as string[] | undefined;
-        if (brigades) for (const bid of brigades) participants.add(bid);
+        if (op.participating_brigades) for (const bid of op.participating_brigades) participants.add(bid);
     }
     return participants;
 }
@@ -86,13 +85,13 @@ function pickLeastStackedTarget(
  * Used to prioritize brigades that want to "go home" during redistribution.
  */
 function hasEmptyHomeNeighbor(
-    f: any,
+    f: FormationState | undefined,
     adjacency: Map<string, string[]>,
     frontOsidSet: Set<string>,
     osidCount: Map<string, number>,
 ): boolean {
-    const loc = f?.location_osid as string | undefined;
-    const home = f?.home_osid as string | undefined;
+    const loc = f?.location_osid;
+    const home = f?.home_osid;
     if (!loc || !home || !frontOsidSet.has(home)) return false;
     if ((osidCount.get(home) ?? 0) > 0) return false; // home not empty
     const neighbors = adjacency.get(loc) ?? [];
@@ -133,7 +132,7 @@ export function distributeBrigadesToFront(
                 const f = formations[bid];
                 if (!f) continue;
                 if (f.status === 'inactive') continue;
-                if ((f as any).disrupted_turns > 0) continue;
+                if ((f.disrupted_turns ?? 0) > 0) continue;
                 if (opParticipants.has(bid)) continue;
                 eligibleBrigadeIds.push(bid);
             }
@@ -146,7 +145,7 @@ export function distributeBrigadesToFront(
                 osidCount.set(osid, 0);
             }
             for (const bid of eligibleBrigadeIds) {
-                const loc = (formations[bid] as any).location_osid as string | undefined;
+                const loc = formations[bid]?.location_osid;
                 if (loc && osidCount.has(loc)) {
                     osidCount.set(loc, (osidCount.get(loc) ?? 0) + 1);
                 }
@@ -157,7 +156,7 @@ export function distributeBrigadesToFront(
                 if (eligibleBrigadeIds.includes(bid)) continue;
                 const f = formations[bid];
                 if (!f) continue;
-                const loc = (f as any).location_osid as string | undefined;
+                const loc = f.location_osid;
                 if (loc && osidCount.has(loc)) {
                     osidCount.set(loc, (osidCount.get(loc) ?? 0) + 1);
                 }
@@ -171,7 +170,7 @@ export function distributeBrigadesToFront(
             // (they're motivated to move to their home). Deterministic tie-break by ID.
             const phaseABrigades = eligibleBrigadeIds
                 .filter(bid => {
-                    const f = formations[bid] as any;
+                    const f = formations[bid];
                     const loc = f?.location_osid;
                     if (!loc || !frontOsidSet.has(loc)) return false;
                     if ((osidCount.get(loc) ?? 0) < 2) return false;
@@ -180,8 +179,8 @@ export function distributeBrigadesToFront(
                     return true;
                 })
                 .sort((a, b) => {
-                    const fA = formations[a] as any;
-                    const fB = formations[b] as any;
+                    const fA = formations[a];
+                    const fB = formations[b];
                     const aHasHomeTarget = hasEmptyHomeNeighbor(fA, adjacency, frontOsidSet, osidCount);
                     const bHasHomeTarget = hasEmptyHomeNeighbor(fB, adjacency, frontOsidSet, osidCount);
                     if (aHasHomeTarget && !bHasHomeTarget) return -1;
@@ -190,7 +189,7 @@ export function distributeBrigadesToFront(
                 });
 
             for (const bid of phaseABrigades) {
-                const f = formations[bid] as FormationState & { location_osid?: string; entrenchment_turns?: number; home_osid?: string };
+                const f = formations[bid]!;
                 const loc = f.location_osid;
                 if (!loc) continue;
                 if ((osidCount.get(loc) ?? 0) < 2) continue; // No longer stacked (earlier move resolved it)
@@ -211,7 +210,7 @@ export function distributeBrigadesToFront(
 
                 const target = candidates[0]!;
                 // Move brigade
-                (f as any).location_osid = target;
+                f.location_osid = target;
                 f.entrenchment_turns = 0;
                 // Update stacking counts
                 osidCount.set(loc, (osidCount.get(loc) ?? 0) - 1);
@@ -220,7 +219,7 @@ export function distributeBrigadesToFront(
 
             // ── Phase B: Issue column march for brigades NOT at any front OSID ──
             for (const bid of eligibleBrigadeIds) {
-                const f = formations[bid] as FormationState & { location_osid?: string; entrenchment_turns?: number; home_osid?: string };
+                const f = formations[bid]!;
                 const loc = f.location_osid;
                 if (!loc) continue;
                 if (frontOsidSet.has(loc)) continue; // Already at front
@@ -233,18 +232,18 @@ export function distributeBrigadesToFront(
 
                 if (dist === 1) {
                     // Adjacent: move directly
-                    (f as any).location_osid = target;
+                    f.location_osid = target;
                     f.entrenchment_turns = 0;
                     osidCount.set(target, (osidCount.get(target) ?? 0) + 1);
                 } else if (dist > 1 && dist <= MAX_REDISTRIBUTION_DISTANCE) {
                     // Issue column march order
                     if (!state.military.brigade_movement_orders) {
-                        (state.military as any).brigade_movement_orders = {};
+                        state.military.brigade_movement_orders = {};
                     }
                     state.military.brigade_movement_orders![bid] = {
-                        destination_sids: [target],
+                        destination_sids: [target as SettlementId],
                         stance: 'column',
-                    } as any;
+                    } as { destination_sids: SettlementId[] };
                 }
                 // If dist > MAX_REDISTRIBUTION_DISTANCE or Infinity: skip
             }

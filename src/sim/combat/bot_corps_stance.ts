@@ -211,7 +211,9 @@ export function generateCorpsStanceOrders(
 
         // Patron directive ceiling: Zagreb's political orders constrain HVO corps stances
         if (faction === 'HRHB') {
-            const directives = (state.military.war_timeline as any)?.patron_directives?.['HRHB'] as Array<{ start_week: number; end_week: number; stance_ceiling: string }> | undefined;
+            type PatronDirective = { start_week: number; end_week: number; stance_ceiling: string };
+            const timeline = state.military.war_timeline as (typeof state.military.war_timeline & { patron_directives?: Record<string, PatronDirective[]> }) | undefined;
+            const directives = timeline?.patron_directives?.['HRHB'];
             if (directives) {
                 const activeDirective = directives.find(d => turn >= d.start_week && turn < d.end_week);
                 if (activeDirective && STANCE_RANK[stance] > STANCE_RANK[activeDirective.stance_ceiling as CorpsStance]) {
@@ -230,7 +232,7 @@ export function generateCorpsStanceOrders(
         // those override the formula bot's computed stance. This allows the AI commander
         // layer and player UI to actually control strategic direction.
         // Only active when ai_army_decisions[faction] exists (never in cadet/formula-only mode).
-        const aiArmyDecision = (state.military as any).ai_army_decisions?.[faction];
+        const aiArmyDecision = state.military.ai_army_decisions?.[faction];
         if (aiArmyDecision?.corps_directives?.[corps.id]?.stance) {
             const aiStance = aiArmyDecision.corps_directives[corps.id].stance as CorpsStance;
             if (STANCE_RANK[aiStance] !== undefined) {

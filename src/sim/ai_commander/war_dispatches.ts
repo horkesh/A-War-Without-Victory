@@ -146,7 +146,7 @@ export async function generateWarDispatch(
     const perspective = getPerspectiveForTurn(turn);
 
     // --- Displacement data ---
-    const displacementLog = (state as any).displacement?.displacement_event_log as Array<{ turn: number; displaced_count: number }> | undefined;
+    const displacementLog = state.displacement?.displacement_event_log as Array<{ turn: number; displaced_count: number }> | undefined;
     let totalDisplaced = 0;
     let recentDisplaced = 0;
     if (displacementLog) {
@@ -179,7 +179,7 @@ export async function generateWarDispatch(
 
     // --- Sieged cities ---
     const siegedCities = ['Sarajevo'];
-    const enclaveState = (state as any).military?.enclave_state as Record<string, { status?: string }> | undefined;
+    const enclaveState = (state.military as unknown as Record<string, unknown>).enclave_state as Record<string, { status?: string }> | undefined;
     if (enclaveState) {
         for (const [name, enc] of Object.entries(enclaveState)) {
             if (enc?.status && enc.status !== 'relief' && name !== 'sarajevo') {
@@ -192,7 +192,7 @@ export async function generateWarDispatch(
     }
 
     // --- Recent battle count (from control events as proxy) ---
-    const controlEvents = (state as any).political?.control_events as Array<{ turn: number; mechanism: string }> | undefined;
+    const controlEvents = (state.political as unknown as Record<string, unknown>)?.control_events as Array<{ turn: number; mechanism: string }> | undefined;
     let recentBattleCount = 0;
     if (controlEvents) {
         recentBattleCount = controlEvents.filter(e => e.turn >= turn - 4).length;

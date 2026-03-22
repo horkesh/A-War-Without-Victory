@@ -11,7 +11,9 @@
  * Deterministic: sorted iteration, no randomness.
  */
 
-import type { GameState, FactionId } from '../../state/game_state.js';
+import type { GameState, FactionId, FormationState, CorpsCommandState, EnclaveResilienceEntry } from '../../state/game_state.js';
+import type { PendingOfficerEvent } from '../../state/officer_types.js';
+import type { PatronRelationship } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 export type BriefingSeverity = 'critical' | 'warning' | 'info';
@@ -104,8 +106,8 @@ registerBriefingCollector('military', (state, faction) => {
 
     // Count active operations
     const ops = Object.values(state.military?.corps_command ?? {})
-        .filter((cc: any) => cc.faction === faction)
-        .flatMap((cc: any) => Object.values(cc.active_operations ?? {}));
+        .filter((cc) => (cc as unknown as Record<string, unknown>)['faction'] === faction)
+        .flatMap((cc) => Object.values((cc as unknown as Record<string, unknown>)['active_operations'] as Record<string, unknown> ?? {}));
 
     if (ops.length > 0) {
         items.push({
@@ -118,8 +120,8 @@ registerBriefingCollector('military', (state, faction) => {
     }
 
     // Count disrupted brigades
-    const disrupted = Object.values(formations).filter((f: any) =>
-        f.faction === faction && f.kind === 'brigade' && f.status === 'active' && (f.ops?.disrupted_turns ?? 0) > 0
+    const disrupted = Object.values(formations).filter((f: FormationState) =>
+        f.faction === faction && f.kind === 'brigade' && f.status === 'active' && ((f.ops as unknown as Record<string, unknown>)?.disrupted_turns as number ?? 0) > 0
     );
     if (disrupted.length >= 3) {
         items.push({
@@ -132,21 +134,21 @@ registerBriefingCollector('military', (state, faction) => {
     }
 
     // Low-cohesion corps warning
-    const corpsFormations = Object.entries(formations).filter(([, f]: any) =>
+    const corpsFormations = Object.entries(formations).filter(([, f]: [string, FormationState]) =>
         f.faction === faction && (f.kind === 'corps' || f.kind === 'corps_asset') && f.status === 'active'
     );
     for (const [corpsId, cf] of corpsFormations) {
-        const subs = Object.values(formations).filter((f: any) =>
+        const subs = Object.values(formations).filter((f: FormationState) =>
             f.corps_id === corpsId && f.kind === 'brigade' && f.status === 'active'
         );
         if (subs.length === 0) continue;
-        const avgCohesion = subs.reduce((sum: number, f: any) => sum + (f.cohesion ?? 60), 0) / subs.length;
+        const avgCohesion = subs.reduce((sum: number, f: FormationState) => sum + (f.cohesion ?? 60), 0) / subs.length;
         if (avgCohesion < 40) {
             items.push({
                 id: `mil-cohesion-${corpsId}`,
                 section: 'military',
                 severity: 'warning',
-                title: `${(cf as any).name ?? corpsId}: low cohesion`,
+                title: `${(cf as FormationState).name ?? corpsId}: low cohesion`,
                 detail: `Average cohesion ${Math.round(avgCohesion)}% — combat effectiveness degraded.`,
                 target: { corpsId },
             });
@@ -176,7 +178,7 @@ registerBriefingCollector('diplomatic', (state, faction) => {
     // Patron pressure threshold
     const patronRel = neg?.patron_relationships?.[faction];
     if (patronRel && typeof patronRel === 'object') {
-        const override = (patronRel as any).override_authority ?? 0;
+        const override = (patronRel as PatronRelationship).override_authority ?? 0;
         if (override >= 75) {
             items.push({
                 id: 'dip-patron-override',
@@ -204,10 +206,10 @@ registerBriefingCollector('humanitarian', (state, faction) => {
     const items: BriefingItem[] = [];
 
     // Enclave status
-    const enclaveRes = (state.military as any)?.enclave_resilience;
+    const enclaveRes = (state.military as unknown as Record<string, unknown>)?.enclave_resilience as Record<string, number | EnclaveResilienceEntry> | undefined;
     if (enclaveRes && typeof enclaveRes === 'object') {
         for (const [enclaveId, entry] of Object.entries(enclaveRes).sort((a, b) => strictCompare(a[0], b[0]))) {
-            const e = typeof entry === 'number' ? { resilience: entry, isolation_turns: 0 } : entry as any;
+            const e: { resilience: number; isolation_turns: number } = typeof entry === 'number' ? { resilience: entry, isolation_turns: 0 } : entry as EnclaveResilienceEntry;
             if (e.isolation_turns >= 8) {
                 items.push({
                     id: `hum-enclave-${enclaveId}`,
@@ -227,7 +229,7 @@ registerBriefingCollector('humanitarian', (state, faction) => {
 // Section 4: Field Reports (AARs)
 registerBriefingCollector('field_reports', (state, _faction) => {
     const items: BriefingItem[] = [];
-    const aars = (state.military as any)?.battle_narratives as Array<{ turn: number; narrative: string; officer_name: string; target_osid: string; outcome: string }> | undefined;
+    const aars = state.military?.battle_narratives;
     if (!aars || aars.length === 0) return items;
     const currentTurn = state.meta?.turn ?? 0;
     const thisTurnAars = aars.filter(a => a.turn === currentTurn);
@@ -248,7 +250,7 @@ registerBriefingCollector('command', (state, faction) => {
     const items: BriefingItem[] = [];
     const pending = state.military?.pending_officer_events;
     if (Array.isArray(pending)) {
-        const factionEvents = pending.filter((e: any) => e.faction === faction);
+        const factionEvents = pending.filter((e: PendingOfficerEvent) => e.faction === faction);
         if (factionEvents.length > 0) {
             items.push({
                 id: 'cmd-officer-events',
