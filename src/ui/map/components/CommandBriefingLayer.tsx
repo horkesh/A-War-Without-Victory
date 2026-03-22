@@ -85,10 +85,10 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
 
   return (
     <div className={`fixed ${topOffset} left-[19rem] right-4 z-20 pointer-events-none`}>
-      <div className="pointer-events-auto mt-2 rounded-lg bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl px-4 py-2.5">
+      <div className="pointer-events-auto relative mt-2 rounded-lg bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl px-4 py-2.5">
         {/* Header line */}
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-amber-400/80">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-[0.25em] text-red-400">
             COMMAND BRIEFING
           </span>
           <span className="text-[9px] font-mono text-white/40">
@@ -97,9 +97,10 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
           <button
             type="button"
             onClick={() => { lastDismissedTurn.current = turn ?? null; setDismissed(true); }}
-            className="ml-auto text-[9px] font-mono uppercase tracking-wide text-white/30 hover:text-white/60 transition-colors px-2 py-0.5 rounded hover:bg-white/5"
+            className="absolute right-4 top-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-red-950/50 border border-red-500/30 text-red-400 hover:bg-red-900/50 hover:border-red-500/50 hover:text-red-300 transition-all"
           >
-            DISMISS
+            <span className="text-[14px] font-bold leading-none">&times;</span>
+            <span className="text-[8px] font-mono font-bold uppercase tracking-wider">DISMISS</span>
           </button>
         </div>
         {/* Item pills */}
