@@ -1,33 +1,24 @@
-# Working On: 5-Round QA for 46 Remaining Essays
+# Working On: v0.7.0 — Event Flag Wiring
 
-## Status
-94-essay Codex is complete (100% game event coverage). All committed.
-- **48 essays**: 5-round QA CERTIFIED (batches 1+2)
-- **46 essays**: Written and committed, PENDING 5-round QA (batch 3)
+## Context
+v0.6.x is COMPLETE. Roadmap cross-examined and cleaned up. Calibration baseline re-frozen at 92.0% (n1030).
 
-## What needs to happen
-Run the same 5-round QA process used for batches 1+2:
-1. **Round 1**: Dispatch 8 historian reviewers (BB sources, ICTY citations, factual errors, hallucinations, tone)
-2. **Round 2**: Fix all issues found in Round 1 (bulk BB cleanup + targeted content fixes)
-3. **Round 3**: Re-review to verify fixes applied correctly
-4. **Round 4**: Cross-essay consistency check + hallucination sweep (dates, ICTY numbers, VRS naming, repetition)
-5. **Round 5**: Final certification — binary PASS/FAIL on each essay
+## What's Next
+v0.7.0: Event flag wiring — the foundation for Dynamic Codex.
 
-## Key rules enforced
-- NEVER fabricate ICTY paragraph numbers
-- NEVER name background sources in body text (no BB, book titles)
-- NEVER guess uncertain facts
-- Perišić acquittal (Feb 2013), Gotovina acquittal (Nov 2012) properly noted
-- VRS anachronism: April 1992 = "Bosnian Serb forces", not "VRS" (established 12 May)
-- Dragomir Milošević always disambiguated from Slobodan
-- Halilović (IT-01-48-T) for Grabovica/Uzdol, not Prlić
+### Scope
+1. **~25 orphan flags** need wiring to downstream consumers (engine systems, events, UI)
+2. **~29 FIXED events** need design pass — which should become CONDITIONAL?
+3. **FIXED→CONDITIONAL conversion** for key events (Srebrenica, 2nd Markale, Žepa, endgame chain)
+4. **New condition types** needed: `enclave_supply_status`, `corridor_severed`, `brigade_count_below`, `artillery_in_zone`
 
-## Files
-- Canonical: `data/scenarios/essays/essay_index.json` (94 essays, all with content)
-- Individual: `data/scenarios/essays/<event_id>.json` (94 files)
-- The 46 essays needing QA are those NOT in batches 1+2 (the original 48)
+### Plan
+`docs/plans/2026-03-23-event-flag-wiring-plan.md` — 6 phases, est. 5-7 sessions.
 
-## After QA completes
-- Commit fixes
-- Sync individual files from index
-- Update memory/ledger/napkin to reflect full certification
+### Key Design Decisions Still Open
+- Which FIXED events should become conditional? (Srebrenica, Markale, Deliberate Force)
+- How does the player see canonical vs dynamic Codex layers in the UI?
+- How does the command autonomy slider interact with event decisions?
+
+### Parallelism Opportunity
+v0.7.1 (essay templates) can run alongside v0.8.0 (political bot) — no dependency between them. Both depend on v0.7.0 (flags).

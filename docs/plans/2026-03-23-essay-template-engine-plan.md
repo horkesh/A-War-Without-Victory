@@ -348,6 +348,10 @@ If `ghost_when` is absent and the event hasn't fired, the essay shows as "Locked
 
 **Ghost activation heuristic:** For Tier 2 essays, set `ghost_when` to activate after the event's `turn_max` has passed. This means: once the window for the event to fire has closed, the essay becomes a ghost rather than staying permanently locked.
 
+**`turn_past:N` syntax — implementation note:** The condition expression evaluator (Section 2.3) handles flag boolean algebra only. `ghost_when` uses a separate format: `"turn_past:N"` means "current turn > N". The `renderEssay()` function should handle this directly: if `ghost_when` starts with `"turn_past:"`, parse the number and compare to `currentTurn`. Otherwise, delegate to `evaluateExpression()` for flag-based conditions. This keeps the expression evaluator pure (flags only) while supporting time-based ghost activation.
+
+**File path resolution:** The plan references both `src/sim/events/condition_expression.ts` and `src/codex/condition_expression.ts`. Use **`src/codex/condition_expression.ts`** — create the `src/codex/` directory. The codex evaluator is a simpler flag-only evaluator separate from the event system's `evaluateCondition()` (which operates on full GameState with 14+ condition types).
+
 ---
 
 ## 6. Codex UI Design

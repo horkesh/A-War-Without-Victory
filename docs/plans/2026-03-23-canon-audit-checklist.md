@@ -1,7 +1,13 @@
-# Canon Audit Checklist — v0.7.2 Peace Phase Removal
+# Canon Audit Checklist — v0.7.3 Peace Phase Removal
+
+> **Version note (2026-03-24):** Reslotted from v0.7.2 to v0.7.3 per roadmap restructuring. Canon audit is cleanup — lowest risk, scheduled last in v0.7.x.
 
 **Date:** 2026-03-23
+**Status:** PLAN
+**Prerequisite:** None (independent of v0.7.0/v0.7.1/v0.7.2)
 **Context:** The full campaign now starts April 1992. The peace phase is no longer playable content. All references to September 1991 start, peace phase gameplay, Phase I (pre-war), and early-war phase transitions need to be identified and either removed or revised.
+
+**Save migration note:** Existing saves may contain `phase: 'peace'` in GameState. After removing `'peace'` from `PhaseName`, deserialization will fail. Add a migration step in `serialize.ts`: if loaded save has `phase === 'peace'`, coerce to `'war'` with a console warning. This must be implemented in Phase E (type system changes) alongside the PhaseName update.
 
 ---
 

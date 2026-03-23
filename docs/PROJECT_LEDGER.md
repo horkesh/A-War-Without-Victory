@@ -1,7 +1,42 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-23
-**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995.** **96-essay Codex — ALL 96 ESSAYS 5-ROUND QA CERTIFIED + deep historian audit.** Roadmap restructured: v0.7=Dynamic Codex, v0.8=Command Chain, v0.9=Consequences. Sep 1991 start CUT. Three v0.7 plans written. Next: finish v0.6.2-v0.6.3 event migration, then v0.7 implementation.
+**Last Updated:** 2026-03-24
+**Status:** **v0.6.1** — Political Wargame. **v0.6.x COMPLETE.** 1412 tests, 116 suites. **92.0% area-weighted (n1033, honest baseline).** Electron 41. **94 events, 75 mechanical. 96-essay Codex.** Pyrrhic team restructured (62 roles). Emergent Cascade Architecture documented. 9 plans ready for nightshift. 3 bugs fixed (event flag propagation). 14 gaps identified + assigned. **Next: v0.6.5 (Drina paramilitaries) → v0.7.0 (flag wiring).**
+
+## [2026-03-24] Emergent Cascade Architecture + Pyrrhic Team Restructuring
+
+**Scope:** Full Pyrrhic team review of v0.7-v1.0 roadmap. Team restructuring. Emergent cascade architecture document. Bug fixes. 9 implementation plans.
+
+**Pyrrhic team restructured (66 → 62 roles):** 7 cuts (lua-scripting, graphics-programmer, frontend-design, devops-specialist, build-engineer, asset-integration, canon-compliance-review). 3 hires (narrative-designer, data-pipeline-engineer, integration-tester). /ui-ux-developer promoted to mandatory gate. Roster, catalog, and skill files updated.
+
+**Full team review (7 specialists):** UI/UX Developer found no unified notification architecture (P0). Narrative Designer found content authoring underestimated 5-7x. Data Pipeline Engineer found 3 whitelist field chokepoints. Integration Tester found 68 IPC handlers with 0 tests. Operations Expert found active ops + stance change is undefined. Game Designer identified mid-game dead zones (w20-35, w80-130) and the v1.0 wow moment. War or Game identified paramilitaries as biggest realism gap and Drina valley as highest-ROI calibration target.
+
+**Emergent Cascade Architecture:** `docs/20_engineering/EMERGENT_CASCADE_ARCHITECTURE.md`. Maps every system connection — player choice → mechanics → dimensions → flags → events → narrative → Dayton. 14 numbered gaps with fix assignments. Milestone dependency graph. The v1.0 cascade coverage test: every player choice must hit 3+ of 5 layers.
+
+**3 bugs fixed:** (1) `resolveEventDecision` dropped `sets_flags`/`dimension_shifts` from player choices. (2) `pickBotResponseV1` defaulted to first option for capital_based/strategic_weighted modes. (3) Bot auto-response in `evaluateEvents` dropped `sets_flags`/`dimension_shifts` (changed calibration hash — re-frozen at n1033/23 events). All verified: 1412 tests pass, calibration green.
+
+**9 plans written:** v0.6.5 (offensive paramilitary sweep), v0.7.2 (warroom migration), v0.8.0 (political bot), v0.8.1 (order interpretation), v0.8.2 (autonomy + API), v0.9.0 (consequence system). Plus 3 existing plans gap-fixed (v0.7.0, v0.7.1, v0.7.3).
+
+**v0.6.5 added to roadmap:** Offensive paramilitary sweep for Drina valley. Extends existing `paramilitary_sweep.ts`. Municipality-scoped, war-crimes-wired, player-agency-preserving. Target: +2-3pp (92% → 94-95%). Must land before v0.7.0. Full consequence chain documented: paramilitaries → war crimes → international standing → patron pressure → Dayton.
+
+**Files:** `docs/20_engineering/EMERGENT_CASCADE_ARCHITECTURE.md` (new), `.cursor/AGENT_TEAM_ROSTER.md` (rewritten), `.agent/skills-catalog.md` (rewritten), `.claude/skills/{narrative-designer,data-pipeline-engineer,integration-tester}/SKILL.md` (new), `.claude/skills/ui-ux-developer/SKILL.md` (promoted), `docs/20_engineering/VERSIONING.md`, `docs/plans/2026-03-24-*.md` (6 new plans), `src/sim/events/{resolve_decision,evaluate_events,bot_response}.ts` (bug fixes), `tests/event_decisions.test.ts` (+2 tests), `tools/freeze_baseline.cjs` (bug fix), `data/calibration/baseline_40w.json` (re-frozen), `nightshift-handoff.md`.
+
+## [2026-03-23] Roadmap Cross-Examination + Calibration Baseline Re-Freeze
+
+**Scope:** Full roadmap audit, calibration infrastructure verification, version tracking cleanup.
+
+**Findings (7 issues):**
+1. Calibration baseline was stale (frozen at n1026/93.1%, current code produces n1030/92.0%). Re-frozen.
+2. v0.6.2-v0.6.4 all delivered by nightshift but not tracked as complete. Marked complete.
+3. v0.7.2 canon audit (peace phase removal, ~100 files) was sandwiched between content milestones. Moved to v0.7.3 (cleanup last).
+4. Two orphan plan files (old v0.7.0-performance, old v0.7.3-visual-polish) had confusing version numbers. Annotated with RESLOTTED headers → v0.9.3/v0.9.4.
+5. v0.7.1 (essay templates) and v0.8.0 (political bot) have no dependency — can run in parallel.
+6. `freeze_baseline.cjs` had hardcoded 93.1% fallback and wrong save-file path. Fixed to compute area-weighted from `final_save.json`.
+7. VERSIONING.md status table had stale numbers. Fixed.
+
+**Calibration regression:** `npm run calibrate:40w` — ALL CHECKS PASSED. Hash deterministic (442b7472a0953056). Baseline frozen at 92.0%.
+
+**Files:** `docs/20_engineering/VERSIONING.md`, `tools/freeze_baseline.cjs`, `data/calibration/baseline_40w.json`, `docs/plans/2026-03-16-v0.7.0-performance.md`, `docs/plans/2026-03-16-v0.7.3-visual-polish.md`.
 
 ## [2026-03-23] 96-Essay Codex — Deep Audit + 2 New Essays
 

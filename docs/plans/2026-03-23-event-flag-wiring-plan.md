@@ -408,6 +408,24 @@ These condition types exist in the type system AND have working evaluators:
 
 **Recommendation:** Implement `enclave_supply_status` and `corridor_severed` first (needed for Srebrenica conditional). `brigade_count_below` and `artillery_in_zone` are lower priority and can be deferred to a follow-up.
 
+### 3.4 Implementation Guide for Placeholder Evaluators
+
+**`enclave_supply_status` — concrete implementation:**
+- Location: `src/sim/events/event_types.ts`, case `'enclave_supply_status'` (currently returns false)
+- Data source: `state.political.last_supply_state_by_osid` — a `Record<string, string>` mapping OSID → supply level ('adequate'/'strained'/'critical')
+- Algorithm: (1) Find all OSIDs in the target municipality: filter keys of `last_supply_state_by_osid` where `osid.split(':')[1] === condition.municipality`. (2) Compute dominant supply state: if ANY OSID is at the target status or worse, return true. Ordering: adequate < strained < critical.
+- Type already defined in `event_types.ts` line 33: `{ type: 'enclave_supply_status'; municipality: string; status: 'adequate' | 'strained' | 'critical' }`
+- Supply level type: `SupplyStateLevel` from `src/state/supply_state_derivation.ts`
+- Test: create a minState with `political.last_supply_state_by_osid` containing 3 OSIDs for 'srebrenica', set two to 'strained' and one to 'critical', assert `enclave_supply_status` with `status: 'critical'` returns true.
+
+**`corridor_severed` — concrete implementation:**
+- Location: `src/sim/events/event_types.ts`, case `'corridor_severed'` (currently returns false)
+- Data source: `state.political.political_controllers` — `Record<string, FactionId>` mapping OSID → controlling faction
+- Adjacency: import `buildOsidAdjacency` from `src/sim/combat/osid_adjacency.ts` (returns `Map<string, string[]>`)
+- Algorithm: BFS from `condition.from_osid` to `condition.to_osid`, only traversing OSIDs where `political_controllers[osid] === condition.faction`. If no path found, corridor is severed → return true.
+- Note: `buildOsidAdjacency` needs the operational contact graph. Pass `state.derived?.osid_adjacency` if cached, or build from `state.map.edges`. Check what `evaluateCondition` receives — it gets the full GameState.
+- Test: create a minState with a linear chain of 5 OSIDs (A→B→C→D→E). Set A,B,D,E to RBiH and C to RS. Assert `corridor_severed` from A to E for RBiH returns true. Then set C back to RBiH, assert returns false.
+
 ---
 
 ## 4. Test Plan

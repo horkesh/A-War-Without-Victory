@@ -76,26 +76,30 @@ Core simulation loop exists. Turn pipeline runs. Factions exist. Map renders.
 - Displacement adapter, Posavina Corridor restructure
 - 93.1% area-weighted calibration (n1026), 1410 tests, 116 suites
 
-### 0.6.x — Political Wargame (ACTIVE)
+### 0.6.x — Political Wargame ✓ (COMPLETED 2026-03-23)
 Transforms AWWV from military simulation into political wargame. Master roadmap: `docs/plans/2026-03-22-v06x-master-roadmap.md`
 
-- v0.6.1: Calibration framework (automated regression, baseline freeze) ✓ COMPLETED 2026-03-23
-- v0.6.2: 1993-1994 events, Game Chronicle, AI Commander + Events integration, HQ deep drill-down
-- v0.6.3: 1995 endgame events, Dayton dimension merge, Chronicle Wrapped, Staff Map
-- v0.6.4: Historical essays (100 × 500 words, Sonnet-generated)
+- v0.6.1: Calibration framework (automated regression, baseline freeze) ✓
+- v0.6.2: 1993-1994 events (42), Game Chronicle, AI Commander + Events integration, HQ deep drill-down ✓
+- v0.6.3: 1995 endgame events (20), Dayton dimension merge, Chronicle Wrapped, Staff/Situation Map ✓
+- v0.6.4: Historical essays (96 × 500 words, /historian-generated, all 5-round QA certified + deep audit) ✓
 
-### 0.7.x — Dynamic Codex
-Plan: `docs/plans/2026-03-23-event-flag-wiring-plan.md`, `2026-03-23-essay-template-engine-plan.md`, `2026-03-23-canon-audit-checklist.md`
+Nightshift 2026-03-23 delivered v0.6.2-v0.6.4 in a single session. 75 events with rich mechanical effects (9 effect types). 96-essay Codex fully certified. All UI components functional.
+
+- v0.6.5: Offensive paramilitary sweep — Drina valley ethnic cleansing model. Extends `paramilitary_sweep.ts` with front-line offensive mode. Target: +2-3pp calibration (92% → 94-95%). **Must land BEFORE v0.7.0** (establishes higher baseline; `drina_cleansing_occurred` flag fires more reliably). Plan: `docs/plans/2026-03-24-offensive-paramilitary-sweep-plan.md`
+
+### 0.7.x — Dynamic Codex (ACTIVE)
+Plans: `docs/plans/2026-03-23-event-flag-wiring-plan.md`, `2026-03-23-essay-template-engine-plan.md`, `2026-03-23-canon-audit-checklist.md`
 
 The Codex transforms from static essays into a living historical document that morphs with player decisions.
 
 - v0.7.0: Event flag wiring (~25 orphan flags → downstream consumers), FIXED→CONDITIONAL conversion (Srebrenica, 2nd Markale)
-- v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries), Codex UI
-- v0.7.2: Canon audit (remove September 1991 start, peace phase references from all docs)
-- v0.7.3: Warroom React migration (absorbs old v0.7.0 scope)
+- v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries), Codex UI. **Can parallel with v0.8.0** — no dependency
+- v0.7.2: Warroom React migration (absorbs scope from old v0.7.0 perf plan, now `docs/plans/2026-03-16-v0.7.0-performance.md`)
+- v0.7.3: Canon audit (remove September 1991 start, peace phase references from all docs) — cleanup last, lowest risk
 
 ### 0.8.x — Command Chain
-Plans: TBD (write after v0.7 ships)
+Plans: TBD (write after v0.7.0 ships). **v0.8.0 can start alongside v0.7.1** — depends on flags (v0.7.0), not essays.
 
 The player commands through a hierarchy of AI personalities that can be delegated to or overridden.
 
@@ -110,16 +114,17 @@ Ahistorical choices produce realistic consequences. Ship preparation.
 
 - v0.9.0: Consequence system (divergence events — no cleansing → partisans, alliance holds → no Washington Agreement chain)
 - v0.9.1: Dynamic essay content (~30 Tier 3 dynamic sections + ~15 Tier 4 ahistorical templates)
-- v0.9.2: External playtesting + balance (absorbs old v0.8.0-v0.8.1)
-- v0.9.3: Performance + accessibility (absorbs old v0.7.0-v0.7.1)
-- v0.9.4: Platform packaging + store (absorbs old v0.8.2, v0.9.1)
+- v0.9.2: External playtesting + balance
+- v0.9.3: Performance + accessibility (plan: `docs/plans/2026-03-16-v0.7.0-performance.md`)
+- v0.9.4: Visual polish (plan: `docs/plans/2026-03-16-v0.7.3-visual-polish.md`)
+- v0.9.5: Platform packaging + store
 
 ### 1.0.0 — Gold / Public Release
 Plan: `docs/plans/2026-03-16-v1.0.0-gold.md` (needs revision for new scope)
 
 Full campaign from April 1992. Dynamic Codex. Command hierarchy. Consequence system. Tutorial. Sound. Ship it.
 
-NOT in v1.0: Localization (v1.1), historical scenarios (v1.2), AI API at corps level (v2.0).
+NOT in v1.0: Localization (v1.1), historical scenarios April 1993/1994/1995 (v1.2), AI API at corps level (v2.0).
 
 "Another such victory and we are undone."
 
@@ -176,7 +181,7 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Equipment pipeline | ✓ Complete |
 | OOB (247 brigades) | ✓ Complete |
 | Scenario runner | ✓ Complete |
-| Calibration pipeline | ✓ Complete (93.1% area-weighted, 6/6 benchmarks) |
+| Calibration pipeline | ✓ Complete (92.0% area-weighted, honest baseline n1029) |
 | Desktop app (Electron) | ✓ Functional |
 | Tactical map (React + MapLibre + Deck.gl) | ✓ Functional |
 | Warroom (vanilla TS + canvas) | ✓ Functional (v0.7+ React migration planned) |
@@ -185,7 +190,7 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Strategic dimensions | ✓ Functional (6 dimensions, Dayton merge complete, UI composite bar) |
 | Scenarios (40w/52w/56w) | ✓ Complete |
 | AI Commander infrastructure | ✓ Functional (14 modules, multi-model routing) |
-| Peace phase | ✗ CUT — game starts April 1992, pre-war events are Codex backstory |
+| Peace phase | ✗ CUT — game starts April 1992, pre-war events are Codex backstory. Cleanup in v0.7.3 |
 | Dayton negotiation | ✓ Functional (UI + engine, dimension merge complete, composite bar) |
 | Full turn cycle | ○ Partial |
 | Save/load | ○ Partial (headless OK, desktop partial) |
@@ -196,7 +201,7 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Sound/music | ✗ Not started |
 | Localization | ✗ Not started (v0.8+ scope: B/C/S + English) |
 
-**Current version: 0.6.1** — Political Wargame. 1410 tests, 116 suites. 92.0% area-weighted (honest baseline, n1029). 96-essay Codex (all 5-round QA certified + deep historian audit). 94 events across 1992-1995. Event dependency graph mapped. Dynamic Codex design established. Campaign starts April 1992 (Sep 1991 start CUT).
+**Current version: 0.6.1** — Political Wargame (v0.6.x COMPLETE). 1410 tests, 116 suites. 92.0% area-weighted (honest baseline, n1029). 96-essay Codex (all 5-round QA certified + deep historian audit). 94 events across 1992-1995 with rich mechanical effects (75 events, 9 effect types). Event dependency graph mapped. Dynamic Codex design established. Campaign starts April 1992 (Sep 1991 start CUT). Chronicle, Wrapped, HQ deep drill-down, Dayton dimension merge all shipped. **Next: v0.7.0 (event flag wiring).**
 
 ---
 

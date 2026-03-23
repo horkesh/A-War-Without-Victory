@@ -8,28 +8,16 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-23, v0.6.1 — Political Wargame)
-**v0.6.1.** 1410 tests, 116 suites. tsc clean. Electron 41. **n1029: 92.0% area-weighted (honest baseline).** 94 events across 1992-1995 (was 19). Chronicle horizontal timeline. Pre-commit hooks active.
-**Night shift (2026-03-23):** 27/28 tasks, 7 plans, 15 commits. Chronicle + Wrapped + AI Commander Events + Dayton Merge + Calibration Framework + HQ Deep Drill + Codex. Essay generation blocked on API key.
-**Codex COMPLETE (2026-03-23):** **96 essays**, ALL 5-round QA CERTIFIED + deep historian audit. Deep audit: 21/21 ICTY cases verified, 15/15 UNSCRs verified, 9 contradictions fixed, zero fabricated sources. 2 new essays: Independence Referendum + Bijeljina Massacre (critical gaps closed). 5 moderate gaps remain (Prijedor, paramilitaries, Vijećnica, Brčko, humanitarian ops).
-**v0.6.0-alpha (nightshift):** Event infrastructure — pressure, dimensions, flags, 14 conditions, constraint bus, bot response v1, recurrence, 3/turn cap, pipeline step. 56 new tests.
-**v0.6.0-beta (morning):** 1992 event migration. 19 events. 3 foundational decisions (ICTY-sourced). /simplify: 6 fixes.
-**v0.6.0 merge UI (day session):** Presidential Toolbar (army crest center → HQ). Bottom strip (faction-contextual, +MORE/LAYERS dropdowns). Command Briefing (frost glass pills, red title, dismiss). Strategic Position dimension bars in Army HQ. Dimension initialization wired. OperationsPanel cycling fix. Pre-commit hooks. RS default player in dev mode.
-**v0.6.0 merge UI (evening session):** Army HQ Phase 3.5–4: 4-tab command center (BRIEFING/SUMMARY/RECORDS/PERSONNEL). CoS missive (paper aesthetic, personality-driven, inline links). Orphan audit: 5 military modals absorbed into HQ tabs. "Two Rooms" spatial metaphor documented. Toolbar: floating crest. Keyboard shortcuts (H/S/E/C). Localization slotted v0.8+.
-**v0.6.0 gate CLOSED (evening):** Event decision IPC wired, pressure indicators live, consequence auto-dismiss, VERSIONING.md fixed (v0.3.1→v0.5.4), pending decisions in briefing.
-**Design specs written:** Dayton Dimension Merge, Game Chronicle + Wrapped.
-**Integration audit:** 4 parallel agents. AI Commander blind to events (prompt builder fix planned). Dual dimension system (merge planned). Warroom-Events transition OK.
-**7 nightshift plans ready (all Pyrrhic-compliant):** Chronicle (6 tasks), AI Commander Events (3), Dayton Merge (5), Calibration Framework (3), HQ Deep Drill (4), Wrapped (4), Essays (3). Total 28 tasks. Handoff: `nightshift-handoff.md`.
-**Plan cleanup done:** 78 completed + 58 legacy plans archived (gitignored). 28 active plans in `docs/plans/`. VERSIONING.md reconciled. `.env` removed from git tracking.
-**/simplify done:** shared FACTION_HEX_COLORS/fmtK/fmtPct extracted, useMemo on WarSummaryContent, stale closure fixed, unnecessary comments removed.
-**Roadmap restructured (2026-03-23):** v0.7=Dynamic Codex (flag wiring, essay templates, canon audit), v0.8=Command Chain (political bot, order interpretation, AI API), v0.9=Consequences+Polish. Sep 1991 start CUT. Peace phase CUT. Historical scenarios deferred to v1.2. Three v0.7 plans written. VERSIONING.md updated.
-**Next priority:** Finish v0.6.2-v0.6.3 (1993-1995 event migration). Then v0.7.0 (event flag wiring). See `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
-**HRHB-RBiH conflict:** P1 Backlog ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
-**Equipment pipeline:** Battlefield scavenging (winner 15-25%, **loser 15%**, stalemate 8% — both sides scavenge with fractional accumulator). Capture from retreat (5%/12%, min-1 at 10+ tanks). **Scarce tank protection** (<10 tanks: half loss rate, no min-1). Abandoned capture on uncontested occupation (0.0004 tanks/pop). **Battle of the Barracks** (w4-6, conditional, 13T+26A). Arms smuggling (2T+3A/12t, 60/40 ARBiH/HVO). Zenica steelworks (+3A/8t ARBiH). HV transfers (+1A/12t HVO). Write-off: >40% non-functional. `ensureBrigadeComposition` empty for non-brigades. JNA mech/moto priority. Dynamic recruitment: no JNA override. Per-brigade `total_equipment_destroyed`/`captured` on BrigadeHistory. 12 accolades in `brigade_accolades.ts`. Corps panel equipment in CorpsDetail.
-**Event effect types (9):** narrative, morale_change, supply_delta, cohesion_change, humanitarian_impact, patron_pressure, alliance_change, negotiation_capital, **equipment_grant**, **aggression_modifier**.
-**v0.5.x–v0.9.1 FULLY PLANNED:** 21 milestones scoped (v0.4.9 added). P4 Fog of Personality → v0.5.2. P5 Dayton Negotiation → v0.6.3.
-**10 architectural patterns MANDATORY for v0.5.x** — registry patterns for briefing, settings, SFX, verdict tabs, menu slots.
-**Calibration freeze rule:** After v0.6.1, any sim-affecting change needs `npm run calibrate:52w` regression check vs freeze baseline.
+## Current State (2026-03-23, v0.6.1 — v0.6.x COMPLETE)
+**v0.6.1.** 1410 tests, 116 suites. tsc clean. Electron 41. **n1030: 92.0% area-weighted (honest baseline, re-frozen).** 94 events, 75 with mechanical effects (9 effect types). 96-essay Codex (all QA certified + deep audit). Chronicle, Wrapped, HQ drill-down, Dayton merge all shipped. Pre-commit hooks active.
+**v0.6.x COMPLETE:** v0.6.2 (1993-1994 events, Chronicle, AI Commander Events, HQ drill-down), v0.6.3 (1995 events, Dayton merge, Wrapped, Situation Map), v0.6.4 (96 essays) — ALL delivered by nightshift 2026-03-23.
+**Calibration baseline re-frozen (2026-03-23):** `freeze_baseline.cjs` had hardcoded 93.1% fallback + wrong save-file path. Fixed. `npm run calibrate:40w` passes. Hash: `442b7472a0953056`.
+**Roadmap (2026-03-23):** v0.7=Dynamic Codex, v0.8=Command Chain, v0.9=Consequences+Polish. v0.7.1 can parallel v0.8.0 (no dependency). Canon audit moved to v0.7.3 (cleanup last). Old perf/polish plans reslotted to v0.9.3/v0.9.4.
+**Next priority:** v0.6.5 (offensive paramilitary sweep — Drina valley, +2-3pp calibration) → v0.7.0 (event flag wiring). Plans: `docs/plans/2026-03-24-offensive-paramilitary-sweep-plan.md`, `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
+**Pyrrhic team restructured (2026-03-24):** 7 cuts (lua, graphics, frontend-design, devops, build-engineer, asset-integration, canon-compliance-review dup). 3 hires (narrative-designer, data-pipeline-engineer, integration-tester). /ui-ux-developer promoted to mandatory gate. 62 active skills.
+**Full Pyrrhic review (2026-03-24):** 7 specialists reviewed roadmap. Key findings: mid-game dead zones (w20-35, w80-130), no unified notification architecture, Drina paramilitaries = biggest calibration opportunity, adapter/IPC untested, content authoring 5-7x underestimated, active ops+stance change undefined. 8 new plans written. P0+P1 bugs fixed.
+**HRHB-RBiH conflict:** P1 ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
+**Calibration freeze rule:** Any sim-affecting change needs `npm run calibrate:40w` regression check vs frozen baseline.
 **External:** Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
 
 ## Session Startup (do these EVERY session — BEFORE any work)
