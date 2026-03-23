@@ -17,13 +17,72 @@ interface SectorsSectionProps {
     factionBattles: TurnBattle[];
 }
 
+/** Compact inline bar — renders a filled percentage strip. */
+function IntelBar({ value, label }: { value: number; label: string }) {
+    const pct = Math.round(value * 100);
+    const barColor = pct >= 70 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-500' : 'bg-red-500';
+    return (
+        <div className="flex items-center gap-2">
+            <span className="text-text-secondary/60 w-14 shrink-0 text-[9px] uppercase tracking-wider">{label}</span>
+            <div className="flex-1 h-1.5 bg-panel-border/30 rounded-full overflow-hidden">
+                <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+            </div>
+            <span className={`tabular-nums w-8 text-right text-[10px] font-bold ${pct >= 70 ? 'text-emerald-400' : pct >= 40 ? 'text-amber-400' : 'text-red-400'}`}>{pct}%</span>
+        </div>
+    );
+}
+
+const STRENGTH_CLASS_COLORS: Record<string, string> = {
+    fortress: 'text-emerald-400',
+    strong: 'text-emerald-400/80',
+    adequate: 'text-accent-gold',
+    thin: 'text-amber-500',
+    critical: 'text-red-500',
+};
+
 function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector: CorpsFrontSectorView; sectorBattles: TurnBattle[]; formationMap: Map<string, FormationView> }) {
     const frontIds = sector.assigned_brigade_ids;
     const reserveIds = sector.reserve_brigade_ids;
 
+    const threatRatio = sector.threat_ratio;
+    const stanceHint = threatRatio > 1.5 ? 'fortify' : threatRatio > 1.0 ? 'defend' : null;
+    const currentStance = sector.sector_stance ?? 'defend';
+    const stanceMismatch = stanceHint !== null && stanceHint !== currentStance;
+
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
-            {/* Front brigades */}
+            {/* Intel + Threat strip */}
+            <div className="space-y-2">
+                <IntelBar value={sector.intel_confidence} label="INTEL" />
+                {sector.offensive_signs && (
+                    <div className="flex items-center gap-2 text-[10px] text-red-400 font-bold animate-pulse">
+                        <span className="text-red-500">!</span> OFFENSIVE SIGNS DETECTED — THREAT RATIO {threatRatio.toFixed(2)}
+                    </div>
+                )}
+                {!sector.offensive_signs && threatRatio > 0 && (
+                    <div className="flex items-center gap-2 text-[10px] text-text-secondary/60">
+                        THREAT RATIO: <span className={`font-bold ${threatRatio > 1.5 ? 'text-red-400' : threatRatio > 1.0 ? 'text-amber-400' : 'text-emerald-400'}`}>{threatRatio.toFixed(2)}</span>
+                    </div>
+                )}
+                {stanceMismatch && (
+                    <div className="text-[9px] text-amber-400/80 uppercase tracking-wider">
+                        RECOMMEND: {stanceHint!.toUpperCase()} (current: {currentStance.toUpperCase()})
+                    </div>
+                )}
+            </div>
+
+            {/* Sector combat summary */}
+            {sector.combat_strength_class && (
+                <div className="flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-text-secondary/60 uppercase tracking-wider border-t border-panel-border/30 pt-2">
+                    <span>CLASS: <span className={`font-bold ${STRENGTH_CLASS_COLORS[sector.combat_strength_class] ?? 'text-text-secondary'}`}>{sector.combat_strength_class.toUpperCase()}</span></span>
+                    {sector.combat_defense_per_edge != null && <span>DEF/EDGE: <span className="font-bold text-text-secondary">{Math.round(sector.combat_defense_per_edge)}</span></span>}
+                    {sector.combat_morale_avg != null && <span>MOR: <span className={`font-bold ${sector.combat_morale_avg >= 60 ? 'text-emerald-400' : sector.combat_morale_avg >= 35 ? 'text-accent-gold' : 'text-red-500'}`}>{Math.round(sector.combat_morale_avg)}</span></span>}
+                    {sector.combat_fatigue_avg != null && <span>FAT: <span className={`font-bold ${sector.combat_fatigue_avg <= 8 ? 'text-emerald-400' : sector.combat_fatigue_avg <= 16 ? 'text-accent-gold' : 'text-red-500'}`}>{Math.round(sector.combat_fatigue_avg)}</span></span>}
+                    {sector.combat_personnel != null && <span>PERS: <span className="font-bold text-text-secondary">{formatPersonnel(sector.combat_personnel)}</span></span>}
+                </div>
+            )}
+
+            {/* Front brigades with OSID positions */}
             {frontIds.length > 0 && (
                 <div>
                     <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">FRONT LINE DEPLOYMENT ({frontIds.length})</div>
@@ -34,15 +93,22 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                             const cohesion = Math.round(b.cohesion ?? 0);
                             const isDisrupted = (b.disrupted_turns ?? 0) > 0;
                             return (
-                                <div key={id} className="flex items-center gap-3">
-                                    <span className="truncate flex-1 min-w-0 text-text-secondary">{b.name}</span>
-                                    <span className="text-text-secondary tabular-nums w-12 text-right shrink-0">
-                                        {formatPersonnel(b.personnel ?? 0)}
-                                    </span>
-                                    <span className={`tabular-nums w-10 text-right shrink-0 font-bold ${cohesion >= 70 ? 'text-emerald-400' : cohesion >= 40 ? 'text-accent-gold' : 'text-red-500'}`}>
-                                        {cohesion}%
-                                    </span>
-                                    {isDisrupted && <span className="text-red-500 font-bold shrink-0 animate-pulse text-[9px]">[DIS]</span>}
+                                <div key={id}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="truncate flex-1 min-w-0 text-text-secondary">{b.name}</span>
+                                        <span className="text-text-secondary tabular-nums w-12 text-right shrink-0">
+                                            {formatPersonnel(b.personnel ?? 0)}
+                                        </span>
+                                        <span className={`tabular-nums w-10 text-right shrink-0 font-bold ${cohesion >= 70 ? 'text-emerald-400' : cohesion >= 40 ? 'text-accent-gold' : 'text-red-500'}`}>
+                                            {cohesion}%
+                                        </span>
+                                        {isDisrupted && <span className="text-red-500 font-bold shrink-0 animate-pulse text-[9px]">[DIS]</span>}
+                                    </div>
+                                    {b.location_osid && (
+                                        <div className="text-[9px] text-text-secondary/40 ml-4 mt-0.5 truncate">
+                                            @ {formatOsidLabel(b.location_osid)}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
@@ -64,6 +130,11 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                                     <span className="tabular-nums w-12 text-right shrink-0">
                                         {formatPersonnel(b.personnel ?? 0)}
                                     </span>
+                                    {b.location_osid && (
+                                        <span className="text-[9px] text-text-secondary/40 truncate max-w-[120px]">
+                                            @ {formatOsidLabel(b.location_osid)}
+                                        </span>
+                                    )}
                                 </div>
                             );
                         })}
@@ -95,6 +166,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
             {/* Sector stats */}
             <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary/60 text-[10px] uppercase tracking-wider">
                 <span>FRONTAGE: {sector.length_edges} KM</span>
+                <span>BDE/KM: {sector.length_edges > 0 ? (frontIds.length / sector.length_edges).toFixed(2) : '—'}</span>
                 <span>TROOP DENSITY: {sector.density.toFixed(2)}</span>
                 {sector.sub_segments && <span>SEGMENTS: {sector.sub_segments.length}</span>}
             </div>
