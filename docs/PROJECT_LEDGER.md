@@ -1,7 +1,25 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-23
-**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995.** **94-essay Codex — 100% event coverage (48 QA-certified, 46 pending QA).** Next: QA remaining 46 essays (5-round), AI Commander smoke test, calibration regressions.
+**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995.** **94-essay Codex — 100% event coverage, ALL 94 ESSAYS 5-ROUND QA CERTIFIED.** Next: AI Commander smoke test, calibration regressions.
+
+## [2026-03-23] 94-Essay Codex — Full 5-Round QA Certification
+
+**Scope:** Batch 3 (46 essays, indices 48-93) through the same 5-round QA process used for batches 1+2.
+
+**Round 1 (6 parallel historian reviewers):** ~35 issues found across 23/46 essays. Most common: hallucinated specific dates/figures (12), factual errors (7), source problems (3). 23 essays clean on first pass.
+
+**Round 2 (bulk fix):** 24 fixes applied via `tools/apply_essay_qa_fixes.cjs`. Key corrections: tunnel duration (4→6 months), Washington Agreement date (1→18 March), Djukic rank (General→Colonel), Stupni Do casualties (31→37 per ICTY Rajić), Sanski Most date (12→11 October), NATO age corrected, COHA expiry (late April→1 May), Akashi removed from August 1993 (not SRSG until January 1994). Hallucinated territory/troop figures hedged across 8 late-war operation essays. Markale ICTY attribution strengthened, Dragomir Milošević added to 2nd Markale essay, Gotovina acquittal noted in Op Flash, Prlić geographic scope corrected for Maglaj.
+
+**Round 3 (verification):** 24/24 fixes confirmed applied. 2 follow-up fixes: duplicate source in Carter ceasefire essay, unhudged "five days" in Op Summer 95.
+
+**Round 4 (cross-essay consistency):** 2 minor issues found and fixed: Op Sana subtitle differentiated from essay 80, UNSCR 819 cited for Srebrenica safe area declaration in essay 70. All casualty figures, ICTY case numbers, event dates, and faction naming consistent across full 46-essay corpus.
+
+**Round 5 (final certification):** 46/46 PASS. Binary check: zero BB source leaks, zero fabricated ICTY paragraph numbers, zero factual errors, balanced tone, coherent narrative.
+
+**Result:** Combined with batches 1+2, the full **94-essay Codex is now 5-round QA certified**.
+
+**Files:** `data/scenarios/essays/essay_index.json` + 81 individual essay files. QA fix script: `tools/apply_essay_qa_fixes.cjs`.
 
 ## [2026-03-23] 94-Essay Codex — Complete Event Coverage
 
