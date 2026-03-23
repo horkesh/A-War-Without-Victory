@@ -1,7 +1,21 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-23
-**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995.** **94-essay Codex — 100% event coverage, ALL 94 ESSAYS 5-ROUND QA CERTIFIED.** Next: AI Commander smoke test, calibration regressions.
+**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995.** **96-essay Codex — ALL 96 ESSAYS 5-ROUND QA CERTIFIED + deep historian audit.** Next: AI Commander smoke test, calibration regressions.
+
+## [2026-03-23] 96-Essay Codex — Deep Audit + 2 New Essays
+
+**Scope:** Full /historian deep audit of the entire Codex, plus 2 new essays closing critical gaps.
+
+**Deep audit (6 parallel /historian agents):** ICTY sources (21/21 verified), UNSCR sources (15/15 verified), all non-ICTY sources verified real. 9 cross-essay contradictions found and fixed (RS Assembly date, safe area resolution, Žepa timeline, Dayton duration, others). 4 additional fixes (empty sources, title corrections, date corrections). Zero fabricated sources in the entire Codex.
+
+**2 new essays (5-round QA certified):**
+- **Independence Referendum** (29 Feb - 1 Mar 1992): Badinter Commission, SDS boycott, 63.4% turnout, barricades crisis, two competing legitimacies. Political trigger for the war.
+- **Bijeljina Massacre** (1-2 April 1992): Arkan's Tigers/SDG, Ron Haviv photographs, SDS crisis staff takeover, template for Drina valley ethnic cleansing. The war's opening act.
+
+**Gap analysis:** 5 moderate gaps remain (Prijedor campaign, paramilitaries, Vijećnica, Brčko, humanitarian ops) — candidates for future essays.
+
+**Files:** `data/scenarios/essays/essay_index.json` (96 essays) + individual files. Fix scripts: `tools/apply_essay_qa_fixes.cjs`, `tools/apply_deep_audit_fixes.cjs`.
 
 ## [2026-03-23] 94-Essay Codex — Full 5-Round QA Certification
 
