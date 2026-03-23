@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { computeNegotiationCapital } from '../src/sim/negotiation/compute_capital.js';
-import { createEmptyCapital, createDefaultPatronRelationship, CAPITAL_WEIGHTS } from '../src/state/negotiation_types.js';
+import { computeNegotiationBreakdown } from '../src/sim/negotiation/compute_capital.js';
+import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
+import { DIMENSION_WEIGHTS } from '../src/sim/events/strategic_dimensions.js';
 import type { GameState } from '../src/state/game_state.js';
 
 function makeState(overrides: Partial<GameState> = {}): GameState {
@@ -27,7 +28,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
 describe('Negotiation Capital', () => {
     it('initializes negotiation state with all 3 factions', () => {
         const state = makeState();
-        computeNegotiationCapital(state);
+        computeNegotiationBreakdown(state);
 
         expect(state.military.negotiation).toBeDefined();
         expect(state.military.negotiation!.capital.RBiH).toBeDefined();
@@ -37,7 +38,7 @@ describe('Negotiation Capital', () => {
 
     it('initializes patron relationships', () => {
         const state = makeState();
-        computeNegotiationCapital(state);
+        computeNegotiationBreakdown(state);
 
         const neg = state.military.negotiation!;
         expect(neg.patron_relationships.RS.patron_id).toBe('serbia');
@@ -45,28 +46,22 @@ describe('Negotiation Capital', () => {
         expect(neg.patron_relationships.RBiH.patron_id).toBe('international_community');
     });
 
-    it('capital dimensions are clamped 0-100', () => {
+    it('raw breakdown fields are populated', () => {
         const state = makeState();
-        computeNegotiationCapital(state);
+        computeNegotiationBreakdown(state);
 
         for (const faction of ['RBiH', 'RS', 'HRHB']) {
             const cap = state.military.negotiation!.capital[faction];
-            expect(cap.military_position).toBeGreaterThanOrEqual(0);
-            expect(cap.military_position).toBeLessThanOrEqual(100);
-            expect(cap.humanitarian_standing).toBeGreaterThanOrEqual(0);
-            expect(cap.humanitarian_standing).toBeLessThanOrEqual(100);
-            expect(cap.international_credibility).toBeGreaterThanOrEqual(0);
-            expect(cap.international_credibility).toBeLessThanOrEqual(100);
-            expect(cap.military_effectiveness).toBeGreaterThanOrEqual(0);
-            expect(cap.military_effectiveness).toBeLessThanOrEqual(100);
-            expect(cap.political_cohesion).toBeGreaterThanOrEqual(0);
-            expect(cap.political_cohesion).toBeLessThanOrEqual(100);
+            expect(cap.territory_controlled_pct).toBeGreaterThanOrEqual(0);
+            expect(cap.territory_controlled_km2).toBeGreaterThanOrEqual(0);
+            expect(cap.operations_launched).toBeGreaterThanOrEqual(0);
+            expect(cap.war_crimes_events).toBeGreaterThanOrEqual(0);
         }
     });
 
     it('preserves existing negotiation state on subsequent calls', () => {
         const state = makeState();
-        computeNegotiationCapital(state);
+        computeNegotiationBreakdown(state);
 
         state.military.negotiation!.peace_plan_history.push({
             plan_id: 'test_plan',
@@ -75,27 +70,26 @@ describe('Negotiation Capital', () => {
             resolved: true,
         });
 
-        computeNegotiationCapital(state);
+        computeNegotiationBreakdown(state);
 
         expect(state.military.negotiation!.peace_plan_history).toHaveLength(1);
         expect(state.military.negotiation!.peace_plan_history[0].plan_id).toBe('test_plan');
     });
 
-    it('capital weights sum to 1.0 for each faction', () => {
+    it('dimension weights sum to 1.0 for each faction', () => {
         for (const faction of ['RBiH', 'RS', 'HRHB']) {
-            const weights = CAPITAL_WEIGHTS[faction];
-            const sum = Object.values(weights).reduce((a, b) => a + b, 0);
+            const weights = DIMENSION_WEIGHTS[faction];
+            const sum = Object.values(weights).reduce((a: number, b: number) => a + b, 0);
             expect(sum).toBeCloseTo(1.0, 5);
         }
     });
 
-    it('empty capital has neutral defaults', () => {
+    it('empty breakdown has zero defaults for raw fields', () => {
         const cap = createEmptyCapital();
-        expect(cap.humanitarian_standing).toBe(50);
-        expect(cap.international_credibility).toBe(50);
-        expect(cap.military_effectiveness).toBe(50);
-        expect(cap.political_cohesion).toBe(50);
-        expect(cap.military_position).toBe(0);
+        expect(cap.territory_controlled_pct).toBe(0);
+        expect(cap.territory_controlled_km2).toBe(0);
+        expect(cap.operations_launched).toBe(0);
+        expect(cap.war_crimes_events).toBe(0);
     });
 
     it('default patron relationships match faction expectations', () => {
@@ -109,7 +103,7 @@ describe('Negotiation Capital', () => {
         expect(hrhb.override_authority).toBe(25);
     });
 
-    it('military effectiveness reflects casualty ratio', () => {
+    it('raw casualty data reflects brigade history', () => {
         const state = makeState({
             military: {
                 formations: {
@@ -137,10 +131,10 @@ describe('Negotiation Capital', () => {
             } as any,
         });
 
-        computeNegotiationCapital(state);
+        computeNegotiationBreakdown(state);
 
         const rbih = state.military.negotiation!.capital.RBiH;
         const rs = state.military.negotiation!.capital.RS;
-        expect(rbih.military_effectiveness).toBeGreaterThan(rs.military_effectiveness);
+        expect(rbih.military_casualties_inflicted).toBeGreaterThan(rs.military_casualties_inflicted);
     });
 });

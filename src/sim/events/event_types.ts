@@ -95,7 +95,7 @@ export interface EventEffectAllianceChange {
 }
 
 /** Effect: negotiation capital dimension adjustment for faction. */
-export interface EventEffectNegotiationCapital {
+export interface EventEffectNegotiationBreakdown {
     kind: 'negotiation_capital';
     faction: FactionId;
     dimension: string;
@@ -131,7 +131,7 @@ export type EventEffect =
     | EventEffectHumanitarianImpact
     | EventEffectPatronPressure
     | EventEffectAllianceChange
-    | EventEffectNegotiationCapital
+    | EventEffectNegotiationBreakdown
     | EventEffectEquipmentGrant
     | EventEffectAggressionModifier;
 

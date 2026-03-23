@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import type { GameState, FactionId } from '../src/state/game_state.js';
-import type { DaytonProposal, NegotiationCapital, PatronRelationship } from '../src/state/negotiation_types.js';
+import type { DaytonProposal, NegotiationBreakdown, PatronRelationship } from '../src/state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
 import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction } from '../src/sim/negotiation/bot_negotiation.js';
+import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
+import type { DimensionStore } from '../src/sim/events/strategic_dimensions.js';
 import { shouldInitiateDayton, initiateDaytonNegotiation, resolveDaytonNegotiation, DAYTON_TRIGGER_WEEK } from '../src/sim/negotiation/dayton_negotiation.js';
 import { getAllTerritorialPackages, getTerritorialPackageById, getDemandCost, getConcessionCost } from '../src/sim/negotiation/territorial_packages.js';
 import { getAllInstitutionalPackages, getInstitutionalPackageById, getInstitutionalCost } from '../src/sim/negotiation/institutional_packages.js';
@@ -11,7 +13,7 @@ import { getAllInstitutionalPackages, getInstitutionalPackageById, getInstitutio
 // Test helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-function makeCapital(overrides: Partial<NegotiationCapital> = {}): NegotiationCapital {
+function makeCapital(overrides: Partial<NegotiationBreakdown> = {}): NegotiationBreakdown {
     return { ...createEmptyCapital(), ...overrides };
 }
 
@@ -32,11 +34,12 @@ function makeState(overrides: Partial<{
     phase: string;
     game_over: boolean;
     player_faction: string;
-    capital: Record<string, Partial<NegotiationCapital>>;
+    capital: Record<string, Partial<NegotiationBreakdown>>;
     patron: Record<string, Partial<PatronRelationship>>;
     political_controllers: Record<string, string>;
+    dimStore: DimensionStore;
 }> = {}): GameState {
-    const capital: Record<string, NegotiationCapital> = {};
+    const capital: Record<string, NegotiationBreakdown> = {};
     const patron_relationships: Record<string, PatronRelationship> = {};
 
     for (const faction of ['RBiH', 'RS', 'HRHB']) {
@@ -65,6 +68,7 @@ function makeState(overrides: Partial<{
                 capital,
                 patron_relationships,
                 peace_plan_history: [],
+                strategic_dimensions: overrides.dimStore ?? initializeStrategicDimensions(),
             },
         },
         political: {
@@ -74,24 +78,40 @@ function makeState(overrides: Partial<{
     } as unknown as GameState;
 }
 
-function highCapital(): Partial<NegotiationCapital> {
+function highCapital(): Partial<NegotiationBreakdown> {
     return {
-        military_position: 80,
-        humanitarian_standing: 70,
-        international_credibility: 75,
-        military_effectiveness: 70,
-        political_cohesion: 65,
+        territory_controlled_pct: 50,
+        operations_launched: 10,
+        operations_successful: 7,
     };
 }
 
-function lowCapital(): Partial<NegotiationCapital> {
+function lowCapital(): Partial<NegotiationBreakdown> {
     return {
-        military_position: 20,
-        humanitarian_standing: 25,
-        international_credibility: 20,
-        military_effectiveness: 25,
-        political_cohesion: 30,
+        territory_controlled_pct: 10,
+        operations_launched: 5,
+        operations_successful: 1,
     };
+}
+
+/** Create a DimensionStore with all dimensions at `value` for all factions. */
+function makeDimStore(perFaction: Record<string, number> = {}): DimensionStore {
+    const store = initializeStrategicDimensions();
+    for (const faction of ['RBiH', 'RS', 'HRHB']) {
+        const v = perFaction[faction] ?? 50;
+        for (const dim of Object.keys(store[faction])) {
+            store[faction][dim] = { base_value: v, event_modifier: 0, effective_value: v };
+        }
+    }
+    return store;
+}
+
+function highDimStore(): DimensionStore {
+    return makeDimStore({ RBiH: 70, RS: 70, HRHB: 70 });
+}
+
+function lowDimStore(): DimensionStore {
+    return makeDimStore({ RBiH: 25, RS: 25, HRHB: 25 });
 }
 
 function makeSimpleProposal(): DaytonProposal {
@@ -200,45 +220,32 @@ describe('Institutional Packages', () => {
 // Composite Capital
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe('Composite Capital', () => {
-    it('computes weighted sum for RBiH (humanitarian-heavy)', () => {
-        const cap = makeCapital({
-            military_position: 50,
-            humanitarian_standing: 80,
-            international_credibility: 60,
-            military_effectiveness: 50,
-            political_cohesion: 40,
-        });
-        const composite = getCompositeCapital(cap, 'RBiH');
-        // RBiH weights: mil=0.15, hum=0.30, int=0.20, eff=0.20, coh=0.15
-        // 50*0.15 + 80*0.30 + 60*0.20 + 50*0.20 + 40*0.15 = 7.5 + 24 + 12 + 10 + 6 = 59.5
-        expect(composite).toBeCloseTo(59.5, 1);
+describe('Composite Capital (via DIMENSION_WEIGHTS)', () => {
+    it('computes weighted sum from strategic dimensions for RBiH', () => {
+        const cap = makeCapital();
+        const store = makeDimStore({ RBiH: 70 });
+        const composite = getCompositeCapital(cap, 'RBiH', store);
+        // All dimensions at 70, weights sum to 1.0 => 70
+        expect(composite).toBeCloseTo(70, 1);
     });
 
-    it('computes weighted sum for RS (military-heavy)', () => {
-        const cap = makeCapital({
-            military_position: 80,
-            humanitarian_standing: 20,
-            international_credibility: 30,
-            military_effectiveness: 70,
-            political_cohesion: 50,
-        });
-        const composite = getCompositeCapital(cap, 'RS');
-        // RS weights: mil=0.30, hum=0.10, int=0.15, eff=0.25, coh=0.20
-        // 80*0.30 + 20*0.10 + 30*0.15 + 70*0.25 + 50*0.20 = 24 + 2 + 4.5 + 17.5 + 10 = 58
-        expect(composite).toBeCloseTo(58, 1);
+    it('computes weighted sum from strategic dimensions for RS', () => {
+        const cap = makeCapital();
+        const store = makeDimStore({ RS: 60 });
+        const composite = getCompositeCapital(cap, 'RS', store);
+        expect(composite).toBeCloseTo(60, 1);
     });
 
     it('clamps to 0-100 range', () => {
-        const cap = makeCapital({
-            military_position: 100,
-            humanitarian_standing: 100,
-            international_credibility: 100,
-            military_effectiveness: 100,
-            political_cohesion: 100,
-        });
-        expect(getCompositeCapital(cap, 'RS')).toBeLessThanOrEqual(100);
-        expect(getCompositeCapital(cap, 'RS')).toBe(100);
+        const cap = makeCapital();
+        const store = makeDimStore({ RS: 100 });
+        expect(getCompositeCapital(cap, 'RS', store)).toBeLessThanOrEqual(100);
+        expect(getCompositeCapital(cap, 'RS', store)).toBe(100);
+    });
+
+    it('returns 50 when no dimension store provided', () => {
+        const cap = makeCapital();
+        expect(getCompositeCapital(cap, 'RS')).toBe(50);
     });
 });
 
@@ -250,6 +257,7 @@ describe('Bot Negotiation', () => {
     it('bot accepts when capital is sufficient', () => {
         const state = makeState({
             capital: { RS: highCapital(), RBiH: highCapital(), HRHB: highCapital() },
+            dimStore: highDimStore(),
         });
 
         // Simple proposal: demand gorazde_corridor (costs RS 10 to concede) + centralized military (costs RS 15)
@@ -260,13 +268,14 @@ describe('Bot Negotiation', () => {
         };
 
         const response = evaluateBotResponse(state, 'RS', proposal);
-        // RS composite ~58 with high capital, cost is 10+15=25, willingness 60% = ~34.8
+        // RS composite ~70, cost is 10+15=25, willingness 60% = 42
         expect(response.decision).toBe('accept');
     });
 
     it('bot rejects when proposal exceeds capital', () => {
         const state = makeState({
             capital: { RS: lowCapital(), RBiH: highCapital(), HRHB: highCapital() },
+            dimStore: lowDimStore(),
         });
 
         // Expensive proposal: many demands against RS
@@ -281,7 +290,7 @@ describe('Bot Negotiation', () => {
         };
 
         const response = evaluateBotResponse(state, 'RS', proposal);
-        // RS low capital ~24, cost = 10+18+12+15+15+20+10 = 100 — way over budget
+        // RS composite ~25, cost = 10+18+12+15+15+20+10 = 100 — way over budget
         expect(response.decision).not.toBe('accept');
     });
 
@@ -289,6 +298,7 @@ describe('Bot Negotiation', () => {
         const state = makeState({
             capital: { RS: lowCapital(), RBiH: highCapital(), HRHB: highCapital() },
             patron: { RS: { override_authority: 95 } },
+            dimStore: lowDimStore(),
         });
 
         const proposal: DaytonProposal = {
@@ -310,18 +320,9 @@ describe('Bot Negotiation', () => {
 
     it('patron override at 90+ with moderate proposal forces acceptance', () => {
         const state = makeState({
-            capital: {
-                RS: {
-                    military_position: 40,
-                    humanitarian_standing: 30,
-                    international_credibility: 25,
-                    military_effectiveness: 40,
-                    political_cohesion: 35,
-                },
-                RBiH: highCapital(),
-                HRHB: highCapital(),
-            },
+            capital: { RS: lowCapital(), RBiH: highCapital(), HRHB: highCapital() },
             patron: { RS: { override_authority: 92 } },
+            dimStore: makeDimStore({ RS: 36, RBiH: 70, HRHB: 70 }),
         });
 
         // Moderate proposal: just gorazde (costs RS 10 to concede)
@@ -332,27 +333,15 @@ describe('Bot Negotiation', () => {
         };
 
         const response = evaluateBotResponse(state, 'RS', proposal);
-        // RS composite: 40*0.30 + 30*0.10 + 25*0.15 + 40*0.25 + 35*0.20 = 12+3+3.75+10+7 = 35.75
-        // Willingness at 92 override: 0.95
-        // Max acceptable: 35.75 * 0.95 = 33.96
-        // Cost: 10
-        // Should accept
+        // RS composite: 36, Willingness at 92 override: 0.95
+        // Max acceptable: 36 * 0.95 = 34.2, Cost: 10 → should accept
         expect(response.decision).toBe('accept');
     });
 
     it('counter-proposal drops most expensive demand first', () => {
         const state = makeState({
-            capital: {
-                RS: {
-                    military_position: 50,
-                    humanitarian_standing: 30,
-                    international_credibility: 30,
-                    military_effectiveness: 50,
-                    political_cohesion: 40,
-                },
-                RBiH: highCapital(),
-                HRHB: highCapital(),
-            },
+            capital: { RS: lowCapital(), RBiH: highCapital(), HRHB: highCapital() },
+            dimStore: makeDimStore({ RS: 43, RBiH: 70, HRHB: 70 }),
         });
 
         // Proposal with multiple demands sorted by RS concession cost:
@@ -364,8 +353,7 @@ describe('Bot Negotiation', () => {
         };
 
         const response = evaluateBotResponse(state, 'RS', proposal);
-        // RS composite: 50*0.30 + 30*0.10 + 30*0.15 + 50*0.25 + 40*0.20 = 15+3+4.5+12.5+8 = 43
-        // Willingness: 0.60, max = 25.8
+        // RS composite: 43, Willingness: 0.60, max = 25.8
         // Cost: 18+12+10 = 40, over budget
         // Should counter by dropping brcko (18) first
         if (response.decision === 'counter') {

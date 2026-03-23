@@ -124,11 +124,11 @@ function buildArmyUserPrompt(state: GameState, faction: FactionId): string {
     lines.push('');
     lines.push(`Supply: general=${generalSupply}, heavy=${heavySupply}`);
 
-    // Negotiation capital
-    const capital = state.military.negotiation?.capital?.[faction];
-    if (capital) {
+    // Negotiation breakdown (raw data)
+    const breakdown = state.military.negotiation?.capital?.[faction];
+    if (breakdown) {
         lines.push('');
-        lines.push(`Negotiation Capital: military_position=${capital.military_position?.toFixed(1)}, humanitarian=${capital.humanitarian_standing?.toFixed(1)}, credibility=${capital.international_credibility?.toFixed(1)}, effectiveness=${capital.military_effectiveness?.toFixed(1)}, cohesion=${capital.political_cohesion?.toFixed(1)}`);
+        lines.push(`Negotiation Breakdown: territory=${breakdown.territory_controlled_pct?.toFixed(1)}%, ops_launched=${breakdown.operations_launched}, ops_successful=${breakdown.operations_successful}, war_crimes=${breakdown.war_crimes_events}`);
     }
 
     // Pending decisions

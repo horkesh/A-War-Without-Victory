@@ -2215,34 +2215,22 @@ function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventD
 }
 
 function deriveNegotiationCapital(state: any): LoadedGameState['negotiationCapital'] {
+    // TODO: Migrate UI to read from strategicDimensions instead of legacy negotiationCapital.
+    // For now, derive placeholder values from strategic_dimensions if available, else zeros.
     const neg = state.military?.negotiation;
-    const capital = neg?.capital;
-    if (!capital || typeof capital !== 'object') return undefined;
+    const dimStore = neg?.strategic_dimensions;
+    if (!neg?.capital || typeof neg.capital !== 'object') return undefined;
     const out: Record<string, { military_position: number; humanitarian_standing: number; international_credibility: number; military_effectiveness: number; political_cohesion: number; composite: number }> = {};
-    for (const [faction, cap] of Object.entries(capital).sort((a, b) => a[0].localeCompare(b[0]))) {
-        const c = cap as any;
-        if (!c || typeof c !== 'object') continue;
-        try {
-            const { computeCompositeScore } = require('../../../sim/negotiation/compute_capital.js');
-            const composite = computeCompositeScore(c, faction);
-            out[faction] = {
-                military_position: Number(c.military_position ?? 0),
-                humanitarian_standing: Number(c.humanitarian_standing ?? 0),
-                international_credibility: Number(c.international_credibility ?? 0),
-                military_effectiveness: Number(c.military_effectiveness ?? 0),
-                political_cohesion: Number(c.political_cohesion ?? 0),
-                composite: typeof composite === 'number' ? composite : 50,
-            };
-        } catch {
-            out[faction] = {
-                military_position: Number(c.military_position ?? 0),
-                humanitarian_standing: Number(c.humanitarian_standing ?? 0),
-                international_credibility: Number(c.international_credibility ?? 0),
-                military_effectiveness: Number(c.military_effectiveness ?? 0),
-                political_cohesion: Number(c.political_cohesion ?? 0),
-                composite: 50,
-            };
-        }
+    for (const [faction] of Object.entries(neg.capital).sort((a: [string, unknown], b: [string, unknown]) => a[0].localeCompare(b[0]))) {
+        const dims = dimStore?.[faction];
+        out[faction] = {
+            military_position: Number(dims?.military_credibility?.effective_value ?? 0),
+            humanitarian_standing: Number(dims?.international_standing?.effective_value ?? 0),
+            international_credibility: Number(dims?.international_standing?.effective_value ?? 0),
+            military_effectiveness: Number(dims?.military_credibility?.effective_value ?? 0),
+            political_cohesion: Number(dims?.internal_cohesion?.effective_value ?? 0),
+            composite: 50, // TODO: compute from DIMENSION_WEIGHTS
+        };
     }
     return Object.keys(out).length > 0 ? out : undefined;
 }

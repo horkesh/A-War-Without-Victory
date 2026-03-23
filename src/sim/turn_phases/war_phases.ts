@@ -156,7 +156,7 @@ import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitmen
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
 import { checkWarTermination, applyWarTermination } from '../war_termination.js';
-import { computeNegotiationCapital } from '../negotiation/compute_capital.js';
+import { computeNegotiationBreakdown } from '../negotiation/compute_capital.js';
 import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
 import { updatePatronPressure } from '../negotiation/patron_pressure.js';
 import { evaluatePatronEvents } from '../negotiation/patron_events.js';
@@ -2317,7 +2317,7 @@ export const warPhases: NamedPhase[] = [
         name: 'compute-negotiation-capital',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            computeNegotiationCapital(context.state);
+            computeNegotiationBreakdown(context.state);
         }
     },
     {

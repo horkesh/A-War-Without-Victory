@@ -11,21 +11,10 @@ import type { FactionId } from './game_state.js';
 import type { DimensionStore } from '../sim/events/strategic_dimensions.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Negotiation Capital
+// Negotiation Breakdown (raw war-data per faction)
 // ═══════════════════════════════════════════════════════════════════════════
 
-export interface NegotiationCapital {
-    /** Territory held, front line strength, strategic positions. 0-100. */
-    military_position: number;
-    /** Civilian protection, refugee management. 0-100 (negative raw = atrocities). */
-    humanitarian_standing: number;
-    /** Diplomatic weight, patron support, peace plan compliance. 0-100. */
-    international_credibility: number;
-    /** Combat performance relative to resources. 0-100. */
-    military_effectiveness: number;
-    /** Internal unity, authority, alliance management. 0-100. */
-    political_cohesion: number;
-
+export interface NegotiationBreakdown {
     // ── Detailed breakdown (raw data, not clamped) ──
     territory_controlled_pct: number;
     territory_controlled_km2: number;
@@ -44,30 +33,7 @@ export interface NegotiationCapital {
     war_crimes_events: number;
 }
 
-/** Faction-specific weights for the 5 capital dimensions. Sum to 1.0. */
-export const CAPITAL_WEIGHTS: Record<string, Record<string, number>> = {
-    RBiH: {
-        military_position: 0.15,
-        humanitarian_standing: 0.30,
-        international_credibility: 0.20,
-        military_effectiveness: 0.20,
-        political_cohesion: 0.15,
-    },
-    RS: {
-        military_position: 0.30,
-        humanitarian_standing: 0.10,
-        international_credibility: 0.15,
-        military_effectiveness: 0.25,
-        political_cohesion: 0.20,
-    },
-    HRHB: {
-        military_position: 0.20,
-        humanitarian_standing: 0.15,
-        international_credibility: 0.20,
-        military_effectiveness: 0.15,
-        political_cohesion: 0.30,
-    },
-};
+// CAPITAL_WEIGHTS removed — replaced by DIMENSION_WEIGHTS in strategic_dimensions.ts
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Patron Relationships
@@ -127,7 +93,7 @@ export interface PeacePlanResponse {
 
 export interface NegotiationState {
     /** Per-faction negotiation capital, updated each turn. */
-    capital: Record<string, NegotiationCapital>;
+    capital: Record<string, NegotiationBreakdown>;
     /** Per-faction patron relationship. */
     patron_relationships: Record<string, PatronRelationship>;
     /** History of peace plan offers and responses. */
@@ -228,14 +194,14 @@ export interface DimensionGrade {
 /** Complete verdict for a single faction. */
 export interface FactionVerdict {
     faction: string;
-    /** Composite score 0-100, weighted by faction-specific CAPITAL_WEIGHTS. */
+    /** Composite score 0-100, weighted by faction-specific DIMENSION_WEIGHTS. */
     pyrrhic_score: number;
     /** Letter grade: 'A+', 'A', 'B', 'C', 'D', 'F'. */
     grade: string;
     /** Human-readable description of the grade anchor matched. */
     grade_description: string;
     /** Full negotiation capital breakdown. */
-    capital_breakdown: NegotiationCapital;
+    capital_breakdown: NegotiationBreakdown;
     /** Per-dimension letter grades (5 dimensions). */
     dimension_grades: DimensionGrade[];
 }
@@ -251,14 +217,9 @@ export interface GameVerdict {
     dayton_result?: DaytonResult;
 }
 
-/** Create empty negotiation capital for a faction. */
-export function createEmptyCapital(): NegotiationCapital {
+/** Create empty negotiation breakdown for a faction. */
+export function createEmptyCapital(): NegotiationBreakdown {
     return {
-        military_position: 0,
-        humanitarian_standing: 50, // start neutral
-        international_credibility: 50,
-        military_effectiveness: 50,
-        political_cohesion: 50,
         territory_controlled_pct: 0,
         territory_controlled_km2: 0,
         civilians_under_protection: 0,

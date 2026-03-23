@@ -99,7 +99,7 @@ export function initiateDaytonNegotiation(state: GameState): {
 
     for (const faction of CANONICAL_FACTIONS) {
         const cap = neg.capital[faction];
-        factionCapital[faction] = cap ? getCompositeCapital(cap, faction) : 50;
+        factionCapital[faction] = cap ? getCompositeCapital(cap, faction, neg.strategic_dimensions) : 50;
         patronOverride[faction] = neg.patron_relationships[faction]?.override_authority ?? 0;
     }
 
@@ -236,7 +236,7 @@ export function resolveDaytonNegotiation(
                     botFaction
                 );
                 const botCapital = neg.capital[botFaction]
-                    ? getCompositeCapital(neg.capital[botFaction], botFaction)
+                    ? getCompositeCapital(neg.capital[botFaction], botFaction, neg.strategic_dimensions)
                     : 0;
 
                 if (costToBotFaction > botCapital * 0.3) {
@@ -377,7 +377,7 @@ function estimatePackageTerritoryPct(pkgId: string): number {
 
 function ensureNegotiationState(state: GameState): void {
     if (!state.military.negotiation) {
-        const capital: Record<string, import('../../state/negotiation_types.js').NegotiationCapital> = {};
+        const capital: Record<string, import('../../state/negotiation_types.js').NegotiationBreakdown> = {};
         const patron_relationships: Record<string, import('../../state/negotiation_types.js').PatronRelationship> = {};
         for (const faction of CANONICAL_FACTIONS) {
             capital[faction] = createEmptyCapital();

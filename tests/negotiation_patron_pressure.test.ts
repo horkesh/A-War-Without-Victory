@@ -26,14 +26,15 @@ import {
     createDefaultPatronRelationship,
 } from '../src/state/negotiation_types.js';
 import type { GameState, FactionId } from '../src/state/game_state.js';
-import type { NegotiationState, PatronRelationship, NegotiationCapital } from '../src/state/negotiation_types.js';
+import type { NegotiationState, PatronRelationship, NegotiationBreakdown } from '../src/state/negotiation_types.js';
+import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
 function makeNegotiationState(overrides: Partial<NegotiationState> = {}): NegotiationState {
-    const capital: Record<string, NegotiationCapital> = {
+    const capital: Record<string, NegotiationBreakdown> = {
         RBiH: createEmptyCapital(),
         RS: createEmptyCapital(),
         HRHB: createEmptyCapital(),
@@ -47,6 +48,7 @@ function makeNegotiationState(overrides: Partial<NegotiationState> = {}): Negoti
         capital,
         patron_relationships,
         peace_plan_history: [],
+        strategic_dimensions: initializeStrategicDimensions(),
         ...overrides,
     };
 }
@@ -361,17 +363,20 @@ describe('Patron Events', () => {
         expect(neg.patron_relationships.HRHB.override_authority).toBeGreaterThan(hrhbOverrideBefore);
     });
 
-    it('Srebrenica reduces RS humanitarian standing by 30', () => {
+    it('Srebrenica reduces RS international_standing dimension by 30', () => {
         const state = makeState({
             turn: SREBRENICA_AFTERMATH.trigger_week,
             war_start_turn: 0,
         });
         const neg = state.military.negotiation!;
-        neg.capital.RS.humanitarian_standing = 50;
+        // Set international_standing base to 50, event_modifier to 0
+        neg.strategic_dimensions!.RS.international_standing = { base_value: 50, event_modifier: 0, effective_value: 50 };
 
         evaluatePatronEvents(state);
 
-        expect(neg.capital.RS.humanitarian_standing).toBe(20);
+        // humanitarian_delta of -30 now applies to strategic_dimensions.international_standing.event_modifier
+        expect(neg.strategic_dimensions!.RS.international_standing.event_modifier).toBe(-30);
+        expect(neg.strategic_dimensions!.RS.international_standing.effective_value).toBe(20);
     });
 
     it('NATO bombing reduces RS support by 20', () => {

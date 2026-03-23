@@ -9,7 +9,6 @@
  */
 
 import type { GameState, FactionId } from '../state/game_state.js';
-import type { NegotiationCapital } from '../state/negotiation_types.js';
 import {
     createEmptyCapital,
     createDefaultPatronRelationship,
@@ -146,16 +145,23 @@ function extractDimension(
 }
 
 /**
- * Preseed negotiation capital for a faction at a given scenario start week.
- * Returns the 5 capital dimensions interpolated from historical baselines.
+ * Preseed negotiation dimensions for a faction at a given scenario start week.
+ * Returns interpolated historical baselines for the legacy 5 dimensions.
+ *
+ * TODO: Migrate to preseed the 6 strategic dimensions directly
+ * (military_credibility, territorial_legitimacy, international_standing,
+ * patron_confidence, internal_cohesion, negotiating_leverage).
  */
-export function preseedNegotiationCapital(
+export function preseedNegotiationBreakdown(
     factionId: FactionId,
     scenarioStartWeek: number,
-): Pick<NegotiationCapital,
-    'military_position' | 'humanitarian_standing' | 'international_credibility' |
-    'military_effectiveness' | 'political_cohesion'
-> {
+): {
+    military_position: number;
+    humanitarian_standing: number;
+    international_credibility: number;
+    military_effectiveness: number;
+    political_cohesion: number;
+} {
     const anchors = CAPITAL_ANCHORS_BY_FACTION[factionId];
     if (!anchors) {
         throw new Error(`No capital anchors for faction: ${factionId}`);
@@ -229,16 +235,15 @@ export function preseedScenarioState(
     const neg = state.military.negotiation;
 
     for (const factionId of ALL_FACTIONS) {
-        // Capital: create empty if missing, then overwrite the 5 baseline dimensions
+        // Breakdown: create empty raw-data breakdown if missing
         if (!neg.capital[factionId]) {
             neg.capital[factionId] = createEmptyCapital();
         }
-        const seeded = preseedNegotiationCapital(factionId, scenarioStartWeek);
-        neg.capital[factionId].military_position = seeded.military_position;
-        neg.capital[factionId].humanitarian_standing = seeded.humanitarian_standing;
-        neg.capital[factionId].international_credibility = seeded.international_credibility;
-        neg.capital[factionId].military_effectiveness = seeded.military_effectiveness;
-        neg.capital[factionId].political_cohesion = seeded.political_cohesion;
+        // TODO: preseed strategic_dimensions from preseedNegotiationBreakdown baselines
+        // For now the legacy 5-dimension preseeding is a no-op since those fields
+        // were removed from NegotiationBreakdown. Strategic dimensions are initialized
+        // via initializeStrategicDimensions() in compute_capital.ts.
+        preseedNegotiationBreakdown(factionId, scenarioStartWeek); // call preserved for future migration
 
         // Patron relationships: create default if missing, then overwrite baseline fields
         if (!neg.patron_relationships[factionId]) {

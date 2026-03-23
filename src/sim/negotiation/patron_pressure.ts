@@ -10,7 +10,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import type { PatronRelationship, NegotiationCapital } from '../../state/negotiation_types.js';
+import type { PatronRelationship, NegotiationBreakdown } from '../../state/negotiation_types.js';
 import { createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { clamp } from '../../utils/math.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -111,7 +111,7 @@ export function computeOverrideAuthority(
     state: GameState,
     faction: FactionId,
     pr: PatronRelationship,
-    cap: NegotiationCapital
+    cap: NegotiationBreakdown
 ): number {
     let authority = 0;
 

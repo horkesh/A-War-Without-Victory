@@ -10,22 +10,22 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import type { NegotiationCapital, DaytonResult } from '../../state/negotiation_types.js';
-import { CAPITAL_WEIGHTS } from '../../state/negotiation_types.js';
+import type { NegotiationBreakdown } from '../../state/negotiation_types.js';
 import type { FactionVerdict, GameVerdict, DimensionGrade } from '../../state/negotiation_types.js';
+import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
+import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
-const CAPITAL_DIMENSIONS = [
-    'military_position',
-    'humanitarian_standing',
-    'international_credibility',
-    'military_effectiveness',
-    'political_cohesion',
+const STRATEGIC_DIMENSIONS = [
+    'military_credibility',
+    'territorial_legitimacy',
+    'international_standing',
+    'patron_confidence',
+    'internal_cohesion',
+    'negotiating_leverage',
 ] as const;
-
-type CapitalDimension = typeof CAPITAL_DIMENSIONS[number];
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Dimension Grading — per-dimension letter grades based on raw 0-100 score
@@ -58,7 +58,7 @@ function gradeDimension(score: number): string {
 interface GradeAnchor {
     grade: string;
     description: string;
-    test: (cap: NegotiationCapital, state: GameState) => boolean;
+    test: (cap: NegotiationBreakdown, state: GameState) => boolean;
 }
 
 const RBIH_GRADE_ANCHORS: GradeAnchor[] = [
@@ -68,7 +68,7 @@ const RBIH_GRADE_ANCHORS: GradeAnchor[] = [
         test: (cap) =>
             cap.territory_controlled_pct > 33 &&
             cap.enclaves_lost.length === 0 &&
-            cap.humanitarian_standing >= 50,
+            cap.war_crimes_events === 0,
     },
     {
         grade: 'A',
@@ -110,14 +110,14 @@ const RS_GRADE_ANCHORS: GradeAnchor[] = [
         description: 'Held >55% territory, maintained international standing, avoided catastrophic isolation',
         test: (cap) =>
             cap.territory_controlled_pct > 55 &&
-            cap.international_credibility >= 40,
+            cap.war_crimes_events <= 2, // proxy for international standing
     },
     {
         grade: 'A',
         description: '49% contiguous territory, entity intact, Belgrade relationship intact',
         test: (cap) =>
-            cap.territory_controlled_pct >= 49 &&
-            cap.political_cohesion >= 40,
+            cap.territory_controlled_pct >= 49,
+            // TODO: migrate political_cohesion check to strategic_dimensions internal_cohesion
     },
     {
         grade: 'B',
@@ -148,22 +148,22 @@ const HRHB_GRADE_ANCHORS: GradeAnchor[] = [
         grade: 'A+',
         description: 'Strong territorial position with high political cohesion, Herzegovina secured',
         test: (cap) =>
-            cap.territory_controlled_pct > 20 &&
-            cap.political_cohesion >= 60,
+            cap.territory_controlled_pct > 20,
+            // TODO: migrate political_cohesion check to strategic_dimensions internal_cohesion
     },
     {
         grade: 'A',
         description: 'Federation partner with constitutional protections, Herzegovina intact',
         test: (cap) =>
-            cap.territory_controlled_pct >= 15 &&
-            cap.political_cohesion >= 45,
+            cap.territory_controlled_pct >= 15,
+            // TODO: migrate political_cohesion check to strategic_dimensions internal_cohesion
     },
     {
         grade: 'B',
         description: 'Federation absorbed but Croat interests protected',
         test: (cap) =>
-            cap.territory_controlled_pct >= 12 &&
-            cap.political_cohesion >= 30,
+            cap.territory_controlled_pct >= 12,
+            // TODO: migrate political_cohesion check to strategic_dimensions internal_cohesion
     },
     {
         grade: 'C',
@@ -195,20 +195,12 @@ const FACTION_GRADE_ANCHORS: Record<string, GradeAnchor[]> = {
 
 /**
  * Compute the composite Pyrrhic Score (0-100) for a faction.
- * Weighted sum of the 5 capital dimensions using faction-specific weights.
+ * Uses DIMENSION_WEIGHTS from strategic_dimensions.ts.
+ * Falls back to 50 if no dimension store is available.
  */
-export function computePyrrhicScore(capital: NegotiationCapital, faction: string): number {
-    const weights = CAPITAL_WEIGHTS[faction];
-    if (!weights) return 0;
-
-    let score = 0;
-    for (const dim of CAPITAL_DIMENSIONS) {
-        const w = weights[dim] ?? 0;
-        const v = capital[dim] ?? 0;
-        score += w * v;
-    }
-
-    return clamp(Math.round(score * 10) / 10, 0, 100);
+export function computePyrrhicScore(_breakdown: NegotiationBreakdown, faction: string, dimensionStore?: DimensionStore): number {
+    if (!dimensionStore) return 50; // TODO: remove NegotiationBreakdown param once all callers pass dimensionStore
+    return clamp(Math.round(computeNegotiatingCapital(dimensionStore, faction) * 10) / 10, 0, 100);
 }
 
 /**
@@ -216,7 +208,7 @@ export function computePyrrhicScore(capital: NegotiationCapital, faction: string
  * Returns { grade, description } where grade is 'A+', 'A', 'B', 'C', 'D', or 'F'.
  */
 export function computeFactionGrade(
-    capital: NegotiationCapital,
+    capital: NegotiationBreakdown,
     faction: string,
     state: GameState,
 ): { grade: string; description: string } {
@@ -234,14 +226,18 @@ export function computeFactionGrade(
 
 /**
  * Compute per-dimension letter grades for a faction.
+ * Uses strategic dimensions when available, falls back to zeros.
  */
-export function computeDimensionGrades(capital: NegotiationCapital): DimensionGrade[] {
-    return CAPITAL_DIMENSIONS.map((dim) => ({
-        dimension: dim,
-        label: formatDimensionLabel(dim),
-        score: capital[dim] ?? 0,
-        grade: gradeDimension(capital[dim] ?? 0),
-    }));
+export function computeDimensionGrades(_breakdown: NegotiationBreakdown, faction?: string, dimensionStore?: DimensionStore): DimensionGrade[] {
+    return STRATEGIC_DIMENSIONS.map((dim) => {
+        const score = (faction ? dimensionStore?.[faction]?.[dim]?.effective_value : undefined) ?? 0;
+        return {
+            dimension: dim,
+            label: formatDimensionLabel(dim),
+            score,
+            grade: gradeDimension(score),
+        };
+    });
 }
 
 /**
@@ -254,9 +250,11 @@ export function computeFactionVerdict(
     const neg = state.military?.negotiation;
     const capital = neg?.capital[faction];
 
+    const dimStore = neg?.strategic_dimensions;
+
     if (!capital) {
         // No negotiation data — return minimal verdict
-        const emptyDims = CAPITAL_DIMENSIONS.map((dim) => ({
+        const emptyDims = STRATEGIC_DIMENSIONS.map((dim) => ({
             dimension: dim,
             label: formatDimensionLabel(dim),
             score: 0,
@@ -267,14 +265,14 @@ export function computeFactionVerdict(
             pyrrhic_score: 0,
             grade: 'F',
             grade_description: 'No negotiation data available',
-            capital_breakdown: null as unknown as NegotiationCapital,
+            capital_breakdown: null as unknown as NegotiationBreakdown,
             dimension_grades: emptyDims,
         };
     }
 
-    const pyrrhicScore = computePyrrhicScore(capital, faction);
+    const pyrrhicScore = computePyrrhicScore(capital, faction, dimStore);
     const { grade, description } = computeFactionGrade(capital, faction, state);
-    const dimensionGrades = computeDimensionGrades(capital);
+    const dimensionGrades = computeDimensionGrades(capital, faction, dimStore);
 
     return {
         faction,

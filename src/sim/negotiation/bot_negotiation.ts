@@ -11,10 +11,11 @@ import type { GameState, FactionId } from '../../state/game_state.js';
 import type {
     DaytonProposal,
     DaytonBotResponse,
-    NegotiationCapital,
+    NegotiationBreakdown,
     PatronRelationship,
 } from '../../state/negotiation_types.js';
-import { CAPITAL_WEIGHTS } from '../../state/negotiation_types.js';
+import { computeNegotiatingCapital } from '../events/strategic_dimensions.js';
+import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { getTerritorialPackageById } from './territorial_packages.js';
 import { getInstitutionalPackageById, getInstitutionalCost } from './institutional_packages.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -41,20 +42,11 @@ const BASE_SPENDING_WILLINGNESS = 0.6;
 
 /**
  * Compute the composite (weighted) negotiation capital for a faction.
- * Uses CAPITAL_WEIGHTS to produce a single 0-100 score from the 5 dimensions.
+ * Uses DIMENSION_WEIGHTS from strategic_dimensions.ts.
  */
-export function getCompositeCapital(capital: NegotiationCapital, faction: string): number {
-    const weights = CAPITAL_WEIGHTS[faction];
-    if (!weights) return 50; // fallback
-
-    const composite =
-        (capital.military_position * (weights.military_position ?? 0)) +
-        (capital.humanitarian_standing * (weights.humanitarian_standing ?? 0)) +
-        (capital.international_credibility * (weights.international_credibility ?? 0)) +
-        (capital.military_effectiveness * (weights.military_effectiveness ?? 0)) +
-        (capital.political_cohesion * (weights.political_cohesion ?? 0));
-
-    return clamp(composite, 0, 100);
+export function getCompositeCapital(_breakdown: NegotiationBreakdown, faction: string, dimensionStore?: DimensionStore): number {
+    if (!dimensionStore) return 50; // TODO: require dimensionStore once all callers pass it
+    return clamp(computeNegotiatingCapital(dimensionStore, faction), 0, 100);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -136,7 +128,7 @@ export function evaluateBotResponse(
         };
     }
 
-    const compositeCapital = getCompositeCapital(capital, faction);
+    const compositeCapital = getCompositeCapital(capital, faction, neg.strategic_dimensions);
     const proposalCost = computeProposalCostToFaction(proposal, faction);
     const overrideAuthority = patronRel?.override_authority ?? 0;
 

@@ -10,7 +10,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import type { PatronRelationship, NegotiationCapital } from '../../state/negotiation_types.js';
+import type { PatronRelationship } from '../../state/negotiation_types.js';
 import { clamp } from '../../utils/math.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -38,7 +38,7 @@ export interface PatronEventEffect {
     set_sanctions?: boolean;
     /** Cap override_authority at this maximum (if defined). */
     override_max?: number;
-    /** Change to humanitarian_standing on negotiation capital. */
+    /** Change to international_standing strategic dimension. */
     humanitarian_delta?: number;
 }
 
@@ -203,15 +203,13 @@ export function applyPatronEvent(state: GameState, event: PatronEvent): void {
             pr.sanctions_active = effect.set_sanctions;
         }
 
-        // Humanitarian standing changes (on negotiation capital)
-        if (effect.humanitarian_delta !== undefined) {
-            const cap = neg.capital[effect.faction];
-            if (cap) {
-                cap.humanitarian_standing = clamp(
-                    cap.humanitarian_standing + effect.humanitarian_delta,
-                    0,
-                    100
-                );
+        // Humanitarian standing changes — now applied to strategic_dimensions
+        // TODO: Apply humanitarian_delta to international_standing dimension instead
+        if (effect.humanitarian_delta !== undefined && neg.strategic_dimensions?.[effect.faction]) {
+            const dim = neg.strategic_dimensions[effect.faction]['international_standing'];
+            if (dim) {
+                dim.event_modifier = clamp(dim.event_modifier + effect.humanitarian_delta, -100, 100);
+                dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
             }
         }
     }

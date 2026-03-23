@@ -32,7 +32,7 @@ function getWarWeek(state: GameState): number {
 /** Ensure negotiation state exists on the GameState. */
 function ensureNegotiationState(state: GameState): NegotiationState {
     if (!state.military.negotiation) {
-        const capital: Record<string, import('../../state/negotiation_types.js').NegotiationCapital> = {};
+        const capital: Record<string, import('../../state/negotiation_types.js').NegotiationBreakdown> = {};
         const patron_relationships: Record<string, import('../../state/negotiation_types.js').PatronRelationship> = {};
         for (const faction of CANONICAL_FACTIONS) {
             capital[faction] = createEmptyCapital();
@@ -263,12 +263,17 @@ function applyRejectionConsequences(
             pr.relationship_events.push(`rejected_${plan.id}`);
         }
 
-        // Apply international credibility change
+        // Apply international credibility change → strategic_dimensions international_standing
         const credChange = plan.credibility_change_on_reject[faction] ?? 0;
-        if (credChange !== 0 && neg.capital[faction]) {
-            const cap = neg.capital[faction];
-            cap.international_credibility = clamp(cap.international_credibility + credChange, 0, 100);
-            cap.peace_plans_rejected.push(plan.id);
+        if (credChange !== 0) {
+            if (neg.strategic_dimensions?.[faction]?.['international_standing']) {
+                const dim = neg.strategic_dimensions[faction]['international_standing'];
+                dim.event_modifier = clamp(dim.event_modifier + credChange, -100, 100);
+                dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
+            }
+            if (neg.capital[faction]) {
+                neg.capital[faction].peace_plans_rejected.push(plan.id);
+            }
         }
     }
 

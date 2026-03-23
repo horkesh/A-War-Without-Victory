@@ -4,7 +4,6 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import type { NegotiationCapital } from '../../state/negotiation_types.js';
 import type { EventEffect } from './event_types.js';
 
 /** Deterministic kind ordering for effect application. */
@@ -65,7 +64,7 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
             applyAllianceChange(state, effect.delta);
             break;
         case 'negotiation_capital':
-            applyNegotiationCapital(state, effect.faction, effect.dimension, effect.delta);
+            applyNegotiationBreakdown(state, effect.faction, effect.dimension, effect.delta);
             break;
         case 'equipment_grant':
             applyEquipmentGrant(state, effect.faction, effect.tanks, effect.artillery, effect.aa_systems, effect.target_municipality);
@@ -199,7 +198,7 @@ function applyAggressionModifier(
 }
 
 /** Adjust a specific negotiation capital dimension for a faction. */
-function applyNegotiationCapital(
+function applyNegotiationBreakdown(
     state: GameState,
     faction: FactionId,
     dimension: string,

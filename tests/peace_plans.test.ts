@@ -3,6 +3,7 @@ import { evaluatePeacePlans, resolvePeacePlan } from '../src/sim/negotiation/pea
 import { PEACE_PLANS, getPeacePlanById } from '../src/sim/negotiation/peace_plan_data.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
 import type { NegotiationState } from '../src/state/negotiation_types.js';
+import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 import type { GameState, FactionId } from '../src/state/game_state.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
@@ -73,6 +74,7 @@ function makeNegotiationState(overrides: {
         capital,
         patron_relationships,
         peace_plan_history: [],
+        strategic_dimensions: initializeStrategicDimensions(),
     };
 }
 
@@ -318,12 +320,12 @@ describe('resolvePeacePlan', () => {
         };
         const state = makeState({ turn: 50, war_start_turn: 10, negotiation: neg });
 
-        const rsBefore = neg.capital.RS.international_credibility; // 50
+        const rsDimBefore = neg.strategic_dimensions!.RS.international_standing.event_modifier; // 0
 
         resolvePeacePlan(state, 'vance_owen', 'accepted');
 
-        // RS rejected Vance-Owen: credibility_change_on_reject.RS = -20
-        expect(neg.capital.RS.international_credibility).toBe(rsBefore - 20);
+        // RS rejected Vance-Owen: credibility_change_on_reject.RS = -20 → applied to international_standing
+        expect(neg.strategic_dimensions!.RS.international_standing.event_modifier).toBe(rsDimBefore - 20);
         expect(neg.capital.RS.peace_plans_rejected).toContain('vance_owen');
     });
 

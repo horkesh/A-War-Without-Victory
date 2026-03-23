@@ -8,18 +8,14 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import type { NegotiationCapital, NegotiationState } from '../../state/negotiation_types.js';
+import type { NegotiationBreakdown, NegotiationState } from '../../state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { initializeStrategicDimensions } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
-
-// ═══════════════════════════════════════════════════════════════════════════
-// OSID area data (loaded lazily)
-// ═══════════════════════════════════════════════════════════════════════════
-
 import { getOsidAreas } from '../osid_areas.js';
+
+const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main computation
@@ -29,7 +25,7 @@ import { getOsidAreas } from '../osid_areas.js';
  * Initialize or update negotiation state for all factions.
  * Called once per turn from war_phases pipeline.
  */
-export function computeNegotiationCapital(state: GameState): void {
+export function computeNegotiationBreakdown(state: GameState): void {
     if (!state.military.negotiation) {
         state.military.negotiation = initializeNegotiationState(state);
     }
@@ -54,7 +50,7 @@ export function computeNegotiationCapital(state: GameState): void {
 }
 
 function initializeNegotiationState(state: GameState): NegotiationState {
-    const capital: Record<string, NegotiationCapital> = {};
+    const capital: Record<string, NegotiationBreakdown> = {};
     const patron_relationships: Record<string, import('../../state/negotiation_types.js').PatronRelationship> = {};
 
     for (const faction of CANONICAL_FACTIONS) {
@@ -74,61 +70,39 @@ function initializeNegotiationState(state: GameState): NegotiationState {
 // Per-faction capital update
 // ═══════════════════════════════════════════════════════════════════════════
 
-function updateFactionCapital(state: GameState, faction: FactionId, cap: NegotiationCapital): void {
-    // 1. Territory
+function updateFactionCapital(state: GameState, faction: FactionId, cap: NegotiationBreakdown): void {
+    // 1. Territory (raw data)
     const territoryData = computeTerritoryData(state, faction);
     cap.territory_controlled_pct = territoryData.pct;
     cap.territory_controlled_km2 = territoryData.km2;
-    cap.military_position = clamp(territoryData.pct * 1.5, 0, 100); // 66% territory = 100 military position
 
-    // 2. Military effectiveness
+    // 2. Military data (raw)
     const milData = computeMilitaryData(state, faction);
     cap.military_casualties_inflicted = milData.casualties_inflicted;
     cap.military_casualties_taken = milData.casualties_taken;
     cap.operations_launched = milData.ops_launched;
     cap.operations_successful = milData.ops_successful;
 
-    // Effectiveness: ratio of inflicted/taken, scaled. 1:1 = 50, 2:1 = 75, 3:1 = 100
-    const casualtyRatio = milData.casualties_taken > 0
-        ? milData.casualties_inflicted / milData.casualties_taken
-        : milData.casualties_inflicted > 0 ? 3.0 : 1.0;
-    cap.military_effectiveness = clamp(casualtyRatio * 33, 0, 100);
-
-    // 3. Humanitarian standing
+    // 3. Humanitarian data (raw)
     const humanData = computeHumanitarianData(state, faction);
     cap.refugees_created = humanData.refugees_created;
     cap.refugees_received = humanData.refugees_received;
     cap.civilians_under_protection = humanData.civilians_under_protection;
     cap.civilian_casualties_caused = humanData.civilian_casualties_caused;
-
-    // Humanitarian: starts at 50, decreases with refugees created / atrocities
-    const humanScore = 50
-        - (humanData.refugees_created / 5000) // each 5000 refugees costs 1 point
-        - (humanData.war_crimes_events * 10)  // each war crime costs 10 points
-        + (humanData.refugees_received / 10000); // receiving refugees gains some credit
-    cap.humanitarian_standing = clamp(humanScore, 0, 100);
     cap.war_crimes_events = humanData.war_crimes_events;
 
-    // 4. International credibility
+    // 4. Credibility data (raw)
     const credData = computeCredibilityData(state, faction);
     cap.peace_plans_accepted = credData.accepted;
     cap.peace_plans_rejected = credData.rejected;
 
-    // Credibility: starts at 50, modified by peace plan responses
-    const credScore = 50
-        + (credData.accepted.length * 10)
-        - (credData.rejected.length * 15)
-        - (humanData.war_crimes_events * 5);
-    cap.international_credibility = clamp(credScore, 0, 100);
-
-    // 5. Political cohesion
-    const cohData = computeCohesionData(state, faction);
-    cap.political_cohesion = clamp(cohData.score, 0, 100);
-
-    // 6. Enclaves
+    // 5. Enclaves (raw)
     const enclaveData = computeEnclaveData(state, faction);
     cap.enclaves_held = enclaveData.held;
     cap.enclaves_lost = enclaveData.lost;
+
+    // NOTE: Scoring dimensions (military_position, humanitarian_standing, etc.)
+    // are now derived via computeDimensionBaseValues() in strategic_dimensions.ts
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -260,39 +234,7 @@ function computeCredibilityData(state: GameState, faction: FactionId): {
     return { accepted, rejected };
 }
 
-function computeCohesionData(state: GameState, faction: FactionId): { score: number } {
-    let score = 50; // baseline
-
-    // Alliance management (RBiH and HRHB)
-    if (faction === 'RBiH' || faction === 'HRHB') {
-        const allianceState = (state.military as unknown as Record<string, unknown>)['rbih_hrhb_state'] as Record<string, unknown> | undefined;
-        const alliance = allianceState?.['alliance_value'];
-        if (typeof alliance === 'number') {
-            // Allied = +20, strained = 0, hostile = -20
-            score += alliance * 20;
-        }
-    }
-
-    // Formation cohesion average
-    const formations = state.military.formations ?? {};
-    let cohesionSum = 0;
-    let cohesionCount = 0;
-    for (const fid of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[fid];
-        if (!f || f.faction !== faction || (f.kind ?? 'brigade') !== 'brigade') continue;
-        if (typeof f.cohesion === 'number') {
-            cohesionSum += f.cohesion;
-            cohesionCount++;
-        }
-    }
-    if (cohesionCount > 0) {
-        const avgCohesion = cohesionSum / cohesionCount;
-        // 70+ cohesion = +10, 50 = 0, 30 = -10
-        score += (avgCohesion - 50) / 2;
-    }
-
-    return { score: Math.max(0, Math.min(100, score)) };
-}
+// computeCohesionData removed — cohesion now derived via internal_cohesion in strategic_dimensions.ts
 
 function computeEnclaveData(state: GameState, faction: FactionId): {
     held: string[];
