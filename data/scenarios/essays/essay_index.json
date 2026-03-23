@@ -1,595 +1,597 @@
-[
-  {
-    "id": "essay_rs_strategic_goals",
-    "event_id": "rs_strategic_goals",
-    "title": "The Six Strategic Goals: How the Bosnian Serb Assembly Chose War",
-    "year": 1992,
-    "category": "political",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 2016), paras. 3521, 3524",
-      "ICJ Bosnia v. Serbia (2007), para. 372",
-      "Balkan Insight, 20 September 2013 (Mladic warning)"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_rbih_state_identity",
-    "event_id": "rbih_state_identity",
-    "title": "Civic Republic or National State: The Bosnian Identity Dilemma",
-    "year": 1992,
-    "category": "political",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), paras. 32, 48, 50",
-      "ARBiH ethnic composition data, June 1992"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_hrhb_political_goal",
-    "event_id": "hrhb_political_goal",
-    "title": "Herceg-Bosna: Zagreb's Project and the Croat Dilemma",
-    "year": 1992,
-    "category": "political",
-    "sources": [
-      "ICTY Kordic Trial Judgment (IT-95-14/2-T), para. 491",
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), JCE findings",
-      "Tudjman-Boban Zagreb meeting, December 1991"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_arms_embargo_impact_1992",
-    "event_id": "arms_embargo_impact_1992",
-    "title": "The Arms Embargo: How the UN Disarmed Bosnia's Defenders",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "UN Security Council Resolution 713 (1991)",
-      "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), arms shortages findings",
-      "BB Vol. I, Ch. 5"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_battle_of_the_barracks_sarajevo",
-    "event_id": "battle_of_the_barracks_sarajevo",
-    "title": "Storming the Barracks: How Sarajevo Armed Itself",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "BB Vol. I, Ch. 4",
-      "ICTY Galic Trial Judgment (IT-98-29-T), background findings"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_battle_of_the_barracks_tuzla",
-    "event_id": "battle_of_the_barracks_tuzla",
-    "title": "The Tuzla Column: Ambush, Seizure, and the Birth of 2nd Corps",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "BB Vol. I, Ch. 4",
-      "ICTY Oric Trial Judgment (IT-03-68-T), background context"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_battle_of_the_barracks_zenica",
-    "event_id": "battle_of_the_barracks_zenica",
-    "title": "The Zenica Seizure: Arming 3rd Corps from JNA Stores",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "BB Vol. I, Ch. 4",
-      "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), 3rd Corps formation"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_battle_of_the_barracks_visoko",
-    "event_id": "battle_of_the_barracks_visoko",
-    "title": "Visoko Depot: A Small Victory on the Sarajevo Approaches",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "BB Vol. I, Ch. 4"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_sarajevo_siege_begins_1992",
-    "event_id": "sarajevo_siege_begins_1992",
-    "title": "The Siege Begins: Sarajevo Under the Guns",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "ICTY Galic Trial Judgment (IT-98-29-T)",
-      "ICTY Milosevic Trial Judgment (IT-98-29/1-T)",
-      "BB Vol. I, Ch. 7"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_jna_withdrawal_1992",
-    "event_id": "jna_withdrawal_1992",
-    "title": "The JNA Withdrawal: A Handover, Not a Retreat",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), paras. 2545-2560",
-      "ICTY Perisic Trial Judgment (IT-04-81-T)",
-      "BB Vol. I, Ch. 3"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_mostar_liberation_1992",
-    "event_id": "mostar_liberation_1992",
-    "title": "Mostar Liberated: A Shared Victory, A Divided City",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "BB Vol. I",
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Mostar findings"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_srebrenica_enclave_forms_1992",
-    "event_id": "srebrenica_enclave_forms_1992",
-    "title": "The Srebrenica Pocket: Oric's Desperate Enclave",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "ICTY Oric Trial Judgment (IT-03-68-T)",
-      "UN Report on Srebrenica (A/54/549, 1999)",
-      "BB Vol. I, Ch. 8"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_drina_cleansing_decision_1992",
-    "event_id": "drina_cleansing_decision_1992",
-    "title": "The Drina Valley Question: Strategic Goal Three and Its Consequences",
-    "year": 1992,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Strategic Goal 3",
-      "BB Vol. I, Ch. 8-9"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_drina_valley_ethnic_cleansing_1992",
-    "event_id": "drina_valley_ethnic_cleansing_1992",
-    "title": "Ethnic Cleansing Along the Drina: Visegrad, Foca, Zvornik",
-    "year": 1992,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Lukic & Lukic Trial Judgment (IT-98-32/1-T), Visegrad findings",
-      "ICTY Krnojelac Trial Judgment (IT-97-25-T), Foca KPD",
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Zvornik municipality"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_operation_corridor_1992",
-    "event_id": "operation_corridor_1992",
-    "title": "Operation Corridor: The Lifeline Through Brcko",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Posavina Corridor findings",
-      "BB Vol. I, Ch. 6"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_concentration_camps_revealed_1992",
-    "event_id": "concentration_camps_revealed_1992",
-    "title": "Omarska and Trnopolje: The Camps That Shocked the World",
-    "year": 1992,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Kvocka et al. Trial Judgment (IT-98-30/1-T), Omarska findings",
-      "ICTY Stakic Trial Judgment (IT-97-24-T), Prijedor municipality",
-      "ITN footage, August 1992"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_london_conference_1992",
-    "event_id": "london_conference_1992",
-    "title": "The London Conference: Declarations Without Enforcement",
-    "year": 1992,
-    "category": "diplomatic",
-    "sources": [
-      "London Conference on Yugoslavia, August 1992, final declaration",
-      "BB Vol. II, Ch. 1"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_hvo_arbih_tensions_rise_1992",
-    "event_id": "hvo_arbih_tensions_rise_1992",
-    "title": "Prozor and Novi Travnik: The Alliance Begins to Crack",
-    "year": 1992,
-    "category": "political",
-    "sources": [
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Prozor findings",
-      "ICTY Kordic Trial Judgment (IT-95-14/2-T), Novi Travnik"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_jajce_falls_1992",
-    "event_id": "jajce_falls_1992",
-    "title": "The Fall of Jajce: A Shared Defeat That Split an Alliance",
-    "year": 1992,
-    "category": "military",
-    "sources": [
-      "BB Vol. I, Ch. 10",
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Jajce recriminations"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_gornji_vakuf_clashes_1993",
-    "event_id": "gornji_vakuf_clashes_1993",
-    "title": "Gornji Vakuf: The First Battles of the Croat-Bosniak War",
-    "year": 1993,
-    "category": "military",
-    "sources": [
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Gornji Vakuf findings",
-      "ICTY Kordic Trial Judgment (IT-95-14/2-T)"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_vance_owen_plan_1993",
-    "event_id": "vance_owen_plan_1993",
-    "title": "The Vance-Owen Plan: Peace Through Partition",
-    "year": 1993,
-    "category": "diplomatic",
-    "sources": [
-      "BB Vol. II, Ch. 2-3",
-      "David Owen, 'Balkan Odyssey' (1995)"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_croat_bosniak_war_begins_1993",
-    "event_id": "croat_bosniak_war_begins_1993",
-    "title": "The War Within the War: How the Croat-Bosniak Alliance Collapsed",
-    "year": 1993,
-    "category": "military",
-    "sources": [
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), JCE findings",
-      "ICTY Kordic Trial Judgment (IT-95-14/2-T)",
-      "BB Vol. II, Ch. 4-5"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_ahmici_massacre_1993",
-    "event_id": "ahmici_massacre_1993",
-    "title": "Ahmici: The Lasva Valley Massacre",
-    "year": 1993,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Blaskic Trial Judgment (IT-95-14-T)",
-      "ICTY Kordic Trial Judgment (IT-95-14/2-T), Ahmici findings",
-      "ICTY Kupreskic et al. Trial Judgment (IT-95-16-T)"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_east_mostar_siege_1993",
-    "event_id": "east_mostar_siege_1993",
-    "title": "The Siege of East Mostar: A City Divided by Its Liberators",
-    "year": 1993,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), East Mostar siege findings",
-      "BB Vol. II, Ch. 6"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_central_bosnia_fighting_1993",
-    "event_id": "central_bosnia_fighting_1993",
-    "title": "Central Bosnia: The Three-Way War",
-    "year": 1993,
-    "category": "military",
-    "sources": [
-      "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T)",
-      "ICTY Kordic Trial Judgment (IT-95-14/2-T)",
-      "BB Vol. II, Ch. 5"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_srebrenica_shelling_1993",
-    "event_id": "srebrenica_shelling_1993",
-    "title": "Srebrenica Under Bombardment: Morillon's Promise",
-    "year": 1993,
-    "category": "humanitarian",
-    "sources": [
-      "UN Report on Srebrenica (A/54/549, 1999)",
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Srebrenica 1993 findings"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_un_safe_areas_declared_1993",
-    "event_id": "un_safe_areas_declared_1993",
-    "title": "Safe Areas: The UN's Hollow Promise",
-    "year": 1993,
-    "category": "diplomatic",
-    "sources": [
-      "UN Security Council Resolution 819 (1993)",
-      "UN Security Council Resolution 824 (1993)",
-      "UN Report on Srebrenica (A/54/549, 1999), mandate vs. means analysis"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_operation_neretva_93_1993",
-    "event_id": "operation_neretva_93_1993",
-    "title": "Operation Neretva '93: The ARBiH Strikes Back in Herzegovina",
-    "year": 1993,
-    "category": "military",
-    "sources": [
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Neretva Valley operations",
-      "BB Vol. II, Ch. 7"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_markale_area_shelling_1993",
-    "event_id": "markale_area_shelling_1993",
-    "title": "Shelling Sarajevo: The SRK Campaign Against Civilians",
-    "year": 1993,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Galic Trial Judgment (IT-98-29-T), shelling incidents",
-      "ICTY Milosevic Trial Judgment (IT-98-29/1-T)"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_owen_stoltenberg_plan_1993",
-    "event_id": "owen_stoltenberg_plan_1993",
-    "title": "Owen-Stoltenberg: Partitioning Bosnia Into Three Republics",
-    "year": 1993,
-    "category": "diplomatic",
-    "sources": [
-      "David Owen, 'Balkan Odyssey' (1995)",
-      "BB Vol. II, Ch. 8"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_abdic_apwb_declared_1993",
-    "event_id": "abdic_apwb_declared_1993",
-    "title": "Abdic's Rebellion: The Autonomous Province of Western Bosnia",
-    "year": 1993,
-    "category": "political",
-    "sources": [
-      "BB Vol. II, Ch. 9",
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Bihac pocket findings"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_mostar_bridge_destroyed_1993",
-    "event_id": "mostar_bridge_destroyed_1993",
-    "title": "The Destruction of Stari Most: Cultural Annihilation in Mostar",
-    "year": 1993,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Stari Most destruction",
-      "UNESCO World Heritage Committee records"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_markale_massacre_1994",
-    "event_id": "markale_massacre_1994",
-    "title": "The First Markale Massacre: 68 Dead and the Road to NATO Action",
-    "year": 1994,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Galic Trial Judgment (IT-98-29-T), Markale shelling incident of 5 February 1994",
-      "UNPROFOR investigation report, February 1994"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_nato_ultimatum_sarajevo_1994",
-    "event_id": "nato_ultimatum_sarajevo_1994",
-    "title": "NATO's Ultimatum: The Sarajevo Exclusion Zone",
-    "year": 1994,
-    "category": "diplomatic",
-    "sources": [
-      "NATO North Atlantic Council decision, 9 February 1994",
-      "BB Vol. II, Ch. 10"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_nato_shoots_down_planes_1994",
-    "event_id": "nato_shoots_down_planes_1994",
-    "title": "Banja Luka Incident: NATO's First Combat Action",
-    "year": 1994,
-    "category": "military",
-    "sources": [
-      "NATO operational records, 28 February 1994",
-      "BB Vol. II, Ch. 10"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_washington_agreement_1994",
-    "event_id": "washington_agreement_1994",
-    "title": "The Washington Agreement: Ending the War Within the War",
-    "year": 1994,
-    "category": "diplomatic",
-    "sources": [
-      "Washington Agreement text, 1 March 1994",
-      "ICTY Prlic et al. Trial Judgment (IT-04-74-T), cessation of hostilities",
-      "BB Vol. II, Ch. 11"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_gorazde_crisis_1994",
-    "event_id": "gorazde_crisis_1994",
-    "title": "The Gorazde Crisis: Safe Areas Under Fire",
-    "year": 1994,
-    "category": "military",
-    "sources": [
-      "UN Report on Srebrenica (A/54/549, 1999), Gorazde context",
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Gorazde findings"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_contact_group_plan_1994",
-    "event_id": "contact_group_plan_1994",
-    "title": "The Contact Group Plan: 51/49 and the Isolation of Pale",
-    "year": 1994,
-    "category": "diplomatic",
-    "sources": [
-      "Contact Group proposal, July 1994",
-      "BB Vol. III, Ch. 1"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_anti_sniping_agreement_1994",
-    "event_id": "anti_sniping_agreement_1994",
-    "title": "The Anti-Sniping Agreement: Small Mercies on Sniper Alley",
-    "year": 1994,
-    "category": "diplomatic",
-    "sources": [
-      "UNPROFOR Sarajevo sector records, August 1994",
-      "ICTY Galic Trial Judgment (IT-98-29-T), sniping campaign"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_bihac_crisis_1994",
-    "event_id": "bihac_crisis_1994",
-    "title": "The Bihac Crisis: The Pocket That Nearly Fell",
-    "year": 1994,
-    "category": "military",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Bihac findings",
-      "BB Vol. III, Ch. 2"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_srebrenica_falls_1995",
-    "event_id": "srebrenica_falls_1995",
-    "title": "The Fall of Srebrenica: Europe's Worst Atrocity Since 1945",
-    "year": 1995,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Srebrenica genocide findings",
-      "ICTY Mladic Trial Judgment (IT-09-92-T), Srebrenica",
-      "ICTY Krstic Trial Judgment (IT-98-33-T)",
-      "ICJ Bosnia v. Serbia (2007), genocide finding",
-      "UN Report on Srebrenica (A/54/549, 1999)"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_zepa_falls_1995",
-    "event_id": "zepa_falls_1995",
-    "title": "The Fall of Zepa: The Second Safe Area Lost",
-    "year": 1995,
-    "category": "military",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Zepa findings",
-      "ICTY Tolimir Trial Judgment (IT-05-88/2-T)"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_operation_storm_1995",
-    "event_id": "operation_storm_1995",
-    "title": "Operation Storm: Croatia Destroys the Krajina Serb Entity",
-    "year": 1995,
-    "category": "military",
-    "sources": [
-      "ICTY Gotovina et al. Trial Judgment (IT-06-90-T)",
-      "BB Vol. III, Ch. 5"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_second_markale_massacre_1995",
-    "event_id": "second_markale_massacre_1995",
-    "title": "The Second Markale Massacre: The Trigger for Deliberate Force",
-    "year": 1995,
-    "category": "humanitarian",
-    "sources": [
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), second Markale incident",
-      "UNPROFOR investigation report, August 1995"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_nato_deliberate_force_1995",
-    "event_id": "nato_deliberate_force_1995",
-    "title": "Operation Deliberate Force: NATO's Air War Against the VRS",
-    "year": 1995,
-    "category": "military",
-    "sources": [
-      "NATO operational records, August-September 1995",
-      "Robert Owen, 'Deliberate Force: A Case Study in Effective Air Campaigning' (2000)",
-      "BB Vol. III, Ch. 6"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_federation_ground_offensive_1995",
-    "event_id": "federation_ground_offensive_1995",
-    "title": "The Federation Offensive: From 70% to 49% in Weeks",
-    "year": 1995,
-    "category": "military",
-    "sources": [
-      "BB Vol. III, Ch. 7",
-      "ICTY Karadzic Trial Judgment (IT-95-5/18-T), autumn 1995 operations"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_ceasefire_1995",
-    "event_id": "ceasefire_1995",
-    "title": "Ceasefire: 1,340 Days of War End in Silence",
-    "year": 1995,
-    "category": "diplomatic",
-    "sources": [
-      "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995",
-      "BB Vol. III, Ch. 8"
-    ],
-    "generated": false
-  },
-  {
-    "id": "essay_dayton_talks_begin_1995",
-    "event_id": "dayton_talks_begin_1995",
-    "title": "Dayton: The Peace That Froze a War",
-    "year": 1995,
-    "category": "diplomatic",
-    "sources": [
-      "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995",
-      "Richard Holbrooke, 'To End a War' (1998)",
-      "BB Vol. III, Ch. 8"
-    ],
-    "generated": false
-  }
-]
+{
+  "essays": [
+    {
+      "id": "essay_rs_strategic_goals",
+      "event_id": "rs_strategic_goals",
+      "title": "The Six Strategic Goals: How the Bosnian Serb Assembly Chose War",
+      "year": 1992,
+      "category": "political",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 2016), paras. 3521, 3524",
+        "ICJ Bosnia v. Serbia (2007), para. 372",
+        "Balkan Insight, 20 September 2013 (Mladic warning)"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_rbih_state_identity",
+      "event_id": "rbih_state_identity",
+      "title": "Civic Republic or National State: The Bosnian Identity Dilemma",
+      "year": 1992,
+      "category": "political",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), paras. 32, 48, 50",
+        "ARBiH ethnic composition data, June 1992"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_hrhb_political_goal",
+      "event_id": "hrhb_political_goal",
+      "title": "Herceg-Bosna: Zagreb's Project and the Croat Dilemma",
+      "year": 1992,
+      "category": "political",
+      "sources": [
+        "ICTY Kordic Trial Judgment (IT-95-14/2-T), para. 491",
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), JCE findings",
+        "Tudjman-Boban Zagreb meeting, December 1991"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_arms_embargo_impact_1992",
+      "event_id": "arms_embargo_impact_1992",
+      "title": "The Arms Embargo: How the UN Disarmed Bosnia's Defenders",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "UN Security Council Resolution 713 (1991)",
+        "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), arms shortages findings",
+        "BB Vol. I, Ch. 5"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_battle_of_the_barracks_sarajevo",
+      "event_id": "battle_of_the_barracks_sarajevo",
+      "title": "Storming the Barracks: How Sarajevo Armed Itself",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "BB Vol. I, Ch. 4",
+        "ICTY Galic Trial Judgment (IT-98-29-T), background findings"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_battle_of_the_barracks_tuzla",
+      "event_id": "battle_of_the_barracks_tuzla",
+      "title": "The Tuzla Column: Ambush, Seizure, and the Birth of 2nd Corps",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "BB Vol. I, Ch. 4",
+        "ICTY Oric Trial Judgment (IT-03-68-T), background context"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_battle_of_the_barracks_zenica",
+      "event_id": "battle_of_the_barracks_zenica",
+      "title": "The Zenica Seizure: Arming 3rd Corps from JNA Stores",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "BB Vol. I, Ch. 4",
+        "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), 3rd Corps formation"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_battle_of_the_barracks_visoko",
+      "event_id": "battle_of_the_barracks_visoko",
+      "title": "Visoko Depot: A Small Victory on the Sarajevo Approaches",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "BB Vol. I, Ch. 4"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_sarajevo_siege_begins_1992",
+      "event_id": "sarajevo_siege_begins_1992",
+      "title": "The Siege Begins: Sarajevo Under the Guns",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "ICTY Galic Trial Judgment (IT-98-29-T)",
+        "ICTY Milosevic Trial Judgment (IT-98-29/1-T)",
+        "BB Vol. I, Ch. 7"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_jna_withdrawal_1992",
+      "event_id": "jna_withdrawal_1992",
+      "title": "The JNA Withdrawal: A Handover, Not a Retreat",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), paras. 2545-2560",
+        "ICTY Perisic Trial Judgment (IT-04-81-T)",
+        "BB Vol. I, Ch. 3"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_mostar_liberation_1992",
+      "event_id": "mostar_liberation_1992",
+      "title": "Mostar Liberated: A Shared Victory, A Divided City",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "BB Vol. I",
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Mostar findings"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_srebrenica_enclave_forms_1992",
+      "event_id": "srebrenica_enclave_forms_1992",
+      "title": "The Srebrenica Pocket: Oric's Desperate Enclave",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "ICTY Oric Trial Judgment (IT-03-68-T)",
+        "UN Report on Srebrenica (A/54/549, 1999)",
+        "BB Vol. I, Ch. 8"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_drina_cleansing_decision_1992",
+      "event_id": "drina_cleansing_decision_1992",
+      "title": "The Drina Valley Question: Strategic Goal Three and Its Consequences",
+      "year": 1992,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Strategic Goal 3",
+        "BB Vol. I, Ch. 8-9"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_drina_valley_ethnic_cleansing_1992",
+      "event_id": "drina_valley_ethnic_cleansing_1992",
+      "title": "Ethnic Cleansing Along the Drina: Visegrad, Foca, Zvornik",
+      "year": 1992,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Lukic & Lukic Trial Judgment (IT-98-32/1-T), Visegrad findings",
+        "ICTY Krnojelac Trial Judgment (IT-97-25-T), Foca KPD",
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Zvornik municipality"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_operation_corridor_1992",
+      "event_id": "operation_corridor_1992",
+      "title": "Operation Corridor: The Lifeline Through Brcko",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Posavina Corridor findings",
+        "BB Vol. I, Ch. 6"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_concentration_camps_revealed_1992",
+      "event_id": "concentration_camps_revealed_1992",
+      "title": "Omarska and Trnopolje: The Camps That Shocked the World",
+      "year": 1992,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Kvocka et al. Trial Judgment (IT-98-30/1-T), Omarska findings",
+        "ICTY Stakic Trial Judgment (IT-97-24-T), Prijedor municipality",
+        "ITN footage, August 1992"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_london_conference_1992",
+      "event_id": "london_conference_1992",
+      "title": "The London Conference: Declarations Without Enforcement",
+      "year": 1992,
+      "category": "diplomatic",
+      "sources": [
+        "London Conference on Yugoslavia, August 1992, final declaration",
+        "BB Vol. II, Ch. 1"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_hvo_arbih_tensions_rise_1992",
+      "event_id": "hvo_arbih_tensions_rise_1992",
+      "title": "Prozor and Novi Travnik: The Alliance Begins to Crack",
+      "year": 1992,
+      "category": "political",
+      "sources": [
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Prozor findings",
+        "ICTY Kordic Trial Judgment (IT-95-14/2-T), Novi Travnik"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_jajce_falls_1992",
+      "event_id": "jajce_falls_1992",
+      "title": "The Fall of Jajce: A Shared Defeat That Split an Alliance",
+      "year": 1992,
+      "category": "military",
+      "sources": [
+        "BB Vol. I, Ch. 10",
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Jajce recriminations"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_gornji_vakuf_clashes_1993",
+      "event_id": "gornji_vakuf_clashes_1993",
+      "title": "Gornji Vakuf: The First Battles of the Croat-Bosniak War",
+      "year": 1993,
+      "category": "military",
+      "sources": [
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Gornji Vakuf findings",
+        "ICTY Kordic Trial Judgment (IT-95-14/2-T)"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_vance_owen_plan_1993",
+      "event_id": "vance_owen_plan_1993",
+      "title": "The Vance-Owen Plan: Peace Through Partition",
+      "year": 1993,
+      "category": "diplomatic",
+      "sources": [
+        "BB Vol. II, Ch. 2-3",
+        "David Owen, 'Balkan Odyssey' (1995)"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_croat_bosniak_war_begins_1993",
+      "event_id": "croat_bosniak_war_begins_1993",
+      "title": "The War Within the War: How the Croat-Bosniak Alliance Collapsed",
+      "year": 1993,
+      "category": "military",
+      "sources": [
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), JCE findings",
+        "ICTY Kordic Trial Judgment (IT-95-14/2-T)",
+        "BB Vol. II, Ch. 4-5"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_ahmici_massacre_1993",
+      "event_id": "ahmici_massacre_1993",
+      "title": "Ahmici: The Lasva Valley Massacre",
+      "year": 1993,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Blaskic Trial Judgment (IT-95-14-T)",
+        "ICTY Kordic Trial Judgment (IT-95-14/2-T), Ahmici findings",
+        "ICTY Kupreskic et al. Trial Judgment (IT-95-16-T)"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_east_mostar_siege_1993",
+      "event_id": "east_mostar_siege_1993",
+      "title": "The Siege of East Mostar: A City Divided by Its Liberators",
+      "year": 1993,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), East Mostar siege findings",
+        "BB Vol. II, Ch. 6"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_central_bosnia_fighting_1993",
+      "event_id": "central_bosnia_fighting_1993",
+      "title": "Central Bosnia: The Three-Way War",
+      "year": 1993,
+      "category": "military",
+      "sources": [
+        "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T)",
+        "ICTY Kordic Trial Judgment (IT-95-14/2-T)",
+        "BB Vol. II, Ch. 5"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_srebrenica_shelling_1993",
+      "event_id": "srebrenica_shelling_1993",
+      "title": "Srebrenica Under Bombardment: Morillon's Promise",
+      "year": 1993,
+      "category": "humanitarian",
+      "sources": [
+        "UN Report on Srebrenica (A/54/549, 1999)",
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Srebrenica 1993 findings"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_un_safe_areas_declared_1993",
+      "event_id": "un_safe_areas_declared_1993",
+      "title": "Safe Areas: The UN's Hollow Promise",
+      "year": 1993,
+      "category": "diplomatic",
+      "sources": [
+        "UN Security Council Resolution 819 (1993)",
+        "UN Security Council Resolution 824 (1993)",
+        "UN Report on Srebrenica (A/54/549, 1999), mandate vs. means analysis"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_operation_neretva_93_1993",
+      "event_id": "operation_neretva_93_1993",
+      "title": "Operation Neretva '93: The ARBiH Strikes Back in Herzegovina",
+      "year": 1993,
+      "category": "military",
+      "sources": [
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Neretva Valley operations",
+        "BB Vol. II, Ch. 7"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_markale_area_shelling_1993",
+      "event_id": "markale_area_shelling_1993",
+      "title": "Shelling Sarajevo: The SRK Campaign Against Civilians",
+      "year": 1993,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Galic Trial Judgment (IT-98-29-T), shelling incidents",
+        "ICTY Milosevic Trial Judgment (IT-98-29/1-T)"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_owen_stoltenberg_plan_1993",
+      "event_id": "owen_stoltenberg_plan_1993",
+      "title": "Owen-Stoltenberg: Partitioning Bosnia Into Three Republics",
+      "year": 1993,
+      "category": "diplomatic",
+      "sources": [
+        "David Owen, 'Balkan Odyssey' (1995)",
+        "BB Vol. II, Ch. 8"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_abdic_apwb_declared_1993",
+      "event_id": "abdic_apwb_declared_1993",
+      "title": "Abdic's Rebellion: The Autonomous Province of Western Bosnia",
+      "year": 1993,
+      "category": "political",
+      "sources": [
+        "BB Vol. II, Ch. 9",
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Bihac pocket findings"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_mostar_bridge_destroyed_1993",
+      "event_id": "mostar_bridge_destroyed_1993",
+      "title": "The Destruction of Stari Most: Cultural Annihilation in Mostar",
+      "year": 1993,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Stari Most destruction",
+        "UNESCO World Heritage Committee records"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_markale_massacre_1994",
+      "event_id": "markale_massacre_1994",
+      "title": "The First Markale Massacre: 68 Dead and the Road to NATO Action",
+      "year": 1994,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Galic Trial Judgment (IT-98-29-T), Markale shelling incident of 5 February 1994",
+        "UNPROFOR investigation report, February 1994"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_nato_ultimatum_sarajevo_1994",
+      "event_id": "nato_ultimatum_sarajevo_1994",
+      "title": "NATO's Ultimatum: The Sarajevo Exclusion Zone",
+      "year": 1994,
+      "category": "diplomatic",
+      "sources": [
+        "NATO North Atlantic Council decision, 9 February 1994",
+        "BB Vol. II, Ch. 10"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_nato_shoots_down_planes_1994",
+      "event_id": "nato_shoots_down_planes_1994",
+      "title": "Banja Luka Incident: NATO's First Combat Action",
+      "year": 1994,
+      "category": "military",
+      "sources": [
+        "NATO operational records, 28 February 1994",
+        "BB Vol. II, Ch. 10"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_washington_agreement_1994",
+      "event_id": "washington_agreement_1994",
+      "title": "The Washington Agreement: Ending the War Within the War",
+      "year": 1994,
+      "category": "diplomatic",
+      "sources": [
+        "Washington Agreement text, 1 March 1994",
+        "ICTY Prlic et al. Trial Judgment (IT-04-74-T), cessation of hostilities",
+        "BB Vol. II, Ch. 11"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_gorazde_crisis_1994",
+      "event_id": "gorazde_crisis_1994",
+      "title": "The Gorazde Crisis: Safe Areas Under Fire",
+      "year": 1994,
+      "category": "military",
+      "sources": [
+        "UN Report on Srebrenica (A/54/549, 1999), Gorazde context",
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Gorazde findings"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_contact_group_plan_1994",
+      "event_id": "contact_group_plan_1994",
+      "title": "The Contact Group Plan: 51/49 and the Isolation of Pale",
+      "year": 1994,
+      "category": "diplomatic",
+      "sources": [
+        "Contact Group proposal, July 1994",
+        "BB Vol. III, Ch. 1"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_anti_sniping_agreement_1994",
+      "event_id": "anti_sniping_agreement_1994",
+      "title": "The Anti-Sniping Agreement: Small Mercies on Sniper Alley",
+      "year": 1994,
+      "category": "diplomatic",
+      "sources": [
+        "UNPROFOR Sarajevo sector records, August 1994",
+        "ICTY Galic Trial Judgment (IT-98-29-T), sniping campaign"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_bihac_crisis_1994",
+      "event_id": "bihac_crisis_1994",
+      "title": "The Bihac Crisis: The Pocket That Nearly Fell",
+      "year": 1994,
+      "category": "military",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Bihac findings",
+        "BB Vol. III, Ch. 2"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_srebrenica_falls_1995",
+      "event_id": "srebrenica_falls_1995",
+      "title": "The Fall of Srebrenica: Europe's Worst Atrocity Since 1945",
+      "year": 1995,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Srebrenica genocide findings",
+        "ICTY Mladic Trial Judgment (IT-09-92-T), Srebrenica",
+        "ICTY Krstic Trial Judgment (IT-98-33-T)",
+        "ICJ Bosnia v. Serbia (2007), genocide finding",
+        "UN Report on Srebrenica (A/54/549, 1999)"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_zepa_falls_1995",
+      "event_id": "zepa_falls_1995",
+      "title": "The Fall of Zepa: The Second Safe Area Lost",
+      "year": 1995,
+      "category": "military",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Zepa findings",
+        "ICTY Tolimir Trial Judgment (IT-05-88/2-T)"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_operation_storm_1995",
+      "event_id": "operation_storm_1995",
+      "title": "Operation Storm: Croatia Destroys the Krajina Serb Entity",
+      "year": 1995,
+      "category": "military",
+      "sources": [
+        "ICTY Gotovina et al. Trial Judgment (IT-06-90-T)",
+        "BB Vol. III, Ch. 5"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_second_markale_massacre_1995",
+      "event_id": "second_markale_massacre_1995",
+      "title": "The Second Markale Massacre: The Trigger for Deliberate Force",
+      "year": 1995,
+      "category": "humanitarian",
+      "sources": [
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), second Markale incident",
+        "UNPROFOR investigation report, August 1995"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_nato_deliberate_force_1995",
+      "event_id": "nato_deliberate_force_1995",
+      "title": "Operation Deliberate Force: NATO's Air War Against the VRS",
+      "year": 1995,
+      "category": "military",
+      "sources": [
+        "NATO operational records, August-September 1995",
+        "Robert Owen, 'Deliberate Force: A Case Study in Effective Air Campaigning' (2000)",
+        "BB Vol. III, Ch. 6"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_federation_ground_offensive_1995",
+      "event_id": "federation_ground_offensive_1995",
+      "title": "The Federation Offensive: From 70% to 49% in Weeks",
+      "year": 1995,
+      "category": "military",
+      "sources": [
+        "BB Vol. III, Ch. 7",
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), autumn 1995 operations"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_ceasefire_1995",
+      "event_id": "ceasefire_1995",
+      "title": "Ceasefire: 1,340 Days of War End in Silence",
+      "year": 1995,
+      "category": "diplomatic",
+      "sources": [
+        "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995",
+        "BB Vol. III, Ch. 8"
+      ],
+      "generated": false
+    },
+    {
+      "id": "essay_dayton_talks_begin_1995",
+      "event_id": "dayton_talks_begin_1995",
+      "title": "Dayton: The Peace That Froze a War",
+      "year": 1995,
+      "category": "diplomatic",
+      "sources": [
+        "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995",
+        "Richard Holbrooke, 'To End a War' (1998)",
+        "BB Vol. III, Ch. 8"
+      ],
+      "generated": false
+    }
+  ]
+}
