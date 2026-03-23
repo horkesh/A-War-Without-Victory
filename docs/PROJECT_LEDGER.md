@@ -3,6 +3,20 @@
 **Last Updated:** 2026-03-23
 **Status:** **v0.6.1** — Political Wargame (Calibration Framework). **1410 tests**, 116 suites. **92.0% area-weighted (n1029). New honest baseline — previous 93.1% inflated by broken sector contiguity.** Electron 41. Next: AI Commander live test, 1993-1995 event content (ICTY research), Staff Map.
 
+## [2026-03-23] Chronicle Horizontal Timeline Redesign
+
+**Scope:** Full rewrite of Chronicle overlay from vertical scroll to horizontal desktop timeline.
+
+**Layout:** Territory ribbon (faction-colored) as top spine. Colored dot markers at turns with events. Vertical stems connect dots to paper-textured cards below. Hybrid turn spacing: 80px for empty turns, 200px+ for turns with events. Mousewheel maps to horizontal scroll. Viewport starts at latest turn.
+
+**Cards:** Dark sepia paper aesthetic. Serif headlines for significant events. Category badge (combat/political/humanitarian/military/diplomatic/narrative) with colored left border.
+
+**Navigation:** Bottom scrubber strip — one territory-color tick per turn, click to jump. Viewport indicator shows visible portion.
+
+**Also this session:** Proper Bosnian municipality names with diacritics (110 entries) for sector labels. CodexPanel essay iteration fix. Order arrows removed.
+
+**Files:** `src/ui/map/components/chronicle/ChronicleOverlay.tsx` (rewrite), `ChronicleSpine.tsx` (rewrite → `ChronicleRibbon` + `ChronicleRibbonScrubber`), `ChronicleCard.tsx` (paper aesthetic), `GameStateAdapter.ts` (municipality names).
+
 ## [2026-03-23] Contact Graph min_dist Fix — Sector Contiguity Restored (n1029)
 
 **Scope:** Root cause fix for disconnected sectors (e.g. "1st Corps - Trnovo, Kalinovik" spanning both sides of RS territory). The operational contact graph had 0/2047 edges with `min_dist`, making ALL adjacency threshold filters no-ops. Strict Case B sector splitting (n682) was dead code.
