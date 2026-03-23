@@ -3,8 +3,11 @@
  * strategic standing. Replaces the plain StatRow list in Army HQ.
  *
  * Each bar: label + effective_value (0-100) + event_modifier indicator.
+ * Composite "Negotiating Capital" bar at top — weighted score.
  * Warroom aesthetic: amber/gold accents, compact, scannable.
  */
+
+import { useState } from 'react';
 
 const DIMENSION_CONFIG: Array<{
     id: string;
@@ -20,6 +23,13 @@ const DIMENSION_CONFIG: Array<{
     { id: 'negotiating_leverage', label: 'Negotiating Leverage', color: 'bg-yellow-400', bgColor: 'bg-yellow-400/20' },
 ];
 
+/** Per-faction dimension weights (must match GameStateAdapter deriveNegotiatingCapital). */
+const FACTION_WEIGHTS: Record<string, Record<string, number>> = {
+    RS:   { military_credibility: 0.25, territorial_legitimacy: 0.25, international_standing: 0.10, patron_confidence: 0.15, internal_cohesion: 0.10, negotiating_leverage: 0.15 },
+    RBiH: { military_credibility: 0.15, territorial_legitimacy: 0.15, international_standing: 0.25, patron_confidence: 0.15, internal_cohesion: 0.15, negotiating_leverage: 0.15 },
+    HRHB: { military_credibility: 0.15, territorial_legitimacy: 0.20, international_standing: 0.15, patron_confidence: 0.25, internal_cohesion: 0.15, negotiating_leverage: 0.10 },
+};
+
 interface DimValue {
     base_value: number;
     event_modifier: number;
@@ -29,10 +39,17 @@ interface DimValue {
 interface StrategicPositionProps {
     dimensions?: Record<string, DimValue>;
     faction: string;
+    compositeScore?: number;
 }
 
 function gradeColor(value: number): string {
     if (value >= 70) return 'text-emerald-400';
+    if (value >= 40) return 'text-amber-400';
+    return 'text-red-400';
+}
+
+function compositeGradeColor(value: number): string {
+    if (value >= 70) return 'text-amber-300';
     if (value >= 40) return 'text-amber-400';
     return 'text-red-400';
 }
@@ -43,7 +60,13 @@ function modifierDisplay(modifier: number): { text: string; color: string } | nu
     return { text: `${modifier}`, color: 'text-red-400' };
 }
 
-export function StrategicPosition({ dimensions, faction }: StrategicPositionProps) {
+function formatWeight(w: number): string {
+    return `${Math.round(w * 100)}%`;
+}
+
+export function StrategicPosition({ dimensions, faction, compositeScore }: StrategicPositionProps) {
+    const [hoveredDim, setHoveredDim] = useState<string | null>(null);
+
     if (!dimensions) {
         return (
             <div className="bg-panel-card border border-panel-border rounded-lg p-4">
@@ -57,22 +80,62 @@ export function StrategicPosition({ dimensions, faction }: StrategicPositionProp
         );
     }
 
+    const weights = FACTION_WEIGHTS[faction];
+    const score = compositeScore ?? 50;
+
     return (
         <div className="bg-panel-card border border-panel-border rounded-lg p-4">
             <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
                 STRATEGIC POSITION
             </div>
+
+            {/* Composite Negotiating Capital bar */}
+            <div className="mb-3 pb-2 border-b border-panel-border/50">
+                <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-amber-400/90">
+                        NEGOTIATING CAPITAL
+                    </span>
+                    <span className={`text-[13px] font-mono font-bold tabular-nums ${compositeGradeColor(score)}`}>
+                        {score}
+                    </span>
+                </div>
+                <div className="h-[6px] rounded-full bg-amber-500/15 overflow-hidden">
+                    <div
+                        className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-500"
+                        style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
+                    />
+                </div>
+                <div className="text-[8px] text-text-secondary/50 mt-0.5 font-mono text-right">
+                    WEIGHTED COMPOSITE
+                </div>
+            </div>
+
+            {/* Individual dimension bars */}
             <div className="space-y-2">
                 {DIMENSION_CONFIG.map(({ id, label, color, bgColor }) => {
                     const dim = dimensions[id];
                     const effective = dim?.effective_value ?? 50;
-                    const mod = modifierDisplay(dim?.event_modifier ?? 0);
+                    const base = dim?.base_value ?? 50;
+                    const eventMod = dim?.event_modifier ?? 0;
+                    const mod = modifierDisplay(eventMod);
+                    const weight = weights?.[id];
+                    const isHovered = hoveredDim === id;
 
                     return (
-                        <div key={id} className="group">
+                        <div
+                            key={id}
+                            className="group relative"
+                            onMouseEnter={() => setHoveredDim(id)}
+                            onMouseLeave={() => setHoveredDim(null)}
+                        >
                             <div className="flex items-center justify-between mb-0.5">
                                 <span className="text-[10px] font-bold uppercase tracking-wide text-text-secondary">
                                     {label}
+                                    {weight != null && (
+                                        <span className="text-[8px] text-text-secondary/40 ml-1 font-mono">
+                                            {formatWeight(weight)}
+                                        </span>
+                                    )}
                                 </span>
                                 <div className="flex items-center gap-1.5">
                                     {mod && (
@@ -91,6 +154,22 @@ export function StrategicPosition({ dimensions, faction }: StrategicPositionProp
                                     style={{ width: `${Math.max(0, Math.min(100, effective))}%` }}
                                 />
                             </div>
+
+                            {/* Tooltip on hover */}
+                            {isHovered && (
+                                <div className="absolute z-50 left-0 top-full mt-1 bg-panel-bg border border-panel-border rounded px-2 py-1.5 shadow-lg whitespace-nowrap pointer-events-none">
+                                    <div className="text-[9px] font-mono text-text-secondary space-y-0.5">
+                                        <div>Base: <span className="text-text-primary font-bold">{Math.round(base)}</span></div>
+                                        <div>Events: <span className={eventMod >= 0 ? 'text-emerald-400' : 'text-red-400'}>{eventMod >= 0 ? '+' : ''}{Math.round(eventMod)}</span></div>
+                                        <div>Effective: <span className={`font-bold ${gradeColor(effective)}`}>{Math.round(effective)}</span></div>
+                                        {weight != null && (
+                                            <div className="border-t border-panel-border/50 pt-0.5 mt-0.5">
+                                                Weight: <span className="text-amber-400">{formatWeight(weight)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     );
                 })}

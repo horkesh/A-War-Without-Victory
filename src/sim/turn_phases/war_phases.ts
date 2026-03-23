@@ -17,6 +17,7 @@ import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCe
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
+import { computeDimensionBaseValues } from '../events/strategic_dimensions.js';
 import { updateDisplacement } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
@@ -239,6 +240,16 @@ export const warPhases: NamedPhase[] = [
             const grazText = checkAndFireGrazAccords(context.state);
             if (grazText) {
                 context.report.events_fired!.push({ id: 'graz_accords', text: grazText });
+            }
+        }
+    },
+    {
+        name: 'compute-dimension-bases',
+        run: (context) => {
+            const neg = context.state.military.negotiation;
+            if (!neg?.strategic_dimensions) return;
+            for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
+                computeDimensionBaseValues(neg.strategic_dimensions, context.state, faction);
             }
         }
     },

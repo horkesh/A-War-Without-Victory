@@ -750,6 +750,9 @@ export interface LoadedGameState {
         composite: number;
     }>;
 
+    /** Per-faction composite negotiating capital score (weighted 0-100). Derived from strategicDimensions. */
+    negotiatingCapital?: Record<string, number>;
+
     /** Per-faction strategic dimensions (v0.6.0 metagame). 6 dimensions, hybrid base + modifier = effective. */
     strategicDimensions?: Record<string, Record<string, {
         base_value: number;

@@ -294,6 +294,7 @@ export function ArmyHQModal() {
                                     <StrategicPosition
                                         dimensions={state.strategicDimensions?.[faction]}
                                         faction={faction}
+                                        compositeScore={state.negotiatingCapital?.[faction]}
                                     />
                                 </div>
                             )}

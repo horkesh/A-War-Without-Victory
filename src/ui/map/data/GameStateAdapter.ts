@@ -1797,6 +1797,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         pendingDayton: derivePendingDayton(state),
         negotiationCapital: deriveNegotiationCapital(state),
         strategicDimensions: deriveStrategicDimensions(state),
+        negotiatingCapital: deriveNegotiatingCapital(state),
         eventFlags: state.military?.event_flags ?? undefined,
         pressureWarning: derivePressureWarning(state),
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
@@ -2251,6 +2252,30 @@ function deriveStrategicDimensions(state: any): LoadedGameState['strategicDimens
                 effective_value: Number(v?.effective_value ?? 50),
             };
         }
+    }
+    return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/** Weighted composite negotiating capital per faction. Weights reflect faction priorities. */
+function deriveNegotiatingCapital(state: any): LoadedGameState['negotiatingCapital'] {
+    const dims = state.military?.negotiation?.strategic_dimensions;
+    if (!dims || typeof dims !== 'object') return undefined;
+    const WEIGHTS: Record<string, Record<string, number>> = {
+        RS:   { military_credibility: 0.25, territorial_legitimacy: 0.25, international_standing: 0.10, patron_confidence: 0.15, internal_cohesion: 0.10, negotiating_leverage: 0.15 },
+        RBiH: { military_credibility: 0.15, territorial_legitimacy: 0.15, international_standing: 0.25, patron_confidence: 0.15, internal_cohesion: 0.15, negotiating_leverage: 0.15 },
+        HRHB: { military_credibility: 0.15, territorial_legitimacy: 0.20, international_standing: 0.15, patron_confidence: 0.25, internal_cohesion: 0.15, negotiating_leverage: 0.10 },
+    };
+    const out: Record<string, number> = {};
+    for (const [faction, factionDims] of Object.entries(dims).sort((a, b) => a[0].localeCompare(b[0]))) {
+        const w = WEIGHTS[faction];
+        if (!w) continue;
+        const fd = factionDims as any;
+        if (!fd || typeof fd !== 'object') continue;
+        let total = 0;
+        for (const [dim, weight] of Object.entries(w)) {
+            total += (Number((fd[dim] as any)?.effective_value ?? 50)) * weight;
+        }
+        out[faction] = Math.round(Math.max(0, Math.min(100, total)));
     }
     return Object.keys(out).length > 0 ? out : undefined;
 }
