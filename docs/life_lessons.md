@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-23 (night shift review — no new lessons, no violations detected)
+> Last updated: 2026-03-23 (min_dist contact graph fix — new lesson added)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -8,6 +8,13 @@
 ---
 
 ## Recently Violated (needs reinforcement)
+
+### [Data] Data pipeline scripts that transform edges must preserve ALL fields — min_dist/type loss silently broke sector splitting (2026-03-23) — NEW
+- **Context**: `merge_micro_osids.cjs` remapped edges with `return { a, b }` — stripping `type` and `min_dist` fields. The `derive_operational_settlements.ts` script computed `min_dist` from polygon geometry, but the merge step (run after derivation) discarded it. The operational contact graph had 0/2047 edges with `min_dist`, making ALL adjacency threshold filters (`frontEdgeAdj` at 33m, `strictAdj` at 5.5m, `caseBSplitAdj` at 16.6m) identical to full unfiltered adjacency.
+- **Impact**: The strict Case B contiguity re-check (n682) — specifically designed to split sectors spanning opposite sides of enemy pockets — was a complete no-op. Sectors like "1st Corps - Trnovo, Kalinovik" grouped disconnected RBiH territory on both sides of an RS wedge. 93.1% calibration was artificially inflated by broken sector defense. True calibration after fix: 92.0%.
+- **Wrong approach**: Adding fields to `parseEdges()` (n620 fix) without verifying the upstream data actually contains them. The parser could read `min_dist` but the data never had it.
+- **Right approach**: When fixing a data pipeline, verify end-to-end: (1) source generates the field, (2) every transform preserves it, (3) consumer reads non-undefined values. Created `tools/enrich_contact_graph_min_dist.cjs` to compute `min_dist` from polygon geometry.
+- **Do instead**: When adding a field to a data pipeline consumer, `grep` for every script that touches the intermediate file and verify it preserves the field. Run a count: `node -e "... edges.filter(e => e.field !== undefined).length"` to confirm non-zero at runtime.
 
 ### [Data] OSID key embeds the municipality — never trust canonical SID mun1990_id for OSID→mun mapping (2026-03-21) — NEW
 - **Context**: `buildOsidToMunFromReverseMap` used the first canonical SID's `mun1990_id` to determine an OSID's municipality. But SIDs can cross municipality boundaries — e.g. `op:kresevo:kresevo_2` contains SIDs whose `mun1990_id` is "fojnica". This caused `factionHasPresenceInMun` to return false for kresevo, blocking 3 mandatory HRHB brigade spawns (95th, Kreševo, Vitezovi).

@@ -100,7 +100,10 @@ graphData.edges = graphData.edges
         let b = mergeMap[e.b] || e.b;
         // Normalize order for dedup
         if (a > b) [a, b] = [b, a];
-        return { a, b };
+        const out = { a, b };
+        if (e.type !== undefined) out.type = e.type;
+        if (e.min_dist !== undefined) out.min_dist = e.min_dist;
+        return out;
     })
     .filter(e => {
         if (e.a === e.b) return false; // self-loop

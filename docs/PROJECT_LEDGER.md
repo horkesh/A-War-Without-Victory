@@ -1,7 +1,21 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-23
-**Status:** **v0.6.1** — Political Wargame (Calibration Framework). **1410 tests**, 116 suites. **93.1% area-weighted (n1026). 6/6 benchmarks PASS.** Electron 41. Next: AI Commander live test, 1993-1995 event content (ICTY research), Staff Map.
+**Status:** **v0.6.1** — Political Wargame (Calibration Framework). **1410 tests**, 116 suites. **92.0% area-weighted (n1029). New honest baseline — previous 93.1% inflated by broken sector contiguity.** Electron 41. Next: AI Commander live test, 1993-1995 event content (ICTY research), Staff Map.
+
+## [2026-03-23] Contact Graph min_dist Fix — Sector Contiguity Restored (n1029)
+
+**Scope:** Root cause fix for disconnected sectors (e.g. "1st Corps - Trnovo, Kalinovik" spanning both sides of RS territory). The operational contact graph had 0/2047 edges with `min_dist`, making ALL adjacency threshold filters no-ops. Strict Case B sector splitting (n682) was dead code.
+
+**Root cause chain:** (1) `derive_operational_settlements.ts` read `min_dist` from canonical graph, which didn't have it. (2) `merge_micro_osids.cjs` stripped `type`/`min_dist` with `return { a, b }`. (3) No enrichment step computed `min_dist` from polygon geometry.
+
+**Fix:** `tools/enrich_contact_graph_min_dist.cjs` computes vertex-to-vertex `min_dist` from polygon boundaries. `merge_micro_osids.cjs` preserves fields. 2025/2047 shared boundary, 22 distant (>33m).
+
+**Calibration:** 93.1% → **92.0% area-weighted.** Previous number was artificially inflated by sectors defending territory brigades couldn't physically reach.
+
+**Also fixed:** CodexPanel `essays is not iterable` (JSON wrapper object). Order arrows removed (player is political leader).
+
+**Files:** `data/derived/operational/operational_contact_graph.json`, `tools/enrich_contact_graph_min_dist.cjs` (new), `tools/merge_micro_osids.cjs`, `src/sim/combat/corps_front_sectors.ts`, `src/ui/map/components/CodexPanel.tsx`, `src/ui/map/map/MapContainer.tsx`, `docs/life_lessons.md`, `docs/40_reports/SECTOR_MASTER.md`, `docs/40_reports/CALIBRATION_MASTER.md`.
 
 ## [2026-03-23] Version Bump — v0.5.4 → v0.6.1
 

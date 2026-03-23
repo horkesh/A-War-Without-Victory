@@ -304,6 +304,14 @@ Density range improved from 100:1 (n623) to 33:1 (n624) after Herzegovina/SRK fi
 **Fix:** Added `type` and `min_dist` field copying to `EdgeRecord` interface and `parseEdges()`.
 **Impact:** Independent correctness fix. Enables future use of edge metadata in sector algorithms.
 
+### Contact graph min_dist never existed — ALL adjacency filters were no-ops (n1029, 2026-03-23)
+
+**Was:** The operational contact graph (`operational_contact_graph.json`) had 0/2047 edges with `min_dist`. Three causes: (1) `derive_operational_settlements.ts` computed `min_dist` from the canonical graph but the canonical graph itself lacked it; (2) `merge_micro_osids.cjs` (n982) remapped edges with `return { a, b }`, stripping `type` and `min_dist`; (3) no enrichment step computed `min_dist` from polygon geometry.
+**Impact:** ALL threshold-based adjacency filters were identical to full adjacency: `frontEdgeAdj` (33m), `strictAdj` (5.5m), `caseBSplitAdj` (16.6m) all passed every edge. The strict Case B re-check (n682) — designed to split cross-pocket sectors — was a complete no-op. Sectors like "1st Corps - Trnovo, Kalinovik" spanned both sides of RS territory, defending disconnected fronts as one unit. 93.1% calibration was artificially inflated.
+**Fix:** (1) `tools/enrich_contact_graph_min_dist.cjs` computes `min_dist` from polygon geometry (vertex-to-vertex minimum). (2) `merge_micro_osids.cjs` preserves `type` and `min_dist` fields. Result: 2025/2047 shared boundary (<5.5m), 22 distant (>33m). Trnovo-Kalinovik sector correctly split.
+**Calibration:** 93.1% → 92.0%. Previous number was inflated by broken defense of unreachable territory.
+**Diagnostic:** `tools/enrich_contact_graph_min_dist.cjs` — run after any contact graph regeneration.
+
 ---
 
 ## Diagnostic Tools
@@ -337,3 +345,4 @@ Density range improved from 100:1 (n623) to 33:1 (n624) after Herzegovina/SRK fi
 | n668 | 2026-03-13 | Layer B: independent sector stances (5 stances, bot AI, combat integration) | 92 | 89.0% |
 | n682 | 2026-03-13 | Strict Case B contiguity — cross-enemy sector fix + municipality BFS guard | 144 | 87.1% |
 | n692 | 2026-03-13 | Case B split threshold 5.5m→16.6m, merge uses same threshold | 131 | 88.2% |
+| n1029 | 2026-03-23 | Contact graph min_dist enrichment — all adjacency filters now functional | TBD | 92.0% |
