@@ -1,7 +1,13 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-23
-**Status:** **v0.5.4** (v0.6.x scope nearly complete). **1410 tests**, 116 suites. **93.1% area-weighted (n1026). 6/6 benchmarks PASS.** Electron 41. Night shift: 27/28 tasks, 7 plans, 15 commits. Chronicle + Wrapped + AI Commander Events + Dayton Dimension Merge + Calibration Framework + HQ Deep Drill + Codex. Next: essay generation (API key), version bump, 1995 event content.
+**Status:** **v0.6.1** — Political Wargame (Calibration Framework). **1410 tests**, 116 suites. **93.1% area-weighted (n1026). 6/6 benchmarks PASS.** Electron 41. Next: AI Commander live test, 1993-1995 event content (ICTY research), Staff Map.
+
+## [2026-03-23] Version Bump — v0.5.4 → v0.6.1
+
+**Scope:** Housekeeping. Version bump to reflect v0.6.1 milestone completion (calibration framework: baseline freeze, regression script, event timing assertions). Night shift also delivered v0.6.2-v0.6.4 partial scope (Chronicle, Wrapped, AI Commander Events, Dayton Merge, HQ Deep Drill, Codex). Essay generation remains blocked on API key.
+
+**Files:** `package.json`, `docs/20_engineering/VERSIONING.md`, `docs/PROJECT_LEDGER.md`.
 
 ## [2026-03-23] Night Shift — 7 Plans, 27/28 Tasks
 

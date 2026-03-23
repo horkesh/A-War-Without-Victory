@@ -74,12 +74,12 @@ Core simulation loop exists. Turn pipeline runs. Factions exist. Map renders.
 - Pressure indicators, consequence auto-dismiss
 - Deck.gl settlement labels, formation counters
 - Displacement adapter, Posavina Corridor restructure
-- 93.1% area-weighted calibration (n1024), 1317 tests, 111 suites
+- 93.1% area-weighted calibration (n1026), 1410 tests, 116 suites
 
 ### 0.6.x — Political Wargame (ACTIVE)
 Transforms AWWV from military simulation into political wargame. Master roadmap: `docs/plans/2026-03-22-v06x-master-roadmap.md`
 
-- v0.6.1: Calibration framework (automated regression, baseline freeze)
+- v0.6.1: Calibration framework (automated regression, baseline freeze) ✓ COMPLETED 2026-03-23
 - v0.6.2: 1993-1994 events, Game Chronicle, AI Commander + Events integration, HQ deep drill-down
 - v0.6.3: 1995 endgame events, Dayton dimension merge, Chronicle Wrapped, Staff Map
 - v0.6.4: Historical essays (100 × 500 words, Sonnet-generated)
@@ -175,22 +175,22 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Tactical map (React + MapLibre + Deck.gl) | ✓ Functional |
 | Warroom (vanilla TS + canvas) | ✓ Functional (v0.7+ React migration planned) |
 | Army HQ (4-tab command center) | ✓ Functional (Briefing/Summary/Records/Personnel) |
-| Events/decisions | ✓ Functional (19 events, pressure system, 14 condition types, 56 tests) |
-| Strategic dimensions | ✓ Functional (6 dimensions, event-driven, UI display) |
+| Events/decisions | ✓ Functional (19 events, pressure system, 14 condition types, 56 tests, AI Commander integration) |
+| Strategic dimensions | ✓ Functional (6 dimensions, Dayton merge complete, UI composite bar) |
 | Scenarios (40w/52w/56w) | ✓ Complete |
 | AI Commander infrastructure | ✓ Functional (14 modules, multi-model routing) |
 | Peace phase | ○ Partial (framework exists, not playable) |
-| Dayton negotiation | ○ Partial (UI + engine exist, dimension merge pending) |
+| Dayton negotiation | ✓ Functional (UI + engine, dimension merge complete, composite bar) |
 | Full turn cycle | ○ Partial |
 | Save/load | ○ Partial (headless OK, desktop partial) |
-| Player orders UX | ○ Partial (HQ actions wired, event decisions pending IPC) |
+| Player orders UX | ○ Partial (HQ actions wired, event decisions IPC live) |
 | Victory conditions | ○ Stub |
 | Diplomacy layer | ○ Partial (patron pressure, alliance, IVP exist) |
 | Tutorial | ✗ Not started |
 | Sound/music | ✗ Not started |
 | Localization | ✗ Not started (v0.8+ scope: B/C/S + English) |
 
-**Current version: 0.5.4** — Feature Complete Beta. 1317 tests, 111 suites. Emergent event system (v0.6.0 merge in progress). Army HQ multi-tab command center. Presidential Toolbar. 93.1% calibration accuracy.
+**Current version: 0.6.1** — Political Wargame (Calibration Framework). 1410 tests, 116 suites. Calibration baseline freeze + automated regression script + event timing assertions. Chronicle + Wrapped + AI Commander Events + Dayton Dimension Merge + HQ Deep Drill + Codex all landed. 93.1% area-weighted (n1026), 6/6 benchmarks.
 
 ---
 

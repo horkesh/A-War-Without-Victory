@@ -8,8 +8,8 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-23, v0.5.4 — v0.6.x scope nearly complete)
-**v0.5.4 (version bump pending).** 1410 tests, 116 suites. tsc clean. Electron 41. **n1026: 93.1% area-weighted. 6/6 benchmarks PASS.** Pre-commit hooks active.
+## Current State (2026-03-23, v0.6.1 — Political Wargame)
+**v0.6.1.** 1410 tests, 116 suites. tsc clean. Electron 41. **n1026: 93.1% area-weighted. 6/6 benchmarks PASS.** Pre-commit hooks active.
 **Night shift (2026-03-23):** 27/28 tasks, 7 plans, 15 commits. Chronicle + Wrapped + AI Commander Events + Dayton Merge + Calibration Framework + HQ Deep Drill + Codex. Essay generation blocked on API key.
 **v0.6.0-alpha (nightshift):** Event infrastructure — pressure, dimensions, flags, 14 conditions, constraint bus, bot response v1, recurrence, 3/turn cap, pipeline step. 56 new tests.
 **v0.6.0-beta (morning):** 1992 event migration. 19 events. 3 foundational decisions (ICTY-sourced). /simplify: 6 fixes.
