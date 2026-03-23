@@ -237,6 +237,10 @@ export interface GameStore {
   /** Whether the Game Chronicle panel is open. */
   chronicleOpen: boolean;
   setChronicleOpen: (open: boolean) => void;
+
+  /** Whether the Chronicle Wrapped cinematic overlay is open. */
+  wrappedOpen: boolean;
+  setWrappedOpen: (open: boolean) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -503,4 +507,7 @@ export const useGameStore = create<GameStore>((set) => ({
 
   chronicleOpen: false,
   setChronicleOpen: (open) => set({ chronicleOpen: open }),
+
+  wrappedOpen: false,
+  setWrappedOpen: (open) => set({ wrappedOpen: open }),
 }));

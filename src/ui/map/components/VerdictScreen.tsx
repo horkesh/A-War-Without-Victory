@@ -176,6 +176,12 @@ export function VerdictScreen() {
                     </div>
                     <div className="flex justify-center gap-3">
                         <button
+                            onClick={() => useGameStore.getState().setWrappedOpen(true)}
+                            className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
+                        >
+                            View Your War
+                        </button>
+                        <button
                             onClick={() => window.location.reload()}
                             className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
                         >
@@ -458,6 +464,12 @@ function FallbackGameOver({
                     </div>
                 </div>
                 <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30 flex justify-center gap-3">
+                    <button
+                        onClick={() => useGameStore.getState().setWrappedOpen(true)}
+                        className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
+                    >
+                        View Your War
+                    </button>
                     <button
                         onClick={() => window.location.reload()}
                         className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"

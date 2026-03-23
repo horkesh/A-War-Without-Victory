@@ -46,6 +46,7 @@ import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
+import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { VerdictScreen } from './components/VerdictScreen';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
@@ -651,6 +652,7 @@ function App() {
       <OperationHistoryPanel isOpen={opsHistoryOpen} onClose={() => setOpsHistoryOpen(false)} />
       <ArmyHQModal />
       <ChronicleOverlay />
+      <WrappedOverlay />
       <OpsPlanningModal />
       <CommanderSelectionModalWrapper />
       <OperationBriefingModalWrapper />
