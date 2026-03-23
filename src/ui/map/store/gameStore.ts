@@ -241,6 +241,10 @@ export interface GameStore {
   /** Whether the Chronicle Wrapped cinematic overlay is open. */
   wrappedOpen: boolean;
   setWrappedOpen: (open: boolean) => void;
+
+  /** Whether the Codex (historical essays) panel is open. */
+  codexOpen: boolean;
+  setCodexOpen: (open: boolean) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -510,4 +514,7 @@ export const useGameStore = create<GameStore>((set) => ({
 
   wrappedOpen: false,
   setWrappedOpen: (open) => set({ wrappedOpen: open }),
+
+  codexOpen: false,
+  setCodexOpen: (open) => set({ codexOpen: open }),
 }));

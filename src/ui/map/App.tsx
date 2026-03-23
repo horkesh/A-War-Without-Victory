@@ -47,6 +47,7 @@ import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
+import { CodexPanel } from './components/CodexPanel';
 import { VerdictScreen } from './components/VerdictScreen';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
@@ -118,6 +119,12 @@ function OperationBriefingModalWrapper() {
       onOrderProbe={() => handleDecision('probe')}
     />
   );
+}
+
+function CodexPanelWrapper() {
+  const codexOpen = useGameStore((s) => s.codexOpen);
+  const setCodexOpen = useGameStore((s) => s.setCodexOpen);
+  return <CodexPanel isOpen={codexOpen} onClose={() => setCodexOpen(false)} />;
 }
 
 function PeaceWarTransitionOverlay() {
@@ -540,6 +547,10 @@ function App() {
         e.preventDefault();
         const gs = useGameStore.getState();
         gs.setChronicleOpen(!gs.chronicleOpen);
+      } else if (e.key === 'x' || e.key === 'X') {
+        e.preventDefault();
+        const gs = useGameStore.getState();
+        gs.setCodexOpen(!gs.codexOpen);
       }
     };
     window.addEventListener('keydown', handler);
@@ -653,6 +664,7 @@ function App() {
       <ArmyHQModal />
       <ChronicleOverlay />
       <WrappedOverlay />
+      <CodexPanelWrapper />
       <OpsPlanningModal />
       <CommanderSelectionModalWrapper />
       <OperationBriefingModalWrapper />

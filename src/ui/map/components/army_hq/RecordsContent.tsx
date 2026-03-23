@@ -1,18 +1,21 @@
 /**
- * Records tab content — wraps AAR and Operation History panels
- * for inline rendering inside Army HQ RECORDS tab.
+ * Records tab content — wraps AAR, Operation History panels,
+ * and Codex (historical essays) for inline rendering inside Army HQ RECORDS tab.
  */
 import { useState } from 'react';
 import { AARPanel } from '../AARPanel';
 import { OperationHistoryPanel } from '../OperationHistoryPanel';
+import { useGameStore } from '../../store/gameStore';
 
 const SUB_TABS = [
     { id: 'aar' as const, label: 'AFTER-ACTION REPORT' },
     { id: 'ops' as const, label: 'OPERATION HISTORY' },
+    { id: 'codex' as const, label: 'CODEX' },
 ];
 
 export function RecordsContent() {
-    const [subTab, setSubTab] = useState<'aar' | 'ops'>('aar');
+    const [subTab, setSubTab] = useState<'aar' | 'ops' | 'codex'>('aar');
+    const setCodexOpen = useGameStore((s) => s.setCodexOpen);
 
     return (
         <div>
@@ -22,9 +25,15 @@ export function RecordsContent() {
                     <button
                         key={id}
                         type="button"
-                        onClick={() => setSubTab(id)}
+                        onClick={() => {
+                            if (id === 'codex') {
+                                setCodexOpen(true);
+                            } else {
+                                setSubTab(id);
+                            }
+                        }}
                         className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] rounded-md border transition-all ${
-                            subTab === id
+                            subTab === id && id !== 'codex'
                                 ? 'bg-amber-400/15 border-amber-400/30 text-amber-400'
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
                         }`}
