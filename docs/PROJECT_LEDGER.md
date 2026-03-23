@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-23
-**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995.** **96-essay Codex — ALL 96 ESSAYS 5-ROUND QA CERTIFIED + deep historian audit.** Next: AI Commander smoke test, calibration regressions.
+**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995.** **96-essay Codex — ALL 96 ESSAYS 5-ROUND QA CERTIFIED + deep historian audit.** Roadmap restructured: v0.7=Dynamic Codex, v0.8=Command Chain, v0.9=Consequences. Sep 1991 start CUT. Three v0.7 plans written. Next: finish v0.6.2-v0.6.3 event migration, then v0.7 implementation.
 
 ## [2026-03-23] 96-Essay Codex — Deep Audit + 2 New Essays
 

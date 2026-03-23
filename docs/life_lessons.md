@@ -73,6 +73,21 @@
 
 ---
 
+## New Lessons (2026-03-23 session)
+
+### [QA] Subagent index-counting errors are systematic — always force-verify with a script (2026-03-23) — NEW
+- **Context**: During 5-round QA of 46 essays, 3 out of 6 reviewer agents miscounted array indices and reviewed the WRONG essays. Batches B, C, and D all reviewed essays 56-63 instead of their assigned ranges (56-63, 64-71, 72-79). Triple coverage on one range, zero on two others.
+- **Wrong approach**: Trusting that a subagent given "review indices 64-71" will actually access the correct array elements. The agents counted lines in the JSON file instead of using array indexing, and the line-to-index mapping drifted.
+- **Right approach**: Force the agent to run a verification script FIRST: `node -e "... for(let i=64;i<=71;i++) console.log(i, essays[i].event_id)"` and STOP if the output doesn't match expected event_ids.
+- **Do instead**: When dispatching subagents to process specific array ranges, always include (1) the expected identifiers at each index, (2) a mandatory verification script, and (3) instructions to STOP and report if there's a mismatch. Don't trust positional access across agents.
+
+### [Design] Design decisions cascade — capture them in memory before they get buried in conversation (2026-03-23) — NEW
+- **Context**: Three major design decisions emerged in rapid conversation: (1) Codex is a dynamic encyclopedia, (2) game starts April 1992 only, (3) command hierarchy with AI slots. Each changes the foundational architecture. If captured only in conversation, they'd be lost on context compaction.
+- **Right approach**: As soon as a design decision is made, write it to memory AND update the canonical docs (VERSIONING.md, napkin, ledger). Don't wait for implementation — the decision IS the deliverable.
+- **Do instead**: When a conversation produces a design decision that changes the project's direction, immediately: (1) save to memory, (2) update VERSIONING.md or relevant canon doc, (3) note in napkin. Three touchpoints ensure the decision propagates to future sessions.
+
+---
+
 ## Active Lessons (no recent violations)
 
 ### [Tooling] Grep for unused files misses .js extension imports — always tsc after bulk deletions (2026-03-21) — NEW

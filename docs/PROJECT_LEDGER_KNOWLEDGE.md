@@ -1,7 +1,15 @@
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-03-21
+**Last Updated:** 2026-03-23
 **Purpose:** Knowledge accumulation by theme.
+
+**Dynamic Codex architecture (2026-03-23):** The Codex is an unlockable encyclopedia that morphs with player decisions. Four essay layers: canonical (ICTY-sourced, immutable), dynamic (game-state paragraphs), divergence notes ("in the real war X, in yours Y"), ghost entries (events that never fired). Four tiers: FIXED (international scaffold, ~29), CONDITIONAL (binary fired/ghost, ~20), SHAPEABLE (dynamic paragraphs, ~33), AHISTORICAL (template-generated, ~14). Event dependency graph: 7 causal chains, Croat-Bosniak war is highest-degree hub (21 dependents), ~25 orphan flags need wiring. Essay template engine: `dynamic_sections[]` keyed by paragraph index + flag conditions, `ghost_when` for unfired events, `unlock_condition` for prologue vs event-triggered.
+
+**Command hierarchy with AI slots (2026-03-23):** Political Leader → Army Commander → Corps Commanders → Brigades. Player chooses depth of involvement per decision. Officers have personalities (aggression, competence, loyalty) that FILTER orders through `interpretOrder()`. Three tiers of pushback: creative interpretation (normal), delay/objection (1-turn), refusal (extreme). AI API plugs in at political level for opposing factions (latency concern blocks corps-level API). Key insight: the player doesn't "choose a mode" — they choose where to intervene; the hierarchy always runs.
+
+**Campaign structure decision (2026-03-23):** Game starts April 1992 ONLY. September 1991 start CUT. Peace phase CUT (pre-war events are Codex backstory, unlocked at game start). Three historical scenarios (April 1993/1994/1995) deferred to v1.2 — each requires months of /historian research for accurate OOB, territory, diplomatic state snapshots. The scenario loader needs mid-war entry support with pre-fired events and pre-set flags.
+
+**Event flag wiring gap (2026-03-23):** The event system sets ~25 flags but only ONE is consumed downstream (`rs_strategic_goals` → `drina_cleansing_decision`). All others are orphans. The flag wiring plan (v0.7.0) maps each to consumers: `corridor_secured` → RS supply, `camps_revealed` → patron pressure, `drina_cleansing_occurred` → Srebrenica conditions, `coha_active` → combat suppression. Three FIXED events become CONDITIONAL: `srebrenica_falls_1995` (enclave garrison + supply + Drina Corps), `second_markale_massacre_1995` (SRK bombardment intensity), `zepa_falls_1995` (Drina Corps available). Six-phase implementation respecting one-change-per-calibration-run.
 
 **Preparation-aware brigade assembly (2026-03-21):** `countAssembledBrigades()` in `operation_preparation.ts` force_staging sub-phase checks how many participating brigades are at staging/objective OSIDs. Gate: 60% assembled OR timeout at preparation_max_turns. The `planning_duration` field on PrePlannedOp is a FALLBACK — the preparation sub-phase machine is the PRIMARY transition gate. Aggressive commanders (aggressiveness ≥ 4) complete preparation in 3 turns regardless of planning_duration. The force_staging assembly check is the correct intervention point.
 
