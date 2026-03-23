@@ -34,11 +34,45 @@ function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+const MUNICIPALITY_DISPLAY_NAMES: Record<string, string> = {
+    banja_luka: 'Banja Luka', banovici: 'Banovići', bihac: 'Bihać', bijeljina: 'Bijeljina',
+    bileca: 'Bileća', bosanska_dubica: 'Bosanska Dubica', bosanska_gradiska: 'Bosanska Gradiška',
+    bosanska_kostajnica: 'Bosanska Kostajnica', bosanska_krupa: 'Bosanska Krupa',
+    bosanski_brod: 'Bosanski Brod', bosanski_novi: 'Bosanski Novi',
+    bosanski_petrovac: 'Bosanski Petrovac', bosanski_samac: 'Bosanski Šamac',
+    bosansko_grahovo: 'Bosansko Grahovo', bratunac: 'Bratunac', brcko: 'Brčko',
+    breza: 'Breza', bugojno: 'Bugojno', busovaca: 'Busovača', cajnice: 'Čajniče',
+    capljina: 'Čapljina', cazin: 'Cazin', celinac: 'Čelinac',
+    centar_sarajevo: 'Centar Sarajevo', citluk: 'Čitluk', derventa: 'Derventa',
+    doboj: 'Doboj', donji_vakuf: 'Donji Vakuf', duvno: 'Duvno', foca: 'Foča',
+    fojnica: 'Fojnica', gacko: 'Gacko', glamoc: 'Glamoč', gorazde: 'Goražde',
+    gornji_vakuf: 'Gornji Vakuf', gracanica: 'Gračanica', gradacac: 'Gradačac',
+    grude: 'Grude', hadzici: 'Hadžići', hanpijesak: 'Han Pijesak',
+    ilidza: 'Ilidža', ilijas: 'Ilijaš', jablanica: 'Jablanica', jajce: 'Jajce',
+    kakanj: 'Kakanj', kalesija: 'Kalesija', kalinovik: 'Kalinovik', kiseljak: 'Kiseljak',
+    kladanj: 'Kladanj', kljuc: 'Ključ', konjic: 'Konjic', kotor_varos: 'Kotor Varoš',
+    kresevo: 'Kreševo', kupres: 'Kupres', laktasi: 'Laktaši', listica: 'Lištica',
+    livno: 'Livno', ljubinje: 'Ljubinje', ljubuski: 'Ljubuški', lopare: 'Lopare',
+    lukavac: 'Lukavac', maglaj: 'Maglaj', modrica: 'Modrića', mostar: 'Mostar',
+    mrkonjic_grad: 'Mrkonjić Grad', neum: 'Neum', nevesinje: 'Nevesinje',
+    novi_grad_sarajevo: 'Novi Grad Sarajevo', novi_travnik: 'Novi Travnik',
+    novo_sarajevo: 'Novo Sarajevo', odzak: 'Odžak', olovo: 'Olovo', orasje: 'Orašje',
+    pale: 'Pale', posusje: 'Posušje', prijedor: 'Prijedor', prnjavor: 'Prnjavor',
+    prozor: 'Prozor', rogatica: 'Rogatica', rudo: 'Rudo', sanski_most: 'Sanski Most',
+    sekovici: 'Šekovići', sipovo: 'Šipovo', skender_vakuf: 'Skender Vakuf',
+    sokolac: 'Sokolac', srbac: 'Srbac', srebrenica: 'Srebrenica', srebrenik: 'Srebrenik',
+    stari_grad_sarajevo: 'Stari Grad Sarajevo', stolac: 'Stolac', tesanj: 'Tešanj',
+    teslic: 'Teslić', titov_drvar: 'Drvar', travnik: 'Travnik', trebinje: 'Trebinje',
+    trnovo: 'Trnovo', tuzla: 'Tuzla', ugljevik: 'Ugljevik', vares: 'Vareš',
+    velika_kladusa: 'Velika Kladuša', visegrad: 'Višegrad', visoko: 'Visoko',
+    vitez: 'Vitez', vlasenica: 'Vlasenica', vogosca: 'Vogošća',
+    zavidovici: 'Zavidovići', zenica: 'Zenica', zepce: 'Žepče',
+    zivinice: 'Živinice', zvornik: 'Zvornik',
+};
+
 function humanizeMunicipalitySlug(slug: string): string {
-    return slug
-        .split('-')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
+    return MUNICIPALITY_DISPLAY_NAMES[slug]
+        ?? slug.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 function operationKeyFromView(operation: OperationView): string {
