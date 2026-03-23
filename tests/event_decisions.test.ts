@@ -142,6 +142,72 @@ describe('Event Decisions', () => {
         expect(() => resolveEventDecision(state, 'nonexistent', 'accept')).toThrow('No pending decision');
     });
 
+    it('resolveEventDecision applies sets_flags from chosen response', () => {
+        const state = makeMinimalState('RBiH');
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'test_flag_event',
+                event_title: 'Strategic Goals',
+                turn_fired: 5,
+                faction: 'RS',
+                response_options: [
+                    {
+                        id: 'maximalist',
+                        label: 'Full territorial goals',
+                        effects: [{ kind: 'narrative', text: 'Maximalist path chosen.' }],
+                        sets_flags: { rs_strategic_goals: 'maximalist', test_flag: true },
+                    },
+                    {
+                        id: 'selective',
+                        label: 'Selective goals',
+                        effects: [{ kind: 'narrative', text: 'Selective path chosen.' }],
+                        sets_flags: { rs_strategic_goals: 'selective' },
+                    },
+                ],
+            },
+        ];
+
+        resolveEventDecision(state, 'test_flag_event', 'selective');
+
+        expect(state.military.event_flags).toBeDefined();
+        expect(state.military.event_flags!['rs_strategic_goals']).toBe('selective');
+        // 'test_flag' should NOT be set (it's on the other option)
+        expect(state.military.event_flags!['test_flag']).toBeUndefined();
+    });
+
+    it('resolveEventDecision applies dimension_shifts from chosen response', () => {
+        const state = makeMinimalState('RBiH');
+        // Set up minimal negotiation/dimension state
+        state.military.negotiation = {
+            strategic_dimensions: {
+                RBiH: { military_credibility: { base_value: 50, event_modifier: 0 } },
+                RS: { military_credibility: { base_value: 50, event_modifier: 0 } },
+                HRHB: { military_credibility: { base_value: 50, event_modifier: 0 } },
+            },
+        } as any;
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'test_dim_event',
+                event_title: 'Dimension Test',
+                turn_fired: 5,
+                faction: 'RBiH',
+                response_options: [
+                    {
+                        id: 'bold',
+                        label: 'Bold move',
+                        effects: [],
+                        dimension_shifts: [{ faction: 'RBiH', dimension: 'military_credibility', delta: 10 }],
+                    },
+                ],
+            },
+        ];
+
+        resolveEventDecision(state, 'test_dim_event', 'bold');
+
+        const dims = state.military.negotiation!.strategic_dimensions as any;
+        expect(dims.RBiH.military_credibility.event_modifier).toBe(10);
+    });
+
     it('resolveEventDecision throws on unknown response_id', () => {
         const state = makeMinimalState('RBiH');
         state.military.pending_event_decisions = [

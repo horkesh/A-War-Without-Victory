@@ -59,17 +59,46 @@ for (let i = 0; i < weeklyLines.length; i++) {
     }
 }
 
-// Extract area-weighted from control_delta
+// Compute area-weighted match from final_save vs painted reference
 let areaWeightedPct = null;
 try {
-    const controlDelta = JSON.parse(fs.readFileSync(path.join(runDir, 'control_delta.json'), 'utf8'));
-    areaWeightedPct = controlDelta.area_weighted_match_pct ?? null;
-} catch { /* optional */ }
+    const finalSave = JSON.parse(fs.readFileSync(path.join(runDir, 'final_save.json'), 'utf8'));
+    const paintedPath = path.resolve(__dirname, '..', 'data', 'source', 'calibration', 'painted_control_jan1993.json');
+    const painted = JSON.parse(fs.readFileSync(paintedPath, 'utf8'));
+    const areasPath = path.resolve(__dirname, '..', 'data', 'derived', 'operational', 'osid_areas.json');
+    const areasData = JSON.parse(fs.readFileSync(areasPath, 'utf8'));
+    const areas = areasData.areas || areasData;
 
-// If not in control_delta, compute from comparison tool output
+    const simControl = finalSave.political?.political_controllers || finalSave.political_controllers || {};
+    const paintedControl = painted.by_settlement_id || painted;
+
+    let matchArea = 0;
+    let totalArea = 0;
+    for (const [osid, paintedFaction] of Object.entries(paintedControl)) {
+        const area = areas[osid] ?? 0;
+        totalArea += area;
+        if (simControl[osid] === paintedFaction) {
+            matchArea += area;
+        }
+    }
+    if (totalArea > 0) {
+        areaWeightedPct = Math.round((matchArea / totalArea) * 1000) / 10;
+    }
+} catch (e) {
+    console.warn('Could not compute area-weighted match:', e.message);
+}
+
+// Fallback: try control_delta if direct computation failed
 if (areaWeightedPct === null) {
-    // Use the known value from the comparison tool run
-    areaWeightedPct = 93.1; // n1026 baseline
+    try {
+        const controlDelta = JSON.parse(fs.readFileSync(path.join(runDir, 'control_delta.json'), 'utf8'));
+        areaWeightedPct = controlDelta.area_weighted_match_pct ?? null;
+    } catch { /* optional */ }
+}
+
+if (areaWeightedPct === null) {
+    console.error('ERROR: Could not compute area-weighted percentage. Provide run with final_save.json.');
+    process.exit(1);
 }
 
 const baseline = {

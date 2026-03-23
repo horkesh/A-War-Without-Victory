@@ -5,6 +5,7 @@
 
 import type { GameState } from '../../state/game_state.js';
 import { applyEventEffects } from './apply_effects.js';
+import { applyDefinitionDimensionShifts, applyDefinitionFlags } from './evaluate_events.js';
 
 /**
  * Resolve a pending event decision.
@@ -32,6 +33,10 @@ export function resolveEventDecision(state: GameState, eventId: string, response
 
     // Apply the chosen response's effects
     applyEventEffects(state, chosen.effects);
+
+    // Apply flags and dimension shifts from the chosen response option
+    applyDefinitionFlags(state, chosen.sets_flags);
+    applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
 
     // Remove from pending list
     pending.splice(idx, 1);

@@ -100,8 +100,8 @@ describe('event timing windows (40w baseline)', () => {
         expect(turn!).toBeLessThanOrEqual(40);
     });
 
-    it('all 19 events fire in 40 weeks', () => {
-        expect(baseline.events_fired.length).toBe(19);
+    it('all 23 events fire in 40 weeks', () => {
+        expect(baseline.events_fired.length).toBe(23);
     });
 
     it('foundational decisions fire in first 7 turns', () => {

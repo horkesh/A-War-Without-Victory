@@ -1,15 +1,15 @@
 {
-  "frozen_at": "2026-03-23T00:19:43.057Z",
-  "run_dir": "apr1992_definitive_40w__77cac5e01d3c929e__w40_n1026",
+  "frozen_at": "2026-03-23T23:50:26.549Z",
+  "run_dir": "apr1992_definitive_40w__77cac5e01d3c929e__w40_n1033",
   "run_id": "apr1992_definitive_40w__77cac5e01d3c929e__w40",
-  "final_state_hash": "7efa17ee8472a017",
+  "final_state_hash": "019959dbe2d25d26",
   "weeks": 40,
-  "area_weighted_pct": 93.1,
+  "area_weighted_pct": 92,
   "territory": {
     "HRHB": {
-      "count": 84,
+      "count": 86,
       "reference": 125,
-      "delta": -41
+      "delta": -39
     },
     "RBiH": {
       "count": 263,
@@ -17,9 +17,9 @@
       "delta": -10
     },
     "RS": {
-      "count": 365,
+      "count": 363,
       "reference": 314,
-      "delta": 51
+      "delta": 49
     }
   },
   "events_fired": [
@@ -85,11 +85,21 @@
     },
     {
       "turn": 10,
+      "id": "drina_cleansing_decision_1992",
+      "text": "The Drina Valley Question"
+    },
+    {
+      "turn": 10,
       "id": "drina_valley_ethnic_cleansing_1992",
       "text": "Drina Valley Campaign Accelerates"
     },
     {
-      "turn": 16,
+      "turn": 11,
+      "id": "operation_corridor_1992",
+      "text": "Operation Corridor — VRS Breaks Through at Brcko"
+    },
+    {
+      "turn": 12,
       "id": "srebrenica_enclave_forms_1992",
       "text": "Srebrenica Pocket Crystallizes"
     },
@@ -110,6 +120,11 @@
     },
     {
       "turn": 38,
+      "id": "kravica_attack_1993",
+      "text": "Kravica Raid on Orthodox Christmas"
+    },
+    {
+      "turn": 38,
       "id": "vance_owen_plan_1993",
       "text": "Vance-Owen Peace Plan Presented"
     },
@@ -117,6 +132,11 @@
       "turn": 39,
       "id": "jajce_falls_1992",
       "text": "Jajce Falls to VRS Forces"
+    },
+    {
+      "turn": 39,
+      "id": "turajlic_assassination_1993",
+      "text": "Deputy Prime Minister Turajlic Assassinated"
     }
   ],
   "total_osids": 712

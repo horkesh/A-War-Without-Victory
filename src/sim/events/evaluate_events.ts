@@ -69,7 +69,7 @@ function getNarrativeText(def: EventDefinition): string {
 }
 
 /** Apply dimension_shifts from an event definition to the strategic dimensions store. */
-function applyDefinitionDimensionShifts(state: GameState, shifts: DimensionShift[] | undefined): void {
+export function applyDefinitionDimensionShifts(state: GameState, shifts: DimensionShift[] | undefined): void {
     if (!shifts || shifts.length === 0) return;
     const negotiation = state.military.negotiation;
     if (!negotiation?.strategic_dimensions) return;
@@ -80,7 +80,7 @@ function applyDefinitionDimensionShifts(state: GameState, shifts: DimensionShift
 }
 
 /** Apply sets_flags from an event definition to event_flags on state. */
-function applyDefinitionFlags(state: GameState, flags: Record<string, string | number | boolean> | undefined): void {
+export function applyDefinitionFlags(state: GameState, flags: Record<string, string | number | boolean> | undefined): void {
     if (!flags) return;
     if (!state.military.event_flags) {
         state.military.event_flags = {};
@@ -213,6 +213,9 @@ export function evaluateEvents(
                 // No player faction (headless/spectator): bot auto-responds once
                 const chosen = pickBotResponseV1(def.response_options, def.bot_response_logic, DEFAULT_BOT_COMMANDER);
                 applyEventEffects(state, chosen.effects);
+                // Apply flags and dimension shifts from the chosen response option
+                applyDefinitionFlags(state, chosen.sets_flags);
+                applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
             }
         }
 
