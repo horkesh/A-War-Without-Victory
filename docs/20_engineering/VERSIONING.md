@@ -84,38 +84,44 @@ Transforms AWWV from military simulation into political wargame. Master roadmap:
 - v0.6.3: 1995 endgame events, Dayton dimension merge, Chronicle Wrapped, Staff Map
 - v0.6.4: Historical essays (100 × 500 words, Sonnet-generated)
 
-### 0.7.x — Unified UI + Command Layer
-Plan: `docs/plans/2026-03-16-v0.7.0-performance.md` through `v0.7.3`
+### 0.7.x — Dynamic Codex
+Plan: `docs/plans/2026-03-23-event-flag-wiring-plan.md`, `2026-03-23-essay-template-engine-plan.md`, `2026-03-23-canon-audit-checklist.md`
 
-- Warroom React migration (single Electron window, smooth transitions)
-- Command autonomy slider (player chooses military autonomy level)
-- Officer defiance events
-- Performance optimization pass
-- Accessibility (colorblind, key remapping)
-- Localization (B/C/S + English)
-- Visual polish
+The Codex transforms from static essays into a living historical document that morphs with player decisions.
 
-### 0.8.x — Release Candidate
-Plan: `docs/plans/2026-03-16-v0.8.0-external-playtesting.md` through `v0.8.2`
+- v0.7.0: Event flag wiring (~25 orphan flags → downstream consumers), FIXED→CONDITIONAL conversion (Srebrenica, 2nd Markale)
+- v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries), Codex UI
+- v0.7.2: Canon audit (remove September 1991 start, peace phase references from all docs)
+- v0.7.3: Warroom React migration (absorbs old v0.7.0 scope)
 
-- External playtesting feedback incorporated
-- Final balance tuning
-- Platform packaging (Windows, Mac, Linux)
-- Steam page + capsule art + wishlists
-- Anthropic developer relations pitch (after AI Commander demo)
+### 0.8.x — Command Chain
+Plans: TBD (write after v0.7 ships)
 
-### 0.9.x — Gold Candidate
-Plan: `docs/plans/2026-03-16-v0.9.0-final-qa.md` through `v0.9.1`
+The player commands through a hierarchy of AI personalities that can be delegated to or overridden.
 
-- Final QA sweep
-- Store marketing materials
-- Platform certification
-- Installer finalized
+- v0.8.0: Political leader bot for non-player factions (event responses, alliance, diplomacy, war crimes policy)
+- v0.8.1: Order interpretation system (officer personality filters commands — creative interpretation, delay, refusal)
+- v0.8.2: Autonomy depth + Claude API at political level
+
+### 0.9.x — Consequences + Polish
+Plans: TBD (write after v0.8 ships)
+
+Ahistorical choices produce realistic consequences. Ship preparation.
+
+- v0.9.0: Consequence system (divergence events — no cleansing → partisans, alliance holds → no Washington Agreement chain)
+- v0.9.1: Dynamic essay content (~30 Tier 3 dynamic sections + ~15 Tier 4 ahistorical templates)
+- v0.9.2: External playtesting + balance (absorbs old v0.8.0-v0.8.1)
+- v0.9.3: Performance + accessibility (absorbs old v0.7.0-v0.7.1)
+- v0.9.4: Platform packaging + store (absorbs old v0.8.2, v0.9.1)
 
 ### 1.0.0 — Gold / Public Release
-Plan: `docs/plans/2026-03-16-v1.0.0-gold.md`
+Plan: `docs/plans/2026-03-16-v1.0.0-gold.md` (needs revision for new scope)
 
-Ship it. "Another such victory and we are undone."
+Full campaign from April 1992. Dynamic Codex. Command hierarchy. Consequence system. Tutorial. Sound. Ship it.
+
+NOT in v1.0: Localization (v1.1), historical scenarios (v1.2), AI API at corps level (v2.0).
+
+"Another such victory and we are undone."
 
 ---
 
@@ -175,11 +181,11 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Tactical map (React + MapLibre + Deck.gl) | ✓ Functional |
 | Warroom (vanilla TS + canvas) | ✓ Functional (v0.7+ React migration planned) |
 | Army HQ (4-tab command center) | ✓ Functional (Briefing/Summary/Records/Personnel) |
-| Events/decisions | ✓ Functional (19 events, pressure system, 14 condition types, 56 tests, AI Commander integration) |
+| Events/decisions | ✓ Functional (94 events, pressure system, 14 condition types, 96-essay Codex certified) |
 | Strategic dimensions | ✓ Functional (6 dimensions, Dayton merge complete, UI composite bar) |
 | Scenarios (40w/52w/56w) | ✓ Complete |
 | AI Commander infrastructure | ✓ Functional (14 modules, multi-model routing) |
-| Peace phase | ○ Partial (framework exists, not playable) |
+| Peace phase | ✗ CUT — game starts April 1992, pre-war events are Codex backstory |
 | Dayton negotiation | ✓ Functional (UI + engine, dimension merge complete, composite bar) |
 | Full turn cycle | ○ Partial |
 | Save/load | ○ Partial (headless OK, desktop partial) |
@@ -190,7 +196,7 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Sound/music | ✗ Not started |
 | Localization | ✗ Not started (v0.8+ scope: B/C/S + English) |
 
-**Current version: 0.6.1** — Political Wargame (Calibration Framework). 1410 tests, 116 suites. Calibration baseline freeze + automated regression script + event timing assertions. Chronicle + Wrapped + AI Commander Events + Dayton Dimension Merge + HQ Deep Drill + Codex all landed. 93.1% area-weighted (n1026), 6/6 benchmarks.
+**Current version: 0.6.1** — Political Wargame. 1410 tests, 116 suites. 92.0% area-weighted (honest baseline, n1029). 96-essay Codex (all 5-round QA certified + deep historian audit). 94 events across 1992-1995. Event dependency graph mapped. Dynamic Codex design established. Campaign starts April 1992 (Sep 1991 start CUT).
 
 ---
 
