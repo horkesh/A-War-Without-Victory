@@ -71,7 +71,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
     }, [firedEvents]);
 
     // Cast and group essays by year
-    const essays = essayIndex as EssayEntry[];
+    const essays = (Array.isArray(essayIndex) ? essayIndex : (essayIndex as { essays: EssayEntry[] }).essays ?? []) as EssayEntry[];
     const essaysByYear = useMemo(() => {
         const grouped = new Map<number, EssayEntry[]>();
         for (const year of YEARS) {

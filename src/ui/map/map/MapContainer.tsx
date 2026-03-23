@@ -25,7 +25,6 @@ import { buildSectorDemarcationGeoJSON } from './builders/buildSectorDemarcation
 import { buildOperationTargetPointsGeoJSON, buildOperationTargetCrosshairsGeoJSON } from './builders/buildOperationTargetIconsGeoJSON';
 import { buildOperationArrowsGeoJSON } from './builders/buildOperationArrowsGeoJSON';
 import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
-import { buildOrderArrowsGeoJSON } from './builders/buildOrderArrowsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
 import { resolveFormationLocationOsid } from './builders/resolveFormationLocationOsid';
 import { ensureFormationIcons, ensureTacticalIcons } from './formationIcons';
@@ -952,7 +951,8 @@ export function MapContainer() {
                 // Only hide map-level icons if the overlay anchor is ready, ensuring no "flicker/disappearance"
                 const activeOverlayOsid = (expandedStackOsid && overlayAnchor) ? expandedStackOsid : null;
                 const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson, activeOverlayOsid);
-                const orderArrowsGeoJson = buildOrderArrowsGeoJSON(state, currentStagedOrders, controlledGeoJson);
+                // Order arrows removed — player is political leader, not military commander.
+                // The source stays empty; layers in awwv_map_style.json are inert.
                 const iconIds = Array.from(new Set(formationsGeoJson.features.flatMap(f => [f.properties.icon_id, f.properties.white_icon_id])));
 
                 // Defer icon registration + setData to idle/next tick so this rAF doesn't block the main thread (freeze fix).
@@ -986,7 +986,7 @@ export function MapContainer() {
 
                     // Keep empty source for sector highlight rings if needed, but disable MapLibre native formation symbols
                     if (m.getSource('formations')) (m.getSource('formations') as GeoJSONSource).setData(formationsGeoJson);
-                    if (m.getSource('order-arrows')) (m.getSource('order-arrows') as GeoJSONSource).setData(orderArrowsGeoJson);
+                    // order-arrows source stays empty (arrows removed)
 
                     // Heatmap: Supply and Combat intensity
                     safeEnsureSource(m, 'operational-heatmap', { type: 'geojson', data: EMPTY_GEOJSON });
