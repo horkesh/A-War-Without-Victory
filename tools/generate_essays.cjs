@@ -68,19 +68,22 @@ EVENT: ${entry.title}
 EVENT ID: ${entry.event_id}
 YEAR: ${entry.year}
 CATEGORY: ${entry.category}
-SOURCES TO REFERENCE: ${entry.sources.join(', ')}
+BACKGROUND SOURCES (use for facts but do NOT cite by name): ${entry.sources.filter(s => !s.startsWith('ICTY')).join(', ') || 'none'}
+ICTY SOURCES (cite these explicitly in the text): ${entry.sources.filter(s => s.startsWith('ICTY')).join(', ') || 'none'}
 
 REQUIREMENTS:
 - Exactly ~${TARGET_WORDS} words (±50)
 - Educational tone, suitable for a strategy game about the Bosnian War
 - Respectful and balanced — present perspectives from all relevant sides
-- Reference the historical sources provided
+- Only ICTY indictments, trial judgments, and appeals judgments may be cited as sources in the text. Reference them by case name and paragraph number where possible.
+- Balkan Battlegrounds and other background sources should inform the content but NEVER be mentioned or attributed by name
 - No glorification of violence, no political advocacy
 - Focus on the strategic/political significance, not graphic details
 - Include context about what led to this event and its consequences
 - Mention specific actors, locations, and dates where historically accurate
+- Do NOT include a title heading — start directly with the first paragraph
 
-Write the essay directly, no preamble or meta-text.`;
+Write the essay directly, no preamble, no title heading, no meta-text.`;
 }
 
 async function main() {
@@ -152,13 +155,20 @@ async function main() {
 
     console.log(`\nDone. Generated: ${generated}/${toGenerate.length}. Estimated total cost: $${totalCost.toFixed(2)}`);
 
-    // Update index with generated status
+    // Update index with generated status + inline content
     for (const entry of essays) {
         const filePath = path.join(ESSAYS_DIR, `${entry.event_id}.json`);
-        entry.generated = fs.existsSync(filePath);
+        if (fs.existsSync(filePath)) {
+            entry.generated = true;
+            const essayData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            entry.content = essayData.content;
+            entry.sources = essayData.sources;
+        } else {
+            entry.generated = false;
+        }
     }
     fs.writeFileSync(INDEX_PATH, JSON.stringify({ essays }, null, 2));
-    console.log('Updated essay_index.json');
+    console.log('Updated essay_index.json (content inlined)');
 }
 
 main().catch(err => {
