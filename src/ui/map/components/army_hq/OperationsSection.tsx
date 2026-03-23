@@ -497,6 +497,15 @@ export function OperationsSection({ corpsId, operations, gameState }: Operations
                                             <span className={`text-[9px] text-text-secondary/60 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}>
                                                 ▶
                                             </span>
+                                            {op.readiness && (
+                                                <span className={`inline-block w-2 h-2 rounded-full ${
+                                                    Math.min(op.readiness.supply, op.readiness.cohesion, op.readiness.intel) < 0.4
+                                                        ? 'bg-red-500'
+                                                        : Math.min(op.readiness.supply, op.readiness.cohesion, op.readiness.intel) < 0.7
+                                                            ? 'bg-amber-400'
+                                                            : 'bg-emerald-400'
+                                                }`} title={`Readiness: Supply ${Math.round(op.readiness.supply * 100)}% / Cohesion ${Math.round(op.readiness.cohesion * 100)}% / Intel ${Math.round(op.readiness.intel * 100)}%`} />
+                                            )}
                                             <span className="text-[14px] font-bold text-text-primary uppercase font-mono tracking-wider"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
                                                 {op.name}
