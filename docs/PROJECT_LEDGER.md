@@ -1,7 +1,29 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-23
-**Status:** **v0.5.4** (v0.6.0 merge in progress). **1317 tests**, 111 suites. **93.1% area-weighted (n1024). 6/6 benchmarks PASS.** Electron 41. Tech debt audit: `any` types 214→64, circular deps resolved, displacement cap verified. Army HQ: 4-tab command center. Next: Phase 5 deep drill-down, event decision UI, warroom React migration (v0.7+).
+**Status:** **v0.5.4** (v0.6.x scope nearly complete). **1410 tests**, 116 suites. **93.1% area-weighted (n1026). 6/6 benchmarks PASS.** Electron 41. Night shift: 27/28 tasks, 7 plans, 15 commits. Chronicle + Wrapped + AI Commander Events + Dayton Dimension Merge + Calibration Framework + HQ Deep Drill + Codex. Next: essay generation (API key), version bump, 1995 event content.
+
+## [2026-03-23] Night Shift — 7 Plans, 27/28 Tasks
+
+**Scope:** Full v0.6.1-v0.6.4 implementation across 7 plans. 15 commits, 93 new tests.
+
+**Plan 1 — Game Chronicle (6 tasks):** Full-screen timeline overlay. Territory + supply snapshots on TurnSummary. generateChronicleEntries (6 card types, significance filtering). ChronicleSpine (CSS territory ribbon). ChronicleCard (6 variants). ChronicleOverlay (z-1000, ESC close). CHRONICLE toolbar button + C shortcut + clickable date. /simplify: extracted shared getOsidAreas, faction colors from theme, humanizeOsid, turnSummaries on adapter.
+
+**Plan 2 — AI Commander Events (3 tasks):** Prompts enriched with fired events, aggression modifiers, operation blocks, doctrine overrides. generateEventDecision (Haiku model, JSON output, personality-driven, fallback). validateCorpsDecision + validateArmyDecision (constraint enforcement).
+
+**Plan 3 — Dayton Dimension Merge (5 tasks):** DIMENSION_WEIGHTS (faction-specific). computeNegotiatingCapital (weighted composite). computeDimensionBaseValues (6 formulas from game state). NegotiationCapital → NegotiationBreakdown (removed 5 scoring fields). Pipeline step compute-dimension-bases (step 143). UI composite bar + weight display + tooltips. 40w calibration: n1026 = 93.1%, zero regression.
+
+**Plan 4 — Calibration Framework (3 tasks):** Baseline freeze (data/calibration/baseline_40w.json). Regression script (npm run calibrate:40w). Event timing assertions (14 tests, 19 events in correct windows).
+
+**Plan 5 — HQ Deep Drill-Down (4 tasks):** Brigade sub-cards (morale/cohesion bars, equipment, arc badges, campaign casualties, decorations, history). Operation sub-cards (commander personality, per-brigade ORBAT, weekly log timeline, AAR grade/casualties/equipment). Sector sub-cards (intel confidence, threat assessment + stance recommendation, brigade positions, density). Readiness dot (green/amber/red).
+
+**Plan 6 — Chronicle Wrapped (4 tasks):** generateWrappedSlides (10 slides). SpiderChart (6-axis SVG radar). WrappedSlide (10 variants, faction-tinted). WrappedOverlay (z-1100 cinematic, click/arrow nav). "VIEW YOUR WAR" on VerdictScreen.
+
+**Plan 7 — Historical Essays (2/3 tasks, 1 blocked):** Essay index (48 entries, all events mapped). CodexPanel (lock/unlock, paper aesthetic, X shortcut). Generation script ready but API key expired.
+
+**Determinism:** All engine changes verified via 40w calibration. UI-only changes elsewhere. No simulation regression.
+
+**Files:** 50+ files across src/sim/, src/state/, src/ui/map/, data/, tools/, tests/.
 
 ## [2026-03-23] Technical Debt Cleanup — Type Safety + Electron Upgrade
 
