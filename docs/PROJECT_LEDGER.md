@@ -1,7 +1,30 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-23
-**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995 (was 19).** Next: AI Commander smoke test, Chronicle visual review, calibration regressions (Posavina, Srebrenica, Simin Han).
+**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995.** **94-essay Codex — 100% event coverage (48 QA-certified, 46 pending QA).** Next: QA remaining 46 essays (5-round), AI Commander smoke test, calibration regressions.
+
+## [2026-03-23] 94-Essay Codex — Complete Event Coverage
+
+**Scope:** Historical Codex essays for every game event, written by /historian subagents and verified through multi-round QA.
+
+**Batch 1 (10 essays, 5-round QA CERTIFIED):** RS Strategic Goals, RBiH State Identity, Herceg-Bosna, Arms Embargo, Barracks (Sarajevo/Tuzla/Zenica/Visoko), Sarajevo Siege, JNA Withdrawal. Key fixes across rounds: BB source leaks (7 essays), fabricated ICTY paras removed, Perišić acquittal noted, Dragomir Milošević disambiguated, Holiday Inn sniper correction, Super Galebs not Jastrebs.
+
+**Batch 2 (38 essays, 5-round QA CERTIFIED):** 1992 military/humanitarian + 1993 Croat-Bosniak war arc + 1993 Srebrenica arc + 1994 NATO interventions + 1995 endgame through Dayton. Key fixes: BB in sources metadata (21 essays), VRS anachronism, Grabovica/Uzdol → Halilović case, Milošević sentence, Markale attribution strengthened.
+
+**Batch 3 (46 essays, WRITTEN, pending 5-round QA):** All remaining game events — 29 from 1993, 5 from 1994, 12 from 1995. Covers Kravica, Turajlić, Čerska, Morillon, all UN resolutions, ICTY establishment, Sarajevo tunnel, HVO camps, Vitez-Kiseljak pockets, Travnik, Bugojno, Op Lukavac, Maglaj, Grabovica/Uzdol, Stupni Do, exclusion zone, Belgrade-Pale break, Carter ceasefire, COHA, Op Flash, Tuzla Gate, UN hostages, RRF, Op Summer 95, Karadžić-Mladić split, Op Mistral 2, Op Sana, US halts advance, Dayton signed.
+
+**Coherence pass:** 3-agent cross-essay consistency review. Fixed: Stari Most "tank fire" standardized, Op Neretva VOPP chronology, sortie count, Žepa resolution, VRS naming, London Conference duplicate.
+
+**Event cross-check:** All 94 game events matched to essays. Fixed: aircraft shootdown count (5→4 of 6), RS Strategic Goals fabricated ICTY para numbers removed.
+
+**Standards enforced across all 94 essays:**
+- Zero background sources named in text (no BB, book titles)
+- Zero fabricated ICTY paragraph numbers
+- All ICTY case numbers verified correct
+- Cross-essay date/fact consistency verified
+- Balanced tone across all factions
+
+**Files:** `data/scenarios/essays/essay_index.json` (canonical) + 94 individual `data/scenarios/essays/<event_id>.json` files. Generator: `tools/generate_essays.cjs` (improved prompt, content inlining).
 
 ## [2026-03-23] Chronicle Horizontal Timeline Redesign
 
