@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-23
-**Status:** **v0.6.1** — Political Wargame (Calibration Framework). **1410 tests**, 116 suites. **92.0% area-weighted (n1029). New honest baseline — previous 93.1% inflated by broken sector contiguity.** Electron 41. Next: AI Commander live test, 1993-1995 event content (ICTY research), Staff Map.
+**Status:** **v0.6.1** — Political Wargame. **1410 tests**, 116 suites. **92.0% area-weighted (n1029). Honest baseline.** Electron 41. **94 events across 1992-1995 (was 19).** Next: AI Commander smoke test, Chronicle visual review, calibration regressions (Posavina, Srebrenica, Simin Han).
 
 ## [2026-03-23] Chronicle Horizontal Timeline Redesign
 
