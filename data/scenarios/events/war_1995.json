@@ -1,17 +1,371 @@
 [
   {
+    "id": "coha_ceasefire_begins_1995",
+    "title": "Cessation of Hostilities Takes Effect",
+    "narrative": "At noon on New Year's Day, the guns fall silent across most of Bosnia. The four-month cessation of hostilities agreement is imperfect -- snipers still shoot, mortars still fall on Sarajevo's outskirts -- but the wholesale combat operations that have defined the war pause. Both sides know this is a breathing space, not peace. The question is who will use it better.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 139,
+      "turn_max": 140,
+      "phase": "war",
+      "requires_events": [
+        "carter_ceasefire_1994"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "aggression_modifier",
+      "faction": "RS",
+      "delta": -0.15,
+      "duration_turns": 16
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RBiH",
+        "delta": -0.1,
+        "duration_turns": 16
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "HRHB",
+        "delta": -0.1,
+        "duration_turns": 16
+      },
+      {
+        "kind": "narrative",
+        "text": "The four-month ceasefire begins. Both sides use the respite to rearm and reposition."
+      }
+    ],
+    "sets_flags": {
+      "coha_active": true
+    },
+    "historical_source": "BB Vol. II. ICTY Karadzic Judgment."
+  },
+  {
+    "id": "coha_expires_1995",
+    "title": "Ceasefire Expires -- War Resumes",
+    "narrative": "The four-month ceasefire expires without renewal. Within days, artillery resumes along front lines across Bosnia. Both sides have used the winter to prepare. The VRS has quietly concentrated Drina Corps assets near the eastern enclaves. The ARBiH has reorganized its corps structure and received equipment through back-channels. The final act of the war begins.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 156,
+      "turn_max": 158,
+      "phase": "war"
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The COHA ceasefire expires. Full-scale hostilities resume across Bosnia-Herzegovina."
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.15,
+        "duration_turns": 12
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RBiH",
+        "delta": 0.1,
+        "duration_turns": 12
+      }
+    ],
+    "sets_flags": {
+      "coha_expired": true
+    },
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). ICTY Mladic Judgment (IT-09-92-T)."
+  },
+  {
+    "id": "operation_flash_1995",
+    "title": "Operation Flash -- Croatia Retakes Western Slavonia",
+    "narrative": "The Croatian Army strikes without warning, launching Operation Flash against the RSK enclave in western Slavonia. In three days, Croatian forces overrun the entire enclave, scattering its defenders. The operation demonstrates a Croatian military transformed from the ragtag forces of 1991 into a capable, NATO-trained army. The Bosnian Serbs retaliate by firing cluster munitions at Zagreb, but the message is clear: the strategic balance in the region has shifted. The VRS command takes note.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 157,
+      "turn_max": 158,
+      "phase": "war"
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RS",
+      "delta": -3
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "Croatia's Operation Flash shatters the RSK enclave in western Slavonia in three days. The strategic balance in the region begins to shift."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "operation_flash_occurred": true
+    },
+    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). UNSCR 981. BB Vol. II, Ch. 13."
+  },
+  {
+    "id": "tuzla_gate_massacre_1995",
+    "title": "Tuzla Gate Massacre",
+    "narrative": "A single artillery shell strikes the Kapija -- the Gate -- in downtown Tuzla on a warm May evening. The date is Youth Day, and hundreds of young people crowd the streets. The shell detonates at 8:55 PM. Seventy-one people are killed. Two hundred and forty are wounded. The average age of the dead is twenty-one years. The youngest victim is two and a half years old. The VRS Chief of Staff ordered the bombardment of a city that has no military targets in its center.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 160,
+      "turn_max": 160,
+      "phase": "war"
+    },
+    "once": true,
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 2
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -3
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RS",
+        "dimension": "international_credibility",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "71 civilians, mostly young people, are killed by VRS shelling of Tuzla's town center on Youth Day. The youngest victim is two years old."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). Bosnian State Court, Novak Djukic conviction (2014). BB Vol. II."
+  },
+  {
+    "id": "un_hostage_crisis_1995",
+    "title": "UN Hostages Chained to VRS Targets",
+    "narrative": "The VRS response to NATO air strikes near Pale is swift and calculated. Within hours, 377 UN peacekeepers are seized across Bosnian Serb territory. Some are chained to bridges and military installations as human shields against further bombing. The images -- blue-helmeted soldiers handcuffed to ammunition bunkers -- are broadcast worldwide. NATO's air campaign stops. UNPROFOR is paralyzed. The tactic works in the short term. But in the corridors of Washington, London, and Paris, the humiliation is hardening resolve. The rules of engagement are about to change.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 160,
+      "turn_max": 163,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "historical",
+    "effect": {
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 15
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -5
+      },
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RS",
+        "war_crimes_delta": 1
+      },
+      {
+        "kind": "narrative",
+        "text": "377 UN peacekeepers are taken hostage by the VRS. Images of soldiers chained to military targets as human shields shock the world."
+      }
+    ],
+    "response_options": [
+      {
+        "id": "maintain_hostages",
+        "label": "Hold hostages until NATO guarantees no more strikes",
+        "description": "Maximum leverage. NATO stops bombing. But every day the hostages remain deepens the diplomatic catastrophe.",
+        "effects": [
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 10
+          },
+          {
+            "kind": "negotiation_capital",
+            "faction": "RS",
+            "dimension": "international_credibility",
+            "delta": -20
+          }
+        ],
+        "sets_flags": {
+          "un_hostage_response": "maintain"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -20
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -15
+          }
+        ],
+        "aggression_affinity": 0.8,
+        "risk_level": 0.9
+      },
+      {
+        "id": "release_gradually",
+        "label": "Release hostages in exchange for concessions",
+        "description": "Trade hostages for guarantees. Some diplomatic damage can be contained. NATO may hesitate to strike again.",
+        "effects": [
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 5
+          },
+          {
+            "kind": "negotiation_capital",
+            "faction": "RS",
+            "dimension": "international_credibility",
+            "delta": -10
+          }
+        ],
+        "sets_flags": {
+          "un_hostage_response": "gradual_release"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.5
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -15
+      }
+    ],
+    "sets_flags": {
+      "un_hostage_crisis_occurred": true
+    },
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T), Count 11 (hostage-taking). Mladic Judgment (IT-09-92-T). UNSCR 998 (1995)."
+  },
+  {
+    "id": "rapid_reaction_force_1995",
+    "title": "UN Rapid Reaction Force Deploys to Mount Igman",
+    "narrative": "A new force arrives on the battlefield. Four thousand British, French, and Dutch troops -- equipped with heavy artillery, armored vehicles, and orders to shoot back -- take up positions on Mount Igman above Sarajevo. The Rapid Reaction Force is not UNPROFOR. Its rules of engagement permit offensive fire against any force that threatens UN operations or the humanitarian supply route. For the first time, the international presence in Bosnia has teeth. The VRS now faces a second army overlooking its siege positions around the capital.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 168,
+      "turn_max": 170,
+      "phase": "war"
+    },
+    "once": true,
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RBiH",
+      "delta": 5
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 10
+      },
+      {
+        "kind": "narrative",
+        "text": "The UN Rapid Reaction Force deploys heavy artillery on Mount Igman. For the first time, the international military presence in Bosnia has offensive capability."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -5
+      }
+    ],
+    "sets_flags": {
+      "rrf_deployed": true
+    },
+    "historical_source": "UNSCR 998 (1995). ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II, Ch. 14."
+  },
+  {
     "id": "srebrenica_falls_1995",
     "title": "Srebrenica Falls",
     "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
     "category": "humanitarian",
-    "trigger": { "turn_min": 170, "turn_max": 170, "phase": "war" },
+    "trigger": {
+      "turn_min": 170,
+      "turn_max": 170,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 5 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 5
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": -15 },
-      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -30 },
-      { "kind": "patron_pressure", "faction": "RS", "delta": 20 },
-      { "kind": "narrative", "text": "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II." }
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -15
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RS",
+        "dimension": "international_credibility",
+        "delta": -30
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 20
+      },
+      {
+        "kind": "narrative",
+        "text": "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II."
+      }
     ]
   },
   {
@@ -19,41 +373,261 @@
     "title": "Zepa Enclave Overrun",
     "narrative": "Following the fall of Srebrenica, the VRS turns its attention to the neighboring Zepa enclave. Despite desperate resistance by the small garrison, the enclave falls within two weeks. The civilian population is forcibly expelled. The international community, still reeling from Srebrenica, watches another safe area collapse.",
     "category": "territorial",
-    "trigger": { "turn_min": 172, "turn_max": 172, "phase": "war", "requires_events": ["srebrenica_falls_1995"] },
+    "trigger": {
+      "turn_min": 172,
+      "turn_max": 172,
+      "phase": "war",
+      "requires_events": [
+        "srebrenica_falls_1995"
+      ]
+    },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 1 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 1
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": -5 },
-      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -10 },
-      { "kind": "narrative", "text": "Zepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis." }
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -5
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RS",
+        "dimension": "international_credibility",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "Zepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis."
+      }
     ]
+  },
+  {
+    "id": "operation_summer_95",
+    "title": "Operation Summer '95 -- Grahovo and Glamoc Fall",
+    "narrative": "Croatian Army and HVO forces launch Operation Summer '95, striking at the strategic junction towns of Bosansko Grahovo and Glamoc. The HV 4th and 7th Guards Brigades, battle-hardened veterans of Operation Flash, spearhead the assault. Grahovo falls on July 28, Glamoc the following day. In five days, 1,600 square kilometers change hands. The critical Knin-Banja Luka supply road is cut. The Republic of Serbian Krajina is now strategically isolated. The groundwork for a far larger operation is laid.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 172,
+      "turn_max": 173,
+      "phase": "war",
+      "requires_events": [
+        "washington_agreement_1994"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "HRHB",
+      "delta": 5
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -5
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -5
+      },
+      {
+        "kind": "narrative",
+        "text": "Grahovo and Glamoc fall to HV-HVO forces. The Knin-Banja Luka supply road is severed, isolating the RSK."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 10
+      },
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": -10
+      }
+    ],
+    "sets_flags": {
+      "grahovo_glamoc_captured": true
+    },
+    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). BB Vol. II, Ch. 14."
   },
   {
     "id": "operation_storm_1995",
     "title": "Operation Storm — Croatia Retakes Krajina",
     "narrative": "The Croatian Army launches Operation Storm, overrunning the Republic of Serbian Krajina in a devastating four-day offensive. The operation eliminates the Serb entity in Croatia and fundamentally shifts the strategic balance in Bosnia. VRS forces in western Bosnia lose their rear-area support, and the success emboldens Croatian and Federation forces for operations in Bosnia.",
     "category": "military",
-    "trigger": { "turn_min": 174, "turn_max": 174, "phase": "war" },
+    "trigger": {
+      "turn_min": 174,
+      "turn_max": 174,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RS", "delta": -10 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RS",
+      "delta": -10
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "HRHB", "delta": 10 },
-      { "kind": "supply_delta", "faction": "RS", "delta": -15 },
-      { "kind": "narrative", "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces." }
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 10
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -15
+      },
+      {
+        "kind": "narrative",
+        "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces."
+      }
     ]
+  },
+  {
+    "id": "karadzic_mladic_split_1995",
+    "title": "Karadzic Attempts to Remove Mladic",
+    "narrative": "The crisis erupts on the worst possible day. As Croatian forces launch Operation Storm, Karadzic announces from Pale that he is removing Mladic from command and assuming personal control of the army. He blames the general for losing Grahovo and Glamoc. The army's reaction is immediate and hostile -- officers rally behind their commander, ignoring the political leadership. For seven days, Republika Srpska's command structure is paralyzed by an internal power struggle. On August 11, Karadzic is forced to back down. Mladic remains. But the damage is done.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 174,
+      "turn_max": 175,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "personality_weighted",
+    "effect": {
+      "kind": "cohesion_change",
+      "faction": "RS",
+      "delta": -5
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -5
+      },
+      {
+        "kind": "narrative",
+        "text": "Karadzic attempts to remove Mladic from command. The VRS officer corps rallies behind the general. RS political-military leadership is paralyzed for a week."
+      }
+    ],
+    "response_options": [
+      {
+        "id": "remove_mladic",
+        "label": "Press the dismissal -- assert political control",
+        "description": "Force Mladic out. You may lose the army's loyalty, but civilian authority over the military must be established. The officer corps will resist.",
+        "effects": [
+          {
+            "kind": "cohesion_change",
+            "faction": "RS",
+            "delta": -10
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -5
+          }
+        ],
+        "sets_flags": {
+          "karadzic_mladic_crisis": "mladic_removed"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -20
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -15
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.9
+      },
+      {
+        "id": "back_down",
+        "label": "Rescind the order -- Mladic stays",
+        "description": "Admit defeat. Mladic remains in command. Your authority is diminished, but the army's command structure is preserved at a critical moment.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          }
+        ],
+        "sets_flags": {
+          "karadzic_mladic_crisis": "backed_down"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.3
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "internal_cohesion",
+        "delta": -10
+      }
+    ],
+    "sets_flags": {
+      "karadzic_mladic_crisis_occurred": true
+    },
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). Mladic Judgment (IT-09-92-T). ICTY witness testimony."
   },
   {
     "id": "second_markale_massacre_1995",
     "title": "Second Markale Massacre",
     "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Zepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
     "category": "humanitarian",
-    "trigger": { "turn_min": 177, "turn_max": 177, "phase": "war" },
+    "trigger": {
+      "turn_min": 177,
+      "turn_max": 177,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 2 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 2
+    },
     "effects": [
-      { "kind": "patron_pressure", "faction": "RS", "delta": 20 },
-      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -15 },
-      { "kind": "narrative", "text": "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces." }
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 20
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RS",
+        "dimension": "international_credibility",
+        "delta": -15
+      },
+      {
+        "kind": "narrative",
+        "text": "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces."
+      }
     ]
   },
   {
@@ -61,13 +635,32 @@
     "title": "NATO Operation Deliberate Force",
     "narrative": "NATO launches Operation Deliberate Force, a sustained air campaign against VRS military targets across Bosnia. Over two weeks, NATO aircraft fly 3,515 sorties and strike ammunition depots, communications facilities, air defenses, and command bunkers. Combined with a Tomahawk cruise missile strike, the campaign devastates VRS military infrastructure and shatters its ability to sustain offensive operations.",
     "category": "military",
-    "trigger": { "turn_min": 177, "turn_max": 177, "phase": "war" },
+    "trigger": {
+      "turn_min": 177,
+      "turn_max": 177,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "supply_delta", "faction": "RS", "delta": -30 },
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RS",
+      "delta": -30
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RS", "delta": -10 },
-      { "kind": "morale_change", "faction": "RBiH", "delta": 10 },
-      { "kind": "narrative", "text": "NATO launches Operation Deliberate Force. Sustained air strikes devastate VRS military infrastructure across Bosnia." }
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "narrative",
+        "text": "NATO launches Operation Deliberate Force. Sustained air strikes devastate VRS military infrastructure across Bosnia."
+      }
     ]
   },
   {
@@ -75,28 +668,308 @@
     "title": "Federation Ground Offensive",
     "narrative": "Coordinated ARBiH and HVO ground forces, supported by Croatian Army units, launch a broad offensive across western and central Bosnia. The operation rapidly captures Sipovo, Jajce, Mrkonjic Grad, and Kljuc, reducing Republika Srpska's territory from roughly 70% to near the 49% envisioned by the Contact Group plan. The VRS, battered by NATO strikes and stretched thin, cannot hold its extended lines.",
     "category": "military",
-    "trigger": { "turn_min": 179, "turn_max": 179, "phase": "war", "requires_events": ["washington_agreement_1994", "nato_deliberate_force_1995"] },
+    "trigger": {
+      "turn_min": 179,
+      "turn_max": 179,
+      "phase": "war",
+      "requires_events": [
+        "washington_agreement_1994",
+        "nato_deliberate_force_1995"
+      ]
+    },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RS", "delta": -10 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RS",
+      "delta": -10
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": 10 },
-      { "kind": "morale_change", "faction": "HRHB", "delta": 5 },
-      { "kind": "supply_delta", "faction": "RS", "delta": -15 },
-      { "kind": "narrative", "text": "Federation forces launch a broad offensive. VRS lines collapse across western Bosnia as Republika Srpska's territory shrinks dramatically." }
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -15
+      },
+      {
+        "kind": "narrative",
+        "text": "Federation forces launch a broad offensive. VRS lines collapse across western Bosnia as Republika Srpska's territory shrinks dramatically."
+      }
     ]
+  },
+  {
+    "id": "operation_mistral_2_1995",
+    "title": "Operation Mistral 2 -- Jajce Recaptured",
+    "narrative": "The Croatian war machine rolls north from Grahovo. Operation Mistral 2 sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- into the heart of VRS-held western Bosnia. Sipovo falls. Mrkonjic Grad falls. And on September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is liberated. Two thousand square kilometers change hands in eight days. The VRS line in western Bosnia is disintegrating.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 179,
+      "turn_max": 180,
+      "phase": "war",
+      "requires_events": [
+        "operation_storm_1995"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "HRHB",
+      "delta": 8
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -8
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "Jajce is recaptured after three years. HV-HVO forces sweep through western Bosnia, collapsing VRS positions across a 2,000 km2 front."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "territorial_legitimacy",
+        "delta": 15
+      },
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": -15
+      },
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -10
+      }
+    ],
+    "sets_flags": {
+      "jajce_recaptured": true
+    },
+    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). BB Vol. II, Ch. 15."
+  },
+  {
+    "id": "operation_sana_1995",
+    "title": "Operation Sana -- The 5th Corps Advances",
+    "narrative": "Three years of siege end in a single week. The 5th Corps -- the same formation that held the Bihac pocket against VRS, RSK, and Abdic's forces combined -- breaks out in force. Operation Sana sweeps south and east. Bosanski Petrovac falls. Bosanska Krupa falls. Sanski Most is captured on October 12. The 5th Corps, which spent three years defending the most isolated pocket in Bosnia, now spearheads the largest ARBiH territorial gain of the entire war.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 179,
+      "turn_max": 183,
+      "phase": "war",
+      "requires_events": [
+        "nato_deliberate_force_1995"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 10
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -8
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "The 5th Corps breaks out of the Bihac pocket. Operation Sana captures Sanski Most, Bosanski Petrovac, and Bosanska Krupa. RS territory approaches the 49% Dayton line."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 15
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "territorial_legitimacy",
+        "delta": 10
+      },
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": -10
+      }
+    ],
+    "sets_flags": {
+      "operation_sana_occurred": true
+    },
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II, Ch. 15."
+  },
+  {
+    "id": "us_halts_federation_advance_1995",
+    "title": "Washington Halts the Federation Advance",
+    "narrative": "Banja Luka is within reach. Federation forces have driven the VRS from a third of its territory in six weeks. But the phone rings from Washington. Holbrooke is blunt: take Banja Luka and you will have 200,000 Serb refugees, a humanitarian catastrophe, and no peace agreement. Zagreb backs down immediately. Sarajevo follows reluctantly. The front lines freeze. The 51/49 line that has defined every peace plan since July 1994 becomes reality not through negotiation, but through the calculated halt of a military advance.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 182,
+      "turn_max": 184,
+      "phase": "war",
+      "requires_events": [
+        "federation_ground_offensive_1995"
+      ]
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "accept_first",
+    "effect": {
+      "kind": "narrative",
+      "text": "The United States pressures Federation forces to halt their advance short of Banja Luka. The front lines freeze along the 51/49% territorial division."
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RBiH",
+        "delta": -0.2,
+        "duration_turns": 12
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "HRHB",
+        "delta": -0.2,
+        "duration_turns": 12
+      }
+    ],
+    "response_options": [
+      {
+        "id": "comply",
+        "label": "Accept the halt -- pursue peace",
+        "description": "Stop the advance. The territorial gains are sufficient for a strong negotiating position. Holbrooke promises a seat at the table.",
+        "effects": [
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 15
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -3
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 10
+          }
+        ],
+        "aggression_affinity": -0.7,
+        "risk_level": 0.2
+      },
+      {
+        "id": "push_further",
+        "label": "Push for Banja Luka before stopping",
+        "description": "Defy Washington. Take Banja Luka and negotiate from maximum strength. But you may lose American support entirely.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": -20
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 15
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "territorial_legitimacy",
+            "delta": 10
+          }
+        ],
+        "aggression_affinity": 0.8,
+        "risk_level": 0.9
+      }
+    ],
+    "sets_flags": {
+      "advance_halted": true
+    },
+    "historical_source": "Holbrooke, 'To End a War' (1998). BB Vol. II, Ch. 15. US State Dept. chronology."
   },
   {
     "id": "ceasefire_1995",
     "title": "General Ceasefire Takes Effect",
     "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina, freezing the front lines after 1,340 days of war. The Dayton Agreement establishes Bosnia as a single state composed of two entities — the Federation of Bosnia and Herzegovina and Republika Srpska — with NATO-led IFOR deployed to enforce the peace. The war that killed over 100,000 people and displaced two million is over.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 183, "turn_max": 183, "phase": "war" },
+    "trigger": {
+      "turn_min": 183,
+      "turn_max": 183,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "narrative", "text": "The ceasefire takes effect. After three and a half years, the guns fall silent across Bosnia-Herzegovina." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The ceasefire takes effect. After three and a half years, the guns fall silent across Bosnia-Herzegovina."
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": 10 },
-      { "kind": "morale_change", "faction": "RS", "delta": 5 },
-      { "kind": "morale_change", "faction": "HRHB", "delta": 5 }
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      }
     ]
   },
   {
@@ -104,19 +977,35 @@
     "title": "Dayton Peace Talks Convene",
     "narrative": "The presidents of Bosnia, Croatia, and Serbia arrive at Wright-Patterson Air Force Base in Dayton, Ohio, for proximity peace talks brokered by US envoy Richard Holbrooke. The military situation — NATO air power, Federation ground gains, and VRS exhaustion — has finally created the conditions for a negotiated settlement. The outcome will define Bosnia's future.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 186, "turn_max": 186, "phase": "war" },
+    "trigger": {
+      "turn_min": 186,
+      "turn_max": 186,
+      "phase": "war"
+    },
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "accept_first",
-    "effect": { "kind": "narrative", "text": "The Dayton peace talks begin. After three and a half years of war, the outlines of a settlement take shape." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Dayton peace talks begin. After three and a half years of war, the outlines of a settlement take shape."
+    },
     "response_options": [
       {
         "id": "accept",
         "label": "Negotiate in Good Faith",
         "description": "Commit fully to the peace process. The war ends, but the compromises will define the country for decades.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 15 },
-          { "kind": "morale_change", "faction": "RBiH", "delta": 5 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 15
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 5
+          }
         ]
       },
       {
@@ -124,10 +1013,59 @@
         "label": "Push for Maximum Concessions",
         "description": "Leverage military momentum to demand more territory and stronger central government. Risks collapse of talks.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": -5 },
-          { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": -5
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          }
         ]
       }
     ]
+  },
+  {
+    "id": "dayton_signed_1995",
+    "title": "The Dayton Agreement Is Signed",
+    "narrative": "In a ceremony in Paris, the presidents of Bosnia, Croatia, and Serbia affix their signatures to the General Framework Agreement for Peace. The document -- hammered out over 21 days of grueling proximity talks at Wright-Patterson Air Force Base -- establishes Bosnia as a single state composed of two entities. Fifty-one percent for the Federation. Forty-nine percent for Republika Srpska. Sixty thousand NATO troops will enforce the peace. The war that began with shots fired at a wedding procession in Sarajevo in March 1992 is over. Over 100,000 are dead. Over two million are displaced. The peace is imperfect. But the killing stops.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 189,
+      "turn_max": 189,
+      "phase": "war",
+      "requires_events": [
+        "dayton_talks_begin_1995"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The Dayton Agreement is signed in Paris. Bosnia is divided into two entities. 60,000 NATO troops deploy to enforce the peace."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "dayton_signed": true
+    },
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). UNSCR 1031 (1995). Dayton General Framework Agreement (1995)."
   }
 ]

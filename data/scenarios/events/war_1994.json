@@ -4,13 +4,33 @@
     "title": "First Markale Massacre",
     "narrative": "A mortar shell strikes the Markale marketplace in Sarajevo, killing 68 civilians and wounding over 140. The images of carnage broadcast worldwide provoke outrage and push NATO toward its first decisive action in the Bosnian war. The VRS denies responsibility, but the international community overwhelmingly attributes the attack to Serb forces.",
     "category": "humanitarian",
-    "trigger": { "turn_min": 96, "turn_max": 96, "phase": "war" },
+    "trigger": {
+      "turn_min": 96,
+      "turn_max": 96,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 2 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 2
+    },
     "effects": [
-      { "kind": "patron_pressure", "faction": "RS", "delta": 15 },
-      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -20 },
-      { "kind": "narrative", "text": "The Markale massacre kills 68 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS." }
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 15
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RS",
+        "dimension": "international_credibility",
+        "delta": -20
+      },
+      {
+        "kind": "narrative",
+        "text": "The Markale massacre kills 68 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS."
+      }
     ]
   },
   {
@@ -18,24 +38,91 @@
     "title": "NATO Issues Ultimatum on Sarajevo",
     "narrative": "In the aftermath of Markale, NATO issues an ultimatum demanding the withdrawal of all VRS heavy weapons from a 20-kilometer exclusion zone around Sarajevo within ten days, or face air strikes. The ultimatum marks NATO's first credible threat of force and fundamentally changes the calculation for the VRS around the capital.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 96, "turn_max": 96, "phase": "war", "requires_events": ["markale_massacre_1994"] },
+    "trigger": {
+      "turn_min": 96,
+      "turn_max": 96,
+      "phase": "war",
+      "requires_events": [
+        "markale_massacre_1994"
+      ]
+    },
     "once": true,
-    "effect": { "kind": "patron_pressure", "faction": "RS", "delta": 10 },
+    "effect": {
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 10
+    },
     "effects": [
-      { "kind": "narrative", "text": "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time." }
+      {
+        "kind": "narrative",
+        "text": "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time."
+      }
     ]
+  },
+  {
+    "id": "sarajevo_exclusion_zone_1994",
+    "title": "Sarajevo Exclusion Zone Takes Effect",
+    "narrative": "Under threat of NATO air strikes, the VRS begins withdrawing heavy weapons from a 20-kilometer exclusion zone around Sarajevo. Hundreds of artillery pieces and mortars are moved or placed under UNPROFOR control at collection points. On February 12, Sarajevo experiences its first day without a single casualty since April 1992. The siege is not lifted, but its deadliest instrument is temporarily muzzled.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 97,
+      "turn_max": 98,
+      "phase": "war",
+      "requires_events": [
+        "nato_ultimatum_sarajevo_1994"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RS",
+      "delta": -5
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": -0.1,
+        "duration_turns": 12
+      },
+      {
+        "kind": "narrative",
+        "text": "VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital."
+      }
+    ],
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T), paras. 3521-3524. UNSCR 836. BB Vol. II."
   },
   {
     "id": "nato_shoots_down_planes_1994",
     "title": "NATO Shoots Down Serb Aircraft",
     "narrative": "NATO fighters shoot down five VRS J-21 Jastreb aircraft violating the no-fly zone over Bosnia in the Banja Luka area. The incident, NATO's first combat action in its history, signals a shift from passive observation to active enforcement. The VRS command begins to factor NATO air power into its operational calculations.",
     "category": "military",
-    "trigger": { "turn_min": 99, "turn_max": 99, "phase": "war" },
+    "trigger": {
+      "turn_min": 99,
+      "turn_max": 99,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
+    "effect": {
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 5
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RS", "delta": -3 },
-      { "kind": "narrative", "text": "NATO shoots down five VRS J-21 Jastreb aircraft. The alliance demonstrates its willingness to use force for the first time." }
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -3
+      },
+      {
+        "kind": "narrative",
+        "text": "NATO shoots down five VRS J-21 Jastreb aircraft. The alliance demonstrates its willingness to use force for the first time."
+      }
     ]
   },
   {
@@ -43,15 +130,36 @@
     "title": "Washington Agreement Signed",
     "narrative": "Under heavy American pressure, Bosniak and Bosnian Croat leaders sign the Washington Agreement, ending the Croat-Bosniak war and establishing the Federation of Bosnia and Herzegovina. The agreement transforms the military balance by uniting two of the three warring factions against the VRS and opens Croatian supply lines to the ARBiH.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 102, "turn_max": 102, "phase": "war", "requires_events": ["croat_bosniak_war_begins_1993"] },
+    "trigger": {
+      "turn_min": 102,
+      "turn_max": 102,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
+    },
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "accept_first",
-    "effect": { "kind": "alliance_change", "delta": 0.8 },
+    "effect": {
+      "kind": "alliance_change",
+      "delta": 0.8
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
-      { "kind": "morale_change", "faction": "HRHB", "delta": 3 },
-      { "kind": "narrative", "text": "The Washington Agreement ends the Croat-Bosniak war. The Federation of Bosnia and Herzegovina is established." }
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 3
+      },
+      {
+        "kind": "narrative",
+        "text": "The Washington Agreement ends the Croat-Bosniak war. The Federation of Bosnia and Herzegovina is established."
+      }
     ],
     "response_options": [
       {
@@ -59,8 +167,17 @@
         "label": "Embrace the Federation",
         "description": "Full commitment to the Federation opens supply lines and creates a unified front against the VRS.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 15 },
-          { "kind": "supply_delta", "faction": "RBiH", "delta": 10 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 15
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RBiH",
+            "delta": 10
+          }
         ]
       },
       {
@@ -68,7 +185,12 @@
         "label": "Accept with Reservations",
         "description": "Accept the agreement but maintain wariness toward former enemies. Slower integration but preserved autonomy.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 5 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 5
+          }
         ]
       }
     ]
@@ -78,12 +200,27 @@
     "title": "Gorazde Crisis",
     "narrative": "The VRS launches a major offensive against the Gorazde safe area, overrunning UN observation posts and pushing into the outskirts of the town. Limited NATO air strikes prove insufficient to halt the advance. The crisis exposes the hollow nature of safe area protection and the mismatch between UN mandates and military reality.",
     "category": "military",
-    "trigger": { "turn_min": 105, "turn_max": 105, "phase": "war" },
+    "trigger": {
+      "turn_min": 105,
+      "turn_max": 105,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": -3 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -3
+    },
     "effects": [
-      { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
-      { "kind": "narrative", "text": "The VRS attacks the Gorazde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection." }
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "The VRS attacks the Gorazde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection."
+      }
     ]
   },
   {
@@ -91,19 +228,35 @@
     "title": "Contact Group Plan Presented",
     "narrative": "The Contact Group — the US, Russia, UK, France, and Germany — presents a take-it-or-leave-it peace plan offering the Federation 51% and Republika Srpska 49% of Bosnian territory. The Bosnian government and Croats accept under pressure, but the Bosnian Serb leadership rejects the plan, further isolating Pale even from its Belgrade patron.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 117, "turn_max": 117, "phase": "war" },
+    "trigger": {
+      "turn_min": 117,
+      "turn_max": 117,
+      "phase": "war"
+    },
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
-    "effect": { "kind": "narrative", "text": "The Contact Group demands acceptance of a 51/49 territorial split. Rejection risks further international isolation." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Contact Group demands acceptance of a 51/49 territorial split. Rejection risks further international isolation."
+    },
     "response_options": [
       {
         "id": "accept",
         "label": "Accept the Contact Group Plan",
         "description": "Acceptance demonstrates good faith and strengthens the case for international support.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 10 },
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": -10 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 10
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -10
+          }
         ]
       },
       {
@@ -111,32 +264,359 @@
         "label": "Reject the Territorial Division",
         "description": "Rejection risks isolation but refuses to legitimize conquest. The war continues.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": -15 },
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": 10 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": -15
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 10
+          }
         ]
       }
     ]
+  },
+  {
+    "id": "belgrade_embargo_rs_1994",
+    "title": "Belgrade Breaks with Pale",
+    "narrative": "Milosevic has had enough. After the Bosnian Serb assembly rejects the Contact Group plan, Belgrade imposes sanctions on Republika Srpska, closing the border to military supplies and severing the political lifeline that has sustained the war effort. Your army's supply lines from Serbia are now severed. The international community watches to see if this is real or theater.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 121,
+      "turn_max": 122,
+      "phase": "war",
+      "requires_events": [
+        "contact_group_plan_1994"
+      ]
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "historical",
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RS",
+      "delta": -10
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 15
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -5
+      },
+      {
+        "kind": "narrative",
+        "text": "Belgrade imposes an embargo on Republika Srpska. The border with Serbia is closed to military supplies."
+      }
+    ],
+    "response_options": [
+      {
+        "id": "defiant",
+        "label": "Defy Belgrade",
+        "description": "We do not need Belgrade's permission to defend our people. Reject the Contact Group map and accept the consequences.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -5
+          }
+        ],
+        "sets_flags": {
+          "rs_belgrade_response": "defiant"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -20
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": 0.7,
+        "risk_level": 0.8
+      },
+      {
+        "id": "negotiate",
+        "label": "Seek accommodation with Belgrade",
+        "description": "Open back-channels to Milosevic. Signal willingness to reconsider the Contact Group map. The embargo may be softened.",
+        "effects": [
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": 5
+          }
+        ],
+        "sets_flags": {
+          "rs_belgrade_response": "negotiate"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.5,
+        "risk_level": 0.4
+      }
+    ],
+    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). UNSCR 942 (1994). BB Vol. II Ch. 10."
   },
   {
     "id": "anti_sniping_agreement_1994",
     "title": "Anti-Sniping Agreement in Sarajevo",
     "narrative": "An anti-sniping agreement is reached for Sarajevo, aiming to reduce the daily toll of civilians killed by snipers along the city's exposed boulevards and intersections. Compliance is sporadic, but the agreement represents a small step in civilian protection and provides UNPROFOR with additional monitoring authority.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 123, "turn_max": 123, "phase": "war" },
+    "trigger": {
+      "turn_min": 123,
+      "turn_max": 123,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "narrative", "text": "An anti-sniping agreement is signed for Sarajevo. Compliance is uneven but civilian casualties decrease temporarily." }
+    "effect": {
+      "kind": "narrative",
+      "text": "An anti-sniping agreement is signed for Sarajevo. Compliance is uneven but civilian casualties decrease temporarily."
+    }
+  },
+  {
+    "id": "bihac_5th_corps_offensive_1994",
+    "title": "5th Corps Breaks Out of Bihac",
+    "narrative": "General Dudakovic and the 5th Corps have achieved the impossible. After crushing Abdic's breakaway forces, the besieged garrison launches Operation Grmec, striking south and east from the Bihac pocket. The Grabez plateau falls in days. Over 100 square kilometers of territory change hands as ARBiH brigades advance toward Bosanska Krupa. The VRS is caught off guard.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 129,
+      "turn_max": 132,
+      "phase": "war"
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 5
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.15,
+        "duration_turns": 8
+      },
+      {
+        "kind": "narrative",
+        "text": "The 5th Corps breaks out of the Bihac pocket. VRS positions on the Grabez plateau are overrun."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 10
+      }
+    ],
+    "sets_flags": {
+      "bihac_breakout_occurred": true
+    },
+    "historical_source": "BB Vol. II, Ch. 11. ICTY Karadzic Judgment. 5th Corps operational records."
+  },
+  {
+    "id": "operation_cincar_1994",
+    "title": "Operation Cincar — Kupres Falls to HVO",
+    "narrative": "The HVO, reinforced by Croatian Army units, launches Operation Cincar against VRS positions around Kupres. After fierce fighting in mountainous terrain, Kupres falls on November 3. The operation captures a strategically vital junction that threatens VRS supply routes to Donji Vakuf. The Washington Agreement's military dividend is becoming apparent.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 131,
+      "turn_max": 133,
+      "phase": "war",
+      "requires_events": [
+        "washington_agreement_1994"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "HRHB",
+      "delta": 5
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -3
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -3
+      },
+      {
+        "kind": "narrative",
+        "text": "Kupres falls to HVO forces in Operation Cincar. VRS supply routes in western Bosnia are threatened."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 10
+      },
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": -5
+      }
+    ],
+    "sets_flags": {
+      "kupres_recaptured": true
+    },
+    "historical_source": "BB Vol. II, Ch. 11. ICTY Prlic et al. (IT-04-74-T). Croatian operational records."
   },
   {
     "id": "bihac_crisis_1994",
     "title": "Bihac Crisis Deepens",
     "narrative": "The VRS, supported by forces from the Republic of Serbian Krajina and Abdic's APWB militia, launches a major counteroffensive against the Bihac pocket. The 5th Corps is pushed back toward the town itself, and the crisis threatens the complete fall of the enclave. NATO air strikes against VRS airfields prove too limited to change the situation.",
     "category": "military",
-    "trigger": { "turn_min": 135, "turn_max": 135, "phase": "war" },
+    "trigger": {
+      "turn_min": 135,
+      "turn_max": 135,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": -5 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -5
+    },
     "effects": [
-      { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
-      { "kind": "narrative", "text": "The Bihac pocket faces collapse as VRS and allied forces close in. NATO strikes prove inadequate to lift the siege." }
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "The Bihac pocket faces collapse as VRS and allied forces close in. NATO strikes prove inadequate to lift the siege."
+      }
     ]
+  },
+  {
+    "id": "carter_ceasefire_1994",
+    "title": "Carter Brokers Winter Ceasefire",
+    "narrative": "Jimmy Carter arrives in Sarajevo. The former president, acting as private mediator, shuttles between the warring parties and extracts a commitment to a complete cessation of hostilities effective New Year's Day. Humanitarian corridors will reopen. Behind the scenes, both sides know the ceasefire is a breathing space — time to rearm, resupply, and prepare for whatever comes next.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 138,
+      "turn_max": 139,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "capital_based",
+    "effect": {
+      "kind": "narrative",
+      "text": "A four-month cessation of hostilities is agreed. The guns fall temporarily silent across Bosnia."
+    },
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": 3
+      }
+    ],
+    "response_options": [
+      {
+        "id": "respect",
+        "label": "Honor the ceasefire",
+        "description": "Use the pause to resupply and rebuild. Comply with the agreement's terms. International credibility improves.",
+        "effects": [
+          {
+            "kind": "aggression_modifier",
+            "faction": "RBiH",
+            "delta": -0.1,
+            "duration_turns": 16
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 10
+          }
+        ],
+        "aggression_affinity": -0.5,
+        "risk_level": 0.3
+      },
+      {
+        "id": "exploit",
+        "label": "Use the pause to prepare offensives",
+        "description": "Nominally comply while aggressively repositioning forces and stockpiling supplies. The spring offensive will be stronger.",
+        "effects": [
+          {
+            "kind": "supply_delta",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RBiH",
+            "delta": 0.05,
+            "duration_turns": 16
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": 0.3,
+        "risk_level": 0.5
+      }
+    ],
+    "sets_flags": {
+      "carter_ceasefire_active": true
+    },
+    "historical_source": "Carter Center archives. BB Vol. II, Ch. 12. ICTY Karadzic Judgment."
   }
 ]

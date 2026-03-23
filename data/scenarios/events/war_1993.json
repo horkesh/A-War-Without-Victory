@@ -16,9 +16,15 @@
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
-    "effect": { "kind": "alliance_change", "delta": -0.15 },
+    "effect": {
+      "kind": "alliance_change",
+      "delta": -0.15
+    },
     "effects": [
-      { "kind": "narrative", "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a pretext for Croat territorial grabs." }
+      {
+        "kind": "narrative",
+        "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a pretext for Croat territorial grabs."
+      }
     ],
     "response_options": [
       {
@@ -26,8 +32,15 @@
         "label": "Respond with force",
         "description": "Send reinforcements to Gornji Vakuf. Escalates the confrontation significantly.",
         "effects": [
-          { "kind": "alliance_change", "delta": -0.20 },
-          { "kind": "morale_change", "faction": "HRHB", "delta": 3 }
+          {
+            "kind": "alliance_change",
+            "delta": -0.2
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 3
+          }
         ]
       },
       {
@@ -35,8 +48,15 @@
         "label": "Seek a local ceasefire",
         "description": "Attempt to contain the fighting. De-escalates but does not resolve underlying tensions.",
         "effects": [
-          { "kind": "alliance_change", "delta": -0.05 },
-          { "kind": "morale_change", "faction": "HRHB", "delta": -2 }
+          {
+            "kind": "alliance_change",
+            "delta": -0.05
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -2
+          }
         ]
       }
     ]
@@ -46,19 +66,35 @@
     "title": "Vance-Owen Peace Plan Presented",
     "narrative": "The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The plan is endorsed by the Bosnian Croats and reluctantly by the Bosniaks, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 39, "turn_max": 39, "phase": "war" },
+    "trigger": {
+      "turn_min": 39,
+      "turn_max": 39,
+      "phase": "war"
+    },
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
-    "effect": { "kind": "narrative", "text": "The Vance-Owen Plan is presented. All parties must decide whether to accept a negotiated partition of Bosnia." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Vance-Owen Plan is presented. All parties must decide whether to accept a negotiated partition of Bosnia."
+    },
     "response_options": [
       {
         "id": "accept",
         "label": "Accept the Vance-Owen Plan",
         "description": "Accepting improves international credibility and may bring relief, but legitimizes territorial losses.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 10 },
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": -5 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 10
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -5
+          }
         ]
       },
       {
@@ -66,11 +102,118 @@
         "label": "Reject the Vance-Owen Plan",
         "description": "Rejection preserves territorial claims but damages standing with the international community.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": -10 },
-          { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": -10
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          }
         ]
       }
     ]
+  },
+  {
+    "id": "kravica_attack_1993",
+    "title": "Kravica Raid on Orthodox Christmas",
+    "narrative": "ARBiH forces under Naser Oric launch a raid from the Srebrenica enclave on the Serb village of Kravica on Orthodox Christmas Day, killing between 30-35 VRS soldiers and 11-13 Serb civilians. The attack provides the VRS a pretext for intensifying its spring offensive against the eastern enclaves. Oric is later indicted by the ICTY for failing to prevent crimes in the enclave's defense.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 39,
+      "turn_max": 41,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.1,
+        "duration_turns": 12
+      },
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RBiH",
+        "war_crimes_delta": 1
+      },
+      {
+        "kind": "narrative",
+        "text": "The Christmas raid on Kravica galvanizes VRS commanders. The Drina Corps begins preparations for an offensive to crush the eastern enclaves once and for all."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "internal_cohesion",
+        "delta": 5
+      }
+    ],
+    "historical_source": "ICTY Oric Indictment (IT-03-68). Krstic Trial Judgment (IT-98-33-T), paras. 17-18.",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    }
+  },
+  {
+    "id": "turajlic_assassination_1993",
+    "title": "Deputy Prime Minister Turajlic Assassinated",
+    "narrative": "VRS soldiers stop a UN convoy transporting Bosnian Deputy Prime Minister Hakija Turajlic from Sarajevo Airport. After a 90-minute standoff, a Serb soldier shoots Turajlic seven times through the open door of a French UNPROFOR APC, killing him in front of five peacekeepers. He is the highest-ranking Bosnian official killed in the war.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 42,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -3
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 2
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RS",
+        "war_crimes_delta": 1
+      },
+      {
+        "kind": "narrative",
+        "text": "The murder of Turajlic inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's contempt for international norms."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -5
+      }
+    ],
+    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), para. 5778.",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -3
+    }
   },
   {
     "id": "croat_bosniak_war_begins_1993",
@@ -83,14 +226,24 @@
       "phase": "war",
       "condition": {
         "type": "alliance_below",
-        "value": 0.10
+        "value": 0.1
       }
     },
     "once": true,
-    "effect": { "kind": "alliance_change", "delta": -0.5 },
+    "effect": {
+      "kind": "alliance_change",
+      "delta": -0.5
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "HRHB", "delta": 5 },
-      { "kind": "narrative", "text": "The Croat-Bosniak alliance collapses. HVO and ARBiH forces engage in open warfare across central Bosnia." }
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "The Croat-Bosniak alliance collapses. HVO and ARBiH forces engage in open warfare across central Bosnia."
+      }
     ]
   },
   {
@@ -102,7 +255,9 @@
       "turn_min": 40,
       "turn_max": 70,
       "phase": "war",
-      "requires_events": ["croat_bosniak_war_begins_1993"],
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
       "condition": {
         "type": "faction_controls_municipality",
         "faction": "HRHB",
@@ -111,11 +266,126 @@
       }
     },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "HRHB", "war_crimes_delta": 3 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "HRHB",
+      "war_crimes_delta": 3
+    },
     "effects": [
-      { "kind": "negotiation_capital", "faction": "HRHB", "dimension": "international_credibility", "delta": -25 },
-      { "kind": "narrative", "text": "The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow." }
+      {
+        "kind": "negotiation_capital",
+        "faction": "HRHB",
+        "dimension": "international_credibility",
+        "delta": -25
+      },
+      {
+        "kind": "narrative",
+        "text": "The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow."
+      }
     ]
+  },
+  {
+    "id": "us_envoy_appointed_1993",
+    "title": "US Special Envoy — American Engagement Begins",
+    "narrative": "President Clinton names Ambassador Reginald Bartholomew as the first US special envoy to Bosnia negotiations, signaling increased American engagement with the conflict. In May, Secretary of State Warren Christopher proposes a 'lift and strike' policy — lifting the arms embargo and using air strikes against VRS positions — but Britain and France reject it. Despite this setback, American diplomatic involvement has begun in earnest.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 44,
+      "turn_max": 46,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 2
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 3
+      },
+      {
+        "kind": "narrative",
+        "text": "American diplomacy enters the Bosnian arena. The 'lift and strike' proposal fails in Europe, but Washington's trajectory toward intervention has begun."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": 3
+      }
+    ],
+    "historical_source": "US State Department, 'Bosnia: Road to the Dayton Peace Agreement.'",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 2
+    }
+  },
+  {
+    "id": "vrs_cerska_offensive_1993",
+    "title": "VRS Cerska-Konjevic Polje Offensive",
+    "narrative": "The VRS Drina Corps, supported by Yugoslav Army armor, launches Operation Cerska, overrunning Bosniak-held positions at Cerska and Konjevic Polje in eastern Bosnia. The offensive severs the land link between the Srebrenica and Zepa enclaves, reducing the Srebrenica pocket to 150 square kilometers and driving 50,000-60,000 refugees into the overcrowded town.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 44,
+      "turn_max": 52,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -5
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": -5
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.1,
+        "duration_turns": 8
+      },
+      {
+        "kind": "narrative",
+        "text": "Cerska and Konjevic Polje fall to the Drina Corps. Srebrenica is now completely isolated and bursting with refugees."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": 5
+      },
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": 3
+      }
+    ],
+    "historical_source": "ICTY Krstic Trial Judgment (IT-98-33-T), paras. 15-22. Mladic Trial Judgment (IT-09-92-T).",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RS",
+      "delta": 5
+    }
   },
   {
     "id": "east_mostar_siege_1993",
@@ -126,15 +396,78 @@
       "turn_min": 45,
       "turn_max": 80,
       "phase": "war",
-      "requires_events": ["croat_bosniak_war_begins_1993"]
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
     },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "HRHB", "war_crimes_delta": 2 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "HRHB",
+      "war_crimes_delta": 2
+    },
     "effects": [
-      { "kind": "supply_delta", "faction": "HRHB", "delta": -5 },
-      { "kind": "patron_pressure", "faction": "HRHB", "delta": 5 },
-      { "kind": "narrative", "text": "East Mostar is besieged. 55,000 Bosniaks are trapped as HVO forces impose a total blockade on the eastern bank." }
+      {
+        "kind": "supply_delta",
+        "faction": "HRHB",
+        "delta": -5
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "East Mostar is besieged. 55,000 Bosniaks are trapped as HVO forces impose a total blockade on the eastern bank."
+      }
     ]
+  },
+  {
+    "id": "un_resolution_808_tribunal_1993",
+    "title": "UN Resolution 808 — International Tribunal Announced",
+    "narrative": "The UN Security Council passes Resolution 808, deciding that an international tribunal shall be established for the prosecution of serious violations of international humanitarian law in the former Yugoslavia. The resolution signals growing judicial attention to wartime atrocities and serves as the direct precursor to the ICTY's formal establishment in May.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 46,
+      "turn_max": 46,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": 3
+      },
+      {
+        "kind": "narrative",
+        "text": "Resolution 808 puts all commanders on notice: the international community is documenting crimes and building the architecture for prosecution."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -3
+      }
+    ],
+    "historical_source": "UN Security Council Resolution 808 (1993), S/RES/808.",
+    "effect": {
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 5
+    }
   },
   {
     "id": "central_bosnia_fighting_1993",
@@ -145,39 +478,737 @@
       "turn_min": 46,
       "turn_max": 80,
       "phase": "war",
-      "requires_events": ["croat_bosniak_war_begins_1993"]
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
     },
     "once": true,
-    "effect": { "kind": "narrative", "text": "Three-way fighting engulfs central Bosnia. The overlapping front lines create a humanitarian catastrophe." },
+    "effect": {
+      "kind": "narrative",
+      "text": "Three-way fighting engulfs central Bosnia. The overlapping front lines create a humanitarian catastrophe."
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": -3 }
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -3
+      }
     ]
+  },
+  {
+    "id": "morillon_enters_srebrenica_1993",
+    "title": "General Morillon Enters Srebrenica",
+    "narrative": "UNPROFOR Commander General Philippe Morillon reaches the besieged Srebrenica enclave after months of convoy blockades. Confronted by desperate civilians, he publicly declares 'You are now under the protection of the United Nations. I will never abandon you.' His personal guarantee raises hopes but lacks any enforcement mechanism.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 48,
+      "turn_max": 50,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "Morillon's dramatic declaration creates an obligation the UN cannot fulfill. The gap between his promise and UNPROFOR's means defines the enclave's tragic position."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      },
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -5
+      }
+    ],
+    "historical_source": "ICTY Krstic Trial Judgment (IT-98-33-T), para. 20. MSF Speaking Out: Srebrenica 1993-2003.",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    }
   },
   {
     "id": "srebrenica_shelling_1993",
     "title": "Srebrenica Under Heavy Bombardment",
     "narrative": "The VRS intensifies its assault on the Srebrenica enclave, systematically shelling the overcrowded town. Thousands of refugees huddle in schools and public buildings as artillery rounds fall indiscriminately. General Morillon's dramatic personal guarantee becomes a symbol of the UN's agonizing position.",
     "category": "humanitarian",
-    "trigger": { "turn_min": 49, "turn_max": 49, "phase": "war" },
+    "trigger": {
+      "turn_min": 49,
+      "turn_max": 49,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 1 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 1
+    },
     "effects": [
-      { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
-      { "kind": "narrative", "text": "Srebrenica is bombarded relentlessly. International outcry mounts as the enclave's humanitarian situation deteriorates." }
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "Srebrenica is bombarded relentlessly. International outcry mounts as the enclave's humanitarian situation deteriorates."
+      }
     ]
+  },
+  {
+    "id": "un_nfz_enforcement_1993",
+    "title": "UN Resolution 816 — No-Fly Zone Enforcement",
+    "narrative": "The UN Security Council passes Resolution 816, authorizing member states to enforce the no-fly zone over Bosnia-Herzegovina that had been violated over 500 times since its establishment in October 1992. On April 12 NATO commences Operation Deny Flight with combat air patrols, marking a shift from passive monitoring to active military involvement.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 51,
+      "turn_max": 53,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 2
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 3
+      },
+      {
+        "kind": "narrative",
+        "text": "NATO combat aircraft now patrol Bosnian airspace. The VRS loses its fixed-wing air support but retains overwhelming ground-based fire superiority."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -3
+      }
+    ],
+    "historical_source": "UN Security Council Resolution 816 (1993), S/RES/816. Operation Deny Flight USAF history.",
+    "effect": {
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 5
+    }
+  },
+  {
+    "id": "croatia_herceg_bosna_control_1993",
+    "title": "Croatia Tightens Control over Herceg-Bosna",
+    "narrative": "The Republic of Croatia deepens its de facto control over the Croatian Community of Herceg-Bosna: HV officers serve in HVO command positions, Croatian state resources flow across the border, and Zagreb's directives increasingly drive HVO military strategy. The ICTY Prlic trial establishes a Joint Criminal Enterprise involving Tudjman's inner circle and HVO commanders aimed at creating ethnically homogeneous Croat territory for eventual annexation.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 52,
+      "turn_max": 60,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 3
+      },
+      {
+        "kind": "equipment_grant",
+        "faction": "HRHB",
+        "tanks": 5,
+        "artillery": 8
+      },
+      {
+        "kind": "narrative",
+        "text": "Zagreb's patronage deepens. HVO commanders receive Croatian Army support — and with it, the expectation that Herceg-Bosna will serve Croatian strategic interests."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "patron_confidence",
+        "delta": 10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "historical_source": "ICTY Prlic Trial Judgment (IT-04-74-T), JCE findings. ICTY Appeals Judgment (IT-04-74-A).",
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "HRHB",
+      "delta": 5
+    }
+  },
+  {
+    "id": "sovici_doljani_attack_1993",
+    "title": "Sovici-Doljani Attack",
+    "narrative": "HVO forces attack the Bosniak villages of Sovici and Doljani near Jablanica, detaining approximately 400 Bosniak civilians and capturing 70-75 ARBiH soldiers. The attack occurs simultaneously with the Ahmici massacre in the Lasva Valley, revealing coordinated HVO operations across both central Bosnia and Herzegovina.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 53,
+      "turn_max": 56,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "humanitarian_impact",
+        "faction": "HRHB",
+        "war_crimes_delta": 1
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 2
+      },
+      {
+        "kind": "alliance_change",
+        "delta": -0.05
+      },
+      {
+        "kind": "narrative",
+        "text": "Coordinated HVO operations strike from Jablanica to the Lasva Valley simultaneously. The scale reveals systematic planning behind what the HVO publicly frames as defensive action."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -5
+      }
+    ],
+    "historical_source": "ICTY Prlic Trial Judgment (IT-04-74-T), Vol. 2. ICTY Naletilic-Martinovic Trial Judgment (IT-98-34-T).",
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "HRHB",
+      "war_crimes_delta": 1
+    }
+  },
+  {
+    "id": "trusina_killings_1993",
+    "title": "Trusina Killings",
+    "narrative": "ARBiH forces kill 15 Croat civilians and 7 HVO prisoners of war in the village of Trusina near Konjic, on the same day as the Ahmici massacre. The reciprocal atrocities illustrate the descending cycle of ethnic violence that the Croat-Bosniak war has unleashed across central Bosnia.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 53,
+      "turn_max": 58,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RBiH",
+        "war_crimes_delta": 1
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -3
+      },
+      {
+        "kind": "narrative",
+        "text": "War crimes on both sides deepen mutual hatred. Each atrocity becomes justification for the next."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Court of Bosnia and Herzegovina, Case S1 1 K 017327 16 Kre2.",
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RBiH",
+      "war_crimes_delta": 1
+    }
+  },
+  {
+    "id": "un_resolution_819_srebrenica_1993",
+    "title": "UN Resolution 819 — Srebrenica Safe Area",
+    "narrative": "The UN Security Council passes Resolution 819, declaring Srebrenica a 'safe area' free from armed attack or any hostile act, and demanding an immediate VRS ceasefire and unimpeded humanitarian access. The declaration creates a promise of protection without committing the military means to enforce it.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 54,
+      "turn_max": 54,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "Srebrenica is declared a UN safe area. The VRS ignores the ceasefire demand while the UN lacks any credible enforcement mechanism."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      }
+    ],
+    "historical_source": "UN Security Council Resolution 819 (1993), S/RES/819.",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    }
+  },
+  {
+    "id": "un_resolution_820_sanctions_1993",
+    "title": "UN Resolution 820 — Tightened Sanctions on Serbia",
+    "narrative": "The Security Council passes Resolution 820, substantially reinforcing the sanctions regime against Serbia and Montenegro. Following the Bosnian Serb assembly's rejection of the Vance-Owen plan on April 26, all commodity transport across Serbian borders is prohibited except medical supplies and foodstuffs, further strangling the RS supply chain through its patron.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 54,
+      "turn_max": 56,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -10
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 10
+      },
+      {
+        "kind": "narrative",
+        "text": "The tightened embargo enters force. Belgrade's ability to sustain the VRS is visibly constrained, and Milosevic's patience with Pale is running thin."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -10
+      },
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -10
+      }
+    ],
+    "historical_source": "UN Security Council Resolution 820 (1993), S/RES/820.",
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RS",
+      "delta": -10
+    }
+  },
+  {
+    "id": "srebrenica_demilitarization_1993",
+    "title": "Srebrenica Demilitarization Agreement",
+    "narrative": "Under intense international pressure following the VRS assault on Srebrenica, Generals Mladic and Halilovic sign a demilitarization agreement on April 17-18: the ARBiH is to surrender weapons under UNPROFOR supervision in exchange for a ceasefire and UN troop deployment. Implementation is flawed on both sides — the ARBiH hides weapons while the VRS continues to restrict humanitarian convoys.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 54,
+      "turn_max": 56,
+      "phase": "war",
+      "requires_events": [
+        "srebrenica_shelling_1993"
+      ]
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "historical",
+    "effect": {
+      "kind": "narrative",
+      "text": "The demilitarization agreement is signed. Srebrenica is technically disarmed — but both sides are already maneuvering around its terms."
+    },
+    "response_options": [
+      {
+        "id": "comply_fully",
+        "label": "Comply fully with disarmament",
+        "description": "Surrender all weapons as demanded. Gains international credibility but leaves the enclave defenseless.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -5
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 5
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -10
+          }
+        ]
+      },
+      {
+        "id": "hide_weapons",
+        "label": "Comply in appearance, hide weapons",
+        "description": "Surrender visible stocks while concealing reserves. The historical choice — preserving minimum defense capability.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -2
+          }
+        ]
+      },
+      {
+        "id": "refuse",
+        "label": "Refuse disarmament",
+        "description": "Publicly reject the agreement. Maintains military capability but draws international condemnation and increased VRS pressure.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 10
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -10
+          }
+        ]
+      }
+    ],
+    "historical_source": "ICTY Krstic Trial Judgment (IT-98-33-T), paras. 23-27. Halilovic-Mladic Agreement, May 8 1993."
   },
   {
     "id": "un_safe_areas_declared_1993",
     "title": "UN Declares Safe Areas",
     "narrative": "The UN Security Council passes Resolution 819, declaring Srebrenica a safe area, followed by Resolution 824 extending protection to Sarajevo, Tuzla, Zepa, Gorazde, and Bihac. The resolutions promise protection without committing adequate military force to deliver it — a fatal gap between mandate and means that will have catastrophic consequences.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 54, "turn_max": 54, "phase": "war" },
+    "trigger": {
+      "turn_min": 54,
+      "turn_max": 54,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    },
     "effects": [
-      { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
-      { "kind": "narrative", "text": "Six UN safe areas are declared. The promise of protection raises hope among besieged populations, but no credible enforcement mechanism exists." }
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "Six UN safe areas are declared. The promise of protection raises hope among besieged populations, but no credible enforcement mechanism exists."
+      }
     ]
+  },
+  {
+    "id": "vitez_kiseljak_pockets_1993",
+    "title": "Vitez-Kiseljak Pockets Isolated",
+    "narrative": "As the Croat-Bosniak war intensifies, HVO garrisons in the Vitez-Busovaca pocket and the Kiseljak enclave become increasingly cut off from resupply by HVO main forces in western Herzegovina. The pockets must survive on local resources and intermittent VRS cooperation, while the ARBiH weighs the cost of an assault against the benefits of encirclement.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 55,
+      "turn_max": 70,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -3
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "HRHB",
+        "delta": -3
+      },
+      {
+        "kind": "narrative",
+        "text": "HVO defenders in central Bosnia fight with the desperation of encirclement. Each convoy that fails to reach them deepens the crisis."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": -3
+      }
+    ],
+    "historical_source": "ICTY Kordic Trial Judgment (IT-95-14/2-T). ICTY Blaskic Trial Judgment (IT-95-14-T).",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "HRHB",
+      "delta": -3
+    }
+  },
+  {
+    "id": "rs_assembly_rejects_voplan_1993",
+    "title": "Bosnian Serb Assembly Rejects Vance-Owen Plan",
+    "narrative": "Despite Karadzic's personal signature on the Vance-Owen plan on April 30, the Republika Srpska National Assembly in Pale votes to reject it on May 5-6, referring the decision to a referendum. The subsequent referendum produces a 96% rejection. Lord Owen declares the plan dead on June 18 — the last comprehensive peace proposal that preserved a unified Bosnia has failed.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 56,
+      "turn_max": 58,
+      "phase": "war",
+      "requires_events": [
+        "vance_owen_plan_1993"
+      ]
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "historical",
+    "effect": {
+      "kind": "narrative",
+      "text": "The Assembly has spoken. The Vance-Owen plan is dead. The war continues on Pale's terms."
+    },
+    "response_options": [
+      {
+        "id": "accept_rejection",
+        "label": "Accept the assembly's vote",
+        "description": "The people have spoken. Reject international pressure and continue the war. Internal cohesion is preserved but Serbia is furious.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 5
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 10
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 10
+          }
+        ]
+      },
+      {
+        "id": "override_assembly",
+        "label": "Attempt to override the assembly",
+        "description": "Defy the nationalist vote and push for acceptance. Historically impossible — risks fracturing the RS political structure.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -5
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": -5
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -20
+          }
+        ]
+      }
+    ],
+    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), paras. 3526-3530. RS National Assembly proceedings, May 5-6 1993."
+  },
+  {
+    "id": "icty_established_1993",
+    "title": "ICTY Formally Established — Resolution 827",
+    "narrative": "The UN Security Council unanimously passes Resolution 827, formally establishing the International Criminal Tribunal for the former Yugoslavia — the first war crimes court created by the UN since Nuremberg and Tokyo. The tribunal has jurisdiction over genocide, crimes against humanity, and violations of the laws of war committed in the former Yugoslavia since 1991. While indictments are years away, the era of impunity may be ending.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "turn_max": 60,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": 3
+      },
+      {
+        "kind": "narrative",
+        "text": "The ICTY opens for business in The Hague. Every commander who orders atrocities now does so with knowledge that a court exists to try them."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -3
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      }
+    ],
+    "historical_source": "UN Security Council Resolution 827 (1993), S/RES/827.",
+    "effect": {
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 5
+    }
+  },
+  {
+    "id": "battle_of_travnik_1993",
+    "title": "Battle of Travnik — ARBiH Recaptures City",
+    "narrative": "The ARBiH 3rd Corps launches an offensive against HVO positions in Travnik, overwhelming the garrison within days. Thousands of Croat civilians flee across VRS lines rather than remain under ARBiH control. The loss of Travnik is a major setback for the HVO in central Bosnia, demonstrating the ARBiH's growing numerical superiority in the interior.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 60,
+      "turn_max": 68,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "travnik",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -5
+      },
+      {
+        "kind": "narrative",
+        "text": "Travnik falls to the ARBiH. Croat civilians flee, and the HVO's position in central Bosnia begins its terminal decline."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": -5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "territorial_legitimacy",
+        "delta": -5
+      }
+    ],
+    "historical_source": "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T).",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 5
+    }
   },
   {
     "id": "operation_neretva_93_1993",
@@ -188,45 +1219,528 @@
       "turn_min": 60,
       "turn_max": 95,
       "phase": "war",
-      "requires_events": ["croat_bosniak_war_begins_1993"]
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
     },
     "once": true,
-    "effect": { "kind": "narrative", "text": "The ARBiH launches Operation Neretva '93, striking at HVO positions in the Neretva Valley and around Mostar." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The ARBiH launches Operation Neretva '93, striking at HVO positions in the Neretva Valley and around Mostar."
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      }
     ]
+  },
+  {
+    "id": "un_resolution_836_force_1993",
+    "title": "UN Resolution 836 — Use of Force Authorized",
+    "narrative": "The Security Council passes Resolution 836, authorizing UNPROFOR to use force in reply to bombardments against safe areas and permitting member states to use 'all necessary measures through the use of air power' in and around them. This is the legal foundation for future NATO air strikes — though the dual-key arrangement between the UN and NATO means the authorization exists largely on paper.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 61,
+      "turn_max": 61,
+      "phase": "war",
+      "requires_events": [
+        "un_safe_areas_declared_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 2
+      },
+      {
+        "kind": "narrative",
+        "text": "NATO now has legal authority to strike VRS positions. Whether it has the political will to use it is another question entirely."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -3
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 3
+      }
+    ],
+    "historical_source": "UN Security Council Resolution 836 (1993), S/RES/836.",
+    "effect": {
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 5
+    }
+  },
+  {
+    "id": "operation_sharp_guard_1993",
+    "title": "Operation Sharp Guard — NATO Naval Blockade",
+    "narrative": "NATO and the Western European Union begin Operation Sharp Guard, a combined naval blockade in the Adriatic Sea to enforce UN sanctions against the Federal Republic of Yugoslavia and the arms embargo on all former Yugoslav republics. The operation intercepts merchant shipping, tightening the economic noose on Serbia while limiting — though not eliminating — arms flows to all parties.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 63,
+      "turn_max": 63,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -3
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": -2
+      },
+      {
+        "kind": "narrative",
+        "text": "NATO warships enforce the Adriatic blockade. Serbia's supply corridor tightens further, but the arms embargo continues to hurt the outgunned ARBiH most."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -3
+      }
+    ],
+    "historical_source": "NATO Operation Sharp Guard records. UN Security Council sanctions monitoring reports.",
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RS",
+      "delta": -3
+    }
+  },
+  {
+    "id": "hvo_detention_camps_1993",
+    "title": "HVO Detention Camps Established",
+    "narrative": "Following the eruption of full-scale Croat-Bosniak war, HVO forces conduct mass arrests of Bosniak men across Herzegovina, including Bosniak members of the HVO itself. Thousands are held in a network of camps including Dretelj Prison, Gabela, and the Heliodrom complex near Mostar. Conditions are brutal — overcrowding, starvation, beatings, and forced labor — paralleling the Serb-run camps revealed at Omarska the previous year.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 63,
+      "turn_max": 70,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "humanitarian_impact",
+        "faction": "HRHB",
+        "war_crimes_delta": 3
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": 10
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "HRHB",
+        "dimension": "international_credibility",
+        "delta": -20
+      },
+      {
+        "kind": "narrative",
+        "text": "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Croatia's patron relationship with the West enters a period of severe strain."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -15
+      }
+    ],
+    "historical_source": "ICTY Prlic Trial Judgment (IT-04-74-T), Vol. 3. ICTY Naletilic-Martinovic Trial Judgment (IT-98-34-T).",
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "HRHB",
+      "war_crimes_delta": 3
+    }
+  },
+  {
+    "id": "sarajevo_tunnel_completed_1993",
+    "title": "Sarajevo Tunnel Completed",
+    "narrative": "After four months of secret construction under the codename 'Objekt BD,' the 800-meter tunnel connecting besieged Dobrinja to free territory at Butmir — passing under the UN-controlled airport runway — is completed. The tunnel carries up to 20 tonnes of supplies daily: food, weapons, ammunition, and communications equipment. It transforms Sarajevo's siege from a total blockade into a strangled but survivable containment.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 64,
+      "turn_max": 66,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "Sarajevo breathes again. The tunnel is a military and psychological lifeline — proof that the city's will to resist can find a way through any encirclement."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": 5
+      }
+    ],
+    "historical_source": "Sarajevo Tunnel Museum archives. ICTY Galic Trial Judgment (IT-98-29-T).",
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RBiH",
+      "delta": 10
+    }
+  },
+  {
+    "id": "operation_lukavac_93",
+    "title": "Operation Lukavac 93 — VRS Offensive on Igman",
+    "narrative": "The VRS launches Operation Lukavac 93 with 15,000 troops against ARBiH positions on Mount Igman and Bjelasnica, aiming to sever Sarajevo's last supply route. VRS forces capture the Igman road on August 4, bringing the city to the brink of total isolation. The offensive provokes the first credible NATO threat of air strikes, forcing VRS withdrawal under a UN-brokered agreement by August 14.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 65,
+      "turn_max": 72,
+      "phase": "war"
+    },
+    "once": true,
+    "requires_player_response": true,
+    "bot_response_logic": "historical",
+    "effect": {
+      "kind": "narrative",
+      "text": "VRS forces have seized the Igman road. Sarajevo faces total isolation — and NATO is issuing its first genuine ultimatum."
+    },
+    "response_options": [
+      {
+        "id": "comply",
+        "label": "Comply with withdrawal demand",
+        "description": "Pull back from Igman under the UN-brokered agreement. Avoids NATO strikes but concedes the strategic gain.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -3
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RS",
+            "delta": -0.1,
+            "duration_turns": 8
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 10
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 5
+          }
+        ]
+      },
+      {
+        "id": "defy_nato",
+        "label": "Defy NATO — hold Igman",
+        "description": "Call NATO's bluff and hold the captured positions. Risks triggering the first NATO combat strikes in history.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -15
+          },
+          {
+            "kind": "humanitarian_impact",
+            "faction": "RS",
+            "war_crimes_delta": 2
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 20
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -20
+          }
+        ]
+      }
+    ],
+    "historical_source": "ICTY Mladic Trial Judgment (IT-09-92-T). Washington Post, Aug 14 1993."
+  },
+  {
+    "id": "maglaj_enclave_blockade_1993",
+    "title": "Maglaj Enclave Under Joint HVO-VRS Blockade",
+    "narrative": "Following the collapse of the ARBiH-HVO alliance, the HVO joins the VRS in imposing a complete blockade on the Bosniak-held pocket around Maglaj, trapping approximately 100,000 people. The town endures relentless bombardment and near-total isolation for nine months, surviving partly on US airdrop supplies. The joint siege exemplifies the impossible tactical situation the ARBiH now faces — encircled from two directions simultaneously.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 65,
+      "turn_max": 70,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -3
+      },
+      {
+        "kind": "alliance_change",
+        "delta": -0.05
+      },
+      {
+        "kind": "narrative",
+        "text": "Maglaj's joint blockade is a new strategic reality: the ARBiH must now defend against coordinated Serb and Croat pressure in the same valley."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -5
+      },
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -3
+      }
+    ],
+    "historical_source": "ICTY Prlic Trial Judgment (IT-04-74-T).",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -3
+    }
+  },
+  {
+    "id": "battle_of_bugojno_1993",
+    "title": "Battle of Bugojno",
+    "narrative": "The ARBiH 307th Brigade attacks HVO positions in Bugojno in central Bosnia, where the defending Eugen Kvaternik Brigade can muster only 200-400 effective troops. After ten days of street fighting the ARBiH secures control of the town and captures significant military equipment, including tanks and artillery, consolidating control over the Vrbas River valley.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 66,
+      "turn_max": 72,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "bugojno",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -3
+      },
+      {
+        "kind": "equipment_grant",
+        "faction": "RBiH",
+        "tanks": 2,
+        "artillery": 3,
+        "target_municipality": "bugojno"
+      },
+      {
+        "kind": "narrative",
+        "text": "Bugojno falls and its HVO arsenal is absorbed into the ARBiH. The momentum in central Bosnia has decisively shifted."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 3
+      }
+    ],
+    "historical_source": "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T).",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    }
   },
   {
     "id": "markale_area_shelling_1993",
     "title": "Sarajevo Market Areas Under Fire",
     "narrative": "Repeated mortar and artillery strikes target civilian areas in Sarajevo, including crowded marketplaces. Each incident draws international condemnation and edges the international community closer to considering military intervention against VRS positions. The SRK maintains its bombardment despite cease-fire agreements.",
     "category": "humanitarian",
-    "trigger": { "turn_min": 68, "turn_max": 68, "phase": "war" },
+    "trigger": {
+      "turn_min": 68,
+      "turn_max": 68,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 1 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 1
+    },
     "effects": [
-      { "kind": "patron_pressure", "faction": "RS", "delta": 5 },
-      { "kind": "narrative", "text": "Artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily." }
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "Artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily."
+      }
     ]
+  },
+  {
+    "id": "nato_air_strike_threat_1993",
+    "title": "NATO Threatens Air Strikes — Sarajevo Ultimatum",
+    "narrative": "NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized potential force in its 44-year history. The dual-key arrangement between UN and NATO commands means execution remains politically constrained, but the threat forces the VRS withdrawal from Mount Igman.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 69,
+      "turn_max": 71,
+      "phase": "war"
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": -0.05,
+        "duration_turns": 12
+      },
+      {
+        "kind": "narrative",
+        "text": "NATO's ultimatum is the clearest signal yet that the international community may use force. The VRS calculates its next move carefully."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      }
+    ],
+    "historical_source": "NATO Council decision, August 9 1993. Operation Deny Flight history.",
+    "effect": {
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 10
+    }
   },
   {
     "id": "owen_stoltenberg_plan_1993",
     "title": "Owen-Stoltenberg Plan Proposed",
     "narrative": "International mediators David Owen and Thorvald Stoltenberg present a new peace plan proposing a loose union of three ethnic republics. The plan effectively legitimizes ethnic partition and is seen by the Bosnian government as rewarding aggression. Negotiations continue through the autumn amid ongoing fighting on all fronts.",
     "category": "diplomatic",
-    "trigger": { "turn_min": 70, "turn_max": 70, "phase": "war" },
+    "trigger": {
+      "turn_min": 70,
+      "turn_max": 70,
+      "phase": "war"
+    },
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
-    "effect": { "kind": "narrative", "text": "The Owen-Stoltenberg Plan proposes a tripartite union of ethnic republics. Each faction must weigh the costs of acceptance or rejection." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Owen-Stoltenberg Plan proposes a tripartite union of ethnic republics. Each faction must weigh the costs of acceptance or rejection."
+    },
     "response_options": [
       {
         "id": "accept",
         "label": "Accept the Owen-Stoltenberg Framework",
         "description": "Accepting brings international relief but concedes the principle of a unified Bosnia.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 5 },
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": -5 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 5
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -5
+          }
         ]
       },
       {
@@ -234,35 +1748,277 @@
         "label": "Reject Ethnic Partition",
         "description": "Rejection defends sovereignty but prolongs the war and frustrates mediators.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": -5 },
-          { "kind": "morale_change", "faction": "RBiH", "delta": 2 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": -5
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 2
+          }
         ]
       }
     ]
+  },
+  {
+    "id": "grabovica_uzdol_massacres_1993",
+    "title": "Grabovica and Uzdol Massacres",
+    "narrative": "During Operation Neretva 93, ARBiH units from Sarajevo commit war crimes against Croat civilians: at least 13 villagers killed at Grabovica on September 8-9, and at least 29 civilians and one HVO POW killed at Uzdol on September 14. ICTY Chief of Staff Sefer Halilovic is indicted but acquitted due to insufficient evidence of effective command control over the perpetrators.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 73,
+      "turn_max": 76,
+      "phase": "war",
+      "requires_events": [
+        "operation_neretva_93_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RBiH",
+        "war_crimes_delta": 2
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -3
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RBiH",
+        "dimension": "international_credibility",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "ARBiH atrocities in Herzegovina are documented. No faction in this war holds clean hands."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
+    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T).",
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RBiH",
+      "war_crimes_delta": 2
+    }
   },
   {
     "id": "abdic_apwb_declared_1993",
     "title": "Fikret Abdic Declares Autonomous Province",
     "narrative": "Fikret Abdic, the powerful Bihac businessman who actually won more votes than Izetbegovic in the 1990 presidential election, declares the Autonomous Province of Western Bosnia centered on Velika Kladusa. His breakaway entity, backed by both the VRS and the Republic of Serbian Krajina, opens a new internal front that splits the Bihac pocket and diverts 5th Corps resources away from the external siege.",
     "category": "political",
-    "trigger": { "turn_min": 77, "turn_max": 77, "phase": "war" },
+    "trigger": {
+      "turn_min": 77,
+      "turn_max": 77,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": -5 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -5
+    },
     "effects": [
-      { "kind": "narrative", "text": "Abdic declares the Autonomous Province of Western Bosnia. The Bihac pocket is now fighting a war within a war." }
+      {
+        "kind": "narrative",
+        "text": "Abdic declares the Autonomous Province of Western Bosnia. The Bihac pocket is now fighting a war within a war."
+      }
     ]
+  },
+  {
+    "id": "bosnian_assembly_rejects_os_1993",
+    "title": "Bosnian Parliament Rejects Owen-Stoltenberg Plan",
+    "narrative": "After sessions aboard HMS Invincible on September 20, the Bosnian government assembly in Sarajevo votes to reject the Owen-Stoltenberg plan's ethnic partition, demanding additional territory and access to the sea. The rejection prolongs the war and frustrates international mediators but preserves the principle of a unified, multi-ethnic Bosnia.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 77,
+      "turn_max": 79,
+      "phase": "war",
+      "requires_events": [
+        "owen_stoltenberg_plan_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "The Bosnian assembly refuses partition. The war will continue — but so will Bosnia's legal claim to its full territory."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": 5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Peace plans proposed before and during the Bosnian War. HMS Invincible negotiations, September 20 1993.",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    }
+  },
+  {
+    "id": "abdic_karadzic_pact_1993",
+    "title": "Abdic-Karadzic Pact",
+    "narrative": "Fikret Abdic signs a declaration with RS President Radovan Karadzic recognizing the Autonomous Province of Western Bosnia's sovereignty. The VRS commits to non-aggression, joint defense coordination, and logistical support including arms supplies, while the RSK also provides backing. The pact transforms the Bihac pocket into a three-way battleground: 5th Corps against Abdic's APWB forces backed by both Serb entities.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 80,
+      "turn_max": 83,
+      "phase": "war",
+      "requires_events": [
+        "abdic_apwb_declared_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -3
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 2
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": 3
+      },
+      {
+        "kind": "narrative",
+        "text": "Abdic and Karadzic formalize their alliance. The 5th Corps now faces encirclement from three directions — VRS, RSK, and APWB."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": -10
+      },
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": 5
+      }
+    ],
+    "historical_source": "Abdic-Karadzic Declaration, Oct 22 1993. ICTY Karadzic Trial Judgment (IT-95-5/18-T).",
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -3
+    }
+  },
+  {
+    "id": "stupni_do_massacre_1993",
+    "title": "Stupni Do Massacre",
+    "narrative": "HVO special units 'Apostoli' and 'Maturice' under Ivica Rajic attack the Bosniak village of Stupni Do near Vares, killing approximately 31 civilians and destroying the village. Over 250 Bosniak men in nearby Vares are rounded up and subjected to inhuman treatment. When UNPROFOR attempts to investigate, HVO forces obstruct access for days before the evidence is documented.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 80,
+      "turn_max": 83,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ]
+    },
+    "once": true,
+    "effects": [
+      {
+        "kind": "humanitarian_impact",
+        "faction": "HRHB",
+        "war_crimes_delta": 2
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "HRHB",
+        "dimension": "international_credibility",
+        "delta": -15
+      },
+      {
+        "kind": "narrative",
+        "text": "Stupni Do is added to the growing list of documented HVO atrocities. Rajic will eventually plead guilty at The Hague."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
+    "historical_source": "ICTY Rajic Sentencing Judgment (IT-95-12-S).",
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "HRHB",
+      "war_crimes_delta": 2
+    }
   },
   {
     "id": "mostar_bridge_destroyed_1993",
     "title": "Stari Most Destroyed in Mostar",
     "narrative": "HVO forces destroy the iconic Stari Most, the 16th-century Ottoman bridge spanning the Neretva River in Mostar. The deliberate demolition of this UNESCO-recognized cultural monument becomes a global symbol of the war's cultural devastation. The act draws widespread international condemnation and deepens the stigma on the Bosnian Croat war effort.",
     "category": "humanitarian",
-    "trigger": { "turn_min": 83, "turn_max": 83, "phase": "war", "requires_events": ["east_mostar_siege_1993"] },
+    "trigger": {
+      "turn_min": 83,
+      "turn_max": 83,
+      "phase": "war",
+      "requires_events": [
+        "east_mostar_siege_1993"
+      ]
+    },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "HRHB", "war_crimes_delta": 1 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "HRHB",
+      "war_crimes_delta": 1
+    },
     "effects": [
-      { "kind": "negotiation_capital", "faction": "HRHB", "dimension": "international_credibility", "delta": -10 },
-      { "kind": "narrative", "text": "The Stari Most is destroyed by HVO shelling. The loss of the iconic bridge becomes a symbol of cultural destruction." }
+      {
+        "kind": "negotiation_capital",
+        "faction": "HRHB",
+        "dimension": "international_credibility",
+        "delta": -10
+      },
+      {
+        "kind": "narrative",
+        "text": "The Stari Most is destroyed by HVO shelling. The loss of the iconic bridge becomes a symbol of cultural destruction."
+      }
     ]
   }
 ]
