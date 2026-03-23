@@ -100,7 +100,7 @@
   {
     "id": "nato_shoots_down_planes_1994",
     "title": "NATO Shoots Down Serb Aircraft",
-    "narrative": "NATO fighters shoot down five VRS J-21 Jastreb aircraft violating the no-fly zone over Bosnia in the Banja Luka area. The incident, NATO's first combat action in its history, signals a shift from passive observation to active enforcement. The VRS command begins to factor NATO air power into its operational calculations.",
+    "narrative": "NATO F-16 fighters intercept six VRS aircraft violating the no-fly zone over central Bosnia, shooting down four. The incident — NATO's first combat action in its forty-five-year history — signals a shift from passive observation to active enforcement. The VRS command begins to factor NATO air power into its operational calculations.",
     "category": "military",
     "trigger": {
       "turn_min": 99,
@@ -121,7 +121,7 @@
       },
       {
         "kind": "narrative",
-        "text": "NATO shoots down five VRS J-21 Jastreb aircraft. The alliance demonstrates its willingness to use force for the first time."
+        "text": "NATO shoots down four of six VRS aircraft violating the no-fly zone. The alliance demonstrates its willingness to use force for the first time."
       }
     ]
   },
