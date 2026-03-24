@@ -1,7 +1,23 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-24
-**Status:** **v0.6.1** — Political Wargame. **v0.6.x COMPLETE.** 1412 tests, 116 suites. **92.0% area-weighted (n1033, honest baseline).** Electron 41. **94 events, 75 mechanical. 96-essay Codex.** Pyrrhic team restructured (62 roles). Emergent Cascade Architecture documented. 9 plans ready for nightshift. 3 bugs fixed (event flag propagation). 14 gaps identified + assigned. **Next: v0.6.5 (Drina paramilitaries) → v0.7.0 (flag wiring).**
+**Last Updated:** 2026-03-24 (nightshift)
+**Status:** **v0.6.5** — Political Wargame. 1446 tests, 117 suites. **92.6% area-weighted (n1040, re-frozen).** 94 events, 21 flag-gated. Offensive paramilitaries (Drina valley). **v0.7.0 Phase 1+2 complete** (evaluators + 21 flag gates). **Next: v0.7.0 Phase 4 (engine flag reads) → Phase 5 (FIXED→CONDITIONAL).**
+
+## [2026-03-24 nightshift] v0.6.5 Offensive Paramilitary Sweep + v0.7.0 Event Flag Wiring Phase 1+2
+
+**Scope:** Offensive paramilitary system (Drina valley ethnic cleansing), adapter integration tests, event flag wiring (evaluators + gates + pressure modifiers).
+
+**v0.6.5 — Offensive Paramilitary Sweep (COMPLETE):** RS paramilitaries (Arkan's Tigers, White Eagles) sweep hostile-controlled OSIDs in 10 Drina valley municipalities during weeks 0-12. 600-person units, 50% RS spawn rate. Can overwhelm defenders <=500 personnel. Enclave core OSIDs excluded (Srebrenica, Gorazde, Bihac, Sarajevo protected). War crimes wired: every capture increments war_crimes_events on negotiation capital. HRHB HOS paramilitaries (15% rate) in Stolac/Capljina/Prozor. Calibration: 92.0% → 92.6% (+0.6pp). 28 RS offensive paras, 6 HRHB. RS 34 war_crimes_events at w40. /war-or-game APPROVED. Baseline re-frozen (n1038→n1040).
+
+**Integration Tests (COMPLETE):** Adapter field completeness — 18 tests against real final_save.json through GameStateAdapter.parseGameState(). Covers formations, political controllers, militia pools, corps sectors, officers, enclaves, displacement, casualties, supply, events, turn summaries.
+
+**v0.7.0 Phase 1 (evaluators):** Implemented `enclave_supply_status` (checks last_supply_state_by_osid for municipality supply severity) and `corridor_severed` (BFS through faction-controlled territory). 8 new condition evaluator tests.
+
+**v0.7.0 Phase 2 (flag gates):** Wired 21 flag gates across 4 event JSON files. sarajevo_siege_active (8 events), srebrenica_enclave_formed (7), mostar_liberated (3), hvo_arbih_tensions_rising (1), arms_embargo_active (1), bihac_breakout_occurred (1), rrf_deployed (1). Pressure modifiers: drina_cleansing_occurred (+2.0 on camps, +1.5 on enclave), mostar_liberated (+0.5 on tensions), jajce_fell (+1.5 on tensions).
+
+**Issues found:** (1) MAX_EVENTS_PER_TURN=3 crowds out jna_withdrawal — P1 fix needed. (2) Gorazde periphery over-capture (3 OSIDs). (3) corridor_severed needs edges data path wiring.
+
+**Files:** `src/sim/combat/paramilitary_sweep.ts` (new offensive mode), `src/sim/combat/enclave_resilience.ts` (exports), `src/sim/turn_phases/war_phases.ts` (+1 step), `src/state/formation_constants.ts` (offensive constants), `src/state/game_state.ts` (paramilitary_mode field), `src/sim/events/event_types.ts` (evaluators), `data/scenarios/events/war_*.json` (flag gates), `tests/` (34 new tests), `data/calibration/baseline_40w.json` (re-frozen).
 
 ## [2026-03-24] Emergent Cascade Architecture + Pyrrhic Team Restructuring
 

@@ -1,24 +1,29 @@
-# Working On: v0.7.0 — Event Flag Wiring
+# Working On: v0.7.0 — Event Flag Wiring (Phase 4 next)
 
 ## Context
-v0.6.x is COMPLETE. Roadmap cross-examined and cleaned up. Calibration baseline re-frozen at 92.0% (n1030).
+v0.6.5 COMPLETE (offensive paramilitary sweep). v0.7.0 Phase 1+2 COMPLETE.
+
+## What's Done
+- Phase 1: `enclave_supply_status` + `corridor_severed` evaluators implemented
+- Phase 2: 21 flag gates wired to downstream events
+- Phase 3 (partial): 3 pressure modifiers wired
 
 ## What's Next
-v0.7.0: Event flag wiring — the foundation for Dynamic Codex.
+- **P1 FIX NEEDED**: MAX_EVENTS_PER_TURN=3 crowds out jna_withdrawal. Increase to 4 or add priority. This unblocks jna_withdrawn flag gates.
+- Phase 4: Engine flag reads — one change per calibration run:
+  1. `supply_reserves.ts` — arms_embargo_active throttles RBiH patron aid (0.6x)
+  2. `supply_reserves.ts` — corridor_secured boosts RS patron aid (1.3x)
+  3. `patron_pressure.ts` — drina_cleansing_occurred +2/turn RS pressure
+  4. `patron_pressure.ts` — camps_revealed +3/turn RS pressure
+  5. `attack_resolution_osid.ts` — coha_active suppresses combat
+  6. `bot_corps_ai.ts` — coha_active forces defensive
+  7. `turn_pipeline.ts` — dayton_signed stops war phases
+- Phase 5: FIXED→CONDITIONAL conversions (Srebrenica, Markale, Zepa, endgame chain)
+- Phase 6: Cleanup
 
-### Scope
-1. **~25 orphan flags** need wiring to downstream consumers (engine systems, events, UI)
-2. **~29 FIXED events** need design pass — which should become CONDITIONAL?
-3. **FIXED→CONDITIONAL conversion** for key events (Srebrenica, 2nd Markale, Žepa, endgame chain)
-4. **New condition types** needed: `enclave_supply_status`, `corridor_severed`, `brigade_count_below`, `artillery_in_zone`
+## Key Issues
+- corridor_severed evaluator needs edges data path (`(state as any).derived?.edges` may not exist at runtime)
+- Gorazde periphery over-capture (3 OSIDs) — consider removing gorazde from offensive para scope
 
-### Plan
-`docs/plans/2026-03-23-event-flag-wiring-plan.md` — 6 phases, est. 5-7 sessions.
-
-### Key Design Decisions Still Open
-- Which FIXED events should become conditional? (Srebrenica, Markale, Deliberate Force)
-- How does the player see canonical vs dynamic Codex layers in the UI?
-- How does the command autonomy slider interact with event decisions?
-
-### Parallelism Opportunity
-v0.7.1 (essay templates) can run alongside v0.8.0 (political bot) — no dependency between them. Both depend on v0.7.0 (flags).
+## Plan
+`docs/plans/2026-03-23-event-flag-wiring-plan.md`

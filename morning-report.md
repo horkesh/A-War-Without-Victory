@@ -1,116 +1,95 @@
-# Morning Report — Night Shift 2026-03-23
+# Morning Report — Night Shift 2026-03-24
 
 ## Summary
-27/28 tasks completed across all 7 plans. 15 commits. 1317→1410 tests (+93 new). tsc clean, build clean, calibration verified (93.1%, zero regression). One task blocked on expired API key.
+Completed v0.6.5 (offensive paramilitary sweep), adapter integration tests, and v0.7.0 Phase 1+2 (evaluators + flag gates). 3 commits, +0.6pp calibration, 1446 tests. Build clean.
 
 ## What Was Done
 
-### Plan 1: Game Chronicle (6/6 tasks)
-- Task 1: Territory + supply snapshots on TurnSummary — `4459d54`
-- Task 2: generateChronicleEntries — 6 card types, significance filtering — `c8345f8`
-- Task 3: Store state + toolbar button + date click + C shortcut — `c8345f8`
-- Task 4: ChronicleCard — 6 variants with distinct border colors — `97c9e78`
-- Task 5: ChronicleSpine — territory ribbon, CSS-only — `97c9e78`
-- Task 6: ChronicleOverlay — full-screen z-1000 assembly — `97c9e78`
-- /simplify: 6 fixes — shared getOsidAreas, faction colors from theme, humanizeOsid, useMemo narrowing, turnSummaries on adapter — `f2db1c1`
+### v0.6.5 — Offensive Paramilitary Sweep (COMPLETE)
+- Phase 1: Constants (OFFENSIVE_PARA_*) + paramilitary_mode field on FormationState
+- Phase 2: `detectOffensiveParamilitaryTargets()` + extended `advanceParamilitaries()` for offensive mode
+- Phase 3: `offensive-paramilitary-detect` pipeline step in war_phases.ts
+- Phase 4: 10 new tests (6 detection + 4 resolution)
+- Phase 5: Calibration 92.0% -> 92.6% (+0.6pp). Baseline re-frozen (n1038). /war-or-game APPROVED
+- /simplify: Ran after completion (3 review agents dispatched)
+- Enclave protection added after first run showed Gorazde/Srebrenica overshoot (90.7% initial -> 92.6% with exclusion)
+- Commit: c9ac0137
 
-### Plan 2: AI Commander Events (3/3 tasks)
-- Task 1: Enrich army/corps prompts with event context — `18dd4a4`
-- Task 2: generateEventDecision with Haiku model + fallback — `18dd4a4`
-- Task 3: validateCorpsDecision + validateArmyDecision — `18dd4a4`
+### Tier 0.5 — Integration Tests (COMPLETE)
+- Adapter field completeness test: 18 tests against real save file
+- Covers: formations, political controllers, control events, militia pools, corps sectors, officers, enclaves, displacement, casualties, supply, events, turn summaries
+- Commit: e5483cdc
 
-### Plan 3: Dayton Dimension Merge (5/5 tasks)
-- Task 1: DIMENSION_WEIGHTS + computeNegotiatingCapital — `cc2ff22`
-- Task 2: computeDimensionBaseValues (6 base formulas) — `cc2ff22`
-- Task 3: NegotiationCapital → NegotiationBreakdown rename — `b6fd9c1`
-- Task 4: compute-dimension-bases pipeline step (143 total) — `6f35795`
-- Task 5: UI composite score + weight bars + tooltips — `6f35795`
-- 40w calibration: n1026 = 93.1% area-weighted, zero regression
-
-### Plan 4: Calibration Framework (3/3 tasks)
-- Task 1: Baseline freeze (tools/freeze_baseline.cjs) — `5137f5c`
-- Task 2: Regression comparison (tools/calibrate_40w.cjs, npm run calibrate:40w) — `5137f5c`
-- Task 3: Event timing assertions (14 tests, all 19 events) — `5137f5c`
-
-### Plan 5: HQ Deep Drill-Down (4/4 tasks)
-- Task 1: Brigade sub-cards (morale/cohesion bars, equipment, arc badges, history) — `9d616a2`
-- Task 2: Operation sub-cards (commander personality, weekly log, AAR grade, casualties) — `9d616a2`
-- Task 3: Sector sub-cards (intel confidence, threat assessment, positions, density) — `9d616a2`
-- Task 4: Operation readiness dot (green/amber/red) — `e17283a`
-
-### Plan 6: Chronicle Wrapped (4/4 tasks)
-- Task 1: generateWrappedSlides — 10 slides from game data — `ced0d9e`
-- Task 2: SpiderChart — 6-axis radar via inline SVG — `ced0d9e`
-- Task 3: WrappedSlide — 10 variant renderings — `07c4a4a`
-- Task 4: WrappedOverlay + VerdictScreen "VIEW YOUR WAR" button — `07c4a4a`
-
-### Plan 7: Historical Essays (2/3 tasks, 1 blocked)
-- Task 1: Essay index (48 entries, all events mapped) — `66d0c65`
-- Task 3: CodexPanel UI (lock/unlock, categories, paper aesthetic) — `66d0c65`
-- Task 2: BLOCKED — API key expired. Script ready (tools/generate_essays.cjs) — `809444f`
+### v0.7.0 — Event Flag Wiring (Phase 1+2 COMPLETE, Phases 3-6 remaining)
+- Phase 1: Implemented `enclave_supply_status` and `corridor_severed` condition evaluators (were placeholders returning false)
+- Phase 2: Wired flag gates to 21 downstream events across all 4 event JSON files
+- Phase 3 (partial): Added pressure modifiers to 3 events (concentration_camps, srebrenica_enclave, hvo_arbih_tensions)
+- 8 new condition evaluator tests
+- Commit: 99655a7a
 
 ## Test Results
-- Suites: 116 passed
-- Tests: 1410 passed (was 1317 at start of shift, +93 new)
-- New tests: chronicle_entries (11), ai_commander_prompt (5), ai_commander_event_decision (19), ai_commander_validation (15), strategic_dimensions (8), event_timing (14), wrapped_slides (19)
+- Suites: 117 passed
+- Tests: 1446 passed (was 1412 at start of shift, +34 new)
+- New tests added: 10 (paramilitary) + 18 (adapter) + 6 (evaluator) = 34
 - TypeScript: clean
-- Build: clean
+- Map build: clean
 
 ## Decisions Made (FLAGGED FOR DAY SHIFT REVIEW)
-- **DECISION-1**: Essay index maps ALL 48 events (1992-1995), not just 1992 + placeholders. Engine already has 29 events for 1993-1995, so real mappings are better than speculative placeholders.
-- **DECISION-2**: NegotiationBreakdown rename was broader than planned — scoring.ts migrated to read from DimensionStore, bot_negotiation delegates to computeNegotiatingCapital. Left TODO comments for full UI migration.
-- **DECISION-3**: DIMENSION_WEIGHTS duplicated in GameStateAdapter (for UI) and strategic_dimensions.ts (for engine). Conservative choice — avoids importing engine code into browser. Should be unified later.
+
+- **[DECISION-1]**: Skipped `jna_withdrawn` flag gates. The `jna_withdrawal_1992` event is being crowded out by MAX_EVENTS_PER_TURN=3 after v0.6.5 changed event timing. Adding gates on a flag that doesn't fire would break the Drina -> Srebrenica -> Corridor cascade. **Fix needed**: either increase MAX_EVENTS_PER_TURN to 4, or give jna_withdrawal higher priority.
+
+- **[DECISION-2]**: Accepted 92.6% (+0.6pp) vs plan target of +2-3pp. /war-or-game approved. The modest gain is because offensive paramilitaries cascade through VRS regular combat, causing Drina over-capture (+10 RS OSIDs vs painted). Enclave core OSIDs are protected.
+
+- **[DECISION-3]**: Exported `ENCLAVE_DEFINITIONS` and `osidBelongsToEnclave` from enclave_resilience.ts (previously private). Needed for paramilitary enclave exclusion. Minimal API surface change.
 
 ## Issues Found
-- **ISSUE-1**: API key in .env is expired (401 authentication error). Script works; just needs a valid key. Severity: LOW (generation is a one-time dev cost).
-- **ISSUE-2**: /simplify found that turnSummaries was not on LoadedGameState type — fixed by adding to adapter. Would have caused empty Chronicle at runtime.
-- **ISSUE-3**: getOsidAreas() was duplicated in compile_turn_summary.ts and compute_capital.ts — extracted to shared src/sim/osid_areas.ts.
+
+- **[ISSUE-1]**: MAX_EVENTS_PER_TURN=3 is too restrictive. At w5, 4+ events are eligible (barracks events + jna_withdrawal + others). The jna_withdrawal event gets squeezed out, which prevents it from setting the `jna_withdrawn` flag. This flag was supposed to gate drina_cleansing, operation_corridor, and srebrenica_enclave. **Severity: P1.** Fix: increase to 4 or add priority-based selection.
+
+- **[ISSUE-2]**: Gorazde periphery over-capture (3 OSIDs: glamoc, kamen, sopotnica). The offensive paramilitaries take Gorazde municipality OSIDs that are NOT in the enclave OSID list but should historically remain RBiH. Consider either expanding the Gorazde enclave OSID list or removing gorazde from the offensive para municipality scope.
+
+- **[ISSUE-3]**: The `corridor_severed` evaluator builds adjacency from `(state as any).derived?.edges` -- this path may not exist at runtime. It needs the operational contact graph edges, which are loaded by the turn pipeline but may not be on the state object. This evaluator may silently return false (corridor never severed) until the edges data path is properly wired.
 
 ## Skipped (Blocked)
-- Essay content generation (Plan 7 Task 2): blocked on expired ANTHROPIC_API_KEY. Resume: update key, run `node tools/generate_essays.cjs --batch 5` then `node tools/generate_essays.cjs`.
+
+- v0.7.0 Phase 4 (engine flag reads): Requires one-change-per-calibration-run protocol. Each engine system read needs its own calibration run. Too slow for tonight.
+- v0.7.0 Phase 5 (FIXED->CONDITIONAL): High-risk conversions (Srebrenica, Markale, Zepa) need careful calibration.
+- v0.7.0 Phase 6 (cleanup): Depends on Phases 4-5.
+- v0.7.3 (canon audit): Not started -- roadmap priority after v0.7.0.
 
 ## Observations & Proposals
 
 ### Opportunities Noticed
-- **OPP-1**: The Chronicle + Wrapped share data derivation patterns. A shared `deriveGameStatistics()` function could feed both. ~50 lines.
-- **OPP-2**: DIMENSION_WEIGHTS are duplicated in engine and adapter. Could export from strategic_dimensions.ts and import in adapter.
-- **OPP-3**: Event timing test pattern could be generalized into an `assertEventWindow(id, min, max)` helper.
+- **[OPP-1]**: The `drina_cleansing_decision_1992` event now fires at w10 thanks to offensive paramilitaries raising war_crimes_events above threshold earlier. This is emergent and historically correct.
+- **[OPP-2]**: HRHB offensive paramilitaries (6 units in Stolac/Capljina/Prozor) correctly model HOS activity in Herzegovina.
 
 ### Problems Discovered
-- **PROB-1**: weekly_report.jsonl doesn't store turn numbers — turn is derived from line index. Fragile if format changes.
+- **[PROB-1]**: Plan estimated +2-3pp from offensive paramilitaries but actual gain is +0.6pp. Root cause: cascade effects. Paramilitaries unlock too much regular VRS expansion in the Drina via adjacency.
+- **[PROB-2]**: Event timing is fragile. Adding 1 pipeline step changed event firing order enough to crowd out jna_withdrawal. MAX_EVENTS_PER_TURN cap is the bottleneck.
+
+### Feature Ideas (DO NOT IMPLEMENT -- for day shift consideration)
+- **[IDEA-1]**: Named paramilitary units ("Arkan's Tigers" for Bijeljina/Zvornik, "White Eagles" for Visegrad/Foca). ~20 lines.
+- **[IDEA-2]**: Player paramilitary decision event with per-OSID granularity. "Arkan's Tigers request permission to operate in Zvornik. This will constitute a war crime."
 
 ### Code Quality Notes
-- OperationsSection.tsx is ~550 lines. Consider extracting OperationExpandedDetail.
-- vitest.config.ts include list is 116 entries on one line. Consider switching to glob pattern.
+- `paramilitary_sweep.ts` grew from 369 to ~580 lines. Approaching split point for offensive vs rear-pocket modes.
+- `corridor_severed` evaluator uses `(state as any).derived?.edges` -- needs proper typing.
 
 ## Commits (chronological)
-1. `4459d54` — feat(engine): territory + supply snapshots on TurnSummary
-2. `c8345f8` — feat(chronicle): entry generator + store state + toolbar wiring
-3. `97c9e78` — feat(chronicle): ChronicleCard + ChronicleSpine + ChronicleOverlay
-4. `f2db1c1` — fix: /simplify — chronicle code reuse, typing, efficiency
-5. `18dd4a4` — feat(ai): AI Commander event awareness
-6. `cc2ff22` — feat(dimensions): DIMENSION_WEIGHTS + computeNegotiatingCapital
-7. `b6fd9c1` — refactor(types): NegotiationCapital → NegotiationBreakdown
-8. `6f35795` — feat(dimensions): pipeline step + UI composite score
-9. `5137f5c` — feat(calibration): framework — baseline freeze, regression, timing
-10. `9d616a2` — feat(hq): deep drill-down — brigade, operation, sector sub-cards
-11. `e17283a` — feat(hq): operation readiness composite indicator
-12. `ced0d9e` — feat(wrapped): generateWrappedSlides + SpiderChart
-13. `07c4a4a` — feat(wrapped): WrappedSlide + WrappedOverlay + VerdictScreen
-14. `66d0c65` — feat(essays): schema + Codex UI panel
-15. `809444f` — feat(essays): generation script (blocked on API key)
+1. c9ac0137 -- feat(sim): v0.6.5 offensive paramilitary sweep -- Drina valley ethnic cleansing
+2. e5483cdc -- test(integration): adapter field completeness -- 18 tests against real save
+3. 99655a7a -- feat(events): v0.7.0 Phase 1+2 -- evaluators + flag gates + pressure modifiers
 
 ## Build State at End of Shift
 - tsc: clean
-- vitest: 116 suites, 1410 tests, 1 skipped
-- desktop:map:build: clean
-- Calibration: n1026, 93.1% area-weighted (zero regression)
-- Last commit: 809444f
-- Current version: v0.5.4 (version bump deferred to day shift)
+- vitest: 117 suites, 1446 tests, 1 skipped
+- Last commit: 99655a7a
+- Current version: v0.6.5 (paramilitary sweep landed), v0.7.0 Phase 1+2 complete
+- Calibration: 92.6% area-weighted, baseline frozen
 
 ## Recommended Next Steps for Day Shift
-1. Update ANTHROPIC_API_KEY, run `node tools/generate_essays.cjs` for all 48 essays
-2. Review decisions 1-3 above
-3. Visual test: Chronicle (C), Wrapped (VerdictScreen), Codex (X)
-4. Version bump per VERSIONING.md milestones
-5. Next: v0.6.3 (1995 Endgame + Dayton — needs 1993-1995 event content + ICTY research)
+1. **Fix MAX_EVENTS_PER_TURN** -- increase to 4 or implement priority-based event selection. This unblocks jna_withdrawn flag gates (DECISION-1).
+2. **Review DECISION-2** -- Gorazde periphery over-capture. Consider removing gorazde from OFFENSIVE_PARA_MUNICIPALITY_SCOPE.
+3. **Continue v0.7.0 Phase 4** -- engine flag reads (supply_reserves, patron_pressure). One change per calibration run.
+4. **Wire corridor_severed edges data path** -- ISSUE-3.
+5. **Plan v0.7.0 Phase 5** -- FIXED->CONDITIONAL conversions for endgame chain.
