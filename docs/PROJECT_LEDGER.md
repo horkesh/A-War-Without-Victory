@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.6.5** — Political Wargame. 1453 tests, 118 suites. **91.4% area-weighted (n1074).** 94 events, 21 flag-gated. **Emergent brigade Phase 2:** enclave capacity gate fix (Srebrenica 1→5 brigs, Gorazde 1→5), surplus pool rerouting, tiered max_personnel activated, RBiH strategic reserve 0.02→0.15. Life lessons restructured (8 topic files). 9 skills wired with Required Reading. **Next: tiered cap calibration (n1075), then v0.7.0 Phase 4.**
+**Status:** **v0.6.5** — Political Wargame. 1453 tests, 118 suites. **91.3% area-weighted (n1078).** 94 events, 21 flag-gated. **Emergent brigade Phase 2 COMPLETE:** enclave capacity gate fix, surplus pool rerouting, deriveMaxPersonnel activated (1200-2800), asymmetric mobilization (RBiH 0.09, RS 0.04, HRHB 0.12), RBiH strategic reserve 0.02→0.15. **RBiH 144k > RS+HRHB 144k (+369) — first time in project history.** 114 RBiH / 83 RS / 36 HRHB brigs, 288k total. Life lessons restructured (8 topic files). 9 skills wired with Required Reading. **Next: v0.7.0 Phase 4 (engine flag reads) + 5 nightshift calibration runs.**
 
 ## [2026-03-25] Emergent Brigade Phase 2 — Enclave Fix + Pool Rerouting + Tiered Caps
 
@@ -17,7 +17,9 @@
 
 **Infrastructure:** Life lessons split from monolith (139 lessons) into 8 topic files. 9 Pyrrhic skills wired with Required Reading sections. CLAUDE.md session startup updated. Historian skill given OOB master hierarchy (OOB masters > BB for troop strengths). ARMY_STRENGTH_COMPARISON.md created.
 
-**Calibration (n1074):** 91.4% area-weighted. RBiH 111 brigs 158k, RS 83 brigs 116k, HRHB 36 brigs 54k. Calibration of tiered caps ongoing — next run will show full effect of lowered caps.
+**Asymmetric mobilization:** RBiH 0.10→0.09, RS 0.12→0.04, HRHB 0.29→0.12. Combined with deriveMaxPersonnel caps (1200-2800 range) and strategic reserve RBiH draw 0.02→0.15, this produces historically accurate force ratios.
+
+**Calibration (n1078 FINAL):** 91.3% area-weighted. RBiH 114 brigs (144,176 pers), RS 83 brigs (99,156 pers), HRHB 36 brigs (44,849 pers). Total 288k (down from 307k baseline). **RBiH exceeds RS+HRHB by +369 personnel — first time in project history.** Baseline frozen.
 
 **Files:** `src/sim/recruitment_engine.ts` (enclave gate + rerouting), `src/state/formation_constants.ts` (ENCLAVE_MUNICIPALITY_IDS, ENCLAVE_FORMATION_CAPACITY_THRESHOLD, deriveMaxPersonnel caps), `src/scenario/oob_loader.ts` (remove default max_personnel), `src/sim/turn_phases/war_phases.ts` (+reroute-pool-surplus step), `src/sim/combat/ongoing_mobilization.ts` (mob scale experiments), `src/sim/combat/strategic_reserve.ts` (RBiH draw rate), `docs/life_lessons.md` + `docs/life_lessons/*.md` (restructure), `.claude/skills/` (9 skills updated), `docs/knowledge/ARMY_STRENGTH_COMPARISON.md` (new).
 
