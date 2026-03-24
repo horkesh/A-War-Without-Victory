@@ -322,6 +322,7 @@
     "title": "JNA Forces Begin Withdrawal from Bosnia",
     "narrative": "The Yugoslav People's Army formally announces its withdrawal from Bosnia-Herzegovina. In practice, Bosnian Serb personnel simply change insignia, and massive quantities of heavy weapons, ammunition depots, and military infrastructure are transferred directly to the newly formed VRS.",
     "category": "military",
+    "priority": 1,
     "trigger": { "turn_min": 5, "turn_max": 5, "phase": "war" },
     "once": true,
     "effect": { "kind": "supply_delta", "faction": "RS", "delta": 20 },

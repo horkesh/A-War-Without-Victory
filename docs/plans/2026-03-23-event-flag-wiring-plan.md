@@ -7,6 +7,41 @@
 
 ---
 
+## ADDENDUM — Prerequisite Fixes (2026-03-24 day shift, Pyrrhic team review)
+
+Three issues from the nightshift must be resolved BEFORE continuing Phase 4+. Each requires its own calibration run per one-change-per-run protocol.
+
+### FIX-A: MAX_EVENTS_PER_TURN cap (P1)
+**Team recommendation (Game Designer):** Both — raise cap to 4 AND add priority tiers.
+- In `evaluate_events.ts`: change `MAX_EVENTS_PER_TURN = 3` to `4`.
+- In `war_1992.json`: add `"priority": 1` to `jna_withdrawal_1992` (single-turn window at w5).
+- Priority scheme: 1=fire-or-miss anchors, 10=cascade prerequisites, 20=cascade consequents, 50=major political, 100=default.
+- **Rationale:** Cap alone defers the problem. Priority alone doesn't help when 3+ events tie at same level. Both together give structural resilience.
+- **Execution:** Two separate calibration runs (cap change first, then priority).
+
+### FIX-B: Gorazde enclave OSID list (P2)
+**Team recommendation (Operations Expert):** Expand `gorazde.osid_list` — do NOT remove gorazde from para scope.
+- Add 3 OSIDs to `enclave_resilience.ts` Gorazde definition: `glamoc_2`, `kamen_2`, `sopotnica_2`.
+- **Rationale:** VRS paramilitaries did historically operate in Gorazde municipality periphery. Removing scope suppresses correct behavior. These 3 OSIDs are historically RBiH-held approaches that were never ethnically cleansed.
+- **Execution:** One calibration run after OSID list change.
+
+### FIX-C: corridor_severed edges data path (P2)
+**Team recommendation (Gameplay Programmer):** Pass `EdgeRecord[]` as parameter — do NOT put edges on GameState.
+- Extend `evaluateCondition` signature to accept optional `edges?: EdgeRecord[]`.
+- Thread edges through `evaluateEvents -> triggerMatches -> evaluateCondition`.
+- In `evaluate-events` pipeline step, load operational data edges and pass them in.
+- **Rationale:** `(state as any).derived?.edges` is always undefined — Engine Invariant S13.1 forbids serializing derived state. Evaluator has been silently returning false.
+- **Execution:** One calibration run. ~8 lines across 3 files.
+
+### Execution sequence (5 calibration runs total)
+1. FIX-A1: Raise MAX_EVENTS_PER_TURN to 4 -> run -> verify jna_withdrawal fires at w5
+2. FIX-A2: Add priority=1 to jna_withdrawal_1992 -> run -> verify cascade chain intact
+3. FIX-C: Wire corridor_severed edges -> run -> verify corridor detection works
+4. FIX-B: Expand Gorazde enclave list -> run -> verify 3 OSIDs stay RBiH
+5. Resume Phase 4 (engine flag reads)
+
+---
+
 ## 0. Problem Statement
 
 The event system sets ~28 flags across 94 events, but only ONE flag (`rs_strategic_goals`) is consumed by any downstream condition (`drina_cleansing_decision_1992` checks `flag_equals: rs_strategic_goals = all_six`). The remaining ~25 flags are write-only breadcrumbs with zero mechanical consequence. The dependency graph (EVENT_DEPENDENCY_GRAPH.md) identifies this as the single biggest structural gap in the event system.

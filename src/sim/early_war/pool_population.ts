@@ -58,7 +58,7 @@ const ELIGIBLE_POP_NORMALIZER = 50_000;
  * n179: HRHB 1.55→39.4k (target 40-45k). Historical note: 1.60→42k, 1.70→47k.
  *   Restoring 1.60 to regain ~42k target. RS scale reduction (0.25→unchanged) irrelevant here. */
 const FACTION_POOL_SCALE: Record<string, number> = {
-    RBiH: 0.08,   // n797: with 122 mandatory + emergent brigades, pool scale has diminishing returns below 0.12.
+    RBiH: 0.15,   // n1052: 0.20 too aggressive (RBiH over-captures in Central Bosnia). 0.15 gives ~498/brigade in Sarajevo — enough for initial spawn.
     RS: 0.25,
     HRHB: 1.05    // n340: cold-front+siege fix eliminated phantom HRHB attrition; 0.95→39.9k, 1.05→42.5k (target 41.5k).
 };

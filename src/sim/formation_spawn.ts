@@ -46,6 +46,61 @@ import {
 } from './combat/municipality_support.js';
 import { getEnclaveIdForOsid, getEnclaveMaxPersonnel } from './combat/enclave_resilience.js';
 
+/**
+ * Shared pocket pool: besieged municipalities where brigades can draw reinforcements
+ * from any pool in the pocket, not just their home municipality.
+ * Historically, the 1st Corps command pooled manpower across the Sarajevo pocket.
+ */
+const SHARED_POCKET_POOLS: ReadonlyMap<string, readonly string[]> = new Map([
+    ['sarajevo_pocket', [
+        'centar_sarajevo',
+        'stari_grad_sarajevo',
+        'novi_grad_sarajevo',
+        'novo_sarajevo',
+        'hadzici',
+        'vogosca',
+    ]],
+]);
+
+/** Get the pocket municipalities for a given municipality, or null if not in a pocket. */
+function getPocketMunicipalities(munId: string): readonly string[] | null {
+    for (const [, muns] of SHARED_POCKET_POOLS) {
+        if (muns.includes(munId)) return muns;
+    }
+    return null;
+}
+
+/**
+ * Find the best available pool in a pocket for a given faction.
+ * Returns the pool with the most available manpower, excluding the home pool.
+ */
+function findPocketPoolFallback(
+    pools: Record<string, MilitiaPoolState>,
+    homeMun: string,
+    faction: string,
+    pocketMuns: readonly string[],
+    reserveForSpawn: number
+): { pool: MilitiaPoolState; key: string } | null {
+    let bestPool: MilitiaPoolState | null = null;
+    let bestKey = '';
+    let bestAvail = 0;
+
+    for (const mun of pocketMuns) {
+        if (mun === homeMun) continue;
+        const key = militiaPoolKey(mun, faction);
+        const pool = pools[key];
+        if (!pool) continue;
+        const avail = Math.max(0, (pool.available ?? 0) - reserveForSpawn);
+        if (avail > bestAvail) {
+            bestAvail = avail;
+            bestPool = pool;
+            bestKey = key;
+        }
+    }
+
+    return bestPool ? { pool: bestPool, key: bestKey } : null;
+}
+
 export interface SpawnFormationsOptions {
     /** If set, used for all factions; if omitted, per-faction nominal size from OOB is used (RBiH 1000, RS 2500, HRHB 1500). */
     batchSize?: number | null;
@@ -236,8 +291,24 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             if (current >= tierCap) continue;
 
             const poolFaction = f.recruit_pool_faction ?? faction;
-            const key = militiaPoolKey(mun_id, poolFaction);
-            const pool = pools[key];
+            const homeKey = militiaPoolKey(mun_id, poolFaction);
+            let pool = pools[homeKey];
+
+            // Shared pocket pool fallback: if home pool is empty, try other pocket municipalities
+            const reserveForSpawn = kind === 'brigade'
+                ? reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive)
+                : 0;
+            let usedPocketFallback = false;
+            if ((!pool || Math.max(0, (pool.available ?? 0) - reserveForSpawn) <= 0)) {
+                const pocketMuns = getPocketMunicipalities(mun_id);
+                if (pocketMuns) {
+                    const fallback = findPocketPoolFallback(pools, mun_id, poolFaction, pocketMuns, reserveForSpawn);
+                    if (fallback) {
+                        pool = fallback.pool;
+                        usedPocketFallback = true;
+                    }
+                }
+            }
             if (!pool || pool.available <= 0) continue;
 
             // Rate limit: combat formations get half rate; faction-specific multiplier
@@ -246,11 +317,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             const rate = Math.max(1, Math.floor(baseRate * factionMult));
 
             const need = Math.min(tierCap - current, rate);
-            // For brigades: reserve manpower for potential spawn; for militia-kind: no reserve needed
-            const reserveForSpawn = kind === 'brigade'
-                ? reservedSpawnManpowerForReinforcement(state, mun_id, faction, spawnDirectiveActive)
-                : 0;
-            const availableForReinforcement = Math.max(0, pool.available - reserveForSpawn);
+            const availableForReinforcement = Math.max(0, pool.available - (usedPocketFallback ? 0 : reserveForSpawn));
             const transfer = Math.min(need, availableForReinforcement);
 
             if (transfer <= 0) continue;

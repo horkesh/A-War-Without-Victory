@@ -12,6 +12,7 @@ import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
 import { loadSettlementGraph } from '../../map/settlements.js';
+import type { EdgeRecord } from '../../map/settlements.js';
 import { loadTerrainScalars } from '../../map/terrain_scalars.js';
 import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
@@ -226,7 +227,7 @@ export const warPhases: NamedPhase[] = [
         name: 'update-event-readiness',
         run: (context) => {
             if (context.input.eventDefinitions) {
-                updateEventReadiness(context.state, context.input.eventDefinitions);
+                updateEventReadiness(context.state, context.input.eventDefinitions, context.input.settlementEdges);
             }
         }
     },
@@ -234,7 +235,7 @@ export const warPhases: NamedPhase[] = [
         name: 'evaluate-events',
         run: (context) => {
             const turn = context.state.meta.turn;
-            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions);
+            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions, context.input.settlementEdges);
             context.report.events_fired = result.fired;
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
             const grazText = checkAndFireGrazAccords(context.state);
@@ -1608,6 +1609,13 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'recall-drifted-brigades',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            recallDriftedBrigades(context.state, context.input.settlementEdges);
+        }
+    },
+    {
         name: 'strategic-reserve-collection',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -2385,3 +2393,82 @@ export const warPhases: NamedPhase[] = [
         }
     }
 ];
+
+/**
+ * Recall brigades that have drifted far from home with no active operation.
+ * BFS on raw adjacency (ignoring faction control) — if a brigade is >MAX hops from
+ * home_osid and not participating in an active operation, issue a column march home.
+ * Prevents SRK Vogosca brigades from permanently parking at Gorazde.
+ */
+const DRIFT_RECALL_MAX_HOPS = 4;
+
+function recallDriftedBrigades(state: GameState, edges?: EdgeRecord[]): void {
+    if (!edges || edges.length === 0) return;
+    const formations = state.military.formations ?? {};
+
+    // Build set of brigades in active operations
+    const inOp = new Set<string>();
+    const corpsCmd = state.military.corps_command ?? {};
+    for (const cmd of Object.values(corpsCmd)) {
+        const op = cmd.active_operation;
+        if (op) {
+            for (const bid of op.participating_brigades ?? []) inOp.add(bid);
+            if (op.axes) {
+                for (const axis of op.axes) {
+                    for (const bid of axis.assigned_brigades ?? []) inOp.add(bid);
+                }
+            }
+        }
+    }
+
+    // Build raw adjacency (no faction filter)
+    const adj = new Map<string, string[]>();
+    for (const e of edges) {
+        if (!adj.has(e.a)) adj.set(e.a, []);
+        if (!adj.has(e.b)) adj.set(e.b, []);
+        adj.get(e.a)!.push(e.b);
+        adj.get(e.b)!.push(e.a);
+    }
+
+    const moveOrders = state.military.brigade_movement_orders ??= {};
+
+    for (const [fid, f] of Object.entries(formations)) {
+        if (f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og') continue;
+        if (!f.home_osid || !f.location_osid) continue;
+        if (f.home_osid === f.location_osid) continue;
+        if (inOp.has(fid)) continue;
+        if ((f.disrupted_turns ?? 0) > 0) continue;
+        if (moveOrders[fid]) continue; // already has movement orders
+
+        // BFS raw distance from home to current location
+        const dist = bfsRawDistance(f.home_osid, f.location_osid, adj, DRIFT_RECALL_MAX_HOPS + 1);
+        if (dist <= DRIFT_RECALL_MAX_HOPS) continue;
+
+        // Brigade is too far from home — recall
+        moveOrders[fid] = {
+            destination_sids: [f.home_osid],
+            stance: 'column',
+        } as any;
+    }
+}
+
+function bfsRawDistance(from: string, to: string, adj: Map<string, string[]>, maxHops: number): number {
+    if (from === to) return 0;
+    const visited = new Set<string>([from]);
+    let frontier = [from];
+    for (let h = 1; h <= maxHops; h++) {
+        const next: string[] = [];
+        for (const n of frontier) {
+            for (const nb of adj.get(n) ?? []) {
+                if (visited.has(nb)) continue;
+                if (nb === to) return h;
+                visited.add(nb);
+                next.push(nb);
+            }
+        }
+        frontier = next;
+        if (frontier.length === 0) break;
+    }
+    return maxHops + 1;
+}

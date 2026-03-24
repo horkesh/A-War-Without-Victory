@@ -1,7 +1,37 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-24 (nightshift)
-**Status:** **v0.6.5** — Political Wargame. 1446 tests, 117 suites. **92.6% area-weighted (n1040, re-frozen).** 94 events, 21 flag-gated. Offensive paramilitaries (Drina valley). **v0.7.0 Phase 1+2 complete** (evaluators + 21 flag gates). **Next: v0.7.0 Phase 4 (engine flag reads) → Phase 5 (FIXED→CONDITIONAL).**
+**Last Updated:** 2026-03-24
+**Status:** **v0.6.5** — Political Wargame. 1445 tests, 117 suites. **92.1% area-weighted (n1057, re-frozen).** 94 events, 21 flag-gated. Offensive paramilitaries (Drina valley). **v0.7.0 Phase 1+2 complete**. Sarajevo siege P0 resolved (8 fixes): SRK drift recall, ARBIH cap removed, OOB rebalanced per BB, pool scale 0.15, mob scale 0.10, initial pers 800, siege-corps target restriction, shared Sarajevo pocket pool, diagnostic toolset. 1st Corps 22.1k pers / avg 633 (was 15.7k / avg 448). **Next: v0.7.0 Phase 4 (engine flag reads).** Remaining: 20/35 1st Corps ineffective — structural (pocket mobilization < attrition). Hrasnica OSID gap. Bot AI opportunity detection.
+
+## [2026-03-24] P1 Bug: SRK Sarajevo Siege Collapse + Brigade Drift Detection Gap
+
+**Scope:** SRK siege of Sarajevo non-functional after w5. Three brigades drifted to Gorazde (~80km south), leaving siege-ring sector with zero brigades. Zero eligible attackers w6-w40 (35 weeks). Invisible to calibration % because Sarajevo OSIDs are RBiH in both painted and sim.
+
+**Full investigation complete. Six compounding bugs:**
+1. SRK brigade drift — 3 brigades at Gorazde (~80km from Sarajevo), siege ring unmanned after w5.
+2. `ARBIH_PERSONNEL_CAP = 95,000` blocks ALL RBiH mobilization for all 40 weeks. Pools never refill. **Cap must be removed/raised.**
+3. Novo Sarajevo (33k Bosniaks) has zero RBiH brigades in OOB — 482 pool manpower stranded.
+4. Municipality pool skew — Centar (6 brigades) drains 4x vs Stari Grad (5 brigades) despite equal Bosniak populations.
+5. RBiH pool scale 0.08 (RS 0.25, HRHB 1.05) — Sarajevo pools too small.
+6. No OPSEC / opportunity detection — bot AI cannot see undefended sectors. 1st Corps defensive doctrine (w0-15) blocks ops, but even after w15 (balanced), zero operations launched. Army HQ produces zero overrides. 4 capable brigades face empty sector but nobody orders an attack.
+
+**Regression:** n1035→n1036 (-11,088 1st Corps personnel). Offensive paramilitaries (v0.6.5) pushed fragile system over edge (+2,522 casualties, -2,489 pool draws). But 19/35 brigades were already combat ineffective before v0.6.5.
+
+**Report:** `docs/40_reports/20260324_SARAJEVO_SIEGE_FULL_INVESTIGATION.md`
+
+## [2026-03-24] Pyrrhic Team Review — Nightshift Issue Triage + Propagation
+
+**Scope:** Orchestrator convened Game Designer, Operations Expert, and Gameplay Programmer to review 3 nightshift issues. Team recommendations documented and propagated to plan, napkin, ledger, and visual report.
+
+**ISSUE-1 (P1) MAX_EVENTS_PER_TURN=3:** Game Designer recommends BOTH cap raise to 4 AND priority-tier system (1=fire-or-miss, 10=cascade prereqs, 20=consequents, 50=political, 100=default). `jna_withdrawal_1992` gets priority 1 (single-turn w5 window). Two separate calibration runs.
+
+**ISSUE-2 (P2) Gorazde over-capture:** Operations Expert recommends expanding Gorazde enclave `osid_list` by 3 OSIDs (glamoc_2, kamen_2, sopotnica_2). Do NOT remove gorazde from para scope — VRS paramilitaries did historically operate there. One calibration run.
+
+**ISSUE-3 (P2) corridor_severed data path:** Gameplay Programmer recommends passing `EdgeRecord[]` as parameter through `evaluateEvents -> triggerMatches -> evaluateCondition`. Do NOT put edges on GameState (Engine Invariant S13.1). `(state as any).derived?.edges` was always undefined — evaluator has been a silent no-op. ~8 lines across 3 files. One calibration run.
+
+**Execution sequence:** 5 calibration runs before resuming v0.7.0 Phase 4. Plan addendum added to `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
+
+**Propagation:** Plan (addendum), napkin (next priority), ledger (this entry), visual morning report (updated), life lessons (already captured by nightshift).
 
 ## [2026-03-24 nightshift] v0.6.5 Offensive Paramilitary Sweep + v0.7.0 Event Flag Wiring Phase 1+2
 

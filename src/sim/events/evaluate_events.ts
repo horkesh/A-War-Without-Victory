@@ -7,6 +7,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
+import type { EdgeRecord } from '../../map/settlements.js';
 import { getEventRegistry } from './event_registry.js';
 import { applyEventEffects } from './apply_effects.js';
 import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, PendingEventDecision, Rng } from './event_types.js';
@@ -16,7 +17,7 @@ import { pickBotResponseV1 } from './bot_response.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 
 /** Maximum events that can fire in a single turn. */
-const MAX_EVENTS_PER_TURN = 3;
+const MAX_EVENTS_PER_TURN = 4;
 
 export interface EventsEvaluationReport {
     fired: FiredEvent[];
@@ -137,7 +138,8 @@ export function evaluateEvents(
     state: GameState,
     rng: Rng,
     currentTurn: number,
-    registry?: EventDefinition[]
+    registry?: EventDefinition[],
+    edges?: EdgeRecord[]
 ): EventsEvaluationReport {
     const fired: FiredEvent[] = [];
     const phase = state.meta.phase;
@@ -166,7 +168,7 @@ export function evaluateEvents(
             if (!isEventReady(state, def)) continue;
         } else {
             // Legacy events: use triggerMatches
-            if (!triggerMatches(def, state, currentTurn)) continue;
+            if (!triggerMatches(def, state, currentTurn, edges)) continue;
         }
 
         // Probability gate (applies to both paths)
@@ -177,7 +179,7 @@ export function evaluateEvents(
         candidates.push(def);
     }
 
-    // Phase 2: Sort by priority (lower first, default 100) and cap at 3
+    // Phase 2: Sort by priority (lower first, default 100) and cap at MAX_EVENTS_PER_TURN
     candidates.sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
     const toFire = candidates.slice(0, MAX_EVENTS_PER_TURN);
 

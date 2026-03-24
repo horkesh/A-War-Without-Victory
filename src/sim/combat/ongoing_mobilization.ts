@@ -67,7 +67,7 @@ const BASE_MOBILIZATION_RATE = 0.003;
 // n794 52w: ARBiH 177k, RS 137k, HRHB 68k — all over by w52.
 // Post-spawn-fix: 122 ARBiH + 44 emergent = 166 brigades draw heavily from pools.
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.02,  // n794: 0.03→154k still high. 0.02 to target 120-130k at w40.
+    RBiH: 0.10,  // n1053: 0.02 produced only ~3 troops/turn per Sarajevo mun — attrition outpaced mobilization, 24/35 1st Corps brigades at dissolution floor. At 0.10: ~15/turn/mun, enough to offset frontline attrition.
     RS: 0.08,    // n794: 0.12→137k at w52 (+37% over). 0.08 to slow late-war RS growth.
     HRHB: 0.20   // n794: 0.29→68k at w52 (+24% over). 0.20 to target 50-55k.
 };
@@ -129,8 +129,13 @@ function getMobilizationSurgeFactor(turn: number, faction: string): number {
 /** Hard cap per municipality per turn to prevent single-mun dominance. */
 const MAX_MOBILIZATION_PER_MUN_PER_TURN = 300;
 
-/** ARBiH total active personnel hard cap. Historical: 80-90k by late 1992, ~180k by 1995. For 40w scenario cap at 95k. */
-export const ARBIH_PERSONNEL_CAP = 95_000;
+/** ARBiH total active personnel hard cap — REMOVED 2026-03-24.
+ * Was 95,000 but brigade spawning pushed past it in early weeks, blocking ALL
+ * ongoing mobilization for the rest of the game. Sarajevo 1st Corps brigades
+ * at dissolution floor (146 personnel) could never recover.
+ * The per-municipality EXHAUSTION_HARD_CAP (50% of mil-age males) already
+ * provides a natural ceiling. No global cap needed. */
+// export const ARBIH_PERSONNEL_CAP = 95_000;
 
 /**
  * Military-age male fraction of census ethnic population.
@@ -204,17 +209,6 @@ export function runOngoingMobilization(
 
     const settlementsByMun = buildSettlementsByMun(settlements);
 
-    // ARBiH personnel cap: count total active RBiH brigade personnel once.
-    // If at or over cap, skip all RBiH mobilization this turn.
-    const formations = state.military.formations ?? {};
-    let rbihTotalPersonnel = 0;
-    for (const fmn of Object.values(formations)) {
-        if (fmn.faction === 'RBiH' && fmn.status === 'active') {
-            rbihTotalPersonnel += fmn.personnel ?? 0;
-        }
-    }
-    const rbihCapped = rbihTotalPersonnel >= ARBIH_PERSONNEL_CAP;
-
     // Build set of municipalities each faction controls (for pocket detection).
     // A faction in only one municipality is isolated — boost their mobilization.
     const factionMunSets = new Map<string, Set<string>>();
@@ -233,8 +227,7 @@ export function runOngoingMobilization(
         const controller = getMunicipalityController(state, sids, munId);
         if (!controller) continue;
 
-        // Skip RBiH mobilization if active personnel already at or over cap
-        if (controller === 'RBiH' && rbihCapped) continue;
+        // Global ARBiH cap removed — per-municipality exhaustion cap is sufficient
 
         const censusEligible = getEligiblePopulationCount(population1991ByMun, munId, controller);
         if (censusEligible <= 0) continue;

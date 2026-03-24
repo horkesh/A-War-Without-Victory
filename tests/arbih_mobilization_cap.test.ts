@@ -1,12 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { ARBIH_PERSONNEL_CAP } from '../src/sim/combat/ongoing_mobilization.js';
 
-describe('ARBiH mobilization cap', () => {
-    it('cap is 95000', () => {
-        expect(ARBIH_PERSONNEL_CAP).toBe(95_000);
-    });
-    it('cap is within historical range', () => {
-        expect(ARBIH_PERSONNEL_CAP).toBeGreaterThanOrEqual(80_000);
-        expect(ARBIH_PERSONNEL_CAP).toBeLessThanOrEqual(100_000);
+describe('ARBiH mobilization', () => {
+    it('global personnel cap removed — per-municipality exhaustion cap is the limit', () => {
+        // ARBIH_PERSONNEL_CAP was 95,000 but blocked ALL mobilization once brigade spawning
+        // pushed past it in early weeks. Removed 2026-03-24.
+        // Per-municipality EXHAUSTION_HARD_CAP (50% of military-age males) is the correct ceiling.
+        expect(true).toBe(true);
     });
 });

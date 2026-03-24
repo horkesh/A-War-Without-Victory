@@ -73,7 +73,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -88,7 +88,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -133,7 +133,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -149,7 +149,7 @@
     "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -164,7 +164,7 @@
     "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -179,7 +179,7 @@
     "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45,
     "distinction_potential": "tier_2",
     "initial_officer_quality": 0.15
@@ -196,7 +196,7 @@
     "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45,
     "distinction_potential": "tier_2",
     "initial_officer_quality": 0.15
@@ -213,7 +213,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -228,7 +228,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -243,7 +243,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -251,14 +251,14 @@
     "faction": "RBiH",
     "name": "155th Motorized",
     "corps": "arbih_1st_corps",
-    "home_mun": "centar_sarajevo",
+    "home_mun": "novi_grad_sarajevo",
     "home_settlement": "Dobrinja",
-    "home_osid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+    "home_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
     "kind": "brigade",
     "default_equipment_class": "motorized",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -3779,14 +3779,14 @@
     "faction": "RBiH",
     "name": "1st Mountain Brigade",
     "corps": "arbih_1st_corps",
-    "home_mun": "stari_grad_sarajevo",
+    "home_mun": "vogosca",
     "home_settlement": "Sarajevo Dio - Stari Grad Sarajevo",
-    "home_osid": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+    "home_osid": "op:vogosca:hotonj",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -3794,14 +3794,14 @@
     "faction": "RBiH",
     "name": "2nd Mountain Brigade",
     "corps": "arbih_1st_corps",
-    "home_mun": "stari_grad_sarajevo",
+    "home_mun": "novi_grad_sarajevo",
     "home_settlement": "Sarajevo Dio - Stari Grad Sarajevo",
-    "home_osid": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+    "home_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -3809,14 +3809,14 @@
     "faction": "RBiH",
     "name": "10th Mountain Brigade",
     "corps": "arbih_1st_corps",
-    "home_mun": "stari_grad_sarajevo",
+    "home_mun": "novo_sarajevo",
     "home_settlement": "Sarajevo Dio - Stari Grad Sarajevo",
-    "home_osid": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+    "home_osid": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45
   },
   {
@@ -3831,7 +3831,7 @@
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
-    "initial_personnel": 500,
+    "initial_personnel": 800,
     "initial_cohesion": 45,
     "recruit_pool_faction": "HRHB"
   },

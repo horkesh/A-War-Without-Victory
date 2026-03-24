@@ -289,7 +289,7 @@ export interface RecurrenceConfig {
 }
 
 /** Check if trigger matches current state (deterministic). */
-export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number): boolean {
+export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number, edges?: EdgeRecord[]): boolean {
     const t = def.trigger;
     if (t.turn_min != null && currentTurn < t.turn_min) return false;
     if (t.turn_max != null && currentTurn > t.turn_max) return false;
@@ -300,13 +300,13 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
     }
     // State-based condition check
     if (t.condition) {
-        if (!evaluateCondition(t.condition, state)) return false;
+        if (!evaluateCondition(t.condition, state, edges)) return false;
     }
     return true;
 }
 
 /** Evaluate a state-based condition against current game state. */
-export function evaluateCondition(condition: EventCondition, state: GameState): boolean {
+export function evaluateCondition(condition: EventCondition, state: GameState, edges?: EdgeRecord[]): boolean {
     switch (condition.type) {
         case 'territory_control': {
             const pc = state.political?.political_controllers ?? {};
@@ -341,11 +341,11 @@ export function evaluateCondition(condition: EventCondition, state: GameState): 
             // TODO: integrate with operation tracking when state fields are available
             return false;
         case 'and':
-            return condition.conditions.every(c => evaluateCondition(c, state));
+            return condition.conditions.every(c => evaluateCondition(c, state, edges));
         case 'or':
-            return condition.conditions.some(c => evaluateCondition(c, state));
+            return condition.conditions.some(c => evaluateCondition(c, state, edges));
         case 'not':
-            return !evaluateCondition(condition.condition, state);
+            return !evaluateCondition(condition.condition, state, edges);
         case 'supply_below': {
             const supply = state.military.general_supply_reserve?.[condition.faction] ?? 0;
             return supply < condition.threshold;
@@ -430,7 +430,6 @@ export function evaluateCondition(condition: EventCondition, state: GameState): 
             if (pc[condition.from_osid] !== condition.faction) return true; // start not held
             if (pc[condition.to_osid] !== condition.faction) return true; // end not held
             // Build adjacency from edges if available
-            const edges = (state as any).derived?.edges as EdgeRecord[] | undefined;
             if (!edges) return false; // can't evaluate without edges
             const adj = buildOsidAdjacency(edges);
             // BFS through faction-controlled OSIDs

@@ -8,6 +8,34 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isOsidInSameEnclave } from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
 
+/**
+ * Maximum BFS hops a brigade should march from its home_osid to reach a sector front.
+ * Prevents brigade drift: e.g. SRK Vogosca brigades marching 80km to Gorazde because
+ * their sector spans both fronts. If dest is farther than this from home, skip the march.
+ */
+const MAX_SECTOR_MARCH_FROM_HOME = 4;
+
+/** BFS distance on raw adjacency graph (no faction filter). Used for home-distance guard. */
+function bfsDistanceRaw(from: string, to: string, adjacency: ReadonlyMap<string, readonly string[]>, maxHops: number): number {
+    if (from === to) return 0;
+    const visited = new Set<string>([from]);
+    let frontier = [from];
+    for (let h = 1; h <= maxHops; h++) {
+        const next: string[] = [];
+        for (const n of frontier) {
+            for (const nb of adjacency.get(n as Osid) ?? []) {
+                if (visited.has(nb)) continue;
+                if (nb === to) return h;
+                visited.add(nb);
+                next.push(nb);
+            }
+        }
+        frontier = next;
+        if (frontier.length === 0) break;
+    }
+    return maxHops + 1; // unreachable within maxHops
+}
+
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments } = ctx;
 
@@ -29,6 +57,17 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
             }
         }
         if (assignedSector) {
+            // If brigade has a pending return-to-home movement order, don't override with sector march.
+            // This prevents evaluateSectorMarch from fighting issuePostOperationReturnMarches.
+            const pendingMove = state.military.brigade_movement_orders?.[brigade.id];
+            if (pendingMove) {
+                const destSids = pendingMove.destination_sids ?? [];
+                const homeOsid = brigade.home_osid;
+                if (homeOsid && destSids.some((d: string) => d === homeOsid)) {
+                    return false; // Returning home — don't redirect to sector front
+                }
+            }
+
             const frontSet = new Set<string>();
             for (const ss of assignedSector.sub_segments) {
                 for (const o of ss.friendly_osids) frontSet.add(o);
@@ -56,6 +95,17 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                     }
                     const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, frontSet);
                     if (dest) {
+                        // Home-distance guard: don't march a brigade far from home to a distant
+                        // sector front. Prevents drift (e.g. SRK Vogosca brigades → Gorazde).
+                        // Uses raw graph adjacency (not faction-filtered) because home_osid may
+                        // be in enemy territory (e.g. RS brigade whose home is in RBiH area).
+                        const homeOsid = brigade.home_osid;
+                        if (homeOsid) {
+                            const distHomeToFront = bfsDistanceRaw(homeOsid, dest, adjacency, MAX_SECTOR_MARCH_FROM_HOME + 1);
+                            if (distHomeToFront > MAX_SECTOR_MARCH_FROM_HOME) {
+                                return false; // Sector front too far from home — skip march
+                            }
+                        }
                         result.column_march_orders[brigade.id] = dest;
                         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                         return true;

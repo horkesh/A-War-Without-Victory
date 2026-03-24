@@ -188,13 +188,11 @@ describe('evaluateCondition — new v0.6.0 condition types', () => {
             'op:a:a_2': 'RS', // blocks path
             'op:a:a_3': 'RBiH',
         };
-        (state as any).derived = {
-            edges: [
-                { a: 'op:a:a_1', b: 'op:a:a_2' },
-                { a: 'op:a:a_2', b: 'op:a:a_3' },
-            ],
-        };
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(true);
+        const edges = [
+            { a: 'op:a:a_1', b: 'op:a:a_2' },
+            { a: 'op:a:a_2', b: 'op:a:a_3' },
+        ] as any;
+        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state, edges)).toBe(true);
     });
 
     it('corridor_severed: false when path exists through friendly territory', () => {
@@ -204,13 +202,11 @@ describe('evaluateCondition — new v0.6.0 condition types', () => {
             'op:a:a_2': 'RBiH',
             'op:a:a_3': 'RBiH',
         };
-        (state as any).derived = {
-            edges: [
-                { a: 'op:a:a_1', b: 'op:a:a_2' },
-                { a: 'op:a:a_2', b: 'op:a:a_3' },
-            ],
-        };
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(false);
+        const edges = [
+            { a: 'op:a:a_1', b: 'op:a:a_2' },
+            { a: 'op:a:a_2', b: 'op:a:a_3' },
+        ] as any;
+        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state, edges)).toBe(false);
     });
 
     it('corridor_severed: true when start OSID not held by faction', () => {

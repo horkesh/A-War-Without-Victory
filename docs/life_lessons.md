@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-24 (nightshift — offensive paramilitaries + event wiring, 3 new lessons)
+> Last updated: 2026-03-24 (day shift — Sarajevo siege collapse investigation, 4 new lessons + 3 nightshift)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -70,6 +70,40 @@
 ### [Debugging] Persistent symptoms = multi-layer failure — VIOLATED 2026-03-15
 - **Violation evidence**: Elite loan system had 5 bugs across 4 files. First session found bugs 1-3 (spawning/deployment layer) and assumed the system would work. Bugs 4-5 (request generation + brigade AI evaluation layers) weren't discovered until the zero-combat report forced a second investigation. Classic multi-layer: fixing one layer doesn't fix the system when other layers are independently broken.
 - **Cost**: Extra investigation cycle. The systematic trace approach in the second pass was correct — should have been applied from the start.
+
+---
+
+## New Lessons (2026-03-24 day shift)
+
+### [Process] When investigation reveals a new fix, add it to the plan immediately — don't defer to "later" (2026-03-24) — NEW
+- **Context**: During Sarajevo siege investigation, discovered RBiH pool scale 0.08 was a major bottleneck. Noted "the real bottleneck is pool scale" but planned to mark FIX-1 done and move on. User corrected: "When you encounter things like this, dynamically add them to the plan!"
+- **Wrong approach**: Identifying a root cause during investigation but not adding it to the task list because "I shouldn't change multiple things at once." The one-change-per-run rule applies to calibration runs, not to task planning.
+- **Right approach**: When investigation reveals a new fix, create a task immediately. Plan all known fixes upfront, execute one at a time.
+- **Do instead**: If during a calibration run you discover a new issue or root cause, immediately `TaskCreate` it. Don't wait until the current fix is done to "remember" the next one.
+
+### [Process] Build diagnostic tools, not one-off scripts — every investigation script should become a permanent tool (2026-03-24) — NEW
+- **Context**: Needed to track brigade locations, check siege health, find stranded pools. Initially wrote one-off node -e commands. User corrected: "This should be a standard diagnostic tool. We need a toolset."
+- **Wrong approach**: Writing throwaway diagnostic commands that disappear after the conversation.
+- **Right approach**: Create `tools/diagnose_run.cjs` — a permanent post-run diagnostic that runs after every calibration run. Checks brigade drift, siege health, empty sectors, combat ineffective concentration, stranded pools.
+- **Do instead**: When you write a diagnostic query more than once, extract it into a permanent tool in `tools/`. If it catches a bug class, it should run after every calibration run forever.
+
+### [Architecture] Sector assignment based on current location creates drift lock-in — once a brigade moves, it's trapped (2026-03-24) — NEW
+- **Context**: SRK brigades fought at Vogosca w3-5, drifted to Gorazde via operation march/attack-through, then `classifyBrigadesByTerritory` assigned them to the Gorazde sector (because they're physically there), and `evaluateSectorMarch` reinforced the assignment by marching them to the sector front. A self-reinforcing loop.
+- **Wrong approach**: Assuming sector assignment by physical location is sufficient. Once a brigade drifts during an operation, the location-based assignment locks it into the wrong sector permanently.
+- **Right approach**: Three-part fix: (1) home-distance guard in `evaluateSectorMarch` — don't march >N hops from home, (2) return-march protection — don't override post-operation return marches, (3) `recall-drifted-brigades` pipeline step — actively pull stranded brigades home each turn.
+- **Do instead**: When adding movement systems (operations, column march, attack-through), always verify the round-trip: can the brigade get back home after the operation? If not, add a recall mechanism.
+
+### [Calibration] Always compute per-turn per-municipality mobilization and compare to attrition rate — "the number looks small" is the clue (2026-03-24) — NEW
+- **Context**: FACTION_MOBILIZATION_SCALE.RBiH=0.02 produced only ~3 troops/turn for Stari Grad (39k Bosniaks). Frontline attrition drained ~9/turn. Net: brigades lost ~6/turn and hit dissolution floor after 40 weeks. Zero-battle brigades ended at 146 personnel — drained purely by passive attrition with no reinforcement.
+- **Wrong approach**: Setting mobilization scale based on faction-level totals (targeting 120-130k) without checking per-municipality flow. The 0.02 scale hit the right global number but created municipality-level starvation — Sarajevo brigades couldn't sustain themselves while other RBiH corps had surplus.
+- **Right approach**: For any mobilization scale change, compute: `per_mun_mobilized = census * BASE_RATE * SCALE * surge`. If < attrition drain per turn (~5-10 for a front-line mun), the brigades will die. Also run `tools/diagnose_run.cjs` and check "combat ineffective concentration" per corps.
+- **Do instead**: When tuning mobilization, always check the municipality-level flow, not just faction totals. A scale that produces the right global number can still starve individual municipalities.
+
+### [Calibration] Area-weighted % is blind to siege/positional bugs — brigades can be 80km from home with 92.6% calibration (2026-03-24) — NEW
+- **Context**: SRK Sarajevo siege was completely non-functional after w5. Three brigades drifted from Sarajevo to Gorazde (~80km south). Siege-ring sector had zero brigades, zero density, zero eligible attackers for 35 consecutive weeks. Calibration stayed at 92.6% because Sarajevo OSIDs are RBiH in both painted and sim — the siege doesn't flip territory.
+- **Wrong approach**: Relying solely on OSID control match % and faction territory shares to validate sim health. These metrics measure WHERE territory is, not WHETHER key military operations are happening. A corps can have zero combat activity for 35 weeks and the calibration number doesn't move.
+- **Right approach**: Supplement area-weighted % with positional health checks: (1) siege health — besieging corps must have N+ brigades near siege target, (2) brigade drift — flag brigades > M hops from home with no active operation, (3) corps activity — flag corps with zero eligible attackers for > K consecutive weeks, (4) sector coverage — no sector with > 5 front edges should have zero brigades.
+- **Do instead**: After every calibration run, check not just "are the right OSIDs the right color" but "are the right brigades in the right places doing the right things." Add siege health and drift checks to `compare_painted_vs_sim.cjs`. A passing calibration % with a dead siege is worse than a failing calibration % that tells you something is wrong.
 
 ---
 

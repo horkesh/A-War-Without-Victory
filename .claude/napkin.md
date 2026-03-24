@@ -8,13 +8,17 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-24 nightshift, v0.6.5 — v0.7.0 in progress)
-**v0.6.5.** 1446 tests, 117 suites. tsc clean. Electron 41. **n1040: 92.6% area-weighted (re-frozen).** 94 events, 21 flag-gated, 75 with mechanical effects. Offensive paramilitary sweep (Drina valley). 96-essay Codex. Chronicle, Wrapped, HQ drill-down, Dayton merge all shipped.
+## Current State (2026-03-24, v0.6.5 — v0.7.0 in progress)
+**v0.6.5.** 1445 tests, 117 suites. tsc clean. Electron 41. **n1053: 91.7% area-weighted (re-frozen).** 94 events, 21 flag-gated, 75 with mechanical effects. Offensive paramilitary sweep (Drina valley). 96-essay Codex. Chronicle, Wrapped, HQ drill-down, Dayton merge all shipped.
+**Sarajevo siege fixes (2026-03-24):** SRK brigade drift recall (pipeline step + home-distance guard + return march protection + siege-corps target restriction). ARBIH_PERSONNEL_CAP removed. OOB rebalanced (4 brigades moved per BB sources: 155th→Novi Grad, 10th→Novo Sarajevo, 1st→Vogosca, 2nd→Novi Grad). Pool scale 0.08→0.15. Diagnostic toolset: `tools/diagnose_run.cjs`.
 **v0.6.5 COMPLETE (nightshift 2026-03-24):** Offensive paramilitary sweep — RS paramilitaries in 10 Drina municipalities, w0-12. 28 RS spawns, 6 HRHB. War crimes wired. Enclave cores protected. +0.6pp calibration (92.0%→92.6%). /war-or-game approved.
 **v0.7.0 Phase 1+2 COMPLETE (nightshift 2026-03-24):** `enclave_supply_status` + `corridor_severed` evaluators implemented. 21 flag gates wired. 3 pressure modifiers added.
 **Calibration baseline re-frozen (2026-03-24):** n1040. `npm run calibrate:40w` passes. Hash: `410325526321a932`.
 **Roadmap:** v0.7=Dynamic Codex, v0.8=Command Chain, v0.9=Consequences+Polish.
-**Next priority:** Fix MAX_EVENTS_PER_TURN (P1) → v0.7.0 Phase 4 (engine flag reads) → Phase 5 (FIXED→CONDITIONAL). Plan: `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
+**Next priority:** Resume v0.7.0 Phase 4 (engine flag reads) → Phase 5 (FIXED→CONDITIONAL).
+  All prerequisite fixes DONE: event cap (4), priority tiers, corridor_severed wiring, Gorazde enclave list, Sarajevo siege (6 fixes).
+  Plan: `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
+  **Diagnostic tool:** Run `node tools/diagnose_run.cjs <run_dir>` after every calibration run.
 **Pyrrhic team restructured (2026-03-24):** 7 cuts (lua, graphics, frontend-design, devops, build-engineer, asset-integration, canon-compliance-review dup). 3 hires (narrative-designer, data-pipeline-engineer, integration-tester). /ui-ux-developer promoted to mandatory gate. 62 active skills.
 **Full Pyrrhic review (2026-03-24):** 7 specialists reviewed roadmap. Key findings: mid-game dead zones (w20-35, w80-130), no unified notification architecture, Drina paramilitaries = biggest calibration opportunity, adapter/IPC untested, content authoring 5-7x underestimated, active ops+stance change undefined. 8 new plans written. P0+P1 bugs fixed.
 **HRHB-RBiH conflict:** P1 ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
@@ -92,6 +96,10 @@
 1. ~~**[2026-03-19] Map UX: heat map legend + context menu (P3)**~~ — RESOLVED (2026-03-22 audit). `MapModeLegend.tsx` ships for all 7 modes. `RadialMenu.tsx` deploys right-click context menu with 4 element types.
 2. **[2026-03-22] Front Line Terrain Tinting (P4)**: → v0.7.3 Phase 2 Task 2.3.
 3. **[2026-03-22] Elevation Profile on Ops Axes (P4)**: → v0.7.3 Phase 2 Task 2.5.
+4. **[2026-03-24] Gorazde periphery recapture (P3)**: `glamoc`, `kamen`, `sopotnica` start RS (census) but painted RBiH at w40. Need either a pre-planned RBiH Drina Corps defensive operation OR a "Gorazde Pocket Consolidation" event with territorial effects. Enclave list protects from paramilitaries but doesn't flip control.
+5. **[2026-03-24] P0 RESOLVED: Sarajevo siege collapse**: 8 fixes applied (cap removed, OOB rebalanced per BB, SRK drift recall, pool scale 0.15, mob scale 0.10, initial pers 800, siege-corps target restriction, diagnostic toolset). 1st Corps 22.2k/avg 636 (was 15.7k/448). 19/35 ineffective remaining — structural: Hadzici pool exhaustion (5 brigades, 15k Bosniaks). Hrasnica pocket (104th) has no RBiH OSID in Ilidza — all RS. Backlog: shared Sarajevo pocket pool, Hrasnica OSID representation.
+6. **[2026-03-24] Gorazde siege: Herzegovina Corps responsibility, not Drina**: Fixed diagnostic to check both corps. 4 brigades near Gorazde (Cajnice, Foca, Kalinovik).
+7. **[2026-03-24] Hrasnica pocket gap**: 104th Vitezka (Hrasnica brigade) and 102nd Motorized are "from Ilidza" but all Ilidza OSIDs are RS-controlled. These brigades pool from Hadzici as workaround. Need: Hrasnica OSID representation or shared Sarajevo pocket pool.
 
 ## Technical Debt (Professional Audit 2026-03-21, updated 2026-03-22)
 1. ~~**[P3] ~216 `any` types in sim/state**~~ — RESOLVED (2026-03-22). 214→64. Remaining 55 are serialize.ts + validateGameState.ts (save migration, inherently untyped). 9 trivial remnants.

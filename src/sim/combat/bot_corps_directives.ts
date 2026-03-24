@@ -1557,6 +1557,28 @@ export function generateCorpsDirectives(
             }
         }
 
+        // Siege corps target restriction: only attack within the siege zone (enclave municipalities).
+        // Prevents siege corps from launching operations toward distant fronts (e.g. SRK → Gorazde).
+        if (isSiegeCorps && offensiveTargets.length > 0) {
+            const siegeMunicipalities = new Set<string>();
+            for (const sec of corpsSectors) {
+                for (const ss of sec.sub_segments ?? []) {
+                    const hasEnclaveEnemy = (ss.enemy_osids ?? []).some((osid: string) => getEnclaveIdForOsid(osid) !== null);
+                    if (hasEnclaveEnemy) {
+                        for (const fo of ss.friendly_osids) siegeMunicipalities.add(fo.split(':')[1] ?? '');
+                        for (const eo of ss.enemy_osids) siegeMunicipalities.add(eo.split(':')[1] ?? '');
+                    }
+                }
+            }
+            if (siegeMunicipalities.size > 0) {
+                for (let i = offensiveTargets.length - 1; i >= 0; i--) {
+                    if (!siegeMunicipalities.has(offensiveTargets[i]!.split(':')[1] ?? '')) {
+                        offensiveTargets.splice(i, 1);
+                    }
+                }
+            }
+        }
+
         const directive: CorpsDirective = {
             assigned_front_ids: assignedFrontIds,
             offensive_targets: offensiveTargets,

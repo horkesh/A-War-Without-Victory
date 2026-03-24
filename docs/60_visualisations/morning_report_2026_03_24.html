@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Morning Briefing — 2026-03-24</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0a0e1a;
+    --bg-card: #0f1628;
+    --bg-card-hover: #141c35;
+    --border: #1a2340;
+    --border-accent: #243060;
+    --text-primary: #e0e6f0;
+    --text-secondary: #8892a8;
+    --text-muted: #556080;
+    --rs-green: #39ff85;
+    --rs-green-dim: #1a7a40;
+    --rs-green-bg: rgba(57,255,133,0.08);
+    --rbih-amber: #ffb833;
+    --rbih-amber-dim: #8a6018;
+    --rbih-amber-bg: rgba(255,184,51,0.08);
+    --hrhb-teal: #33e0e0;
+    --hrhb-teal-dim: #187070;
+    --hrhb-teal-bg: rgba(51,224,224,0.08);
+    --accent-blue: #4488ff;
+    --accent-red: #ff4466;
+    --accent-purple: #aa66ff;
+    --accent-orange: #ff8833;
+    --glow-green: 0 0 20px rgba(57,255,133,0.15);
+    --glow-amber: 0 0 20px rgba(255,184,51,0.15);
+    --glow-red: 0 0 20px rgba(255,68,102,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 40px 32px; }
+
+  /* HERO */
+  .hero { text-align: center; padding: 60px 0 40px; position: relative; }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 200px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--rs-green), transparent);
+  }
+  .hero-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--rs-green); margin-bottom: 12px; opacity: 0.8;
+  }
+  .hero-title {
+    font-size: 42px; font-weight: 700; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--rs-green) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 8px;
+  }
+  .hero-subtitle { font-size: 16px; color: var(--text-secondary); font-weight: 300; }
+  .hero-subtitle em { color: var(--rbih-amber); font-style: normal; font-weight: 500; }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 40px;
+  }
+  .kpi-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; text-align: center;
+    transition: all 0.3s ease;
+  }
+  .kpi-card:hover { background: var(--bg-card-hover); border-color: var(--border-accent); }
+  .kpi-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .kpi-value { font-size: 36px; font-weight: 700; line-height: 1.1; margin-bottom: 4px; }
+  .kpi-delta { font-size: 13px; font-weight: 500; }
+  .kpi-delta.positive { color: var(--rs-green); }
+  .kpi-delta.neutral { color: var(--text-secondary); }
+  .kpi-delta.negative { color: var(--accent-red); }
+  .kpi-card.green { border-left: 3px solid var(--rs-green); }
+  .kpi-card.green .kpi-value { color: var(--rs-green); }
+  .kpi-card.amber { border-left: 3px solid var(--rbih-amber); }
+  .kpi-card.amber .kpi-value { color: var(--rbih-amber); }
+  .kpi-card.teal { border-left: 3px solid var(--hrhb-teal); }
+  .kpi-card.teal .kpi-value { color: var(--hrhb-teal); }
+  .kpi-card.blue { border-left: 3px solid var(--accent-blue); }
+  .kpi-card.blue .kpi-value { color: var(--accent-blue); }
+
+  /* SECTION HEADERS */
+  .section { margin-bottom: 40px; }
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .section-icon.green { background: var(--rs-green-bg); color: var(--rs-green); }
+  .section-icon.amber { background: var(--rbih-amber-bg); color: var(--rbih-amber); }
+  .section-icon.red { background: rgba(255,68,102,0.1); color: var(--accent-red); }
+  .section-icon.blue { background: rgba(68,136,255,0.1); color: var(--accent-blue); }
+  .section-icon.purple { background: rgba(170,102,255,0.1); color: var(--accent-purple); }
+  .section-icon.teal { background: var(--hrhb-teal-bg); color: var(--hrhb-teal); }
+  .section-title { font-size: 20px; font-weight: 600; }
+
+  /* COMMIT TIMELINE */
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px;
+    width: 2px; background: linear-gradient(180deg, var(--rs-green), var(--accent-blue), var(--accent-purple));
+    border-radius: 1px;
+  }
+  .timeline-item { position: relative; margin-bottom: 24px; }
+  .timeline-dot {
+    position: absolute; left: -27px; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid; background: var(--bg-deep);
+  }
+  .timeline-item:nth-child(1) .timeline-dot { border-color: var(--rs-green); box-shadow: var(--glow-green); }
+  .timeline-item:nth-child(2) .timeline-dot { border-color: var(--accent-blue); box-shadow: 0 0 20px rgba(68,136,255,0.15); }
+  .timeline-item:nth-child(3) .timeline-dot { border-color: var(--accent-purple); box-shadow: 0 0 20px rgba(170,102,255,0.15); }
+  .timeline-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; transition: all 0.3s ease;
+  }
+  .timeline-card:hover { background: var(--bg-card-hover); border-color: var(--border-accent); }
+  .timeline-sha {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    color: var(--text-muted); margin-bottom: 4px;
+  }
+  .timeline-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .timeline-details { font-size: 14px; color: var(--text-secondary); }
+  .timeline-details li { margin-bottom: 4px; }
+
+  /* TAG BADGES */
+  .tag {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 500; padding: 2px 8px;
+    border-radius: 4px; letter-spacing: 0.5px; margin-right: 6px;
+  }
+  .tag.complete { background: rgba(57,255,133,0.12); color: var(--rs-green); }
+  .tag.partial { background: rgba(255,184,51,0.12); color: var(--rbih-amber); }
+  .tag.blocked { background: rgba(255,68,102,0.12); color: var(--accent-red); }
+  .tag.version { background: rgba(68,136,255,0.12); color: var(--accent-blue); }
+  .tag.approved { background: rgba(57,255,133,0.12); color: var(--rs-green); border: 1px solid var(--rs-green-dim); }
+
+  /* ISSUE / DECISION CARDS */
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card-grid.single { grid-template-columns: 1fr; }
+  .alert-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; transition: all 0.3s ease;
+  }
+  .alert-card:hover { background: var(--bg-card-hover); }
+  .alert-card.p1 { border-left: 3px solid var(--accent-red); }
+  .alert-card.p2 { border-left: 3px solid var(--rbih-amber); }
+  .alert-card.info { border-left: 3px solid var(--accent-blue); }
+  .alert-card.decision { border-left: 3px solid var(--accent-purple); }
+  .alert-id {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .alert-card.p1 .alert-id { color: var(--accent-red); }
+  .alert-card.p2 .alert-id { color: var(--rbih-amber); }
+  .alert-card.info .alert-id { color: var(--accent-blue); }
+  .alert-card.decision .alert-id { color: var(--accent-purple); }
+  .alert-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .alert-body { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* PHASE PROGRESS */
+  .phase-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 8px; transition: all 0.3s ease;
+  }
+  .phase-row:hover { background: var(--bg-card-hover); }
+  .phase-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .phase-bar-track {
+    width: 180px; height: 6px; background: rgba(255,255,255,0.06);
+    border-radius: 3px; overflow: hidden;
+  }
+  .phase-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+  .phase-bar-fill.done { background: var(--rs-green); }
+  .phase-bar-fill.partial { background: var(--rbih-amber); }
+  .phase-bar-fill.blocked { background: var(--accent-red); width: 0 !important; }
+  .phase-pct {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    width: 48px; text-align: right;
+  }
+  .phase-pct.done { color: var(--rs-green); }
+  .phase-pct.partial { color: var(--rbih-amber); }
+  .phase-pct.blocked { color: var(--accent-red); }
+
+  /* NEXT STEPS */
+  .steps-list { list-style: none; counter-reset: step; }
+  .steps-list li {
+    counter-increment: step; display: flex; align-items: flex-start;
+    gap: 14px; padding: 16px; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 10px; transition: all 0.3s ease;
+  }
+  .steps-list li:hover { background: var(--bg-card-hover); border-color: var(--border-accent); }
+  .steps-list li::before {
+    content: counter(step);
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;
+    min-width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(68,136,255,0.12); color: var(--accent-blue); flex-shrink: 0;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .step-desc { font-size: 13px; color: var(--text-secondary); }
+
+  /* OBSERVATIONS */
+  .obs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .obs-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px; transition: all 0.3s ease;
+  }
+  .obs-card:hover { background: var(--bg-card-hover); }
+  .obs-card.positive { border-left: 3px solid var(--rs-green); }
+  .obs-card.caution { border-left: 3px solid var(--rbih-amber); }
+  .obs-card.idea { border-left: 3px solid var(--accent-purple); }
+  .obs-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .obs-card.positive .obs-label { color: var(--rs-green); }
+  .obs-card.caution .obs-label { color: var(--rbih-amber); }
+  .obs-card.idea .obs-label { color: var(--accent-purple); }
+  .obs-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .obs-text strong { color: var(--text-primary); font-weight: 500; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center; padding-top: 40px; margin-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-text {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--text-muted); letter-spacing: 1px;
+  }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .card-grid, .obs-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-label">Pyrrhic Games &mdash; Night Shift Debrief</div>
+    <div class="hero-title">Morning Report</div>
+    <div class="hero-subtitle">24 March 2026 &mdash; <em>v0.6.5 offensive paramilitaries + v0.7.0 Phase 1-2</em></div>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label">Calibration</div>
+      <div class="kpi-value">92.6%</div>
+      <div class="kpi-delta positive">+0.6pp from 92.0%</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Tests</div>
+      <div class="kpi-value">1,446</div>
+      <div class="kpi-delta positive">+34 new (117 suites)</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">Commits</div>
+      <div class="kpi-value">3</div>
+      <div class="kpi-delta neutral">tsc clean &middot; vitest clean</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Enclaves</div>
+      <div class="kpi-value">4 / 4</div>
+      <div class="kpi-delta positive">all holding</div>
+    </div>
+  </div>
+
+  <!-- COMMIT TIMELINE -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon green">&#9679;</div>
+      <div class="section-title">Commit Timeline</div>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-sha">c9ac0137</div>
+          <div class="timeline-title">
+            <span class="tag version">v0.6.5</span>
+            <span class="tag approved">WAR-OR-GAME APPROVED</span>
+            Offensive Paramilitary Sweep
+          </div>
+          <ul class="timeline-details">
+            <li>Constants (OFFENSIVE_PARA_*) + <code>paramilitary_mode</code> field on FormationState</li>
+            <li><code>detectOffensiveParamilitaryTargets()</code> + extended <code>advanceParamilitaries()</code></li>
+            <li><code>offensive-paramilitary-detect</code> pipeline step in war_phases.ts</li>
+            <li>10 new tests (6 detection + 4 resolution)</li>
+            <li>Calibration 92.0% &rarr; 92.6%. Baseline re-frozen (n1038)</li>
+            <li>Enclave protection added after Gorazde/Srebrenica overshoot (90.7% &rarr; 92.6%)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-sha">e5483cdc</div>
+          <div class="timeline-title">
+            <span class="tag complete">COMPLETE</span>
+            Adapter Integration Tests
+          </div>
+          <ul class="timeline-details">
+            <li>18 tests against real save file</li>
+            <li>Covers: formations, political controllers, control events, militia pools, corps sectors, officers, enclaves, displacement, casualties, supply, events, turn summaries</li>
+          </ul>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-sha">99655a7a</div>
+          <div class="timeline-title">
+            <span class="tag version">v0.7.0</span>
+            <span class="tag partial">PH 1-2</span>
+            Event Flag Wiring
+          </div>
+          <ul class="timeline-details">
+            <li>Implemented <code>enclave_supply_status</code> and <code>corridor_severed</code> condition evaluators</li>
+            <li>Wired flag gates to 21 downstream events across all 4 event JSON files</li>
+            <li>Added pressure modifiers to 3 events (concentration_camps, srebrenica_enclave, hvo_arbih_tensions)</li>
+            <li>8 new condition evaluator tests</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- v0.7.0 PHASE PROGRESS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon blue">&#9638;</div>
+      <div class="section-title">v0.7.0 Phase Progress</div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-name"><span class="tag complete">DONE</span> Phase 1 &mdash; Condition Evaluators</div>
+      <div class="phase-bar-track"><div class="phase-bar-fill done" style="width:100%"></div></div>
+      <div class="phase-pct done">100%</div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-name"><span class="tag complete">DONE</span> Phase 2 &mdash; Flag Gates + Pressure Mods</div>
+      <div class="phase-bar-track"><div class="phase-bar-fill done" style="width:100%"></div></div>
+      <div class="phase-pct done">100%</div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-name"><span class="tag partial">PARTIAL</span> Phase 3 &mdash; Pressure Modifiers</div>
+      <div class="phase-bar-track"><div class="phase-bar-fill partial" style="width:50%"></div></div>
+      <div class="phase-pct partial">50%</div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-name"><span class="tag blocked">BLOCKED</span> Phase 4 &mdash; Engine Flag Reads</div>
+      <div class="phase-bar-track"><div class="phase-bar-fill blocked"></div></div>
+      <div class="phase-pct blocked">0%</div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-name"><span class="tag blocked">BLOCKED</span> Phase 5 &mdash; FIXED &rarr; CONDITIONAL</div>
+      <div class="phase-bar-track"><div class="phase-bar-fill blocked"></div></div>
+      <div class="phase-pct blocked">0%</div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-name"><span class="tag blocked">BLOCKED</span> Phase 6 &mdash; Cleanup</div>
+      <div class="phase-bar-track"><div class="phase-bar-fill blocked"></div></div>
+      <div class="phase-pct blocked">0%</div>
+    </div>
+  </div>
+
+  <!-- ISSUES -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon red">&#9888;</div>
+      <div class="section-title">Issues Found</div>
+    </div>
+    <div class="card-grid">
+      <div class="alert-card p1">
+        <div class="alert-id">ISSUE-1 &middot; P1</div>
+        <div class="alert-title">MAX_EVENTS_PER_TURN = 3 Too Restrictive</div>
+        <div class="alert-body">At w5, 4+ events are eligible (barracks + jna_withdrawal + others). The <code>jna_withdrawal</code> event gets squeezed out, preventing the <code>jna_withdrawn</code> flag from being set. This flag gates <code>drina_cleansing</code>, <code>operation_corridor</code>, and <code>srebrenica_enclave</code>. <strong>Fix: increase to 4 or add priority-based selection.</strong></div>
+      </div>
+      <div class="alert-card p2">
+        <div class="alert-id">ISSUE-2 &middot; P2</div>
+        <div class="alert-title">Gorazde Periphery Over-Capture</div>
+        <div class="alert-body">Offensive paramilitaries take 3 Gorazde municipality OSIDs (glamoc, kamen, sopotnica) that are NOT in the enclave OSID list but should historically remain RBiH. <strong>Expand enclave list or remove gorazde from para scope.</strong></div>
+      </div>
+      <div class="alert-card p2">
+        <div class="alert-id">ISSUE-3 &middot; P2</div>
+        <div class="alert-title">corridor_severed Evaluator Data Path</div>
+        <div class="alert-body">Uses <code>(state as any).derived?.edges</code> which may not exist at runtime. The operational contact graph edges are loaded by the turn pipeline but may not be on the state object. <strong>May silently return false (corridor never severed).</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECISIONS FLAGGED -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon purple">&#9733;</div>
+      <div class="section-title">Decisions Flagged for Review</div>
+    </div>
+    <div class="card-grid">
+      <div class="alert-card decision">
+        <div class="alert-id">DECISION-1</div>
+        <div class="alert-title">Skipped jna_withdrawn Flag Gates</div>
+        <div class="alert-body">The <code>jna_withdrawal_1992</code> event is crowded out by MAX_EVENTS_PER_TURN=3 after v0.6.5 changed event timing. Adding gates on a flag that doesn't fire would break the Drina &rarr; Srebrenica &rarr; Corridor cascade.</div>
+      </div>
+      <div class="alert-card decision">
+        <div class="alert-id">DECISION-2</div>
+        <div class="alert-title">Accepted +0.6pp vs Planned +2-3pp</div>
+        <div class="alert-body">/war-or-game approved. Modest gain because offensive paramilitaries cascade through VRS regular combat, causing Drina over-capture (+10 RS OSIDs vs painted). Enclave core OSIDs are protected.</div>
+      </div>
+      <div class="alert-card decision">
+        <div class="alert-id">DECISION-3</div>
+        <div class="alert-title">Exported Enclave Internals</div>
+        <div class="alert-body"><code>ENCLAVE_DEFINITIONS</code> and <code>osidBelongsToEnclave</code> exported from <code>enclave_resilience.ts</code> (previously private). Needed for paramilitary enclave exclusion. Minimal API surface change.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSERVATIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon teal">&#9670;</div>
+      <div class="section-title">Observations &amp; Proposals</div>
+    </div>
+    <div class="obs-grid">
+      <div class="obs-card positive">
+        <div class="obs-label">Emergent Behavior</div>
+        <div class="obs-text"><strong>Drina cleansing fires at w10</strong> thanks to offensive paramilitaries raising <code>war_crimes_events</code> above threshold earlier. Historically correct and emergent &mdash; not hard-coded.</div>
+      </div>
+      <div class="obs-card positive">
+        <div class="obs-label">Historical Accuracy</div>
+        <div class="obs-text"><strong>HRHB offensive paramilitaries</strong> (6 units in Stolac/Capljina/Prozor) correctly model HOS activity in Herzegovina.</div>
+      </div>
+      <div class="obs-card caution">
+        <div class="obs-label">Cascade Problem</div>
+        <div class="obs-text"><strong>Paramilitaries unlock too much VRS expansion</strong> in Drina via adjacency. Planned +2-3pp yielded only +0.6pp because of downstream over-capture effects.</div>
+      </div>
+      <div class="obs-card caution">
+        <div class="obs-label">Fragile Event Timing</div>
+        <div class="obs-text"><strong>Adding 1 pipeline step changed event firing order</strong> enough to crowd out jna_withdrawal. MAX_EVENTS_PER_TURN cap is the structural bottleneck.</div>
+      </div>
+      <div class="obs-card idea">
+        <div class="obs-label">Feature Idea</div>
+        <div class="obs-text"><strong>Named paramilitary units</strong> &mdash; "Arkan's Tigers" for Bijeljina/Zvornik, "White Eagles" for Visegrad/Foca. ~20 lines of code.</div>
+      </div>
+      <div class="obs-card idea">
+        <div class="obs-label">Feature Idea</div>
+        <div class="obs-text"><strong>Player paramilitary decision event</strong> with per-OSID granularity. "Arkan's Tigers request permission to operate in Zvornik. This will constitute a war crime."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PYRRHIC TEAM RECOMMENDATIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon amber">&#9733;</div>
+      <div class="section-title">Pyrrhic Team Recommendations</div>
+    </div>
+    <div class="card-grid">
+      <div class="alert-card p1">
+        <div class="alert-id">GAME DESIGNER &middot; ISSUE-1</div>
+        <div class="alert-title">Both: Cap to 4 + Priority Tiers</div>
+        <div class="alert-body">
+          Cap alone defers the problem. Priority alone doesn't help when 3+ events tie.
+          <strong>Priority scheme:</strong> 1=fire-or-miss anchors (single-turn windows),
+          10=cascade prerequisites, 20=cascade consequents, 50=major political, 100=default.
+          Set <code>jna_withdrawal_1992</code> to priority 1. Two field edits, two calibration runs.
+        </div>
+      </div>
+      <div class="alert-card p2">
+        <div class="alert-id">OPERATIONS EXPERT &middot; ISSUE-2</div>
+        <div class="alert-title">Expand Gorazde Enclave OSID List</div>
+        <div class="alert-body">
+          Do NOT remove gorazde from para scope &mdash; VRS paramilitaries did historically operate in Gorazde
+          municipality periphery. Add 3 OSIDs to <code>gorazde.osid_list</code>:
+          <code>glamoc_2</code>, <code>kamen_2</code>, <code>sopotnica_2</code>.
+          These are historically RBiH-held approaches that were never ethnically cleansed.
+          One calibration run, no logic changes.
+        </div>
+      </div>
+      <div class="alert-card p2">
+        <div class="alert-id">GAMEPLAY PROGRAMMER &middot; ISSUE-3</div>
+        <div class="alert-title">Pass EdgeRecord[] as Parameter</div>
+        <div class="alert-body">
+          Do NOT put edges on GameState (Engine Invariant &sect;13.1).
+          <code>(state as any).derived?.edges</code> is always <code>undefined</code> &mdash;
+          evaluator has been a silent no-op since written.
+          Thread <code>edges?: EdgeRecord[]</code> through
+          <code>evaluateEvents &rarr; triggerMatches &rarr; evaluateCondition</code>.
+          ~8 lines across 3 files. One calibration run.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDED NEXT STEPS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon blue">&#9654;</div>
+      <div class="section-title">Recommended Next Steps</div>
+    </div>
+    <ol class="steps-list">
+      <li>
+        <div class="step-content">
+          <div class="step-title">FIX-A1: Raise MAX_EVENTS_PER_TURN to 4</div>
+          <div class="step-desc">Single constant change in <code>evaluate_events.ts</code>. Calibration run: verify <code>jna_withdrawal</code> fires at w5.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">FIX-A2: Add priority=1 to jna_withdrawal_1992</div>
+          <div class="step-desc">JSON field in <code>war_1992.json</code>. Calibration run: verify full cascade chain (jna &rarr; drina &rarr; corridor &rarr; srebrenica).</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">FIX-C: Wire corridor_severed edges parameter</div>
+          <div class="step-desc">Thread <code>EdgeRecord[]</code> through evaluateEvents &rarr; triggerMatches &rarr; evaluateCondition. ~8 lines, 3 files. Calibration run.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">FIX-B: Expand Gorazde enclave OSID list</div>
+          <div class="step-desc">Add <code>glamoc_2</code>, <code>kamen_2</code>, <code>sopotnica_2</code> to <code>enclave_resilience.ts</code>. Calibration run: verify 3 OSIDs stay RBiH.</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <div class="step-title">Resume v0.7.0 Phase 4 &rarr; Phase 5</div>
+          <div class="step-desc">Engine flag reads (<code>supply_reserves</code>, <code>patron_pressure</code>), then FIXED &rarr; CONDITIONAL conversions (Srebrenica, Markale, Zepa).</div>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- BUILD STATE -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon green">&#10003;</div>
+      <div class="section-title">Build State at End of Shift</div>
+    </div>
+    <div class="card-grid">
+      <div class="alert-card info">
+        <div class="alert-id">TYPESCRIPT</div>
+        <div class="alert-title" style="color:var(--rs-green)">Clean</div>
+        <div class="alert-body"><code>tsc --noEmit</code> &mdash; zero errors</div>
+      </div>
+      <div class="alert-card info">
+        <div class="alert-id">VITEST</div>
+        <div class="alert-title" style="color:var(--rs-green)">117 suites &middot; 1,446 tests &middot; 1 skipped</div>
+        <div class="alert-body">All passing. +34 new tests this shift.</div>
+      </div>
+      <div class="alert-card info">
+        <div class="alert-id">MAP BUILD</div>
+        <div class="alert-title" style="color:var(--rs-green)">Clean</div>
+        <div class="alert-body"><code>desktop:map:build</code> &mdash; no warnings</div>
+      </div>
+      <div class="alert-card info">
+        <div class="alert-id">BASELINE</div>
+        <div class="alert-title" style="color:var(--rs-green)">n1038 frozen</div>
+        <div class="alert-body">92.6% area-weighted, 4/4 enclaves. Last commit: <code>99655a7a</code></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-text">PYRRHIC GAMES &mdash; A WAR WITHOUT VICTORY &mdash; NIGHT SHIFT REPORT + TEAM REVIEW &mdash; 2026-03-24</div>
+  </div>
+
+</div>
+</body>
+</html>

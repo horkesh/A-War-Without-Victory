@@ -73,6 +73,7 @@ describe('war-phase step ordering', () => {
         // +1 from update-event-readiness (v0.6.0 pressure system readiness tick before evaluate-events)
         // +1 from compute-dimension-bases (strategic dimension base values after events)
         // +1 from offensive-paramilitary-detect (v0.6.5 Drina valley offensive sweep)
-        expect(stepNames.length).toBe(144);
+        // +1 from recall-drifted-brigades (prevent brigade drift far from home)
+        expect(stepNames.length).toBe(145);
     });
 });

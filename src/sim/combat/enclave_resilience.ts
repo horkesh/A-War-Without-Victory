@@ -97,14 +97,18 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
         id: 'gorazde',
         faction: 'RBiH',
         // Painted January 1993 RBiH OSIDs only — not entire municipality (20 total, 16 RBiH)
+        // glamoc, kamen, sopotnica added 2026-03-24: historically RBiH-held approaches, never ethnically cleansed
         osid_list: [
             'op:gorazde:bacci', 'op:gorazde:citluk_2',
-            'op:gorazde:faocici_2', 'op:gorazde:gorazde_2',
+            'op:gorazde:faocici_2', 'op:gorazde:glamoc',
+            'op:gorazde:gorazde_2',
             'op:gorazde:hrancici',
+            'op:gorazde:kamen',
             'op:gorazde:kola', 'op:gorazde:kolovarice',
             'op:gorazde:mravinjac_2', 'op:gorazde:novakovici',
             'op:gorazde:osjecani_2', 'op:gorazde:semihova_2',
-            'op:gorazde:slatina_2', 'op:gorazde:ustipraca_2',
+            'op:gorazde:slatina_2', 'op:gorazde:sopotnica',
+            'op:gorazde:ustipraca_2',
             'op:gorazde:zorlaci', 'op:gorazde:zorovici',
         ],
         resilience_start_turn: 0,   // BB2 p.478: organized TDF defense from April 1992
