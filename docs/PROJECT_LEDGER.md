@@ -1,7 +1,25 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-24
-**Status:** **v0.6.5** — Political Wargame. 1453 tests, 118 suites. **91.7% area-weighted (n1065, re-frozen).** 94 events, 21 flag-gated. **Emergent brigade formation:** pool-gated spawning replaces time gates — RBiH 98 brigades avg 1,382 (was 120 avg 1,050). Sarajevo siege P0 resolved (11 fixes). OOB: 146th→Visoko, 145th removed, SRK excluded from Rogatica/Gorazde. **Next: v0.7.0 Phase 4 (engine flag reads).**
+**Last Updated:** 2026-03-25
+**Status:** **v0.6.5** — Political Wargame. 1453 tests, 118 suites. **91.4% area-weighted (n1074).** 94 events, 21 flag-gated. **Emergent brigade Phase 2:** enclave capacity gate fix (Srebrenica 1→5 brigs, Gorazde 1→5), surplus pool rerouting, tiered max_personnel activated, RBiH strategic reserve 0.02→0.15. Life lessons restructured (8 topic files). 9 skills wired with Required Reading. **Next: tiered cap calibration (n1075), then v0.7.0 Phase 4.**
+
+## [2026-03-25] Emergent Brigade Phase 2 — Enclave Fix + Pool Rerouting + Tiered Caps
+
+**Scope:** Three-part fix to unlock stranded RBiH manpower and introduce historically-accurate brigade sizes.
+
+**Enclave capacity gate fix:** `getMunBrigadesForFaction()` now caps max_personnel to ENCLAVE_MAX_PERSONNEL (1500) for enclave municipalities (srebrenica, gorazde, zepa). New ENCLAVE_FORMATION_CAPACITY_THRESHOLD=0.30 (vs 0.60 global) because siege attrition prevents enclave brigades from reaching 60%. Result: Srebrenica 1→5 brigades (600→3,342 pers), Gorazde 1→5 brigades (800→4,000 pers). 10k pool unlocked.
+
+**Surplus pool rerouting:** New `reroutePoolSurplus()` pipeline step before `brigade-reinforcement`. Transfers manpower from municipalities where all OOB is exhausted and brigades at capacity, to municipalities with waiting OOB candidates but insufficient pool. Enclaves excluded (isolated). Deterministic ordering.
+
+**Tiered max_personnel activated:** `deriveMaxPersonnel()` was dead code — OOB loader defaulted all brigades to 3000. Fixed loader to pass undefined, activating historical tiered caps. Then lowered caps to w40-effective range: RBiH light=1800, mountain=1600; RS light=1800, mountain=2000; HRHB light=1500, mountain=1800. Mechanized=2800, motorized=2200, police/special=1200.
+
+**Strategic reserve fix:** RBiH draw rate 0.02→0.15 (was manpower graveyard — 14k stranded at 0.02).
+
+**Infrastructure:** Life lessons split from monolith (139 lessons) into 8 topic files. 9 Pyrrhic skills wired with Required Reading sections. CLAUDE.md session startup updated. Historian skill given OOB master hierarchy (OOB masters > BB for troop strengths). ARMY_STRENGTH_COMPARISON.md created.
+
+**Calibration (n1074):** 91.4% area-weighted. RBiH 111 brigs 158k, RS 83 brigs 116k, HRHB 36 brigs 54k. Calibration of tiered caps ongoing — next run will show full effect of lowered caps.
+
+**Files:** `src/sim/recruitment_engine.ts` (enclave gate + rerouting), `src/state/formation_constants.ts` (ENCLAVE_MUNICIPALITY_IDS, ENCLAVE_FORMATION_CAPACITY_THRESHOLD, deriveMaxPersonnel caps), `src/scenario/oob_loader.ts` (remove default max_personnel), `src/sim/turn_phases/war_phases.ts` (+reroute-pool-surplus step), `src/sim/combat/ongoing_mobilization.ts` (mob scale experiments), `src/sim/combat/strategic_reserve.ts` (RBiH draw rate), `docs/life_lessons.md` + `docs/life_lessons/*.md` (restructure), `.claude/skills/` (9 skills updated), `docs/knowledge/ARMY_STRENGTH_COMPARISON.md` (new).
 
 ## [2026-03-24] Emergent Brigade Formation — Pool-Gated Spawning
 
