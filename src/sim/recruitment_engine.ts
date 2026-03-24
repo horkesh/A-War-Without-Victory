@@ -13,7 +13,7 @@ import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/ope
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
 import { factionHasPresenceInMun } from '../scenario/oob_early_war_entry.js';
 import type { BrigadeDecoration } from '../state/decoration_types.js';
-import { deriveMaxPersonnel, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
+import { deriveMaxPersonnel, FORMATION_CAPACITY_THRESHOLD, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
 import type {
     BrigadeComposition,
@@ -354,6 +354,49 @@ export interface RecruitBrigadeResult {
  * Recruit a single brigade from the catalog. Validates all constraints,
  * deducts resources, creates FormationState. Does NOT mutate state -- caller applies.
  */
+
+/**
+ * Check if a new brigade can form via pool-gated emergent formation.
+ * Conditions: (1) currentTurn >= availableFrom, (2) pool can afford it,
+ * (3) all existing same-faction brigades in the municipality are at capacity.
+ */
+export function canFormEmergentBrigade(
+    existingBrigades: Array<{ personnel: number; max_personnel?: number }>,
+    pool: { available: number } | undefined,
+    requiredPersonnel: number,
+    currentTurn: number,
+    availableFrom: number
+): boolean {
+    if (currentTurn < availableFrom) return false;
+    if (!pool || pool.available < requiredPersonnel) return false;
+    for (const b of existingBrigades) {
+        const max = b.max_personnel ?? 3000;
+        if (b.personnel < max * FORMATION_CAPACITY_THRESHOLD) return false;
+    }
+    return true;
+}
+
+/** Get all active brigades in a municipality for a given faction. */
+function getMunBrigadesForFaction(
+    state: GameState, munId: string, faction: string
+): Array<{ personnel: number; max_personnel?: number }> {
+    const formations = state.military.formations ?? {};
+    const result: Array<{ personnel: number; max_personnel?: number }> = [];
+    for (const f of Object.values(formations)) {
+        if (f.faction !== faction || f.status !== 'active' || f.kind !== 'brigade') continue;
+        const tags = f.tags;
+        if (Array.isArray(tags)) {
+            for (const t of tags) {
+                if (typeof t === 'string' && t.startsWith('mun:') && t.slice(4) === munId) {
+                    result.push({ personnel: f.personnel ?? 0, max_personnel: f.max_personnel });
+                    break;
+                }
+            }
+        }
+    }
+    return result;
+}
+
 export function recruitBrigade(
     state: GameState,
     brigade: OobBrigade,
@@ -541,10 +584,19 @@ export function runBotRecruitment(
         const factionBrigades = oobBrigades.filter(b => b.faction === faction);
 
         // Step 1: Recruit mandatory formations first (zero cost for capital/equipment)
+        // Pool-gated emergent formation: turn-0 brigades spawn unconditionally;
+        // later brigades require pool surplus + existing brigades at capacity.
+        const pools = state.military.militia_pools as Record<string, { available: number; committed: number }> | undefined;
         const mandatoryBrigades = includeMandatory
             ? factionBrigades
                 .filter(b => b.mandatory)
-                .filter(b => b.available_from <= currentTurn)
+                .filter(b => {
+                    if (b.available_from > currentTurn) return false;
+                    if (b.available_from === 0) return true; // seed formation
+                    const munBrigades = getMunBrigadesForFaction(state, b.home_mun, faction);
+                    const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
+                    return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from);
+                })
                 .sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
             : [];
 
@@ -647,9 +699,16 @@ export function runBotRecruitment(
         }
 
         // Step 2: Score and recruit elective formations
+        // Same pool-gated emergent formation logic as mandatory brigades.
         const electiveBrigades = factionBrigades
             .filter(b => !b.mandatory && !resources.recruited_brigade_ids.includes(b.id))
-            .filter(b => b.available_from <= currentTurn);
+            .filter(b => {
+                if (b.available_from > currentTurn) return false;
+                if (b.available_from === 0) return true;
+                const munBrigades = getMunBrigadesForFaction(state, b.home_mun, faction);
+                const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
+                return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from);
+            });
 
         // Score each brigade
         const scored = electiveBrigades.map(b => ({

@@ -107,6 +107,13 @@ export function isEligibleForReinforcement(f: { kind?: string; readiness?: strin
 /** Default brigade personnel cap — used when no per-brigade override exists. Tuned for historical personnel band (~3k per brigade at full strength). */
 export const MAX_BRIGADE_PERSONNEL = 3_000;
 
+/**
+ * Fraction of max_personnel at which a brigade is considered "at capacity" for emergent
+ * formation purposes. When ALL brigades in a municipality are above this threshold,
+ * new brigades can form from pool surplus. At 0.60 with max 3000: threshold = 1800.
+ */
+export const FORMATION_CAPACITY_THRESHOLD = 0.60;
+
 /** Get the effective personnel cap for a formation. Uses per-brigade override if set, else MAX_BRIGADE_PERSONNEL. */
 export function getMaxPersonnel(f: { max_personnel?: number }): number {
     return f.max_personnel ?? MAX_BRIGADE_PERSONNEL;
