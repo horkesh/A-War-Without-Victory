@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Lessons Review — 2026-03-24</title>
+<style>
+  :root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #c9d1d9; --muted: #8b949e; --green: #3fb950; --red: #f85149; --yellow: #d29922; --blue: #58a6ff; --purple: #bc8cff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 2rem; line-height: 1.6; }
+  h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #fff; }
+  h2 { font-size: 1.3rem; margin: 2rem 0 1rem; color: var(--blue); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.05rem; margin: 1rem 0 0.5rem; color: #fff; }
+  .subtitle { color: var(--muted); margin-bottom: 2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .metric { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; text-align: center; }
+  .metric .value { font-size: 2rem; font-weight: 700; }
+  .metric .label { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+  .metric.green .value { color: var(--green); }
+  .metric.yellow .value { color: var(--yellow); }
+  .metric.red .value { color: var(--red); }
+  .metric.blue .value { color: var(--blue); }
+  .metric.purple .value { color: var(--purple); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; margin: 0.8rem 0; }
+  .card.violation { border-left: 4px solid var(--yellow); }
+  .card.new-lesson { border-left: 4px solid var(--blue); }
+  .card.applied { border-left: 4px solid var(--green); }
+  .tag { display: inline-block; font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 4px; margin-right: 0.4rem; font-weight: 600; }
+  .tag.low { background: rgba(210,153,34,0.2); color: var(--yellow); }
+  .tag.applied { background: rgba(63,185,80,0.2); color: var(--green); }
+  .tag.new { background: rgba(88,166,255,0.2); color: var(--blue); }
+  .tag.active { background: rgba(139,148,158,0.2); color: var(--muted); }
+  .evidence { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  th, td { padding: 0.6rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; }
+  .bar-container { display: flex; align-items: center; gap: 0.5rem; }
+  .bar { height: 10px; border-radius: 5px; }
+  .bar.green { background: var(--green); }
+  .bar.yellow { background: var(--yellow); }
+  .bar.red { background: var(--red); }
+  .bar.muted { background: var(--border); }
+  .timeline { position: relative; margin: 1rem 0; padding-left: 2rem; }
+  .timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 1rem; }
+  .timeline-item::before { content: ''; position: absolute; left: -1.65rem; top: 0.5rem; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); border: 2px solid var(--card); }
+  .timeline-item.violation::before { background: var(--yellow); }
+  .timeline-item.success::before { background: var(--green); }
+  .commit-hash { font-family: monospace; font-size: 0.85rem; color: var(--purple); }
+</style>
+</head>
+<body>
+<h1>Life Lessons Review</h1>
+<p class="subtitle">24h Activity Analysis — 2026-03-24 | Night Shift Session</p>
+
+<div class="grid">
+  <div class="metric green"><div class="value">1446</div><div class="label">Tests Passing (+34)</div></div>
+  <div class="metric green"><div class="value">92.6%</div><div class="label">Area-Weighted (+0.6pp)</div></div>
+  <div class="metric blue"><div class="value">6</div><div class="label">Commits This Session</div></div>
+  <div class="metric yellow"><div class="value">1</div><div class="label">Borderline Violation</div></div>
+  <div class="metric blue"><div class="value">3</div><div class="label">New Lessons</div></div>
+  <div class="metric purple"><div class="value">38</div><div class="label">Active Lessons</div></div>
+</div>
+
+<h2>Violation Detection</h2>
+
+<div class="card violation">
+  <h3><span class="tag low">LOW</span> [Calibration] One change per run — BORDERLINE</h3>
+  <p>v0.6.5 bundled constants + detection + pipeline + enclave protection. First run (n1035) hit 90.7% — enclave overshoot. Added enclave protection (second architectural change), re-ran at 92.6%. Then rate-tuned 0.50 &rarr; 0.35 (regressed to 91.4%), reverted. That's 4 runs with 2 mixed changes.</p>
+  <p class="evidence"><strong>Mitigating:</strong> Caught and corrected within session. Plan should have predicted enclave overshoot as a risk.</p>
+</div>
+
+<div class="card applied">
+  <h3><span class="tag applied">APPLIED</span> [Process] Smoke-test triad after every change</h3>
+  <p>tsc + vitest + desktop:map:build run after every phase. 1446 tests pass. Build clean.</p>
+</div>
+
+<div class="card applied">
+  <h3><span class="tag applied">APPLIED</span> [Process] Determinism is sacred</h3>
+  <p><code>deterministicHash()</code> for spawn decisions. No Math.random(). Sorted iteration via <code>strictCompare</code>.</p>
+</div>
+
+<div class="card applied">
+  <h3><span class="tag applied">APPLIED</span> [Data] OSID key embeds the municipality</h3>
+  <p>Municipality scope uses <code>osid.split(':')[1]</code> throughout offensive paramilitary target selection. Correct.</p>
+</div>
+
+<h2>New Lessons Synthesized</h2>
+
+<div class="card new-lesson">
+  <h3><span class="tag new">NEW</span> [Events] MAX_EVENTS_PER_TURN creates fragile event chains</h3>
+  <p>Adding <code>offensive-paramilitary-detect</code> step changed early-war state enough that at w5, <code>jna_withdrawal_1992</code> got crowded out. The <code>jna_withdrawn</code> flag never fires, breaking intended cascade to drina_cleansing, operation_corridor, and srebrenica_enclave gates.</p>
+  <p class="evidence"><strong>Do instead:</strong> Before adding pipeline steps in weeks 0-12, diff the event firing list against baseline. If an event drops, check whether its flag is consumed downstream.</p>
+</div>
+
+<div class="card new-lesson">
+  <h3><span class="tag new">NEW</span> [Calibration] Offensive territory gains cascade through adjacency</h3>
+  <p>Plan estimated +2-3pp from offensive paramilitaries. Actual: +0.6pp. The 28 paramilitary captures gave VRS adjacency to 10+ more OSIDs that regular combat over-captured. Net gain modest because over-capture offsets correct captures.</p>
+  <p class="evidence"><strong>Do instead:</strong> When estimating calibration impact of territory-changing systems, halve the expected gain and budget for cascade over-capture.</p>
+</div>
+
+<div class="card new-lesson">
+  <h3><span class="tag new">NEW</span> [Quality] Three review agents find real bugs — always run /simplify</h3>
+  <p>/simplify found: duplicate spawn functions (-29 lines), 3 unnamed magic numbers, inline adjacency duplicating <code>buildOsidAdjacency</code>, per-OSID enclave checks reducible to O(1) Set lookup.</p>
+  <p class="evidence"><strong>Do instead:</strong> Run /simplify between major feature phases. The 3-agent parallel review catches reuse, quality, and efficiency issues simultaneously.</p>
+</div>
+
+<h2>Session Commit Timeline</h2>
+
+<div class="timeline">
+  <div class="timeline-item success">
+    <p><span class="commit-hash">c9ac0137</span> &mdash; feat(sim): v0.6.5 offensive paramilitary sweep</p>
+    <p class="evidence">+619/-50 lines. 10 new tests. Calibration 92.0% &rarr; 92.6%.</p>
+  </div>
+  <div class="timeline-item success">
+    <p><span class="commit-hash">e5483cdc</span> &mdash; test(integration): adapter field completeness</p>
+    <p class="evidence">+153 lines. 18 new tests. vitest.config.ts updated.</p>
+  </div>
+  <div class="timeline-item success">
+    <p><span class="commit-hash">99655a7a</span> &mdash; feat(events): v0.7.0 Phase 1+2 — evaluators + flag gates</p>
+    <p class="evidence">+187/-40 lines. 8 new evaluator tests. 21 event flag gates wired.</p>
+  </div>
+  <div class="timeline-item">
+    <p><span class="commit-hash">def97eb8</span> &mdash; docs: nightshift morning report + ledger</p>
+    <p class="evidence">Morning report, ledger entry, working-on.md.</p>
+  </div>
+  <div class="timeline-item success">
+    <p><span class="commit-hash">e313a952</span> &mdash; refactor: use buildOsidAdjacency in corridor_severed</p>
+    <p class="evidence">-3 lines. Eliminated code duplication from /simplify finding.</p>
+  </div>
+  <div class="timeline-item success">
+    <p><span class="commit-hash">67673d3a</span> &mdash; refactor: merge spawn functions + named constants</p>
+    <p class="evidence">+34/-63 lines. 3 magic numbers extracted. Spawn duplication removed.</p>
+  </div>
+</div>
+
+<h2>Lesson Health Dashboard</h2>
+
+<table>
+  <tr><th>Category</th><th>Count</th><th>Distribution</th></tr>
+  <tr>
+    <td>Recently Violated</td><td>6</td>
+    <td><div class="bar-container"><div class="bar yellow" style="width: 60px"></div></div></td>
+  </tr>
+  <tr>
+    <td>New (this session)</td><td>3</td>
+    <td><div class="bar-container"><div class="bar green" style="width: 30px"></div></div></td>
+  </tr>
+  <tr>
+    <td>Active (no violations)</td><td>29</td>
+    <td><div class="bar-container"><div class="bar muted" style="width: 290px"></div></div></td>
+  </tr>
+  <tr>
+    <td>Internalized</td><td>3</td>
+    <td><div class="bar-container"><div class="bar green" style="width: 30px"></div></div></td>
+  </tr>
+</table>
+
+<h2>Recommendations</h2>
+
+<div class="card">
+  <h3>P1: Fix MAX_EVENTS_PER_TURN</h3>
+  <p>Increase from 3 to 4, or implement priority-based selection. The jna_withdrawal crowding-out blocks the entire Drina event cascade. This is the single most impactful fix for v0.7.0.</p>
+</div>
+
+<div class="card">
+  <h3>P2: Append 3 new lessons to life_lessons.md</h3>
+  <p>Event chain fragility, calibration cascade effects, and /simplify value should be written into the lessons file.</p>
+</div>
+
+<div class="card">
+  <h3>P3: Update timestamp on life_lessons.md header</h3>
+  <p>Currently says "2026-03-23 (min_dist contact graph fix)". Should be "2026-03-24 (nightshift — offensive paramilitaries + event wiring)".</p>
+</div>
+
+<p class="subtitle" style="margin-top: 3rem; text-align: center;">Generated by Life Lessons Review Cron | Night Shift 2026-03-24</p>
+</body>
+</html>

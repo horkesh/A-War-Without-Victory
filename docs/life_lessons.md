@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-23 (min_dist contact graph fix — new lesson added)
+> Last updated: 2026-03-24 (nightshift — offensive paramilitaries + event wiring, 3 new lessons)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -72,6 +72,26 @@
 - **Cost**: Extra investigation cycle. The systematic trace approach in the second pass was correct — should have been applied from the start.
 
 ---
+
+## New Lessons (2026-03-24 nightshift)
+
+### [Events] MAX_EVENTS_PER_TURN=3 creates fragile event chains — pipeline changes cascade into missing events (2026-03-24) — NEW
+- **Context**: v0.6.5 added `offensive-paramilitary-detect` pipeline step. This changed early-war state enough that at w5, `jna_withdrawal_1992` got crowded out by 4+ eligible events (barracks events + others). The `jna_withdrawn` flag never fires, breaking the intended cascade to `drina_cleansing`, `operation_corridor`, and `srebrenica_enclave` flag gates.
+- **Wrong approach**: Adding a pipeline step and only checking calibration % — not diffing the event firing list. The event dropout was caught by the event_timing test, not by manual review.
+- **Right approach**: Before adding any pipeline step that runs in weeks 0-12, run a 40w scenario and diff the event firing list against baseline. If an event drops out, investigate whether its flag is consumed downstream.
+- **Do instead**: After any sim-affecting change, run `node -e "... baseline.events_fired.map(e => e.id).sort()"` and compare to the new run. Missing events = broken flag cascade.
+
+### [Calibration] Offensive territory gains cascade through adjacency — halve expected gains (2026-03-24) — NEW
+- **Context**: Plan estimated +2-3pp from offensive paramilitaries sweeping Drina valley. Actual: +0.6pp. The 28 paramilitary captures gave VRS adjacency to 10+ additional OSIDs that regular combat then captured (over-capture). The net was modest because over-capture offset correct captures.
+- **Wrong approach**: Estimating linear impact (N OSIDs captured = N OSIDs closer to painted). Territory gains are nonlinear — each capture changes the adjacency graph for regular combat.
+- **Right approach**: When estimating calibration impact of territory-changing systems, halve the expected gain and budget for cascade over-capture.
+- **Do instead**: Before implementing a territory-changing system, count how many NEW hostile OSIDs become adjacent after the system runs. That's the cascade risk. If cascade OSIDs > direct captures, the system will over-capture unless constrained.
+
+### [Quality] /simplify with 3 parallel review agents catches real bugs — run after major features (2026-03-24) — NEW
+- **Context**: /simplify found: duplicate spawn functions (-29 lines), 3 unnamed magic numbers, inline adjacency building duplicating `buildOsidAdjacency`, per-OSID enclave checks reducible to O(1) Set lookup.
+- **Wrong approach**: Skipping post-implementation review because "tests pass and calibration is good." Code quality issues are invisible to tests.
+- **Right approach**: Run /simplify between major feature phases. The 3-agent parallel review (reuse, quality, efficiency) catches different categories simultaneously.
+- **Do instead**: After every feature commit, run /simplify. Estimate 10-20% code reduction from the review. The spawn duplication was obvious in hindsight but emerged naturally from parallel development of rear-pocket and offensive modes.
 
 ## New Lessons (2026-03-23 session)
 
