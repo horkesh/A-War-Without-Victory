@@ -60,6 +60,11 @@ const SHARED_POCKET_POOLS: ReadonlyMap<string, readonly string[]> = new Map([
         'hadzici',
         'vogosca',
     ]],
+    ['herzegovina_pocket', [
+        'mostar',
+        'jablanica',
+        'konjic',
+    ]],
 ]);
 
 /** Get the pocket municipalities for a given municipality, or null if not in a pocket. */

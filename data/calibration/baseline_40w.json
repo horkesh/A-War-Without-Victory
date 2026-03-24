@@ -1,10 +1,10 @@
 {
-  "frozen_at": "2026-03-24T16:37:18.445Z",
-  "run_dir": "apr1992_definitive_40w__77cac5e01d3c929e__w40_n1057",
+  "frozen_at": "2026-03-24T17:53:53.740Z",
+  "run_dir": "apr1992_definitive_40w__77cac5e01d3c929e__w40_n1061",
   "run_id": "apr1992_definitive_40w__77cac5e01d3c929e__w40",
-  "final_state_hash": "5f61cf67bd93c3b5",
+  "final_state_hash": "db758ce1f84af1e6",
   "weeks": 40,
-  "area_weighted_pct": 92.1,
+  "area_weighted_pct": 92.2,
   "territory": {
     "HRHB": {
       "count": 91,
@@ -12,14 +12,14 @@
       "delta": -34
     },
     "RBiH": {
-      "count": 251,
+      "count": 250,
       "reference": 273,
-      "delta": -22
+      "delta": -23
     },
     "RS": {
-      "count": 370,
+      "count": 371,
       "reference": 314,
-      "delta": 56
+      "delta": 57
     }
   },
   "events_fired": [

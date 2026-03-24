@@ -89,9 +89,9 @@ const BOSNIAK_ROUTES: Record<string, readonly MunicipalityId[]> = {
     DRINA_ENCLAVE:      ['srebrenica', 'kladanj', 'tuzla'],  // Bratunac/Vlasenica → Srebrenica enclave
     DRINA_SOUTH:        ['gorazde', 'centar_sarajevo', 'zenica'],
     DRINA_SEKOVICI:     ['kladanj', 'olovo', 'tuzla'],
-    SARAJEVO_RS_HELD:   ['centar_sarajevo', 'visoko', 'zenica'],
+    SARAJEVO_RS_HELD:   ['centar_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'novo_sarajevo', 'hadzici', 'visoko', 'zenica'],
     CENTRAL_BOSNIA:     ['travnik', 'zenica', 'kakanj', 'visoko'],
-    HERZEGOVINA:        ['jablanica', 'konjic', 'zenica', 'travnik'],
+    HERZEGOVINA:        ['jablanica', 'konjic', 'mostar', 'zenica', 'travnik'],
     HERCEG_EAST:        ['gorazde', 'centar_sarajevo'],
     BIHAC_EDGE:         ['bihac', 'cazin', 'velika_kladusa'],
 };

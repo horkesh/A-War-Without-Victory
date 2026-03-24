@@ -19,6 +19,18 @@ import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { buildEdgeAdjacency } from './sector_edge_adjacency.js';
 
 /**
+ * Corps territory exclusions: municipalities that should NEVER be claimed by a specific corps,
+ * even if the BFS reaches them. Prevents siege corps from absorbing distant fronts.
+ * Example: SRK should not claim Gorazde/Rogatica (Drina/Herzegovina responsibility).
+ */
+const CORPS_EXCLUDED_MUNICIPALITIES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
+    ['vrs_sarajevo_romanija', new Set([
+        'gorazde', 'rogatica', 'cajnice', 'kalinovik', 'foca', 'visegrad', 'rudo',
+        'han_pijesak', 'vlasenica', 'bratunac', 'srebrenica', 'zvornik', 'sekovici',
+    ])],
+]);
+
+/**
  * Multi-source BFS from all corps HQ locations through friendly-controlled territory.
  * Each OSID is assigned to the nearest corps by hop count.
  * Deterministic: corps sorted by ID, neighbors sorted by strictCompare.
@@ -180,6 +192,9 @@ export function mapOsidsToCorps(
             if (neighborMun) {
                 const munCorps = homeMunCorps.get(neighborMun);
                 if (munCorps && !munCorps.has(corpsId)) continue;
+                // Corps-specific municipality exclusions (e.g. SRK excluded from Gorazde)
+                const excluded = CORPS_EXCLUDED_MUNICIPALITIES.get(corpsId);
+                if (excluded?.has(neighborMun)) continue;
             }
             result.set(neighbor, corpsId);
             queue.push({ osid: neighbor, corpsId });

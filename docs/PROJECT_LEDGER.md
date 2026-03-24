@@ -1,7 +1,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-24
-**Status:** **v0.6.5** — Political Wargame. 1445 tests, 117 suites. **92.1% area-weighted (n1057, re-frozen).** 94 events, 21 flag-gated. Offensive paramilitaries (Drina valley). **v0.7.0 Phase 1+2 complete**. Sarajevo siege P0 resolved (8 fixes): SRK drift recall, ARBIH cap removed, OOB rebalanced per BB, pool scale 0.15, mob scale 0.10, initial pers 800, siege-corps target restriction, shared Sarajevo pocket pool, diagnostic toolset. 1st Corps 22.1k pers / avg 633 (was 15.7k / avg 448). **Next: v0.7.0 Phase 4 (engine flag reads).** Remaining: 20/35 1st Corps ineffective — structural (pocket mobilization < attrition). Hrasnica OSID gap. Bot AI opportunity detection.
+**Status:** **v0.6.5** — Political Wargame. 1445 tests, 117 suites. **92.2% area-weighted (n1061, re-frozen).** 94 events, 21 flag-gated. Offensive paramilitaries (Drina valley). **v0.7.0 Phase 1+2 complete**. Sarajevo siege P0 resolved (11 fixes total). 1st Corps 28.2k / avg 829 / 18/34 ineff (was 15.7k / 448 / 25/35). SRK 14.3k, ratio 1.97:1. 712-OSID audit: 1 fix (paklarevo). OOB: 146th→Visoko, 145th removed, SRK excluded from Rogatica/Gorazde. **Next: v0.7.0 Phase 4 (engine flag reads).**
 
 ## [2026-03-24] P1 Bug: SRK Sarajevo Siege Collapse + Brigade Drift Detection Gap
 
