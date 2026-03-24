@@ -155,6 +155,7 @@ import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParami
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK } from '../../state/formation_constants.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
+import { reroutePoolSurplus } from '../recruitment_engine.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
 import { checkWarTermination, applyWarTermination } from '../war_termination.js';
@@ -1599,6 +1600,26 @@ export const warPhases: NamedPhase[] = [
                 graph.settlements,
                 context.input.municipalityPopulation1991 ?? undefined
             );
+        }
+    },
+    {
+        name: 'reroute-pool-surplus',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const catalog = await loadRecruitmentCatalog();
+            if (!catalog?.brigades?.length) return;
+            const activeIds = new Set(Object.keys(context.state.military.formations ?? {}));
+            for (const faction of ['HRHB', 'RBiH', 'RS'] as const) {
+                const unspawnedByMun: Record<string, { faction: string; initial_personnel: number }[]> = {};
+                for (const b of catalog.brigades) {
+                    if (b.faction !== faction) continue;
+                    if (activeIds.has(b.id)) continue;
+                    const mun = b.home_mun;
+                    if (!unspawnedByMun[mun]) unspawnedByMun[mun] = [];
+                    unspawnedByMun[mun].push({ faction: b.faction, initial_personnel: b.initial_personnel ?? b.manpower_cost ?? 500 });
+                }
+                reroutePoolSurplus(context.state, faction, unspawnedByMun);
+            }
         }
     },
     {

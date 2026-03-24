@@ -378,7 +378,7 @@ export function canFormEmergentBrigade(
 }
 
 /** Get all active brigades in a municipality for a given faction. */
-function getMunBrigadesForFaction(
+export function getMunBrigadesForFaction(
     state: GameState, munId: string, faction: string
 ): Array<{ personnel: number; max_personnel?: number }> {
     const formations = state.military.formations ?? {};
@@ -800,4 +800,108 @@ export function isEmergentFormationSuppressed(
         }
     }
     return false;
+}
+
+// ---------------------------------------------------------------------------
+// Surplus pool rerouting
+// ---------------------------------------------------------------------------
+
+/**
+ * Reroute surplus pool manpower from municipalities where all OOB candidates are
+ * exhausted and all brigades are at capacity, to municipalities that have waiting
+ * OOB candidates but insufficient pool.
+ *
+ * Does NOT route from/to enclave municipalities (isolated by definition).
+ * Deterministic: surplus sorted by available descending, deficit by needed ascending.
+ */
+export function reroutePoolSurplus(
+    state: GameState,
+    faction: FactionId,
+    /** Unspawned OOB candidates grouped by home_mun. */
+    unspawnedByMun: Record<string, { faction: string; initial_personnel: number }[]>
+): { transferred: number; routes: Array<{ from: string; to: string; amount: number }> } {
+    const pools = state.military.militia_pools ?? {};
+    const routes: Array<{ from: string; to: string; amount: number }> = [];
+    let transferred = 0;
+
+    // 1. Classify municipalities as SURPLUS or DEFICIT
+    const surplusMuns: Array<{ mun: string; poolKey: string; available: number }> = [];
+    const deficitMuns: Array<{ mun: string; poolKey: string; needed: number }> = [];
+
+    for (const [key, pool] of Object.entries(pools)) {
+        if (!key.endsWith(':' + faction)) continue;
+        const mun = key.slice(0, key.lastIndexOf(':'));
+        if (ENCLAVE_MUNICIPALITY_IDS.has(mun)) continue; // never route from/to enclaves
+        const unspawned = unspawnedByMun[mun] ?? [];
+
+        if (unspawned.length === 0 && pool.available > 0) {
+            // Check all brigades at capacity
+            const brigs = getMunBrigadesForFaction(state, mun, faction);
+            const capacityThreshold = ENCLAVE_MUNICIPALITY_IDS.has(mun)
+                ? ENCLAVE_FORMATION_CAPACITY_THRESHOLD
+                : FORMATION_CAPACITY_THRESHOLD;
+            const allAtCapacity = brigs.length === 0 || brigs.every(
+                b => b.personnel >= (b.max_personnel ?? 3000) * capacityThreshold
+            );
+            if (allAtCapacity) {
+                surplusMuns.push({ mun, poolKey: key, available: pool.available });
+            }
+        } else if (unspawned.length > 0) {
+            // Deficit: has unspawned OOB, needs manpower
+            const maxNeeded = unspawned.reduce((sum, c) => sum + (c.initial_personnel ?? 500), 0);
+            const deficit = Math.max(0, maxNeeded - pool.available);
+            if (deficit > 0) {
+                deficitMuns.push({ mun, poolKey: key, needed: deficit });
+            }
+        }
+    }
+
+    // Also check deficit muns that have NO pool yet — they need a pool created
+    for (const [mun, candidates] of Object.entries(unspawnedByMun)) {
+        if (ENCLAVE_MUNICIPALITY_IDS.has(mun)) continue;
+        const poolKey = militiaPoolKey(mun, faction);
+        if (pools[poolKey]) continue; // already handled above
+        const maxNeeded = candidates.reduce((sum, c) => sum + (c.initial_personnel ?? 500), 0);
+        if (maxNeeded > 0) {
+            deficitMuns.push({ mun, poolKey, needed: maxNeeded });
+        }
+    }
+
+    // Deterministic sort
+    surplusMuns.sort((a, b) => b.available - a.available || a.mun.localeCompare(b.mun));
+    deficitMuns.sort((a, b) => a.needed - b.needed || a.mun.localeCompare(b.mun));
+
+    // 2. Transfer
+    for (const deficit of deficitMuns) {
+        if (deficit.needed <= 0) continue;
+        for (const surplus of surplusMuns) {
+            if (surplus.available <= 0) continue;
+            const amount = Math.min(surplus.available, deficit.needed);
+            if (amount <= 0) continue;
+
+            // Execute transfer
+            pools[surplus.poolKey].available -= amount;
+            surplus.available -= amount;
+
+            // Create deficit pool if it doesn't exist yet
+            if (!pools[deficit.poolKey]) {
+                pools[deficit.poolKey] = {
+                    mun_id: deficit.mun as MunicipalityId,
+                    faction,
+                    available: 0,
+                    committed: 0,
+                    exhausted: 0,
+                    updated_turn: state.meta?.turn ?? 0,
+                };
+            }
+            pools[deficit.poolKey].available += amount;
+            deficit.needed -= amount;
+            transferred += amount;
+            routes.push({ from: surplus.mun, to: deficit.mun, amount });
+
+            if (deficit.needed <= 0) break;
+        }
+    }
+
+    return { transferred, routes };
 }

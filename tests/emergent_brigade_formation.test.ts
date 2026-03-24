@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canFormEmergentBrigade } from '../src/sim/recruitment_engine.js';
+import { canFormEmergentBrigade, reroutePoolSurplus } from '../src/sim/recruitment_engine.js';
 import { ENCLAVE_FORMATION_CAPACITY_THRESHOLD } from '../src/state/formation_constants.js';
 
 function makeBrigade(personnel: number, maxPersonnel = 3000) {
@@ -94,5 +94,89 @@ describe('canFormEmergentBrigade — enclave lowered threshold (0.30)', () => {
         // 1000/3000 = 33% < 60% default → false
         const existing = [makeBrigade(1000, 3000)];
         expect(canFormEmergentBrigade(existing, { available: 800 }, 600, 4, 0)).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// reroutePoolSurplus
+// ---------------------------------------------------------------------------
+
+describe('reroutePoolSurplus', () => {
+    function makeState(pools: Record<string, { available: number; committed: number }>, formations: any[] = []) {
+        const fmnsObj: Record<string, any> = {};
+        for (const f of formations) fmnsObj[f.id] = f;
+        return {
+            meta: { turn: 10 },
+            military: {
+                militia_pools: pools,
+                formations: fmnsObj,
+            },
+        } as any;
+    }
+
+    function makeFormation(id: string, faction: string, mun: string, personnel: number, status = 'active') {
+        return { id, faction, status, kind: 'brigade', personnel, max_personnel: 3000, tags: [`mun:${mun}`] };
+    }
+
+    it('transfers surplus from exhausted mun to deficit mun', () => {
+        const state = makeState({
+            'zenica:RBiH': { available: 5000, committed: 10000 },
+            'visoko:RBiH': { available: 0, committed: 2000 },
+        }, [
+            makeFormation('b1', 'RBiH', 'zenica', 2500), // above 60% capacity
+        ]);
+        const oobByMun: Record<string, { faction: string; initial_personnel: number }[]> = {
+            visoko: [{ faction: 'RBiH', initial_personnel: 800 }],
+        };
+        const result = reroutePoolSurplus(state, 'RBiH', oobByMun);
+        expect(result.transferred).toBeGreaterThan(0);
+        expect(state.military.militia_pools['visoko:RBiH'].available).toBeGreaterThan(0);
+        expect(state.military.militia_pools['zenica:RBiH'].available).toBeLessThan(5000);
+    });
+
+    it('does NOT route into enclave municipalities', () => {
+        const state = makeState({
+            'zenica:RBiH': { available: 5000, committed: 10000 },
+            'srebrenica:RBiH': { available: 100, committed: 1000 },
+        }, [
+            makeFormation('b1', 'RBiH', 'zenica', 2500),
+        ]);
+        const oobByMun: Record<string, { faction: string; initial_personnel: number }[]> = {
+            srebrenica: [{ faction: 'RBiH', initial_personnel: 800 }],
+        };
+        const result = reroutePoolSurplus(state, 'RBiH', oobByMun);
+        expect(result.transferred).toBe(0); // enclaves are isolated
+    });
+
+    it('does nothing when no surplus municipalities exist', () => {
+        const state = makeState({
+            'visoko:RBiH': { available: 0, committed: 2000 },
+        });
+        const result = reroutePoolSurplus(state, 'RBiH', {});
+        expect(result.transferred).toBe(0);
+    });
+
+    it('deterministic ordering — surplus sorted by available desc, deficit by needed asc', () => {
+        const state = makeState({
+            'aaa_mun:RBiH': { available: 1000, committed: 5000 },
+            'zzz_mun:RBiH': { available: 3000, committed: 5000 },
+            'bbb_mun:RBiH': { available: 0, committed: 1000 },
+            'ccc_mun:RBiH': { available: 0, committed: 1000 },
+        }, [
+            // surplus muns have brigades at capacity
+            makeFormation('b1', 'RBiH', 'aaa_mun', 2500),
+            makeFormation('b2', 'RBiH', 'zzz_mun', 2500),
+        ]);
+        const oobByMun: Record<string, { faction: string; initial_personnel: number }[]> = {
+            bbb_mun: [{ faction: 'RBiH', initial_personnel: 500 }],
+            ccc_mun: [{ faction: 'RBiH', initial_personnel: 800 }],
+        };
+        const result = reroutePoolSurplus(state, 'RBiH', oobByMun);
+        expect(result.transferred).toBe(1300); // 500 + 800
+        // zzz_mun (3000) is drained first (highest surplus), then aaa_mun (1000)
+        expect(result.routes[0].from).toBe('zzz_mun');
+        expect(result.routes[0].to).toBe('bbb_mun'); // bbb needs 500 (smallest deficit first)
+        expect(result.routes[1].from).toBe('zzz_mun');
+        expect(result.routes[1].to).toBe('ccc_mun'); // ccc needs 800
     });
 });
