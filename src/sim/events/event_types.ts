@@ -5,6 +5,8 @@
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
+import type { EdgeRecord } from '../../map/settlements.js';
+import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 
 /** State-based condition for conditional event triggers. */
 export type EventCondition =
@@ -428,15 +430,9 @@ export function evaluateCondition(condition: EventCondition, state: GameState): 
             if (pc[condition.from_osid] !== condition.faction) return true; // start not held
             if (pc[condition.to_osid] !== condition.faction) return true; // end not held
             // Build adjacency from edges if available
-            const edges = (state as any).derived?.edges as Array<{ a: string; b: string }> | undefined;
+            const edges = (state as any).derived?.edges as EdgeRecord[] | undefined;
             if (!edges) return false; // can't evaluate without edges
-            const adj = new Map<string, string[]>();
-            for (const e of edges) {
-                if (!adj.has(e.a)) adj.set(e.a, []);
-                if (!adj.has(e.b)) adj.set(e.b, []);
-                adj.get(e.a)!.push(e.b);
-                adj.get(e.b)!.push(e.a);
-            }
+            const adj = buildOsidAdjacency(edges);
             // BFS through faction-controlled OSIDs
             const visited = new Set<string>([condition.from_osid]);
             const queue = [condition.from_osid];

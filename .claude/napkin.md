@@ -8,12 +8,13 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-23, v0.6.1 — v0.6.x COMPLETE)
-**v0.6.1.** 1410 tests, 116 suites. tsc clean. Electron 41. **n1030: 92.0% area-weighted (honest baseline, re-frozen).** 94 events, 75 with mechanical effects (9 effect types). 96-essay Codex (all QA certified + deep audit). Chronicle, Wrapped, HQ drill-down, Dayton merge all shipped. Pre-commit hooks active.
-**v0.6.x COMPLETE:** v0.6.2 (1993-1994 events, Chronicle, AI Commander Events, HQ drill-down), v0.6.3 (1995 events, Dayton merge, Wrapped, Situation Map), v0.6.4 (96 essays) — ALL delivered by nightshift 2026-03-23.
-**Calibration baseline re-frozen (2026-03-23):** `freeze_baseline.cjs` had hardcoded 93.1% fallback + wrong save-file path. Fixed. `npm run calibrate:40w` passes. Hash: `442b7472a0953056`.
-**Roadmap (2026-03-23):** v0.7=Dynamic Codex, v0.8=Command Chain, v0.9=Consequences+Polish. v0.7.1 can parallel v0.8.0 (no dependency). Canon audit moved to v0.7.3 (cleanup last). Old perf/polish plans reslotted to v0.9.3/v0.9.4.
-**Next priority:** v0.6.5 (offensive paramilitary sweep — Drina valley, +2-3pp calibration) → v0.7.0 (event flag wiring). Plans: `docs/plans/2026-03-24-offensive-paramilitary-sweep-plan.md`, `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
+## Current State (2026-03-24 nightshift, v0.6.5 — v0.7.0 in progress)
+**v0.6.5.** 1446 tests, 117 suites. tsc clean. Electron 41. **n1040: 92.6% area-weighted (re-frozen).** 94 events, 21 flag-gated, 75 with mechanical effects. Offensive paramilitary sweep (Drina valley). 96-essay Codex. Chronicle, Wrapped, HQ drill-down, Dayton merge all shipped.
+**v0.6.5 COMPLETE (nightshift 2026-03-24):** Offensive paramilitary sweep — RS paramilitaries in 10 Drina municipalities, w0-12. 28 RS spawns, 6 HRHB. War crimes wired. Enclave cores protected. +0.6pp calibration (92.0%→92.6%). /war-or-game approved.
+**v0.7.0 Phase 1+2 COMPLETE (nightshift 2026-03-24):** `enclave_supply_status` + `corridor_severed` evaluators implemented. 21 flag gates wired. 3 pressure modifiers added.
+**Calibration baseline re-frozen (2026-03-24):** n1040. `npm run calibrate:40w` passes. Hash: `410325526321a932`.
+**Roadmap:** v0.7=Dynamic Codex, v0.8=Command Chain, v0.9=Consequences+Polish.
+**Next priority:** Fix MAX_EVENTS_PER_TURN (P1) → v0.7.0 Phase 4 (engine flag reads) → Phase 5 (FIXED→CONDITIONAL). Plan: `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
 **Pyrrhic team restructured (2026-03-24):** 7 cuts (lua, graphics, frontend-design, devops, build-engineer, asset-integration, canon-compliance-review dup). 3 hires (narrative-designer, data-pipeline-engineer, integration-tester). /ui-ux-developer promoted to mandatory gate. 62 active skills.
 **Full Pyrrhic review (2026-03-24):** 7 specialists reviewed roadmap. Key findings: mid-game dead zones (w20-35, w80-130), no unified notification architecture, Drina paramilitaries = biggest calibration opportunity, adapter/IPC untested, content authoring 5-7x underestimated, active ops+stance change undefined. 8 new plans written. P0+P1 bugs fixed.
 **HRHB-RBiH conflict:** P1 ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
