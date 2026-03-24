@@ -1,25 +1,16 @@
-# Working On: Emergent Brigade Phase 2 — Troop Strength Calibration
+# Working On: Emergent Brigade Phase 2 — COMPLETE
 
-## Context
-Enclave fix + pool rerouting + tiered caps implemented. Calibration in progress.
-
-## What's Done
+## What Was Done
 - Enclave capacity gate fix (ENCLAVE_FORMATION_CAPACITY_THRESHOLD=0.30)
 - Surplus pool rerouting (new pipeline step)
-- deriveMaxPersonnel activated (OOB loader fix)
-- Tiered caps lowered to w40-effective range
-- Strategic reserve RBiH draw rate 0.02->0.15
+- deriveMaxPersonnel activated with lowered caps (1200-2800)
+- Asymmetric mobilization (RBiH 0.09, RS 0.04, HRHB 0.12)
+- Strategic reserve RBiH draw rate 0.02→0.15
 - Life lessons restructured (8 topic files)
 - 9 skills wired with Required Reading
 - Historian OOB master hierarchy
+- n1078: 91.3%, RBiH 144k > RS+HRHB 144k (+369)
 
 ## What's Next
-- Run calibration with lowered caps (n1074 was before lowered caps took effect — need n1075)
-- If RBiH still trails RS+HRHB: asymmetric mobilization reduction (RS/HRHB cut more than RBiH)
-- Then return to v0.7.0 Phase 4 (engine flag reads)
-
-## Key Metrics to Hit
-- RBiH: 115-130k, 114+ brigades
-- RS: 85-95k
-- HRHB: 35-42k
-- RBiH > RS+HRHB combined
+- v0.7.0 Phase 4 (engine flag reads) — plan at docs/plans/2026-03-23-event-flag-wiring-plan.md
+- 5 calibration runs from nightshift issue triage (MAX_EVENTS_PER_TURN, Gorazde, corridor_severed)
