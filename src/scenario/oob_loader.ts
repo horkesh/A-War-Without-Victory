@@ -27,7 +27,7 @@ export interface OobBrigade {
     priority: number;
     mandatory: boolean;
     available_from: number;
-    max_personnel: number;
+    max_personnel?: number;
     /** Per-brigade initial personnel override. When set, used instead of FACTION_INITIAL_PERSONNEL. For Phase 0→II scenarios, Phase 0 gameplay determines this; for April 1992 start, these are defaults. */
     initial_personnel?: number;
     /** Per-brigade initial cohesion override [0,100]. When set, used instead of FACTION_INITIAL_COHESION. */
@@ -153,7 +153,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const priority = typeof r.priority === 'number' && Number.isFinite(r.priority) ? r.priority : RECRUITMENT_DEFAULTS.priority;
         const mandatory = r.mandatory === true;
         const available_from = typeof r.available_from === 'number' && Number.isFinite(r.available_from) ? r.available_from : RECRUITMENT_DEFAULTS.available_from;
-        const max_personnel = typeof r.max_personnel === 'number' && Number.isFinite(r.max_personnel) ? r.max_personnel : RECRUITMENT_DEFAULTS.max_personnel;
+        const max_personnel = typeof r.max_personnel === 'number' && Number.isFinite(r.max_personnel) ? r.max_personnel : undefined;
         // Per-brigade optional overrides (April 1992 defaults; Phase 0 gameplay overrides these)
         const initial_personnel = typeof r.initial_personnel === 'number' && Number.isFinite(r.initial_personnel) ? r.initial_personnel : undefined;
         const initial_cohesion = typeof r.initial_cohesion === 'number' && Number.isFinite(r.initial_cohesion) ? r.initial_cohesion : undefined;

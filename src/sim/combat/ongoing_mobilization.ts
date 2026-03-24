@@ -67,9 +67,9 @@ const BASE_MOBILIZATION_RATE = 0.003;
 // n794 52w: ARBiH 177k, RS 137k, HRHB 68k — all over by w52.
 // Post-spawn-fix: 122 ARBiH + 44 emergent = 166 brigades draw heavily from pools.
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.07,  // n1072: 0.10 produced 163k at w40 (target 115-130k). Reducing to bring into OOB Master band.
-    RS: 0.06,    // n1072: 0.08 produced 117k at w40 (target 85-95k). Reducing to match VRS OOB Master estimates.
-    HRHB: 0.14   // n1072: 0.20 produced 54k at w40 (target 35-42k). Reducing to match HVO OOB Master estimates.
+    RBiH: 0.10,  // n1073: reverted from 0.07. Tiered max_personnel caps handle total reduction.
+    RS: 0.08,    // n1073: reverted from 0.06. Tiered max_personnel caps handle total reduction.
+    HRHB: 0.20   // n1073: reverted from 0.14. Tiered max_personnel caps handle total reduction.
 };
 const DEFAULT_MOBILIZATION_SCALE = 1.0;
 
