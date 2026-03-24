@@ -470,6 +470,21 @@ export interface OperationView {
     has_active_probe?: boolean;
 }
 
+/** Sector intelligence record — enemy assessment from one friendly sector. */
+export interface SectorIntelRecordView {
+    friendly_sector_id: string;
+    enemy_sector_id: string;
+    enemy_faction: string;
+    enemy_corps_id: string;
+    front_edge_count: number;
+    strength_category: 'unknown' | 'thin' | 'moderate' | 'dense' | 'fortress';
+    posture_observed: 'unknown' | 'defensive' | 'entrenched' | 'offensive_prep';
+    offensive_signs: boolean;
+    confidence: number;
+    turns_in_contact: number;
+    visible_brigade_ids: string[];
+}
+
 export interface LoadedGameState {
     label: string;
     turn: number;
@@ -532,6 +547,8 @@ export interface LoadedGameState {
     /** Per-OSID displacement totals from event log (exact out/lost/in so numbers add up). */
     displacementByOsid?: Record<string, { out: number; lost: number; in: number }>;
     fogOfWar?: FogOfWarView;
+    /** Sector intelligence records for the player faction — per friendly sector, what we know about enemy sectors. */
+    sectorIntel?: SectorIntelRecordView[];
     movementOrdersSettlement?: MovementOrderSettlementView[];
     repositionOrders?: RepositionOrderView[];
     corpsFrontSectors?: CorpsFrontSectorView[];

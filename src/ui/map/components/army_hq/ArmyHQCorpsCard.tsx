@@ -19,6 +19,8 @@ import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
 import { FlipCard } from './FlipCard';
 
+import type { ReadinessGrade } from './ForceReadiness';
+
 interface ArmyHQCorpsCardProps {
     corps: FormationView;
     brigades: FormationView[];
@@ -29,6 +31,10 @@ interface ArmyHQCorpsCardProps {
     isExpanded: boolean;
     isCompressed: boolean;
     onToggleExpand: () => void;
+    /** Corps readiness grade from ForceReadiness computation. */
+    readinessGrade?: ReadinessGrade;
+    /** Whether enemy offensive preparation is detected facing this corps. */
+    hasThreat?: boolean;
 }
 
 const COHESION_CRITICAL = 40;
@@ -39,7 +45,7 @@ const GRADE_COLORS: Record<string, string> = {
 };
 
 const STANCE_LABELS: Record<string, string> = {
-    offensive: '[OFFENSIVE]', defensive: '[DEFENSIVE]', balanced: '[BALANCED]', reorganize: '[REORGANIZE]',
+    offensive: 'OFF', defensive: 'DEF', balanced: 'BAL', reorganize: 'REORG',
 };
 const STANCE_COLORS: Record<string, string> = {
     offensive: 'text-red-500 border-red-500/30 bg-red-500/5',
@@ -48,9 +54,18 @@ const STANCE_COLORS: Record<string, string> = {
     reorganize: 'text-neutral-400 border-neutral-400/30 bg-neutral-400/5',
 };
 
+const READINESS_BORDER: Record<string, string> = {
+    'COMBAT READY': 'border-l-emerald-400',
+    'ADEQUATE': '',
+    'STRAINED': 'border-l-amber-500',
+    'DEGRADED': 'border-l-red-500',
+    'INEFFECTIVE': 'border-l-red-600',
+};
+
 export function ArmyHQCorpsCard({
     corps, brigades, sectors, operations, factionBattles, gameState,
     isExpanded, isCompressed, onToggleExpand,
+    readinessGrade, hasThreat,
 }: ArmyHQCorpsCardProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
@@ -60,6 +75,9 @@ export function ArmyHQCorpsCard({
         const avgCohesion = brigades.length > 0
             ? brigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / brigades.length
             : 100;
+        const avgFatigue = brigades.length > 0
+            ? brigades.reduce((s, b) => s + (b.fatigue ?? 0), 0) / brigades.length
+            : 0;
         const eff = aggregateEffectiveness(brigades);
         const commander = getFormationCommander(corps, gameState);
         const stance = corps.corpsStance ?? 'balanced';
@@ -74,7 +92,7 @@ export function ArmyHQCorpsCard({
         }
         const corpsBattles = factionBattles.filter((b) => corpsTerritoryOsids.has(b.osid));
 
-        const equipment = brigades.reduce((acc, b) => {
+        const rawEquip = brigades.reduce((acc, b) => {
             const c = b.composition;
             if (!c) return acc;
             acc.tanksOp += c.tank_condition?.operational ?? 0;
@@ -83,8 +101,14 @@ export function ArmyHQCorpsCard({
             acc.artyTotal += c.artillery ?? 0;
             return acc;
         }, { tanksOp: 0, tanksTotal: 0, artyOp: 0, artyTotal: 0 });
+        const equipment = {
+            tanksOp: Math.round(rawEquip.tanksOp),
+            tanksTotal: Math.round(rawEquip.tanksTotal),
+            artyOp: Math.round(rawEquip.artyOp),
+            artyTotal: Math.round(rawEquip.artyTotal),
+        };
 
-        return { totalPersonnel, avgCohesion, eff, commander, stance, activeOp, corpsBattles, equipment };
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -99,7 +123,7 @@ export function ArmyHQCorpsCard({
             <button
                 type="button"
                 onClick={onToggleExpand}
-                className="bg-panel-card border border-panel-border rounded-lg overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group"
+                className="bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group"
             >
                 <div className="flex items-center justify-between px-3 py-2 bg-panel-card">
                     <span className="text-[11px] font-bold text-text-secondary uppercase tracking-widest font-mono">
@@ -131,9 +155,16 @@ export function ArmyHQCorpsCard({
         <button
             type="button"
             onClick={onToggleExpand}
-            className={`min-h-[280px] w-full bg-panel-card border border-panel-border rounded-lg overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
-                ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
+            className={`min-h-[280px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
+                ${readinessGrade && READINESS_BORDER[readinessGrade] ? `border-l-[3px] ${READINESS_BORDER[readinessGrade]}` : isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
+            {/* Threat badge */}
+            {hasThreat && (
+                <div className="absolute top-2 left-2 text-[8px] text-red-400 font-bold animate-pulse tracking-[0.15em] bg-red-500/10 border border-red-500/30 px-1.5 py-0.5 z-10">
+                    ⚠ INCOMING
+                </div>
+            )}
+
             {/* Status Stamp */}
             <div className={`absolute top-4 right-4 text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 border ${stanceClass} z-10 font-mono`}>
                 {STANCE_LABELS[data.stance] ?? data.stance}
@@ -156,17 +187,17 @@ export function ArmyHQCorpsCard({
                     <span className={`font-bold ${gradeColor}`}>EF: {data.eff.grade}</span>
                 </div>
 
-                {/* Equipment */}
+                {/* Equipment icons */}
                 <div className="flex items-center gap-4 mt-2 text-[12px]">
-                    <span className="flex items-center gap-1 cursor-help" title={`Tanks: ${Math.round(data.equipment.tanksOp)} operational / ${Math.round(data.equipment.tanksTotal)} total`}>
+                    <span className="flex items-center gap-1">
                         <Icon name="tanks" size={14} className="text-text-secondary" />
-                        <span className="text-text-primary font-bold tabular-nums">{Math.round(data.equipment.tanksOp)}</span>
-                        <span className="text-text-secondary/60">/{Math.round(data.equipment.tanksTotal)}</span>
+                        <span className="text-text-primary font-bold tabular-nums">{data.equipment.tanksOp}</span>
+                        <span className="text-text-secondary/60">/{data.equipment.tanksTotal}</span>
                     </span>
-                    <span className="flex items-center gap-1 cursor-help" title={`Artillery: ${Math.round(data.equipment.artyOp)} operational / ${Math.round(data.equipment.artyTotal)} total`}>
+                    <span className="flex items-center gap-1">
                         <Icon name="artillery" size={14} className="text-text-secondary" />
-                        <span className="text-text-primary font-bold tabular-nums">{Math.round(data.equipment.artyOp)}</span>
-                        <span className="text-text-secondary/60">/{Math.round(data.equipment.artyTotal)}</span>
+                        <span className="text-text-primary font-bold tabular-nums">{data.equipment.artyOp}</span>
+                        <span className="text-text-secondary/60">/{data.equipment.artyTotal}</span>
                     </span>
                 </div>
 
@@ -212,11 +243,13 @@ export function ArmyHQCorpsCard({
                 )}
             </div>
 
-            {/* Cohesion bar (Bottom) */}
-            <div className="h-[4px] bg-panel-bg w-full">
+            {/* Health stripe: cohesion (green/amber/red) + fatigue (blue) */}
+            <div className="flex h-[4px] bg-panel-bg w-full">
                 <div className={`h-full transition-all duration-500 ${data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold' : 'bg-red-500'
                     }`}
-                    style={{ width: `${Math.min(100, data.avgCohesion)}%` }} />
+                    style={{ width: `${Math.min(70, data.avgCohesion * 0.7)}%` }} />
+                <div className="h-full bg-blue-500/60 transition-all duration-500"
+                    style={{ width: `${Math.min(30, ((data.avgFatigue ?? 0) / 30) * 30)}%` }} />
             </div>
         </button>
     );
@@ -224,7 +257,7 @@ export function ArmyHQCorpsCard({
     // Back face: full detail sections (scrollable)
     const cardBack = (
         <div
-            className={`min-h-[280px] bg-panel-card border border-panel-border rounded-lg overflow-hidden flex flex-col
+            className={`min-h-[280px] bg-panel-card border border-panel-border overflow-hidden flex flex-col
                 ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
             {/* Header with back button + stance dropdown */}

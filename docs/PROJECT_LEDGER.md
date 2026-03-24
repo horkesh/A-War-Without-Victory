@@ -373,6 +373,28 @@
 
 **Files:** src/sim/events/ (event_types.ts, evaluate_events.ts, pressure_system.ts, strategic_dimensions.ts, event_constraints.ts, turn_incidents.ts, bot_response.ts), src/state/ (game_state.ts, negotiation_types.ts), src/sim/combat/bot_corps_directives.ts, src/sim/turn_phases/war_phases.ts, src/ui/map/components/army_hq/ArmyHQModal.tsx.
 
+## [2026-03-22] Army HQ Nerve Center v2 — Intelligence Panels + Corps Card Enhancements
+
+**Scope:** Three new intelligence panels (Threat Assessment, Force Readiness, Supply Intelligence) added to Army HQ Modal. Corps cards enhanced with readiness-driven border colors, incoming threat badges, and health stripes. Adapter extended with `SectorIntelRecordView` exposure. Bug fixes across corps cards and briefing. 5 files modified, 3 new files created.
+
+**Phase 1 — Bug fixes:** `Math.round()` on equipment values in corps cards and briefing resilience/isolation. Date display fallback using existing `turnToDateString()` utility. Stance badge shortened to OFF/DEF/BAL/REORG.
+
+**Phase 2 — Adapter SectorIntel exposure:** New `SectorIntelRecordView` type on `LoadedGameState` (11 fields: enemy sector, faction, corps, strength, posture, offensive_signs, confidence, visible brigades). Single-pass derivation in `GameStateAdapter.ts` — merged fog-of-war and sectorIntel into one loop, replacing previous double pass.
+
+**Phase 3 — Threat Assessment panel (`ThreatAssessment.tsx`):** Three categories: ACTIVE THREATS (offensive_signs + enemy operations), HARDENED POSITIONS (strong enemy sectors), INTELLIGENCE GAPS (low confidence sectors). Pre-indexed formations via `formationById` Map. Enemy-to-friendly corps mapping via `enemyCorpsToFriendlyCorps` Map — fixes `findFacingCorps` which previously returned first sector's corps instead of correct mapping from sectorIntel adjacency.
+
+**Phase 4 — Force Readiness panel (`ForceReadiness.tsx`):** Per-corps readiness grade: COMBAT READY / ADEQUATE / STRAINED / DEGRADED / INEFFECTIVE. Computed from ineffective brigade percentage, fatigue, cohesion, disrupted count. Recommendation text per corps.
+
+**Phase 5 — Supply Intelligence panel (`SupplyIntelligence.tsx`):** Supply breakdown estimated from canonical constants (imported from `supply_reserve_constants.ts`). Enclave resilience bars with color coding. Mobilization summary. Supply runway projection.
+
+**Phase 7 — Corps card enhancements:** Readiness grade drives left border color (green/amber/red). Incoming threat badge from sector intel. Health stripe: dual-segment bar (cohesion green/amber/red + fatigue blue). Pre-indexed readiness and threat lookups (Map/Set instead of `.find()`/`.some()` per card).
+
+**Simplify pass:** Merged double sectorIntel pass in adapter. Pre-indexed corps lookups (`readinessByCorpsId` Map, `activeThreatsById` Set). Pre-indexed formations in ThreatAssessment (`formationById` Map). Fixed broken `findFacingCorps`. Replaced inline date math with existing `turnToDateString()`. Imported supply constants from canonical `supply_reserve_constants.ts`. Removed all `(op as any)` casts — uses typed `OperationView` fields.
+
+**Determinism:** UI-only changes. No simulation impact.
+
+**Files:** `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/components/army_hq/ArmyHQModal.tsx`, `src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx`, `src/ui/map/components/army_hq/SituationBriefing.tsx`. New: `ThreatAssessment.tsx`, `ForceReadiness.tsx`, `SupplyIntelligence.tsx`.
+
 ## [2026-03-21] Deep Codebase Cleanup — 404 Files, ~740 MB Reclaimed
 
 **Research:** Three parallel agents scanned sim/state, UI, and data/tools/docs layers for unused imports, dead exports, orphaned files. Verified each finding with grep + tsc + vitest before deletion.

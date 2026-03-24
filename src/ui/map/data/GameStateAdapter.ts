@@ -1409,7 +1409,9 @@ export function parseGameState(json: unknown): LoadedGameState {
             ? Object.fromEntries(Object.entries(rawDesiredCap).filter(([, v]) => typeof v === 'number' && v >= 1 && v <= 4).sort((a, b) => a[0].localeCompare(b[0])))
             : undefined;
 
+    // Single pass: derive fogOfWar + sectorIntel from sector_intel records
     let fogOfWar: FogOfWarView | undefined;
+    const sectorIntelRecords: LoadedGameState['sectorIntel'] = [];
     const rawSectorIntel = state.military.sector_intel as Record<string, Array<Record<string, unknown>>> | undefined;
     const rawCorpsFrontSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
     if (playerFaction && rawSectorIntel && rawCorpsFrontSectors) {
@@ -1421,6 +1423,8 @@ export function parseGameState(json: unknown): LoadedGameState {
             for (const rec of records) {
                 const enemySectorId = typeof rec.enemy_sector_id === 'string' ? rec.enemy_sector_id : '';
                 if (!enemySectorId) continue;
+
+                // Fog-of-war: accumulate visible enemy OSIDs and sector IDs
                 visibleEnemySectorIds.add(enemySectorId);
                 const enemySector = rawCorpsFrontSectors[enemySectorId];
                 const subSegments = Array.isArray(enemySector?.sub_segments)
@@ -1439,6 +1443,23 @@ export function parseGameState(json: unknown): LoadedGameState {
                     const locationOsid = typeof brigade?.location_osid === 'string' ? brigade.location_osid : '';
                     if (locationOsid) visibleEnemyOsids.add(locationOsid);
                 }
+
+                // Sector intel: full record for Threat Assessment panel
+                sectorIntelRecords.push({
+                    friendly_sector_id: friendlySectorId,
+                    enemy_sector_id: enemySectorId,
+                    enemy_faction: typeof rec.enemy_faction === 'string' ? rec.enemy_faction : '',
+                    enemy_corps_id: typeof rec.enemy_corps_id === 'string' ? rec.enemy_corps_id : '',
+                    front_edge_count: typeof rec.front_edge_count === 'number' ? rec.front_edge_count : 0,
+                    strength_category: (['unknown', 'thin', 'moderate', 'dense', 'fortress'].includes(rec.strength_category as string)
+                        ? rec.strength_category as 'unknown' | 'thin' | 'moderate' | 'dense' | 'fortress' : 'unknown'),
+                    posture_observed: (['unknown', 'defensive', 'entrenched', 'offensive_prep'].includes(rec.posture_observed as string)
+                        ? rec.posture_observed as 'unknown' | 'defensive' | 'entrenched' | 'offensive_prep' : 'unknown'),
+                    offensive_signs: Boolean(rec.offensive_signs),
+                    confidence: typeof rec.confidence === 'number' ? rec.confidence : 0,
+                    turns_in_contact: typeof rec.turns_in_contact === 'number' ? rec.turns_in_contact : 0,
+                    visible_brigade_ids: visibleBrigadeIds.filter((id: unknown): id is string => typeof id === 'string').sort(strictCompare),
+                });
             }
         }
         if (visibleEnemySectorIds.size > 0 || visibleEnemyOsids.size > 0) {
@@ -1787,6 +1808,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         departedByMun: departedByMun && Object.keys(departedByMun).length > 0 ? departedByMun : undefined,
         displacementByOsid: Object.keys(displacementByOsid).length > 0 ? displacementByOsid : undefined,
         fogOfWar,
+        sectorIntel: sectorIntelRecords.length > 0 ? sectorIntelRecords : undefined,
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,

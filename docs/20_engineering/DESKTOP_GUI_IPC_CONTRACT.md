@@ -11,6 +11,8 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 
 **State contract (front assignment and theatres):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. It includes `front_edges`, `assignable_front_segments`, `brigade_front_assignment`, `theatres`, `army_theatre_assignment`, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). The 2D tactical map and 3D operational map both read these from the same payload; see [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for single-source and verification.
 
+**Derived adapter fields (not IPC channels):** `GameStateAdapter.ts` derives additional view-model fields from the raw `GameState` payload. Notable: `sectorIntel` (`SectorIntelRecordView[]`) — derived from `state.sector_intel` and `state.military.corps_front_sectors` in a single merged pass (also produces `fogOfWar`). Exposes 11 fields per enemy sector: sector ID, faction, corps, strength category, posture, offensive_signs, confidence, visible brigades, friendly OSIDs, enemy OSIDs, assessed turn. Consumed by Army HQ intelligence panels (ThreatAssessment, ForceReadiness, SupplyIntelligence) and corps card threat badges. No IPC round-trip — entirely client-side derivation from the `game-state-updated` payload.
+
 ## Channels
 
 - `load-scenario-dialog` (invoke)

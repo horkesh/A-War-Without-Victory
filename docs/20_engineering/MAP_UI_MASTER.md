@@ -86,7 +86,21 @@ src/ui/map/
 │   ├── SidePickerOverlay.tsx      Faction selection overlay shown before game load (Phase 4)
 │   ├── RecruitmentModal.tsx       Brigade recruitment modal: catalog, eligibility, recruit action (Phase 4)
 │   ├── WarSummaryModal.tsx        War Summary modal: area-weighted territory, military strength, displacement (Phase 5)
-│   └── panelRail.ts               Shared panel positioning constants (DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE)
+│   ├── panelRail.ts               Shared panel positioning constants (DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE)
+│   └── army_hq/                   Army HQ Nerve Center (full-screen command modal)
+│       ├── ArmyHQModal.tsx          Main modal: wires 3 intel panels, date display, pre-indexed corps lookups
+│       ├── ArmyHQCorpsCard.tsx      Corps card: readiness border color, threat badge, health stripe (cohesion + fatigue)
+│       ├── FlipCard.tsx             CSS 3D flip animation wrapper
+│       ├── SituationBriefing.tsx    Prioritized CRITICAL/WARNING/INFO alerts from game state scan
+│       ├── ThreatAssessment.tsx     Active threats, hardened positions, intelligence gaps from sectorIntel
+│       ├── ForceReadiness.tsx       Per-corps readiness grade (COMBAT READY → INEFFECTIVE) + recommendations
+│       ├── SupplyIntelligence.tsx   Supply breakdown, enclave resilience, mobilization, runway projection
+│       ├── CollapsibleSection.tsx   Reusable expand/collapse wrapper
+│       ├── CommanderSection.tsx     Corps commander profile on card back
+│       ├── SectorsSection.tsx       Sector listing on card back
+│       ├── OperationsSection.tsx    Active operations on card back
+│       ├── OrbatSection.tsx         Brigade ORBAT on card back
+│       └── CombatRecordSection.tsx  Combat record on card back
 │
 ├── store/
 │   └── gameStore.ts               Zustand store — all UI state (see §4)
@@ -246,6 +260,19 @@ Usage: `style={getPanelRailStyle(railSlot, '24rem')}`.
   - **Campaign History** (collapsible) — per-brigade totals (loans, weeks deployed, KIA) + episode log
 - **IPC:** APPROVE → `approve-reserve-request`; Recall → `recall-elite-brigade`
 - **Data:** `loadedGameState.pendingReserveRequests`, `loadedGameState.eliteBrigadeTracker`, formation `eliteLoanState`
+
+#### Army HQ Modal (`army_hq/`)
+- **Opens:** `armyHQOpen` store flag, keyboard shortcut `H`
+- **Full-screen** command center modal with dark warroom aesthetic
+- **Top row:** Commander (left), faction army crest 180px (center), Strategic Situation stats (right)
+- **Intelligence panels (v2, 2026-03-22):**
+  - **Threat Assessment** (`ThreatAssessment.tsx`) — three categories: ACTIVE THREATS (offensive_signs + enemy operations from `sectorIntel`), HARDENED POSITIONS, INTELLIGENCE GAPS. Pre-indexed formations via `formationById` Map. Enemy-to-friendly corps mapping via `enemyCorpsToFriendlyCorps` Map.
+  - **Force Readiness** (`ForceReadiness.tsx`) — per-corps grade (COMBAT READY / ADEQUATE / STRAINED / DEGRADED / INEFFECTIVE) from ineffective %, fatigue, cohesion, disrupted count. Recommendation text per corps.
+  - **Supply Intelligence** (`SupplyIntelligence.tsx`) — supply breakdown from canonical `supply_reserve_constants.ts`. Enclave resilience bars. Mobilization summary. Supply runway projection.
+- **Situation Briefing** (`SituationBriefing.tsx`) — `generateBriefing()` pure function produces prioritized CRITICAL/WARNING/INFO alerts. Click alert flips relevant corps card.
+- **Corps cards** (`ArmyHQCorpsCard.tsx`) — FlipCard animation. Front: summary with equipment icons, readiness-driven left border color, incoming threat badge from sectorIntel, health stripe (cohesion + fatigue dual bar). Back: 5 collapsible sections (Commander, Sectors, Operations, ORBAT, Combat Record).
+- **Data:** `loadedGameState.sectorIntel` (v2), `loadedGameState.formations`, `loadedGameState.operations`, `loadedGameState.factionReserves`, `loadedGameState.corpsFrontSectors`
+- **Store:** `armyHQOpen`, `armyHQExpandedCorpsId`, `armyHQExpandedSections`, `armyHQOfficerSelectionCorpsId`
 
 #### OperationsPanel
 - **Shows:** `isOperationsPanelOpen` true (opened by clicking op card in OOBSidebar, or via `setSelectedOperationKey`)
@@ -447,6 +474,7 @@ interface LoadedGameState {
   frontPressureByEdge?: Record<string, FrontPressureView>;
   displacementByMun?: Record<string, { ... }>;
   departedByOsid?: Record<string, Record<string, number>>;  // Per-OSID per-faction TOTAL removed (displaced+killed+fled_abroad)
+  sectorIntel?: SectorIntelRecordView[];                    // Enemy sector intel (11 fields: sector, faction, corps, strength, posture, offensive_signs, confidence, visible brigades)
   militiaPools: MilitiaPoolView[];
 }
 ```

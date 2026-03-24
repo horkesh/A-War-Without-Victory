@@ -6,12 +6,6 @@
 import type { LoadedGameState, FactionId } from '../../data/types';
 
 // ── Types ────────────────────────────────────────────────────────────
-export type BriefingTarget =
-    | { type: 'corps'; corpsId: string }
-    | { type: 'sector'; sectorId: string }
-    | { type: 'operation'; operationKey: string }
-    | { type: 'none' };
-
 export interface BriefingItem {
     id: string;
     severity: 'critical' | 'warning' | 'info';
@@ -19,12 +13,11 @@ export interface BriefingItem {
     title: string;
     detail: string;
     corpsId?: string;
-    target: BriefingTarget;
 }
 
 export interface SituationBriefingProps {
     items: BriefingItem[];
-    onNavigate?: (target: BriefingTarget) => void;
+    onCorpsClick?: (corpsId: string) => void;
 }
 
 // ── Pure briefing generator ──────────────────────────────────────────
@@ -62,27 +55,13 @@ export function generateBriefing(
 
     // ── CRITICAL ─────────────────────────────────────────────────────
 
-    // Pending event decisions
-    const pendingDecisions = (state.pendingEventDecisions ?? []).filter(
-        (d) => d.faction === faction,
-    );
-    for (const decision of pendingDecisions) {
-        items.push({
-            id: id(), severity: 'critical', category: 'event_decision',
-            title: decision.event_title ?? `Decision: ${decision.event_id}`,
-            detail: `${decision.response_options?.length ?? 0} options — awaiting your response`,
-            target: { type: 'none' },
-        });
-    }
-
     // Enclaves with critical supply
     for (const [enclaveId, enc] of Object.entries(state.enclaveResilience ?? {})) {
         if (enc.supply_state === 'critical' && enc.faction === faction) {
             items.push({
                 id: id(), severity: 'critical', category: 'supply',
                 title: `${enc.display_name ?? enclaveId} supply critical`,
-                detail: `Enclave resilience ${enc.resilience ?? 0} — isolated ${enc.isolation_turns ?? 0} turns`,
-                target: { type: 'none' },
+                detail: `Enclave resilience ${Math.round(enc.resilience ?? 0)} — isolated ${Math.round(enc.isolation_turns ?? 0)} turns`,
             });
         }
     }
@@ -97,7 +76,6 @@ export function generateBriefing(
                 title: `${corps.name ?? corps.id} has no front sectors assigned`,
                 detail: `${corpsBrigades.length} brigades without sector assignment`,
                 corpsId: corps.id,
-                target: { type: 'corps', corpsId: corps.id },
             });
         }
     }
@@ -113,7 +91,6 @@ export function generateBriefing(
                     ? 'Forces staged and ready — awaiting launch order'
                     : `Commander assessment: ${op.commander_assessment ?? 'pending'}`,
                 corpsId: op.corps_id,
-                target: { type: 'operation', operationKey: `${op.corps_id}|${op.name}` },
             });
         }
     }
@@ -124,7 +101,6 @@ export function generateBriefing(
             id: id(), severity: 'critical', category: 'personnel',
             title: `${pendingOfficerEvents.length} personnel decision${pendingOfficerEvents.length > 1 ? 's' : ''} pending`,
             detail: pendingOfficerEvents.map((e) => e.officer_name).join(', '),
-            target: { type: 'none' },
         });
     }
 
@@ -139,7 +115,6 @@ export function generateBriefing(
                 title: `${corps.name ?? corps.id} cohesion critical (${Math.round(avgCohesion)})`,
                 detail: `${corpsBrigades.length} brigades, avg cohesion ${Math.round(avgCohesion)}`,
                 corpsId: corps.id,
-                target: { type: 'corps', corpsId: corps.id },
             });
         }
     }
@@ -154,7 +129,6 @@ export function generateBriefing(
                 title: `Low intel in ${sector.display_name ?? sector.sector_id}`,
                 detail: `Intel confidence ${Math.round((sector.intel_confidence ?? 0) * 100)}%`,
                 corpsId: sector.corps_id,
-                target: { type: 'sector', sectorId: sector.sector_id },
             });
         }
     }
@@ -166,7 +140,6 @@ export function generateBriefing(
             id: id(), severity: 'warning', category: 'exhaustion',
             title: `War exhaustion ${Math.round(exhaustion)} -- offensive capacity degraded`,
             detail: exhaustion > 40 ? 'Critical exhaustion level' : 'Moderate exhaustion',
-            target: { type: 'none' },
         });
     }
 
@@ -185,7 +158,6 @@ export function generateBriefing(
             title: `${count} brigade${count > 1 ? 's' : ''} combat ineffective in ${corpsName}`,
             detail: 'Personnel below 400 — cannot attack',
             corpsId,
-            target: { type: 'corps', corpsId },
         });
     }
 
@@ -196,7 +168,6 @@ export function generateBriefing(
             id: id(), severity: 'warning', category: 'supply',
             title: `Supply reserves LOW (${Math.round(reserves.generalSupply ?? 0)})`,
             detail: 'General supply critically low — operations constrained',
-            target: { type: 'none' },
         });
     }
 
@@ -208,7 +179,6 @@ export function generateBriefing(
                 id: id(), severity: 'warning', category: 'diplomacy',
                 title: `Alliance deteriorating (${(alliance * 100).toFixed(0)}%)`,
                 detail: alliance < 0.2 ? 'War between factions imminent' : 'Cooperation strained',
-                target: { type: 'none' },
             });
         }
     }
@@ -223,7 +193,6 @@ export function generateBriefing(
                 title: `Thin front: ${sector.display_name ?? sector.sector_id}`,
                 detail: `${brigadeCount} brigade${brigadeCount !== 1 ? 's' : ''} covering ${edgeCount} edges`,
                 corpsId: sector.corps_id,
-                target: { type: 'sector', sectorId: sector.sector_id },
             });
         }
     }
@@ -240,17 +209,16 @@ export function generateBriefing(
                 title: `Op ${op.name ?? 'UNNAMED'} in execution`,
                 detail: `${captured}/${total} objectives captured`,
                 corpsId: op.corps_id,
-                target: { type: 'operation', operationKey: `${op.corps_id}|${op.name}` },
             });
         }
     }
 
-    // Territory info
+    // Territory info — computed from controlBySettlement
+    // (territoryPct is computed in the modal data, but we can add a simple note)
     items.push({
         id: id(), severity: 'info', category: 'territory',
         title: `Week ${state.turn ?? 0}`,
         detail: `${brigades.length} active brigades, ${operations.length} operations`,
-        target: { type: 'none' },
     });
 
     // Battles this turn
@@ -263,7 +231,6 @@ export function generateBriefing(
             id: id(), severity: 'info', category: 'combat',
             title: `${factionBattles.length} engagement${factionBattles.length > 1 ? 's' : ''} this turn`,
             detail: 'See battle reports for details',
-            target: { type: 'none' },
         });
     }
 
@@ -288,21 +255,18 @@ const SEVERITY_LABEL: Record<string, string> = {
     info: 'SITREP',
 };
 
-const TARGET_LABELS: Record<BriefingTarget['type'], string> = {
-    corps: '→ CORPS',
-    sector: '→ SECTOR',
-    operation: '→ OP',
-    none: '',
-};
+export function SituationBriefing({ items, onCorpsClick }: SituationBriefingProps) {
+    const criticalItems = items.filter((i) => i.severity === 'critical');
+    const warningItems = items.filter((i) => i.severity === 'warning');
+    const infoItems = items.filter((i) => i.severity === 'info');
 
-export function SituationBriefing({ items, onNavigate }: SituationBriefingProps) {
     if (items.length === 0) {
         return (
-            <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4">
-                <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-1.5 border-b border-panel-border">
+            <div className="bg-panel-card border border-panel-border rounded p-4 mb-6">
+                <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-2 border-b border-panel-border">
                     SITUATION BRIEFING
                 </div>
-                <div className="text-[11px] text-text-secondary italic py-1">
+                <div className="text-[12px] text-text-secondary italic py-2">
                     No alerts — situation nominal
                 </div>
             </div>
@@ -310,46 +274,91 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
     }
 
     return (
-        <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4">
-            <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-1.5 border-b border-panel-border">
+        <div className="bg-panel-card border border-panel-border rounded p-4 mb-6">
+            <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
                 SITUATION BRIEFING
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                {items.map((item) => {
-                    const dotColor = item.severity === 'critical' ? 'bg-red-500' : item.severity === 'warning' ? 'bg-amber-400' : 'bg-sky-400';
-                    const borderColor = item.severity === 'critical' ? 'border-red-500/30 hover:border-red-500/50' : item.severity === 'warning' ? 'border-amber-500/30 hover:border-amber-500/50' : 'border-panel-border hover:border-panel-border';
-                    const hasTarget = item.target.type !== 'none';
+            <div className="space-y-3">
+                {criticalItems.length > 0 && (
+                    <BriefingSection
+                        severity="critical"
+                        items={criticalItems}
+                        onCorpsClick={onCorpsClick}
+                    />
+                )}
+                {warningItems.length > 0 && (
+                    <BriefingSection
+                        severity="warning"
+                        items={warningItems}
+                        onCorpsClick={onCorpsClick}
+                    />
+                )}
+                {infoItems.length > 0 && (
+                    <BriefingSection
+                        severity="info"
+                        items={infoItems}
+                        onCorpsClick={onCorpsClick}
+                    />
+                )}
+            </div>
+        </div>
+    );
+}
 
-                    return (
-                        <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => hasTarget && onNavigate?.(item.target)}
-                            disabled={!hasTarget || !onNavigate}
-                            className={`text-left rounded-md border ${borderColor} bg-panel-bg p-2.5 transition-colors group disabled:cursor-default`}
-                        >
-                            <div className="flex items-start gap-2">
-                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${dotColor}`} />
-                                <div className="min-w-0 flex-1">
-                                    <div className="text-[11px] text-text-primary leading-snug font-semibold">
-                                        {item.title}
-                                    </div>
-                                    {item.detail && (
-                                        <div className="text-[10px] text-text-secondary leading-snug mt-0.5">
-                                            {item.detail}
-                                        </div>
-                                    )}
-                                </div>
-                                {hasTarget && onNavigate && (
-                                    <span className="text-amber-400/50 group-hover:text-amber-400 text-[9px] font-mono font-bold shrink-0 transition-colors">
-                                        {TARGET_LABELS[item.target.type]}
-                                    </span>
-                                )}
+function BriefingSection({
+    severity,
+    items,
+    onCorpsClick,
+}: {
+    severity: 'critical' | 'warning' | 'info';
+    items: BriefingItem[];
+    onCorpsClick?: (corpsId: string) => void;
+}) {
+    const headerColor = severity === 'critical'
+        ? 'text-red-400'
+        : severity === 'warning'
+            ? 'text-amber-400'
+            : 'text-text-secondary';
+
+    const borderColor = severity === 'critical'
+        ? 'border-red-400'
+        : severity === 'warning'
+            ? 'border-amber-400'
+            : 'border-panel-border/50';
+
+    return (
+        <div>
+            <div className={`text-[10px] uppercase tracking-[0.25em] font-bold ${headerColor} mb-1.5`}>
+                [{SEVERITY_ICON[severity]}] {SEVERITY_LABEL[severity]}
+            </div>
+            <div className="space-y-1">
+                {items.map((item) => (
+                    <div
+                        key={item.id}
+                        className={`flex items-start justify-between gap-3 border-l-2 ${borderColor} pl-2 py-0.5`}
+                    >
+                        <div className="min-w-0 flex-1">
+                            <div className="text-[12px] text-text-primary leading-snug">
+                                {item.title}
                             </div>
-                        </button>
-                    );
-                })}
+                            {item.detail && (
+                                <div className="text-[11px] text-text-secondary leading-snug">
+                                    {item.detail}
+                                </div>
+                            )}
+                        </div>
+                        {item.corpsId && onCorpsClick && (
+                            <button
+                                type="button"
+                                onClick={() => onCorpsClick(item.corpsId!)}
+                                className="text-amber-400 hover:underline cursor-pointer text-[11px] whitespace-nowrap shrink-0"
+                            >
+                                &rarr; Corps
+                            </button>
+                        )}
+                    </div>
+                ))}
             </div>
         </div>
     );
