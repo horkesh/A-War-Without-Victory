@@ -186,6 +186,9 @@ export const ENCLAVE_REINFORCEMENT_RATE = 80;
 /** Enclave brigades never reach full strength — limited local supply/logistics. */
 export const ENCLAVE_MAX_PERSONNEL = 1500;
 
+/** Municipalities where brigades are enclave-constrained (max_personnel capped at ENCLAVE_MAX_PERSONNEL). */
+export const ENCLAVE_MUNICIPALITY_IDS = new Set<string>(['srebrenica', 'gorazde', 'zepa']);
+
 /**
  * Faction-specific reinforcement rate multiplier by war phase.
  * Historically: RS inherited JNA logistics (full rate from day 1).

@@ -13,7 +13,7 @@ import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/ope
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
 import { factionHasPresenceInMun } from '../scenario/oob_early_war_entry.js';
 import type { BrigadeDecoration } from '../state/decoration_types.js';
-import { deriveMaxPersonnel, FORMATION_CAPACITY_THRESHOLD, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
+import { deriveMaxPersonnel, ENCLAVE_MAX_PERSONNEL, ENCLAVE_MUNICIPALITY_IDS, FORMATION_CAPACITY_THRESHOLD, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
 import type {
     BrigadeComposition,
@@ -381,6 +381,7 @@ function getMunBrigadesForFaction(
     state: GameState, munId: string, faction: string
 ): Array<{ personnel: number; max_personnel?: number }> {
     const formations = state.military.formations ?? {};
+    const isEnclave = ENCLAVE_MUNICIPALITY_IDS.has(munId);
     const result: Array<{ personnel: number; max_personnel?: number }> = [];
     for (const f of Object.values(formations)) {
         if (f.faction !== faction || f.status !== 'active' || f.kind !== 'brigade') continue;
@@ -388,7 +389,9 @@ function getMunBrigadesForFaction(
         if (Array.isArray(tags)) {
             for (const t of tags) {
                 if (typeof t === 'string' && t.startsWith('mun:') && t.slice(4) === munId) {
-                    result.push({ personnel: f.personnel ?? 0, max_personnel: f.max_personnel });
+                    const rawMax = f.max_personnel;
+                    const effectiveMax = isEnclave ? Math.min(rawMax ?? 3000, ENCLAVE_MAX_PERSONNEL) : rawMax;
+                    result.push({ personnel: f.personnel ?? 0, max_personnel: effectiveMax });
                     break;
                 }
             }

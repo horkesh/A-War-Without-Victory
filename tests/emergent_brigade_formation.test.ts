@@ -45,3 +45,25 @@ describe('canFormEmergentBrigade', () => {
         expect(canFormEmergentBrigade(existing, undefined, 600, 4, 0)).toBe(false);
     });
 });
+
+describe('canFormEmergentBrigade — enclave capacity gate', () => {
+    it('enclave brigade (max=1500) at 1000 passes 60% threshold (1000 > 900)', () => {
+        const existing = [makeBrigade(1000, 1500)];
+        expect(canFormEmergentBrigade(existing, { available: 800 }, 600, 4, 0)).toBe(true);
+    });
+
+    it('enclave brigade (max=1500) at 600 fails 60% threshold (600 < 900)', () => {
+        const existing = [makeBrigade(600, 1500)];
+        expect(canFormEmergentBrigade(existing, { available: 800 }, 600, 4, 0)).toBe(false);
+    });
+
+    it('standard brigade (max=3000) at 1000 FAILS but enclave (max=1500) at 1000 PASSES', () => {
+        // Standard: 1000 < 3000 * 0.60 = 1800 → false
+        const standard = [makeBrigade(1000, 3000)];
+        expect(canFormEmergentBrigade(standard, { available: 800 }, 600, 4, 0)).toBe(false);
+
+        // Enclave: 1000 > 1500 * 0.60 = 900 → true
+        const enclave = [makeBrigade(1000, 1500)];
+        expect(canFormEmergentBrigade(enclave, { available: 800 }, 600, 4, 0)).toBe(true);
+    });
+});
