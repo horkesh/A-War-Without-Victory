@@ -67,9 +67,9 @@ const BASE_MOBILIZATION_RATE = 0.003;
 // n794 52w: ARBiH 177k, RS 137k, HRHB 68k — all over by w52.
 // Post-spawn-fix: 122 ARBiH + 44 emergent = 166 brigades draw heavily from pools.
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.09,  // n1075: 145k at w40 (target 115-130k). Mild cut — RBiH must exceed RS+HRHB combined.
-    RS: 0.055,   // n1075: 103k at w40 (target 85-95k). Stronger cut — VRS plateaus after initial JNA inheritance.
-    HRHB: 0.14   // n1075: 47k at w40 (target 35-42k). Strongest cut — HVO smallest force, limited manpower base.
+    RBiH: 0.09,  // n1076: 144k at w40. Unchanged — must exceed RS+HRHB.
+    RS: 0.045,   // n1076: 101k at w40 (target 85-95k). Cut to close 1.9k gap and bring RS into band.
+    HRHB: 0.14   // n1076: 45k at w40 (target 35-42k). Unchanged — close to band.
 };
 const DEFAULT_MOBILIZATION_SCALE = 1.0;
 
