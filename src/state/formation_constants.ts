@@ -125,27 +125,30 @@ export function getMaxPersonnel(f: { max_personnel?: number }): number {
 
 /**
  * Derive max personnel from equipment class and faction.
+ * n1074: previous caps (2200-2800) had no effect at w40 — brigades avg 1,400, nobody reached cap.
+ * These lower caps (1200-2200) are in the range where brigades actually operate, reducing total
+ * personnel while lowering the spawn gate (60% of 1800=1080 vs 60% of 2500=1500).
  * Historical basis: Bosnian War brigades varied from 500 (enclave) to 3500+ (JNA-inherited mech).
  * Prevents cookie-cutter 3000-cap uniformity (REAL_WAR_MASTER #20).
  */
 export function deriveMaxPersonnel(equipmentClass: string, faction: string): number {
     // Mechanized/motorized: JNA-inherited heavy formations, best organized
-    if (equipmentClass === 'mechanized') return 3500;
-    if (equipmentClass === 'motorized') return 3000;
+    if (equipmentClass === 'mechanized') return 2800;
+    if (equipmentClass === 'motorized') return 2200;
     // Mountain: standard organized infantry
     if (equipmentClass === 'mountain') {
-        if (faction === 'RS') return 2800;    // VRS mountain brigades well-organized
-        if (faction === 'HRHB') return 2500;  // HVO smaller but organized
-        return 2200;                            // ARBiH mountain — still forming
+        if (faction === 'RS') return 2000;    // VRS mountain brigades well-organized
+        if (faction === 'HRHB') return 1800;  // HVO smaller but organized
+        return 1600;                            // ARBiH mountain — still forming
     }
     // Light infantry: the bulk — varies by faction
     if (equipmentClass === 'light_infantry') {
-        if (faction === 'RS') return 2500;    // VRS light infantry had JNA cadre
-        if (faction === 'HRHB') return 2200;  // HVO moderate
-        return 2500;                            // ARBiH — varied wildly, best brigades reached 3000+
+        if (faction === 'RS') return 1800;    // VRS light infantry had JNA cadre
+        if (faction === 'HRHB') return 1500;  // HVO moderate
+        return 1800;                            // ARBiH — varied wildly, cap matches RS
     }
     // Police/special: smaller specialist formations
-    if (equipmentClass === 'police' || equipmentClass === 'special') return 1500;
+    if (equipmentClass === 'police' || equipmentClass === 'special') return 1200;
     // Fallback
     return MAX_BRIGADE_PERSONNEL;
 }
