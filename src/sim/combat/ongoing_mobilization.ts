@@ -67,9 +67,9 @@ const BASE_MOBILIZATION_RATE = 0.003;
 // n794 52w: ARBiH 177k, RS 137k, HRHB 68k — all over by w52.
 // Post-spawn-fix: 122 ARBiH + 44 emergent = 166 brigades draw heavily from pools.
 const FACTION_MOBILIZATION_SCALE: Record<string, number> = {
-    RBiH: 0.10,  // n1053: 0.02 produced only ~3 troops/turn per Sarajevo mun — attrition outpaced mobilization, 24/35 1st Corps brigades at dissolution floor. At 0.10: ~15/turn/mun, enough to offset frontline attrition.
-    RS: 0.08,    // n794: 0.12→137k at w52 (+37% over). 0.08 to slow late-war RS growth.
-    HRHB: 0.20   // n794: 0.29→68k at w52 (+24% over). 0.20 to target 50-55k.
+    RBiH: 0.07,  // n1072: 0.10 produced 163k at w40 (target 115-130k). Reducing to bring into OOB Master band.
+    RS: 0.06,    // n1072: 0.08 produced 117k at w40 (target 85-95k). Reducing to match VRS OOB Master estimates.
+    HRHB: 0.14   // n1072: 0.20 produced 54k at w40 (target 35-42k). Reducing to match HVO OOB Master estimates.
 };
 const DEFAULT_MOBILIZATION_SCALE = 1.0;
 
