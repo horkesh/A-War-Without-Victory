@@ -72,6 +72,7 @@ describe('war-phase step ordering', () => {
         // +1 from assemble-command-briefing (sim-side briefing collector)
         // +1 from update-event-readiness (v0.6.0 pressure system readiness tick before evaluate-events)
         // +1 from compute-dimension-bases (strategic dimension base values after events)
-        expect(stepNames.length).toBe(143);
+        // +1 from offensive-paramilitary-detect (v0.6.5 Drina valley offensive sweep)
+        expect(stepNames.length).toBe(144);
     });
 });

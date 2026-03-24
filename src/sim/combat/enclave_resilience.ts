@@ -60,7 +60,7 @@ export const CAPITAL_GARRISON_MULT = 2.0;
  * Known enclaves — hard-coded OSID prefix sets.
  * These are areas that historically resisted siege despite supply isolation.
  */
-const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
+export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     {
         id: 'bihac_pocket',
         faction: 'RBiH',
@@ -196,7 +196,7 @@ function readEntry(entry: number | EnclaveResilienceEntry | undefined): EnclaveR
 }
 
 /** Check if an OSID belongs to an enclave. Explicit osid_list takes precedence over prefix matching. */
-function osidBelongsToEnclave(osid: string, enclave: EnclaveDefinition): boolean {
+export function osidBelongsToEnclave(osid: string, enclave: EnclaveDefinition): boolean {
     if (enclave.osid_list) {
         return enclave.osid_list.includes(osid);
     }

@@ -150,9 +150,9 @@ import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
-import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
+import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
-import { PARAMILITARY_FADE_WEEK } from '../../state/formation_constants.js';
+import { PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK } from '../../state/formation_constants.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
@@ -698,6 +698,28 @@ export const warPhases: NamedPhase[] = [
             );
             if (report.spawned.length > 0 || report.pending_player_requests > 0) {
                 context.report.paramilitary_sweep = report;
+            }
+        }
+    },
+    {
+        name: 'offensive-paramilitary-detect',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if ((context.state.meta?.turn ?? 0) > OFFENSIVE_PARA_FADE_WEEK) return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+
+            const report = detectOffensiveParamilitaryTargets(
+                context.state, od.edges, od.opData.operationalToCanonical
+            );
+            if (report.spawned.length > 0 || report.pending_player_requests > 0) {
+                const existing = context.report.paramilitary_sweep as import('../combat/paramilitary_sweep.js').ParamilitarySweepReport | undefined;
+                if (existing) {
+                    existing.spawned.push(...report.spawned);
+                    existing.pending_player_requests += report.pending_player_requests;
+                } else {
+                    context.report.paramilitary_sweep = report;
+                }
             }
         }
     },

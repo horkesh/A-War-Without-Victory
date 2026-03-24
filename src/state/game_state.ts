@@ -599,6 +599,8 @@ export interface FormationState {
     paramilitary_target?: string;
     /** Turns remaining until paramilitary unit reaches target and captures it. */
     paramilitary_eta?: number;
+    /** Paramilitary mode: 'rear_pocket' (default) or 'offensive' (Drina valley ethnic cleansing). */
+    paramilitary_mode?: 'rear_pocket' | 'offensive';
 
     /** Fractional scavenge accumulator — sub-integer amounts from battlefield scavenging.
      *  When a brigade scavenges 0.3 tanks from a battle, it's stored here.

@@ -268,6 +268,29 @@ export const VRS_EQUIPMENT_DECAY_RATE = 0.005;
 /** Floor: VRS equipment never degrades below this fraction. */
 export const VRS_EQUIPMENT_DECAY_FLOOR = 0.60;
 
+// --- Offensive paramilitary sweep (Drina valley ethnic cleansing, April-August 1992) ---
+/** Offensive paramilitary unit size (personnel). Larger than rear pocket — organized paramilitary groups (Arkan's Tigers, White Eagles). */
+export const OFFENSIVE_PARA_UNIT_SIZE = 600;
+/** Week after which offensive paramilitaries stop spawning (historical: concentrated April-August 1992). */
+export const OFFENSIVE_PARA_FADE_WEEK = 12;
+/** Turns to reach target. 1 = arrive next turn (advancing alongside regulars). */
+export const OFFENSIVE_PARA_MARCH_TURNS = 1;
+/** Offensive paramilitary spawn probability by faction. RS dominant; HRHB limited HOS; RBiH none. */
+export const OFFENSIVE_PARA_SPAWN_RATE: Record<string, number> = {
+    RS: 0.50,
+    HRHB: 0.15,
+    RBiH: 0.0,
+};
+/** Civilian casualty rate for offensive sweeps — higher than rear pocket (systematic ethnic cleansing). */
+export const OFFENSIVE_PARA_CIVILIAN_CASUALTY_RATE = 0.05;
+/** Max defender personnel for paramilitary to overwhelm. Above this, paramilitaries retreat with heavy casualties. */
+export const OFFENSIVE_PARA_LIGHT_DEFENSE_THRESHOLD = 500;
+/** Municipality scope restriction for bot factions — prevents ahistorical sweep outside known AOs. */
+export const OFFENSIVE_PARA_MUNICIPALITY_SCOPE: Record<string, string[]> = {
+    RS: ['zvornik', 'bratunac', 'vlasenica', 'srebrenica', 'rogatica', 'visegrad', 'foca', 'cajnice', 'rudo', 'gorazde'],
+    HRHB: ['stolac', 'capljina', 'prozor'],
+};
+
 // --- Paramilitary rear pocket cleanup ---
 /** Base paramilitary unit size (personnel). Small autonomous units. */
 export const PARAMILITARY_UNIT_SIZE = 150;
