@@ -114,6 +114,10 @@ export const MAX_BRIGADE_PERSONNEL = 3_000;
  */
 export const FORMATION_CAPACITY_THRESHOLD = 0.60;
 
+/** Lower capacity threshold for enclave municipalities — siege attrition prevents brigades from reaching 60%.
+ *  At 0.30 with ENCLAVE_MAX_PERSONNEL=1500: threshold = 450. Srebrenica (600) and Gorazde (800) pass immediately. */
+export const ENCLAVE_FORMATION_CAPACITY_THRESHOLD = 0.30;
+
 /** Get the effective personnel cap for a formation. Uses per-brigade override if set, else MAX_BRIGADE_PERSONNEL. */
 export function getMaxPersonnel(f: { max_personnel?: number }): number {
     return f.max_personnel ?? MAX_BRIGADE_PERSONNEL;

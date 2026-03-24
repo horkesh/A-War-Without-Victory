@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { canFormEmergentBrigade } from '../src/sim/recruitment_engine.js';
+import { ENCLAVE_FORMATION_CAPACITY_THRESHOLD } from '../src/state/formation_constants.js';
 
 function makeBrigade(personnel: number, maxPersonnel = 3000) {
     return { personnel, max_personnel: maxPersonnel };
@@ -65,5 +66,33 @@ describe('canFormEmergentBrigade — enclave capacity gate', () => {
         // Enclave: 1000 > 1500 * 0.60 = 900 → true
         const enclave = [makeBrigade(1000, 1500)];
         expect(canFormEmergentBrigade(enclave, { available: 800 }, 600, 4, 0)).toBe(true);
+    });
+});
+
+describe('canFormEmergentBrigade — enclave lowered threshold (0.30)', () => {
+    it('enclave threshold (0.30) allows formation when brigade at 600/1500', () => {
+        const existing = [makeBrigade(600, 1500)]; // 40% > 30%
+        expect(canFormEmergentBrigade(existing, { available: 800 }, 600, 4, 0, ENCLAVE_FORMATION_CAPACITY_THRESHOLD)).toBe(true);
+    });
+
+    it('enclave threshold (0.30) blocks when brigade at 300/1500', () => {
+        const existing = [makeBrigade(300, 1500)]; // 20% < 30%
+        expect(canFormEmergentBrigade(existing, { available: 800 }, 600, 4, 0, ENCLAVE_FORMATION_CAPACITY_THRESHOLD)).toBe(false);
+    });
+
+    it('enclave threshold (0.30) passes at exact boundary (450/1500 = 30%, strict less-than)', () => {
+        const existing = [makeBrigade(450, 1500)]; // exactly 30% — not less than, so passes
+        expect(canFormEmergentBrigade(existing, { available: 800 }, 600, 4, 0, ENCLAVE_FORMATION_CAPACITY_THRESHOLD)).toBe(true);
+    });
+
+    it('enclave threshold (0.30) blocks just below boundary (449/1500)', () => {
+        const existing = [makeBrigade(449, 1500)];
+        expect(canFormEmergentBrigade(existing, { available: 800 }, 600, 4, 0, ENCLAVE_FORMATION_CAPACITY_THRESHOLD)).toBe(false);
+    });
+
+    it('default threshold still works when no override passed', () => {
+        // 1000/3000 = 33% < 60% default → false
+        const existing = [makeBrigade(1000, 3000)];
+        expect(canFormEmergentBrigade(existing, { available: 800 }, 600, 4, 0)).toBe(false);
     });
 });

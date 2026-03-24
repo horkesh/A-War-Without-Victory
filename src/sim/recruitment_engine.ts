@@ -13,7 +13,7 @@ import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/ope
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
 import { factionHasPresenceInMun } from '../scenario/oob_early_war_entry.js';
 import type { BrigadeDecoration } from '../state/decoration_types.js';
-import { deriveMaxPersonnel, ENCLAVE_MAX_PERSONNEL, ENCLAVE_MUNICIPALITY_IDS, FORMATION_CAPACITY_THRESHOLD, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
+import { deriveMaxPersonnel, ENCLAVE_FORMATION_CAPACITY_THRESHOLD, ENCLAVE_MAX_PERSONNEL, ENCLAVE_MUNICIPALITY_IDS, FORMATION_CAPACITY_THRESHOLD, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
 import type {
     BrigadeComposition,
@@ -365,13 +365,14 @@ export function canFormEmergentBrigade(
     pool: { available: number } | undefined,
     requiredPersonnel: number,
     currentTurn: number,
-    availableFrom: number
+    availableFrom: number,
+    capacityThreshold: number = FORMATION_CAPACITY_THRESHOLD
 ): boolean {
     if (currentTurn < availableFrom) return false;
     if (!pool || pool.available < requiredPersonnel) return false;
     for (const b of existingBrigades) {
         const max = b.max_personnel ?? 3000;
-        if (b.personnel < max * FORMATION_CAPACITY_THRESHOLD) return false;
+        if (b.personnel < max * capacityThreshold) return false;
     }
     return true;
 }
@@ -598,7 +599,8 @@ export function runBotRecruitment(
                     if (b.available_from === 0) return true; // seed formation
                     const munBrigades = getMunBrigadesForFaction(state, b.home_mun, faction);
                     const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
-                    return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from);
+                    const threshold = ENCLAVE_MUNICIPALITY_IDS.has(b.home_mun) ? ENCLAVE_FORMATION_CAPACITY_THRESHOLD : FORMATION_CAPACITY_THRESHOLD;
+                    return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from, threshold);
                 })
                 .sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
             : [];
@@ -710,7 +712,8 @@ export function runBotRecruitment(
                 if (b.available_from === 0) return true;
                 const munBrigades = getMunBrigadesForFaction(state, b.home_mun, faction);
                 const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
-                return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from);
+                const threshold = ENCLAVE_MUNICIPALITY_IDS.has(b.home_mun) ? ENCLAVE_FORMATION_CAPACITY_THRESHOLD : FORMATION_CAPACITY_THRESHOLD;
+                return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from, threshold);
             });
 
         // Score each brigade
