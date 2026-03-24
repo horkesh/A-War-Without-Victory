@@ -1,7 +1,19 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-24
-**Status:** **v0.6.5** — Political Wargame. 1445 tests, 117 suites. **92.2% area-weighted (n1061, re-frozen).** 94 events, 21 flag-gated. Offensive paramilitaries (Drina valley). **v0.7.0 Phase 1+2 complete**. Sarajevo siege P0 resolved (11 fixes total). 1st Corps 28.2k / avg 829 / 18/34 ineff (was 15.7k / 448 / 25/35). SRK 14.3k, ratio 1.97:1. 712-OSID audit: 1 fix (paklarevo). OOB: 146th→Visoko, 145th removed, SRK excluded from Rogatica/Gorazde. **Next: v0.7.0 Phase 4 (engine flag reads).**
+**Status:** **v0.6.5** — Political Wargame. 1453 tests, 118 suites. **91.7% area-weighted (n1065, re-frozen).** 94 events, 21 flag-gated. **Emergent brigade formation:** pool-gated spawning replaces time gates — RBiH 98 brigades avg 1,382 (was 120 avg 1,050). Sarajevo siege P0 resolved (11 fixes). OOB: 146th→Visoko, 145th removed, SRK excluded from Rogatica/Gorazde. **Next: v0.7.0 Phase 4 (engine flag reads).**
+
+## [2026-03-24] Emergent Brigade Formation — Pool-Gated Spawning
+
+**Scope:** Replaced time-gated brigade spawning with pool-gated emergent formation. 56 time-gated brigades now require pool surplus + existing brigades at 60% capacity before forming. Turn-0 seed brigades (70 RBiH) unchanged.
+
+**Results (n1065):** RBiH 98 brigades avg 1,382 pers (was 120 avg 1,050). 25 ineffective (was 36). HRHB 1 ineffective (was 7). Calibration 91.7%. Each brigade stronger, fewer ghost units. Tuzla/Zenica/Bihac surplus pools (5k each) waiting for gated brigades to meet capacity threshold.
+
+**Root cause investigation:** Found 25,025 stranded RBiH manpower in overflow pools. Strategic reserve OVERFLOW_THRESHOLD=5,000 siphons excess into reserve with draw rate 0.02 (effectively zero). Emergent formation addresses this by forming brigades where population supports them instead of sending excess to a dead reserve.
+
+**Also in this session:** OOB fixes (146th→Visoko per lineage, 145th removed), SRK CORPS_EXCLUDED_MUNICIPALITIES (Gorazde/Rogatica/Drina valley excluded), Herzegovina pocket pool, displacement routing (HERZEGOVINA +Mostar), 712-OSID audit (1 fix: Paklarevo), 4th Corps investigation (historically defensible at 5.8k).
+
+**Files:** `src/sim/recruitment_engine.ts` (canFormEmergentBrigade + wiring), `src/state/formation_constants.ts` (FORMATION_CAPACITY_THRESHOLD), `src/sim/combat/sector_territory.ts` (CORPS_EXCLUDED_MUNICIPALITIES), `src/sim/formation_spawn.ts` (Herzegovina pocket pool), `src/state/displacement_routing_data.ts` (HERZEGOVINA route +Mostar), `data/source/oob_brigades.json` (146th, 145th), `data/derived/operational/operational_political_control.json` (Paklarevo), `tests/emergent_brigade_formation.test.ts` (8 tests), `vitest.config.ts`, `tools/diagnose_run.cjs`. Design: `docs/plans/2026-03-24-emergent-brigade-formation-design.md`. Plan: `docs/plans/2026-03-24-emergent-brigade-formation-plan.md`.
 
 ## [2026-03-24] P1 Bug: SRK Sarajevo Siege Collapse + Brigade Drift Detection Gap
 

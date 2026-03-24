@@ -1,6 +1,6 @@
 # Life Lessons — AWWV Development
 
-> Last updated: 2026-03-24 (day shift — Sarajevo siege collapse investigation, 4 new lessons + 3 nightshift)
+> Last updated: 2026-03-24 (day shift — siege collapse, emergent formation, 5 new lessons + 3 nightshift)
 > Auto-generated daily at 06:00. Cross-checked against previous entries.
 > Violation-tracked: lessons with recent violations stay at the top.
 > Enforcement: session-start scan, pre-commit gate (`/awwv_pre_commit_check`), daily cron violation detection.
@@ -74,6 +74,12 @@
 ---
 
 ## New Lessons (2026-03-24 day shift)
+
+### [Process] NEVER fabricate historical claims — dispatch /historian, don't speculate (2026-03-24) — NEW
+- **Context**: When analyzing 4th Corps weakness, I stated "Significant reinforcement from 3rd Corps (Central Bosnia) units redeploying south" as if it were sourced fact. User called it out. I had no source — it was speculation presented as history.
+- **Wrong approach**: Reasoning about what "probably happened" historically and presenting it as established fact. In a project with a `/historian` agent specifically for sourced historical research, this is a role violation.
+- **Right approach**: When a question requires historical knowledge, dispatch `/historian` with specific questions and source requirements. Present only what the historian returns with citations. If no source exists, say "no source found" — never fill the gap with inference dressed as fact.
+- **Do instead**: Before making ANY historical claim in investigation or design, ask: "Is this sourced?" If not, dispatch `/historian`. The project exists to model historical reality — unsourced claims corrupt the foundation.
 
 ### [Process] When investigation reveals a new fix, add it to the plan immediately — don't defer to "later" (2026-03-24) — NEW
 - **Context**: During Sarajevo siege investigation, discovered RBiH pool scale 0.08 was a major bottleneck. Noted "the real bottleneck is pool scale" but planned to mark FIX-1 done and move on. User corrected: "When you encounter things like this, dynamically add them to the plan!"

@@ -140,11 +140,17 @@ All fixes applied sequentially, one calibration run each:
 
 **Final: n1057, 92.1%. 1st Corps 22,140 pers / avg 633 / 20/35 ineffective (was 15,692 / 448 / 25/35).**
 
-### Remaining after all fixes
-- 20/35 ineffective — structural: total pocket mobilization (~90/turn) < attrition (~210/turn). Historically accurate.
-- Hadzici 5/5 — pool exhausted (hard cap). 104th Vitezka (Hrasnica) has no RBiH OSID in Ilidza.
+### Remaining after siege fixes
+- 20/35 ineffective — structural: total pocket mobilization (~90/turn) < attrition (~210/turn).
+
+### Emergent brigade formation (later same session)
+Replaced time-gated spawning with pool-gated emergent formation. 56 gated brigades now require pool surplus + existing brigades at 60% capacity. Results (n1065): RBiH 98 brigades avg 1,382 (was 120 avg 1,050). 25 ineffective (was 36). 1st Corps 29,476 / 30 brigades / avg 983. This further addressed the "too many brigades for too small a pool" root cause by preventing deficit spawning entirely. Design: `docs/plans/2026-03-24-emergent-brigade-formation-design.md`.
+
+### Remaining backlog
 - Hrasnica/Butmir pocket needs OSID representation (v1.x).
 - Bot AI opportunity detection — undefended sectors. Needs design session.
+- Strategic reserve draw rate RBiH 0.02 is effectively zero — manpower graveyard.
+- Beyond-OOB emergent brigades (Tuzla/Zenica/Doboj have 5k surplus, no more OOB candidates).
 
 ---
 
