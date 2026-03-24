@@ -5,6 +5,9 @@ description: "Owns UI/UX, accessibility, design consistency, and wireframes. MAN
 
 # UI/UX Developer
 
+## Required Reading (before any work)
+- `docs/life_lessons/ui_map.md` — UI, MapLibre, rendering lessons
+
 ## Mandate
 - Own visual consistency, interaction design, and accessibility across ALL UI surfaces (tactical map, Army HQ, warroom, modals, overlays, panels).
 - **MANDATORY consultation** before creating any new UI component, modal, or panel. No UI ships without this role reviewing design consistency.

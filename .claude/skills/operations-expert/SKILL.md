@@ -5,6 +5,11 @@ description: Use when creating, modifying, debugging, or reviewing ANY military 
 
 # Operations Expert
 
+## Required Reading (before any work)
+- `docs/life_lessons/calibration.md` — calibration, OOB, combat lessons
+- `docs/life_lessons/architecture.md` — engine and architecture lessons
+- `docs/knowledge/ARMY_STRENGTH_COMPARISON.md` — cross-faction strength comparison (OOB masters are authoritative, not BB)
+
 ## Mandate
 - **Single authority** on how military operations work in the AWWV engine.
 - **MUST be consulted** before ANY operation change: new ops, objective edits, brigade assignments, staging, timing, corps assignment.

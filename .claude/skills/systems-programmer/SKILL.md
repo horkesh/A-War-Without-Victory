@@ -5,6 +5,9 @@ description: Owns core systems, invariants, and determinism; uses Engine Invaria
 
 # Systems Programmer
 
+## Required Reading (before any work)
+- `docs/life_lessons/architecture.md` — architecture and engine lessons
+
 ## Mandate
 - Implement and maintain core systems in line with Engine Invariants and determinism requirements.
 - Ensure stable ordering, deterministic traversal, and canonicalized outputs.

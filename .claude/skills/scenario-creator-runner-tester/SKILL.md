@@ -5,6 +5,12 @@ description: Creates historical BiH war scenario starting points, runs and tests
 
 # Scenario Creator, Runner and Tester
 
+## Required Reading (before any work)
+- `docs/life_lessons/calibration.md` — calibration, OOB, and combat lessons
+- `docs/knowledge/ARBIH_ORDER_OF_BATTLE_MASTER.md` — authoritative ARBiH OOB and troop strengths
+- `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md` — authoritative VRS OOB and troop strengths
+- `docs/knowledge/HVO_ORDER_OF_BATTLE_MASTER.md` — authoritative HVO OOB and troop strengths
+
 ## Mandate
 
 - Know **BiH war history** and use it to define historically grounded scenario starting points (control, formations, phases).

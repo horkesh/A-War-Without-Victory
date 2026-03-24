@@ -11,6 +11,15 @@ description: Use when discussing historical events, BiH war scenarios, citation-
 - **Answer** questions about control, takeover, holdouts, enclaves, pockets, JNA/VRS, displacement, and timeline with **citations** (volume + page).
 - **Consult** whenever historical events, scenario design, or plausibility of run outcomes are discussed.
 
+## Source Hierarchy for Troop Strengths and OOB
+
+1. **OOB Master files** (authoritative for AWWV simulation):
+   - `docs/knowledge/ARBIH_ORDER_OF_BATTLE_MASTER.md`
+   - `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md`
+   - `docs/knowledge/HVO_ORDER_OF_BATTLE_MASTER.md`
+2. **ARMY_STRENGTH_COMPARISON.md** — cross-faction comparison
+3. **BB aggregate strength figures are UNRELIABLE** — they conflate mobilized reserves with active combat strength. Use BB for operational details, events, and geography — NOT for army-wide troop totals. When BB contradicts OOB masters on aggregate strength, the OOB masters win.
+
 ## Authority
 
 - **Single source of truth:** `data/derived/knowledge_base/balkan_battlegrounds/`

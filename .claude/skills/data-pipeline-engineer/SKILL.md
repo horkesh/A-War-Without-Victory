@@ -5,6 +5,9 @@ description: "Owns derived data pipelines: contact graph, OSID derivation, polyg
 
 # Data Pipeline Engineer
 
+## Required Reading (before any work)
+- `docs/life_lessons/data_pipeline.md` — data pipeline, geometry lessons
+
 ## Mandate
 - Own the integrity of all derived data pipelines: the chain from `data/source/` through transform scripts in `tools/` to outputs in `data/derived/`.
 - Ensure every transform preserves ALL fields. When a script processes edges, settlements, or graphs, no field may be silently stripped.

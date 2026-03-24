@@ -5,6 +5,10 @@ description: Implements and maintains phase logic, state, and simulation behavio
 
 # Gameplay Programmer
 
+## Required Reading (before any work)
+- `docs/life_lessons/architecture.md` — engine and architecture lessons
+- `docs/life_lessons/calibration.md` — calibration and combat lessons
+
 ## Mandate
 - Implement phase and simulation logic in line with phase specs and Systems Manual.
 - Preserve determinism and stable ordering; no invention of mechanics.

@@ -6,7 +6,7 @@ Deterministic strategic-level simulation of the 1992-1995 Bosnian War. Negative-
 
 1. Read `.claude/napkin.md` — curated runbook. Internalize silently, curate on read (re-prioritize, merge dupes, cap 10/category). Update during work.
 2. Read `docs/PROJECT_LEDGER.md` (latest 80 lines — current state).
-3. Read `docs/life_lessons.md` — scan active lessons, flag any relevant to current task. If about to violate an active lesson, STOP and flag it.
+3. Read `docs/life_lessons.md` (index) — always read "Recently Violated" and "New Lessons" sections. Then load the topic file(s) relevant to your current task (e.g. `docs/life_lessons/calibration.md` for calibration work, `docs/life_lessons/ui_map.md` for UI work). If about to violate an active lesson, STOP and flag it.
 4. If `working-on.md` exists at project root, read it (interrupted task from previous session). Delete after reading.
 5. Check crons via `CronList` — reschedule if missing (two required, see napkin §Session Startup).
 

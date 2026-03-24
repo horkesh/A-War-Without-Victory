@@ -5,6 +5,10 @@ description: Realism auditor. Investigates sim outputs, AARs, battle logs, and c
 
 # War or Game
 
+## Required Reading (before any work)
+- `docs/life_lessons/calibration.md` — calibration, OOB, combat lessons
+- `docs/knowledge/ARMY_STRENGTH_COMPARISON.md` — cross-faction strength comparison (OOB masters are authoritative, not BB)
+
 ## Mandate
 
 Find the bullshit. Investigate every sim output with one question: **"What would a real Bosnian War commander find absurd?"**

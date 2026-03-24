@@ -5,6 +5,14 @@ description: Owns militia spawning, brigade formation, militia pools, and format
 
 # Formation Expert
 
+## Required Reading (before any work)
+- `docs/life_lessons/calibration.md` — calibration, OOB, combat lessons
+- `docs/life_lessons/architecture.md` — engine and architecture lessons
+- `docs/knowledge/ARBIH_ORDER_OF_BATTLE_MASTER.md` — authoritative ARBiH OOB and troop strengths
+- `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md` — authoritative VRS OOB and troop strengths
+- `docs/knowledge/HVO_ORDER_OF_BATTLE_MASTER.md` — authoritative HVO OOB and troop strengths
+- `docs/knowledge/ARMY_STRENGTH_COMPARISON.md` — cross-faction strength comparison (BB figures are reference only, OOB masters are authoritative)
+
 ## Mandate
 
 - Own **militia spawning** and **brigade formation**: pool population, formation spawn from pools, formation lifecycle, and related constants.
