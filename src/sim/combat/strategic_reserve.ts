@@ -51,7 +51,7 @@ const OVERFLOW_THRESHOLD = 5000;
  */
 const RESERVE_DRAW_RATE_MULT_DEFAULT = 0.25;
 const FACTION_RESERVE_DRAW_RATE: Record<string, number> = {
-    RBiH: 0.02,    // poor early logistics until 1994 professionalization; limits redistribution
+    RBiH: 0.15,    // n1065: 0.02 made reserve a dead pool (14k stranded). 0.15 allows redistribution to depleted brigades while still reflecting weaker ARBiH logistics vs JNA-inherited RS.
     RS: 0.25,      // JNA logistics inheritance
     HRHB: 0.25     // Croatian support, compact territory
 };
