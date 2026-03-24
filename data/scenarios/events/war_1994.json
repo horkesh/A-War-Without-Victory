@@ -7,7 +7,8 @@
     "trigger": {
       "turn_min": 96,
       "turn_max": 96,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
     },
     "once": true,
     "effect": {
@@ -44,7 +45,8 @@
       "phase": "war",
       "requires_events": [
         "markale_massacre_1994"
-      ]
+      ],
+      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
     },
     "once": true,
     "effect": {
@@ -70,7 +72,8 @@
       "phase": "war",
       "requires_events": [
         "nato_ultimatum_sarajevo_1994"
-      ]
+      ],
+      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
     },
     "once": true,
     "effect": {
@@ -401,7 +404,8 @@
     "trigger": {
       "turn_min": 123,
       "turn_max": 123,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
     },
     "once": true,
     "effect": {
@@ -509,7 +513,8 @@
     "trigger": {
       "turn_min": 135,
       "turn_max": 135,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "bihac_breakout_occurred", "value": true }
     },
     "once": true,
     "effect": {

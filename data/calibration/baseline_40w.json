@@ -1,8 +1,8 @@
 {
-  "frozen_at": "2026-03-24T00:17:18.927Z",
-  "run_dir": "apr1992_definitive_40w__77cac5e01d3c929e__w40_n1038",
+  "frozen_at": "2026-03-24T00:30:24.126Z",
+  "run_dir": "apr1992_definitive_40w__77cac5e01d3c929e__w40_n1040",
   "run_id": "apr1992_definitive_40w__77cac5e01d3c929e__w40",
-  "final_state_hash": "d9e0c627f99776e7",
+  "final_state_hash": "410325526321a932",
   "weeks": 40,
   "area_weighted_pct": 92.6,
   "territory": {
@@ -99,12 +99,12 @@
       "text": "Operation Corridor — VRS Breaks Through at Brcko"
     },
     {
-      "turn": 16,
+      "turn": 14,
       "id": "concentration_camps_revealed_1992",
       "text": "The World Is Watching"
     },
     {
-      "turn": 23,
+      "turn": 22,
       "id": "hvo_arbih_tensions_rise_1992",
       "text": "HVO-ARBiH Clash at Prozor"
     },

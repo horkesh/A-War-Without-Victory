@@ -337,7 +337,8 @@
     "trigger": {
       "turn_min": 170,
       "turn_max": 170,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
     },
     "once": true,
     "effect": {
@@ -379,7 +380,8 @@
       "phase": "war",
       "requires_events": [
         "srebrenica_falls_1995"
-      ]
+      ],
+      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
     },
     "once": true,
     "effect": {
@@ -604,7 +606,8 @@
     "trigger": {
       "turn_min": 177,
       "turn_max": 177,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
     },
     "once": true,
     "effect": {
@@ -638,7 +641,8 @@
     "trigger": {
       "turn_min": 177,
       "turn_max": 177,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "rrf_deployed", "value": true }
     },
     "once": true,
     "effect": {

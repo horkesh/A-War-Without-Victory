@@ -125,7 +125,8 @@
     "trigger": {
       "turn_min": 39,
       "turn_max": 41,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
     },
     "once": true,
     "effects": [
@@ -258,12 +259,10 @@
       "requires_events": [
         "croat_bosniak_war_begins_1993"
       ],
-      "condition": {
-        "type": "faction_controls_municipality",
-        "faction": "HRHB",
-        "municipality": "vitez",
-        "threshold": 0.5
-      }
+      "condition": { "type": "and", "conditions": [
+        { "type": "faction_controls_municipality", "faction": "HRHB", "municipality": "vitez", "threshold": 0.5 },
+        { "type": "flag_equals", "flag": "hvo_arbih_tensions_rising", "value": true }
+      ]}
     },
     "once": true,
     "effect": {
@@ -398,7 +397,8 @@
       "phase": "war",
       "requires_events": [
         "croat_bosniak_war_begins_1993"
-      ]
+      ],
+      "condition": { "type": "flag_equals", "flag": "mostar_liberated", "value": true }
     },
     "once": true,
     "effect": {
@@ -503,7 +503,8 @@
     "trigger": {
       "turn_min": 48,
       "turn_max": 50,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
     },
     "once": true,
     "effects": [
@@ -549,7 +550,8 @@
     "trigger": {
       "turn_min": 49,
       "turn_max": 49,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
     },
     "once": true,
     "effect": {
@@ -767,7 +769,8 @@
     "trigger": {
       "turn_min": 54,
       "turn_max": 54,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
     },
     "once": true,
     "effects": [
@@ -857,7 +860,8 @@
       "phase": "war",
       "requires_events": [
         "srebrenica_shelling_1993"
-      ]
+      ],
+      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
     },
     "once": true,
     "requires_player_response": true,
@@ -1221,7 +1225,8 @@
       "phase": "war",
       "requires_events": [
         "croat_bosniak_war_begins_1993"
-      ]
+      ],
+      "condition": { "type": "flag_equals", "flag": "mostar_liberated", "value": true }
     },
     "once": true,
     "effect": {
@@ -1293,7 +1298,8 @@
     "trigger": {
       "turn_min": 63,
       "turn_max": 63,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "arms_embargo_active", "value": true }
     },
     "once": true,
     "effects": [
@@ -1384,7 +1390,8 @@
     "trigger": {
       "turn_min": 64,
       "turn_max": 66,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
     },
     "once": true,
     "effects": [
@@ -1635,7 +1642,8 @@
     "trigger": {
       "turn_min": 68,
       "turn_max": 68,
-      "phase": "war"
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
     },
     "once": true,
     "effect": {
@@ -2000,7 +2008,8 @@
       "phase": "war",
       "requires_events": [
         "east_mostar_siege_1993"
-      ]
+      ],
+      "condition": { "type": "flag_equals", "flag": "mostar_liberated", "value": true }
     },
     "once": true,
     "effect": {

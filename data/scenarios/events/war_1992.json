@@ -371,7 +371,12 @@
     "effects": [
       { "kind": "narrative", "text": "Bosniak forces consolidate around Srebrenica, forming a besieged enclave that becomes a symbol of resistance." }
     ],
-    "pressure": { "base_rate": 1.5, "threshold": 5, "decay_rate": 0.2 },
+    "pressure": {
+      "base_rate": 1.5, "threshold": 5, "decay_rate": 0.2,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "drina_cleansing_occurred", "value": true }, "rate_bonus": 1.5 }
+      ]
+    },
     "dimension_shifts": [
       { "faction": "RBiH", "dimension": "international_standing", "delta": 5 },
       { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 5 }
@@ -490,7 +495,12 @@
         ]
       }
     },
-    "pressure": { "base_rate": 1.5, "threshold": 5, "decay_rate": 0.3 },
+    "pressure": {
+      "base_rate": 1.5, "threshold": 5, "decay_rate": 0.3,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "drina_cleansing_occurred", "value": true }, "rate_bonus": 2.0 }
+      ]
+    },
     "once": true,
     "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 3 },
     "effects": [
@@ -615,7 +625,13 @@
     "effects": [
       { "kind": "narrative", "text": "HVO and ARBiH forces clash at Prozor and Novi Travnik. The fragile alliance between Croats and Bosniaks shows deepening cracks." }
     ],
-    "pressure": { "base_rate": 1.0, "threshold": 5, "decay_rate": 0.5 },
+    "pressure": {
+      "base_rate": 1.0, "threshold": 5, "decay_rate": 0.5,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "mostar_liberated", "value": true }, "rate_bonus": 0.5 },
+        { "condition": { "type": "flag_equals", "flag": "jajce_fell", "value": true }, "rate_bonus": 1.5 }
+      ]
+    },
     "dimension_shifts": [
       { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -5 },
       { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -5 }

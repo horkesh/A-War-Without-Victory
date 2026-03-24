@@ -145,13 +145,89 @@ describe('evaluateCondition — new v0.6.0 condition types', () => {
         expect(evaluateCondition({ type: 'morale_average_below', faction: 'RS', threshold: 30 }, state)).toBe(true); // avg 25
     });
 
-    it('enclave_supply_status: returns false (placeholder)', () => {
+    // ── enclave_supply_status (v0.7.0) ──────────────────────────────
+
+    it('enclave_supply_status: true when OSID in municipality has critical supply', () => {
+        const state = minState();
+        (state.political as any).last_supply_state_by_osid = {
+            'op:srebrenica:srebrenica_2': 'critical',
+            'op:srebrenica:potocari_2': 'strained',
+            'op:gorazde:gorazde_2': 'adequate',
+        };
+        expect(evaluateCondition({ type: 'enclave_supply_status', municipality: 'srebrenica', status: 'critical' }, state)).toBe(true);
+    });
+
+    it('enclave_supply_status: true when checking strained and OSID is critical (worse than target)', () => {
+        const state = minState();
+        (state.political as any).last_supply_state_by_osid = {
+            'op:srebrenica:srebrenica_2': 'critical',
+        };
+        expect(evaluateCondition({ type: 'enclave_supply_status', municipality: 'srebrenica', status: 'strained' }, state)).toBe(true);
+    });
+
+    it('enclave_supply_status: false when supply is adequate', () => {
+        const state = minState();
+        (state.political as any).last_supply_state_by_osid = {
+            'op:srebrenica:srebrenica_2': 'adequate',
+            'op:srebrenica:potocari_2': 'adequate',
+        };
+        expect(evaluateCondition({ type: 'enclave_supply_status', municipality: 'srebrenica', status: 'critical' }, state)).toBe(false);
+    });
+
+    it('enclave_supply_status: false when no supply data', () => {
         const state = minState();
         expect(evaluateCondition({ type: 'enclave_supply_status', municipality: 'srebrenica', status: 'critical' }, state)).toBe(false);
     });
 
-    it('corridor_severed: returns false (placeholder)', () => {
+    // ── corridor_severed (v0.7.0) ────────────────────────────────────
+
+    it('corridor_severed: true when enemy OSID blocks path', () => {
         const state = minState();
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:b:b_1', faction: 'RBiH' }, state)).toBe(false);
+        state.political.political_controllers = {
+            'op:a:a_1': 'RBiH',
+            'op:a:a_2': 'RS', // blocks path
+            'op:a:a_3': 'RBiH',
+        };
+        (state as any).derived = {
+            edges: [
+                { a: 'op:a:a_1', b: 'op:a:a_2' },
+                { a: 'op:a:a_2', b: 'op:a:a_3' },
+            ],
+        };
+        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(true);
+    });
+
+    it('corridor_severed: false when path exists through friendly territory', () => {
+        const state = minState();
+        state.political.political_controllers = {
+            'op:a:a_1': 'RBiH',
+            'op:a:a_2': 'RBiH',
+            'op:a:a_3': 'RBiH',
+        };
+        (state as any).derived = {
+            edges: [
+                { a: 'op:a:a_1', b: 'op:a:a_2' },
+                { a: 'op:a:a_2', b: 'op:a:a_3' },
+            ],
+        };
+        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(false);
+    });
+
+    it('corridor_severed: true when start OSID not held by faction', () => {
+        const state = minState();
+        state.political.political_controllers = {
+            'op:a:a_1': 'RS',
+            'op:a:a_3': 'RBiH',
+        };
+        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(true);
+    });
+
+    it('corridor_severed: false when no edges (cannot evaluate)', () => {
+        const state = minState();
+        state.political.political_controllers = {
+            'op:a:a_1': 'RBiH',
+            'op:a:a_3': 'RBiH',
+        };
+        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(false);
     });
 });

@@ -408,12 +408,49 @@ export function evaluateCondition(condition: EventCondition, state: GameState): 
             return true;
         }
         case 'enclave_supply_status': {
-            // Placeholder — needs supply system integration (deferred)
+            // Check if any OSID in target municipality has supply at or worse than target status
+            const supplyByOsid = state.political?.last_supply_state_by_osid;
+            if (!supplyByOsid) return false;
+            const SUPPLY_SEVERITY: Record<string, number> = { adequate: 0, strained: 1, critical: 2 };
+            const targetSeverity = SUPPLY_SEVERITY[condition.status] ?? 0;
+            for (const osid of Object.keys(supplyByOsid)) {
+                if (osid.split(':')[1] !== condition.municipality) continue;
+                const osidSeverity = SUPPLY_SEVERITY[supplyByOsid[osid]] ?? 0;
+                if (osidSeverity >= targetSeverity) return true;
+            }
             return false;
         }
         case 'corridor_severed': {
-            // Placeholder — needs adjacency graph BFS integration (deferred)
-            return false;
+            // BFS from from_osid to to_osid through faction-controlled territory
+            // If no path found, corridor is severed → return true
+            const pc = state.political?.political_controllers;
+            if (!pc) return false;
+            if (pc[condition.from_osid] !== condition.faction) return true; // start not held
+            if (pc[condition.to_osid] !== condition.faction) return true; // end not held
+            // Build adjacency from edges if available
+            const edges = (state as any).derived?.edges as Array<{ a: string; b: string }> | undefined;
+            if (!edges) return false; // can't evaluate without edges
+            const adj = new Map<string, string[]>();
+            for (const e of edges) {
+                if (!adj.has(e.a)) adj.set(e.a, []);
+                if (!adj.has(e.b)) adj.set(e.b, []);
+                adj.get(e.a)!.push(e.b);
+                adj.get(e.b)!.push(e.a);
+            }
+            // BFS through faction-controlled OSIDs
+            const visited = new Set<string>([condition.from_osid]);
+            const queue = [condition.from_osid];
+            while (queue.length > 0) {
+                const current = queue.shift()!;
+                if (current === condition.to_osid) return false; // path found → not severed
+                for (const neighbor of adj.get(current) ?? []) {
+                    if (visited.has(neighbor)) continue;
+                    if (pc[neighbor] !== condition.faction) continue;
+                    visited.add(neighbor);
+                    queue.push(neighbor);
+                }
+            }
+            return true; // no path found → corridor severed
         }
         default:
             return true;
