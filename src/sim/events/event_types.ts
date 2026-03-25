@@ -204,7 +204,12 @@ export interface EventDefinition {
     dimension_shifts?: DimensionShift[];
     /** Auto-resolve after N turns if player doesn't respond. Worst option applied. */
     auto_resolve_turns?: number;
-    /** Lower = fires first when multiple events trigger. Default 100. */
+    /**
+     * Lower = fires first when multiple events trigger. Default 100.
+     * Priority tiers: 1=fire-or-miss anchors (single-turn windows),
+     * 10=cascade prerequisites, 20=cascade consequents,
+     * 50=major political, 100=default.
+     */
     priority?: number;
     /** Only one event per mutex group fires per turn. */
     mutex_group?: string;
