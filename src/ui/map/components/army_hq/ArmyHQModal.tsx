@@ -14,6 +14,7 @@ import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
+import { turnToDateString } from '../../utils/formatters';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
 import { PersonnelContent } from './PersonnelContent';
@@ -215,7 +216,7 @@ export function ArmyHQModal() {
                                 STRATEGIC SITUATION
                             </div>
                             <div className="text-[13px] font-bold text-text-primary tabular-nums">
-                                Week {state.turn} {state.metadata?.date ? `\u2014 ${state.metadata.date}` : ''}
+                                Week {state.turn} {`\u2014 ${turnToDateString(state.turn ?? 0)}`}
                             </div>
                         </div>
                         <button
