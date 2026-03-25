@@ -179,7 +179,7 @@ export function ArmyHQCorpsCard({
                 {/* Line 2: Commander + grade */}
                 <div className="text-[12px] text-text-secondary mt-2 flex items-center gap-3 font-mono">
                     {data.commander ? (
-                        <span className="truncate">{data.commander.name}</span>
+                        <span>{data.commander.name}</span>
                     ) : (
                         <span className="italic text-red-500/60">[!] UNASSIGNED</span>
                     )}

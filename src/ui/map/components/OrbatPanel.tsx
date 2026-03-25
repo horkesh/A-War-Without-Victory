@@ -5,6 +5,7 @@ import { BrigadeRow } from './BrigadeRow';
 import { FACTION_COLORS } from '../utils/theme';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import type { CorpsFrontSectorView } from '../data/types';
 
 
 export function OrbatPanel() {
@@ -32,6 +33,13 @@ export function OrbatPanel() {
         if (!loadedGameState || !corps) return null;
         return getFormationCommander(corps, loadedGameState);
     }, [loadedGameState, corps]);
+
+    const corpsSectors: CorpsFrontSectorView[] = useMemo(() => {
+        if (!loadedGameState?.corpsFrontSectors || !selectedOrbatCorpsId) return [];
+        return loadedGameState.corpsFrontSectors.filter(
+            (s) => s.corps_id === selectedOrbatCorpsId
+        );
+    }, [loadedGameState?.corpsFrontSectors, selectedOrbatCorpsId]);
 
     if (!corps) return null;
 
@@ -110,7 +118,12 @@ export function OrbatPanel() {
 
             {/* Visual Polish Footer */}
             <div className="px-4 py-2 bg-black/40 border-t border-panel-border flex justify-between items-center shrink-0">
-                <span className="text-[9px] font-mono text-text-secondary uppercase">Sector: {corps.location_osid ?? 'Unknown'}</span>
+                <span className="text-[9px] font-mono text-text-secondary uppercase">
+                    {corpsSectors.length > 0
+                        ? `${corpsSectors.length} sector${corpsSectors.length !== 1 ? 's' : ''}: ${corpsSectors.map((s) => s.display_name).join(', ')}`
+                        : 'No active sectors'
+                    }
+                </span>
                 <span className="text-[9px] font-mono text-accent-gold/50 uppercase">AWWV v0.6.0-TAC</span>
             </div>
         </div>

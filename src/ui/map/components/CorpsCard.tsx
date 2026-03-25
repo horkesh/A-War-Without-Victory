@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { FormationView } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { Icon, type IconName } from './icons/Icon';
+import { FlipCard } from './army_hq/FlipCard';
 
 const STANCE_ICON: Record<string, IconName> = {
   offensive: 'offensive', defensive: 'defensive', reorganize: 'reorganizing', balanced: 'balanced',
@@ -27,6 +29,12 @@ export interface CorpsCardProps {
   onMouseLeave?: () => void;
   commanderName?: string;
   commanderActing?: boolean;
+  /** Number of front sectors assigned to this corps. */
+  sectorCount?: number;
+  /** Active operation name (if any). */
+  activeOperationName?: string;
+  /** Active operation phase (if any). */
+  activeOperationPhase?: string;
 }
 
 function getAvgCohesion(brigades: FormationView[]): number {
@@ -67,7 +75,11 @@ export function CorpsCard({
   onMouseLeave,
   commanderName,
   commanderActing,
+  sectorCount,
+  activeOperationName,
+  activeOperationPhase,
 }: CorpsCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
   const displayName = corpsName ?? `Corps ${corpsId}`;
   const factionClass = FACTION_COLORS[faction] ?? 'text-text-primary';
   const totalPersonnel = brigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
@@ -83,21 +95,17 @@ export function CorpsCard({
     )
   );
 
-  return (
+  const handleBodyClick = () => {
+    setIsFlipped((prev) => !prev);
+  };
+
+  const cardFront = (
     <div
       className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden border-l-3 ${stanceBorder}`}
-      onMouseEnter={() => {
-        onHoverOsidsChange?.(corpsOsids);
-        onMouseEnter?.();
-      }}
-      onMouseLeave={() => {
-        onHoverOsidsChange?.([]);
-        onMouseLeave?.();
-      }}
     >
       <button
         type="button"
-        onClick={onHeaderClick}
+        onClick={(e) => { e.stopPropagation(); onHeaderClick?.(); }}
         className={`w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 ${onHeaderClick ? 'hover:bg-panel-hover transition-colors cursor-pointer' : 'cursor-default'}`}
       >
         <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
@@ -115,32 +123,41 @@ export function CorpsCard({
         <div className={`h-full ${getCohesionBarColor(avgCohesion)} transition-all`} style={{ width: `${Math.min(100, avgCohesion)}%` }} />
       </div>
 
-      {commanderName && (
-        <div className="px-3 py-1 text-[10px] bg-panel-bg flex justify-between border-b border-panel-border/50 text-text-secondary">
-          <span>Commander:</span>
-          <span className="text-text-primary">{commanderName}{commanderActing ? ' (Acting)' : ''}</span>
-        </div>
-      )}
+      {/* Clickable body area — flips the card */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleBodyClick}
+        onKeyDown={(e) => e.key === 'Enter' && handleBodyClick()}
+        className="cursor-pointer hover:bg-panel-hover/40 transition-colors"
+      >
+        {commanderName && (
+          <div className="px-3 py-1 text-[10px] bg-panel-bg border-b border-panel-border/50 text-text-secondary">
+            <div>Commander:</div>
+            <div className="text-text-primary font-semibold">{commanderName}{commanderActing ? ' (Acting)' : ''}</div>
+          </div>
+        )}
 
-      {/* Equipment summary row */}
-      {(equip.tanksTotal > 0 || equip.artyTotal > 0) && (
-        <div className="px-3 py-1.5 flex items-center gap-4 text-[11px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
-          {equip.tanksTotal > 0 && (
-            <span className="flex items-center gap-1" title={`Tanks: ${equip.tanks} operational / ${equip.tanksTotal} total`}>
-              <Icon name="tanks" size={13} />
-              <span className="text-text-primary font-semibold">{equip.tanks}</span>
-              <span className="text-text-secondary/70">/ {equip.tanksTotal}</span>
-            </span>
-          )}
-          {equip.artyTotal > 0 && (
-            <span className="flex items-center gap-1" title={`Artillery: ${equip.arty} operational / ${equip.artyTotal} total`}>
-              <Icon name="artillery" size={13} />
-              <span className="text-text-primary font-semibold">{equip.arty}</span>
-              <span className="text-text-secondary/70">/ {equip.artyTotal}</span>
-            </span>
-          )}
-        </div>
-      )}
+        {/* Equipment summary row */}
+        {(equip.tanksTotal > 0 || equip.artyTotal > 0) && (
+          <div className="px-3 py-1.5 flex items-center gap-4 text-[11px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
+            {equip.tanksTotal > 0 && (
+              <span className="flex items-center gap-1" title={`Tanks: ${equip.tanks} operational / ${equip.tanksTotal} total`}>
+                <Icon name="tanks" size={13} />
+                <span className="text-text-primary font-semibold">{equip.tanks}</span>
+                <span className="text-text-secondary/70">/ {equip.tanksTotal}</span>
+              </span>
+            )}
+            {equip.artyTotal > 0 && (
+              <span className="flex items-center gap-1" title={`Artillery: ${equip.arty} operational / ${equip.artyTotal} total`}>
+                <Icon name="artillery" size={13} />
+                <span className="text-text-primary font-semibold">{equip.arty}</span>
+                <span className="text-text-secondary/70">/ {equip.artyTotal}</span>
+              </span>
+            )}
+          </div>
+        )}
+      </div>
 
       {onStanceChange && (
         <div className="px-3 py-1.5 flex items-center justify-between gap-2">
@@ -152,6 +169,7 @@ export function CorpsCard({
             <select
               value={stance ?? 'balanced'}
               onChange={(event) => onStanceChange(event.target.value)}
+              onClick={(e) => e.stopPropagation()}
               className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-[10px] font-mono text-text-primary focus:outline-none"
             >
               <option value="defensive" title="Digs in. No offensive operations. Maximum entrenchment rate.">Defensive</option>
@@ -171,5 +189,101 @@ export function CorpsCard({
         </div>
       )}
     </div>
+  );
+
+  const cardBack = (
+    <div
+      className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden border-l-3 ${stanceBorder}`}
+    >
+      {/* Back header with flip-back button */}
+      <div className="w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2">
+        <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
+        <button
+          type="button"
+          onClick={() => setIsFlipped(false)}
+          className="text-[10px] text-text-secondary hover:text-text-primary transition-colors font-mono"
+        >
+          &larr; Back
+        </button>
+      </div>
+
+      <div className="px-3 py-2 space-y-2">
+        {/* Commander profile */}
+        <div>
+          <div className="text-[9px] uppercase tracking-wider text-text-secondary font-bold mb-1">Commander</div>
+          {commanderName ? (
+            <div className="text-[11px] text-text-primary font-semibold">
+              {commanderName}{commanderActing ? ' (Acting)' : ''}
+            </div>
+          ) : (
+            <div className="text-[11px] text-amber-500/60 italic">Unassigned</div>
+          )}
+        </div>
+
+        {/* Sector overview */}
+        <div>
+          <div className="text-[9px] uppercase tracking-wider text-text-secondary font-bold mb-1">Front Sectors</div>
+          <div className="text-[11px] text-text-primary tabular-nums">
+            {sectorCount != null && sectorCount > 0
+              ? `${sectorCount} sector${sectorCount !== 1 ? 's' : ''}`
+              : <span className="text-text-secondary italic">No active sectors</span>
+            }
+          </div>
+        </div>
+
+        {/* Operation status */}
+        <div>
+          <div className="text-[9px] uppercase tracking-wider text-text-secondary font-bold mb-1">Operations</div>
+          {activeOperationName ? (
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+              <div className="text-[11px]">
+                <span className="text-red-400 font-bold uppercase">{activeOperationName}</span>
+                {activeOperationPhase && (
+                  <span className="text-text-secondary ml-1.5">({activeOperationPhase})</span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-[11px] text-text-secondary italic">No active operations</div>
+          )}
+        </div>
+
+        {/* Quick stats */}
+        <div className="pt-1 border-t border-panel-border/30">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
+            <span className="text-text-secondary">Personnel</span>
+            <span className="text-text-primary tabular-nums font-semibold">{totalPersonnel.toLocaleString()}</span>
+            <span className="text-text-secondary">Brigades</span>
+            <span className="text-text-primary tabular-nums font-semibold">{brigades.length}</span>
+            <span className="text-text-secondary">Avg Cohesion</span>
+            <span className={`tabular-nums font-semibold ${avgCohesion >= 70 ? 'text-emerald-400' : avgCohesion >= 40 ? 'text-amber-400' : 'text-red-400'}`}>
+              {Math.round(avgCohesion)}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <FlipCard
+      isFlipped={isFlipped}
+      front={
+        <div
+          onMouseEnter={() => {
+            onHoverOsidsChange?.(corpsOsids);
+            onMouseEnter?.();
+          }}
+          onMouseLeave={() => {
+            onHoverOsidsChange?.([]);
+            onMouseLeave?.();
+          }}
+        >
+          {cardFront}
+        </div>
+      }
+      back={cardBack}
+    />
   );
 }

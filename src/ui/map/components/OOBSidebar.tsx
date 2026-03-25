@@ -273,7 +273,7 @@ export function OOBSidebar() {
               {!armyByFaction || armyByFaction.size === 0 ? (
                 <div className="text-xs text-text-secondary italic">No formations.</div>
               ) : (
-                FACTION_ORDER.filter((f) => armyByFaction.has(f) || reserveByFaction.has(f)).map((faction) => {
+                FACTION_ORDER.filter((f) => armyByFaction.has(f) || reserveByFaction.has(f)).map((faction, factionIndex) => {
                   const formations = armyByFaction.get(faction) ?? [];
                   const reserves = reserveByFaction.get(faction) ?? [];
                   const isCollapsed = collapsed[faction];
@@ -289,8 +289,34 @@ export function OOBSidebar() {
                     .filter(([id]) => !armyHqIds.has(id))
                     .sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
+                  const FACTION_DIVIDER_BG: Record<string, string> = {
+                    RS: 'bg-faction-rs/8',
+                    RBiH: 'bg-faction-rbih/8',
+                    HRHB: 'bg-faction-hrhb/8',
+                  };
+                  const FACTION_DIVIDER_BORDER: Record<string, string> = {
+                    RS: 'border-faction-rs/25',
+                    RBiH: 'border-faction-rbih/25',
+                    HRHB: 'border-faction-hrhb/25',
+                  };
+
                   return (
                     <div key={faction} className="space-y-2">
+                      {/* Faction divider — prominent separator between army sections */}
+                      {factionIndex > 0 && (
+                        <div className="h-px bg-panel-border mt-2 mb-1" />
+                      )}
+                      <div className={`flex items-center justify-center gap-2.5 py-2 -mx-3 px-3 border-y ${FACTION_DIVIDER_BORDER[faction] ?? 'border-panel-border'} ${FACTION_DIVIDER_BG[faction] ?? 'bg-panel-card'}`}>
+                        {getArmyCrest(faction) && (
+                          <img src={getArmyCrest(faction)} alt="" className="w-4 h-4 object-contain opacity-70" />
+                        )}
+                        <span className={`text-[11px] font-mono font-bold uppercase tracking-[0.2em] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                          {getArmyName(faction) ?? faction}
+                        </span>
+                        {getArmyCrest(faction) && (
+                          <img src={getArmyCrest(faction)} alt="" className="w-4 h-4 object-contain opacity-70" />
+                        )}
+                      </div>
                       <div
                         role="button"
                         tabIndex={0}
@@ -316,8 +342,9 @@ export function OOBSidebar() {
                             const commander = getFactionArmyCommander(faction, loadedGameState);
                             if (commander) {
                               return (
-                                <div className="text-[10px] text-text-secondary pl-7 truncate">
-                                  CO: <span className="text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</span>
+                                <div className="text-[10px] text-text-secondary pl-7">
+                                  <div>CO:</div>
+                                  <div className="text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</div>
                                 </div>
                               );
                             }
@@ -362,48 +389,56 @@ export function OOBSidebar() {
                               </button>
                             );
                           })}
-                          {corpsEntries.map(([corpsId, brigades]) => (
-                            <CorpsCard
-                              key={corpsId}
-                              corpsId={corpsId}
-                              corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : (() => {
-                                const fName = corpsFormationById.get(corpsId)?.name ?? corpsId;
-                                return fName === corpsId ? toTitleCase(fName.replace(/^(RS|RBiH|HRHB)_/i, '')) : fName;
-                              })()}
-                              brigades={brigades}
-                              faction={faction}
-                              stance={getCorpsStance(corpsId, faction)}
-                              onStanceChange={(next) => setCorpsStance(corpsId, next)}
-                              onHeaderClick={() => {
-                                if (corpsId !== '_ungrouped') {
-                                  setSelectedCorpsId(corpsId);
-                                } else {
-                                  const first = [...brigades].sort((a, b) => a.id.localeCompare(b.id))[0];
-                                  if (first) setSelectedFormationId(first.id);
-                                }
-                              }}
-                              onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
-                              onMouseEnter={() => setHoveredCorpsId(corpsId)}
-                              onMouseLeave={() => setHoveredCorpsId(null)}
-                              onOrbatClick={() => setSelectedOrbatCorpsId(corpsId)}
-                              commanderName={(() => {
-                                if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
-                                for (const entry of loadedGameState.namedOfficerData) {
-                                  const st = loadedGameState.namedOfficerStateById[entry.id];
-                                  if (st?.status === 'active' && st.assigned_corps_id === corpsId) return entry.name;
-                                }
-                                return undefined;
-                              })()}
-                              commanderActing={(() => {
-                                if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
-                                for (const entry of loadedGameState.namedOfficerData) {
-                                  const st = loadedGameState.namedOfficerStateById[entry.id];
-                                  if (st?.status === 'active' && st.assigned_corps_id === corpsId) return st.acting_commander;
-                                }
-                                return undefined;
-                              })()}
-                            />
-                          ))}
+                          {corpsEntries.map(([corpsId, brigades]) => {
+                            const corpsSectors = loadedGameState?.corpsFrontSectors?.filter((s) => s.corps_id === corpsId) ?? [];
+                            const corpsOps = loadedGameState?.operations?.filter((op) => op.corps_id === corpsId) ?? [];
+                            const activeOp = corpsOps.find((op) => op.phase === 'execution');
+                            return (
+                              <CorpsCard
+                                key={corpsId}
+                                corpsId={corpsId}
+                                corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : (() => {
+                                  const fName = corpsFormationById.get(corpsId)?.name ?? corpsId;
+                                  return fName === corpsId ? toTitleCase(fName.replace(/^(RS|RBiH|HRHB)_/i, '')) : fName;
+                                })()}
+                                brigades={brigades}
+                                faction={faction}
+                                stance={getCorpsStance(corpsId, faction)}
+                                onStanceChange={(next) => setCorpsStance(corpsId, next)}
+                                onHeaderClick={() => {
+                                  if (corpsId !== '_ungrouped') {
+                                    setSelectedCorpsId(corpsId);
+                                  } else {
+                                    const first = [...brigades].sort((a, b) => a.id.localeCompare(b.id))[0];
+                                    if (first) setSelectedFormationId(first.id);
+                                  }
+                                }}
+                                onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
+                                onMouseEnter={() => setHoveredCorpsId(corpsId)}
+                                onMouseLeave={() => setHoveredCorpsId(null)}
+                                onOrbatClick={() => setSelectedOrbatCorpsId(corpsId)}
+                                sectorCount={corpsSectors.length}
+                                activeOperationName={activeOp?.name}
+                                activeOperationPhase={activeOp?.phase}
+                                commanderName={(() => {
+                                  if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
+                                  for (const entry of loadedGameState.namedOfficerData) {
+                                    const st = loadedGameState.namedOfficerStateById[entry.id];
+                                    if (st?.status === 'active' && st.assigned_corps_id === corpsId) return entry.name;
+                                  }
+                                  return undefined;
+                                })()}
+                                commanderActing={(() => {
+                                  if (!loadedGameState?.namedOfficerData || !loadedGameState?.namedOfficerStateById) return undefined;
+                                  for (const entry of loadedGameState.namedOfficerData) {
+                                    const st = loadedGameState.namedOfficerStateById[entry.id];
+                                    if (st?.status === 'active' && st.assigned_corps_id === corpsId) return st.acting_commander;
+                                  }
+                                  return undefined;
+                                })()}
+                              />
+                            );
+                          })}
                         </>
                       )}
                     </div>
@@ -509,10 +544,17 @@ export function OOBSidebar() {
                                 <span className="text-text-secondary">Mom: {op.momentum}</span>
                               )}
                             </div>
-                            <div className="text-text-secondary text-[10px] tabular-nums">
-                              {objTotal > 0 && `Obj: ${objCurrent}/${objTotal}`}
-                              {op.supply_readiness != null && ` · Supply: ${(op.supply_readiness * 100).toFixed(0)}%`}
-                              {` · ${op.participating_brigade_count} brigades`}
+                            <div className="text-[10px] tabular-nums flex items-center gap-1 flex-wrap">
+                              {objTotal > 0 && <span className="text-text-secondary">Obj: {objCurrent}/{objTotal}</span>}
+                              <span className="text-text-secondary">{objTotal > 0 ? ' · ' : ''}Supply:{' '}</span>
+                              {op.supply_readiness != null ? (
+                                <span className={op.supply_readiness < 0.3 ? 'text-red-400 font-semibold' : op.supply_readiness < 0.7 ? 'text-amber-400' : 'text-green-400'}>
+                                  {(op.supply_readiness * 100).toFixed(0)}%
+                                </span>
+                              ) : (
+                                <span className="text-text-secondary italic" title="Supply readiness not yet assessed for this operation">N/A</span>
+                              )}
+                              <span className="text-text-secondary"> · {op.participating_brigade_count} brigades</span>
                             </div>
                           </button>
                         );
