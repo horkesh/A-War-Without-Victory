@@ -340,7 +340,16 @@ export function updateSupplyReserves(
         // Phase B: Patron aid income
         const materialSupport = faction?.patron_state?.material_support_level ?? 0;
         const factionEfficiency = PATRON_AID_FACTION_EFFICIENCY[fid] ?? 1.0;
-        const rawPatronAid = materialSupport * PATRON_AID_SCALE * factionEfficiency;
+
+        // Arms embargo throttles RBiH patron aid (v0.7.0 Phase 4)
+        const armsEmbargoActive = state.military.event_flags?.arms_embargo_active === true;
+        const embargoMult = (fid === 'RBiH' && armsEmbargoActive) ? 0.6 : 1.0;
+
+        // Posavina corridor boosts RS supply (v0.7.0 Phase 4)
+        const corridorSecured = state.military.event_flags?.corridor_secured === true;
+        const corridorMult = (fid === 'RS' && corridorSecured) ? 1.3 : 1.0;
+
+        const rawPatronAid = materialSupport * PATRON_AID_SCALE * factionEfficiency * embargoMult * corridorMult;
         const patronAidGeneral = rawPatronAid * PATRON_AID_GENERAL_FRACTION;
         const patronAidHeavy = rawPatronAid * PATRON_AID_HEAVY_FRACTION;
 
