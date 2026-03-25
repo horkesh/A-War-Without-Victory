@@ -3,6 +3,13 @@
 
 ---
 
+### [Calibration] When a threshold system isn't biting, check the numerator accounting before tuning the threshold (2026-03-25) — NEW
+- **Context**: RS grew from 99k at w40 to 149k at w104 (target 110-120k). Exhaustion thresholds (0.25 half-rate, 0.50 hard cap) weren't constraining growth. Four attempts to fix via constant tuning (displacement reduction, casualty feedback 25%→75%, surge curves) had near-zero effect.
+- **Wrong approach**: Tuning constants (feedback rates, surge curves, thresholds) when the system receiving the data has accounting bugs. Three bugs meant the exhaustion numerator tracked only ~60% of actual demographic commitment: pool.available excluded, initial OOB troops invisible, strategic reserve sweeps leaked.
+- **Right approach**: Investigate WHY the threshold isn't binding. Diagnostic script showed 86/110 RS municipalities below 0.25 with median ratio 0.08. The thresholds were correct — the data was wrong. Fix the accounting first, THEN tune constants if still needed.
+- **Do instead**: Before tuning any threshold/cap system, write a diagnostic that shows the distribution of values relative to the threshold. If most values are far below the threshold, the problem is upstream (data quality), not the threshold itself.
+
+
 ### [Calibration] One change per run + mandatory insanity check — VIOLATED 2026-03-15
 - **Violation evidence**: n747 (`56f2ae0`) bundled FOUR independent fixes (offensive_support trigger, auto-join op, force-assign sector, bot AI corps lookup) into a single calibration run. When the first three produced 0 elite battles (n746), attribution was ambiguous. Debug logging after n746 identified Change 4 as the sole blocker — if each fix had been a separate run, identification would have been immediate.
 - **Cost**: One wasted calibration cycle (n746). No regression, but delayed root-cause identification.

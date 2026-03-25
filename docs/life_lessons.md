@@ -70,11 +70,7 @@
 
 ## New Lessons (always read these)
 
-### [Calibration] When a threshold system isn't biting, check the numerator accounting before tuning the threshold (2026-03-25) — NEW
-- **Context**: RS grew from 99k at w40 to 149k at w104 (target 110-120k). Exhaustion thresholds (0.25 half-rate, 0.50 hard cap) weren't constraining growth. Four attempts to fix via constant tuning (displacement reduction, casualty feedback 25%→75%, surge curves) had near-zero effect.
-- **Wrong approach**: Tuning constants (feedback rates, surge curves, thresholds) when the system receiving the data has accounting bugs. Three bugs meant the exhaustion numerator tracked only ~60% of actual demographic commitment: pool.available excluded, initial OOB troops invisible, strategic reserve sweeps leaked.
-- **Right approach**: Investigate WHY the threshold isn't binding. Diagnostic script showed 86/110 RS municipalities below 0.25 with median ratio 0.08. The thresholds were correct — the data was wrong. Fix the accounting first, THEN tune constants if still needed.
-- **Do instead**: Before tuning any threshold/cap system, write a diagnostic that shows the distribution of values relative to the threshold. If most values are far below the threshold, the problem is upstream (data quality), not the threshold itself.
+### [Calibration] When a threshold system isn't biting, check the numerator accounting before tuning the threshold (2026-03-25) — NEW → see `calibration.md`
 
 ### [Process] NEVER fabricate historical claims — dispatch /historian, don't speculate (2026-03-24) — NEW
 - **Context**: When analyzing 4th Corps weakness, I stated "Significant reinforcement from 3rd Corps (Central Bosnia) units redeploying south" as if it were sourced fact. User called it out. I had no source — it was speculation presented as history.
