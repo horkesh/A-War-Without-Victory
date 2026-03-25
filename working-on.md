@@ -1,16 +1,16 @@
-# Working On: Emergent Brigade Phase 2 — COMPLETE
+# Working On: v0.7.0 Phase 5 — FIXED→CONDITIONAL Event Conversions
 
-## What Was Done
-- Enclave capacity gate fix (ENCLAVE_FORMATION_CAPACITY_THRESHOLD=0.30)
-- Surplus pool rerouting (new pipeline step)
-- deriveMaxPersonnel activated with lowered caps (1200-2800)
-- Asymmetric mobilization (RBiH 0.09, RS 0.04, HRHB 0.12)
-- Strategic reserve RBiH draw rate 0.02→0.15
-- Life lessons restructured (8 topic files)
-- 9 skills wired with Required Reading
-- Historian OOB master hierarchy
-- n1078: 91.3%, RBiH 144k > RS+HRHB 144k (+369)
+## Context
+v0.7.0 Phases 1-4 COMPLETE. Phase 5 is event JSON work — no engine code.
+
+## What's Done (this session)
+- Emergent Brigade Phase 2: enclave fix, pool rerouting, tiered caps, asymmetric mobilization
+- n1079: 91.3%, RBiH 144k > RS+HRHB 144k (+369), 114 RBiH brigades
+- v0.7.0 Phase 4: all 7 engine flag reads wired (supply, pressure, ceasefire, Dayton)
+- Life lessons restructured (8 topic files), 9 skills wired, historian hierarchy
+- Nightshift triage confirmed complete
 
 ## What's Next
-- v0.7.0 Phase 4 (engine flag reads) — plan at docs/plans/2026-03-23-event-flag-wiring-plan.md
-- 5 calibration runs from nightshift issue triage (MAX_EVENTS_PER_TURN, Gorazde, corridor_severed)
+- Phase 5: FIXED→CONDITIONAL conversions (Srebrenica, Markale, Zepa, endgame chain)
+- Phase 6: Cleanup + remaining orphan flags
+- Then v0.7.0 is complete → v0.7.1 (Dynamic Codex Phase 1)
