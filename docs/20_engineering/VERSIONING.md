@@ -96,7 +96,7 @@ The Codex transforms from static essays into a living historical document that m
 - v0.7.0: Event flag wiring + exhaustion overhaul + Codex QA **COMPLETE**. 25 flags wired, 7 FIXED→CONDITIONAL endgame chain, pool decay, 30 essay corrections across 3-pass QA. 91.6% calibration.
 - v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, Operation Corridor, Mostar liberation, Srebrenica enclave, HRHB political goal, arms embargo). /historian + /narrative-designer.
 - v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries), Codex UI. **+ Letter Home**: procedural casualty vignettes in CoS briefing (template-driven, 1 per turn). **Can parallel with v0.8.0** — no dependency
-- v0.7.2: Warroom React migration. **+ Ghost Map**: 1991 census demographics overlay (Deck.gl ScatterplotLayer, toolbar toggle). **+ Exhaustion Clock**: visual depletion indicator in Army HQ (single component, reads warPhaseExhaustion)
+- v0.7.2: Warroom React migration. **+ Ghost Map**: 1991 census demographics overlay (Deck.gl ScatterplotLayer, toolbar toggle). **+ Exhaustion Clock**: visual depletion indicator in Army HQ (single component, reads warPhaseExhaustion). **+ Ops Modal UX Overhaul**: 4 work packages — parameter strip subtitles/tooltips, brigade card readability, G-2 phase redesign, modal flow fixes (pointer-events bug first). Prompt: `docs/40_reports/PROMPT_OPS_MODAL_UX_OVERHAUL.md`
 - v0.7.3: Canon audit (remove September 1991 start, peace phase references from all docs) — cleanup last, lowest risk
 
 ### 0.8.x — Command Chain
