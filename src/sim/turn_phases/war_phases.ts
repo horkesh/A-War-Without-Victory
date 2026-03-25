@@ -91,6 +91,7 @@ import {
 import { runCohesionDrift } from '../combat/cohesion_drift.js';
 import { runMoraleDrift } from '../combat/morale_drift.js';
 import { runOngoingMobilization } from '../combat/ongoing_mobilization.js';
+import { applyPoolWarWearinessDecay } from '../combat/pool_decay.js';
 import { getEnablePhase3ADiffusion, runPhase3APressureDiffusion } from '../pressure/phase3a_pressure_diffusion.js';
 import {
     buildPressureEligibilityPhase3A,
@@ -1600,6 +1601,13 @@ export const warPhases: NamedPhase[] = [
                 graph.settlements,
                 context.input.municipalityPopulation1991 ?? undefined
             );
+        }
+    },
+    {
+        name: 'pool-war-weariness-decay',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            context.report.pool_war_weariness_decay = applyPoolWarWearinessDecay(context.state);
         }
     },
     {

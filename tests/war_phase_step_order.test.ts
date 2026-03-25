@@ -75,6 +75,7 @@ describe('war-phase step ordering', () => {
         // +1 from offensive-paramilitary-detect (v0.6.5 Drina valley offensive sweep)
         // +1 from recall-drifted-brigades (prevent brigade drift far from home)
         // +1 from reroute-pool-surplus (transfer manpower from exhausted to deficit municipalities)
-        expect(stepNames.length).toBe(146);
+        // +1 from pool-war-weariness-decay (desertion/draft evasion/emigration drain on pool.available)
+        expect(stepNames.length).toBe(147);
     });
 });

@@ -65,6 +65,7 @@ import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
 import type { SiegeAttritionReport } from './combat/siege_attrition.js';
 import type { MoraleDriftReport } from './combat/morale_drift.js';
 import type { OngoingMobilizationReport } from './combat/ongoing_mobilization.js';
+import type { PoolDecayReport } from './combat/pool_decay.js';
 import type { StrategicReserveCollectionReport, StrategicReserveReinforcementReport } from './combat/strategic_reserve.js';
 import type { ResolveAttackOrdersReport } from './combat/resolve_attack_orders.js';
 import type { OsidColumnMovementReport } from './combat/osid_column_movement.js';
@@ -179,6 +180,7 @@ export interface TurnReport {
     siege_bombardment_attrition?: SiegeAttritionReport;
     takeover_displacement?: TakeoverDisplacementReport;
     ongoing_mobilization?: OngoingMobilizationReport;
+    pool_war_weariness_decay?: PoolDecayReport;
     brigade_reinforcement?: ReinforceBrigadesReport;
     brigade_dissolution?: DissolutionReport;
     brigade_reconstitution?: ReconstitutionReport;

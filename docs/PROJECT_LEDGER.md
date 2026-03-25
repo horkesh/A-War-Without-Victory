@@ -1,7 +1,24 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.7.0 Phase 5 COMPLETE + Exhaustion Accounting Overhaul.** 1465 tests, 118 suites. **91.3% area-weighted (40w, zero regression).** Exhaustion system fixed: RS w104 149k→139k (target 110-120k, was 29k over, now 19k over). Three accounting bugs fixed (A1+A2+A3). Casualty feedback unified to 75%. RS/HRHB surge curves lowered post-w52. **Next: pool decay or threshold tuning to close remaining RS gap.**
+**Status:** **v0.7.0 Phase 5 COMPLETE + Pool Decay (War Weariness).** 1465 tests, 118 suites. **91.2% area-weighted (40w, -0.1pp).** Pool decay drains pool.available per turn (desertion/emigration/draft evasion). Faction-differentiated: HRHB 2.5%, RS 2.0%, RBiH 1.2%. Enclaves exempt. RS w104 139k→124k (target 110-120k, now 4k over). HRHB w104 66k→58k (target 50-55k, 3k over). **Next: threshold tuning to close remaining RS/HRHB gap, then v0.7.0 Phase 6.**
+
+## [2026-03-25] Pool War Weariness Decay — Force Plateau Mechanism
+
+**Scope:** Per-turn decay on pool.available modeling desertion, draft evasion, and emigration. Secondary mechanism to close remaining RS/HRHB force plateau gap after exhaustion accounting overhaul.
+
+**Implementation:**
+- New file: `src/sim/combat/pool_decay.ts` — `applyPoolWarWearinessDecay()`.
+- Pipeline step `pool-war-weariness-decay` after `ongoing-mobilization`, before `reroute-pool-surplus`.
+- Faction-differentiated rates: HRHB 2.5% (exit-to-Croatia), RS 2.0% (desertion crisis), RBiH 1.2% (geographic entrapment).
+- Enclave municipalities exempt (srebrenica, gorazde, zepa) — no escape route.
+- Decayed men vanish entirely (not added to pool.exhausted).
+- Report: `PoolDecayReport` on turn context (`pool_war_weariness_decay`).
+
+**Results:**
+- 40w: 91.2% area-weighted (was 91.3%, -0.1pp marginal). ARBiH 142k, RS 98k, HRHB 41k.
+- 104w: ARBiH 199k, RS 124k (was 139k, -15k), HRHB 58k (was 66k, -8k).
+- RS 4k over 120k ceiling; HRHB 3k over 55k ceiling. Significant improvement from 19k/11k over.
 
 ## [2026-03-25] Exhaustion Accounting Overhaul — Force Plateau Fixes
 
