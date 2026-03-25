@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import type { OperationView, FormationView, LoadedGameState, NamedOfficerView } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
-import { formatOsidLabel } from '../../utils/formatters';
+import { formatOsidLabel, turnToDateString } from '../../utils/formatters';
 import { CollapsibleSection } from './CollapsibleSection';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
@@ -171,7 +171,7 @@ function WeeklyLogTimeline({ log }: { log: CompletedOp['weekly_log'] }) {
                     const hasEvents = entry.notable_events.length > 0;
                     return (
                         <div key={i} className={`flex items-start gap-2 px-2 py-0.5 text-[9px] font-mono tabular-nums ${hasCaptures ? 'bg-emerald-500/5 border-l-2 border-emerald-400/40' : 'border-l-2 border-panel-border/20'}`}>
-                            <span className="text-text-secondary/60 w-8 shrink-0">W{entry.turn}</span>
+                            <span className="text-text-secondary/60 w-16 shrink-0">{turnToDateString(entry.turn).split(' ').slice(1, 3).join(' ')}</span>
                             <span className="text-text-secondary/40 w-10 shrink-0 uppercase">{entry.phase.slice(0, 5)}</span>
                             {entry.attacks_this_turn > 0 && (
                                 <span className="text-red-500/80">{entry.attacks_this_turn} ATK</span>

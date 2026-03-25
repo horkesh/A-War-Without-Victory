@@ -1,5 +1,6 @@
 import React from 'react';
 import { FACTION_HEX_COLORS } from '../../utils/theme.js';
+import { turnToDateString } from '../../utils/formatters.js';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -123,7 +124,7 @@ export const ChronicleRibbonScrubber = React.memo(function ChronicleRibbonScrubb
                             className="flex-1 cursor-pointer hover:opacity-100 transition-opacity"
                             style={{ backgroundColor: color, opacity: 0.5 }}
                             onClick={() => onClickTurn(turn)}
-                            title={`Week ${turn}`}
+                            title={`${turnToDateString(turn)} (Week ${turn})`}
                         />
                     );
                 })}

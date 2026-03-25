@@ -7,6 +7,7 @@
  * Enclave data comes directly from enclaveResilience on LoadedGameState.
  */
 import type { LoadedGameState, FormationView } from '../../data/types';
+import { turnToDateString } from '../../utils/formatters';
 
 import {
     MAINTENANCE_DRAIN_PER_FORMATION,
@@ -167,7 +168,7 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
                     </span>
                     {breakdown.estimatedRunwayTurns != null && (
                         <span className="text-[10px] text-red-400/80">
-                            Depletion ~{breakdown.estimatedRunwayTurns} turns (Week {currentTurn + breakdown.estimatedRunwayTurns})
+                            Depletion ~{breakdown.estimatedRunwayTurns} turns ({turnToDateString(currentTurn + breakdown.estimatedRunwayTurns)})
                         </span>
                     )}
                 </div>

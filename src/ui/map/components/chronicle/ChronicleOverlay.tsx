@@ -4,7 +4,21 @@ import { generateChronicleEntries } from './generateChronicleEntries.js';
 import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { FACTION_HEX_COLORS } from '../../utils/theme.js';
+import { turnToDateString } from '../../utils/formatters.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
+
+/** Abbreviated date for column labels: "Dec 1992" */
+function turnToShortDate(turn: number): string {
+    const full = turnToDateString(turn); // "25 Dec 1992"
+    const parts = full.split(' ');
+    if (parts.length >= 3) return `${parts[1]} ${parts[2]}`;
+    return full;
+}
+
+/** Full date for group headers: "25 Dec 1992" */
+function turnToFullDate(turn: number): string {
+    return turnToDateString(turn);
+}
 
 /** Minimum width for turns with no events. */
 const EMPTY_TURN_WIDTH = 80;
@@ -36,6 +50,7 @@ export function ChronicleOverlay() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [viewportFraction, setViewportFraction] = useState(1);
     const [viewportOffset, setViewportOffset] = useState(0);
+    const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set());
 
     const turnSummaries = state?.turnSummaries ?? [];
 
@@ -135,6 +150,15 @@ export function ChronicleOverlay() {
 
     const handleClose = useCallback(() => setOpen(false), [setOpen]);
 
+    const toggleWeekExpanded = useCallback((turn: number) => {
+        setExpandedWeeks(prev => {
+            const next = new Set(prev);
+            if (next.has(turn)) next.delete(turn);
+            else next.add(turn);
+            return next;
+        });
+    }, []);
+
     // ESC to close
     useEffect(() => {
         if (!open) return;
@@ -196,7 +220,7 @@ export function ChronicleOverlay() {
                     className="text-[8px] font-mono text-stone-500 mt-1 select-none"
                     style={{ marginTop: RIBBON_HEIGHT + 2 }}
                 >
-                    {t % 4 === 0 || hasEvents ? `W${t}` : ''}
+                    {t % 4 === 0 || hasEvents ? turnToShortDate(t) : ''}
                 </div>
 
                 {/* Stem + cards */}
@@ -208,12 +232,52 @@ export function ChronicleOverlay() {
                             style={{ height: '20px' }}
                         />
 
-                        {/* Cards stacked vertically */}
-                        <div className="flex flex-col items-center" style={{ gap: `${CARD_STACK_GAP}px` }}>
-                            {group.map((entry, i) => (
-                                <ChronicleCard key={`${t}-${entry.type}-${i}`} entry={entry} />
-                            ))}
-                        </div>
+                        {group.length === 1 ? (
+                            /* Single entry — show card directly with date */
+                            <div className="flex flex-col items-center" style={{ gap: `${CARD_STACK_GAP}px` }}>
+                                <div className="text-[8px] font-mono text-stone-400 mb-1">
+                                    {turnToFullDate(t)}
+                                </div>
+                                <ChronicleCard key={`${t}-${group[0].type}-0`} entry={group[0]} />
+                            </div>
+                        ) : (
+                            /* Multiple entries — expandable group */
+                            <div className="flex flex-col items-center w-full" style={{ gap: `${CARD_STACK_GAP}px` }}>
+                                <button
+                                    onClick={() => toggleWeekExpanded(t)}
+                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[9px] font-mono text-stone-300 hover:text-amber-300 transition-colors cursor-pointer select-none"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #2a2520 0%, #1e1b18 100%)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        minWidth: '140px',
+                                    }}
+                                >
+                                    <span className="text-amber-400/80">{turnToFullDate(t)}</span>
+                                    <span className="text-stone-500">—</span>
+                                    <span>{group.length} events</span>
+                                    <span className="ml-auto text-[8px] text-stone-500">
+                                        {expandedWeeks.has(t) ? '\u25B2' : '\u25BC'}
+                                    </span>
+                                </button>
+
+                                {expandedWeeks.has(t) && (
+                                    <div
+                                        className="flex flex-col items-center"
+                                        style={{
+                                            gap: `${CARD_STACK_GAP}px`,
+                                            maxHeight: '400px',
+                                            overflowY: 'auto',
+                                            scrollbarWidth: 'thin',
+                                            scrollbarColor: '#555 #1a1a1a',
+                                        }}
+                                    >
+                                        {group.map((entry, i) => (
+                                            <ChronicleCard key={`${t}-${entry.type}-${i}`} entry={entry} />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -232,7 +296,7 @@ export function ChronicleOverlay() {
                         War Chronicle
                     </h1>
                     <span className="text-[9px] font-mono text-stone-500">
-                        {entries.length} events — Weeks {minTurn}–{maxTurn}
+                        {entries.length} events — {turnToFullDate(minTurn)} – {turnToFullDate(maxTurn)}
                     </span>
                 </div>
                 <button

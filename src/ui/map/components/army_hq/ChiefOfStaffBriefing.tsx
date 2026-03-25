@@ -7,6 +7,7 @@
 import { useMemo } from 'react';
 import type { LoadedGameState } from '../../data/types';
 import type { BriefingItem } from './SituationBriefing';
+import { turnToDateString } from '../../utils/formatters';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -253,7 +254,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
 
             {/* Header */}
             <div className="px-3 py-2 border-b border-neutral-300/60 bg-[#ebe5d8]">
-                <div className="text-[8px] uppercase font-bold text-neutral-500 tracking-[0.2em]">Daily Briefing — Week {turn}</div>
+                <div className="text-[8px] uppercase font-bold text-neutral-500 tracking-[0.2em]">Daily Briefing — {turnToDateString(turn)}</div>
                 <div className="text-[11px] font-bold text-neutral-800 mt-0.5">
                     {profile.rank} {profile.name}
                 </div>

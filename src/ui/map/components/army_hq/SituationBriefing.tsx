@@ -4,6 +4,7 @@
  * knows what needs attention without reading every panel.
  */
 import type { LoadedGameState, FactionId } from '../../data/types';
+import { turnToDateString } from '../../utils/formatters';
 
 // ── Types ────────────────────────────────────────────────────────────
 export type BriefingTarget =
@@ -248,7 +249,7 @@ export function generateBriefing(
     // Territory info
     items.push({
         id: id(), severity: 'info', category: 'territory',
-        title: `Week ${state.turn ?? 0}`,
+        title: turnToDateString(state.turn ?? 0),
         detail: `${brigades.length} active brigades, ${operations.length} operations`,
         target: { type: 'none' },
     });
