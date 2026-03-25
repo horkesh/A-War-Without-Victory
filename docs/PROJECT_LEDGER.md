@@ -1,7 +1,23 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.7.0 Phase 5 COMPLETE + Exhaustion Overhaul + Simin Han + OSID Display Names.** 1465 tests, 118 suites. **91.6% area-weighted (40w).** OSID display names: "Simin Han (Tuzla)" not "simin_han_2", no "Tuzla (Tuzla)" duplicates. **Next: v0.7.0 Phase 6 (Dynamic Codex) or v0.8 (Command Chain).**
+**Status:** **v0.7.0 Phase 5 COMPLETE + UI Polish.** 1465 tests, 118 suites. **91.6% area-weighted (40w).** Chronicle expandable cards + real dates across 7/9 UI surfaces. **Next: v0.7.0 Phase 6 (Dynamic Codex) or v0.8 (Command Chain).**
+
+## [2026-03-25] Chronicle Expandable Cards + Real Dates Across UI
+
+**Scope:** Fix chronicle stacking overflow and replace raw week/turn numbers with human-readable dates across 7 UI components.
+
+**Chronicle expandable cards:** Same-week entries no longer stack vertically into invisible overflow. Multiple entries per week collapse into a summary bar ("25 Dec 1992 — 3 events") with click-to-expand. Expanded container capped at 400px with scroll. Single-entry weeks show card directly. Header shows date range ("1 Apr 1992 – 25 Mar 1993"). Column labels show "Dec 1992" instead of "W35".
+
+**Date display audit:** Found 9 UI surfaces showing turn/week numbers. 2 already used `turnToDateString()` (Army HQ modal, AAR panel). Fixed remaining 7:
+- ChiefOfStaffBriefing: "Daily Briefing — 7 Oct 1992" (was "Week 15")
+- SituationBriefing: card titles show dates (was "Week 15")
+- SupplyIntelligence: depletion estimate shows target date (was "Week 47")
+- OperationsSection: weekly log shows "Dec 1992" (was "W12"), span widened w-8→w-16
+- ChronicleOverlay: header + column labels use dates (was "Weeks 0-52" / "W35")
+- ChronicleSpine: scrubber tooltip "25 Dec 1992 (Week 35)" (was "Week 35")
+
+**Files:** `ChronicleOverlay.tsx` (expandable cards + dates), `ChronicleSpine.tsx` (tooltip), `ChiefOfStaffBriefing.tsx`, `SituationBriefing.tsx`, `SupplyIntelligence.tsx`, `OperationsSection.tsx`.
 
 ## [2026-03-25] OSID Display Names — Human-Readable Settlement Names
 
