@@ -1,7 +1,44 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.7.0 Phase 5 COMPLETE + UI Polish.** 1465 tests, 118 suites. **91.6% area-weighted (40w).** Chronicle expandable cards + real dates across 7/9 UI surfaces. **Next: v0.7.0 Phase 6 (Dynamic Codex) or v0.8 (Command Chain).**
+**Status:** **v0.7.0 Phase 5 COMPLETE + Codex QA COMPLETE.** 1465 tests, 118 suites. **91.6% area-weighted (40w).** 83 Codex essays verified through 3-pass QA (24 corrections). 13 missing essays tracked. **Next: author 13 missing 1992 essays, then v0.7.0 Phase 6 (Dynamic Codex) or v0.8 (Command Chain).**
+
+## [2026-03-25] Codex Essay QA — 3-Pass Audit (24 Corrections Across 18 Essays)
+
+**Scope:** Systematic factual accuracy audit of all 83 Codex essays. Three full passes with 5 QA rounds each: historian fact-check (4 parallel agents), operations expert military accuracy, web/ICTY verification, war-or-game realism audit, geographic/directional sanity check. Source hierarchy: ICTY verdicts FIRST, BB second, web tertiary.
+
+**Pass 1 — 17 corrections across 15 essays:**
+- Operation Sana: title "Sweeps West" → "Breaks East" (5th Corps went SE from Bihac)
+- Operation Sharp Guard: predecessor ops corrected
+- Operation Cincar: joint ARBiH-HVO attribution (was HVO-only). ARBiH 7th Corps did 12 days heavy lifting (Oct 20), HVO entered Nov 1, captured Kupres Nov 3
+- Bijeljina: "town of 97k" → "municipality" (town was 36k)
+- Carter ceasefire: itinerary reversed (Sarajevo first per BB1 p.64)
+- Resolution 820: impossible chronology fixed
+- Stupni Do: fabricated "Apostoli" unit removed then RESTORED (ICTY confirms both Apostoli + Maturice)
+- Grabovica/Uzdol: Halilovic "Chief of Staff" → "former Commander"
+- US envoy: Redman succession "1993" → "early 1994"
+- Second Markale: "single mortar round" → "five mortar rounds"
+- Tuzla Gate: Djukic "died" → "fled to Serbia, remains fugitive"
+- Deliberate Force: ended 20 September (not 14 September)
+- Sarajevo tunnel: construction 29 January 1993, 760m, D-B codename (museum primary source overriding Wikipedia)
+- Federation ground offensive: Sana = ARBiH 5th Corps, Mrkonjic Grad = Mistral 2
+- Operation Neretva 93: Halilovic General Staff coordination role added
+
+**Pass 2 — 5 corrections:**
+- Sharp Guard predecessors: Maritime Guard (NATO) + Sharp Fence (WEU) — corrected after first-pass got faction assignment backward
+- Stupni Do: "Apostoli" restored (first-pass removal was wrong per ICTY indictment)
+- Operation Sana: removed false capture sequence (no sourced order)
+- Srebrenica shelling: duplicate text artifact removed
+
+**Pass 3 — 2 corrections:**
+- Tuzla Gate: Djukic conviction year 2007 → 2009
+- Operation Mistral 2: added 1st Krajina Corps' 30th Infantry Division to VRS defense attribution
+
+**Key process lesson:** First-pass "fixes" can introduce new errors. The Stupni Do "Apostoli" removal was wrong — ICTY confirms both units. The Sharp Guard predecessor names were corrected incorrectly twice before getting right on the third pass. Wikipedia contradicted the Sarajevo Tunnel Museum's own records — primary source in Bosnian language was authoritative.
+
+**Remaining:** 13 essays listed in index have no files (all 1992 foundation events — barracks, siege, JNA withdrawal, Drina cleansing, Operation Corridor). Essay index has ID prefix mismatch (index uses `essay_` prefix, files don't). 6 editorial/tone issues from Round 4 realism audit await user direction.
+
+**Files:** 18 essay JSON files in `data/scenarios/essays/` modified across 4 commits.
 
 ## [2026-03-25] Chronicle Expandable Cards + Real Dates Across UI
 

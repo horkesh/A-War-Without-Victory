@@ -72,6 +72,10 @@
 
 ### [Calibration] When a threshold system isn't biting, check the numerator accounting before tuning the threshold (2026-03-25) — NEW → see `calibration.md`
 
+### [QA] First-pass fixes can introduce new errors — always verify corrected content (2026-03-25) — NEW → see `process.md`
+
+### [QA] Primary sources in local language override English Wikipedia (2026-03-25) — NEW → see `process.md`
+
 ### [Process] NEVER fabricate historical claims — dispatch /historian, don't speculate (2026-03-24) — NEW
 - **Context**: When analyzing 4th Corps weakness, I stated "Significant reinforcement from 3rd Corps (Central Bosnia) units redeploying south" as if it were sourced fact. User called it out. I had no source — it was speculation presented as history.
 - **Wrong approach**: Reasoning about what "probably happened" historically and presenting it as established fact. In a project with a `/historian` agent specifically for sourced historical research, this is a role violation.

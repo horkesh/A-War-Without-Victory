@@ -3,6 +3,19 @@
 
 ---
 
+### [QA] First-pass fixes can introduce new errors — always run a verification pass on corrected content (2026-03-25) — NEW
+- **Context**: 3-pass Codex essay QA. Pass 1 removed "Apostoli" unit from Stupni Do essay because BB didn't mention it. Pass 2 found ICTY and Wikipedia confirm BOTH Apostoli AND Maturice participated — the removal was wrong. Similarly, Sharp Guard predecessor operations were "corrected" to wrong names twice before the third pass got them right.
+- **Wrong approach**: Applying fixes from one source (BB) without cross-referencing others (ICTY, web). Assuming a fix is correct because it came from a QA agent.
+- **Right approach**: Every batch of fixes needs a verification pass that re-reads the corrected text and checks the specific claims that were changed. The fix itself is a new claim that needs verification.
+- **Do instead**: After any QA fix batch, dispatch a focused verification agent that reads ONLY the modified essays and web-searches the specific changed claims.
+
+### [QA] Primary sources in local language override English Wikipedia (2026-03-25) — NEW
+- **Context**: Sarajevo Tunnel Museum's own text (Bosnian) says construction began 29 January 1993, length 760m. Wikipedia says 1 March and ~800m. A QA agent "fixed" the essay from January to March based on Wikipedia — making it WORSE.
+- **Wrong approach**: Treating English Wikipedia as authoritative when a primary source in the original language exists. The museum built the tunnel — they know when construction started.
+- **Right approach**: Source hierarchy for BiH war facts: ICTY verdicts > primary sources in B/C/S > BB > academic sources > English Wikipedia. When a primary source contradicts Wikipedia, the primary source wins.
+- **Do instead**: When verifying Bosnian War facts, always check if a B/C/S primary source exists (museum, court, government archive). If it does, it overrides English-language secondary sources.
+
+
 ### [Process] Prove it in a test script BEFORE pushing renderer changes — VIOLATED 2026-03-19
 - **Violation evidence**: Built an HTML edges viewer that correctly rendered continuous front lines with gap bridging. Then "ported" the fix to the game renderer (`buildCorpsFrontLinesGeoJSON.ts`) by writing new code from memory instead of extracting the proven algorithm. Pushed 4 broken versions: (1) friendlyAdj excluded exterior polygon edges (2 bridges instead of 345), (2) deadEndCoords Map overwritten during iteration, (3) `frontier=[]` didn't break outer loop, (4) bridges added as disconnected features instead of merged into chains.
 - **Cost**: 4 broken commits, user frustration, hours of churn. The working algorithm existed in the viewer the entire time.
