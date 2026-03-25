@@ -92,12 +92,13 @@ const DEFAULT_MOBILIZATION_SCALE = 1.0;
 function getMobilizationSurgeFactor(turn: number, faction: string): number {
     if (faction === 'RS') {
         // VRS: JNA inheritance → organized, lower initial rush, more sustained
+        // n1082: post-w52 drop to plateau at ~110k (was growing to 149k at w104)
         if (turn <= 12) return 1.6;
         if (turn <= 26) return 1.4;
         if (turn <= 52) return 1.1;
-        if (turn <= 78) return 0.9;
-        if (turn <= 104) return 0.8;
-        return 0.5;
+        if (turn <= 78) return 0.4;   // was 0.9 — VRS peaked mid-93, manpower exhaustion
+        if (turn <= 104) return 0.2;  // was 0.8 — near-zero growth, VRS shrinking by 1994
+        return 0.1;                   // was 0.5 — minimal, war weariness + desertions
     }
     if (faction === 'RBiH') {
         // ARBiH: desperate mass mobilization early, exhaustion-driven decline
@@ -110,12 +111,13 @@ function getMobilizationSurgeFactor(turn: number, faction: string): number {
     }
     if (faction === 'HRHB') {
         // HVO: capable early, slight growth boost, two-front stress decline late
+        // n1082: post-w52 drop to plateau at ~55k (was growing to 68k at w104)
         if (turn <= 12) return 2.0;
         if (turn <= 26) return 1.6;
         if (turn <= 52) return 1.2;
-        if (turn <= 78) return 0.8;
-        if (turn <= 104) return 0.5;
-        return 0.35;
+        if (turn <= 78) return 0.3;   // was 0.8 — HVO smallest pop base, plateau by mid-93
+        if (turn <= 104) return 0.15; // was 0.5 — near replacement rate only
+        return 0.1;                   // was 0.35 — minimal
     }
     // Default fallback
     if (turn <= 12) return 2.5;
@@ -240,7 +242,7 @@ export function runOngoingMobilization(
         // FACTION_MOBILIZATION_SCALE was calibrated with full census population for the rate
         // formula, so keep censusEligible there (no net change to per-turn amounts).
         const milAgeMales = Math.max(1, Math.floor(censusEligible * MILITARY_AGE_MALE_FRACTION));
-        const cumulative = (pool.committed ?? 0) + (pool.exhausted ?? 0);
+        const cumulative = (pool.available ?? 0) + (pool.committed ?? 0) + (pool.exhausted ?? 0);
         const exhaustionRatio = cumulative / milAgeMales;
         if (exhaustionRatio >= EXHAUSTION_HARD_CAP) {
             report.exhausted_municipalities += 1;

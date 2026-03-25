@@ -90,6 +90,7 @@ export function collectStrategicReserves(state: GameState): StrategicReserveColl
 
         const excess = pool.available - OVERFLOW_THRESHOLD;
         pool.available -= excess;
+        pool.committed = (pool.committed ?? 0) + excess;
         reserves[faction] = (reserves[faction] ?? 0) + excess;
 
         report.pools_overflowed += 1;

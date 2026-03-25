@@ -149,14 +149,14 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
                 killed, wounded, missing_captured: missing
             });
 
-            // Feed into pool.exhausted for demographic gating (matches frontline_attrition pattern)
+            // Feed into pool.exhausted for demographic gating (75% rate — matches applyCasualtyPoolExhaustion)
             const originMun = f.origin_mun;
             if (originMun) {
                 const poolKey = militiaPoolKey(originMun, besiegedFaction);
                 const pool = pools[poolKey];
                 if (pool) {
                     const permanentLoss = killed + missing;
-                    pool.exhausted = (pool.exhausted ?? 0) + Math.round(permanentLoss * 0.25);
+                    pool.exhausted = (pool.exhausted ?? 0) + Math.round(permanentLoss * 0.75);
                 }
             }
 

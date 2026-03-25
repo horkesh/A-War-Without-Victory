@@ -315,14 +315,14 @@ export function applyFrontlineAttrition(
             killed, wounded, missing_captured: mia
         });
 
-        // Feed into pool.exhausted for demographic gating (25% rate — see applyCasualtyPoolExhaustion).
+        // Feed into pool.exhausted for demographic gating (75% rate — matches applyCasualtyPoolExhaustion).
         const originMun = formation.origin_mun;
         if (originMun) {
             const poolKey = militiaPoolKey(originMun, factionId);
             const pool = pools[poolKey];
             if (pool) {
                 const permanentLoss = killed + mia;
-                pool.exhausted = (pool.exhausted ?? 0) + Math.round(permanentLoss * 0.25);
+                pool.exhausted = (pool.exhausted ?? 0) + Math.round(permanentLoss * 0.75);
             }
         }
 

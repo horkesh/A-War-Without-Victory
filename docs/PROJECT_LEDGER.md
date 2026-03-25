@@ -1,7 +1,43 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.7.0 Phase 5 COMPLETE** — Political Wargame. 1465 tests, 118 suites. **91.3% area-weighted (n1081, 40w). 91.0% (n1080, 52w).** 94 events, 33 fire at 52w. **13 orphan flags wired, 7 endgame events FIXED→CONDITIONAL.** Full endgame chain: Srebrenica→Zepa→Markale II→Deliberate Force→Federation Offensive→Ceasefire→Dayton. 121 RBiH / 140 RS / 47 HRHB brigs at 52w. **Next: v0.7.0 Phase 6 (Dynamic Codex content) or v0.8 (Command Chain).**
+**Status:** **v0.7.0 Phase 5 COMPLETE + Exhaustion Accounting Overhaul.** 1465 tests, 118 suites. **91.3% area-weighted (40w, zero regression).** Exhaustion system fixed: RS w104 149k→139k (target 110-120k, was 29k over, now 19k over). Three accounting bugs fixed (A1+A2+A3). Casualty feedback unified to 75%. RS/HRHB surge curves lowered post-w52. **Next: pool decay or threshold tuning to close remaining RS gap.**
+
+## [2026-03-25] Exhaustion Accounting Overhaul — Force Plateau Fixes
+
+**Scope:** Fix three exhaustion accounting bugs and unify casualty feedback to make faction force levels plateau at historically correct values. RS was growing from 99k at w40 to 149k at w104 (OOB Master target: 110-120k). Investigation convened historian, game designer, systems programmer, and gameplay programmer.
+
+**Root cause investigation:** Exhaustion system (EXHAUSTION_THRESHOLD=0.25, HARD_CAP=0.50) was designed correctly but tracking only ~60% of actual demographic commitment. Three accounting bugs: (1) pool.available excluded from exhaustion numerator, (2) initial OOB troops never counted as committed (38k RS invisible), (3) strategic reserve sweeps bypassed committed tracking (20-40k leak). Additionally, frontline/siege attrition (95% of casualties) used 25% feedback vs 75% for battle resolution.
+
+**Fix A1 — pool.available in exhaustion numerator** (`ongoing_mobilization.ts` line 245): Changed `cumulative = committed + exhausted` to `cumulative = available + committed + exhausted`. Mobilized-but-unassigned men are demographically committed. RS w104: -4k.
+
+**Fix A2 — Initial OOB personnel as committed** (`oob_early_war_entry.ts`): After creating each OOB brigade, increment home municipality `pool.committed` by initial personnel. RS+RBiH+HRHB: 98k previously invisible now tracked. No trajectory impact alone (needs A1 to activate).
+
+**Fix A3 — Strategic reserve committed tracking** (`strategic_reserve.ts` line 93): When `collectStrategicReserves()` sweeps excess pool.available, increment `pool.committed` by same amount. RS w104: -6k (first fix to move the needle).
+
+**Casualty feedback unification** (`frontline_attrition.ts`, `siege_attrition.ts`, `pool_population.ts`): All three casualty channels now use 75% feedback rate (was 25% for frontline/siege, which handle 95% of losses). Minimal standalone impact — exhaustion thresholds weren't binding regardless of feedback rate.
+
+**RS/HRHB surge curve reduction** (`ongoing_mobilization.ts` `getMobilizationSurgeFactor`): RS post-w52: 0.9/0.8/0.5 → 0.4/0.2/0.1. HRHB post-w52: 0.8/0.5/0.35 → 0.3/0.15/0.1. w1-52 curves unchanged (preserves 40w calibration). Minimal standalone impact — pool surplus from w1-52 sustains growth regardless.
+
+**Combined result (A1+A2+A3+feedback+surge):**
+
+| | Before | After | Delta | Target |
+|---|---|---|---|---|
+| RS w40 | 99k | 100k | +1k | 90-100k |
+| RS w104 | 149k | 139k | **-10k** | 110-120k |
+| HRHB w104 | 68k | 66k | -2k | 50-55k |
+| ARBiH w104 | 194k | 195k | +1k | 165-180k |
+| 40w cal | 91.3% | **91.3%** | 0 | ≥90% |
+
+**Remaining gap:** RS still 19k over target at w104. Game designer + systems programmer recommend pool decay as secondary mechanism. Convene pending.
+
+**Key architectural finding (systems programmer):** The exhaustion system was designed as the demographic plateau mechanism but received bad data. Fixing the accounting (not adding new mechanics) was the correct approach. Pool decay may be needed as a secondary mechanism for the remaining gap.
+
+**Key design finding (game designer):** Correct exhaustion accounting connects to v0.8 (Command Chain: "no replacements" dialogue grounded in real empty pools) and v0.9 (Consequences: war crimes displacement destroying your own recruitment base becomes self-defeating — the negative-sum design intent).
+
+**Determinism:** No impact. All changes are deterministic constant/formula modifications. No randomness introduced.
+
+**Files:** `src/sim/combat/ongoing_mobilization.ts` (A1 + surge curves), `src/scenario/oob_early_war_entry.ts` (A2), `src/sim/combat/strategic_reserve.ts` (A3), `src/sim/combat/frontline_attrition.ts` (feedback 25%→75%), `src/sim/combat/siege_attrition.ts` (feedback 25%→75%), `src/sim/early_war/pool_population.ts` (feedback 25%→75%).
 
 ## [2026-03-25] v0.7.0 Phase 5 Complete — FIXED→CONDITIONAL Event Conversions
 

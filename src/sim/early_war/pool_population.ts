@@ -445,12 +445,12 @@ export function applyCasualtyPoolExhaustion(
         const pool = pools[key];
         if (!pool) continue;
 
-        // Feed 25% of permanent battle losses into pool.exhausted.
-        // Full (100%) feedback overpowers the mobilization threshold in frontline
-        // municipalities, causing RS to fail organic captures and requiring excessive
-        // overrides that kill bot activity. 25% keeps demographic gating active while
-        // preserving sim dynamics. Re-evaluate at longer (52w) run if needed.
-        pool.exhausted = (pool.exhausted ?? 0) + Math.round(permanentLoss * 0.25);
+        // Feed 75% of permanent battle losses into pool.exhausted.
+        // Dead soldiers can't be re-mobilized — high feedback ensures combat losses
+        // properly constrain long-run mobilization. Previous 25% let 75% of casualties
+        // vanish from the demographic model, causing unrealistic late-war army growth
+        // (RS 99k→147k w40→w104). 75% balances demographic realism with sim dynamics.
+        pool.exhausted = (pool.exhausted ?? 0) + Math.round(permanentLoss * 0.75);
         report.formations_processed += 1;
         report.total_exhaustion_added += permanentLoss;
         report.by_faction[cas.faction] = (report.by_faction[cas.faction] ?? 0) + permanentLoss;

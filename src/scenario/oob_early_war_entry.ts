@@ -8,6 +8,7 @@ import { resolveLocationOsid, type CanonicalToOperationalMap, type OperationalSe
 import type { EdgeRecord } from '../map/settlements.js';
 import type { MunicipalityPopulation1991Map } from '../sim/early_war/pool_population.js';
 import { getEligiblePopulationCount } from '../sim/early_war/pool_population.js';
+import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { analyzeFactionGraph, type FrontClassification } from '../sim/combat/osid_graph_analysis.js';
 import { buildOsidAdjacency, type Osid } from '../sim/combat/osid_adjacency.js';
 import { FACTION_INITIAL_COHESION, FACTION_INITIAL_PERSONNEL, MIN_BRIGADE_SPAWN, MIN_ELIGIBLE_POPULATION_FOR_BRIGADE } from '../state/formation_constants.js';
@@ -273,6 +274,17 @@ export function createOobFormations(
         if (b.distinction_potential) formation.distinction_potential = b.distinction_potential;
         state.military.formations[b.id] = formation;
         report.brigades_created += 1;
+
+        // Fix A2: Count initial OOB personnel as committed in their home municipality pool.
+        // Without this, pool.committed understates demographic commitment, causing the
+        // exhaustion system to undercount troops already mobilized at scenario init.
+        if (initialPersonnel > 0) {
+            const poolKey = militiaPoolKey(b.home_mun as MunicipalityId, b.faction as FactionId);
+            const pool = (state.military.militia_pools as Record<string, { committed: number }>)?.[poolKey];
+            if (pool) {
+                pool.committed += initialPersonnel;
+            }
+        }
     }
 
     return report;
