@@ -95,8 +95,8 @@ The Codex transforms from static essays into a living historical document that m
 
 - v0.7.0: Event flag wiring + exhaustion overhaul + Codex QA **COMPLETE**. 25 flags wired, 7 FIXED→CONDITIONAL endgame chain, pool decay, 30 essay corrections across 3-pass QA. 91.6% calibration.
 - v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, Operation Corridor, Mostar liberation, Srebrenica enclave, HRHB political goal, arms embargo). /historian + /narrative-designer.
-- v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries), Codex UI. **Can parallel with v0.8.0** — no dependency
-- v0.7.2: Warroom React migration (absorbs scope from old v0.7.0 perf plan, now `docs/plans/2026-03-16-v0.7.0-performance.md`)
+- v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries), Codex UI. **+ Letter Home**: procedural casualty vignettes in CoS briefing (template-driven, 1 per turn). **Can parallel with v0.8.0** — no dependency
+- v0.7.2: Warroom React migration. **+ Ghost Map**: 1991 census demographics overlay (Deck.gl ScatterplotLayer, toolbar toggle). **+ Exhaustion Clock**: visual depletion indicator in Army HQ (single component, reads warPhaseExhaustion)
 - v0.7.3: Canon audit (remove September 1991 start, peace phase references from all docs) — cleanup last, lowest risk
 
 ### 0.8.x — Command Chain
@@ -104,8 +104,8 @@ Plans: TBD (write after v0.7.0 ships). **v0.8.0 can start alongside v0.7.1** —
 
 The player commands through a hierarchy of AI personalities that can be delegated to or overridden.
 
-- v0.8.0: Political leader bot for non-player factions (event responses, alliance, diplomacy, war crimes policy)
-- v0.8.1: Order interpretation system (officer personality filters commands — creative interpretation, delay, refusal)
+- v0.8.0: Political leader bot for non-player factions (event responses, alliance, diplomacy, war crimes policy). **+ Patron Phone Call**: 8-12 dramatic patron pressure events with ICTY-sourced dialogue, player decisions
+- v0.8.1: Order interpretation system (officer personality filters commands — creative interpretation, delay, refusal). Includes Warlord Problem (militia integration resistance) as sub-feature
 - v0.8.2: Autonomy depth + Claude API at political level
 
 ### 0.9.x — Consequences + Polish
@@ -114,11 +114,15 @@ Plans: TBD (write after v0.8 ships)
 Ahistorical choices produce realistic consequences. Ship preparation.
 
 - v0.9.0: Consequence system (divergence events — no cleansing → partisans, alliance holds → no Washington Agreement chain)
-- v0.9.1: Dynamic essay content (~30 Tier 3 dynamic sections + ~15 Tier 4 ahistorical templates)
-- v0.9.2: External playtesting + balance
+- v0.9.1: Dynamic essay content (~30 Tier 3 dynamic sections + ~15 Tier 4 ahistorical templates). **+ Cost Ledger**: ICTY-style prosecutorial endgame narrative (template-driven, reads event flags + casualties + displacement)
+- v0.9.2: External playtesting + balance. **+ Endgame Comparison**: split-screen your-war-vs-real-war at milestone weeks (territory + casualties + displacement)
 - v0.9.3: Performance + accessibility (plan: `docs/plans/2026-03-16-v0.7.0-performance.md`)
-- v0.9.4: Visual polish (plan: `docs/plans/2026-03-16-v0.7.3-visual-polish.md`)
+- v0.9.4: Visual polish (plan: `docs/plans/2026-03-16-v0.7.3-visual-polish.md`). **+ Map That Scars**: visual degradation keyed to per-OSID data (desaturation, battle marks, siege ring). **+ Refugee Column**: animated displacement flow arcs (TripsLayer, threshold-triggered). **+ Corridor Heartbeat**: supply corridor pulse visualization
 - v0.9.5: Platform packaging + store
+
+### Post-1.0 — Named Updates
+- **The Silence**: Full audio degradation design (ambient layering, exhaustion-keyed, no music). Requires audio infrastructure + asset pipeline (green-field)
+- **The Other Side's Briefing**: Enemy CoS briefing after major battles. Requires v0.8.2+ AI Commander maturity
 
 ### 1.0.0 — Gold / Public Release
 Plan: `docs/plans/2026-03-16-v1.0.0-gold.md` (needs revision for new scope)
