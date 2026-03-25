@@ -1,7 +1,23 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.6.5** — Political Wargame. 1453 tests, 118 suites. **91.3% area-weighted (n1078).** 94 events, 21 flag-gated. **Emergent brigade Phase 2 COMPLETE:** enclave capacity gate fix, surplus pool rerouting, deriveMaxPersonnel activated (1200-2800), asymmetric mobilization (RBiH 0.09, RS 0.04, HRHB 0.12), RBiH strategic reserve 0.02→0.15. **RBiH 144k > RS+HRHB 144k (+369) — first time in project history.** 114 RBiH / 83 RS / 36 HRHB brigs, 288k total. Life lessons restructured (8 topic files). 9 skills wired with Required Reading. **Next: v0.7.0 Phase 4 (engine flag reads) + 5 nightshift calibration runs.**
+**Status:** **v0.7.0 Phase 4 COMPLETE** — Political Wargame. 1453 tests, 118 suites. **91.3% area-weighted (n1079).** 94 events, 21 flag-gated, **7 engine flag reads wired** (supply embargo, corridor, patron pressure, COHA, Dayton). Emergent brigade Phase 2 complete. **RBiH 144k > RS+HRHB 144k (+369).** 114 RBiH / 83 RS / 36 HRHB brigs, 288k total. **Next: v0.7.0 Phase 5 (FIXED→CONDITIONAL event conversions).**
+
+## [2026-03-25] v0.7.0 Phase 4 Complete — Engine Flag Reads
+
+**Scope:** Wired 7 engine flag reads so event flags have mechanical consequences. Also completed nightshift triage (FIX-A/B/C already implemented).
+
+**Supply flags:** `arms_embargo_active` throttles RBiH patron aid (×0.6). `corridor_secured` boosts RS patron aid (×1.3). Both fire at w40 and offset each other — historically correct.
+
+**Patron pressure flags:** `drina_cleansing_occurred` +2/turn RS override authority. `camps_revealed` +3/turn RS override authority. Both fire by w20.
+
+**Ceasefire/endgame flags:** `coha_active` suppresses combat + forces defensive stance (w139). `dayton_signed` triggers game over (w183). Future-proofed for 52w+ runs.
+
+**Nightshift triage:** FIX-A (MAX_EVENTS_PER_TURN + priority tiers), FIX-B (Gorazde OSIDs), FIX-C (corridor_severed edges) — all confirmed already implemented from prior sessions. Minor comment fixes committed.
+
+**Calibration (n1079):** 91.3% area-weighted. No regression from flag reads. 19 flags active at w40. RBiH 144k > RS+HRHB 144k (+369).
+
+**Files:** `src/state/supply_reserves.ts` (embargo + corridor), `src/sim/negotiation/patron_pressure.ts` (drina + camps), `src/sim/combat/attack_resolution_osid.ts` + `frontline_attrition.ts` (COHA combat suppress), `src/sim/combat/bot_corps_directives.ts` (COHA defensive), `src/sim/turn_pipeline.ts` (Dayton game over), `src/sim/events/evaluate_events.ts` + `event_types.ts` (priority tier docs).
 
 ## [2026-03-25] Emergent Brigade Phase 2 — Enclave Fix + Pool Rerouting + Tiered Caps
 
