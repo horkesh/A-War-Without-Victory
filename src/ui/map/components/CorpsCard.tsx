@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FormationView } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { Icon, type IconName } from './icons/Icon';
@@ -13,6 +13,13 @@ const STANCE_COLOR: Record<string, string> = {
   defensive: 'border-l-blue-400/70',
   balanced: 'border-l-amber-400/70',
   reorganize: 'border-l-gray-400/70',
+};
+
+const STANCE_LABELS: Record<string, string> = {
+  offensive: 'Offensive',
+  defensive: 'Defensive',
+  balanced: 'Balanced',
+  reorganize: 'Reorganize',
 };
 
 export interface CorpsCardProps {
@@ -99,9 +106,37 @@ export function CorpsCard({
     setIsFlipped((prev) => !prev);
   };
 
+  // R5: Stance change confirmation — flash + toast
+  const [flashActive, setFlashActive] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [toastExiting, setToastExiting] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleStanceChange = useCallback((nextStance: string) => {
+    onStanceChange?.(nextStance);
+    // Flash the card border
+    setFlashActive(true);
+    setTimeout(() => setFlashActive(false), 500);
+    // Show toast
+    const label = STANCE_LABELS[nextStance] ?? nextStance;
+    setToastMsg(`${label} stance set`);
+    setToastExiting(false);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => {
+      setToastExiting(true);
+      setTimeout(() => { setToastMsg(null); setToastExiting(false); }, 200);
+    }, 1800);
+  }, [onStanceChange]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
+  }, []);
+
   const cardFront = (
     <div
-      className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden border-l-3 ${stanceBorder}`}
+      className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-visible border-l-3 ${stanceBorder} ${flashActive ? 'stance-flash' : ''}`}
+      style={{ position: 'relative' }}
     >
       <button
         type="button"
@@ -138,21 +173,23 @@ export function CorpsCard({
           </div>
         )}
 
-        {/* Equipment summary row */}
+        {/* R4: Labeled equipment summary row */}
         {(equip.tanksTotal > 0 || equip.artyTotal > 0) && (
           <div className="px-3 py-1.5 flex items-center gap-4 text-[11px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
             {equip.tanksTotal > 0 && (
               <span className="flex items-center gap-1" title={`Tanks: ${equip.tanks} operational / ${equip.tanksTotal} total`}>
                 <Icon name="tanks" size={13} />
+                <span className="text-text-secondary/60 text-[9px] uppercase tracking-wide">Tanks</span>
                 <span className="text-text-primary font-semibold">{equip.tanks}</span>
-                <span className="text-text-secondary/70">/ {equip.tanksTotal}</span>
+                <span className="text-text-secondary/50">/{equip.tanksTotal}</span>
               </span>
             )}
             {equip.artyTotal > 0 && (
               <span className="flex items-center gap-1" title={`Artillery: ${equip.arty} operational / ${equip.artyTotal} total`}>
                 <Icon name="artillery" size={13} />
+                <span className="text-text-secondary/60 text-[9px] uppercase tracking-wide">Arty</span>
                 <span className="text-text-primary font-semibold">{equip.arty}</span>
-                <span className="text-text-secondary/70">/ {equip.artyTotal}</span>
+                <span className="text-text-secondary/50">/{equip.artyTotal}</span>
               </span>
             )}
           </div>
@@ -168,7 +205,7 @@ export function CorpsCard({
             </span>
             <select
               value={stance ?? 'balanced'}
-              onChange={(event) => onStanceChange(event.target.value)}
+              onChange={(event) => handleStanceChange(event.target.value)}
               onClick={(e) => e.stopPropagation()}
               className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-[10px] font-mono text-text-primary focus:outline-none"
             >
@@ -186,6 +223,18 @@ export function CorpsCard({
           >
             Orbat
           </button>
+        </div>
+      )}
+
+      {/* R5: Stance change toast */}
+      {toastMsg && (
+        <div
+          className={`absolute left-0 right-0 flex justify-center pointer-events-none ${toastExiting ? 'stance-toast-exit' : 'stance-toast-enter'}`}
+          style={{ bottom: '-24px', zIndex: 30 }}
+        >
+          <span className="px-2 py-0.5 bg-accent-gold/20 border border-accent-gold/40 rounded text-[9px] font-mono text-accent-gold tracking-wider uppercase shadow-lg">
+            {toastMsg}
+          </span>
         </div>
       )}
     </div>

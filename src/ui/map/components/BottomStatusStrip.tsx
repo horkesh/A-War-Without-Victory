@@ -1,20 +1,20 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { FACTION_COLORS_SUBTLE } from '../utils/theme';
+import { FACTION_COLORS_SUBTLE, FACTION_HEX_COLORS } from '../utils/theme';
 import { MAP_MODES, DEV_LAYER_TOGGLES, LIVE_LAYER_TOGGLES } from '../utils/mapModes';
 import { Icon } from './icons/Icon';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
-/** Primary modes shown as pills. The rest go in "+More" dropdown. */
+/** Primary modes shown as pills. The rest go in "+More" inline extension. */
 const PRIMARY_MODES = ['political', 'ethnic', 'supply', 'operations'];
 const primaryModes = MAP_MODES.filter(m => PRIMARY_MODES.includes(m.id));
 const secondaryModes = MAP_MODES.filter(m => !PRIMARY_MODES.includes(m.id));
 
 /**
- * Redesigned bottom bar — president's map controls.
- * Primary map modes | player territory (prominent) | faction indicator | layer gear
+ * Redesigned bottom bar — president's warroom situation ticker.
+ * R6: Territory stacked bar with trend arrows. R8: Persistent +MORE expansion.
  */
 export function BottomStatusStrip() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -37,6 +37,16 @@ export function BottomStatusStrip() {
       HRHB: totalArea > 0 ? (totals.HRHB / totalArea) * 100 : 0,
     };
   }, [controlBySettlement]);
+
+  // R6: Territory trend from latestTurnSummary.territory_net
+  const territoryNet = loadedGameState?.latestTurnSummary?.territory_net;
+  const getTrendArrow = useCallback((faction: 'RS' | 'RBiH' | 'HRHB'): string => {
+    if (!territoryNet) return '';
+    const net = (territoryNet as Partial<Record<string, number>>)[faction] ?? 0;
+    if (net > 0) return ' \u2191'; // up arrow
+    if (net < 0) return ' \u2193'; // down arrow
+    return ' \u2192'; // right arrow (stable)
+  }, [territoryNet]);
 
   // Map mode
   const devMode = useGameStore((s) => s.devMode);
@@ -71,9 +81,22 @@ export function BottomStatusStrip() {
     municipalityBordersVisible: { value: municipalityBordersVisible, set: setMunicipalityBordersVisible },
   };
 
-  const [moreOpen, setMoreOpen] = useState(false);
+  // R8: +MORE expansion — persistent, not ephemeral
+  const [moreExpanded, setMoreExpanded] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
 
+  // R8: Close +MORE when clicking outside
+  useEffect(() => {
+    if (!moreExpanded) return;
+    const handler = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreExpanded(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [moreExpanded]);
 
   // Faction-specific ordering: player faction first
   const factions: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
@@ -86,8 +109,8 @@ export function BottomStatusStrip() {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 px-3 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
 
-      {/* 1. Map mode pills (primary) */}
-      <div className="flex items-center gap-0.5 shrink-0">
+      {/* 1. Map mode pills (primary) + R8: inline secondary expansion */}
+      <div className="flex items-center gap-0.5 shrink-0" ref={moreRef}>
         {primaryModes.map(({ id, label }) => {
           const active = mapMode === id;
           return (
@@ -105,69 +128,93 @@ export function BottomStatusStrip() {
           );
         })}
 
-        {/* +More dropdown */}
-        <div className="relative">
+        {/* R8: +MORE toggle — expands inline instead of ephemeral popup */}
+        <button
+          type="button"
+          onClick={() => setMoreExpanded(prev => !prev)}
+          className={`px-2 py-1 rounded text-[9px] font-mono tracking-widest uppercase transition-all ${
+            moreExpanded || secondaryModes.some(m => m.id === mapMode)
+              ? 'bg-accent-gold/20 text-accent-gold font-bold'
+              : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+          }`}
+        >
+          {secondaryModes.find(m => m.id === mapMode)?.label ?? (moreExpanded ? 'LESS' : '+MORE')}
+        </button>
+
+        {/* R8: Secondary modes — persistent inline extension */}
+        {moreExpanded && secondaryModes.map(({ id, label, key }) => (
           <button
+            key={id}
             type="button"
-            onClick={() => setMoreOpen(!moreOpen)}
-            className={`px-2 py-1 rounded text-[9px] font-mono tracking-widest uppercase transition-all ${
-              secondaryModes.some(m => m.id === mapMode)
-                ? 'bg-accent-gold/20 text-accent-gold font-bold'
+            onClick={() => { setMapMode(id); }}
+            className={`px-2.5 py-1 rounded text-[9px] font-mono tracking-widest transition-all duration-200 uppercase ${
+              mapMode === id
+                ? 'bg-accent-gold/20 text-accent-gold shadow-glow-sm font-bold'
                 : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
             }`}
+            title={`${key}: ${label}`}
           >
-            {secondaryModes.find(m => m.id === mapMode)?.label ?? '+MORE'}
+            {label}
           </button>
-          {moreOpen && (
-            <div className="absolute bottom-full left-0 mb-1 bg-[#0c0c18]/95 backdrop-blur-md border border-white/10 rounded-md shadow-xl overflow-hidden">
-              {secondaryModes.map(({ id, label, key }) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => { setMapMode(id); setMoreOpen(false); }}
-                  className={`block w-full px-4 py-1.5 text-left text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                    mapMode === id ? 'text-accent-gold bg-accent-gold/10' : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
-                  }`}
-                >
-                  {label} <span className="text-white/20 ml-1">{key}</span>
-                </button>
-              ))}
-            </div>
-          )}
+        ))}
+      </div>
+
+      <div className="w-[1px] h-4 bg-white/10 shrink-0" />
+
+      {/* R6: Territory — stacked horizontal progress bar */}
+      <div className="hidden md:flex items-center gap-2 px-2 shrink-0">
+        {/* Stacked bar */}
+        <div className="flex h-[14px] rounded-sm overflow-hidden w-[180px] border border-white/10" title="Territory control (area-weighted)">
+          {orderedFactions.map((faction) => {
+            const pct = territoryPct[faction];
+            const hex = FACTION_HEX_COLORS[faction] ?? '#888';
+            return (
+              <div
+                key={faction}
+                className="h-full transition-all duration-500 relative group"
+                style={{ width: `${pct}%`, backgroundColor: hex }}
+              >
+                {/* Show percentage label inside bar segment if wide enough */}
+                {pct > 15 && (
+                  <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono font-bold text-white/90 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                    {pct.toFixed(0)}%
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Faction labels with trend arrows */}
+        <div className="flex items-center gap-1.5">
+          {orderedFactions.map((faction, idx) => {
+            const pct = territoryPct[faction];
+            const isPlayer = faction === playerFaction;
+            const color = FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary';
+            const trend = getTrendArrow(faction);
+            return (
+              <span key={faction} className={`flex items-center gap-0.5 font-mono tabular-nums ${color}`}>
+                {idx > 0 && <span className="text-white/10 mr-0.5">|</span>}
+                <span className={isPlayer ? 'text-[11px] font-bold' : 'text-[9px]'}>
+                  {faction} {pct.toFixed(1)}%
+                  {trend && <span className={`ml-0.5 ${trend.includes('\u2191') ? 'text-emerald-400' : trend.includes('\u2193') ? 'text-red-400' : 'text-text-secondary/50'}`}>{trend}</span>}
+                </span>
+              </span>
+            );
+          })}
         </div>
       </div>
 
       <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 
-      {/* 2. Territory — player faction prominent, others compact */}
-      <div className="hidden md:flex items-center gap-2 px-2 shrink-0">
-        {orderedFactions.map((faction, idx) => {
-          const pct = territoryPct[faction];
-          const isPlayer = faction === playerFaction;
-          const color = FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary';
-          return (
-            <span key={faction} className={`flex items-center gap-1 font-mono tabular-nums ${color}`}>
-              {idx > 0 && <span className="text-white/10 mr-1">|</span>}
-              {isPlayer ? (
-                <span className="text-[12px] font-bold">{faction} {pct.toFixed(1)}%</span>
-              ) : (
-                <span className="text-[9px]">{faction} {pct.toFixed(1)}%</span>
-              )}
-            </span>
-          );
-        })}
-      </div>
-
-      <div className="w-[1px] h-4 bg-white/10 shrink-0" />
-
-      {/* 3. Faction-contextual indicator */}
+      {/* 3. Faction-contextual indicator — R6: more prominent */}
       <div className="hidden lg:flex items-center gap-2 px-2 shrink-0 text-[10px] font-mono">
         {showAlliance && alliance != null && (() => {
           const a = alliance;
           const status = a <= 0.10 ? 'WAR' : a <= 0.20 ? 'MOBILIZING' : a <= 0.45 ? 'STRAINED' : 'ALLIED';
           const color = status === 'WAR' ? '#e05050' : status === 'MOBILIZING' ? '#d4a055' : status === 'STRAINED' ? '#d4d455' : '#50b850';
           return (
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
               <Icon name="balanced" size={10} color={color} />
               <span style={{ color }} className="font-bold uppercase text-[9px] tracking-wider">{status}</span>
             </span>
@@ -180,9 +227,9 @@ export function BottomStatusStrip() {
           const status = patronValue >= 70 ? 'SUPPORTIVE' : patronValue >= 40 ? 'CAUTIOUS' : 'WAVERING';
           const color = status === 'SUPPORTIVE' ? '#50b850' : status === 'CAUTIOUS' ? '#d4d455' : '#e05050';
           return (
-            <span className="flex items-center gap-1.5">
-              <span className="text-[9px] text-white/40 uppercase">Belgrade:</span>
-              <span style={{ color }} className="font-bold uppercase text-[9px] tracking-wider">{status}</span>
+            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
+              <span className="text-[9px] text-white/50 uppercase font-semibold">Belgrade:</span>
+              <span style={{ color }} className="font-bold uppercase text-[10px] tracking-wider">{status}</span>
             </span>
           );
         })()}

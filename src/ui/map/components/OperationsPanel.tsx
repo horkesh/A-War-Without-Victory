@@ -360,12 +360,14 @@ export function OperationsPanel() {
                       <span className={`tabular-nums ${momentumTone}`}>{selectedOperation.momentum}</span>
                     </div>
                   )}
-                  {supplyPct != null && (
-                    <div>
-                      <span className="text-text-secondary">Supply: </span>
-                      <span className="text-text-primary tabular-nums">{supplyPct}%</span>
-                    </div>
-                  )}
+                  <div>
+                    <span className="text-text-secondary">Supply: </span>
+                    {supplyPct != null ? (
+                      <span className={`tabular-nums ${supplyPct < 30 ? 'text-red-400 font-semibold' : supplyPct < 70 ? 'text-amber-300' : 'text-green-400'}`}>{supplyPct}%</span>
+                    ) : (
+                      <span className="text-text-secondary italic" title="Supply readiness not yet assessed">N/A</span>
+                    )}
+                  </div>
                   {selectedOperation.consecutive_failures_on_current != null && (
                     <div>
                       <span className="text-text-secondary">Failures: </span>
@@ -473,7 +475,11 @@ export function OperationsPanel() {
                       </div>
                       <div className="rounded border border-panel-border bg-panel-bg/70 px-1.5 py-1">
                         <span className="text-text-secondary">Supply: </span>
-                        <span className="text-text-primary tabular-nums">{supplyPct != null ? `${supplyPct}%` : '—'}</span>
+                        {supplyPct != null ? (
+                          <span className={`tabular-nums ${supplyPct < 30 ? 'text-red-400 font-semibold' : supplyPct < 70 ? 'text-amber-300' : 'text-green-400'}`}>{supplyPct}%</span>
+                        ) : (
+                          <span className="text-text-secondary italic" title="Supply readiness not yet assessed">N/A</span>
+                        )}
                       </div>
                     </div>
                     {readiness && (

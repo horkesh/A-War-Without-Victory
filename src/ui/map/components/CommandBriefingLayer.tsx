@@ -19,6 +19,18 @@ const SEVERITY_TEXT: Record<CommandBriefingItemView['severity'], string> = {
   info: 'text-sky-300',
 };
 
+const SEVERITY_BORDER: Record<CommandBriefingItemView['severity'], string> = {
+  critical: 'border-red-500/60',
+  warning: 'border-amber-500/40',
+  info: 'border-sky-500/30',
+};
+
+const SEVERITY_BG: Record<CommandBriefingItemView['severity'], string> = {
+  critical: 'bg-red-950/50',
+  warning: 'bg-amber-950/40',
+  info: 'bg-sky-950/30',
+};
+
 export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandBriefingLayerProps) {
   const commandBriefing = useGameStore((state) => state.loadedGameState?.commandBriefing);
   const setSelectedOperationKey = useGameStore((state) => state.setSelectedOperationKey);
@@ -81,49 +93,72 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
 
   // Position below the floating crest (~120px tall) — dev strip adds another row
   const topOffset = devMode ? 'top-[8.5rem]' : 'top-[7.5rem]';
+  const criticalCount = commandBriefing.items.filter((i) => i.severity === 'critical').length;
+  const hasCritical = criticalCount > 0;
 
   return (
     <div className={`fixed ${topOffset} left-[19rem] right-4 z-20 pointer-events-none`}>
-      <div className="pointer-events-auto relative mt-2 rounded-lg bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl px-4 py-2.5">
-        {/* Header line */}
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-[0.25em] text-red-400">
+      <div
+        className={`pointer-events-auto relative mt-2 rounded-lg backdrop-blur-xl shadow-xl px-4 py-4 ${
+          hasCritical
+            ? 'bg-red-950/30 border-2 border-red-500/40 alert-pulse'
+            : 'bg-panel-card/80 border border-panel-border'
+        }`}
+      >
+        {/* Header line with persistent alert count */}
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <span className="text-xs font-mono font-bold uppercase tracking-[0.25em] text-accent-gold">
             COMMAND BRIEFING
           </span>
-          <span className="text-[9px] font-mono text-white/40">
+          <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-red-600 text-white text-[11px] font-bold tabular-nums">
+            {commandBriefing.items.length}
+          </span>
+          <span className="text-[10px] font-mono text-text-secondary">
             {commandBriefing.headline}
           </span>
           <button
             type="button"
             onClick={() => { lastDismissedTurn.current = turn ?? null; setDismissed(true); }}
-            className="absolute right-4 top-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-red-950/50 border border-red-500/30 text-red-400 hover:bg-red-900/50 hover:border-red-500/50 hover:text-red-300 transition-all"
+            className="absolute right-4 top-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-red-950/50 border border-red-500/30 text-red-400 hover:bg-red-900/50 hover:border-red-500/50 hover:text-red-300 transition-all"
           >
             <span className="text-[14px] font-bold leading-none">&times;</span>
             <span className="text-[8px] font-mono font-bold uppercase tracking-wider">DISMISS</span>
           </button>
         </div>
-        {/* Item pills */}
-        <div className="flex flex-wrap gap-2">
+        {/* Item cards — taller, severity-colored */}
+        <div className="flex flex-wrap gap-2.5">
           {commandBriefing.items.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => handleOpenItem(item)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-black/40 backdrop-blur-sm border border-white/8 hover:bg-black/50 hover:border-white/15 transition-all group"
+              className={`flex items-center gap-2.5 px-3.5 py-3 rounded-md border-l-[3px] ${SEVERITY_BORDER[item.severity]} ${SEVERITY_BG[item.severity]} hover:brightness-125 transition-all group min-h-[2.75rem]`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${SEVERITY_DOT[item.severity]}`} />
-              <span className={`text-[11px] font-semibold ${SEVERITY_TEXT[item.severity]} group-hover:text-white transition-colors`}>
-                {item.title}
-              </span>
-              {item.actionLabel && (
-                <span className="text-[9px] font-mono uppercase text-amber-400/50 group-hover:text-amber-400 transition-colors">
-                  {item.actionLabel}
+              <span className={`w-2 h-2 rounded-full shrink-0 ${SEVERITY_DOT[item.severity]} ${item.severity === 'critical' ? 'animate-pulse' : ''}`} />
+              <div className="flex flex-col items-start gap-0.5">
+                <span className={`text-[12px] font-semibold leading-tight ${SEVERITY_TEXT[item.severity]} group-hover:text-white transition-colors`}>
+                  {item.title}
                 </span>
-              )}
+                {item.actionLabel && (
+                  <span className="text-[9px] font-mono uppercase text-accent-gold/60 group-hover:text-accent-gold transition-colors">
+                    {item.actionLabel}
+                  </span>
+                )}
+              </div>
             </button>
           ))}
         </div>
       </div>
+      {/* CSS animation for critical pulse */}
+      <style>{`
+        .alert-pulse {
+          animation: briefing-pulse 2s ease-in-out infinite;
+        }
+        @keyframes briefing-pulse {
+          0%, 100% { border-color: rgba(239, 68, 68, 0.25); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+          50% { border-color: rgba(239, 68, 68, 0.55); box-shadow: 0 0 12px 2px rgba(239, 68, 68, 0.15); }
+        }
+      `}</style>
     </div>
   );
 }

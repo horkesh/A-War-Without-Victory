@@ -145,14 +145,16 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
               <MomentumBar momentum={op.momentum} />
             </div>
           )}
-          {op.supply_readiness != null && (
-            <div className="flex justify-between">
-              <span className="text-text-secondary">Supply readiness</span>
-              <span className={`tabular-nums ${op.supply_readiness < 0.4 ? 'text-red-400' : op.supply_readiness < 0.7 ? 'text-amber-300' : 'text-green-400'}`}>
+          <div className="flex justify-between">
+            <span className="text-text-secondary">Supply readiness</span>
+            {op.supply_readiness != null ? (
+              <span className={`tabular-nums ${op.supply_readiness < 0.3 ? 'text-red-400 font-semibold' : op.supply_readiness < 0.7 ? 'text-amber-300' : 'text-green-400'}`}>
                 {(op.supply_readiness * 100).toFixed(0)}%
               </span>
-            </div>
-          )}
+            ) : (
+              <span className="text-text-secondary italic" title="Supply readiness not yet assessed for this operation">N/A</span>
+            )}
+          </div>
           {op.tempo && TEMPO_BADGE[op.tempo] && (
             <div className="flex justify-between items-center">
               <span className="text-text-secondary">Tempo</span>
