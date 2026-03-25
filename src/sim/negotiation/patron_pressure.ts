@@ -57,6 +57,12 @@ export const SANCTIONS_SUPPORT_DECAY_PER_TURN = 0.5;
 /** Support level loss when client rejects a peace plan. */
 export const PEACE_PLAN_REJECTION_SUPPORT_COST = 5;
 
+/** RS override authority bonus per turn when Drina valley cleansing occurred (v0.7.0 Phase 4). */
+export const DRINA_CLEANSING_OVERRIDE_PER_TURN = 2;
+
+/** RS override authority bonus per turn when concentration camps revealed (v0.7.0 Phase 4). */
+export const CAMPS_REVEALED_OVERRIDE_PER_TURN = 3;
+
 /** Default patron support levels by faction. */
 export const DEFAULT_SUPPORT: Record<string, number> = {
     RS: 80,
@@ -129,6 +135,16 @@ export function computeOverrideAuthority(
         MAX_WAR_CRIMES_OVERRIDE,
         cap.war_crimes_events * WAR_CRIMES_OVERRIDE_PER_EVENT
     );
+
+    // 3b. Drina valley cleansing increases RS international pressure (v0.7.0 Phase 4)
+    if (faction === 'RS' && state.military.event_flags?.drina_cleansing_occurred === true) {
+        authority += DRINA_CLEANSING_OVERRIDE_PER_TURN;
+    }
+
+    // 3c. Camp revelations permanently increase RS pressure (v0.7.0 Phase 4)
+    if (faction === 'RS' && state.military.event_flags?.camps_revealed === true) {
+        authority += CAMPS_REVEALED_OVERRIDE_PER_TURN;
+    }
 
     // 4. Patron's own exhaustion (derived from war duration)
     authority += Math.min(MAX_PATRON_EXHAUSTION_OVERRIDE, getPatronExhaustion(state, faction));
