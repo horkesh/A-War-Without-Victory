@@ -113,7 +113,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
                     turn,
                     type: 'military',
                     headline: false,
-                    title: `${spawn.name || spawn.id} formed`,
+                    title: `${spawn.formation_name || spawn.formation_id || 'Unknown'} formed`,
                     detail: spawn.faction || '',
                 });
             }
@@ -125,7 +125,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
                     turn,
                     type: 'military',
                     headline: true,
-                    title: `${destruction.name || destruction.id} destroyed`,
+                    title: `${destruction.formation_name || destruction.formation_id || 'Unknown'} destroyed`,
                     detail: destruction.faction || '',
                 });
             }

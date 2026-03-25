@@ -316,7 +316,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {/* Negotiation Capital & Patron Pressure (v0.5.0) */}
       {(state.negotiationCapital || state.patronOverrideAuthority) && (
-        <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+        <section data-summary-section="capital" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Diplomacy</div>
           <DiplomacyOverview
             capital={state.negotiationCapital}
