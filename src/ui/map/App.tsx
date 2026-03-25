@@ -49,6 +49,7 @@ import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
 import { VerdictScreen } from './components/VerdictScreen';
+import { StrategicDashboard } from './components/StrategicDashboard';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
@@ -125,6 +126,12 @@ function CodexPanelWrapper() {
   const codexOpen = useGameStore((s) => s.codexOpen);
   const setCodexOpen = useGameStore((s) => s.setCodexOpen);
   return <CodexPanel isOpen={codexOpen} onClose={() => setCodexOpen(false)} />;
+}
+
+function StrategicDashboardWrapper() {
+  const open = useGameStore((s) => s.strategicDashboardOpen);
+  if (!open) return null;
+  return <StrategicDashboard />;
 }
 
 function PeaceWarTransitionOverlay() {
@@ -665,6 +672,7 @@ function App() {
       <ChronicleOverlay />
       <WrappedOverlay />
       <CodexPanelWrapper />
+      <StrategicDashboardWrapper />
       <OpsPlanningModal />
       <CommanderSelectionModalWrapper />
       <OperationBriefingModalWrapper />

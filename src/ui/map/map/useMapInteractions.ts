@@ -17,6 +17,8 @@ export interface MapInteractionCallbacks {
 }
 
 const HOVER_DELAY_MS = 300;
+/** Throttle interval for mousemove handlers that call queryRenderedFeatures (ms). */
+const MOUSEMOVE_THROTTLE_MS = 50;
 
 const HIGHLIGHT_POS_LAYER = 'front-edges-highlight-pos';
 const HIGHLIGHT_NEG_LAYER = 'front-edges-highlight-neg';
@@ -27,6 +29,8 @@ export function useMapInteractions(
 ) {
   let hoverTimeout: number | undefined;
   let hoveredSectorId: string | null = null;
+  let lastOsidMoveTime = 0;
+  let lastFrontEdgeMoveTime = 0;
 
   if (!map) return;
 
@@ -65,6 +69,10 @@ export function useMapInteractions(
 
   const handleOsidMouseMove = (e: MapLayerMouseEvent) => {
     map.getCanvas().style.cursor = 'pointer';
+    // Throttle: skip processing if called too frequently (queryRenderedFeatures is expensive)
+    const now = performance.now();
+    if (now - lastOsidMoveTime < MOUSEMOVE_THROTTLE_MS) return;
+    lastOsidMoveTime = now;
     const feature = e.features?.[0];
     const osid = feature?.properties?.osid as string | undefined;
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
@@ -154,6 +162,10 @@ export function useMapInteractions(
 
   const handleFrontEdgeMouseMove = (e: MapLayerMouseEvent) => {
     map.getCanvas().style.cursor = 'pointer';
+    // Throttle: skip processing if called too frequently
+    const now = performance.now();
+    if (now - lastFrontEdgeMoveTime < MOUSEMOVE_THROTTLE_MS) return;
+    lastFrontEdgeMoveTime = now;
     const feature = e.features?.[0];
     const edgeId = feature?.properties?.edge_id as string | undefined;
     const sectorId = feature?.properties?.sector_id as string | undefined;

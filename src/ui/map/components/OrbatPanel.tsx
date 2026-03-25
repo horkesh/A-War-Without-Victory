@@ -16,6 +16,8 @@ export function OrbatPanel() {
     const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
     const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
     const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
+    const panToOsid = useGameStore((s) => s.panToOsid);
+    const setFlashOsid = useGameStore((s) => s.setFlashOsid);
 
     const corps = useMemo(() => {
         if (!loadedGameState || !selectedOrbatCorpsId) return null;
@@ -98,14 +100,25 @@ export function OrbatPanel() {
                                 key={b.id}
                                 formation={b}
                                 compact
-                                onClick={() => setSelectedFormationId(b.id)}
+                                onClick={() => {
+                                    setSelectedFormationId(b.id);
+                                    // R12: ORBAT-map sync — fly to brigade location and flash it
+                                    const osid = b.location_osid;
+                                    if (osid) {
+                                        panToOsid?.(osid);
+                                        setFlashOsid(osid);
+                                    }
+                                }}
                                 onHoverChange={(hovered, e) => {
-                                    setHoveredOsids(hovered ? (b.aorSettlementIds ?? (b.location_osid ? [b.location_osid] : [])) : []);
+                                    const osids = hovered ? (b.aorSettlementIds ?? (b.location_osid ? [b.location_osid] : [])) : [];
+                                    setHoveredOsids(osids);
                                     if (hovered) {
                                         setTooltipTargetWithPosition(
                                             { type: 'formation', id: b.id },
                                             e ? { x: e.clientX, y: e.clientY } : undefined
                                         );
+                                        // R12: brief flash on hover
+                                        if (b.location_osid) setFlashOsid(b.location_osid);
                                     } else {
                                         clearTooltipTarget();
                                     }

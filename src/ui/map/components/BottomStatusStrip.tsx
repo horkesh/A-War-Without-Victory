@@ -49,6 +49,7 @@ export function BottomStatusStrip() {
   }, [territoryNet]);
 
   // Map mode
+  const setStrategicDashboardOpen = useGameStore((s) => s.setStrategicDashboardOpen);
   const devMode = useGameStore((s) => s.devMode);
   const LAYER_TOGGLES = devMode ? DEV_LAYER_TOGGLES : LIVE_LAYER_TOGGLES;
   const mapMode = useGameStore((s) => s.mapMode);
@@ -161,8 +162,12 @@ export function BottomStatusStrip() {
 
       <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 
-      {/* R6: Territory — stacked horizontal progress bar */}
-      <div className="hidden md:flex items-center gap-2 px-2 shrink-0">
+      {/* R6: Territory — stacked horizontal progress bar. R14: Click opens Strategic Dashboard. */}
+      <div
+        className="hidden md:flex items-center gap-2 px-2 shrink-0 cursor-pointer hover:bg-white/5 rounded transition-colors"
+        onClick={() => setStrategicDashboardOpen(true)}
+        title="Open Strategic Dashboard"
+      >
         {/* Stacked bar */}
         <div className="flex h-[14px] rounded-sm overflow-hidden w-[180px] border border-white/10" title="Territory control (area-weighted)">
           {orderedFactions.map((faction) => {

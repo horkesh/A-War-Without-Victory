@@ -5,7 +5,7 @@
  *
  * Position: bottom-left, 250x180px. Click → pan main map.
  */
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { FeatureCollection, Feature, Polygon } from 'geojson';
@@ -109,7 +109,7 @@ function buildMinimapStyle(): maplibregl.StyleSpecification {
   };
 }
 
-export function Minimap() {
+export const Minimap = React.memo(function Minimap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const minimapVisible = useGameStore((s) => s.minimapVisible);
@@ -246,4 +246,4 @@ export function Minimap() {
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
     </div>
   );
-}
+});

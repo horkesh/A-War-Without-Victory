@@ -414,6 +414,7 @@ export function MapContainer() {
         center: BOSNIA_CENTER,
         zoom: DEFAULT_ZOOM,
         pitch: 15,
+        attributionControl: false,
       });
       map.on('error', (e) => {
         // Suppress noisy PMTiles "Unimplemented type: 4" errors (MVT geometry type unsupported by MapLibre)
@@ -463,20 +464,26 @@ export function MapContainer() {
       // Only the ops planning modal uses 3D terrain for tactical planning context.
 
       // Deck.gl zoom sync: trigger layer update on zoom to handle dynamic scaling
+      // Throttled to ~20fps (50ms) to avoid rebuilding deck layers every frame during zoom animations
+      let zoomThrottleTimer: ReturnType<typeof setTimeout> | null = null;
       map.on('zoom', () => {
-        if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
-          const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState } = useGameStore.getState();
-          deckOverlayRef.current.setProps({
-            layers: composeTacticalDeckLayers({
-              formationsGeoJson: lastFormationsGeoJsonRef.current,
-              labelsVisible: lVis,
-              formationsVisible: fVis,
-              zoom: map.getZoom(),
-              loadedGameState,
-              centroidLookup: osidCentroidsRef.current,
-            }),
-          });
-        }
+        if (zoomThrottleTimer) return;
+        zoomThrottleTimer = setTimeout(() => {
+          zoomThrottleTimer = null;
+          if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
+            const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState } = useGameStore.getState();
+            deckOverlayRef.current.setProps({
+              layers: composeTacticalDeckLayers({
+                formationsGeoJson: lastFormationsGeoJsonRef.current,
+                labelsVisible: lVis,
+                formationsVisible: fVis,
+                zoom: map.getZoom(),
+                loadedGameState,
+                centroidLookup: osidCentroidsRef.current,
+              }),
+            });
+          }
+        }, 50);
       });
 
       // Minimap: register panToCenter callback
@@ -2550,6 +2557,57 @@ export function MapContainer() {
       clearTimeout(retryId);
     };
   }, [selectedOsid, mapReady, osidPropertiesMap]);
+
+  // R12: ORBAT-map sync — flash an OSID polygon briefly when flashOsid is set
+  const flashOsid = useGameStore((s) => s.flashOsid);
+  const setFlashOsid = useGameStore((s) => s.setFlashOsid);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !flashOsid) return;
+
+    // Use the existing osid-selected-outline layer to flash the OSID
+    const FLASH_LAYER = 'osid-flash-highlight';
+    try {
+      // Create a transient fill layer for the flash if it doesn't exist
+      if (!map.getLayer(FLASH_LAYER)) {
+        map.addLayer({
+          id: FLASH_LAYER,
+          type: 'fill',
+          source: 'osid-control',
+          paint: {
+            'fill-color': '#fbbf24',
+            'fill-opacity': 0,
+          },
+          filter: ['==', ['get', 'osid'], '__none__'],
+        });
+      }
+      // Set filter to target the flash OSID
+      map.setFilter(FLASH_LAYER, ['==', ['get', 'osid'], flashOsid]);
+      // Animate: fade in then out
+      map.setPaintProperty(FLASH_LAYER, 'fill-opacity', 0.5);
+      const fadeOut = setTimeout(() => {
+        try {
+          if (map.getLayer(FLASH_LAYER)) {
+            map.setPaintProperty(FLASH_LAYER, 'fill-opacity', 0.25);
+          }
+        } catch { /* layer may be gone */ }
+      }, 200);
+      const clear = setTimeout(() => {
+        try {
+          if (map.getLayer(FLASH_LAYER)) {
+            map.setPaintProperty(FLASH_LAYER, 'fill-opacity', 0);
+            map.setFilter(FLASH_LAYER, ['==', ['get', 'osid'], '__none__']);
+          }
+        } catch { /* layer may be gone */ }
+        setFlashOsid(null);
+      }, 600);
+
+      return () => {
+        clearTimeout(fadeOut);
+        clearTimeout(clear);
+      };
+    } catch { /* style not ready */ }
+  }, [flashOsid, mapReady, setFlashOsid]);
 
   // Pulse animation for staged orders and battle markers
   useEffect(() => {

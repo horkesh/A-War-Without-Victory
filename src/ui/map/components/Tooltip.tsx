@@ -2,7 +2,7 @@
  * Rich tooltip system (Phase C1). HOI spec §7, §9.2.
  * 300ms delay, warm palette, pointer-events: none so tooltips never block clicks.
  */
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getFormationsAtOsid } from '../utils/formationAtOsid';
@@ -319,7 +319,7 @@ function DefensePreviewContent({
   );
 }
 
-export function Tooltip() {
+export const Tooltip = React.memo(function Tooltip() {
   const tooltipTarget = useGameStore((s) => s.tooltipTarget);
   const tooltipPosition = useGameStore((s) => s.tooltipPosition);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
@@ -414,4 +414,4 @@ export function Tooltip() {
       )}
     </div>
   );
-}
+});

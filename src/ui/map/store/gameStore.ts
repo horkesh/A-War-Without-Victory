@@ -245,6 +245,14 @@ export interface GameStore {
   /** Whether the Codex (historical essays) panel is open. */
   codexOpen: boolean;
   setCodexOpen: (open: boolean) => void;
+
+  /** OSID to flash-highlight on the map (brief pulse, auto-clears). Used by ORBAT-map sync. */
+  flashOsid: string | null;
+  setFlashOsid: (osid: string | null) => void;
+
+  /** Whether the Strategic Dashboard overlay is open. */
+  strategicDashboardOpen: boolean;
+  setStrategicDashboardOpen: (open: boolean) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -517,4 +525,10 @@ export const useGameStore = create<GameStore>((set) => ({
 
   codexOpen: false,
   setCodexOpen: (open) => set({ codexOpen: open }),
+
+  flashOsid: null,
+  setFlashOsid: (osid) => set({ flashOsid: osid }),
+
+  strategicDashboardOpen: false,
+  setStrategicDashboardOpen: (open) => set({ strategicDashboardOpen: open }),
 }));
