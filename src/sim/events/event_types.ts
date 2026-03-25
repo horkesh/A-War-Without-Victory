@@ -125,6 +125,13 @@ export interface EventEffectAggressionModifier {
     duration_turns: number;
 }
 
+/** Effect: flip OSID control to a faction. Used for barracks seizures, territorial events. */
+export interface EventEffectControlChange {
+    kind: 'control_change';
+    faction: FactionId;
+    osids: string[];
+}
+
 export type EventEffect =
     | EventEffectNarrative
     | EventEffectMoraleChange
@@ -135,7 +142,8 @@ export type EventEffect =
     | EventEffectAllianceChange
     | EventEffectNegotiationBreakdown
     | EventEffectEquipmentGrant
-    | EventEffectAggressionModifier;
+    | EventEffectAggressionModifier
+    | EventEffectControlChange;
 
 /** A player/bot response option for decision events. */
 export interface EventResponseOption {

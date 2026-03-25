@@ -252,7 +252,8 @@
       { "kind": "aggression_modifier", "faction": "RS", "delta": 0.20, "duration_turns": 10 },
       { "kind": "patron_pressure", "faction": "RBiH", "delta": 10 },
       { "kind": "humanitarian_impact", "faction": "RBiH", "war_crimes_delta": 2 },
-      { "kind": "narrative", "text": "The Br\u010danska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. VRS high command redirects forces toward the Tuzla corridor." }
+      { "kind": "control_change", "faction": "RBiH", "osids": ["op:tuzla:simin_han_2"] },
+      { "kind": "narrative", "text": "The Br\u010danska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. TDF forces secure the Simin Han barracks complex. VRS high command redirects forces toward the Tuzla corridor." }
     ],
     "dimension_shifts": [{ "faction": "RBiH", "dimension": "military_credibility", "delta": 5 }],
     "sets_flags": { "barracks_tuzla_seized": true }

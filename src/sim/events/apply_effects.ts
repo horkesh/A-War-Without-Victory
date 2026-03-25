@@ -11,13 +11,14 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     aggression_modifier: 0,
     alliance_change: 1,
     cohesion_change: 2,
-    equipment_grant: 3,
-    humanitarian_impact: 4,
-    morale_change: 5,
-    narrative: 6,
-    negotiation_capital: 7,
-    patron_pressure: 8,
-    supply_delta: 9,
+    control_change: 3,
+    equipment_grant: 4,
+    humanitarian_impact: 5,
+    morale_change: 6,
+    narrative: 7,
+    negotiation_capital: 8,
+    patron_pressure: 9,
+    supply_delta: 10,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -71,6 +72,9 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
             break;
         case 'aggression_modifier':
             applyAggressionModifier(state, effect.faction, effect.delta, effect.duration_turns);
+            break;
+        case 'control_change':
+            applyControlChange(state, effect.faction, effect.osids);
             break;
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
@@ -195,6 +199,14 @@ function applyAggressionModifier(
     const mods = state.military.event_aggression_modifiers;
     const currentTurn = state.meta.turn ?? 0;
     mods.push({ faction, delta, expires_turn: currentTurn + durationTurns });
+}
+
+/** Flip OSID control to a faction. Used for barracks seizures, territorial events. */
+function applyControlChange(state: GameState, faction: FactionId, osids: string[]): void {
+    const pc = state.political.political_controllers ??= {};
+    for (const osid of osids) {
+        pc[osid] = faction;
+    }
 }
 
 /** Adjust a specific negotiation capital dimension for a faction. */
