@@ -95,7 +95,7 @@ export function SidePickerOverlay({
         </div>
         <div className="px-4 py-3 border-t border-panel-border bg-panel-bg flex justify-between items-center">
           <div className="text-[10px] text-text-secondary italic">
-            v0.4.1 Build Fallback Active
+            v0.6.1
           </div>
           <button
             type="button"
