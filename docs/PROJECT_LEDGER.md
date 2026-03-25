@@ -1,7 +1,19 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.7.0 Phase 5 COMPLETE + Pool Decay (War Weariness).** 1465 tests, 118 suites. **91.2% area-weighted (40w, -0.1pp).** Pool decay drains pool.available per turn (desertion/emigration/draft evasion). Faction-differentiated: HRHB 2.5%, RS 2.0%, RBiH 1.2%. Enclaves exempt. RS w104 139k→124k (target 110-120k, now 4k over). HRHB w104 66k→58k (target 50-55k, 3k over). **Next: threshold tuning to close remaining RS/HRHB gap, then v0.7.0 Phase 6.**
+**Status:** **v0.7.0 Phase 5 COMPLETE + Exhaustion Overhaul + Simin Han.** 1465 tests, 118 suites. **91.6% area-weighted (40w).** New `control_change` event effect type. Tuzla barracks event flips Simin Han to RBiH (+0.4pp). Pool decay + exhaustion accounting: RS w104 149k→124k. **Next: v0.7.0 Phase 6 (Dynamic Codex) or v0.8 (Command Chain).**
+
+## [2026-03-25] New Event Effect: control_change + Simin Han Fix
+
+**Scope:** New `EventEffectControlChange` type flips OSID political control via events. Applied to Tuzla barracks event to resolve long-standing calibration issue.
+
+**Implementation:** `EventEffectControlChange { kind: 'control_change', faction: FactionId, osids: string[] }` in `event_types.ts`. Handler in `apply_effects.ts` sets `political_controllers[osid] = faction` for each OSID. Deterministic ordering via `EFFECT_KIND_ORDER`.
+
+**Tuzla barracks:** `battle_of_the_barracks_tuzla` now includes `{ kind: 'control_change', faction: 'RBiH', osids: ['op:tuzla:simin_han_2'] }`. The JNA barracks complex at Simin Han was seized during the Brčanska Malta column ambush. Narrative updated to mention Simin Han.
+
+**Calibration:** 91.2% → **91.6%** (+0.4pp). Resolves CALIBRATION_MASTER known issue: "Simin Han at Tuzla — RS holds, should be RBiH."
+
+**Files:** `src/sim/events/event_types.ts` (new type), `src/sim/events/apply_effects.ts` (handler + ordering), `data/scenarios/events/war_1992.json` (Tuzla barracks effect).
 
 ## [2026-03-25] Pool War Weariness Decay — Force Plateau Mechanism
 
