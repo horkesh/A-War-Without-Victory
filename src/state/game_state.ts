@@ -904,7 +904,7 @@ export interface DisplacementState {
 export interface ControlEvent {
     turn: number;
     settlement_id: string;
-    mechanism: 'combat' | 'consolidation' | 'abandoned';
+    mechanism: 'combat' | 'consolidation' | 'abandoned' | 'event';
     from: string | null;
     to: string | null;
     mun_id?: string;

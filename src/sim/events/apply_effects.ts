@@ -3,7 +3,7 @@
  * Deterministic: effects sorted by kind before application; no timestamps or randomness.
  */
 
-import type { GameState, FactionId } from '../../state/game_state.js';
+import type { GameState, FactionId, ControlEvent } from '../../state/game_state.js';
 import type { EventEffect } from './event_types.js';
 
 /** Deterministic kind ordering for effect application. */
@@ -201,11 +201,23 @@ function applyAggressionModifier(
     mods.push({ faction, delta, expires_turn: currentTurn + durationTurns });
 }
 
-/** Flip OSID control to a faction. Used for barracks seizures, territorial events. */
+/** Flip OSID control to a faction. Used for barracks seizures, territorial events.
+ *  Also records a ControlEvent so the GUI battle-markers layer and consistency
+ *  assertions can track the flip. */
 function applyControlChange(state: GameState, faction: FactionId, osids: string[]): void {
     const pc = state.political.political_controllers ??= {};
+    const turn = state.meta?.turn ?? 0;
     for (const osid of osids) {
+        const prev = pc[osid] ?? null;
         pc[osid] = faction;
+        (state.political.control_events ??= []).push({
+            turn,
+            settlement_id: osid,
+            mechanism: 'event',
+            from: prev,
+            to: faction,
+            mun_id: osid.split(':')[1] ?? undefined,
+        } satisfies ControlEvent);
     }
 }
 

@@ -639,6 +639,24 @@
     "enables_events": ["vance_owen_plan_1993"]
   },
   {
+    "id": "gorazde_pocket_consolidation_1992",
+    "title": "Operation Circle: The Gorazde Pocket Holds",
+    "narrative": "The 1st and 31st Drina Strike Brigades of the ARBiH launch Operation Circle, a counteroffensive to push VRS forces out of Gorazde's eastern approaches. After weeks of fighting through August, the operation succeeds in consolidating the enclave's perimeter, securing outlying settlements and establishing a defensible pocket. Gorazde \u2014 the largest Bosniak-held enclave in the Drina valley \u2014 will endure under siege for the remainder of the war, but it will not fall.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 18, "turn_max": 24, "phase": "war",
+      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "gorazde", "threshold": 0.3 }
+    },
+    "once": true,
+    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
+    "effects": [
+      { "kind": "control_change", "faction": "RBiH", "osids": ["op:gorazde:glamoc", "op:gorazde:kamen", "op:gorazde:sopotnica"] },
+      { "kind": "narrative", "text": "Operation Circle consolidates the Gorazde pocket. ARBiH forces secure the enclave perimeter, pushing VRS from outlying settlements." }
+    ],
+    "sets_flags": { "gorazde_pocket_consolidated": true },
+    "historical_source": "Wikipedia: Siege of Gorazde. Operation Krug (Circle), August 1992."
+  },
+  {
     "id": "hvo_arbih_tensions_rise_1992",
     "title": "HVO-ARBiH Clash at Prozor",
     "narrative": "The fragile alliance between the HVO and ARBiH fractures openly at Prozor in central Bosnia. HVO forces attack Bosniak civilians and ARBiH positions in a calculated bid to assert Croat control over the town. Further clashes erupt near Novi Travnik. The incidents mark the first serious military confrontation between the two nominal allies.",

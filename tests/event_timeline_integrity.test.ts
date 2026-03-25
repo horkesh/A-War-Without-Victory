@@ -115,7 +115,7 @@ describe('Event timeline historical integrity', () => {
         }
     });
 
-    it('total event count is 94', () => {
-        expect(allEvents.length).toBe(94);
+    it('total event count is 95', () => {
+        expect(allEvents.length).toBe(95);
     });
 });
