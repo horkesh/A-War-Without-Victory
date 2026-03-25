@@ -179,6 +179,9 @@ export function applyFrontlineAttrition(
         by_faction: {}
     };
 
+    // COHA ceasefire suspends frontline attrition (v0.7.0 Phase 4)
+    if (state.military.event_flags?.coha_active === true) return report;
+
     const formations = state.military.formations;
     if (!formations) return report;
 

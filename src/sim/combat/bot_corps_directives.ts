@@ -582,6 +582,23 @@ export function generateCorpsDirectives(
         // Skip corps whose directives were already set by the AI command layer
         if (cmd.ai_decided) continue;
 
+        // COHA ceasefire forces all corps to defensive — no offensive operations (v0.7.0 Phase 4)
+        if (state.military.event_flags?.coha_active === true) {
+            cmd.stance = 'defensive';
+            cmd.directive = {
+                assigned_front_ids: [],
+                offensive_targets: [],
+                hold_osids: [],
+                avoid_osids: [],
+                max_attackers_per_target: 0,
+                reserve_fraction: 1.0,
+                min_attack_outcome: 'stalemate',
+                aggression_modifier: -1.0,
+            };
+            cmd.status_reason = 'ceasefire_active';
+            continue;
+        }
+
         const subordinates = getCorpsSubordinates(state, corps.id);
         if (subordinates.length === 0) {
             cmd.directive = null;

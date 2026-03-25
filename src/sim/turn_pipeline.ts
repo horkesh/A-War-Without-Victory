@@ -47,6 +47,12 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
         throw new Error(`runTurn: unsupported lifecycle phase "${String(phase)}"`);
     }
 
+    // Dayton Agreement ends the war — set game_over and short-circuit (v0.7.0 Phase 4)
+    if (working.military.event_flags?.dayton_signed === true && !working.meta.game_over) {
+        working.meta.game_over = true;
+        working.meta.outcome = 'dayton_agreement';
+    }
+
     // Game over gate: if game_over is set, short-circuit to report-only mode (no combat/movement)
     if (working.meta.game_over) {
         working.meta = {

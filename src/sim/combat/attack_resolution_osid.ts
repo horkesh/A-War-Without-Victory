@@ -545,6 +545,9 @@ export function resolveAttackOrdersOsid(
         battles: []
     };
 
+    // COHA ceasefire suppresses all combat (v0.7.0 Phase 4)
+    if (state.military.event_flags?.coha_active === true) return report;
+
     const terrainMultByOsid = buildTerrainMultByOsid(reverseMap, terrainData);
     const slopeByOsid = buildSlopeByOsid(reverseMap, terrainData);
 
