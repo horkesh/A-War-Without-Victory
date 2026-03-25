@@ -1,11 +1,23 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.7.0 Phase 5 COMPLETE + Codex QA COMPLETE.** 1465 tests, 118 suites. **91.6% area-weighted (40w).** 83 Codex essays verified through 3-pass QA (24 corrections). 13 missing essays tracked. **Next: author 13 missing 1992 essays, then v0.7.0 Phase 6 (Dynamic Codex) or v0.8 (Command Chain).**
+**Status:** **v0.7.0 COMPLETE. Backlog clear.** 1465 tests, 118 suites. **91.7% area-weighted (40w), 95 events.** Codex QA (30 corrections), Gorazde consolidation event, Hrasnica pocket fix. 9 legendary features on roadmap. **Next: v0.7.0.1 (13 missing 1992 essays), then v0.7.1 (essay template engine + Letter Home).**
 
-## [2026-03-25] Codex Essay QA — 3-Pass Audit (24 Corrections Across 18 Essays)
+## [2026-03-25] P3 Backlog Cleared — Gorazde + Hrasnica
 
-**Scope:** Systematic factual accuracy audit of all 83 Codex essays. Three full passes with 5 QA rounds each: historian fact-check (4 parallel agents), operations expert military accuracy, web/ICTY verification, war-or-game realism audit, geographic/directional sanity check. Source hierarchy: ICTY verdicts FIRST, BB second, web tertiary.
+**Gorazde pocket consolidation:** New event `gorazde_pocket_consolidation_1992` (Operation Circle). ARBiH 1st and 31st Drina Strike Brigades consolidated the Gorazde enclave perimeter Aug-Sep 1992. Flips `op:gorazde:glamoc`, `op:gorazde:kamen`, `op:gorazde:sopotnica` from RS to RBiH via `control_change` effect. Resolves 3 calibration mismatches. Also improved `applyControlChange` to emit `ControlEvent` entries (added `'event'` to mechanism union type).
+
+**Hrasnica pocket fix:** 102nd Motorized was `home_mun: "ilidza"` but all Ilidza OSIDs are RS-controlled. Brigade is a refugee formation — displaced Ilidza Bosniaks relocated to Hrasnica (Hadzici municipality). Changed `home_mun` to `"hadzici"`, `home_osid` to `op:hadzici:binjezevo`, added `displaced_from: "ilidza"`. Now draws from correct Hadzici pool where the displaced population lives.
+
+**Calibration:** 91.6% → **91.7%** (+0.1pp from Gorazde fix). Zero regression from Hrasnica fix.
+
+**Remaining:** `op:gorazde:kolovarice` mismatch (painted RS, sim RBiH) — census data inconclusive, needs historical research.
+
+**Files:** `data/scenarios/events/war_1992.json` (new event), `src/sim/events/apply_effects.ts` (ControlEvent emission), `src/state/game_state.ts` (mechanism type), `data/source/oob_brigades.json` (102nd home relocation).
+
+## [2026-03-25] Codex Essay QA — 3-Pass Audit (30 Corrections Across 21 Essays)
+
+**Scope:** Systematic factual accuracy audit of all 83 Codex essays. Three full passes with 5 QA rounds each: historian fact-check (4 parallel agents), operations expert military accuracy, web/ICTY verification, war-or-game realism audit, geographic/directional sanity check. Source hierarchy: ICTY verdicts FIRST, BB second, web tertiary. Plus 6 tone/framing fixes (no hedging ICTY verdicts, documentary parity across factions).
 
 **Pass 1 — 17 corrections across 15 essays:**
 - Operation Sana: title "Sweeps West" → "Breaks East" (5th Corps went SE from Bihac)

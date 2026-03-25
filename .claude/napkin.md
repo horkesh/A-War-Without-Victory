@@ -96,9 +96,8 @@
 5. **[2026-03-08] Warroom/vitest jsdom for DOM-dependent tests**
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
-## Known Backlog (P3 — active)
-1. **[2026-03-24] Gorazde periphery recapture (P3)**: `glamoc`, `kamen`, `sopotnica` start RS (census) but painted RBiH at w40. Can use new `control_change` event effect via a "Gorazde Pocket Consolidation" event.
-2. **[2026-03-24] Hrasnica pocket gap (P3)**: 104th Vitezka and 102nd Motorized are "from Ilidza" but all Ilidza OSIDs are RS-controlled. Need: Hrasnica OSID representation or shared Sarajevo pocket pool.
+## Known Backlog
+**All P3 items RESOLVED (2026-03-25).** Gorazde: Operation Circle event flips 3 OSIDs. Hrasnica: 102nd relocated to Hadzici (refugee brigade). Remaining: `op:gorazde:kolovarice` mismatch (needs /historian research).
 
 **Deferred to roadmap:**
 - Front Line Terrain Tinting (P4) → v0.9.4 (Map That Scars milestone)
