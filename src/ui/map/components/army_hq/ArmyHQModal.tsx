@@ -10,14 +10,10 @@ import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { SituationBriefing, generateBriefing } from './SituationBriefing';
-import { ThreatAssessment, generateThreatAssessment } from './ThreatAssessment';
-import { ForceReadiness, generateForceReadiness } from './ForceReadiness';
-import { SupplyIntelligence, computeSupplyBreakdown, getEnclaveStatuses, getMobilizationInfo } from './SupplyIntelligence';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
-import { turnToDateString } from '../../utils/formatters';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
 import { PersonnelContent } from './PersonnelContent';
@@ -47,6 +43,7 @@ export function ArmyHQModal() {
     const setActiveTab = useGameStore((s) => s.setArmyHQTab);
     const expandedCorpsId = useGameStore((s) => s.armyHQExpandedCorpsId);
     const setExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
+    // These remain available for future use but briefing navigation now stays inside HQ
 
     useEffect(() => {
         if (!open) return;
@@ -95,22 +92,6 @@ export function ArmyHQModal() {
 
         const briefingItems = generateBriefing(state, faction as 'RS' | 'RBiH' | 'HRHB');
 
-        // Threat Assessment (enemy intel synthesis)
-        const threatItems = generateThreatAssessment(state, faction);
-        const threatCorpsIds = new Set(threatItems.filter(t => t.friendlyCorpsId).map(t => t.friendlyCorpsId!));
-        const activeThreatsById = new Set(
-            threatItems.filter(t => t.severity === 'active' && t.friendlyCorpsId).map(t => t.friendlyCorpsId!),
-        );
-
-        // Force Readiness (per-corps health grade)
-        const readinessItems = generateForceReadiness(state.formations, state.operations ?? [], faction, threatCorpsIds);
-        const readinessByCorpsId = new Map(readinessItems.map(r => [r.corpsId, r.grade]));
-
-        // Supply & Sustainability
-        const supplyBreakdown = computeSupplyBreakdown(state, faction);
-        const enclaveStatuses = getEnclaveStatuses(state, faction);
-        const mobilizationInfo = getMobilizationInfo(state, faction);
-
         const sectorsByCorps = new Map<string, typeof sectors>();
         for (const s of sectors) {
             const list = sectorsByCorps.get(s.corps_id) || [];
@@ -128,9 +109,7 @@ export function ArmyHQModal() {
             formations, brigades, corpsFormations, totalPersonnel, sectors, operations,
             sectorsByCorps, opsByCorps,
             territoryPct, exhaustionDisplay, reserves,
-            eff, commander, factionBattles, briefingItems,
-            threatItems, readinessItems, readinessByCorpsId, activeThreatsById,
-            supplyBreakdown, enclaveStatuses, mobilizationInfo,
+            eff, commander, factionBattles, briefingItems
         };
     }, [open, state, faction]);
 
@@ -148,6 +127,26 @@ export function ArmyHQModal() {
         setActiveTab('briefing');
         setExpandedCorpsId(corpsId);
     }, [setActiveTab, setExpandedCorpsId]);
+
+    const handleBriefingNavigate = useCallback((target: { type: string; corpsId: string; sectorId?: string; operationKey?: string }) => {
+        switch (target.type) {
+            case 'corps':
+                navigateToCorps(target.corpsId);
+                break;
+            case 'sector': {
+                // Find which corps owns this sector and expand it
+                const sector = data?.sectors.find(s => s.sector_id === target.sectorId);
+                if (sector) navigateToCorps(sector.corps_id);
+                break;
+            }
+            case 'operation': {
+                // operationKey is "corpsId|opName" — extract corps
+                const corpsId = target.operationKey?.split('|')[0];
+                if (corpsId) navigateToCorps(corpsId);
+                break;
+            }
+        }
+    }, [data, navigateToCorps]);
 
     if (!open || !faction || !state || !data) return null;
 
@@ -216,7 +215,7 @@ export function ArmyHQModal() {
                                 STRATEGIC SITUATION
                             </div>
                             <div className="text-[13px] font-bold text-text-primary tabular-nums">
-                                Week {state.turn} — {state.metadata?.date ?? turnToDateString(state.turn)}
+                                Week {state.turn} {state.metadata?.date ? `\u2014 ${state.metadata.date}` : ''}
                             </div>
                         </div>
                         <button
@@ -229,7 +228,6 @@ export function ArmyHQModal() {
                     </div>
                 </div>
 
-                {/* Tab Bar */}
                 <div className="flex items-center gap-0.5 px-6 py-1.5 bg-panel-bg border-b border-panel-border shrink-0">
                     {HQ_TABS.map(({ id, label }) => (
                         <button
@@ -247,10 +245,9 @@ export function ArmyHQModal() {
                     ))}
                 </div>
 
-                {/* Content */}
                 <div className="relative flex-1 overflow-y-auto px-6 pt-4 pb-6">
 
-                    {/* === BRIEFING TAB === */}
+                    {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
                         <>
                             {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
@@ -306,33 +303,7 @@ export function ArmyHQModal() {
                             {!expandedCorpsId && data.briefingItems.length > 0 && (
                                 <SituationBriefing
                                     items={data.briefingItems}
-                                    onCorpsClick={navigateToCorps}
-                                />
-                            )}
-
-                            {/* Threat Assessment */}
-                            {!expandedCorpsId && data.threatItems.length > 0 && (
-                                <ThreatAssessment
-                                    items={data.threatItems}
-                                    onCorpsClick={navigateToCorps}
-                                />
-                            )}
-
-                            {/* Force Readiness */}
-                            {!expandedCorpsId && data.readinessItems.length > 0 && (
-                                <ForceReadiness
-                                    items={data.readinessItems}
-                                    onCorpsClick={navigateToCorps}
-                                />
-                            )}
-
-                            {/* Supply & Sustainability */}
-                            {!expandedCorpsId && (
-                                <SupplyIntelligence
-                                    breakdown={data.supplyBreakdown}
-                                    enclaves={data.enclaveStatuses}
-                                    mobilization={data.mobilizationInfo}
-                                    currentTurn={state.turn}
+                                    onCorpsClick={(corpsId) => handleBriefingNavigate({ type: 'corps', corpsId })}
                                 />
                             )}
 
@@ -358,8 +329,6 @@ export function ArmyHQModal() {
                                             isExpanded={expandedCorpsId === corps.id}
                                             isCompressed={expandedCorpsId !== null && expandedCorpsId !== corps.id}
                                             onToggleExpand={() => setExpandedCorpsId(expandedCorpsId === corps.id ? null : corps.id)}
-                                            readinessGrade={data.readinessByCorpsId.get(corps.id)}
-                                            hasThreat={data.activeThreatsById.has(corps.id)}
                                         />
                                     ))}
                                 </div>
@@ -367,17 +336,17 @@ export function ArmyHQModal() {
                         </>
                     )}
 
-                    {/* === SUMMARY TAB === */}
+                    {/* ═══ SUMMARY TAB ═══ */}
                     {activeTab === 'summary' && (
                         <WarSummaryContent />
                     )}
 
-                    {/* === RECORDS TAB === */}
+                    {/* ═══ RECORDS TAB ═══ */}
                     {activeTab === 'records' && (
                         <RecordsContent />
                     )}
 
-                    {/* === PERSONNEL TAB === */}
+                    {/* ═══ PERSONNEL TAB ═══ */}
                     {activeTab === 'personnel' && (
                         <PersonnelContent />
                     )}
