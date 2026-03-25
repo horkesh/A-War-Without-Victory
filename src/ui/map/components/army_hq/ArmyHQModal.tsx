@@ -9,7 +9,7 @@ import { useIPC } from '../../desktop/useIPC';
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
-import { SituationBriefing, generateBriefing } from './SituationBriefing';
+import { SituationBriefing, generateBriefing, type BriefingTarget } from './SituationBriefing';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
@@ -128,7 +128,7 @@ export function ArmyHQModal() {
         setExpandedCorpsId(corpsId);
     }, [setActiveTab, setExpandedCorpsId]);
 
-    const handleBriefingNavigate = useCallback((target: { type: string; corpsId: string; sectorId?: string; operationKey?: string }) => {
+    const handleBriefingNavigate = useCallback((target: BriefingTarget) => {
         switch (target.type) {
             case 'corps':
                 navigateToCorps(target.corpsId);
@@ -303,7 +303,7 @@ export function ArmyHQModal() {
                             {!expandedCorpsId && data.briefingItems.length > 0 && (
                                 <SituationBriefing
                                     items={data.briefingItems}
-                                    onCorpsClick={(corpsId) => handleBriefingNavigate({ type: 'corps', corpsId })}
+                                    onNavigate={handleBriefingNavigate}
                                 />
                             )}
 
