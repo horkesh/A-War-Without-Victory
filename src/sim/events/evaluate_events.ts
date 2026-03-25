@@ -3,7 +3,7 @@
  * Uses caller-provided RNG for random events; stable iteration order.
  * v0.4.1: applies mechanical effects via applyEventEffects; tracks fired_event_ids for once-only events.
  * v0.4.1 Phase 2: decision events — player faction queues pending decisions; bot factions auto-respond.
- * v0.6.0: recurrence model, priority queue (3/turn cap), pressure integration, dimension shifts.
+ * v0.6.0: recurrence model, priority queue (4/turn cap), pressure integration, dimension shifts.
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
@@ -16,7 +16,12 @@ import { isEventReady } from './pressure_system.js';
 import { pickBotResponseV1 } from './bot_response.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 
-/** Maximum events that can fire in a single turn. */
+/**
+ * Maximum events that can fire in a single turn.
+ * Raised from 3→4: at w5, jna_withdrawal_1992 was crowded out by 4+ eligible
+ * events (barracks + others), preventing the jna_withdrawn flag from firing
+ * and breaking the Drina → Srebrenica → Corridor cascade chain.
+ */
 const MAX_EVENTS_PER_TURN = 4;
 
 export interface EventsEvaluationReport {
