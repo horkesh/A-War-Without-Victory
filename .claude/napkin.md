@@ -78,7 +78,9 @@
    Do instead: **`deckFormationCounters` defaults `true`** — clean NATO IconLayer counters only (enrichments stripped). MapLibre `formation-markers`/`formation-labels` hidden. Zoom-interpolation: `16px` @ Z6 to `40px` @ Z14. **Settlement labels**: Deck.gl TextLayer (27 cities) — MapLibre symbol layers globally broken (0 rendered features). `fontSettings: { sdf: true }`, `characterSet: 'auto'` for Bosnian diacritics. `setSettlementLabelData()` feeds from `buildMajorCityLabelGeoJSON`. Sarajevo 5 muns merged to one label.
 
 ## GUI / Map
-1. **[2026-03-20] G-2 prediction empty in ops modal**
+1. **[2026-03-25] OSID display names: human-readable, no duplicates**
+   Do instead: `osidDisplayName.ts` handles both GeoJSON-sourced and fallback paths. `humanizeOsid()` strips `op:` prefix, `_2` cluster suffix, title-cases, appends municipality only when different from name. `formatSettlementDisplayName()` strips `(+N)`, same dedup rule. "Simin Han (Tuzla)" not "simin_han_2". "Tuzla" not "Tuzla (Tuzla)".
+2. **[2026-03-20] G-2 prediction empty in ops modal**
    Do instead: Engine returns `OperationPredictionResponse` (`axes`, `totalEstimatedCasualties`, commander `sections` as `{enemy, ownForces, assessment}`). UI expects `PredictionResult` — normalize in `usePrediction` (`normalizeOperationPredictionResponse`). Without `window.awwv`, show explicit desktop-required message, not infinite “Awaiting…”.
 
 ## Imports & Build

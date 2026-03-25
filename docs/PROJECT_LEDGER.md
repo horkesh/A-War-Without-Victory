@@ -1,7 +1,29 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.7.0 Phase 5 COMPLETE + Exhaustion Overhaul + Simin Han.** 1465 tests, 118 suites. **91.6% area-weighted (40w).** New `control_change` event effect type. Tuzla barracks event flips Simin Han to RBiH (+0.4pp). Pool decay + exhaustion accounting: RS w104 149k→124k. **Next: v0.7.0 Phase 6 (Dynamic Codex) or v0.8 (Command Chain).**
+**Status:** **v0.7.0 Phase 5 COMPLETE + Exhaustion Overhaul + Simin Han + OSID Display Names.** 1465 tests, 118 suites. **91.6% area-weighted (40w).** OSID display names: "Simin Han (Tuzla)" not "simin_han_2", no "Tuzla (Tuzla)" duplicates. **Next: v0.7.0 Phase 6 (Dynamic Codex) or v0.8 (Command Chain).**
+
+## [2026-03-25] OSID Display Names — Human-Readable Settlement Names
+
+**Scope:** OSID identifiers like `op:tuzla:simin_han_2` are engine-internal. Players should see "Simin Han (Tuzla)" in the UI. When the settlement name matches the municipality, show just the name ("Tuzla", not "Tuzla (Tuzla)").
+
+**Changes to `src/ui/map/utils/osidDisplayName.ts`:**
+- `humanizeOsid()` (fallback when no GeoJSON): strips `op:` prefix, strips trailing cluster suffix (`_2`, `_13`), title-cases words, appends municipality in parentheses only when different from settlement name.
+- `formatSettlementDisplayName()` (GeoJSON-sourced): strips `(+N)` merge count, appends municipality only when different from base name (case-insensitive comparison).
+- `getOsidDisplayName()` and `buildOsidDisplayNameMap()` unchanged — they delegate to the fixed functions.
+
+**Examples:**
+| OSID | Before | After |
+|------|--------|-------|
+| `op:tuzla:simin_han_2` | "Simin Han 2" / "Simin Han (Tuzla)" | **Simin Han (Tuzla)** |
+| `op:tuzla:tuzla_2` | "Tuzla 2" / "Tuzla (Tuzla)" | **Tuzla** |
+| `op:bihac:bihac_2` | "Bihac 2" / "Bihać (Bihać)" | **Bihać** |
+| `op:sarajevo:stari_grad_2` | "Stari Grad 2" | **Stari Grad (Sarajevo)** |
+| `op:bosanski_petrovac:prkosi` | "Prkosi" | **Prkosi (Bosanski Petrovac)** |
+
+**Affects:** All UI surfaces that display OSID names — tooltips, settlement panels, chronicle entries, operation details, corps panels, AAR, order queue, formation detail. Both GeoJSON-sourced (map) and fallback (engine logs) paths fixed.
+
+**Files:** `src/ui/map/utils/osidDisplayName.ts`.
 
 ## [2026-03-25] New Event Effect: control_change + Simin Han Fix
 
