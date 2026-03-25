@@ -6,17 +6,35 @@ import type { FeatureCollection } from 'geojson';
  */
 export function humanizeOsid(osid: string): string {
   if (!osid || typeof osid !== 'string') return osid;
-  // Handle internal operational prefixes: strip everything before the final ":"
-  const segment = osid.includes(':') ? osid.split(':').pop() ?? osid : osid;
+  // Extract parts: "op:municipality:slug" → municipality and slug
+  const parts = osid.split(':');
+  const slug = parts.length >= 3 ? parts[2] : parts[parts.length - 1] ?? osid;
+  const mun = parts.length >= 3 ? parts[1] : undefined;
 
-  // Strip common technical suffixes or prefixes that shouldn't be humanized
-  const clean = segment.replace(/^(op|sector)_/i, '');
+  // Strip common technical suffixes/prefixes
+  const clean = slug.replace(/^(op|sector)_/i, '');
 
-  return clean
+  // Strip trailing numeric cluster suffix (e.g. "_2", "_13")
+  const withoutSuffix = clean.replace(/_\d+$/, '');
+
+  const name = (withoutSuffix || clean)
     .split('_')
     .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''))
     .join(' ')
     .trim() || osid;
+
+  // Append municipality in parentheses when different from the name
+  if (mun) {
+    const munDisplay = mun
+      .split('_')
+      .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : ''))
+      .join(' ');
+    if (munDisplay.toLowerCase() !== name.toLowerCase()) {
+      return `${name} (${munDisplay})`;
+    }
+  }
+
+  return name;
 }
 
 interface OsidFeatureProperties {
@@ -25,10 +43,12 @@ interface OsidFeatureProperties {
   mun1990_name?: string;
 }
 
-/** Strip "(+N)" suffix from settlement_name and optionally append " (mun1990_name)". */
+/** Strip "(+N)" suffix from settlement_name and optionally append " (mun1990_name)".
+ *  Skip municipality when it matches the base name (avoids "Tuzla (Tuzla)"). */
 function formatSettlementDisplayName(settlementName: string, mun1990Name?: string): string {
   const base = settlementName.replace(/\s*\(\+\d+\)\s*$/, '').trim();
-  if (mun1990Name && mun1990Name.trim()) return `${base} (${mun1990Name.trim()})`;
+  const mun = mun1990Name?.trim();
+  if (mun && mun.toLowerCase() !== base.toLowerCase()) return `${base} (${mun})`;
   return base;
 }
 
