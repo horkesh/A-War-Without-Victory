@@ -94,6 +94,8 @@
 **Files created:** `src/sim/letter_home.ts`
 **Files modified:** `ChiefOfStaffBriefing.tsx`
 
+**STOP AND ASK gate:** Before implementing, determine whether `generateLetterHome()` runs as a pipeline step (sim-side, uses GameState fields only) or as a UI-adapter call (uses adapter fields). If sim-side, use `state.military.casualty_ledger` and derive battle context from `turn_summary`. Do NOT reference `latestTurnSummary` (UI-adapter-only field). Recommend: UI-side generation from adapter data — simpler, no pipeline change, no save format change.
+
 **Process:**
 1. /gameplay-programmer implements deterministic selection + template substitution
 2. /determinism-auditor reviews: no Math.random(), seeded from turn + casualty count
@@ -151,8 +153,10 @@
 **Consulted:** /historian (Cost Ledger — which ICTY case structures to template?)
 **Reviewer:** /product-manager (sequencing, scope)
 
+**STOP AND ASK gate for 7A:** Create ONLY the type interfaces from the architecture spec Section 1.2. Do NOT implement any behavioral logic. Do NOT resolve the 8 open questions at the end of the architecture doc — flag them for daytime review. This is a types-only scaffold.
+
 **Process:**
-1. 7A: Create `src/state/political_leader_types.ts` (interfaces only)
+1. 7A: Create `src/state/political_leader_types.ts` (interfaces only, per gate above)
 2. 7B: Write v0.9.0 consequence system design doc. Convene /game-designer first.
 3. 7C: Write Cost Ledger template format. Convene /historian for ICTY case structure.
 4. 7D: Write Endgame Comparison data requirements. Convene /historian for historical timeline gaps.
@@ -170,7 +174,7 @@
 **Worktree:** `chore/canon-audit`
 
 **Process:**
-1. Phase A: Delete `src/phase0/` (11 files) + 3 phase0 scenarios. /technical-architect verifies no live imports.
+1. Phase A: Delete `src/phase0/` (11 files) + 3 phase0 scenarios. /technical-architect verifies no live imports. **CRITICAL:** After deletion, grep `tests/` for `phase0` imports. Remove or stub affected test files. Remove their entries from `vitest.config.ts` include array. Run smoke triad to verify zero breakage.
 2. Phase B: Rename `peace_phases.ts` to `early_war_phases.ts`. Update all imports.
 3. Phase C: Update 16+ docs removing Sep 1991/peace phase references. NEVER touch FORAWWV.md.
 4. Smoke triad after each phase
