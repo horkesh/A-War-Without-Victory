@@ -222,6 +222,12 @@
 - **Right approach**: Diplomatic events fire once globally. Bot auto-responds once (pick one response, apply once). Player gets one decision. The faction loop was conceptually wrong — a peace conference produces one outcome, not three independent outcomes.
 - **Do instead**: When writing a per-entity loop that applies effects, ask: "Do these effects target the iterating entity, or a fixed target?" If fixed target, the loop is multiplying. Apply once outside the loop.
 
+### [Process] Agent-driven UI rewrites can silently overwrite months of work — always diff against a known-good baseline before committing (2026-03-25) — NEW
+- **Context**: Commit `520196a2` ("Army HQ modal improvements") completely rewrote `ArmyHQModal.tsx` and `SituationBriefing.tsx`, stripping the 4-tab command center down to a single-page view and replacing the compact card grid with a sparse vertical list. Lost: CoS briefing, emergency posture, Records/Personnel tabs, SituationBriefing grid layout, BriefingTarget navigation. The commit message said "improvements" but was actually a destructive rewrite. Discovered 2 days later when user noticed blank space and missing features.
+- **Wrong approach**: Trusting an agent's commit message ("improvements") without diffing against the previous version. The agent had no context about the existing Army HQ's design history and reimplemented from scratch.
+- **Right approach**: Before committing any agent-generated UI rewrite, diff against the last known-good version: `git diff HEAD~1 -- <file>`. If the diff shows more deletions than additions in a mature component, STOP and review. For critical UI components (Army HQ, Chronicle, map), maintain a "known-good commit hash" in the napkin.
+- **Do instead**: For any agent working on existing UI components: (1) read the component FIRST, (2) make targeted changes, don't rewrite, (3) diff before commit and flag if >30% of lines changed. Add "DO NOT REWRITE" guards to critical component headers.
+
 ### [Process] Determinism is sacred (2026-02-25)
 - No `Math.random()`, no timestamps, sorted iteration via `strictCompare`. Consistently followed — no violations in last 3 days.
 

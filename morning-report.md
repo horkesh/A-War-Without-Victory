@@ -21,6 +21,14 @@ Massive session: Emergent Brigade Phase 2 (enclave fix + pool rerouting + tiered
 - **Stream C (P2)**: Equipment labels, stance toast+flash, territory progress bar+arrows, +MORE persistent. `4ad29682`
 - **Stream D (P3+)**: Version string, MapLibre attribution hidden, perf throttling (50ms), ORBAT-map sync (fly+flash), strategic dashboard (territory/casualty charts). `1464b999` + `d40aa77a`
 
+### Army HQ + Chronicle Restoration (post-nightshift)
+- **520196a2 was a destructive rewrite** — stripped Army HQ tabs, CoS briefing, SituationBriefing grid
+- Restored ArmyHQModal.tsx and SituationBriefing.tsx from c80d5767
+- Fixed date display ("UNKNOWN" → turnToDateString)
+- Fixed chronicle "undefined formed/destroyed" (formation_name field mismatch)
+- Fixed capital scroll target (missing data-summary-section)
+- **Life lesson added**: Agent UI rewrites must diff against known-good baseline
+
 ### Infrastructure
 - Life lessons split into 8 topic files. 9 skills wired with Required Reading.
 - Historian OOB master hierarchy. ARMY_STRENGTH_COMPARISON.md.

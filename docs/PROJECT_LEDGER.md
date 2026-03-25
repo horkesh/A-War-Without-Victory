@@ -3,6 +3,20 @@
 **Last Updated:** 2026-03-25
 **Status:** **v0.7.0 Phase 4 COMPLETE** — Political Wargame. 1453 tests, 118 suites. **91.3% area-weighted (n1079).** 94 events, 21 flag-gated, **7 engine flag reads wired** (supply embargo, corridor, patron pressure, COHA, Dayton). Emergent brigade Phase 2 complete. **RBiH 144k > RS+HRHB 144k (+369).** 114 RBiH / 83 RS / 36 HRHB brigs, 288k total. **Next: v0.7.0 Phase 5 (FIXED→CONDITIONAL event conversions).**
 
+## [2026-03-25] Army HQ + Chronicle Restoration + UI Bug Fixes
+
+**Scope:** Restored Army HQ modal and SituationBriefing after destructive rewrite by commit 520196a2. Fixed chronicle "undefined" bug and capital scroll target.
+
+**Army HQ restoration:** Commit 520196a2 ("Army HQ modal improvements") had silently replaced the 4-tab command center (BRIEFING|SUMMARY|RECORDS|PERSONNEL) with a stripped-down single-page view, losing CoS briefing, emergency posture controls, WarSummaryContent, RecordsContent, PersonnelContent. Restored from last known good version (c80d5767). Date display fixed (was showing "UNKNOWN" — now uses turnToDateString).
+
+**SituationBriefing restoration:** Same commit replaced the compact multi-column card grid (grid-cols-2 lg:grid-cols-3) with a sparse vertical list, causing massive blank space. Restored grid layout with BriefingTarget navigation (→ CORPS / → SECTOR / → OP).
+
+**Chronicle fix:** `generateChronicleEntries.ts` used wrong field names (spawn.name vs formation_name). Fixed to match turn_summary.ts types. Test fixtures updated.
+
+**Capital scroll target:** Added missing `data-summary-section="capital"` to SituationTab.tsx.
+
+**Files:** `src/ui/map/components/army_hq/ArmyHQModal.tsx` (restored + date fix), `src/ui/map/components/army_hq/SituationBriefing.tsx` (restored grid), `src/ui/map/components/chronicle/generateChronicleEntries.ts` (formation_name fix), `src/ui/map/components/SituationTab.tsx` (capital scroll), `tests/chronicle_entries.test.ts`.
+
 ## [2026-03-25] v0.7.0 Phase 4 Complete — Engine Flag Reads
 
 **Scope:** Wired 7 engine flag reads so event flags have mechanical consequences. Also completed nightshift triage (FIX-A/B/C already implemented).

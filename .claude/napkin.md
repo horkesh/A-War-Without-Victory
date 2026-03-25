@@ -19,6 +19,7 @@
 **Next priority:** v0.7.0 Phase 4 (engine flag reads) → Phase 5 (FIXED→CONDITIONAL). Plan: `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
 **Pyrrhic team restructured (2026-03-24):** 7 cuts (lua, graphics, frontend-design, devops, build-engineer, asset-integration, canon-compliance-review dup). 3 hires (narrative-designer, data-pipeline-engineer, integration-tester). /ui-ux-developer promoted to mandatory gate. 62 active skills.
 **Full Pyrrhic review (2026-03-24):** 7 specialists reviewed roadmap. Key findings: mid-game dead zones (w20-35, w80-130), no unified notification architecture, Drina paramilitaries = biggest calibration opportunity, adapter/IPC untested, content authoring 5-7x underestimated, active ops+stance change undefined. 8 new plans written. P0+P1 bugs fixed.
+**Army HQ restoration (2026-03-25):** 520196a2 destroyed 4-tab Army HQ + SituationBriefing grid. Restored from c80d5767. Known-good Army HQ baseline: c80d5767. **Rule: never rewrite ArmyHQModal.tsx or SituationBriefing.tsx — targeted edits only.**
 **HRHB-RBiH conflict:** P1 ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
 **Calibration freeze rule:** Any sim-affecting change needs `npm run calibrate:40w` regression check vs frozen baseline.
 **External:** Visual assets (user, Gemini Pro). Audio assets (sourcing needed).

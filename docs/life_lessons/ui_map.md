@@ -33,6 +33,12 @@
 - **Right approach**: During the `map.on('load')` init callback, create sources and layers directly via `map.addSource()` + `map.addLayer()` without any `isStyleLoaded()` guards. Reserve the remove+re-add pattern (`replaceArrowSource`) for subsequent updates triggered by React effects, where the style IS fully loaded.
 - **Do instead**: In any MapLibre `map.on('load')` callback, never gate source/layer creation on `isStyleLoaded()`. If you have a helper function that does remove+re-add (designed for updates), do NOT call it during init — the "remove" step is a no-op and the "add" step may silently fail. Create init sources/layers inline, then use the helper for updates only. This is distinct from the `setData()` modal bug (GUI_MASTER section 4) — that bug affects updates, this one affects init.
 
+### [UI] Chronicle entry fields must match turn_summary.ts types exactly — spawn.name vs formation_name (2026-03-25) — NEW
+- **Context**: `generateChronicleEntries.ts` used `spawn.name` and `destruction.name` but the `FormationSpawn` and `FormationDestruction` types in `turn_summary.ts` use `formation_name` and `formation_id`. Result: "undefined formed" / "undefined destroyed" in chronicle entries.
+- **Wrong approach**: Assuming field names without checking the type definition. The types were defined in a different file (`turn_summary.ts`) from the consumer (`generateChronicleEntries.ts`).
+- **Right approach**: When accessing fields from typed interfaces, always verify the field names against the source type definition. Use TypeScript strict mode — if the field doesn't exist on the type, tsc should catch it (but didn't here because the code used loose indexing).
+- **Do instead**: When writing chronicle/display code that reads from turn summaries, grep for the interface definition first: `grep "interface FormationSpawn" src/state/turn_summary.ts`.
+
 ### [GUI] GameStateAdapter field paths: always verify `state.military.*` (2026-03-10)
 - **Context**: Sectors stopped being clickable, hoverable, and highlighting. No white glow line. No zoom from Command. Investigation took hours across MapLibre layer timing, queryRenderedFeatures, line-offset, React race conditions — all red herrings.
 - **Wrong approach**: Debugging MapLibre layers, adding diagnostic click handlers, testing line-offset behavior. The entire rendering and interaction pipeline was correct — it simply had no data to work with.

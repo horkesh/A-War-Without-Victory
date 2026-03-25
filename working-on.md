@@ -1,16 +1,17 @@
 # Working On: v0.7.0 Phase 5 + UI Visual Verification
 
 ## Context
-v0.7.0 Phases 1-4 COMPLETE. UI/UX audit (15 recommendations) IMPLEMENTED. Phase 5 is event JSON work — no engine code.
+v0.7.0 Phases 1-4 COMPLETE. UI/UX audit IMPLEMENTED. Army HQ + Chronicle restored.
 
-## What's Done (this session)
-- Emergent Brigade Phase 2: enclave fix, pool rerouting, tiered caps, asymmetric mobilization
-- n1079: 91.3%, RBiH 144k > RS+HRHB 144k (+369), 114 RBiH brigades
-- v0.7.0 Phase 4: all 7 engine flag reads wired (supply, pressure, ceasefire, Dayton)
-- Life lessons restructured (8 topic files), 9 skills wired, historian hierarchy
-- Nightshift triage confirmed complete
+## What Was Done (2026-03-25)
+- Emergent Brigade Phase 2 (enclave fix, pool rerouting, tiered caps, mobilization)
+- v0.7.0 Phase 4 (7 engine flag reads)
+- UI/UX audit (15 recommendations, 4 parallel streams)
+- Army HQ restoration (520196a2 destructive rewrite undone)
+- Chronicle "undefined" fix + capital scroll target
+- n1079: 91.3%, RBiH 144k > RS+HRHB (+369)
 
 ## What's Next
-- Phase 5: FIXED→CONDITIONAL conversions (Srebrenica, Markale, Zepa, endgame chain)
-- Phase 6: Cleanup + remaining orphan flags
-- Then v0.7.0 is complete → v0.7.1 (Dynamic Codex Phase 1)
+- v0.7.0 Phase 5: FIXED→CONDITIONAL event conversions
+- 52w scenario to verify tiered caps + mobilization at full war length
+- Visual verification of all UI changes in browser
