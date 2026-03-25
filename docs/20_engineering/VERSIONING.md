@@ -93,7 +93,8 @@ Plans: `docs/plans/2026-03-23-event-flag-wiring-plan.md`, `2026-03-23-essay-temp
 
 The Codex transforms from static essays into a living historical document that morphs with player decisions.
 
-- v0.7.0: Event flag wiring (25 orphan flags → downstream consumers) **COMPLETE**. Phases 1-5 shipped: evaluators, 21 flag gates, pressure modifiers, 7 engine flag reads, 13 orphan flag wirings, 7 FIXED→CONDITIONAL conversions. Full endgame chain wired.
+- v0.7.0: Event flag wiring + exhaustion overhaul + Codex QA **COMPLETE**. 25 flags wired, 7 FIXED→CONDITIONAL endgame chain, pool decay, 30 essay corrections across 3-pass QA. 91.6% calibration.
+- v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, Operation Corridor, Mostar liberation, Srebrenica enclave, HRHB political goal, arms embargo). /historian + /narrative-designer.
 - v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries), Codex UI. **Can parallel with v0.8.0** — no dependency
 - v0.7.2: Warroom React migration (absorbs scope from old v0.7.0 perf plan, now `docs/plans/2026-03-16-v0.7.0-performance.md`)
 - v0.7.3: Canon audit (remove September 1991 start, peace phase references from all docs) — cleanup last, lowest risk
