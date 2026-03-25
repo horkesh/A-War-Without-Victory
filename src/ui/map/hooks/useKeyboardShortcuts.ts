@@ -66,16 +66,10 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
-      // H → toggle Army HQ modal
-      if (event.key === 'h' || event.key === 'H') {
-        const store = useGameStore.getState();
-        if (store.armyHQOpen) {
-          store.setArmyHQOpen(false);
-        } else if (store.loadedGameState) {
-          const faction = store.loadedGameState.player_faction ?? 'RBiH';
-          store.setSelectedArmyId(faction);
-        }
-        return;
+      // H → toggle Army HQ modal (handled in App.tsx with tab support)
+      // S → open Army HQ summary tab (handled in App.tsx)
+      if (event.key === 'h' || event.key === 'H' || (event.key === 's' && !event.ctrlKey && !event.metaKey)) {
+        return; // Let App.tsx handler manage HQ shortcuts
       }
 
       // Tab → cycle through corps (within HQ or sidebar)

@@ -540,11 +540,13 @@ function App() {
       if (e.key === 'h' || e.key === 'H') {
         e.preventDefault();
         const gs = useGameStore.getState();
+        if (gs.armyHQOpen) { gs.setArmyHQOpen(false); return; }
         const pf = gs.loadedGameState?.player_faction;
         if (pf) { gs.setSelectedArmyId(pf); gs.setArmyHQOpen(true); gs.setArmyHQTab('briefing'); }
       } else if (e.key === 's' && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         const gs = useGameStore.getState();
+        if (gs.armyHQOpen) { gs.setArmyHQTab('summary'); return; }
         const pf = gs.loadedGameState?.player_faction;
         if (pf) { gs.setSelectedArmyId(pf); gs.setArmyHQOpen(true); gs.setArmyHQTab('summary'); }
       } else if (e.key === 'e' || e.key === 'E') {
