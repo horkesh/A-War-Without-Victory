@@ -1,7 +1,7 @@
-# Working On: v0.7.0 Phase 5 — FIXED→CONDITIONAL Event Conversions
+# Working On: v0.7.0 Phase 5 + UI Visual Verification
 
 ## Context
-v0.7.0 Phases 1-4 COMPLETE. Phase 5 is event JSON work — no engine code.
+v0.7.0 Phases 1-4 COMPLETE. UI/UX audit (15 recommendations) IMPLEMENTED. Phase 5 is event JSON work — no engine code.
 
 ## What's Done (this session)
 - Emergent Brigade Phase 2: enclave fix, pool rerouting, tiered caps, asymmetric mobilization

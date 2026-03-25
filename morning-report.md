@@ -1,4 +1,48 @@
-# Morning Report — Night Shift 2026-03-24
+# Morning Report — Day/Night Shift 2026-03-25
+
+## Session Summary
+
+Massive session: Emergent Brigade Phase 2 (enclave fix + pool rerouting + tiered caps + troop balance), v0.7.0 Phase 4 complete (7 engine flag reads), nightshift triage confirmed done, and full UI/UX audit implementation (15 recommendations across 4 parallel streams). 23+ commits on main.
+
+### Emergent Brigade Phase 2 — Troop Strength Calibration (8 calibration runs: n1069-n1079)
+- **Enclave capacity gate fixed**: `ENCLAVE_FORMATION_CAPACITY_THRESHOLD=0.30`. Srebrenica 1->5 brigades (600->3,342), Gorazde 1->5 brigades (800->4,000).
+- **Surplus pool rerouting**: New pipeline step transfers manpower from exhausted to deficit municipalities.
+- **deriveMaxPersonnel activated**: Was dead code. OOB loader fixed, caps lowered to 1200-2800.
+- **Asymmetric mobilization**: RBiH 0.09, RS 0.04, HRHB 0.12.
+- **Strategic reserve**: RBiH draw rate 0.02->0.15.
+- **Result (n1079)**: RBiH 144k > RS+HRHB 144k (+369). 114 RBiH brigades (was 98). 91.3%.
+
+### v0.7.0 Phase 4 — Engine Flag Reads (COMPLETE)
+7 engine reads wired: arms_embargo (RBiH aid x0.6), corridor_secured (RS aid x1.3), drina_cleansing (+2/turn RS pressure), camps_revealed (+3/turn RS pressure), coha_active (suppress combat + defensive), dayton_signed (game over). n1079 frozen: 91.3%, 19 flags active.
+
+### UI/UX Audit — All 15 Recommendations Implemented (4 parallel streams)
+- **Stream A (P0)**: Commander names (two-line), corps card flip (FlipCard wired), ORBAT sector fixed. `a020179d`
+- **Stream B (P1)**: Alert banners amplified, faction dividers, supply 0% visually alarming. Concurrent with A+C.
+- **Stream C (P2)**: Equipment labels, stance toast+flash, territory progress bar+arrows, +MORE persistent. `4ad29682`
+- **Stream D (P3+)**: Version string, MapLibre attribution hidden, perf throttling (50ms), ORBAT-map sync (fly+flash), strategic dashboard (territory/casualty charts). `1464b999` + `d40aa77a`
+
+### Infrastructure
+- Life lessons split into 8 topic files. 9 skills wired with Required Reading.
+- Historian OOB master hierarchy. ARMY_STRENGTH_COMPARISON.md.
+
+### Decisions Flagged for Review
+- DECISION-3: Aggressive deriveMaxPersonnel caps (1200-2800) -- verify in 52w run
+- DECISION-4: Asymmetric mobilization (RS 0.04) -- may be too low for late-war
+- DECISION-5: Operation supply 0% is genuine -- made alarming, not hidden
+
+### Recommended Next Steps
+1. Visually verify UI changes in browser (`npm run dev:map`)
+2. v0.7.0 Phase 5: FIXED->CONDITIONAL event conversions
+3. Run 52w scenario to verify tiered caps + mobilization at full war length
+4. Consider strategic dashboard as between-turns review screen
+
+### Build State
+- tsc: clean | vitest: 118 suites, 1465 tests | desktop:map:build: succeeds
+- Calibration: n1079 frozen at 91.3% | Last commit: `d40aa77a`
+
+---
+
+# Morning Report — Night Shift 2026-03-24 (previous)
 
 ## Summary
 Completed v0.6.5 (offensive paramilitary sweep), adapter integration tests, and v0.7.0 Phase 1+2 (evaluators + flag gates). 3 commits, +0.6pp calibration, 1446 tests. Build clean.

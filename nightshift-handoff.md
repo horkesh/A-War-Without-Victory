@@ -157,4 +157,81 @@ node tools/compare_painted_vs_sim.cjs <run_dir>  # Area-weighted comparison
 - `docs/plans/2026-03-24-v082-autonomy-api-plan.md` (v0.8.2, 5 phases)
 - `docs/plans/2026-03-24-v090-consequence-system-plan.md` (v0.9.0, 7 chains, 26 events)
 
+---
+
+# Nightshift Addendum — 2026-03-25: UI/UX Audit Implementation
+
+## Updated State
+- **v0.6.5** — 1465 tests, 118 suites. tsc clean. n1079: **91.3% area-weighted**.
+- RBiH 144k > RS+HRHB 144k (+369). 114 RBiH brigades.
+- v0.7.0 Phases 1-4 COMPLETE. Phase 5 (FIXED→CONDITIONAL) pending.
+- Emergent Brigade Phase 2 COMPLETE.
+
+## What was already done from previous handoff
+- Tier 0 (offensive paramilitary sweep): DONE (v0.6.5 shipped)
+- Tier 0.5 (integration tests): DONE (18 adapter tests)
+- v0.7.0 Phases 1-4: DONE (evaluators, flag gates, pressure mods, engine reads)
+- Nightshift triage FIX-A/B/C: DONE (already implemented)
+
+## NEW PRIORITY: UI/UX Audit Implementation
+
+**Audit:** `docs/40_reports/20260324_UI_UX_COMPREHENSIVE_AUDIT.md`
+**Scope:** Implement all 15 recommendations. UI-only — no engine changes.
+
+### Stream A: P0 + Corps Card (R1, R7, C1-C3)
+**Files:** `src/ui/map/components/CorpsCard.tsx`, `src/ui/map/components/army_hq/FlipCard.tsx`, `src/ui/map/components/army_hq/CommanderSection.tsx`, `src/ui/map/components/OrbatPanel.tsx`
+- R1: Fix commander name truncation — remove text-overflow ellipsis, allow two-line layout (rank line 1, name line 2)
+- R7: Activate corps card flip — FlipCard component exists at `army_hq/FlipCard.tsx`, wire click handler on corps card body
+- C2: Fix corps card click target (body click opens Army Reserve instead of flipping)
+- C3: Fix "SECTOR: UNKNOWN" in ORBAT footer — check data binding for sector assignment
+
+### Stream B: P1 Alerts + Operations (R2, R3, R10)
+**Files:** `src/ui/map/components/CommandBriefingLayer.tsx`, `src/ui/map/components/OOBSidebar.tsx`, `src/ui/map/components/OperationsPanel.tsx`
+- R2: Amplify alert banners — 2x taller, pulsing border on critical alerts, faction-colored backgrounds. Model after HOI4 decision notifications.
+- R3: Add faction dividers between VRS/ARBiH/HVO sections — full-width horizontal rule with faction emblem and name, color-coded background tint
+- R10: Fix operation supply 0% — check data binding, show "N/A" with tooltip if data missing
+
+### Stream C: P2 UX Polish (R4, R5, R6, R8)
+**Files:** `src/ui/map/components/CorpsCard.tsx` (equipment labels + stance), `src/ui/map/components/BottomStatusStrip.tsx`, `src/ui/map/components/MapModeToolbar.tsx` or `TabBar.tsx`
+- R4: Label equipment numbers — "Tanks: 106/201 · Vehicles: 546/594" instead of cryptic icons
+- R5: Stance change confirmation — flash corps card border + brief toast "Offensive stance set"
+- R6: Status bar upgrade — wider territory bars with stacked progress bar + trend arrows
+- R8: Fix +MORE popup — persistent tab bar extension instead of ephemeral popup, show active mode
+
+### Stream D: P3+ Advanced (R9, R12, R14, cosmetic)
+**Files:** Various — profile first, then targeted fixes
+- R9: Performance investigation — profile render loop, throttle tooltip updates, memoize polygon rendering, check minimap update frequency
+- R12: ORBAT-map sync — clicking brigade in ORBAT highlights its OSID on map, hovering flashes position
+- R14: Strategic dashboard overlay — territory/casualty charts on status bar click
+- M1: DEV badge conditional on build mode (check import.meta.env or similar)
+- L2: Hide MapLibre attribution in production
+- L4: Fix version string "Fallback Active"
+
+### Execution Order
+1. Streams A + B + C in parallel (independent components)
+2. Stream D after A+B+C complete (may depend on component changes)
+3. Final smoke test: `npx tsc --noEmit` + `npm run test:vitest` + `npm run desktop:map:build`
+
+### Required Reading Per Stream
+- All streams: `docs/life_lessons/ui_map.md`
+- All streams: `docs/40_reports/GUI_MASTER.md` (design language reference)
+- All streams: `docs/40_reports/20260324_UI_UX_COMPREHENSIVE_AUDIT.md`
+
+### Design Language Constraints
+- Preserve warroom palette: `bg-panel-bg`, `bg-panel-card`, `border-panel-border`, amber/gold headings
+- No green terminal, no CRT effects, no generic AI aesthetics
+- See `docs/40_reports/GUI_MASTER.md` for authoritative style guide
+
+### DO NOT Touch
+- Simulation engine (`src/sim/`)
+- Game state (`src/state/`)
+- Scenario data (`data/`)
+- Canon docs (`docs/10_canon/`)
+
+## Remaining from Previous Handoff (lower priority, do if time)
+- v0.7.0 Phase 5: FIXED→CONDITIONAL event conversions (event JSON work)
+- v0.7.3: Canon audit (peace phase removal)
+- v0.7.1: Essay template engine
+- v0.7.2: Warroom React migration
+
 Good luck. "Another such victory and we are undone."
