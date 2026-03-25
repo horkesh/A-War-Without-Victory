@@ -424,6 +424,12 @@
       "phase": "war"
     },
     "once": true,
+    "pressure": {
+      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "kupres_recaptured", "value": true }, "rate_bonus": 0.5 }
+      ]
+    },
     "effect": {
       "kind": "morale_change",
       "faction": "RBiH",

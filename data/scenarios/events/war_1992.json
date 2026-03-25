@@ -322,7 +322,6 @@
     "title": "JNA Forces Begin Withdrawal from Bosnia",
     "narrative": "The Yugoslav People's Army formally announces its withdrawal from Bosnia-Herzegovina. In practice, Bosnian Serb personnel simply change insignia, and massive quantities of heavy weapons, ammunition depots, and military infrastructure are transferred directly to the newly formed VRS.",
     "category": "military",
-    "priority": 1,
     "trigger": { "turn_min": 5, "turn_max": 5, "phase": "war" },
     "once": true,
     "effect": { "kind": "supply_delta", "faction": "RS", "delta": 20 },
@@ -330,6 +329,15 @@
       { "kind": "morale_change", "faction": "RBiH", "delta": -5 },
       { "kind": "narrative", "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS." }
     ],
+    "pressure": {
+      "base_rate": 3.0, "threshold": 5, "decay_rate": 0,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "barracks_sarajevo_seized", "value": true }, "rate_bonus": 1.0 },
+        { "condition": { "type": "flag_equals", "flag": "barracks_tuzla_seized", "value": true }, "rate_bonus": 1.0 },
+        { "condition": { "type": "flag_equals", "flag": "barracks_zenica_seized", "value": true }, "rate_bonus": 1.0 },
+        { "condition": { "type": "flag_equals", "flag": "barracks_visoko_seized", "value": true }, "rate_bonus": 1.0 }
+      ]
+    },
     "dimension_shifts": [{ "faction": "RS", "dimension": "military_credibility", "delta": 15 }],
     "sets_flags": { "jna_withdrawn": true }
   },
@@ -365,7 +373,13 @@
     "category": "military",
     "trigger": {
       "turn_min": 6, "turn_max": 20, "phase": "war",
-      "condition": { "type": "territory_percentage", "faction": "RS", "comparator": "above", "threshold": 0.48 }
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "territory_percentage", "faction": "RS", "comparator": "above", "threshold": 0.48 },
+          { "type": "flag_equals", "flag": "jna_withdrawn", "value": true }
+        ]
+      }
     },
     "once": true,
     "effect": { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
@@ -448,7 +462,13 @@
     "category": "humanitarian",
     "trigger": {
       "turn_min": 8, "turn_max": 25, "phase": "war",
-      "condition": { "type": "territory_percentage", "faction": "RS", "comparator": "above", "threshold": 0.45 }
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "territory_percentage", "faction": "RS", "comparator": "above", "threshold": 0.45 },
+          { "type": "flag_equals", "flag": "jna_withdrawn", "value": true }
+        ]
+      }
     },
     "once": true,
     "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 3 },
@@ -468,7 +488,7 @@
     "title": "Operation Corridor \u2014 VRS Breaks Through at Brcko",
     "narrative": "The VRS launches Operation Corridor to link the Krajina region with Serbia proper through the narrow Posavina corridor near Brcko. Fierce fighting against HVO and ARBiH forces gradually widens the corridor, establishing a critical supply and communication link that sustains the western Bosnian Serb entity.",
     "category": "military",
-    "trigger": { "turn_min": 12, "turn_max": 22, "phase": "war", "condition": { "type": "faction_controls_municipality", "faction": "RS", "municipality": "brcko", "threshold": 0.5 } },
+    "trigger": { "turn_min": 12, "turn_max": 22, "phase": "war", "condition": { "type": "and", "conditions": [ { "type": "faction_controls_municipality", "faction": "RS", "municipality": "brcko", "threshold": 0.5 }, { "type": "flag_equals", "flag": "jna_withdrawn", "value": true } ] } },
     "once": true,
     "effect": { "kind": "narrative", "text": "The VRS secures the Posavina Corridor near Brcko, linking Krajina with Serbia. A vital supply artery is established." },
     "effects": [
@@ -609,7 +629,12 @@
         ]
       }
     ],
-    "pressure": { "base_rate": 1.5, "threshold": 6, "decay_rate": 0.3 },
+    "pressure": {
+      "base_rate": 1.5, "threshold": 6, "decay_rate": 0.3,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "drina_cleansing_occurred", "value": true }, "rate_bonus": 1.0 }
+      ]
+    },
     "enables_events": ["vance_owen_plan_1993"]
   },
   {

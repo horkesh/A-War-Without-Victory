@@ -1,7 +1,44 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-25
-**Status:** **v0.7.0 Phase 4 COMPLETE** — Political Wargame. 1453 tests, 118 suites. **91.3% area-weighted (n1079).** 94 events, 21 flag-gated, **7 engine flag reads wired** (supply embargo, corridor, patron pressure, COHA, Dayton). Emergent brigade Phase 2 complete. **RBiH 144k > RS+HRHB 144k (+369).** 114 RBiH / 83 RS / 36 HRHB brigs, 288k total. **Next: v0.7.0 Phase 5 (FIXED→CONDITIONAL event conversions).**
+**Status:** **v0.7.0 Phase 5 COMPLETE** — Political Wargame. 1465 tests, 118 suites. **91.3% area-weighted (n1081, 40w). 91.0% (n1080, 52w).** 94 events, 33 fire at 52w. **13 orphan flags wired, 7 endgame events FIXED→CONDITIONAL.** Full endgame chain: Srebrenica→Zepa→Markale II→Deliberate Force→Federation Offensive→Ceasefire→Dayton. 121 RBiH / 140 RS / 47 HRHB brigs at 52w. **Next: v0.7.0 Phase 6 (Dynamic Codex content) or v0.8 (Command Chain).**
+
+## [2026-03-25] v0.7.0 Phase 5 Complete — FIXED→CONDITIONAL Event Conversions
+
+**Scope:** Wire 13 orphan flags to downstream events as pressure modifiers and condition gates. Convert 7 endgame events from fixed-turn to conditional/pressure triggers with requires_events chains. Add requires_events support to pressure system.
+
+**Phase 5A — Orphan flag wiring (JSON-only, 4 event files):**
+- 4 `barracks_*_seized` flags → pressure modifiers on `jna_withdrawal_1992` (+1.0 rate each, accelerating JNA withdrawal when barracks are seized)
+- `jna_withdrawn` → AND condition gates on `drina_valley_ethnic_cleansing_1992`, `operation_corridor_1992`, `srebrenica_enclave_forms_1992` (VRS operations gated on JNA formal withdrawal)
+- `drina_cleansing_occurred` → +1.0 pressure on `london_conference_1992`
+- `jajce_fell` → +1.0 pressure on `croat_bosniak_war_begins_1993`, +0.5 on `vance_owen_plan_1993`
+- `hvo_arbih_tensions_rising` → +1.0 pressure on `gornji_vakuf_clashes_1993`, +0.5 on `croat_bosniak_war_begins_1993`
+- `carter_ceasefire_active` → condition gate on `coha_ceasefire_begins_1995`
+- `un_hostage_crisis_occurred` → condition gate on `rapid_reaction_force_1995`
+- `operation_flash_occurred` → +1.0 pressure on `un_hostage_crisis_1995`
+- `grahovo_glamoc_captured` → +3.0 pressure on `operation_storm_1995`
+- `kupres_recaptured` → +0.5 pressure on `bihac_5th_corps_offensive_1994`
+
+**Phase 5B — FIXED→CONDITIONAL conversions (war_1995.json + engine):**
+- `srebrenica_falls_1995`: pressure system (base_rate 1.0, threshold 8, window w160-185), gated on `srebrenica_enclave_formed` AND `srebrenica_demilitarized`, modifiers: coha_expired +2.0, rrf_deployed -0.5, hostage_crisis +1.0
+- `zepa_falls_1995`: pressure (base 3.0, threshold 6, decay 0), requires_events: [srebrenica_falls_1995]
+- `second_markale_massacre_1995`: pressure (base 0.8, threshold 6), conditions: sarajevo_siege_active AND rrf_deployed, modifiers: coha_expired +1.5, war_crimes>=8 +1.0
+- `nato_deliberate_force_1995`: requires_events: [second_markale_massacre_1995], condition: rrf_deployed
+- `federation_ground_offensive_1995`: requires_events: [washington_agreement_1994, nato_deliberate_force_1995]
+- `ceasefire_1995`: requires_events: [federation_ground_offensive_1995], condition: flag_not_set coha_active, window w181-200
+- `dayton_talks_begin_1995` → requires_events: [ceasefire_1995]; `dayton_signed_1995` → requires_events: [dayton_talks_begin_1995]
+
+**Engine:** `requires_events` checking added to `updateEventReadiness()` in `pressure_system.ts`. Gates pressure accumulation until all prerequisite events have fired. `state.military.fired_event_ids` used for prerequisite lookup. Call site in `war_phases.ts` updated (removed stale `edges` parameter).
+
+**New flag:** `srebrenica_demilitarized` set by `srebrenica_demilitarization_1993` — prerequisite for Srebrenica fall.
+
+**Calibration (n1081, 40w):** 91.3% area-weighted — zero regression from n1079 baseline. 24 events fire, 19 flags active. Event firing list identical to baseline.
+
+**Calibration (n1080, 52w):** 91.0% area-weighted. 33 events fire (9 new beyond w40: croat_bosniak_war_begins, east_mostar_siege, central_bosnia_fighting, morillon_enters_srebrenica, etc). Full HRHB-RBiH war cascade fires. RBiH 121 brigs 166k / RS 140 brigs 124k / HRHB 47 brigs 52k.
+
+**Determinism:** No impact. All changes are event JSON conditions/pressure modifiers (evaluated deterministically) and a deterministic requires_events check. No randomness introduced.
+
+**Files:** `data/scenarios/events/war_1992.json` (barracks pressure, jna_withdrawn gates, drina pressure on london_conference), `data/scenarios/events/war_1993.json` (gornji_vakuf/vance_owen/croat_bosniak pressure, srebrenica_demilitarized flag), `data/scenarios/events/war_1994.json` (kupres pressure), `data/scenarios/events/war_1995.json` (7 FIXED→CONDITIONAL conversions, carter/flash/hostage/grahovo wiring), `src/sim/events/pressure_system.ts` (requires_events), `src/sim/turn_phases/war_phases.ts` (call site fix).
 
 ## [2026-03-25] Army HQ + Chronicle Restoration + UI Bug Fixes
 

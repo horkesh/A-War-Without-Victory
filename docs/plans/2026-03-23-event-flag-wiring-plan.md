@@ -1,7 +1,7 @@
 # v0.7.0 Event Flag Wiring — Implementation Plan
 
 **Date:** 2026-03-23
-**Status:** DRAFT — ready for review
+**Status:** COMPLETE — all phases implemented (2026-03-25). Phases 1-5 shipped. Zero orphan flags remain.
 **Scope:** Wire ~25 orphan flags to downstream event conditions and engine systems
 **Prerequisite:** v0.6.0 event system (94 events, pressure system, condition evaluator) is live
 

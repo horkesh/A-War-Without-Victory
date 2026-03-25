@@ -370384,13 +370384,13 @@
       "concentration_camps_revealed_1992": 15,
       "drina_cleansing_decision_1992": 11,
       "drina_valley_ethnic_cleansing_1992": 11,
-      "gornji_vakuf_clashes_1993": 35,
+      "gornji_vakuf_clashes_1993": 36,
       "hrhb_political_goal": 4,
       "hvo_arbih_tensions_rise_1992": 23,
       "jajce_falls_1992": 40,
       "jna_withdrawal_1992": 5,
       "kravica_attack_1993": 39,
-      "london_conference_1992": 24,
+      "london_conference_1992": 22,
       "mostar_liberation_1992": 7,
       "operation_corridor_1992": 12,
       "rbih_state_identity": 3,
@@ -370405,14 +370405,17 @@
       "concentration_camps_revealed_1992": 49.50000000000003,
       "drina_cleansing_decision_1992": 17.000000000000007,
       "drina_valley_ethnic_cleansing_1992": 11.00000000000001,
+      "gornji_vakuf_clashes_1993": 12,
       "hrhb_political_goal": 7.5,
       "hvo_arbih_tensions_rise_1992": 25.5,
-      "london_conference_1992": 0,
+      "jna_withdrawal_1992": 0,
+      "london_conference_1992": 3.0000000000000027,
       "mostar_liberation_1992": 16,
       "rbih_state_identity": 6,
       "rs_strategic_goals": 10,
       "sarajevo_siege_begins_1992": 0.9999999999999991,
-      "srebrenica_enclave_forms_1992": 26.000000000000014
+      "srebrenica_enclave_forms_1992": 26.000000000000014,
+      "vance_owen_plan_1993": 0
     },
     "faction_officer_maturity": {
       "HRHB": 3.1666666666666665,
@@ -370427,17 +370430,17 @@
       "battle_of_the_barracks_sarajevo",
       "battle_of_the_barracks_tuzla",
       "battle_of_the_barracks_visoko",
-      "jna_withdrawal_1992",
       "battle_of_the_barracks_zenica",
       "sarajevo_siege_begins_1992",
+      "jna_withdrawal_1992",
       "mostar_liberation_1992",
       "srebrenica_enclave_forms_1992",
       "drina_cleansing_decision_1992",
       "drina_valley_ethnic_cleansing_1992",
       "operation_corridor_1992",
       "concentration_camps_revealed_1992",
-      "hvo_arbih_tensions_rise_1992",
       "london_conference_1992",
+      "hvo_arbih_tensions_rise_1992",
       "gornji_vakuf_clashes_1993",
       "kravica_attack_1993",
       "vance_owen_plan_1993",
@@ -386980,7 +386983,7 @@
         },
         "location_osid": "op:zepce:ozimica_2",
         "max_personnel": 1500,
-        "morale": 45,
+        "morale": 48,
         "name": "104th Bosanski Brod Brigade",
         "officer_quality": 0.05004875,
         "ops": {
@@ -442920,7 +442923,12 @@
       },
       "displacement_hotspot": "novi_grad_sarajevo",
       "displacement_total": 5275,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "gornji_vakuf_clashes_1993",
+          "text": "HVO-ARBiH Fighting Erupts at Gornji Vakuf"
+        }
+      ],
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
@@ -443029,12 +443037,7 @@
       },
       "displacement_hotspot": "novi_grad_sarajevo",
       "displacement_total": 5433,
-      "events_fired": [
-        {
-          "id": "gornji_vakuf_clashes_1993",
-          "text": "HVO-ARBiH Fighting Erupts at Gornji Vakuf"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
@@ -445012,12 +445015,7 @@
       },
       "displacement_hotspot": "zvornik",
       "displacement_total": 9195,
-      "events_fired": [
-        {
-          "id": "london_conference_1992",
-          "text": "London Conference on Yugoslavia"
-        }
-      ],
+      "events_fired": [],
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
@@ -445424,7 +445422,12 @@
       },
       "displacement_hotspot": "derventa",
       "displacement_total": 16609,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "london_conference_1992",
+          "text": "London Conference on Yugoslavia"
+        }
+      ],
       "formation_destructions": [],
       "formation_spawns": [
         {
@@ -450367,16 +450370,16 @@
       "displacement_total": 528182,
       "events_fired": [
         {
-          "id": "jna_withdrawal_1992",
-          "text": "JNA Forces Begin Withdrawal from Bosnia"
-        },
-        {
           "id": "battle_of_the_barracks_zenica",
           "text": "Battle of the Barracks — Zenica"
         },
         {
           "id": "sarajevo_siege_begins_1992",
           "text": "Siege of Sarajevo Intensifies"
+        },
+        {
+          "id": "jna_withdrawal_1992",
+          "text": "JNA Forces Begin Withdrawal from Bosnia"
         }
       ],
       "formation_destructions": [],

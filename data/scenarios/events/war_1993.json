@@ -16,6 +16,12 @@
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
+    "pressure": {
+      "base_rate": 2.0, "threshold": 4, "decay_rate": 0.5,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "hvo_arbih_tensions_rising", "value": true }, "rate_bonus": 1.0 }
+      ]
+    },
     "effect": {
       "kind": "alliance_change",
       "delta": -0.15
@@ -74,6 +80,12 @@
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
+    "pressure": {
+      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "jajce_fell", "value": true }, "rate_bonus": 0.5 }
+      ]
+    },
     "effect": {
       "kind": "narrative",
       "text": "The Vance-Owen Plan is presented. All parties must decide whether to accept a negotiated partition of Bosnia."
@@ -231,6 +243,13 @@
       }
     },
     "once": true,
+    "pressure": {
+      "base_rate": 1.5, "threshold": 5, "decay_rate": 0.3,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "jajce_fell", "value": true }, "rate_bonus": 1.0 },
+        { "condition": { "type": "flag_equals", "flag": "hvo_arbih_tensions_rising", "value": true }, "rate_bonus": 0.5 }
+      ]
+    },
     "effect": {
       "kind": "alliance_change",
       "delta": -0.5
@@ -937,6 +956,9 @@
         ]
       }
     ],
+    "sets_flags": {
+      "srebrenica_demilitarized": true
+    },
     "historical_source": "ICTY Krstic Trial Judgment (IT-98-33-T), paras. 23-27. Halilovic-Mladic Agreement, May 8 1993."
   },
   {

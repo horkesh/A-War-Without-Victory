@@ -228,7 +228,7 @@ export const warPhases: NamedPhase[] = [
         name: 'update-event-readiness',
         run: (context) => {
             if (context.input.eventDefinitions) {
-                updateEventReadiness(context.state, context.input.eventDefinitions, context.input.settlementEdges);
+                updateEventReadiness(context.state, context.input.eventDefinitions);
             }
         }
     },

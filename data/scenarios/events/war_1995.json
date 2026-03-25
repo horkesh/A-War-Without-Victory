@@ -10,7 +10,8 @@
       "phase": "war",
       "requires_events": [
         "carter_ceasefire_1994"
-      ]
+      ],
+      "condition": { "type": "flag_equals", "flag": "carter_ceasefire_active", "value": true }
     },
     "once": true,
     "effect": {
@@ -180,6 +181,12 @@
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "historical",
+    "pressure": {
+      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "operation_flash_occurred", "value": true }, "rate_bonus": 1.0 }
+      ]
+    },
     "effect": {
       "kind": "patron_pressure",
       "faction": "RS",
@@ -286,59 +293,60 @@
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T), Count 11 (hostage-taking). Mladic Judgment (IT-09-92-T). UNSCR 998 (1995)."
   },
   {
-    "id": "rapid_reaction_force_1995",
-    "title": "UN Rapid Reaction Force Deploys to Mount Igman",
-    "narrative": "A new force arrives on the battlefield. Four thousand British, French, and Dutch troops -- equipped with heavy artillery, armored vehicles, and orders to shoot back -- take up positions on Mount Igman above Sarajevo. The Rapid Reaction Force is not UNPROFOR. Its rules of engagement permit offensive fire against any force that threatens UN operations or the humanitarian supply route. For the first time, the international presence in Bosnia has teeth. The VRS now faces a second army overlooking its siege positions around the capital.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 168,
-      "turn_max": 170,
-      "phase": "war"
-    },
-    "once": true,
-    "effect": {
-      "kind": "supply_delta",
-      "faction": "RBiH",
-      "delta": 5
-    },
-    "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 10
-      },
-      {
-        "kind": "narrative",
-        "text": "The UN Rapid Reaction Force deploys heavy artillery on Mount Igman. For the first time, the international military presence in Bosnia has offensive capability."
-      }
-    ],
-    "dimension_shifts": [
-      {
-        "faction": "RS",
-        "dimension": "military_credibility",
-        "delta": -5
-      }
-    ],
-    "sets_flags": {
-      "rrf_deployed": true
-    },
-    "historical_source": "UNSCR 998 (1995). ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II, Ch. 14."
-  },
-  {
     "id": "srebrenica_falls_1995",
     "title": "Srebrenica Falls",
     "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 170,
-      "turn_max": 170,
+      "turn_min": 160,
+      "turn_max": 185,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "srebrenica_enclave_formed",
+            "value": true
+          },
+          {
+            "type": "flag_equals",
+            "flag": "srebrenica_demilitarized",
+            "value": true
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 8,
+      "decay_rate": 0.5,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "coha_expired",
+            "value": true
+          },
+          "rate_bonus": 2
+        },
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "rrf_deployed",
+            "value": true
+          },
+          "rate_bonus": -0.5
+        },
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "un_hostage_crisis_occurred",
+            "value": true
+          },
+          "rate_bonus": 1
+        }
+      ]
     },
     "once": true,
     "effect": {
@@ -375,13 +383,22 @@
     "narrative": "Following the fall of Srebrenica, the VRS turns its attention to the neighboring Zepa enclave. Despite desperate resistance by the small garrison, the enclave falls within two weeks. The civilian population is forcibly expelled. The international community, still reeling from Srebrenica, watches another safe area collapse.",
     "category": "territorial",
     "trigger": {
-      "turn_min": 172,
-      "turn_max": 172,
+      "turn_min": 160,
+      "turn_max": 190,
       "phase": "war",
       "requires_events": [
         "srebrenica_falls_1995"
       ],
-      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "srebrenica_enclave_formed",
+        "value": true
+      }
+    },
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 6,
+      "decay_rate": 0
     },
     "once": true,
     "effect": {
@@ -406,6 +423,206 @@
         "text": "Zepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis."
       }
     ]
+  },
+  {
+    "id": "second_markale_massacre_1995",
+    "title": "Second Markale Massacre",
+    "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Zepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 165,
+      "turn_max": 190,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "sarajevo_siege_active",
+            "value": true
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rrf_deployed",
+            "value": true
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 0.8,
+      "threshold": 6,
+      "decay_rate": 0.3,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "coha_expired",
+            "value": true
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "war_crimes_above",
+            "faction": "RS",
+            "threshold": 8
+          },
+          "rate_bonus": 1
+        }
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 2
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 20
+      },
+      {
+        "kind": "negotiation_capital",
+        "faction": "RS",
+        "dimension": "international_credibility",
+        "delta": -15
+      },
+      {
+        "kind": "narrative",
+        "text": "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces."
+      }
+    ]
+  },
+  {
+    "id": "nato_deliberate_force_1995",
+    "title": "NATO Operation Deliberate Force",
+    "narrative": "NATO launches Operation Deliberate Force, a sustained air campaign against VRS military targets across Bosnia. Over two weeks, NATO aircraft fly 3,515 sorties and strike ammunition depots, communications facilities, air defenses, and command bunkers. Combined with a Tomahawk cruise missile strike, the campaign devastates VRS military infrastructure and shatters its ability to sustain offensive operations.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 165,
+      "turn_max": 195,
+      "phase": "war",
+      "requires_events": [
+        "second_markale_massacre_1995"
+      ],
+      "condition": {
+        "type": "flag_equals",
+        "flag": "rrf_deployed",
+        "value": true
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RS",
+      "delta": -30
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "narrative",
+        "text": "NATO launches Operation Deliberate Force. Sustained air strikes devastate VRS military infrastructure across Bosnia."
+      }
+    ]
+  },
+  {
+    "id": "federation_ground_offensive_1995",
+    "title": "Federation Ground Offensive",
+    "narrative": "Coordinated ARBiH and HVO ground forces, supported by Croatian Army units, launch a broad offensive across western and central Bosnia. The operation rapidly captures Sipovo, Jajce, Mrkonjic Grad, and Kljuc, reducing Republika Srpska's territory from roughly 70% to near the 49% envisioned by the Contact Group plan. The VRS, battered by NATO strikes and stretched thin, cannot hold its extended lines.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 165,
+      "turn_max": 200,
+      "phase": "war",
+      "requires_events": [
+        "washington_agreement_1994",
+        "nato_deliberate_force_1995"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RS",
+      "delta": -10
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -15
+      },
+      {
+        "kind": "narrative",
+        "text": "Federation forces launch a broad offensive. VRS lines collapse across western Bosnia as Republika Srpska's territory shrinks dramatically."
+      }
+    ]
+  },
+  {
+    "id": "rapid_reaction_force_1995",
+    "title": "UN Rapid Reaction Force Deploys to Mount Igman",
+    "narrative": "A new force arrives on the battlefield. Four thousand British, French, and Dutch troops -- equipped with heavy artillery, armored vehicles, and orders to shoot back -- take up positions on Mount Igman above Sarajevo. The Rapid Reaction Force is not UNPROFOR. Its rules of engagement permit offensive fire against any force that threatens UN operations or the humanitarian supply route. For the first time, the international presence in Bosnia has teeth. The VRS now faces a second army overlooking its siege positions around the capital.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 168,
+      "turn_max": 170,
+      "phase": "war",
+      "condition": { "type": "flag_equals", "flag": "un_hostage_crisis_occurred", "value": true }
+    },
+    "once": true,
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RBiH",
+      "delta": 5
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 10
+      },
+      {
+        "kind": "narrative",
+        "text": "The UN Rapid Reaction Force deploys heavy artillery on Mount Igman. For the first time, the international military presence in Bosnia has offensive capability."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -5
+      }
+    ],
+    "sets_flags": {
+      "rrf_deployed": true
+    },
+    "historical_source": "UNSCR 998 (1995). ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II, Ch. 14."
   },
   {
     "id": "operation_summer_95",
@@ -470,6 +687,12 @@
       "phase": "war"
     },
     "once": true,
+    "pressure": {
+      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "modifiers": [
+        { "condition": { "type": "flag_equals", "flag": "grahovo_glamoc_captured", "value": true }, "rate_bonus": 3.0 }
+      ]
+    },
     "effect": {
       "kind": "morale_change",
       "faction": "RS",
@@ -599,117 +822,6 @@
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). Mladic Judgment (IT-09-92-T). ICTY witness testimony."
   },
   {
-    "id": "second_markale_massacre_1995",
-    "title": "Second Markale Massacre",
-    "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Zepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
-    "category": "humanitarian",
-    "trigger": {
-      "turn_min": 177,
-      "turn_max": 177,
-      "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
-    },
-    "once": true,
-    "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "RS",
-      "war_crimes_delta": 2
-    },
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 20
-      },
-      {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -15
-      },
-      {
-        "kind": "narrative",
-        "text": "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces."
-      }
-    ]
-  },
-  {
-    "id": "nato_deliberate_force_1995",
-    "title": "NATO Operation Deliberate Force",
-    "narrative": "NATO launches Operation Deliberate Force, a sustained air campaign against VRS military targets across Bosnia. Over two weeks, NATO aircraft fly 3,515 sorties and strike ammunition depots, communications facilities, air defenses, and command bunkers. Combined with a Tomahawk cruise missile strike, the campaign devastates VRS military infrastructure and shatters its ability to sustain offensive operations.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 177,
-      "turn_max": 177,
-      "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "rrf_deployed", "value": true }
-    },
-    "once": true,
-    "effect": {
-      "kind": "supply_delta",
-      "faction": "RS",
-      "delta": -30
-    },
-    "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": -10
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 10
-      },
-      {
-        "kind": "narrative",
-        "text": "NATO launches Operation Deliberate Force. Sustained air strikes devastate VRS military infrastructure across Bosnia."
-      }
-    ]
-  },
-  {
-    "id": "federation_ground_offensive_1995",
-    "title": "Federation Ground Offensive",
-    "narrative": "Coordinated ARBiH and HVO ground forces, supported by Croatian Army units, launch a broad offensive across western and central Bosnia. The operation rapidly captures Sipovo, Jajce, Mrkonjic Grad, and Kljuc, reducing Republika Srpska's territory from roughly 70% to near the 49% envisioned by the Contact Group plan. The VRS, battered by NATO strikes and stretched thin, cannot hold its extended lines.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 179,
-      "turn_max": 179,
-      "phase": "war",
-      "requires_events": [
-        "washington_agreement_1994",
-        "nato_deliberate_force_1995"
-      ]
-    },
-    "once": true,
-    "effect": {
-      "kind": "morale_change",
-      "faction": "RS",
-      "delta": -10
-    },
-    "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 10
-      },
-      {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": 5
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -15
-      },
-      {
-        "kind": "narrative",
-        "text": "Federation forces launch a broad offensive. VRS lines collapse across western Bosnia as Republika Srpska's territory shrinks dramatically."
-      }
-    ]
-  },
-  {
     "id": "operation_mistral_2_1995",
     "title": "Operation Mistral 2 -- Jajce Recaptured",
     "narrative": "The Croatian war machine rolls north from Grahovo. Operation Mistral 2 sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- into the heart of VRS-held western Bosnia. Sipovo falls. Mrkonjic Grad falls. And on September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is liberated. Two thousand square kilometers change hands in eight days. The VRS line in western Bosnia is disintegrating.",
@@ -834,6 +946,46 @@
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II, Ch. 15."
   },
   {
+    "id": "ceasefire_1995",
+    "title": "General Ceasefire Takes Effect",
+    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina, freezing the front lines after 1,340 days of war. The Dayton Agreement establishes Bosnia as a single state composed of two entities — the Federation of Bosnia and Herzegovina and Republika Srpska — with NATO-led IFOR deployed to enforce the peace. The war that killed over 100,000 people and displaced two million is over.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 181,
+      "turn_max": 200,
+      "phase": "war",
+      "requires_events": [
+        "federation_ground_offensive_1995"
+      ],
+      "condition": {
+        "type": "flag_not_set",
+        "flag": "coha_active"
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The ceasefire takes effect. After three and a half years, the guns fall silent across Bosnia-Herzegovina."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      }
+    ]
+  },
+  {
     "id": "us_halts_federation_advance_1995",
     "title": "Washington Halts the Federation Advance",
     "narrative": "Banja Luka is within reach. Federation forces have driven the VRS from a third of its territory in six weeks. But the phone rings from Washington. Holbrooke is blunt: take Banja Luka and you will have 200,000 Serb refugees, a humanitarian catastrophe, and no peace agreement. Zagreb backs down immediately. Sarajevo follows reluctantly. The front lines freeze. The 51/49 line that has defined every peace plan since July 1994 becomes reality not through negotiation, but through the calculated halt of a military advance.",
@@ -944,47 +1096,17 @@
     "historical_source": "Holbrooke, 'To End a War' (1998). BB Vol. II, Ch. 15. US State Dept. chronology."
   },
   {
-    "id": "ceasefire_1995",
-    "title": "General Ceasefire Takes Effect",
-    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina, freezing the front lines after 1,340 days of war. The Dayton Agreement establishes Bosnia as a single state composed of two entities — the Federation of Bosnia and Herzegovina and Republika Srpska — with NATO-led IFOR deployed to enforce the peace. The war that killed over 100,000 people and displaced two million is over.",
-    "category": "diplomatic",
-    "trigger": {
-      "turn_min": 183,
-      "turn_max": 183,
-      "phase": "war"
-    },
-    "once": true,
-    "effect": {
-      "kind": "narrative",
-      "text": "The ceasefire takes effect. After three and a half years, the guns fall silent across Bosnia-Herzegovina."
-    },
-    "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 10
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": 5
-      }
-    ]
-  },
-  {
     "id": "dayton_talks_begin_1995",
     "title": "Dayton Peace Talks Convene",
     "narrative": "The presidents of Bosnia, Croatia, and Serbia arrive at Wright-Patterson Air Force Base in Dayton, Ohio, for proximity peace talks brokered by US envoy Richard Holbrooke. The military situation — NATO air power, Federation ground gains, and VRS exhaustion — has finally created the conditions for a negotiated settlement. The outcome will define Bosnia's future.",
     "category": "diplomatic",
     "trigger": {
-      "turn_min": 186,
-      "turn_max": 186,
-      "phase": "war"
+      "turn_min": 184,
+      "turn_max": 210,
+      "phase": "war",
+      "requires_events": [
+        "ceasefire_1995"
+      ]
     },
     "once": true,
     "requires_player_response": true,
@@ -1038,8 +1160,8 @@
     "narrative": "In a ceremony in Paris, the presidents of Bosnia, Croatia, and Serbia affix their signatures to the General Framework Agreement for Peace. The document -- hammered out over 21 days of grueling proximity talks at Wright-Patterson Air Force Base -- establishes Bosnia as a single state composed of two entities. Fifty-one percent for the Federation. Forty-nine percent for Republika Srpska. Sixty thousand NATO troops will enforce the peace. The war that began with shots fired at a wedding procession in Sarajevo in March 1992 is over. Over 100,000 are dead. Over two million are displaced. The peace is imperfect. But the killing stops.",
     "category": "diplomatic",
     "trigger": {
-      "turn_min": 189,
-      "turn_max": 189,
+      "turn_min": 184,
+      "turn_max": 215,
       "phase": "war",
       "requires_events": [
         "dayton_talks_begin_1995"

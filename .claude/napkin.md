@@ -16,7 +16,8 @@
 **v0.7.0 Phase 1+2 COMPLETE (nightshift 2026-03-24):** evaluators + 21 flag gates + pressure modifiers.
 **Diagnostic toolset:** `tools/diagnose_run.cjs` — run after every calibration run. Checks: drift, siege health, empty sectors, depleted corps, stranded pools.
 **Roadmap:** v0.7=Dynamic Codex, v0.8=Command Chain, v0.9=Consequences+Polish.
-**Next priority:** v0.7.0 Phase 4 (engine flag reads) → Phase 5 (FIXED→CONDITIONAL). Plan: `docs/plans/2026-03-23-event-flag-wiring-plan.md`.
+**v0.7.0 Phase 4+5 COMPLETE (2026-03-25):** Phase 4: 7 engine flag reads. Phase 5: 13 orphan flags wired as pressure modifiers/condition gates + 7 endgame events converted FIXED→CONDITIONAL with requires_events chains. n1081: 91.3% (40w), n1080: 91.0% (52w). 33 events fire at 52w. Full endgame chain: Srebrenica→Zepa→Markale II→Deliberate Force→Federation Offensive→Ceasefire→Dayton.
+**Next priority:** v0.7.0 Phase 6 — Dynamic Codex content authoring (event-driven essay unlocks). Plan needed.
 **Pyrrhic team restructured (2026-03-24):** 7 cuts (lua, graphics, frontend-design, devops, build-engineer, asset-integration, canon-compliance-review dup). 3 hires (narrative-designer, data-pipeline-engineer, integration-tester). /ui-ux-developer promoted to mandatory gate. 62 active skills.
 **Full Pyrrhic review (2026-03-24):** 7 specialists reviewed roadmap. Key findings: mid-game dead zones (w20-35, w80-130), no unified notification architecture, Drina paramilitaries = biggest calibration opportunity, adapter/IPC untested, content authoring 5-7x underestimated, active ops+stance change undefined. 8 new plans written. P0+P1 bugs fixed.
 **Army HQ restoration (2026-03-25):** 520196a2 destroyed 4-tab Army HQ + SituationBriefing grid. Restored from c80d5767. Known-good Army HQ baseline: c80d5767. **Rule: never rewrite ArmyHQModal.tsx or SituationBriefing.tsx — targeted edits only.**

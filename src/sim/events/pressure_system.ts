@@ -1,5 +1,4 @@
 import type { GameState } from '../../state/game_state.js';
-import type { EdgeRecord } from '../../map/settlements.js';
 import type { EventDefinition } from './event_types.js';
 import { evaluateCondition } from './event_types.js';
 
@@ -12,8 +11,7 @@ import { evaluateCondition } from './event_types.js';
  */
 export function updateEventReadiness(
     state: GameState,
-    registry: EventDefinition[],
-    edges?: EdgeRecord[]
+    registry: EventDefinition[]
 ): void {
     if (!state.military.event_readiness) {
         state.military.event_readiness = {};
@@ -28,7 +26,7 @@ export function updateEventReadiness(
 
         // Check if the event's trigger conditions are met
         const conditionsMet = def.trigger.condition
-            ? evaluateCondition(def.trigger.condition, state, edges)
+            ? evaluateCondition(def.trigger.condition, state)
             : true;
 
         // Also check turn window if present
@@ -36,11 +34,18 @@ export function updateEventReadiness(
         const inWindow = (def.trigger.turn_min == null || turn >= def.trigger.turn_min)
             && (def.trigger.turn_max == null || turn <= def.trigger.turn_max);
 
-        if (conditionsMet && inWindow) {
+        // Check requires_events prerequisite chain
+        const requiresMet = def.trigger.requires_events == null
+            || def.trigger.requires_events.length === 0
+            || def.trigger.requires_events.every(
+                id => (state.military.fired_event_ids ?? []).includes(id)
+            );
+
+        if (conditionsMet && inWindow && requiresMet) {
             let rate = base_rate;
             if (modifiers) {
                 for (const mod of modifiers) {
-                    if (evaluateCondition(mod.condition, state, edges)) {
+                    if (evaluateCondition(mod.condition, state)) {
                         rate += mod.rate_bonus;
                     }
                 }
