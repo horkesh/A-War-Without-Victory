@@ -96,28 +96,14 @@
 5. **[2026-03-08] Warroom/vitest jsdom for DOM-dependent tests**
    Do instead: Tests that import warroom or any code using document/window need jsdom. In vitest.config set environmentMatchGlobs for the test file to 'jsdom'.
 
-## Known Backlog
-1. ~~**[2026-03-19] Map UX: heat map legend + context menu (P3)**~~ — RESOLVED (2026-03-22 audit). `MapModeLegend.tsx` ships for all 7 modes. `RadialMenu.tsx` deploys right-click context menu with 4 element types.
-2. **[2026-03-22] Front Line Terrain Tinting (P4)**: → v0.7.3 Phase 2 Task 2.3.
-3. **[2026-03-22] Elevation Profile on Ops Axes (P4)**: → v0.7.3 Phase 2 Task 2.5.
-4. **[2026-03-24] Gorazde periphery recapture (P3)**: `glamoc`, `kamen`, `sopotnica` start RS (census) but painted RBiH at w40. Need either a pre-planned RBiH Drina Corps defensive operation OR a "Gorazde Pocket Consolidation" event with territorial effects. Enclave list protects from paramilitaries but doesn't flip control.
-5. **[2026-03-24] P0 RESOLVED: Sarajevo siege collapse**: 8 fixes applied (cap removed, OOB rebalanced per BB, SRK drift recall, pool scale 0.15, mob scale 0.10, initial pers 800, siege-corps target restriction, diagnostic toolset). 1st Corps 22.2k/avg 636 (was 15.7k/448). 19/35 ineffective remaining — structural: Hadzici pool exhaustion (5 brigades, 15k Bosniaks). Hrasnica pocket (104th) has no RBiH OSID in Ilidza — all RS. Backlog: shared Sarajevo pocket pool, Hrasnica OSID representation.
-6. **[2026-03-24] Gorazde siege: Herzegovina Corps responsibility, not Drina**: Fixed diagnostic to check both corps. 4 brigades near Gorazde (Cajnice, Foca, Kalinovik).
-7. **[2026-03-24] Hrasnica pocket gap**: 104th Vitezka (Hrasnica brigade) and 102nd Motorized are "from Ilidza" but all Ilidza OSIDs are RS-controlled. These brigades pool from Hadzici as workaround. Need: Hrasnica OSID representation or shared Sarajevo pocket pool.
+## Known Backlog (P3 — active)
+1. **[2026-03-24] Gorazde periphery recapture (P3)**: `glamoc`, `kamen`, `sopotnica` start RS (census) but painted RBiH at w40. Can use new `control_change` event effect via a "Gorazde Pocket Consolidation" event.
+2. **[2026-03-24] Hrasnica pocket gap (P3)**: 104th Vitezka and 102nd Motorized are "from Ilidza" but all Ilidza OSIDs are RS-controlled. Need: Hrasnica OSID representation or shared Sarajevo pocket pool.
 
-## Technical Debt (Professional Audit 2026-03-21, updated 2026-03-22)
-1. ~~**[P3] ~216 `any` types in sim/state**~~ — RESOLVED (2026-03-22). 214→64. Remaining 55 are serialize.ts + validateGameState.ts (save migration, inherently untyped). 9 trivial remnants.
-2. ~~**[P3] 8 circular dependencies**~~ — RESOLVED. All type-only imports (`import type`), no runtime cycles. No barrel needed.
-3. ~~**[P4] Electron 33 → 41**~~ — RESOLVED (2026-03-22). Upgraded to v41.0.3. Zero code changes needed. Smoke-test triad passes.
-4. ~~**[P4] No pre-commit hooks**~~ — RESOLVED. Husky active: `npx tsc --noEmit` on every commit.
-5. ~~**[P4] Engine displacement cap**~~ — RESOLVED on audit (2026-03-22). Branch A: one-time proportional to osidPop, capped by mun remainingPop. Branch B: `cumulative_displaced` per-OSID aggregate tracking, stops at `remainingMinority < 10`. Municipality: `Math.min(amount, remainingPopulation)`. Settlement: [0,1] fraction. All paths guarded.
-
-## Map & UX Upgrade Queue (strategic design: `docs/plans/2026-03-20-terrain-map-ux-strategic-design.md`)
-**Tier 1-2: ALL DONE.** Icon language, battle markers, counter enrichment, op visualization, battle flyover, settlement panel mini-profile (full `SettlementDetailContent.tsx`), terrain cost movement overlay.
-**Remaining (Tier 3):**
-1. **Elevation Profile on Ops Axes (P4)**: Hover tooltips done. SVG area chart along axis of advance not done.
-2. **Front Line Terrain Tinting (P4)**: Front lines colored by corps/sector only. Friction data exists but not wired to edge rendering.
-**Explicitly rejected:** LOS cones, full 3D main map, 3D battle replay, threat heat layer, pulsing markers.
+**Deferred to roadmap:**
+- Front Line Terrain Tinting (P4) → v0.9.4 (Map That Scars milestone)
+- Elevation Profile on Ops Axes (P4) → v0.9.4 (visual polish)
+- **Explicitly rejected:** LOS cones, full 3D main map, 3D battle replay, threat heat layer, pulsing markers.
 
 ## Simulation Engine
 1. **[2026-03-07] Phase C supply agency lives in patron_pressure + supply_reserves, not a separate subsystem**
