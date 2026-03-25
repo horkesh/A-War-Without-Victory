@@ -1,8 +1,8 @@
 {
-  "frozen_at": "2026-03-24T23:56:44.900Z",
-  "run_dir": "apr1992_definitive_40w__77cac5e01d3c929e__w40_n1078",
+  "frozen_at": "2026-03-25T00:29:06.392Z",
+  "run_dir": "apr1992_definitive_40w__77cac5e01d3c929e__w40_n1079",
   "run_id": "apr1992_definitive_40w__77cac5e01d3c929e__w40",
-  "final_state_hash": "59b50b836d5eea8d",
+  "final_state_hash": "1b5c7925e66f7dbf",
   "weeks": 40,
   "area_weighted_pct": 91.3,
   "territory": {
@@ -112,6 +112,11 @@
       "turn": 22,
       "id": "hvo_arbih_tensions_rise_1992",
       "text": "HVO-ARBiH Clash at Prozor"
+    },
+    {
+      "turn": 23,
+      "id": "london_conference_1992",
+      "text": "London Conference on Yugoslavia"
     },
     {
       "turn": 34,

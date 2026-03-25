@@ -370304,7 +370304,8 @@
       }
     },
     "enabled_event_ids": [
-      "london_conference_1992"
+      "london_conference_1992",
+      "vance_owen_plan_1993"
     ],
     "event_aggression_modifiers": [
       {
@@ -370343,6 +370344,7 @@
       "jajce_falls_1992": 1,
       "jna_withdrawal_1992": 1,
       "kravica_attack_1993": 1,
+      "london_conference_1992": 1,
       "mostar_liberation_1992": 1,
       "operation_corridor_1992": 1,
       "rbih_state_identity": 1,
@@ -370388,6 +370390,7 @@
       "jajce_falls_1992": 40,
       "jna_withdrawal_1992": 5,
       "kravica_attack_1993": 39,
+      "london_conference_1992": 24,
       "mostar_liberation_1992": 7,
       "operation_corridor_1992": 12,
       "rbih_state_identity": 3,
@@ -370404,6 +370407,7 @@
       "drina_valley_ethnic_cleansing_1992": 11.00000000000001,
       "hrhb_political_goal": 7.5,
       "hvo_arbih_tensions_rise_1992": 25.5,
+      "london_conference_1992": 0,
       "mostar_liberation_1992": 16,
       "rbih_state_identity": 6,
       "rs_strategic_goals": 10,
@@ -370433,6 +370437,7 @@
       "operation_corridor_1992",
       "concentration_camps_revealed_1992",
       "hvo_arbih_tensions_rise_1992",
+      "london_conference_1992",
       "gornji_vakuf_clashes_1993",
       "kravica_attack_1993",
       "vance_owen_plan_1993",
@@ -406486,7 +406491,7 @@
     "general_supply_reserve": {
       "HRHB": 70.22730158730158,
       "RBiH": 47.62,
-      "RS": 87.67029743084643
+      "RS": 90.30262712195068
     },
     "heavy_munitions_reserve": {
       "HRHB": 50.09650793650793,
@@ -414385,10 +414390,10 @@
           "patron_id": "international_community",
           "relationship_events": [],
           "sanctions_active": false,
-          "support_level": 50
+          "support_level": 45
         },
         "RS": {
-          "override_authority": 0,
+          "override_authority": 4.03,
           "patron_id": "serbia",
           "relationship_events": [],
           "sanctions_active": false,
@@ -414445,8 +414450,8 @@
           },
           "international_standing": {
             "base_value": 10,
-            "effective_value": 45,
-            "event_modifier": 35
+            "effective_value": 55,
+            "event_modifier": 45
           },
           "military_credibility": {
             "base_value": 65.44805752307362,
@@ -414454,13 +414459,13 @@
             "event_modifier": 13
           },
           "negotiating_leverage": {
-            "base_value": 52.519866810783014,
-            "effective_value": 67.51986681078301,
+            "base_value": 50.85320014411635,
+            "effective_value": 65.85320014411636,
             "event_modifier": 15
           },
           "patron_confidence": {
-            "base_value": 50,
-            "effective_value": 50,
+            "base_value": 45,
+            "effective_value": 45,
             "event_modifier": 0
           },
           "territorial_legitimacy": {
@@ -442453,12 +442458,12 @@
       "supply_deltas": {
         "HRHB": -0.15853968253968276,
         "RBiH": 0.007999999999995566,
-        "RS": -0.1373238849672589
+        "RS": 0.13119855052210028
       },
       "supply_snapshot": {
         "HRHB": 70.22730158730158,
         "RBiH": 47.62,
-        "RS": 87.67029743084643
+        "RS": 90.30262712195068
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -442605,12 +442610,12 @@
       "supply_deltas": {
         "HRHB": 0.02546031746031474,
         "RBiH": 0.008000000000002672,
-        "RS": -0.26859396034761573
+        "RS": -0.36476190476189174
       },
       "supply_snapshot": {
         "HRHB": 70.38584126984126,
         "RBiH": 47.612,
-        "RS": 87.80762131581369
+        "RS": 90.17142857142858
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -442743,12 +442748,12 @@
       "supply_deltas": {
         "HRHB": 0.02546031746031474,
         "RBiH": 0.008000000000002672,
-        "RS": 0.09609546162113247
+        "RS": 0.025238095238094616
       },
       "supply_snapshot": {
         "HRHB": 70.36038095238095,
         "RBiH": 47.604,
-        "RS": 88.0762152761613
+        "RS": 90.53619047619047
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -442880,12 +442885,12 @@
       "supply_deltas": {
         "HRHB": 0.09403174603174591,
         "RBiH": 0.007999999999995566,
-        "RS": 0.0707815103513525
+        "RS": 0.025238095238094616
       },
       "supply_snapshot": {
         "HRHB": 70.33492063492064,
         "RBiH": 47.596,
-        "RS": 87.98011981454017
+        "RS": 90.51095238095238
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -442989,12 +442994,12 @@
       "supply_deltas": {
         "HRHB": -0.014539682539677301,
         "RBiH": 0.008000000000002672,
-        "RS": 0.04546708551680467
+        "RS": 0.025238095238094616
       },
       "supply_snapshot": {
         "HRHB": 70.24088888888889,
         "RBiH": 47.588,
-        "RS": 87.90933830418882
+        "RS": 90.48571428571428
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -443163,12 +443168,12 @@
       "supply_deltas": {
         "HRHB": -0.10787301587302522,
         "RBiH": 0.007999999999995566,
-        "RS": 0.01840333875257727
+        "RS": 0.025238095238094616
       },
       "supply_snapshot": {
         "HRHB": 70.25542857142857,
         "RBiH": 47.58,
-        "RS": 87.86387121867202
+        "RS": 90.46047619047619
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -443282,12 +443287,12 @@
       "supply_deltas": {
         "HRHB": 0.02546031746032895,
         "RBiH": 0.07200000000000273,
-        "RS": -0.005156422843043629
+        "RS": 0.1752380952380861
       },
       "supply_snapshot": {
         "HRHB": 70.36330158730159,
         "RBiH": 47.572,
-        "RS": 87.84546787991944
+        "RS": 90.43523809523809
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -443487,12 +443492,12 @@
       "supply_deltas": {
         "HRHB": 0.14546031746030508,
         "RBiH": -0.1039999999999992,
-        "RS": -0.18186379714629197
+        "RS": -0.18476190476189913
       },
       "supply_snapshot": {
         "HRHB": 70.33784126984126,
         "RBiH": 47.5,
-        "RS": 87.85062430276248
+        "RS": 90.26
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -443583,12 +443588,12 @@
       "supply_deltas": {
         "HRHB": -0.14253968253967741,
         "RBiH": 0.00895299066729649,
-        "RS": -0.0016417653041997937
+        "RS": 0.027144076572682252
       },
       "supply_snapshot": {
         "HRHB": 70.19238095238096,
         "RBiH": 47.604,
-        "RS": 88.03248809990878
+        "RS": 90.4447619047619
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -443799,12 +443804,12 @@
       "supply_deltas": {
         "HRHB": 0.09403174603174591,
         "RBiH": 0.007047009332701748,
-        "RS": -0.025625636848261024
+        "RS": 0.07666798904689642
       },
       "supply_snapshot": {
         "HRHB": 70.33492063492064,
         "RBiH": 47.5950470093327,
-        "RS": 88.03412986521298
+        "RS": 90.41761782818922
       },
       "supply_transitions": [
         {
@@ -443979,12 +443984,12 @@
       "supply_deltas": {
         "HRHB": -0.014539682539677301,
         "RBiH": 0.008000000000002672,
-        "RS": -0.10177908738207009
+        "RS": -0.02809777990529483
       },
       "supply_snapshot": {
         "HRHB": 70.24088888888889,
         "RBiH": 47.588,
-        "RS": 88.05975550206124
+        "RS": 90.34094983914233
       },
       "supply_transitions": [],
       "territory_net": {
@@ -444181,12 +444186,12 @@
       "supply_deltas": {
         "HRHB": 0.016571428571424462,
         "RBiH": 0.007999999999995566,
-        "RS": -0.03662791101650953
+        "RS": 0.025238095238094616
       },
       "supply_snapshot": {
         "HRHB": 70.25542857142857,
         "RBiH": 47.58,
-        "RS": 88.1615345894433
+        "RS": 90.36904761904762
       },
       "supply_transitions": [
         {
@@ -444301,12 +444306,12 @@
       "supply_deltas": {
         "HRHB": -0.1523174603174624,
         "RBiH": 0.008000000000002672,
-        "RS": -0.0619683355575944
+        "RS": 0.18886779239625184
       },
       "supply_snapshot": {
         "HRHB": 70.23885714285714,
         "RBiH": 47.572,
-        "RS": 88.19816250045982
+        "RS": 90.34380952380953
       },
       "supply_transitions": [
         {
@@ -444563,12 +444568,12 @@
       "supply_deltas": {
         "HRHB": 0.02546031746031474,
         "RBiH": 0.008000000000002672,
-        "RS": -0.25095002132398747
+        "RS": -0.18293536189763415
       },
       "supply_snapshot": {
         "HRHB": 70.3911746031746,
         "RBiH": 47.564,
-        "RS": 88.26013083601741
+        "RS": 90.15494173141327
       },
       "supply_transitions": [
         {
@@ -444749,12 +444754,12 @@
       "supply_deltas": {
         "HRHB": 0.2729252716964652,
         "RBiH": 0.007999999999995566,
-        "RS": -0.06854089586512657
+        "RS": 0.11559975535175226
       },
       "supply_snapshot": {
         "HRHB": 70.36571428571429,
         "RBiH": 47.556,
-        "RS": 88.5110808573414
+        "RS": 90.33787709331091
       },
       "supply_transitions": [
         {
@@ -444977,12 +444982,12 @@
       "supply_deltas": {
         "HRHB": 0.2700319702539673,
         "RBiH": 0.008000000000002672,
-        "RS": -0.18478443665759414
+        "RS": -0.12057980489798581
       },
       "supply_snapshot": {
         "HRHB": 70.09278901401782,
         "RBiH": 47.548,
-        "RS": 88.57962175320652
+        "RS": 90.22227733795916
       },
       "supply_transitions": [],
       "territory_net": {
@@ -445007,7 +445012,12 @@
       },
       "displacement_hotspot": "zvornik",
       "displacement_total": 9195,
-      "events_fired": [],
+      "events_fired": [
+        {
+          "id": "london_conference_1992",
+          "text": "London Conference on Yugoslavia"
+        }
+      ],
       "formation_destructions": [],
       "formation_spawns": [],
       "heavy_munitions_deltas": {
@@ -445087,12 +445097,12 @@
       "supply_deltas": {
         "HRHB": 0.2429803483936439,
         "RBiH": 0.008000000000002672,
-        "RS": -0.06853361757924858
+        "RS": 0.025238095238094616
       },
       "supply_snapshot": {
         "HRHB": 69.82275704376386,
         "RBiH": 47.54,
-        "RS": 88.76440618986412
+        "RS": 90.34285714285714
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -445333,12 +445343,12 @@
       "supply_deltas": {
         "HRHB": 0.21780350573332896,
         "RBiH": 0.5429343425967801,
-        "RS": -0.09300284457287944
+        "RS": 0.09510678043166365
       },
       "supply_snapshot": {
         "HRHB": 69.57977669537021,
         "RBiH": 47.532,
-        "RS": 88.83293980744337
+        "RS": 90.31761904761905
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -445574,12 +445584,12 @@
       "supply_deltas": {
         "HRHB": 0.19188225507302548,
         "RBiH": 0.004788820182739073,
-        "RS": -0.1893593066255761
+        "RS": 0.0822993715866005
       },
       "supply_snapshot": {
         "HRHB": 69.36197318963688,
         "RBiH": 46.989065657403216,
-        "RS": 88.92594265201625
+        "RS": 90.22251226718738
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -445925,12 +445935,12 @@
       "supply_deltas": {
         "HRHB": 0.16759217521270386,
         "RBiH": 0.007178834076484009,
-        "RS": -0.2684807887593337
+        "RS": -0.1400327005728741
       },
       "supply_snapshot": {
         "HRHB": 69.17009093456386,
         "RBiH": 46.98427683722048,
-        "RS": 89.11530195864182
+        "RS": 90.14021289560078
       },
       "supply_transitions": [
         {
@@ -446294,12 +446304,12 @@
       "supply_deltas": {
         "HRHB": 0.15697840135239005,
         "RBiH": -0.004021360222516535,
-        "RS": -0.10268225057296831
+        "RS": 0.05985724905924883
       },
       "supply_snapshot": {
         "HRHB": 69.00249875935116,
         "RBiH": 46.97709800314399,
-        "RS": 89.38378274740116
+        "RS": 90.28024559617366
       },
       "supply_transitions": [
         {
@@ -446646,12 +446656,12 @@
       "supply_deltas": {
         "HRHB": 0.09826774346655043,
         "RBiH": 0.9811193633665098,
-        "RS": -0.13920024537625864
+        "RS": -0.0033715738732951195
       },
       "supply_snapshot": {
         "HRHB": 68.84552035799877,
         "RBiH": 46.98111936336651,
-        "RS": 89.48646499797412
+        "RS": 90.22038834711441
       },
       "supply_transitions": [
         {
@@ -446886,12 +446896,12 @@
       ],
       "supply_deltas": {
         "HRHB": 0.17581706932560337,
-        "RS": -0.0425868264758833
+        "RS": 0.01768727549359994
       },
       "supply_snapshot": {
         "HRHB": 68.74725261453221,
         "RBiH": 46,
-        "RS": 89.62566524335038
+        "RS": 90.2237599209877
       },
       "supply_transitions": [
         {
@@ -447202,12 +447212,12 @@
       ],
       "supply_deltas": {
         "HRHB": 0.16542336333753838,
-        "RS": -0.04423211414645323
+        "RS": 0.02993591270227114
       },
       "supply_snapshot": {
         "HRHB": 68.57143554520661,
         "RBiH": 46,
-        "RS": 89.66825206982627
+        "RS": 90.2060726454941
       },
       "supply_transitions": [
         {
@@ -447348,12 +447358,12 @@
       ],
       "supply_deltas": {
         "HRHB": -0.0574528507659835,
-        "RS": -0.04512975643429229
+        "RS": 0.012214294464101272
       },
       "supply_snapshot": {
         "HRHB": 68.40601218186907,
         "RBiH": 46,
-        "RS": 89.71248418397272
+        "RS": 90.17613673279183
       },
       "supply_transitions": [],
       "territory_net": {
@@ -447573,12 +447583,12 @@
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": 0.06264470060513361,
-        "RS": -0.032231675081433764
+        "RS": 0.155351009756302
       },
       "supply_snapshot": {
         "HRHB": 68.46346503263506,
         "RBiH": 46,
-        "RS": 89.75761394040701
+        "RS": 90.16392243832773
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -447774,12 +447784,12 @@
       "supply_deltas": {
         "HRHB": 0.05003975375238667,
         "RBiH": 0.11330603061535527,
-        "RS": -0.1717092689301296
+        "RS": 0.026630743323224237
       },
       "supply_snapshot": {
         "HRHB": 68.40082033202992,
         "RBiH": 46,
-        "RS": 89.78984561548845
+        "RS": 90.00857142857143
       },
       "supply_transitions": [
         {
@@ -448134,12 +448144,12 @@
       "supply_deltas": {
         "HRHB": -0.039992861209952935,
         "RBiH": -0.04331110320949705,
-        "RS": -0.09845526076971112
+        "RS": -0.07806945994008174
       },
       "supply_snapshot": {
         "HRHB": 68.35078057827754,
         "RBiH": 45.886693969384645,
-        "RS": 89.96155488441858
+        "RS": 89.9819406852482
       },
       "supply_transitions": [
         {
@@ -451235,7 +451245,7 @@
       ],
       "supply_deltas": {
         "HRHB": 0.46027149206348383,
-        "RBiH": 16.571190428366506,
+        "RBiH": 16.648292085953983,
         "RS": -0.5315587644006428
       },
       "supply_snapshot": {
@@ -451976,12 +451986,12 @@
       ],
       "supply_deltas": {
         "HRHB": -2.0187928253968295,
-        "RBiH": -5.719146614815116,
+        "RBiH": -5.796248272402593,
         "RS": -0.1325995655063963
       },
       "supply_snapshot": {
         "HRHB": 66.07881034920635,
-        "RBiH": 29.3457864844275,
+        "RBiH": 29.268684826840023,
         "RS": 73.31822329943726
       },
       "supply_transitions": [
