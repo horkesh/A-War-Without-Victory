@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<!-- AWWV UI/UX Mockup 04 — G-2 Assessment Redesign -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Mockup 04 — G-2 Assessment Redesign (Before/After)</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #14120f;
+    color: #ffffff;
+    font-family: system-ui, -apple-system, sans-serif;
+    min-width: 1920px;
+    padding: 40px 60px 80px;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 48px;
+    border-bottom: 1px solid rgba(180,160,130,0.15);
+    padding-bottom: 24px;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    color: #c4a35a;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .page-header p {
+    color: #a89968;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  /* ── Two-Column Layout ── */
+  .columns {
+    display: flex;
+    gap: 64px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .column {
+    flex: 0 0 auto;
+  }
+  .column-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .column-subtitle {
+    font-size: 12px;
+    color: #a89968;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .col-before .column-title { color: #f87171; }
+  .col-after .column-title { color: #4ade80; }
+
+  /* ── Clipboard Container ── */
+  .clipboard {
+    position: relative;
+    border-radius: 4px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .clipboard-before { width: 360px; }
+  .clipboard-after { width: 480px; }
+
+  /* ── Binder Clip ── */
+  .binder-clip {
+    position: relative;
+    height: 28px;
+    display: flex;
+    justify-content: center;
+    z-index: 2;
+  }
+  .binder-bar {
+    width: 80%;
+    height: 14px;
+    background: linear-gradient(180deg, #6a6258 0%, #4a4238 60%, #3a3228 100%);
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    top: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .binder-bar::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -8px;
+    width: 36px;
+    height: 18px;
+    background: linear-gradient(180deg, #7a7268 0%, #5a5248 100%);
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.3);
+  }
+
+  /* ── Paper ── */
+  .paper {
+    position: relative;
+    padding: 20px 24px 28px;
+    min-height: 520px;
+    border-radius: 0 0 2px 2px;
+    overflow: hidden;
+  }
+  .paper-before {
+    background: #f0e8d8;
+  }
+  .paper-after {
+    background: #faf6ef;
+  }
+
+  /* ── Classified Stamp ── */
+  .stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-18deg);
+    font-family: 'Courier New', monospace;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    color: rgba(194, 64, 64, 0.20);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1;
+  }
+
+  /* ── Tab Buttons ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .tab-btn {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tab-btn.active {
+    background: #3a3228;
+    color: #f0e8d8;
+  }
+  .tab-btn.inactive {
+    background: #d6ccb7;
+    color: #6a5e4e;
+  }
+  .tab-btn:hover:not(.active) {
+    background: #c4b8a2;
+  }
+
+  /* ── Tab Content ── */
+  .tab-content {
+    display: none;
+    position: relative;
+    z-index: 2;
+  }
+  .tab-content.visible { display: block; }
+
+  /* ── Document Header (Courier New) ── */
+  .doc-header {
+    text-align: center;
+    margin-bottom: 12px;
+    font-family: 'Courier New', monospace;
+  }
+  .doc-header .faction-line {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .doc-header .crest {
+    font-size: 20px;
+    margin: 4px 0;
+    display: block;
+  }
+  .doc-header .corps-name {
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .doc-header .ref-line {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  .doc-header .separator {
+    margin: 8px auto;
+    font-size: 10px;
+    letter-spacing: -1px;
+  }
+
+  /* ── Before colors ── */
+  .paper-before .doc-header .faction-line { color: #5a4e3e; }
+  .paper-before .doc-header .corps-name { color: #3a3228; }
+  .paper-before .doc-header .ref-line { color: #6a5e4e; }
+  .paper-before .doc-header .separator { color: #4a4238; }
+  .paper-before .section-heading { color: #3a3228; font-family: 'Courier New', monospace; font-size: 10px; font-weight: 700; margin: 12px 0 4px; }
+  .paper-before .body-text { color: #4a4238; font-family: 'Courier New', monospace; font-size: 10px; line-height: 1.55; margin-bottom: 8px; }
+
+  /* ── After colors ── */
+  .paper-after .doc-header .faction-line { color: #4a3e2e; }
+  .paper-after .doc-header .corps-name { color: #1a1610; }
+  .paper-after .doc-header .ref-line { color: #5a4e3e; }
+  .paper-after .doc-header .separator { color: #2a2218; }
+  .paper-after .section-heading { color: #1a1610; font-family: 'Courier New', monospace; font-size: 10px; font-weight: 700; margin: 12px 0 4px; border-bottom: 1px solid rgba(42,34,24,0.15); padding-bottom: 2px; }
+  .paper-after .body-text { color: #2a2218; font-family: 'Courier New', monospace; font-size: 10px; line-height: 1.55; margin-bottom: 8px; }
+  .paper-after .heading-translation { color: #5a4e3e; font-weight: 400; font-style: italic; }
+
+  /* ── Quick Assessment Box ── */
+  .quick-assessment {
+    background: rgba(196, 163, 90, 0.08);
+    border: 1px solid rgba(196, 163, 90, 0.35);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #2a2218;
+  }
+  .quick-assessment .qa-title {
+    font-weight: 700;
+    font-size: 10px;
+    color: #1a1610;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .qa-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+  }
+  .qa-label { color: #4a3e2e; }
+  .qa-value { font-weight: 700; }
+  .qa-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+  .badge-green { background: rgba(74,154,85,0.2); color: #2d6e36; }
+  .badge-amber { background: rgba(251,191,36,0.2); color: #92650a; }
+  .badge-red   { background: rgba(194,64,64,0.2); color: #a03030; }
+  .qa-reasoning {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(42,34,24,0.1);
+    color: #4a3e2e;
+    line-height: 1.5;
+  }
+
+  /* ── Map Legend (After panel) ── */
+  .legend-section {
+    margin-bottom: 14px;
+    font-family: 'Courier New', monospace;
+  }
+  .legend-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #1a1610;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(42,34,24,0.15);
+    padding-bottom: 2px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+    color: #2a2218;
+    padding: 3px 0;
+  }
+  .legend-swatch {
+    width: 16px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .legend-line {
+    width: 20px;
+    height: 0;
+    flex-shrink: 0;
+  }
+  .legend-symbol {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .legend-modifier-note {
+    color: #5a4e3e;
+    font-size: 9px;
+    margin-left: 30px;
+  }
+
+  /* ── Advance Button ── */
+  .advance-btn-wrap {
+    margin-top: 16px;
+    text-align: center;
+  }
+  .advance-btn {
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 28px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+  .advance-gold {
+    background: linear-gradient(180deg, #c4a35a 0%, #a88a42 100%);
+    color: #14120f;
+  }
+  .advance-amber {
+    background: linear-gradient(180deg, #fbbf24 0%, #d4a017 100%);
+    color: #14120f;
+  }
+  .advance-subtitle {
+    font-size: 11px;
+    color: #a89968;
+    margin-top: 6px;
+  }
+
+  /* ── Annotation Callouts (Before panel) ── */
+  .annotations {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .callout {
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .callout-line {
+    width: 2px;
+    background: #f87171;
+    flex-shrink: 0;
+  }
+  .callout-text {
+    background: rgba(127,29,29,0.85);
+    color: #fca5a5;
+    font-size: 10px;
+    font-family: system-ui, sans-serif;
+    padding: 5px 8px;
+    border-radius: 3px;
+    border: 1px solid rgba(248,113,113,0.3);
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  .callout-arrow {
+    color: #f87171;
+    font-size: 14px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  /* ── Contrast Comparison Panel ── */
+  .contrast-panel {
+    max-width: 1200px;
+    margin: 64px auto 0;
+    background: rgba(20,18,15,0.92);
+    border: 1px solid rgba(180,160,130,0.15);
+    border-radius: 6px;
+    padding: 32px 40px;
+  }
+  .contrast-panel h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #c4a35a;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+  .contrast-row {
+    display: flex;
+    gap: 48px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .contrast-sample {
+    padding: 16px 24px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    width: 460px;
+  }
+  .contrast-label {
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    width: 320px;
+    flex-shrink: 0;
+  }
+  .contrast-label .ratio { font-weight: 700; }
+  .contrast-label .fail { color: #f87171; }
+  .contrast-label .pass { color: #4ade80; }
+
+  /* ── Key Improvements ── */
+  .improvements {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    background: rgba(20,18,15,0.92);
+    border: 1px solid rgba(180,160,130,0.15);
+    border-radius: 6px;
+    padding: 32px 40px;
+  }
+  .improvements h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #c4a35a;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .improvements ol {
+    padding-left: 20px;
+  }
+  .improvements li {
+    color: #e0d8c8;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 4px;
+  }
+  .improvements li strong {
+    color: #4ade80;
+  }
+
+  /* ── Before Wrapper (relative for callouts) ── */
+  .before-wrapper {
+    position: relative;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<div class="page-header">
+  <h1>G-2 Assessment Phase — Redesign Comparison</h1>
+  <p>AWWV Ops Planning Modal &middot; Before / After &middot; Contrast, Width, Legend &amp; Summary Fixes</p>
+</div>
+
+<!-- ══════════════════ COLUMNS ══════════════════ -->
+<div class="columns">
+
+  <!-- ────────── BEFORE ────────── -->
+  <div class="column col-before">
+    <div class="column-title">CURRENT: G-2 Phase</div>
+    <div class="column-subtitle">360px &middot; Low Contrast &middot; No Legend</div>
+
+    <div class="before-wrapper">
+      <div class="clipboard clipboard-before">
+        <!-- Binder clip -->
+        <div class="binder-clip"><div class="binder-bar"></div></div>
+
+        <!-- Paper -->
+        <div class="paper paper-before">
+          <!-- Classified stamp -->
+          <div class="stamp">OGRANI&#x10C;ENO</div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(this,'before','assessment')">Assessment</button>
+            <button class="tab-btn inactive" onclick="switchTab(this,'before','raw')">Raw Intel</button>
+          </div>
+
+          <!-- Assessment tab -->
+          <div class="tab-content visible" data-panel="before" data-tab="assessment">
+            <div class="doc-header">
+              <div class="faction-line">REPUBLIKA SRPSKA</div>
+              <div class="faction-line">VOJSKA REPUBLIKE SRPSKE</div>
+              <span class="crest">&#x1F985;</span>
+              <div class="corps-name">1st Krajina Corps</div>
+              <div class="ref-line">G-2/Obavje&scaron;tajni</div>
+              <div class="ref-line">Ref: OZ-G2/1993-04-15/001</div>
+              <div class="separator">&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;</div>
+            </div>
+
+            <div class="section-heading">1. NEPRIJATELJ (Enemy)</div>
+            <div class="body-text">
+              Enemy forces in the Jajce sector consist of 3 brigades estimated at 4,200 personnel. Defensive positions are moderately entrenched (est. 1.2 turns). Supply lines appear intact through Travnik corridor. Morale assessed as moderate; no significant reinforcements detected in the past 7 days.
+            </div>
+
+            <div class="section-heading">2. VLASTITE SNAGE (Own Forces)</div>
+            <div class="body-text">
+              Available for commitment: 6 brigades, est. 8,400 effective personnel. Heavy weapons: 12 T-55, 8 M-84. Artillery support: 2 batteries 122mm. Supply adequate for 4 turns sustained operations. Fatigue level: low.
+            </div>
+
+            <div class="section-heading">3. PROCJENA (Assessment)</div>
+            <div class="body-text">
+              Force ratio favors the attacker at 2.0:1. Terrain is mixed with some elevated positions held by the defender. Weather: clear, no significant impact. Predicted outcome: costly victory. Estimated casualties: ~300 personnel. Recommendation: proceed with operation.
+            </div>
+          </div>
+
+          <!-- Raw Intel tab -->
+          <div class="tab-content" data-panel="before" data-tab="raw">
+            <div class="doc-header">
+              <div class="faction-line">RAW INTELLIGENCE REPORTS</div>
+              <div class="separator">&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;</div>
+            </div>
+            <div class="body-text">
+              SIGINT intercept 12-APR: 3rd enemy brigade relocating 2 companies to Hill 804. Confidence: MODERATE.<br><br>
+              HUMINT report 13-APR: Local source reports enemy ammunition resupply via Donji Vakuf road. Unconfirmed.<br><br>
+              IMINT 14-APR: Aerial observation confirms 2 tank platoons in defilade positions NW of Jajce. Grid ref: 34TBM 4821 7533.
+            </div>
+          </div>
+        </div><!-- /paper -->
+      </div><!-- /clipboard -->
+
+      <!-- ── Annotation Callouts ── -->
+      <div class="annotations" style="position:absolute; top:0; left:0; width:360px; height:100%;">
+        <!-- Callout 1: Contrast -->
+        <div class="callout" style="top: 280px; left: 365px; width: 340px;">
+          <span class="callout-arrow">&larr;</span>
+          <div class="callout-text">Contrast ratio ~3.5:1 &mdash; FAILS WCAG AA (needs 4.5:1)</div>
+        </div>
+        <!-- Callout 2: Width -->
+        <div class="callout" style="top: 100px; left: 365px; width: 380px;">
+          <span class="callout-arrow">&larr;</span>
+          <div class="callout-text">360px = 15.7% of viewport. 84% of screen is dimmed map.</div>
+        </div>
+        <!-- Callout 3: No legend -->
+        <div class="callout" style="top: 60px; left: 365px; width: 370px;">
+          <span class="callout-arrow">&larr;</span>
+          <div class="callout-text">No map legend &mdash; what do the colors on the map mean?</div>
+        </div>
+        <!-- Callout 4: No summary -->
+        <div class="callout" style="top: 500px; left: 365px; width: 370px;">
+          <span class="callout-arrow">&larr;</span>
+          <div class="callout-text">No summary stats box &mdash; all data buried in prose</div>
+        </div>
+        <!-- Callout 5: B/C/S -->
+        <div class="callout" style="top: 210px; left: 365px; width: 380px;">
+          <span class="callout-arrow">&larr;</span>
+          <div class="callout-text">B/C/S without translation &mdash; inaccessible to non-speakers</div>
+        </div>
+      </div>
+    </div><!-- /before-wrapper -->
+  </div>
+
+  <!-- ────────── AFTER ────────── -->
+  <div class="column col-after">
+    <div class="column-title">PROPOSED: G-2 Phase</div>
+    <div class="column-subtitle">480px &middot; Readable &middot; With Legend &amp; Summary</div>
+
+    <div class="clipboard clipboard-after">
+      <!-- Binder clip -->
+      <div class="binder-clip"><div class="binder-bar"></div></div>
+
+      <!-- Paper -->
+      <div class="paper paper-after">
+        <!-- Classified stamp -->
+        <div class="stamp">OGRANI&#x10C;ENO</div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'after','assessment')">Assessment</button>
+          <button class="tab-btn inactive" onclick="switchTab(this,'after','raw')">Raw Intel</button>
+          <button class="tab-btn inactive" onclick="switchTab(this,'after','legend')">Map Legend</button>
+        </div>
+
+        <!-- Assessment tab -->
+        <div class="tab-content visible" data-panel="after" data-tab="assessment">
+          <div class="doc-header">
+            <div class="faction-line">REPUBLIKA SRPSKA</div>
+            <div class="faction-line">VOJSKA REPUBLIKE SRPSKE</div>
+            <span class="crest">&#x1F985;</span>
+            <div class="corps-name">1st Krajina Corps</div>
+            <div class="ref-line">G-2/Obavje&scaron;tajni</div>
+            <div class="ref-line">Ref: OZ-G2/1993-04-15/001</div>
+            <div class="separator">&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;</div>
+          </div>
+
+          <!-- NEW: Quick Assessment -->
+          <div class="quick-assessment">
+            <div class="qa-title">QUICK ASSESSMENT</div>
+            <div class="qa-row">
+              <span class="qa-label">Force Ratio</span>
+              <span class="qa-value">2.0:1 <span class="qa-badge badge-green">FAVORABLE</span></span>
+            </div>
+            <div class="qa-row">
+              <span class="qa-label">Intel Confidence</span>
+              <span class="qa-value">72% <span class="qa-badge badge-amber">MODERATE</span></span>
+            </div>
+            <div class="qa-row">
+              <span class="qa-label">Est. Casualties</span>
+              <span class="qa-value">~300</span>
+            </div>
+            <div class="qa-row">
+              <span class="qa-label">Predicted</span>
+              <span class="qa-value"><span class="qa-badge badge-amber">COSTLY VICTORY</span></span>
+            </div>
+            <div class="qa-row">
+              <span class="qa-label">Recommendation</span>
+              <span class="qa-value"><span class="qa-badge badge-green">LAUNCH &#x2713;</span></span>
+            </div>
+            <div class="qa-reasoning">
+              <strong>Reasoning:</strong> Superior numbers, moderate terrain advantage. Supply adequate for 4 turns sustained operations. Defender entrenchment is low.
+            </div>
+          </div>
+
+          <div class="section-heading">1. NEPRIJATELJ <span class="heading-translation">&mdash; Enemy Forces</span></div>
+          <div class="body-text">
+            Enemy forces in the Jajce sector consist of 3 brigades estimated at 4,200 personnel. Defensive positions are moderately entrenched (est. 1.2 turns). Supply lines appear intact through Travnik corridor. Morale assessed as moderate; no significant reinforcements detected in the past 7 days.
+          </div>
+
+          <div class="section-heading">2. VLASTITE SNAGE <span class="heading-translation">&mdash; Own Forces</span></div>
+          <div class="body-text">
+            Available for commitment: 6 brigades, est. 8,400 effective personnel. Heavy weapons: 12 T-55, 8 M-84. Artillery support: 2 batteries 122mm. Supply adequate for 4 turns sustained operations. Fatigue level: low.
+          </div>
+
+          <div class="section-heading">3. PROCJENA <span class="heading-translation">&mdash; Assessment</span></div>
+          <div class="body-text">
+            Force ratio favors the attacker at 2.0:1. Terrain is mixed with some elevated positions held by the defender. Weather: clear, no significant impact. Predicted outcome: costly victory. Estimated casualties: ~300 personnel.
+          </div>
+        </div>
+
+        <!-- Raw Intel tab -->
+        <div class="tab-content" data-panel="after" data-tab="raw">
+          <div class="doc-header">
+            <div class="faction-line">RAW INTELLIGENCE REPORTS</div>
+            <div class="separator">&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;</div>
+          </div>
+          <div class="body-text">
+            SIGINT intercept 12-APR: 3rd enemy brigade relocating 2 companies to Hill 804. Confidence: MODERATE.<br><br>
+            HUMINT report 13-APR: Local source reports enemy ammunition resupply via Donji Vakuf road. Unconfirmed.<br><br>
+            IMINT 14-APR: Aerial observation confirms 2 tank platoons in defilade positions NW of Jajce. Grid ref: 34TBM 4821 7533.
+          </div>
+        </div>
+
+        <!-- Map Legend tab (NEW) -->
+        <div class="tab-content" data-panel="after" data-tab="legend">
+          <div class="legend-section">
+            <div class="legend-section-title">TERRITORY</div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: rgba(74,154,85,0.35); border: 1px solid rgba(74,154,85,0.6);"></span>
+              Friendly controlled
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: rgba(194,64,64,0.35); border: 1px solid rgba(194,64,64,0.6);"></span>
+              Enemy controlled
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: rgba(251,191,36,0.35); border: 1px solid rgba(251,191,36,0.6);"></span>
+              Contested
+            </div>
+          </div>
+
+          <div class="legend-section">
+            <div class="legend-section-title">FRONT LINES</div>
+            <div class="legend-item">
+              <span class="legend-line" style="border-top: 3px solid #c4a35a;"></span>
+              Your corps front
+            </div>
+            <div class="legend-item">
+              <span class="legend-line" style="border-top: 2px solid #888;"></span>
+              Other corps fronts
+            </div>
+            <div class="legend-item">
+              <span class="legend-line" style="border-top: 2px dotted #999;"></span>
+              Front edge
+            </div>
+          </div>
+
+          <div class="legend-section">
+            <div class="legend-section-title">OPERATION MARKERS</div>
+            <div class="legend-item">
+              <span class="legend-symbol" style="color: #8b2020;">&#x25CF;</span>
+              Objective
+            </div>
+            <div class="legend-item">
+              <span class="legend-symbol" style="color: #c4a35a;">&#x2605;</span>
+              Schwerpunkt
+            </div>
+            <div class="legend-item">
+              <span class="legend-symbol" style="color: #4a9a55;">&#x25B2;</span>
+              Staging area
+            </div>
+            <div class="legend-item">
+              <span class="legend-symbol" style="color: #6a8ec4;">&#x25C6;</span>
+              Brigade position
+            </div>
+          </div>
+
+          <div class="legend-section">
+            <div class="legend-section-title">SELECTION STATE</div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: transparent; border: 2px solid #c4a35a;"></span>
+              Selectable target
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: rgba(100,100,100,0.3); border: 1px solid rgba(100,100,100,0.3); opacity: 0.45;"></span>
+              Out of range
+            </div>
+          </div>
+
+          <div class="legend-section">
+            <div class="legend-section-title">TERRAIN MODIFIERS</div>
+            <div class="legend-item">
+              <span class="legend-symbol">&#x26F0;</span>
+              Mountain (+30% defense)
+            </div>
+            <div class="legend-item">
+              <span class="legend-symbol">&#x1F332;</span>
+              Forest (+15% defense)
+            </div>
+            <div class="legend-item">
+              <span class="legend-symbol">&#x1F3D9;</span>
+              Urban (+50-100% defense)
+            </div>
+            <div class="legend-item">
+              <span class="legend-symbol">&#x1F30A;</span>
+              River crossing (-20% attack)
+            </div>
+          </div>
+        </div>
+      </div><!-- /paper -->
+    </div><!-- /clipboard -->
+
+    <!-- Advance Button -->
+    <div class="advance-btn-wrap">
+      <button class="advance-btn advance-gold">Proceed to Authorization &rarr;</button>
+      <div class="advance-subtitle">Review complete. Next: final authorization.</div>
+    </div>
+    <div class="advance-btn-wrap" style="margin-top: 12px; opacity: 0.5;">
+      <button class="advance-btn advance-amber">Proceed Despite Low Intel &rarr;</button>
+      <div class="advance-subtitle" style="color: #fbbf24;">Low intel confidence. Proceed with caution.</div>
+    </div>
+  </div>
+
+</div><!-- /columns -->
+
+<!-- ══════════════════ CONTRAST COMPARISON ══════════════════ -->
+<div class="contrast-panel">
+  <h2>Contrast Comparison</h2>
+
+  <div class="contrast-row">
+    <div class="contrast-label">
+      <strong>CURRENT:</strong> <code>#4a4238</code> on <code>#f0e8d8</code><br>
+      Ratio: <span class="ratio fail">3.5:1</span> &nbsp; &#x2717; FAILS WCAG AA
+    </div>
+    <div class="contrast-sample" style="background: #f0e8d8; color: #4a4238;">
+      Enemy forces in the Jajce sector consist of 3 brigades estimated at 4,200 personnel. Defensive positions are moderately entrenched.
+    </div>
+  </div>
+
+  <div class="contrast-row">
+    <div class="contrast-label">
+      <strong>PROPOSED:</strong> <code>#2a2218</code> on <code>#faf6ef</code><br>
+      Ratio: <span class="ratio pass">5.2:1</span> &nbsp; &#x2713; PASSES WCAG AA
+    </div>
+    <div class="contrast-sample" style="background: #faf6ef; color: #2a2218;">
+      Enemy forces in the Jajce sector consist of 3 brigades estimated at 4,200 personnel. Defensive positions are moderately entrenched.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ KEY IMPROVEMENTS ══════════════════ -->
+<div class="improvements">
+  <h2>Key Improvements</h2>
+  <ol>
+    <li><strong>Width: 360px &rarr; 480px (+33%)</strong> &mdash; more room for intelligence data</li>
+    <li><strong>Contrast: 3.5:1 &rarr; 5.2:1</strong> &mdash; passes WCAG AA accessibility</li>
+    <li><strong>NEW: Map Legend tab</strong> &mdash; colors explained instead of guessed</li>
+    <li><strong>NEW: Quick Assessment summary</strong> &mdash; key numbers at a glance before prose</li>
+    <li><strong>NEW: Inline translations</strong> &mdash; B/C/S terms now accessible to all players</li>
+    <li><strong>NEW: Commander recommendation REASONING</strong> &mdash; not just "LAUNCH" but WHY</li>
+  </ol>
+</div>
+
+<!-- ══════════════════ TAB SWITCHING ══════════════════ -->
+<script>
+function switchTab(btn, panel, tab) {
+  // Deactivate all tabs in this panel
+  const parent = btn.closest('.paper');
+  parent.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active');
+    b.classList.add('inactive');
+  });
+  btn.classList.remove('inactive');
+  btn.classList.add('active');
+
+  // Hide all content in this panel, show selected
+  parent.querySelectorAll('.tab-content').forEach(tc => {
+    if (tc.dataset.panel === panel && tc.dataset.tab === tab) {
+      tc.classList.add('visible');
+    } else if (tc.dataset.panel === panel) {
+      tc.classList.remove('visible');
+    }
+  });
+}
+</script>
+
+</body>
+</html>

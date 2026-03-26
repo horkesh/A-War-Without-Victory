@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<!--
+  AWWV UI/UX Mockup 01 — War Room Layout Proposal
+  A War Without Victory — Bosnian War Strategy Game
+  Proposed redesign: modal-heavy → persistent war room panels
+  Date: 2026-03-25
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>AWWV Mockup 01 — War Room Layout</title>
+<style>
+  /* ── RESET & BASE ─────────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow-x: hidden; }
+  body {
+    background: #14120f;
+    color: #ffffff;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── TOKENS ───────────────────────────────────────── */
+  :root {
+    --bg:          #14120f;
+    --card-bg:     rgba(20, 18, 15, 0.92);
+    --gold:        #c4a35a;
+    --gold-subtle: rgba(196, 163, 90, 0.15);
+    --border:      rgba(180, 160, 130, 0.15);
+    --text-1:      #ffffff;
+    --text-2:      #a89968;
+    --text-dim:    rgba(168, 153, 104, 0.5);
+    --red:         #c24040;
+    --green:       #4a9a55;
+    --amber:       #c4a35a;
+    --mono:        'Courier New', Courier, monospace;
+    --sans:        system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --banner-h:  40px;
+    --bottom-h:  36px;
+    --left-w:    220px;
+    --right-w:   320px;
+  }
+
+  /* ── FADE-IN ──────────────────────────────────────── */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn 0.5s ease-out both; }
+  .fade-in-d1 { animation-delay: 0.08s; }
+  .fade-in-d2 { animation-delay: 0.16s; }
+  .fade-in-d3 { animation-delay: 0.24s; }
+  .fade-in-d4 { animation-delay: 0.32s; }
+  .fade-in-d5 { animation-delay: 0.40s; }
+
+  /* ── LAYOUT GRID ──────────────────────────────────── */
+  .war-room {
+    width: 1920px;
+    height: 1080px;
+    display: grid;
+    grid-template-rows: var(--banner-h) 1fr var(--bottom-h);
+    grid-template-columns: var(--left-w) 1fr var(--right-w);
+    grid-template-areas:
+      "banner  banner  banner"
+      "left    map     right"
+      "bottom  bottom  bottom";
+    overflow: hidden;
+  }
+
+  /* ── TOP BRIEFING BANNER ──────────────────────────── */
+  .banner {
+    grid-area: banner;
+    background: rgba(25, 22, 18, 0.95);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 10;
+  }
+  .banner-alerts {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .banner-alerts .alert-icon { color: var(--amber); font-size: 13px; }
+  .banner-alerts .alert-text { color: var(--amber); }
+  .banner-alerts .alert-text.critical { color: var(--red); }
+  .banner-alerts .sep { color: var(--text-dim); margin: 0 4px; }
+  .banner-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-shrink: 0;
+  }
+  .banner-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-2);
+    letter-spacing: 0.5px;
+  }
+  .banner-btn {
+    background: var(--gold-subtle);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-family: var(--sans);
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .banner-btn:hover {
+    background: rgba(196, 163, 90, 0.25);
+    border-color: rgba(196, 163, 90, 0.35);
+  }
+
+  /* ── LEFT CORPS RAIL ──────────────────────────────── */
+  .corps-rail {
+    grid-area: left;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .corps-rail-title {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    color: var(--gold);
+    text-transform: uppercase;
+    padding: 0 12px 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .corps-card {
+    padding: 7px 12px 7px 14px;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+    position: relative;
+  }
+  .corps-card:hover {
+    background: rgba(196, 163, 90, 0.06);
+  }
+  .corps-card.active {
+    border-left-color: var(--gold);
+    background: rgba(196, 163, 90, 0.08);
+  }
+  .corps-card + .corps-card { border-top: 1px solid rgba(180, 160, 130, 0.07); }
+
+  .cc-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 3px;
+  }
+  .cc-name {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    letter-spacing: 0.3px;
+  }
+  .cc-health {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .cc-health-bar {
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .cc-health-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .cc-personnel {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+
+  .cc-row2 {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+  }
+  .cc-stance {
+    font-size: 8px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+  .cc-stance.offensive  { background: rgba(74, 154, 85, 0.18); color: var(--green); }
+  .cc-stance.defensive  { background: rgba(196, 163, 90, 0.15); color: var(--amber); }
+  .cc-stance.balanced   { background: rgba(100, 140, 200, 0.15); color: #7eaadc; }
+  .cc-stance.reorganize { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+  .cc-meta {
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+  .cc-meta .dot { margin: 0 2px; }
+
+  .cc-row3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 13px;
+  }
+  .cc-alert {
+    font-size: 9px;
+    color: var(--amber);
+  }
+  .cc-alert.critical { color: var(--red); }
+  .cc-op {
+    font-size: 9px;
+    color: var(--gold);
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .cc-op:hover { color: #dfc07a; text-decoration: underline; }
+
+  /* ── CENTER MAP ───────────────────────────────────── */
+  .map-area {
+    grid-area: map;
+    position: relative;
+    overflow: hidden;
+    background: #100e0b;
+  }
+  .map-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(196,163,90,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(196,163,90,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .map-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .map-svg {
+    position: absolute; inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── RIGHT CONTEXT PANEL ──────────────────────────── */
+  .context-panel {
+    grid-area: right;
+    background: var(--card-bg);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .ctx-breadcrumb {
+    font-size: 9px;
+    padding: 8px 14px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .ctx-crumb {
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .ctx-crumb:hover { color: var(--gold); }
+  .ctx-crumb.current { color: var(--text-2); }
+  .ctx-sep { color: rgba(168,153,104,0.3); }
+  .ctx-pin {
+    margin-left: auto;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+    font-size: 12px;
+  }
+  .ctx-pin:hover { opacity: 0.8; }
+
+  .ctx-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 14px 14px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(196,163,90,0.2) transparent;
+  }
+  .ctx-body::-webkit-scrollbar { width: 5px; }
+  .ctx-body::-webkit-scrollbar-track { background: transparent; }
+  .ctx-body::-webkit-scrollbar-thumb { background: rgba(196,163,90,0.2); border-radius: 3px; }
+
+  .ctx-section {
+    margin-top: 14px;
+  }
+  .ctx-section-title {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ctx-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .ctx-badge.strained { background: rgba(196,163,90,0.18); color: var(--amber); }
+  .ctx-badge.executing { background: rgba(74,154,85,0.15); color: var(--green); }
+  .ctx-badge.moderate { background: rgba(196,163,90,0.15); color: var(--amber); }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+  }
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .metric-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .metric-value {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-1);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .metric-bar {
+    display: inline-block;
+    width: 52px;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    vertical-align: middle;
+  }
+  .metric-bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+  }
+  .metric-tag {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+  }
+  .metric-tag.thin { color: var(--amber); }
+  .metric-tag.moderate { color: var(--amber); }
+  .metric-hint {
+    font-size: 8px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* operation card */
+  .op-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+  }
+  .op-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .op-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-1);
+  }
+  .op-progress-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .op-progress-fill {
+    height: 100%;
+    width: 60%;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+  .op-objectives {
+    list-style: none;
+    padding: 0;
+  }
+  .op-objectives li {
+    font-size: 9px;
+    color: var(--text-2);
+    padding: 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .op-obj-status {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .op-obj-status.done { background: var(--green); }
+  .op-obj-status.active { background: var(--gold); box-shadow: 0 0 4px rgba(196,163,90,0.4); }
+  .op-obj-status.pending { background: rgba(255,255,255,0.15); }
+
+  /* battle entry */
+  .battle-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(180,160,130,0.06);
+  }
+  .battle-name {
+    font-size: 10px;
+    color: var(--text-1);
+  }
+  .battle-week {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+  .battle-result {
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .battle-result.costly { color: var(--amber); }
+  .battle-result.decisive { color: var(--green); }
+  .battle-result.repulsed { color: var(--red); }
+  .battle-cas {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+
+  /* ── BOTTOM INTELLIGENCE BAR ──────────────────────── */
+  .intel-bar {
+    grid-area: bottom;
+    background: rgba(25, 22, 18, 0.95);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 10;
+  }
+  .intel-territory {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .intel-faction {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .intel-faction-bar {
+    width: 6px; height: 12px;
+    border-radius: 1px;
+  }
+  .intel-faction .pct { color: var(--text-1); font-weight: 600; }
+  .intel-faction .trend { font-size: 10px; }
+  .intel-faction .trend.up { color: var(--green); }
+  .intel-faction .trend.down { color: var(--red); }
+  .intel-faction .trend.flat { color: var(--text-dim); }
+  .intel-faction .label { font-size: 9px; color: var(--text-2); margin-right: 2px; }
+
+  .intel-casualties {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-2);
+  }
+  .intel-casualties .val { color: var(--text-1); font-weight: 600; }
+
+  .intel-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .action-btn {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--text-2);
+  }
+  .action-btn:hover {
+    background: rgba(196,163,90,0.1);
+    border-color: rgba(196,163,90,0.3);
+    color: var(--text-1);
+  }
+  .action-btn.primary {
+    background: rgba(196,163,90,0.18);
+    border-color: rgba(196,163,90,0.4);
+    color: var(--gold);
+  }
+  .action-btn.primary:hover {
+    background: rgba(196,163,90,0.3);
+    border-color: var(--gold);
+    color: #fff;
+  }
+
+  /* ── COMPARISON SECTION (below viewport) ──────────── */
+  .comparison {
+    width: 1920px;
+    padding: 60px 80px;
+    background: #0e0d0a;
+    border-top: 2px solid var(--border);
+  }
+  .comparison h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: start;
+  }
+  .comparison-col {
+    background: rgba(20,18,15,0.7);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+  }
+  .comparison-col h3 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .comparison-col.before h3 { color: var(--red); }
+  .comparison-col.after h3 { color: var(--green); }
+  .comparison-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--gold);
+    padding-top: 60px;
+  }
+
+  .comp-sketch {
+    width: 100%;
+    height: 280px;
+    border: 1px solid rgba(180,160,130,0.1);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  /* Before sketch elements */
+  .sketch-map-before {
+    position: absolute;
+    inset: 10px;
+    background: rgba(60,120,180,0.06);
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sketch-map-before::after {
+    content: 'MAP';
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+  }
+  .sketch-modal {
+    position: absolute;
+    background: rgba(30,27,22,0.96);
+    border: 1px solid rgba(196,163,90,0.3);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 600;
+    color: var(--text-2);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.3;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .sketch-modal.army-hq {
+    top: 30px; left: 50%; transform: translateX(-50%);
+    width: 280px; height: 180px;
+    border-color: var(--red);
+    z-index: 3;
+  }
+  .sketch-modal.army-hq::after {
+    content: 'ARMY HQ MODAL\A(covers 60% of map)\A6+ clicks to navigate';
+    white-space: pre;
+    color: var(--red);
+    font-size: 10px;
+  }
+  .sketch-modal.overlay1 {
+    bottom: 40px; left: 20px;
+    width: 120px; height: 80px; z-index: 2;
+  }
+  .sketch-modal.overlay1::after { content: 'SECTOR\AOVERLAY'; white-space: pre; }
+  .sketch-modal.overlay2 {
+    bottom: 50px; right: 20px;
+    width: 120px; height: 80px; z-index: 2;
+  }
+  .sketch-modal.overlay2::after { content: 'BATTLE\AREPORT'; white-space: pre; }
+  .sketch-modal.overlay3 {
+    top: 50%; right: 40px; transform: translateY(-50%);
+    width: 100px; height: 60px; z-index: 2;
+  }
+  .sketch-modal.overlay3::after { content: 'OPS\APANEL'; white-space: pre; }
+
+  /* After sketch elements */
+  .sketch-after-layout {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: 50px 1fr 70px;
+    grid-template-rows: 14px 1fr 14px;
+    gap: 2px;
+    padding: 6px;
+  }
+  .sa-banner {
+    grid-column: 1 / -1;
+    background: rgba(196,163,90,0.08);
+    border: 1px solid rgba(196,163,90,0.15);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .sa-left {
+    background: rgba(196,163,90,0.06);
+    border: 1px solid rgba(196,163,90,0.12);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+  .sa-map {
+    background: rgba(60,120,180,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+  .sa-map::after { content: 'MAP (always visible)'; font-family: var(--mono); font-size: 9px; }
+  .sa-right {
+    background: rgba(196,163,90,0.06);
+    border: 1px solid rgba(196,163,90,0.12);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+  .sa-bottom {
+    grid-column: 1 / -1;
+    background: rgba(196,163,90,0.08);
+    border: 1px solid rgba(196,163,90,0.15);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .improvements {
+    list-style: none;
+    padding: 0;
+  }
+  .improvements li {
+    font-size: 12px;
+    color: var(--text-2);
+    padding: 6px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid rgba(180,160,130,0.06);
+  }
+  .improvements li:last-child { border-bottom: none; }
+  .imp-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    flex-shrink: 0;
+    width: 20px;
+  }
+  .imp-text { color: var(--text-1); }
+  .imp-text em { color: var(--gold); font-style: normal; font-weight: 600; }
+
+  /* ── TOOLTIP UTILITY ──────────────────────────────── */
+  [data-tip] {
+    position: relative;
+  }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,9,7,0.95);
+    color: var(--text-2);
+    font-family: var(--sans);
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+  }
+  [data-tip]:hover::after { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN WAR ROOM — 1920 x 1080 viewport
+     ═══════════════════════════════════════════════════ -->
+<div class="war-room">
+
+  <!-- ── TOP BRIEFING BANNER ── -->
+  <header class="banner fade-in">
+    <div class="banner-alerts">
+      <span class="alert-icon">&#9888;</span>
+      <span class="alert-text critical">1st Krajina cohesion 35%</span>
+      <span class="sep">&middot;</span>
+      <span class="alert-text">Op Hrast losing momentum</span>
+      <span class="sep">&middot;</span>
+      <span class="alert-text">IVP 31%</span>
+      <span class="sep">&middot;</span>
+      <span class="alert-text critical">Srebrenica supply CRITICAL</span>
+      <span class="sep">&middot;</span>
+      <span class="alert-text">2nd Krajina requesting reinforcements</span>
+    </div>
+    <div class="banner-right">
+      <span class="banner-date">Week 40 &middot; Spring 1993</span>
+      <button class="banner-btn">4 alerts &#9662;</button>
+    </div>
+  </header>
+
+  <!-- ── LEFT CORPS RAIL ── -->
+  <aside class="corps-rail fade-in fade-in-d1">
+    <div class="corps-rail-title">Corps Commands</div>
+
+    <!-- 1st Krajina — ACTIVE -->
+    <div class="corps-card active">
+      <div class="cc-row1">
+        <span class="cc-name">1ST KRAJINA CORPS</span>
+        <span class="cc-health">
+          <span class="cc-health-bar"><span class="cc-health-bar-fill" style="width:68%; background:var(--amber);"></span></span>
+          <span class="cc-personnel">41,200</span>
+        </span>
+      </div>
+      <div class="cc-row2">
+        <span class="cc-stance offensive">Offensive</span>
+        <span class="cc-meta">8 sectors<span class="dot"> &middot; </span>36 bdes</span>
+      </div>
+      <div class="cc-row3">
+        <span class="cc-alert critical">Cohesion 35%</span>
+        <a class="cc-op" href="#">Op Hrast &#9654;</a>
+      </div>
+    </div>
+
+    <!-- 2nd Krajina -->
+    <div class="corps-card">
+      <div class="cc-row1">
+        <span class="cc-name">2ND KRAJINA CORPS</span>
+        <span class="cc-health">
+          <span class="cc-health-bar"><span class="cc-health-bar-fill" style="width:82%; background:var(--green);"></span></span>
+          <span class="cc-personnel">18,400</span>
+        </span>
+      </div>
+      <div class="cc-row2">
+        <span class="cc-stance balanced">Balanced</span>
+        <span class="cc-meta">5 sectors<span class="dot"> &middot; </span>14 bdes</span>
+      </div>
+      <div class="cc-row3">
+        <span class="cc-alert">Requesting reinforcements</span>
+      </div>
+    </div>
+
+    <!-- Eastern Bosnia -->
+    <div class="corps-card">
+      <div class="cc-row1">
+        <span class="cc-name">EAST BOSNIA CORPS</span>
+        <span class="cc-health">
+          <span class="cc-health-bar"><span class="cc-health-bar-fill" style="width:55%; background:var(--amber);"></span></span>
+          <span class="cc-personnel">12,800</span>
+        </span>
+      </div>
+      <div class="cc-row2">
+        <span class="cc-stance defensive">Defensive</span>
+        <span class="cc-meta">4 sectors<span class="dot"> &middot; </span>11 bdes</span>
+      </div>
+      <div class="cc-row3">
+        <span class="cc-alert">Drina front stable</span>
+      </div>
+    </div>
+
+    <!-- Sarajevo-Romanija -->
+    <div class="corps-card">
+      <div class="cc-row1">
+        <span class="cc-name">SARAJEVO-ROMANIJA</span>
+        <span class="cc-health">
+          <span class="cc-health-bar"><span class="cc-health-bar-fill" style="width:74%; background:var(--green);"></span></span>
+          <span class="cc-personnel">22,600</span>
+        </span>
+      </div>
+      <div class="cc-row2">
+        <span class="cc-stance offensive">Offensive</span>
+        <span class="cc-meta">6 sectors<span class="dot"> &middot; </span>18 bdes</span>
+      </div>
+      <div class="cc-row3">
+        <a class="cc-op" href="#">Op Lukavac 93 &#9654;</a>
+      </div>
+    </div>
+
+    <!-- Drina Corps -->
+    <div class="corps-card">
+      <div class="cc-row1">
+        <span class="cc-name">DRINA CORPS</span>
+        <span class="cc-health">
+          <span class="cc-health-bar"><span class="cc-health-bar-fill" style="width:60%; background:var(--amber);"></span></span>
+          <span class="cc-personnel">14,100</span>
+        </span>
+      </div>
+      <div class="cc-row2">
+        <span class="cc-stance balanced">Balanced</span>
+        <span class="cc-meta">5 sectors<span class="dot"> &middot; </span>12 bdes</span>
+      </div>
+      <div class="cc-row3">
+        <span class="cc-alert">Enclave pressure steady</span>
+      </div>
+    </div>
+
+    <!-- Herzegovina -->
+    <div class="corps-card">
+      <div class="cc-row1">
+        <span class="cc-name">HERZEGOVINA CORPS</span>
+        <span class="cc-health">
+          <span class="cc-health-bar"><span class="cc-health-bar-fill" style="width:45%; background:var(--red);"></span></span>
+          <span class="cc-personnel">8,900</span>
+        </span>
+      </div>
+      <div class="cc-row2">
+        <span class="cc-stance reorganize">Reorganize</span>
+        <span class="cc-meta">3 sectors<span class="dot"> &middot; </span>9 bdes</span>
+      </div>
+      <div class="cc-row3">
+        <span class="cc-alert critical">Morale 18</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── CENTER MAP AREA ── -->
+  <main class="map-area fade-in fade-in-d2">
+    <div class="map-grid"></div>
+    <svg class="map-svg" viewBox="0 0 1380 1004" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <pattern id="hatch-rs" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(180,60,60,0.08)" stroke-width="1"/>
+        </pattern>
+        <pattern id="hatch-rbih" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+          <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(60,120,180,0.08)" stroke-width="1"/>
+        </pattern>
+        <pattern id="hatch-hrhb" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+          <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(60,160,80,0.08)" stroke-width="1"/>
+        </pattern>
+      </defs>
+
+      <!-- Bosnia outline (simplified) -->
+      <path d="M 260 120 L 420 80 L 580 70 L 720 85 L 860 60 L 980 100 L 1080 180 L 1120 300 L 1100 420 L 1060 540 L 980 660 L 920 740 L 840 800 L 740 840 L 620 860 L 500 830 L 400 780 L 320 700 L 260 600 L 220 480 L 200 360 L 220 240 Z"
+            fill="none" stroke="rgba(180,160,130,0.12)" stroke-width="1.5"/>
+
+      <!-- RS territory (north + east) -->
+      <path d="M 260 120 L 420 80 L 580 70 L 720 85 L 860 60 L 980 100 L 1080 180 L 1120 300 L 1100 420 L 1060 540 L 980 540 L 900 480 L 820 440 L 740 420 L 660 380 L 580 360 L 500 380 L 420 400 L 360 380 L 300 340 L 260 280 L 240 200 Z"
+            fill="rgba(180,60,60,0.12)" stroke="none"/>
+      <path d="M 260 120 L 420 80 L 580 70 L 720 85 L 860 60 L 980 100 L 1080 180 L 1120 300 L 1100 420 L 1060 540 L 980 540 L 900 480 L 820 440 L 740 420 L 660 380 L 580 360 L 500 380 L 420 400 L 360 380 L 300 340 L 260 280 L 240 200 Z"
+            fill="url(#hatch-rs)"/>
+      <!-- RS southeast pocket -->
+      <path d="M 980 660 L 1060 540 L 1100 420 L 1080 540 L 1020 620 L 960 700 L 920 740 L 840 800 L 800 760 L 860 700 L 920 660 Z"
+            fill="rgba(180,60,60,0.10)" stroke="none"/>
+
+      <!-- RBiH territory (central) -->
+      <path d="M 360 380 L 420 400 L 500 380 L 580 360 L 660 380 L 740 420 L 720 500 L 680 560 L 620 600 L 560 620 L 480 600 L 400 560 L 340 500 L 320 440 Z"
+            fill="rgba(60,120,180,0.12)" stroke="none"/>
+      <path d="M 360 380 L 420 400 L 500 380 L 580 360 L 660 380 L 740 420 L 720 500 L 680 560 L 620 600 L 560 620 L 480 600 L 400 560 L 340 500 L 320 440 Z"
+            fill="url(#hatch-rbih)"/>
+      <!-- RBiH Bihac pocket -->
+      <path d="M 260 280 L 300 260 L 340 300 L 320 360 L 280 360 L 240 320 Z"
+            fill="rgba(60,120,180,0.15)" stroke="none"/>
+      <!-- RBiH enclaves -->
+      <circle cx="1000" cy="480" r="18" fill="rgba(60,120,180,0.2)" stroke="rgba(60,120,180,0.3)" stroke-width="1"/>
+      <text x="1000" y="510" text-anchor="middle" fill="rgba(60,120,180,0.4)" font-size="9" font-family="var(--mono)">Gorazde</text>
+      <circle cx="1020" cy="340" r="14" fill="rgba(60,120,180,0.2)" stroke="rgba(60,120,180,0.3)" stroke-width="1"/>
+      <text x="1020" y="365" text-anchor="middle" fill="rgba(60,120,180,0.4)" font-size="9" font-family="var(--mono)">Srebrenica</text>
+      <circle cx="1060" cy="400" r="10" fill="rgba(60,120,180,0.2)" stroke="rgba(60,120,180,0.3)" stroke-width="1"/>
+      <text x="1060" y="420" text-anchor="middle" fill="rgba(60,120,180,0.4)" font-size="8" font-family="var(--mono)">Zepa</text>
+
+      <!-- HRHB territory (southwest) -->
+      <path d="M 340 500 L 400 560 L 480 600 L 560 620 L 620 600 L 620 660 L 580 720 L 500 780 L 420 780 L 360 740 L 300 680 L 260 600 L 240 540 L 280 480 Z"
+            fill="rgba(60,160,80,0.10)" stroke="none"/>
+      <path d="M 340 500 L 400 560 L 480 600 L 560 620 L 620 600 L 620 660 L 580 720 L 500 780 L 420 780 L 360 740 L 300 680 L 260 600 L 240 540 L 280 480 Z"
+            fill="url(#hatch-hrhb)"/>
+
+      <!-- FRONT LINES (dashed gold) -->
+      <!-- RS-RBiH front -->
+      <path d="M 360 380 L 420 400 L 500 380 L 580 360 L 660 380 L 740 420 L 820 440 L 900 480 L 980 540"
+            fill="none" stroke="rgba(196,163,90,0.35)" stroke-width="1.5" stroke-dasharray="6,4" filter="url(#glow)"/>
+      <!-- RBiH-HRHB front -->
+      <path d="M 340 500 L 400 560 L 480 600 L 560 620 L 620 600"
+            fill="none" stroke="rgba(196,163,90,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+      <!-- RS west front (Bihac) -->
+      <path d="M 260 280 L 300 340 L 360 380"
+            fill="none" stroke="rgba(196,163,90,0.3)" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <!-- RS south front -->
+      <path d="M 620 600 L 680 560 L 720 500 L 740 420"
+            fill="none" stroke="rgba(196,163,90,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+      <!-- RS southeast front -->
+      <path d="M 980 540 L 980 660"
+            fill="none" stroke="rgba(196,163,90,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+
+      <!-- Brigade markers (diamonds) -->
+      <!-- RS brigades -->
+      <g transform="translate(600, 200) rotate(45)" fill="rgba(180,60,60,0.6)" stroke="rgba(180,60,60,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(780, 160) rotate(45)" fill="rgba(180,60,60,0.6)" stroke="rgba(180,60,60,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(500, 240) rotate(45)" fill="rgba(180,60,60,0.6)" stroke="rgba(180,60,60,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(900, 280) rotate(45)" fill="rgba(180,60,60,0.6)" stroke="rgba(180,60,60,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(1020, 220) rotate(45)" fill="rgba(180,60,60,0.6)" stroke="rgba(180,60,60,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(700, 300) rotate(45)" fill="rgba(180,60,60,0.5)" stroke="rgba(180,60,60,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(400, 200) rotate(45)" fill="rgba(180,60,60,0.5)" stroke="rgba(180,60,60,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(840, 380) rotate(45)" fill="rgba(180,60,60,0.5)" stroke="rgba(180,60,60,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+
+      <!-- RBiH brigades -->
+      <g transform="translate(480, 440) rotate(45)" fill="rgba(60,120,180,0.7)" stroke="rgba(60,120,180,0.4)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(560, 420) rotate(45)" fill="rgba(60,120,180,0.7)" stroke="rgba(60,120,180,0.4)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(640, 460) rotate(45)" fill="rgba(60,120,180,0.7)" stroke="rgba(60,120,180,0.4)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(400, 480) rotate(45)" fill="rgba(60,120,180,0.6)" stroke="rgba(60,120,180,0.4)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(700, 480) rotate(45)" fill="rgba(60,120,180,0.6)" stroke="rgba(60,120,180,0.4)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <!-- Bihac pocket brigade -->
+      <g transform="translate(290, 310) rotate(45)" fill="rgba(60,120,180,0.7)" stroke="rgba(60,120,180,0.5)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+
+      <!-- HRHB brigades -->
+      <g transform="translate(440, 660) rotate(45)" fill="rgba(60,160,80,0.6)" stroke="rgba(60,160,80,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(540, 700) rotate(45)" fill="rgba(60,160,80,0.6)" stroke="rgba(60,160,80,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+      <g transform="translate(360, 620) rotate(45)" fill="rgba(60,160,80,0.5)" stroke="rgba(60,160,80,0.3)" stroke-width="0.5">
+        <rect x="-4" y="-4" width="8" height="8"/></g>
+
+      <!-- City labels -->
+      <text x="280" y="320" fill="rgba(255,255,255,0.25)" font-size="10" font-family="var(--mono)" letter-spacing="1">Bihac</text>
+      <text x="520" y="450" fill="rgba(255,255,255,0.3)" font-size="11" font-family="var(--mono)" letter-spacing="1">Sarajevo</text>
+      <circle cx="515" cy="440" r="3" fill="rgba(255,255,255,0.2)"/>
+      <text x="640" y="420" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)">Jajce</text>
+      <circle cx="635" cy="410" r="2.5" fill="rgba(255,255,255,0.15)"/>
+      <text x="780" y="200" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)">Banja Luka</text>
+      <circle cx="775" cy="190" r="2.5" fill="rgba(255,255,255,0.15)"/>
+      <text x="440" y="730" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)">Mostar</text>
+      <circle cx="435" cy="720" r="2.5" fill="rgba(255,255,255,0.15)"/>
+      <text x="800" y="140" fill="rgba(255,255,255,0.15)" font-size="9" font-family="var(--mono)">Brcko</text>
+      <text x="350" y="160" fill="rgba(255,255,255,0.15)" font-size="9" font-family="var(--mono)">Prijedor</text>
+      <text x="950" y="260" fill="rgba(255,255,255,0.15)" font-size="9" font-family="var(--mono)">Tuzla</text>
+      <text x="360" y="540" fill="rgba(255,255,255,0.15)" font-size="9" font-family="var(--mono)">Jablanica</text>
+
+      <!-- Op Hrast arrow (gold, near Jajce) -->
+      <line x1="600" y1="400" x2="650" y2="390" stroke="var(--gold)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      <defs>
+        <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <polygon points="0 0, 6 3, 0 6" fill="var(--gold)"/>
+        </marker>
+      </defs>
+      <text x="610" y="418" fill="var(--gold)" font-size="8" font-family="var(--mono)" font-weight="bold" opacity="0.7">OP HRAST</text>
+
+      <!-- Sarajevo siege ring indicator -->
+      <circle cx="515" cy="440" r="22" fill="none" stroke="rgba(180,60,60,0.25)" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="545" y="450" fill="rgba(180,60,60,0.35)" font-size="7" font-family="var(--mono)">SIEGE</text>
+
+      <!-- Legend -->
+      <g transform="translate(40, 40)">
+        <rect x="0" y="0" width="120" height="80" rx="3" fill="rgba(14,12,10,0.85)" stroke="var(--border)" stroke-width="1"/>
+        <g transform="translate(10, 16)">
+          <rect width="10" height="6" fill="rgba(180,60,60,0.4)" rx="1"/>
+          <text x="16" y="5" fill="var(--text-dim)" font-size="8" font-family="var(--mono)">RS (VRS)</text>
+        </g>
+        <g transform="translate(10, 32)">
+          <rect width="10" height="6" fill="rgba(60,120,180,0.4)" rx="1"/>
+          <text x="16" y="5" fill="var(--text-dim)" font-size="8" font-family="var(--mono)">RBiH (ARBiH)</text>
+        </g>
+        <g transform="translate(10, 48)">
+          <rect width="10" height="6" fill="rgba(60,160,80,0.4)" rx="1"/>
+          <text x="16" y="5" fill="var(--text-dim)" font-size="8" font-family="var(--mono)">HRHB (HVO)</text>
+        </g>
+        <g transform="translate(10, 64)">
+          <line x1="0" y1="0" x2="10" y2="0" stroke="rgba(196,163,90,0.4)" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="16" y="3" fill="var(--text-dim)" font-size="8" font-family="var(--mono)">Front line</text>
+        </g>
+      </g>
+    </svg>
+  </main>
+
+  <!-- ── RIGHT CONTEXT PANEL ── -->
+  <aside class="context-panel fade-in fade-in-d3">
+    <div class="ctx-breadcrumb">
+      <span class="ctx-crumb">VRS</span>
+      <span class="ctx-sep">&#8250;</span>
+      <span class="ctx-crumb">1st Krajina</span>
+      <span class="ctx-sep">&#8250;</span>
+      <span class="ctx-crumb current">Sector: Jajce</span>
+      <span class="ctx-pin" title="Pin this panel">&#128204;</span>
+    </div>
+
+    <div class="ctx-body">
+      <!-- SECTOR INTELLIGENCE -->
+      <div class="ctx-section">
+        <div class="ctx-section-title">Sector Intelligence</div>
+        <span class="ctx-badge strained">Strained</span>
+
+        <div class="metrics-grid">
+          <div class="metric">
+            <span class="metric-label">Density</span>
+            <span class="metric-value">
+              <span class="metric-bar"><span class="metric-bar-fill" style="width:42%; background: var(--amber);"></span></span>
+              <span class="metric-tag thin">THIN</span>
+              <span style="font-size:9px; color:var(--text-dim);">(0.50)</span>
+            </span>
+            <span class="metric-hint">brigades per km of front</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Front</span>
+            <span class="metric-value" style="font-size:13px;">~14 <span style="font-size:9px; color:var(--text-dim);">km</span></span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Assigned</span>
+            <span class="metric-value">7 <span style="font-size:9px; color:var(--text-dim);">brigades</span></span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Reserve</span>
+            <span class="metric-value">1 <span style="font-size:9px; color:var(--text-dim);">brigade</span></span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Threat</span>
+            <span class="metric-value"><span class="metric-tag moderate">MODERATE</span></span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Enemy</span>
+            <span class="metric-value">~4 <span style="font-size:9px; color:var(--text-dim);">fmns detected</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRIGADES IN SECTOR (compact list) -->
+      <div class="ctx-section">
+        <div class="ctx-section-title">Brigades in Sector</div>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(180,160,130,0.06);">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--text-1);">19th Inf Bde</span>
+            <span style="font-family:var(--mono); font-size:9px; color:var(--text-2);">2,840</span>
+            <span style="font-size:8px; color:var(--green); font-weight:600;">READY</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(180,160,130,0.06);">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--text-1);">6th Krajina Bde</span>
+            <span style="font-family:var(--mono); font-size:9px; color:var(--text-2);">3,100</span>
+            <span style="font-size:8px; color:var(--green); font-weight:600;">READY</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(180,160,130,0.06);">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--text-1);">11th Inf Bde</span>
+            <span style="font-family:var(--mono); font-size:9px; color:var(--text-2);">1,920</span>
+            <span style="font-size:8px; color:var(--amber); font-weight:600;">FATIGUED</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(180,160,130,0.06);">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--text-1);">1st Arm Btn</span>
+            <span style="font-family:var(--mono); font-size:9px; color:var(--text-2);">680</span>
+            <span style="font-size:8px; color:var(--green); font-weight:600;">READY</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(180,160,130,0.06);">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--text-1);">43rd Mtn Bde</span>
+            <span style="font-family:var(--mono); font-size:9px; color:var(--text-2);">2,200</span>
+            <span style="font-size:8px; color:var(--red); font-weight:600;">DISRUPTED</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(180,160,130,0.06);">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--text-1);">5th Kozara Bde</span>
+            <span style="font-family:var(--mono); font-size:9px; color:var(--text-2);">2,560</span>
+            <span style="font-size:8px; color:var(--green); font-weight:600;">READY</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(180,160,130,0.06);">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--text-1);">22nd Inf Bde</span>
+            <span style="font-family:var(--mono); font-size:9px; color:var(--text-2);">1,740</span>
+            <span style="font-size:8px; color:var(--amber); font-weight:600;">RESERVE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVE OPERATIONS -->
+      <div class="ctx-section">
+        <div class="ctx-section-title">Active Operations</div>
+        <div class="op-card">
+          <div class="op-header">
+            <span class="op-name">Op Hrast</span>
+            <span class="ctx-badge executing" style="margin:0;">Executing</span>
+          </div>
+          <div class="op-progress-track">
+            <div class="op-progress-fill"></div>
+          </div>
+          <ul class="op-objectives">
+            <li><span class="op-obj-status done"></span>Seize Jajce approaches (w36)</li>
+            <li><span class="op-obj-status active"></span>Encircle Jajce garrison</li>
+            <li><span class="op-obj-status pending"></span>Capture Jajce town center</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RECENT COMBAT -->
+      <div class="ctx-section">
+        <div class="ctx-section-title">Recent Combat</div>
+        <div class="battle-entry">
+          <div>
+            <div class="battle-name">Battle of Jajce <span class="battle-week">(w39)</span></div>
+          </div>
+          <div style="text-align:right;">
+            <div class="battle-result costly">Costly Victory</div>
+            <div class="battle-cas">120 casualties</div>
+          </div>
+        </div>
+        <div class="battle-entry">
+          <div>
+            <div class="battle-name">Skirmish at Vlasic <span class="battle-week">(w38)</span></div>
+          </div>
+          <div style="text-align:right;">
+            <div class="battle-result decisive">Decisive</div>
+            <div class="battle-cas">45 casualties</div>
+          </div>
+        </div>
+        <div class="battle-entry">
+          <div>
+            <div class="battle-name">Probe: Donji Vakuf <span class="battle-week">(w37)</span></div>
+          </div>
+          <div style="text-align:right;">
+            <div class="battle-result repulsed">Repulsed</div>
+            <div class="battle-cas">88 casualties</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMANDER -->
+      <div class="ctx-section">
+        <div class="ctx-section-title">Sector Commander</div>
+        <div style="display:flex; align-items:center; gap:10px; padding:6px 0;">
+          <div style="width:32px; height:32px; border-radius:50%; background:rgba(180,60,60,0.15); border:1px solid rgba(180,60,60,0.3); display:flex; align-items:center; justify-content:center; font-size:13px; color:rgba(180,60,60,0.6); flex-shrink:0;">&#9733;</div>
+          <div>
+            <div style="font-size:11px; font-weight:600; color:var(--text-1);">Col. Stanislav Galic</div>
+            <div style="font-size:9px; color:var(--text-2);">Competence 72 &middot; Aggression 0.18</div>
+            <div style="font-size:9px; color:var(--text-dim);">Commanding Op Hrast since w34</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── BOTTOM INTELLIGENCE BAR ── -->
+  <footer class="intel-bar fade-in fade-in-d4">
+    <div class="intel-territory">
+      <div class="intel-faction" data-tip="RS controls 62.1% of territory, up 0.3% this week">
+        <span class="intel-faction-bar" style="background:rgba(180,60,60,0.6);"></span>
+        <span class="label">RS</span>
+        <span class="pct">62.1%</span>
+        <span class="trend up">&#9650;</span>
+      </div>
+      <div class="intel-faction" data-tip="RBiH controls 24.3% of territory, down 0.2% this week">
+        <span class="intel-faction-bar" style="background:rgba(60,120,180,0.6);"></span>
+        <span class="label">RBiH</span>
+        <span class="pct">24.3%</span>
+        <span class="trend down">&#9660;</span>
+      </div>
+      <div class="intel-faction" data-tip="HRHB controls 13.6% of territory, no change this week">
+        <span class="intel-faction-bar" style="background:rgba(60,160,80,0.6);"></span>
+        <span class="label">HRHB</span>
+        <span class="pct">13.6%</span>
+        <span class="trend flat">&#9644;</span>
+      </div>
+    </div>
+
+    <div class="intel-casualties">
+      <span data-tip="Total active-duty personnel across all factions"><span class="val">119k</span> &#9876; Active</span>
+      <span data-tip="Total killed in action"><span class="val" style="color:var(--red);">7.2k</span> &#8224; KIA</span>
+      <span data-tip="Total wounded in action"><span class="val" style="color:var(--amber);">14k</span> &#9877; WIA</span>
+    </div>
+
+    <div class="intel-actions">
+      <button class="action-btn">Chronicle</button>
+      <button class="action-btn primary">Advance Turn</button>
+      <button class="action-btn">Save</button>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     BEFORE vs AFTER COMPARISON
+     ═══════════════════════════════════════════════════ -->
+<div class="comparison fade-in fade-in-d5">
+  <h2>Before vs After &mdash; Layout Comparison</h2>
+
+  <div class="comparison-grid">
+    <!-- BEFORE -->
+    <div class="comparison-col before">
+      <h3>Current: Modal-Heavy Layout</h3>
+      <div class="comp-sketch" style="background:#100e0b;">
+        <div class="sketch-map-before"></div>
+        <div class="sketch-modal army-hq"></div>
+        <div class="sketch-modal overlay1"></div>
+        <div class="sketch-modal overlay2"></div>
+        <div class="sketch-modal overlay3"></div>
+      </div>
+      <ul class="improvements">
+        <li style="color:var(--red);">
+          <span class="imp-num" style="color:var(--red);">&#10007;</span>
+          <span class="imp-text">Army HQ modal <em>covers 60% of map</em> when open</span>
+        </li>
+        <li style="color:var(--red);">
+          <span class="imp-num" style="color:var(--red);">&#10007;</span>
+          <span class="imp-text"><em>6+ clicks</em> to navigate corps &rarr; sector &rarr; brigade</span>
+        </li>
+        <li style="color:var(--red);">
+          <span class="imp-num" style="color:var(--red);">&#10007;</span>
+          <span class="imp-text"><em>5 separate overlays</em> for sector, ops, battle, summary, brigade</span>
+        </li>
+        <li style="color:var(--red);">
+          <span class="imp-num" style="color:var(--red);">&#10007;</span>
+          <span class="imp-text"><em>7 sub-tabs</em> in Summary panel for basic intel</span>
+        </li>
+        <li style="color:var(--red);">
+          <span class="imp-num" style="color:var(--red);">&#10007;</span>
+          <span class="imp-text">Context lost on every modal close &mdash; <em>no persistent state</em></span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ARROW -->
+    <div class="comparison-arrow">&rarr;</div>
+
+    <!-- AFTER -->
+    <div class="comparison-col after">
+      <h3>Proposed: War Room Layout</h3>
+      <div class="comp-sketch" style="background:#100e0b;">
+        <div class="sketch-after-layout">
+          <div class="sa-banner">Alerts</div>
+          <div class="sa-left">Corps</div>
+          <div class="sa-map"></div>
+          <div class="sa-right">Context</div>
+          <div class="sa-bottom">Intel &middot; Actions</div>
+        </div>
+      </div>
+      <ul class="improvements">
+        <li>
+          <span class="imp-num">1.</span>
+          <span class="imp-text">Army HQ modal <em>eliminated</em> &mdash; corps info always visible in left rail</span>
+        </li>
+        <li>
+          <span class="imp-num">2.</span>
+          <span class="imp-text">Context panel <em>replaces 5 separate overlays</em></span>
+        </li>
+        <li>
+          <span class="imp-num">3.</span>
+          <span class="imp-text">Bottom bar <em>replaces 7 Summary sub-tabs</em></span>
+        </li>
+        <li>
+          <span class="imp-num">4.</span>
+          <span class="imp-text">Map <em>never obscured</em> &mdash; always visible, always interactive</span>
+        </li>
+        <li>
+          <span class="imp-num">5.</span>
+          <span class="imp-text"><em>0 modals needed</em> for routine information</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

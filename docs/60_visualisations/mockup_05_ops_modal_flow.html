@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<!-- AWWV UI/UX Mockup 05 — Complete Ops Modal Flow -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Mockup 05 — Ops Modal Flow</title>
+<style>
+  :root {
+    --bg: #14120f;
+    --panel-bg: rgba(20, 18, 15, 0.92);
+    --backdrop-bg: rgba(20, 18, 15, 0.88);
+    --card-bg: rgba(20, 18, 15, 0.4);
+    --accent-gold: #c4a35a;
+    --accent-gold-bg: rgba(196, 163, 90, 0.20);
+    --border: rgba(180, 160, 130, 0.15);
+    --border-subtle: rgba(180, 160, 130, 0.08);
+    --text-primary: #ffffff;
+    --text-secondary: #a89968;
+    --text-dim: rgba(168, 153, 104, 0.3);
+    --green: #4a9a55;
+    --green-dark: #2d6a4f;
+    --red: #c24040;
+    --amber: #fbbf24;
+    --cream: #faf6ef;
+    --cream-text: #2a2218;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background map ── */
+  .bg-map {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-map svg { width: 100%; height: 100%; opacity: 0.07; }
+
+  /* ── Modal frame ── */
+  .modal-frame {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Phase stepper ── */
+  .phase-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 20px 40px 12px;
+    background: var(--backdrop-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .phase-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: default;
+    padding: 0 8px;
+    min-width: 120px;
+    transition: opacity 0.3s;
+  }
+  .phase-step.completed { cursor: pointer; }
+  .phase-step.future { opacity: 0.35; }
+  .phase-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    border: 1.5px solid var(--text-dim);
+    transition: all 0.3s;
+  }
+  .phase-step.completed .phase-dot {
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+  }
+  .phase-step.active .phase-dot {
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 10px rgba(196,163,90,0.6), 0 0 20px rgba(196,163,90,0.3);
+  }
+  .phase-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    color: var(--text-dim);
+    font-weight: 600;
+    transition: color 0.3s;
+  }
+  .phase-step.completed .phase-label { color: var(--text-secondary); }
+  .phase-step.active .phase-label { color: var(--accent-gold); }
+  .phase-connector {
+    width: 80px; height: 1px;
+    background: var(--text-dim);
+    margin-bottom: 18px;
+    transition: background 0.3s;
+  }
+  .phase-connector.completed { background: var(--accent-gold); }
+  .stepper-hint {
+    position: absolute;
+    bottom: 3px;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Close button ── */
+  .close-btn {
+    position: absolute;
+    top: 14px; right: 24px;
+    width: 36px; height: 36px;
+    background: rgba(20, 18, 15, 0.8);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .close-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 8px rgba(196,163,90,0.3);
+  }
+  .close-tooltip {
+    display: none;
+    position: absolute;
+    right: 42px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .close-btn:hover .close-tooltip { display: block; }
+
+  /* ── Phase content ── */
+  .phase-content-area {
+    flex: 1;
+    position: relative;
+  }
+  .phase-panel {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: flex;
+    padding: 20px 32px;
+    gap: 24px;
+  }
+  .phase-panel.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ── Shared panel styles ── */
+  .side-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+    overflow-y: auto;
+  }
+  .panel-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .panel-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  /* ── Map placeholder ── */
+  .map-area {
+    flex: 1;
+    background: rgba(20, 18, 15, 0.3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+  }
+  .map-area svg { width: 100%; height: 100%; }
+  .map-label {
+    position: absolute;
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  /* ── Officer cards ── */
+  .officer-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .officer-card:hover:not(.disabled) {
+    border-color: rgba(196, 163, 90, 0.35);
+    background: rgba(20, 18, 15, 0.55);
+  }
+  .officer-card.disabled {
+    opacity: 0.45;
+  }
+  .officer-card.selected {
+    border-color: var(--accent-gold);
+    background: var(--accent-gold-bg);
+  }
+  .badge {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .badge-gold { background: var(--accent-gold-bg); color: var(--accent-gold); }
+  .badge-green { background: rgba(74, 154, 85, 0.2); color: var(--green); }
+  .badge-amber { background: rgba(251, 191, 36, 0.15); color: var(--amber); }
+  .badge-red { background: rgba(194, 64, 64, 0.15); color: var(--red); }
+  .officer-name {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 6px 0 2px;
+    color: var(--text-primary);
+  }
+  .officer-corps {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .stat-label { width: 80px; }
+  .pips { display: flex; gap: 3px; }
+  .pip {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text-dim);
+  }
+  .pip.filled { background: var(--accent-gold); }
+  .stat-value { font-size: 11px; color: var(--text-secondary); margin-left: 4px; }
+  .officer-record {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .officer-status {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-gold {
+    background: var(--accent-gold);
+    color: var(--bg);
+  }
+  .btn-gold:hover { background: #d4b36a; box-shadow: 0 0 12px rgba(196,163,90,0.4); }
+  .btn-green {
+    background: var(--green);
+    color: #fff;
+  }
+  .btn-green:hover { background: #5aaa65; box-shadow: 0 0 12px rgba(74,154,85,0.4); }
+  .btn-amber {
+    background: var(--amber);
+    color: var(--bg);
+  }
+  .btn-amber:hover { background: #fcd34d; }
+  .btn-subtle {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  .btn-subtle:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+  .btn-disabled {
+    background: rgba(168, 153, 104, 0.1);
+    color: var(--text-dim);
+    cursor: not-allowed;
+  }
+  .btn-sm { padding: 5px 12px; font-size: 10px; }
+  .btn-full { width: 100%; margin-top: 10px; }
+
+  /* ── Confirmation bar ── */
+  .confirmation-bar {
+    display: none;
+    background: var(--accent-gold-bg);
+    border: 1px solid rgba(196, 163, 90, 0.35);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .confirmation-bar.show { display: block; }
+  .confirmation-text {
+    font-size: 12px;
+    color: var(--accent-gold);
+    margin-bottom: 8px;
+  }
+
+  /* ── Phase 2 specifics ── */
+  .param-strip {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .param-group-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+  .param-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    cursor: default;
+  }
+  .param-pill.active {
+    color: var(--accent-gold);
+    background: var(--accent-gold-bg);
+    border-color: rgba(196,163,90,0.35);
+  }
+  .param-pill-sub {
+    display: block;
+    font-size: 8px;
+    color: var(--text-dim);
+    margin-top: 1px;
+  }
+  .param-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+
+  .brigade-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+  .brigade-name { flex: 1; color: var(--text-primary); font-weight: 600; font-size: 11px; }
+  .brigade-pers { color: var(--text-secondary); font-family: 'Courier New', monospace; font-size: 11px; }
+  .brigade-status { font-size: 10px; }
+  .coh-pips { display: flex; gap: 2px; }
+  .coh-pip { width: 5px; height: 5px; border-radius: 50%; background: var(--text-dim); }
+  .coh-pip.filled { background: var(--accent-gold); }
+
+  .obj-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    margin-bottom: 6px;
+  }
+  .obj-num { color: var(--text-dim); font-size: 12px; font-weight: 700; width: 18px; }
+  .obj-star { color: var(--accent-gold); font-size: 14px; }
+  .obj-name { flex: 1; font-size: 12px; color: var(--text-primary); font-weight: 600; }
+  .obj-controls { display: flex; gap: 3px; }
+  .obj-ctrl-btn {
+    width: 20px; height: 20px;
+    background: rgba(180, 160, 130, 0.08);
+    border: 1px solid var(--border-subtle);
+    border-radius: 3px;
+    color: var(--text-secondary);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .obj-ctrl-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+  .obj-terrain {
+    font-size: 10px;
+    color: var(--text-dim);
+    padding: 2px 10px 0 28px;
+    margin-bottom: 4px;
+  }
+  .map-legend {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: var(--backdrop-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 14px;
+    backdrop-filter: blur(6px);
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+
+  /* ── Phase 3: G-2 clipboard ── */
+  .clipboard {
+    width: 480px;
+    min-width: 480px;
+    background: var(--cream);
+    border-radius: 8px;
+    position: relative;
+    color: var(--cream-text);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .clip-top {
+    height: 28px;
+    background: linear-gradient(180deg, #8a7a6a 0%, #6a5a4a 100%);
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .clip-ring {
+    width: 40px; height: 12px;
+    background: #aaa;
+    border-radius: 0 0 6px 6px;
+    border: 2px solid #888;
+    border-top: none;
+  }
+  .clip-tabs {
+    display: flex;
+    background: #ede8df;
+    border-bottom: 1px solid #d5cfc3;
+  }
+  .clip-tab {
+    padding: 8px 18px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #8a7a6a;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .clip-tab.active {
+    color: var(--cream-text);
+    border-bottom-color: var(--cream-text);
+  }
+  .clip-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .summary-box {
+    background: #f0eade;
+    border: 1px solid #d5cfc3;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .summary-row { display: flex; gap: 8px; }
+  .summary-label { width: 130px; color: #6a5a4a; }
+  .summary-value { font-weight: 700; }
+  .summary-value.favorable { color: var(--green-dark); }
+  .summary-value.moderate { color: #8a6a2a; }
+  .summary-value.launch { color: var(--green-dark); }
+  .summary-reason {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #d5cfc3;
+    font-style: italic;
+    font-family: system-ui;
+    font-size: 12px;
+    color: #5a4a3a;
+  }
+  .intel-narrative {
+    font-family: 'Courier New', monospace;
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: #3a3228;
+  }
+  .intel-narrative p { margin-bottom: 10px; }
+
+  /* ── Phase 4: OPORD ── */
+  .opord-summary {
+    width: 300px;
+    min-width: 300px;
+  }
+  .summary-section {
+    margin-bottom: 14px;
+  }
+  .summary-section-title {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .summary-kv {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  .summary-kv-label { color: var(--text-secondary); }
+  .summary-kv-value { color: var(--text-primary); font-weight: 600; text-align: right; }
+
+  .opord-paper {
+    flex: 1;
+    max-width: 600px;
+    background: var(--cream);
+    color: var(--cream-text);
+    border-radius: 6px;
+    padding: 32px 36px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .opord-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #c5baa8;
+  }
+  .opord-faction {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8a7a6a;
+    margin-bottom: 2px;
+  }
+  .opord-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .opord-ref {
+    font-size: 10px;
+    color: #8a7a6a;
+    margin-top: 4px;
+  }
+  .opord-section-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 14px 0 4px;
+    font-size: 11px;
+  }
+  .opord-text {
+    font-size: 11.5px;
+    margin-bottom: 6px;
+  }
+
+  /* Stamp overlay */
+  .stamp-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(250, 246, 239, 0.4);
+    z-index: 5;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .stamp-overlay.show { display: flex; }
+  .stamp {
+    border: 5px solid var(--green-dark);
+    color: var(--green-dark);
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    padding: 12px 28px;
+    transform: rotate(-12deg);
+    opacity: 0.85;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+  }
+  .stamp-sub {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--green-dark);
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+  }
+  .stamp-close {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #5a4a3a;
+    cursor: pointer;
+  }
+  .stamp-close:hover { color: var(--green-dark); }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: var(--backdrop-bg);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Annotation ── */
+  .annotation {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(196, 163, 90, 0.06);
+    border-left: 2px solid var(--accent-gold);
+    border-radius: 0 4px 4px 0;
+    font-size: 10px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .annotation strong { color: var(--accent-gold); }
+
+  /* ── Bottom comparison bar ── */
+  .comparison-bar {
+    background: rgba(20, 18, 15, 0.96);
+    border-top: 1px solid var(--border);
+    padding: 24px 40px 32px;
+  }
+  .comparison-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+  .comparison-table th {
+    text-align: left;
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .comparison-table td {
+    padding: 6px 12px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: top;
+  }
+  .comparison-table td:first-child {
+    color: var(--accent-gold);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .comparison-table td:last-child {
+    color: var(--green);
+  }
+
+  /* ── Op name in Phase 2 ── */
+  .op-name-header {
+    font-size: 14px;
+    color: var(--accent-gold);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  /* ── Responsive scroll ── */
+  .phase-content-area {
+    height: calc(100vh - 140px);
+    overflow: hidden;
+  }
+  .phase-panel { overflow-y: auto; }
+</style>
+</head>
+<body>
+
+<!-- Background map -->
+<div class="bg-map">
+  <svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+    <!-- Simplified Bosnia outline with faction territories -->
+    <g opacity="0.5">
+      <!-- RS territory (red tint) -->
+      <path d="M700,200 L900,150 L1100,180 L1250,250 L1300,400 L1250,550 L1100,580 L950,500 L800,520 L700,450 L650,350 Z"
+            fill="rgba(194,64,64,0.08)" stroke="rgba(194,64,64,0.12)" stroke-width="1"/>
+      <!-- RBiH territory (blue tint) -->
+      <path d="M500,350 L650,350 L700,450 L800,520 L750,650 L600,700 L480,650 L400,550 L420,420 Z"
+            fill="rgba(80,120,200,0.08)" stroke="rgba(80,120,200,0.12)" stroke-width="1"/>
+      <!-- HRHB territory (green tint) -->
+      <path d="M400,550 L480,650 L600,700 L750,650 L800,750 L700,850 L500,880 L350,800 L320,650 Z"
+            fill="rgba(74,154,85,0.08)" stroke="rgba(74,154,85,0.12)" stroke-width="1"/>
+      <!-- Border outline -->
+      <path d="M500,150 L700,200 L900,150 L1100,180 L1250,250 L1300,400 L1250,550 L1100,580 L800,750 L700,850 L500,880 L350,800 L320,650 L400,550 L420,420 L500,350 Z"
+            fill="none" stroke="rgba(180,160,130,0.1)" stroke-width="1.5"/>
+    </g>
+  </svg>
+</div>
+
+<!-- Modal frame -->
+<div class="modal-frame">
+
+  <!-- Phase stepper -->
+  <div class="phase-stepper">
+    <div class="phase-step active" data-phase="1" onclick="goToPhase(1)">
+      <div class="phase-dot"></div>
+      <div class="phase-label">Commander</div>
+    </div>
+    <div class="phase-connector" id="conn-1-2"></div>
+    <div class="phase-step future" data-phase="2" onclick="goToPhase(2)">
+      <div class="phase-dot"></div>
+      <div class="phase-label">Plan</div>
+    </div>
+    <div class="phase-connector" id="conn-2-3"></div>
+    <div class="phase-step future" data-phase="3" onclick="goToPhase(3)">
+      <div class="phase-dot"></div>
+      <div class="phase-label">G-2</div>
+    </div>
+    <div class="phase-connector" id="conn-3-4"></div>
+    <div class="phase-step future" data-phase="4" onclick="goToPhase(4)">
+      <div class="phase-dot"></div>
+      <div class="phase-label">Authorize</div>
+    </div>
+    <span class="stepper-hint">(1-4)</span>
+
+    <div class="close-btn" onclick="alert('Modal closed. Draft lost.')">
+      &#x2715;
+      <span class="close-tooltip">Close (ESC) — draft will be lost</span>
+    </div>
+  </div>
+
+  <!-- Phase content area -->
+  <div class="phase-content-area">
+
+    <!-- ═══ PHASE 1: COMMANDER SELECTION ═══ -->
+    <div class="phase-panel active" id="phase-1">
+      <div class="side-panel" style="width:320px; min-width:320px;">
+        <div class="panel-title">Select Operation Commander</div>
+        <div class="panel-subtitle">Choose an officer to lead this operation. Their personality affects preparation time and risk tolerance.</div>
+
+        <!-- Card 1: Talic (recommended) -->
+        <div class="officer-card" id="card-talic" onclick="selectOfficer('talic')">
+          <span class="badge badge-gold">&#x2605; Recommended</span>
+          <div class="officer-name">Col. Momir Talic</div>
+          <div class="officer-corps">1st Krajina Corps &middot; <span class="badge badge-green" style="font-size:8px">Home Corps</span></div>
+          <div class="stat-row">
+            <span class="stat-label">Competence</span>
+            <div class="pips">
+              <div class="pip filled"></div><div class="pip filled"></div><div class="pip filled"></div><div class="pip filled"></div><div class="pip"></div>
+            </div>
+            <span class="stat-value">(4/5)</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Aggression</span>
+            <div class="pips">
+              <div class="pip filled"></div><div class="pip filled"></div><div class="pip filled"></div><div class="pip"></div><div class="pip"></div>
+            </div>
+            <span class="stat-value">(3/5)</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Prep Time</span>
+            <span class="stat-value" style="margin-left:0">5 turns (balanced)</span>
+          </div>
+          <div class="officer-record">
+            Record: 6 ops, 4 victories<br>
+            <span class="officer-status" style="color:var(--green)">Status: Available &#x2713;</span>
+          </div>
+          <button class="btn btn-gold btn-full btn-sm" id="btn-talic">Select Commander</button>
+        </div>
+
+        <!-- Card 2: Galic -->
+        <div class="officer-card" id="card-galic" onclick="selectOfficer('galic')">
+          <div class="officer-name">Maj. Stanislav Galic</div>
+          <div class="officer-corps">Sarajevo-Romanija &middot; <span class="badge badge-amber" style="font-size:8px">Out of Region</span></div>
+          <div class="stat-row">
+            <span class="stat-label">Competence</span>
+            <div class="pips">
+              <div class="pip filled"></div><div class="pip filled"></div><div class="pip filled"></div><div class="pip"></div><div class="pip"></div>
+            </div>
+            <span class="stat-value">(3/5)</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Aggression</span>
+            <div class="pips">
+              <div class="pip filled"></div><div class="pip filled"></div><div class="pip filled"></div><div class="pip filled"></div><div class="pip filled"></div>
+            </div>
+            <span class="stat-value">(5/5)</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Prep Time</span>
+            <span class="stat-value" style="margin-left:0">3 turns (aggressive)</span>
+          </div>
+          <div class="officer-record">
+            Record: 3 ops, 2 victories<br>
+            <span class="officer-status" style="color:var(--green)">Status: Available &#x2713;</span>
+          </div>
+          <button class="btn btn-gold btn-full btn-sm" id="btn-galic">Select Commander</button>
+        </div>
+
+        <!-- Card 3: Lisica (unavailable) -->
+        <div class="officer-card disabled">
+          <div class="officer-name">Lt.Col. Slavko Lisica</div>
+          <div class="officer-corps">East Bosnia &middot; <span class="badge" style="font-size:8px; color:var(--text-secondary); background:var(--card-bg)">Compatible</span></div>
+          <div class="stat-row">
+            <span class="stat-label">Competence</span>
+            <div class="pips">
+              <div class="pip filled"></div><div class="pip filled"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div>
+            </div>
+            <span class="stat-value">(2/5)</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Aggression</span>
+            <div class="pips">
+              <div class="pip filled"></div><div class="pip filled"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div>
+            </div>
+            <span class="stat-value">(2/5)</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Prep Time</span>
+            <span class="stat-value" style="margin-left:0">7 turns (cautious)</span>
+          </div>
+          <div class="officer-record">
+            Record: 1 op, 0 victories<br>
+            <span class="officer-status" style="color:var(--red)">Status: &#x26A0; Assigned to Op Vuk</span>
+          </div>
+          <button class="btn btn-disabled btn-full btn-sm">Unavailable</button>
+        </div>
+
+        <!-- Confirmation bar -->
+        <div class="confirmation-bar" id="confirm-bar">
+          <div class="confirmation-text" id="confirm-text">Selected: Col. Momir Talic — Proceed to planning?</div>
+          <button class="btn btn-gold btn-sm" onclick="advancePhase()">Confirm &#x2192;</button>
+          &nbsp;
+          <button class="btn btn-subtle btn-sm" onclick="cancelSelection()">Cancel</button>
+        </div>
+
+        <div class="annotation">
+          <strong>IMPROVEMENT:</strong> Added confirmation step. Current version jumps to Phase 2 on single click with no undo.
+        </div>
+      </div>
+
+      <!-- Map area (Phase 1) -->
+      <div class="map-area">
+        <svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+          <!-- Simplified territory map -->
+          <rect width="900" height="600" fill="rgba(20,18,15,0.5)"/>
+          <!-- Grid lines -->
+          <g stroke="rgba(180,160,130,0.05)" stroke-width="0.5">
+            <line x1="0" y1="100" x2="900" y2="100"/><line x1="0" y1="200" x2="900" y2="200"/>
+            <line x1="0" y1="300" x2="900" y2="300"/><line x1="0" y1="400" x2="900" y2="400"/>
+            <line x1="0" y1="500" x2="900" y2="500"/>
+            <line x1="150" y1="0" x2="150" y2="600"/><line x1="300" y1="0" x2="300" y2="600"/>
+            <line x1="450" y1="0" x2="450" y2="600"/><line x1="600" y1="0" x2="600" y2="600"/>
+            <line x1="750" y1="0" x2="750" y2="600"/>
+          </g>
+          <!-- Corps territory highlight (1st Krajina) -->
+          <path d="M100,120 L350,80 L400,150 L420,280 L380,380 L250,400 L120,350 L80,220 Z"
+                fill="rgba(196,163,90,0.08)" stroke="rgba(196,163,90,0.2)" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <text x="220" y="240" fill="rgba(196,163,90,0.35)" font-size="14" font-family="system-ui" text-anchor="middle" font-weight="700">1ST KRAJINA CORPS AO</text>
+          <!-- Other territories -->
+          <path d="M400,150 L600,100 L700,180 L680,300 L550,350 L420,280 Z"
+                fill="rgba(194,64,64,0.05)" stroke="rgba(194,64,64,0.1)" stroke-width="0.5"/>
+          <path d="M250,400 L380,380 L420,280 L550,350 L500,480 L350,500 L200,460 Z"
+                fill="rgba(80,120,200,0.05)" stroke="rgba(80,120,200,0.1)" stroke-width="0.5"/>
+          <text x="680" y="50" fill="rgba(180,160,130,0.2)" font-size="10" font-family="system-ui" letter-spacing="2">CORPS TERRITORY</text>
+        </svg>
+        <span class="map-label" style="top:12px;left:12px;">Map — Corps Overview</span>
+      </div>
+    </div>
+
+    <!-- ═══ PHASE 2: PLAN ═══ -->
+    <div class="phase-panel" id="phase-2">
+      <div style="flex:1; display:flex; flex-direction:column; gap:16px; overflow-y:auto;">
+        <!-- Op name + parameter strip -->
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+          <div class="op-name-header">Operacija Hrast</div>
+          <div style="font-size:11px; color:var(--text-secondary)">1st Krajina Corps &middot; Week 15</div>
+        </div>
+        <div class="param-strip">
+          <span class="param-group-label">Type</span>
+          <span class="param-pill">Probe</span>
+          <span class="param-pill active">Sector Attack<span class="param-pill-sub">Multi-objective</span></span>
+          <span class="param-pill">Corps Offensive<span class="param-pill-sub">Full commitment</span></span>
+          <div class="param-divider"></div>
+          <span class="param-group-label">Tempo</span>
+          <span class="param-pill">Deliberate<span class="param-pill-sub">7+ turns prep</span></span>
+          <span class="param-pill active">Standard<span class="param-pill-sub">5 turns prep</span></span>
+          <span class="param-pill">Hasty<span class="param-pill-sub">3 turns prep</span></span>
+          <div class="param-divider"></div>
+          <span class="param-group-label">Tolerance</span>
+          <span class="param-pill active">Accept Costly<span class="param-pill-sub">1.0x ratio</span></span>
+          <span class="param-pill">Victory Only<span class="param-pill-sub">1.5x ratio</span></span>
+          <div class="param-divider"></div>
+          <span class="param-group-label">Support</span>
+          <span class="param-pill active">Artillery<span class="param-pill-sub">+15% FP</span></span>
+          <span class="param-pill">Air<span class="param-pill-sub">Unavailable</span></span>
+        </div>
+
+        <div style="display:flex; gap:16px; flex:1;">
+          <!-- Left: Brigade assignment -->
+          <div class="side-panel" style="width:260px; min-width:260px;">
+            <div class="panel-title">Brigade Assignment</div>
+            <div class="panel-subtitle" style="margin-bottom:10px">Assigned forces for this operation.</div>
+
+            <div class="brigade-mini">
+              <span class="brigade-name">94th Motorized</span>
+              <span class="brigade-pers">1,247</span>
+              <span class="brigade-status" style="color:var(--amber)">&#x23F1; 2t</span>
+              <div class="coh-pips"><div class="coh-pip filled"></div><div class="coh-pip filled"></div><div class="coh-pip filled"></div><div class="coh-pip"></div><div class="coh-pip"></div></div>
+            </div>
+            <div class="brigade-mini">
+              <span class="brigade-name">1st BL Light Inf</span>
+              <span class="brigade-pers">2,340</span>
+              <span class="brigade-status" style="color:var(--green)">&#x2705;</span>
+              <div class="coh-pips"><div class="coh-pip filled"></div><div class="coh-pip filled"></div><div class="coh-pip filled"></div><div class="coh-pip filled"></div><div class="coh-pip"></div></div>
+            </div>
+            <div class="brigade-mini">
+              <span class="brigade-name">2nd Krajina</span>
+              <span class="brigade-pers">1,890</span>
+              <span class="brigade-status" style="color:var(--amber)">&#x23F1; 1t</span>
+              <div class="coh-pips"><div class="coh-pip filled"></div><div class="coh-pip filled"></div><div class="coh-pip filled"></div><div class="coh-pip"></div><div class="coh-pip"></div></div>
+            </div>
+
+            <button class="btn btn-subtle btn-sm btn-full" style="margin-top:8px">+ Add Brigade</button>
+
+            <div style="margin-top:12px; font-size:11px; color:var(--text-secondary); text-align:center; padding:8px; background:var(--card-bg); border-radius:4px;">
+              3 brigades &middot; <strong style="color:var(--text-primary)">5,477</strong> personnel
+            </div>
+          </div>
+
+          <!-- Center: Map -->
+          <div class="map-area">
+            <svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg">
+              <rect width="700" height="500" fill="rgba(20,18,15,0.5)"/>
+              <g stroke="rgba(180,160,130,0.04)" stroke-width="0.5">
+                <line x1="0" y1="100" x2="700" y2="100"/><line x1="0" y1="200" x2="700" y2="200"/>
+                <line x1="0" y1="300" x2="700" y2="300"/><line x1="0" y1="400" x2="700" y2="400"/>
+                <line x1="140" y1="0" x2="140" y2="500"/><line x1="280" y1="0" x2="280" y2="500"/>
+                <line x1="420" y1="0" x2="420" y2="500"/><line x1="560" y1="0" x2="560" y2="500"/>
+              </g>
+              <!-- Front line -->
+              <path d="M80,180 L180,200 L280,170 L380,210 L450,250 L520,230 L600,260"
+                    fill="none" stroke="rgba(196,163,90,0.5)" stroke-width="2"/>
+              <!-- Friendly territory -->
+              <path d="M0,0 L700,0 L700,160 L600,260 L520,230 L450,250 L380,210 L280,170 L180,200 L80,180 L0,200 Z"
+                    fill="rgba(194,64,64,0.06)"/>
+              <!-- Enemy territory -->
+              <path d="M0,200 L80,180 L180,200 L280,170 L380,210 L450,250 L520,230 L600,260 L700,260 L700,500 L0,500 Z"
+                    fill="rgba(80,120,200,0.06)"/>
+              <!-- Staging area (green circle) -->
+              <circle cx="300" cy="130" r="18" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="4,3"/>
+              <text x="300" y="135" fill="var(--green)" font-size="10" text-anchor="middle" font-weight="700">&#x25B2;</text>
+              <text x="300" y="108" fill="var(--green)" font-size="9" text-anchor="middle" font-family="system-ui">Banja Luka</text>
+              <!-- Objective 1 (schwerpunkt) -->
+              <circle cx="350" cy="300" r="16" fill="none" stroke="var(--red)" stroke-width="2"/>
+              <text x="350" y="303" fill="var(--accent-gold)" font-size="12" text-anchor="middle">&#x2605;</text>
+              <text x="350" y="328" fill="var(--red)" font-size="9" text-anchor="middle" font-family="system-ui">Jajce</text>
+              <!-- Objective 2 -->
+              <circle cx="460" cy="340" r="12" fill="none" stroke="var(--red)" stroke-width="1.5"/>
+              <text x="460" y="360" fill="var(--red)" font-size="9" text-anchor="middle" font-family="system-ui">D.Vakuf</text>
+              <!-- Objective 3 -->
+              <circle cx="230" cy="320" r="12" fill="none" stroke="var(--red)" stroke-width="1.5"/>
+              <text x="230" y="340" fill="var(--red)" font-size="9" text-anchor="middle" font-family="system-ui">Mrkonjic Grad</text>
+              <!-- Arrows -->
+              <line x1="300" y1="148" x2="345" y2="282" stroke="rgba(196,163,90,0.4)" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arrowhead)"/>
+              <line x1="300" y1="148" x2="450" y2="326" stroke="rgba(196,163,90,0.25)" stroke-width="1" stroke-dasharray="6,4"/>
+              <line x1="300" y1="148" x2="235" y2="306" stroke="rgba(196,163,90,0.25)" stroke-width="1" stroke-dasharray="6,4"/>
+              <defs>
+                <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                  <polygon points="0 0, 8 3, 0 6" fill="rgba(196,163,90,0.5)"/>
+                </marker>
+              </defs>
+            </svg>
+            <span class="map-label" style="top:12px;left:12px;">Map — Operation Planning</span>
+            <div class="map-legend">
+              <span class="legend-item"><span class="legend-dot" style="background:var(--red)"></span> Objective</span>
+              <span class="legend-item"><span style="color:var(--accent-gold); font-size:10px;">&#x2605;</span> Schwerpunkt</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span> Staging</span>
+              <span class="legend-item"><span style="color:rgba(196,163,90,0.5); font-size:9px;">&#x2501;&#x2501;</span> Front</span>
+            </div>
+          </div>
+
+          <!-- Right: Objectives -->
+          <div class="side-panel" style="width:280px; min-width:280px;">
+            <div class="panel-title">Objectives (3/4)</div>
+            <div class="panel-subtitle" style="margin-bottom:10px">Priority order. Drag or use arrows to reorder.</div>
+
+            <div class="obj-item">
+              <span class="obj-num">1.</span>
+              <span class="obj-star">&#x2605;</span>
+              <span class="obj-name">Jajce</span>
+              <div class="obj-controls">
+                <span class="obj-ctrl-btn">&#x2191;</span>
+                <span class="obj-ctrl-btn">&#x2193;</span>
+                <span class="obj-ctrl-btn">&#x2715;</span>
+              </div>
+            </div>
+            <div class="obj-terrain">Mixed terrain &middot; Est. 1,200 defenders &middot; Urban (+50% def)</div>
+
+            <div class="obj-item">
+              <span class="obj-num">2.</span>
+              <span class="obj-star" style="visibility:hidden">&#x2605;</span>
+              <span class="obj-name">Donji Vakuf</span>
+              <div class="obj-controls">
+                <span class="obj-ctrl-btn">&#x2191;</span>
+                <span class="obj-ctrl-btn">&#x2193;</span>
+                <span class="obj-ctrl-btn">&#x2715;</span>
+              </div>
+            </div>
+            <div class="obj-terrain">Hill terrain &middot; Est. 800 defenders &middot; Entrenched</div>
+
+            <div class="obj-item">
+              <span class="obj-num">3.</span>
+              <span class="obj-star" style="visibility:hidden">&#x2605;</span>
+              <span class="obj-name">Mrkonjic Grad</span>
+              <div class="obj-controls">
+                <span class="obj-ctrl-btn">&#x2191;</span>
+                <span class="obj-ctrl-btn">&#x2193;</span>
+                <span class="obj-ctrl-btn">&#x2715;</span>
+              </div>
+            </div>
+            <div class="obj-terrain">Mountain &middot; Est. 600 defenders &middot; Light garrison</div>
+
+            <div style="margin-top:10px; font-size:10px; color:var(--text-dim); line-height:1.5;">
+              Click enemy territory on map to add objectives. Click friendly territory to set staging.
+            </div>
+
+            <button class="btn btn-gold btn-full btn-sm" style="margin-top:16px" onclick="advancePhase()">Request G-2 Assessment &#x2192;</button>
+
+            <div class="annotation" style="margin-top:12px">
+              <strong>IMPROVEMENTS:</strong> Visible objective controls (were hidden-until-hover), terrain info per objective, compact map legend, parameter subtitles.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PHASE 3: G-2 ASSESSMENT ═══ -->
+    <div class="phase-panel" id="phase-3">
+      <!-- Map area (left) -->
+      <div class="map-area">
+        <svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg">
+          <rect width="700" height="500" fill="rgba(20,18,15,0.5)"/>
+          <g stroke="rgba(180,160,130,0.04)" stroke-width="0.5">
+            <line x1="0" y1="100" x2="700" y2="100"/><line x1="0" y1="200" x2="700" y2="200"/>
+            <line x1="0" y1="300" x2="700" y2="300"/><line x1="0" y1="400" x2="700" y2="400"/>
+          </g>
+          <!-- Same operation overlay -->
+          <path d="M80,180 L180,200 L280,170 L380,210 L450,250 L520,230 L600,260"
+                fill="none" stroke="rgba(196,163,90,0.5)" stroke-width="2"/>
+          <path d="M0,0 L700,0 L700,160 L600,260 L520,230 L450,250 L380,210 L280,170 L180,200 L80,180 L0,200 Z"
+                fill="rgba(194,64,64,0.06)"/>
+          <path d="M0,200 L80,180 L180,200 L280,170 L380,210 L450,250 L520,230 L600,260 L700,260 L700,500 L0,500 Z"
+                fill="rgba(80,120,200,0.06)"/>
+          <!-- Intel overlay: threat zones -->
+          <circle cx="350" cy="300" r="50" fill="rgba(194,64,64,0.12)" stroke="rgba(194,64,64,0.25)" stroke-width="1" stroke-dasharray="3,3"/>
+          <circle cx="460" cy="340" r="35" fill="rgba(194,64,64,0.08)" stroke="rgba(194,64,64,0.15)" stroke-width="1" stroke-dasharray="3,3"/>
+          <circle cx="230" cy="320" r="30" fill="rgba(194,64,64,0.06)" stroke="rgba(194,64,64,0.1)" stroke-width="1" stroke-dasharray="3,3"/>
+          <!-- Objectives -->
+          <circle cx="350" cy="300" r="16" fill="none" stroke="var(--red)" stroke-width="2"/>
+          <text x="350" y="303" fill="var(--accent-gold)" font-size="12" text-anchor="middle">&#x2605;</text>
+          <circle cx="460" cy="340" r="12" fill="none" stroke="var(--red)" stroke-width="1.5"/>
+          <circle cx="230" cy="320" r="12" fill="none" stroke="var(--red)" stroke-width="1.5"/>
+          <!-- Staging -->
+          <circle cx="300" cy="130" r="18" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="4,3"/>
+          <text x="300" y="135" fill="var(--green)" font-size="10" text-anchor="middle" font-weight="700">&#x25B2;</text>
+          <text x="350" y="40" fill="rgba(194,64,64,0.3)" font-size="9" font-family="system-ui" letter-spacing="1">THREAT ASSESSMENT OVERLAY</text>
+        </svg>
+        <span class="map-label" style="top:12px;left:12px;">Map — G-2 Intel Overlay</span>
+      </div>
+
+      <!-- Clipboard -->
+      <div class="clipboard">
+        <div class="clip-top">
+          <div class="clip-ring"></div>
+        </div>
+        <div class="clip-tabs">
+          <div class="clip-tab active">Assessment</div>
+          <div class="clip-tab">Raw Intel</div>
+          <div class="clip-tab">Map Legend</div>
+        </div>
+        <div class="clip-body">
+          <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#8a7a6a; margin-bottom:4px; font-weight:700;">G-2 Intelligence Assessment</div>
+          <div style="font-size:10px; color:#8a7a6a; margin-bottom:14px;">Operacija Hrast &middot; 1st Krajina Corps &middot; Week 15</div>
+
+          <div class="summary-box">
+            <div class="summary-row"><span class="summary-label">Force Ratio:</span> <span class="summary-value favorable">2.0:1 &nbsp; FAVORABLE &#x2713;</span></div>
+            <div class="summary-row"><span class="summary-label">Intel Conf:</span> <span class="summary-value moderate">72% &nbsp; MODERATE</span></div>
+            <div class="summary-row"><span class="summary-label">Est. Casualties:</span> <span class="summary-value">~300</span></div>
+            <div class="summary-row"><span class="summary-label">Prediction:</span> <span class="summary-value">COSTLY VICTORY</span></div>
+            <div class="summary-row"><span class="summary-label">Recommendation:</span> <span class="summary-value launch">LAUNCH &#x2713;</span></div>
+            <div class="summary-reason">&#x2192; Superior numbers offset moderate terrain disadvantage. Urban defense at Jajce will be the hardest fight.</div>
+          </div>
+
+          <div class="intel-narrative">
+            <p><strong>1. ENEMY DISPOSITION.</strong> Garrison at primary objective (Jajce) estimated at 1,200 personnel of the ARBiH 7th Corps, entrenched in mixed urban-hill terrain. Secondary objectives lightly held. Reserve elements from 17th Krajina Division may reinforce within 2-3 turns.</p>
+
+            <p><strong>2. TERRAIN.</strong> Vrbas river valley approach favors armored movement on the Banja Luka-Jajce axis. Flanking routes through Mrkonjic Grad are mountainous with limited road network. Urban terrain at Jajce provides +50% defensive bonus.</p>
+
+            <p><strong>3. ASSESSMENT.</strong> At 2:1 force ratio with artillery support, a sector attack has favorable odds against dispersed defensive positions. The schwerpunkt at Jajce carries the highest risk due to urban terrain and entrenched defenders. Recommend concentrated effort on Jajce before engaging secondary objectives.</p>
+
+            <p><strong>4. RISKS.</strong> (a) Enemy reinforcement from Travnik within 3 turns. (b) Extended supply lines through mountain passes. (c) Moderate intel confidence &mdash; enemy reserve positions estimated, not confirmed.</p>
+          </div>
+
+          <button class="btn btn-gold btn-full" style="margin-top:16px" onclick="advancePhase()">Proceed to Authorization &#x2192;</button>
+
+          <div class="annotation" style="margin-top:12px; background:rgba(42,34,24,0.08);">
+            <strong style="color:#8a6a2a">IMPROVEMENTS:</strong> <span style="color:#5a4a3a">Summary box before prose, wider panel (480px vs 360px), WCAG-compliant contrast, recommendation explains reasoning.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PHASE 4: AUTHORIZE ═══ -->
+    <div class="phase-panel" id="phase-4" style="justify-content:center;">
+      <!-- Operation summary panel -->
+      <div class="side-panel opord-summary" style="width:300px; min-width:280px;">
+        <div class="panel-title">Operation Summary</div>
+        <div style="margin-top:12px;">
+          <div class="summary-section">
+            <div class="summary-section-title">Command</div>
+            <div class="summary-kv"><span class="summary-kv-label">Commander</span><span class="summary-kv-value">Col. Talic</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Type</span><span class="summary-kv-value">Sector Attack</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Tempo</span><span class="summary-kv-value">Standard</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Tolerance</span><span class="summary-kv-value">Accept Costly (1.0x)</span></div>
+          </div>
+          <div class="summary-section">
+            <div class="summary-section-title">Force</div>
+            <div class="summary-kv"><span class="summary-kv-label">Brigades</span><span class="summary-kv-value">3 (5,477 pers.)</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Objectives</span><span class="summary-kv-value">3</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Schwerpunkt</span><span class="summary-kv-value" style="color:var(--accent-gold)">Jajce</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Route</span><span class="summary-kv-value" style="font-size:10px">Jajce &#x2192; D.Vakuf &#x2192; Mrkonjic</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Staging</span><span class="summary-kv-value">Banja Luka sector</span></div>
+          </div>
+          <div class="summary-section">
+            <div class="summary-section-title">G-2 Assessment</div>
+            <div class="summary-kv"><span class="summary-kv-label">Force Ratio</span><span class="summary-kv-value" style="color:var(--green)">2.0:1</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Prediction</span><span class="summary-kv-value">Costly Victory</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Recommendation</span><span class="summary-kv-value" style="color:var(--green)">LAUNCH &#x2713;</span></div>
+          </div>
+          <div class="summary-section">
+            <div class="summary-section-title">Estimates</div>
+            <div class="summary-kv"><span class="summary-kv-label">Casualties</span><span class="summary-kv-value">~300 (5.5%)</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Duration</span><span class="summary-kv-value">6-8 turns</span></div>
+            <div class="summary-kv"><span class="summary-kv-label">Supply Cost</span><span class="summary-kv-value">~800 rounds</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPORD document -->
+      <div class="opord-paper" style="position:relative;">
+        <div class="opord-header">
+          <div class="opord-faction">Vojska Republike Srpske &middot; 1. Krajiski Korpus</div>
+          <div class="opord-title">OPERATIVNA ZAPOVIJED</div>
+          <div class="opord-ref">br. OZ/1993-04-15/01 &middot; Operacija Hrast</div>
+        </div>
+
+        <div class="opord-section-title">1. Zadatak (Mission)</div>
+        <div class="opord-text">Provesti sektorski napad u pravcu Jajce sa ciljem zauzimanja grada i okolnih opstina. Glavni pravac djelovanja: Banja Luka &mdash; Jajce. Pomocni pravci: Mrkonjic Grad, Donji Vakuf.</div>
+
+        <div class="opord-section-title">2. Snage (Forces)</div>
+        <div class="opord-text">94. motorizovana brigada (1,247)<br>1. banjalucka laka pesadijska (2,340)<br>2. krajiska brigada (1,890)<br><em>Ukupno: 5,477 boraca, artiljerijska podrska</em></div>
+
+        <div class="opord-section-title">3. Izvrsenje (Execution)</div>
+        <div class="opord-text">Faza 1: Izvidjacke aktivnosti (Intel &mdash; 5 turns)<br>Faza 2: Koncentracija snaga u sektoru Banja Luka<br>Faza 3: Napad na schwerpunkt Jajce<br>Faza 4: Sirenje na sekundarne ciljeve</div>
+
+        <div class="opord-section-title">4. Logistika (Logistics)</div>
+        <div class="opord-text">Snabdijevanje iz Banja Luke. Procijenjeni utrosak: ~800 rundi. Medicinska evakuacija: standard.</div>
+
+        <div class="opord-section-title">5. Komandovanje (Command)</div>
+        <div class="opord-text">Komandant operacije: Pukovnik Momir Talic<br>KM: Banja Luka &middot; Veza: kanal 3</div>
+
+        <!-- Stamp overlay -->
+        <div class="stamp-overlay" id="stamp-overlay">
+          <div class="stamp">Odobreno</div>
+          <div class="stamp-sub">Zapovijed Proslijedena &mdash; Directive Transmitted</div>
+          <div class="stamp-close" onclick="document.getElementById('stamp-overlay').classList.remove('show')">Click to close</div>
+        </div>
+      </div>
+
+      <!-- Side: action buttons -->
+      <div style="display:flex; flex-direction:column; gap:10px; min-width:240px; justify-content:flex-end; padding-bottom:20px;">
+        <button class="btn btn-green" style="padding:14px 24px; font-size:13px;" onclick="authorize()">
+          Odobriti Operaciju<br><span style="font-size:10px; font-weight:400; opacity:0.8">Authorize Operation</span>
+        </button>
+        <button class="btn btn-subtle" onclick="goToPhase(2)">&#x21A9; Return to Plan</button>
+        <div style="margin-top:8px; padding-top:12px; border-top:1px solid var(--border-subtle);">
+          <div style="font-size:9px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">Low Intel Option</div>
+          <button class="btn btn-amber btn-full btn-sm" onclick="alert('Probe customization modal would open here.\nChoose probe brigades and objective.')">
+            Narediti Izvidanje<br><span style="font-size:9px; font-weight:400; opacity:0.8">Order Probe (choose brigades + target)</span>
+          </button>
+        </div>
+
+        <div class="annotation" style="margin-top:16px">
+          <strong>IMPROVEMENTS:</strong> Operation summary visible alongside OPORD, probe customization instead of auto-select, skip button for animation.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /phase-content-area -->
+
+  <!-- Action bar -->
+  <div class="action-bar" id="action-bar">
+    <button class="btn btn-subtle btn-sm" id="btn-prev" onclick="prevPhase()" style="display:none">&#x2190; Previous Phase</button>
+    <span style="font-size:11px; color:var(--text-secondary);" id="phase-indicator">Phase 1 of 4 — Commander Selection</span>
+    <button class="btn btn-gold btn-sm" id="btn-next" onclick="advancePhase()">Next Phase &#x2192;</button>
+  </div>
+
+</div><!-- /modal-frame -->
+
+<!-- ═══ BOTTOM COMPARISON BAR ═══ -->
+<div class="comparison-bar">
+  <div class="comparison-title">Key Improvements Across All Phases</div>
+  <table class="comparison-table">
+    <thead>
+      <tr><th>Phase</th><th>Current Issue</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Commander</td>
+        <td>Single click = immediate advance, no undo</td>
+        <td>Confirmation step before advancing</td>
+      </tr>
+      <tr>
+        <td>Plan</td>
+        <td>Hidden controls, no legend, no terrain info</td>
+        <td>Visible controls, inline legend, terrain per objective</td>
+      </tr>
+      <tr>
+        <td>G-2</td>
+        <td>360px panel, fails WCAG, no summary</td>
+        <td>480px panel, passes WCAG, summary stats box</td>
+      </tr>
+      <tr>
+        <td>Authorize</td>
+        <td>Stamps blind, auto-selects probe</td>
+        <td>Summary panel, customizable probe, skip animation</td>
+      </tr>
+      <tr>
+        <td>All Phases</td>
+        <td>2.5px phase dots, 8px close button</td>
+        <td>8px dots with labels, 24px close with tooltip</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+let currentPhase = 1;
+const maxPhase = 4;
+let highestReached = 1;
+
+const phaseNames = {
+  1: 'Commander Selection',
+  2: 'Operation Planning',
+  3: 'G-2 Assessment',
+  4: 'Authorization'
+};
+
+function updateStepper() {
+  document.querySelectorAll('.phase-step').forEach(step => {
+    const p = parseInt(step.dataset.phase);
+    step.classList.remove('active', 'completed', 'future');
+    if (p === currentPhase) step.classList.add('active');
+    else if (p < currentPhase || p <= highestReached) step.classList.add('completed');
+    else step.classList.add('future');
+  });
+  // Connectors
+  for (let i = 1; i < maxPhase; i++) {
+    const conn = document.getElementById('conn-' + i + '-' + (i + 1));
+    if (conn) conn.classList.toggle('completed', i < currentPhase || i < highestReached);
+  }
+  // Panels
+  document.querySelectorAll('.phase-panel').forEach(panel => {
+    panel.classList.remove('active');
+  });
+  document.getElementById('phase-' + currentPhase).classList.add('active');
+  // Indicator
+  document.getElementById('phase-indicator').textContent =
+    'Phase ' + currentPhase + ' of ' + maxPhase + ' \u2014 ' + phaseNames[currentPhase];
+  // Prev/Next
+  document.getElementById('btn-prev').style.display = currentPhase > 1 ? '' : 'none';
+  document.getElementById('btn-next').style.display = currentPhase < maxPhase ? '' : 'none';
+}
+
+function goToPhase(p) {
+  if (p < 1 || p > maxPhase) return;
+  if (p > highestReached + 1) return; // can't skip ahead
+  if (p > highestReached) highestReached = p;
+  currentPhase = p;
+  updateStepper();
+}
+
+function advancePhase() {
+  if (currentPhase < maxPhase) goToPhase(currentPhase + 1);
+}
+
+function prevPhase() {
+  if (currentPhase > 1) goToPhase(currentPhase - 1);
+}
+
+function selectOfficer(id) {
+  // Deselect all
+  document.querySelectorAll('.officer-card:not(.disabled)').forEach(c => c.classList.remove('selected'));
+  const bar = document.getElementById('confirm-bar');
+  if (id === 'talic') {
+    document.getElementById('card-talic').classList.add('selected');
+    document.getElementById('confirm-text').textContent = 'Selected: Col. Momir Talic \u2014 Proceed to planning?';
+  } else if (id === 'galic') {
+    document.getElementById('card-galic').classList.add('selected');
+    document.getElementById('confirm-text').textContent = 'Selected: Maj. Stanislav Galic \u2014 Proceed to planning?';
+  }
+  bar.classList.add('show');
+}
+
+function cancelSelection() {
+  document.querySelectorAll('.officer-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('confirm-bar').classList.remove('show');
+}
+
+function authorize() {
+  const overlay = document.getElementById('stamp-overlay');
+  overlay.classList.add('show');
+  // Auto-close timer
+  let countdown = 3;
+  const sub = overlay.querySelector('.stamp-close');
+  const timer = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+      clearInterval(timer);
+      sub.textContent = 'Click to close';
+    } else {
+      sub.textContent = 'Closing in ' + countdown + 's... Click to close now';
+    }
+  }, 1000);
+  sub.onclick = function() {
+    clearInterval(timer);
+    overlay.classList.remove('show');
+  };
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+  const key = e.key;
+  if (key >= '1' && key <= '4') {
+    goToPhase(parseInt(key));
+  } else if (key === 'ArrowRight') {
+    advancePhase();
+  } else if (key === 'ArrowLeft') {
+    prevPhase();
+  } else if (key === 'Escape') {
+    alert('Modal closed. Draft lost.');
+  }
+});
+
+// Init
+updateStepper();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,958 @@
+<!-- AWWV UI/UX Mockup 03 — Brigade Card Redesign -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Mockup 03 — Brigade Card Redesign</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #14120f;
+    --card-bg: rgba(30, 28, 24, 0.5);
+    --card-bg-hover: rgba(50, 46, 38, 0.9);
+    --card-bg-selected: rgba(20, 18, 15, 0.4);
+    --accent-gold: #c4a35a;
+    --border: rgba(180, 160, 130, 0.12);
+    --text-primary: #ffffff;
+    --text-secondary: #a89968;
+    --green: #4a9a55;
+    --amber: #c4a35a;
+    --red: #c24040;
+    --mono: 'Courier New', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 40px 60px;
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 28px;
+    color: var(--accent-gold);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  h1 small {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 48px;
+  }
+
+  /* ─── Section Headers ─── */
+  .section-header {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .section-subheader {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid rgba(180, 160, 130, 0.15);
+    margin: 56px 0 40px;
+  }
+
+  /* ─── BEFORE Cards ─── */
+  .before-row {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    margin-bottom: 32px;
+  }
+
+  .before-card {
+    width: 160px;
+    height: 140px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: var(--mono);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .before-card.selected {
+    border-color: var(--accent-gold);
+    background: var(--card-bg-selected);
+    box-shadow: 0 0 12px rgba(196, 163, 90, 0.25);
+  }
+
+  .before-card .name {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 6px;
+  }
+
+  .before-card .personnel {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .before-card .personnel.low { color: var(--red); }
+
+  .before-card .equipment {
+    font-size: 9px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .before-card .coh-bar {
+    height: 4px;
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    margin-bottom: 4px;
+    overflow: hidden;
+  }
+
+  .before-card .coh-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  .before-card .coh-bar-fill.green { background: var(--green); }
+  .before-card .coh-bar-fill.amber { background: var(--amber); }
+  .before-card .coh-bar-fill.red { background: var(--red); }
+
+  .before-card .stats {
+    font-size: 7px;
+    color: var(--text-primary);
+    opacity: 0.5;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .before-card .march {
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .before-card .march.red-text { color: var(--red); }
+  .before-card .march.green-text { color: var(--green); }
+
+  .before-card .badge-suggested {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent-gold);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-family: 'Segoe UI', sans-serif;
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── Annotations ─── */
+  .annotations {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 20px;
+    background: rgba(194, 64, 64, 0.06);
+    border: 1px solid rgba(194, 64, 64, 0.2);
+    border-radius: 8px;
+  }
+
+  .annotation {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #e8a0a0;
+    line-height: 1.5;
+  }
+
+  .annotation .marker {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .annotation code {
+    background: rgba(255,255,255,0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #f0c0c0;
+  }
+
+  /* ─── AFTER Cards ─── */
+  .after-row {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    margin-bottom: 32px;
+    align-items: flex-start;
+  }
+
+  .after-card {
+    width: 220px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    position: relative;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    cursor: default;
+  }
+
+  .after-card:hover {
+    background: var(--card-bg-hover);
+    border-color: rgba(180, 160, 130, 0.3);
+  }
+
+  .after-card.selected {
+    border-color: var(--accent-gold);
+    background: var(--card-bg-selected);
+    box-shadow: 0 0 16px rgba(196, 163, 90, 0.3);
+  }
+
+  .after-card.weak {
+    border-left: 3px solid var(--red);
+    background: rgba(50, 20, 18, 0.4);
+  }
+
+  .after-card .card-header {
+    padding: 10px 12px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .after-card .unit-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .after-card .unit-name .icon {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .after-card .unit-type {
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-left: 18px;
+  }
+
+  .after-card .suggested-badge {
+    float: right;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.5px;
+  }
+
+  .after-card .card-body {
+    padding: 10px 12px 12px;
+  }
+
+  /* Personnel bar */
+  .after-card .personnel-row {
+    margin-bottom: 10px;
+  }
+
+  .after-card .personnel-bar-track {
+    height: 6px;
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border-radius: 3px;
+    margin-bottom: 3px;
+    overflow: hidden;
+  }
+
+  .after-card .personnel-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .after-card .personnel-label {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .after-card .personnel-label .count { font-weight: 700; }
+  .after-card .personnel-label .suffix { color: var(--text-secondary); font-size: 10px; }
+  .after-card .personnel-label .warn { color: var(--red); font-size: 12px; }
+
+  .after-card .combat-ineffective {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+  }
+
+  /* Equipment row */
+  .after-card .equip-row {
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .after-card .equip-row .val {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+
+  .after-card .equip-row .sep {
+    color: rgba(180, 160, 130, 0.3);
+    margin: 0 6px;
+  }
+
+  /* Stat bars */
+  .after-card .stat-group {
+    margin-bottom: 8px;
+  }
+
+  .after-card .stat-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+  }
+
+  .after-card .stat-name {
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.8px;
+  }
+
+  .after-card .stat-value {
+    font-size: 10px;
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .after-card .stat-bar-track {
+    height: 4px;
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border-radius: 2px;
+    margin-bottom: 2px;
+    overflow: hidden;
+  }
+
+  .after-card .stat-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  .after-card .stat-descriptor {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .after-card .stat-descriptor.green { color: var(--green); }
+  .after-card .stat-descriptor.amber { color: var(--amber); }
+  .after-card .stat-descriptor.red { color: var(--red); }
+
+  /* Footer info */
+  .after-card .card-footer {
+    padding: 8px 12px 10px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+  }
+
+  .after-card .footer-line {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 3px;
+    color: var(--text-secondary);
+  }
+
+  .after-card .footer-line:last-child { margin-bottom: 0; }
+  .after-card .footer-line .fi { font-size: 11px; flex-shrink: 0; }
+  .after-card .footer-line.red-text { color: var(--red); }
+  .after-card .footer-line.green-text { color: var(--green); }
+  .after-card .footer-line.amber-text { color: var(--amber); }
+
+  /* ─── Tooltip ─── */
+  .tooltip-demo-wrap {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+
+  .tooltip-box {
+    width: 320px;
+    background: rgba(40, 36, 28, 0.97);
+    border: 1px solid rgba(196, 163, 90, 0.35);
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .tooltip-box::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 24px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid rgba(196, 163, 90, 0.35);
+  }
+
+  .tooltip-box .tt-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tooltip-box .tt-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+  }
+
+  .tooltip-box .tt-key { color: var(--text-secondary); }
+
+  .tooltip-box .tt-val {
+    color: var(--text-primary);
+    font-family: var(--mono);
+    font-size: 11px;
+    text-align: right;
+  }
+
+  .tooltip-box .tt-note {
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 2px;
+    padding-left: 12px;
+  }
+
+  .tooltip-box .tt-section {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .tooltip-connector {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 20px;
+    padding-top: 20px;
+  }
+
+  /* ─── Comparison Table ─── */
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  .comparison-table th {
+    text-align: left;
+    padding: 10px 16px;
+    background: rgba(196, 163, 90, 0.1);
+    color: var(--accent-gold);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid rgba(180, 160, 130, 0.2);
+  }
+
+  .comparison-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(180, 160, 130, 0.08);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .comparison-table td:first-child {
+    color: var(--text-secondary);
+    font-weight: 600;
+    width: 180px;
+  }
+
+  .comparison-table .col-before {
+    color: #c09090;
+    width: 300px;
+  }
+
+  .comparison-table .col-after {
+    color: var(--green);
+    width: 340px;
+  }
+
+  .comparison-table tr:hover td {
+    background: rgba(255,255,255,0.02);
+  }
+
+  /* ─── JS tooltip on hover ─── */
+  .hover-tooltip-target { position: relative; }
+
+  .hover-tooltip-target .live-tooltip {
+    display: none;
+    position: absolute;
+    left: calc(100% + 16px);
+    top: -10px;
+    z-index: 100;
+  }
+
+  .hover-tooltip-target:hover .live-tooltip {
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<h1>AWWV Mockup 03 — Brigade Card Redesign <small>Ops Planning Modal</small></h1>
+<p class="subtitle">BEFORE / AFTER comparison of brigade selection cards. Players pick brigades for operations; the card is their only info source about each unit.</p>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: BEFORE -->
+<!-- ============================================================ -->
+
+<div class="section-header">SECTION 1: CURRENT BRIGADE CARDS &mdash; The Problem</div>
+<p class="section-subheader">What players actually see when selecting brigades for an operation. 160&times;140px, Courier New, minimal labelling.</p>
+
+<div class="before-row">
+  <!-- Card 1: 94th Motorized (selected) -->
+  <div class="before-card selected">
+    <div class="name">94th Motorized Bde</div>
+    <div class="personnel">1,247</div>
+    <div class="equipment">T: 12&ensp;A: 8</div>
+    <div class="coh-bar"><div class="coh-bar-fill amber" style="width:55%"></div></div>
+    <div class="stats">COH 55&ensp;FAT 3</div>
+    <div class="march">2 turns march</div>
+  </div>
+
+  <!-- Card 2: 1st Banja Luka LI -->
+  <div class="before-card">
+    <div class="name">1st Banja Luka LI</div>
+    <div class="personnel">2,340</div>
+    <div class="equipment">T: 0&ensp;A: 1</div>
+    <div class="coh-bar"><div class="coh-bar-fill green" style="width:82%"></div></div>
+    <div class="stats">COH 82&ensp;FAT 0</div>
+    <div class="march green-text">In position</div>
+  </div>
+
+  <!-- Card 3: 705th Slavna Mt (weak) -->
+  <div class="before-card">
+    <div class="name">705th Slavna Mt</div>
+    <div class="personnel low">487</div>
+    <div class="equipment">A: 2</div>
+    <div class="coh-bar"><div class="coh-bar-fill red" style="width:28%"></div></div>
+    <div class="stats">COH 28&ensp;FAT 8</div>
+    <div class="march red-text">4 turns march</div>
+  </div>
+
+  <!-- Card 4: 2nd Krajina Bde (suggested) -->
+  <div class="before-card">
+    <span class="badge-suggested">SUGGESTED</span>
+    <div class="name">2nd Krajina Bde</div>
+    <div class="personnel">1,890</div>
+    <div class="equipment">T: 5&ensp;A: 15</div>
+    <div class="coh-bar"><div class="coh-bar-fill amber" style="width:65%"></div></div>
+    <div class="stats">COH 65&ensp;FAT 2</div>
+    <div class="march">1 turn march</div>
+  </div>
+</div>
+
+<!-- Annotations -->
+<div class="annotations">
+  <div class="annotation">
+    <div class="marker">1</div>
+    <div><code>A: 1</code> on Card 2 reads as "Attack: 1" &mdash; it actually means <strong>1 artillery piece</strong>. Completely ambiguous abbreviation.</div>
+  </div>
+  <div class="annotation">
+    <div class="marker">2</div>
+    <div><code>COH 55&ensp;FAT 3</code> is rendered at <strong>7px font, 50% opacity</strong>. These are critical combat stats, effectively invisible on screen.</div>
+  </div>
+  <div class="annotation">
+    <div class="marker">3</div>
+    <div><strong>~40px wasted space</strong> at the bottom of every card. No location, no unit type, no additional context fills this gap.</div>
+  </div>
+  <div class="annotation">
+    <div class="marker">4</div>
+    <div><strong>No unit type shown.</strong> Is "705th Slavna Mt" mountain infantry? Armor? Motorized? The player cannot tell from the card.</div>
+  </div>
+  <div class="annotation">
+    <div class="marker">5</div>
+    <div><strong>No scale on cohesion bar.</strong> Is COH 55 good or bad? The bar color (amber) is the only clue. No verbal descriptor, no reference point.</div>
+  </div>
+  <div class="annotation">
+    <div class="marker">6</div>
+    <div><strong>Zero hover tooltips.</strong> No <code>title</code> attributes on any element. No way to get more detail without opening a separate panel.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: AFTER -->
+<!-- ============================================================ -->
+
+<hr class="section-divider">
+
+<div class="section-header">SECTION 2: PROPOSED BRIGADE CARDS &mdash; Information at a Glance</div>
+<p class="section-subheader">Same 4 brigades, redesigned. Every stat is labelled, scaled, and explained. Hover for full detail.</p>
+
+<div class="after-row">
+
+  <!-- AFTER Card 1: 94th Motorized (selected, with live tooltip) -->
+  <div class="after-card selected hover-tooltip-target">
+    <div class="card-header">
+      <div class="unit-name"><span class="icon">&#x1F697;</span> 94th Motorized Brigade</div>
+      <div class="unit-type">Motorized Infantry</div>
+    </div>
+    <div class="card-body">
+      <!-- Personnel -->
+      <div class="personnel-row">
+        <div class="personnel-bar-track"><div class="personnel-bar-fill" style="width:62%; background: var(--amber);"></div></div>
+        <div class="personnel-label"><span><span class="count">1,247</span> <span class="suffix">personnel</span></span></div>
+      </div>
+      <!-- Equipment -->
+      <div class="equip-row">
+        TANKS <span class="val">12</span><span class="sep">&middot;</span>ARTY <span class="val">8</span>
+      </div>
+      <!-- Cohesion -->
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Cohesion</span><span class="stat-value">55</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:55%; background: var(--amber);"></div></div>
+        <div class="stat-descriptor amber">ADEQUATE</div>
+      </div>
+      <!-- Fatigue -->
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Fatigue</span><span class="stat-value">3</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:10%; background: var(--green);"></div></div>
+        <div class="stat-descriptor green">FRESH</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="footer-line amber-text"><span class="fi">&#x23F1;</span> 2 turns to staging</div>
+      <div class="footer-line"><span class="fi">&#x1F4CD;</span> Currently: Banja Luka</div>
+    </div>
+
+    <!-- Live tooltip on hover -->
+    <div class="live-tooltip">
+      <div class="tooltip-box">
+        <div class="tt-title">94th Motorized Brigade</div>
+        <div class="tt-row"><span class="tt-key">Personnel</span><span class="tt-val">1,247 / 2,000 (62%)</span></div>
+        <div class="tt-row"><span class="tt-key">Equipment</span><span class="tt-val">12 tanks, 8 artillery</span></div>
+        <div class="tt-row"><span class="tt-key">Cohesion</span><span class="tt-val">55 &mdash; Adequate</span></div>
+        <div class="tt-note">Holds under pressure but may waver in costly engagements</div>
+        <div class="tt-row"><span class="tt-key">Fatigue</span><span class="tt-val">3 &mdash; Fresh</span></div>
+        <div class="tt-note">Full combat power</div>
+        <div class="tt-row"><span class="tt-key">Entrenchment</span><span class="tt-val">0.2 (recently moved)</span></div>
+        <div class="tt-section">
+          <div class="tt-row"><span class="tt-key">Home Municipality</span><span class="tt-val">Banja Luka</span></div>
+          <div class="tt-row"><span class="tt-key">Corps</span><span class="tt-val">1st Krajina</span></div>
+          <div class="tt-row"><span class="tt-key">Last Battle</span><span class="tt-val">Week 38 (Victory)</span></div>
+          <div class="tt-row"><span class="tt-key">Combat Record</span><span class="tt-val">4W 1L 2D</span></div>
+        </div>
+        <div class="tt-section">
+          <div class="tt-row"><span class="tt-key">March Route</span><span class="tt-val">2 turns via Mrkonjic Grad</span></div>
+          <div class="tt-row"><span class="tt-key">Home Dist. Penalty</span><span class="tt-val">None (home area)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AFTER Card 2: 1st Banja Luka LI -->
+  <div class="after-card">
+    <div class="card-header">
+      <div class="unit-name"><span class="icon">&#x1F43E;</span> 1st Banja Luka LI</div>
+      <div class="unit-type">Light Infantry</div>
+    </div>
+    <div class="card-body">
+      <div class="personnel-row">
+        <div class="personnel-bar-track"><div class="personnel-bar-fill" style="width:90%; background: var(--green);"></div></div>
+        <div class="personnel-label"><span><span class="count">2,340</span> <span class="suffix">personnel</span></span></div>
+      </div>
+      <div class="equip-row">
+        TANKS <span class="val">0</span><span class="sep">&middot;</span>ARTY <span class="val">1</span>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Cohesion</span><span class="stat-value">82</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:82%; background: var(--green);"></div></div>
+        <div class="stat-descriptor green">STRONG &#x2713;</div>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Fatigue</span><span class="stat-value">0</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:0%; background: var(--green);"></div></div>
+        <div class="stat-descriptor green">RESTED &#x2713;</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="footer-line green-text"><span class="fi">&#x2705;</span> In position</div>
+      <div class="footer-line"><span class="fi">&#x1F4CD;</span> Currently: Front line</div>
+    </div>
+  </div>
+
+  <!-- AFTER Card 3: 705th Slavna Mountain (weak) -->
+  <div class="after-card weak">
+    <div class="card-header">
+      <div class="unit-name"><span class="icon">&#x26F0;</span> 705th Slavna Mountain</div>
+      <div class="unit-type">Mountain Infantry</div>
+    </div>
+    <div class="card-body">
+      <div class="personnel-row">
+        <div class="personnel-bar-track"><div class="personnel-bar-fill" style="width:19%; background: var(--red);"></div></div>
+        <div class="personnel-label">
+          <span><span class="count" style="color: var(--red);">487</span> <span class="suffix">personnel</span></span>
+          <span class="warn">&#x26A0;</span>
+        </div>
+        <div class="combat-ineffective">COMBAT INEFFECTIVE</div>
+      </div>
+      <div class="equip-row">
+        TANKS <span class="val">0</span><span class="sep">&middot;</span>ARTY <span class="val">2</span>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Cohesion</span><span class="stat-value" style="color: var(--red);">28</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:28%; background: var(--red);"></div></div>
+        <div class="stat-descriptor red">CRITICAL &#x26A0;</div>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Fatigue</span><span class="stat-value" style="color: var(--red);">8</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:27%; background: var(--red);"></div></div>
+        <div class="stat-descriptor red">EXHAUSTED &#x26A0;</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="footer-line red-text"><span class="fi">&#x23F1;</span> 4 turns to staging</div>
+      <div class="footer-line"><span class="fi">&#x1F4CD;</span> Currently: Bugojno</div>
+    </div>
+  </div>
+
+  <!-- AFTER Card 4: 2nd Krajina Brigade (suggested) -->
+  <div class="after-card">
+    <div class="card-header">
+      <div class="unit-name">
+        <span class="icon">&#x1F52B;</span> 2nd Krajina Brigade
+        <span class="suggested-badge" style="margin-left:auto;">&#x2605; SUGGESTED</span>
+      </div>
+      <div class="unit-type">Infantry</div>
+    </div>
+    <div class="card-body">
+      <div class="personnel-row">
+        <div class="personnel-bar-track"><div class="personnel-bar-fill" style="width:75%; background: var(--green);"></div></div>
+        <div class="personnel-label"><span><span class="count">1,890</span> <span class="suffix">personnel</span></span></div>
+      </div>
+      <div class="equip-row">
+        TANKS <span class="val">5</span><span class="sep">&middot;</span>ARTY <span class="val">15</span>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Cohesion</span><span class="stat-value">65</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:65%; background: var(--amber);"></div></div>
+        <div class="stat-descriptor amber">ADEQUATE</div>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Fatigue</span><span class="stat-value">2</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:7%; background: var(--green);"></div></div>
+        <div class="stat-descriptor green">FRESH</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="footer-line amber-text"><span class="fi">&#x23F1;</span> 1 turn to staging</div>
+      <div class="footer-line"><span class="fi">&#x1F4CD;</span> Currently: Reserve</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: HOVER TOOLTIP DEMO -->
+<!-- ============================================================ -->
+
+<hr class="section-divider">
+
+<div class="section-header">SECTION 3: HOVER TOOLTIP DEMO</div>
+<p class="section-subheader">Hover over the selected card above (94th Motorized) to see the live tooltip. Static reference shown below.</p>
+
+<div class="tooltip-demo-wrap">
+  <!-- Mini card reference -->
+  <div class="after-card selected" style="width: 220px; pointer-events: none;">
+    <div class="card-header">
+      <div class="unit-name"><span class="icon">&#x1F697;</span> 94th Motorized Brigade</div>
+      <div class="unit-type">Motorized Infantry</div>
+    </div>
+    <div class="card-body">
+      <div class="personnel-row">
+        <div class="personnel-bar-track"><div class="personnel-bar-fill" style="width:62%; background: var(--amber);"></div></div>
+        <div class="personnel-label"><span><span class="count">1,247</span> <span class="suffix">personnel</span></span></div>
+      </div>
+      <div class="equip-row">TANKS <span class="val">12</span><span class="sep">&middot;</span>ARTY <span class="val">8</span></div>
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Cohesion</span><span class="stat-value">55</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:55%; background: var(--amber);"></div></div>
+        <div class="stat-descriptor amber">ADEQUATE</div>
+      </div>
+      <div class="stat-group">
+        <div class="stat-label-row"><span class="stat-name">Fatigue</span><span class="stat-value">3</span></div>
+        <div class="stat-bar-track"><div class="stat-bar-fill" style="width:10%; background: var(--green);"></div></div>
+        <div class="stat-descriptor green">FRESH</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="footer-line amber-text"><span class="fi">&#x23F1;</span> 2 turns to staging</div>
+      <div class="footer-line"><span class="fi">&#x1F4CD;</span> Currently: Banja Luka</div>
+    </div>
+  </div>
+
+  <div class="tooltip-connector">&rarr;</div>
+
+  <!-- Static tooltip -->
+  <div class="tooltip-box" style="position: relative;">
+    <div style="position: absolute; left: -8px; top: 24px; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 8px solid rgba(196, 163, 90, 0.35);"></div>
+    <div class="tt-title">94th Motorized Brigade</div>
+    <div class="tt-row"><span class="tt-key">Personnel</span><span class="tt-val">1,247 / 2,000 (62%)</span></div>
+    <div class="tt-row"><span class="tt-key">Equipment</span><span class="tt-val">12 tanks, 8 artillery</span></div>
+    <div class="tt-row"><span class="tt-key">Cohesion</span><span class="tt-val">55 &mdash; Adequate</span></div>
+    <div class="tt-note">Holds under pressure but may waver in costly engagements</div>
+    <div class="tt-row"><span class="tt-key">Fatigue</span><span class="tt-val">3 &mdash; Fresh</span></div>
+    <div class="tt-note">Full combat power</div>
+    <div class="tt-row"><span class="tt-key">Entrenchment</span><span class="tt-val">0.2 (recently moved)</span></div>
+    <div class="tt-section">
+      <div class="tt-row"><span class="tt-key">Home Municipality</span><span class="tt-val">Banja Luka</span></div>
+      <div class="tt-row"><span class="tt-key">Corps</span><span class="tt-val">1st Krajina</span></div>
+      <div class="tt-row"><span class="tt-key">Last Battle</span><span class="tt-val">Week 38 (Victory)</span></div>
+      <div class="tt-row"><span class="tt-key">Combat Record</span><span class="tt-val">4W 1L 2D</span></div>
+    </div>
+    <div class="tt-section">
+      <div class="tt-row"><span class="tt-key">March Route</span><span class="tt-val">2 turns via Mrkonjic Grad</span></div>
+      <div class="tt-row"><span class="tt-key">Home Dist. Penalty</span><span class="tt-val">None (home area)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: COMPARISON TABLE -->
+<!-- ============================================================ -->
+
+<hr class="section-divider">
+
+<div class="section-header">SECTION 4: COMPARISON TABLE</div>
+<p class="section-subheader">Side-by-side summary of every improvement.</p>
+
+<table class="comparison-table">
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Current</th>
+      <th>Proposed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>"A:1" label</td>
+      <td class="col-before">Reads as "Attack: 1" &mdash; ambiguous</td>
+      <td class="col-after">"ARTY 1" &mdash; unambiguous, fully spelled out</td>
+    </tr>
+    <tr>
+      <td>COH / FAT text</td>
+      <td class="col-before">7px font, 50% opacity &mdash; effectively invisible</td>
+      <td class="col-after">9px, 100% opacity, named bars with verbal descriptors</td>
+    </tr>
+    <tr>
+      <td>Unit type</td>
+      <td class="col-before">Not shown anywhere on the card</td>
+      <td class="col-after">Icon + label (MOTORIZED / MOUNTAIN / LIGHT INFANTRY)</td>
+    </tr>
+    <tr>
+      <td>Status context</td>
+      <td class="col-before">None &mdash; raw numbers only</td>
+      <td class="col-after">Verbal: STRONG / ADEQUATE / CRITICAL with color coding</td>
+    </tr>
+    <tr>
+      <td>Current location</td>
+      <td class="col-before">Not shown</td>
+      <td class="col-after">"Currently: Banja Luka" with pin icon</td>
+    </tr>
+    <tr>
+      <td>Health warnings</td>
+      <td class="col-before">Only red text on low personnel count</td>
+      <td class="col-after">Red left border + "COMBAT INEFFECTIVE" label + warning icons</td>
+    </tr>
+    <tr>
+      <td>Hover detail</td>
+      <td class="col-before">Zero &mdash; no tooltips, no title attributes</td>
+      <td class="col-after">Full unit profile: max personnel, corps, combat record, march route</td>
+    </tr>
+    <tr>
+      <td>Wasted space</td>
+      <td class="col-before">~40px empty space at bottom of every card</td>
+      <td class="col-after">Used for location + march detail + status line</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(180,160,130,0.1); color: var(--text-secondary); font-size: 11px;">
+  AWWV UI/UX Mockup 03 &mdash; Brigade Card Redesign &mdash; Generated 2026-03-25
+</div>
+
+</body>
+</html>

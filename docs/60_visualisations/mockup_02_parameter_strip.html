@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<!-- AWWV UI/UX Mockup 02 — Parameter Strip Redesign -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>AWWV Mockup 02 — Parameter Strip Redesign</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #14120f;
+    --panel-bg: rgba(20, 18, 15, 0.92);
+    --card-bg: rgba(20, 18, 15, 0.4);
+    --gold: #c4a35a;
+    --gold-active-bg: rgba(196, 163, 90, 0.20);
+    --gold-active-border: rgba(196, 163, 90, 0.60);
+    --border: rgba(180, 160, 130, 0.12);
+    --text: #ffffff;
+    --text-secondary: #a89968;
+    --text-dim: rgba(168, 153, 104, 0.3);
+    --red: #c24040;
+    --red-bg: rgba(239, 68, 68, 0.15);
+    --green: #4a9a55;
+    --amber: #fbbf24;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    padding: 40px 60px;
+    line-height: 1.4;
+  }
+
+  h1 {
+    font-size: 28px;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+    font-weight: 300;
+  }
+  h1 span { font-weight: 700; }
+
+  .page-subtitle {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 48px;
+    letter-spacing: 1px;
+  }
+
+  /* ── Section Headers ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .section-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 3px;
+  }
+  .tag-before {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid rgba(194, 64, 64, 0.4);
+  }
+  .tag-after {
+    background: rgba(74, 154, 85, 0.15);
+    color: var(--green);
+    border: 1px solid rgba(74, 154, 85, 0.4);
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* ── Panel (shared) ── */
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+
+  /* ── BEFORE: Current Strip ── */
+  .before-strip {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .before-group { position: relative; }
+  .before-group-label {
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+  }
+  .before-pills {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .before-pill {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: default;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .before-pill.active {
+    background: var(--gold-active-bg);
+    border-color: var(--gold-active-border);
+    color: var(--gold);
+  }
+
+  .before-name-input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-size: 11px;
+    padding: 5px 10px;
+    width: 180px;
+    font-family: system-ui;
+    outline: none;
+    margin-top: 16px;
+  }
+
+  /* Annotation callouts */
+  .annotations-before {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--red);
+    background: var(--red-bg);
+    padding: 8px 14px;
+    border-radius: 4px;
+    border-left: 3px solid var(--red);
+    max-width: 320px;
+  }
+  .callout-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: -1px;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), rgba(196,163,90,0.25), var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  /* ── AFTER: Redesigned Strip ── */
+  .after-strip {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .after-group { position: relative; }
+  .after-group-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2px;
+  }
+  .after-group-desc {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .after-pills {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .after-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 7px 12px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+    position: relative;
+    min-width: 80px;
+  }
+  .after-pill .pill-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .after-pill .pill-sub {
+    font-size: 7.5px;
+    color: rgba(168, 153, 104, 0.25);
+    margin-top: 2px;
+    line-height: 1.3;
+    max-width: 140px;
+    white-space: nowrap;
+  }
+  .after-pill:hover {
+    border-color: rgba(196, 163, 90, 0.35);
+    background: rgba(196, 163, 90, 0.06);
+  }
+  .after-pill:hover .pill-label { color: var(--text-secondary); }
+  .after-pill:hover .pill-sub { color: rgba(168, 153, 104, 0.45); }
+
+  .after-pill.active {
+    background: var(--gold-active-bg);
+    border-color: var(--gold-active-border);
+  }
+  .after-pill.active .pill-label { color: var(--text); }
+  .after-pill.active .pill-sub { color: var(--text-secondary); }
+
+  /* Danger pill */
+  .after-pill.danger {
+    border-color: rgba(194, 64, 64, 0.3);
+  }
+  .after-pill.danger .pill-label { color: rgba(194, 64, 64, 0.5); }
+  .after-pill.danger .pill-sub { color: rgba(194, 64, 64, 0.35); }
+  .after-pill.danger:hover {
+    border-color: rgba(194, 64, 64, 0.5);
+    background: rgba(239, 68, 68, 0.06);
+  }
+  .after-pill.danger.active {
+    background: var(--red-bg);
+    border-color: var(--red);
+    animation: dangerPulse 2.5s ease-in-out infinite;
+  }
+  .after-pill.danger.active .pill-label { color: var(--red); }
+  .after-pill.danger.active .pill-sub { color: var(--red); }
+
+  @keyframes dangerPulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(194, 64, 64, 0.15); }
+    50% { box-shadow: 0 0 16px rgba(194, 64, 64, 0.35); }
+  }
+
+  /* Toggle pill (arty) */
+  .after-pill.toggle-off .pill-sub { color: rgba(168, 153, 104, 0.25); }
+  .after-pill.toggle-on {
+    background: var(--red-bg);
+    border-color: var(--red);
+    box-shadow: 0 0 10px rgba(194, 64, 64, 0.2);
+  }
+  .after-pill.toggle-on .pill-label { color: var(--red); }
+  .after-pill.toggle-on .pill-sub { color: var(--text-secondary); }
+
+  .after-name-input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-size: 11px;
+    padding: 5px 10px;
+    width: 180px;
+    font-family: system-ui;
+    outline: none;
+  }
+  .after-name-hint {
+    font-size: 8px;
+    color: var(--text-dim);
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  /* ── Tooltip ── */
+  .tooltip-demo {
+    position: relative;
+    margin-top: 20px;
+    display: inline-block;
+  }
+  .tooltip-card {
+    background: rgba(20, 18, 15, 0.96);
+    border: 1px solid var(--gold-active-border);
+    border-radius: 5px;
+    padding: 14px 18px;
+    width: 320px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+  .tooltip-card h4 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2px;
+  }
+  .tooltip-card .tt-subtitle {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  .tooltip-card p {
+    font-size: 10px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .tooltip-card .tt-stats {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+  .tooltip-card .tt-stats span {
+    display: block;
+    margin-bottom: 2px;
+  }
+  .tooltip-card .tt-best {
+    font-size: 9px;
+    color: var(--green);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* ── Hover tooltips on pills ── */
+  .after-pill .hover-tooltip {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    width: 300px;
+    background: rgba(20, 18, 15, 0.96);
+    border: 1px solid var(--gold-active-border);
+    border-radius: 5px;
+    padding: 12px 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    text-align: left;
+    pointer-events: none;
+  }
+  .after-pill:hover .hover-tooltip { display: block; }
+  .after-pill .hover-tooltip h5 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .after-pill .hover-tooltip p {
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.5;
+    margin-bottom: 0;
+  }
+  .after-pill .hover-tooltip .tt-stat {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+  .after-pill .hover-tooltip .tt-best {
+    font-size: 9px;
+    color: var(--green);
+    margin-top: 8px;
+    font-style: italic;
+  }
+  .after-pill .hover-tooltip .tt-warn {
+    font-size: 9px;
+    color: var(--amber);
+    margin-top: 8px;
+    font-style: italic;
+  }
+  .after-pill .hover-tooltip .tt-danger {
+    font-size: 9px;
+    color: var(--red);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* Force first tooltip visible by default */
+  .show-tooltip-default .hover-tooltip { display: block !important; }
+
+  /* ── Support group states ── */
+  .support-states {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .support-state-label {
+    font-size: 8px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  /* ── Summary stat bar ── */
+  .stat-bar {
+    display: flex;
+    gap: 32px;
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: rgba(196, 163, 90, 0.04);
+    border: 1px solid rgba(196, 163, 90, 0.12);
+    border-radius: 4px;
+  }
+  .stat-item {
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    font-family: 'Courier New', monospace;
+  }
+  .stat-num.stat-red { color: var(--red); }
+  .stat-num.stat-green { color: var(--green); }
+  .stat-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* ── Design Notes ── */
+  .design-notes {
+    margin-top: 48px;
+  }
+  .design-notes h3 {
+    font-size: 13px;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .design-notes ol {
+    list-style: none;
+    counter-reset: dn;
+  }
+  .design-notes li {
+    counter-increment: dn;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+  }
+  .design-notes li::before {
+    content: counter(dn);
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--gold-active-bg);
+    border: 1px solid var(--gold-active-border);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- HEADER -->
+<!-- ════════════════════════════════════════════════════════ -->
+<h1><span>Mockup 02</span> &mdash; Parameter Strip Redesign</h1>
+<p class="page-subtitle">Ops Planning Modal &middot; Before / After comparison &middot; A War Without Victory</p>
+
+<!-- Stat bar -->
+<div class="stat-bar">
+  <div class="stat-item">
+    <div class="stat-num stat-red">0</div>
+    <div class="stat-label">Tooltips (current)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num stat-red">0</div>
+    <div class="stat-label">Subtitles (current)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num stat-red">0</div>
+    <div class="stat-label">Group desc (current)</div>
+  </div>
+  <div class="stat-item" style="border-left: 1px solid var(--border); padding-left: 32px;">
+    <div class="stat-num stat-green">15</div>
+    <div class="stat-label">Tooltips (proposed)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num stat-green">15</div>
+    <div class="stat-label">Subtitles (proposed)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num stat-green">4</div>
+    <div class="stat-label">Group desc (proposed)</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num stat-green">34</div>
+    <div class="stat-label">Total context pieces</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- BEFORE -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div style="margin-top: 48px;">
+  <div class="section-header">
+    <span class="section-tag tag-before">BEFORE</span>
+    <div>
+      <div class="section-title">CURRENT: 15 Buttons, Zero Explanations</div>
+      <div class="section-subtitle">The player must guess what every parameter does</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="before-strip">
+      <!-- Name -->
+      <div class="before-group">
+        <div class="before-group-label">Operation Name</div>
+        <input class="before-name-input" type="text" value="Operacija Hrast" readonly>
+      </div>
+
+      <!-- TYPE -->
+      <div class="before-group" id="before-type">
+        <div class="before-group-label">Type</div>
+        <div class="before-pills">
+          <div class="before-pill active">Sector Attack</div>
+          <div class="before-pill">General Offensive</div>
+          <div class="before-pill">Strategic Defense</div>
+          <div class="before-pill">Reorganization</div>
+          <div class="before-pill">Feint</div>
+          <div class="before-pill">Probe</div>
+        </div>
+      </div>
+
+      <!-- TEMPO -->
+      <div class="before-group" id="before-tempo">
+        <div class="before-group-label">Tempo</div>
+        <div class="before-pills">
+          <div class="before-pill">Methodical</div>
+          <div class="before-pill active">Standard</div>
+          <div class="before-pill">All-Out</div>
+        </div>
+      </div>
+
+      <!-- TOLERANCE -->
+      <div class="before-group" id="before-tolerance">
+        <div class="before-group-label">Tolerance</div>
+        <div class="before-pills">
+          <div class="before-pill">Decisive Only</div>
+          <div class="before-pill">Victory Required</div>
+          <div class="before-pill active">Accept Costly</div>
+          <div class="before-pill">Accept Stalemate</div>
+          <div class="before-pill">Regardless</div>
+        </div>
+      </div>
+
+      <!-- SUPPORT -->
+      <div class="before-group" id="before-support">
+        <div class="before-group-label">Support</div>
+        <div class="before-pills">
+          <div class="before-pill">&loz; Arty Prep</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Annotations -->
+    <div class="annotations-before">
+      <div class="callout">
+        <span class="callout-icon">&nearr;</span>
+        <span><strong>TYPE:</strong> What does &ldquo;Feint&rdquo; DO? No tooltip. No explanation. Player must experiment or read docs.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">&nearr;</span>
+        <span><strong>TEMPO:</strong> &ldquo;Methodical&rdquo; vs &ldquo;All-Out&rdquo; = what tradeoff? Faster? More casualties? Both?</span>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">&warning;</span>
+        <span><strong>TOLERANCE:</strong> &ldquo;REGARDLESS&rdquo; is a suicide order that sends brigades into predicted defeats. No warning.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">&nearr;</span>
+        <span><strong>ARTY PREP:</strong> What does this cost? What&rsquo;s the effect? Toggle with zero context.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">&cross;</span>
+        <span><strong>TOTAL:</strong> 15 parameter buttons. 0 tooltips. 0 subtitles. 0 group descriptions.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- DIVIDER -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div class="divider"></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- AFTER -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div>
+  <div class="section-header">
+    <span class="section-tag tag-after">AFTER</span>
+    <div>
+      <div class="section-title">PROPOSED: Context at Every Decision Point</div>
+      <div class="section-subtitle">Every button explains itself &mdash; subtitles, tooltips, and warnings</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="after-strip">
+      <!-- Name -->
+      <div class="after-group">
+        <div class="after-group-label">Operation Name</div>
+        <input class="after-name-input" type="text" value="Operacija Hrast">
+        <div class="after-name-hint">Auto-generated, editable</div>
+      </div>
+
+      <!-- TYPE -->
+      <div class="after-group pill-group-interactive" data-group="type">
+        <div class="after-group-label">Operation Type</div>
+        <div class="after-group-desc">What kind of operation?</div>
+        <div class="after-pills">
+          <div class="after-pill active show-tooltip-default" data-value="sector">
+            <span class="pill-label">Sector Attack</span>
+            <span class="pill-sub">Push on one sector front</span>
+            <div class="hover-tooltip">
+              <h5>Sector Attack</h5>
+              <p>Commits 3-8 brigades to attack enemy positions on a single sector. Lowest risk operation type.</p>
+              <div class="tt-stat">Duration: 4-8 turns typical</div>
+              <div class="tt-stat">Brigades: 3-8 committed</div>
+              <p class="tt-best">Best for: Probing weak points, securing specific objectives</p>
+            </div>
+          </div>
+          <div class="after-pill" data-value="general">
+            <span class="pill-label">General Offensive</span>
+            <span class="pill-sub">Corps-wide assault, all sectors</span>
+            <div class="hover-tooltip">
+              <h5>General Offensive</h5>
+              <p>Launches simultaneous attacks across all corps sectors. Maximum pressure but spreads forces thin. High supply cost.</p>
+              <div class="tt-stat">Duration: 6-12 turns</div>
+              <div class="tt-stat">Brigades: All available</div>
+              <p class="tt-warn">Warning: Heavy casualties and supply drain expected</p>
+            </div>
+          </div>
+          <div class="after-pill" data-value="defense">
+            <span class="pill-label">Strategic Defense</span>
+            <span class="pill-sub">Hold positions, absorb attacks</span>
+            <div class="hover-tooltip">
+              <h5>Strategic Defense</h5>
+              <p>Fortifies current positions and builds entrenchment. Brigades hold ground and counter-attack only when favorable.</p>
+              <div class="tt-stat">Duration: Indefinite</div>
+              <div class="tt-stat">Entrenchment: +2.0x build rate</div>
+              <p class="tt-best">Best for: Buying time, defending key terrain</p>
+            </div>
+          </div>
+          <div class="after-pill" data-value="reorg">
+            <span class="pill-label">Reorganization</span>
+            <span class="pill-sub">Rest and refit, no combat</span>
+            <div class="hover-tooltip">
+              <h5>Reorganization</h5>
+              <p>Pulls brigades out of combat for rest, reinforcement, and equipment repair. No offensive or defensive actions.</p>
+              <div class="tt-stat">Duration: 3-6 turns</div>
+              <div class="tt-stat">Recovery: Morale +5/turn, Fatigue -3/turn</div>
+              <p class="tt-warn">Warning: Front line left weakened during refit</p>
+            </div>
+          </div>
+          <div class="after-pill" data-value="feint">
+            <span class="pill-label">Feint</span>
+            <span class="pill-sub">Fake attack to draw reserves</span>
+            <div class="hover-tooltip">
+              <h5>Feint</h5>
+              <p>Simulates an attack to force the enemy to reposition reserves. Low commitment, low casualties, but enemy may not react.</p>
+              <div class="tt-stat">Duration: 2-4 turns</div>
+              <div class="tt-stat">Brigades: 1-3 committed</div>
+              <p class="tt-best">Best for: Setting up a real attack elsewhere</p>
+            </div>
+          </div>
+          <div class="after-pill" data-value="probe">
+            <span class="pill-label">Probe</span>
+            <span class="pill-sub">Recon in force, test defenses</span>
+            <div class="hover-tooltip">
+              <h5>Probe</h5>
+              <p>Sends brigades to test enemy strength without committing to a full assault. Reveals enemy disposition and defensive capability.</p>
+              <div class="tt-stat">Duration: 1-3 turns</div>
+              <div class="tt-stat">Intel: Reveals enemy strength in sector</div>
+              <p class="tt-best">Best for: Intel gathering before a major operation</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEMPO -->
+      <div class="after-group pill-group-interactive" data-group="tempo">
+        <div class="after-group-label">Tempo</div>
+        <div class="after-group-desc">Speed vs. casualties tradeoff</div>
+        <div class="after-pills">
+          <div class="after-pill" data-value="methodical">
+            <span class="pill-label">&#x1f6e1;&#xfe0f; Methodical</span>
+            <span class="pill-sub">Slow, fewer losses</span>
+            <div class="hover-tooltip">
+              <h5>Methodical Tempo</h5>
+              <p>Advances cautiously with thorough preparation. Lower casualty rate but gives the enemy time to reinforce and entrench.</p>
+              <div class="tt-stat">Casualty modifier: 0.7x</div>
+              <div class="tt-stat">Speed: Slow (50% advance rate)</div>
+            </div>
+          </div>
+          <div class="after-pill active" data-value="standard">
+            <span class="pill-label">&#x2696;&#xfe0f; Standard</span>
+            <span class="pill-sub">Balanced approach</span>
+            <div class="hover-tooltip">
+              <h5>Standard Tempo</h5>
+              <p>Default operational tempo. Balances speed of advance against acceptable casualties. No modifiers applied.</p>
+              <div class="tt-stat">Casualty modifier: 1.0x (baseline)</div>
+              <div class="tt-stat">Speed: Normal</div>
+            </div>
+          </div>
+          <div class="after-pill" data-value="allout">
+            <span class="pill-label">&#x2694;&#xfe0f; All-Out</span>
+            <span class="pill-sub">Fast, heavy casualties</span>
+            <div class="hover-tooltip">
+              <h5>All-Out Tempo</h5>
+              <p>Maximum aggression. Brigades attack continuously without pause. Rapid advance but devastating attrition and fatigue buildup.</p>
+              <div class="tt-stat">Casualty modifier: 1.5x</div>
+              <div class="tt-stat">Speed: Fast (150% advance rate)</div>
+              <div class="tt-stat">Fatigue: +2 per turn</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOLERANCE -->
+      <div class="after-group pill-group-interactive" data-group="tolerance">
+        <div class="after-group-label">Minimum Outcome</div>
+        <div class="after-group-desc">When do brigades stop attacking?</div>
+        <div class="after-pills">
+          <div class="after-pill" data-value="decisive">
+            <span class="pill-label">Decisive Only</span>
+            <span class="pill-sub">Stop unless overwhelming (2.0x)</span>
+            <div class="hover-tooltip">
+              <h5>Decisive Only</h5>
+              <p>Brigades only attack when they predict an overwhelming victory. Extremely conservative &mdash; many attacks will be cancelled.</p>
+              <div class="tt-stat">Min power ratio: 2.0x</div>
+              <div class="tt-stat">Expected attacks cancelled: ~60-80%</div>
+            </div>
+          </div>
+          <div class="after-pill" data-value="victory">
+            <span class="pill-label">Victory Required</span>
+            <span class="pill-sub">Stop unless clear win (1.5x)</span>
+            <div class="hover-tooltip">
+              <h5>Victory Required</h5>
+              <p>Brigades attack only when they predict a clear victory. Conservative but will engage advantageous targets.</p>
+              <div class="tt-stat">Min power ratio: 1.5x</div>
+              <div class="tt-stat">Expected attacks cancelled: ~40-50%</div>
+            </div>
+          </div>
+          <div class="after-pill active" data-value="costly">
+            <span class="pill-label">Accept Costly</span>
+            <span class="pill-sub">Continue through costly wins (1.0x)</span>
+            <div class="hover-tooltip">
+              <h5>Accept Costly</h5>
+              <p>Brigades continue attacking even when expected to take significant casualties. Standard setting for most operations.</p>
+              <div class="tt-stat">Min power ratio: 1.0x</div>
+              <div class="tt-stat">Expected casualties: Moderate-High</div>
+            </div>
+          </div>
+          <div class="after-pill" data-value="stalemate">
+            <span class="pill-label">Accept Stalemate</span>
+            <span class="pill-sub">Continue through stalemates (0.7x)</span>
+            <div class="hover-tooltip">
+              <h5>Accept Stalemate</h5>
+              <p>Brigades attack even when the outcome is likely a stalemate. Used for attrition or when any contact is valuable.</p>
+              <div class="tt-stat">Min power ratio: 0.7x</div>
+              <div class="tt-stat">Risk: High casualties for little gain</div>
+            </div>
+          </div>
+          <div class="after-pill danger" data-value="regardless">
+            <span class="pill-label">&warning; Regardless</span>
+            <span class="pill-sub">&warning; Attack into predicted defeat (0.5x)</span>
+            <div class="hover-tooltip" style="border-color: var(--red);">
+              <h5 style="color: var(--red);">&warning; REGARDLESS &mdash; DANGER</h5>
+              <p>Brigades attack even when defeat is predicted. Expect catastrophic casualties, potential brigade dissolution, and morale collapse.</p>
+              <div class="tt-stat" style="color: var(--red);">Min power ratio: 0.5x (predicted defeat)</div>
+              <div class="tt-stat" style="color: var(--red);">Risk: Brigade dissolution, mass casualties</div>
+              <p class="tt-danger">This is a suicide order. Use only in desperate circumstances.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUPPORT -->
+      <div class="after-group" data-group="support">
+        <div class="after-group-label">Fire Support</div>
+        <div class="after-group-desc">Artillery barrage before assault</div>
+        <div class="support-states">
+          <div>
+            <div class="support-state-label">Off state:</div>
+            <div class="after-pills">
+              <div class="after-pill toggle-off" id="arty-off">
+                <span class="pill-label">&loz; Arty Prep</span>
+                <span class="pill-sub">Disabled &mdash; no bombardment</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="support-state-label">On state:</div>
+            <div class="after-pills">
+              <div class="after-pill toggle-on" id="arty-on">
+                <span class="pill-label">&diams; Arty Prep</span>
+                <span class="pill-sub">~200 rounds &middot; +15% attack bonus</span>
+                <div class="hover-tooltip" style="border-color: var(--red);">
+                  <h5>Artillery Preparation</h5>
+                  <p>Pre-assault bombardment softens enemy positions. Consumes ammunition from corps supply reserves.</p>
+                  <div class="tt-stat">Supply cost: ~200 rounds per battle</div>
+                  <div class="tt-stat">Attack bonus: +15% combat power</div>
+                  <div class="tt-stat">Defender entrenchment: -0.5 degradation</div>
+                  <p class="tt-warn">Check supply reserves before enabling</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone tooltip demo -->
+  <div style="margin-top: 24px;">
+    <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">
+      Hover Tooltip Demo &mdash; visible by default on SECTOR ATTACK above. Full mechanical detail:
+    </div>
+    <div class="tooltip-card" style="display: inline-block;">
+      <h4>Sector Attack</h4>
+      <div class="tt-subtitle">Push on one sector front</div>
+      <p>Commits 3-8 brigades to attack enemy positions on a single sector. Lowest risk operation type. Objectives are limited to OSIDs within one corps sector.</p>
+      <p>The corps AI selects the weakest point on the enemy front and concentrates available brigades. Pioneer brigades probe first; reinforcements join when concentration bonus is favorable.</p>
+      <div class="tt-stats">
+        <span>Duration: 4-8 turns typical</span>
+        <span>Brigades: 3-8 committed (MAX_PARTICIPATING = 12)</span>
+        <span>Preparation: 3-7 turns (commander personality)</span>
+        <span>Failure limit: 5 total / 3 consecutive on same target</span>
+      </div>
+      <div class="tt-best">Best for: Probing weak points, securing specific objectives, testing a sector before committing to a general offensive.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- DESIGN NOTES -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div class="divider"></div>
+
+<div class="design-notes">
+  <h3>Design Notes</h3>
+  <ol>
+    <li><strong>Group-level descriptions</strong> tell the player WHAT they are choosing &mdash; &ldquo;Speed vs. casualties tradeoff&rdquo; is immediately actionable context.</li>
+    <li><strong>Per-pill subtitles</strong> show the TRADEOFF at a glance &mdash; the player never has to guess what &ldquo;Methodical&rdquo; means relative to &ldquo;All-Out&rdquo;.</li>
+    <li><strong>Hover tooltips</strong> provide FULL mechanical explanation &mdash; power ratios, durations, casualty modifiers, all visible on demand without leaving the modal.</li>
+    <li><strong>REGARDLESS gets danger treatment</strong> &mdash; red background, red pulse animation, warning icon. It is a suicide order and should look like one.</li>
+    <li><strong>Artillery prep shows COST before enabling</strong> &mdash; &ldquo;~200 rounds, +15% attack bonus&rdquo; lets the player weigh the tradeoff before toggling.</li>
+    <li><strong>Total added:</strong> 15 subtitles + 15 tooltips + 4 group descriptions = <strong>34 pieces of context</strong> (was: 0). Zero additional screen space for subtitles; tooltips appear on demand.</li>
+  </ol>
+</div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- INTERACTIVITY -->
+<!-- ════════════════════════════════════════════════════════ -->
+<script>
+  // Make pill groups interactive: clicking toggles active state within group
+  document.querySelectorAll('.pill-group-interactive').forEach(function(group) {
+    group.querySelectorAll('.after-pill').forEach(function(pill) {
+      pill.addEventListener('click', function() {
+        // Remove active from siblings
+        group.querySelectorAll('.after-pill').forEach(function(p) {
+          p.classList.remove('active');
+          p.classList.remove('show-tooltip-default');
+        });
+        pill.classList.add('active');
+      });
+    });
+  });
+
+  // Toggle arty pills
+  document.getElementById('arty-off').addEventListener('click', function() {
+    var el = this;
+    if (el.classList.contains('toggle-off')) {
+      el.classList.remove('toggle-off');
+      el.classList.add('toggle-on');
+      el.querySelector('.pill-label').textContent = '\u2666 Arty Prep';
+      el.querySelector('.pill-sub').textContent = '~200 rounds \u00b7 +15% attack bonus';
+    } else {
+      el.classList.remove('toggle-on');
+      el.classList.add('toggle-off');
+      el.querySelector('.pill-label').textContent = '\u25c7 Arty Prep';
+      el.querySelector('.pill-sub').textContent = 'Disabled \u2014 no bombardment';
+    }
+  });
+
+  document.getElementById('arty-on').addEventListener('click', function() {
+    var el = this;
+    if (el.classList.contains('toggle-on')) {
+      el.classList.remove('toggle-on');
+      el.classList.add('toggle-off');
+      el.querySelector('.pill-label').textContent = '\u25c7 Arty Prep';
+      el.querySelector('.pill-sub').textContent = 'Disabled \u2014 no bombardment';
+    } else {
+      el.classList.remove('toggle-off');
+      el.classList.add('toggle-on');
+      el.querySelector('.pill-label').textContent = '\u2666 Arty Prep';
+      el.querySelector('.pill-sub').textContent = '~200 rounds \u00b7 +15% attack bonus';
+    }
+  });
+</script>
+
+</body>
+</html>
