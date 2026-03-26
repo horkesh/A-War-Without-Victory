@@ -34,27 +34,27 @@ export interface FactionReconProfile {
  * negative, so only combat or probes keep confidence high.
  *
  * Net in-contact rate = passive_buildup - confidence_decay:
- *   RS:   0.05 - 0.12 = -0.07/turn → combat intel (1.0) drops to threshold (0.35) in ~9 turns
- *   RBiH: 0.06 - 0.10 = -0.04/turn → combat intel (1.0) drops to threshold (0.40) in ~15 turns
- *   HRHB: 0.05 - 0.12 = -0.07/turn → combat intel (1.0) drops to threshold (0.30) in ~10 turns
+ *   RS:   0.08 - 0.12 = -0.04/turn → combat intel (1.0) drops to threshold (0.35) in ~16 turns
+ *   RBiH: 0.12 - 0.10 = +0.02/turn → sustains above threshold indefinitely in contact
+ *   HRHB: 0.08 - 0.12 = -0.04/turn → combat intel (1.0) drops to threshold (0.30) in ~18 turns
  */
 export const FACTION_RECON_PROFILES: Record<NonNullable<FactionId>, FactionReconProfile> = {
     RBiH: {
-        passive_buildup_per_turn: 0.06,
+        passive_buildup_per_turn: 0.12,
         confidence_decay_per_turn: 0.10,   // was 0.08 — intel goes stale universally
         recon_range: 2,
         probe_confidence_gain: 0.50,
         probe_casualty_factor: 0.15,
     },
     RS: {
-        passive_buildup_per_turn: 0.05,
-        confidence_decay_per_turn: 0.12,   // was 0.10 — blitz intel fades within ~9 turns
+        passive_buildup_per_turn: 0.08,
+        confidence_decay_per_turn: 0.12,   // was 0.10 — blitz intel fades within ~16 turns
         recon_range: 1,
         probe_confidence_gain: 0.35,
         probe_casualty_factor: 0.25,
     },
     HRHB: {
-        passive_buildup_per_turn: 0.05,
+        passive_buildup_per_turn: 0.08,
         confidence_decay_per_turn: 0.12,   // was 0.10 — intel goes stale universally
         recon_range: 1,
         probe_confidence_gain: 0.35,
