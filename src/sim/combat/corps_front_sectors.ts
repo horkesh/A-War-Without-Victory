@@ -275,7 +275,7 @@ function buildFactionSectors(
     // Step 6: Classify brigades — corps-driven assignment.
     const commanderProfiles = buildCorpsCommanderProfiles(state, sectors);
     const playerOverrides = state.military.brigade_sector_override;
-    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, commanderProfiles, playerOverrides);
+    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, commanderProfiles, playerOverrides, state);
 
     // Step 6b: Cross-corps enclave defense
     assignCrossCorpsEnclaveDefenders(sectors, formations, faction, componentOf);

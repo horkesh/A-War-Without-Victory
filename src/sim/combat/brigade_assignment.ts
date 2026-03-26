@@ -8,6 +8,7 @@ import type {
     FactionId,
     FormationId,
     FormationState,
+    GameState,
 } from '../../state/game_state.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
@@ -20,6 +21,11 @@ import {
 } from './corps_front_sectors_constants.js';
 import { getSectorComponent, getSectorFrontOsids, bfsToNearestSector } from './sector_utils.js';
 import type { CorpsCommanderProfile } from './commander_override.js';
+import {
+    removeFromActiveOperation,
+    DISSOLUTION_PERSONNEL_TO_RESERVE_RATE,
+    DISSOLUTION_EQUIPMENT_TRANSFER_RATE,
+} from './brigade_dissolution.js';
 
 /**
  * Classify brigades into sectors based on territory membership.
@@ -44,6 +50,7 @@ export function classifyBrigadesByTerritory(
     componentOf: Map<string, number>,
     commanderProfiles: Map<string, CorpsCommanderProfile>,
     playerOverrides?: Record<string, string>, // brigadeId → sector_id
+    state?: GameState,
 ): void {
     if (sectors.length === 0) return;
 
@@ -362,6 +369,63 @@ export function classifyBrigadesByTerritory(
                 target.need = Math.max(0, target.need - 1);
             } else if (sectorNeed.length > 0) {
                 // Fallback: brigade is in a disconnected component with no matching sector.
+
+                // Pocket-destroyable brigades: dissolve instead of teleporting 200km.
+                // Historical: when the Posavina pocket fell, its brigades ceased to exist.
+                if (Array.isArray(f.tags) && f.tags.includes('pocket_destroyable') && state) {
+                    const personnel = f.personnel ?? 0;
+                    const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);
+
+                    // Add personnel to strategic reserve
+                    if (state.military.strategic_reserves && f.faction) {
+                        const factionReserve = state.military.strategic_reserves[f.faction];
+                        if (typeof factionReserve === 'number') {
+                            (state.military.strategic_reserves as Record<string, number>)[f.faction] = factionReserve + personnelToReserve;
+                        }
+                    }
+
+                    // Transfer equipment to nearest same-corps active brigade (70% salvaged)
+                    if (f.composition && f.corps_id) {
+                        const salvageRate = DISSOLUTION_EQUIPMENT_TRANSFER_RATE;
+                        const tanksToTransfer = Math.floor((f.composition.tanks ?? 0) * salvageRate);
+                        const artilleryToTransfer = Math.floor((f.composition.artillery ?? 0) * salvageRate);
+
+                        // Find first alphabetically in same corps (deterministic)
+                        const sortedIds = Object.keys(formations).sort((a, b) => strictCompare(a, b));
+                        let targetBrigade: FormationState | null = null;
+                        for (const tid of sortedIds) {
+                            const t = formations[tid];
+                            if (!t || t.status !== 'active' || tid === bid) continue;
+                            if (t.faction !== f.faction || t.corps_id !== f.corps_id) continue;
+                            if (t.kind !== 'brigade' && t.kind !== 'og') continue;
+                            targetBrigade = t;
+                            break;
+                        }
+
+                        if (targetBrigade && targetBrigade.composition) {
+                            targetBrigade.composition.tanks = (targetBrigade.composition.tanks ?? 0) + tanksToTransfer;
+                            targetBrigade.composition.artillery = (targetBrigade.composition.artillery ?? 0) + artilleryToTransfer;
+                        }
+
+                        // Zero out dissolved brigade's equipment to prevent duplication
+                        f.composition.tanks = 0;
+                        f.composition.artillery = 0;
+                        f.composition.aa_systems = 0;
+                    }
+
+                    // Remove from active operation before marking inactive
+                    removeFromActiveOperation(state, bid, f.corps_id);
+
+                    // Mark as destroyed — pocket overrun
+                    f.status = 'inactive';
+                    f.lifecycle_status = 'destroyed';
+                    f.personnel = 0;
+                    f.destruction_turn = state.meta?.turn ?? 0;
+
+                    console.warn(`[brigade_assignment] Pocket brigade ${f.name ?? bid} destroyed: home pocket overrun (${personnelToReserve} personnel to reserve)`);
+                    continue; // Skip force-assignment
+                }
+
                 // Force-assign to the best sector regardless of component to avoid silent drops.
                 const fallback = [...sectorNeed]
                     .sort((a, b) => {

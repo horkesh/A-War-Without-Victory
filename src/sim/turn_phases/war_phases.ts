@@ -727,6 +727,20 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'consolidate-rear-pockets',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const report = consolidateRearPockets(
+                context.state, od.edges, od.opData.operationalToCanonical
+            );
+            if (report.total_flipped > 0) {
+                context.report.rear_pocket_consolidation = report;
+            }
+        }
+    },
+    {
         name: 'paramilitary-advance',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -743,20 +757,6 @@ export const warPhases: NamedPhase[] = [
                 } else {
                     context.report.paramilitary_sweep = report;
                 }
-            }
-        }
-    },
-    {
-        name: 'consolidate-rear-pockets',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-            const report = consolidateRearPockets(
-                context.state, od.edges, od.opData.operationalToCanonical
-            );
-            if (report.total_flipped > 0) {
-                context.report.rear_pocket_consolidation = report;
             }
         }
     },

@@ -904,7 +904,14 @@ export function advanceSectorOffensives(
                 // into whatever sector owns that OSID — potentially far from home.
                 issuePostOperationReturnMarches(state, op);
 
-                cmd.consecutive_probes = 0;
+                // Only reset probe counter when a FULL operation completes.
+                // Probe completions must preserve the counter so it can reach
+                // MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT and force a real commitment.
+                // Bug: resetting on probe completion created an infinite probe loop —
+                // counter went 0→1→complete→0→1→complete→... never reaching 2.
+                if (op.type !== 'probe') {
+                    cmd.consecutive_probes = 0;
+                }
                 // Save completed op for theater-aware follow-on suppression.
                 cmd.last_completed_operation = cmd.active_operation;
                 cmd.last_completed_operation_turn = turn;

@@ -3465,7 +3465,8 @@
     "mandatory": true,
     "initial_personnel": 600,
     "initial_cohesion": 50,
-    "fallback_osid": "op:orasje:orasje"
+    "fallback_osid": "op:orasje:orasje",
+    "tags": ["pocket_destroyable"]
   },
   {
     "id": "hrhb_104th_bosanski_brod_brigade",
@@ -3480,7 +3481,8 @@
     "mandatory": true,
     "initial_personnel": 600,
     "initial_cohesion": 50,
-    "fallback_osid": "op:orasje:orasje"
+    "fallback_osid": "op:orasje:orasje",
+    "tags": ["pocket_destroyable"]
   },
   {
     "id": "hrhb_105th_modrica_brigade",
