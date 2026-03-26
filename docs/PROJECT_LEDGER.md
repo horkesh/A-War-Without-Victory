@@ -1,7 +1,25 @@
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-25
-**Status:** **v0.7.0 COMPLETE. Backlog clear.** 1465 tests, 118 suites. **91.7% area-weighted (40w), 95 events.** Codex QA (30 corrections), Gorazde consolidation event, Hrasnica pocket fix. 9 legendary features on roadmap. **Next: v0.7.0.1 (13 missing 1992 essays), then v0.7.1 (essay template engine + Letter Home).**
+**Last Updated:** 2026-03-26
+**Status:** **v0.7.0 COMPLETE. Night shift delivered 8 workstreams.** 1487 tests, 123 suites. 96 essays (all standalone). Ghost Map + Exhaustion Clock. Letter Home engine. Ops Modal UX overhaul. Canon audit Phases A-C (phase0 removed). v0.8.0 types scaffolded. 5 integration test suites. **Next: v0.7.1 version bump, visual verification, canon audit Phase D/E.**
+
+## [2026-03-26] Night Shift — 8 Workstreams Complete
+
+**WS1 (essays):** 13 missing 1992 essays authored — all 96 Codex essays now standalone JSON. 800-870 words each, ICTY-first sourcing, no hedging.
+
+**WS2 (templates):** Letter Home template system — 25 templates (5 per casualty type) + 9 name pools (Bosniak/Serbian/Croatian).
+
+**WS3 (Ghost Map + Clock):** Deck.gl ScatterplotLayer census overlay (1991 demographics, ethnicity-colored dots). Exhaustion Clock candle visual in ArmyHQ (5 states, pulse animation).
+
+**WS4 (Letter Home engine):** Deterministic casualty vignette generation — multiply-by-primes hash, UI-side from adapter data. Renders in CoS briefing.
+
+**WS5 (Ops Modal UX):** Pointer-events fix, parameter strip (subtitles, tooltips, REGARDLESS danger), brigade cards (verbal descriptors), G-2 phase (WCAG, Map Legend, Quick Assessment), modal flow (commander confirm, phase stepper).
+
+**WS6 (integration tests):** 5 test files, 22 tests — scenario round-trip, event system, save/load, pool integrity, formation integrity.
+
+**WS7 (v0.8 scaffold):** PoliticalLeaderProfile/State types. Cost Ledger + Endgame Comparison design docs.
+
+**WS8 (canon audit):** Phase0 deleted (11 src + 3 scenarios + 16 tests + 3 warroom). peace_phases -> early_war_phases. 15 docs updated. Phase D/E deferred.
 
 ## [2026-03-25] P3 Backlog Cleared — Gorazde + Hrasnica
 

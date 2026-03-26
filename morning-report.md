@@ -1,147 +1,135 @@
-# Morning Report — Day/Night Shift 2026-03-25
-
-## Session Summary
-
-Massive session: Emergent Brigade Phase 2 (enclave fix + pool rerouting + tiered caps + troop balance), v0.7.0 Phase 4 complete (7 engine flag reads), nightshift triage confirmed done, and full UI/UX audit implementation (15 recommendations across 4 parallel streams). 23+ commits on main.
-
-### Emergent Brigade Phase 2 — Troop Strength Calibration (8 calibration runs: n1069-n1079)
-- **Enclave capacity gate fixed**: `ENCLAVE_FORMATION_CAPACITY_THRESHOLD=0.30`. Srebrenica 1->5 brigades (600->3,342), Gorazde 1->5 brigades (800->4,000).
-- **Surplus pool rerouting**: New pipeline step transfers manpower from exhausted to deficit municipalities.
-- **deriveMaxPersonnel activated**: Was dead code. OOB loader fixed, caps lowered to 1200-2800.
-- **Asymmetric mobilization**: RBiH 0.09, RS 0.04, HRHB 0.12.
-- **Strategic reserve**: RBiH draw rate 0.02->0.15.
-- **Result (n1079)**: RBiH 144k > RS+HRHB 144k (+369). 114 RBiH brigades (was 98). 91.3%.
-
-### v0.7.0 Phase 4 — Engine Flag Reads (COMPLETE)
-7 engine reads wired: arms_embargo (RBiH aid x0.6), corridor_secured (RS aid x1.3), drina_cleansing (+2/turn RS pressure), camps_revealed (+3/turn RS pressure), coha_active (suppress combat + defensive), dayton_signed (game over). n1079 frozen: 91.3%, 19 flags active.
-
-### UI/UX Audit — All 15 Recommendations Implemented (4 parallel streams)
-- **Stream A (P0)**: Commander names (two-line), corps card flip (FlipCard wired), ORBAT sector fixed. `a020179d`
-- **Stream B (P1)**: Alert banners amplified, faction dividers, supply 0% visually alarming. Concurrent with A+C.
-- **Stream C (P2)**: Equipment labels, stance toast+flash, territory progress bar+arrows, +MORE persistent. `4ad29682`
-- **Stream D (P3+)**: Version string, MapLibre attribution hidden, perf throttling (50ms), ORBAT-map sync (fly+flash), strategic dashboard (territory/casualty charts). `1464b999` + `d40aa77a`
-
-### Army HQ + Chronicle Restoration (post-nightshift)
-- **520196a2 was a destructive rewrite** — stripped Army HQ tabs, CoS briefing, SituationBriefing grid
-- Restored ArmyHQModal.tsx and SituationBriefing.tsx from c80d5767
-- Fixed date display ("UNKNOWN" → turnToDateString)
-- Fixed chronicle "undefined formed/destroyed" (formation_name field mismatch)
-- Fixed capital scroll target (missing data-summary-section)
-- **Life lesson added**: Agent UI rewrites must diff against known-good baseline
-
-### Infrastructure
-- Life lessons split into 8 topic files. 9 skills wired with Required Reading.
-- Historian OOB master hierarchy. ARMY_STRENGTH_COMPARISON.md.
-
-### Decisions Flagged for Review
-- DECISION-3: Aggressive deriveMaxPersonnel caps (1200-2800) -- verify in 52w run
-- DECISION-4: Asymmetric mobilization (RS 0.04) -- may be too low for late-war
-- DECISION-5: Operation supply 0% is genuine -- made alarming, not hidden
-
-### Recommended Next Steps
-1. Visually verify UI changes in browser (`npm run dev:map`)
-2. v0.7.0 Phase 5: FIXED->CONDITIONAL event conversions
-3. Run 52w scenario to verify tiered caps + mobilization at full war length
-4. Consider strategic dashboard as between-turns review screen
-
-### Build State
-- tsc: clean | vitest: 118 suites, 1465 tests | desktop:map:build: succeeds
-- Calibration: n1079 frozen at 91.3% | Last commit: `d40aa77a`
-
----
-
-# Morning Report — Night Shift 2026-03-24 (previous)
+# Morning Report — Night Shift 2026-03-26
 
 ## Summary
-Completed v0.6.5 (offensive paramilitary sweep), adapter integration tests, and v0.7.0 Phase 1+2 (evaluators + flag gates). 3 commits, +0.6pp calibration, 1446 tests. Build clean.
+All 8 workstreams completed successfully. 9 commits, 22 new tests (+22 from 1465 to 1487), 5,500 lines deleted (phase0 cleanup), ~2,100 lines added across features. Build clean: tsc passes, 123 suites / 1487 tests, desktop:map:build succeeds.
 
 ## What Was Done
 
-### v0.6.5 — Offensive Paramilitary Sweep (COMPLETE)
-- Phase 1: Constants (OFFENSIVE_PARA_*) + paramilitary_mode field on FormationState
-- Phase 2: `detectOffensiveParamilitaryTargets()` + extended `advanceParamilitaries()` for offensive mode
-- Phase 3: `offensive-paramilitary-detect` pipeline step in war_phases.ts
-- Phase 4: 10 new tests (6 detection + 4 resolution)
-- Phase 5: Calibration 92.0% -> 92.6% (+0.6pp). Baseline re-frozen (n1038). /war-or-game APPROVED
-- /simplify: Ran after completion (3 review agents dispatched)
-- Enclave protection added after first run showed Gorazde/Srebrenica overshoot (90.7% initial -> 92.6% with exclusion)
-- Commit: c9ac0137
+### WS1: Author 13 Missing 1992 Essays — 103ff645
+- Extracted 13 essays from essay_index.json inline content
+- Expanded each from ~520-600 words to 800-870 words
+- Added all mandatory ICTY citations (Galic, Karadzic, Kunarac, Prlic, Oric, Brdanin, etc.)
+- Fixed drina_cleansing category from humanitarian to political per spec
+- All 96 Codex essays now have standalone JSON files
 
-### Tier 0.5 — Integration Tests (COMPLETE)
-- Adapter field completeness test: 18 tests against real save file
-- Covers: formations, political controllers, control events, militia pools, corps sectors, officers, enclaves, displacement, casualties, supply, events, turn summaries
-- Commit: e5483cdc
+### WS2: Letter Home Templates — a1f99593
+- Created `data/templates/letter_home_templates.json`
+- 25 templates (5 per type: kia_offensive, kia_defensive, kia_siege, wia, mia)
+- 9 name pools: Bosniak/Serbian/Croatian male, female, and surnames
+- Note: spec header said "20 templates" but detailed content defined 25 (5x5)
 
-### v0.7.0 — Event Flag Wiring (Phase 1+2 COMPLETE, Phases 3-6 remaining)
-- Phase 1: Implemented `enclave_supply_status` and `corridor_severed` condition evaluators (were placeholders returning false)
-- Phase 2: Wired flag gates to 21 downstream events across all 4 event JSON files
-- Phase 3 (partial): Added pressure modifiers to 3 events (concentration_camps, srebrenica_enclave, hvo_arbih_tensions)
-- 8 new condition evaluator tests
-- Commit: 99655a7a
+### WS3: Ghost Map + Exhaustion Clock — 79b27924
+- **Ghost Map**: Deck.gl ScatterplotLayer showing 1991 census demographics as colored dots
+  - New file: `buildGhostMapLayer.ts` (data transform + layer builder)
+  - Toggle via "1991" button in MapModeToolbar
+  - Modified: DataLoader, deckLayerCapabilities, composeTacticalDeckLayers, gameStore, mapModes, MapModeToolbar, MapContainer
+- **Exhaustion Clock**: Candle visual in Army HQ briefing grid
+  - New file: `ExhaustionClock.tsx`
+  - Five states: strong/steady/waning/critical/spent with pulse animation
+  - Inserted between crest and strategic position in ArmyHQModal grid
+
+### WS4: Letter Home Engine — c2065bf7
+- Created `src/sim/letter_home.ts` — deterministic casualty vignette generation
+- multiply-by-primes hash (no Math.random, no Date.now)
+- UI-side generation from adapter data (no pipeline change, no save format change)
+- Modified `ChiefOfStaffBriefing.tsx` — renders as italic Georgia text with muted gold border
+- Faction-appropriate name pools, rear municipalities, hospitals
+
+### WS5: Ops Modal UX Overhaul — 07bbb7ff
+- **WP4a**: Pointer-events click bug FIXED — OpsMap gets pointer-events-none when disabled
+- **WP1**: Parameter strip: group descriptions, per-pill subtitles, title attrs, REGARDLESS danger pulse, artillery info
+- **WP2**: Brigade cards: TANKS/ARTY labels, verbal cohesion/fatigue, unit type indicator, combat ineffective border
+- **WP3**: G-2 phase: widened clipboard (480px), WCAG contrast fix, Map Legend tab, Quick Assessment box, B/C/S translations
+- **WP4b-f**: Commander confirmation step, enlarged phase stepper, close button, always-visible buttons, skip animation
+
+### WS6: Integration Tests — 6e61e676
+- 5 test files, 22 tests total, all passing
+- Scenario round-trip (3 tests), event system (7 tests), save/load (4 tests), pool integrity (4 tests), formation integrity (4 tests)
+- Adapted spec code to match actual exports (singular condition, control_change shape, serializeGameState)
+
+### WS7: v0.8.0 Types + v0.9 Design Docs — 99b8705c
+- Created `src/state/political_leader_types.ts` — interfaces only, no logic
+- 5 open questions flagged in comments for daytime review
+- v0.9 consequence system doc already existed
+- Created Cost Ledger template format doc + Endgame Comparison data requirements doc
+
+### WS8: Canon Audit Phases A-C — 5296fba4
+- **Phase A**: Deleted src/phase0/ (11 files), 3 phase0 scenarios, 16 phase0 tests, 3 warroom phase0 files. Fixed imports in 10+ files.
+- **Phase B**: Renamed peace_phases.ts -> early_war_phases.ts, bot_phase_i.ts -> bot_early_war.ts, peacePhaseTimeFactor -> earlyWarTimeFactor
+- **Phase C**: Updated 15 canon + engineering docs, archived 3 obsolete docs to docs/_old/
+- **HARD STOP**: Phase D/E deferred (type system changes need daytime sign-off)
 
 ## Test Results
-- Suites: 117 passed
-- Tests: 1446 passed (was 1412 at start of shift, +34 new)
-- New tests added: 10 (paramilitary) + 18 (adapter) + 6 (evaluator) = 34
-- TypeScript: clean
-- Map build: clean
+- Suites: 123 passed (was 118 at start — +5 new, -16 deleted phase0)
+- Tests: 1487 passed, 1 skipped (was 1465 at start — +22 new)
+- New tests added: 22 (5 integration test files)
+- TypeScript: clean (0 errors)
+- Desktop map build: succeeds
 
 ## Decisions Made (FLAGGED FOR DAY SHIFT REVIEW)
 
-- **[DECISION-1]**: Skipped `jna_withdrawn` flag gates. The `jna_withdrawal_1992` event is being crowded out by MAX_EVENTS_PER_TURN=3 after v0.6.5 changed event timing. Adding gates on a flag that doesn't fire would break the Drina -> Srebrenica -> Corridor cascade. **Fix needed**: either increase MAX_EVENTS_PER_TURN to 4, or give jna_withdrawal higher priority.
-
-- **[DECISION-2]**: Accepted 92.6% (+0.6pp) vs plan target of +2-3pp. /war-or-game approved. The modest gain is because offensive paramilitaries cascade through VRS regular combat, causing Drina over-capture (+10 RS OSIDs vs painted). Enclave core OSIDs are protected.
-
-- **[DECISION-3]**: Exported `ENCLAVE_DEFINITIONS` and `osidBelongsToEnclave` from enclave_resilience.ts (previously private). Needed for paramilitary enclave exclusion. Minimal API surface change.
+- **[DECISION-1]**: WS5 WP4a pointer-events fix — added `pointer-events-none` to OpsMap container when `enabled=false`. Simplest fix among the three options. Alternative: wrapping each phase in pointer-events-auto full-area container.
+- **[DECISION-2]**: WS5 WP2e unit type indicator — parsed from brigade name (regex for MOTORIZED, MOUNTAIN, etc.) since `FormationView` has no `unit_type` field. Alternative: add `unit_type` to adapter.
+- **[DECISION-3]**: WS4 Letter Home — implemented as UI-side generation (adapter data, not pipeline step), per spec recommendation. No save format change.
+- **[DECISION-4]**: WS2 template count — spec header said "20" but detailed content defined 25 (5x5). Included all 25.
+- **[DECISION-5]**: WS8 Phase0 warroom stubs — InvestmentPanel, WarPlanningMap, MagazineModal, FactionOverviewPanel had phase0 imports. Replaced with local stub types/functions rather than full removal (files still needed for war-phase functionality).
 
 ## Issues Found
 
-- **[ISSUE-1]**: MAX_EVENTS_PER_TURN=3 is too restrictive. At w5, 4+ events are eligible (barracks events + jna_withdrawal + others). The jna_withdrawal event gets squeezed out, which prevents it from setting the `jna_withdrawn` flag. This flag was supposed to gate drina_cleansing, operation_corridor, and srebrenica_enclave. **Severity: P1.** Fix: increase to 4 or add priority-based selection.
-
-- **[ISSUE-2]**: Gorazde periphery over-capture (3 OSIDs: glamoc, kamen, sopotnica). The offensive paramilitaries take Gorazde municipality OSIDs that are NOT in the enclave OSID list but should historically remain RBiH. Consider either expanding the Gorazde enclave OSID list or removing gorazde from the offensive para municipality scope.
-
-- **[ISSUE-3]**: The `corridor_severed` evaluator builds adjacency from `(state as any).derived?.edges` -- this path may not exist at runtime. It needs the operational contact graph edges, which are loaded by the turn pipeline but may not be on the state object. This evaluator may silently return false (corridor never severed) until the edges data path is properly wired.
+- **[ISSUE-1]**: Pre-existing SECTOR REACHABILITY INVARIANT VIOLATION — `arbih_guards_brigade` at `op:visoko:visoko_2` assigned to unreachable sector. Logged in integration test stderr. Not caused by nightshift changes.
+- **[ISSUE-2]**: WS8 archived docs to `docs/_old/` but `.gitignore` initially excluded that path. Force-added with `git add -f`.
 
 ## Skipped (Blocked)
 
-- v0.7.0 Phase 4 (engine flag reads): Requires one-change-per-calibration-run protocol. Each engine system read needs its own calibration run. Too slow for tonight.
-- v0.7.0 Phase 5 (FIXED->CONDITIONAL): High-risk conversions (Srebrenica, Markale, Zepa) need careful calibration.
-- v0.7.0 Phase 6 (cleanup): Depends on Phases 4-5.
-- v0.7.3 (canon audit): Not started -- roadmap priority after v0.7.0.
+- **WS8 Phase D/E**: Type system changes (`PhaseName = 'peace' | 'war'` to `'war'` only) + save migration. Needs daytime sign-off per handoff instructions.
+- **WS5 WP4f**: Per-objective terrain info — requires new data pipeline lookup. Conservative skip.
+- **WS5 WP4g**: AuthorizePhase summary panel — medium complexity. Conservative skip.
+- **WS5 WP4h**: Probe customization — spec said "STOP AND ASK". Conservative skip.
 
 ## Observations & Proposals
 
 ### Opportunities Noticed
-- **[OPP-1]**: The `drina_cleansing_decision_1992` event now fires at w10 thanks to offensive paramilitaries raising war_crimes_events above threshold earlier. This is emergent and historically correct.
-- **[OPP-2]**: HRHB offensive paramilitaries (6 units in Stolac/Capljina/Prozor) correctly model HOS activity in Herzegovina.
+- **[OPP-1]**: Ghost Map data could power a "displacement delta" visualization — compare 1991 dots against current control to show demographic change. ~50 lines in a new layer.
+- **[OPP-2]**: Letter Home templates could be faction-specific in tone (not just names) — ARBiH templates referencing Sarajevo landmarks, VRS templates referencing Drina valley geography.
+- **[OPP-3]**: Integration tests pattern (40w scenario in beforeAll) could be extracted into a shared test fixture. Both pool_integrity and formation_integrity run independent 40w scenarios — could share one.
 
 ### Problems Discovered
-- **[PROB-1]**: Plan estimated +2-3pp from offensive paramilitaries but actual gain is +0.6pp. Root cause: cascade effects. Paramilitaries unlock too much regular VRS expansion in the Drina via adjacency.
-- **[PROB-2]**: Event timing is fragile. Adding 1 pipeline step changed event firing order enough to crowd out jna_withdrawal. MAX_EVENTS_PER_TURN cap is the bottleneck.
+- **[PROB-1]**: Warroom files (InvestmentPanel, WarPlanningMap, etc.) have deep dependencies on phase0 types even for war-phase rendering. Stubs work but are technical debt — audit in Phase D.
+- **[PROB-2]**: `docs/_old/` directory is in .gitignore. Archived docs are force-added but could be accidentally cleaned.
 
-### Feature Ideas (DO NOT IMPLEMENT -- for day shift consideration)
-- **[IDEA-1]**: Named paramilitary units ("Arkan's Tigers" for Bijeljina/Zvornik, "White Eagles" for Visegrad/Foca). ~20 lines.
-- **[IDEA-2]**: Player paramilitary decision event with per-OSID granularity. "Arkan's Tigers request permission to operate in Zvornik. This will constitute a war crime."
+### Feature Ideas (DO NOT IMPLEMENT)
+- **[IDEA-1]**: ExhaustionClock could show all 3 faction candles side-by-side in dev/analyst mode.
+- **[IDEA-2]**: MapLegendTab could be promoted to a standalone floating panel accessible from any map view.
+- **[IDEA-3]**: Letter Home could extend with a "Memorial Wall" — accumulating all vignettes into a scrollable list, creating growing weight of war.
 
 ### Code Quality Notes
-- `paramilitary_sweep.ts` grew from 369 to ~580 lines. Approaching split point for offensive vs rear-pocket modes.
-- `corridor_severed` evaluator uses `(state as any).derived?.edges` -- needs proper typing.
+- `ChiefOfStaffBriefing.tsx` is growing large — consider extracting Letter Home section into its own component.
+- `OpsPlanningModal.tsx` phase stepper logic is complex — could benefit from a `PhaseStepper` sub-component.
+- Integration tests running 40w scenarios are slow (~60s each). Consider shared fixture or shorter test scenario.
 
 ## Commits (chronological)
-1. c9ac0137 -- feat(sim): v0.6.5 offensive paramilitary sweep -- Drina valley ethnic cleansing
-2. e5483cdc -- test(integration): adapter field completeness -- 18 tests against real save
-3. 99655a7a -- feat(events): v0.7.0 Phase 1+2 -- evaluators + flag gates + pressure modifiers
+1. 103ff645 — feat(codex): author 13 missing 1992 essays with ICTY-first sourcing
+2. a1f99593 — feat(letter-home): add 25 casualty vignette templates + name pools
+3. 99b8705c — feat(v0.8): scaffold political leader types + v0.9 design docs
+4. 5296fba4 — chore(canon-audit): remove peace phase, rename to early war (Phases A-C)
+5. 6e61e676 — test(integration): add 5 integration test suites with 22 tests
+6. 79b27924 — feat(ui): Ghost Map census overlay + Exhaustion Clock candle visual
+7. 07bbb7ff — feat(ops-modal): UX overhaul — pointer-events fix, parameter strip, brigade cards, G-2 phase, modal flow
+8. c2065bf7 — feat(letter-home): deterministic casualty vignette engine + CoS briefing
+9. 949a8bc0 — docs: add UI/UX audit, ops modal spec, and 5 interactive mockups
 
 ## Build State at End of Shift
-- tsc: clean
-- vitest: 117 suites, 1446 tests, 1 skipped
-- Last commit: 99655a7a
-- Current version: v0.6.5 (paramilitary sweep landed), v0.7.0 Phase 1+2 complete
-- Calibration: 92.6% area-weighted, baseline frozen
+- tsc: clean (0 errors)
+- vitest: 123 suites, 1487 tests, 1 skipped
+- desktop:map:build: success
+- Last commit: 949a8bc0
+- Working tree: clean
 
 ## Recommended Next Steps for Day Shift
-1. **Fix MAX_EVENTS_PER_TURN** -- increase to 4 or implement priority-based event selection. This unblocks jna_withdrawn flag gates (DECISION-1).
-2. **Review DECISION-2** -- Gorazde periphery over-capture. Consider removing gorazde from OFFENSIVE_PARA_MUNICIPALITY_SCOPE.
-3. **Continue v0.7.0 Phase 4** -- engine flag reads (supply_reserves, patron_pressure). One change per calibration run.
-4. **Wire corridor_severed edges data path** -- ISSUE-3.
-5. **Plan v0.7.0 Phase 5** -- FIXED->CONDITIONAL conversions for endgame chain.
+1. Review DECISION-1 through DECISION-5 above
+2. Run `npm run desktop` and visually verify: Ghost Map toggle, Exhaustion Clock, Ops Modal UX, Letter Home vignettes
+3. Execute WS8 Phase D/E (type system: remove 'peace' from PhaseName, add save migration)
+4. Run 3-pass QA on 13 new essays (WS1 bonus task)
+5. Consider OPP-3 (shared 40w test fixture) to speed up integration tests
+6. Address PROB-2 (docs/_old in .gitignore)
+7. Next milestone: v0.7.1 (Letter Home + Ghost Map) or v0.7.2 (Ops Modal)
