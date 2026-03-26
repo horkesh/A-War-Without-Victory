@@ -16,6 +16,30 @@ interface RawIntelTabProps {
     prediction: PredictionResult;
 }
 
+// WP3f: Synthesize recommendation reasoning from available prediction fields
+function getRecommendationReasoning(prediction: PredictionResult): string {
+    const { overall } = prediction;
+    const parts: string[] = [];
+
+    // Force ratio assessment
+    if (overall.forceRatio >= 2.0) parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 favorable`);
+    else if (overall.forceRatio >= 1.2) parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 adequate`);
+    else if (overall.forceRatio >= 0.8) parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 contested`);
+    else parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 unfavorable`);
+
+    // Intel confidence
+    if (overall.intelConfidence >= 0.7) parts.push('intel high');
+    else if (overall.intelConfidence >= 0.4) parts.push('intel moderate');
+    else parts.push('intel insufficient');
+
+    // Casualty estimate
+    if (overall.estimatedCasualties > 500) parts.push('heavy casualties expected');
+    else if (overall.estimatedCasualties > 200) parts.push('moderate casualties expected');
+    else parts.push('light casualties expected');
+
+    return `${overall.recommendedAction.toUpperCase()} \u2014 ${parts.join(', ')}`;
+}
+
 export function RawIntelTab({ prediction }: RawIntelTabProps) {
     const { overall, perAxis } = prediction;
     const outcomeStyle = OUTCOME_STYLES[overall.predictedOutcome] ?? {
@@ -34,7 +58,7 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
                 <ReadinessBar
                     label="Force Ratio"
                     value={Math.min(1, overall.forceRatio / 2)}
-                    qualitativeLabel={`${overall.forceRatio.toFixed(2)}:1 — ${labelFromThresholds(overall.forceRatio, FORCE_RATIO_LABELS)}`}
+                    qualitativeLabel={`${overall.forceRatio.toFixed(2)}:1 \u2014 ${labelFromThresholds(overall.forceRatio, FORCE_RATIO_LABELS)}`}
                 />
             </div>
 
@@ -75,6 +99,11 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
                 </span>
             </div>
 
+            {/* WP3f: Recommendation reasoning */}
+            <div className="text-[9px] text-text-secondary/70 italic -mt-2 ml-4">
+                {getRecommendationReasoning(prediction)}
+            </div>
+
             {/* Per-axis breakdown */}
             {perAxis.length > 0 && (
                 <div className="space-y-2">
@@ -106,7 +135,7 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
             {overall.intelConfidence < 0.4 && (
                 <div className="bg-red-900/20 border border-red-400/20 rounded-lg p-3">
                     <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
-                        ⚠ INTEL INSUFFICIENT
+                        \u26A0 INTEL INSUFFICIENT
                     </div>
                     <div className="text-[9px] text-red-400/70 mt-1">
                         Recommend reconnaissance in force before commitment.

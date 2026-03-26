@@ -87,11 +87,12 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                                 </button>
 
                                 {/* Reorder */}
+                                {/* WP4e: Always-visible reorder/remove controls */}
                                 <button
                                     type="button"
                                     onClick={() => moveObjective(idx, -1)}
                                     disabled={idx === 0}
-                                    className="text-[9px] text-text-secondary/30 hover:text-white disabled:opacity-0 transition-opacity opacity-0 group-hover:opacity-100"
+                                    className="text-[9px] text-text-secondary/40 hover:text-white disabled:opacity-20 transition-colors"
                                 >
                                     ↑
                                 </button>
@@ -99,7 +100,7 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                                     type="button"
                                     onClick={() => moveObjective(idx, 1)}
                                     disabled={idx === objectives.length - 1}
-                                    className="text-[9px] text-text-secondary/30 hover:text-white disabled:opacity-0 transition-opacity opacity-0 group-hover:opacity-100"
+                                    className="text-[9px] text-text-secondary/40 hover:text-white disabled:opacity-20 transition-colors"
                                 >
                                     ↓
                                 </button>
@@ -108,7 +109,7 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                                 <button
                                     type="button"
                                     onClick={() => removeObjective(osid)}
-                                    className="text-[9px] text-text-secondary/20 hover:text-red-400 transition-opacity opacity-0 group-hover:opacity-100"
+                                    className="text-[9px] text-text-secondary/40 hover:text-red-400 transition-colors"
                                 >
                                     ×
                                 </button>

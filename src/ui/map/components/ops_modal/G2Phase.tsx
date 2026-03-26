@@ -1,6 +1,6 @@
 /**
  * Phase 3 — G2 Assessment clipboard.
- * Slides in from right. Two tabs: narrative assessment + raw intel.
+ * Slides in from right. Three tabs: narrative assessment + raw intel + map legend.
  */
 import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
@@ -8,9 +8,11 @@ import type { OpsPlanState } from './types';
 import type { PredictionResult } from './usePrediction';
 import { NarrativeTab } from './NarrativeTab';
 import { RawIntelTab } from './RawIntelTab';
+import { MapLegendTab } from './MapLegendTab';
 import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
 
-type G2Tab = 'assessment' | 'raw_intel';
+// WP3c: Three tabs
+type G2Tab = 'assessment' | 'raw_intel' | 'map_legend';
 
 interface G2PhaseProps {
     plan: OpsPlanState;
@@ -43,16 +45,16 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
 
     return (
         <div className="absolute inset-0 z-10 pointer-events-none">
-            {/* Clipboard — right side */}
-            <div className="absolute top-16 right-4 bottom-4 w-[360px] pointer-events-auto
+            {/* Clipboard — right side (WP3a: widened from 360px to 480px) */}
+            <div className="absolute top-16 right-4 bottom-4 w-[480px] pointer-events-auto
                             flex flex-col overflow-hidden">
                 {/* Binder clip */}
                 <div className="h-8 bg-[#4a4238] rounded-t-lg flex items-center justify-center relative">
                     <div className="w-16 h-3 bg-[#6a6258] rounded-sm border border-[#3a3228]" />
                 </div>
 
-                {/* Paper body */}
-                <div className="flex-1 overflow-y-auto bg-[#f0e8d8] rounded-b-lg border-x border-b border-[#c0b090] p-4"
+                {/* Paper body (WP3b: WCAG contrast fix — lighter background) */}
+                <div className="flex-1 overflow-y-auto bg-[#faf6ef] rounded-b-lg border-x border-b border-[#c0b090] p-4"
                      style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'4\' height=\'4\' viewBox=\'0 0 4 4\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M1 3h1v1H1V3zm2-2h1v1H3V1z\' fill=\'%23c0b09020\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")' }}>
 
                     {/* Tab buttons */}
@@ -62,8 +64,8 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                             onClick={() => setActiveTab('assessment')}
                             className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
                                 ${activeTab === 'assessment'
-                                    ? 'bg-[#3a3228] text-[#f0e8d8]'
-                                    : 'bg-[#d6ccb7] text-[#6a5e4e] hover:bg-[#c0b090]'
+                                    ? 'bg-[#3a3228] text-[#faf6ef]'
+                                    : 'bg-[#d6ccb7] text-[#4a4238] hover:bg-[#c0b090]'
                                 }`}
                         >
                             Assessment
@@ -73,11 +75,22 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                             onClick={() => setActiveTab('raw_intel')}
                             className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
                                 ${activeTab === 'raw_intel'
-                                    ? 'bg-[#3a3228] text-[#f0e8d8]'
-                                    : 'bg-[#d6ccb7] text-[#6a5e4e] hover:bg-[#c0b090]'
+                                    ? 'bg-[#3a3228] text-[#faf6ef]'
+                                    : 'bg-[#d6ccb7] text-[#4a4238] hover:bg-[#c0b090]'
                                 }`}
                         >
                             Raw Intel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('map_legend')}
+                            className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
+                                ${activeTab === 'map_legend'
+                                    ? 'bg-[#3a3228] text-[#faf6ef]'
+                                    : 'bg-[#d6ccb7] text-[#4a4238] hover:bg-[#c0b090]'
+                                }`}
+                        >
+                            Map Legend
                         </button>
                     </div>
 
@@ -98,18 +111,21 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                     )}
 
                     {!loading && !error && !prediction && !hasObjectives && (
-                        <div className="text-[10px] text-[#6a5e4e] italic text-center py-8">
+                        <div className="text-[10px] text-[#4a4238] italic text-center py-8">
                             Complete your plan to generate assessment
                         </div>
                     )}
 
                     {!loading && !error && !prediction && hasObjectives && (
-                        <div className="text-[10px] text-[#6a5e4e] italic text-center py-8">
+                        <div className="text-[10px] text-[#4a4238] italic text-center py-8">
                             Awaiting G2 prediction data...
                         </div>
                     )}
 
-                    {!loading && prediction && (
+                    {/* WP3c: Map Legend tab */}
+                    {activeTab === 'map_legend' && <MapLegendTab />}
+
+                    {!loading && prediction && activeTab !== 'map_legend' && (
                         activeTab === 'assessment'
                             ? <NarrativeTab
                                 prediction={prediction}
@@ -133,7 +149,7 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                                 : 'bg-accent-gold/20 text-accent-gold border-accent-gold/20 hover:bg-accent-gold/30'
                             }`}
                     >
-                        {isLowIntel ? 'Proceed Despite Low Intel →' : 'Proceed to Authorization →'}
+                        {isLowIntel ? 'Proceed Despite Low Intel \u2192' : 'Proceed to Authorization \u2192'}
                     </button>
                 </div>
             </div>

@@ -441,12 +441,31 @@ export function OpsMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [objectives, stagingOsid, axes, faction, mapReady, selectableOsids, enabled]);
 
+    // WP4a FIX: When map interaction is disabled (non-plan phases), set pointer-events-none
+    // on the entire map container. This prevents MapLibre canvas from intercepting clicks
+    // that should reach the phase overlay panels (CommanderPhase, G2Phase, AuthorizePhase).
+    // The phase panels have pointer-events-auto on their interactive children, which works
+    // correctly when the MapLibre canvas beneath cannot steal clicks.
     return (
-        <div
-            ref={mapContainerRef}
-            className="absolute inset-0"
-            style={{ background: '#d6ccb7' }}
-        />
+        <>
+            <div
+                ref={mapContainerRef}
+                className={`absolute inset-0 ${enabled ? '' : 'pointer-events-none'}`}
+                style={{ background: '#d6ccb7' }}
+            />
+            {/* WP4j: Compact map legend — Plan phase only */}
+            {enabled && (
+                <div className="absolute bottom-4 left-4 z-20 pointer-events-auto
+                                bg-[rgba(20,18,15,0.85)] backdrop-blur-sm rounded-md
+                                border border-[rgba(180,160,130,0.15)] px-3 py-2 text-[8px]">
+                    <div className="text-accent-gold font-bold uppercase tracking-wider mb-1">Legend</div>
+                    <div className="space-y-0.5 text-text-secondary">
+                        <div><span className="inline-block w-2 h-2 rounded-full bg-red-800 mr-1" /> Objective &middot; <span className="text-accent-gold">&#9733;</span> Schwerpunkt &middot; <span className="inline-block w-2 h-2 rounded-full bg-[#2d6a4f] mr-1" /> Staging</div>
+                        <div><span className="inline-block w-3 h-0.5 bg-[rgba(255,220,120,0.8)] mr-1" /> Corps front &middot; Bright = selectable &middot; Dim = out of range</div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
 

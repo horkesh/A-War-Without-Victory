@@ -156,6 +156,19 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                 />
             </div>
 
+            {/* WP4i: Skip animation button */}
+            {isStamped && !transmitted && (
+                <div className="relative z-10 mt-4 text-center">
+                    <button
+                        type="button"
+                        onClick={() => setTransmitted(true)}
+                        className="text-[9px] text-text-secondary/50 hover:text-text-secondary transition-colors"
+                    >
+                        Skip animation &rarr;
+                    </button>
+                </div>
+            )}
+
             {/* Transmitted message */}
             {transmitted && (
                 <div className="relative z-10 mt-4 text-center animate-[fadeIn_0.5s_ease-out]">

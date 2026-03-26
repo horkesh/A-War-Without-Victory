@@ -3,7 +3,7 @@
  * Shows corps identity card and officer selection grid.
  * Click an officer card to select and advance to Phase 2.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import type { NamedOfficerView } from '../../data/types';
 import {
@@ -109,10 +109,27 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
         };
     }, [loadedGameState, corpsId]);
 
+    // WP4b: Confirmation step — click selects (pending), confirm advances
+    const [pendingOfficerId, setPendingOfficerId] = useState<string | null>(null);
+
     const handleSelectOfficer = (officerId: string) => {
-        setSelectedOfficer(officerId);
-        onAdvance();
+        setPendingOfficerId(officerId);
     };
+
+    const handleConfirm = () => {
+        if (pendingOfficerId) {
+            setSelectedOfficer(pendingOfficerId);
+            onAdvance();
+        }
+    };
+
+    const handleCancelSelection = () => {
+        setPendingOfficerId(null);
+    };
+
+    const pendingOfficer = pendingOfficerId
+        ? availableOfficers.find(({ officer }) => officer.id === pendingOfficerId)
+        : null;
 
     return (
         <div className="absolute inset-0 z-10 flex items-end justify-center pb-8 pointer-events-none">
@@ -165,9 +182,11 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                                     key={officer.id}
                                     type="button"
                                     onClick={() => handleSelectOfficer(officer.id)}
-                                    className="text-left p-3 rounded-md border border-[rgba(180,160,130,0.12)]
-                                               bg-[rgba(40,36,30,0.6)] hover:bg-[rgba(60,54,44,0.8)]
-                                               hover:border-accent-gold/40 transition-all group"
+                                    className={`text-left p-3 rounded-md border transition-all group
+                                        ${pendingOfficerId === officer.id
+                                            ? 'border-accent-gold bg-[rgba(60,54,44,0.8)] shadow-[0_0_12px_rgba(196,163,90,0.25)]'
+                                            : 'border-[rgba(180,160,130,0.12)] bg-[rgba(40,36,30,0.6)] hover:bg-[rgba(60,54,44,0.8)] hover:border-accent-gold/40'
+                                        }`}
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="min-w-0">
@@ -215,6 +234,36 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                             );
                         })}
                     </div>
+
+                    {/* WP4b: Confirmation bar */}
+                    {pendingOfficer && (
+                        <div className="mt-3 pt-3 border-t border-[rgba(180,160,130,0.15)] flex items-center gap-3">
+                            <span className="text-[10px] text-text-secondary flex-1 truncate">
+                                Selected: <span className="text-white font-bold">
+                                    {formatRank(pendingOfficer.officer.rank)} {pendingOfficer.officer.name}
+                                </span>
+                                <span className={`ml-1.5 text-[8px] uppercase ${pendingOfficer.fit.colorClass}`}>
+                                    ({pendingOfficer.fit.label})
+                                </span>
+                            </span>
+                            <button
+                                type="button"
+                                onClick={handleConfirm}
+                                className="px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider
+                                           bg-accent-gold/20 text-accent-gold border border-accent-gold/30
+                                           hover:bg-accent-gold/30 transition-colors"
+                            >
+                                Confirm & Proceed &rarr;
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleCancelSelection}
+                                className="text-[9px] text-text-secondary/50 hover:text-text-secondary transition-colors"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    )}
 
                     {/* Unavailable officers (collapsed) */}
                     {unavailableOfficers.length > 0 && (

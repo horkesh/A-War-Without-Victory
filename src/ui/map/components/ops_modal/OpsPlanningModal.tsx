@@ -286,7 +286,8 @@ export function OpsPlanningModal() {
                         disabled={i > highestPhase}
                         className="flex items-center gap-2 group"
                     >
-                        <div className={`w-2.5 h-2.5 rounded-full transition-all ${
+                        {/* WP4c: Enlarged phase dots */}
+                        <div className={`w-3.5 h-3.5 rounded-full transition-all ${
                             i === currentIdx
                                 ? 'bg-accent-gold shadow-[0_0_8px_rgba(196,163,90,0.5)]'
                                 : i <= highestPhase
@@ -297,6 +298,7 @@ export function OpsPlanningModal() {
                             i === currentIdx ? 'text-accent-gold' : i <= highestPhase ? 'text-text-secondary' : 'text-text-secondary/30'
                         }`}>
                             {PHASE_LABELS[p]}
+                            <span className="text-[7px] text-text-secondary/30 ml-1">{i + 1}</span>
                         </span>
                         {i < PHASE_ORDER.length - 1 && (
                             <div className={`w-6 h-px ${i < currentIdx ? 'bg-accent-gold/40' : 'bg-[rgba(180,160,130,0.1)]'}`} />
@@ -337,10 +339,12 @@ export function OpsPlanningModal() {
             )}
 
             {/* Close button — top right */}
+            {/* WP4d: Enlarged close button with title */}
             <button
                 type="button"
                 onClick={clearContext}
-                className="absolute top-4 right-4 z-30 w-8 h-8 flex items-center justify-center
+                title="Close operations planning (ESC) — draft will be lost"
+                className="absolute top-4 right-4 z-30 w-10 h-10 flex items-center justify-center
                            text-text-secondary hover:text-white rounded-full
                            bg-[rgba(20,18,15,0.6)] hover:bg-[rgba(20,18,15,0.9)]
                            backdrop-blur-sm transition-colors border border-[rgba(180,160,130,0.1)]"
