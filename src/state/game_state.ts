@@ -908,6 +908,10 @@ export interface ControlEvent {
     from: string | null;
     to: string | null;
     mun_id?: string;
+    /** Deterministic join key: {turn}:{osid}:{attacker_brigade}:{defender_brigade|null} */
+    battle_id?: string;
+    /** Brigade that attacked to cause this control change. */
+    attacker_brigade?: string;
 }
 
 export interface DisplacementEvent {

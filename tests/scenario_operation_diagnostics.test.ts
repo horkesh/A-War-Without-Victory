@@ -95,20 +95,25 @@ function makeOrderSnapshot(
     };
 }
 
+type PartialBattle = Omit<AttackResolutionOsidReport['battles'][number], 'battle_id'> & { battle_id?: string };
 function makeOsidReport(
-    battles: AttackResolutionOsidReport['battles']
+    battles: PartialBattle[]
 ): AttackResolutionOsidReport {
+    const filled = battles.map(b => ({
+        ...b,
+        battle_id: b.battle_id ?? `0:${b.target_osid}:${b.attacker_brigade}:${b.defender_brigade ?? 'null'}`,
+    }));
     return {
-        orders_processed: battles.length,
-        unique_attack_targets: battles.length,
+        orders_processed: filled.length,
+        unique_attack_targets: filled.length,
         flips_applied: 0,
         casualty_attacker: 0,
         casualty_defender: 0,
-        orders_by_faction: battles.length > 0 ? { RS: battles.length } : {},
+        orders_by_faction: filled.length > 0 ? { RS: filled.length } : {},
         engaged_formation_ids: [],
         snap_events: [],
         snap_event_counts: {},
-        battles
+        battles: filled
     };
 }
 

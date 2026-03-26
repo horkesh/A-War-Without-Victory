@@ -1917,19 +1917,36 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
             // Extract per-battle results from attack resolution report
             const weeklyBattles: WeeklyBattleEntry[] | undefined =
-                turnReport.attack_resolution_osid?.battles?.map(b => ({
-                    attacker_brigade: b.attacker_brigade,
-                    attacker_faction: b.attacker_faction,
-                    defender_faction: b.defender_faction,
-                    target_osid: b.target_osid,
-                    outcome: b.outcome,
-                    power_ratio: Math.round(b.power_ratio * 100) / 100,
-                    attacker_won: b.attacker_won,
-                    defender_brigade: b.defender_brigade,
-                    attacker_casualties: b.attacker_casualties,
-                    defender_casualties: b.defender_casualties,
-                    ...(b.equipment ? { equipment: b.equipment } : {}),
-                }));
+                turnReport.attack_resolution_osid?.battles?.map(b => {
+                    // Derive operation_id from the attacker's active corps operation
+                    let operation_id: string | undefined;
+                    let operation_name: string | undefined;
+                    const attackerFmt = state.military.formations?.[b.attacker_brigade];
+                    const attackerCorpsId = attackerFmt?.corps_id;
+                    if (attackerCorpsId && state.military.corps_command) {
+                        const cmd = state.military.corps_command[attackerCorpsId];
+                        const op = cmd?.active_operation;
+                        if (op && op.phase === 'execution') {
+                            operation_id = `${attackerCorpsId}:${op.name}:t${op.started_turn}`;
+                            operation_name = op.name;
+                        }
+                    }
+                    return {
+                        battle_id: b.battle_id,
+                        attacker_brigade: b.attacker_brigade,
+                        attacker_faction: b.attacker_faction,
+                        defender_faction: b.defender_faction,
+                        target_osid: b.target_osid,
+                        outcome: b.outcome,
+                        power_ratio: Math.round(b.power_ratio * 100) / 100,
+                        attacker_won: b.attacker_won,
+                        defender_brigade: b.defender_brigade,
+                        attacker_casualties: b.attacker_casualties,
+                        defender_casualties: b.defender_casualties,
+                        ...(b.equipment ? { equipment: b.equipment } : {}),
+                        ...(operation_id ? { operation_id, operation_name } : {}),
+                    };
+                });
 
             // Extract dissolution and reconstitution entries from turn report
             const weeklyDissolution = turnReport.brigade_dissolution?.dissolved_brigades;

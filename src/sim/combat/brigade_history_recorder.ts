@@ -164,6 +164,7 @@ export function recordAttackerEngagements(
     isConcentrated: boolean,
     state?: GameState,
     equipmentData?: { destroyed: { tanks: number; artillery: number }; captured: { tanks: number; artillery: number } },
+    battleId?: string,
 ): void {
     const perAttackerCas = attackerFormations.length > 0
         ? Math.floor(totalAttackerCasualties / attackerFormations.length)
@@ -171,6 +172,7 @@ export function recordAttackerEngagements(
 
     for (const atk of attackerFormations) {
         recordBrigadeEngagement(atk, {
+            ...(battleId != null ? { battle_id: battleId } : {}),
             turn,
             osid: targetOsid,
             role: 'attacker',
@@ -203,8 +205,10 @@ export function recordDefenderEngagement(
     wasConcentrated: boolean,
     state?: GameState,
     equipmentData?: { destroyed: { tanks: number; artillery: number }; captured: { tanks: number; artillery: number } },
+    battleId?: string,
 ): void {
     recordBrigadeEngagement(defenderFormation, {
+        ...(battleId != null ? { battle_id: battleId } : {}),
         turn,
         osid,
         role: 'defender',

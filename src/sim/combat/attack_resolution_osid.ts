@@ -464,6 +464,8 @@ export interface AttackResolutionOsidReport {
     snap_events: AttackResolutionOsidSnapEvent[];
     snap_event_counts: Partial<Record<AttackResolutionOsidSnapEventType, number>>;
     battles: Array<{
+        /** Deterministic join key: {turn}:{osid}:{attacker_brigade}:{defender_brigade|null} */
+        battle_id: string;
         attacker_brigade: FormationId;
         attacker_faction: FactionId;
         defender_faction: FactionId;
@@ -1198,8 +1200,12 @@ export function resolveAttackOrdersOsid(
             }
         }
 
+        // Compute deterministic battle_id join key
+        const battleId = `${currentTurn}:${targetOsid}:${firstAttacker.id}:${defenderFormation?.id ?? 'null'}`;
+
         // Push battle report with equipment data
         report.battles.push({
+            battle_id: battleId,
             attacker_brigade: firstAttacker.id,
             attacker_faction: attackerFaction,
             defender_faction: (controller ?? attackerFaction) as FactionId,
@@ -1422,6 +1428,8 @@ export function resolveAttackOrdersOsid(
                 from: prevController,
                 to: attackerFaction,
                 mun_id: targetOsid.split(':')[1] ?? undefined,
+                battle_id: battleId,
+                attacker_brigade: firstAttacker.id as string,
             } satisfies ControlEvent);
         }
 
@@ -1557,7 +1565,7 @@ export function resolveAttackOrdersOsid(
         recordAttackerEngagements(
             attackerFormations, currentTurn, targetOsid, outcome,
             defFaction, flip, finalAttackerCas, finalDefenderCas, isConcentrated, state,
-            attackerEquipData,
+            attackerEquipData, battleId,
         );
         if (defenderFormation) {
             // Defender: destroyed attacker equipment, captured from attacker
@@ -1569,7 +1577,7 @@ export function resolveAttackOrdersOsid(
             recordDefenderEngagement(
                 defenderFormation, currentTurn, targetOsid, outcome,
                 attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated, state,
-                defenderEquipData,
+                defenderEquipData, battleId,
             );
         }
 

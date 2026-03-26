@@ -310,9 +310,15 @@ function makeState(ops: Record<string, CorpsOperation>, formations: Record<strin
     return { military: { formations, corps_command } } as any;
 }
 
-function makeReport(battles: AttackResolutionOsidReport['battles']): AttackResolutionOsidReport {
+type PartialBattle = Omit<AttackResolutionOsidReport['battles'][number], 'battle_id'> & { battle_id?: string };
+function makeReport(battles: PartialBattle[]): AttackResolutionOsidReport {
+    // Auto-fill battle_id if missing in test data
+    const filled = battles.map(b => ({
+        ...b,
+        battle_id: b.battle_id ?? `0:${b.target_osid}:${b.attacker_brigade}:${b.defender_brigade ?? 'null'}`,
+    }));
     return {
-        orders_processed: battles.length,
+        orders_processed: filled.length,
         unique_attack_targets: 1,
         flips_applied: 0,
         casualty_attacker: 0,
@@ -321,7 +327,7 @@ function makeReport(battles: AttackResolutionOsidReport['battles']): AttackResol
         engaged_formation_ids: [],
         snap_events: [],
         snap_event_counts: {},
-        battles,
+        battles: filled,
     };
 }
 

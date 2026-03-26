@@ -109,6 +109,8 @@ export interface WeeklyReconstitutionEntry {
 
 /** Compact per-battle entry persisted in weekly report for diagnostics. */
 export interface WeeklyBattleEntry {
+    /** Deterministic join key: {turn}:{osid}:{attacker_brigade}:{defender_brigade|null} */
+    battle_id: string;
     attacker_brigade: FormationId;
     attacker_faction: FactionId;
     defender_faction: FactionId;
@@ -119,6 +121,10 @@ export interface WeeklyBattleEntry {
     defender_brigade: FormationId | null;
     attacker_casualties: number;
     defender_casualties: number;
+    /** Deterministic operation join key: {corps_id}:{op_name}:t{started_turn} */
+    operation_id?: string;
+    /** Human-readable operation name. */
+    operation_name?: string;
 }
 
 function sortedKeys(obj: Record<string, unknown>): string[] {

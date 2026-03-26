@@ -21,6 +21,8 @@ export type CombatOutcome =
 
 /** A single recorded engagement for a brigade. */
 export interface BrigadeEngagement {
+    /** Deterministic join key: {turn}:{osid}:{attacker_brigade}:{defender_brigade|null} */
+    battle_id?: string;
     /** Turn when battle occurred. */
     turn: number;
     /** OSID where battle occurred. */
