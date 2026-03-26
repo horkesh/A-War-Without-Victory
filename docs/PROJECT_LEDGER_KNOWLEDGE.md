@@ -1054,3 +1054,38 @@ Serbs having the highest fled_abroad count is correct (Serbia next door). Bosnia
 
 ### Multiple tracking systems must all update all stores
 If `civilian_casualties` and `displacement_event_log` both exist, every code path that generates civilian casualties must write to BOTH. Paramilitaries wrote to one, old displacement wrote to the other. Result: 3,700 phantom gap between systems.
+
+## Essay Sourcing & QA Methodology (2026-03-26)
+
+### Source hierarchy for Codex essays is non-negotiable
+All 96 Codex essays are now standalone JSON (13 missing 1992 foundation events authored in this night shift). Source hierarchy: ICTY trial verdicts and judgments FIRST (legal record, cross-examined testimony), museum primary sources in B/C/S second (e.g., Sarajevo Tunnel Museum records overrode Wikipedia on tunnel construction date and codename), Balkan Battlegrounds third, Wikipedia last resort. When sources conflict, always escalate upward. Wikipedia is especially unreliable on Bosnian War operational details — dates, unit identities, and command attributions are frequently wrong.
+
+### 3-pass QA audit catches errors that single-pass misses
+The essay QA used 5 rounds per pass: (1) historian fact-check with parallel agents, (2) operations expert military accuracy, (3) web/ICTY verification, (4) war-or-game realism audit, (5) geographic/directional sanity check. Critical finding: first-pass "fixes" can introduce new errors. The Stupni Do "Apostoli" unit was removed as fabricated in Pass 1, then restored in Pass 2 when ICTY indictment confirmed both Apostoli and Maturice units. Sharp Guard predecessor names were corrected incorrectly twice before Pass 3 got them right. **Lesson: multi-pass verification is not redundant — each pass catches errors introduced by the previous pass.**
+
+### Essay voice: documentary, not academic
+No hedging language on ICTY-adjudicated facts. "The massacre killed 116 civilians" not "it is believed that approximately 116 civilians may have died." Documentary parity across factions — RS atrocities documented with the same clinical precision as ARBiH or HVO actions. 800-870 words per essay, standalone JSON with metadata (week, factions, category, prerequisites).
+
+## Canon Audit: phase0 to early_war Rename (2026-03-26)
+
+### "Phase 0" was a misleading abstraction
+The simulation had a concept called "phase0" that predated the war phases. In reality, there is no pre-war phase in the simulation — what was called "phase0" IS the early war (April-June 1992: JNA withdrawal, militia emergence, authority vacuum). The name implied something before the war started, but the mechanics were all wartime: mobilization, territorial control shifts, ethnic displacement. Renaming `peace_phases` to `early_war_phases` and deleting all `phase0` references (11 src files, 3 scenario files, 16 test files, 3 warroom files) eliminated a persistent source of confusion about what the simulation actually models.
+
+### Scope of a naming cleanup can be deceptive
+What looked like a simple rename touched 33+ files across src, scenarios, tests, and warroom. The `phase0` concept had metastasized into type definitions, pipeline step names, scenario JSON fields, and test assertions. A "just rename it" task becomes a full audit when the old name is load-bearing in serialized data (scenario JSON) and runtime type checks. Always grep exhaustively before declaring a rename complete.
+
+## Deterministic Vignette Generation (2026-03-26)
+
+### Multiply-by-primes hash replaces Math.random for UI content
+The Letter Home system generates casualty vignettes (personal narratives about fallen soldiers) deterministically using a hash function that multiplies character codes by prime numbers. This is critical: `Math.random()` is banned in simulation code, but the vignette system needed apparent randomness for template selection, name generation, and detail variation. The multiply-by-primes approach (seed from turn + brigade ID + casualty index) produces well-distributed values without any entropy source. Same game state always produces the same letters — saves and replays are byte-identical.
+
+### UI-side rendering from adapter data, not sim state
+Vignette content is generated in the UI layer (adapter/renderer), not in the simulation engine. The sim provides structured casualty data (type, brigade, turn, count); the UI's Letter Home engine selects templates, names, and details. This separation means the sim state stays lean (no string bloat) and the vignette system can be iterated without touching simulation code. 25 templates (5 per casualty type: KIA, WIA, MIA, captured, missing) + 9 name pools (3 ethnicities x 3 name types: first/last/patronymic).
+
+## Integration Test Architecture (2026-03-26)
+
+### Integration tests run full scenario slices, not unit mocks
+The 5 original integration suites (scenario round-trip, event system, save/load, pool integrity, formation integrity) plus 4 new suites (deployment health, run diagnostics, run summary, state assertions) all instantiate the real scenario runner and advance the simulation by N turns. No mocking of GameState, no stubbed combat resolution, no fake event triggers. This catches the class of bugs that unit tests structurally cannot: pipeline ordering issues, state mutation side effects, event-combat interaction timing, and serialization round-trip fidelity.
+
+### Integration tests are the last gate before calibration runs
+The smoke-test triad (`tsc --noEmit` + `vitest run` + `desktop:map:build`) catches type errors, unit regressions, and build failures. But integration tests catch semantic regressions: "the scenario still runs to completion," "events still fire at the right week," "save/load produces identical state," "no brigade has negative personnel." These are the tests that would have caught the displacement phantom gap (3,700 missing casualties between two tracking systems) if they had existed earlier.
