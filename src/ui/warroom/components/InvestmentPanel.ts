@@ -7,15 +7,25 @@
  * Wires to Phase0DirectiveState for staging/unstaging investments.
  */
 
-import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
-import type { InvestmentType } from '../../../phase0/investment.js';
-import {
-    getInvestmentCostWithCoordination,
-    getInvestmentTypesForFaction,
-    isCoordinationEligibleFaction
-} from '../../../phase0/investment.js';
+/** @deprecated Phase 0 investment system removed (peace phase no longer exists). Stubs below. */
+type InvestmentType = string;
+function getPrewarCapital(_s: unknown, _f: unknown): number { return 0; }
+const PREWAR_CAPITAL_INITIAL: Record<string, number> = {};
+function getInvestmentCostWithCoordination(_t: unknown, _s?: unknown, _c?: unknown): number { return 0; }
+function getInvestmentTypesForFaction(_f: unknown): InvestmentType[] { return []; }
+function isCoordinationEligibleFaction(_f: unknown): boolean { return false; }
 import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
-import type { Phase0DirectiveState, StagedInvestment } from './Phase0DirectiveState.js';
+export type StagedInvestment = { id: string; investmentType: string; munId: string; cost: number; coordinated?: boolean; targetMunIds: string[] };
+export type Phase0DirectiveState = {
+    getStagedForMunicipality(munId: string): StagedInvestment[];
+    getStagedInvestments(): StagedInvestment[];
+    getTotalStagedCost(): number;
+    getStagedCount(): number;
+    stage(...args: unknown[]): { ok: boolean } | unknown;
+    unstage(...args: unknown[]): void;
+    validate(...args: unknown[]): { ok: boolean; valid?: boolean; reason?: string };
+    clear(): void;
+};
 
 /** Municipality metadata for the panel. */
 export interface InvestmentPanelMunInfo {

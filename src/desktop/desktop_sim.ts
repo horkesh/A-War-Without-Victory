@@ -9,9 +9,6 @@ import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { loadTerrainScalars } from '../map/terrain_scalars.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
-import { initializePhase0Relationships, updateAllianceAfterInvestment } from '../phase0/alliance.js';
-import type { InvestmentScope, InvestmentType } from '../phase0/investment.js';
-import { applyInvestment } from '../phase0/investment.js';
 import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_loader.js';
 import { buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js';
 import { createStateFromScenario } from '../scenario/scenario_runner.js';
@@ -38,13 +35,11 @@ import {
     type CorridorDerivationReport,
     type SupplyStateDerivationReport
 } from '../state/supply_state_derivation.js';
-import type { FactionId, GameState, MunicipalityId } from '../state/game_state.js';
-import { applyMunicipalityControllersFromMun1990Only } from '../state/political_control_init.js';
+import type { FactionId, GameState } from '../state/game_state.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass } from '../state/recruitment_types.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { strictCompare } from '../state/validateGameState.js';
-import { runPhase0TurnAndAdvance } from '../ui/warroom/run_phase0_turn.js';
 import { deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
 
 function settlementGraphOptions(baseDir: string): { settlementsPath: string; edgesPath: string } {
@@ -72,12 +67,10 @@ export interface DesktopSimAdvanceResult {
 
 /** Scenario file used for "New Game" (April 1992 definitive war start, hybrid_1992). */
 export const NEW_GAME_SCENARIO_RELATIVE = 'data/scenarios/apr1992_definitive_52w.json';
-export const SEP_1991_SCENARIO_RELATIVE = 'data/scenarios/sep_1991_phase0.json';
-export type DesktopScenarioKey = 'apr_1992' | 'sep_1991';
+export type DesktopScenarioKey = 'apr_1992';
 const DEFAULT_DESKTOP_SCENARIO_KEY: DesktopScenarioKey = 'apr_1992';
 const SCENARIO_KEY_TO_PATH: Record<DesktopScenarioKey, string> = {
     apr_1992: NEW_GAME_SCENARIO_RELATIVE,
-    sep_1991: SEP_1991_SCENARIO_RELATIVE,
 };
 
 /** April 1992 game start: initial recruitment capital and equipment for desktop recruitment UI (from apr1992_definitive_52w). */
@@ -133,7 +126,7 @@ export async function loadStateFromPath(statePath: string): Promise<{ state: Gam
 }
 
 /**
- * Advance one turn using peace runner (`runPhase0TurnAndAdvance`) or war pipeline (`runTurn`).
+ * Advance one war-phase turn via the war pipeline (`runTurn`).
  * Returns new state; does not mutate the argument.
  */
 export async function advanceTurn(state: GameState, baseDir: string): Promise<DesktopSimAdvanceResult> {
@@ -145,28 +138,6 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
     const graphForBrowser = graph as LoadedSettlementGraph;
 
     try {
-        if (phase === 'peace') {
-            const playerFaction = state.meta?.player_faction;
-            const phaseBefore = state.meta.phase;
-            const next = runPhase0TurnAndAdvance(state, seed, playerFaction);
-            if (
-                phaseBefore === 'peace' &&
-                next.meta.phase === 'war' &&
-                next.meta.peace_war_start_control_path
-            ) {
-                await applyMunicipalityControllersFromMun1990Only(
-                    next,
-                    graphForBrowser,
-                    next.meta.peace_war_start_control_path
-                );
-            }
-            return {
-                state: next,
-                game_over: next.meta.game_over === true ? true : undefined,
-                outcome: next.meta.outcome ?? undefined,
-                report: { phase, turn: next.meta.turn }
-            };
-        }
         if (phase === 'war') {
             const { nextState, report } = await runTurn(state, {
                 seed,
@@ -186,48 +157,6 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
     }
 }
 
-export interface Phase0DirectivePayload {
-    id: string;
-    factionId: FactionId;
-    investmentType: InvestmentType;
-    scope: InvestmentScope;
-    targetMunIds: MunicipalityId[];
-    coordinated?: boolean;
-}
-
-/**
- * Apply staged Phase 0 directives in deterministic order before advancing.
- * Returns number of directives successfully applied.
- */
-export function applyPhase0Directives(state: GameState, directives: Phase0DirectivePayload[]): number {
-    if (!Array.isArray(directives) || directives.length === 0) return 0;
-
-    const sorted = [...directives].sort((a, b) => {
-        const byId = strictCompare(a.id, b.id);
-        if (byId !== 0) return byId;
-        const byFaction = strictCompare(a.factionId, b.factionId);
-        if (byFaction !== 0) return byFaction;
-        return strictCompare(a.investmentType, b.investmentType);
-    });
-
-    let applied = 0;
-    for (const directive of sorted) {
-        const result = applyInvestment(state, directive.factionId, directive.investmentType, directive.scope, {
-            coordinated: directive.coordinated === true,
-        });
-        if (!result.ok) continue;
-        if (!state.political.phase0_relationships) {
-            state.political.phase0_relationships = initializePhase0Relationships();
-        }
-        updateAllianceAfterInvestment(
-            state.political.phase0_relationships,
-            directive.factionId,
-            directive.coordinated === true
-        );
-        applied++;
-    }
-    return applied;
-}
 
 /** Read-only query: movement range preview for deployed vs column stance. */
 export async function queryMovementRangeForBrigade(

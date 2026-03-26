@@ -30,7 +30,7 @@ export type HoverRegion = {
 import { buildGraphFromJSON, type LoadedSettlementGraph } from '../../map/settlements_parse.js';
 import { runPhaseITurn } from '../../sim/run_early_war_browser.js';
 import { runPhaseIITurn } from '../../sim/run_combat_browser.js';
-import type { FactionId, Phase0Event } from '../../state/game_state.js';
+import type { FactionId } from '../../state/game_state.js';
 import { GameState } from '../../state/game_state.js';
 import { INTERNATIONAL_SANCTIONS_THRESHOLD } from '../../state/patron_pressure.js';
 import { deserializeState } from '../../state/serialize.js';
@@ -42,8 +42,6 @@ import { MagazineModal } from './components/MagazineModal.js';
 import { ModalManager } from './components/ModalManager.js';
 import { NewspaperModal } from './components/NewspaperModal.js';
 import { NewsTicker } from './components/NewsTicker.js';
-import { Phase0DirectiveState, type StagedInvestment } from './components/Phase0DirectiveState.js';
-import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
 import { ReportsModal } from './components/ReportsModal.js';
 import { CommandBriefingModal } from './components/CommandBriefingModal.js';
 import { OperationalSituationModal } from './components/OperationalSituationModal.js';
@@ -51,10 +49,8 @@ import { TacticalMap } from './components/TacticalMap.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { extractWarData } from './data/war_data_extractor.js';
 import { capturePreviousTurnSnapshot, getPreviousSnapshot, setPreviousSnapshot, setLastTurnReport, type LastTurnReport } from './data/warroom_state.js';
-import { runPhase0TurnAndAdvance } from './run_phase0_turn.js';
-
 type DesktopBridge = {
-    advanceTurn?: (payload?: { phase0Directives?: StagedInvestment[] }) => Promise<{ ok: boolean; error?: string; stateJson?: string; report?: unknown }>;
+    advanceTurn?: (payload?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; stateJson?: string; report?: unknown }>;
     openTacticalMapWindow?: () => Promise<unknown>;
 };
 
@@ -78,14 +74,11 @@ export class ClickableRegionManager {
     private modalManager: ModalManager | null = null;
     private tacticalMap: TacticalMap | null = null;
     private warPlanningMap: WarPlanningMap | null = null;
-    private phase0PreparationMap: Phase0PreparationMap | null = null;
     private mapSceneOpenHandler: (() => void) | null = null;
     private tacticalMapOpenHandler: (() => void) | null = null;
     private newsTicker: NewsTicker = new NewsTicker();
     private onGameStateChange: ((newState: GameState) => void) | null = null;
     private settlementGraphCache: LoadedSettlementGraph | null = null;
-    /** Phase 0 directive staging for player investments. */
-    public phase0Directives: Phase0DirectiveState = new Phase0DirectiveState();
     /** Player's chosen faction (first in array by default). */
     private playerFaction: FactionId | undefined = undefined;
 
@@ -112,11 +105,6 @@ export class ClickableRegionManager {
 
     setWarPlanningMap(map: WarPlanningMap): void {
         this.warPlanningMap = map;
-    }
-
-    setPhase0PreparationMap(map: Phase0PreparationMap): void {
-        this.phase0PreparationMap = map;
-        this.phase0Directives = map.getDirectiveState();
     }
 
     /** Called by warroom to provide scene transition. Open map = handler then show(). */
@@ -343,11 +331,6 @@ export class ClickableRegionManager {
     }
 
     private openPrimaryMap(gameState: unknown): void {
-        const state = gameState as GameState;
-        if (state?.meta?.phase === 'peace') {
-            this.openPhase0PreparationMap();
-            return;
-        }
         this.openTacticalMap(gameState);
     }
 
@@ -358,15 +341,6 @@ export class ClickableRegionManager {
         }
         this.mapSceneOpenHandler?.();
         this.warPlanningMap.show();
-    }
-
-    private openPhase0PreparationMap(): void {
-        if (!this.phase0PreparationMap) {
-            console.warn('Phase0PreparationMap not set');
-            return;
-        }
-        this.mapSceneOpenHandler?.();
-        this.phase0PreparationMap.show();
     }
 
     private async loadSettlementGraphIfNeeded(): Promise<LoadedSettlementGraph> {
@@ -392,18 +366,11 @@ export class ClickableRegionManager {
         const state = gameState as GameState;
         const currentTurn = state.meta.turn;
         const nextTurn = currentTurn + 1;
-        const stagedCount = state.meta.phase === 'peace' ? this.phase0Directives.getStagedCount() : 0;
-        const stagedCost = state.meta.phase === 'peace' ? this.phase0Directives.getTotalStagedCost() : 0;
-
         // Create confirmation dialog using ops-center theme
         const dialog = document.createElement('div');
         dialog.className = 'wr-dialog';
 
-        const stagedInfo = stagedCount > 0
-            ? `<div class="wr-dialog-info wr-info-green">Staged investments: <strong>${stagedCount}</strong> (cost: ${stagedCost})</div>`
-            : state.meta.phase === 'peace'
-                ? `<div class="wr-dialog-info wr-info-amber">No investments staged this turn. Allocate capital before advancing.</div>`
-                : '';
+        const stagedInfo = '';
 
         const thisWeekPreview = this.generateThisWeekPreview(state);
 
@@ -416,7 +383,6 @@ export class ClickableRegionManager {
                 ${thisWeekPreview}
             </div>
             <div class="wr-dialog-actions">
-                ${state.meta.phase === 'peace' ? '<button id="open-invest-map-btn" class="wr-btn wr-btn-secondary">Open Investment Map</button>' : ''}
                 <button id="cancel-turn-btn" class="wr-btn wr-btn-secondary">Cancel</button>
                 <button id="advance-turn-btn" class="wr-btn wr-btn-primary">Advance Turn</button>
             </div>
@@ -434,14 +400,6 @@ export class ClickableRegionManager {
                 this.modalManager?.hideModal();
             };
         }
-        const openInvestMapBtn = document.getElementById('open-invest-map-btn');
-        if (openInvestMapBtn) {
-            openInvestMapBtn.onclick = () => {
-                this.modalManager?.hideModal();
-                this.openPhase0PreparationMap();
-            };
-        }
-
         if (advanceBtn) {
             advanceBtn.onclick = async () => {
                 const prevPhase = state.meta.phase;
@@ -452,13 +410,8 @@ export class ClickableRegionManager {
                 setPreviousSnapshot(capturePreviousTurnSnapshot(state));
 
                 if (bridge?.advanceTurn) {
-                    const phase0Directives = state.meta.phase === 'peace'
-                        ? this.phase0Directives.getStagedInvestments()
-                        : [];
                     try {
-                        const result = await bridge.advanceTurn(
-                            phase0Directives.length > 0 ? { phase0Directives: [...phase0Directives] } : undefined
-                        );
+                        const result = await bridge.advanceTurn();
                         this.modalManager?.hideModal();
                         if (!result?.ok || !result.stateJson) {
                             console.error('Desktop advance-turn failed:', result?.error ?? 'No state returned');
@@ -470,19 +423,6 @@ export class ClickableRegionManager {
                         if (result.report) setLastTurnReport(result.report as LastTurnReport);
                         const pf = this.playerFaction ?? 'RBiH';
 
-                        const lastEvents: Phase0Event[] = newState.political.phase0_events_log?.[newState.political.phase0_events_log.length - 1] ?? [];
-                        const criticalEvent = findCriticalEvent(lastEvents);
-                        if (criticalEvent) {
-                            await showDeclarationModal(criticalEvent, pf);
-                        }
-
-                        if (checkWarTransition(prevPhase, newState.meta.phase)) {
-                            await showWarBeginsModal(pf);
-                        }
-
-                        if (phase0Directives.length > 0) {
-                            this.phase0Directives.clear();
-                        }
                         this.onGameStateChange?.(newState);
 
                         await this.checkWarMilestone(newState, pf);
@@ -493,76 +433,38 @@ export class ClickableRegionManager {
                     return;
                 }
 
-                if (state.meta.phase === 'peace') {
-                    // Apply staged investments before running the turn
-                    const working = { ...state };
-                    this.phase0Directives.applyAll(working);
-
-                    // Determine player faction
-                    const pf = this.playerFaction ?? (state.factions[0]?.id as FactionId | undefined);
-
-                    const newState = runPhase0TurnAndAdvance(working, state.meta.seed ?? 'start_1991_09', pf);
-                    this.modalManager?.hideModal();
-
-                    // Check for critical Phase 0 events (declarations, referendum)
-                    const lastEvents: Phase0Event[] = newState.political.phase0_events_log?.[newState.political.phase0_events_log.length - 1] ?? [];
-                    const criticalEvent = findCriticalEvent(lastEvents);
-                    if (criticalEvent) {
-                        await showDeclarationModal(criticalEvent, pf ?? 'RBiH');
-                    }
-
-                    // Check for Phase 0 → Peace phase transition (war begins)
-                    if (checkWarTransition(prevPhase, newState.meta.phase)) {
-                        await showWarBeginsModal(pf ?? 'RBiH');
-                    }
-
-                    this.onGameStateChange?.(newState);
-                } else if (state.meta.phase === 'war') {
-                    try {
-                        const graph = await this.loadSettlementGraphIfNeeded();
-                        const seed = state.meta.seed ?? 'start_1991_09';
-                        const { nextState } = await runPhaseITurn(state, { seed, settlementGraph: graph });
-                        this.onGameStateChange?.(nextState);
-                        await this.checkWarMilestone(nextState, this.playerFaction ?? 'RBiH');
-                    } catch (e) {
-                        console.error('Peace phase advance failed', e);
-                    }
-                    this.modalManager?.hideModal();
-                } else {
-                    // War phase: browser-safe advance (turn + AoR init when empty).
-                    try {
-                        const graph = await this.loadSettlementGraphIfNeeded();
-                        const seed = state.meta.seed ?? 'start_1991_09';
-                        const { nextState } = runPhaseIITurn(state, { seed, settlementGraph: graph });
-                        this.onGameStateChange?.(nextState);
-                        await this.checkWarMilestone(nextState, this.playerFaction ?? 'RBiH');
-                    } catch (e) {
-                        console.error('War phase advance failed', e);
-                    }
-                    this.modalManager?.hideModal();
+                // War phase: browser-safe advance via early-war or combat pipeline.
+                try {
+                    const graph = await this.loadSettlementGraphIfNeeded();
+                    const seed = state.meta.seed ?? 'start_1992_04';
+                    const { nextState } = await runPhaseITurn(state, { seed, settlementGraph: graph });
+                    this.onGameStateChange?.(nextState);
+                    await this.checkWarMilestone(nextState, this.playerFaction ?? 'RBiH');
+                } catch (e) {
+                    console.error('War phase advance failed', e);
                 }
+                this.modalManager?.hideModal();
             };
         }
     }
 
     /** Show a full-screen milestone modal if a war milestone was just crossed. */
     private async checkWarMilestone(newState: GameState, pf: FactionId): Promise<void> {
-        if (newState.meta.phase === 'peace') return;
         const prevSnap = getPreviousSnapshot();
         const milestone = findWarMilestoneEvent(newState, prevSnap, pf);
         if (milestone) {
-            await showDeclarationModal({ type: milestone, turn: newState.meta.turn, details: {} } as Phase0Event, pf);
+            await showDeclarationModal({ type: milestone, turn: newState.meta.turn, details: {} } as { type: string; turn: number; details: Record<string, unknown> }, pf);
         }
     }
 
     /**
      * Generate "THIS WEEK" preview for war-phase turn advance dialog.
      * Shows pending operations, incoming returns, and critical warnings.
-     * Returns empty string for Phase 0.
+     * Returns empty string if phase is not 'war'.
      */
     private generateThisWeekPreview(state: GameState): string {
-        const phase = state.meta.phase ?? 'peace';
-        if (phase === 'peace') return '';
+        const phase = state.meta.phase ?? 'war';
+        if (phase !== 'war') return '';
 
         const pf = (state.meta.player_faction ?? this.playerFaction ?? state.factions[0]?.id ?? 'RBiH') as FactionId;
         const snap = extractWarData(state, pf);
@@ -723,18 +625,6 @@ export class ClickableRegionManager {
 
         const state = gameState as GameState;
         const phase = state.meta.phase;
-
-        // Diplomacy is only available once the war has started
-        if (phase === 'peace') {
-            const notice = document.createElement('div');
-            notice.className = 'wr-dialog';
-            notice.innerHTML = `
-                <h3>Line Dead</h3>
-                <div class="wr-dialog-notice">The diplomatic channel is not yet active. War must begin before negotiations can start.</div>
-            `;
-            this.modalManager.showModal(notice);
-            return;
-        }
 
         const diplomacyRoot = new DiplomacyModal(state).render();
         const wrapper = document.createElement('div');

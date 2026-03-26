@@ -4,12 +4,12 @@
  * Close via [X] or ESC. Three zoom levels (Strategic / Operational / Tactical).
  */
 
-import type { InvestmentType } from '../../../phase0/investment.js';
+/** @deprecated Investment types are no longer used (peace phase removed). Kept as stub for WarPlanningMap compatibility. */
+type InvestmentType = string;
 import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
 import wallMapFrameUrl from '../assets/wall_map_frame_v1.webp?url';
-import type { InvestmentPanelMunInfo } from './InvestmentPanel.js';
+import type { InvestmentPanelMunInfo, Phase0DirectiveState } from './InvestmentPanel.js';
 import { InvestmentPanel } from './InvestmentPanel.js';
-import { Phase0DirectiveState } from './Phase0DirectiveState.js';
 import { SettlementInfoPanel } from './SettlementInfoPanel.js';
 
 /** GeoJSON Position [x, y] or [x, y, z]. */
@@ -103,7 +103,17 @@ export class WarPlanningMap {
     // INVEST layer (Phase 0)
     private layerInvest = false;
     private investmentPanel: InvestmentPanel | null = null;
-    private directiveState: Phase0DirectiveState = new Phase0DirectiveState();
+    /** @deprecated Peace phase removed; directive state is a no-op stub. */
+    private directiveState: Phase0DirectiveState = {
+        getStagedForMunicipality() { return []; },
+        getStagedInvestments() { return []; },
+        getTotalStagedCost() { return 0; },
+        getStagedCount() { return 0; },
+        stage() { return { ok: false }; },
+        unstage() {},
+        validate() { return { ok: false, reason: 'Peace phase removed' }; },
+        clear() {},
+    };
     private playerFaction: FactionId = 'RBiH';
     private selectedMunicipality: InvestmentPanelMunInfo | null = null;
     private onInvestmentChanged: (() => void) | null = null;
@@ -497,7 +507,7 @@ export class WarPlanningMap {
         }
     }
 
-    /** Get the directive state for the calendar wiring. */
+    /** Get the directive state for the calendar wiring. @deprecated Peace phase removed. */
     getDirectiveState(): Phase0DirectiveState {
         return this.directiveState;
     }

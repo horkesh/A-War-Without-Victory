@@ -30,7 +30,7 @@ Primary entrypoints (from deterministic discovery):
 - Scenario CLI: `src/cli/sim_scenario.ts`
 - Single-turn sim CLI: `src/cli/sim_run.ts`
 - War-phase pipeline: `src/sim/turn_pipeline.ts` (orchestrator; steps in `src/sim/turn_phases/war_phases.ts`)
-- Peace phase / canonical pipeline: `src/state/turn_pipeline.ts`
+- Canonical pipeline: `src/state/turn_pipeline.ts`
 - War-phase browser advance (warroom subset): `src/sim/run_combat_browser.ts`
 - AoR init shared helper: `src/scenario/aor_init.ts`
 - Event framework (B1, report-only): `src/sim/events/`

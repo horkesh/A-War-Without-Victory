@@ -1,7 +1,7 @@
 /**
  * Turn pipeline orchestrator.
- * Assembles war and peace phase steps, runs them in sequence via runTurn().
- * Step implementations live in turn_phases/war_phases.ts and turn_phases/peace_phases.ts.
+ * Assembles war-phase and early-war steps, runs them in sequence via runTurn().
+ * Step implementations live in turn_phases/war_phases.ts and turn_phases/early_war_phases.ts.
  * Types, context helpers, and caches live in turn_pipeline_types.ts.
  */
 
@@ -13,7 +13,7 @@ import { GameState } from '../state/game_state.js';
 import { assignFrontSegmentTheatres, ensureDefaultTheatres } from '../state/theatres.js';
 import { ensureBrigadeFrontAssignments } from './combat/front_assignment.js';
 import { buildLocalFronts } from './combat/local_front_defense.js';
-import { peacePhases } from './turn_phases/peace_phases.js';
+import { earlyWarPhases } from './turn_phases/early_war_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
 
 // Re-export all public types so existing importers (scenario_runner, tests, etc.) continue to work.
@@ -36,15 +36,10 @@ import type { TurnInput, TurnReport, TurnContext, Rng, NamedPhase } from './turn
 export async function runTurn(state: GameState, input: TurnInput): Promise<{ nextState: GameState; report: TurnReport }> {
     const working = cloneGameState(state);
 
-    // Two-phase model: Peace turns use state pipeline; this runner is for War turns only.
+    // War-only pipeline: all games start in April 1992 (war phase).
     const phase = working.meta.phase;
-    if (phase === 'peace') {
-        throw new Error(
-            'runTurn: use state pipeline runOneTurn for peace; runTurn handles war-phase turns'
-        );
-    }
     if (phase !== 'war') {
-        throw new Error(`runTurn: unsupported lifecycle phase "${String(phase)}"`);
+        throw new Error(`runTurn: unsupported lifecycle phase "${String(phase)}"; expected 'war'`);
     }
 
     // Dayton Agreement ends the war — set game_over and short-circuit (v0.7.0 Phase 4)
@@ -127,7 +122,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
             'activate-corps',
             'promote-formations',
         ]);
-        for (const step of peacePhases) {
+        for (const step of earlyWarPhases) {
             if (!bottomUpStepNames.has(step.name)) continue;
             report.phases.push({ name: step.name });
             await step.run(context);

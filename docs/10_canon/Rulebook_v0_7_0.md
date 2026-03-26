@@ -488,17 +488,7 @@ These tools expand agency without overriding command friction, logistics, exhaus
 
 A phase-by-phase summary of player actions each turn. For system details, see the relevant sections above. *Implementation-note: This section satisfies pipeline backlog item 1.2 (Player's Turn Guide); confirmed 2026-02-24.*
 
-### 17.1 Peace phase (Pre-War)
-
-Each turn the player:
-1. **Reviews** the political landscape: stability scores, organizational factors, faction declarations
-2. **Allocates capital** to investments: police loyalty, TO control, organizational penetration, political pressure
-3. **Monitors** escalation: referendum timing, JNA posture, rival declarations
-4. **Ends turn** — investments resolve; escalation conditions evaluated
-
-The player cannot control military forces (none exist). Strategic choices shape starting conditions for war.
-
-### 17.2 War phase (Early War)
+### 17.1 War phase (Early War)
 
 Each turn the player:
 1. **Reviews** the situation: control map, militia emergence, authority states, alliance status
@@ -602,7 +592,7 @@ Different factions face different paths to acceptable outcomes.
 - Capabilities evolve over time; early-war advantages are not permanent.
 
 ### Contested Control
-- Initial control can be secure, contested, or highly contested based on Peace phase stability.
+- Initial control can be secure, contested, or highly contested based on early-war stability.
 - Highly contested areas are fragile in early war.
 
 ## 20. v0.7 Systems Summary

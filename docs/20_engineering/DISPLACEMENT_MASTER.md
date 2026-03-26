@@ -3,8 +3,7 @@
 > Authoritative technical reference for AWWV's displacement mechanic.
 > Covers all pipeline steps, trigger types, routing, loss fractions, state machines, and feedback loops.
 >
-> **Canon:** v0.6.0 two-phase model (Peace / War). There is no separate "Phase I" or "Phase II".
-> As of 2026-03-07, codebase fully uses Peace/War terminology (legacy `phase_ii_*` step IDs renamed).
+> **Canon:** v0.7.3 single-phase model (War only). All canonical scenarios start in April 1992.
 >
 > **Architecture (2026-03-01, updated 2026-03-19):** Displacement is **OSID-based**, not municipality-based.
 > Each OSID triggers its own displacement independently. Municipalities only serve as

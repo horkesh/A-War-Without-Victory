@@ -1,4 +1,4 @@
-/** Pre-war (Peace phase) and early-war pipeline steps. Extracted from turn_pipeline.ts (R7). */
+/** Early-war pipeline steps (militia emergence, JNA dissolution, pool population, etc.). Extracted from turn_pipeline.ts (R7). */
 
 import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
@@ -34,7 +34,7 @@ import { checkAndApplyWashington } from '../early_war/washington_agreement.js';
 import { activateCorpsForTurn } from '../early_war/activate_corps.js';
 import { computeSiegeState } from '../early_war/compute_siege_state.js';
 import { promoteFormations } from '../early_war/promote_formations.js';
-import { runEarlyWarBotPosture } from '../early_war/bot_phase_i.js';
+import { runEarlyWarBotPosture } from '../early_war/bot_early_war.js';
 import type { NamedPhase, TurnContext } from '../turn_pipeline_types.js';
 import { getSiegeStateCache, setSiegeStateCache, loadRecruitmentCatalog } from '../turn_pipeline_types.js';
 
@@ -61,7 +61,7 @@ export function assertNoAoRInEarlyWar(state: GameState): void {
 }
 
 /** Pre-war and early-war turn steps. */
-export const peacePhases: NamedPhase[] = [
+export const earlyWarPhases: NamedPhase[] = [
     {
         name: 'evaluate-events',
         run: (context) => {

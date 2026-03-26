@@ -9,7 +9,9 @@
  * No Math.random(), no Date.now().
  */
 
-import { getPrewarCapital, PREWAR_CAPITAL_INITIAL } from '../../../phase0/capital.js';
+/** @deprecated Phase 0 removed. Stubs for prewar capital display. */
+function getPrewarCapital(_s: unknown, _f: unknown): number { return 0; }
+const PREWAR_CAPITAL_INITIAL: Record<string, number> = {};
 import type { FactionId, GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { extractWarData } from '../data/war_data_extractor.js';

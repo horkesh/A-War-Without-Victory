@@ -44,9 +44,8 @@ Core simulation loop exists. Turn pipeline runs. Factions exist. Map renders.
 - 627 tests passing
 
 ### 0.3.x — Playable Alpha ✓ (COMPLETED 2026-03-15)
-- Peace phase fully playable (pre-war diplomacy, referendum)
 - War phase fully playable (player orders, operations, officer management)
-- Complete turn cycle: peace → war → endgame
+- Complete turn cycle: war → endgame
 - Save/load reliable
 - Basic victory/defeat conditions functional
 - All three factions selectable and playable

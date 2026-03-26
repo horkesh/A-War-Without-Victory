@@ -7,8 +7,8 @@
 
 - **Census source:** `data/derived/municipality_population_1991.json`. Loaded in scenario runner as `municipalityPopulation1991` (type `MunicipalityPopulation1991`). Supports both `by_mun1990_id` and `by_municipality_id` (with `mun1990_id` field); runner flattens to keys = mun1990_id (kebab-case).
 - **Key:** Same municipality ID used elsewhere: `mun1990_id` (e.g. `banja_luka`, `centar_sarajevo`). Displacement state is keyed by this id in `state.displacement_state[munId]`.
-- **Init order:** After `createInitialGameState`, after phase is set (peace or war), before first turn run. Seeding runs in scenario_runner once state and graph exist.
-- **Scope:** Seed only when (a) census is available (`municipalityPopulation1991` present) and (b) scenario uses a wartime start phase (`scenario.start_phase === 'peace' || scenario.start_phase === 'war'`). Pre-war peace has no displacement; early-war and war phases do.
+- **Init order:** After `createInitialGameState`, after phase is set (war), before first turn run. Seeding runs in scenario_runner once state and graph exist.
+- **Scope:** Seed only when (a) census is available (`municipalityPopulation1991` present) and (b) scenario uses war start phase.
 - **Determinism:** Iterate census keys in sorted order (`Object.keys(municipalityPopulation1991).sort(strictCompare)`) so identical scenario + baseDir produces identical `displacement_state` and hashes remain stable.
 
 ## Behaviour

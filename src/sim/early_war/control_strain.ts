@@ -81,8 +81,8 @@ function authorityMultiplier(authority0to100: number): number {
     return Math.max(0, 1 - score);
 }
 
-/** Peace phase time factor: 0.50 + (Turn_Number_Since_War_Start × 0.05), cap 1.0. */
-function peacePhaseTimeFactor(turn: number, warStartTurn: number | null | undefined): number {
+/** Early-war time factor: 0.50 + (Turn_Number_Since_War_Start × 0.05), cap 1.0. */
+function earlyWarTimeFactor(turn: number, warStartTurn: number | null | undefined): number {
     if (warStartTurn == null || turn < warStartTurn) return TIME_FACTOR_BASE;
     const turnsSince = turn - warStartTurn;
     return Math.min(TIME_FACTOR_CAP, TIME_FACTOR_BASE + turnsSince * TIME_FACTOR_RATE);
@@ -118,7 +118,7 @@ export function runControlStrain(
         const faction = state.factions?.find((f) => f.id === controller);
         const authority0to100 = faction?.profile?.authority ?? 50;
         const authMult = authorityMultiplier(authority0to100);
-        const timeFactor = peacePhaseTimeFactor(turn, warStartTurn);
+        const timeFactor = earlyWarTimeFactor(turn, warStartTurn);
         const increment =
             HOSTILE_POP_STUB * DEMO_FACTOR_STUB * authMult * CONTROL_METHOD_MILITIA * timeFactor;
         const current = strainByMun[munId] ?? 0;

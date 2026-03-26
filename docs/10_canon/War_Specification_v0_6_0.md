@@ -1,6 +1,6 @@
 # War Specification v0.6.0 — War Phase
 
-**Status:** Canon (v0.6.0; two-phase model)
+**Status:** Canon (v0.7.3; single-phase War-only model)
 **Canon Version:** v0.6.0
 **Date:** 2026-02-28
 
@@ -17,7 +17,7 @@
 
 **War start is referendum-gated:** CANON.md War Start Rule (Phase D0.4a) — War begins only when the mandatory EC-coerced RBiH independence referendum has been held and current_turn == referendum_turn + 4.
 
-**Canonical April 1992 scenarios start directly in War.** There is no separate "Phase I" or "Phase II"; the runtime phase value for war is **war**. When a scenario starts in War, all brigade location_osid and war state are initialized at scenario load; no intra-war phase transition.
+**All canonical scenarios start in April 1992 in War phase.** The runtime phase value is **war**. All brigade location_osid and war state are initialized at scenario load. Early-war mechanics (militia emergence, JNA dissolution) run as pipeline steps during the first ~12 weeks.
 
 War-phase logic runs only when **meta.phase === "war"**. All mechanics are deterministic; no randomness, no timestamps.
 
@@ -81,7 +81,7 @@ Attack resolution: Attack Resolution Formula Spec (combat power, outcome thresho
 
 ## 11. v0.6 Canon consolidation
 
-This document (v0.6.0) is the single War phase specification in the two-phase (Peace/War) model. Runtime phase value for this phase is **war**.
+This document is the War phase specification. As of v0.7.3, the simulation is single-phase (War only). The former peace phase has been removed. Runtime phase value is **war**.
 
 *Historical note: This document replaces the former Phase_I_Specification_v0_5_0.md and Phase_II_Specification_v0_5_0.md (three-phase model). Those deprecated docs are in docs/_old/10_canon/.*
 

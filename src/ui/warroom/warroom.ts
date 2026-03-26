@@ -6,7 +6,6 @@ import { ModalManager } from './components/ModalManager.js';
 import { SettingsModal } from './components/SettingsModal.js';
 
 import { NewspaperModal } from './components/NewspaperModal.js';
-import { Phase0PreparationMap } from './components/Phase0PreparationMap.js';
 import { TacticalMap } from './components/TacticalMap.js';
 import { WallCalendar } from './components/WallCalendar.js';
 import { OsidThumbnailRenderer } from './components/OsidThumbnailRenderer.js';
@@ -96,7 +95,6 @@ class WarroomApp {
     private calendar = new WallCalendar();
     private map = new TacticalMap();
     private warPlanningMap = new WarPlanningMap();
-    private phase0PreparationMap = new Phase0PreparationMap();
     private regionManager = new ClickableRegionManager();
     private hoverRenderer = new HoverRenderer();
     private modalManager = new ModalManager();
@@ -114,7 +112,6 @@ class WarroomApp {
     private mapServerUrl: string | null = null;
     /** Embedded iframe subscribers to game-state-updated bridge events. */
     private embeddedBridgeSubscribers = new Map<WindowProxy, string>();
-    private phase0StartBriefShown = false;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
     /** Faction for which we last loaded region data (so we only reload when faction changes). */
@@ -168,7 +165,6 @@ class WarroomApp {
         this.regionManager.setModalManager(this.modalManager);
         this.regionManager.setTacticalMap(this.map);
         this.regionManager.setWarPlanningMap(this.warPlanningMap);
-        this.regionManager.setPhase0PreparationMap(this.phase0PreparationMap);
         this.regionManager.setMapSceneOpenHandler(() => this.showMapScene());
         this.regionManager.setTacticalMapOpenHandler(() => this.showTacticalMapScene());
 
@@ -183,8 +179,6 @@ class WarroomApp {
         if (mapScene) {
             mapScene.appendChild(this.warPlanningMap.getContainer());
             this.warPlanningMap.setCloseCallback(() => this.showWarroomScene());
-            mapScene.appendChild(this.phase0PreparationMap.getContainer());
-            this.phase0PreparationMap.setCloseCallback(() => this.showWarroomScene());
         }
         this.wireToolbar();
         this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
@@ -206,7 +200,6 @@ class WarroomApp {
         });
 
         await this.warPlanningMap.loadData();
-        await this.phase0PreparationMap.loadData();
 
         // Resolve tactical map HTTP server URL (set by Electron main process).
         // MapLibre requires http:// origin; its Web Workers don't work under awwv://.
@@ -355,11 +348,7 @@ class WarroomApp {
         this.osidThumbnail.setControlFromState(this.gameState);
         this.osidThumbnail.setPlayerFaction(playerFaction);
         this.thumbnailDirty = true;
-        this.phase0PreparationMap.setGameState(this.gameState);
-        this.phase0PreparationMap.setPlayerFaction(playerFaction);
-        this.regionManager.phase0Directives = this.phase0PreparationMap.getDirectiveState();
         this.updateToolbarTurnDisplay();
-        this.maybeShowPhase0StartingBrief();
     }
 
     private getDesktopBridge(): DesktopBridge | null {
@@ -389,15 +378,6 @@ class WarroomApp {
         } catch (error) {
             console.error('Failed to apply game state JSON in warroom', error);
         }
-    }
-
-    private maybeShowPhase0StartingBrief(): void {
-        if (!this.gameState) return;
-        if (this.phase0StartBriefShown) return;
-        if (this.gameState.meta.phase !== 'peace' || this.gameState.meta.turn !== 0) return;
-        this.phase0StartBriefShown = true;
-        const brief = new NewspaperModal(this.gameState, { startBrief: true });
-        this.modalManager.showModal(brief.render());
     }
 
     // ── 3-step campaign flow: Main Menu → Side Picker → Scenario Picker ──
@@ -640,11 +620,6 @@ class WarroomApp {
         }
         if (mapBtn) {
             mapBtn.onclick = () => {
-                if (this.gameState?.meta.phase === 'peace') {
-                    this.showMapScene();
-                    this.phase0PreparationMap.show();
-                    return;
-                }
                 this.showTacticalMapScene('operational');
             };
         }
@@ -653,9 +628,7 @@ class WarroomApp {
         }
         if (investBtn) {
             investBtn.onclick = () => {
-                if (!this.gameState || this.gameState.meta.phase !== 'peace') return;
-                this.showMapScene();
-                this.phase0PreparationMap.show();
+                // Investment map removed (peace phase no longer exists)
             };
         }
         if (settingsBtn) {
@@ -696,13 +669,11 @@ class WarroomApp {
         if (!el || !this.gameState) return;
         const turn = this.gameState.meta.turn;
         const label = turnToShortLabel(turn);
-        const phase = this.gameState.meta.phase === 'peace' ? 'Peace phase'
-            : this.gameState.meta.phase === 'war' ? 'War phase'
-                : 'Post-War';
+        const phase = this.gameState.meta.phase === 'war' ? 'War phase' : 'Post-War';
         el.textContent = `Turn ${turn} \u2014 ${label} \u2014 ${phase}`;
         const investBtn = document.getElementById('wr-btn-invest') as HTMLButtonElement | null;
         if (investBtn) {
-            investBtn.style.display = this.gameState.meta.phase === 'peace' ? '' : 'none';
+            investBtn.style.display = 'none';
         }
     }
 

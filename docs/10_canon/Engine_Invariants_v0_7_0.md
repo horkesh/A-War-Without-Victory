@@ -411,9 +411,10 @@ The following systems have been fully removed from the codebase and must not be 
 ## Appendix B: Version History
 
 - **v0.7.0** (2026-03-15): Brigade no-destruction, ops-only attack, officer succession, cold front, elite loan invariants. Removed Systems appendix. Enclave/Sarajevo detail. Morale retreat resistance floors.
+- **v0.7.3**: Single-phase (War only) model. Peace phase and Phase 0 removed.
 - **v0.6.0**: Two-phase (Peace/War) model. Purged Phase I/II terminology.
 - **v0.5.0**: OSID model, supply reserves, paramilitary lifecycle.
 
 ---
 
-*Engine Invariants v0.7.0 -- Two-phase (Peace/War) model, corps-driven operations.*
+*Engine Invariants v0.7.0 -- Single-phase (War only) model, corps-driven operations.*

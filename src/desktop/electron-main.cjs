@@ -685,10 +685,6 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const phase0Directives = Array.isArray(payload?.phase0Directives) ? payload.phase0Directives : [];
-      if (state.meta?.phase === 'peace' && phase0Directives.length > 0 && typeof sim.applyPhase0Directives === 'function') {
-        sim.applyPhase0Directives(state, phase0Directives);
-      }
       const result = await sim.advanceTurn(state, getBaseDir());
       if (result.error) return { ok: false, error: result.error };
       currentGameStateJson = sim.serializeState(result.state);

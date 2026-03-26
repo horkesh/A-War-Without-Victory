@@ -20,18 +20,18 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Behavior: opens scenario file picker, builds initial state via `loadScenarioFromPath()`.
 
 - `start-new-campaign` (invoke)
-  - Payload: `{ playerFaction: 'RBiH' | 'RS' | 'HRHB', scenarioKey?: 'sep_1991' | 'apr_1992' }`
+  - Payload: `{ playerFaction: 'RBiH' | 'RS' | 'HRHB', scenarioKey?: 'apr_1992' }`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
-  - Behavior: loads scenario by key (`sep_1991` -> `data/scenarios/sep_1991_phase0.json`, `apr_1992` -> `data/scenarios/apr1992_definitive_52w.json`), sets `meta.player_faction`, and serializes + pushes state via `game-state-updated`. For April 1992 starts, recruitment_state is initialized for recruitment UI. Called by warroom launcher and tactical-map side picker.
+  - Behavior: loads April 1992 scenario (`data/scenarios/apr1992_definitive_52w.json`), sets `meta.player_faction`, and serializes + pushes state via `game-state-updated`. Recruitment_state is initialized for recruitment UI. Called by warroom launcher and tactical-map side picker.
 
 - `load-state-dialog` (invoke)
   - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
   - Behavior: opens state file picker, loads serialized GameState via `loadStateFromPath()`.
 
 - `advance-turn` (invoke)
-  - Payload (optional): `{ phase0Directives?: Array<{ id, factionId, investmentType, scope, targetMunIds }> }`
+  - Payload (optional): `{}`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, report?: { phase: string, turn: number, details?: unknown } | null }`
-  - Behavior: advances exactly one turn on current in-memory state using phase-aware desktop sim (`peace` -> runPeaceTurn, `war` -> runTurn). If `phase0Directives` are provided, they are applied deterministically before peace-phase advance. Returns updated serialized state plus phase report metadata.
+  - Behavior: advances exactly one war-phase turn on current in-memory state using `runTurn`. Returns updated serialized state plus phase report metadata.
 
 - `stage-attack-order` (invoke)
   - Payload: `{ brigadeId: string, targetSettlementId: string }`

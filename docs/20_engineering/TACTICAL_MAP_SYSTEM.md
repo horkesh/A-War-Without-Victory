@@ -549,7 +549,7 @@ When cursor is near a front line, both OSID and front-edge hover handlers fire. 
 
 **Replay scrubber** — Slider + week label for jumping to a specific week in a loaded replay timeline. Visible when a replay is loaded; keyboard shortcut `R` focuses it (desktop).
 
-**Toolbar date** — Top-right label shows deterministic campaign date derived from `(meta.phase, meta.turn)` anchors (peace = Sep 1991 anchor; war = Apr 1992 anchor). This replaces turn/capital/army summary text in the toolbar.
+**Toolbar date** — Top-right label shows deterministic campaign date derived from `meta.turn` with April 1992 anchor. This replaces turn/capital/army summary text in the toolbar.
 
 ### 13.1 Layer toolbar (bottom floating)
 

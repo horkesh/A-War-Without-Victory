@@ -83,7 +83,7 @@
 
 ## Turn pipeline and canon systems (Phase Specifications v0.5)
 
-Canon global turn-order hooks (docs/10_canon/Phase_Specifications_v0_5_0.md) map to step names as follows. Steps are defined in `src/sim/turn_phases/war_phases.ts` (war phase + early-war) and `src/sim/turn_phases/peace_phases.ts` (peace phase), orchestrated by `src/sim/turn_pipeline.ts`. Gaps (e.g. explicit “System 10 capability step” ordering) should be closed per PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md.
+Canon global turn-order hooks map to step names as follows. Steps are defined in `src/sim/turn_phases/war_phases.ts` (war phase) and `src/sim/turn_phases/early_war_phases.ts` (early-war), orchestrated by `src/sim/turn_pipeline.ts`. Gaps (e.g. explicit “System 10 capability step” ordering) should be closed per PARADOX_STATE_OF_GAME_MEETING_2026_02_08.md.
 
 | Canon hook | System | Pipeline step(s) |
 |------------|--------|-------------------|
