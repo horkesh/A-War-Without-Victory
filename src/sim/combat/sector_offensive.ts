@@ -465,11 +465,15 @@ function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn
     }
 }
 
-function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation['recovery_reason']): void {
+function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation['recovery_reason'], state?: GameState): void {
     op.phase = 'recovery';
     op.phase_started_turn = turn;
     op.recovery_reason = reason;
     op.force_launch = false;
+    // Clean up OPSEC marking when operation leaves active phase
+    if (op.sector_id && state && Array.isArray(state.military.opsec_sectors)) {
+        state.military.opsec_sectors = state.military.opsec_sectors.filter(s => s !== op.sector_id);
+    }
 }
 
 function getRecoveryDuration(op: CorpsOperation): number {
@@ -682,7 +686,7 @@ export function advanceSectorOffensives(
                     const anyAttempts = multiAxis
                         ? sumAxesField(op.axes!, 'attack_attempt_count') > 0
                         : (op.attack_attempt_count ?? 0) > 0;
-                    beginRecovery(op, turn, anyAttempts ? 'orphaned_sector' : 'no_logged_attempt');
+                    beginRecovery(op, turn, anyAttempts ? 'orphaned_sector' : 'no_logged_attempt', state);
                     continue;
                 }
             }
@@ -695,11 +699,22 @@ export function advanceSectorOffensives(
             if (op.dig_in_on_halt) {
                 applyDigInOnHalt(state, allBrigades);
             }
-            beginRecovery(op, turn, 'manual_termination');
+            beginRecovery(op, turn, 'manual_termination', state);
             continue;
         }
 
         if (op.phase === 'planning') {
+            // Ensure OPSEC marking during planning — enables passive intel
+            // buildup reduction (sector_intel.ts) and cohesion penalty (cohesion_drift.ts)
+            if (op.sector_id) {
+                if (!Array.isArray(state.military.opsec_sectors)) {
+                    state.military.opsec_sectors = [];
+                }
+                if (!state.military.opsec_sectors.includes(op.sector_id)) {
+                    state.military.opsec_sectors.push(op.sector_id);
+                }
+            }
+
             if (op.type === 'probe') {
                 op.planning_duration = 1;
                 op.participating_brigades = [...(op.participating_brigades ?? [])].sort(strictCompare).slice(0, 2);
@@ -732,7 +747,7 @@ export function advanceSectorOffensives(
 
                 if (prepResult.aborted) {
                     // Commander recommends abort — low exhaustion cost
-                    beginRecovery(op, turn, 'manual_termination');
+                    beginRecovery(op, turn, 'manual_termination', state);
                     continue;
                 }
 
@@ -790,7 +805,7 @@ export function advanceSectorOffensives(
                 applyCohesionDelta(state, allBrigades, -5);
                 if (!state.military.general_supply_reserve) state.military.general_supply_reserve = {};
                 state.military.general_supply_reserve[faction] = Math.max(0, (state.military.general_supply_reserve[faction] ?? 0) - 0.5);
-                beginRecovery(op, turn, 'manual_termination');
+                beginRecovery(op, turn, 'manual_termination', state);
                 continue;
             }
 
@@ -835,24 +850,24 @@ export function advanceSectorOffensives(
                 // Multi-axis: check if all axes are terminal
                 if (allAxesTerminal(op.axes!)) {
                     const allComplete = op.axes!.every(a => a.status === 'complete');
-                    beginRecovery(op, turn, allComplete ? 'completed' : 'max_failures');
+                    beginRecovery(op, turn, allComplete ? 'completed' : 'max_failures', state);
                     continue;
                 }
             } else {
                 // Legacy flat: check completion and failures
                 const objectives = op.objectives ?? [];
                 if ((op.current_objective_index ?? 0) >= objectives.length) {
-                    beginRecovery(op, turn, 'completed');
+                    beginRecovery(op, turn, 'completed', state);
                     continue;
                 }
                 if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
-                    beginRecovery(op, turn, getNoAttemptRecoveryReason(op));
+                    beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
                     continue;
                 }
             }
 
             if (op.type === 'probe' && !multiAxis && (op.attack_attempt_count ?? 0) > 0) {
-                beginRecovery(op, turn, op.last_result === 'captured' ? 'completed' : 'probe_complete');
+                beginRecovery(op, turn, op.last_result === 'captured' ? 'completed' : 'probe_complete', state);
                 continue;
             }
         } else if (op.phase === 'recovery') {
@@ -1169,7 +1184,7 @@ function updateMultiAxisResults(
     // Check if all axes terminal → operation enters recovery
     if (allAxesTerminal(axes)) {
         const allComplete = axes.every(a => a.status === 'complete');
-        beginRecovery(op, turn, allComplete ? 'completed' : 'max_failures');
+        beginRecovery(op, turn, allComplete ? 'completed' : 'max_failures', state);
     }
 }
 
@@ -1289,7 +1304,7 @@ function updateLegacyFlatResults(
             // time to march from staging to objectives via regular movement (1 hop/turn).
             if (!anyMoved && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 4) {
                 op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);
-                beginRecovery(op, turn, 'no_logged_attempt');
+                beginRecovery(op, turn, 'no_logged_attempt', state);
                 return;
             }
 
@@ -1297,7 +1312,7 @@ function updateLegacyFlatResults(
             // Happens when brigades can't reach objectives or fail probe thresholds.
             // Abort before wasting the entire command cycle.
             if ((op.movement_only_execution_turns ?? 0) >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
-                beginRecovery(op, turn, 'no_logged_attempt');
+                beginRecovery(op, turn, 'no_logged_attempt', state);
                 return;
             }
 
@@ -1309,10 +1324,10 @@ function updateLegacyFlatResults(
     }
 
     if ((op.current_objective_index ?? 0) >= objectives.length) {
-        beginRecovery(op, turn, 'completed');
+        beginRecovery(op, turn, 'completed', state);
     }
     if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
-        beginRecovery(op, turn, getNoAttemptRecoveryReason(op));
+        beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
     }
 }
 
