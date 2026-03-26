@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Night Shift Report — 2026-03-26</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0a0e1a;
+    --bg-card: #0f1628;
+    --bg-card-hover: #141c35;
+    --bg-card-alt: #111a2e;
+    --border: #1a2340;
+    --border-accent: #243060;
+    --text-primary: #e0e6f0;
+    --text-secondary: #8892a8;
+    --text-muted: #556080;
+    --green: #39ff85;
+    --green-dim: #1a7a40;
+    --green-bg: rgba(57,255,133,0.08);
+    --amber: #ffb833;
+    --amber-dim: #8a6018;
+    --amber-bg: rgba(255,184,51,0.08);
+    --teal: #33e0e0;
+    --teal-dim: #187070;
+    --teal-bg: rgba(51,224,224,0.08);
+    --blue: #4488ff;
+    --blue-bg: rgba(68,136,255,0.08);
+    --red: #ff4466;
+    --red-bg: rgba(255,68,102,0.08);
+    --purple: #aa66ff;
+    --purple-bg: rgba(170,102,255,0.08);
+    --orange: #ff8833;
+    --orange-bg: rgba(255,136,51,0.08);
+    --glow-green: 0 0 20px rgba(57,255,133,0.15);
+    --glow-amber: 0 0 20px rgba(255,184,51,0.15);
+    --glow-red: 0 0 20px rgba(255,68,102,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .container { max-width: 1340px; margin: 0 auto; padding: 40px 32px; }
+
+  /* HERO */
+  .hero { text-align: center; padding: 60px 0 40px; position: relative; }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 300px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+  .hero-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--green); margin-bottom: 12px; opacity: 0.8;
+  }
+  .hero-title {
+    font-size: 44px; font-weight: 700; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--green) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 8px;
+  }
+  .hero-subtitle { font-size: 16px; color: var(--text-secondary); font-weight: 300; }
+  .hero-subtitle em { color: var(--amber); font-style: normal; font-weight: 500; }
+
+  /* STAT STRIP */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin: 32px 0 48px;
+  }
+  .stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 16px;
+    text-align: center;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .stat-box:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--glow-green);
+  }
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: -1px;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .stat-delta {
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 4px;
+  }
+  .stat-delta.positive { color: var(--green); }
+  .stat-delta.negative { color: var(--red); }
+  .stat-delta.neutral { color: var(--text-muted); }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 48px 0 24px;
+  }
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-accent), transparent);
+  }
+  .section-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 2px;
+  }
+
+  /* WORKSTREAM GRID */
+  .ws-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .ws-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.15s;
+  }
+  .ws-card:hover {
+    border-color: var(--border-accent);
+    transform: translateY(-1px);
+  }
+  .ws-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 3px 0 0 3px;
+  }
+  .ws-card[data-color="green"]::before { background: var(--green); }
+  .ws-card[data-color="amber"]::before { background: var(--amber); }
+  .ws-card[data-color="teal"]::before { background: var(--teal); }
+  .ws-card[data-color="blue"]::before { background: var(--blue); }
+  .ws-card[data-color="purple"]::before { background: var(--purple); }
+  .ws-card[data-color="orange"]::before { background: var(--orange); }
+  .ws-card[data-color="red"]::before { background: var(--red); }
+
+  .ws-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .ws-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .ws-number.green { background: var(--green-bg); color: var(--green); }
+  .ws-number.amber { background: var(--amber-bg); color: var(--amber); }
+  .ws-number.teal { background: var(--teal-bg); color: var(--teal); }
+  .ws-number.blue { background: var(--blue-bg); color: var(--blue); }
+  .ws-number.purple { background: var(--purple-bg); color: var(--purple); }
+  .ws-number.orange { background: var(--orange-bg); color: var(--orange); }
+  .ws-number.red { background: var(--red-bg); color: var(--red); }
+
+  .ws-title {
+    font-size: 15px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .ws-commit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+  .ws-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--green-bg);
+    color: var(--green);
+  }
+  .ws-body {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .ws-body ul {
+    list-style: none;
+    padding: 0;
+  }
+  .ws-body li {
+    position: relative;
+    padding-left: 16px;
+    margin-bottom: 4px;
+  }
+  .ws-body li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border-accent);
+  }
+  .ws-body strong { color: var(--text-primary); font-weight: 500; }
+  .ws-body code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    background: rgba(255,255,255,0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--teal);
+  }
+  .ws-file-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 40px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--green), var(--border-accent) 30%, var(--border-accent) 70%, var(--amber));
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .timeline-dot {
+    position: absolute;
+    left: -33px;
+    top: 4px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid var(--green);
+    background: var(--bg-deep);
+  }
+  .timeline-commit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 72px;
+  }
+  .timeline-msg {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .timeline-msg strong {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* DECISIONS / FLAGS */
+  .flag-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 10px;
+  }
+  .flag-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .flag-icon {
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .flag-icon.decision { background: var(--amber-bg); }
+  .flag-icon.issue { background: var(--red-bg); }
+  .flag-icon.skip { background: var(--purple-bg); }
+  .flag-icon.idea { background: var(--blue-bg); }
+  .flag-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .flag-label.decision { color: var(--amber); }
+  .flag-label.issue { color: var(--red); }
+  .flag-label.skip { color: var(--purple); }
+  .flag-label.idea { color: var(--blue); }
+  .flag-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .flag-text strong { color: var(--text-primary); font-weight: 500; }
+
+  /* BUILD STATUS BAR */
+  .build-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .build-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .build-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .build-icon.pass { background: var(--green-bg); }
+  .build-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+  }
+  .build-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--green);
+  }
+
+  /* NEXT STEPS */
+  .next-steps {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    margin-top: 24px;
+  }
+  .next-steps h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--amber);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .next-steps ol {
+    padding-left: 24px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 2;
+  }
+  .next-steps li::marker {
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .next-steps code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--teal);
+  }
+
+  /* PROPOSALS */
+  .proposal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .proposal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .proposal-card:hover { border-color: var(--border-accent); }
+  .proposal-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .proposal-tag.opportunity { background: var(--green-bg); color: var(--green); }
+  .proposal-tag.problem { background: var(--red-bg); color: var(--red); }
+  .proposal-tag.idea { background: var(--blue-bg); color: var(--blue); }
+  .proposal-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .proposal-body {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* CANDLE ILLUSTRATION */
+  .candle-demo {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 24px;
+    margin: 16px 0;
+  }
+  .candle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .candle-flame {
+    width: 12px;
+    height: 18px;
+    background: radial-gradient(ellipse, #ffe066 20%, #ff9900 60%, transparent 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flicker 1.5s ease-in-out infinite alternate;
+    filter: blur(0.5px);
+  }
+  .candle-flame.spent {
+    width: 6px;
+    height: 8px;
+    background: radial-gradient(ellipse, #ff440088 20%, #88220033 60%, transparent 100%);
+    animation: flicker 0.8s ease-in-out infinite alternate;
+  }
+  .candle-wax {
+    width: 20px;
+    background: linear-gradient(to bottom, #f0e0c0, #d4c4a0);
+    border-radius: 2px 2px 3px 3px;
+    position: relative;
+  }
+  .candle-wax::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #c0b080;
+    border-radius: 0 0 3px 3px;
+  }
+  .candle-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+  @keyframes flicker {
+    0% { transform: scale(1) translateY(0); opacity: 1; }
+    50% { transform: scale(1.05) translateY(-1px); opacity: 0.9; }
+    100% { transform: scale(0.95) translateY(0.5px); opacity: 1; }
+  }
+
+  /* GHOST DOT DEMO */
+  .ghost-demo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    padding: 16px;
+    margin: 16px 0;
+  }
+  .ghost-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    opacity: 0.7;
+    position: relative;
+  }
+  .ghost-dot.bosniak { background: #39b54a; box-shadow: 0 0 12px rgba(57,181,74,0.4); }
+  .ghost-dot.croat { background: #3388ee; box-shadow: 0 0 12px rgba(51,136,238,0.4); }
+  .ghost-dot.serb { background: #ee4444; box-shadow: 0 0 12px rgba(238,68,68,0.4); }
+  .ghost-dot.mixed { background: #8b7355; box-shadow: 0 0 12px rgba(139,115,85,0.3); }
+  .ghost-dot-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+  .ghost-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* LETTER HOME DEMO */
+  .letter-demo {
+    background: #1a1812;
+    border-left: 2px solid #b8860b44;
+    padding: 16px 20px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    font-family: Georgia, serif;
+    font-size: 13px;
+    font-style: italic;
+    color: #a09880;
+    line-height: 1.8;
+  }
+
+  /* WIDE CARD */
+  .ws-card.wide {
+    grid-column: 1 / -1;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .stat-strip { grid-template-columns: repeat(3, 1fr); }
+    .ws-grid { grid-template-columns: 1fr; }
+    .proposal-grid { grid-template-columns: 1fr; }
+    .build-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-label">Pyrrhic Games &mdash; Night Shift Report</div>
+    <div class="hero-title">8 / 8 Workstreams Delivered</div>
+    <div class="hero-subtitle">2026-03-26 &mdash; <em>All specs executed, build green, zero blockers</em></div>
+  </div>
+
+  <!-- STAT STRIP -->
+  <div class="stat-strip">
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--green);">8/8</div>
+      <div class="stat-label">Workstreams</div>
+      <div class="stat-delta positive">all complete</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--teal);">10</div>
+      <div class="stat-label">Commits</div>
+      <div class="stat-delta neutral">clean history</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--amber);">1487</div>
+      <div class="stat-label">Tests</div>
+      <div class="stat-delta positive">+22 new</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--purple);">123</div>
+      <div class="stat-label">Suites</div>
+      <div class="stat-delta positive">+5 new &minus;16 phase0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--red);">&minus;5.5k</div>
+      <div class="stat-label">Lines Deleted</div>
+      <div class="stat-delta neutral">phase0 purge</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" style="color: var(--blue);">+2.1k</div>
+      <div class="stat-label">Lines Added</div>
+      <div class="stat-delta neutral">features + tests</div>
+    </div>
+  </div>
+
+  <!-- BUILD STATUS -->
+  <div class="section-header">
+    <span class="section-number">00</span>
+    <h2>Build Status</h2>
+  </div>
+  <div class="build-bar">
+    <div class="build-item">
+      <div class="build-icon pass">&#x2714;</div>
+      <div>
+        <div class="build-label">TypeScript</div>
+        <div class="build-value">0 errors</div>
+      </div>
+    </div>
+    <div class="build-item">
+      <div class="build-icon pass">&#x2714;</div>
+      <div>
+        <div class="build-label">Vitest</div>
+        <div class="build-value">1487 pass / 1 skip</div>
+      </div>
+    </div>
+    <div class="build-item">
+      <div class="build-icon pass">&#x2714;</div>
+      <div>
+        <div class="build-label">Map Build</div>
+        <div class="build-value">success</div>
+      </div>
+    </div>
+    <div class="build-item">
+      <div class="build-icon pass">&#x2714;</div>
+      <div>
+        <div class="build-label">Working Tree</div>
+        <div class="build-value">clean</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKSTREAMS -->
+  <div class="section-header">
+    <span class="section-number">01</span>
+    <h2>Workstreams</h2>
+  </div>
+
+  <div class="ws-grid">
+
+    <!-- WS1 -->
+    <div class="ws-card" data-color="green">
+      <div class="ws-header">
+        <span class="ws-number green">WS1</span>
+        <span class="ws-title">13 Missing 1992 Essays</span>
+        <span class="ws-commit">103ff645</span>
+        <span class="ws-badge">COMPLETE</span>
+      </div>
+      <div class="ws-body">
+        <ul>
+          <li>All <strong>96 Codex essays</strong> now have standalone JSON files</li>
+          <li>Each essay 800-870 words, <strong>ICTY-first sourcing</strong></li>
+          <li>Mandatory citations: Galic, Karadzic, Kunarac, Prlic, Oric, Brdanin</li>
+          <li>Covers: barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, Op Corridor, Srebrenica enclave, Mostar liberation, arms embargo, Herceg-Bosna goals</li>
+        </ul>
+        <span class="ws-file-count">&#128196; 13 files created &middot; data/scenarios/essays/</span>
+      </div>
+    </div>
+
+    <!-- WS2 -->
+    <div class="ws-card" data-color="amber">
+      <div class="ws-header">
+        <span class="ws-number amber">WS2</span>
+        <span class="ws-title">Letter Home Templates + Name Pools</span>
+        <span class="ws-commit">a1f99593</span>
+        <span class="ws-badge">COMPLETE</span>
+      </div>
+      <div class="ws-body">
+        <ul>
+          <li><strong>25 templates</strong> across 5 casualty types (kia_offensive, kia_defensive, kia_siege, wia, mia)</li>
+          <li><strong>9 name pools</strong>: Bosniak/Serbian/Croatian &times; male/female/surnames</li>
+          <li>100 Bosniak male + 50 female, 50 Serbian male + 30 female, 30 Croatian male + 20 female</li>
+        </ul>
+        <span class="ws-file-count">&#128196; 1 file created &middot; data/templates/letter_home_templates.json</span>
+      </div>
+    </div>
+
+    <!-- WS3 -->
+    <div class="ws-card" data-color="teal">
+      <div class="ws-header">
+        <span class="ws-number teal">WS3</span>
+        <span class="ws-title">Ghost Map + Exhaustion Clock</span>
+        <span class="ws-commit">79b27924</span>
+        <span class="ws-badge">COMPLETE</span>
+      </div>
+      <div class="ws-body">
+        <p style="margin-bottom: 10px;"><strong>Ghost Map</strong> &mdash; Deck.gl ScatterplotLayer showing 1991 census demographics:</p>
+        <div class="ghost-demo">
+          <div class="ghost-legend-item"><div class="ghost-dot bosniak"></div><span class="ghost-dot-label">Bosniak</span></div>
+          <div class="ghost-legend-item"><div class="ghost-dot croat"></div><span class="ghost-dot-label">Croat</span></div>
+          <div class="ghost-legend-item"><div class="ghost-dot serb"></div><span class="ghost-dot-label">Serb</span></div>
+          <div class="ghost-legend-item"><div class="ghost-dot mixed"></div><span class="ghost-dot-label">Mixed</span></div>
+        </div>
+        <p style="margin-bottom: 10px;"><strong>Exhaustion Clock</strong> &mdash; Candle visual in Army HQ with 5 states:</p>
+        <div class="candle-demo">
+          <div class="candle">
+            <div class="candle-flame"></div>
+            <div class="candle-wax" style="height: 48px;"></div>
+            <div class="candle-label" style="color: var(--green);">Strong</div>
+          </div>
+          <div class="candle">
+            <div class="candle-flame"></div>
+            <div class="candle-wax" style="height: 36px;"></div>
+            <div class="candle-label" style="color: var(--teal);">Steady</div>
+          </div>
+          <div class="candle">
+            <div class="candle-flame" style="animation-duration: 1s;"></div>
+            <div class="candle-wax" style="height: 24px;"></div>
+            <div class="candle-label" style="color: var(--amber);">Waning</div>
+          </div>
+          <div class="candle">
+            <div class="candle-flame" style="animation-duration: 0.6s; width: 10px; height: 14px;"></div>
+            <div class="candle-wax" style="height: 12px;"></div>
+            <div class="candle-label" style="color: var(--orange);">Critical</div>
+          </div>
+          <div class="candle">
+            <div class="candle-flame spent"></div>
+            <div class="candle-wax" style="height: 4px;"></div>
+            <div class="candle-label" style="color: var(--red);">Spent</div>
+          </div>
+        </div>
+        <span class="ws-file-count">&#128196; 2 new + 8 modified &middot; src/ui/map/</span>
+      </div>
+    </div>
+
+    <!-- WS4 -->
+    <div class="ws-card" data-color="amber">
+      <div class="ws-header">
+        <span class="ws-number amber">WS4</span>
+        <span class="ws-title">Letter Home Engine</span>
+        <span class="ws-commit">c2065bf7</span>
+        <span class="ws-badge">COMPLETE</span>
+      </div>
+      <div class="ws-body">
+        <ul>
+          <li><strong>Deterministic</strong> casualty vignette generation (multiply-by-primes hash)</li>
+          <li>UI-side from adapter data &mdash; no pipeline change, no save format change</li>
+          <li>Faction-appropriate names, municipalities, hospitals</li>
+        </ul>
+        <div class="letter-demo">
+          Corporal Senad Halilovi&#263;, age 23, from Visoko. Former schoolteacher.
+          Served with 303rd Mountain Brigade since the summer. Killed leading
+          his section forward at Ilija&#353;. His commanding officer noted he had
+          requested transfer to a quieter sector the previous week. The request
+          was still being processed.
+        </div>
+        <span class="ws-file-count">&#128196; 1 new + 1 modified &middot; src/sim/ + src/ui/map/</span>
+      </div>
+    </div>
+
+    <!-- WS5 (wide) -->
+    <div class="ws-card wide" data-color="blue">
+      <div class="ws-header">
+        <span class="ws-number blue">WS5</span>
+        <span class="ws-title">Ops Modal UX Overhaul</span>
+        <span class="ws-commit">07bbb7ff</span>
+        <span class="ws-badge">COMPLETE</span>
+      </div>
+      <div class="ws-body">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+          <div>
+            <strong style="color: var(--red); font-size: 11px; letter-spacing: 1px;">WP4a CRITICAL FIX</strong>
+            <p>Pointer-events click bug &mdash; OpsMap canvas no longer steals clicks from phase panels</p>
+          </div>
+          <div>
+            <strong style="color: var(--blue); font-size: 11px; letter-spacing: 1px;">WP1 PARAMETER STRIP</strong>
+            <p>Group descriptions, per-pill subtitles, title attrs, REGARDLESS danger pulse, artillery prep info</p>
+          </div>
+          <div>
+            <strong style="color: var(--blue); font-size: 11px; letter-spacing: 1px;">WP2 BRIGADE CARDS</strong>
+            <p>TANKS/ARTY labels, verbal cohesion &amp; fatigue descriptors, unit type indicator, combat ineffective border</p>
+          </div>
+          <div>
+            <strong style="color: var(--blue); font-size: 11px; letter-spacing: 1px;">WP3 G-2 PHASE</strong>
+            <p>Widened clipboard (480px), WCAG contrast fix, Map Legend tab, Quick Assessment box, B/C/S translations</p>
+          </div>
+          <div>
+            <strong style="color: var(--blue); font-size: 11px; letter-spacing: 1px;">WP4b-f MODAL FLOW</strong>
+            <p>Commander confirmation step, enlarged phase stepper, close button, always-visible reorder, skip animation</p>
+          </div>
+          <div>
+            <strong style="color: var(--text-muted); font-size: 11px; letter-spacing: 1px;">SKIPPED (CONSERVATIVE)</strong>
+            <p style="color: var(--text-muted);">WP4f terrain info, WP4g summary panel, WP4h probe customization &mdash; flagged for day shift</p>
+          </div>
+        </div>
+        <span class="ws-file-count">&#128196; 1 new + 7 modified &middot; src/ui/map/components/ops_modal/</span>
+      </div>
+    </div>
+
+    <!-- WS6 -->
+    <div class="ws-card" data-color="purple">
+      <div class="ws-header">
+        <span class="ws-number purple">WS6</span>
+        <span class="ws-title">Integration Tests</span>
+        <span class="ws-commit">6e61e676</span>
+        <span class="ws-badge">COMPLETE</span>
+      </div>
+      <div class="ws-body">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+          <div><code>scenario_roundtrip</code> <span style="color: var(--text-muted); font-size: 11px;">&mdash; 3 tests</span></div>
+          <div><code>event_system</code> <span style="color: var(--text-muted); font-size: 11px;">&mdash; 7 tests</span></div>
+          <div><code>save_load</code> <span style="color: var(--text-muted); font-size: 11px;">&mdash; 4 tests</span></div>
+          <div><code>pool_integrity</code> <span style="color: var(--text-muted); font-size: 11px;">&mdash; 4 tests</span></div>
+          <div><code>formation_integrity</code> <span style="color: var(--text-muted); font-size: 11px;">&mdash; 4 tests</span></div>
+        </div>
+        <p style="margin-top: 8px;">Adapted spec code to match actual exports (singular <code>condition</code>, <code>control_change</code> shape, <code>serializeGameState</code>)</p>
+        <span class="ws-file-count">&#128196; 5 files + vitest.config.ts &middot; tests/integration_*.test.ts</span>
+      </div>
+    </div>
+
+    <!-- WS7 -->
+    <div class="ws-card" data-color="orange">
+      <div class="ws-header">
+        <span class="ws-number orange">WS7</span>
+        <span class="ws-title">v0.8.0 Types + v0.9 Design Docs</span>
+        <span class="ws-commit">99b8705c</span>
+        <span class="ws-badge">COMPLETE</span>
+      </div>
+      <div class="ws-body">
+        <ul>
+          <li><code>political_leader_types.ts</code> &mdash; interfaces only, no logic</li>
+          <li>PoliticalLeaderProfile, PoliticalLeaderState, PoliticalPosture, WarCrimesPolicy, AlliancePosture</li>
+          <li><strong>5 open questions</strong> flagged for daytime review</li>
+          <li>Cost Ledger template format + Endgame Comparison data requirements docs</li>
+        </ul>
+        <span class="ws-file-count">&#128196; 1 new + 2 design docs &middot; src/state/ + docs/plans/</span>
+      </div>
+    </div>
+
+    <!-- WS8 (wide) -->
+    <div class="ws-card wide" data-color="red">
+      <div class="ws-header">
+        <span class="ws-number red">WS8</span>
+        <span class="ws-title">Canon Audit &mdash; Phases A-C</span>
+        <span class="ws-commit">5296fba4</span>
+        <span class="ws-badge">COMPLETE</span>
+      </div>
+      <div class="ws-body">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+          <div>
+            <strong style="color: var(--red); font-size: 11px; letter-spacing: 1px;">PHASE A &mdash; DELETE</strong>
+            <ul>
+              <li><code>src/phase0/</code> &mdash; 11 files</li>
+              <li>3 phase0 scenarios</li>
+              <li>16 phase0 tests</li>
+              <li>3 warroom phase0 components</li>
+              <li>10+ files with dead imports fixed</li>
+            </ul>
+          </div>
+          <div>
+            <strong style="color: var(--amber); font-size: 11px; letter-spacing: 1px;">PHASE B &mdash; RENAME</strong>
+            <ul>
+              <li><code>peace_phases.ts</code> &#8594; <code>early_war_phases.ts</code></li>
+              <li><code>peacePhases</code> &#8594; <code>earlyWarPhases</code></li>
+              <li><code>bot_phase_i.ts</code> &#8594; <code>bot_early_war.ts</code></li>
+              <li><code>peacePhaseTimeFactor</code> &#8594; <code>earlyWarTimeFactor</code></li>
+            </ul>
+          </div>
+          <div>
+            <strong style="color: var(--teal); font-size: 11px; letter-spacing: 1px;">PHASE C &mdash; DOCS</strong>
+            <ul>
+              <li>15 canon + engineering docs updated</li>
+              <li>3 obsolete docs archived to <code>docs/_old/</code></li>
+              <li><code>FORAWWV.md</code> untouched (sacred)</li>
+            </ul>
+          </div>
+        </div>
+        <div style="margin-top: 12px; padding: 8px 12px; background: var(--red-bg); border-radius: 6px; font-size: 12px; color: var(--red);">
+          &#9888; HARD STOP: Phase D/E (type system changes: remove 'peace' from PhaseName + save migration) deferred for daytime sign-off
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMIT TIMELINE -->
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <h2>Commit Timeline</h2>
+  </div>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">103ff645</span>
+      <span class="timeline-msg"><strong>feat(codex)</strong>: author 13 missing 1992 essays with ICTY-first sourcing</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">a1f99593</span>
+      <span class="timeline-msg"><strong>feat(letter-home)</strong>: add 25 casualty vignette templates + name pools</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">99b8705c</span>
+      <span class="timeline-msg"><strong>feat(v0.8)</strong>: scaffold political leader types + v0.9 design docs</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">5296fba4</span>
+      <span class="timeline-msg"><strong>chore(canon-audit)</strong>: remove peace phase, rename to early war (A-C)</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">6e61e676</span>
+      <span class="timeline-msg"><strong>test(integration)</strong>: add 5 integration test suites with 22 tests</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">79b27924</span>
+      <span class="timeline-msg"><strong>feat(ui)</strong>: Ghost Map census overlay + Exhaustion Clock candle visual</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">07bbb7ff</span>
+      <span class="timeline-msg"><strong>feat(ops-modal)</strong>: UX overhaul &mdash; 5 work packages</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">c2065bf7</span>
+      <span class="timeline-msg"><strong>feat(letter-home)</strong>: deterministic casualty vignette engine + CoS briefing</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <span class="timeline-commit">949a8bc0</span>
+      <span class="timeline-msg"><strong>docs</strong>: add UI/UX audit, ops modal spec, and 5 interactive mockups</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="border-color: var(--amber);"></div>
+      <span class="timeline-commit">87e2dfb5</span>
+      <span class="timeline-msg"><strong>chore</strong>: night shift complete &mdash; morning report + ledger update</span>
+    </div>
+  </div>
+
+  <!-- DECISIONS -->
+  <div class="section-header">
+    <span class="section-number">03</span>
+    <h2>Decisions for Day Shift Review</h2>
+  </div>
+  <div class="flag-grid">
+    <div class="flag-card">
+      <div class="flag-icon decision">&#9878;</div>
+      <div>
+        <div class="flag-label decision">DECISION 1 &mdash; WS5</div>
+        <div class="flag-text"><strong>Pointer-events fix</strong> &mdash; added <code>pointer-events-none</code> to OpsMap container when <code>enabled=false</code>. Simplest of 3 options. Alternative: wrap each phase in <code>pointer-events-auto</code> full-area container.</div>
+      </div>
+    </div>
+    <div class="flag-card">
+      <div class="flag-icon decision">&#9878;</div>
+      <div>
+        <div class="flag-label decision">DECISION 2 &mdash; WS5</div>
+        <div class="flag-text"><strong>Unit type indicator</strong> &mdash; parsed from brigade name via regex (MOTORIZED, MOUNTAIN, etc.) since <code>FormationView</code> has no <code>unit_type</code> field. Alternative: add field to adapter.</div>
+      </div>
+    </div>
+    <div class="flag-card">
+      <div class="flag-icon decision">&#9878;</div>
+      <div>
+        <div class="flag-label decision">DECISION 3 &mdash; WS4</div>
+        <div class="flag-text"><strong>Letter Home generation</strong> &mdash; UI-side from adapter data (not pipeline step), per spec recommendation. No save format change needed.</div>
+      </div>
+    </div>
+    <div class="flag-card">
+      <div class="flag-icon decision">&#9878;</div>
+      <div>
+        <div class="flag-label decision">DECISION 4 &mdash; WS2</div>
+        <div class="flag-text"><strong>Template count</strong> &mdash; spec header said "20" but detailed content defined 25 (5&times;5 categories). Included all 25.</div>
+      </div>
+    </div>
+    <div class="flag-card">
+      <div class="flag-icon decision">&#9878;</div>
+      <div>
+        <div class="flag-label decision">DECISION 5 &mdash; WS8</div>
+        <div class="flag-text"><strong>Phase0 warroom stubs</strong> &mdash; InvestmentPanel, WarPlanningMap, MagazineModal, FactionOverviewPanel had phase0 imports. Replaced with local stubs (files still needed for war-phase rendering).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ISSUES -->
+  <div class="section-header">
+    <span class="section-number">04</span>
+    <h2>Issues &amp; Skipped Items</h2>
+  </div>
+  <div class="flag-grid">
+    <div class="flag-card">
+      <div class="flag-icon issue">&#9888;</div>
+      <div>
+        <div class="flag-label issue">ISSUE 1 &mdash; PRE-EXISTING</div>
+        <div class="flag-text">Sector reachability invariant violation &mdash; <code>arbih_guards_brigade</code> at <code>op:visoko:visoko_2</code> assigned to unreachable sector. Logged in integration test stderr. Not caused by nightshift.</div>
+      </div>
+    </div>
+    <div class="flag-card">
+      <div class="flag-icon issue">&#9888;</div>
+      <div>
+        <div class="flag-label issue">ISSUE 2 &mdash; WS8</div>
+        <div class="flag-text"><code>docs/_old/</code> is in <code>.gitignore</code>. Archived docs force-added with <code>git add -f</code>. Could be accidentally cleaned. Consider removing <code>_old</code> from .gitignore.</div>
+      </div>
+    </div>
+    <div class="flag-card">
+      <div class="flag-icon skip">&#8987;</div>
+      <div>
+        <div class="flag-label skip">SKIPPED &mdash; WS8 PHASE D/E</div>
+        <div class="flag-text">Type system changes (<code>PhaseName = 'peace' | 'war'</code> &rarr; <code>'war'</code> only) + save migration. Needs daytime sign-off per handoff instructions.</div>
+      </div>
+    </div>
+    <div class="flag-card">
+      <div class="flag-icon skip">&#8987;</div>
+      <div>
+        <div class="flag-label skip">SKIPPED &mdash; WS5 WP4f/g/h</div>
+        <div class="flag-text">Per-objective terrain info (needs data pipeline), AuthorizePhase summary panel (medium complexity), probe customization (spec said STOP AND ASK). All conservative skips.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPOSALS -->
+  <div class="section-header">
+    <span class="section-number">05</span>
+    <h2>Observations &amp; Proposals</h2>
+  </div>
+  <div class="proposal-grid">
+    <div class="proposal-card">
+      <span class="proposal-tag opportunity">OPPORTUNITY</span>
+      <div class="proposal-title">Displacement Delta Visualization</div>
+      <div class="proposal-body">Ghost Map data could power a "displacement delta" view &mdash; compare 1991 dots against current control to show demographic change. ~50 lines in a new layer.</div>
+    </div>
+    <div class="proposal-card">
+      <span class="proposal-tag opportunity">OPPORTUNITY</span>
+      <div class="proposal-title">Faction-Specific Letter Tone</div>
+      <div class="proposal-body">Templates could be faction-specific &mdash; ARBiH referencing Sarajevo landmarks, VRS referencing Drina valley geography. ~20 templates per faction.</div>
+    </div>
+    <div class="proposal-card">
+      <span class="proposal-tag opportunity">OPPORTUNITY</span>
+      <div class="proposal-title">Shared 40w Test Fixture</div>
+      <div class="proposal-body">pool_integrity and formation_integrity both run independent 40w scenarios. Could share one &mdash; saves ~60s per test run.</div>
+    </div>
+    <div class="proposal-card">
+      <span class="proposal-tag problem">PROBLEM</span>
+      <div class="proposal-title">Warroom Phase0 Debt</div>
+      <div class="proposal-body">InvestmentPanel, WarPlanningMap etc. still have deep phase0 type dependencies. Stubs work but are tech debt. Audit in Phase D.</div>
+    </div>
+    <div class="proposal-card">
+      <span class="proposal-tag idea">IDEA</span>
+      <div class="proposal-title">Triple Candle Analyst Mode</div>
+      <div class="proposal-body">ExhaustionClock could show all 3 faction candles side-by-side in dev mode for instant comparative exhaustion overview.</div>
+    </div>
+    <div class="proposal-card">
+      <span class="proposal-tag idea">IDEA</span>
+      <div class="proposal-title">Memorial Wall</div>
+      <div class="proposal-body">Accumulate all Letter Home vignettes into a scrollable list from Army HQ. A growing weight of war the player can revisit.</div>
+    </div>
+  </div>
+
+  <!-- NEXT STEPS -->
+  <div class="section-header">
+    <span class="section-number">06</span>
+    <h2>Recommended Next Steps</h2>
+  </div>
+  <div class="next-steps">
+    <h3>Day Shift Priorities</h3>
+    <ol>
+      <li>Review <strong>DECISION-1 through DECISION-5</strong> above</li>
+      <li>Run <code>npm run desktop</code> and visually verify: Ghost Map toggle, Exhaustion Clock, Ops Modal UX, Letter Home vignettes</li>
+      <li>Execute <strong>WS8 Phase D/E</strong> &mdash; remove <code>'peace'</code> from PhaseName type, add save migration</li>
+      <li>Run 3-pass QA on 13 new essays (ICTY citations, word count, no hedging)</li>
+      <li>Consider <strong>OPP-3</strong> (shared 40w test fixture) to speed up integration tests</li>
+      <li>Address <strong>ISSUE-2</strong> &mdash; <code>docs/_old/</code> in .gitignore</li>
+      <li>Next milestone: <strong>v0.7.1</strong> (Letter Home + Ghost Map) or <strong>v0.7.2</strong> (Ops Modal)</li>
+    </ol>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="text-align: center; padding: 48px 0 24px; color: var(--text-muted); font-size: 12px; font-family: 'IBM Plex Mono', monospace;">
+    PYRRHIC GAMES &mdash; NIGHT SHIFT COMPLETE &mdash; 2026-03-26<br>
+    <span style="font-size: 10px; opacity: 0.5;">Generated by Claude Opus 4.6 (1M context)</span>
+  </div>
+
+</div>
+</body>
+</html>

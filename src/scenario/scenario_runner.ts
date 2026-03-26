@@ -458,6 +458,16 @@ const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected
     { osid: 'op:gorazde:gorazde_2', expected_controller: 'RBiH' },         // Gorazde enclave — ARBiH defended
     { osid: 'op:srebrenica:srebrenica_2', expected_controller: 'RBiH' },   // Srebrenica enclave — ARBiH defended
     { osid: 'op:zavidovici:vozuca_2', expected_controller: 'RS' },          // Vozuca — VRS Ozren salient
+    // Additional city-core & enclave anchors
+    { osid: 'op:gradacac:gradacac_2', expected_controller: 'RBiH' },      // Gradacac — ARBiH defended, never fell
+    { osid: 'op:rogatica:zepa_2', expected_controller: 'RBiH' },          // Zepa enclave — ARBiH defended (until 1995)
+    { osid: 'op:derventa:derventa_2', expected_controller: 'RS' },         // Derventa — VRS captured June 1992
+    { osid: 'op:prijedor:prijedor_2', expected_controller: 'RS' },         // Prijedor — VRS from April 1992
+    { osid: 'op:foca:foca_3', expected_controller: 'RS' },                // Foca — VRS from April 1992
+    { osid: 'op:visegrad:visegrad_2', expected_controller: 'RS' },         // Visegrad — VRS from April 1992
+    { osid: 'op:zenica:zenica_2', expected_controller: 'RBiH' },          // Zenica — ARBiH 3rd Corps HQ
+    { osid: 'op:travnik:travnik_2', expected_controller: 'RBiH' },        // Travnik — ARBiH held
+    { osid: 'op:mostar:mostar_zapad_2', expected_controller: 'HRHB' },    // Mostar west — HVO controlled
 ];
 
 function countControllers(snapshot: ControlKey[]): Map<string, number> {
