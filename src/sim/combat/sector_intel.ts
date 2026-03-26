@@ -81,7 +81,13 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
             // Intel goes stale: decay applies even in contact. Passive buildup
             // partially offsets it, but net effect is negative — only combat or
             // probes refresh intel to full confidence.
-            const newConfidence = Math.min(1.0, Math.max(0, prevConfidence + passiveBuildup - profile.confidence_decay_per_turn));
+            let newConfidence = Math.min(1.0, Math.max(0, prevConfidence + passiveBuildup - profile.confidence_decay_per_turn));
+
+            // Concentration detection: if enemy has 2+ reserve brigades, defenders detect staging
+            if ((enemySector.reserve_brigade_ids?.length ?? 0) >= 2) {
+                newConfidence = Math.min(1.0, newConfidence + 0.10);
+            }
+
             const turnsInContact = prevTurnsInContact + 1;
             newRecords.push(buildRecord(
                 enemySectorId, enemySector, edgeCount,
