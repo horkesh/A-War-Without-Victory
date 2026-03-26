@@ -174,9 +174,13 @@ export function generateCorpsOperationOrders(
             })
         ).slice(0, 5);
 
+        // Coerce zombie op types to sector_attack — only type with execution logic
+        const effectiveType = (bestTemplate.type === 'general_offensive' || bestTemplate.type === 'strategic_defense')
+            ? 'sector_attack' : bestTemplate.type;
+
         const operation: CorpsOperation = {
             name: bestTemplate.name,
-            type: bestTemplate.type,
+            type: effectiveType,
             phase: 'planning',
             started_turn: turn,
             phase_started_turn: turn,
