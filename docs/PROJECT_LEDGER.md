@@ -1,7 +1,25 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-26
-**Status:** **v0.7.0 COMPLETE. 4 deployment health fixes (OOB, BFS guard, rear march, silent drops). 91.4% area-weighted calibration.** 1487 tests, 123 suites. 96 essays (all standalone). Ghost Map + Exhaustion Clock. Letter Home engine. Ops Modal UX overhaul. Canon audit Phases A-C (phase0 removed). v0.8.0 types scaffolded. 5 integration test suites. **Next: v0.7.1 version bump, visual verification, canon audit Phase D/E.**
+**Status:** **v0.7.0 COMPLETE. 16 mechanical fixes across deployment, operations, intel, data, combat layers. 91.4% area-weighted calibration.** 1487 tests, 123 suites. 96 essays (all standalone). Ghost Map + Exhaustion Clock. Letter Home engine. Ops Modal UX overhaul. Canon audit Phases A-C (phase0 removed). v0.8.0 types scaffolded. 5 integration test suites. Anomaly detector (10 checks). **Next: v0.7.1 version bump, visual verification, canon audit Phase D/E.**
+
+## [2026-03-26] Combat Audit Afternoon — 7 Fixes (P9, P11-P15, P7)
+
+**Fix 5 (zombie ops, P7):** Coerced `general_offensive` and `strategic_defense` op types to `sector_attack` at creation — these had no execution logic and consumed corps slots as zombie ops.
+
+**Fix 6 (intel decay, P11):** Raised passive intel buildup rates (RBiH 0.06→0.12, RS/HRHB→0.08) so factions sustain awareness of enemy dispositions past w40.
+
+**Fix 7 (OPSEC, P12):** Wired `opsec_sectors` — operations now push sector_id during planning phase. Previously read but never written.
+
+**Fix 8 (concentration detection, P13):** Added +0.10 intel confidence boost when enemy sector has 2+ reserve brigades. Passive early warning for defenders.
+
+**Fix 9 (assembly gate, P9):** Extended `computePlanningDuration()` by march time estimate. Added 60% assembly gate — ops wait for brigades to arrive before executing. Eliminates zero-attacker operations.
+
+**Fix 10 (data joins, P14):** Added deterministic `battle_id` join key across battles, operations, territory flips, and brigade history. Enables cross-layer post-run analysis.
+
+**Fix 11 (friction visibility, P15):** Frontline attrition now records skirmish engagements in brigade history when casualties exceed threshold. Personnel losses no longer appear from nowhere.
+
+**Running total:** 16/19 problems FIXED. Remaining: P10 (design discussion), P16 (strategic reserve), P17 (4th Corps).
 
 ## [2026-03-26] Deployment Health — 4 Mechanical Fixes
 
