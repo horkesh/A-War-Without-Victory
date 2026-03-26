@@ -382,11 +382,17 @@ export function validateAxisContiguity(
 // Planning duration
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Compute planning duration from number of objectives. */
+/** Minimum extra turns added to planning for bot-generated ops (brigade march buffer). */
+export const PLANNING_MARCH_BUFFER = 2;
+
+/** Compute planning duration from number of objectives.
+ *  Adds PLANNING_MARCH_BUFFER turns so brigades can march to staging before execution. */
 export function computePlanningDuration(objectiveCount: number): number {
-    if (objectiveCount <= 2) return 1;
-    if (objectiveCount <= 5) return Math.ceil(objectiveCount * 0.6);
-    return Math.min(5, Math.ceil(objectiveCount * 0.8));
+    let base: number;
+    if (objectiveCount <= 2) base = 1;
+    else if (objectiveCount <= 5) base = Math.ceil(objectiveCount * 0.6);
+    else base = Math.min(5, Math.ceil(objectiveCount * 0.8));
+    return base + PLANNING_MARCH_BUFFER;
 }
 
 function collectObjectiveApproachOsids(

@@ -59,20 +59,21 @@ describe('Pre-planned Operations — No Exempt Corps Brigades', () => {
 });
 
 describe('Sector Offensive — Planning Duration', () => {
-    it('1-2 objectives → 1 turn', () => {
-        assert.equal(computePlanningDuration(1), 1);
-        assert.equal(computePlanningDuration(2), 1);
+    // +2 march buffer added to all planning durations
+    it('1-2 objectives → 1 + 2 march buffer = 3 turns', () => {
+        assert.equal(computePlanningDuration(1), 3);
+        assert.equal(computePlanningDuration(2), 3);
     });
 
-    it('3-5 objectives → ceil(N × 0.6)', () => {
-        assert.equal(computePlanningDuration(3), 2); // ceil(1.8) = 2
-        assert.equal(computePlanningDuration(4), 3); // ceil(2.4) = 3
-        assert.equal(computePlanningDuration(5), 3); // ceil(3.0) = 3
+    it('3-5 objectives → ceil(N × 0.6) + 2 march buffer', () => {
+        assert.equal(computePlanningDuration(3), 4); // ceil(1.8) + 2 = 4
+        assert.equal(computePlanningDuration(4), 5); // ceil(2.4) + 2 = 5
+        assert.equal(computePlanningDuration(5), 5); // ceil(3.0) + 2 = 5
     });
 
-    it('6+ objectives → min(5, ceil(N × 0.8))', () => {
-        assert.equal(computePlanningDuration(6), 5); // min(5, ceil(4.8)) = 5
-        assert.equal(computePlanningDuration(8), 5); // min(5, ceil(6.4)) = 5
+    it('6+ objectives → min(5, ceil(N × 0.8)) + 2 march buffer', () => {
+        assert.equal(computePlanningDuration(6), 7); // min(5, ceil(4.8)) + 2 = 7
+        assert.equal(computePlanningDuration(8), 7); // min(5, ceil(6.4)) + 2 = 7
     });
 });
 
