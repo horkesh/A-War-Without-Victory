@@ -34,6 +34,8 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
+import { deterministicRandom } from '../../state/deterministic_random.js';
+import { recordBrigadeEngagement } from './brigade_history_recorder.js';
 import {
     isGrazAccordsActive,
     isHerzegovinaTruceActive,
@@ -94,6 +96,11 @@ const KIA_FRACTION = 0.30;
 const WIA_FRACTION = 0.55;
 // MIA_FRACTION = 0.15 (remainder)
 
+/** Probability that a frontline friction event is recorded as a skirmish engagement. */
+const FRICTION_RECORD_CHANCE = 0.35;
+/** Minimum casualties for a friction event to be eligible for recording. */
+const FRICTION_CASUALTY_THRESHOLD = 15;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
@@ -102,6 +109,8 @@ export interface FrontlineAttritionReport {
     brigades_affected: number;
     total_casualties: number;
     by_faction: Record<string, number>;
+    /** Number of friction skirmish engagements recorded in brigade history this turn. */
+    friction_engagements: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -159,6 +168,21 @@ export function isColdFront(state: GameState, formation: FormationState, sector:
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Friction helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Infer the primary enemy faction from a sector's opposing forces.
+ * Picks the first opposing faction in sorted order for determinism.
+ */
+function inferEnemyFaction(sector: CorpsFrontSector, ownFaction: string): string {
+    const opponents = sector.opposing_factions
+        .filter(f => f !== ownFaction)
+        .sort(strictCompare);
+    return opponents[0] ?? 'RS'; // fallback should never trigger
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Main function
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -176,7 +200,8 @@ export function applyFrontlineAttrition(
     const report: FrontlineAttritionReport = {
         brigades_affected: 0,
         total_casualties: 0,
-        by_faction: {}
+        by_faction: {},
+        friction_engagements: 0,
     };
 
     // COHA ceasefire suspends frontline attrition (v0.7.0 Phase 4)
@@ -233,6 +258,9 @@ export function applyFrontlineAttrition(
         factionFrontFP[fac].totalFP += artEff + tankEff * 0.5;
         factionFrontFP[fac].count += 1;
     }
+
+    const turn = state.meta?.turn ?? 0;
+    const seed = state.meta?.seed ?? 'awwv';
 
     for (const { fid, formation, sector } of frontlineBrigades) {
         // Graz Accords: skip attrition on cold (truce-covered) fronts
@@ -323,6 +351,30 @@ export function applyFrontlineAttrition(
             if (pool) {
                 const permanentLoss = killed + mia;
                 pool.exhausted = (pool.exhausted ?? 0) + Math.round(permanentLoss * 0.75);
+            }
+        }
+
+        // ── Probabilistic friction skirmish recording ──
+        // Not every week: deterministic random keyed on turn + brigade ID.
+        // ~35% chance when casualties exceed threshold — some weeks quiet, some notable.
+        if (casualties >= FRICTION_CASUALTY_THRESHOLD) {
+            const frictionRoll = deterministicRandom(seed, `friction_${turn}_${fid}`);
+            if (frictionRoll < FRICTION_RECORD_CHANCE) {
+                const enemyFaction = inferEnemyFaction(sector, factionId);
+                const location = formation.location_osid ?? sector.sub_segments?.[0]?.friendly_osids?.[0] ?? 'unknown';
+                recordBrigadeEngagement(formation, {
+                    battle_id: `${turn}:${location}:friction:${fid}`,
+                    turn,
+                    osid: location,
+                    role: 'defender',
+                    outcome: 'stalemate',
+                    casualties_taken: casualties,
+                    casualties_inflicted: Math.floor(casualties * 0.3), // approximate reciprocal friction
+                    enemy_faction: enemyFaction,
+                    territory_flipped: false,
+                    was_concentrated: false,
+                });
+                report.friction_engagements++;
             }
         }
 
