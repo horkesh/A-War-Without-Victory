@@ -98,6 +98,8 @@ export interface GameStore {
   battlesVisible: boolean;
   /** OSID polygon outlines (`osid-control-outline`) + 1990 mun boundaries (`mun-borders` / bih_adm3_1990); default off. */
   municipalityBordersVisible: boolean;
+  /** Ghost Map (1991 census overlay) visibility. */
+  ghostMapVisible: boolean;
   setFrontsVisible: (v: boolean) => void;
   setFormationsVisible: (v: boolean) => void;
   setLabelsVisible: (v: boolean) => void;
@@ -105,6 +107,7 @@ export interface GameStore {
   setFogVisible: (v: boolean) => void;
   setBattlesVisible: (v: boolean) => void;
   setMunicipalityBordersVisible: (v: boolean) => void;
+  setGhostMapVisible: (v: boolean) => void;
 
   /** Phase C4: When 'attack'/'move'/'sector', next OSID click opens AttackConfirmation or stages move/sector assignment. */
   orderModeForFormation: 'attack' | 'move' | 'sector' | null;
@@ -301,6 +304,7 @@ export const useGameStore = create<GameStore>((set) => ({
   fogVisible: true,
   battlesVisible: false,
   municipalityBordersVisible: false,
+  ghostMapVisible: false,
   setFrontsVisible: (v) => set({ frontsVisible: v }),
   setFormationsVisible: (v) => set({ formationsVisible: v }),
   setLabelsVisible: (v) => set({ labelsVisible: v }),
@@ -308,6 +312,7 @@ export const useGameStore = create<GameStore>((set) => ({
   setFogVisible: (v) => set({ fogVisible: v }),
   setBattlesVisible: (v) => set({ battlesVisible: v }),
   setMunicipalityBordersVisible: (v) => set({ municipalityBordersVisible: v }),
+  setGhostMapVisible: (v) => set({ ghostMapVisible: v }),
 
   orderModeForFormation: null,
   setOrderModeForFormation: (mode: 'attack' | 'move' | 'sector' | null) => set({ orderModeForFormation: mode }),

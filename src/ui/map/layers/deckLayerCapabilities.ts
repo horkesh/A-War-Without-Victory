@@ -29,6 +29,9 @@ export interface DeckLayerCapabilities {
    * When true, consider hiding MapLibre `formation-markers` / native formation symbol layers.
    */
   readonly unitScatterDots: boolean;
+
+  /** Ghost Map: pre-war census demographics as ScatterplotLayer dots. */
+  readonly ghostMapVisible: boolean;
 }
 
 /** Default: Deck.gl formation counters ON (enriched); other experiments off. */
@@ -37,4 +40,5 @@ export const DEFAULT_DECK_LAYER_CAPABILITIES: DeckLayerCapabilities = {
   operationArcs: false,
   deckFrontLines: false,
   unitScatterDots: false,
+  ghostMapVisible: false,
 };

@@ -27,6 +27,8 @@ export function MapModeToolbar() {
   const setBattlesVisible = useGameStore((s) => s.setBattlesVisible);
   const municipalityBordersVisible = useGameStore((s) => s.municipalityBordersVisible);
   const setMunicipalityBordersVisible = useGameStore((s) => s.setMunicipalityBordersVisible);
+  const ghostMapVisible = useGameStore((s) => s.ghostMapVisible);
+  const setGhostMapVisible = useGameStore((s) => s.setGhostMapVisible);
 
   const toggles: Record<string, { value: boolean; set: (v: boolean) => void }> = {
     frontsVisible: { value: frontsVisible, set: setFrontsVisible },
@@ -37,6 +39,7 @@ export function MapModeToolbar() {
     fogVisible: { value: fogVisible, set: setFogVisible },
     battlesVisible: { value: battlesVisible, set: setBattlesVisible },
     municipalityBordersVisible: { value: municipalityBordersVisible, set: setMunicipalityBordersVisible },
+    ghostMapVisible: { value: ghostMapVisible, set: setGhostMapVisible },
   };
 
   return (

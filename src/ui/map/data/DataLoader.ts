@@ -16,6 +16,10 @@ export async function loadOperationalSettlements(): Promise<FeatureCollection> {
   return fetchJson<FeatureCollection>('/data/derived/operational/operational_settlements.geojson');
 }
 
+export async function loadCensusSettlements(): Promise<FeatureCollection> {
+  return fetchJson<FeatureCollection>('/data/derived/settlements_wgs84_1990.geojson');
+}
+
 export async function loadOperationalPoliticalControl(): Promise<Record<string, string | null>> {
   const payload = await fetchJson<PoliticalControlPayload>('/data/derived/operational/operational_political_control.json');
   return payload.by_settlement_id ?? {};

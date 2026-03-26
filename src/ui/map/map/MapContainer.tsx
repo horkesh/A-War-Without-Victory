@@ -10,7 +10,7 @@ import { useGameStore } from '../store/gameStore';
 import { collectSectorFriendlyOsids, buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap } from '../utils/osidDisplayName';
-import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency, loadSidToOsidMapping, loadTerrainScalars } from '../data/DataLoader';
+import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency, loadSidToOsidMapping, loadTerrainScalars, loadCensusSettlements } from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildMoraleGeoJSON } from './builders/buildMoraleGeoJSON';
 import { buildCasualtiesGeoJSON } from './builders/buildCasualtiesGeoJSON';
@@ -42,6 +42,7 @@ import styleJson from './awwv_map_style.json';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
 import { setSettlementLabelData } from '../layers/buildTacticalDeckLayers';
+import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
@@ -182,6 +183,7 @@ export function MapContainer() {
   const osidAdjacencyRef = useRef<Map<string, string[]> | null>(null);
   const osidCentroidsRef = useRef<Map<string, [number, number]>>(new Map());
   const lastFormationsGeoJsonRef = useRef<FeatureCollection | null>(null);
+  const ghostMapDataRef = useRef<GhostMapDatum[] | null>(null);
   const lastPanTargetRef = useRef<string | null>(null);
   const prevSectorIdRef = useRef<string | null>(null);
   /** When true, sector selection came from a map click — skip zoom. Cleared after the pan/zoom effect reads it. */
@@ -340,13 +342,19 @@ export function MapContainer() {
     let initCancelled = false;
     const init = async () => {
       try {
-        const [geojson, byOsid, adjacency, sidToOsid, terrainScalars] = await Promise.all([
+        const [geojson, byOsid, adjacency, sidToOsid, terrainScalars, censusGeoJson] = await Promise.all([
           loadOperationalSettlements(),
           loadOperationalPoliticalControl(),
           loadOsidAdjacency(),
           loadSidToOsidMapping(),
           loadTerrainScalars(),
+          loadCensusSettlements().catch(() => null),
         ]);
+
+        // Pre-compute ghost map data from census (never changes)
+        if (censusGeoJson) {
+          ghostMapDataRef.current = buildGhostMapData(censusGeoJson);
+        }
 
         osidBaseRef.current = geojson;
         osidAdjacencyRef.current = adjacency;
@@ -471,7 +479,7 @@ export function MapContainer() {
         zoomThrottleTimer = setTimeout(() => {
           zoomThrottleTimer = null;
           if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
-            const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState } = useGameStore.getState();
+            const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState, ghostMapVisible: gmVis } = useGameStore.getState();
             deckOverlayRef.current.setProps({
               layers: composeTacticalDeckLayers({
                 formationsGeoJson: lastFormationsGeoJsonRef.current,
@@ -480,6 +488,8 @@ export function MapContainer() {
                 zoom: map.getZoom(),
                 loadedGameState,
                 centroidLookup: osidCentroidsRef.current,
+                capabilities: { ...DEFAULT_DECK_LAYER_CAPABILITIES, ghostMapVisible: gmVis },
+                ghostMapData: ghostMapDataRef.current ?? undefined,
               }),
             });
           }
@@ -979,6 +989,7 @@ export function MapContainer() {
 
                     // Update Deck.gl layers
                     if (deckOverlayRef.current) {
+                      const gmVis = useGameStore.getState().ghostMapVisible;
                       deckOverlayRef.current.setProps({
                         layers: composeTacticalDeckLayers({
                           formationsGeoJson,
@@ -987,6 +998,8 @@ export function MapContainer() {
                           zoom: initialMap.getZoom(),
                           loadedGameState: state,
                           centroidLookup: osidCentroidsRef.current,
+                          capabilities: { ...DEFAULT_DECK_LAYER_CAPABILITIES, ghostMapVisible: gmVis },
+                          ghostMapData: ghostMapDataRef.current ?? undefined,
                         }),
                       });
                     }
@@ -2389,6 +2402,26 @@ export function MapContainer() {
       safeSetLayoutVisibility(map, MUN_BORDERS_LAYER_ID, municipalityBordersVisible);
     }
   }, [mapReady, fogVisible, battlesVisible, municipalityBordersVisible]);
+
+  // Ghost Map toggle: rebuild Deck.gl layers when ghostMapVisible changes
+  const ghostMapVisible = useGameStore((s) => s.ghostMapVisible);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapReady || !map || !deckOverlayRef.current || !lastFormationsGeoJsonRef.current) return;
+    const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState: gs } = useGameStore.getState();
+    deckOverlayRef.current.setProps({
+      layers: composeTacticalDeckLayers({
+        formationsGeoJson: lastFormationsGeoJsonRef.current,
+        labelsVisible: lVis,
+        formationsVisible: fVis,
+        zoom: map.getZoom(),
+        loadedGameState: gs,
+        centroidLookup: osidCentroidsRef.current,
+        capabilities: { ...DEFAULT_DECK_LAYER_CAPABILITIES, ghostMapVisible },
+        ghostMapData: ghostMapDataRef.current ?? undefined,
+      }),
+    });
+  }, [mapReady, ghostMapVisible]);
 
   useEffect(() => {
     const map = mapRef.current;

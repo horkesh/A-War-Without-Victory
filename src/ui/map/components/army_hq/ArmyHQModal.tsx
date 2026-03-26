@@ -12,6 +12,7 @@ import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { SituationBriefing, generateBriefing, type BriefingTarget } from './SituationBriefing';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
+import { ExhaustionClock } from './ExhaustionClock';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import { turnToDateString } from '../../utils/formatters';
@@ -253,7 +254,7 @@ export function ArmyHQModal() {
                         <>
                             {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
                             {!expandedCorpsId && (
-                                <div className="grid grid-cols-[1fr_1fr_auto_1fr] gap-4 mb-4 items-stretch">
+                                <div className="grid grid-cols-[1fr_1fr_auto_auto_1fr] gap-4 mb-4 items-stretch">
                                     {/* Commander */}
                                     <div className="bg-panel-card border border-panel-border rounded-lg p-4">
                                         <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1.5 border-b border-panel-border">
@@ -290,6 +291,12 @@ export function ArmyHQModal() {
                                             {FACTION_DISPLAY[faction] ?? faction}
                                         </div>
                                     </div>
+
+                                    {/* Exhaustion Clock */}
+                                    <ExhaustionClock
+                                        exhaustion={state.warPhaseExhaustion?.[faction] ?? 0}
+                                        faction={faction}
+                                    />
 
                                     {/* Strategic Position — 6 dimension bars */}
                                     <StrategicPosition

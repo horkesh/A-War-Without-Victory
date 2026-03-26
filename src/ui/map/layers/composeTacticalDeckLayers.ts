@@ -4,6 +4,7 @@ import type { LoadedGameState } from '../data/types';
 import type { OsidCentroidLookup } from '../map/builders/geojsonLookup';
 import { buildExperimentalDeckLayers } from './buildExperimentalDeckLayers';
 import { buildTacticalDeckLayers } from './buildTacticalDeckLayers';
+import { buildGhostMapLayer, type GhostMapDatum } from './buildGhostMapLayer';
 import {
   DEFAULT_DECK_LAYER_CAPABILITIES,
   type DeckLayerCapabilities,
@@ -25,8 +26,16 @@ export function composeTacticalDeckLayers(args: {
   centroidLookup: OsidCentroidLookup;
   /** Omit to use {@link DEFAULT_DECK_LAYER_CAPABILITIES} (all off). */
   capabilities?: DeckLayerCapabilities;
+  /** Pre-computed ghost map census data (pass when ghostMapVisible is true). */
+  ghostMapData?: GhostMapDatum[];
 }): Layer[] {
   const caps = args.capabilities ?? DEFAULT_DECK_LAYER_CAPABILITIES;
+
+  // Ghost map renders UNDER everything else
+  const ghost: Layer[] = (caps.ghostMapVisible && args.ghostMapData)
+    ? [buildGhostMapLayer(args.ghostMapData)]
+    : [];
+
   const under = buildExperimentalDeckLayers(
     args.loadedGameState,
     args.centroidLookup,
@@ -41,5 +50,5 @@ export function composeTacticalDeckLayers(args: {
         args.zoom,
       )
     : [];
-  return [...under, ...counters];
+  return [...ghost, ...under, ...counters];
 }
