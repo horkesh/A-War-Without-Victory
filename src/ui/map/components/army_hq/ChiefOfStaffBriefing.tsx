@@ -8,6 +8,9 @@ import { useMemo } from 'react';
 import type { LoadedGameState } from '../../data/types';
 import type { BriefingItem } from './SituationBriefing';
 import { turnToDateString } from '../../utils/formatters';
+import { generateLetterHome } from '../../../../sim/letter_home.js';
+import type { LetterHomeInput } from '../../../../sim/letter_home.js';
+import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -225,6 +228,47 @@ export function generateCoSBriefing(
     return paragraphs;
 }
 
+// ── Letter Home helper ───────────────────────────────────────────────
+
+function buildLetterHomeInput(state: LoadedGameState, faction: string): LetterHomeInput | null {
+    const turn = state.turn ?? 0;
+    const battles = state.latestTurnSummary?.battles ?? [];
+    const factionBattles = battles.filter(
+        b => b.attacker_faction === faction || b.defender_faction === faction,
+    );
+    if (factionBattles.length === 0) return null;
+
+    // Cumulative casualties from the casualty ledger
+    const ledgerEntry = state.casualtyLedger?.[faction];
+    const factionKilled = ledgerEntry?.killed ?? 0;
+    const factionWounded = ledgerEntry?.wounded ?? 0;
+    const factionMissing = ledgerEntry?.missing_captured ?? 0;
+
+    if (factionKilled + factionWounded + factionMissing === 0) return null;
+
+    // Build formation lookup from adapter formations
+    const formationLookup = new Map<string, { id: string; name: string; home_osid?: string; turns_under_siege?: number }>();
+    for (const f of state.formations) {
+        formationLookup.set(f.id, {
+            id: f.id,
+            name: f.name,
+            home_osid: f.home_osid,
+            turns_under_siege: f.brigade_history?.turns_under_siege,
+        });
+    }
+
+    return {
+        turn,
+        faction,
+        factionKilled,
+        factionWounded,
+        factionMissing,
+        factionBattles,
+        formationLookup,
+        templateData: letterHomeData as LetterHomeInput['templateData'],
+    };
+}
+
 // ── Component ───────────────────────────────────────────────────────
 
 interface ChiefOfStaffBriefingProps {
@@ -242,6 +286,12 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
         () => generateCoSBriefing(briefingItems, gameState, faction),
         [briefingItems, gameState, faction],
     );
+
+    const letterHomeText = useMemo(() => {
+        const input = buildLetterHomeInput(gameState, faction);
+        if (!input) return null;
+        return generateLetterHome(input);
+    }, [gameState, faction]);
 
     if (!profile || paragraphs.length === 0) return null;
 
@@ -284,6 +334,18 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
                         {i === paragraphs.length - 1 && <>&rdquo;</>}
                     </p>
                 ))}
+
+                {/* Letter Home — casualty vignette */}
+                {letterHomeText && (
+                    <div className="mt-2 pt-2 border-t border-neutral-300/40">
+                        <p
+                            className="text-[9.5px] text-neutral-600 leading-relaxed italic"
+                            style={{ fontFamily: 'Georgia, serif', borderLeft: '2px solid #b8860b44', paddingLeft: '8px' }}
+                        >
+                            {letterHomeText}
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Footer — signature line */}
