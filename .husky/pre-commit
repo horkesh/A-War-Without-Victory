@@ -1,2 +1,15 @@
 #!/bin/sh
+
+# Step 1: Typecheck (fast fail ~15s)
 npx tsc --noEmit
+
+# Step 2: Baseline regression (~2 min — catches calibration regressions)
+# Skips gracefully if manifest doesn't exist yet.
+# After intentional changes: UPDATE_BASELINES=1 npm run test:baselines
+MANIFEST="data/derived/scenario/baselines/manifest.json"
+if [ -f "$MANIFEST" ]; then
+  npm run test:baselines
+else
+  echo "Baseline manifest not found — skipping regression check."
+  echo "Run: UPDATE_BASELINES=1 npm run test:baselines"
+fi
