@@ -1,7 +1,21 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-26
-**Status:** **v0.7.0 COMPLETE. Night shift delivered 8 workstreams.** 1487 tests, 123 suites. 96 essays (all standalone). Ghost Map + Exhaustion Clock. Letter Home engine. Ops Modal UX overhaul. Canon audit Phases A-C (phase0 removed). v0.8.0 types scaffolded. 5 integration test suites. **Next: v0.7.1 version bump, visual verification, canon audit Phase D/E.**
+**Status:** **v0.7.0 COMPLETE. 4 deployment health fixes (OOB, BFS guard, rear march, silent drops). 91.4% area-weighted calibration.** 1487 tests, 123 suites. 96 essays (all standalone). Ghost Map + Exhaustion Clock. Letter Home engine. Ops Modal UX overhaul. Canon audit Phases A-C (phase0 removed). v0.8.0 types scaffolded. 5 integration test suites. **Next: v0.7.1 version bump, visual verification, canon audit Phase D/E.**
+
+## [2026-03-26] Deployment Health — 4 Mechanical Fixes
+
+**Fix 1 (OOB):** `rs_2nd_romanija_brigade` corps reassigned from `vrs_drina` to `vrs_sarajevo_romanija`. Brigade homed in Sokolac (SRK municipality). Wrong assignment caused BFS territory to give Sokolac + Sarajevo ring to Drina Corps. Removed from Operation Podrinje Sweep.
+
+**Fix 2 (Step 6b guard):** Added BFS component reachability check to cross-corps enclave defense in `brigade_assignment.ts`. Brigades no longer assigned to sectors in unreachable components. Same pattern already used in Step 7 (`ensureMinimumSectorCoverage`). Calibration-neutral.
+
+**Fix 3 (rear brigades):** `MAX_REDISTRIBUTION_DISTANCE` raised 8→20 in `brigade_front_distribution.ts`. Also raised `bfsDistance()` internal `maxDepth` 10→20 in `sector_utils.ts` — the BFS cap was the true bottleneck (old constant change would have been a no-op). Rear brigades now get column march orders to front.
+
+**Fix 4 (silent drops):** Added fallback in Phase 2 surplus allocation (`brigade_assignment.ts`). When `reachable.length === 0`, brigades are now force-assigned to best sector cross-component with `console.warn`, instead of being silently dropped. No brigade vanishes from assignment.
+
+**Calibration:** 91.7% → 91.4% (net -0.3pp). Number dropped because previously-invisible broken mechanics were inflating it. Correct mechanics are the priority.
+
+**Files:** `data/source/oob_brigades.json`, `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/brigade_front_distribution.ts`, `src/sim/combat/sector_utils.ts`, `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/pre_planned_operations.ts`, `tests/brigade_front_distribution.test.ts`, `tests/integration_state_assertions.test.ts`.
 
 ## [2026-03-26] Night Shift — 8 Workstreams Complete
 

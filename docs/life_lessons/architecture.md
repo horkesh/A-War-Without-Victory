@@ -246,3 +246,15 @@
 - **Right approach**: When building a component that WILL be extended by later milestones, use a simple **open registry pattern**: an array of items + a `register()` function. Later milestones push onto the array without modifying the original file. Cost: ~10 lines of code. Savings: prevents 6+ milestones of invasive edits.
 - **How to apply**: For any component in a multi-milestone roadmap: count how many future milestones will touch it. If >=3, add a registry pattern. Applies to: panel sections, menu items, briefing collectors, SFX manifests, settings sections, post-game tabs.
 
+### [Architecture] Hidden BFS depth caps silently disable constant changes — always trace the full call chain (2026-03-26) — NEW
+- **Context**: Raised `MAX_REDISTRIBUTION_DISTANCE` from 8 to 20 in `brigade_front_distribution.ts`. The change was a complete no-op because `bfsDistance()` in `sector_utils.ts` had its own hardcoded `maxDepth = 10`. Any distance >10 returned `Infinity`, so the 8→20 raise changed nothing until the BFS cap was also raised.
+- **Wrong approach**: Changing a constant and assuming it takes effect. The constant was consumed by a function that had its own internal cap.
+- **Right approach**: When changing a threshold/constant, trace every function in the call chain to verify no intermediate cap is lower than the new value.
+- **Do instead**: `grep` for the constant name AND the functions that consume it. Read those functions for internal caps, early returns, or clamping logic. A constant change that doesn't match its consumer's internal limits is dead code.
+
+### [Architecture] Silent drops in assignment pipelines hide broken deployment — always log unmatched items (2026-03-26) — NEW
+- **Context**: Phase 2 surplus allocation in `brigade_assignment.ts` had a code path where `reachable.length === 0` caused brigades to be silently dropped. A variable `unmatched` existed but was never used. These brigades vanished from sector assignment entirely — invisible to all diagnostics.
+- **Wrong approach**: Allowing pipeline stages to silently discard items when no match is found. The code returned nothing instead of logging or falling back.
+- **Right approach**: Every pipeline stage that processes a collection must account for 100% of inputs. If an item can't be placed, either force-assign with a fallback or emit a warning. Never silently drop.
+- **Do instead**: When writing assignment/matching pipelines, add an `else` branch for the no-match case. At minimum `console.warn`. Preferably a fallback. At the end of the pipeline, assert `assigned.length === input.length`.
+

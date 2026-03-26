@@ -3038,7 +3038,7 @@
     "id": "rs_2nd_romanija_brigade",
     "faction": "RS",
     "name": "2nd Romanija Motorized Brigade",
-    "corps": "vrs_drina",
+    "corps": "vrs_sarajevo_romanija",
     "home_mun": "sokolac",
     "home_osid": "op:sokolac:donji_kalimanici",
     "kind": "brigade",

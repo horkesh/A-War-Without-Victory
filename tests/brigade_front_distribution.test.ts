@@ -458,9 +458,9 @@ describe('distributeBrigadesToFront', () => {
     });
 
     it('skips brigades too far away (> MAX_REDISTRIBUTION_DISTANCE)', () => {
-        // Brigade 10 hops from front
+        // Brigade 22 hops from front (beyond MAX_REDISTRIBUTION_DISTANCE=20 and bfsDistance cap=20)
         const state = makeState({
-            brig_far: makeFormation({ location_osid: 'op:test:r10' }),
+            brig_far: makeFormation({ location_osid: 'op:test:r22' }),
         });
 
         const sectors = [
@@ -477,12 +477,12 @@ describe('distributeBrigadesToFront', () => {
             }),
         ];
 
-        // 10-hop chain: r10 → r9 → ... → r1 → f1 ↔ f2
+        // 22-hop chain: r22 → r21 → ... → r1 → f1 ↔ f2
         const pairs: [string, string][] = [
             ['op:test:f1', 'op:test:f2'],
         ];
-        for (let i = 1; i <= 10; i++) {
-            const from = i === 10 ? 'op:test:r10' : `op:test:r${i}`;
+        for (let i = 1; i <= 22; i++) {
+            const from = i === 22 ? 'op:test:r22' : `op:test:r${i}`;
             const to = i === 1 ? 'op:test:f1' : `op:test:r${i - 1}`;
             pairs.push([from, to]);
         }
@@ -490,8 +490,8 @@ describe('distributeBrigadesToFront', () => {
 
         distributeBrigadesToFront(state, sectors, adjacency);
 
-        // Brigade too far — no movement, no order (bfsDistance caps at 10 and returns Infinity)
-        expect(state.military.formations.brig_far.location_osid).toBe('op:test:r10');
+        // Brigade too far — no movement, no order (bfsDistance caps at 20 and returns Infinity)
+        expect(state.military.formations.brig_far.location_osid).toBe('op:test:r22');
         expect(state.military.brigade_movement_orders?.brig_far).toBeUndefined();
     });
 

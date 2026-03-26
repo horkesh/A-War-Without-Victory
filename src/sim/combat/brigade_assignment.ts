@@ -360,6 +360,23 @@ export function classifyBrigadesByTerritory(
                 const target = reachable[0]!;
                 target.sector.assigned_brigade_ids.push(bid);
                 target.need = Math.max(0, target.need - 1);
+            } else if (sectorNeed.length > 0) {
+                // Fallback: brigade is in a disconnected component with no matching sector.
+                // Force-assign to the best sector regardless of component to avoid silent drops.
+                const fallback = [...sectorNeed]
+                    .sort((a, b) => {
+                        if (a.need > 0 && b.need <= 0) return -1;
+                        if (b.need > 0 && a.need <= 0) return 1;
+                        const aHome = homeMun && sectorMunicipalities.get(a.sector)?.has(homeMun) ? 1 : 0;
+                        const bHome = homeMun && sectorMunicipalities.get(b.sector)?.has(homeMun) ? 1 : 0;
+                        if (bHome !== aHome) return bHome - aHome;
+                        return (sectorEnemyPers.get(b.sector) ?? 0) - (sectorEnemyPers.get(a.sector) ?? 0)
+                            || strictCompare(a.sector.sector_id, b.sector.sector_id);
+                    });
+                const target = fallback[0]!;
+                target.sector.assigned_brigade_ids.push(bid);
+                target.need = Math.max(0, target.need - 1);
+                console.warn(`[brigade_assignment] Force-assigned ${bid} to ${target.sector.sector_id} (cross-component fallback)`);
             }
         }
 
@@ -410,6 +427,7 @@ export function assignCrossCorpsEnclaveDefenders(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     faction: FactionId,
+    componentOf: Map<string, number>,
 ): void {
     const assigned = new Set<string>();
     for (const s of sectors) {
@@ -457,7 +475,12 @@ export function assignCrossCorpsEnclaveDefenders(
         }
         if (!sectorIndices || sectorIndices.length === 0) continue;
 
-        const factionIndices = sectorIndices.filter(idx => sectors[idx]!.faction === faction);
+        const brigComp = componentOf.get(loc) ?? -2;
+        const factionIndices = sectorIndices.filter(idx => {
+            const s = sectors[idx]!;
+            return s.faction === faction
+                && getSectorComponent(s, componentOf) === brigComp;
+        });
         if (factionIndices.length === 0) continue;
 
         let bestIdx = factionIndices[0]!;

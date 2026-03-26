@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-03-24. 139 lessons across 8 topic files.
+> Last restructured: 2026-03-24. 142 lessons across 8 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
@@ -70,6 +70,12 @@
 
 ## New Lessons (always read these)
 
+### [Calibration] Calibration % means nothing if reached through broken mechanics — GOLDEN RULE (2026-03-26) — NEW → see `calibration.md`
+
+### [Architecture] Hidden BFS depth caps silently disable constant changes — always trace the full call chain (2026-03-26) — NEW → see `architecture.md`
+
+### [Architecture] Silent drops in assignment pipelines hide broken deployment — always log unmatched items (2026-03-26) — NEW → see `architecture.md`
+
 ### [Calibration] When a threshold system isn't biting, check the numerator accounting before tuning the threshold (2026-03-25) — NEW → see `calibration.md`
 
 ### [QA] First-pass fixes can introduce new errors — always verify corrected content (2026-03-25) — NEW → see `process.md`
@@ -134,8 +140,8 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 27 | Running calibration scenarios, tuning parameters, OOB changes |
-| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 41 | Changing engine structure, state, pipeline, adding systems |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 28 | Running calibration scenarios, tuning parameters, OOB changes |
+| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 43 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 9 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 12 | Frontend, map, tactical overlay, modal work |
 | [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 40 | General development process (skim at session start) |

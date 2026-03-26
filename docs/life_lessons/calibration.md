@@ -3,6 +3,12 @@
 
 ---
 
+### [Calibration] Calibration % means nothing if reached through broken mechanics — GOLDEN RULE (2026-03-26) — NEW
+- **Context**: 91.7% calibration was inflated by: Drina Corps besieging Sarajevo (wrong corps assignment), brigades silently dropped from sector assignment, brigades >8 hops from front permanently stuck in rear. Fixing all four bugs dropped calibration to 91.4% but made the simulation mechanically correct.
+- **Wrong approach**: Hesitating on mechanically correct fixes because they regress calibration %. Offering to revert correct fixes because of -0.3pp. Treating calibration as a decision criterion rather than an indicator.
+- **Right approach**: Fix mechanics first. The number follows. A high calibration % with broken mechanics is a lie; a lower % with correct mechanics is a foundation.
+- **Do instead**: When a fix is mechanically correct, apply it unconditionally. Report calibration as an indicator, never as a reason to hesitate. The question is always "are the mechanics right?" — if yes, commit.
+
 ### [Calibration] When a threshold system isn't biting, check the numerator accounting before tuning the threshold (2026-03-25) — NEW
 - **Context**: RS grew from 99k at w40 to 149k at w104 (target 110-120k). Exhaustion thresholds (0.25 half-rate, 0.50 hard cap) weren't constraining growth. Four attempts to fix via constant tuning (displacement reduction, casualty feedback 25%→75%, surge curves) had near-zero effect.
 - **Wrong approach**: Tuning constants (feedback rates, surge curves, thresholds) when the system receiving the data has accounting bugs. Three bugs meant the exhaustion numerator tracked only ~60% of actual demographic commitment: pool.available excluded, initial OOB troops invisible, strategic reserve sweeps leaked.

@@ -278,7 +278,7 @@ function buildFactionSectors(
     classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, commanderProfiles, playerOverrides);
 
     // Step 6b: Cross-corps enclave defense
-    assignCrossCorpsEnclaveDefenders(sectors, formations, faction);
+    assignCrossCorpsEnclaveDefenders(sectors, formations, faction, componentOf);
 
     // Step 7: Ensure every sector with front edges has at least one assigned brigade.
     ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf);

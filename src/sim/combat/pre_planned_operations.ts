@@ -151,7 +151,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'rs_1st_guards_motorized',
                     'rs_65th_protection_motorized_regiment',
-                    'rs_2nd_romanija_brigade',
                     'rs_1st_podrinje',
                 ],
                 objectives: [

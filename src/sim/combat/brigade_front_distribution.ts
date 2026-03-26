@@ -20,7 +20,7 @@ import { bfsDistance } from './sector_utils.js';
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 /** Max hops before we skip redistribution (brigade too far, will be reassigned). */
-const MAX_REDISTRIBUTION_DISTANCE = 8;
+const MAX_REDISTRIBUTION_DISTANCE = 20;
 
 /** Brigades with this many entrenchment turns or more are NOT redistributed in Phase A.
  *  Only freshly-arrived brigades get spread — entrenched positions are too valuable to abandon. */

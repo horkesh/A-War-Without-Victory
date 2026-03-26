@@ -1089,3 +1089,18 @@ The 5 original integration suites (scenario round-trip, event system, save/load,
 
 ### Integration tests are the last gate before calibration runs
 The smoke-test triad (`tsc --noEmit` + `vitest run` + `desktop:map:build`) catches type errors, unit regressions, and build failures. But integration tests catch semantic regressions: "the scenario still runs to completion," "events still fire at the right week," "save/load produces identical state," "no brigade has negative personnel." These are the tests that would have caught the displacement phantom gap (3,700 missing casualties between two tracking systems) if they had existed earlier.
+
+## BFS Territory Assignment — Corps Home Municipality Coupling (2026-03-26)
+
+### A single brigade in the wrong corps cascades BFS territory through entire municipalities
+The `mapOsidsToCorps` BFS in `sector_territory.ts` uses a `homeMunCorps` guard: municipalities are claimed by the corps whose brigades are homed there. A single brigade in the wrong corps (e.g. `rs_2nd_romanija_brigade` assigned to `vrs_drina` instead of `vrs_sarajevo_romanija`) causes the BFS to claim the entire municipality and cascade into adjacent territory. The Sokolac→Sarajevo cascade gave Drina Corps the Sarajevo siege ring. Fix: correct the OOB data. The BFS logic itself is correct — it faithfully propagates from home positions.
+
+## Hidden Internal Caps in Utility Functions (2026-03-26)
+
+### Utility functions with internal limits can silently disable constant changes in their consumers
+`bfsDistance()` in `sector_utils.ts` had an internal `maxDepth = 10` that silently capped distance calculations regardless of the caller's intent. `MAX_REDISTRIBUTION_DISTANCE` was raised from 8 to 20, but the change was a no-op until the BFS internal cap was also raised. Pattern: utility functions with internal limits can silently disable constant changes in their consumers. Always trace the full call chain when adjusting thresholds.
+
+## Silent Pipeline Drops — The Invisible Brigade Problem (2026-03-26)
+
+### Calibration % means nothing if reached through broken mechanics
+Phase 2 surplus allocation in `brigade_assignment.ts` silently dropped brigades when `reachable.length === 0`. A variable `unmatched` existed but was never consumed. These brigades vanished from the assignment pipeline — no sector, no warning, no diagnostic trace. The 91.7% calibration was inflated because these brigades' absence meant fewer incorrect deployments were visible. Fix: force-assign with cross-component fallback + console.warn. Golden rule: calibration % means nothing if reached through broken mechanics.

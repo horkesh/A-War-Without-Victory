@@ -167,7 +167,7 @@ export function bfsDistance(from: string, to: string, adjacency: Map<string, str
     const visited = new Set<string>([from]);
     const queue: Array<{ osid: string; depth: number }> = [{ osid: from, depth: 0 }];
     let head = 0;
-    const maxDepth = 10; // cap search depth
+    const maxDepth = 20; // cap search depth
 
     while (head < queue.length) {
         const { osid, depth } = queue[head++]!;
