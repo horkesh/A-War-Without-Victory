@@ -8,27 +8,26 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-26, v0.7.0 COMPLETE)
-**v0.7.0.** 1487 tests, 123 suites. tsc clean. Electron 41. **n1065: 91.7% area-weighted (re-frozen).** 94 events, 21 flag-gated, 75 with mechanical effects. Offensive paramilitary sweep (Drina valley). 96-essay Codex. Chronicle, Wrapped, HQ drill-down, Dayton merge all shipped.
-**Night shift summary (2026-03-25→26, 8 workstreams):**
-- **WS1 Essays:** 13 missing 1992 essays authored (96 total). 3-pass QA, 24 corrections across 18 essays. Art direction + 84 image prompts.
-- **WS2 Letter-Home Templates:** 40 handwritten templates across 5 archetypes × 8 tones.
-- **WS3 Ghost Map + Clock:** Spectral displacement layer + animated turn clock for war room.
-- **WS4 Letter-Home Engine:** Deterministic casualty vignette engine + CoS briefing system.
-- **WS5 Ops Modal UX:** Pointer-events fix, parameter strip, brigade cards, G-2 prediction phase (DONE), modal flow overhaul.
-- **WS6 Integration Tests:** 9 test suites — deployment health, run diagnostics, run summary, state assertions, adapter, IPC, event lifecycle, save/load, scenario manifests.
-- **WS7 v0.8 Scaffold:** Command Chain architecture design docs and stubs.
-- **WS8 Canon Audit:** Phase A-C complete (OOB, events, OSIDs). Phases D-E (timeline, Codex cross-ref) remaining.
-**Emergent brigade formation (2026-03-24):** Pool-gated spawning replaces time gates. RBiH 98 brigades avg 1,382 (was 120 avg 1,050). 25 ineffective (was 36). HRHB 1 ineffective (was 7). `canFormEmergentBrigade()` in `recruitment_engine.ts`. FORMATION_CAPACITY_THRESHOLD=0.60. Design: `docs/plans/2026-03-24-emergent-brigade-formation-design.md`.
-**Sarajevo siege fixes (2026-03-24, 11 total):** SRK drift recall, ARBIH cap removed, OOB rebalanced per BB, pool scale 0.15, mob scale 0.10, initial pers 800, siege-corps target restriction, shared pocket pool, displacement routing, SRK CORPS_EXCLUDED_MUNICIPALITIES, Herzegovina pocket pool. 1st Corps 29.5k/avg 983 (was 15.7k/448).
-**Diagnostic toolset:** `tools/diagnose_run.cjs` — run after every calibration run. Checks: drift, siege health, empty sectors, depleted corps, stranded pools.
-**Roadmap:** v0.7=Dynamic Codex (COMPLETE), v0.8=Command Chain, v0.9=Consequences+Polish.
-**Exhaustion + pool decay overhaul (2026-03-25):** Three pool accounting bugs fixed (A1-A3) + casualty feedback 75% + surge curves. Pool decay added: HRHB 2.5%, RS 2.0%, RBiH 1.2% per turn. Enclaves exempt. Combined result: RS w104 149k→124k (target 110-120k, 4k over), HRHB 68k→58k (target 50-55k, 3k over), ARBiH 194k→199k. 40w cal 91.2% (-0.1pp). Remaining gap acceptable — minor threshold tuning possible later. `pool_decay.ts`, `tools/diagnose_pool_exhaustion.cjs`.
-**Next priority:** v0.7.1 version bump, visual verification, canon audit Phase D/E, then Phase 6 content or v0.8.
-**Army HQ restoration (2026-03-25):** 520196a2 destroyed 4-tab Army HQ + SituationBriefing grid. Restored from c80d5767. Known-good Army HQ baseline: c80d5767. **Rule: never rewrite ArmyHQModal.tsx or SituationBriefing.tsx — targeted edits only.**
+## Current State (2026-03-26, v0.7.0 + Combat Audit COMPLETE)
+**v0.7.0 + 16 mechanical fixes.** 1487 tests, 123 suites. tsc clean. Electron 41. **91.4% area-weighted (40w). Golden rule: calibration % means nothing if reached via broken mechanics.**
+**Combat audit (2026-03-26, 11 sequential fixes verified):**
+- **P1-P4:** OOB corps correction (2nd Romanija→SRK), BFS component guards, redistribution distance 8→20 (+ bfsDistance cap 10→20), silent drop fallback. Net -0.3pp (correct mechanics exposed artificial inflation).
+- **P5 Posavina pockets:** 103rd/104th dissolution via `pocket_destroyable` tag — brigades no longer teleport to Mostar.
+- **P6 Probe loop:** `consecutive_probes` only resets on non-probe op completion. Infinite probe chains eliminated.
+- **P7 Zombie ops:** `general_offensive`/`strategic_defense` coerced to `sector_attack` at injection — dead execution logic removed.
+- **P8 Paramilitary ordering:** `consolidate-rear-pockets` swapped before `paramilitary-advance` in `war_phases.ts`.
+- **P9 Assembly gate:** `computePlanningDuration()` extended by march estimate; force_staging waits for 60% assembly or 5-turn timeout. Zero-attacker ops eliminated.
+- **P10/P11 Intel:** Passive buildup raised (RBiH 0.06→0.12, RS/HRHB→0.08). OPSEC now writes `opsec_sectors[]`. Concentration detection +0.10 on 2+ reserve brigades.
+- **P14 Data silos:** Deterministic `battle_id` join key (`{turn}:{osid}:{attacker}:{defender|null}`) propagates to battles, ops, territory flips, brigade history. Friction: `{turn}:{osid}:friction:{brigadeId}`.
+- **P15 Friction:** `frontline_attrition.ts` records skirmish BrigadeEngagements when casualties ≥15 (35% deterministic chance).
+- **Anomaly detector:** `src/scenario/anomaly_detector.ts` — 10 post-run checks wired.
+**Open:** P16 (strategic reserve 0 manpower all factions), P17 (4th Corps 80% ineffective, downstream).
+**Battle tempo:** 54 battles/40w pre-fix (historical target 150-250). Assembly gate + intel fixes expected to improve — verify next run.
+**Roadmap:** v0.7.1 version bump, visual verification, canon audit Phase D/E, then v0.8=Command Chain.
+**Army HQ restoration (2026-03-25):** Known-good baseline c80d5767. Rule: never rewrite ArmyHQModal.tsx or SituationBriefing.tsx — targeted edits only.
 **HRHB-RBiH conflict:** P1 ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
 **Calibration freeze rule:** Any sim-affecting change needs `npm run calibrate:40w` regression check vs frozen baseline.
-**External:** Visual assets (user, Gemini Pro). Audio assets (sourcing needed).
+**Diagnostic toolset:** `tools/diagnose_run.cjs` — run after every calibration run. Checks: drift, siege health, empty sectors, depleted corps, stranded pools.
 
 ## Integration Test Suites (9 suites, WS6)
 1. `tests/integration_deployment_health.test.ts` — app bootstrap, Electron readiness

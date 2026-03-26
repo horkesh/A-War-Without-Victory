@@ -3,6 +3,24 @@
 
 ---
 
+### [Architecture] Hidden BFS depth caps silently disable constant changes — always trace the full call chain (2026-03-26) — NEW
+- **Context**: `MAX_REDISTRIBUTION_DISTANCE=8` was raised to 20 in `brigade_front_distribution.ts`. Calibration: unchanged. Root cause: `bfsDistance()` in `sector_utils.ts` had an internal `maxDepth=10` local variable that silently capped BFS depth regardless of the external constant. The constant was read and passed in correctly — the cap was invisible in the caller.
+- **Wrong approach**: Changing a named constant and assuming the behavior changed. The constant was correctly used in the calling code; the override was deep inside the helper function.
+- **Right approach**: When a constant change produces no effect, trace ALL code paths that implement the behavior. Any private loop variable, local `maxDepth`, or early-return inside a helper can be the true ceiling, silently overriding the public constant.
+- **Do instead**: After changing a BFS-depth constant, search for all depth-bounding constructs in the call chain: `while (queue.length && depth < X)`, `if (depth >= X) continue`, `const maxDepth = N` inside helper functions. Any internal cap lower than the new constant is the true ceiling. Raise both, then verify behavior actually changed.
+
+### [Architecture] Silent drops in assignment pipelines hide broken deployment — always log unmatched items (2026-03-26) — NEW
+- **Context**: Phase 2 surplus allocation in `brigade_assignment.ts` silently dropped brigades when `reachable.length === 0`. No log, no fallback, no error — the brigade simply never got a sector assignment. Symptom: wrong brigade density in aggregate stats. Diagnosis took hours because nothing signaled the drop.
+- **Wrong approach**: `if (reachable.length === 0) continue;` — entity disappears into the void with zero trace. The aggregate count is wrong but no error fires, no warning appears.
+- **Right approach**: Any assignment pipeline step that can produce "no match" must (1) emit at minimum a `console.warn` identifying the entity, its properties, and the condition that failed; (2) either handle it with a fallback or throw explicitly. Silent drops are invisible bugs that inflate calibration numbers artificially.
+- **Do instead**: Grep every pipeline step that loops over brigades/formations for `continue` statements without a preceding log. A `continue` after a failed lookup is a silent drop unless there's a warning. The fix pattern: `console.warn('brigade_assignment: no reachable sector for brigade', brigadeId, 'forcing cross-component assignment'); force-assign to best`.
+
+### [Engine] Zombie op types consume corps slots but execute nothing — always verify op type has execution path (2026-03-26) — NEW
+- **Context**: `general_offensive` and `strategic_defense` op types were valid string values in `PrePlannedOperationDef`. They could be injected and queued. The operation lifecycle moved them through planning → execution. But `bot_corps_operations.ts` execution logic had zero handling for these types — they ran `sector_attack` code only. Zombie ops held corps' `active_operation` slot indefinitely, blocking queued ops.
+- **Root cause**: Op type enum and execution logic were decoupled. Adding a new op type to the definition didn't require adding execution logic — the compiler didn't enforce it.
+- **Right approach**: Coerce unsupported op types to `sector_attack` at injection time with a warning. Future: make op type a discriminated union where each type's execution is a required method.
+- **Do instead**: When adding a new operation type, grep for every switch/if-else on `operation.type` in the execution pipeline (`sector_offensive.ts`, `bot_corps_operations.ts`). If the type is not handled in any branch, it's a zombie. Add a `console.error` in the default/fallthrough case to surface new zombies immediately.
+
 ### [Architecture] Map hybrid strategy for high-fidelity tactical overlays (2026-03-20)
 - **Problem**: Attempting to render hundreds of dynamic game indicators (bars, dots, floating icons) purely in MapLibre layers leads to complex GeoJSON generation and limited animation flexibility.
 - **Right approach**: Use a hybrid stack. MapLibre GL JS for the base map (roads, terrain, static labels) and Deck.gl for the tactical overlay (map counters, unit status, movement previews).
