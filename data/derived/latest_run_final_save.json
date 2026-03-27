@@ -9972,7 +9972,7 @@
         "fled_abroad": 150,
         "killed": 5,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 5
       },
@@ -19148,7 +19148,7 @@
         "fled_abroad": 4,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 6
       },
@@ -28568,7 +28568,7 @@
         "fled_abroad": 4,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 7
       },
@@ -38094,7 +38094,7 @@
         "fled_abroad": 4,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 8
       },
@@ -47800,7 +47800,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 9
       },
@@ -59928,7 +59928,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 10
       },
@@ -69788,7 +69788,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 11
       },
@@ -79618,7 +79618,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 12
       },
@@ -89438,7 +89438,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 13
       },
@@ -99288,7 +99288,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 14
       },
@@ -109116,7 +109116,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 15
       },
@@ -118882,7 +118882,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 16
       },
@@ -128542,7 +128542,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 17
       },
@@ -138132,7 +138132,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 18
       },
@@ -147628,7 +147628,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 19
       },
@@ -157134,7 +157134,7 @@
         "fled_abroad": 3,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 20
       },
@@ -166674,7 +166674,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 21
       },
@@ -176244,7 +176244,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 22
       },
@@ -185814,7 +185814,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 23
       },
@@ -195348,7 +195348,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 24
       },
@@ -204828,7 +204828,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 25
       },
@@ -214198,7 +214198,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 26
       },
@@ -223470,7 +223470,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 27
       },
@@ -232678,7 +232678,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 28
       },
@@ -241864,7 +241864,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 29
       },
@@ -251166,7 +251166,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 30
       },
@@ -260474,7 +260474,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 31
       },
@@ -269738,7 +269738,7 @@
         "fled_abroad": 2,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 32
       },
@@ -279020,7 +279020,7 @@
         "fled_abroad": 1,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 33
       },
@@ -288264,7 +288264,7 @@
         "fled_abroad": 1,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 34
       },
@@ -297526,7 +297526,7 @@
         "fled_abroad": 1,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 35
       },
@@ -306776,7 +306776,7 @@
         "fled_abroad": 1,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 36
       },
@@ -316004,7 +316004,7 @@
         "fled_abroad": 1,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 37
       },
@@ -325232,7 +325232,7 @@
         "fled_abroad": 1,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 38
       },
@@ -334454,7 +334454,7 @@
         "fled_abroad": 1,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 39
       },
@@ -343622,7 +343622,7 @@
         "fled_abroad": 1,
         "killed": 0,
         "origin_mun": "zvornik",
-        "origin_osid": "op:zvornik:vitinica_2",
+        "origin_osid": "op:zvornik:sapna",
         "settled": 0,
         "turn": 40
       },
@@ -349484,7 +349484,7 @@
         "started_turn": 22,
         "to_faction": "RBiH"
       },
-      "op:zvornik:vitinica_2|RS": {
+      "op:zvornik:sapna|RS": {
         "cumulative_displaced": 831,
         "from_faction": "RS",
         "matured_turn": 5,
@@ -355696,11 +355696,11 @@
           "op:visoko:gornja_vratnica_2__op:visoko:stuparici_2",
           "op:visoko:gornja_vratnica_2__op:visoko:visoko_2",
           "op:vogosca:hotonj__op:vogosca:vogosca_3",
-          "op:zvornik:djulici__op:zvornik:vitinica_2",
+          "op:zvornik:djulici__op:zvornik:sapna",
           "op:zvornik:gornji_sepak_2__op:zvornik:rastosnica_2",
           "op:zvornik:kozluk_2__op:zvornik:rastosnica_2",
-          "op:zvornik:kozluk_2__op:zvornik:vitinica_2",
-          "op:zvornik:krizevici__op:zvornik:vitinica_2"
+          "op:zvornik:kozluk_2__op:zvornik:sapna",
+          "op:zvornik:krizevici__op:zvornik:sapna"
         ],
         "front_id": "RBiH__RS__op:brcko:bijela_2__op:brcko:maoca_2",
         "length_edges": 180,
@@ -356096,7 +356096,7 @@
       },
       "arbih_246th_vitezka_mountain": {
         "destination_sids": [
-          "op:zvornik:vitinica_2"
+          "op:zvornik:sapna"
         ],
         "stance": "column"
       },
@@ -357057,7 +357057,7 @@
       },
       "arbih_246th_vitezka_mountain": {
         "destination_sids": [
-          "op:zvornik:vitinica_2"
+          "op:zvornik:sapna"
         ],
         "path": [
           "op:banovici:seona",
@@ -357067,7 +357067,7 @@
           "op:kalesija:tojsici_2",
           "op:kalesija:kalesija_grad_2",
           "op:kalesija:kalesija_selo",
-          "op:zvornik:vitinica_2"
+          "op:zvornik:sapna"
         ],
         "stance": "column",
         "status": "in_transit",
@@ -360775,7 +360775,7 @@
             "op:zivinice:zivinice_gornje_2",
             "op:zivinice:zivinice_grad_2",
             "op:zvornik:rastosnica_2",
-            "op:zvornik:vitinica_2"
+            "op:zvornik:sapna"
           ],
           "max_attackers_per_target": 3,
           "min_attack_outcome": "costly_victory",
@@ -365463,8 +365463,8 @@
           "op:kladanj:brgule__op:kladanj:tarevo_2",
           "op:kladanj:brgule__op:zivinice:basigovci_2",
           "op:kladanj:brgule__op:zivinice:gracanica_2",
-          "op:zvornik:djulici__op:zvornik:vitinica_2",
-          "op:zvornik:krizevici__op:zvornik:vitinica_2"
+          "op:zvornik:djulici__op:zvornik:sapna",
+          "op:zvornik:krizevici__op:zvornik:sapna"
         ],
         "faction": "RBiH",
         "length_edges": 15,
@@ -365491,8 +365491,8 @@
               "op:kladanj:brgule__op:kladanj:tarevo_2",
               "op:kladanj:brgule__op:zivinice:basigovci_2",
               "op:kladanj:brgule__op:zivinice:gracanica_2",
-              "op:zvornik:djulici__op:zvornik:vitinica_2",
-              "op:zvornik:krizevici__op:zvornik:vitinica_2"
+              "op:zvornik:djulici__op:zvornik:sapna",
+              "op:zvornik:krizevici__op:zvornik:sapna"
             ],
             "enemy_osids": [
               "op:kalesija:gojcin_2",
@@ -365512,7 +365512,7 @@
               "op:kladanj:tarevo_2",
               "op:zivinice:basigovci_2",
               "op:zivinice:gracanica_2",
-              "op:zvornik:vitinica_2"
+              "op:zvornik:sapna"
             ],
             "gap": false,
             "length_edges": 15,
@@ -365540,7 +365540,7 @@
           "op:zivinice:dubrave_gornje",
           "op:zivinice:gracanica_2",
           "op:zivinice:zivinice_grad_2",
-          "op:zvornik:vitinica_2"
+          "op:zvornik:sapna"
         ],
         "threat_ratio": 2.427905184781544
       },
@@ -365628,7 +365628,7 @@
           "op:ugljevik:srednja_trnova_2__op:ugljevik:teocak_krstac_2",
           "op:zvornik:gornji_sepak_2__op:zvornik:rastosnica_2",
           "op:zvornik:kozluk_2__op:zvornik:rastosnica_2",
-          "op:zvornik:kozluk_2__op:zvornik:vitinica_2"
+          "op:zvornik:kozluk_2__op:zvornik:sapna"
         ],
         "faction": "RBiH",
         "length_edges": 10,
@@ -365651,7 +365651,7 @@
               "op:ugljevik:srednja_trnova_2__op:ugljevik:teocak_krstac_2",
               "op:zvornik:gornji_sepak_2__op:zvornik:rastosnica_2",
               "op:zvornik:kozluk_2__op:zvornik:rastosnica_2",
-              "op:zvornik:kozluk_2__op:zvornik:vitinica_2"
+              "op:zvornik:kozluk_2__op:zvornik:sapna"
             ],
             "enemy_osids": [
               "op:lopare:lopare_selo_2",
@@ -365665,7 +365665,7 @@
             "friendly_osids": [
               "op:ugljevik:teocak_krstac_2",
               "op:zvornik:rastosnica_2",
-              "op:zvornik:vitinica_2"
+              "op:zvornik:sapna"
             ],
             "gap": false,
             "length_edges": 10,
@@ -365680,7 +365680,7 @@
         "territory_osids": [
           "op:ugljevik:teocak_krstac_2",
           "op:zvornik:rastosnica_2",
-          "op:zvornik:vitinica_2"
+          "op:zvornik:sapna"
         ],
         "threat_ratio": 35.002318684483136
       },
@@ -368251,11 +368251,11 @@
           "op:kladanj:vucinici_2__op:olovo:gurdici_2",
           "op:kladanj:vucinici_2__op:olovo:olovo_2",
           "op:olovo:gurdici_2__op:olovo:slivnje",
-          "op:zvornik:djulici__op:zvornik:vitinica_2",
+          "op:zvornik:djulici__op:zvornik:sapna",
           "op:zvornik:gornji_sepak_2__op:zvornik:rastosnica_2",
           "op:zvornik:kozluk_2__op:zvornik:rastosnica_2",
-          "op:zvornik:kozluk_2__op:zvornik:vitinica_2",
-          "op:zvornik:krizevici__op:zvornik:vitinica_2"
+          "op:zvornik:kozluk_2__op:zvornik:sapna",
+          "op:zvornik:krizevici__op:zvornik:sapna"
         ],
         "faction": "RS",
         "length_edges": 27,
@@ -368279,11 +368279,11 @@
               "op:kalesija:seher_2__op:sekovici:sekovici_2",
               "op:kalesija:seher_2__op:sekovici:udbina_2",
               "op:kalesija:seher_2__op:zvornik:krizevici",
-              "op:zvornik:djulici__op:zvornik:vitinica_2",
+              "op:zvornik:djulici__op:zvornik:sapna",
               "op:zvornik:gornji_sepak_2__op:zvornik:rastosnica_2",
               "op:zvornik:kozluk_2__op:zvornik:rastosnica_2",
-              "op:zvornik:kozluk_2__op:zvornik:vitinica_2",
-              "op:zvornik:krizevici__op:zvornik:vitinica_2"
+              "op:zvornik:kozluk_2__op:zvornik:sapna",
+              "op:zvornik:krizevici__op:zvornik:sapna"
             ],
             "enemy_osids": [
               "op:kalesija:kalesija_grad_2",
@@ -368292,7 +368292,7 @@
               "op:kalesija:tojsici_2",
               "op:zivinice:gracanica_2",
               "op:zvornik:rastosnica_2",
-              "op:zvornik:vitinica_2"
+              "op:zvornik:sapna"
             ],
             "friendly_osids": [
               "op:kalesija:gojcin_2",
@@ -377962,7 +377962,7 @@
         },
         "faction": "RBiH",
         "home_defense_active": false,
-        "home_osid": "op:zvornik:vitinica_2",
+        "home_osid": "op:zvornik:sapna",
         "hq_sid": "op:zvornik:djulici",
         "id": "arbih_246th_vitezka_mountain",
         "kind": "brigade",
@@ -396875,7 +396875,7 @@
         "name": "Offensive Paramilitary (RS)",
         "paramilitary_eta": 0,
         "paramilitary_mode": "offensive",
-        "paramilitary_target": "op:zvornik:vitinica_2",
+        "paramilitary_target": "op:zvornik:sapna",
         "personnel": 600,
         "status": "inactive"
       },
@@ -412316,11 +412316,11 @@
           "op:visoko:gornja_vratnica_2__op:visoko:stuparici_2",
           "op:visoko:gornja_vratnica_2__op:visoko:visoko_2",
           "op:vogosca:hotonj__op:vogosca:vogosca_3",
-          "op:zvornik:djulici__op:zvornik:vitinica_2",
+          "op:zvornik:djulici__op:zvornik:sapna",
           "op:zvornik:gornji_sepak_2__op:zvornik:rastosnica_2",
           "op:zvornik:kozluk_2__op:zvornik:rastosnica_2",
-          "op:zvornik:kozluk_2__op:zvornik:vitinica_2",
-          "op:zvornik:krizevici__op:zvornik:vitinica_2"
+          "op:zvornik:kozluk_2__op:zvornik:sapna",
+          "op:zvornik:krizevici__op:zvornik:sapna"
         ],
         "faction": "RBiH",
         "id": "RBiH__RS__op:brcko:bijela_2__op:brcko:maoca_2",
@@ -424305,8 +424305,8 @@
       },
       {
         "a": "op:zvornik:djulici",
-        "b": "op:zvornik:vitinica_2",
-        "edge_id": "op:zvornik:djulici__op:zvornik:vitinica_2",
+        "b": "op:zvornik:sapna",
+        "edge_id": "op:zvornik:djulici__op:zvornik:sapna",
         "side_a": "RS",
         "side_b": "RBiH"
       },
@@ -424326,15 +424326,15 @@
       },
       {
         "a": "op:zvornik:kozluk_2",
-        "b": "op:zvornik:vitinica_2",
-        "edge_id": "op:zvornik:kozluk_2__op:zvornik:vitinica_2",
+        "b": "op:zvornik:sapna",
+        "edge_id": "op:zvornik:kozluk_2__op:zvornik:sapna",
         "side_a": "RS",
         "side_b": "RBiH"
       },
       {
         "a": "op:zvornik:krizevici",
-        "b": "op:zvornik:vitinica_2",
-        "edge_id": "op:zvornik:krizevici__op:zvornik:vitinica_2",
+        "b": "op:zvornik:sapna",
+        "edge_id": "op:zvornik:krizevici__op:zvornik:sapna",
         "side_a": "RS",
         "side_b": "RBiH"
       }
@@ -432949,7 +432949,7 @@
       "op:zvornik:krizevici": false,
       "op:zvornik:novo_selo": false,
       "op:zvornik:rastosnica_2": false,
-      "op:zvornik:vitinica_2": false,
+      "op:zvornik:sapna": false,
       "op:zvornik:zvornik": false
     },
     "control_events": [
@@ -434890,7 +434890,7 @@
       "op:zvornik:krizevici": "strained",
       "op:zvornik:novo_selo": "strained",
       "op:zvornik:rastosnica_2": "strained",
-      "op:zvornik:vitinica_2": "strained",
+      "op:zvornik:sapna": "strained",
       "op:zvornik:zvornik": "adequate"
     },
     "loss_of_control_trends": {
@@ -437733,7 +437733,7 @@
       "op:zvornik:krizevici": "RS",
       "op:zvornik:novo_selo": "RS",
       "op:zvornik:rastosnica_2": "RBiH",
-      "op:zvornik:vitinica_2": "RBiH",
+      "op:zvornik:sapna": "RBiH",
       "op:zvornik:zvornik": "RS"
     },
     "rbih_hrhb_state": {
@@ -446425,7 +446425,7 @@
           "stability_bonus": 0.18000000000000002
         }
       },
-      "op:zvornik:vitinica_2": {
+      "op:zvornik:sapna": {
         "legitimacy_state": {
           "coercion_penalty": 0,
           "demographic_legitimacy": 0.5,
@@ -455605,7 +455605,7 @@
         {
           "formation_id": "arbih_246th_vitezka_mountain",
           "formation_name": "246th Vitezka Mountain",
-          "from_osid": "op:zvornik:vitinica_2",
+          "from_osid": "op:zvornik:sapna",
           "to_osid": "op:banovici:seona"
         },
         {

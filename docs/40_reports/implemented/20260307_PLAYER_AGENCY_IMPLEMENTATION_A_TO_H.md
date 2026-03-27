@@ -68,7 +68,7 @@
 - `n248`: H gate restored. `invalid_operation_count = 0`, `valid_for_combat_calibration = true`, benchmark suite `6/6`.
 - `n249`: post-refactor verification. Same final state hash as `n248` (`f5e0e48c6d2538ab`), same green combat-calibration status.
 - `n252`: Phase E 40w verification. Final hash `79a01c403c82038c`, combat-calibration still valid, benchmark suite still passed `6/6`.
-- `n254`: informational 52w verification. Combat-calibration still valid (`invalid_operation_count = 0`), but historical fit remained weak (`2/6` benchmarks, failed anchors at `bihac`, `op:zvornik:vitinica_2`, and `op:ugljevik:teocak_krstac_2`).
+- `n254`: informational 52w verification. Combat-calibration still valid (`invalid_operation_count = 0`), but historical fit remained weak (`2/6` benchmarks, failed anchors at `bihac`, `op:zvornik:sapna`, and `op:ugljevik:teocak_krstac_2`).
 
 ## Final State
 

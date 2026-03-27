@@ -451,7 +451,7 @@ const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected
     { osid: 'op:centar_sarajevo:sarajevo_dio_centar_sajarevo', expected_controller: 'RBiH' }, // Sarajevo centre — ARBiH throughout
     // Specific contested/enclave OSIDs
     { osid: 'op:zvornik:zvornik', expected_controller: 'RS' },             // Zvornik city — VRS captured May 1992
-    { osid: 'op:zvornik:vitinica_2', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold
+    { osid: 'op:zvornik:sapna', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold
     { osid: 'op:ugljevik:teocak_krstac_2', expected_controller: 'RBiH' },  // Teocak — ARBiH stronghold
     { osid: 'op:orasje:orasje', expected_controller: 'HRHB' },              // Orasje pocket — HVO held throughout
     { osid: 'op:brcko:brka_2', expected_controller: 'RBiH' },              // Brka (south Brcko) — ARBiH held

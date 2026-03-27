@@ -3555,7 +3555,7 @@
       "lon": 18.947392929824563
     },
     {
-      "id": "op:zvornik:vitinica_2",
+      "id": "op:zvornik:sapna",
       "lat": 44.4498729,
       "lon": 18.968795700000005
     },
@@ -9263,7 +9263,7 @@
     },
     {
       "a": "op:kalesija:kalesija_selo",
-      "b": "op:zvornik:vitinica_2",
+      "b": "op:zvornik:sapna",
       "min_dist": 0
     },
     {
@@ -9303,7 +9303,7 @@
     },
     {
       "a": "op:kalesija:seher_2",
-      "b": "op:zvornik:vitinica_2",
+      "b": "op:zvornik:sapna",
       "min_dist": 0
     },
     {
@@ -13733,7 +13733,7 @@
     },
     {
       "a": "op:zvornik:djulici",
-      "b": "op:zvornik:vitinica_2",
+      "b": "op:zvornik:sapna",
       "min_dist": 0
     },
     {
@@ -13773,7 +13773,7 @@
     },
     {
       "a": "op:zvornik:kozluk_2",
-      "b": "op:zvornik:vitinica_2",
+      "b": "op:zvornik:sapna",
       "min_dist": 0
     },
     {
@@ -13783,7 +13783,7 @@
     },
     {
       "a": "op:zvornik:krizevici",
-      "b": "op:zvornik:vitinica_2",
+      "b": "op:zvornik:sapna",
       "min_dist": 0
     },
     {
@@ -13798,7 +13798,7 @@
     },
     {
       "a": "op:zvornik:rastosnica_2",
-      "b": "op:zvornik:vitinica_2",
+      "b": "op:zvornik:sapna",
       "min_dist": 0
     }
   ]

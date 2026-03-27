@@ -575,7 +575,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                     'arbih_246th_vitezka_mountain',
                     'arbih_254th_mountain',
                 ],
-                objectives: ['op:zvornik:vitinica_2'],
+                objectives: ['op:zvornik:sapna'],
                 staging_osid: 'op:zvornik:djulici',
             },
         ],

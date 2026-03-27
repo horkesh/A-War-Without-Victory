@@ -1556,7 +1556,7 @@
     "corps": "arbih_2nd_corps",
     "home_mun": "zvornik",
     "home_settlement": "Sapna",
-    "home_osid": "op:zvornik:vitinica_2",
+    "home_osid": "op:zvornik:sapna",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,

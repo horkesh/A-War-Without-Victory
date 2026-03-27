@@ -14890,7 +14890,7 @@ Remaining 30% trickles via sustained at 3%/turn. Historically: ~70% fled immedia
 
 ### Regression note
 - 40w run [`apr1992_definitive_40w__024b4776f64c7a22__w40_n252`](/F:/A-War-Without-Victory/runs/apr1992_definitive_40w__024b4776f64c7a22__w40_n252) finished with final hash `79a01c403c82038c`, `valid_for_combat_calibration = true`, `invalid_operation_count = 0`, and benchmark suite `6/6`.
-- Informational 52w run [`apr1992_definitive_52w__63ff6bc6328b5629__w52_n254`](/F:/A-War-Without-Victory/runs/apr1992_definitive_52w__63ff6bc6328b5629__w52_n254) also preserved `valid_for_combat_calibration = true` with `invalid_operation_count = 0`, but historical-fit remained weak (`2/6` benchmarks, failed anchors at `bihac`, `op:zvornik:vitinica_2`, and `op:ugljevik:teocak_krstac_2`).
+- Informational 52w run [`apr1992_definitive_52w__63ff6bc6328b5629__w52_n254`](/F:/A-War-Without-Victory/runs/apr1992_definitive_52w__63ff6bc6328b5629__w52_n254) also preserved `valid_for_combat_calibration = true` with `invalid_operation_count = 0`, but historical-fit remained weak (`2/6` benchmarks, failed anchors at `bihac`, `op:zvornik:sapna`, and `op:ugljevik:teocak_krstac_2`).
 - Interpretation: the Phase E mechanic is dormant without staged player orders, so the 52w drift should be treated as branch-level long-horizon state, not a direct Phase E behavior change.
 - Final branch verification after doc propagation is green: `npm run typecheck`, `npm run desktop:map:build`, and full `npm run test:vitest` all pass.
 

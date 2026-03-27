@@ -183,6 +183,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const distinction_potential = (r.distinction_potential === 'tier_1' || r.distinction_potential === 'tier_2' || r.distinction_potential === 'tier_3')
             ? r.distinction_potential as 'tier_1' | 'tier_2' | 'tier_3' : undefined;
         const displaced_from = typeof r.displaced_from === 'string' && r.displaced_from.trim() ? r.displaced_from.trim() : undefined;
+        const deployment_osid = typeof r.deployment_osid === 'string' && r.deployment_osid.trim() ? r.deployment_osid.trim() : undefined;
         result.push({
             id,
             faction,
@@ -215,6 +216,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(initial_officer_quality != null && { initial_officer_quality }),
             ...(distinction_potential && { distinction_potential }),
             ...(displaced_from && { displaced_from }),
+            ...(deployment_osid && { deployment_osid }),
         });
     }
 

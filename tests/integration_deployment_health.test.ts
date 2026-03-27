@@ -358,7 +358,7 @@ describe('deployment health (40w)', () => {
                 // Specific contested/enclave OSIDs
                 { osid: 'op:zvornik:zvornik', expected: 'RS' },
                 // TODO calibration target: vitinica_2 currently falls to RS by w40
-                // { osid: 'op:zvornik:vitinica_2', expected: 'RBiH' },
+                // { osid: 'op:zvornik:sapna', expected: 'RBiH' },
                 { osid: 'op:ugljevik:teocak_krstac_2', expected: 'RBiH' },
                 { osid: 'op:orasje:orasje', expected: 'HRHB' },
                 { osid: 'op:brcko:brka_2', expected: 'RBiH' },

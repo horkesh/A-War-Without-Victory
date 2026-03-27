@@ -4,5 +4,6 @@
 npx tsc --noEmit
 
 # Baseline regression removed from pre-commit (runs 3 full scenarios, 5+ min).
+# Now checked in CI: .github/workflows/baseline-regression.yml
 # Run manually: npm run test:baselines
 # Update after intentional changes: UPDATE_BASELINES=1 npm run test:baselines
