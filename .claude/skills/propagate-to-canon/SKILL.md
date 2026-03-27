@@ -24,7 +24,6 @@ Search these locations for references to the changed items:
 - `docs/10_canon/` — canon, MUST update
 - `docs/20_engineering/` — engineering, MUST update
 - `docs/30_planning/` — update if actively referenced
-- `.cursor/skills/` — Pyrrhic role skills, MUST update
 - `.claude/skills/` — Claude skills, MUST update
 - `.agent/` — agent config, update if references exist
 - `.claude/napkin.md` and MEMORY.md files — session memory, MUST update

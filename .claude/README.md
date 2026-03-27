@@ -1,6 +1,6 @@
 # Claude Code Skills
 
-This directory contains all skills ported from `.cursor/skills/` for use with Claude Code.
+This directory contains the repo’s shared skills (Cursor-style skill structure) for use with Claude Code.
 
 ## Skills Available (53 total)
 

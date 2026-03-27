@@ -150,7 +150,7 @@ New content, balance changes, quality-of-life improvements, system expansions.
 
 Each 1.x.0 can have its own hotfix patches (1.1.1, 1.1.2, etc.)
 
-### Named Updates (Paradox-style)
+### Named Updates (studio-style)
 Major updates get codenames for communication:
 - 1.1.0 "Operation Corridor" — Posavina expansion
 - 1.2.0 "Autumn Leaves" — 1993–1994 content

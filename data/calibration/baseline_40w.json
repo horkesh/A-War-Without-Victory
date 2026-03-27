@@ -22,6 +22,32 @@
       "delta": 84
     }
   },
-  "events_fired": [],
+  "events_fired": [
+    { "turn": 1, "id": "rs_strategic_goals", "text": "The Assembly Speaks" },
+    { "turn": 3, "id": "rbih_state_identity", "text": "What Is Bosnia?" },
+    { "turn": 3, "id": "arms_embargo_impact_1992", "text": "UN Arms Embargo Strangles Bosnia" },
+    { "turn": 4, "id": "hrhb_political_goal", "text": "What Is Herceg-Bosna?" },
+    { "turn": 4, "id": "battle_of_the_barracks_sarajevo", "text": "Battle of the Barracks — Sarajevo" },
+    { "turn": 4, "id": "battle_of_the_barracks_tuzla", "text": "Battle of the Barracks — Tuzla" },
+    { "turn": 4, "id": "battle_of_the_barracks_visoko", "text": "Battle of the Barracks — Visoko" },
+    { "turn": 4, "id": "graz_accords", "text": "6 May 1992 — Karadžić and Boban meet in Graz, Austria, and agree to divide Bosnia between them. Herzegovina Corps and HVO Southeast Herzegovina observe a ceasefire. Kiseljak pocket forces hold positions. Posavina corridor fighting continues unabated." },
+    { "turn": 5, "id": "battle_of_the_barracks_zenica", "text": "Battle of the Barracks — Zenica" },
+    { "turn": 5, "id": "sarajevo_siege_begins_1992", "text": "Siege of Sarajevo Intensifies" },
+    { "turn": 5, "id": "jna_withdrawal_1992", "text": "JNA Forces Begin Withdrawal from Bosnia" },
+    { "turn": 7, "id": "mostar_liberation_1992", "text": "Mostar Liberated" },
+    { "turn": 9, "id": "srebrenica_enclave_forms_1992", "text": "Srebrenica Pocket Crystallizes" },
+    { "turn": 11, "id": "drina_cleansing_decision_1992", "text": "The Drina Valley Question" },
+    { "turn": 11, "id": "drina_valley_ethnic_cleansing_1992", "text": "Drina Valley Campaign Accelerates" },
+    { "turn": 12, "id": "operation_corridor_1992", "text": "Operation Corridor — VRS Breaks Through at Brcko" },
+    { "turn": 15, "id": "concentration_camps_revealed_1992", "text": "The World Is Watching" },
+    { "turn": 18, "id": "london_conference_1992", "text": "London Conference on Yugoslavia" },
+    { "turn": 18, "id": "gorazde_pocket_consolidation_1992", "text": "Operation Circle: The Gorazde Pocket Holds" },
+    { "turn": 23, "id": "hvo_arbih_tensions_rise_1992", "text": "HVO-ARBiH Clash at Prozor" },
+    { "turn": 36, "id": "gornji_vakuf_clashes_1993", "text": "HVO-ARBiH Fighting Erupts at Gornji Vakuf" },
+    { "turn": 39, "id": "kravica_attack_1993", "text": "Kravica Raid on Orthodox Christmas" },
+    { "turn": 39, "id": "vance_owen_plan_1993", "text": "Vance-Owen Peace Plan Presented" },
+    { "turn": 40, "id": "jajce_falls_1992", "text": "Jajce Falls to VRS Forces" },
+    { "turn": 40, "id": "turajlic_assassination_1993", "text": "Deputy Prime Minister Turajlic Assassinated" }
+  ],
   "total_osids": 753
 }

@@ -1,6 +1,6 @@
-# Paradox Rules
+# Pyrrhic Rules
 
-**Purpose:** Standard rules for Paradox-team execution when the Orchestrator is in charge of a multi-phase implementation (e.g. Phase C GUI). All agents and subagents follow these unless overridden.
+**Purpose:** Standard rules for **Pyrrhic** execution when the Orchestrator is in charge of a multi-phase implementation (e.g. Phase C GUI). All agents and subagents follow these unless overridden.
 
 **Authority:** Set by user/orchestrator. When in force, Orchestrator runs the show; Architect oversees and flags decisions for user review.
 

@@ -3,7 +3,7 @@
 **Owner:** Orchestrator  
 **Oversight:** Architect (decisions flagged for user review)  
 **Source:** HOI_VISUAL_GUI_OVERHAUL_SPEC.md §10 Phase C; AWWV_GUI_ARCHITECTURE_REWORK_v2.md §0  
-**Rules:** docs/20_engineering/PARADOX_RULES.md (refactor between phases, delegate, concurrent where possible, tests → report → napkin/ledger/docs → commit/push)
+**Rules:** `docs/20_engineering/PYRRHIC_RULES.md` (refactor between phases, delegate, concurrent where possible, tests → report → napkin/ledger/docs → commit/push)
 
 ---
 

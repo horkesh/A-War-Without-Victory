@@ -73,7 +73,7 @@
 - **Critical bug found:** sidToMun map corruption in scenario_runner.ts prevented ALL 217 mandatory OOB brigades from spawning through normal path (only 33 RS via fallback). Fixed with canonicalSidToMun preservation.
 - **RBiH premature counterattacking:** ARBiH had NO meaningful counteroffensive until mid-1993 (~week 52). Standing orders, doctrine phases, and army priorities all recalibrated to enforce general_defensive through week 52.
 - **Knowledge base:** Use docs/knowledge/{VRS,ARBIH,HVO}_ORDER_OF_BATTLE_MASTER.md for historical data.
-- **Skills copied:** .cursor/skills/{architect,historian,modern-wargame-expert,reports-custodian,scenario-report} → .claude/skills/
+- **Skills mirrored:** Cursor-style skills `{architect,historian,modern-wargame-expert,reports-custodian,scenario-report}` are maintained under `.claude/skills/` for this repo.
 
 ## Patterns That Don't Work
 - Voronoi: simplify + turf fallback alone; gap-based salvage collapsing munis; Chaikin smoothing (white gaps).

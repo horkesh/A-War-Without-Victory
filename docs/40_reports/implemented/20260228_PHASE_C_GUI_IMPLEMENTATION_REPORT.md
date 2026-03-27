@@ -4,7 +4,7 @@
 **Owner:** Orchestrator  
 **Oversight:** Architect  
 **Plan:** docs/40_reports/phase_c/PHASE_C_EXECUTION_PLAN.md  
-**Rules:** docs/20_engineering/PARADOX_RULES.md
+**Rules:** `docs/20_engineering/PYRRHIC_RULES.md`
 
 ---
 

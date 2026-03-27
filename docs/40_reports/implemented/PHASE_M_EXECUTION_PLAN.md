@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-01
 **Status:** PLANNED — awaiting user approval
-**Orchestrator-led.** Paradox Rules in effect (`docs/20_engineering/PARADOX_RULES.md`).
+**Orchestrator-led.** Pyrrhic rules in effect (`docs/20_engineering/PYRRHIC_RULES.md`).
 **Design source:** `docs/30_planning/20260228_phase_ii_mechanics_design.md`
 **Canon review:** Completed — see §Canon Extensions Required below.
 

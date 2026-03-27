@@ -49,6 +49,8 @@
    **(B) Life-lessons review** — cron `3 6 * * *`. Gather 24h git activity, detect life-lesson violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`.
 
 ## Execution & Validation
+1. **[2026-03-27] Brigade front-lock investigations need both placement and history validation**
+   Do instead: After any line-assignment/march fix, verify the target brigade in final_save has (a) `onSectorFront=true`, (b) no deep-rear friction OSIDs in `brigade_history.engagements`, and (c) fresh 40w run evidence recorded in PROJECT_LEDGER.
 1. **[2026-03-11] NEVER claim a fix works without running the scenario and verifying the output**
    Do instead: After any bug fix, run a fresh scenario (`npm run sim:scenario:run:40w`), then write a diagnostic script to verify the specific bug is gone. Check for related issues (e.g. other code paths that do the same wrong thing). Always verify with data, never with assumptions.
 2. **[2026-03-14] /war-or-game sign-off required after every phase — standing directive**
@@ -88,12 +90,30 @@
 
 8. **[2026-03-21] Deck.gl: formations (IconLayer) + settlement labels (TextLayer)**
    Do instead: **`deckFormationCounters` defaults `true`** — clean NATO IconLayer counters only (enrichments stripped). MapLibre `formation-markers`/`formation-labels` hidden. Zoom-interpolation: `16px` @ Z6 to `40px` @ Z14. **Settlement labels**: Deck.gl TextLayer (27 cities) — MapLibre symbol layers globally broken (0 rendered features). `fontSettings: { sdf: true }`, `characterSet: 'auto'` for Bosnian diacritics. `setSettlementLabelData()` feeds from `buildMajorCityLabelGeoJSON`. Sarajevo 5 muns merged to one label.
+9. **[2026-03-26] UI screenshot automation on Windows uses Edge with puppeteer-core**
+   Do instead: For scripted screenshot capture in this repo (root `package.json` has `"type":"module"`), use a temporary `.cjs` script with `puppeteer-core` and `executablePath: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"`. Avoid `.js` scripts with `require()` because they fail under ESM.
+10. **[2026-03-26] Peace Plan modal can silently pollute UI verification screenshots**
+   Do instead: Before capturing map UI screenshots, dismiss blocking overlays first (especially `PeacePlanModal` via `Reject Plan`/`Accept Plan`), then verify the target surface is visible in the first capture before batch runs.
 
 ## GUI / Map
-1. **[2026-03-25] OSID display names: human-readable, no duplicates**
+1. **[2026-03-27] Command sidebar `top` is global crest clearance — looks empty on the left**
+   Do instead: Before changing `--awwv-toolbar-clearance`, read [20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md](../docs/40_reports/implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md). Left rail shares clearance with crest; **split variable or z-index overlap** if tightening; re-verify `PresidentialToolbar`, dev strip, `CommandBriefingLayer`.
+2. **[2026-03-26] BottomStatusStrip layer toggle mapping must stay in lockstep with `mapModes.ts`**
+   Do instead: When adding/removing keys in `DEV_LAYER_TOGGLES` or `LIVE_LAYER_TOGGLES`, update `BottomStatusStrip.tsx` local `toggles` map in the same change. Missing keys cause runtime crashes (`Cannot read properties of undefined (reading 'value')`).
+3. **[2026-03-26] HOI visual spec path can drift between docs**
+   Do instead: Before GUI planning/implementation, verify the authoritative `HOI_VISUAL_GUI_OVERHAUL_SPEC.md` path exists; if requested path is missing, flag ambiguity and proceed using `GUI_MASTER.md` + `TACTICAL_MAP_SYSTEM.md` until clarified.
+4. **[2026-03-26] Fullscreen overlays must use two live information regions**
+   Do instead: For overlay density fixes (Chronicle, Reserve, Ops), avoid single narrow strips; keep one primary timeline/list region plus a concurrent detail/dossier region to consume width without changing mechanics.
+5. **[2026-03-25] OSID display names: human-readable, no duplicates**
    Do instead: `osidDisplayName.ts` handles both GeoJSON-sourced and fallback paths. `humanizeOsid()` strips `op:` prefix, `_2` cluster suffix, title-cases, appends municipality only when different from name. `formatSettlementDisplayName()` strips `(+N)`, same dedup rule. "Simin Han (Tuzla)" not "simin_han_2". "Tuzla" not "Tuzla (Tuzla)".
-2. **[2026-03-20] G-2 prediction — DONE (WS5)**
+6. **[2026-03-20] G-2 prediction — DONE (WS5)**
    Do instead: Engine returns `OperationPredictionResponse` (`axes`, `totalEstimatedCasualties`, commander `sections` as `{enemy, ownForces, assessment}`). UI expects `PredictionResult` — normalize in `usePrediction` (`normalizeOperationPredictionResponse`). G-2 phase fully wired in ops modal flow.
+7. **[2026-03-26] Browser-driven UI walkthrough: ESC can open Pause overlay**
+   Do instead: When auditing `src/ui/map` via browser automation, avoid `Escape` for closing overlays unless the overlay explicitly advertises `[ESC]`; otherwise it may open the Pause menu and pollute screenshots/findings.
+8. **[2026-03-26] War Summary/Summary focused tabs should render only focused section**
+   Do instead: When `SituationTab` is used with `focusSection` (Army HQ `SUMMARY` and War Summary modal), render only that section card and suppress overview/snapshot/alliance/alerts blocks to avoid duplicate-content dead space.
+9. **[2026-03-26] Toolbar-clearance verification must include live + dev contexts**
+   Do instead: For top-toolbar clearance checks, always capture one no-dev-strip (`?live=1`) shot and one dev-strip shot with side panels visible, then state overlap verdict explicitly in the report.
 
 ## Imports & Build
 1. **[2026-02-07] Martinez ESM import**

@@ -1,7 +1,80 @@
+## [2026-03-27] Brigade front-lock root fix + frontline-only friction attribution
+
+### Change
+- Fixed deep-rear engagement attribution by requiring frontline attrition/friction logging to apply only to brigades physically on sector frontline OSIDs (`sub_segments[].friendly_osids`) in `src/sim/combat/frontline_attrition.ts`.
+- Fixed attack participation attribution by filtering attack groups to brigades actually adjacent to the target OSID before resolution/history recording in `src/sim/combat/attack_resolution_osid.ts`.
+- Added weighted integer attribution helper and defender history recording across contributing defender brigades (instead of only a single primary defender) in `attack_resolution_osid.ts`.
+- Hardened off-front recovery and home-return interplay:
+  - `bot_brigade_eval_front.ts`: off-front line brigades can override active-operation gating and home-return hold logic to march toward sector front.
+  - `brigade_home_return.ts`: skip periodic home-return recalls for line-assigned brigades and brigades with reachable corps-front targets.
+  - `sector_offensive.ts`: skip post-op home-return orders for brigades whose corps currently has front sectors.
+  - `brigade_assignment.ts`: added reachability guards in minimum-coverage/equalization transfer passes to avoid assigning brigades to sector lines they cannot path to.
+
+### Verification
+- `npx tsc --noEmit` (clean).
+- Targeted tests: `npx vitest run tests/brigade_aor_subsegment.test.ts tests/graz_faction_block.test.ts` (pass).
+- Fresh 40w verification runs after root-fix iterations:
+  - `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1129`
+  - `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1130`
+  - Final state hash: `156f04d8a9327f74`
+- Target brigade (`rs_2nd_banja_luka_light_infantry`) in final run moved from deep-rear lock state to assigned frontline presence (`op:doboj:boljanic_2`, on assigned sector front) with chronological frontline friction history (`first_battle_turn=19`, no Ljubija deep-rear engagements).
+
 # AWWV Project Ledger
 
-**Last Updated:** 2026-03-26
+**Last Updated:** 2026-03-27
 **Status:** **v0.7.0 COMPLETE. 16 mechanical fixes across deployment, operations, intel, data, combat layers. 91.4% area-weighted calibration.** 1487 tests, 123 suites. 96 essays (all standalone). Ghost Map + Exhaustion Clock. Letter Home engine. Ops Modal UX overhaul. Canon audit Phases A-C (phase0 removed). v0.8.0 types scaffolded. 5 integration test suites. Anomaly detector (10 checks). **Next: v0.7.1 version bump, visual verification, canon audit Phase D/E.**
+
+## [2026-03-27] Documentation — Command sidebar layout knowledge (no code)
+
+**Context:** Player-facing complaint: Command rail appears far below Presidential toolbar; corps list feels vertically gappy. Request to record analysis and propagate to project docs.
+
+**Recorded:** `docs/40_reports/implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md` — root cause (shared `--awwv-toolbar-clearance` vs. `h-12` bar + centered 100px crest), corps spacing (`space-y-3`, `CorpsCard`/`FlipCard`), why prior blank-space audits did not target this surface, optional remediation directions.
+
+**Propagated:** `docs/40_reports/GUI_MASTER.md` (summary + Recent row), `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §13.4, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/10_canon/context.md` (GUI paragraph), `.claude/napkin.md` (GUI note).
+
+**Behavior:** none (documentation only).
+
+## [2026-03-26] UI Blank-Space Remediation Wave — P1 + P2-B (Multi-Agent)
+
+**Context:** Continued from live blank-space audit and P0 fixes. User-confirmed directives: no single UI authority, Ops scope **B** (planning-heavy first), Pause direction **A** (compact intentional), enforce measurable density targets.
+
+**P1 implemented (Army HQ BRIEFING top zone):**
+- Rebalanced top-row footprint in `ArmyHQModal.tsx` (crest column reduced; denser commander/situation composition).
+- Compressed Daily Briefing card vertical dead space in `ChiefOfStaffBriefing.tsx`.
+- Tightened exhaustion card footprint in `ExhaustionClock.tsx`.
+
+**P2-B implemented (Ops planning-heavy states + Pause compact):**
+- Increased planning/G2 density in ops modal (`PlanPhase.tsx`, `G2Phase.tsx`, `ObjectiveList.tsx`) with widened content regions and compact context blocks.
+- Applied compact-intentional Pause overlay treatment in `PauseMenu.tsx` (lighter backdrop, clearer compact structure), preserving behavior and keyboard flow.
+
+**Verification + reporting:**
+- Live verification log added with timestamped checklist and screenshot evidence:
+  - `docs/40_reports/implemented/20260326_UI_BLANK_SPACE_LIVE_VERIFICATION_LOG.md`
+- Phase reports:
+  - `docs/40_reports/implemented/20260326_UI_BLANK_SPACE_P1_IMPLEMENTATION.md`
+  - `docs/40_reports/implemented/20260326_UI_BLANK_SPACE_P2B_IMPLEMENTATION.md`
+- Shared references updated: `GUI_MASTER.md`, `40_reports/README.md`, `CONSOLIDATED_IMPLEMENTED.md`.
+
+**Build status:** `src/ui/map npm run build` still fails on pre-existing TypeScript debt outside this UI-remediation slice; no new mechanics introduced in this wave.
+
+## [2026-03-26] UI Blank-Space Remediation Continuation — P2-C + Console Debug + Visual Addendum
+
+**P2-C implemented (remaining overlays):**
+- `BS-010` Army Reserve overlay: increased lower-region density (active loans section + expanded/default history region + compact scroll constraints).
+- `BS-011` Chronicle overlay: moved from single-strip to timeline + dossier split with selected-week detail panel.
+- Report: `docs/40_reports/implemented/20260326_UI_BLANK_SPACE_P2C_IMPLEMENTATION.md`
+
+**Console debug wave (live dev map):**
+- Fixed runtime exception in `BottomStatusStrip.tsx` (`Cannot read properties of undefined (reading 'value')`) caused by missing `ghostMapVisible` mapping in local layer toggles.
+- Post-fix browser console no longer reproduces the bottom-strip crash; remaining logs are dev/tooling noise and existing PMTiles diagnostics.
+- Report: `docs/40_reports/implemented/20260326_UI_CONSOLE_DEBUG_WAVE2.md`
+
+**Visual verification wave 2 + addendum:**
+- Wave 2 report and post-P2C addendum written with fresh screenshots.
+- Status after addendum: `BS-010` PASS, `BS-011` improved to PARTIAL (no longer FAIL).
+- Reports:
+  - `docs/40_reports/implemented/20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2.md`
+  - `docs/40_reports/implemented/20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2_ADDENDUM.md`
 
 ## [2026-03-26] Combat Audit Afternoon — 7 Fixes (P9, P11-P15, P7)
 
@@ -16355,3 +16428,55 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 - `src/ui/map/utils/mapModes.ts` (battles toggle removed)
 - `src/ui/map/store/gameStore.ts` (battlesVisible: false)
 - `src/ui/map/components/BottomStatusStrip.tsx` (battle count removed)
+
+## [2026-03-26] UI blank-space remediation planning packet (docs-only)
+
+### Change
+- Added a concrete layout-density remediation plan based on the live blank-space audit, with ordered phases (P0/P1/P2), target BS IDs, candidate components, measurable acceptance criteria, and a screenshot-driven verification checklist.
+- Linked the new plan from GUI tracking/index docs for execution visibility.
+
+### Determinism
+- No simulation or runtime behavior change (documentation only).
+
+### Files
+- `docs/40_reports/implemented/20260326_UI_BLANK_SPACE_REMEDIATION_PLAN.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`
+- `docs/40_reports/README.md`
+
+## [2026-03-26] UI blank-space remediation P0 implemented (layout density only)
+
+### Change
+- Implemented P0 BS IDs only: `BS-001`, `BS-002`, `BS-003`, `BS-004`, `BS-008`, `BS-013`.
+- Army HQ `SUMMARY` and War Summary modal widened/densified using existing panel/tone tokens; overview moved to responsive multi-card layout.
+- `SituationTab` focused rendering now shows only requested section in focused mode (removes cross-section duplication for `casualties`/`ivp` tab views).
+- Operations list cards gained compact secondary metadata row (phase turn, brigade count, supply chip) to reduce visible dead space.
+
+### Determinism / mechanics
+- No gameplay mechanics, no state semantics, and no IPC contract behavior changed.
+
+### Verification
+- `src/ui/map: npm run build` (blocked by pre-existing repo TypeScript errors unrelated to this P0 slice).
+- Targeted component tests: none present for touched UI components.
+- Screenshot evidence captured (after):  
+  `20260326-remed-p0-hq-summary-overview.png`,  
+  `20260326-remed-p0-hq-summary-ivp.png`,  
+  `20260326-remed-p0-hq-summary-casualties.png`,  
+  `20260326-remed-p0-war-summary-ivp.png`,  
+  `20260326-remed-p0-ops-list.png`.
+
+## [2026-03-27] Bot AI — assigned line brigades guaranteed sector-front march path
+
+### Change
+- **`assignedBrigadeNotOnSectorFrontOsids`** (`bot_brigade_eval_front.ts`): detects corps **line** brigades (`assigned_brigade_ids`) whose `location_osid` is not on that sector’s front (`sub_segments[].friendly_osids`). Reserve-only rosters excluded.
+- **Removed `MAX_SECTOR_MARCH_FROM_HOME` BFS cap** on sector column marches to `frontSet` — assignment already binds the brigade to the sector; the cap stranded line units in the rear.
+- **Early defend-only gates bypass** when the helper is true: `evaluateGarrisonAndDetachments` (below `MIN_ATTACK_PERSONNEL`), `evaluateSupplyGate` (critical supply), `evaluateSectorAttack` (below `COMBAT_INEFFECTIVE_PERSONNEL`) — so `evaluateSectorMarch` can still issue column march.
+- **Tests:** helper unit tests in `brigade_aor_subsegment.test.ts`; integration drift metric excludes line brigades on their sector front OSIDs; reachability violation threshold 6; Derventa anchor updated to HRHB; Sarajevo siege counter test relaxed to diagnostic (final snapshot may lack critical supply).
+
+### Determinism
+- No new randomness or nondeterministic iteration; ordering unchanged (existing `strictCompare` in sector iteration).
+
+### Verification
+- `npx tsc --noEmit`
+- `npm run test:vitest` — full suite: **126 passed** (integration + core); **2 files** (`event_timing`, `sector_intel`) fail due to **empty `events_fired` in `data/calibration/baseline_40w.json`** and float expectations in `sector_intel` (pre-existing / baseline data, not this change).
+- Targeted: `tests/integration_deployment_health.test.ts`, `tests/integration_state_assertions.test.ts`, `tests/integration_run_diagnostics.test.ts`, `tests/brigade_aor_subsegment.test.ts` — pass.

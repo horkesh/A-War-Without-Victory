@@ -590,15 +590,19 @@ When the user **clicks a formation marker** on the map (with game state loaded),
 
 When the Brigade AoR layer is on, the selected formation’s AoR settlements are highlighted on the map (light faction fill + dashed outline). Closing the panel or pressing Escape clears `selectedFormationId` and the brigade AoR highlight. Clicking a settlement still opens the settlement panel (5 tabs) as before.
 
-### 13.4 OOB Sidebar
+### 13.4 OOB Sidebar (Command rail)
 
-300px left-side sliding panel. Toggle via toolbar "OOB" button or `O` key.
+**Canonical implementation (React map):** Fixed left column **`OOBSidebar.tsx`** (`w-72` = 18rem), not the legacy sliding panel. Accordion sections: Situation, Army, Mobilization, Operations, Sectors; **Army** lists factions with **CorpsCard** per corps. See **`GUI_MASTER.md`** and live reference [20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md](../40_reports/implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md).
+
+**Toolbar clearance (2026-03-27):** The sidebar’s `top` is **`var(--awwv-toolbar-clearance, 7.5rem)`** ( **`8.5rem`** when `devMode` ), set from **`App.tsx`** together with right-hand detail panels. That value clears the **centered floating army crest** (100px image + label) and the **dev tools strip**, not only the 48px Presidential bar — so the **left** rail starts **much lower** than the thin top bar. **Open UX debt:** split clearance for left rail vs. center/right, or accept crest overlapping the top-left; see knowledge doc §5.
+
+**Legacy note:** Older docs described a 300px sliding OOB toggled with **OOB** / `O` key; the current product uses **PresidentialToolbar** + this fixed Command rail.
 
 Groups formations by faction (RBiH, RS, HRHB). Each faction section shows:
 - Header with faction badge, label, count, and average cohesion
-- Up to 50 formation rows (readiness badge, name, kind)
-- Total militia pool summary (available/committed/exhausted)
-- Clickable rows — jump to municipality centroid at tactical zoom
+- Corps cards and formation rows; reserves and HQ entries as implemented in `OOBSidebar.tsx`
+- Total militia pool summary (available/committed/exhausted) where applicable
+- Clickable rows — selection opens detail panels / map focus per current behavior
 
 ### 13.5 Search Overlay
 
