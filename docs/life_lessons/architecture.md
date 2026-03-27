@@ -276,3 +276,15 @@
 - **Right approach**: Every pipeline stage that processes a collection must account for 100% of inputs. If an item can't be placed, either force-assign with a fallback or emit a warning. Never silently drop.
 - **Do instead**: When writing assignment/matching pipelines, add an `else` branch for the no-match case. At minimum `console.warn`. Preferably a fallback. At the end of the pipeline, assert `assigned.length === input.length`.
 
+### [Architecture] Cross-faction pools have a chicken-and-egg problem — hardcode the seed list (2026-03-27) — NEW
+- **Context**: Cross-faction pool seeding loop iterated only active formations. Brigades couldn't spawn without pools, pools couldn't be created without active brigades. The loop found zero cross-faction pairs because the formations that needed cross-faction pools hadn't been created yet.
+- **Wrong approach**: Only scanning active formations for cross-faction pool pairs. This creates a circular dependency: formations need pools to spawn, but pools need formations to exist.
+- **Right approach**: Hardcode `CROSS_FACTION_POOL_MUNICIPALITIES` constant with known cross-faction pairs (e.g., HVO brigades under ARBiH command). Merge into the pool seeding loop before scanning formations. The list is small and stable — it comes from the OOB, not from runtime state.
+- **Do instead**: When a seeding/initialization loop depends on entities that don't exist yet, hardcode the seed data. Don't try to discover it dynamically from entities that haven't been created. Known cross-faction relationships are OOB facts, not emergent properties.
+
+### [Architecture] home_mun must match home_osid's municipality — mismatches silently block placement (2026-03-27) — NEW
+- **Context**: 255th Slavna had `home_mun: "ugljevik"` but `home_osid` in Zvornik. `factionHasPresenceInMun` checked Ugljevik (RS-controlled), returned false, and the brigade was never placed. The mismatch between the two fields created a silent spawn failure.
+- **Wrong approach**: Assuming `home_mun` and `home_osid` are independent fields that can point to different municipalities. The placement system uses `home_mun` for control checks and `home_osid` for physical location — if they disagree, the brigade falls through.
+- **Right approach**: For non-enclave brigades, `home_mun` MUST be the municipality embedded in `home_osid` (i.e., `home_osid.split(':')[1]`). For enclave brigades in enemy territory, use the `enclave` tag to bypass the municipality control check entirely.
+- **Do instead**: When adding a brigade to the OOB, verify `home_mun === home_osid.split(':')[1]`. If the brigade is behind enemy lines, tag it as `enclave` and set both fields consistently. Add a preflight check that flags any brigade where `home_mun` doesn't match the OSID's municipality.
+

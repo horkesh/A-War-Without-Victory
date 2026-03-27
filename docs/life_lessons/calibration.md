@@ -167,6 +167,18 @@
 - **Right approach**: Bot AI must explicitly exclude paramilitary target OSIDs from its offensive targets. New mechanics that compete for territory must gate the bot's access to that target class.
 - **Do instead**: When adding any new mechanic that captures OSIDs, immediately check `generateCorpsDirectives` and `bot_brigade_ai_osid.ts` for conflicts. Add explicit exclusions before wiring the mechanic.
 
+### [Calibration] Sector-coverage defenders must NOT be physically displaced (2026-03-27) — NEW
+- **Context**: The 217th ARBiH at Gradacac was "retreated" from a position it never occupied when a remote OSID it was covering flipped. This evacuated Gradacac, allowing RS walk-in.
+- **Wrong approach**: Treating all defenders identically in retreat logic regardless of whether they're physically present at the lost OSID.
+- **Right approach**: Guard displacement with `isPhysicalDefender` check. Sector-coverage defenders take morale/disruption penalties but stay at their physical location.
+- **Do instead**: When writing retreat/displacement logic triggered by OSID loss, always check whether the defending brigade is physically located at the lost OSID or merely providing sector coverage. Only physically-present brigades should be forced to relocate.
+
+### [Calibration] garrison tag pins brigades but operations can still pull them — remove from op if garrison needed (2026-03-27) — NEW
+- **Context**: 255th with `garrison:true` was still pulled to Op Teocak staging. Garrison blocks `evaluateSectorMarch` but NOT operation `force_staging`.
+- **Wrong approach**: Assuming `garrison:true` prevents all movement. It only prevents sector march.
+- **Right approach**: Garrison prevents sector march only. If a brigade must hold a position, also remove it from any operation's brigade list. The garrison tag and operation assignment are independent systems — both must be checked.
+- **Do instead**: When a brigade must hold a fixed position, verify it is (1) tagged `garrison:true` AND (2) not listed in any operation's brigade array. Grep for the brigade ID in `pre_planned_operations.ts` and `triggered_operations.ts`. A garrisoned brigade in an op will march to staging when the op fires.
+
 ### [Bot AI] Stale-count reads cause oscillation — always track planned movements (2026-03-16) — NEW
 - **Evidence**: `evaluateSectorMarch` in `bot_brigade_eval_front.ts` used `countCorpsBrigadesAtOsid()` to check overstacking. Since all brigades evaluate against the same static state in one pass, 7 brigades at OSID X all see count=7 and all march to OSID Y. Next turn: all 7 at Y, march back to X. Perpetual oscillation.
 - **Root cause**: Per-entity evaluation loop reads shared static state without tracking the effects of earlier entities' decisions in the same loop.

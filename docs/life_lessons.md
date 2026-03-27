@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-03-26. 145 lessons across 8 topic files.
+> Last restructured: 2026-03-27. 149 lessons across 8 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
@@ -76,7 +76,15 @@
 
 ### [Architecture] Silent drops in assignment pipelines hide broken deployment — always log unmatched items (2026-03-26) — NEW → see `architecture.md`
 
+### [Architecture] Cross-faction pools have a chicken-and-egg problem — hardcode the seed list (2026-03-27) — NEW → see `architecture.md`
+
+### [Architecture] home_mun must match home_osid's municipality — mismatches silently block placement (2026-03-27) — NEW → see `architecture.md`
+
 ### [Engine] Zombie op types consume corps slots but execute nothing — always verify op type has execution path (2026-03-26) — NEW → see `architecture.md`
+
+### [Calibration] Sector-coverage defenders must NOT be physically displaced (2026-03-27) — NEW → see `calibration.md`
+
+### [Calibration] garrison tag pins brigades but operations can still pull them — remove from op if garrison needed (2026-03-27) — NEW → see `calibration.md`
 
 ### [Calibration] When a threshold system isn't biting, check the numerator accounting before tuning the threshold (2026-03-25) — NEW → see `calibration.md`
 
@@ -142,8 +150,8 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 28 | Running calibration scenarios, tuning parameters, OOB changes |
-| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 43 | Changing engine structure, state, pipeline, adding systems |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 30 | Running calibration scenarios, tuning parameters, OOB changes |
+| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 45 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 9 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 12 | Frontend, map, tactical overlay, modal work |
 | [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 40 | General development process (skim at session start) |

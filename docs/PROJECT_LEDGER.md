@@ -16480,3 +16480,16 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 - `npx tsc --noEmit`
 - `npm run test:vitest` — full suite: **126 passed** (integration + core); **2 files** (`event_timing`, `sector_intel`) fail due to **empty `events_fired` in `data/calibration/baseline_40w.json`** and float expectations in `sector_intel` (pre-existing / baseline data, not this change).
 - Targeted: `tests/integration_deployment_health.test.ts`, `tests/integration_state_assertions.test.ts`, `tests/integration_run_diagnostics.test.ts`, `tests/brigade_aor_subsegment.test.ts` — pass.
+
+## [2026-03-27] Sector-coverage displacement guard + cross-faction HRHB pools + Teočak corridor + elite loans + calibration ATH
+
+### Change
+- **Sector-coverage displacement guard** (`attack_resolution_osid.ts`): Sector-coverage defenders no longer physically displaced when remote OSID flips. Fixes Gradačac walk-in bug. +gradacac_2 anchor.
+- **Cross-faction HRHB pool seeding** (`ongoing_mobilization.ts`): 5x mobilization multiplier for HRHB pools in RBiH municipalities. Hardcoded municipality list breaks chicken-and-egg. 4 missing brigades now spawn (107th, 101st Bihać, 110th, 115th).
+- **Cross-faction brigade spawn bypass** (`recruitment_engine.ts` + `oob_brigades.json`): Mandatory cross-faction brigades bypass `canFormEmergentBrigade`. Added `mandatory:true` to hvo_101st_bihac.
+- **Teočak corridor fixes**: 255th Slavna as enclave at teocak_krstac_2 with garrison+enclave tags. 3 code sites bypass `factionHasPresenceInMun` for enclave brigades. 246th Vitezka at vitinica_2, `available_from:0`. Op Teočak second axis (vitinica_recovery).
+- **Black Swans elite loan to Op Teočak**: Elite pool gate bypass. New `deployment_osid` OOB field. `buildAxesFromDef` allows elite brigades through exempt-corps filter. Loan auto-deploys at op injection.
+- **Pre-commit hook**: Baseline regression removed (was 5+ min, now ~15s tsc only).
+
+### Calibration
+- **91.4% → 92.1% area-weighted (new ATH)**. All 22 anchors pass. 4/4 enclaves. 6/6 benchmarks.

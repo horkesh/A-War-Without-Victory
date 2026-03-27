@@ -1110,3 +1110,23 @@ The `mapOsidsToCorps` BFS in `sector_territory.ts` uses a `homeMunCorps` guard: 
 
 ### Calibration % means nothing if reached through broken mechanics
 Phase 2 surplus allocation in `brigade_assignment.ts` silently dropped brigades when `reachable.length === 0`. A variable `unmatched` existed but was never consumed. These brigades vanished from the assignment pipeline — no sector, no warning, no diagnostic trace. The 91.7% calibration was inflated because these brigades' absence meant fewer incorrect deployments were visible. Fix: force-assign with cross-component fallback + console.warn. Golden rule: calibration % means nothing if reached through broken mechanics.
+
+## Sector-Coverage Defense and Cross-Faction Spawning (2026-03-27)
+
+### Sector-coverage defenders must NOT be displaced
+Sector-coverage defenders project defense remotely — they are not physically at the attacked OSID. When a remote OSID flips, displacing the covering brigade causes it to abandon its actual position, creating walk-in opportunities at adjacent OSIDs (e.g. Gradačac). Fix: skip physical displacement for brigades contributing via sector coverage only.
+
+### Cross-faction pools need both pool creation AND spawn bypass
+HRHB brigades in RBiH-controlled municipalities (e.g. 107th, 101st Bihać, 110th, 115th) face a chicken-and-egg problem: `canFormEmergentBrigade` checks for faction municipal presence, but these brigades ARE the faction presence. Two fixes required in tandem: (1) 5x mobilization multiplier for HRHB pools in RBiH municipalities to seed the pool, and (2) `mandatory:true` OOB flag to bypass the `canFormEmergentBrigade` gate in `recruitment_engine.ts`.
+
+### Enclave brigades bypass factionHasPresenceInMun
+Enclave brigades (e.g. 255th Slavna at Teočak) spawn in enemy-controlled territory by definition. Code sites that gate on `factionHasPresenceInMun` must check for `tags.includes('enclave')` and bypass the gate. Three sites identified and patched.
+
+### Elite brigades bypass canFormEmergentBrigade
+Elite/professional units (e.g. Black Swans) are not municipality-pool formations. They bypass `canFormEmergentBrigade` because their existence is not contingent on local demographic pools. The elite pool gate must also be bypassed for loan deployments to operations.
+
+### deployment_osid enables initial placement override
+The `deployment_osid` OOB field separates identity (home_osid, used for municipality affinity and pool linkage) from initial physical placement. Elite brigades loaned to operations deploy at `deployment_osid` while retaining home identity. This enables ops-injection without teleporting the brigade's conceptual origin.
+
+### garrison tag pins brigades via evaluateGarrisonAndDetachments
+The `garrison` tag causes `evaluateGarrisonAndDetachments` (which fires before `evaluateSectorMarch` in the brigade AI pipeline) to hold the brigade at its current position. Combined with `enclave` tag, this pins enclave garrisons in place — they defend but do not march toward distant sector fronts.
