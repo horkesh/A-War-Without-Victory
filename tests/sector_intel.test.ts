@@ -98,18 +98,18 @@ describe('T1: first contact passive buildup', () => {
 // ---------------------------------------------------------------------------
 describe('T2: intel staleness — in-contact confidence decays to floor', () => {
     it('confidence converges to 0 when decay exceeds passive buildup', () => {
-        const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RBiH', ['e1'], ['oA'], ['oB']);
-        const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RS', ['e1'], ['oB'], ['oA']);
+        const sectorA = makeSector('sector:corps-A:0', 'corps-A', 'RS', ['e1'], ['oA'], ['oB']);
+        const sectorB = makeSector('sector:corps-B:0', 'corps-B', 'RBiH', ['e1'], ['oB'], ['oA']);
         const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
         state.military.sector_intel = {};
-        // RBiH: net = passive(0.06) - decay(0.10) = -0.04/turn
-        // From initial 0.05, drops to 0 after ~2 turns
-        for (let t = 1; t <= 5; t++) {
+        // RS: net = passive(0.08) - decay(0.12) = -0.04/turn
+        // From initial 0.30, drops to 0 after ~8 turns
+        for (let t = 1; t <= 10; t++) {
             deriveSectorIntel(state, t);
         }
         const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
         expect(rec.confidence).toBe(0);
-        expect(rec.turns_in_contact).toBe(5);
+        expect(rec.turns_in_contact).toBe(10);
     });
 });
 
@@ -254,7 +254,7 @@ describe('T6: visible_brigade_ids below threshold', () => {
                 strength_category: 'unknown',
                 posture_observed: 'unknown',
                 offensive_signs: false,
-                confidence: 0.05,
+                confidence: 0.04,
                 turns_in_contact: 1,
                 visible_brigade_ids: [],
                 last_updated_turn: 0,
@@ -262,7 +262,7 @@ describe('T6: visible_brigade_ids below threshold', () => {
         };
         deriveSectorIntel(state2, 2);
         const rec = (state2.military.sector_intel!['sector:corps-C:0'] ?? [])[0]!;
-        // Pre-seeded 0.05 + RS passive 0.05 - RS decay 0.12 = -0.02 → clamped to 0
+        // Pre-seeded 0.04 + RS passive 0.08 - RS decay 0.12 = 0.00 → clamped to 0
         expect(rec.confidence).toBeCloseTo(0, 5);
         expect(rec.visible_brigade_ids.length).toBe(0);
     });

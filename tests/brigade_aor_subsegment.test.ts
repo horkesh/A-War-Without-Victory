@@ -8,6 +8,7 @@
 import { describe, it, expect } from 'vitest';
 import { assignBrigadesToSubSegments, findSubSegmentForOsid, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../src/sim/combat/corps_front_sectors.js';
 import { findWeakestSubSegment, getWeakSubSegmentBonus, WEAK_SUBSEGMENT_SCORE_BONUS } from '../src/sim/combat/bot_brigade_eval_attack.js';
+import { assignedBrigadeNotOnSectorFrontOsids } from '../src/sim/combat/bot_brigade_eval_front.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment, GameState, FormationState } from '../src/state/game_state.js';
 
 function makeFormation(overrides: Partial<FormationState> & { location_osid?: string }): FormationState {
@@ -526,5 +527,24 @@ describe('Phase D: overstretched sub-segment gets double attack bonus', () => {
         // ss2 is weakest (less personnel) but NOT a gap
         const bonus = getWeakSubSegmentBonus('enemy_ss2', sector, formations);
         expect(bonus).toBe(WEAK_SUBSEGMENT_SCORE_BONUS);
+    });
+});
+
+describe('assignedBrigadeNotOnSectorFrontOsids', () => {
+    it('is true for line brigade whose location is not on sector friendly_osids', () => {
+        const ss = makeSubSeg('ss1', ['front_a', 'front_b'], 2);
+        const sector = makeSector('sec1', [ss], ['br1']);
+        const state = { military: { corps_front_sectors: { sec1: sector } } } as unknown as GameState;
+        const b = makeFormation({ id: 'br1', location_osid: 'rear_x' });
+        expect(assignedBrigadeNotOnSectorFrontOsids(state, b, 'rear_x')).toBe(true);
+        expect(assignedBrigadeNotOnSectorFrontOsids(state, b, 'front_a')).toBe(false);
+    });
+
+    it('is false when brigade is only in reserve list (not assigned line)', () => {
+        const ss = makeSubSeg('ss1', ['front_a'], 1);
+        const sector = makeSector('sec1', [ss], [], ['res1']);
+        const state = { military: { corps_front_sectors: { sec1: sector } } } as unknown as GameState;
+        const b = makeFormation({ id: 'res1', location_osid: 'rear_x' });
+        expect(assignedBrigadeNotOnSectorFrontOsids(state, b, 'rear_x')).toBe(false);
     });
 });

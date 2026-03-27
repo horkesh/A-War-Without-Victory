@@ -151,10 +151,13 @@ describe('notable moments', () => {
     it('selects victory streak', () => {
         const f = makeFormation();
         const h = makeHistory({
+            first_battle_turn: 12,
             longest_victory_streak: 6,
         });
         const moments = selectNotableMoments(f, h);
         assert.ok(moments.some(m => m.description.includes('6 consecutive victories')));
+        const streak = moments.find(m => m.description.includes('6 consecutive victories'));
+        assert.equal(streak?.turn, 12);
     });
 
     it('caps at 3 moments', () => {
