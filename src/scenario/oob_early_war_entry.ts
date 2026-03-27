@@ -227,10 +227,10 @@ export function createOobFormations(
             population1991ByMun != null && eligiblePop < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE
                 ? resolveFormationName(b.faction as FactionId, b.home_mun, 'brigade', ordinal)
                 : b.name;
-        // Resolve location OSID: use per-brigade home_osid override if present, else derive from HQ settlement.
-        const location_osid = b.home_osid
-            ? b.home_osid
-            : (canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined);
+        // Resolve location OSID: deployment_osid overrides home_osid for initial placement (elite units deployed away from home).
+        const location_osid = b.deployment_osid
+            ?? b.home_osid
+            ?? (canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined);
         // Per-brigade personnel/cohesion overrides (April 1992 defaults; Phase 0 gameplay overrides these).
         const initialPersonnel = b.initial_personnel ?? FACTION_INITIAL_PERSONNEL[b.faction] ?? MIN_BRIGADE_SPAWN;
         const initialCohesion = b.initial_cohesion ?? FACTION_INITIAL_COHESION[b.faction] ?? 60;

@@ -31,6 +31,7 @@
     "home_mun": "kakanj",
     "home_settlement": "Kakanj",
     "home_osid": "op:kakanj:brnjic_2",
+    "deployment_osid": "op:kalesija:kalesija_grad_2",
     "kind": "brigade",
     "default_equipment_class": "special",
     "available_from": 14,

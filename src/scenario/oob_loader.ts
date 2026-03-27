@@ -69,6 +69,8 @@ export interface OobBrigade {
     distinction_potential?: 'tier_1' | 'tier_2' | 'tier_3';
     /** Municipality the brigade's soldiers originally came from (refugees/displaced). Informational. */
     displaced_from?: string;
+    /** Override initial location_osid for deployment (e.g. elite units deployed away from home). home_osid unchanged. */
+    deployment_osid?: string;
 }
 
 export interface OobCorps {

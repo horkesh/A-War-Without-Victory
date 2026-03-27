@@ -24,6 +24,7 @@ import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
+import { deployEliteLoan } from './army_reserve_system.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -559,6 +560,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 name: 'Kalesija Assault',
                 brigades: [
                     'arbih_2nd_tuzla',
+                    'arbih_120th_liberation_black_swans', // elite loan from General Staff
                     'arbih_241st_spreca_muslim_light_gazije',
                     'arbih_242nd_zvornik_muslim_light',
                     'arbih_245th_mountain',
@@ -596,20 +598,25 @@ const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED
 function buildAxesFromDef(
     def: PrePlannedOp,
     state: GameState,
-): { axes: OperationAxis[]; participating: FormationId[] } | null {
+): { axes: OperationAxis[]; participating: FormationId[]; eliteLoans: { brigadeId: FormationId; corpsId: string }[] } | null {
     const formations = state.military.formations ?? {};
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
+    const eliteLoans: { brigadeId: FormationId; corpsId: string }[] = [];
 
     for (const axisDef of def.axes) {
         const axisBrigades = axisDef.brigades.filter((fid) => {
             const formation = formations[fid];
             if (!formation) return false;
             if (!isEligibleOperationFormation(formation)) return false;
-            // Don't include brigades from exempt corps — they have no sector
-            // assignment and can't receive march orders to reach the front.
+            // Exempt-corps brigades (e.g. General Staff elites) are allowed
+            // if explicitly named in a pre-planned op — they get an elite loan
+            // to the operation's corps at injection time.
             const corpsId = getFormationCorpsId(formation);
-            if (corpsId && EXEMPT_CORPS_IDS.has(corpsId)) return false;
+            if (corpsId && EXEMPT_CORPS_IDS.has(corpsId)) {
+                if (!formation.elite_loan_state) return false; // non-elite exempt = skip
+                eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
+            }
             return true;
         }).sort(strictCompare);
 
@@ -634,7 +641,7 @@ function buildAxesFromDef(
     }
 
     if (builtAxes.length === 0) return null;
-    return { axes: builtAxes, participating: allParticipating };
+    return { axes: builtAxes, participating: allParticipating, eliteLoans };
 }
 
 function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participating: FormationId[], turn: number): CorpsOperation {
@@ -694,6 +701,25 @@ export function injectPrePlannedOperations(state: GameState): void {
         // Build axes with validated brigades and objectives
         const result = buildAxesFromDef(def, state);
         if (!result) continue;
+
+        // Deploy elite loans for exempt-corps brigades named in this op
+        for (const loan of result.eliteLoans) {
+            deployEliteLoan(
+                state,
+                loan.brigadeId,
+                loan.corpsId,
+                'offensive_support',
+                0, // pre-planned: no travel penalty
+                turn,
+                {
+                    purpose: 'offensive',
+                    why_needed: `Pre-planned deployment: ${loan.brigadeId} assigned to ${def.name}`,
+                    how_to_use: `Assault reserve on main axis of ${def.name}`,
+                },
+                `Pre-planned elite loan for ${def.name}`,
+                'army_ai',
+            );
+        }
 
         const op = buildCorpsOperation(def, result.axes, result.participating, turn);
         cmd.active_operation = op;
@@ -780,6 +806,25 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
     // Build axes — brigades may not exist yet; keep queue entry for retry
     const result = buildAxesFromDef(def, state);
     if (!result) return false;
+
+    // Deploy elite loans for exempt-corps brigades named in this op
+    for (const loan of result.eliteLoans) {
+        deployEliteLoan(
+            state,
+            loan.brigadeId,
+            loan.corpsId,
+            'offensive_support',
+            0,
+            turn,
+            {
+                purpose: 'offensive',
+                why_needed: `Pre-planned deployment: ${loan.brigadeId} assigned to ${def.name}`,
+                how_to_use: `Assault reserve on main axis of ${def.name}`,
+            },
+            `Pre-planned elite loan for ${def.name}`,
+            'army_ai',
+        );
+    }
 
     // Success — consume queue entry
     cmd.queued_operations.shift();

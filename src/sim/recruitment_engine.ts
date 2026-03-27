@@ -206,7 +206,7 @@ function buildRecruitedFormation(
     const effectivePersonnel = brigade.initial_personnel ?? personnel;
     const defaultCohesion = isMandatory ? BRIGADE_BASE_COHESION + 10 : BRIGADE_BASE_COHESION;
     const effectiveCohesion = brigade.initial_cohesion ?? defaultCohesion;
-    const effectiveLocationOsid = brigade.home_osid ?? locationOsid;
+    const effectiveLocationOsid = brigade.deployment_osid ?? brigade.home_osid ?? locationOsid;
 
     return {
         id: brigade.id as FormationId,
@@ -598,6 +598,7 @@ export function runBotRecruitment(
                 .filter(b => {
                     if (b.available_from > currentTurn) return false;
                     if (b.available_from === 0) return true; // seed formation
+                    if (b.is_elite) return true; // elite brigades spawn from national pool, not municipality pool
                     if (b.recruit_pool_faction && b.recruit_pool_faction !== faction) return true; // cross-faction mandatory: force-create handles pool
                     const munBrigades = getMunBrigadesForFaction(state, b.home_mun, faction);
                     const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
