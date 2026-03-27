@@ -2,7 +2,7 @@
  * Time/condition-triggered VRS operations.
  *
  * These operations appear as offers when conditions are met:
- * - Posavina Corridor: after 1KK + EBK opening ops finish (consolidation after Op Corridor takes Derventa)
+ * - Posavina Corridor: after 1KK completes Op Corridor + EBK is idle (consolidation after Derventa)
  * - Kotor Varos: ~w10
  * - Jajce: ~w24
  * - Cerska-Kamenica: ~w40
@@ -62,6 +62,13 @@ function corpsOpFinished(state: GameState, corpsId: string): boolean {
     return !cmd.active_operation && (!cmd.queued_operations || cmd.queued_operations.length === 0);
 }
 
+/** Check whether a corps has completed a specific operation (by name) in the AAR history. */
+function corpsCompletedOp(state: GameState, corpsId: string, opName: string): boolean {
+    const history = state.operation_history;
+    if (!history) return false;
+    return history.some(aar => aar.corps_id === corpsId && aar.operation_name === opName);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Definitions
 // ═══════════════════════════════════════════════════════════════════════════
@@ -73,8 +80,9 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         staging_osid: 'op:derventa:derventa_2',
         planning_duration: 2,
         trigger: (state, _turn) => {
-            // Both 1KK and EBK opening ops must be done
-            return corpsOpFinished(state, 'vrs_1st_krajina')
+            // 1KK must have completed Op Corridor (not wait for entire queue to drain)
+            // EBK must be idle (no active/queued ops)
+            return corpsCompletedOp(state, 'vrs_1st_krajina', 'Operation Corridor')
                 && corpsOpFinished(state, 'vrs_east_bosnian');
         },
         axes: [

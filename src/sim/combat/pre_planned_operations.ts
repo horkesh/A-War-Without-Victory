@@ -149,8 +149,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'rogatica_sokolac',
                 name: 'Rogatica-Sokolac',
                 brigades: [
-                    'rs_1st_guards_motorized',
-                    'rs_65th_protection_motorized_regiment',
+                    'rs_1st_vlasenica',
+                    'rs_5th_podrinje',
                     'rs_1st_podrinje',
                 ],
                 objectives: [
@@ -407,16 +407,18 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Operation Corridor',
         staging_osid: 'op:modrica:skugric_gornji_2',
         min_attack_outcome: 'repulsed',
+        planning_duration: 3, // ~2-week preliminary phase: Doboj-Derventa clearing before main push
         axes: [
             {
                 axis_id: 'corridor_east',
                 name: 'Corridor East',
                 brigades: [
                     'rs_27th_derventa_motorized',   // spearhead — named for Derventa, fighting for home ground
-                    'rs_43rd_prijedor_motorized',    // redeployed from Op Prijedor
-                    'rs_16th_krajina_motorized',     // redeployed from Op Prijedor (Sanski Most axis)
-                    'rs_5th_kozara_light_infantry',  // redeployed from Op Prijedor
+                    'rs_16th_krajina_motorized',     // redeployed from Op Prijedor (Sanski Most axis) — historically at Derventa
                     'rs_1st_trebava_infantry',       // homed at Modriča — local knowledge, natural staging
+                    'rs_1st_krnjin_light_infantry',  // local — home: Doboj area
+                    'rs_3rd_ozren_light_infantry',   // local — home: Doboj area
+                    'rs_1st_prnjavor_light_infantry', // nearby — home: Prnjavor (~4 hops)
                 ],
                 objectives: [
                     'op:modrica:modrica',
