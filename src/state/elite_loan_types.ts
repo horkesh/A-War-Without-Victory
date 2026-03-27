@@ -58,6 +58,9 @@ export type ReserveRequestReason =
     | 'exploitation'        // corps just captured territory, wants to exploit
     | 'enclave_relief';     // enclave under siege, resilience falling
 
+export type ReserveRequestPurpose = 'offensive' | 'defensive';
+export type ReserveDecisionOutcome = 'accepted' | 'declined' | 'terminated';
+
 export type EliteRecallReason =
     | 'op_complete'
     | 'need_expired'
@@ -68,9 +71,17 @@ export type EliteRecallReason =
     | 'permanent_degradation';
 
 export interface ArmyReserveRequest {
+    /** Deterministic request ID for player/UI actions. */
+    request_id?: string;
     corps_id: string;
     faction: string;
     reason: ReserveRequestReason;
+    /** High-level purpose for Army CO review and player readability. */
+    purpose?: ReserveRequestPurpose;
+    /** Corps CO statement: why this loan is needed right now. */
+    why_needed?: string;
+    /** Corps CO concept of employment for the elite brigade. */
+    how_to_use?: string;
     /** Priority after geographic penalty applied (0–100, or negative = rejected). */
     priority: number;
     /** Priority before geographic penalty. */
@@ -80,6 +91,20 @@ export interface ArmyReserveRequest {
     turn_requested: number;
     description: string;
     suggested_brigade_id: string | null;
+}
+
+export interface ArmyReserveDecisionRecord {
+    request_id: string;
+    turn: number;
+    faction: string;
+    corps_id: string;
+    brigade_id: string | null;
+    outcome: ReserveDecisionOutcome;
+    reason: string;
+    decided_by: 'army_ai' | 'player';
+    purpose: ReserveRequestPurpose;
+    why_needed: string;
+    how_to_use: string;
 }
 
 export interface EliteLoanEpisode {
@@ -103,6 +128,17 @@ export interface EliteLoanEpisode {
     osids_captured: number;
     /** Estimated KIA inflicted while on this loan */
     kia_inflicted_est: number;
+    /** Corps CO request text captured at approval time. */
+    request_dialogue?: {
+        purpose: ReserveRequestPurpose;
+        why_needed: string;
+        how_to_use: string;
+    };
+    /** Army CO decision text captured when approved. */
+    approval_dialogue?: {
+        decided_by: 'army_ai' | 'player';
+        reason: string;
+    };
 }
 
 export interface EliteBrigadeTracker {

@@ -201,15 +201,25 @@ const FEINT_PLANNING_TURNS = 2;
 function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): void {
     const formations = state.military.formations ?? {};
     const allBrigades = isMultiAxis(op) ? getAllAxisBrigades(op) : (op.participating_brigades ?? []);
+    const lineAssigned = new Set<string>();
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        for (const bid of sector.assigned_brigade_ids ?? []) lineAssigned.add(bid);
+    }
 
     for (const bid of allBrigades) {
         const f = formations[bid];
         if (!f || f.status !== 'active') continue;
         if ((f.kind ?? 'brigade') !== 'brigade') continue;
+        // Line-assigned brigades should return to their assigned sector fronts via
+        // brigade AI, not be force-pulled to home municipality after each operation.
+        if (lineAssigned.has(bid)) continue;
 
         const loc = f.location_osid;
         const homeOsid = f.home_osid;
         if (!loc || !homeOsid) continue;
+        const hasOwnCorpsFront = Object.values(state.military.corps_front_sectors ?? {})
+            .some((s) => s.corps_id === f.corps_id && (s.sub_segments?.length ?? 0) > 0);
+        if (hasOwnCorpsFront) continue;
 
         // Already home — no march needed
         const homeMun = homeOsid.split(':')[1] ?? '';

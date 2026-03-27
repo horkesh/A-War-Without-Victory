@@ -88,6 +88,32 @@ function bfsTowardHome(
     return null; // no path through friendly territory
 }
 
+function bfsDistanceToAny(
+    start: string,
+    targets: Set<string>,
+    adjacency: Map<string, string[]>,
+    friendlyOsids: Set<string>
+): number | null {
+    if (targets.has(start)) return 0;
+    const visited = new Set<string>([start]);
+    const queue: Array<{ osid: string; depth: number }> = [{ osid: start, depth: 0 }];
+    let head = 0;
+    const maxDepth = 20;
+    while (head < queue.length) {
+        const { osid, depth } = queue[head++]!;
+        if (depth >= maxDepth) continue;
+        const neighbors = adjacency.get(osid) ?? [];
+        for (const n of neighbors) {
+            if (visited.has(n)) continue;
+            if (!friendlyOsids.has(n)) continue;
+            if (targets.has(n)) return depth + 1;
+            visited.add(n);
+            queue.push({ osid: n, depth: depth + 1 });
+        }
+    }
+    return null;
+}
+
 /**
  * Check if a brigade is participating in an active operation.
  * Mirrors the logic in compute_home_defense.ts and brigade_front_distribution.ts.
@@ -136,6 +162,16 @@ export function computeReturnMarches(
 ): ReturnMarchOrder[] {
     const formations = state.military.formations ?? {};
     const existingOrders = state.military.brigade_movement_orders ?? {};
+    const lineAssigned = new Set<string>();
+    const corpsFrontTargets = new Map<string, Set<string>>();
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        for (const bid of sector.assigned_brigade_ids ?? []) lineAssigned.add(bid);
+        const set = corpsFrontTargets.get(sector.corps_id) ?? new Set<string>();
+        for (const ss of sector.sub_segments ?? []) {
+            for (const osid of ss.friendly_osids ?? []) set.add(osid);
+        }
+        corpsFrontTargets.set(sector.corps_id, set);
+    }
 
     // Collect candidates
     const candidates: Array<ReturnMarchOrder & { corps_id: string }> = [];
@@ -148,6 +184,9 @@ export function computeReturnMarches(
         if (f.faction !== faction) continue;
         if (f.status !== 'active') continue;
         if ((f.kind ?? 'brigade') !== 'brigade') continue;
+        // Line-assigned brigades are expected to stay with their sector front,
+        // not get periodic home-return pulls.
+        if (lineAssigned.has(id)) continue;
 
         // Skip if no location or no home
         const loc = f.location_osid;
@@ -174,6 +213,11 @@ export function computeReturnMarches(
         // Skip if no corps (unattached)
         const corpsId = f.corps_id;
         if (!corpsId) continue;
+        const corpsFrontSet = corpsFrontTargets.get(corpsId);
+        if (corpsFrontSet && corpsFrontSet.size > 0) {
+            const distToCorpsFront = bfsDistanceToAny(loc, corpsFrontSet, adjacency, friendlyOsids);
+            if (distToCorpsFront != null) continue;
+        }
 
         // BFS toward home municipality through friendly territory
         const result = bfsTowardHome(loc, homeMun, adjacency, friendlyOsids);

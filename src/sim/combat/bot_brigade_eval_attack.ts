@@ -22,6 +22,7 @@ import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sec
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
 import { areRbihHrhbAllied, isFriendlyFaction, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { isOsidInSameEnclave } from './enclave_resilience.js';
+import { assignedBrigadeNotOnSectorFrontOsids } from './bot_brigade_eval_front.js';
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
 // We will import them appropriately. For now, I'll import from bot_brigade_ai_osid if needed, but they are pure.
@@ -66,12 +67,14 @@ export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
 }
 
 export function evaluateSupplyGate(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, brigadeSupplyState, isActiveSectorOperationParticipant, result } = ctx;
+    const { brigade, state, loc, brigadeSupplyState, isActiveSectorOperationParticipant, result } = ctx;
     if (brigadeSupplyState === 'critical') {
         // Operation participants at critical supply still need to reposition —
         // let them through to evaluateSectorAttack which handles movement-toward-approach.
         // They won't attack (combat predictor penalizes critical supply), but they can march.
         if (isActiveSectorOperationParticipant) return false;
+        // Line brigades off their sector front must reach the front before sitting in defend.
+        if (assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc)) return false;
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         return true;
     }
@@ -84,6 +87,9 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
     // Combat ineffective gate: brigades below minimum personnel defend only.
     // A 300-man brigade cannot execute an attack — it needs to reconstitute.
     const COMBAT_INEFFECTIVE_PERSONNEL = 400;
+    if (assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc)) {
+        return false;
+    }
     if ((brigade.personnel ?? 0) < COMBAT_INEFFECTIVE_PERSONNEL) {
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         return true;

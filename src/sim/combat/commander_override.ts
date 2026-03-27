@@ -38,6 +38,36 @@ export interface CommanderOverride {
 const DEFENSIVE_CRITICAL_THREAT = 2.0;
 const MIN_DONOR_BRIGADES = 1;
 const MAX_VIABILITY_WITHDRAWALS_PER_CORPS = 2;
+const REAR_GUARD_CORPS = new Set(['vrs_1st_krajina', 'vrs_2nd_krajina']);
+const REAR_GUARD_LINE_MAX_HOPS = 6;
+
+function friendlyDistanceToAny(
+    startOsid: string,
+    targets: Set<string>,
+    adjacency: Map<string, string[]>,
+    friendlyOsids: Set<string>,
+    maxHops = 20
+): number | null {
+    if (!startOsid || targets.size === 0) return null;
+    if (targets.has(startOsid)) return 0;
+    const visited = new Set<string>([startOsid]);
+    let frontier = [startOsid];
+    for (let hop = 1; hop <= maxHops; hop++) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const nb of adjacency.get(osid) ?? []) {
+                if (visited.has(nb)) continue;
+                visited.add(nb);
+                if (!friendlyOsids.has(nb)) continue;
+                if (targets.has(nb)) return hop;
+                next.push(nb);
+            }
+        }
+        if (next.length === 0) break;
+        frontier = next;
+    }
+    return null;
+}
 
 /**
  * Build a CorpsCommanderProfile for each corps that has sectors.
@@ -104,6 +134,8 @@ function transferBrigadesBetweenSectors(
     reason: CommanderOverride['reason'],
     componentOf: Map<string, number>,
     floorModifier?: number,
+    adjacency?: Map<string, string[]>,
+    friendlyOsids?: Set<string>,
 ): void {
     const takenFromSector = new Map<string, number>();
     for (const { sector: deficit, need: initialNeed } of deficits) {
@@ -130,7 +162,20 @@ function transferBrigadesBetweenSectors(
                     if (!f) return false;
                     if (!f.location_osid) return false;
                     const brigComp = componentOf.get(f.location_osid) ?? -2;
-                    return deficitComp < 0 || brigComp === deficitComp;
+                    if (!(deficitComp < 0 || brigComp === deficitComp)) return false;
+                    if (
+                        adjacency && friendlyOsids
+                        && REAR_GUARD_CORPS.has(deficit.corps_id)
+                        && deficit.corps_id === donor.corps_id
+                    ) {
+                        const frontSet = new Set<string>();
+                        for (const ss of deficit.sub_segments) {
+                            for (const o of ss.friendly_osids) frontSet.add(o);
+                        }
+                        const d = friendlyDistanceToAny(f.location_osid, frontSet, adjacency, friendlyOsids, 20);
+                        if (d == null || d > REAR_GUARD_LINE_MAX_HOPS) return false;
+                    }
+                    return true;
                 })
                 .map(bid => ({ bid, personnel: formations[bid]?.personnel ?? 0 }))
                 .sort((a, b) => a.personnel - b.personnel || strictCompare(a.bid, b.bid));
@@ -188,10 +233,10 @@ export function commanderReviewAssignment(
         for (const bid of opParticipants) overriddenBrigadeIds.add(bid);
     }
 
-    applyMissionCompliance(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
-    applyNonPriorityExcess(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
-    applyOffensiveStaging(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
-    applyDefensiveCoherence(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds, componentOf);
+    applyMissionCompliance(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
+    applyNonPriorityExcess(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
+    applyOffensiveStaging(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
+    applyDefensiveCoherence(corpsSectors, formations, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
     applyPositionViability(corpsSectors, formations, armyPriorities, commanderProfile, overrides, overriddenBrigadeIds, componentOf, adjacency, friendlyOsids);
 
     // Execute overrides: splice from source sector, push to target sector
@@ -222,6 +267,8 @@ function applyMissionCompliance(
     overrides: CommanderOverride[],
     overriddenBrigadeIds: Set<string>,
     componentOf: Map<string, number>,
+    adjacency: Map<string, string[]>,
+    friendlyOsids: Set<string>,
 ): void {
     if (armyPriorities.length === 0) return;
 
@@ -273,7 +320,7 @@ function applyMissionCompliance(
     missionDeficits.sort((a, b) => b.weight - a.weight || strictCompare(a.sector.sector_id, b.sector.sector_id));
     nonMissionSurplus.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
 
-    transferBrigadesBetweenSectors(missionDeficits, nonMissionSurplus, formations, overrides, overriddenBrigadeIds, 'mission_priority', componentOf);
+    transferBrigadesBetweenSectors(missionDeficits, nonMissionSurplus, formations, overrides, overriddenBrigadeIds, 'mission_priority', componentOf, undefined, adjacency, friendlyOsids);
 }
 
 /**
@@ -287,6 +334,8 @@ function applyNonPriorityExcess(
     overrides: CommanderOverride[],
     overriddenBrigadeIds: Set<string>,
     componentOf: Map<string, number>,
+    adjacency: Map<string, string[]>,
+    friendlyOsids: Set<string>,
 ): void {
     if (armyPriorities.length === 0) return;
 
@@ -335,7 +384,7 @@ function applyNonPriorityExcess(
     recipients.sort((a, b) => b.sector.threat_ratio - a.sector.threat_ratio || strictCompare(a.sector.sector_id, b.sector.sector_id));
     donors.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
 
-    transferBrigadesBetweenSectors(recipients, donors, formations, overrides, overriddenBrigadeIds, 'non_priority_excess', componentOf, defensiveKeep);
+    transferBrigadesBetweenSectors(recipients, donors, formations, overrides, overriddenBrigadeIds, 'non_priority_excess', componentOf, defensiveKeep, adjacency, friendlyOsids);
 }
 
 /**
@@ -348,6 +397,8 @@ function applyOffensiveStaging(
     overrides: CommanderOverride[],
     overriddenBrigadeIds: Set<string>,
     componentOf: Map<string, number>,
+    adjacency: Map<string, string[]>,
+    friendlyOsids: Set<string>,
 ): void {
     const weights = commanderProfile.preStagingSectorWeights;
     if (weights.size === 0) return;
@@ -393,7 +444,7 @@ function applyOffensiveStaging(
     stagingDeficits.sort((a, b) => strictCompare(a.sector.sector_id, b.sector.sector_id));
     donors.sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id));
 
-    transferBrigadesBetweenSectors(stagingDeficits, donors, formations, overrides, overriddenBrigadeIds, 'offensive_staging', componentOf);
+    transferBrigadesBetweenSectors(stagingDeficits, donors, formations, overrides, overriddenBrigadeIds, 'offensive_staging', componentOf, undefined, adjacency, friendlyOsids);
 }
 
 /** Reinforce critically threatened defensive sectors by pulling from safe surplus sectors. */
@@ -404,6 +455,8 @@ function applyDefensiveCoherence(
     overrides: CommanderOverride[],
     overriddenBrigadeIds: Set<string>,
     componentOf: Map<string, number>,
+    adjacency: Map<string, string[]>,
+    friendlyOsids: Set<string>,
 ): void {
     const deficitSectors = corpsSectors
         .filter(s => {
@@ -425,7 +478,7 @@ function applyDefensiveCoherence(
 
     if (deficitSectors.length === 0 || surplusSectors.length === 0) return;
 
-    transferBrigadesBetweenSectors(deficitSectors, surplusSectors, formations, overrides, overriddenBrigadeIds, 'defensive_critical', componentOf);
+    transferBrigadesBetweenSectors(deficitSectors, surplusSectors, formations, overrides, overriddenBrigadeIds, 'defensive_critical', componentOf, undefined, adjacency, friendlyOsids);
 }
 
 /**

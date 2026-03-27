@@ -7,41 +7,41 @@ import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isOsidInSameEnclave } from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
+import type { FormationState, GameState } from '../../state/game_state.js';
 
 /**
- * Maximum BFS hops a brigade should march from its home_osid to reach a sector front.
- * Prevents brigade drift: e.g. SRK Vogosca brigades marching 80km to Gorazde because
- * their sector spans both fronts. If dest is farther than this from home, skip the march.
+ * True if this brigade is in a corps sector's **assigned** line (not reserve) roster but its
+ * `location_osid` is not one of that sector's front OSIDs (`sub_segments[].friendly_osids`).
+ * Used to bypass defend-only gates so line units can column-march to the sector front first.
+ * Reserve brigades (one hop behind) are intentionally excluded.
  */
-const MAX_SECTOR_MARCH_FROM_HOME = 4;
-
-/** BFS distance on raw adjacency graph (no faction filter). Used for home-distance guard. */
-function bfsDistanceRaw(from: string, to: string, adjacency: ReadonlyMap<string, readonly string[]>, maxHops: number): number {
-    if (from === to) return 0;
-    const visited = new Set<string>([from]);
-    let frontier = [from];
-    for (let h = 1; h <= maxHops; h++) {
-        const next: string[] = [];
-        for (const n of frontier) {
-            for (const nb of adjacency.get(n as Osid) ?? []) {
-                if (visited.has(nb)) continue;
-                if (nb === to) return h;
-                visited.add(nb);
-                next.push(nb);
-            }
+export function assignedBrigadeNotOnSectorFrontOsids(
+    state: GameState,
+    brigade: FormationState,
+    loc: string
+): boolean {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return false;
+    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+        const sec = sectors[sid]!;
+        if (!sec.assigned_brigade_ids.includes(brigade.id)) continue;
+        const frontSet = new Set<string>();
+        for (const ss of sec.sub_segments) {
+            for (const o of ss.friendly_osids) frontSet.add(o);
         }
-        frontier = next;
-        if (frontier.length === 0) break;
+        if (frontSet.size === 0) continue;
+        return !frontSet.has(loc);
     }
-    return maxHops + 1; // unreachable within maxHops
+    return false;
 }
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments } = ctx;
+    const offAssignedFront = assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc);
 
     // --- Sector march: brigade assigned/reserve in a sector but not on its front → column march ---
     // This overrides home defense: the corps needs this brigade at the front.
-    if (state.military.corps_front_sectors && !isActiveSectorOperationParticipant) {
+    if (state.military.corps_front_sectors && (!isActiveSectorOperationParticipant || offAssignedFront)) {
         let assignedSector: (typeof state.military.corps_front_sectors)[string] | null = null;
         let isReserve = false;
         for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
@@ -57,13 +57,14 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
             }
         }
         if (assignedSector) {
-            // If brigade has a pending return-to-home movement order, don't override with sector march.
-            // This prevents evaluateSectorMarch from fighting issuePostOperationReturnMarches.
+            // If brigade has a pending return-to-home movement order, normally don't override it.
+            // Exception: line-assigned brigades that are still off their assigned sector front
+            // must be pulled to the sector front (root fix for rear lock-in).
             const pendingMove = state.military.brigade_movement_orders?.[brigade.id];
             if (pendingMove) {
                 const destSids = pendingMove.destination_sids ?? [];
                 const homeOsid = brigade.home_osid;
-                if (homeOsid && destSids.some((d: string) => d === homeOsid)) {
+                if (homeOsid && destSids.some((d: string) => d === homeOsid) && !offAssignedFront) {
                     return false; // Returning home — don't redirect to sector front
                 }
             }
@@ -95,23 +96,48 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                     }
                     const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, frontSet);
                     if (dest) {
-                        // Home-distance guard: don't march a brigade far from home to a distant
-                        // sector front. Prevents drift (e.g. SRK Vogosca brigades → Gorazde).
-                        // Uses raw graph adjacency (not faction-filtered) because home_osid may
-                        // be in enemy territory (e.g. RS brigade whose home is in RBiH area).
-                        const homeOsid = brigade.home_osid;
-                        if (homeOsid) {
-                            const distHomeToFront = bfsDistanceRaw(homeOsid, dest, adjacency, MAX_SECTOR_MARCH_FROM_HOME + 1);
-                            if (distHomeToFront > MAX_SECTOR_MARCH_FROM_HOME) {
-                                return false; // Sector front too far from home — skip march
-                            }
-                        }
+                        // No home-distance cap: destination is always chosen from **this sector's**
+                        // front OSIDs. Corps assignment already binds the brigade to this sector;
+                        // capping by home↔front distance stranded line units in the rear (see
+                        // brigade rear audits 2026-03-27). Reserve / enclave carve-outs above.
                         result.column_march_orders[brigade.id] = dest;
                         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                         return true;
                     }
+                    // Trap remediation: assigned sector front may be disconnected from brigade location.
+                    // Re-route within corps to nearest reachable sector-front OSID to avoid rear lock-in.
+                    const corpsId = brigade.corps_id;
+                    if (corpsId && state.military.corps_front_sectors) {
+                        const reachableCorpsFront = new Set<string>();
+                        for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
+                            const sec = state.military.corps_front_sectors[sid]!;
+                            if (sec.corps_id !== corpsId) continue;
+                            for (const ss of sec.sub_segments) {
+                                for (const o of ss.friendly_osids) reachableCorpsFront.add(o);
+                            }
+                        }
+                        if (reachableCorpsFront.size > 0) {
+                            const rerouteDest = findNearestFriendlyOsidDestination(
+                                state, faction, loc, adjacency, reverseMap, reachableCorpsFront
+                            );
+                            if (rerouteDest) {
+                                result.column_march_orders[brigade.id] = rerouteDest;
+                                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                                return true;
+                            }
+                        }
+                    }
                 }
             } else {
+                // Already on assigned sector front: cancel stale home-return column orders.
+                const pendingMove = state.military.brigade_movement_orders?.[brigade.id];
+                if (pendingMove) {
+                    const homeOsid = brigade.home_osid;
+                    const destSids = pendingMove.destination_sids ?? [];
+                    if (homeOsid && destSids.some((d: string) => d === homeOsid)) {
+                        delete state.military.brigade_movement_orders?.[brigade.id];
+                    }
+                }
                 // Brigade IS on a sector front OSID. Check if this position is overstacked
                 // while other front OSIDs in the same sector are under-covered.
                 // This prevents brigades from piling into a corner front OSID (e.g. a single RS

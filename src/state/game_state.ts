@@ -32,7 +32,7 @@ import type { OperationWeeklyEntry, PendingOperationCasualties, OperationAAR } f
 import type { CasualtyLedger } from './casualty_ledger.js';
 import type { CombatSummary } from './combat_summary.js';
 import type { BrigadeDecoration } from './decoration_types.js';
-import type { EliteLoanState, ArmyReserveRequest, EliteBrigadeTracker } from './elite_loan_types.js';
+import type { EliteLoanState, ArmyReserveRequest, EliteBrigadeTracker, ArmyReserveDecisionRecord } from './elite_loan_types.js';
 import type { BrigadeWarStory } from '../sim/war_stories.js';
 import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
@@ -591,6 +591,8 @@ export interface FormationState {
     fallback_osid?: string;
     /** Origin OSID — where this brigade was raised / permanently based. Used for home distance effectiveness. Set at creation, never changes. */
     home_osid?: string;
+    /** Elite reserve base OSID used for return after loan termination/recall. */
+    base_osid?: string;
     /** Sub-segment this brigade is assigned to defend (AoR). Derived each turn. */
     assigned_sub_segment_id?: string;
     /** Garrison unit — only defends, never attacks. Set from OOB (e.g. VRS 65th Protection Regiment). */
@@ -1727,6 +1729,8 @@ opsec_sectors?: string[];
 used_operation_names?: Record<string, number>;
 /** Pending army reserve loan requests from corps, awaiting army-AI or player approval this turn. */
 pending_reserve_requests?: ArmyReserveRequest[];
+/** Reserve decision history (accepted/declined/terminated) for Army HQ dialogue log. */
+reserve_request_history?: ArmyReserveDecisionRecord[];
 /** Army HQ overrides forcing corps to launch operations. Consumed and cleared each turn. */
 army_hq_overrides?: ArmyHQOverride[];
 /** Active campaign plan per faction (null = no plan, use defaults). */

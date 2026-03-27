@@ -279,6 +279,39 @@ function getFriendlyRetreatDestinations(
 /** Max BFS hops when searching for nearest friendly OSID during emergency retreat. */
 const EMERGENCY_RETREAT_BFS_MAX_HOPS = 8;
 
+function allocateIntegerByWeights(
+    ids: string[],
+    total: number,
+    weightById: Map<string, number>
+): Map<string, number> {
+    const out = new Map<string, number>();
+    if (total <= 0 || ids.length === 0) return out;
+    const sorted = [...ids].sort(strictCompare);
+    const totalWeight = sorted.reduce((s, id) => s + Math.max(0, weightById.get(id) ?? 0), 0);
+    if (totalWeight <= 0) {
+        // If no brigade has defensive weight, attribute all to deterministic primary.
+        out.set(sorted[0]!, total);
+        return out;
+    }
+    let assigned = 0;
+    const remainderOrder: Array<{ id: string; rem: number }> = [];
+    for (const id of sorted) {
+        const raw = total * (Math.max(0, weightById.get(id) ?? 0) / totalWeight);
+        const whole = Math.floor(raw);
+        out.set(id, whole);
+        assigned += whole;
+        remainderOrder.push({ id, rem: raw - whole });
+    }
+    remainderOrder.sort((a, b) => (b.rem - a.rem) || strictCompare(a.id, b.id));
+    let left = total - assigned;
+    for (let i = 0; i < remainderOrder.length && left > 0; i++) {
+        const id = remainderOrder[i]!.id;
+        out.set(id, (out.get(id) ?? 0) + 1);
+        left--;
+    }
+    return out;
+}
+
 function findEmergencyRetreatOsid(
     state: GameState,
     formation: FormationState,
@@ -611,15 +644,18 @@ export function resolveAttackOrdersOsid(
 
         const attackerFormations = attackerIds
             .map(id => state.military.formations?.[id])
-            .filter((f): f is FormationState => f != null && f.status === 'active');
+            .filter((f): f is FormationState => f != null && f.status === 'active')
+            .filter((f) => {
+                const loc = (f as { location_osid?: string }).location_osid;
+                if (!loc) return false;
+                const neighbors = adjacency.get(loc) ?? [];
+                return neighbors.includes(targetOsid);
+            })
+            .sort((a, b) => strictCompare(a.id, b.id));
         if (attackerFormations.length === 0) continue;
 
         const firstAttacker = attackerFormations[0]!;
         const attackerFaction = firstAttacker.faction as FactionId;
-        const attackerLoc = (firstAttacker as { location_osid?: string }).location_osid;
-        if (!attackerLoc) continue;
-        const neighbors = adjacency.get(attackerLoc) ?? [];
-        if (!neighbors.includes(targetOsid)) continue;
 
         // Safety gate: suppress HRHB↔RBiH combat during mobilization (belt-and-suspenders).
         // If an attack order somehow slips through (e.g. player-ordered), skip resolution.
@@ -1568,17 +1604,46 @@ export function resolveAttackOrdersOsid(
             attackerEquipData, battleId,
         );
         if (defenderFormation) {
-            // Defender: destroyed attacker equipment, captured from attacker
-            const defenderEquipData = {
-                destroyed: { tanks: battleEquipAttackerTanksLost, artillery: battleEquipAttackerArtLost },
-                captured: { tanks: battleEquipCapturedBy === (defenderFormation.faction as string) ? battleEquipCapturedTanks : 0,
-                            artillery: battleEquipCapturedBy === (defenderFormation.faction as string) ? battleEquipCapturedArt : 0 },
-            };
-            recordDefenderEngagement(
-                defenderFormation, currentTurn, targetOsid, outcome,
-                attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated, state,
-                defenderEquipData, battleId,
-            );
+            const defenderGroup = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
+                ? [...sectorDefenseBrigades].sort((a, b) => strictCompare(a.id, b.id))
+                : [defenderFormation];
+            if (defenderGroup.length > 1 && sectorBrigadeWeights) {
+                const weightById = new Map<string, number>();
+                for (const b of defenderGroup) weightById.set(b.id, sectorBrigadeWeights.get(b.id) ?? 0);
+                const takenById = allocateIntegerByWeights(
+                    defenderGroup.map(b => b.id),
+                    finalDefenderCas,
+                    weightById
+                );
+                const inflictedById = allocateIntegerByWeights(
+                    defenderGroup.map(b => b.id),
+                    finalAttackerCas,
+                    weightById
+                );
+                for (const b of defenderGroup) {
+                    const defenderEquipData = {
+                        destroyed: { tanks: 0, artillery: 0 },
+                        captured: { tanks: 0, artillery: 0 },
+                    };
+                    recordDefenderEngagement(
+                        b, currentTurn, targetOsid, outcome,
+                        attackerFaction, flip, takenById.get(b.id) ?? 0, inflictedById.get(b.id) ?? 0, isConcentrated, state,
+                        defenderEquipData, battleId,
+                    );
+                }
+            } else {
+                // Single/primary defender path keeps equipment accounting attached here.
+                const defenderEquipData = {
+                    destroyed: { tanks: battleEquipAttackerTanksLost, artillery: battleEquipAttackerArtLost },
+                    captured: { tanks: battleEquipCapturedBy === (defenderFormation.faction as string) ? battleEquipCapturedTanks : 0,
+                                artillery: battleEquipCapturedBy === (defenderFormation.faction as string) ? battleEquipCapturedArt : 0 },
+                };
+                recordDefenderEngagement(
+                    defenderFormation, currentTurn, targetOsid, outcome,
+                    attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated, state,
+                    defenderEquipData, battleId,
+                );
+            }
         }
 
         // === SECTOR INTEL: RECON BY FORCE ===

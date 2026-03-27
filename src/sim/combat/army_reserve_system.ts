@@ -27,7 +27,9 @@ import {
     MAX_AUTO_DEPLOY_HOPS,
     createEliteBrigadeTracker,
     type ArmyReserveRequest,
+    type ArmyReserveDecisionRecord,
     type ReserveRequestReason,
+    type ReserveRequestPurpose,
     type EliteRecallReason,
 } from '../../state/elite_loan_types.js';
 import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
@@ -108,6 +110,48 @@ function corpsHasLoanedElite(state: GameState, corpsId: string): boolean {
         if (f.elite_loan_state?.on_loan && f.elite_loan_state.loaned_to_corps === corpsId) return true;
     }
     return false;
+}
+
+function describeCorpsNeed(
+    reason: ReserveRequestReason,
+    corpsId: string,
+    description: string
+): { purpose: ReserveRequestPurpose; whyNeeded: string; howToUse: string } {
+    switch (reason) {
+        case 'offensive_support':
+            return {
+                purpose: 'offensive',
+                whyNeeded: `Corps ${corpsId} requests elite reinforcement to sustain offensive momentum. ${description}`,
+                howToUse: 'Attach as assault reserve on the main axis, then consolidate captured front OSIDs.',
+            };
+        case 'exploitation':
+            return {
+                purpose: 'offensive',
+                whyNeeded: `Corps ${corpsId} requests elite reinforcement to exploit a local breakthrough. ${description}`,
+                howToUse: 'Push the exploitation axis, secure flanks, and prevent enemy re-closure of the breach.',
+            };
+        case 'enclave_relief':
+            return {
+                purpose: 'defensive',
+                whyNeeded: `Corps ${corpsId} requests elite reinforcement for enclave relief. ${description}`,
+                howToUse: 'Open/hold a supply corridor and rotate exhausted defenders off the most threatened edge.',
+            };
+        case 'defensive_gap':
+        default:
+            return {
+                purpose: 'defensive',
+                whyNeeded: `Corps ${corpsId} requests elite reinforcement due to critical defensive weakness. ${description}`,
+                howToUse: 'Anchor the thinnest sector-front sub-segment and stabilize local defensive depth.',
+            };
+    }
+}
+
+function appendReserveDecision(
+    state: GameState,
+    entry: ArmyReserveDecisionRecord
+): void {
+    if (!state.military.reserve_request_history) state.military.reserve_request_history = [];
+    state.military.reserve_request_history.push(entry);
 }
 
 // ─── Request generation ───────────────────────────────────────────────────────
@@ -228,9 +272,13 @@ export function generateArmyReserveRequests(
         if (priority < 0) continue; // too far for bot AI
 
         requests.push({
+            request_id: `req:${turn}:${corpsId}:${bestReason}`,
             corps_id: corpsId,
             faction: corpsFaction,
             reason: bestReason,
+            purpose: describeCorpsNeed(bestReason, corpsId, bestDescription).purpose,
+            why_needed: describeCorpsNeed(bestReason, corpsId, bestDescription).whyNeeded,
+            how_to_use: describeCorpsNeed(bestReason, corpsId, bestDescription).howToUse,
             priority,
             raw_priority: bestRawPriority,
             travel_hops: bestHops,
@@ -261,7 +309,10 @@ export function deployEliteLoan(
     corpsId: string,
     reason: ReserveRequestReason,
     travelHops: number,
-    turn: number
+    turn: number,
+    requestDialogue?: { purpose: ReserveRequestPurpose; why_needed: string; how_to_use: string },
+    approvalReason?: string,
+    approvalBy: 'army_ai' | 'player' = 'army_ai'
 ): void {
     const f = state.military.formations?.[brigadeId];
     if (!f?.elite_loan_state) return;
@@ -271,6 +322,9 @@ export function deployEliteLoan(
     ls.loaned_to_corps = corpsId;
     ls.loan_start_turn = turn;
     ls.loan_start_personnel = f.personnel ?? 0;
+    if (!f.base_osid) {
+        f.base_osid = f.location_osid ?? f.home_osid;
+    }
 
     // Ensure tracker exists
     if (!state.military.elite_brigade_tracker) state.military.elite_brigade_tracker = {};
@@ -294,6 +348,15 @@ export function deployEliteLoan(
         battles_fought: 0,
         osids_captured: 0,
         kia_inflicted_est: 0,
+        request_dialogue: requestDialogue ? {
+            purpose: requestDialogue.purpose,
+            why_needed: requestDialogue.why_needed,
+            how_to_use: requestDialogue.how_to_use,
+        } : undefined,
+        approval_dialogue: approvalReason ? {
+            decided_by: approvalBy,
+            reason: approvalReason,
+        } : undefined,
     });
 
     tracker.total_loans++;
@@ -350,6 +413,11 @@ export function recallEliteLoan(
     ls.loaned_to_corps = null;
     ls.last_recall_turn = turn;
     ls.current_episode_id = null;
+    // Explicit reserve contract: when loan ends, elite returns to base (not home).
+    const returnBase = f.base_osid ?? f.home_osid;
+    if (returnBase) {
+        f.location_osid = returnBase;
+    }
 }
 
 // ─── Bot AI assignment ────────────────────────────────────────────────────────
@@ -407,7 +475,34 @@ export function evaluateArmyReserveAssignments(
                 remaining.push(req);
                 continue;
             }
-            deployEliteLoan(state, nearestId, req.corps_id, req.reason, nearestHops, turn);
+            const purpose = req.purpose ?? 'defensive';
+            const whyNeeded = req.why_needed ?? req.description;
+            const howToUse = req.how_to_use ?? 'Reinforce threatened front sectors and stabilize local combat power.';
+            const requestId = req.request_id ?? `req:${req.turn_requested}:${req.corps_id}:${req.reason}`;
+            deployEliteLoan(
+                state,
+                nearestId,
+                req.corps_id,
+                req.reason,
+                nearestHops,
+                turn,
+                { purpose, why_needed: whyNeeded, how_to_use: howToUse },
+                'Army CO accepted: nearest available elite can reinforce in time.',
+                'army_ai'
+            );
+            appendReserveDecision(state, {
+                request_id: requestId,
+                turn,
+                faction: req.faction,
+                corps_id: req.corps_id,
+                brigade_id: nearestId,
+                outcome: 'accepted',
+                reason: 'Army CO accepted: nearest available elite can reinforce in time.',
+                decided_by: 'army_ai',
+                purpose,
+                why_needed: whyNeeded,
+                how_to_use: howToUse,
+            });
             usedBrigades.add(nearestId);
             fulfilled.push(req);
             continue;
@@ -420,7 +515,34 @@ export function evaluateArmyReserveAssignments(
             continue;
         }
 
-        deployEliteLoan(state, brigadeId, req.corps_id, req.reason, req.travel_hops, turn);
+        const purpose = req.purpose ?? 'defensive';
+        const whyNeeded = req.why_needed ?? req.description;
+        const howToUse = req.how_to_use ?? 'Reinforce threatened front sectors and stabilize local combat power.';
+        const requestId = req.request_id ?? `req:${req.turn_requested}:${req.corps_id}:${req.reason}`;
+        deployEliteLoan(
+            state,
+            brigadeId,
+            req.corps_id,
+            req.reason,
+            req.travel_hops,
+            turn,
+            { purpose, why_needed: whyNeeded, how_to_use: howToUse },
+            'Army CO accepted: request aligns with current operational priorities.',
+            'army_ai'
+        );
+        appendReserveDecision(state, {
+            request_id: requestId,
+            turn,
+            faction: req.faction,
+            corps_id: req.corps_id,
+            brigade_id: brigadeId,
+            outcome: 'accepted',
+            reason: 'Army CO accepted: request aligns with current operational priorities.',
+            decided_by: 'army_ai',
+            purpose,
+            why_needed: whyNeeded,
+            how_to_use: howToUse,
+        });
         usedBrigades.add(brigadeId);
         fulfilled.push(req);
     }

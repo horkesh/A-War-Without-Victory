@@ -843,6 +843,10 @@ export function getToTerrainDefenseMult(
  * Returns 1.0 if no cache or no entry (backwards compatible).
  */
 function getHomeDistanceMultFromCache(state: GameState, formation: FormationState): number {
+    if (formation.elite_loan_state?.on_loan) {
+        // Loaned elites are intentionally unconstrained by home distance.
+        return 1.0;
+    }
     const cache = state.military.home_distance_cache;
     if (!cache) return 1.0;
     const hops = cache[formation.id];

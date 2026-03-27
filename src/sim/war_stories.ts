@@ -158,6 +158,7 @@ export function selectNotableMoments(
     history: BrigadeHistory,
 ): NotableMoment[] {
     const moments: NotableMoment[] = [];
+    const anchorTurn = history.first_battle_turn ?? 1;
 
     // First battle
     if (history.first_battle_turn != null && history.first_battle_osid) {
@@ -170,7 +171,7 @@ export function selectNotableMoments(
     // Longest victory streak
     if (history.longest_victory_streak >= 4) {
         moments.push({
-            turn: 0, // Streak spans multiple turns
+            turn: anchorTurn, // milestone anchored to combat start
             description: `${history.longest_victory_streak} consecutive victories`,
         });
     }
@@ -178,7 +179,7 @@ export function selectNotableMoments(
     // Longest defense streak
     if (history.longest_defense_streak >= 3 && moments.length < 3) {
         moments.push({
-            turn: 0,
+            turn: anchorTurn,
             description: `Held position through ${history.longest_defense_streak} consecutive attacks`,
         });
     }
@@ -194,7 +195,7 @@ export function selectNotableMoments(
     // Personnel nadir
     if (history.nadir_personnel < history.peak_personnel * 0.30 && moments.length < 3) {
         moments.push({
-            turn: 0,
+            turn: anchorTurn,
             description: `Reached a low of ${history.nadir_personnel} personnel (${Math.round(100 * history.nadir_personnel / Math.max(1, history.peak_personnel))}% of peak)`,
         });
     }

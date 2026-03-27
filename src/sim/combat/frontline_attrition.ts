@@ -221,9 +221,8 @@ export function applyFrontlineAttrition(
     const pools = (state.military.militia_pools ?? {}) as Record<string, MilitiaPoolState>;
 
     // Build brigade→sector lookup from assigned_brigade_ids.
-    // A brigade takes frontline attrition if it appears in any sector's
-    // assigned_brigade_ids (physically present in the sector's territory).
-    // Reserves (not in any sector territory) are exempt.
+    // A brigade takes frontline attrition only if it is physically on one of
+    // that sector's frontline OSIDs.
     const brigadeSector = new Map<string, CorpsFrontSector>();
     for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sectorId]!;
@@ -232,7 +231,7 @@ export function applyFrontlineAttrition(
         }
     }
 
-    // Identify sector-assigned brigades for attrition
+    // Identify true frontline brigades for attrition
     const formationIds = Object.keys(formations).sort(strictCompare);
     const frontlineBrigades: Array<{ fid: string; formation: FormationState; sector: CorpsFrontSector }> = [];
     for (const fid of formationIds) {
@@ -240,6 +239,13 @@ export function applyFrontlineAttrition(
         if (!f || f.status !== 'active') continue;
         const sector = brigadeSector.get(fid);
         if (!sector) continue;
+        const loc = f.location_osid ?? '';
+        if (!loc) continue;
+        const frontSet = new Set<string>();
+        for (const ss of sector.sub_segments ?? []) {
+            for (const o of ss.friendly_osids ?? []) frontSet.add(o);
+        }
+        if (frontSet.size === 0 || !frontSet.has(loc)) continue;
         frontlineBrigades.push({ fid, formation: f, sector });
     }
 
@@ -361,7 +367,13 @@ export function applyFrontlineAttrition(
             const frictionRoll = deterministicRandom(seed, `friction_${turn}_${fid}`);
             if (frictionRoll < FRICTION_RECORD_CHANCE) {
                 const enemyFaction = inferEnemyFaction(sector, factionId);
-                const location = formation.location_osid ?? sector.sub_segments?.[0]?.friendly_osids?.[0] ?? 'unknown';
+                const frontSet = new Set<string>();
+                for (const ss of sector.sub_segments ?? []) {
+                    for (const o of ss.friendly_osids ?? []) frontSet.add(o);
+                }
+                const location = frontSet.has(formation.location_osid ?? '')
+                    ? (formation.location_osid as string)
+                    : (sector.sub_segments?.[0]?.friendly_osids?.[0] ?? 'unknown');
                 recordBrigadeEngagement(formation, {
                     battle_id: `${turn}:${location}:friction:${fid}`,
                     turn,

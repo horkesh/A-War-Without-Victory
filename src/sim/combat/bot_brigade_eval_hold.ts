@@ -2,9 +2,10 @@ import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { predictAllAdjacentTargets } from './combat_predictor.js';
 import { isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
+import { assignedBrigadeNotOnSectorFrontOsids } from './bot_brigade_eval_front.js';
 
 export function evaluateGarrisonAndDetachments(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, result } = ctx;
+    const { brigade, state, loc, result } = ctx;
 
     // Garrison units (e.g. VRS 65th Protection) only defend home — never attack.
     if (brigade.garrison === true) {
@@ -21,6 +22,11 @@ export function evaluateGarrisonAndDetachments(ctx: BrigadeEvaluationContext): b
     // Combat-ineffective brigades: below MIN_ATTACK_PERSONNEL, can only defend.
     // A sub-200-man unit lacks the mass to assault positions — prevents death-spiral
     // attacks where depleted brigades throw 100-200 men at fortified positions repeatedly.
+    // Exception: corps line brigades not yet on their sector front must fall through so
+    // evaluateSectorMarch can column-march them before this defend-only posture sticks.
+    if (assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc)) {
+        return false;
+    }
     if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) {
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         return true;
