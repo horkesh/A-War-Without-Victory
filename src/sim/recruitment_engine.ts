@@ -41,6 +41,7 @@ import {
     getEquipmentCost
 } from '../state/recruitment_types.js';
 import { getRsJnaHeavyComposition, getRsMountainComposition } from './combat/equipment_effects.js';
+import { isEnclaveBrigade } from './combat/enclave_resilience.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 
 const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
@@ -418,8 +419,7 @@ export function recruitBrigade(
     }
 
     // Control check — enclave brigades bypass (they exist in enemy-surrounded territory)
-    const isEnclave = brigade.tags?.includes('enclave') === true;
-    if (!isEnclave && !factionHasPresenceInMun(state, faction, home_mun, sidToMun)) {
+    if (!isEnclaveBrigade(brigade) && !factionHasPresenceInMun(state, faction, home_mun, sidToMun)) {
         return { success: false, reason: 'no_control' };
     }
 
@@ -622,8 +622,7 @@ export function runBotRecruitment(
             // Their home_mun may use different slug formatting than the operational layer
             // (e.g. "han_pijesak" vs "hanpijesak"), and they spawn unconditionally from a national pool.
             // Enclave brigades bypass — they exist in enemy-surrounded territory at their home_osid.
-            const isBrigadeEnclave = brigade.tags?.includes('enclave') === true;
-            if (!brigade.is_elite && !isBrigadeEnclave && !factionHasPresenceInMun(state, faction, brigade.home_mun, sidToMun)) {
+            if (!brigade.is_elite && !isEnclaveBrigade(brigade) && !factionHasPresenceInMun(state, faction, brigade.home_mun, sidToMun)) {
                 report.brigades_skipped_no_control++;
                 continue;
             }

@@ -31,6 +31,14 @@ import {
 import { ENCLAVE_MAX_PERSONNEL } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
+/** Canonical tag string used to identify enclave brigades in formation tags. */
+export const ENCLAVE_TAG = 'enclave';
+
+/** Check whether a formation is tagged as an enclave brigade. */
+export function isEnclaveBrigade(f: { tags?: string[] }): boolean {
+    return f.tags?.includes(ENCLAVE_TAG) === true;
+}
+
 // ── Enclave definitions ─────────────────────────────────────────────────────
 
 interface EnclaveDefinition {

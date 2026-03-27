@@ -20,6 +20,7 @@
  */
 
 import type { FormationId, FormationState, GameState } from '../../state/game_state.js';
+import { isEnclaveBrigade } from './enclave_resilience.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /**
@@ -84,7 +85,7 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
 
         // Enclave brigades have a lower absolute floor — they are last-line defenders
         // with nowhere to dissolve to, and require ALL THREE criteria (not two).
-        const isEnclave = Array.isArray(f.tags) && f.tags.includes('enclave');
+        const isEnclave = isEnclaveBrigade(f);
         const absFloor = isEnclave ? ENCLAVE_DISSOLUTION_ABSOLUTE_FLOOR : DISSOLUTION_ABSOLUTE_FLOOR;
         const requiredCriteria = isEnclave ? 3 : 2;
 

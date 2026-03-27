@@ -92,7 +92,7 @@ import {
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid, getCorpsHqOsid } from './corps_front_sectors.js';
-import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital, isOsidInSameEnclave } from './enclave_resilience.js';
+import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 // frontDensityModifier import removed — no longer used in sector defense
 
 // Backward-compat re-exports
@@ -141,6 +141,31 @@ const FACTION_LEARNING_RATE: Record<string, number> = {
 };
 const DEFAULT_LEARNING_RATE = 1.0;
 const COMMANDER_EXP_LOSS = 0.15;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Defeat/displacement helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Zero entrenchment and defense streak after displacement or defeat. */
+function resetFormationEntrenchment(f: FormationState): void {
+    (f as { entrenchment_turns?: number }).entrenchment_turns = 0;
+    (f as { defense_streak?: number }).defense_streak = 0;
+}
+
+/** Apply standard defeat penalties to a displaced defender: reset entrenchment, record retreat origin, and optionally set disrupted turns. */
+function applyDefeatPenalties(
+    f: FormationState,
+    targetOsid: string,
+    turn: number,
+    outcome: CombatOutcome,
+): void {
+    resetFormationEntrenchment(f);
+    (f as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
+        osid: targetOsid, turn,
+    };
+    if (outcome === 'decisive_victory') (f as { disrupted_turns?: number }).disrupted_turns = 2;
+    else if (outcome === 'victory') (f as { disrupted_turns?: number }).disrupted_turns = 1;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Resolver-only helpers
@@ -227,8 +252,7 @@ function getFriendlyRetreatDestinations(
         // Enclave-tagged brigades MUST NOT retreat outside their enclave.
         // Without this filter, brigades drift out through temporary corridors
         // and end up 100km from their pocket (e.g., Goražde brigades in Visoko).
-        const isEnclaveBrigade = formation.tags?.includes('enclave') === true;
-        if (isEnclaveBrigade) {
+        if (isEnclaveBrigade(formation)) {
             friendly = friendly.filter(f => isOsidInSameEnclave(loc, f));
         }
 
@@ -402,24 +426,18 @@ function forceRetreatWithPenalties(
     const cohesionLoss = opts?.cohesionLoss ?? EMERGENCY_RETREAT_COHESION_LOSS;
     const disruptedTurns = opts?.disruptedTurns ?? EMERGENCY_RETREAT_DISRUPTED_TURNS;
     const dest = findEmergencyRetreatOsid(state, formation, reverseMap, opts?.adjacency, sourceOsid);
-    const f = formation as FormationState & { location_osid?: string; entrenchment_turns?: number; defense_streak?: number; disrupted_turns?: number; last_retreat_from?: { osid: string; turn: number } };
+    const f = formation as FormationState & { location_osid?: string; disrupted_turns?: number; last_retreat_from?: { osid: string; turn: number } };
+    resetFormationEntrenchment(formation);
+    f.disrupted_turns = disruptedTurns;
+    formation.cohesion = Math.max(0, (formation.cohesion ?? 60) - cohesionLoss);
+    formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((formation.personnel ?? 0) * personnelRetain));
     if (dest != null) {
         f.location_osid = dest;
-        f.entrenchment_turns = 0;
-        f.defense_streak = 0;
-        f.disrupted_turns = disruptedTurns;
-        formation.cohesion = Math.max(0, (formation.cohesion ?? 60) - cohesionLoss);
-        formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((formation.personnel ?? 0) * personnelRetain));
         f.last_retreat_from = { osid: sourceOsid, turn: state.meta?.turn ?? 0 };
     } else {
         // Absolute last resort: no friendly territory exists at all — brigade disperses
         // This should only happen if the entire faction's territory is lost
         f.location_osid = undefined;
-        f.entrenchment_turns = 0;
-        f.defense_streak = 0;
-        f.disrupted_turns = disruptedTurns;
-        formation.cohesion = Math.max(0, (formation.cohesion ?? 60) - cohesionLoss);
-        formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((formation.personnel ?? 0) * personnelRetain));
         removeFromActiveOperation(state, formation.id, formation.corps_id);
         formation.status = 'inactive';
     }
@@ -450,8 +468,7 @@ export function displaceFormationsInEnemyTerritory(
         if (dest != null) {
             // Adjacent friendly OSID — simple displacement, no penalties
             otherFormation.location_osid = dest;
-            (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-            (otherFormation as { defense_streak?: number }).defense_streak = 0;
+            resetFormationEntrenchment(otherFormation);
         } else {
             // No adjacent friendly — emergency retreat with penalties
             forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
@@ -606,8 +623,7 @@ export function resolveAttackOrdersOsid(
             const dest = retreatDests[0];
             if (dest != null) {
                 otherFormation.location_osid = dest;
-                (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                (otherFormation as { defense_streak?: number }).defense_streak = 0;
+                resetFormationEntrenchment(otherFormation);
             } else {
                 forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
             }
@@ -1529,17 +1545,9 @@ export function resolveAttackOrdersOsid(
                 const retreatDests = surrenderCascade ? [] : getFriendlyRetreatDestinations(state, defenderFormation, adjacency, reverseMap);
                 const dest = retreatDests[0];
                 if (dest != null) {
-                    // Adjacent friendly OSID — standard retreat
                     (defenderFormation as { location_osid?: string }).location_osid = dest;
-                    (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                    (defenderFormation as { defense_streak?: number }).defense_streak = 0;
-                    (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
-                        osid: targetOsid, turn: state.meta?.turn ?? 0
-                    };
-                    if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
-                    else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
+                    applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome);
                 } else {
-                    // Direct defender with no adjacent retreat — emergency retreat with penalties
                     forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, { adjacency });
                 }
             } else {
@@ -1547,13 +1555,7 @@ export function resolveAttackOrdersOsid(
                 // Apply morale/disruption penalties at their current position —
                 // losing a covered OSID is demoralizing and disrupts the formation,
                 // but the brigade stays where it physically is.
-                (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                (defenderFormation as { defense_streak?: number }).defense_streak = 0;
-                (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
-                    osid: targetOsid, turn: state.meta?.turn ?? 0
-                };
-                if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
-                else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
+                applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome);
             }
         }
 
@@ -1594,8 +1596,7 @@ export function resolveAttackOrdersOsid(
                 const dest = retreatDests[0];
                 if (dest != null) {
                     otherFormation.location_osid = dest;
-                    (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-                    (otherFormation as { defense_streak?: number }).defense_streak = 0;
+                    resetFormationEntrenchment(otherFormation);
                 } else {
                     forceRetreatWithPenalties(state, otherFormation, reverseMap, targetOsid, { adjacency });
                 }
@@ -1692,8 +1693,7 @@ export function resolveAttackOrdersOsid(
         const dest = retreatDests[0];
         if (dest != null) {
             otherFormation.location_osid = dest;
-            (otherFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
-            (otherFormation as { defense_streak?: number }).defense_streak = 0;
+            resetFormationEntrenchment(otherFormation);
         } else {
             forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
         }

@@ -21,7 +21,7 @@ import type { BrigadePosture, FormationState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
 import { areRbihHrhbAllied, isFriendlyFaction, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
-import { isOsidInSameEnclave } from './enclave_resilience.js';
+import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { assignedBrigadeNotOnSectorFrontOsids } from './bot_brigade_eval_front.js';
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
@@ -455,7 +455,7 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // Without this, besieged ARBiH enclave brigades walk into adjacent RS positions
         // when VRS brigades sector-march away (e.g. 280th–284th recapturing obadi/vranesevici
         // from the Srebrenica pocket, undoing Ring operations).
-        if (brigade.tags?.includes('enclave') && !isOsidInSameEnclave(loc as string, n)) continue;
+        if (isEnclaveBrigade(brigade) && !isOsidInSameEnclave(loc as string, n)) continue;
 
         // Salient aversion: don't walk into undefended territory if it creates
         // an indefensible salient (>75% of neighbors are enemy after capture).

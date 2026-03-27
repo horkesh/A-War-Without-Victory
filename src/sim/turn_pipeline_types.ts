@@ -108,10 +108,6 @@ export interface TurnInput {
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
     /** When provided, historical event definitions loaded from scenario JSON files. */
     eventDefinitions?: import('./events/event_types.js').EventDefinition[];
-    /** Cross-faction pool definitions: (mun_id, pool_faction) pairs from OOB brigades with recruit_pool_faction.
-     *  Used by ongoing mobilization to create/grow militia pools for cross-faction recruitment
-     *  (e.g. HRHB pools in RBiH-controlled municipalities for HVO-designation ARBiH brigades). */
-    crossFactionPoolDefs?: Array<{ mun_id: string; pool_faction: string }>;
 }
 
 export interface TurnReport {

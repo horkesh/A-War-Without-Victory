@@ -5,7 +5,7 @@ import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS, findNe
 import { countFactionBrigadesAtOsid, countCorpsBrigadesAtOsid, MAX_CORPS_BRIGADES_PER_OSID } from './bot_brigade_context.js';
 import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import { isOsidInSameEnclave } from './enclave_resilience.js';
+import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
 import type { FormationState, GameState } from '../../state/game_state.js';
 
@@ -89,8 +89,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 // Enclave brigades must NOT march outside their enclave — they defend their pocket.
                 // Without this, Goražde brigades march to Visoko via temporary corridors.
                 if (frontSet.size > 0) {
-                    const isEnclaveBrigade = brigade.tags?.includes('enclave') === true;
-                    if (isEnclaveBrigade) {
+                    if (isEnclaveBrigade(brigade)) {
                         const hasEnclaveTarget = [...frontSet].some(f => isOsidInSameEnclave(loc, f));
                         if (!hasEnclaveTarget) return false; // Skip march — no enclave-local sector front
                     }
@@ -155,10 +154,10 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                     // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
                     // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
                     // front OSIDs in the same sector when those OSIDs have fewer brigades.
-                    const isEnclaveBrigade = brigade.tags?.includes('enclave') === true;
+                    const enclave = isEnclaveBrigade(brigade);
                     const otherFronts = [...frontSet]
                         .filter(o => o !== loc)
-                        .filter(o => !isEnclaveBrigade || isOsidInSameEnclave(loc as string, o))
+                        .filter(o => !enclave || isOsidInSameEnclave(loc as string, o))
                         .sort((a, b) => {
                             const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a)
                                 + (columnAssignments.get(a as Osid) ?? 0);

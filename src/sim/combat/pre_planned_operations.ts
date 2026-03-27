@@ -644,6 +644,32 @@ function buildAxesFromDef(
     return { axes: builtAxes, participating: allParticipating, eliteLoans };
 }
 
+/** Deploy elite loans for exempt-corps brigades named in a pre-planned operation. */
+function deployPrePlannedEliteLoans(
+    state: GameState,
+    eliteLoans: { brigadeId: FormationId; corpsId: string }[],
+    def: PrePlannedOp,
+    turn: number,
+): void {
+    for (const loan of eliteLoans) {
+        deployEliteLoan(
+            state,
+            loan.brigadeId,
+            loan.corpsId,
+            'offensive_support',
+            0,
+            turn,
+            {
+                purpose: 'offensive',
+                why_needed: `Pre-planned deployment: ${loan.brigadeId} assigned to ${def.name}`,
+                how_to_use: `Assault reserve on main axis of ${def.name}`,
+            },
+            `Pre-planned elite loan for ${def.name}`,
+            'army_ai',
+        );
+    }
+}
+
 function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participating: FormationId[], turn: number): CorpsOperation {
     const allObjectives = axes.flatMap(a => a.objectives);
     return {
@@ -702,24 +728,7 @@ export function injectPrePlannedOperations(state: GameState): void {
         const result = buildAxesFromDef(def, state);
         if (!result) continue;
 
-        // Deploy elite loans for exempt-corps brigades named in this op
-        for (const loan of result.eliteLoans) {
-            deployEliteLoan(
-                state,
-                loan.brigadeId,
-                loan.corpsId,
-                'offensive_support',
-                0, // pre-planned: no travel penalty
-                turn,
-                {
-                    purpose: 'offensive',
-                    why_needed: `Pre-planned deployment: ${loan.brigadeId} assigned to ${def.name}`,
-                    how_to_use: `Assault reserve on main axis of ${def.name}`,
-                },
-                `Pre-planned elite loan for ${def.name}`,
-                'army_ai',
-            );
-        }
+        deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn);
 
         const op = buildCorpsOperation(def, result.axes, result.participating, turn);
         cmd.active_operation = op;
@@ -807,24 +816,7 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
     const result = buildAxesFromDef(def, state);
     if (!result) return false;
 
-    // Deploy elite loans for exempt-corps brigades named in this op
-    for (const loan of result.eliteLoans) {
-        deployEliteLoan(
-            state,
-            loan.brigadeId,
-            loan.corpsId,
-            'offensive_support',
-            0,
-            turn,
-            {
-                purpose: 'offensive',
-                why_needed: `Pre-planned deployment: ${loan.brigadeId} assigned to ${def.name}`,
-                how_to_use: `Assault reserve on main axis of ${def.name}`,
-            },
-            `Pre-planned elite loan for ${def.name}`,
-            'army_ai',
-        );
-    }
+    deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn);
 
     // Success — consume queue entry
     cmd.queued_operations.shift();

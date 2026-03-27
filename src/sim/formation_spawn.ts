@@ -44,7 +44,7 @@ import {
     HRHB_SUPPORT_PACKAGE_COHESION_BONUS,
     RS_STAFF_PRIORITY_RATE_BONUS
 } from './combat/municipality_support.js';
-import { getEnclaveIdForOsid, getEnclaveMaxPersonnel } from './combat/enclave_resilience.js';
+import { getEnclaveIdForOsid, getEnclaveMaxPersonnel, isEnclaveBrigade } from './combat/enclave_resilience.js';
 
 /**
  * Shared pocket pool: besieged municipalities where brigades can draw reinforcements
@@ -416,7 +416,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         .filter((id) => {
             const f = formations[id] as FormationState | undefined;
             if (!f || f.status !== 'active' || f.kind !== 'brigade') return false;
-            return Array.isArray(f.tags) && f.tags.includes('enclave');
+            return isEnclaveBrigade(f);
         })
         .sort(strictCompare);
 

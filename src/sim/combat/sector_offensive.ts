@@ -45,7 +45,7 @@ import { finalizeOperationAAR } from './operation_aar.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
-import { isOsidInSameEnclave } from './enclave_resilience.js';
+import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
 import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
@@ -1500,7 +1500,7 @@ export function evaluateCorpsOffensiveLaunch(
     // This prevents Goražde brigades marching through northern Foča to attack Foča objectives.
     corpsBrigadeIds = corpsBrigadeIds.filter(bid => {
         const b = formations[bid];
-        if (!b?.tags?.includes('enclave')) return true; // Non-enclave brigades: always eligible
+        if (!b || !isEnclaveBrigade(b)) return true; // Non-enclave brigades: always eligible
         const loc = b.location_osid;
         if (!loc) return true;
         // Enclave brigade: include only if at least one objective is in the same enclave.

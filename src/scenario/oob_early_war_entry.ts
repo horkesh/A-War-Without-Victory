@@ -12,6 +12,7 @@ import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { analyzeFactionGraph, type FrontClassification } from '../sim/combat/osid_graph_analysis.js';
 import { buildOsidAdjacency, type Osid } from '../sim/combat/osid_adjacency.js';
 import { FACTION_INITIAL_COHESION, FACTION_INITIAL_PERSONNEL, MIN_BRIGADE_SPAWN, MIN_ELIGIBLE_POPULATION_FOR_BRIGADE } from '../state/formation_constants.js';
+import { isEnclaveBrigade } from '../sim/combat/enclave_resilience.js';
 import { getFactionDefaultOfficerQuality } from '../sim/combat/combat_math.js';
 import { resolveFormationName } from '../state/formation_naming.js';
 import type {
@@ -212,8 +213,7 @@ export function createOobFormations(
         if (state.military.formations[b.id]) continue;
         // Enclave brigades bypass municipality presence check — they spawn in enemy-surrounded
         // territory at their home_osid (e.g. 255th at Teočak in RS-controlled Ugljevik).
-        const isEnclave = b.tags?.includes('enclave') === true;
-        if (!isEnclave && !factionHasPresenceInMun(state, b.faction, b.home_mun, sidToMun)) continue;
+        if (!isEnclaveBrigade(b) && !factionHasPresenceInMun(state, b.faction, b.home_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[b.home_mun];
         const tags = [`mun:${b.home_mun}`];
         if (b.corps) tags.push(`corps:${b.corps}`);
